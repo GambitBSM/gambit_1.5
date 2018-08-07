@@ -600,7 +600,7 @@ START_MODULE
   QUICK_FUNCTION(DarkBit, sigma_SIq2_p, NEW_CAPABILITY, sigma_SIq2_p_simple, double, (), (DD_couplings, DM_nucleon_couplings), (mwimp, double))
   QUICK_FUNCTION(DarkBit, sigma_SIq2_n, NEW_CAPABILITY, sigma_SIq2_n_simple, double, (), (DD_couplings, DM_nucleon_couplings), (mwimp, double))
 
-  // Generalized v^2n, q^2n DM-nucleon cross sections Norway
+  // Generalized v^2n, q^2n DM-nucleon cross sections
   #define CAPABILITY sigma_SI_p
       #define FUNCTION sigma_SI_vnqn_FermionDMHiggsPortal
       START_FUNCTION(map_intpair_dbl)
@@ -755,13 +755,15 @@ START_MODULE
       DEPENDENCY(capture_rate_Sun, double)
     #undef FUNCTION
 
-    /// Equilibration time for capture and annihilation of fermion Higgs portal DM in the Sun (s)
-    #define FUNCTION equilibration_time_Sun_FermionDMHiggsPortal
+    /// Same as the above function except sigma-v is calculated at the most probable speed v = sqrt(2*T/mDM) where
+    /// T = 1.35e-6 GeV is the Sun's core temperature
+    #define FUNCTION equilibration_time_Sun_vprob
       START_FUNCTION(double)
       DEPENDENCY(TH_ProcessCatalog, DarkBit::TH_ProcessCatalog)
       DEPENDENCY(mwimp, double)
       DEPENDENCY(DarkMatter_ID, std::string)
       DEPENDENCY(capture_rate_Sun, double)
+      ALLOW_MODELS(DiracDM, MajoranaDM)
     #undef FUNCTION
   #undef CAPABILITY
 

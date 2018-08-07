@@ -18,7 +18,7 @@
 ///
 ///  \author Ankit Beniwal
 ///          (ankit.beniwal@adelaide.edu.au)
-///  \date 2018 Jan
+///  \date 2018 Jan, Aug
 ///
 ///  *********************************************
 
@@ -56,6 +56,7 @@ namespace Gambit
       // assume that whichever backend has been hooked up here does so too.
       result = BEreq::cap_Sun_v0q0_isoscalar(
           *Dep::mwimp, *Dep::sigma_SI_p, *Dep::sigma_SD_p);
+
       //cout << "mwimp" << *Dep::mwimp << "sigma_SI_p: " << *Dep::sigma_SI_p << " sigma_SD_p: " << *Dep::sigma_SD_p << "result: " << result << "\n";
       //cout << "capture rate via capture_rate_Sun_const_xsec = " << result << "\n";
 
@@ -68,9 +69,11 @@ namespace Gambit
       double resultSD;
       double resultSI;
       double maxcap;
+
       BEreq::cap_sun_saturation(*Dep::mwimp,maxcap);
       BEreq::cap_Sun_v0q0_isoscalar(*Dep::mwimp,*Dep::sigma_SD_p,*Dep::sigma_SI_p,resultSD,resultSI);
       result = resultSI + resultSD;
+
       if (maxcap < result)
       {
         result = maxcap;
@@ -88,6 +91,7 @@ namespace Gambit
     void capture_rate_Sun_vnqn(double &result)
     {
       using namespace Pipes::capture_rate_Sun_vnqn;
+
       double resultSD;
       double resultSI;
       double capped;
@@ -112,6 +116,7 @@ namespace Gambit
         {
           qpow = (iterator->first).first/2 ;
           vpow =  (iterator->first).second/2;
+
           //Capture
           BEreq::cap_Sun_vnqn_isoscalar(*Dep::mwimp,iterator->second,1,qpow,vpow,capped);
           resultSD = resultSD+capped;
@@ -127,6 +132,7 @@ namespace Gambit
         {
           qpow = (iterator->first).first/2 ;
           vpow =  (iterator->first).second/2;
+
           //Capture
           BEreq::cap_Sun_vnqn_isoscalar(*Dep::mwimp,iterator->second,nelems,qpow,vpow,capped);
           resultSI = resultSI+capped;
@@ -135,7 +141,8 @@ namespace Gambit
       result = resultSI+resultSD;
 
       logger() << "Capgen captured: SI: " << resultSI << " SD: " << resultSD << " total: " << result << "max = " << maxcap << "\n" << EOM;
-      //If capture is above saturation, return saturation value.
+
+      // If capture is above saturation, return saturation value.
       if (maxcap < result)
       {
         result = maxcap;
@@ -155,11 +162,11 @@ namespace Gambit
       result = pow(*Dep::capture_rate_Sun * ca, -0.5);
     }
 
-    // Equilibration time for capture and annihilation of fermion Higgs portal DM in the Sun (s)
-    // Here sigma-v is calculated at v = sqrt(2*T/mDM) where T = 1.35e-6 GeV (Sun's core temperature)
-    void equilibration_time_Sun_FermionDMHiggsPortal(double &result)
+    // Same as the above function except sigma-v is calculated at the most probable speed v = sqrt(2*T/mDM) where
+    // T = 1.35e-6 GeV is the Sun's core temperature
+    void equilibration_time_Sun_vprob(double &result)
     {
-      using namespace Pipes::equilibration_time_Sun_FermionDMHiggsPortal;
+      using namespace Pipes::equilibration_time_Sun_vprob;
 
       double sigmav = 0;
       double T_Sun_core = 1.35e-6; // Sun's core temperature (GeV)
@@ -177,14 +184,15 @@ namespace Gambit
           sigmav += it->genRate->bind("v")->eval(sqrt(2.0*T_Sun_core/(*Dep::mwimp)));
         }
       }
+
       // Add invisible contributions
       sigmav += annProc.genRateMisc->bind("v")->eval(sqrt(2.0*T_Sun_core/(*Dep::mwimp)));
 
       double ca = sigmav/6.6e28 * pow(*Dep::mwimp/20.0, 1.5);
       result = pow(*Dep::capture_rate_Sun * ca, -0.5);
 
-      //std::cout << "v = " << sqrt(2.0*T_Sun_core/(*Dep::mwimp)) << " and sigmav inside equilibration_time_Sun_FermionDMHiggsPortal = " << sigmav << std::endl;
-      //std::cout << "capture_rate_Sun inside equilibration_time_Sun_FermionDMHiggsPortal = " << *Dep::capture_rate_Sun << std::endl;
+      // std::cout << "v = " << sqrt(2.0*T_Sun_core/(*Dep::mwimp)) << " and sigmav inside equilibration_time_Sun_vprob = " << sigmav << std::endl;
+      // std::cout << "capture_rate_Sun inside equilibration_time_Sun_vprob = " << *Dep::capture_rate_Sun << std::endl;
     }
 
     /// Annihilation rate of dark matter in the Sun (s^-1)
