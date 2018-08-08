@@ -240,6 +240,9 @@ namespace Gambit
       // Initialize empty catalog
       TH_ProcessCatalog catalog;
       TH_Process process_ann("X", "X");
+      
+      // Explicitly state that Majorana DM is self-conjugate
+      process_ann.isSelfConj = true;
 
       ///////////////////////////////////////
       // Import particle masses and couplings

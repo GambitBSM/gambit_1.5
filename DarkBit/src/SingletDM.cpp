@@ -222,7 +222,9 @@ namespace Gambit
       // Initialize empty catalog and main annihilation process
       TH_ProcessCatalog catalog;
       TH_Process process_ann("S", "S");
-
+      
+      // Explicitly state that Scalar DM is self-conjugate
+      process_ann.isSelfConj = true;
 
       ///////////////////////////////////////
       // Import particle masses and couplings

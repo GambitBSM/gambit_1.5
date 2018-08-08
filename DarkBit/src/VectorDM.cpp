@@ -224,6 +224,9 @@ namespace Gambit
       // Initialize empty catalog
       TH_ProcessCatalog catalog;
       TH_Process process_ann("V", "V");
+      
+      // Explicitly state that Vector DM is self-conjugate
+      process_ann.isSelfConj = true;
 
       ///////////////////////////////////////
       // Import particle masses and couplings

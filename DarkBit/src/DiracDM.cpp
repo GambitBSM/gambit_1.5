@@ -241,7 +241,6 @@ namespace Gambit
       
       // Explicitly state that Dirac DM is not self-conjugate to add extra
       // factors of 1/2 where necessary
-      
       process_ann.isSelfConj = false;
 
       ///////////////////////////////////////
