@@ -549,7 +549,7 @@ START_MODULE
       BACKEND_REQ(dsddgpgn, (), void, (double&, double&, double&, double&))
       BACKEND_REQ(mspctm, (), DS_MSPCTM)
       BACKEND_REQ(ddcom, (DarkSUSY), DS_DDCOM)
-      ALLOW_MODELS(nuclear_params_fnq)
+      ALLOW_JOINT_MODEL(nuclear_params_fnq,MSSM63atQ)
     #undef FUNCTION
 
     #define FUNCTION DD_couplings_MicrOmegas

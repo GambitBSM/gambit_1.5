@@ -238,6 +238,11 @@ namespace Gambit
       // Initialize empty catalog
       TH_ProcessCatalog catalog;
       TH_Process process_ann("F", "F");
+      
+      // Explicitly state that Dirac DM is not self-conjugate to add extra
+      // factors of 1/2 where necessary
+      
+      process_ann.isSelfConj = false;
 
       ///////////////////////////////////////
       // Import particle masses and couplings

@@ -172,10 +172,6 @@ Rules:
   - capability: RD_fraction
     function: RD_fraction_leq_one
 
-  # Choose to use detailed Fermi Pass-8 dwarfs likelihoood from gamLike
-  - capability: lnL_FermiLATdwarfs
-    function:  lnL_FermiLATdwarfs_gamLike
-
   # Choose to use DarkSUSY's yield tables for indirect detection
   - capability: SimYieldTable
     function: SimYieldTable_DarkSUSY
