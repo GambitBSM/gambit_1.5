@@ -16,10 +16,6 @@
 ///          (sebastian.wild@ph.tum.de)
 ///  \date 2016 Aug
 ///
-///  \author Ankit Beniwal
-///          (ankit.beniwal@adelaide.edu.au)
-///  \date 2016 Nov, 2017 Jun
-///
 ///  *********************************************
 
 #include "gambit/Elements/gambit_module_headers.hpp"

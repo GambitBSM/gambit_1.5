@@ -17,6 +17,10 @@
 ///          (patscott@physics.mcgill.ca)
 ///  \date 2015 Mar
 ///
+/// \author Sanjay Bloor
+///         (sanjay.bloor12@imperial.ac.uk)
+/// \date 2018 Aug
+///
 ///  *********************************************
 
 
