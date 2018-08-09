@@ -64,14 +64,14 @@ namespace Gambit
     /// **************************************************
 
 
-    #ifdef COLLIDERBIT_DEBUG
+    //#ifdef COLLIDERBIT_DEBUG
     inline str debug_prefix()
     {
       std::stringstream ss;
       ss << "DEBUG: OMP thread " << omp_get_thread_num() << ":  ";
       return ss.str();
     }
-    #endif
+    //#endif
 
 
 
@@ -2559,30 +2559,31 @@ namespace Gambit
           #endif
 
 
-          // Shortcut: if all SRs have 0 signal prediction, we know the Delta LogLike is 0.
-          bool all_zero_signal = true;
-          for (size_t SR = 0; SR < adata.size(); ++SR)
-          {
-            if (adata[SR].n_signal != 0)
-            {
-              all_zero_signal = false;
-              break;
-            }
-          }
-          if (all_zero_signal)
-          {
-            // Store result
-            result[adata.analysis_name].combination_sr_label = "all";
-            result[adata.analysis_name].combination_sr_index = -1;
-            result[adata.analysis_name].combination_loglike = 0.0;
+          // Ben: DISABLED FOR TESTING
+          // // Shortcut: if all SRs have 0 signal prediction, we know the Delta LogLike is 0.
+          // bool all_zero_signal = true;
+          // for (size_t SR = 0; SR < adata.size(); ++SR)
+          // {
+          //   if (adata[SR].n_signal != 0)
+          //   {
+          //     all_zero_signal = false;
+          //     break;
+          //   }
+          // }
+          // if (all_zero_signal)
+          // {
+          //   // Store result
+          //   result[adata.analysis_name].combination_sr_label = "all";
+          //   result[adata.analysis_name].combination_sr_index = -1;
+          //   result[adata.analysis_name].combination_loglike = 0.0;
 
-            #ifdef COLLIDERBIT_DEBUG
-            cout << debug_prefix() << "calc_LHC_LogLikes: " << adata.analysis_name << "_LogLike : " << 0.0 << " (No signal predicted. Skipped covariance calculation.)" <<endl;
-            #endif
+          //   #ifdef COLLIDERBIT_DEBUG
+          //   cout << debug_prefix() << "calc_LHC_LogLikes: " << adata.analysis_name << "_LogLike : " << 0.0 << " (No signal predicted. Skipped covariance calculation.)" <<endl;
+          //   #endif
 
-            // Continue to next analysis
-            continue;
-          }
+          //   // Continue to next analysis
+          //   continue;
+          // }
 
           // Construct vectors of SR numbers
           Eigen::ArrayXd n_obs(adata.size()), n_pred_b(adata.size()), n_pred_sb(adata.size()), abs_unc_s(adata.size());
@@ -2605,6 +2606,8 @@ namespace Gambit
 
           // Diagonalise the background-only covariance matrix, extracting the rotation matrix
           /// @todo No need to recompute the background-only covariance decomposition for every point!
+          /// Ben: Actually don't need to recompute the background-only marginalisation at all. It
+          ///      is always the same, so can just do it once at the start of the scan.
           const Eigen::SelfAdjointEigenSolver<Eigen::MatrixXd> eig_b(adata.srcov);
           const Eigen::ArrayXd Eb = eig_b.eigenvalues();
           const Eigen::ArrayXd sqrtEb = Eb.sqrt();
@@ -2652,13 +2655,12 @@ namespace Gambit
           {
 
             // typedef Eigen::Array<long double, Eigen::Dynamic, 1> ArrayXld;
-            Eigen::ArrayXd lsums_b = Eigen::ArrayXd::Zero(adata.size());
-            Eigen::ArrayXd lsums_sb = Eigen::ArrayXd::Zero(adata.size());
 
             /// @note How to correct negative rates? Discard (scales badly), set to
             /// epsilon (= discontinuous & unphysical pdf), transform to log-space
             /// (distorts the pdf quite badly), or something else (skew term)?
             /// We're using the "set to epsilon" version for now.
+            /// Ben: I would vote for 'discard'. It can't be that inefficient, surely?
             ///
             /// @todo Add option for normal sampling in log(rate), i.e. "multidimensional log-normal"
 
@@ -2669,12 +2671,11 @@ namespace Gambit
               #pragma omp parallel
               {
                 std::normal_distribution<> unitnormdbn{0,1};
-                Eigen::ArrayXd lsums_b_private = Eigen::ArrayXd::Zero(adata.size());
-                Eigen::ArrayXd lsums_sb_private = Eigen::ArrayXd::Zero(adata.size());
-
-                #pragma omp for nowait
+                double lsum_b_private  = 0;
+                double lsum_sb_private = 0;
 
                 // Sample correlated SR rates from a rotated Gaussian defined by the covariance matrix and offset by the mean rates
+                #pragma omp for nowait
                 for (size_t i = 0; i < NSAMPLE; ++i) {
 
                   Eigen::VectorXd norm_sample_b(adata.size()), norm_sample_sb(adata.size());
@@ -2688,23 +2689,28 @@ namespace Gambit
                   const Eigen::VectorXd n_pred_sb_sample = n_pred_sb + (Vsb*norm_sample_sb).array();
 
                   // Calculate Poisson likelihood and add to composite likelihood calculation
+                  double combined_loglike_b = 0;
+                  double combined_loglike_sb = 0;
                   for (size_t j = 0; j < adata.size(); ++j) {
                     const double lambda_b_j = std::max(n_pred_b_sample(j), 1e-3); //< manually avoid <= 0 rates
                     const double lambda_sb_j = std::max(n_pred_sb_sample(j), 1e-3); //< manually avoid <= 0 rates
                     //const double llr_j = n_obs(j)*log(lambda_sb_j/lambda_b_j) - (lambda_sb_j - lambda_b_j);
-                    const double like_b_j = boost::math::pdf(boost::math::poisson(lambda_b_j), n_obs(j));
-                    const double like_sb_j = boost::math::pdf(boost::math::poisson(lambda_sb_j), n_obs(j));
-                    lsums_b_private(j) += like_b_j;
-                    lsums_sb_private(j) += like_sb_j;
+                    //const double like_b_j = boost::math::pdf(boost::math::poisson(lambda_b_j), n_obs(j));
+                    //const double like_sb_j = boost::math::pdf(boost::math::poisson(lambda_sb_j), n_obs(j));
+                    const double loglike_b_j  = n_obs(j)*log(lambda_b_j) - lambda_b_j;
+                    const double loglike_sb_j = n_obs(j)*log(lambda_sb_j) - lambda_sb_j;
+                    combined_loglike_b  += loglike_b_j;
+                    combined_loglike_sb += loglike_sb_j;
                   }
+                  // Add combined likelihood to running sums (to later calculate averages)
+                  lsum_b_private  += exp(combined_loglike_b);
+                  lsum_sb_private += exp(combined_loglike_sb);
                 }
 
                 #pragma omp critical
                 {
-                  for (size_t j = 0; j < adata.size(); ++j) {
-                    lsums_b(j) += lsums_b_private(j);
-                    lsums_sb(j) += lsums_sb_private(j);
-                  }
+                  lsum_b  += lsum_b_private;
+                  lsum_sb += lsum_sb_private;
                 }
               } // End omp parallel
             }  // End if !COVLOGNORMAL
@@ -2755,15 +2761,6 @@ namespace Gambit
             //   } // End omp parallel
             // }
 
-
-            // Calculate product of expected likelihoods sums (done manually, for safer conversion to long double)
-            // lsum_b = lsums_b.prod();
-            // lsum_sb = lsums_sb.prod();
-            for (size_t j = 0; j < adata.size(); ++j) {
-              lsum_b *= lsums_b(j);
-              lsum_sb *= lsums_sb(j);
-            }
-
             // Compare convergence to previous independent batch
             if (first_iteration)  // The first round must be generated twice
             {
@@ -2792,15 +2789,17 @@ namespace Gambit
               NSAMPLE *=2;  // This ensures that the next batch for lsum is as big as the current batch size for lsum_prev, so they can be compared directly.
             }
 
-            #ifdef COLLIDERBIT_DEBUG
+            //#ifdef COLLIDERBIT_DEBUG
               cout << debug_prefix()
                    << "diff_rel: " << diff_rel
                    <<  "   diff_abs: " << diff_abs
                    << "   ana_llr_prev: " << log(ana_like_sb_prev/ana_like_b_prev)
-                   << "   ana_dll: " << log(ana_like_sb/ana_like_b) << endl;
-              cout << debug_prefix() << "NSAMPLE for the next iteration is: " << NSAMPLE << endl;
+                   << "   ana_dll: " << log(ana_like_sb/ana_like_b) << endl
+                   << "   logl_sb: " << log(ana_like_sb) << endl
+                   << "   logl_b: " << log(ana_like_b) << endl;
+               cout << debug_prefix() << "NSAMPLE for the next iteration is: " << NSAMPLE << endl;
               cout << debug_prefix() << endl;
-            #endif
+            //#endif
           }  // End while loop
 
           // Combine the independent estimates ana_like and ana_like_prev.
