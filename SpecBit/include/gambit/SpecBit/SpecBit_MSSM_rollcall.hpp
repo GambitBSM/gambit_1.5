@@ -206,6 +206,12 @@
     START_FUNCTION(map_str_dbl) // Just a string to double map. Can't have commas in macro input
     DEPENDENCY(MSSM_spectrum, Spectrum)
     #undef FUNCTION
+
+    #define FUNCTION get_MSSMslha_spectrum_as_map
+    START_FUNCTION(map_str_dbl) // Just a string to double map. Can't have commas in macro input
+    DEPENDENCY(MSSM_spectrum, Spectrum)
+    #undef FUNCTION
+
   #undef CAPABILITY
 
   #define CAPABILITY unimproved_MSSM_spectrum
