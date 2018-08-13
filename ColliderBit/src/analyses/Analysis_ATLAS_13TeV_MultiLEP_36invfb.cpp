@@ -34,16 +34,30 @@ namespace Gambit {
     protected:
 
       // Counters for the number of accepted events for each signal region
-      std::map<string,double> _numSR; 
+      std::map<string,double> _numSR = {
+        {"SR2_SF_loose", 0},
+        {"SR2_SF_tight", 0},
+        {"SR2_DF_100", 0},
+        {"SR2_DF_150", 0},
+        {"SR2_DF_200", 0},
+        {"SR2_DF_300", 0},
+        {"SR2_int", 0},
+        {"SR2_high", 0},
+        {"SR2_low", 0},
+        {"SR3_slep_a", 0},
+        {"SR3_slep_b", 0},
+        {"SR3_slep_c", 0},
+        {"SR3_slep_d", 0},
+        {"SR3_slep_e", 0},
+        {"SR3_WZ_0Ja", 0},
+        {"SR3_WZ_0Jb", 0},
+        {"SR3_WZ_0Jc", 0},
+        {"SR3_WZ_1Ja", 0},
+        {"SR3_WZ_1Jb", 0},
+        {"SR3_WZ_1Jc", 0}
+      }; 
 
     private:
-
-      const vector<string> _included_SRs = {"SR2_SF_loose", "SR2_SF_tight", "SR2_DF_100", "SR2_DF_150",
-                                            "SR2_DF_200", "SR2_DF_300",
-                                            "SR2_int", "SR2_high", "SR2_low",
-                                            "SR3_slep_a", "SR3_slep_b", "SR3_slep_c", "SR3_slep_d", 
-                                            "SR3_slep_e", "SR3_WZ_0Ja", "SR3_WZ_0Jb", "SR3_WZ_0Jc", 
-                                            "SR3_WZ_1Ja", "SR3_WZ_1Jb", "SR3_WZ_1Jc"};
 
       vector<int> cutFlowVector1;
       vector<string> cutFlowVector1_str;
@@ -84,20 +98,10 @@ namespace Gambit {
 
     public:
 
-      // This function can be overridden by the derived SR-specific classes
-      virtual void increment_SR(string SR_label) {
-        // If SR_label is found in _included_SRs, increment the counter for this SR in the map _numSR.
-        if (std::find(_included_SRs.begin(), _included_SRs.end(), SR_label) != _included_SRs.end()) _numSR[SR_label]++;
-      }
-
-
       Analysis_ATLAS_13TeV_MultiLEP_36invfb() {
 
         set_analysis_name("ATLAS_13TeV_MultiLEP_36invfb");
         set_luminosity(36.1);
-
-        // Create SR counters in the _numSR map and initialize them to zero
-        for (string SR_label : _included_SRs) { _numSR[SR_label] = 0.;}
 
         NCUTS1=22;
 
@@ -244,8 +248,8 @@ namespace Gambit {
         size_t nSignalJets=signalJets.size();
         size_t nSignalBJets=signalBJets.size();
 
-        vector<vector<HEPUtils::Particle*>> SFOSpairs=getSFOSpair(signalLeptons);
-        vector<vector<HEPUtils::Particle*>> OSpairs=getOSpair(signalLeptons);
+        vector<vector<HEPUtils::Particle*>> SFOSpairs=getSFOSpairs(signalLeptons);
+        vector<vector<HEPUtils::Particle*>> OSpairs=getOSpairs(signalLeptons);
 
         //Variables
         double pT_l0=0.;
@@ -352,14 +356,14 @@ namespace Gambit {
         //2lep+0jet
         if (preselection && nSignalLeptons==2 && OSpairs.size()==1 && mll>40 && central_jet_veto && bjet_veto) {
           if (SFOSpairs.size()==1) {
-            if (mT2>100 && mll>111) increment_SR("SR2_SF_loose");
-            if (mT2>130 && mll>300) increment_SR("SR2_SF_tight"); 
+            if (mT2>100 && mll>111) _numSR["SR2_SF_loose"]++;
+            if (mT2>130 && mll>300) _numSR["SR2_SF_tight"]++;
           }
           if (SFOSpairs.size()==0) {
-            if (mT2>100 && mll>111) increment_SR("SR2_DF_100");
-            if (mT2>150 && mll>111) increment_SR("SR2_DF_150");
-            if (mT2>200 && mll>111) increment_SR("SR2_DF_200");
-            if (mT2>300 && mll>111) increment_SR("SR2_DF_300");
+            if (mT2>100 && mll>111) _numSR["SR2_DF_100"]++;
+            if (mT2>150 && mll>111) _numSR["SR2_DF_150"]++;
+            if (mT2>200 && mll>111) _numSR["SR2_DF_200"]++;
+            if (mT2>300 && mll>111) _numSR["SR2_DF_300"]++;
           }
         }
         
@@ -367,35 +371,35 @@ namespace Gambit {
         if (preselection && nSignalLeptons==2 && SFOSpairs.size()==1 && bjet_veto && nSignalJets>1 && pT_j0>30 && pT_j1>30 && pT_l1>25) {
           //SR2_int + SR2_high
           if (mll>81. && mll<101. && mjj>70. && mjj<100. && Z.pT()>80. && W.pT()>100. && mT2>100. && deltaR_jj<1.5 && deltaR_ll<1.8 && deltaPhi_met_W>0.5 && deltaPhi_met_W<3.0) {
-            if (met>150) increment_SR("SR2_int");
-            if (met>250) increment_SR("SR2_high");
+            if (met>150) _numSR["SR2_int"]++;
+            if (met>250) _numSR["SR2_high"]++;
           }
           //SR2_low_2J
-          if (nSignalJets==2 && mll>81. && mll<101. && mjj>70. && mjj<90. && met>100. && Z.pT()>60. && deltaPhi_met_Z<0.8 && deltaPhi_met_W>1.5 && (met/Z.pT())>0.6 && (met/Z.pT())<1.6 && (met/W.pT())<0.8) increment_SR("SR2_low");
+          if (nSignalJets==2 && mll>81. && mll<101. && mjj>70. && mjj<90. && met>100. && Z.pT()>60. && deltaPhi_met_Z<0.8 && deltaPhi_met_W>1.5 && (met/Z.pT())>0.6 && (met/Z.pT())<1.6 && (met/W.pT())<0.8) _numSR["SR2_low"]++;
           //SR2_low_3J
-          if (nSignalJets>2 && nSignalJets<6 && mll>86 && mll<96 && mjj>70. && mjj<90. && met>100 && Z.pT()>40 && deltaR_jj<2.2 && deltaPhi_met_W<2.2 && deltaPhi_met_ISR>2.4 && deltaPhi_met_jet0>2.6 && (met/W_ISR.at(1).pT())>0.4 && (met/W_ISR.at(1).pT())<0.8 && Z.abseta()<1.6 && pT_j2>30.) increment_SR("SR2_low");
+          if (nSignalJets>2 && nSignalJets<6 && mll>86 && mll<96 && mjj>70. && mjj<90. && met>100 && Z.pT()>40 && deltaR_jj<2.2 && deltaPhi_met_W<2.2 && deltaPhi_met_ISR>2.4 && deltaPhi_met_jet0>2.6 && (met/W_ISR.at(1).pT())>0.4 && (met/W_ISR.at(1).pT())<0.8 && Z.abseta()<1.6 && pT_j2>30.) _numSR["SR2_low"]++;
         }
         
         //3lep
         if (preselection && nSignalLeptons==3 && bjet_veto && SFOSpairs.size()) {
           if (mSFOS<81.2 && met>130. && mTmin>110.) {
-            if (pT_l2>20. && pT_l2<30.) increment_SR("SR3_slep_a");
-            if (pT_l2>30.) increment_SR("SR3_slep_b");
+            if (pT_l2>20. && pT_l2<30.) _numSR["SR3_slep_a"]++;
+            if (pT_l2>30.) _numSR["SR3_slep_b"]++;
           }
           if (mSFOS>101.2 && met>130. && mTmin>110.) {
-            if (pT_l2>20. && pT_l2<50.) increment_SR("SR3_slep_c");
-            if (pT_l2>50. && pT_l2<80.) increment_SR("SR3_slep_d");
-            if (pT_l2>80.) increment_SR("SR3_slep_e");
+            if (pT_l2>20. && pT_l2<50.) _numSR["SR3_slep_c"]++;
+            if (pT_l2>50. && pT_l2<80.) _numSR["SR3_slep_d"]++;
+            if (pT_l2>80.) _numSR["SR3_slep_e"]++;
           }
           if (mSFOS>81.2 && mSFOS<101.2 && nSignalJets==0 && mTmin>110.) {
-            if (met>60. && met<120.) increment_SR("SR3_WZ_0Ja");
-            if (met>120. && met<170.) increment_SR("SR3_WZ_0Jb");
-            if (met>170.) increment_SR("SR3_WZ_0Jc");
+            if (met>60. && met<120.) _numSR["SR3_WZ_0Ja"]++;
+            if (met>120. && met<170.) _numSR["SR3_WZ_0Jb"]++;
+            if (met>170.) _numSR["SR3_WZ_0Jc"]++;
           }
           if (mSFOS>81.2 && mSFOS<101.2 && nSignalJets>0) {
-            if (met>120. && met<200. && mTmin>110. && pTlll<120. && pT_j1>70.) increment_SR("SR3_WZ_1Ja");
-            if (met>200. && mTmin>110. && mTmin<160.) increment_SR("SR3_WZ_1Jb");
-            if (met>200. && pT_l2>35. && mTmin>160.) increment_SR("SR3_WZ_1Jc");
+            if (met>120. && met<200. && mTmin>110. && pTlll<120. && pT_j1>70.) _numSR["SR3_WZ_1Ja"]++;
+            if (met>200. && mTmin>110. && mTmin<160.) _numSR["SR3_WZ_1Jb"]++;
+            if (met>200. && pT_l2>35. && mTmin>160.) _numSR["SR3_WZ_1Jc"]++;
           }
         }
 
@@ -859,36 +863,6 @@ namespace Gambit {
       }
 
 
-      vector<vector<HEPUtils::Particle*>> getSFOSpair(vector<HEPUtils::Particle*> leptons) {
-        vector<vector<HEPUtils::Particle*>> SFOSpair_container;
-        for (size_t iLe1=0;iLe1<leptons.size();iLe1++) {
-          for (size_t iLe2=0;iLe2<leptons.size();iLe2++) {
-            if (leptons.at(iLe1)->abspid()==leptons.at(iLe2)->abspid() && leptons.at(iLe1)->pid()!=leptons.at(iLe2)->pid()) {
-              vector<HEPUtils::Particle*> SFOSpair;
-              SFOSpair.push_back(leptons.at(iLe1));
-              SFOSpair.push_back(leptons.at(iLe2));
-              SFOSpair_container.push_back(SFOSpair);
-            }
-          }
-        }
-        return SFOSpair_container;
-      }
-
-      vector<vector<HEPUtils::Particle*>> getOSpair(vector<HEPUtils::Particle*> leptons) {
-        vector<vector<HEPUtils::Particle*>> OSpair_container;
-        for (size_t iLe1=0;iLe1<leptons.size();iLe1++) {
-          for (size_t iLe2=0;iLe2<leptons.size();iLe2++) {
-            if (leptons.at(iLe1)->pid()*leptons.at(iLe2)->pid()<0.) {
-              vector<HEPUtils::Particle*> OSpair;
-              OSpair.push_back(leptons.at(iLe1));
-              OSpair.push_back(leptons.at(iLe2));
-              OSpair_container.push_back(OSpair);
-            }
-          }
-        }
-        return OSpair_container;
-      }
-
       vector<HEPUtils::P4> get_W_ISR(vector<HEPUtils::Jet*> jets, HEPUtils::P4 Z, HEPUtils::P4 met) {
         HEPUtils::P4 Z_met_sys=Z+met;
         double deltaR_min=999;
@@ -947,17 +921,9 @@ namespace Gambit {
     // 
     class Analysis_ATLAS_13TeV_MultiLEP_2Lep0Jets_36invfb : public Analysis_ATLAS_13TeV_MultiLEP_36invfb {
 
-    private:
-      const vector<string> _included_SRs = {"SR2_SF_loose", "SR2_SF_tight", "SR2_DF_100", "SR2_DF_150", "SR2_DF_200", "SR2_DF_300"};
-
     public:
       Analysis_ATLAS_13TeV_MultiLEP_2Lep0Jets_36invfb() {
         set_analysis_name("ATLAS_13TeV_MultiLEP_2Lep0Jets_36invfb");
-      }
-
-      virtual void increment_SR(string SR_label) {
-        // If SR_label is found in _included_SRs, increment the counter for this SR in the map _numSR.
-        if (std::find(_included_SRs.begin(), _included_SRs.end(), SR_label) != _included_SRs.end()) _numSR[SR_label]++;
       }
 
       virtual void collect_results() {
@@ -981,17 +947,9 @@ namespace Gambit {
     // Derived analysis class for the 2LepPlusJets SRs
     class Analysis_ATLAS_13TeV_MultiLEP_2LepPlusJets_36invfb : public Analysis_ATLAS_13TeV_MultiLEP_36invfb {
 
-    private:
-      const vector<string> _included_SRs = {"SR2_int", "SR2_high", "SR2_low"};
-
     public:
       Analysis_ATLAS_13TeV_MultiLEP_2LepPlusJets_36invfb() {
         set_analysis_name("ATLAS_13TeV_MultiLEP_2LepPlusJets_36invfb");
-      }
-
-      virtual void increment_SR(string SR_label) {
-        // If SR_label is found in _included_SRs, increment the counter for this SR in the map _numSR.
-        if (std::find(_included_SRs.begin(), _included_SRs.end(), SR_label) != _included_SRs.end()) _numSR[SR_label]++;
       }
 
       virtual void collect_results() {
@@ -1008,22 +966,13 @@ namespace Gambit {
     DEFINE_ANALYSIS_FACTORY(ATLAS_13TeV_MultiLEP_2LepPlusJets_36invfb)
 
 
+
     // Derived analysis class for the 3Lep SRs
     class Analysis_ATLAS_13TeV_MultiLEP_3Lep_36invfb : public Analysis_ATLAS_13TeV_MultiLEP_36invfb {
-
-    private:
-      const vector<string> _included_SRs = {"SR3_slep_a", "SR3_slep_b", "SR3_slep_c", "SR3_slep_d", 
-                                            "SR3_slep_e", "SR3_WZ_0Ja", "SR3_WZ_0Jb", "SR3_WZ_0Jc", 
-                                            "SR3_WZ_1Ja", "SR3_WZ_1Jb", "SR3_WZ_1Jc"};
 
     public:
       Analysis_ATLAS_13TeV_MultiLEP_3Lep_36invfb() {
         set_analysis_name("ATLAS_13TeV_MultiLEP_3Lep_36invfb");
-      }
-
-      virtual void increment_SR(string SR_label) {
-        // If SR_label is found in _included_SRs, increment the counter for this SR in the map _numSR.
-        if (std::find(_included_SRs.begin(), _included_SRs.end(), SR_label) != _included_SRs.end()) _numSR[SR_label]++;
       }
 
       virtual void collect_results() {

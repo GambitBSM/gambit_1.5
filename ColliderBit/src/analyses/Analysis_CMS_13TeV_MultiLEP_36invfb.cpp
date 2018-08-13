@@ -32,11 +32,18 @@ namespace Gambit {
 
     protected:
       // Counters for the number of accepted events for each signal region
-      std::map<string,double> _numSR; 
+      std::map<string,double> _numSR = {
+        {"SR1", 0.},
+        {"SR2", 0.},
+        {"SR3", 0.},
+        {"SR4", 0.},
+        {"SR5", 0.},
+        {"SR6", 0.},
+        {"SR7", 0.},
+        {"SR8", 0.}
+      };
 
     private:
-
-      const vector<string> _included_SRs = {"SR1", "SR2", "SR3", "SR4", "SR5", "SR6", "SR7", "SR8"};
 
       vector<int> cutFlowVector1, cutFlowVector2, cutFlowVector3, cutFlowVector4;
       vector<string> cutFlowVector_str1, cutFlowVector_str2, cutFlowVector_str3, cutFlowVector_str4;
@@ -52,20 +59,11 @@ namespace Gambit {
         bool operator() (HEPUtils::Particle* i,HEPUtils::Particle* j) {return (i->pT()>j->pT());}
       } comparePt;
 
-      // This function can be overridden by the derived SR-specific classes
-      virtual void increment_SR(string SR_label) {
-        // If SR_label is found in _included_SRs, increment the counter for this SR in the map _numSR.
-        if (std::find(_included_SRs.begin(), _included_SRs.end(), SR_label) != _included_SRs.end()) _numSR[SR_label]++;
-      }
-
       Analysis_CMS_13TeV_MultiLEP_36invfb() {
 
         set_analysis_name("CMS_13TeV_MultiLEP_36invfb");
         set_luminosity(35.9);
         
-        // Create SR counters in the _numSR map and initialize them to zero
-        for (string SR_label : _included_SRs) { _numSR[SR_label] = 0.;}
-
         NCUTS1=10;
         NCUTS2=7;
         NCUTS3=7;
@@ -225,8 +223,8 @@ namespace Gambit {
         double mT=0;
         double mT2=0;
         // double mll=0;
-        vector<vector<HEPUtils::Particle*>> SFOSpair_cont = getSFOSpair(signalLeptons);
-        vector<vector<HEPUtils::Particle*>> OSpair_cont = getOSpair(signalLeptons);
+        vector<vector<HEPUtils::Particle*>> SFOSpair_cont = getSFOSpairs(signalLeptons);
+        vector<vector<HEPUtils::Particle*>> OSpair_cont = getOSpairs(signalLeptons);
 
         if (nSignalLeptons>1)pT_ll=(signalLeptons.at(0)->mom()+signalLeptons.at(1)->mom()).pT();
         if (nSignalLightLeptons>0 && nSignalTaus>0) {
@@ -267,8 +265,8 @@ namespace Gambit {
         if (preselection && nSignalLeptons==2 && nSignalTaus==0 && met>60 && conversion_veto) {
           if (signalLeptons.at(0)->pid()*signalLeptons.at(1)->pid()>0) {
             if ((signalLeptons.at(0)->abspid()==11 && signalLeptons.at(0)->pT()>25) || (signalLeptons.at(0)->abspid()==13 && signalLeptons.at(0)->pT()>20)) {
-              if (num_ISRjets==0 && met>140 && mT>100) increment_SR("SR1");
-              if (num_ISRjets==1 && met>200 && mT<100 && pT_ll<100) increment_SR("SR2");
+              if (num_ISRjets==0 && met>140 && mT>100) _numSR["SR1"]++;
+              if (num_ISRjets==1 && met>200 && mT<100 && pT_ll<100) _numSR["SR2"]++;
             }   
           }
         }
@@ -279,19 +277,19 @@ namespace Gambit {
           if (nSignalTaus<2) {
             if ((signalLightLeptons.at(0)->abspid()==11 && signalLightLeptons.at(0)->pT()>25) || (signalLightLeptons.at(0)->abspid()==13 && signalLightLeptons.at(0)->pT()>20 && nSignalMuons>1) || (signalLightLeptons.at(0)->abspid()==13 && signalLightLeptons.at(0)->pT()>25 && nSignalMuons==1)) {
               if (nSignalLightLeptons==3 && nSignalTaus==0) {
-                if (mT>120 && met>200) increment_SR("SR3");
-                if (met>250) increment_SR("SR4");
+                if (mT>120 && met>200) _numSR["SR3"]++;
+                if (met>250) _numSR["SR4"]++;
               }
-              if (nSignalLightLeptons==2 && nSignalTaus==1 && mT2>50 && met>200) increment_SR("SR5");
-              if (nSignalLeptons>3 && met>200) increment_SR("SR8");
+              if (nSignalLightLeptons==2 && nSignalTaus==1 && mT2>50 && met>200) _numSR["SR5"]++;
+              if (nSignalLeptons>3 && met>200) _numSR["SR8"]++;
             }
           }
 
           if (nSignalLightLeptons==1 && nSignalTaus==2) {
             if ((signalLightLeptons.at(0)->abspid()==11 && signalLightLeptons.at(0)->pT()>30) || (signalLightLeptons.at(0)->abspid()==13 && signalLightLeptons.at(0)->pT()>25)) {
               if (signalLeptons.at(0)->abseta()<2.1 && signalLeptons.at(1)->abseta()<2.1 && signalLeptons.at(2)->abseta()<2.1) {  
-                if (mT2>50 && met>200) increment_SR("SR6");
-                if (met>75) increment_SR("SR7");
+                if (mT2>50 && met>200) _numSR["SR6"]++;
+                if (met>75) _numSR["SR7"]++;
               }
             }
           }
@@ -638,31 +636,7 @@ namespace Gambit {
         add_result(SignalRegionData("SR8", 166., {_numSR["SR8"], 0.}, {197, 42.}));
       }
 
-      vector<vector<HEPUtils::Particle*>> getSFOSpair(vector<HEPUtils::Particle*> leptons) {
-        vector<vector<HEPUtils::Particle*>> SFOSpair_container;
-        for (size_t iLe1=0;iLe1<leptons.size();iLe1++) {        
-          for (size_t iLe2=0;iLe2<leptons.size();iLe2++) {
-            if (leptons.at(iLe1)->abspid()==leptons.at(iLe2)->abspid() && leptons.at(iLe1)->pid()!=leptons.at(iLe2)->pid()) {
-              vector<HEPUtils::Particle*> SFOSpair;
-              SFOSpair.push_back(leptons.at(iLe1));
-              SFOSpair.push_back(leptons.at(iLe2));
-              SFOSpair_container.push_back(SFOSpair);
-            } } }
-        return SFOSpair_container;
-      }
 
-      vector<vector<HEPUtils::Particle*>> getOSpair(vector<HEPUtils::Particle*> leptons) {
-        vector<vector<HEPUtils::Particle*>> OSpair_container;
-        for (size_t iLe1=0;iLe1<leptons.size();iLe1++) {        
-          for (size_t iLe2=0;iLe2<leptons.size();iLe2++) {
-            if (leptons.at(iLe1)->pid()*leptons.at(iLe2)->pid()<0.) {
-              vector<HEPUtils::Particle*> OSpair;
-              OSpair.push_back(leptons.at(iLe1));
-              OSpair.push_back(leptons.at(iLe2));
-              OSpair_container.push_back(OSpair);
-            } } }
-        return OSpair_container;
-      }
 
       vector<double> get_mll_mT(vector<vector<HEPUtils::Particle*>> pair_cont, vector<HEPUtils::Particle*> leptons, HEPUtils::P4 met, int type) { 
         vector<double> mll_mT;
@@ -733,17 +707,9 @@ namespace Gambit {
     // 
     class Analysis_CMS_13TeV_MultiLEP_2SSLep_36invfb : public Analysis_CMS_13TeV_MultiLEP_36invfb {
 
-    private:
-      const vector<string> _included_SRs = {"SR1", "SR2"};
-
     public:
       Analysis_CMS_13TeV_MultiLEP_2SSLep_36invfb() {
         set_analysis_name("CMS_13TeV_MultiLEP_2SSLep_36invfb");
-      }
-
-      virtual void increment_SR(string SR_label) {
-        // If SR_label is found in _included_SRs, increment the counter for this SR in the map _numSR.
-        if (std::find(_included_SRs.begin(), _included_SRs.end(), SR_label) != _included_SRs.end()) _numSR[SR_label]++;
       }
 
       virtual void collect_results() {
@@ -764,17 +730,9 @@ namespace Gambit {
     // 
     class Analysis_CMS_13TeV_MultiLEP_3Lep_36invfb : public Analysis_CMS_13TeV_MultiLEP_36invfb {
 
-    private:
-      const vector<string> _included_SRs = {"SR3", "SR4", "SR5", "SR6", "SR7", "SR8"};
-
     public:
       Analysis_CMS_13TeV_MultiLEP_3Lep_36invfb() {
         set_analysis_name("CMS_13TeV_MultiLEP_3Lep_36invfb");
-      }
-
-      virtual void increment_SR(string SR_label) {
-        // If SR_label is found in _included_SRs, increment the counter for this SR in the map _numSR.
-        if (std::find(_included_SRs.begin(), _included_SRs.end(), SR_label) != _included_SRs.end()) _numSR[SR_label]++;
       }
 
       virtual void collect_results() {
