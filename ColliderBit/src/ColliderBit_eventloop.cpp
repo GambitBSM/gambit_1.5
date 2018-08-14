@@ -2611,8 +2611,6 @@ namespace Gambit
           const Eigen::SelfAdjointEigenSolver<Eigen::MatrixXd> eig_b(adata.srcov);
           const Eigen::ArrayXd Eb = eig_b.eigenvalues();
           const Eigen::ArrayXd sqrtEb = Eb.sqrt();
-          std::cout<<"Eigenvalues: "<<Eb<<std::endl;
-          std::cout<<"Sqrt:        "<<sqrtEb<<std::endl;
           const Eigen::MatrixXd Vb = eig_b.eigenvectors();
           //const Eigen::MatrixXd Vbinv = Vb.inverse();
 
@@ -2787,7 +2785,7 @@ namespace Gambit
               NSAMPLE *=2;  // This ensures that the next batch for lsum is as big as the current batch size for lsum_prev, so they can be compared directly.
             }
 
-            //#ifdef COLLIDERBIT_DEBUG
+            #ifdef COLLIDERBIT_DEBUG
               cout << debug_prefix()
                    << "diff_rel: " << diff_rel << endl
                    <<  "   diff_abs: " << diff_abs << endl
@@ -2797,7 +2795,7 @@ namespace Gambit
                    << "   logl_b: " << log(ana_like_b) << endl;
                cout << debug_prefix() << "NSAMPLE for the next iteration is: " << NSAMPLE << endl;
               cout << debug_prefix() << endl;
-            //#endif
+            #endif
           }  // End while loop
 
           // Combine the independent estimates ana_like and ana_like_prev.
