@@ -2612,7 +2612,7 @@ namespace Gambit
           const Eigen::ArrayXd Eb = eig_b.eigenvalues();
           const Eigen::ArrayXd sqrtEb = Eb.sqrt();
           const Eigen::MatrixXd Vb = eig_b.eigenvectors();
-          const Eigen::MatrixXd Vbinv = Vb.inverse();
+          //const Eigen::MatrixXd Vbinv = Vb.inverse();
 
           // Construct and diagonalise the s+b covariance matrix, adding the diagonal signal uncertainties in quadrature
           /// @todo Is this the best way, or should we just sample the s numbers independently and then be able to completely cache the cov matrix diagonalisation?
@@ -2622,8 +2622,7 @@ namespace Gambit
           const Eigen::ArrayXd Esb = eig_sb.eigenvalues();
           const Eigen::ArrayXd sqrtEsb = Esb.sqrt();
           const Eigen::MatrixXd Vsb = eig_sb.eigenvectors();
-          const Eigen::MatrixXd Vsbinv = Vsb.inverse();
-
+          //const Eigen::MatrixXd Vsbinv = Vsb.inverse();
 
           ///////////////////
           /// @todo Split this whole chunk off into a lnlike-style utility function?
@@ -2646,13 +2645,15 @@ namespace Gambit
           long double ana_like_sb = 1;
           long double lsum_b_prev = 0;
           long double lsum_sb_prev = 0;
-          long double lsum_b = 0;
-          long double lsum_sb = 0;
 
+          std::normal_distribution<double> unitnormdbn(0,1);
+ 
           // Check absolute difference between independent estimates
           /// @todo Should also implement a check of relative difference
           while ((diff_abs > CONVERGENCE_TOLERANCE_ABS && diff_rel > CONVERGENCE_TOLERANCE_REL) || 1.0/sqrt(NSAMPLE) > CONVERGENCE_TOLERANCE_ABS)
           {
+            long double lsum_b = 0;
+            long double lsum_sb = 0;
 
             // typedef Eigen::Array<long double, Eigen::Dynamic, 1> ArrayXld;
 
@@ -2670,7 +2671,6 @@ namespace Gambit
 
               #pragma omp parallel
               {
-                std::normal_distribution<> unitnormdbn{0,1};
                 double lsum_b_private  = 0;
                 double lsum_sb_private = 0;
 
@@ -2682,10 +2682,10 @@ namespace Gambit
                   for (size_t j = 0; j < adata.size(); ++j) {
                     norm_sample_b(j) = sqrtEb(j) * unitnormdbn(Random::rng());
                     norm_sample_sb(j) = sqrtEsb(j) * unitnormdbn(Random::rng());
-                  }
+                   }
 
                   // Rotate rate deltas into the SR basis and shift by SR mean rates
-                  const Eigen::VectorXd n_pred_b_sample = n_pred_b + (Vb*norm_sample_b).array();
+                  const Eigen::VectorXd n_pred_b_sample  = n_pred_b + (Vb*norm_sample_b).array();
                   const Eigen::VectorXd n_pred_sb_sample = n_pred_sb + (Vsb*norm_sample_sb).array();
 
                   // Calculate Poisson likelihood and add to composite likelihood calculation
@@ -2694,9 +2694,6 @@ namespace Gambit
                   for (size_t j = 0; j < adata.size(); ++j) {
                     const double lambda_b_j = std::max(n_pred_b_sample(j), 1e-3); //< manually avoid <= 0 rates
                     const double lambda_sb_j = std::max(n_pred_sb_sample(j), 1e-3); //< manually avoid <= 0 rates
-                    //const double llr_j = n_obs(j)*log(lambda_sb_j/lambda_b_j) - (lambda_sb_j - lambda_b_j);
-                    //const double like_b_j = boost::math::pdf(boost::math::poisson(lambda_b_j), n_obs(j));
-                    //const double like_sb_j = boost::math::pdf(boost::math::poisson(lambda_sb_j), n_obs(j));
                     const double loglike_b_j  = n_obs(j)*log(lambda_b_j) - lambda_b_j;
                     const double loglike_sb_j = n_obs(j)*log(lambda_sb_j) - lambda_sb_j;
                     combined_loglike_b  += loglike_b_j;
@@ -2706,7 +2703,6 @@ namespace Gambit
                   lsum_b_private  += exp(combined_loglike_b);
                   lsum_sb_private += exp(combined_loglike_sb);
                 }
-
                 #pragma omp critical
                 {
                   lsum_b  += lsum_b_private;
@@ -2789,17 +2785,17 @@ namespace Gambit
               NSAMPLE *=2;  // This ensures that the next batch for lsum is as big as the current batch size for lsum_prev, so they can be compared directly.
             }
 
-            //#ifdef COLLIDERBIT_DEBUG
+            #ifdef COLLIDERBIT_DEBUG
               cout << debug_prefix()
-                   << "diff_rel: " << diff_rel
-                   <<  "   diff_abs: " << diff_abs
-                   << "   ana_llr_prev: " << log(ana_like_sb_prev/ana_like_b_prev)
+                   << "diff_rel: " << diff_rel << endl
+                   <<  "   diff_abs: " << diff_abs << endl
+                   << "   ana_llr_prev: " << log(ana_like_sb_prev/ana_like_b_prev) << endl
                    << "   ana_dll: " << log(ana_like_sb/ana_like_b) << endl
                    << "   logl_sb: " << log(ana_like_sb) << endl
                    << "   logl_b: " << log(ana_like_b) << endl;
                cout << debug_prefix() << "NSAMPLE for the next iteration is: " << NSAMPLE << endl;
               cout << debug_prefix() << endl;
-            //#endif
+            #endif
           }  // End while loop
 
           // Combine the independent estimates ana_like and ana_like_prev.
