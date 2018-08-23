@@ -172,6 +172,10 @@ Rules:
   - capability: RD_fraction
     function: RD_fraction_leq_one
 
+  # Choose to use DarkBit's own calculation of the direct detection couplings
+  - capability: DD_couplings
+    function: DD_couplings_VectorDM
+
   # Choose to use DarkSUSY's yield tables for indirect detection
   - capability: SimYieldTable
     function: SimYieldTable_DarkSUSY
