@@ -213,7 +213,7 @@ Scanner:
       plugin: multinest
       like: LogLike
       nlive: 20000
-      tol: 1E-4
+      tol: 1E-2
 
     diver:
       plugin: diver
