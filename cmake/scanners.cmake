@@ -30,12 +30,11 @@
 #
 #************************************************
 
-
 # Diver
 set(name "diver")
 set(ver "1.0.0")
 set(lib "libdiver")
-set(dl "https://www.hepforge.org/archive/${name}/${name}-${ver}.tar.gz")
+set(dl "https://${name}.hepforge.org/downloads/${name}-${ver}.tar.gz")
 set(md5 "61c76e948855f19dfa394c14df8c6af2")
 set(dir "${PROJECT_SOURCE_DIR}/ScannerBit/installed/${name}/${ver}")
 set(patch "${PROJECT_SOURCE_DIR}/ScannerBit/patches/${name}/${ver}/patch_${name}_${ver}.dif")
@@ -63,7 +62,7 @@ endif()
 set(name "diver")
 set(ver "1.0.2")
 set(lib "libdiver")
-set(dl "https://www.hepforge.org/archive/${name}/${name}-${ver}.tar.gz")
+set(dl "https://${name}.hepforge.org/downloads/${name}-${ver}.tar.gz")
 set(md5 "28c74db26c573d745383e303f6bece18")
 set(dir "${PROJECT_SOURCE_DIR}/ScannerBit/installed/${name}/${ver}")
 set(diverSO_LINK_FLAGS "${CMAKE_Fortran_MPI_SO_LINK_FLAGS} -fopenmp")
@@ -89,7 +88,7 @@ endif()
 set(name "diver")
 set(ver "1.0.4")
 set(lib "libdiver")
-set(dl "https://www.hepforge.org/archive/${name}/${name}-${ver}.tar.gz")
+set(dl "https://${name}.hepforge.org/downloads/${name}-${ver}.tar.gz")
 set(md5 "2cdf72c58d57ba88ef6b747737796ddf")
 set(dir "${PROJECT_SOURCE_DIR}/ScannerBit/installed/${name}/${ver}")
 set(diverSO_LINK_FLAGS "${CMAKE_Fortran_MPI_SO_LINK_FLAGS} -fopenmp")
