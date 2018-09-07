@@ -41,7 +41,40 @@
 #          (j.mckay14@imperial.ac.uk)
 #  \date 2016 Aug
 #
+#  \author Ankit Beniwal
+#  	   (ankit.beniwal@adelaide.edu.au)
+#  \date 2016 Aug
+#  \date 2017 Jun
+#  \date 2018 Aug
+#
+#  \author Aaron Vincent
+#          (aaron.vincent@cparc.ca)
+#  \date 2017 Sep, Nov
+#
 #************************************************
+
+
+
+# CaptnGeneral
+set(name "capgen")
+set(ver "1.0")
+set(lib "gencaplib")
+set(dl "null")
+set(dir "${PROJECT_SOURCE_DIR}/Backends/installed/${name}/${ver}")
+check_ditch_status(${name} ${ver})
+if(NOT ditched_${name}_${ver})
+  ExternalProject_Add(${name}_${ver}
+    GIT_REPOSITORY https://github.com/aaronvincent/captngen.git
+    SOURCE_DIR ${dir}
+    BUILD_IN_SOURCE 1
+    CONFIGURE_COMMAND ""
+    BUILD_COMMAND ${CMAKE_MAKE_PROGRAM} ${lib}.so FC=${CMAKE_Fortran_COMPILER} FOPT=${GAMBIT_Fortran_FLAGS} MODULE=${FMODULE}
+    INSTALL_COMMAND ""
+)
+  add_extra_targets("backend" ${name} ${ver} ${dir} ${dl} clean)
+  set_as_default_version("backend" ${name} ${ver})
+endif()
+
 
 
 # DarkSUSY
@@ -152,6 +185,26 @@ set(lib "libDDCalc")
 set(dl "https://${name}.hepforge.org/downloads/${name}-${ver}.tar.gz")
 set(md5 "93b894b80b360159264f0d634cd7387e")
 set(dir "${PROJECT_SOURCE_DIR}/Backends/installed/${name}/${ver}")
+set(ddcalc_flags "${GAMBIT_Fortran_FLAGS} -${FMODULE} ${dir}/build")
+check_ditch_status(${name} ${ver})
+if(NOT ditched_${name}_${ver})
+  ExternalProject_Add(${name}_${ver}
+    DOWNLOAD_COMMAND ${DL_BACKEND} ${dl} ${md5} ${dir} ${name} ${ver}
+    SOURCE_DIR ${dir}
+    BUILD_IN_SOURCE 1
+    CONFIGURE_COMMAND ""
+    BUILD_COMMAND ${CMAKE_MAKE_PROGRAM} ${lib}.so FC=${CMAKE_Fortran_COMPILER} FOPT=${ddcalc_flags} DDCALC_DIR=${dir} OUTPUT_PIPE=>/dev/null
+    INSTALL_COMMAND ""
+  )
+  add_extra_targets("backend" ${name} ${ver} ${dir} ${dl} clean)
+endif()
+
+set(name "ddcalc")
+set(ver "2.0.0")
+set(lib "libDDCalc")
+set(dl "https://www.hepforge.org/archive/${name}/${name}-${ver}.tar.gz")
+set(md5 "504cb95a298fa62d11097793dc318549")
+set(dir "${PROJECT_SOURCE_DIR}/Backends/installed/${name}/${ver}/")
 set(ddcalc_flags "${GAMBIT_Fortran_FLAGS} -${FMODULE} ${dir}/build")
 check_ditch_status(${name} ${ver})
 if(NOT ditched_${name}_${ver})
@@ -275,6 +328,59 @@ if(NOT ditched_${name}_${model}_${ver})
   set_as_default_version("backend model" ${name}_${model} ${ver})
 endif()
 
+# MicrOmegas VectorDM model
+set(model "VectorDM")
+set(patch "${PROJECT_SOURCE_DIR}/Backends/patches/${name}/${ver}/patch_${name}_${ver}_${model}")
+check_ditch_status(${name}_${model} ${ver})
+if(NOT ditched_${name}_${model}_${ver})
+  ExternalProject_Add(${name}_${model}_${ver}
+    DOWNLOAD_COMMAND ""
+    SOURCE_DIR ${dir}
+    PATCH_COMMAND ./newProject ${model} && patch -p1 < ${patch}
+    BUILD_IN_SOURCE 1
+    CONFIGURE_COMMAND ""
+    BUILD_COMMAND ${CMAKE_COMMAND} -E chdir ${model} ${CMAKE_MAKE_PROGRAM} sharedlib main=main.c
+    INSTALL_COMMAND ""
+  )
+  add_extra_targets("backend model" ${name} ${ver} ${dir}/${model} ${model} "yes | clean")
+  set_as_default_version("backend model" ${name}_${model} ${ver})
+endif()
+
+# MicrOmegas MajoranaDM model
+set(model "MajoranaDM")
+set(patch "${PROJECT_SOURCE_DIR}/Backends/patches/${name}/${ver}/patch_${name}_${ver}_${model}")
+check_ditch_status(${name}_${model} ${ver})
+if(NOT ditched_${name}_${model}_${ver})
+  ExternalProject_Add(${name}_${model}_${ver}
+    DOWNLOAD_COMMAND ""
+    SOURCE_DIR ${dir}
+    PATCH_COMMAND ./newProject ${model} && patch -p1 < ${patch}
+    BUILD_IN_SOURCE 1
+    CONFIGURE_COMMAND ""
+    BUILD_COMMAND ${CMAKE_COMMAND} -E chdir ${model} ${CMAKE_MAKE_PROGRAM} sharedlib main=main.c
+    INSTALL_COMMAND ""
+  )
+  add_extra_targets("backend model" ${name} ${ver} ${dir}/${model} ${model} "yes | clean")
+  set_as_default_version("backend model" ${name}_${model} ${ver})
+endif()
+
+# MicrOmegas DiracDM model
+set(model "DiracDM")
+set(patch "${PROJECT_SOURCE_DIR}/Backends/patches/${name}/${ver}/patch_${name}_${ver}_${model}")
+check_ditch_status(${name}_${model} ${ver})
+if(NOT ditched_${name}_${model}_${ver})
+  ExternalProject_Add(${name}_${model}_${ver}
+    DOWNLOAD_COMMAND ""
+    SOURCE_DIR ${dir}
+    PATCH_COMMAND ./newProject ${model} && patch -p1 < ${patch}
+    BUILD_IN_SOURCE 1
+    CONFIGURE_COMMAND ""
+    BUILD_COMMAND ${CMAKE_COMMAND} -E chdir ${model} ${CMAKE_MAKE_PROGRAM} sharedlib main=main.c
+    INSTALL_COMMAND ""
+  )
+  add_extra_targets("backend model" ${name} ${ver} ${dir}/${model} ${model} "yes | clean")
+  set_as_default_version("backend model" ${name}_${model} ${ver})
+endif()
 
 # Pythia
 set(name "pythia")

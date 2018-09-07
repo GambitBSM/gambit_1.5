@@ -16,6 +16,10 @@
 ///          (crogan@cern.ch)
 ///  \date 2014 Aug
 ///
+///  \author Ankit Beniwal
+///         (ankit.beniwal@adelaide.edu.au)
+///  \date 2016 Oct
+///
 ///  *********************************************
 
 #include <algorithm>
@@ -641,6 +645,30 @@ namespace Gambit
       result.upper = result.central * LE.get(Par::Pole_Mass_1srd_high, "W+");
       result.lower = result.central * LE.get(Par::Pole_Mass_1srd_low, "W+");
     }
+    void mw_from_VV_spectrum(triplet<double> &result)
+    {
+      using namespace Pipes::mw_from_VV_spectrum;
+      const SubSpectrum& LE = Dep::VectorDM_spectrum->get_LE();
+      result.central = LE.get(Par::Pole_Mass, "W+");
+      result.upper = result.central * LE.get(Par::Pole_Mass_1srd_high, "W+");
+      result.lower = result.central * LE.get(Par::Pole_Mass_1srd_low, "W+");
+    }
+    void mw_from_XX_spectrum(triplet<double> &result)
+    {
+      using namespace Pipes::mw_from_XX_spectrum;
+      const SubSpectrum& LE = Dep::MajoranaDM_spectrum->get_LE();
+      result.central = LE.get(Par::Pole_Mass, "W+");
+      result.upper = result.central * LE.get(Par::Pole_Mass_1srd_high, "W+");
+      result.lower = result.central * LE.get(Par::Pole_Mass_1srd_low, "W+");
+    }
+      void mw_from_FF_spectrum(triplet<double> &result)
+    {
+      using namespace Pipes::mw_from_FF_spectrum;
+      const SubSpectrum& LE = Dep::DiracDM_spectrum->get_LE();
+      result.central = LE.get(Par::Pole_Mass, "W+");
+      result.upper = result.central * LE.get(Par::Pole_Mass_1srd_high, "W+");
+      result.lower = result.central * LE.get(Par::Pole_Mass_1srd_low, "W+");
+    }    
     void mw_from_MSSM_spectrum(triplet<double> &result)
     {
       using namespace Pipes::mw_from_MSSM_spectrum;

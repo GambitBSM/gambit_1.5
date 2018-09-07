@@ -16,6 +16,10 @@
 ///          (sebastian.wild@ph.tum.de)
 ///  \date 2016 Aug
 ///
+///  \author Ankit Beniwal
+///          (ankit.beniwal@adelaide.edu.au)
+///  \date 2018 Jan, Aug
+///
 ///  *********************************************
 
 #include "gambit/Elements/gambit_module_headers.hpp"
@@ -52,6 +56,100 @@ namespace Gambit
       // assume that whichever backend has been hooked up here does so too.
       result = BEreq::cap_Sun_v0q0_isoscalar(
           *Dep::mwimp, *Dep::sigma_SI_p, *Dep::sigma_SD_p);
+
+      //cout << "mwimp" << *Dep::mwimp << "sigma_SI_p: " << *Dep::sigma_SI_p << " sigma_SD_p: " << *Dep::sigma_SD_p << "result: " << result << "\n";
+      //cout << "capture rate via capture_rate_Sun_const_xsec = " << result << "\n";
+
+    }
+
+    ///Alternative to the darkSusy fct, using captn_specific from capgen instead
+    void capture_rate_Sun_const_xsec_capgen(double &result)
+    {
+      using namespace Pipes::capture_rate_Sun_const_xsec_capgen;
+      double resultSD;
+      double resultSI;
+      double maxcap;
+
+      BEreq::cap_sun_saturation(*Dep::mwimp,maxcap);
+      BEreq::cap_Sun_v0q0_isoscalar(*Dep::mwimp,*Dep::sigma_SD_p,*Dep::sigma_SI_p,resultSD,resultSI);
+      result = resultSI + resultSD;
+
+      if (maxcap < result)
+      {
+        result = maxcap;
+      }
+
+      //cout << "mwimp" << *Dep::mwimp << "sigma_SI_p: " << *Dep::sigma_SI_p << " sigma_SD_p: " << *Dep::sigma_SD_p << "result: " << result << "\n";
+      //cout << "capture rate via capture_rate_Sun_const_xsec_capgen = " << result << "\n";
+
+    }
+
+    ///Capture rate for v^n and q^n-dependent cross sections.
+    ///Isoscalar (same proton/neutron coupling)
+    ///SD only couples to Hydrogen.
+    ///See DirectDetection.cpp to see how to define the cross sections sigma_SD_p, sigma_SI_pi
+    void capture_rate_Sun_vnqn(double &result)
+    {
+      using namespace Pipes::capture_rate_Sun_vnqn;
+
+      double resultSD;
+      double resultSI;
+      double capped;
+      int qpow;
+      int vpow;
+      const int nelems = 29;
+      double maxcap;
+
+      BEreq::cap_sun_saturation(*Dep::mwimp,maxcap);
+
+      resultSI = 0e0;
+      resultSD = 0e0;
+      typedef map_intpair_dbl::const_iterator it_type;
+
+      //Spin-dependent:
+      for(it_type iterator = Dep::sigma_SD_p->begin();
+        iterator != Dep::sigma_SD_p->end();
+        iterator++)
+      {
+         //don't capture anything if cross section is zero or all the DM is already capped
+        if((iterator->second > 1e-90) && (resultSD < maxcap))
+        {
+          qpow = (iterator->first).first/2 ;
+          vpow =  (iterator->first).second/2;
+
+          //Capture
+          BEreq::cap_Sun_vnqn_isoscalar(*Dep::mwimp,iterator->second,1,qpow,vpow,capped);
+          resultSD = resultSD+capped;
+        }
+      }
+
+      //Spin independent:
+      for(it_type iterator = Dep::sigma_SI_p->begin();
+        iterator != Dep::sigma_SI_p->end();
+        iterator++)
+      {
+        if((iterator->second > 1e-90) && (resultSI+resultSD < maxcap))
+        {
+          qpow = (iterator->first).first/2 ;
+          vpow =  (iterator->first).second/2;
+
+          //Capture
+          BEreq::cap_Sun_vnqn_isoscalar(*Dep::mwimp,iterator->second,nelems,qpow,vpow,capped);
+          resultSI = resultSI+capped;
+        }
+      }
+      result = resultSI+resultSD;
+
+      logger() << "Capgen captured: SI: " << resultSI << " SD: " << resultSD << " total: " << result << "max = " << maxcap << "\n" << EOM;
+
+      // If capture is above saturation, return saturation value.
+      if (maxcap < result)
+      {
+        result = maxcap;
+      }
+
+      //cout << "capture rate via capture_rate_Sun_vnqn = " << result << "\n";
+
     }
 
     /*! \brief Equilibration time for capture and annihilation of dark matter
@@ -62,6 +160,39 @@ namespace Gambit
       using namespace Pipes::equilibration_time_Sun;
       double ca = *Dep::sigmav/6.6e28 * pow(*Dep::mwimp/20.0, 1.5);
       result = pow(*Dep::capture_rate_Sun * ca, -0.5);
+    }
+
+    // Same as the above function except sigma-v is calculated at the most probable speed v = sqrt(2*T/mDM) where
+    // T = 1.35e-6 GeV is the Sun's core temperature
+    void equilibration_time_Sun_vprob(double &result)
+    {
+      using namespace Pipes::equilibration_time_Sun_vprob;
+
+      double sigmav = 0;
+      double T_Sun_core = 1.35e-6; // Sun's core temperature (GeV)
+
+      std::string DMid = *Dep::DarkMatter_ID;
+      TH_Process annProc = Dep::TH_ProcessCatalog->getProcess(DMid, DMid);
+
+      // Add all the regular channels
+      for (std::vector<TH_Channel>::iterator it = annProc.channelList.begin();
+          it != annProc.channelList.end(); ++it)
+      {
+        if ( it->nFinalStates == 2 )
+        {
+          // (sv)(v = sqrt(2T/mDM)) for two-body final state
+          sigmav += it->genRate->bind("v")->eval(sqrt(2.0*T_Sun_core/(*Dep::mwimp)));
+        }
+      }
+
+      // Add invisible contributions
+      sigmav += annProc.genRateMisc->bind("v")->eval(sqrt(2.0*T_Sun_core/(*Dep::mwimp)));
+
+      double ca = sigmav/6.6e28 * pow(*Dep::mwimp/20.0, 1.5);
+      result = pow(*Dep::capture_rate_Sun * ca, -0.5);
+
+      // std::cout << "v = " << sqrt(2.0*T_Sun_core/(*Dep::mwimp)) << " and sigmav inside equilibration_time_Sun_vprob = " << sigmav << std::endl;
+      // std::cout << "capture_rate_Sun inside equilibration_time_Sun_vprob = " << *Dep::capture_rate_Sun << std::endl;
     }
 
     /// Annihilation rate of dark matter in the Sun (s^-1)

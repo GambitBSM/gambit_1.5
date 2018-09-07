@@ -21,6 +21,11 @@
 ///          (peter.athron@coepp.org.au)
 ///  \date 2015 Jun
 ///
+///  \author Ankit Beniwal
+///          (ankit.beniwal@adelaide.edu.au)
+///  \date 2016 Oct
+///  \date 2017 Jun
+///
 ///  \author Are Raklev
 ///          (ahye@fys.uio.no)
 ///  \date 2018 Jan
@@ -2874,7 +2879,135 @@ namespace Gambit
 
       // Make sure the width is sensible.
       check_width(LOCAL_INFO, result.width_in_GeV, runOptions->getValueOrDef<bool>(false, "invalid_point_for_negative_width"));
-   }
+    }
+
+    //////////// Vector DM /////////////////////
+
+    /// Add the decay of Higgs to vectors for the VectorDM model (see arXiv:1512.06458v4)
+    void VectorDM_Higgs_decays (DecayTable::Entry& result)
+    {
+      using namespace Pipes::VectorDM_Higgs_decays;
+
+      // Get the spectrum information
+      const Spectrum& spec = *Dep::VectorDM_spectrum;
+      const SubSpectrum& he = spec.get_HE();
+      double mass = spec.get(Par::Pole_Mass,"V");
+      double lambda = he.get(Par::dimensionless,"lambda_hV");
+      double v0 = he.get(Par::mass1,"vev");
+      double mhpole = spec.get(Par::Pole_Mass,"h0_1");
+
+      // Get the reference SM Higgs decays
+      result = *Dep::Reference_SM_Higgs_decay_rates;
+
+      // Add the h -> VV width to the total
+      double massratio2 = pow(mass/mhpole,2);
+      double midfactor = (1 - 4*massratio2 + 12*pow(massratio2,2));
+      double gamma = (2.0*mass <= mhpole) ? ((pow(lambda*v0,2)*pow(mhpole,3))/(128.0*pi*pow(mass,4))) * midfactor * sqrt(1.0 - 4.0*massratio2) : 0.0;
+      result.width_in_GeV = result.width_in_GeV + gamma;
+
+      // Print out the h -> VV width for debugging
+      logger() << "Gamma (h -> VV) = " << gamma << " GeV" << std::endl;
+
+      // Rescale the SM decay branching fractions.
+      double wscaling = Dep::Reference_SM_Higgs_decay_rates->width_in_GeV/result.width_in_GeV;
+      for (auto it = result.channels.begin(); it != result.channels.end(); ++it)
+      {
+        it->second.first  *= wscaling; // rescale BF
+        it->second.second *= wscaling; // rescale error on BF
+      }
+
+      // Add the h->VV branching fraction
+      result.set_BF(gamma/result.width_in_GeV, 0.0, "V", "V");
+
+      // Make sure the width is sensible.
+      check_width(LOCAL_INFO, result.width_in_GeV, runOptions->getValueOrDef<bool>(false, "invalid_point_for_negative_width"));
+    }
+
+    //////////// Majorana fermion DM /////////////////////
+
+    /// Add the decay of Higgs to Majorana fermions for the MajoranaDM model (see arXiv:1512.06458v4)
+    void MajoranaDM_Higgs_decays (DecayTable::Entry& result)
+    {
+      using namespace Pipes::MajoranaDM_Higgs_decays;
+
+      // Get the spectrum information
+      const Spectrum& spec = *Dep::MajoranaDM_spectrum;
+      const SubSpectrum& he = spec.get_HE();
+      double mass = spec.get(Par::Pole_Mass,"X");
+      double lambda = he.get(Par::dimensionless,"lX");
+      double cxi = std::cos(he.get(Par::dimensionless,"xi"));
+      double v0 = he.get(Par::mass1,"vev");
+      double mhpole = spec.get(Par::Pole_Mass,"h0_1");
+
+      // Get the reference SM Higgs decays
+      result = *Dep::Reference_SM_Higgs_decay_rates;
+
+      // Add the h -> XX width to the total
+      double massratio2 = pow(mass/mhpole,2);
+      double lfactor = (1 - 4*massratio2*pow(cxi,2));
+      double gamma = (2.0*mass <= mhpole) ? ((mhpole*pow(v0*lambda,2))/(16.0*pi)) * sqrt(1.0 - 4.0*massratio2) * lfactor : 0.0;
+      result.width_in_GeV = result.width_in_GeV + gamma;
+
+      // Print out the h -> XX width for debugging
+      logger() << "Gamma (h -> XX) = " << gamma << " GeV" << std::endl;
+
+      // Rescale the SM decay branching fractions.
+      double wscaling = Dep::Reference_SM_Higgs_decay_rates->width_in_GeV/result.width_in_GeV;
+      for (auto it = result.channels.begin(); it != result.channels.end(); ++it)
+      {
+        it->second.first  *= wscaling; // rescale BF
+        it->second.second *= wscaling; // rescale error on BF
+      }
+
+      // Add the h->XX branching fraction
+      result.set_BF(gamma/result.width_in_GeV, 0.0, "X", "X");
+
+      // Make sure the width is sensible.
+      check_width(LOCAL_INFO, result.width_in_GeV, runOptions->getValueOrDef<bool>(false, "invalid_point_for_negative_width"));
+    }
+
+    //////////// Dirac fermion DM /////////////////////
+
+    /// Add the decay of Higgs to Dirac fermions for the DiracDM model (see arXiv:1512.06458v4)
+    void DiracDM_Higgs_decays (DecayTable::Entry& result)
+    {
+      using namespace Pipes::DiracDM_Higgs_decays;
+
+      // Get the spectrum information
+      const Spectrum& spec = *Dep::DiracDM_spectrum;
+      const SubSpectrum& he = spec.get_HE();
+      double mass = spec.get(Par::Pole_Mass,"F");
+      double lambda = he.get(Par::dimensionless,"lF");
+      double cxi = std::cos(he.get(Par::dimensionless,"xi"));
+      double v0 = he.get(Par::mass1,"vev");
+      double mhpole = spec.get(Par::Pole_Mass,"h0_1");
+
+      // Get the reference SM Higgs decays
+      result = *Dep::Reference_SM_Higgs_decay_rates;
+
+      // Add the h -> FF width to the total
+      double massratio2 = pow(mass/mhpole,2);
+      double lfactor = (1 - 4*massratio2*pow(cxi,2));
+      double gamma = (2.0*mass <= mhpole) ? ((mhpole*pow(v0*lambda,2))/(8.0*pi)) * sqrt(1.0 - 4.0*massratio2) * lfactor : 0.0;
+      result.width_in_GeV = result.width_in_GeV + gamma;
+
+      // Print out the h -> FF width for debugging
+      logger() << "Gamma (h -> FF) = " << gamma << " GeV" << std::endl;
+
+      // Rescale the SM decay branching fractions.
+      double wscaling = Dep::Reference_SM_Higgs_decay_rates->width_in_GeV/result.width_in_GeV;
+      for (auto it = result.channels.begin(); it != result.channels.end(); ++it)
+      {
+        it->second.first  *= wscaling; // rescale BF
+        it->second.second *= wscaling; // rescale error on BF
+      }
+
+      // Add the h->FF branching fraction
+      result.set_BF(gamma/result.width_in_GeV, 0.0, "F", "F");
+
+      // Make sure the width is sensible.
+      check_width(LOCAL_INFO, result.width_in_GeV, runOptions->getValueOrDef<bool>(false, "invalid_point_for_negative_width"));
+    }
 
 
     //////////// Everything ///////////////////
@@ -3333,6 +3466,33 @@ namespace Gambit
         tau, SM_Z::gamma_inv.sigma, false);
     }
 
+    // Implemented: Belanger et al. 2013, arXiv:1306.2941
+    void lnL_Higgs_invWidth_SMlike_VDM(double& result)
+    {
+      using namespace Pipes::lnL_Higgs_invWidth_SMlike_VDM;
+      double BF = Dep::Higgs_decay_rates->BF("V","V");
+      static daFunk::Funk chi2 = get_Higgs_invWidth_chi2(GAMBIT_DIR "/DecayBit/data/arXiv_1306.2941_Figure_8.dat");
+      result = (BF > 0.0) ? -chi2->bind("BR")->eval(BF)*0.5 : -0.0;
+    }
+
+    // Implemented: Belanger et al. 2013, arXiv:1306.2941
+    void lnL_Higgs_invWidth_SMlike_MDM(double& result)
+    {
+      using namespace Pipes::lnL_Higgs_invWidth_SMlike_MDM;
+      double BF = Dep::Higgs_decay_rates->BF("X","X");
+      static daFunk::Funk chi2 = get_Higgs_invWidth_chi2(GAMBIT_DIR "/DecayBit/data/arXiv_1306.2941_Figure_8.dat");
+      result = (BF > 0.0) ? -chi2->bind("BR")->eval(BF)*0.5 : -0.0;
+    }
+
+    // Implemented: Belanger et al. 2013, arXiv:1306.2941
+    void lnL_Higgs_invWidth_SMlike_DDM(double& result)
+    {
+      using namespace Pipes::lnL_Higgs_invWidth_SMlike_DDM;
+      double BF = Dep::Higgs_decay_rates->BF("F","F");
+      static daFunk::Funk chi2 = get_Higgs_invWidth_chi2(GAMBIT_DIR "/DecayBit/data/arXiv_1306.2941_Figure_8.dat");
+      result = (BF > 0.0) ? -chi2->bind("BR")->eval(BF)*0.5 : -0.0;
+    }
+
     void Z_gamma_nu_SM_2l(triplet<double>& gamma)
     {
       /**
@@ -3408,7 +3568,8 @@ namespace Gambit
       gamma.central = MSSM_Z::gamma_chi_0(0, 0, m_0, Z, g2, MZ, sw2);
       gamma.lower = gamma.central * 0.1;
       gamma.upper = gamma.lower;  // Error is symmetric
-  }
+    }
+
   }  // namespace DecayBit
 
 }  // namespace Gambit
