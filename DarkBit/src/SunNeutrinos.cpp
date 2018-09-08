@@ -429,23 +429,18 @@ namespace Gambit
             << Higgs_masses_neutral[j] << endl;
         }
         cout<< endl;
-        cout<< "higg charged mass: " << Higgs_mass_charged << endl;
+        cout<< "higgs charged mass: " << Higgs_mass_charged << endl;
         cout<< endl;
         cout<< "*Dep::mwimp: " << *Dep::mwimp << endl;
         cout<< endl;
         cout<< "*Dep::sigmav: " << *Dep::sigmav << endl;
-        cout<< endl;
-        cout<< "*Dep::si: " << *Dep::sigma_SI_p << endl;
-        cout<< endl;
-        cout<< "*Dep::sd: " << *Dep::sigma_SD_p << endl;
         cout<< endl;
       #endif
 
       // Set up DarkSUSY to do neutrino yields for this particular WIMP
       BEreq::nuyield_setup(annihilation_bf, Higgs_decay_BFs_neutral,
           Higgs_decay_BFs_charged, Higgs_masses_neutral,
-          Higgs_mass_charged, *Dep::mwimp, *Dep::sigmav,
-          *Dep::sigma_SI_p, *Dep::sigma_SD_p);
+          Higgs_mass_charged, *Dep::mwimp);
 
       // Hand back the pointer to the DarkSUSY neutrino yield function
       result.pointer = BEreq::nuyield.pointer();
@@ -460,7 +455,9 @@ namespace Gambit
                      + __GNUC_MINOR__ * 100 \
                      + __GNUC_PATCHLEVEL__)
         #if GCC_VERSION > 60000
-          result.threadsafe = false;
+          #if GCC_VERSION < 70000
+            result.threadsafe = false;
+          #endif
         #endif
         #undef GCC_VERSION
       #endif

@@ -787,12 +787,10 @@ START_MODULE
     DEPENDENCY(TH_ProcessCatalog, DarkBit::TH_ProcessCatalog)
     DEPENDENCY(mwimp, double)
     DEPENDENCY(sigmav, double)
-    DEPENDENCY(sigma_SI_p, double)
-    DEPENDENCY(sigma_SD_p, double)
     DEPENDENCY(DarkMatter_ID, std::string)
     BACKEND_REQ(nuyield_setup, (needs_DS), void, (const double(&)[29],
      const double(&)[29][3], const double(&)[15], const double(&)[3], const double&,
-     const double&, const double&, const double&, const double&))
+     const double&))
     BACKEND_REQ(nuyield, (needs_DS), double, (const double&, const int&, void*&))
     BACKEND_REQ(get_DS_neutral_h_decay_channels, (needs_DS), std::vector< std::vector<str> >, ())
     BACKEND_REQ(get_DS_charged_h_decay_channels, (needs_DS), std::vector< std::vector<str> >, ())
