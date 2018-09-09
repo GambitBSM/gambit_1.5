@@ -11,6 +11,7 @@
 ///  \author Pat Scott
 ///          (pscott@imperial.ac.uk)
 ///  \date 2015 Apr
+///        2018 Sep
 ///
 ///  \author Sebastian Wild
 ///          (sebastian.wild@ph.tum.de)

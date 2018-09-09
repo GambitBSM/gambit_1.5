@@ -19,6 +19,7 @@
 ///          (patscott@physics.mcgill.ca)
 ///  \date 2013 Apr
 ///        2015 Mar
+///        2018 Sep
 ///
 ///  \author Christoph Weniger
 ///          (c.weniger@uva.nl)
