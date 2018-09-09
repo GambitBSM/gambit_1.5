@@ -710,61 +710,50 @@ START_MODULE
 
 
   // Declare different DD experiments that exist in DDCalc.
-  // If SET_BACKEND_OPTION is not specified, any version of any backend is allowed.
   DD_DECLARE_EXPERIMENT(XENON100_2012)        // Aprile et al., PRL 109, 181301 (2013) [arxiv:1207.5988]
-
   DD_DECLARE_EXPERIMENT(XENON1T_2017)         // Aprile et al., PRL 119, 181301 (2017) [arxiv:1705.06655]
-  SET_BACKEND_OPTION(XENON1T_2017, (DDCalc, 1.1.0, 1.2.0, 2.0.0))
-
   DD_DECLARE_EXPERIMENT(XENON1T_2018)         // Aprile et al., May 28 talk at Gran Sasso.
-  SET_BACKEND_OPTION(XENON1T_2018, (DDCalc, 2.0.0))
-
   DD_DECLARE_EXPERIMENT(DARWIN)               // M. Schumann et al., [arXiv:1506.08309]
-  SET_BACKEND_OPTION(DARWIN, (DDCalc, 2.0.0))
-
   DD_DECLARE_EXPERIMENT(LUX_2013)             // Akerib et al., PRL 112, 091303 (2014) [arxiv:1310.8214]
-
   DD_DECLARE_EXPERIMENT(LUX_2015)             // D.S. Akerib et al., PRL 116, 161301 (2016) [arXiv:1512.03506]
-
   DD_DECLARE_EXPERIMENT(LUX_2016)             // D.S. Akerib et al., PRL 118, 021303 (2017) [arxiv:1608.07648]
-
   DD_DECLARE_EXPERIMENT(LZ)                   // LZ TDR, [arXiv:1509.02910]
-  SET_BACKEND_OPTION(LZ, (DDCalc, 2.0.0))
-
   DD_DECLARE_EXPERIMENT(PandaX_2016)          // A. Tan et al., PRL 117, 121303 (2016) [arxiv:1607.07400]
-
   DD_DECLARE_EXPERIMENT(PandaX_2017)          // X. Cui et al., PRL 119, 181302 (2017) [arxiv:1708.06917]
-  SET_BACKEND_OPTION(PandaX_2017, (DDCalc, 1.2.0, 2.0.0))
-
   DD_DECLARE_EXPERIMENT(DarkSide_50)          // P. Agnes et al., [arXiv:1802.07198]
-  SET_BACKEND_OPTION(DarkSide_50, (DDCalc, 2.0.0))
-
   DD_DECLARE_EXPERIMENT(CRESST_II)            // G. Angloher et al., [arXiv:1509.01515]
-  SET_BACKEND_OPTION(CRESST_II, (DDCalc, 2.0.0))
-
   DD_DECLARE_EXPERIMENT(SuperCDMS_2014)       // Agnese et al., PRL 112, 241302 (2014) [arxiv:1402.7137]
-
   DD_DECLARE_EXPERIMENT(CDMSlite)             // Agnese et al., PRL 116, 071301 (2015) [arxiv:1509.02448]
-  SET_BACKEND_OPTION(CDMSlite, (DDCalc, 2.0.0))
-
   DD_DECLARE_EXPERIMENT(SIMPLE_2014)          // Felizardo et al., PRD 89, 072013 (2014) [arxiv:1404.4309]
-
   DD_DECLARE_EXPERIMENT(PICO_2L)              // C. Amole et al., PRD 93, 061101 (2016) [arXiv:1601.03729]
-
   DD_DECLARE_EXPERIMENT(PICO_60_F)            // C. Amole et al., PRD 93, 052014 (2016) [arXiv:1510.07754]
-  SET_BACKEND_OPTION(PICO_60_F, (DDCalc, 1.0.0, 1.1.0, 1.2.0))
-
   DD_DECLARE_EXPERIMENT(PICO_60_I)            // C. Amole et al., PRD 93, 052014 (2016) [arXiv:1510.07754]
-  SET_BACKEND_OPTION(PICO_60_I, (DDCalc, 1.0.0, 1.1.0, 1.2.0))
-
   DD_DECLARE_EXPERIMENT(PICO_60)              // C. Amole et al., PRD 93, 052014 (2016) [arXiv:1510.07754]
-  SET_BACKEND_OPTION(PICO_60, (DDCalc, 2.0.0))
-
   DD_DECLARE_EXPERIMENT(PICO_60_2017)         // C. Amole et al., arXiv:1702.07666
-  SET_BACKEND_OPTION(PICO_60_2017, (DDCalc, 1.1.0, 1.2.0, 2.0.0))
-
   DD_DECLARE_EXPERIMENT(PICO_500)             // S. Fallows, talk at TAUP 2017
+
+  // Specify which versions of DDCalc support which experiments.
+  // If an experiment does not have any entry here, any version (of any backend) is allowed.
+
+  // Introduced in DDCalc 1.0.0 but later deleted
+  SET_BACKEND_OPTION(PICO_60_F, (DDCalc, 1.0.0, 1.1.0, 1.2.0))
+  SET_BACKEND_OPTION(PICO_60_I, (DDCalc, 1.0.0, 1.1.0, 1.2.0))
+  // Introduced in DDCalc 1.1.0
+  SET_BACKEND_OPTION(PICO_60_2017, (DDCalc, 1.1.0, 1.2.0, 2.0.0))
+  SET_BACKEND_OPTION(XENON1T_2017, (DDCalc, 1.1.0, 1.2.0, 2.0.0))
+  // Introduced in DDCalc 1.2.0
+  SET_BACKEND_OPTION(PandaX_2017, (DDCalc, 1.2.0, 2.0.0))
+  // Introduced in DDCalc 2.0.0
+  SET_BACKEND_OPTION(XENON1T_2018, (DDCalc, 2.0.0))
+  SET_BACKEND_OPTION(DARWIN, (DDCalc, 2.0.0))
+  SET_BACKEND_OPTION(LZ, (DDCalc, 2.0.0))
+  SET_BACKEND_OPTION(DarkSide_50, (DDCalc, 2.0.0))
+  SET_BACKEND_OPTION(CRESST_II, (DDCalc, 2.0.0))
+  SET_BACKEND_OPTION(CDMSlite, (DDCalc, 2.0.0))
+  SET_BACKEND_OPTION(PICO_60, (DDCalc, 2.0.0))
   SET_BACKEND_OPTION(PICO_500, (DDCalc, 2.0.0))
+
+
 
   // INDIRECT DETECTION: NEUTRINOS =====================================
 
