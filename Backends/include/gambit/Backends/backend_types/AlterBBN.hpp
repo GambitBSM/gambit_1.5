@@ -21,6 +21,7 @@
 #define __AlterBBN_types_hpp__
 
 #define NNUCREAC 100
+#define NTABMAX 1000
 
 namespace Gambit
 {
@@ -28,34 +29,48 @@ namespace Gambit
   struct relicparam
 /* structure containing the cosmological model parameters */
   {
-    int err;                    // error computation type
-    int failsafe;               // failsafe mode
-
     int entropy_model,energy_model;
-    double dd0,ndd,Tdend,Tddeq; /* dark density */
-    double sd0,nsd,Tsend; /* dark entropy */
-    double Sigmad0,nSigmad,TSigmadend; /* dark entropy injection */
-    double Sigmarad0,nSigmarad,TSigmaradend; /* standard entropy injection */
-    double nt0,nnt,Tnend; /* non-thermal production of relics */
-   
-    int phi_model;
-    double eta_phi,Gamma_phi,rhot_phi_fo,rho_phi; /* decaying scalar field - eta_phi = b / m_phi */
-    double Tphi0,rhot_phi0;
- 
-    double mgravitino; /* gravitino mass */
-        
+    double dd0,ndd,Tdend,Tddeq; // dark density
+    double sd0,nsd,Tsend; // dark entropy
+    double Sigmad0,nSigmad,TSigmadend; // dark entropy injection
+    double Sigmarad0,nSigmarad,TSigmaradend; // standard entropy injection
+    double nt0,nnt,Tnend; // non-thermal production of relics
+    
+    double quintn2,quintn3,quintn4,quintT12,quintT23,quintT34; // effective quintessence model
+
+    int phi_model; // decaying scalar field model switch
+    double eta_phi,Gamma_phi,rhot_phi_Tmax,rho_phi; // eta_phi = b / m_phi
+    double rhot_phi0,Tphi0;
+    double T_RH;
+    double Sigmatildestar;
+    double Sigmatildestar_max;
+    double Tstdstar_max;
+
+    double mgravitino; // gravitino mass
+            
     double relicmass;
     int scalar;
     
-    int solver;
+    int solver; // switch for linear or logarithmic differential equation solver
     
-    double T;
-    double Y,Yeq;
-    double Tfo;
+    double T; // Temperature in GeV
+    double Y; // Y=n/s
+    double Tfo,Tmax; // Freeze out and maximal temperature
     
-    int full_comput;
+    int full_comput; // Switch to deactivate the fast freeze out temperature determination
   
     double table_eff[276][3];   // Reads values from the SgStar files
+   
+    int use_table_rhoPD;
+    double table_rhoPD[2][NTABMAX];
+    int size_table_rhoPD;
+
+    /*---------------------*/
+    /* AlterBBN parameters */
+    /*---------------------*/
+    
+    int err;
+    int failsafe;
     double eta0;                // Initial Baryon to photon ratio
     double Nnu;                 // Number of Neutrinos (e+- included)
     double dNnu;                // Number of extra neutrinos (delta N_nu)
@@ -70,19 +85,17 @@ namespace Gambit
     int fermion;
     int EM_coupled, neut_coupled, neuteq_coupled;
     double chi2;
-    int nobs;
-    double test_pass,test_pass_n;
+    int nobs;    
   };
 
 
 struct errorparam
 /* structure containing the cosmological model parameters */
  {
-   int err;                    // error computation type
-   int failsafe;               // failsafe mode
-   int errnumber;              // process number for error calculation
-   double random[NNUCREAC+2];  // random numbers for Monte Carlo
-   double life_neutron;
+   int failsafe;                // failsafe mode
+    int errnumber;              // process number for error calculation
+    double random[NNUCREAC+2];  // random numbers for Monte Carlo
+    double life_neutron;
  };
  
 }
