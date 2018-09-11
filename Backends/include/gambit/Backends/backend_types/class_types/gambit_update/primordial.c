@@ -66,11 +66,13 @@ int primordial_spectrum_at_k(
   int last_index;
 
   /** - infer ln(k) from input. In linear mode, reject negative value of input k value. */
+//  printf("DEBUG: (primordial.c) we are in primordial_spectrum_at_k\n");
 
   if (mode == linear) {
     class_test(input<=0.,
                ppm->error_message,
                "k = %e",input);
+    // printf("DEBUG: mode is linear!");
     lnk=log(input);
   }
   else {
@@ -79,8 +81,11 @@ int primordial_spectrum_at_k(
 
   /** - if ln(k) is not in the interpolation range, return an error, unless
       we are in the case of a analytic spectrum, for which a direct computation is possible */
-
+//  printf("DEBUG: (primordial.c) lnk = %e \n",lnk);
+								 
   if ((lnk > ppm->lnk[ppm->lnk_size-1]) || (lnk < ppm->lnk[0])) {
+	  
+	printf("DEBUG: (primordial.c) ln(k) is not in the interpolation range\n");
 
     class_test(ppm->primordial_spec_type != analytic_Pk,
                ppm->error_message,
@@ -128,10 +133,10 @@ int primordial_spectrum_at_k(
       }
     }
   }
-
   /** - otherwise, interpolate in the pre-computed table */
 
   else {
+    // printf("DEBUG: (primordial.c) otherwise, interpolate in the pre-computed table\n");
 
     class_call(array_interpolate_spline(
                                         ppm->lnk,
@@ -148,7 +153,7 @@ int primordial_spectrum_at_k(
                ppm->error_message);
 
     /* if mode==logarithmic, output is already in the correct format. Otherwise, apply necessary transformation. */
-
+	  
     if (mode == linear) {
 
       for (index_ic1 = 0; index_ic1 < ppm->ic_size[index_md]; index_ic1++) {
@@ -169,7 +174,8 @@ int primordial_spectrum_at_k(
       }
     }
   }
-
+  // printf("ppm->lnpk[%d] = %e\n",index_md,ppm->lnpk[index_md]);
+  // printf("DEBUG: returning successfully from the primordial_spectrum_at_k\n");
   return _SUCCESS_;
 
 }
@@ -243,7 +249,7 @@ int primordial_init(
   /** - allocate and fill values of \f$ \ln{k}\f$'s */
   // SH: skip if the power spectrum is filled by GAMBIT
   if ( ppm->primordial_spec_type != gambit_Pk) {
-	printf("we are inside primordial_spec_type \n");
+	// printf("DEBUG: we are inside primordial_spec_type \n");
 
     class_call(primordial_get_lnk_list(ppm,
                                        k_min,
@@ -256,18 +262,18 @@ int primordial_init(
   /** - define indices and allocate tables in primordial structure */
   // SH: skip if the power spectrum is filled by GAMBIT
   if ( ppm->primordial_spec_type != gambit_Pk) {
-	printf("we are inside primordial_indices \n");
+	// printf("DEBUG: we are inside primordial_indices \n");
 
 	class_call(primordial_indices(ppt,
 								  ppm),
              ppm->error_message,
              ppm->error_message);
   }
-  printf("ppt->md_size = %d \n",ppt->md_size);
+  // printf("DEBUG: (ppm) ppt->md_size = %d \n",ppt->md_size);
 	
   for (index_md = 0; index_md < ppt->md_size; index_md++) {
-    printf("ppm->ic_size[%d] = %d \n", index_md,ppm->ic_size[index_md]);
-	printf("ppm->ic_ic_size[%d] = %d \n", index_md,ppm->ic_ic_size[index_md]);
+    // printf("DEBUG: ppm->ic_size[%d] = %d \n", index_md,ppm->ic_size[index_md]);
+	// printf("DEBUG: ppm->ic_ic_size[%d] = %d \n", index_md,ppm->ic_ic_size[index_md]);
   }
 
   /** - deal with case of analytic primordial spectra (with amplitudes, tilts, runnings, etc.) */
@@ -417,15 +423,14 @@ int primordial_init(
 				 ppm->error_message,
 				 "external Pk module cannot work if you ask for vector modes");
 
-	printf("ppm->lnk_size = %d \n",ppm->lnk_size);
+	// printf("DEBUG: ppm->lnk_size = %d \n",ppm->lnk_size);
 	  
 	for (index_k=0; index_k<ppm->lnk_size; index_k++) {
 		  
-		  printf("ppm->lnk[%d] = %e \n",index_k,ppm->lnk[index_k]);
-		  printf("ppm->lnpk[%d][%d] = %e \n",ppt->index_md_scalars,index_k,ppm->lnpk[ppt->index_md_scalars][index_k]);
+		  printf("DEBUG: ppm->lnk[%d] = %e \n",index_k,ppm->lnk[index_k]);
+		  printf("DEBUG: ppm->lnpk[%d][%d] = %e \n",ppt->index_md_scalars,index_k,ppm->lnpk[ppt->index_md_scalars][index_k]);
 	}
-		  //if (ppm->primordial_verbose > 0)
-    printf(" (Pk calculated by GAMBIT)\n");
+    printf("DEBUG:  (Pk calculated by GAMBIT)\n");
 	  
    /* ------------------------------------- */
 	  
@@ -441,9 +446,17 @@ int primordial_init(
   }
 
   /** - compute second derivative of each \f$ \ln{P_k} \f$ versus lnk with spline, in view of interpolation */
+  printf("DEBUG: array_spline_table_lines\n");
 
   for (index_md = 0; index_md < ppm->md_size; index_md++) {
 
+	  printf("DEBUG: ppm->lnk[0] = %e\n",ppm->lnk[0]);
+	  printf("DEBUG: ppm->lnk_size = %e\n",ppm->lnk_size);
+	  printf("DEBUG: index_md = %d\n",index_md);
+	  printf("DEBUG: ppm->lnpk[%d][0] = %e\n",index_md,ppm->lnpk[index_md][0]);
+	  printf("DEBUG: ppm->ic_ic_size[%d] = %e\n",index_md,ppm->ic_ic_size[index_md]);
+	  printf("DEBUG: ppm->ddlnpk[%d] = %e\n",index_md,ppm->ddlnpk[index_md][0]);
+	  
     class_call(array_spline_table_lines(ppm->lnk,
                                         ppm->lnk_size,
                                         ppm->lnpk[index_md],
@@ -460,6 +473,7 @@ int primordial_init(
       (not used by the rest of the code, but useful to keep in memory for several types of investigation) */
 
   if (ppm->primordial_spec_type != analytic_Pk) {
+	printf("DEBUG: ppm->primordial_spec_type != analytic_Pk\n");
 
     dlnk = log(10.)/ppr->k_per_decade_primordial;
 
@@ -473,14 +487,17 @@ int primordial_init(
                  ppm->error_message,
                  ppm->error_message);
 
+	  printf("DEBUG: primordial_spectrum_at_k at %e where lnpk_pivot = %e\n",log(ppm->k_pivot),lnpk_pivot);
+
       class_call(primordial_spectrum_at_k(ppm,
                                           ppt->index_md_scalars,
                                           logarithmic,
                                           log(ppm->k_pivot)+dlnk,
-
                                           &lnpk_plus),
                  ppm->error_message,
                  ppm->error_message);
+		
+	  printf("DEBUG: primordial_spectrum_at_k at %e where lnpk_plus = %e\n",log(ppm->k_pivot)+dlnk,lnpk_plus);
 
       class_call(primordial_spectrum_at_k(ppm,
                                           ppt->index_md_scalars,
@@ -489,6 +506,9 @@ int primordial_init(
                                           &lnpk_minus),
                  ppm->error_message,
                  ppm->error_message);
+		
+	  printf("DEBUG: primordial_spectrum_at_k at %e where lnpk_minus = %e\n",log(ppm->k_pivot)-dlnk,lnpk_minus);
+
 
       ppm->A_s = exp(lnpk_pivot);
       ppm->n_s = (lnpk_plus-lnpk_minus)/(2.*dlnk)+1.;
@@ -532,6 +552,9 @@ int primordial_init(
       ppm->beta_s = (lnpk_plusplus-2.*lnpk_plus+2.*lnpk_minus-lnpk_minusminus)/pow(dlnk,3);
 
     }
+	  
+    printf("DEBUG: -> A_s=%g  n_s=%g  alpha_s=%g\n",ppm->A_s,ppm->n_s,ppm->alpha_s);
+	  
 	if (ppm->primordial_verbose > 0)
 	  printf(" -> A_s=%g  n_s=%g  alpha_s=%g\n",ppm->A_s,ppm->n_s,ppm->alpha_s);
 

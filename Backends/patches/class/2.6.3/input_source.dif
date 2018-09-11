@@ -1,0 +1,75 @@
+*** /Users/selimhotinli/Dropbox/gambit_CosmoBit/Backends/installed/class/2.6.3/source/input.c	2017-10-24 09:42:41.000000000 -0400
+--- /Users/selimhotinli/Dropbox/gambit_CosmoBit/Backends/include/gambit/Backends/backend_types/class_types/gambit_update/input.c	2018-06-17 23:20:23.000000000 -0400
+***************
+*** 1435,1440 ****
+--- 1435,1442 ----
+                   errmsg,
+                   "You wrote: modes=%s. Could not identify any of the modes ('s', 'v', 't') in such input",string1);
+      }
++ 	  
++     printf("ppt->has_tensors = %d\n",ppt->has_tensors);
+  
+      if (ppt->has_scalars == _TRUE_) {
+  
+***************
+*** 1531,1536 ****
+--- 1533,1545 ----
+        ppm->primordial_spec_type = external_Pk;
+        flag2=_TRUE_;
+      }
++ 	/* ------------------- SH -------------------- */
++ 	if (strcmp(string1,"gambit_Pk") == 0) {
++ 		  printf("we have set gambit_Pk!\n");
++ 		  ppm->primordial_spec_type = gambit_Pk;
++ 		  flag2=_TRUE_;
++ 	}
++ 	/* ------------------------------------------- */
+      class_test(flag2==_FALSE_,
+                 errmsg,
+                 "could not identify primordial spectrum type, check that it is one of 'analytic_pk', 'two_scales', 'inflation_V', 'inflation_H', 'external_Pk'...");
+***************
+*** 3191,3196 ****
+--- 3200,3208 ----
+    sprintf(ppr->sBBN_file,__CLASSDIR__);
+    strcat(ppr->sBBN_file,"/bbn/sBBN_2017.dat");
+  
++ //  sprintf(ppr->sBBN_file,"");
++ //  strcat(ppr->sBBN_file,"/Users/selimhotinli/Dropbox/gambit_CosmoBit_Local/Backends/installed/class/2.6.1/bbn/sBBN_2017.dat");
++ 
+    /* for recombination */
+  
+    ppr->recfast_z_initial=1.e4;
+***************
+*** 3226,3237 ****
+  
+    ppr->recfast_H_frac=1.e-3;               /* from recfast 1.4 */
+  
+!   sprintf(ppr->hyrec_Alpha_inf_file,__CLASSDIR__);
+!   strcat(ppr->hyrec_Alpha_inf_file,"/hyrec/Alpha_inf.dat");
+!   sprintf(ppr->hyrec_R_inf_file,__CLASSDIR__);
+!   strcat(ppr->hyrec_R_inf_file,"/hyrec/R_inf.dat");
+!   sprintf(ppr->hyrec_two_photon_tables_file,__CLASSDIR__);
+!   strcat(ppr->hyrec_two_photon_tables_file,"/hyrec/two_photon_tables.dat");
+  
+    /* for reionization */
+  
+--- 3238,3256 ----
+  
+    ppr->recfast_H_frac=1.e-3;               /* from recfast 1.4 */
+  
+! //  sprintf(ppr->hyrec_Alpha_inf_file,__CLASSDIR__);
+! //  strcat(ppr->hyrec_Alpha_inf_file,"/hyrec/Alpha_inf.dat");
+! //  sprintf(ppr->hyrec_R_inf_file,__CLASSDIR__);
+! //  strcat(ppr->hyrec_R_inf_file,"/hyrec/R_inf.dat");
+! //  sprintf(ppr->hyrec_two_photon_tables_file,__CLASSDIR__);
+! //  strcat(ppr->hyrec_two_photon_tables_file,"/hyrec/two_photon_tables.dat");
+! 
+!   sprintf(ppr->hyrec_Alpha_inf_file,"");
+!   strcat(ppr->hyrec_Alpha_inf_file,"/Users/selimhotinli/Dropbox/gambit_CosmoBit_Local/Backends/installed/class/2.6.1/hyrec/Alpha_inf.dat");
+!   sprintf(ppr->hyrec_R_inf_file,"");
+!   strcat(ppr->hyrec_R_inf_file,"/Users/selimhotinli/Dropbox/gambit_CosmoBit_Local/Backends/installed/class/2.6.1/hyrec/R_inf.dat");
+!   sprintf(ppr->hyrec_two_photon_tables_file,"");
+!   strcat(ppr->hyrec_two_photon_tables_file,"/Users/selimhotinli/Dropbox/gambit_CosmoBit_Local/Backends/installed/class/2.6.1/hyrec/two_photon_tables.dat");
+  
+    /* for reionization */
+  

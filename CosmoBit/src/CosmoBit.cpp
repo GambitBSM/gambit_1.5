@@ -456,7 +456,7 @@ namespace Gambit
 
       std::cout << "calc_full_pk = " << calc_full_pk << std::endl;
 
-      calc_full_pk = 0; // lets hack for now as I decide how to implement full spectra to Patrick's version.
+      // calc_full_pk = 0; // lets hack for now as I decide how to implement full spectra to Patrick's version.
 
       std::cout << "steps = " << steps << std::endl;
 
@@ -510,10 +510,11 @@ namespace Gambit
 
       std::cout << " we are out of the multimodecode_gambit_driver function" << std::endl;
 
-      std::cout << "observs.k_array = " << sizeof(observs.k_array) << std::endl;
-      std::cout << "observs.k_array[0] = " << observs.k_array[0] << std::endl;
-      //std::cout << "observs.pks_array = " << observs.pks_array << std::endl;
-      //std::cout << "observs.pkt_array = " << observs.pkt_array << std::endl;
+      // std::cout << "DEBUG: observs.k_array = " << sizeof(observs.k_array) << std::endl;
+      // std::cout << "DEBUG: observs.k_array[0] = " << observs.k_array[0] << std::endl;
+	  // std::cout << "DEBUG: observs.k_array = " << observs.k_array << std::endl;
+	  // std::cout << "DEBUG: observs.pks_array = " << observs.pks_array << std::endl;
+      // std::cout << "DEBUG: observs.pkt_array = " << observs.pkt_array << std::endl;
 
       std::cout << "calc_full_pk = " << calc_full_pk << std::endl;
       if (calc_full_pk == 0)
@@ -543,6 +544,32 @@ namespace Gambit
         cosmo.input.addEntry("tau_reio",*Param["tau_reio"]);
         cosmo.input.addEntry("r",observs.r);
       }
+	  else
+	  {
+		printf("DEBUG: we are inside P_k_ini type = gambit_Pk \n");
+		/* gambit_Pk type is set if full_spectra is asked. */
+		cosmo.input.addEntry("P_k_ini type","gambit_Pk");
+		  
+		cosmo.Pk_S.resize(steps+1, 0.);
+		cosmo.Pk_T.resize(steps+1, 0.);
+		cosmo.k_ar.resize(steps+1, 0.);
+		  
+		for (int ii=0; ii < steps; ii++)
+		{
+			// printf("DEBUG: observs.k_array[%d] = %e\n",ii,observs.k_array[ii+1]);
+			// printf("DEBUG: observs.pks_array[%d] = %e\n",ii,observs.pks_array[ii+1]);
+			// printf("DEBUG: observs.pkt_array[%d] = %e\n",ii,observs.pkt_array[ii+1]);
+			cosmo.k_ar.at(ii) = observs.k_array[ii];
+			cosmo.Pk_S.at(ii) = observs.pks_array[ii];
+			cosmo.Pk_T.at(ii) = observs.pkt_array[ii];
+		}
+		  
+		cosmo.input.addEntry("omega_b",*Param["omega_b"]);
+		cosmo.input.addEntry("omega_cdm",*Param["omega_cdm"]);
+		cosmo.input.addEntry("H0",*Param["H0"]);
+		cosmo.input.addEntry("tau_reio",*Param["tau_reio"]);
+
+	  }
 
       YAML::Node class_dict;
       if (runOptions->hasKey("class_dict"))
@@ -637,7 +664,7 @@ namespace Gambit
 
       std::cout << "calc_full_pk = " << calc_full_pk << std::endl;
 
-      calc_full_pk = 0; // lets hack for now as I decide how to implement full spectra to Patrick's version.
+      // calc_full_pk = 1; // lets hack for now as I decide how to implement full spectra to Patrick's version.
 
       std::cout << "steps = " << steps << std::endl;
 
@@ -691,10 +718,10 @@ namespace Gambit
 
       std::cout << " we are out of the multimodecode_gambit_driver function" << std::endl;
 
-      std::cout << "observs.k_array = " << sizeof(observs.k_array) << std::endl;
-      std::cout << "observs.k_array[0] = " << observs.k_array[0] << std::endl;
-      //std::cout << "observs.pks_array = " << observs.pks_array << std::endl;
-      //std::cout << "observs.pkt_array = " << observs.pkt_array << std::endl;
+      // std::cout << "observs.k_array = " << sizeof(observs.k_array) << std::endl;
+      // std::cout << "observs.k_array[0] = " << observs.k_array[0] << std::endl;
+      // std::cout << "observs.pks_array = " << observs.pks_array << std::endl;
+      // std::cout << "observs.pkt_array = " << observs.pkt_array << std::endl;
 
       std::cout << "calc_full_pk = " << calc_full_pk << std::endl;
       if (calc_full_pk == 0)
@@ -873,10 +900,10 @@ namespace Gambit
 
       std::cout << " we are out of the multimodecode_gambit_driver function" << std::endl;
 
-      std::cout << "observs.k_array = " << sizeof(observs.k_array) << std::endl;
-      std::cout << "observs.k_array[0] = " << observs.k_array[0] << std::endl;
-      //std::cout << "observs.pks_array = " << observs.pks_array << std::endl;
-      //std::cout << "observs.pkt_array = " << observs.pkt_array << std::endl;
+      // std::cout << "observs.k_array = " << sizeof(observs.k_array) << std::endl;
+      // std::cout << "observs.k_array[0] = " << observs.k_array[0] << std::endl;
+      // std::cout << "observs.pks_array = " << observs.pks_array << std::endl;
+      // std::cout << "observs.pkt_array = " << observs.pkt_array << std::endl;
 
       std::cout << "calc_full_pk = " << calc_full_pk << std::endl;
       if (calc_full_pk == 0)
@@ -1054,10 +1081,10 @@ namespace Gambit
 
       std::cout << " we are out of the multimodecode_gambit_driver function" << std::endl;
 
-      std::cout << "observs.k_array = " << sizeof(observs.k_array) << std::endl;
-      std::cout << "observs.k_array[0] = " << observs.k_array[0] << std::endl;
-      //std::cout << "observs.pks_array = " << observs.pks_array << std::endl;
-      //std::cout << "observs.pkt_array = " << observs.pkt_array << std::endl;
+      // std::cout << "observs.k_array = " << sizeof(observs.k_array) << std::endl;
+      // std::cout << "observs.k_array[0] = " << observs.k_array[0] << std::endl;
+      // std::cout << "observs.pks_array = " << observs.pks_array << std::endl;
+      // std::cout << "observs.pkt_array = " << observs.pkt_array << std::endl;
 
       std::cout << "calc_full_pk = " << calc_full_pk << std::endl;
       if (calc_full_pk == 0)
@@ -1268,7 +1295,7 @@ namespace Gambit
 
     void class_get_spectra_func(Class_container& cosmo)
     {
-      //std::cout << "Last seen alive in: class_get_spectra_func" << std::endl;
+      std::cout << "Last seen alive in: class_get_spectra_func" << std::endl;
       using namespace Pipes::class_get_spectra_func;
 
       cosmo = BEreq::get_ptr_to_class();
@@ -1301,11 +1328,13 @@ namespace Gambit
           // For l >= 2 ask for the cl-spectra.
           if (BEreq::class_output_total_cl_at_l(&cosmo.sp,&cosmo.le,&cosmo.op,byVal(l),byVal(cl)) == _SUCCESS_)
           {
+			if(l==3) std::cout << "  cosmo.Cl_TT.at("<<l<<") = " << cosmo.Cl_TT.at(l) << std::endl;
             cosmo.Cl_TT.at(l) = cl[cosmo.sp.index_ct_tt]*pow(cosmo.ba.T_cmb*1.e6,2);
             cosmo.Cl_TE.at(l) = cl[cosmo.sp.index_ct_te]*pow(cosmo.ba.T_cmb*1.e6,2);
             cosmo.Cl_EE.at(l) = cl[cosmo.sp.index_ct_ee]*pow(cosmo.ba.T_cmb*1.e6,2);
             cosmo.Cl_BB.at(l) = cl[cosmo.sp.index_ct_bb]*pow(cosmo.ba.T_cmb*1.e6,2);
             cosmo.Cl_PhiPhi.at(l) = cl[cosmo.sp.index_ct_pp];
+			if(l==3) std::cout << "  cosmo.Cl_TT.at("<<l<<") = " << cosmo.Cl_TT.at(l) << std::endl;
           }
           else
           {
@@ -1325,7 +1354,7 @@ namespace Gambit
 
     void function_Planck_high_TT_loglike(double& result)
     {
-      //std::cout << "Last seen alive in: function_Planck_high_TT_loglike" << std::endl;
+      std::cout << "Last seen alive in: function_Planck_high_TT_loglike" << std::endl;
       using namespace Pipes::function_Planck_high_TT_loglike;
 
       double  cl_and_pars[2525];
@@ -1335,9 +1364,12 @@ namespace Gambit
       //--------------------------------------------------------------------------
       //------addition of the Cl for TT, TE, EE and BB to Cl array----------------
       //--------------------------------------------------------------------------
+      std::cout << " cosmo.Cl_TT.at("<<3<<") = " << cosmo.Cl_TT.at(3) << std::endl;
+
       for(int ii = 0; ii < 2509 ; ii++)
       {
         idx_tt = ii;
+
         if (ii >= 2)
         {
           cl_and_pars[idx_tt] = cosmo.Cl_TT.at(ii);
@@ -1380,7 +1412,7 @@ namespace Gambit
                byVal(cl_and_pars),
                &_err);
 
-      //std::cout << "Log likelihood (of high_TT) is : " << result << std::endl;
+      std::cout << "Log likelihood (of high_TT) is : " << result << std::endl;
     }
 
     void function_Planck_high_TTTEEE_loglike(double& result)
@@ -1467,7 +1499,7 @@ namespace Gambit
                byVal(cl_and_pars),
                &_err);
 
-      //std::cout << "Log likelihood (of high_TTTEEE) is : " << result << std::endl;
+      std::cout << "Log likelihood (of high_TTTEEE) is : " << result << std::endl;
     }
 
     void function_Planck_high_TT_lite_loglike(double& result)
@@ -1512,7 +1544,7 @@ namespace Gambit
                byVal(cl_and_pars),
                &_err);
 
-      //std::cout << "Log likelihood (of high_TT_lite) is : " << result << std::endl;
+      std::cout << "Log likelihood (of high_TT_lite) is : " << result << std::endl;
     }
 
     void function_Planck_high_TTTEEE_lite_loglike(double& result)
@@ -1618,7 +1650,7 @@ namespace Gambit
                byVal(cl_and_pars),
                &_err);
 
-      //std::cout << "Log likelihood (of lensing) is : " << result << std::endl;
+      std::cout << "Log likelihood (of lensing) is : " << result << std::endl;
     }
 
     void function_Planck_lowp_TT_loglike(double& result)
@@ -1673,7 +1705,7 @@ namespace Gambit
                byVal(cl_and_pars),
                &_err);
 
-      //std::cout << "Log likelihood (of lowp_TT) is : " << result << std::endl;
+      std::cout << "Log likelihood (of lowp_TT) is : " << result << std::endl;
     }
 
   }

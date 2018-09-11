@@ -43,9 +43,9 @@
   N_pivot_prior_min: 30
   N_pivot_prior_max: 70
 # For calculating the full power spectrum P(k).  Samples in uniform increments in log(k).
-  calc_full_pk: 0
-  steps: 300
-  kmin: 1e-4
+  calc_full_pk: 1
+  steps: 100
+  kmin: 1e-7
   kmax: 1e6
 # Options for output from the code. (missing)
 # Advanced options for technical features. (missing)
