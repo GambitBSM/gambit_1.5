@@ -20,6 +20,8 @@
 #ifndef __AlterBBN_types_hpp__
 #define __AlterBBN_types_hpp__
 
+#define NNUCREAC 100
+
 namespace Gambit
 {
 
@@ -69,17 +71,19 @@ namespace Gambit
     int EM_coupled, neut_coupled, neuteq_coupled;
     double chi2;
     int nobs;
+    double test_pass,test_pass_n;
   };
 
-//  struct errorparam
-///* structure containing the cosmological model parameters */
-//  {
-//    int err;                    // error computation type
-//    int failsafe;               // failsafe mode
-//    int errnumber;              // process number for error calculation
-//    double random[NNUCREAC+2];  // random numbers for Monte Carlo
-//    double life_neutron;
-//  };
+
+struct errorparam
+/* structure containing the cosmological model parameters */
+ {
+   int err;                    // error computation type
+   int failsafe;               // failsafe mode
+   int errnumber;              // process number for error calculation
+   double random[NNUCREAC+2];  // random numbers for Monte Carlo
+   double life_neutron;
+ };
  
 }
 #endif /* defined __AlterBBN_types_hpp__ */

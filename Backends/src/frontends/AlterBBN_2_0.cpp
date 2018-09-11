@@ -30,8 +30,13 @@
 #define NNUC 26
 
 // Initialisation
-BE_INI_FUNCTION{}
+BE_INI_FUNCTION{
+  //struct relicparam result;
+  //Init_cosmomodel(&result);
+
+}
 END_BE_INI_FUNCTION
+
 
 // Convenience functions (definitions)
 BE_NAMESPACE

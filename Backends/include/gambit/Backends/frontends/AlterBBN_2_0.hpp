@@ -16,6 +16,7 @@
 
 
 
+
 #define BACKENDNAME AlterBBN
 #define BACKENDLANG CC
 #define VERSION 2.0
@@ -23,12 +24,11 @@
 
 LOAD_LIBRARY
 
-// BE_ALLOW_MODELS(MSSM63atQ, MSSM63atMGUT, WC)
 
 BE_FUNCTION(Init_cosmomodel, void, (relicparam*), "Init_cosmomodel", "Init_cosmomodel")
-BE_FUNCTION(nucl, int, (relicparam*, double*), "nucl", "nucl")
+//BE_FUNCTION(nucl, int, (relicparam*, double*), "nucl", "nucl")
 
-BE_FUNCTION(Init_cosmomodel_param, void, (double, double, double, double, double, double, double, double, relicparam*), "Init_cosmomodel_param", "Init_cosmomodel_param")
+//BE_FUNCTION(Init_cosmomodel_param, void, (double, double, double, double, double, double, double, double, const relicparam*), "Init_cosmomodel_param", "Init_cosmomodel_param")
 
 
 
@@ -61,6 +61,7 @@ BE_FUNCTION(Init_cosmomodel_param, void, (double, double, double, double, double
 // // calculate chi2 for Yp and 2H/H --> write own routine in gambit to be able to adopt measured values and which abundances are used 
 // BE_FUNCTION(bbn_excluded_chi2, int, (relicparam*), "bbn_excluded_chi2", "bbn_excluded_chi2")
 
+// BE_ALLOW_MODELS(MSSM63atQ, MSSM63atMGUT, WC)
 
 
 // Convenience functions:

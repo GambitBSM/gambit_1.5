@@ -49,13 +49,13 @@ Scanner:
 
     random:
       plugin: random
-      point_number: 5
+      point_number: 1
       like:  LogLike
 
 #======== Observables of interest ========
 ObsLikes:
   - purpose:      LogLike
-    capability:   compute_BBN_abundances
+    capability:   BBN_abundances
     module:       CosmoBit
     type:         double
 
@@ -90,10 +90,10 @@ Rules:
 ####
 
 
-  - capability: compute_BBN_abundances
-    options:
-      eta: 5.3
-      N_eff: 3.2
+ # - capability: compute_BBN_abundances
+ #   options:
+ #     eta: 5.3
+ #     N_eff: 3.2
       #planck_path: /home/janina/code/PlanckLike/plc_2.0
       #planck_path: /home/janina/code/gambit_devel/Backends/installed/plc/2.0/plc-2.0
 
