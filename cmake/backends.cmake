@@ -64,7 +64,7 @@ if(NOT ditched_${name}_${ver})
     CONFIGURE_COMMAND ""
     #BUILD_COMMAND sed ${dashi} -e "s#CC = gcc#CC = ${CMAKE_C_COMPILER}#g" Makefile
     BUILD_COMMAND sed ${dashi} -e "s#CC = gcc#CC = ${CMAKE_C_COMPILER}#g" Makefile
-          COMMAND sed ${dashi} -e "s#rcsU#rcs#g" src/Makefile
+          COMMAND sed ${dashi} -e "s#rcsU#rcs#g" Makefile
           COMMAND sed ${dashi} -e "s/CFLAGS= -O3 -pipe -fomit-frame-pointer/CFLAGS= -fPIC ${GAMBIT_C_FLAGS}/g" Makefile
           COMMAND ${CMAKE_MAKE_PROGRAM}
           COMMAND ar x src/libbbn.a
@@ -838,7 +838,7 @@ if(NOT ditched_${name}_${ver})
     DOWNLOAD_COMMAND ${DL_BACKEND} ${dl} ${md5} ${dir}
     SOURCE_DIR ${dir}
     BUILD_IN_SOURCE 1
-    CONFIGURE_COMMAND ./configure FC=${CMAKE_Fortran_COMPILER} FCFLAGS=${CMAKE_Fortran_FLAGS} FFLAGS=${CMAKE_Fortran_FLAGS} CC=${CMAKE_C_COMPILER} CFLAGS=${CMAKE_C_FLAGS} CXX=${CMAKE_CXX_COMPILER} CXXFLAGS=${CMAKE_CXX_FLAGS} SHLIB_SUFFIX=${CFITSIO_SO}
+    CONFIGURE_COMMAND ./configure FC=${CMAKE_Fortran_COMPILER} FCFLAGS=${GAMBIT_Fortran_FLAGS} FFLAGS=${GAMBIT_Fortran_FLAGS} CC=${CMAKE_C_COMPILER} CFLAGS=${GAMBIT_C_FLAGS} CXX=${CMAKE_CXX_COMPILER} CXXFLAGS=${GAMBIT_CXX_FLAGS} SHLIB_SUFFIX=${CFITSIO_SO}
     BUILD_COMMAND ${CMAKE_MAKE_PROGRAM} shared SHLIB_SUFFIX=${CFITSIO_SO}
     INSTALL_COMMAND ${CMAKE_MAKE_PROGRAM} install SHLIB_SUFFIX=${CFITSIO_SO}
   )
@@ -882,8 +882,8 @@ set(name "class")
 set(ver "2.6.3")
 set(lib "libclass")
 #set(patch "${PROJECT_SOURCE_DIR}/Backends/patches/${name}/${ver}")
-set(dl "http://lesgourg.github.io/class_public/class_public-2.6.3.tar.gz")
-set(md5 "dfb8652cd5af14d61e677e0f8b96f62f")
+set(dl "https://github.com/lesgourg/class_public/archive/v${ver}.tar.gz")
+set(md5 "e6eb0fd721bb1098e642f5d1970501ce")
 set(dir "${PROJECT_SOURCE_DIR}/Backends/installed/${name}/${ver}")
 set(CLASS_DLL_DIR "build")
 set(CLASS_IFLAG "-I")
@@ -893,10 +893,9 @@ if(NOT ditched_${name}_${ver})
     SOURCE_DIR ${dir}
     BUILD_IN_SOURCE 1
     CONFIGURE_COMMAND ""
-    #BUILD_COMMAND ${CMAKE_MAKE_PROGRAM} CC=${CMAKE_C_COMPILER} CCFLAG=${CMAKE_C_FLAGS} class
-    BUILD_COMMAND ${CMAKE_MAKE_PROGRAM} CC=${CMAKE_C_COMPILER} class
+    BUILD_COMMAND ${CMAKE_MAKE_PROGRAM} CC=${CMAKE_C_COMPILER} CCFLAG=${GAMBIT_C_FLAGS} OMPFLAG=${OpenMP_CXX_FLAGS} class
     COMMAND ${CMAKE_COMMAND} -E make_directory lib
-    COMMAND ${CMAKE_COMMAND} -E echo "${CMAKE_C_COMPILER} -shared ${CMAKE_C_FLAGS} -J${CLASS_DLL_DIR} ${CLASS_IFLAG}${CLASS_DLL_DIR}/ -o lib/${lib}.so ${CLASS_DLL_DIR}/*.o" > make_so.sh
+    COMMAND ${CMAKE_COMMAND} -E echo "${CMAKE_C_COMPILER} -shared ${GAMBIT_C_FLAGS} -J${CLASS_DLL_DIR} ${CLASS_IFLAG}${CLASS_DLL_DIR}/ -o lib/${lib}.so ${CLASS_DLL_DIR}/*.o" > make_so.sh
     COMMAND chmod u+x make_so.sh
     COMMAND ./make_so.sh
     INSTALL_COMMAND ""
@@ -945,13 +944,13 @@ if(NOT ditched_${name}_${ver})
           COMMAND patch -p1 < ${patch}/modpk_utils.dif
           COMMAND patch -p1 < ${patch}/multimodecode_driver.dif
     CONFIGURE_COMMAND ""
-    BUILD_COMMAND ${CMAKE_MAKE_PROGRAM} FC=${CMAKE_Fortran_COMPILER} F90C=${CMAKE_Fortran_COMPILER} FFLAG=${CMAKE_Fortran_FLAGS}
+    BUILD_COMMAND ${CMAKE_MAKE_PROGRAM} FC=${CMAKE_Fortran_COMPILER} F90C=${CMAKE_Fortran_COMPILER} FFLAG=${GAMBIT_Fortran_FLAGS}
     COMMAND ${CMAKE_COMMAND} -E copy ${driver}/multimodecode_gambit.f90 ${dir}
-    COMMAND ${CMAKE_COMMAND} -E echo "${CMAKE_Fortran_COMPILER} ${CMAKE_Fortran_FLAGS} -c ${dir}/multimodecode_gambit.f90" > make_so1.sh
+    COMMAND ${CMAKE_COMMAND} -E echo "${CMAKE_Fortran_COMPILER} ${GAMBIT_Fortran_FLAGS} -c ${dir}/multimodecode_gambit.f90" > make_so1.sh
     COMMAND chmod u+x make_so1.sh
     COMMAND ./make_so1.sh
     COMMAND ${CMAKE_COMMAND} -E make_directory lib
-    COMMAND ${CMAKE_COMMAND} -E echo "${CMAKE_Fortran_COMPILER} -shared ${CMAKE_Fortran_FLAGS} -o lib/${lib}.so *.o" > make_so2.sh
+    COMMAND ${CMAKE_COMMAND} -E echo "${CMAKE_Fortran_COMPILER} -shared ${GAMBIT_Fortran_FLAGS} -o lib/${lib}.so *.o" > make_so2.sh
     COMMAND chmod u+x make_so2.sh
     COMMAND ./make_so2.sh
     INSTALL_COMMAND ""
