@@ -106,8 +106,9 @@ BE_INI_FUNCTION
   // Point-level initialization ----------------------------
 
   // Change DM parameters
-  DDCalc_SetWIMP_mG(WIMP,*Dep::mwimp,Dep::DD_couplings->gps,Dep::DD_couplings->gns,
-                    Dep::DD_couplings->gpa,Dep::DD_couplings->gna);
+  // Note: f's = G's/2 where G's are the effective DM-nucleon couplings
+  DDCalc_SetWIMP_higgsportal(WIMP,*Dep::mwimp,(Dep::DD_couplings->gps)/2,(Dep::DD_couplings->gns)/2,
+                    (Dep::DD_couplings->gpa)/2,(Dep::DD_couplings->gna)/2);
 
   // Log stuff if in debug mode
   #ifdef DDCALC_DEBUG

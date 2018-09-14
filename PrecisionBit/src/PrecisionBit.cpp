@@ -16,6 +16,10 @@
 ///          (crogan@cern.ch)
 ///  \date 2014 Aug
 ///
+///  \author Ankit Beniwal
+///         (ankit.beniwal@adelaide.edu.au)
+///  \date 2016 Oct
+///
 ///  *********************************************
 
 #include <algorithm>
@@ -641,6 +645,30 @@ namespace Gambit
       result.upper = result.central * LE.get(Par::Pole_Mass_1srd_high, "W+");
       result.lower = result.central * LE.get(Par::Pole_Mass_1srd_low, "W+");
     }
+    void mw_from_VV_spectrum(triplet<double> &result)
+    {
+      using namespace Pipes::mw_from_VV_spectrum;
+      const SubSpectrum& LE = Dep::VectorDM_spectrum->get_LE();
+      result.central = LE.get(Par::Pole_Mass, "W+");
+      result.upper = result.central * LE.get(Par::Pole_Mass_1srd_high, "W+");
+      result.lower = result.central * LE.get(Par::Pole_Mass_1srd_low, "W+");
+    }
+    void mw_from_XX_spectrum(triplet<double> &result)
+    {
+      using namespace Pipes::mw_from_XX_spectrum;
+      const SubSpectrum& LE = Dep::MajoranaDM_spectrum->get_LE();
+      result.central = LE.get(Par::Pole_Mass, "W+");
+      result.upper = result.central * LE.get(Par::Pole_Mass_1srd_high, "W+");
+      result.lower = result.central * LE.get(Par::Pole_Mass_1srd_low, "W+");
+    }
+      void mw_from_FF_spectrum(triplet<double> &result)
+    {
+      using namespace Pipes::mw_from_FF_spectrum;
+      const SubSpectrum& LE = Dep::DiracDM_spectrum->get_LE();
+      result.central = LE.get(Par::Pole_Mass, "W+");
+      result.upper = result.central * LE.get(Par::Pole_Mass_1srd_high, "W+");
+      result.lower = result.central * LE.get(Par::Pole_Mass_1srd_low, "W+");
+    }    
     void mw_from_MSSM_spectrum(triplet<double> &result)
     {
       using namespace Pipes::mw_from_MSSM_spectrum;
@@ -955,18 +983,20 @@ namespace Gambit
         model.get_physical().MFu =smin.mU; //MSbar
         model.get_physical().MFc =smin.mCmC; // MSbar
 
-        /// Use hardcoded values as reccommended by GM2Calc authours
-        /// unless the user really wants to change these
-        double alpha_MZ = runOptions->getValueOrDef
-        <double>(0.00729735, "GM2Calc_extra_alpha_e_MZ");
-        double alpha_thompson = runOptions->getValueOrDef
-        <double>(0.00775531, "GM2Calc_extra_alpha_e_thompson_limit");
+        /// alpha_MZ := alpha(0) (1 - \Delta^{OS}(M_Z) ) where
+        /// \Delta^{OS}(M_Z) = quark and lepton contributions to
+        // on-shell renormalized photon vacuum polarization
+        // default value recommended by GM2calc from arxiv:1105.3149  
+        const double alpha_MZ = runOptions->getValueOrDef
+        <double>(alpha_e_OS_MZ, "GM2Calc_extra_alpha_e_MZ");
+        const double alpha_thomson = runOptions->getValueOrDef
+        <double>(alpha_e_OS_thomson_limit, "GM2Calc_extra_alpha_e_thomson_limit");
 
         if (alpha_MZ > std::numeric_limits<double>::epsilon())
           model.set_alpha_MZ(alpha_MZ);
 
-        if (alpha_thompson > std::numeric_limits<double>::epsilon())
-          model.set_alpha_thompson(alpha_thompson);
+        if (alpha_thomson > std::numeric_limits<double>::epsilon())
+          model.set_alpha_thompson(alpha_thomson);
 
         model.set_scale(mssm.GetScale());                   // 2L
 
@@ -1007,10 +1037,10 @@ namespace Gambit
         invalid_point().raise(err.str());
       }
 
-      double error = BEreq::calculate_uncertainty_amu_2loop(model);
+      const double error = BEreq::calculate_uncertainty_amu_2loop(model);
 
-      double amumssm = BEreq::calculate_amu_1loop(model)
-                       + BEreq::calculate_amu_2loop(model);
+      const double amumssm = BEreq::calculate_amu_1loop(model)
+         + BEreq::calculate_amu_2loop(model);
 
       // Convert from a_mu to g-2
       result.central = 2.0*amumssm;

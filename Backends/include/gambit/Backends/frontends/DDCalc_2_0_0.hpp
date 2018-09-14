@@ -104,6 +104,15 @@ BE_FUNCTION(DARWIN_Init,         int, (), "C_DDCalc_darwin_init",         "DARWI
 // values are already set via DDCalc_InitHalo routine, so it need not be called at all if the default values are to be used.
 BE_FUNCTION(DDCalc_SetSHM, void, (const int&, const double&, const double&, const double&, const double&), "C_DDCalc_ddcalc_setshm", "SetSHM")
 
+// Set the WIMP mass and couplings for the Higgs portal DM models.
+//    *higgsportal:  mass, fsp, fsn, app, apn
+//  Units: mass [GeV]; f [GeV^-2] = pure scalar coupling; a [GeV^-2] = pure pseudoscalar coupling
+// Convention: f = G/2 where G is the effective 4 vertex DM-nucleon coupling.
+BE_FUNCTION(DDCalc_SetWIMP_higgsportal, void, (const int&, const double&, const double&, const double&, const double&, const double&), "C_DDCalc_ddcalc_setwimp_higgsportal", "SetWIMP_higgsportal")
+
+// Get the WIMP mass and couplings for the Higgs portal DM models.
+BE_FUNCTION(DDCalc_GetWIMP_higgsportal, void, (const int&, double&, double&, double&, double&, double&), "C_DDCalc_ddcalc_getwimp_higgsportal", "GetWIMP_higgsportal")
+
 // Set the WIMP mass and couplings/cross-sections for standard SI/SD scattering.
 // There are three versions, depending on how the couplings are specified:
 //   * mfa:    mass, fp, fn, ap, an
@@ -129,12 +138,12 @@ BE_FUNCTION(DDCalc_GetWIMP_msigma, void, (const int&,double&,double&,double&,dou
 //    Arguments are the WIMP index, the mass of the WIMP in GeV, and the spin of the WIMP.
 //  - SetNRCoefficient sets the coefficient of a single operator to a given value.
 //    Arguments are:
-//	(1) the WIMP index
-//	(2) The operator index, i.e. an integer specifying the non-relativistic operator, e.g. 6 for O_6.
-//	    For the specific cases of O_1 and O_4 one can also use the operators (q^2/mp^2) * O_1 and (q^2/mp^2) * O_4,
-//	    by passing -1 and -4, respectively.
-//	(3) The isospin index: 0 for the isoscalar and 1 for the isovector component of the operator.
-//	(4) The desired value of the operator coefficient in units GeV^(-2).
+//  (1) the WIMP index
+//  (2) The operator index, i.e. an integer specifying the non-relativistic operator, e.g. 6 for O_6.
+//      For the specific cases of O_1 and O_4 one can also use the operators (q^2/mp^2) * O_1 and (q^2/mp^2) * O_4,
+//      by passing -1 and -4, respectively.
+//  (3) The isospin index: 0 for the isoscalar and 1 for the isovector component of the operator.
+//  (4) The desired value of the operator coefficient in units GeV^(-2).
 BE_FUNCTION(DDCalc_SetWIMP_NREffectiveTheory, void, (const int&,const double&,const double&), "C_DDCalc_ddcalc_setwimp_nreffectivetheory", "SetWIMP_NREffectiveTheory")
 BE_FUNCTION(DDCalc_SetNRCoefficient, void, (const int&,const int&,const int&,const double&), "C_DDCalc_ddcalc_setnrcoefficient", "SetNRCoefficient")
 
