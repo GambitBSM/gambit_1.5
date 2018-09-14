@@ -516,7 +516,19 @@ endmacro()
 set(BOSS_dir "${PROJECT_SOURCE_DIR}/Backends/scripts/BOSS")
 set(needs_BOSSing "")
 set(needs_BOSSing_failed "")
+
+# Define some variables used to check for castxml binaries in BOSS
+set(have_checked_castxml_binary FALSE)
+
 macro(BOSS_backend name backend_version)
+
+  # Do check for castxml binaries in BOSS?
+  if(NOT ${have_checked_castxml_binary})
+    message("${BoldYellow}-- DEBUG: I'll look for the castxml binaries now...")
+    set(have_checked_castxml_binary TRUE)
+  else()
+    message("${BoldYellow}-- DEBUG: I have already looked for the castxml binaries")
+  endif()
 
   # Replace "." by "_" in the backend version number
   string(REPLACE "." "_" backend_version_safe ${backend_version})
@@ -547,6 +559,8 @@ macro(BOSS_backend name backend_version)
       set(BOSS_castxml_cc "")
     endif()
     ExternalProject_Add_Step(${name}_${ver} BOSS
+      # Check for castxml binaries
+      COMMAND ${PROJECT_SOURCE_DIR}/cmake/scripts/check_for_castxml_binaries.sh ${BOSS_dir}
       # Run BOSS
       COMMAND ${PYTHON_EXECUTABLE} ${BOSS_dir}/boss.py ${BOSS_castxml_cc} ${BOSS_includes} ${name}_${backend_version_safe}
       # Copy BOSS-generated files to correct folders within Backends/include
@@ -558,3 +572,10 @@ macro(BOSS_backend name backend_version)
   endif()
 endmacro()
 
+
+#      # Check if the castxml binary exists
+#      if(NOT EXISTS "${BOSS_dir}/castxml")
+#        message("${BoldRed}-- Did not find the castxml directory.")
+#      else()
+#        message("${BoldGreen}-- Found the castxml directory.")
+#      endif()
