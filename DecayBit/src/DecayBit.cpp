@@ -3319,15 +3319,6 @@ namespace Gambit
       return daFunk::interp("BR", table["BR"], table["Delta_chi2"]);
     }
 
-    void SingletDM_inv_Higgs_BF(double& BF)
-    {
-       /**
-          @brief Branching fraction for Higgs into singlet DM
-          @param BF \f$\textrm{BR}(h\to S S)\f$
-       */
-       using namespace Pipes::SingletDM_inv_Higgs_BF;
-       BF = Dep::Higgs_decay_rates->BF("S", "S");
-    }
 
     void MSSM_inv_Higgs_BF(double &BF)
     {
@@ -3427,6 +3418,46 @@ namespace Gambit
       BF = gamma_inv / gamma_tot;
     }
 
+    void SingletDM_inv_Higgs_BF(double& BF)
+    {
+       /**
+          @brief Branching fraction for Higgs into scalar singlet DM
+          @param BF \f$\textrm{BR}(h\to S S)\f$
+       */
+       using namespace Pipes::SingletDM_inv_Higgs_BF;
+       BF = Dep::Higgs_decay_rates->BF("S", "S");
+    }
+
+    void VectorDM_inv_Higgs_BF(double& BF)
+    {
+       /**
+          @brief Branching fraction for Higgs into vector singlet DM
+          @param BF \f$\textrm{BR}(h\to V V)\f$
+       */
+       using namespace Pipes::VectorDM_inv_Higgs_BF;
+       BF = Dep::Higgs_decay_rates->BF("V", "V");
+    }
+
+    void MajoranaDM_inv_Higgs_BF(double& BF)
+    {
+       /**
+          @brief Branching fraction for Higgs into Majorana singlet DM
+          @param BF \f$\textrm{BR}(h\to X X)\f$
+       */
+       using namespace Pipes::MajoranaDM_inv_Higgs_BF;
+       BF = Dep::Higgs_decay_rates->BF("X", "X");
+    }
+
+    void DiracDM_inv_Higgs_BF(double& BF)
+    {
+       /**
+          @brief Branching fraction for Higgs into Dirac singlet DM
+          @param BF \f$\textrm{BR}(h\to F F)\f$
+       */
+       using namespace Pipes::DiracDM_inv_Higgs_BF;
+       BF = Dep::Higgs_decay_rates->BF("F", "F");
+    }
+
     void lnL_Higgs_invWidth_SMlike(double& lnL)
     {
       /**
@@ -3503,33 +3534,6 @@ namespace Gambit
       const double tau = std::sqrt(pow(tau_nu, 2) + pow(tau_chi_0, 2));
       lnL = Stats::gaussian_loglikelihood(gamma_inv, SM_Z::gamma_inv.mu,
         tau, SM_Z::gamma_inv.sigma, false);
-    }
-
-    // Implemented: Belanger et al. 2013, arXiv:1306.2941
-    void lnL_Higgs_invWidth_SMlike_VDM(double& result)
-    {
-      using namespace Pipes::lnL_Higgs_invWidth_SMlike_VDM;
-      double BF = Dep::Higgs_decay_rates->BF("V","V");
-      static daFunk::Funk chi2 = get_Higgs_invWidth_chi2(GAMBIT_DIR "/DecayBit/data/arXiv_1306.2941_Figure_8.dat");
-      result = (BF > 0.0) ? -chi2->bind("BR")->eval(BF)*0.5 : -0.0;
-    }
-
-    // Implemented: Belanger et al. 2013, arXiv:1306.2941
-    void lnL_Higgs_invWidth_SMlike_MDM(double& result)
-    {
-      using namespace Pipes::lnL_Higgs_invWidth_SMlike_MDM;
-      double BF = Dep::Higgs_decay_rates->BF("X","X");
-      static daFunk::Funk chi2 = get_Higgs_invWidth_chi2(GAMBIT_DIR "/DecayBit/data/arXiv_1306.2941_Figure_8.dat");
-      result = (BF > 0.0) ? -chi2->bind("BR")->eval(BF)*0.5 : -0.0;
-    }
-
-    // Implemented: Belanger et al. 2013, arXiv:1306.2941
-    void lnL_Higgs_invWidth_SMlike_DDM(double& result)
-    {
-      using namespace Pipes::lnL_Higgs_invWidth_SMlike_DDM;
-      double BF = Dep::Higgs_decay_rates->BF("F","F");
-      static daFunk::Funk chi2 = get_Higgs_invWidth_chi2(GAMBIT_DIR "/DecayBit/data/arXiv_1306.2941_Figure_8.dat");
-      result = (BF > 0.0) ? -chi2->bind("BR")->eval(BF)*0.5 : -0.0;
     }
 
     void Z_gamma_nu_SM_2l(triplet<double>& gamma)

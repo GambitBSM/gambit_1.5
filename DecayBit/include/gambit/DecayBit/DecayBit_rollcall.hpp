@@ -135,13 +135,13 @@ START_MODULE
     DEPENDENCY(SingletDM_spectrum, Spectrum)
     ALLOW_MODELS(SingletDM,SingletDM_running)
     #undef FUNCTION
-    
+
 		#define FUNCTION SingletDMZ3_Higgs_decays
     START_FUNCTION(DecayTable::Entry)
     DEPENDENCY(Reference_SM_Higgs_decay_rates, DecayTable::Entry)
     DEPENDENCY(SingletDMZ3_spectrum, Spectrum)
     ALLOW_MODELS(SingletDMZ3)
-    #undef FUNCTION    
+    #undef FUNCTION
 
     #define FUNCTION VectorDM_Higgs_decays
     START_FUNCTION(DecayTable::Entry)
@@ -860,6 +860,24 @@ START_MODULE
     ALLOW_MODELS(SingletDM, SingletDMZ3)
     #undef FUNCTION
 
+    #define FUNCTION VectorDM_inv_Higgs_BF
+    START_FUNCTION(double)
+    DEPENDENCY(Higgs_decay_rates, DecayTable::Entry)
+    ALLOW_MODELS(VectorDM)
+    #undef FUNCTION
+
+    #define FUNCTION MajoranaDM_inv_Higgs_BF
+    START_FUNCTION(double)
+    DEPENDENCY(Higgs_decay_rates, DecayTable::Entry)
+    ALLOW_MODELS(MajoranaDM)
+    #undef FUNCTION
+
+    #define FUNCTION DiracDM_inv_Higgs_BF
+    START_FUNCTION(double)
+    DEPENDENCY(Higgs_decay_rates, DecayTable::Entry)
+    ALLOW_MODELS(DiracDM)
+    #undef FUNCTION
+
     #define FUNCTION MSSM_inv_Higgs_BF
     START_FUNCTION(double)
     DEPENDENCY(MSSM_spectrum, Spectrum)
@@ -914,15 +932,6 @@ QUICK_FUNCTION(DecayBit, snubar_muonl_decay_rates,     NEW_CAPABILITY, snubar_mu
 QUICK_FUNCTION(DecayBit, snubar_taul_decay_rates,      NEW_CAPABILITY, snubar_taul_decays,      DecayTable::Entry, (MSSM63atQ, MSSM63atMGUT), (snu_taul_decay_rates,       DecayTable::Entry))
 QUICK_FUNCTION(DecayBit, chargino_minus_1_decay_rates, NEW_CAPABILITY, chargino_minus_1_decays, DecayTable::Entry, (MSSM63atQ, MSSM63atMGUT), (chargino_plus_1_decay_rates,DecayTable::Entry))
 QUICK_FUNCTION(DecayBit, chargino_minus_2_decay_rates, NEW_CAPABILITY, chargino_minus_2_decays, DecayTable::Entry, (MSSM63atQ, MSSM63atMGUT), (chargino_plus_2_decay_rates,DecayTable::Entry))
-
-// Likelihoods
-<<<<<<< HEAD
-QUICK_FUNCTION(DecayBit, lnL_Higgs_invWidth, NEW_CAPABILITY, lnL_Higgs_invWidth_SMlike, double, (SingletDM,SingletDM_running, SingletDMZ3), (Higgs_decay_rates, DecayTable::Entry))
-=======
-QUICK_FUNCTION(DecayBit, lnL_Higgs_invWidth, OLD_CAPABILITY, lnL_Higgs_invWidth_SMlike_VDM, double, (VectorDM), (Higgs_decay_rates, DecayTable::Entry))
-QUICK_FUNCTION(DecayBit, lnL_Higgs_invWidth, OLD_CAPABILITY, lnL_Higgs_invWidth_SMlike_MDM, double, (MajoranaDM), (Higgs_decay_rates, DecayTable::Entry))
-QUICK_FUNCTION(DecayBit, lnL_Higgs_invWidth, OLD_CAPABILITY, lnL_Higgs_invWidth_SMlike_DDM, double, (DiracDM), (Higgs_decay_rates, DecayTable::Entry))
->>>>>>> master
 
 #endif /* defined(__DecayBit_rollcall_hpp__) */
 
