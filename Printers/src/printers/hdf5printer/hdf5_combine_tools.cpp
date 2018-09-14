@@ -882,12 +882,6 @@ namespace Gambit
                             if(file_ids[file_i]>=0)  HDF5::closeFile(file_ids[file_i]);
                         }
 
-                        HDF5::closeDataset(dataset_out);
-                        HDF5::closeDataset(dataset2_out);
-
-                        // Move offset so that next batch is written to correct place in output file
-                        offset += batch_size_tot;
-
                     } // end batch, begin processing next batch of files.
                 }
                 std::cout << "  Combining primary datasets... Done.                                 "<<std::endl;
