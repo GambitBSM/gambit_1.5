@@ -208,12 +208,7 @@ START_MODULE
     // Routine for cross checking relic density results
     #define FUNCTION RD_oh2_MicrOmegas
       START_FUNCTION(double)
-<<<<<<< HEAD
       DEPENDENCY(RD_oh2_Xf_MicrOmegas, ddpair)
-=======
-      BACKEND_REQ(oh2, (MicrOmegas_MSSM, MicrOmegas_SingletDM, MicrOmegas_VectorDM, MicrOmegas_MajoranaDM, MicrOmegas_DiracDM), double, (double*,int,double))
-      ALLOW_MODELS(MSSM63atQ, SingletDM, VectorDM, MajoranaDM, DiracDM)
->>>>>>> master
     #undef FUNCTION
 
   #undef CAPABILITY
@@ -224,8 +219,8 @@ START_MODULE
   START_CAPABILITY
     #define FUNCTION RD_oh2_Xf_MicrOmegas
       START_FUNCTION(ddpair)
-      BACKEND_REQ(oh2, () , double,  (double*, int, double))
-      //ALLOW_MODELS(MSSM63atQ,SingletDM,SingletDMZ3)
+      BACKEND_REQ(oh2, (MicrOmegas_MSSM, MicrOmegas_SingletDM, MicrOmegas_SingletDMZ3, MicrOmegas_VectorDM, MicrOmegas_MajoranaDM, MicrOmegas_DiracDM), double, (double*,int,double))
+      ALLOW_MODELS(MSSM63atQ, MSSM63atMGUT, SingletDM_running, SingletDMZ3, VectorDM, MajoranaDM, DiracDM)
     #undef FUNCTION
   #undef CAPABILITY
 
