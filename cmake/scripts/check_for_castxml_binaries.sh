@@ -1,24 +1,20 @@
 
-
-# https://midas3.kitware.com/midas/download/item/318227/castxml-linux.tar.gz
-# https://midas3.kitware.com/midas/download/item/318762/castxml-macosx.tar.gz
-
-
 # Arguments:
 #   1. BOSS directory
 #   2. cmake command
 #   3. primary URL
 
+# Source for prebuilt castxml binaries
+#   https://midas3.kitware.com/midas/download/item/318227/castxml-linux.tar.gz
+#   https://midas3.kitware.com/midas/download/item/318762/castxml-macosx.tar.gz
 
-if [ -d $1/castxml ] ; then
-  echo "DEBUG: Found the castxml directory"
-else
-  echo "DEBUG: Did NOT find the castxml directory. Will try to download castxml now"
+
+
+if ! [ -d $1/castxml ] ; then
+
+  echo "Did not find the castxml directory in ${1}/castxml. Will try to download castxml now."
 
   # Download
-  echo "DEBUG: arg 1: $1"
-  echo "DEBUG: arg 2: $2"
-  echo "DEBUG: arg 3: $3"
   axel_worked=0
   filename=$($2 -E echo $3 | sed 's#.*/##g')
   $2 -E make_directory $1 >/dev/null

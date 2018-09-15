@@ -522,14 +522,6 @@ set(have_checked_castxml_binary FALSE)
 
 macro(BOSS_backend name backend_version)
 
-  # Do check for castxml binaries in BOSS?
-  if(NOT ${have_checked_castxml_binary})
-    message("${BoldYellow}-- DEBUG: I'll look for the castxml binaries now...")
-    set(have_checked_castxml_binary TRUE)
-  else()
-    message("${BoldYellow}-- DEBUG: I have already looked for the castxml binaries")
-  endif()
-
   # Replace "." by "_" in the backend version number
   string(REPLACE "." "_" backend_version_safe ${backend_version})
 
@@ -558,9 +550,14 @@ macro(BOSS_backend name backend_version)
     elseif("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Intel")
       set(BOSS_castxml_cc "")
     endif()
+    if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
+      set(dl "https://midas3.kitware.com/midas/download/item/318762/castxml-macosx.tar.gz")
+    else()
+      set(dl "https://midas3.kitware.com/midas/download/item/318227/castxml-linux.tar.gz")
+    endif()
     ExternalProject_Add_Step(${name}_${ver} BOSS
       # Check for castxml binaries and download if they do not exist
-      COMMAND ${PROJECT_SOURCE_DIR}/cmake/scripts/check_for_castxml_binaries.sh ${BOSS_dir} ${CMAKE_COMMAND} https://midas3.kitware.com/midas/download/item/318227/castxml-linux.tar.gz
+      COMMAND ${PROJECT_SOURCE_DIR}/cmake/scripts/check_for_castxml_binaries.sh ${BOSS_dir} ${CMAKE_COMMAND} ${dl}
       # Run BOSS
       COMMAND ${PYTHON_EXECUTABLE} ${BOSS_dir}/boss.py ${BOSS_castxml_cc} ${BOSS_includes} ${name}_${backend_version_safe}
       # Copy BOSS-generated files to correct folders within Backends/include
