@@ -24,6 +24,11 @@
 ///
 ///  \author Csaba Balazs
 ///  \date 2015 Jan-May
+///
+///  \author Ankit Beniwal
+///          (ankit.beniwal@adelaide.edu.au)
+///  \date 2016 Aug
+///
 ///   \author Tomas Gonzalo
 ///           (t.e.gonzalo@fys.uio.no)
 ///  \date 2018 Feb
@@ -129,6 +134,27 @@ START_MODULE
     DEPENDENCY(Reference_SM_Higgs_decay_rates, DecayTable::Entry)
     DEPENDENCY(SingletDM_spectrum, Spectrum)
     ALLOW_MODELS(SingletDM, SingletDMZ3)
+    #undef FUNCTION
+
+    #define FUNCTION VectorDM_Higgs_decays
+    START_FUNCTION(DecayTable::Entry)
+    DEPENDENCY(Reference_SM_Higgs_decay_rates, DecayTable::Entry)
+    DEPENDENCY(VectorDM_spectrum, Spectrum)
+    ALLOW_MODELS(VectorDM)
+    #undef FUNCTION
+
+    #define FUNCTION MajoranaDM_Higgs_decays
+    START_FUNCTION(DecayTable::Entry)
+    DEPENDENCY(Reference_SM_Higgs_decay_rates, DecayTable::Entry)
+    DEPENDENCY(MajoranaDM_spectrum, Spectrum)
+    ALLOW_MODELS(MajoranaDM)
+    #undef FUNCTION
+
+    #define FUNCTION DiracDM_Higgs_decays
+    START_FUNCTION(DecayTable::Entry)
+    DEPENDENCY(Reference_SM_Higgs_decay_rates, DecayTable::Entry)
+    DEPENDENCY(DiracDM_spectrum, Spectrum)
+    ALLOW_MODELS(DiracDM)
     #undef FUNCTION
 
     #define FUNCTION MSSM_h0_1_decays
@@ -881,6 +907,11 @@ QUICK_FUNCTION(DecayBit, snubar_muonl_decay_rates,     NEW_CAPABILITY, snubar_mu
 QUICK_FUNCTION(DecayBit, snubar_taul_decay_rates,      NEW_CAPABILITY, snubar_taul_decays,      DecayTable::Entry, (MSSM63atQ, MSSM63atMGUT), (snu_taul_decay_rates,       DecayTable::Entry))
 QUICK_FUNCTION(DecayBit, chargino_minus_1_decay_rates, NEW_CAPABILITY, chargino_minus_1_decays, DecayTable::Entry, (MSSM63atQ, MSSM63atMGUT), (chargino_plus_1_decay_rates,DecayTable::Entry))
 QUICK_FUNCTION(DecayBit, chargino_minus_2_decay_rates, NEW_CAPABILITY, chargino_minus_2_decays, DecayTable::Entry, (MSSM63atQ, MSSM63atMGUT), (chargino_plus_2_decay_rates,DecayTable::Entry))
+
+// Likelihoods
+QUICK_FUNCTION(DecayBit, lnL_Higgs_invWidth, OLD_CAPABILITY, lnL_Higgs_invWidth_SMlike_VDM, double, (VectorDM), (Higgs_decay_rates, DecayTable::Entry))
+QUICK_FUNCTION(DecayBit, lnL_Higgs_invWidth, OLD_CAPABILITY, lnL_Higgs_invWidth_SMlike_MDM, double, (MajoranaDM), (Higgs_decay_rates, DecayTable::Entry))
+QUICK_FUNCTION(DecayBit, lnL_Higgs_invWidth, OLD_CAPABILITY, lnL_Higgs_invWidth_SMlike_DDM, double, (DiracDM), (Higgs_decay_rates, DecayTable::Entry))
 
 #endif /* defined(__DecayBit_rollcall_hpp__) */
 
