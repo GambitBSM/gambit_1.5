@@ -1,5 +1,5 @@
-*** /Users/selimhotinli/Dropbox/gambit_CosmoBit/Backends/installed/class/2.6.3/source/thermodynamics.c	2017-10-24 09:42:41.000000000 -0400
---- /Users/selimhotinli/Dropbox/gambit_CosmoBit/Backends/include/gambit/Backends/backend_types/class_types/gambit_update/thermodynamics.c	2018-06-18 15:00:35.000000000 -0400
+*** ../../Backends/installed/class/2.6.3/source/thermodynamics.c	2017-10-24 14:42:41.000000000 +0100
+--- ../../Backends/include/gambit/Backends/backend_types/class_types/gambit_update/thermodynamics.c	2018-08-30 12:57:30.000000000 +0100
 ***************
 *** 379,384 ****
 --- 379,387 ----
@@ -13,19 +13,8 @@
                pth->error_message,
                pth->error_message);
 ***************
-*** 432,437 ****
---- 435,442 ----
-  
-    for (index_tau=0; index_tau < pth->tt_size; index_tau++) {
-  
-+ //	printf("\nDEBUG: call for background_at_tau at index_tau = %d where the pth->tt_size = %e\n",index_tau,pth->tt_size);
-+   
-      class_call(background_at_tau(pba,
-                                   tau_table[index_tau],
-                                   pba->normal_info,
-***************
 *** 478,483 ****
---- 483,490 ----
+--- 481,488 ----
     /** - --> compute r_d = 2pi/k_d = 2pi * [int_{tau_ini}^{tau} dtau (1/kappa') (R^2+4/5(1+R))/(1+R^2)/6 ]^1/2 (see e.g. Wayne Hu's thesis eq. (5.59) */
   
     if (pth->compute_damping_scale == _TRUE_) {
@@ -49,7 +38,7 @@
     /** - find damping scale at recombination (using linear interpolation) */
   
     if (pth->compute_damping_scale == _TRUE_) {
---- 732,744 ----
+--- 730,742 ----
     class_call(background_at_tau(pba,pth->tau_rec, pba->long_info, pba->inter_normal, &last_index_back, pvecback),
                pba->error_message,
                pth->error_message);
@@ -78,7 +67,7 @@
     class_call(background_at_tau(pba,
                                  tau_bbn,
                                  pba->long_info,
---- 1107,1119 ----
+--- 1105,1117 ----
   
     /** - 8.6173e-11 converts from Kelvin to MeV. We randomly choose 0.1 MeV to be the temperature of BBN */
     z_bbn = 0.1/(8.6173e-11*pba->T_cmb)-1.0;
@@ -93,21 +82,22 @@
                                  tau_bbn,
                                  pba->long_info,
 ***************
-*** 1139,1146 ****
---- 1146,1158 ----
-       omegab2 deltaN2 YHe
-       .....
+*** 1141,1147 ****
     */
-+   // printf("DEBUG: we are begining to open ppr->sBBN_file = \n");
-+   // printf("DEBUG: ppr->sBBN_file = %s\n",ppr->sBBN_file);
   
     class_open(fA,ppr->sBBN_file, "r",pth->error_message);
-+ 	
-+   // printf("DEBUG: we managed to open ppr->sBBN_file = %s\n",ppr->sBBN_file);
-+   // printf("DEBUG: we are entering the while loop (quite pussibly) for reading the sBBN_file \n");
-  
+! 
     /* go through each line */
     while (fgets(line,_LINE_LENGTH_MAX_-1,fA) != NULL) {
+  
+--- 1146,1152 ----
+    */
+  
+    class_open(fA,ppr->sBBN_file, "r",pth->error_message);
+! 	
+    /* go through each line */
+    while (fgets(line,_LINE_LENGTH_MAX_-1,fA) != NULL) {
+  
 ***************
 *** 1206,1212 ****
                pth->error_message);
@@ -117,7 +107,7 @@
     class_test(omega_b < omegab[0],
                pth->error_message,
                "You have asked for an unrealistic small value omega_b = %e. The corresponding value of the primordial helium fraction cannot be found in the interpolation table. If you really want this value, you should fix YHe to a given value rather than to BBN",
---- 1218,1224 ----
+--- 1211,1217 ----
                pth->error_message);
   
     omega_b=pba->Omega0_b*pba->h*pba->h;

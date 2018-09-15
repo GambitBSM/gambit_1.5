@@ -1,19 +1,25 @@
-*** /Users/selimhotinli/Dropbox/gambit_CosmoBit/Backends/installed/class/2.6.3/source/input.c	2017-10-24 09:42:41.000000000 -0400
---- /Users/selimhotinli/Dropbox/gambit_CosmoBit/Backends/include/gambit/Backends/backend_types/class_types/gambit_update/input.c	2018-06-17 23:20:23.000000000 -0400
+*** ../../Backends/installed/class/2.6.3/source/input.c	2017-10-24 14:42:41.000000000 +0100
+--- ../../Backends/include/gambit/Backends/backend_types/class_types/gambit_update/input.c	2018-09-05 12:40:53.000000000 +0100
 ***************
-*** 1435,1440 ****
---- 1435,1442 ----
+*** 1435,1441 ****
                    errmsg,
                    "You wrote: modes=%s. Could not identify any of the modes ('s', 'v', 't') in such input",string1);
       }
-+ 	  
-+     printf("ppt->has_tensors = %d\n",ppt->has_tensors);
-  
+! 
       if (ppt->has_scalars == _TRUE_) {
   
+        class_call(parser_read_string(pfc,"ic",&string1,&flag1,errmsg),
+--- 1435,1441 ----
+                   errmsg,
+                   "You wrote: modes=%s. Could not identify any of the modes ('s', 'v', 't') in such input",string1);
+      }
+! 	  
+      if (ppt->has_scalars == _TRUE_) {
+  
+        class_call(parser_read_string(pfc,"ic",&string1,&flag1,errmsg),
 ***************
 *** 1531,1536 ****
---- 1533,1545 ----
+--- 1531,1543 ----
         ppm->primordial_spec_type = external_Pk;
         flag2=_TRUE_;
       }
@@ -29,7 +35,7 @@
                  "could not identify primordial spectrum type, check that it is one of 'analytic_pk', 'two_scales', 'inflation_V', 'inflation_H', 'external_Pk'...");
 ***************
 *** 3191,3196 ****
---- 3200,3208 ----
+--- 3198,3206 ----
     sprintf(ppr->sBBN_file,__CLASSDIR__);
     strcat(ppr->sBBN_file,"/bbn/sBBN_2017.dat");
   
@@ -53,7 +59,7 @@
   
     /* for reionization */
   
---- 3238,3256 ----
+--- 3236,3254 ----
   
     ppr->recfast_H_frac=1.e-3;               /* from recfast 1.4 */
   

@@ -1,17 +1,25 @@
-*** /Users/selimhotinli/Dropbox/gambit_CosmoBit_Local/Backends/installed/class/2.6.1/source/output.c	2017-10-24 14:42:41.000000000 +0100
---- /Users/selimhotinli/Dropbox/gambit_CosmoBit_Local/Backends/include/gambit/Backends/backend_types/class_types/gambit_update/output.c	2018-03-27 10:52:57.000000000 +0100
+*** ../../Backends/installed/class/2.6.3/source/output.c	2017-10-24 14:42:41.000000000 +0100
+--- ../../Backends/include/gambit/Backends/backend_types/class_types/gambit_update/output.c	2018-04-06 23:23:17.000000000 +0100
 ***************
-*** 31,42 ****
---- 31,50 ----
+*** 30,42 ****
+                           cl_md[index_md][index_ct] */
   
     int index_md;
+! 
+    if (ple->has_lensed_cls == _TRUE_) {
+      class_call(lensing_cl_at_l(ple,
+                                 l,
+                                 cl),
+                 ple->error_message,
+                 pop->error_message);
+    }
+    else {
   
-+ //  printf(" we are inside output_total_cl_at_l \n");
-+ //	
-+ //  printf("psp->md_size = %d\n",psp->md_size);
-+ //	
-+ //  printf("psp->ic_size[0] = %d\n",psp->ic_size[0]);
-+ 	
+--- 30,43 ----
+                           cl_md[index_md][index_ct] */
+  
+    int index_md;
+! 	
     if (ple->has_lensed_cls == _TRUE_) {
       class_call(lensing_cl_at_l(ple,
                                  l,
@@ -19,38 +27,18 @@
                  ple->error_message,
                  pop->error_message);
 + 	  
-+ //    printf(" we did class_call(lensing_cl_at_l))\n");
     }
     else {
   
 ***************
-*** 50,55 ****
---- 58,65 ----
-  
-      for (index_md = 0; index_md < psp->md_size; index_md++) {
-  
-+ //	  printf(" we are in for loop index_md = %d\n",index_md);
-+ 
-        if (psp->md_size > 1)
-  
-          class_alloc(cl_md[index_md],
-***************
 *** 71,78 ****
---- 81,98 ----
+--- 72,81 ----
                  psp->error_message,
                  pop->error_message);
   
-+ //	printf(" we are out of spectra_cl_at_l\n");
-+ 
-+ //	printf(" cl[0] = %e\n",cl[0]);
-+ //	printf(" cl[1] = %e\n",cl[1]);
-+ //	printf(" cl[2] = %e\n",cl[2]);
-+ //	printf(" cl[3] = %e\n",cl[3]);
 +  
       for (index_md = 0; index_md < psp->md_size; index_md++) {
   
-+ //	  printf(" we are in the 2nd for loop index_md = %d\n",index_md);
-+ 
 + 		
         if (psp->md_size > 1)
           free(cl_md[index_md]);

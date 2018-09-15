@@ -144,18 +144,6 @@ contains
     !not available to be controlled from the gambit function. MultiModeCode at
     !this point does not have reheating option (other than instant-).
 
-    !---------------------------------------------------------------
-    !Read initializing params from file
-   	  ! open(newunit=pfile, file="parameters_multimodecode.txt", &
-      ! status="old", delim = "apostrophe")
-    ! read(unit=pfile, nml=init)
-    ! read(unit=pfile, nml=analytical)
-    ! read(unit=pfile, nml=inflaton_sampling_nml)
-
-    !Instead the idea is to set these inital parameters to be an
-    !argument for the function.
-    !---------------------------------------------------------------
-
     type(observables) :: observs, observs_SR
 
     !Run-specific input params
@@ -200,18 +188,10 @@ contains
 
     ! {1=reg_samp, 2=eqen_samp, 3=slowroll_samp, 6=isoN}
     ic_sampling = ginput_ic_sampling
-	energy_scale = ginput_energy_scale
+	  energy_scale = ginput_energy_scale
     numb_samples = ginput_numb_samples
     save_iso_N = ginput_save_iso_N
     N_iso_ref = ginput_N_iso_ref
-
-    print*,"num_inflaton = ",num_inflaton
-    print*,"instreheat = ",instreheat
-    print*,"ic_sampling = ",ic_sampling
-    print*,"potential_choice = ",potential_choice
-    print*,"vparam_rows = ",vparam_rows
-    print*,"slowroll_infl_end = ",slowroll_infl_end
-    print*,"param_sampling = ",param_sampling
 
     call deallocate_vars()
     !Make some arrays
@@ -229,15 +209,6 @@ contains
     k_pivot = ginput_k_pivot
     dlnk = ginput_dlnk
 
-    print*, "k_pivot=",k_pivot
-	print*, "dlnk=",dlnk
-    print*, "ginput_N_pivot=",ginput_N_pivot
-    print*, "N_pivot = ",N_pivot
-    print*, "ginput_vparams = ",ginput_vparams
-    print*, "vparams = ",vparams
-    print*, "vparams(1,:)", vparams(1,:)
-    print*, "vparams(:,1)", vparams(:,1)
-
     !---------------------------------------------------------------
     ! setting up the printer options at the code-level.
     ! TODO: make this from GAMBIT yaml file. 
@@ -252,10 +223,7 @@ contains
     out_opt%spectra = .false.
     out_opt%modes = .false.
 
-	steps = ginput_steps
-
-    !---------------------------------------------------------------
-
+	  steps = ginput_steps
 
     !---------------------------------------------------------------
     ! setting up the integrater options at the code-level.
@@ -344,7 +312,7 @@ contains
     ! it might make sense instead to put zero's etc. to the values here instead of just returning
 	if (potential_choice == 18) then
       if (.not. observs%is_ic_ok) then
-        print*, "SMASH: exiting pk_observables "
+        ! print*, "SMASH: exiting pk_observables "
         RETURN
 	  else
 		! at the moment, smash potential is only calculated by solving the background dynamics
@@ -374,10 +342,8 @@ contains
       goutput_inflation_observables%alpha_s = observs%alpha_s
       goutput_inflation_observables%runofrun = observs%runofrun
       goutput_inflation_observables%f_NL = observs%f_NL
-	  goutput_inflation_observables%tau_NL = observs%tau_NL
+	    goutput_inflation_observables%tau_NL = observs%tau_NL
       !-------------setting up the observables--------------------
-
-      ! print*,"ModeCode DEBUG: calc_full_pk = ",calc_full_pk
 
     end if
 
@@ -715,7 +681,7 @@ contains
       leave = .false.
 
 !-------------------DEVELOPEMENT-------------------------------
-	  print*,"we are inside calculate_pk_observables."
+	  ! print*,"we are inside calculate_pk_observables."
 !      !Get e-folds after pivot scale leaves horizon
 
 !      !num_inflaton sets many array sizes, have to treat it slightly differently
@@ -728,7 +694,7 @@ contains
 
       !Get ICs
       if (ic_sampling/=ic_flags%reg_samp) then
-	    print*,"we are inside ic_sampling condition"
+	    ! print*,"we are inside ic_sampling condition"
         call get_ic(phi_init0, dphi_init0, &
           icpriors_min, icpriors_max, &
           numb_samples,energy_scale)
@@ -738,13 +704,13 @@ contains
       allocate(observs%ic(2*num_inflaton))
       observs%ic(1:num_inflaton)=phi_init0
       observs%ic(num_inflaton+1:2*num_inflaton)=dphi_init0
-      print*,"dphi_init0 = ", dphi_init0
+      ! print*,"dphi_init0 = ", dphi_init0
       if (use_deltaN_SR) then
         allocate(observs_SR%ic(2*num_inflaton))
         observs_SR%ic = observs%ic
       end if
 
-      print*,"N_pivot = ", N_pivot
+      ! print*,"N_pivot = ", N_pivot
 
       !Initialize potential and calc background
       call potinit(observs)
@@ -804,7 +770,7 @@ contains
         observs%tau_NL = observs_SR%tau_NL
       end if
 
-      print*,"observs_SR%ns = ",observs_SR%ns
+      ! print*,"observs_SR%ns = ",observs_SR%ns
 
       !Evaluate the mode functions
       if (evaluate_modes) then
@@ -817,45 +783,45 @@ contains
 !DEBUG
 !print*, "Not evaluating second and third evolve routines"
 !stop
-	      print*, "second evolve"
-		  print*, "k_pivot*exp(-dlnk) = " , k_pivot*exp(-dlnk)
-		  print*, "dlnk = ", dlnk
+	     ! print*, "second evolve"
+		   ! print*, "k_pivot*exp(-dlnk) = " , k_pivot*exp(-dlnk)
+		   ! print*, "dlnk = ", dlnk
 
         call evolve(k_pivot*exp(-dlnk), pk1)
           call test_bad(pk_bad, observs, leave)
           if (leave) return
-		  print*, "left second evolve"
-		  print*, "third evolve"
-		  print*, "k_pivot*exp(dlnk) = " , k_pivot*exp(dlnk)
+		  ! print*, "left second evolve"
+		  ! print*, "third evolve"
+		  ! print*, "k_pivot*exp(dlnk) = " , k_pivot*exp(dlnk)
 		  call evolve(k_pivot*exp(dlnk), pk2)
           call test_bad(pk_bad, observs, leave)
           if (leave) return
-		  print*, "left third evolve"
+		  ! print*, "left third evolve"
 
         if (get_runningofrunning) then
 			print*, "get_runningofrunning = True"
             !Alpha_s from 5-pt stencil
             !or running of running
           call evolve(k_pivot*exp(-2.0e0_dp*dlnk), pk3)
-          print*, "fourth evolve"
+          ! print*, "fourth evolve"
             call test_bad(pk_bad, observs, leave)
             if (leave) return
 		  call evolve(k_pivot*exp(2.0e0_dp*dlnk), pk4)
-		  print*, "fifth evolve"
+		  ! print*, "fifth evolve"
             call test_bad(pk_bad, observs, leave)
             if (leave) return
         end if
 
-        print*, "pk0%adiab = ", pk0%adiab
+        ! print*, "pk0%adiab = ", pk0%adiab
 
           !Construct the observables
         if (get_runningofrunning) then
           call observs%set_finite_diff(dlnk, &
             pk0,pk1,pk2,pk3,pk4, &
             field_bundle%exp_scalar)
-          print*,"here we calculate the observables!"
+          ! print*,"here we calculate the observables!"
         else
-		  print*,"here we calculate the observables!"
+		  ! print*,"here we calculate the observables!"
           call observs%set_finite_diff(dlnk, &
             pk0,pk1,pk2,&
             bundle_width=field_bundle%exp_scalar)
@@ -923,7 +889,7 @@ contains
         end if
       end if
 
-      print*,"save_iso_N=",save_iso_N
+      ! print*,"save_iso_N=",save_iso_N
 
       if (save_iso_N) then
         observs%ic(1:num_inflaton) = phi_iso_N
@@ -954,7 +920,7 @@ contains
         end if
       end if
 
-     print*,"no issue before here!"
+   !  print*,"no issue before here!"
 
     end subroutine calculate_pk_observables
 

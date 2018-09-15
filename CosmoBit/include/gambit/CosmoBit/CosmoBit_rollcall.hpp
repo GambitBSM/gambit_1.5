@@ -147,6 +147,20 @@ START_MODULE
     BACKEND_REQ(multimodecode_gambit_driver,(modecode_tag), void, (gambit_inflation_observables*,int& ,int& ,  int& ,  int& ,int& ,  int& ,  int& ,  int& ,  int& ,int& ,double& ,int& ,  int& ,double& ,int& ,double*,double*,  int& ,  int& ,double*,double*,double*,double& ,double& ,double& ,  int& ,int& ,double& ,double*,double*,double*,double*,double& ,double&))
     #undef FUNCTION
 
+    #define FUNCTION class_set_parameter_inf_1naturalInf_LCDMt
+    START_FUNCTION(CosmoBit::Class_container)
+    ALLOW_MODELS(inf_1naturalInf_LCDMt)
+    BACKEND_REQ(multimodecode_gambit_driver,(modecode_tag), void, (gambit_inflation_observables*,int& ,int& ,  int& ,  int& ,int& ,  int& ,  int& ,  int& ,  int& ,int& ,double& ,int& ,  int& ,double& ,int& ,double*,double*,  int& ,  int& ,double*,double*,double*,double& ,double& ,double& ,  int& ,int& ,double& ,double*,double*,double*,double*,double& ,double&))
+    #undef FUNCTION
+
+
+    #define FUNCTION class_set_parameter_inf_1hilltopInf_LCDMt
+    START_FUNCTION(CosmoBit::Class_container)
+    ALLOW_MODELS(inf_1hilltopInf_LCDMt)
+    BACKEND_REQ(multimodecode_gambit_driver,(modecode_tag), void, (gambit_inflation_observables*,int& ,int& ,  int& ,  int& ,int& ,  int& ,  int& ,  int& ,  int& ,int& ,double& ,int& ,  int& ,double& ,int& ,double*,double*,  int& ,  int& ,double*,double*,double*,double& ,double& ,double& ,  int& ,int& ,double& ,double*,double*,double*,double*,double& ,double&))
+    #undef FUNCTION
+
+
     #define FUNCTION class_set_parameter_inf_smashInf_LCDMt
     START_FUNCTION(CosmoBit::Class_container)
     ALLOW_MODELS(inf_smashInf_LCDMt)

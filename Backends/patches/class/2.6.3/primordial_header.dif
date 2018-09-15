@@ -1,24 +1,34 @@
---- /Users/selimhotinli/Dropbox/gambit_CosmoBit_Local/Backends/installed/class/2.6.1/include/primordial.h	2017-07-02 17:19:45.000000000 +0100
-+++ /Users/selimhotinli/Dropbox/gambit/Backends/include/gambit/Backends/backend_types/class_types/gambit_update/primordial.h	2018-01-08 20:49:35.000000000 +0000
-@@ -13,7 +13,8 @@
-   inflation_V,
-   inflation_H,
-   inflation_V_end,
--  external_Pk
-+  external_Pk,
-+  gambit_Pk // ADDED BY S.C.H. FOR GAMBIT 01-2018
- };
- 
- /** enum defining whether the spectrum routine works with linear or logarithmic input/output */
-@@ -84,6 +85,11 @@
- 
-   //@{
- 
-+//  double *k_gambit   // scalar perturbation power spectrum // ADDED BY S.C.H. FOR GAMBIT 01-2018
-+//  double *pks_gambit // scalar perturbation power spectrum // ADDED BY S.C.H. FOR GAMBIT 01-2018
-+//  double *pkt_gambit // tensor perturbation power spectrum // ADDED BY S.C.H. FOR GAMBIT 01-2018
-+//  int ksteps_gambit  // bin number of  the  power spectrum // ADDED BY S.C.H. FOR GAMBIT 01-2018
-+
-   double k_pivot; /**< pivot scale in \f$ Mpc^{-1} \f$ */
- 
-   enum primordial_spectrum_type primordial_spec_type; /**< type of primordial spectrum (simple analytic from, integration of inflationary perturbations, etc.) */
+*** ../../Backends/installed/class/2.6.3/include/primordial.h	2017-10-24 14:42:41.000000000 +0100
+--- ../../Backends/include/gambit/Backends/backend_types/class_types/gambit_update/primordial.h	2018-03-23 23:58:49.000000000 +0000
+***************
+*** 13,19 ****
+    inflation_V,
+    inflation_H,
+    inflation_V_end,
+!   external_Pk
+  };
+  
+  /** enum defining whether the spectrum routine works with linear or logarithmic input/output */
+--- 13,20 ----
+    inflation_V,
+    inflation_H,
+    inflation_V_end,
+!   external_Pk,
+!   gambit_Pk // ADDED BY S.C.H. FOR GAMBIT 01-2018
+  };
+  
+  /** enum defining whether the spectrum routine works with linear or logarithmic input/output */
+***************
+*** 84,89 ****
+--- 85,95 ----
+  
+    //@{
+  
++ //  double *k_gambit   // scalar perturbation power spectrum // ADDED BY S.C.H. FOR GAMBIT 01-2018
++ //  double *pks_gambit // scalar perturbation power spectrum // ADDED BY S.C.H. FOR GAMBIT 01-2018
++ //  double *pkt_gambit // tensor perturbation power spectrum // ADDED BY S.C.H. FOR GAMBIT 01-2018
++ //  int ksteps_gambit  // bin number of  the  power spectrum // ADDED BY S.C.H. FOR GAMBIT 01-2018
++ 
+    double k_pivot; /**< pivot scale in \f$ Mpc^{-1} \f$ */
+  
+    enum primordial_spectrum_type primordial_spec_type; /**< type of primordial spectrum (simple analytic from, integration of inflationary perturbations, etc.) */

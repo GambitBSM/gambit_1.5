@@ -1,35 +1,36 @@
-*** /Users/selimhotinli/Dropbox/gambit_CosmoBit/Backends/installed/class/2.6.3/source/transfer.c	2017-10-24 09:42:41.000000000 -0400
---- /Users/selimhotinli/Dropbox/gambit_CosmoBit/Backends/include/gambit/Backends/backend_types/class_types/gambit_update/transfer.c	2018-06-17 22:47:22.000000000 -0400
+*** ../../Backends/installed/class/2.6.3/source/transfer.c	2017-10-24 14:42:41.000000000 +0100
+--- ../../Backends/include/gambit/Backends/backend_types/class_types/gambit_update/transfer.c	2018-08-30 12:58:46.000000000 +0100
 ***************
-*** 208,213 ****
---- 208,216 ----
+*** 208,214 ****
         distance, i.e. on curvature. */
   
     ptr->angular_rescaling = pth->angular_rescaling;
-+ 	
-+   printf("DEBUG: ptr->angular_rescaling (e) = %e\n",ptr->angular_rescaling);
-+   printf("DEBUG: ptr->angular_rescaling (d) = %d\n",ptr->angular_rescaling);
-  
+! 
     /** - order of magnitude of the oscillation period of transfer functions */
   
-***************
-*** 402,407 ****
---- 405,411 ----
-    class_call(hyperspherical_HIS_free(&BIS,ptr->error_message),
-               ptr->error_message,
-               ptr->error_message);
-+   printf("DEBUG: We are successfully out of the transfer_init.\n");
-    return _SUCCESS_;
-  }
+    q_period = 2.*_PI_/(tau0-tau_rec)*ptr->angular_rescaling;
+--- 208,214 ----
+        distance, i.e. on curvature. */
   
+    ptr->angular_rescaling = pth->angular_rescaling;
+! 	
+    /** - order of magnitude of the oscillation period of transfer functions */
+  
+    q_period = 2.*_PI_/(tau0-tau_rec)*ptr->angular_rescaling;
 ***************
-*** 960,965 ****
---- 964,971 ----
+*** 960,966 ****
           ptr->l_size_tt[index_md][index_tt]++;
   
         ptr->l_size[index_md] = MAX(ptr->l_size[index_md],ptr->l_size_tt[index_md][index_tt]);
-+ 		
-+ 	  // printf("DEBUG: ptr->l_size[%d] = %d\n",index_md,ptr->l_size[index_md]);
-  
+! 
       }
     }
+  
+--- 960,966 ----
+          ptr->l_size_tt[index_md][index_tt]++;
+  
+        ptr->l_size[index_md] = MAX(ptr->l_size[index_md],ptr->l_size_tt[index_md][index_tt]);
+! 		
+      }
+    }
+  
