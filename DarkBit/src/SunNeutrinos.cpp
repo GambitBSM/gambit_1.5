@@ -160,6 +160,8 @@ namespace Gambit
     {
       using namespace Pipes::equilibration_time_Sun;
       double ca = *Dep::sigmav/6.6e28 * pow(*Dep::mwimp/20.0, 1.5);
+      // Scale the annihilation rate down by a factor of two if the DM is not self-conjugate
+      if (not (*Dep::TH_ProcessCatalog).getProcess(*Dep::DarkMatter_ID, *Dep::DarkMatter_ID).isSelfConj) ca *= 0.5;
       result = pow(*Dep::capture_rate_Sun * ca, -0.5);
     }
 
@@ -190,6 +192,8 @@ namespace Gambit
       sigmav += annProc.genRateMisc->bind("v")->eval(sqrt(2.0*T_Sun_core/(*Dep::mwimp)));
 
       double ca = sigmav/6.6e28 * pow(*Dep::mwimp/20.0, 1.5);
+      // Scale the annihilation rate down by a factor of two if the DM is not self-conjugate
+      if (not (*Dep::TH_ProcessCatalog).getProcess(*Dep::DarkMatter_ID, *Dep::DarkMatter_ID).isSelfConj) ca *= 0.5;
       result = pow(*Dep::capture_rate_Sun * ca, -0.5);
 
       // std::cout << "v = " << sqrt(2.0*T_Sun_core/(*Dep::mwimp)) << " and sigmav inside equilibration_time_Sun_vprob = " << sigmav << std::endl;

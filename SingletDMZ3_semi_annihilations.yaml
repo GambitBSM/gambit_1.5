@@ -54,12 +54,7 @@ Parameters:
 
 
 Printer:
-  printer: hdf5
-  options:
-    output_file: "gambit_output.hdf5"
-    group: "/singlet"
-    delete_file_if_exists: true
-    delete_file_on_restart: true
+  printer: cout
 
 
 Scanner:
@@ -74,11 +69,11 @@ Scanner:
       NP: 50000
       verbosity: 1
       convthresh: 0.0001
-      
+
     random:
       plugin: random
       point_number: 1
-      like: LogLike         
+      like: LogLike
 
 ObsLikes:
 
@@ -93,11 +88,11 @@ ObsLikes:
     # Precision physics likelihoods
     - capability: lnL_h_mass
       purpose:    LogLike
-      
+
     # Vacuum stability and perturbitivity
     - capability: check_EW_stability_SingletDMZ3
       purpose: LogLike
-    
+
     - capability: VS_likelihood
       purpose: LogLike
 
@@ -158,11 +153,11 @@ ObsLikes:
     # Other observables
     - purpose:    Observable
       capability: RD_oh2
-      
+
     # Get fraction of semi-annhillation
     - purpose: Observable
-      capability: get_channel_MicrOmegas      
-      
+      capability: get_channel_MicrOmegas
+
     - capability: SingletDMZ3_spectrum
       purpose: Observable
       function: get_SingletDMZ3_spectrum_as_map
@@ -179,11 +174,15 @@ Rules:
  #   options:
  #     check_perturb: false
  #     check_perturb_pts: 10
-      
+
+  - capability: capture_rate_Sun
+    function: capture_rate_Sun_const_xsec
+    module: DarkBit
+
   # Choose to rescale signals in direct and indirect detection by the relic density fraction
   - capability: RD_fraction
-    function: RD_fraction_leq_one       
-       
+    function: RD_fraction_leq_one
+
   - capability: vacuum_stability
     function: find_min_lambda_SingletDMZ3
     module: SpecBit
@@ -196,7 +195,7 @@ Rules:
        profile_systematics: false # Use likelihood version that has been profiled over systematics
        oh2_fractional_theory_error: 0.05
 
-  
+
   - function: MicrOmegas_SingletDMZ3_3_6_9_2_init
     options:
        VZdecay: 1 # 0 - no 3 body final states, 1 - virtual Z in annihilations, 2 - virtual Z in coannihilations

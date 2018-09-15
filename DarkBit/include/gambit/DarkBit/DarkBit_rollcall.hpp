@@ -637,7 +637,7 @@ START_MODULE
       DEPENDENCY(SingletDMZ3_spectrum, Spectrum)
       ALLOW_MODEL_DEPENDENCE(nuclear_params_fnq, SingletDMZ3)
       MODEL_GROUP(group1, (nuclear_params_fnq))
-      MODEL_GROUP(group2, (SingletDMZ3, SingletDM))
+      MODEL_GROUP(group2, (SingletDMZ3))
       ALLOW_MODEL_COMBINATION(group1, group2)
      #undef FUNCTION
 
@@ -867,7 +867,9 @@ START_MODULE
     #define FUNCTION equilibration_time_Sun
       START_FUNCTION(double)
       DEPENDENCY(sigmav, double)
+      DEPENDENCY(TH_ProcessCatalog, DarkBit::TH_ProcessCatalog)
       DEPENDENCY(mwimp, double)
+      DEPENDENCY(DarkMatter_ID, std::string)
       DEPENDENCY(capture_rate_Sun, double)
     #undef FUNCTION
 
@@ -1226,7 +1228,7 @@ START_MODULE
   START_CAPABILITY
     #define FUNCTION DarkMatter_ID_SingletDM
     START_FUNCTION(std::string)
-    ALLOW_MODELS(SingletDM,SingletDMZ3, SingletDM_running)
+    ALLOW_MODELS(SingletDM, SingletDM_running, SingletDMZ3)
     #undef FUNCTION
     #define FUNCTION DarkMatter_ID_VectorDM
     START_FUNCTION(std::string)
