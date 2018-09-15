@@ -559,8 +559,8 @@ macro(BOSS_backend name backend_version)
       set(BOSS_castxml_cc "")
     endif()
     ExternalProject_Add_Step(${name}_${ver} BOSS
-      # Check for castxml binaries
-      COMMAND ${PROJECT_SOURCE_DIR}/cmake/scripts/check_for_castxml_binaries.sh ${BOSS_dir}
+      # Check for castxml binaries and download if they do not exist
+      COMMAND ${PROJECT_SOURCE_DIR}/cmake/scripts/check_for_castxml_binaries.sh ${BOSS_dir} ${CMAKE_COMMAND} https://midas3.kitware.com/midas/download/item/318227/castxml-linux.tar.gz
       # Run BOSS
       COMMAND ${PYTHON_EXECUTABLE} ${BOSS_dir}/boss.py ${BOSS_castxml_cc} ${BOSS_includes} ${name}_${backend_version_safe}
       # Copy BOSS-generated files to correct folders within Backends/include
