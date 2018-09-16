@@ -298,6 +298,7 @@ struct primordial {
 	/** @name - added smash parameters */
 	
 	//@{
+	
 	int max_pot_smash; // need to set it properly
 	int last_index;
 	
@@ -314,7 +315,7 @@ struct primordial {
 	double * ddd1V_array;
 	double * ddd2V_array;
 	double * ddd3V_array;
-	
+
 	//@}
 
 

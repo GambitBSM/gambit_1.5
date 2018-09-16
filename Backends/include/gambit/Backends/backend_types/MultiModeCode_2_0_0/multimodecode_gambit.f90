@@ -217,7 +217,7 @@ contains
     out_opt%output_reduced = .true.
     out_opt%output_badic =.false.
 
-    out_opt%save_traj = .true.
+    out_opt%save_traj = .false.
     out_opt%fields_horiz = .false.
     out_opt%fields_end_infl = .false.
     out_opt%spectra = .false.
