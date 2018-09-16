@@ -1,1 +1,21 @@
 Here we add things to do for the DS6 implementation in gambit.
+
+
+1. make copy of standalones (for testing)
+   Here: change explcitly to DS6 versions
+
+2. cp DarkSUSY_5_1_3.hpp -> 6_0
+(comment out everything but init, then comment in one by one)
+
+0. "Every backend can only provide one library" -> needs to be sorted out / discussed!
+
+3. cp DarkSUSY_5_1_3.cpp -> 6_0 (frontend)
+
+3. for each replaced function(ality) DS5->DS6, change/update:
+   - DarkBit_rollcall.hpp (always, unless same capability is same)
+   - src/.cpp files (if implementation / call changes)
+   - types/DarkSUSY.hpp (version ??)
+
+
+relevant TEST programs: 
+DarkBit_XXX_standalone -> modifiy by commenting out + replace ini
