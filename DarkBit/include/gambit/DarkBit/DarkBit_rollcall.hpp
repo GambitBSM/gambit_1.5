@@ -866,22 +866,10 @@ START_MODULE
   START_CAPABILITY
     #define FUNCTION equilibration_time_Sun
       START_FUNCTION(double)
-      DEPENDENCY(sigmav, double)
       DEPENDENCY(TH_ProcessCatalog, DarkBit::TH_ProcessCatalog)
       DEPENDENCY(mwimp, double)
       DEPENDENCY(DarkMatter_ID, std::string)
       DEPENDENCY(capture_rate_Sun, double)
-    #undef FUNCTION
-
-    /// Same as the above function except sigma-v is calculated at the most probable speed v = sqrt(2*T/mDM) where
-    /// T = 1.35e-6 GeV is the Sun's core temperature
-    #define FUNCTION equilibration_time_Sun_vprob
-      START_FUNCTION(double)
-      DEPENDENCY(TH_ProcessCatalog, DarkBit::TH_ProcessCatalog)
-      DEPENDENCY(mwimp, double)
-      DEPENDENCY(DarkMatter_ID, std::string)
-      DEPENDENCY(capture_rate_Sun, double)
-      ALLOW_MODELS(DiracDM, MajoranaDM)
     #undef FUNCTION
   #undef CAPABILITY
 

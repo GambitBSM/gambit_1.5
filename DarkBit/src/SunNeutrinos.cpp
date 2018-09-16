@@ -159,17 +159,6 @@ namespace Gambit
     void equilibration_time_Sun(double &result)
     {
       using namespace Pipes::equilibration_time_Sun;
-      double ca = *Dep::sigmav/6.6e28 * pow(*Dep::mwimp/20.0, 1.5);
-      // Scale the annihilation rate down by a factor of two if the DM is not self-conjugate
-      if (not (*Dep::TH_ProcessCatalog).getProcess(*Dep::DarkMatter_ID, *Dep::DarkMatter_ID).isSelfConj) ca *= 0.5;
-      result = pow(*Dep::capture_rate_Sun * ca, -0.5);
-    }
-
-    // Same as the above function except sigma-v is calculated at the most probable speed v = sqrt(2*T/mDM) where
-    // T = 1.35e-6 GeV is the Sun's core temperature
-    void equilibration_time_Sun_vprob(double &result)
-    {
-      using namespace Pipes::equilibration_time_Sun_vprob;
 
       double sigmav = 0;
       double T_Sun_core = 1.35e-6; // Sun's core temperature (GeV)
@@ -196,8 +185,8 @@ namespace Gambit
       if (not (*Dep::TH_ProcessCatalog).getProcess(*Dep::DarkMatter_ID, *Dep::DarkMatter_ID).isSelfConj) ca *= 0.5;
       result = pow(*Dep::capture_rate_Sun * ca, -0.5);
 
-      // std::cout << "v = " << sqrt(2.0*T_Sun_core/(*Dep::mwimp)) << " and sigmav inside equilibration_time_Sun_vprob = " << sigmav << std::endl;
-      // std::cout << "capture_rate_Sun inside equilibration_time_Sun_vprob = " << *Dep::capture_rate_Sun << std::endl;
+      // std::cout << "v = " << sqrt(2.0*T_Sun_core/(*Dep::mwimp)) << " and sigmav inside equilibration_time_Sun = " << sigmav << std::endl;
+      // std::cout << "capture_rate_Sun inside equilibration_time_Sun = " << *Dep::capture_rate_Sun << std::endl;
     }
 
     /// Annihilation rate of dark matter in the Sun (s^-1)

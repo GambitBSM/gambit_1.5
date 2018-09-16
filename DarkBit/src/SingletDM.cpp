@@ -33,7 +33,7 @@ namespace Gambit
 
   namespace DarkBit
   {
-    //#define DARKBIT_DEBUG
+    #define DARKBIT_DEBUG
 
     class SingletDM
     {
@@ -480,7 +480,8 @@ namespace Gambit
         i++;
       }
 
-      // Get the semi-annihilation cross-section, accounting for the fact that MO already scales vSigma_total down by a factor of 2 for non-self-conjugate DM.
+      // Get the semi-annihilation cross-section, accounting for the fact that MO already scales
+      // vSigma_total down by a factor of 2 to account for the fact that Z3 scalar singlet DM is not self-conjugate.
       double vSigma_semi = BR_semi * 2.0 * vSigma_total;
 
       #ifdef DARKBIT_DEBUG
@@ -604,11 +605,11 @@ namespace Gambit
       // conventions, this lowest threshold is not listed)
       process_ann.resonances_thresholds.threshold_energy.push_back(2*mS);
       auto channel =
-        daFunk::vec<string>("bb", "WW", "cc", "tautau", "ZZ", "tt", "hh","Sh");
+        daFunk::vec<string>("bb", "WW", "cc", "tautau", "ZZ", "tt", "hh", "Sh");
       auto p1 =
-        daFunk::vec<string>("d_3",   "W+", "u_2",   "e+_3", "Z0", "u_3",   "h0_1","S");
+        daFunk::vec<string>("d_3",   "W+", "u_2",   "e+_3", "Z0", "u_3", "h0_1", "S");
       auto p2 =
-        daFunk::vec<string>("dbar_3","W-", "ubar_2","e-_3", "Z0", "ubar_3","h0_1","h0_1");
+        daFunk::vec<string>("dbar_3","W-", "ubar_2","e-_3", "Z0", "ubar_3", "h0_1", "h0_1");
       {
         for ( unsigned int i = 0; i < channel.size(); i++ )
         {
