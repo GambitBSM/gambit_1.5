@@ -33,7 +33,7 @@ namespace Gambit
 
   namespace DarkBit
   {
-    #define DARKBIT_DEBUG
+    //#define DARKBIT_DEBUG
 
     class SingletDM
     {
