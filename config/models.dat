@@ -583,6 +583,12 @@ inf_smashInf_LCDMt: |
    8 parameter cosmology smash inflation model --- smash inflation
    A_s, n_s and r are given by inflationary model parameters: xi, m^2.
 
+inf_1naturalInf_LCDMt: |
+   7 parameter cosmology+inflation model with axion-like potential.
+
+inf_1hilltopInf_LCDMt: | 
+   7 parameter cosmology+inflation model with hilltop potential.
+ 
 lowl_SMW_70_dx11d_2014_10_03_v5c_Ap: |
 
    Planck likelihood for low-p TT spectrum with a single nuisance parameter.

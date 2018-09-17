@@ -11,6 +11,8 @@
 ///  \author Selim C. Hotinli
 ///          (selim.hotinli14@pimperial.ac.uk)
 ///  \date 2017 Jul
+///  \date 2018 May
+///  \date 2018 Aug - Sep
 ///
 ///  \author Patrick Stoecker
 ///          (stoecker@physik.rwth-aachen.de)
@@ -1580,9 +1582,9 @@ namespace Gambit
 		}
 		
     void class_set_parameter_inf_smashInf_LCDMt(Class_container& cosmo)
-    {
-      //std::cout << "Last seen alive in: class_set_parameter_inf_smashInf_LCDMt" << std::endl;
-      using namespace Pipes::class_set_parameter_inf_smashInf_LCDMt;
+		{
+			//std::cout << "Last seen alive in: class_set_parameter_inf_smashInf_LCDMt" << std::endl;
+			using namespace Pipes::class_set_parameter_inf_smashInf_LCDMt;
 			
 			//---------------------------------------------------------------//
 			// Below, SMASH inflationary potential is calculated and
@@ -1591,162 +1593,196 @@ namespace Gambit
 			// of the inflaton potential at which infator starts its
 			// slow-roll with zero-velocity.
 			//---------------------------------------------------------------//
-
-			int silence = runOptions->getValue<int> ("is_not_silent");
-
-      int l_max=cosmo.lmax;
-
-      cosmo.input.clear();
-
-      cosmo.input.addEntry("output","tCl pCl lCl");
-      cosmo.input.addEntry("l_max_scalars",l_max);
-      cosmo.input.addEntry("modes","s,t");
-      cosmo.input.addEntry("lensing","yes");
-
 			
-			//-------------------------------------------------------------
-			// Parameters to be passed to the potential
-			//-------------------------------------------------------------
-      std::vector<double> vparams = runOptions->getValue<std::vector<double> >("vparams");
+			int calc_tech = runOptions->getValue<int> ("calc_technique");
+			int silence = runOptions->getValue<int> ("is_not_silent");
+			
+			int l_max=cosmo.lmax;
+			
+			cosmo.input.clear();
+			
+			cosmo.input.addEntry("output","tCl pCl lCl");
+			cosmo.input.addEntry("l_max_scalars",l_max);
+			cosmo.input.addEntry("modes","s,t");
+			cosmo.input.addEntry("lensing","yes");
+			
+			
+			
+			if (calc_tech==0){
+				//-------------------------------------------------------------
+				// Having GAMBIT-defined functions solve for the slow-roll parameters which is then given to CLASS.
+				//-------------------------------------------------------------
 
-      vparams[0] = *Param["log10_xi"];
-      vparams[1] = *Param["log10_beta"];
-      vparams[2] = *Param["log10_lambda"];
-
-      std::cout << "log10[xi] = " << vparams[0] << std::endl;
-      std::cout << "log10[beta] = " << vparams[1] << std::endl;
-      std::cout << "log10[lambda] = " << vparams[2] << std::endl;
-
-			/* coefficients of:
-			 P(x) = -8+b*\phi**2+b*\xi*\phi**4+6*\xi**2*\phi**4
-			 */
-      double smashp1[5] = { -8.0, 0, pow(10.0,vparams[1]), 0, (pow(10.0,vparams[1])*
-                     pow(10.0,vparams[0])+
-                     6.0*pow(10.0,vparams[0])*
-                     pow(10.0,vparams[0]))};
-
-      double smashd1[8];
-
-      gsl_poly_complex_workspace * wsmash = gsl_poly_complex_workspace_alloc (5);
-      gsl_poly_complex_solve (smashp1, 5, wsmash, smashd1);
-      gsl_poly_complex_workspace_free (wsmash);
-
-      double badway[4] = {smashd1[0],smashd1[2],smashd1[4],smashd1[6]};
-      double tempbw = 0;
-
-      for(int i=0;i<4;i++)
-      {
-        if(badway[i]>tempbw) tempbw=badway[i];
-      }
-
-      vparams[3] = tempbw;
-
-      //-------------------------------------------------
-      //--------------- Sampling N_pivot ----------------
-      //-------------------------------------------------
-      double N_pivot = *Param["N_pivot"];
-
-			// Solving the slow-roll equality to
-			int status;
-      int iter = 0, max_iter = 100000;
-      const gsl_min_fminimizer_type *T;
-      gsl_min_fminimizer *s;
-      double m = tempbw*10.0, m_expected = M_PI; // Correct for.
-      double a = 0.0, b = 100.0; // Correct for.
-      gsl_function F;
-
-      struct my_f_params params = { vparams[0], vparams[1], vparams[3] , N_pivot};
-
-      F.function = &fn1;
-      F.params = &params;
-
-      T = gsl_min_fminimizer_brent;
-      s = gsl_min_fminimizer_alloc (T);
-      gsl_min_fminimizer_set (s, &F, m, a, b);
-
-			/*
-      printf ("using %s method\n",gsl_min_fminimizer_name (s));
-      printf ("%5s [%9s, %9s] %9s %10s %9s\n","iter", "lower", "upper", "min","err", "err(est)");
-      printf ("%5d [%.7f, %.7f] %.7f %+.7f %.7f\n",iter, a, b, m, m - m_expected, b - a);
-			*/
-
-      do
-      {
-        iter++;
-        status = gsl_min_fminimizer_iterate (s);
-
-        m = gsl_min_fminimizer_x_minimum (s);
-        a = gsl_min_fminimizer_x_lower (s);
-        b = gsl_min_fminimizer_x_upper (s);
-
-        status = gsl_min_test_interval (a, b, 0.01, 0.0);
-
-				/*
-        if (status == GSL_SUCCESS) printf ("Converged:\n");
-        printf ("%5d [%.7f, %.7f] %.7f %+.7f %.7f\n",
-                  iter, a, b,
-                  m, m - m_expected, b - a);
+				
+				//-------------------------------------------------------------
+				// Parameters to be passed to the potential
+				//-------------------------------------------------------------
+				std::vector<double> vparams = runOptions->getValue<std::vector<double> >("vparams");
+				
+				vparams[0] = *Param["log10_xi"];
+				vparams[1] = *Param["log10_beta"];
+				vparams[2] = *Param["log10_lambda"];
+				
+				if (silence==1){
+					std::cout << "log10[xi] = " << vparams[0] << std::endl;
+					std::cout << "log10[beta] = " << vparams[1] << std::endl;
+					std::cout << "log10[lambda] = " << vparams[2] << std::endl;
+				}
+				/* coefficients of:
+				 P(x) = -8+b*\phi**2+b*\xi*\phi**4+6*\xi**2*\phi**4
 				 */
-      }
-      while (status == GSL_CONTINUE && iter < max_iter);
+				double smashp1[5] = { -8.0, 0, pow(10.0,vparams[1]), 0, (pow(10.0,vparams[1])*
+																																 pow(10.0,vparams[0])+
+																																 6.0*pow(10.0,vparams[0])*
+																																 pow(10.0,vparams[0]))};
+				
+				double smashd1[8];
+				
+				gsl_poly_complex_workspace * wsmash = gsl_poly_complex_workspace_alloc (5);
+				gsl_poly_complex_solve (smashp1, 5, wsmash, smashd1);
+				gsl_poly_complex_workspace_free (wsmash);
+				
+				double badway[4] = {smashd1[0],smashd1[2],smashd1[4],smashd1[6]};
+				double tempbw = 0;
+				
+				for(int i=0;i<4;i++)
+				{
+					if(badway[i]>tempbw) tempbw=badway[i];
+				}
+				
+				vparams[3] = tempbw;
+				
+				//-------------------------------------------------------------
+				//									Sampling N_pivot
+				//-------------------------------------------------------------
+				double N_pivot = *Param["N_pivot"];
+				
+				// Solving the slow-roll equality to
+				int status;
+				int iter = 0, max_iter = 100000;
+				const gsl_min_fminimizer_type *T;
+				gsl_min_fminimizer *s;
+				double m = tempbw*10.0, m_expected = M_PI; // Correct for.
+				double a = 0.0, b = 100.0; // Correct for.
+				gsl_function F;
+				
+				struct my_f_params params = { vparams[0], vparams[1], vparams[3] , N_pivot};
+				
+				F.function = &fn1;
+				F.params = &params;
+				
+				T = gsl_min_fminimizer_brent;
+				s = gsl_min_fminimizer_alloc (T);
+				gsl_min_fminimizer_set (s, &F, m, a, b);
+				
+				/*
+				 printf ("using %s method\n",gsl_min_fminimizer_name (s));
+				 printf ("%5s [%9s, %9s] %9s %10s %9s\n","iter", "lower", "upper", "min","err", "err(est)");
+				 printf ("%5d [%.7f, %.7f] %.7f %+.7f %.7f\n",iter, a, b, m, m - m_expected, b - a);
+				 */
+				
+				do
+				{
+					iter++;
+					status = gsl_min_fminimizer_iterate (s);
+					
+					m = gsl_min_fminimizer_x_minimum (s);
+					a = gsl_min_fminimizer_x_lower (s);
+					b = gsl_min_fminimizer_x_upper (s);
+					
+					status = gsl_min_test_interval (a, b, 0.01, 0.0);
+					
+					/*
+					 if (status == GSL_SUCCESS) printf ("Converged:\n");
+					 printf ("%5d [%.7f, %.7f] %.7f %+.7f %.7f\n",
+					 iter, a, b,
+					 m, m - m_expected, b - a);
+					 */
+				}
+				while (status == GSL_CONTINUE && iter < max_iter);
+				
+				gsl_min_fminimizer_free (s);
+				
+				double smash_pot = 0.0;
+				double smash_eps = 0.0;
+				double smash_eta = 0.0;
+				
+				smash_pot = pot_SMASH(pow(10.0,*Param["log10_lambda"]),
+															a,
+															pow(10.0,*Param["log10_xi"]));
+				smash_eps = SRparameters_epsilon_SMASH(a,
+																							 pow(10.0,*Param["log10_beta"]),
+																							 pow(10.0,*Param["log10_xi"]));
+				smash_eta = SRparameters_eta_SMASH(a,
+																					 pow(10.0,*Param["log10_beta"]),
+																					 pow(10.0,*Param["log10_xi"]));
+				
+				double As_self = 0.0;
+				double ns_self = 0.0;
+				double r_self = 0.0;
+				
+				As_self = As_SR(smash_eps,smash_pot);
+				ns_self = ns_SR(smash_eps,smash_eta);
+				r_self  = r_SR(smash_eps,smash_eta);
+				
+				//-------------------------------------------------------------
+				/* Have calculated the field value at N_pivot
+				 predicted by slow-roll approximation.
+				 Choosing a very close slightly higher
+				 value will be satisfactory for initial conditions.
+				 */
+				//-------------------------------------------------------------
+				
+				if (silence == 1)
+				{
+					printf("n_s from smash = %e\n",ns_self);
+					printf("A_s from smash = %e\n",As_self);
+					printf("r from smash = %e\n",r_self);
+				}
+				
+				cosmo.input.addEntry("omega_b",*Param["omega_b"]);
+				cosmo.input.addEntry("omega_cdm",*Param["omega_cdm"]);
+				cosmo.input.addEntry("H0",*Param["H0"]);
+				cosmo.input.addEntry("A_s",As_self);
+				cosmo.input.addEntry("n_s",ns_self);
+				cosmo.input.addEntry("tau_reio",*Param["tau_reio"]);
+				cosmo.input.addEntry("r",r_self);
 
-      gsl_min_fminimizer_free (s);
+			}
+			else if (calc_tech==1){
+				//-------------------------------------------------------------
+				// Having CLASS primordial.h module calculate inflationary predictions of the SMASH potential.
+				//-------------------------------------------------------------
+				
+				cosmo.input.addEntry("P_k_ini type","inflation_V");
+				cosmo.input.addEntry("full_potential","smash_inflation");
 
-      double smash_pot = 0.0;
-      double smash_eps = 0.0;
-      double smash_eta = 0.0;
+				cosmo.input.addEntry("V_0",*Param["log10_xi"]);
+				cosmo.input.addEntry("V_1",*Param["log10_beta"]);
+				cosmo.input.addEntry("V_3",*Param["log10_lambda"]);
 
-      smash_pot = pot_SMASH(pow(10.0,*Param["log10_lambda"]),
-          a,
-          pow(10.0,*Param["log10_xi"]));
-      smash_eps = SRparameters_epsilon_SMASH(a,
-               pow(10.0,*Param["log10_beta"]),
-               pow(10.0,*Param["log10_xi"]));
-      smash_eta = SRparameters_eta_SMASH(a,
-           pow(10.0,*Param["log10_beta"]),
-           pow(10.0,*Param["log10_xi"]));
-
-      double As_self = 0.0;
-      double ns_self = 0.0;
-      double r_self = 0.0;
-
-      As_self = As_SR(smash_eps,smash_pot);
-      ns_self = ns_SR(smash_eps,smash_eta);
-      r_self  = r_SR(smash_eps,smash_eta);
-
-      /* Have calculated the field value at N_pivot
-        predicted by slow-roll approximation.
-        Choosing a very close slightly higher
-        value will be satisfactory for initial conditions.
-      */
-
-			if (silence == 1)
-			{
-				printf("n_s from smash = %e\n",ns_self);
-				printf("A_s from smash = %e\n",As_self);
-				printf("r from smash = %e\n",r_self);
+				cosmo.input.addEntry("V_2",-100.); //Hard coding \chi inflaton potential boundaries.
+				cosmo.input.addEntry("N_star",*Param["N_star"]); //Hard coding \chi inflaton potential boundaries.
+				
+				cosmo.input.addEntry("omega_b",*Param["omega_b"]);
+				cosmo.input.addEntry("omega_cdm",*Param["omega_cdm"]);
+				cosmo.input.addEntry("H0",*Param["H0"]);
+				cosmo.input.addEntry("tau_reio",*Param["tau_reio"]);
+				
 			}
 			
-      cosmo.input.addEntry("omega_b",*Param["omega_b"]);
-      cosmo.input.addEntry("omega_cdm",*Param["omega_cdm"]);
-      cosmo.input.addEntry("H0",*Param["H0"]);
-      cosmo.input.addEntry("A_s",As_self);
-      cosmo.input.addEntry("n_s",ns_self);
-      cosmo.input.addEntry("tau_reio",*Param["tau_reio"]);
-      cosmo.input.addEntry("r",r_self);
-
-      YAML::Node class_dict;
-      if (runOptions->hasKey("class_dict"))
-      {
-        class_dict = runOptions->getValue<YAML::Node>("class_dict");
-        for (auto it=class_dict.begin(); it != class_dict.end(); it++)
-        {
-          std::string name = it->first.as<std::string>();
-          std::string value = it->second.as<std::string>();
-          cosmo.input.addEntry(name,value);
-        }
-      }
-    }
+			YAML::Node class_dict;
+			if (runOptions->hasKey("class_dict"))
+			{
+				class_dict = runOptions->getValue<YAML::Node>("class_dict");
+				for (auto it=class_dict.begin(); it != class_dict.end(); it++)
+				{
+					std::string name = it->first.as<std::string>();
+					std::string value = it->second.as<std::string>();
+					cosmo.input.addEntry(name,value);
+				}
+			}
+		}
 
     void class_get_spectra_func(Class_container& cosmo)
     {

@@ -93,7 +93,7 @@ START_MODEL
 DEFINEPARS(lambda,faxion,N_pivot,omega_b,omega_cdm,H0,tau_reio)
 #undef MODEL
 
-#define MODEL inf_1hilltopInf_LCDMt // Hilltop 
+#define MODEL inf_1hilltopInf_LCDMt // Hilltop
 START_MODEL
 DEFINEPARS(lambda,mu,N_pivot,omega_b,omega_cdm,H0,tau_reio)
 #undef MODEL

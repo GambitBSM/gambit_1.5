@@ -3640,6 +3640,12 @@ inf_smashInf_LCDMt_parameters: |
     8 parameter cosmology smash inflation model --- smash inflation
     A_s, n_s and r are given by inflationary model parameters: xi, m^2.
 
+inf_1hilltopInf_LCDMt_parameters: |
+    7 parameter cosmology and inflation model with hilltop inflation.
+
+inf_1naturalInf_LCDMt_parameters: |
+    7 parameter cosmology and inflation model with axion motivated natural inflation.
+
 lnL_A_planck : |
    "prior"-likelihood for A_planck. Applies the Gauss bell on 
     A_planck if a flat prior is chosen. Should have the same
