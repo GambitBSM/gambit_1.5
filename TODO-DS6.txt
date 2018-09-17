@@ -1,21 +1,23 @@
 Here we add things to do for the DS6 implementation in gambit.
+General: we decided to have one DS6 backend per model, like 
+for micrOMEGAs.
 
+1. extend cmake/backends.cmake along the same lines as for mO;
+   start with just the MSSM module
 
-1. make copy of standalones (for testing)
-   Here: change explcitly to DS6 versions
+2. cp include/gambit/Backends/frontends/DarkSUSY_5_1_3.hpp  -> 6_0;
+   again one for each module, start with MSSM 
+   (comment out everything but init, then comment in one by one)
 
-2. cp DarkSUSY_5_1_3.hpp -> 6_0
-(comment out everything but init, then comment in one by one)
+3. cp src/frontends/DarkSUSY_5_1_3.cpp -> 6_0;
+   again one for each module, start with MSSM 
 
-0. "Every backend can only provide one library" -> needs to be sorted out / discussed!
-
-3. cp DarkSUSY_5_1_3.cpp -> 6_0 (frontend)
-
-3. for each replaced function(ality) DS5->DS6, change/update:
+4. for each replaced function(ality) DS5->DS6, change/update:
    - DarkBit_rollcall.hpp (always, unless same capability is same)
    - src/.cpp files (if implementation / call changes)
-   - types/DarkSUSY.hpp (version ??)
+   - include/gambit/Backends/backend_types/DarkSUSY.hpp (version ??)
 
-
-relevant TEST programs: 
-DarkBit_XXX_standalone -> modifiy by commenting out + replace ini
+5. make copy of standalones (for testing)
+   Here: change explcitly to DS6 versions
+   relevant TEST programs: 
+   DarkBit_XXX_standalone -> modifiy by commenting out + replace ini
