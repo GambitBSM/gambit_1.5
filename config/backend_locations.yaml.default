@@ -16,6 +16,9 @@ PyArrayTest:
 DarkAges:
   1.0.0:       ./Backends/installed/DarkAges/1.0.0/DarkAges_for_GAMBIT.py
 
+CaptnGeneral:
+  1.0:         ./Backends/installed/capgen/1.0/gencaplib.so
+
 DarkSUSY:
   5.1.3:       ./Backends/installed/darksusy/5.1.3/lib/libdarksusy.so
 
@@ -26,6 +29,7 @@ DDCalc:
   1.0.0:       ./Backends/installed/ddcalc/1.0.0/lib/libDDCalc.so
   1.1.0:       ./Backends/installed/ddcalc/1.1.0/lib/libDDCalc.so
   1.2.0:       ./Backends/installed/ddcalc/1.2.0/lib/libDDCalc.so
+  2.0.0:       ./Backends/installed/ddcalc/2.0.0/lib/libDDCalc.so
 
 HiggsBounds:
   4.2.1:       ./Backends/installed/higgsbounds/4.2.1/lib/libhiggsbounds.so
@@ -55,6 +59,15 @@ MicrOmegas_MSSM:
 
 MicrOmegas_SingletDM:
   3.6.9.2:     ./Backends/installed/micromegas/3.6.9.2/SingletDM/libmicromegas.so
+
+MicrOmegas_VectorDM:
+  3.6.9.2:     ./Backends/installed/micromegas/3.6.9.2/VectorDM/libmicromegas.so
+
+MicrOmegas_MajoranaDM:
+  3.6.9.2:     ./Backends/installed/micromegas/3.6.9.2/MajoranaDM/libmicromegas.so
+
+MicrOmegas_DiracDM:
+  3.6.9.2:     ./Backends/installed/micromegas/3.6.9.2/DiracDM/libmicromegas.so
 
 nulike:
   1.0.4:       ./Backends/installed/nulike/1.0.4/lib/libnulike.so
