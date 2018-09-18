@@ -1,4 +1,4 @@
-*** ../../Backends/installed/class/2.6.3/source/thermodynamics.c	2017-10-24 14:42:41.000000000 +0100
+*** ../../Backends/installed/class/2.6.3/source/thermodynamics.c	2018-09-10 17:06:10.000000000 +0100
 --- ../../Backends/include/gambit/Backends/backend_types/class_types/gambit_update/thermodynamics.c	2018-08-30 12:57:30.000000000 +0100
 ***************
 *** 379,384 ****

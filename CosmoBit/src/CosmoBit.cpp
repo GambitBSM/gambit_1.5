@@ -1749,20 +1749,21 @@ namespace Gambit
 				cosmo.input.addEntry("r",r_self);
 
 			}
-			else if (calc_tech==1){
+			else if (calc_tech==1)
+			{
 				//-------------------------------------------------------------
 				// Having CLASS primordial.h module calculate inflationary predictions of the SMASH potential.
 				//-------------------------------------------------------------
 				
 				cosmo.input.addEntry("P_k_ini type","inflation_V");
-				cosmo.input.addEntry("full_potential","smash_inflation");
+				cosmo.input.addEntry("potential","smash_inflation");
 
 				cosmo.input.addEntry("V_0",*Param["log10_xi"]);
 				cosmo.input.addEntry("V_1",*Param["log10_beta"]);
 				cosmo.input.addEntry("V_3",*Param["log10_lambda"]);
 
 				cosmo.input.addEntry("V_2",-100.); //Hard coding \chi inflaton potential boundaries.
-				cosmo.input.addEntry("N_star",*Param["N_star"]); //Hard coding \chi inflaton potential boundaries.
+//				cosmo.input.addEntry("N_star",*Param["N_pivot"]); //Hard coding \chi inflaton potential boundaries.
 				
 				cosmo.input.addEntry("omega_b",*Param["omega_b"]);
 				cosmo.input.addEntry("omega_cdm",*Param["omega_cdm"]);

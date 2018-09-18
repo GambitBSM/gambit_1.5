@@ -1,4 +1,4 @@
-*** ../../Backends/installed/class/2.6.3/source/perturbations.c	2017-10-24 14:42:41.000000000 +0100
+*** ../../Backends/installed/class/2.6.3/source/perturbations.c	2018-09-10 17:06:10.000000000 +0100
 --- ../../Backends/include/gambit/Backends/backend_types/class_types/gambit_update/perturbations.c	2018-09-03 17:15:53.000000000 +0100
 ***************
 *** 106,111 ****
@@ -28,7 +28,27 @@
     int index_md;
     int index_ic;
 ***************
-*** 627,635 ****
+*** 573,579 ****
+    ppt->has_source_t = _FALSE_;
+    ppt->has_source_p = _FALSE_;
+    ppt->has_source_delta_m = _FALSE_;
+-   ppt->has_source_delta_cb = _FALSE_;
+    ppt->has_source_delta_g = _FALSE_;
+    ppt->has_source_delta_b = _FALSE_;
+    ppt->has_source_delta_cdm = _FALSE_;
+--- 574,579 ----
+***************
+*** 584,590 ****
+    ppt->has_source_delta_ur = _FALSE_;
+    ppt->has_source_delta_ncdm = _FALSE_;
+    ppt->has_source_theta_m = _FALSE_;
+-   ppt->has_source_theta_cb = _FALSE_;
+    ppt->has_source_theta_g = _FALSE_;
+    ppt->has_source_theta_b = _FALSE_;
+    ppt->has_source_theta_cdm = _FALSE_;
+--- 584,589 ----
+***************
+*** 629,637 ****
     class_define_index(ppt->index_tp_perturbed_recombination_delta_temp,ppt->has_perturbed_recombination,index_type,1);
     class_define_index(ppt->index_tp_perturbed_recombination_delta_chi,ppt->has_perturbed_recombination,index_type,1);
   
@@ -40,7 +60,7 @@
     class_call(perturb_get_k_list(ppr,
 --- 628,633 ----
 ***************
-*** 642,652 ****
+*** 644,654 ****
     /** - loop over modes. Initialize flags and indices which are specific to each mode. */
   
     for (index_md = 0; index_md < ppt->md_size; index_md++) {
@@ -65,7 +85,53 @@
   
         if ((ppt->has_cl_cmb_lensing_potential == _TRUE_) || (ppt->has_cl_lensing_potential)) {
 ***************
-*** 784,790 ****
+*** 659,667 ****
+        if ((ppt->has_pk_matter == _TRUE_) || (ppt->has_nl_corrections_based_on_delta_m)) {
+          ppt->has_lss = _TRUE_;
+          ppt->has_source_delta_m = _TRUE_;
+-         if (pba->has_ncdm == _TRUE_){
+-           ppt->has_source_delta_cb = _TRUE_;
+-         }
+        }
+  
+        if (ppt->has_density_transfers == _TRUE_) {
+--- 655,660 ----
+***************
+*** 717,727 ****
+          }
+          if (ppt->has_nc_rsd == _TRUE_) {
+            ppt->has_source_theta_m = _TRUE_;
+-           if (pba->has_ncdm == _TRUE_)
+-             /* we may not need theta_cb at all, rsd always defined for
+-                the total matter, but at least this is made
+-                available */
+-               ppt->has_source_theta_cb = _TRUE_;
+          }
+          if (ppt->has_nc_lens == _TRUE_) {
+            ppt->has_source_phi_plus_psi = _TRUE_;
+--- 710,715 ----
+***************
+*** 752,758 ****
+        class_define_index(ppt->index_tp_t0,         ppt->has_source_t,         index_type,1);
+        class_define_index(ppt->index_tp_t1,         ppt->has_source_t,         index_type,1);
+        class_define_index(ppt->index_tp_delta_m,    ppt->has_source_delta_m,   index_type,1);
+-       class_define_index(ppt->index_tp_delta_cb,   ppt->has_source_delta_cb,  index_type,1);
+        class_define_index(ppt->index_tp_delta_g,    ppt->has_source_delta_g,   index_type,1);
+        class_define_index(ppt->index_tp_delta_b,    ppt->has_source_delta_b,   index_type,1);
+        class_define_index(ppt->index_tp_delta_cdm,  ppt->has_source_delta_cdm, index_type,1);
+--- 740,745 ----
+***************
+*** 763,769 ****
+        class_define_index(ppt->index_tp_delta_ur,   ppt->has_source_delta_ur,  index_type,1);
+        class_define_index(ppt->index_tp_delta_ncdm1,ppt->has_source_delta_ncdm,index_type,pba->N_ncdm);
+        class_define_index(ppt->index_tp_theta_m,    ppt->has_source_theta_m,   index_type,1);
+-       class_define_index(ppt->index_tp_theta_cb,   ppt->has_source_theta_cb,  index_type,1);
+        class_define_index(ppt->index_tp_theta_g,    ppt->has_source_theta_g,   index_type,1);
+        class_define_index(ppt->index_tp_theta_b,    ppt->has_source_theta_b,   index_type,1);
+        class_define_index(ppt->index_tp_theta_cdm,  ppt->has_source_theta_cdm, index_type,1);
+--- 750,755 ----
+***************
+*** 796,802 ****
         class_define_index(ppt->index_ic_nid,ppt->has_nid,index_ic,1);
         class_define_index(ppt->index_ic_niv,ppt->has_niv,index_ic,1);
         ppt->ic_size[index_md] = index_ic;
@@ -84,7 +150,7 @@
                    ppt->error_message,
                    "you should have at least one adiabatic or isocurvature initial condition...} !!!");
 ***************
-*** 845,851 ****
+*** 857,863 ****
                   ppt->error_message);
   
     }
@@ -94,7 +160,7 @@
   }
 --- 845,850 ----
 ***************
-*** 1256,1262 ****
+*** 1268,1274 ****
     int newk_size, index_newk, add_k_output_value;
   
     /** Summary: */
@@ -111,7 +177,7 @@
                ppt->error_message,
                "stop to avoid division by zero");
 ***************
-*** 1292,1298 ****
+*** 1304,1310 ****
     /** - scalar modes */
   
     if (ppt->has_scalars == _TRUE_) {
@@ -128,7 +194,7 @@
       if (pba->sgnK == 0) {
         /* K<0 (flat)  : start close to zero */
 ***************
-*** 1319,1325 ****
+*** 1331,1337 ****
       k_max = k_min;
   
       if (ppt->has_cls == _TRUE_) {
@@ -145,7 +211,7 @@
   
         /* choose a k_max_cmb[ppt->index_md_scalars] corresponding to a wavelength on the last
 ***************
-*** 1329,1334 ****
+*** 1341,1346 ****
 --- 1328,1334 ----
   
         k_max_cmb[ppt->index_md_scalars] = ppr->k_max_tau0_over_l_max*ppt->l_scalar_max
@@ -155,7 +221,7 @@
         k_max     = k_max_cmb[ppt->index_md_scalars];
   
 ***************
-*** 1405,1411 ****
+*** 1417,1423 ****
       /* values until k_max_cmb[ppt->index_md_scalars] */
   
       while (k < k_max_cmb[ppt->index_md_scalars]) {
@@ -172,7 +238,7 @@
            centered around the characteristic scale set by the sound
            horizon at recombination (associated to the comoving wavenumber
 ***************
-*** 1425,1431 ****
+*** 1437,1443 ****
            gradually in the k-->0 limit, by up to a factor 10. The actual
            stepsize is still fixed by k_step_super, this is just a
            reduction factor. */
@@ -189,7 +255,7 @@
   
         step *= (k*k/scale2+1.)/(k*k/scale2+1./ppr->k_step_super_reduction);
 ***************
-*** 1434,1440 ****
+*** 1446,1452 ****
                    ppt->error_message,
                    "k step =%e < machine precision : leads either to numerical error or infinite loop",
                    step * k_rec);
@@ -206,7 +272,7 @@
   
         class_test(k <= ppt->k[ppt->index_md_scalars][index_k-1],
 ***************
-*** 1444,1449 ****
+*** 1456,1461 ****
 --- 1444,1450 ----
         ppt->k[ppt->index_md_scalars][index_k] = k;
   
@@ -216,7 +282,7 @@
   
       ppt->k_size_cmb[ppt->index_md_scalars] = index_k;
 ***************
-*** 1481,1487 ****
+*** 1493,1499 ****
                     ppt->k_size[ppt->index_md_scalars]*sizeof(double),
                     ppt->error_message);
     }
@@ -233,7 +299,7 @@
   
     if (ppt->has_vectors == _TRUE_) {
 ***************
-*** 1619,1625 ****
+*** 1631,1637 ****
     /** - tensor modes */
   
     if (ppt->has_tensors == _TRUE_) {
@@ -250,7 +316,7 @@
       if (pba->sgnK == 0) {
         /* K<0 (flat)  : start close to zero */
 ***************
-*** 1841,1846 ****
+*** 1853,1858 ****
 --- 1842,1849 ----
     free(k_max_cmb);
     free(k_max_cl);
@@ -261,7 +327,7 @@
   
   }
 ***************
-*** 1870,1876 ****
+*** 1882,1888 ****
                              int index_md,
                              struct perturb_workspace * ppw
                              ) {
@@ -271,7 +337,7 @@
     /** - define local variables */
 --- 1873,1878 ----
 ***************
-*** 2015,2021 ****
+*** 2027,2033 ****
       }
   
     }
@@ -280,3 +346,87 @@
   }
   
 --- 2017,2022 ----
+***************
+*** 5247,5264 ****
+        // of decaying dark matter.
+      }
+  
+-     if (ppt->has_source_delta_cb == _TRUE_) {
+-       ppw->delta_cb += 3. *ppw->pvecback[pba->index_bg_a]*ppw->pvecback[pba->index_bg_H] * ppw->theta_cb/k2;//check gauge transformation
+-     }
+- 
+      if (ppt->has_source_theta_m == _TRUE_) {
+        if  (ppt->gauge == synchronous) {
+          ppw->theta_m += ppw->pvecmetric[ppw->index_mt_alpha]*k2;
+!       }
+!     }
+!     if (ppt->has_source_theta_cb == _TRUE_){
+!       if  (ppt->gauge == synchronous) {
+!         ppw->theta_cb += ppw->pvecmetric[ppw->index_mt_alpha]*k2; //check gauge transformation
+        }
+      }
+    }
+--- 5236,5245 ----
+        // of decaying dark matter.
+      }
+  
+      if (ppt->has_source_theta_m == _TRUE_) {
+        if  (ppt->gauge == synchronous) {
+          ppw->theta_m += ppw->pvecmetric[ppw->index_mt_alpha]*k2;
+! 
+        }
+      }
+    }
+***************
+*** 5650,5659 ****
+          rho_m += ppw->pvecback[pba->index_bg_rho_dcdm];
+        }
+  
+-       /* infer delta_cb */
+-       if (ppt->has_source_delta_cb)
+-        ppw->delta_cb = delta_rho_m/rho_m;
+- 
+        /* include any other species non-relativistic today (like ncdm species) */
+  
+        if (pba->has_ncdm == _TRUE_) {
+--- 5631,5636 ----
+***************
+*** 5695,5703 ****
+          rho_plus_p_m += ppw->pvecback[pba->index_bg_rho_dcdm];
+        }
+  
+-       if ((ppt->has_source_delta_cb == _TRUE_) || (ppt->has_source_theta_cb == _TRUE_))
+-        ppw->theta_cb = rho_plus_p_theta_m/rho_plus_p_m;
+- 
+        /* include any other species non-relativistic today (like ncdm species) */
+  
+        if (pba->has_ncdm == _TRUE_) {
+--- 5672,5677 ----
+***************
+*** 6124,6134 ****
+        _set_source_(ppt->index_tp_delta_m) = ppw->delta_m;
+      }
+  
+-     /* cdm and baryon over density */
+-     if (ppt->has_source_delta_cb == _TRUE_) {
+-       _set_source_(ppt->index_tp_delta_cb) = ppw->delta_cb;
+-     }
+- 
+      /* delta_g */
+      if (ppt->has_source_delta_g == _TRUE_)  {
+        _set_source_(ppt->index_tp_delta_g) = delta_g;
+--- 6098,6103 ----
+***************
+*** 6196,6206 ****
+        _set_source_(ppt->index_tp_theta_m) = ppw->theta_m;
+      }
+  
+-     /* cdm and baryon velocity */
+-     if (ppt->has_source_theta_cb == _TRUE_) {
+-       _set_source_(ppt->index_tp_theta_cb) = ppw->theta_cb;
+-     }
+- 
+      /* theta_g */
+      if (ppt->has_source_theta_g == _TRUE_) {
+        if (ppw->approx[ppw->index_ap_rsa]==(int)rsa_off)
+--- 6165,6170 ----

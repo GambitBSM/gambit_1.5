@@ -846,9 +846,9 @@ endif()
 set(name "class")
 set(ver "2.6.3")
 set(lib "libclass")
-#set(patch "${PROJECT_SOURCE_DIR}/Backends/patches/${name}/${ver}")
-set(dl "http://lesgourg.github.io/class_public/class_public-2.6.3.tar.gz")
-set(md5 "dfb8652cd5af14d61e677e0f8b96f62f")
+set(patch "${PROJECT_SOURCE_DIR}/Backends/patches/${name}/${ver}")
+set(dl "http://lesgourg.github.io/class_public/class_public-2.7.0.tar.gz")
+set(md5 "5b53e482420606205ef586e792b16d8e")
 set(dir "${PROJECT_SOURCE_DIR}/Backends/installed/${name}/${ver}")
 set(CLASS_DLL_DIR "build")
 set(CLASS_IFLAG "-I")
@@ -857,6 +857,15 @@ if(NOT ditched_${name}_${ver})
     DOWNLOAD_COMMAND ${DL_BACKEND} ${dl} ${md5} ${dir}
     SOURCE_DIR ${dir}
     BUILD_IN_SOURCE 1
+    PATCH_COMMAND patch -p0 < ${patch}/primordial_header.dif
+    COMMAND patch -p0 < ${patch}/primordial_source.dif
+    COMMAND patch -p0 < ${patch}/input_source.dif
+    ## COMMAND patch -p0 < ${patch}/output_source.dif
+    ## COMMAND patch -p0 < ${patch}/spectra_source.dif
+    ## COMMAND patch -p0 < ${patch}/transfer_source.dif
+    COMMAND patch -p0 < ${patch}/perturbations_source.dif
+    COMMAND patch -p0 < ${patch}/thermo_source.dif
+    COMMAND patch -p0 < ${patch}/backgrnd_source.dif
     CONFIGURE_COMMAND ""
     #BUILD_COMMAND ${CMAKE_MAKE_PROGRAM} CC=${CMAKE_C_COMPILER} CCFLAG=${CMAKE_C_FLAGS} class
     BUILD_COMMAND ${CMAKE_MAKE_PROGRAM} CC=${CMAKE_C_COMPILER} class

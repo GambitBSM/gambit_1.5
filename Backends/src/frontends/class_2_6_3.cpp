@@ -12,6 +12,8 @@
 ///          (stoecker@physik.rwth-aachen.de)
 ///  \date 2018 Apr, May
 ///
+///  \author Selim Hotinli
+///  \date 2018 May-June
 ///  *********************************************
 
 #include "gambit/Backends/frontend_macros.hpp"
