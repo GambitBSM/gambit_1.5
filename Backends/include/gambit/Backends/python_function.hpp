@@ -18,12 +18,13 @@
 #ifndef __python_function_hpp__
 #define __python_function_hpp__
 
-#include <pybind11/pybind11.h>
-
 #include "gambit/Elements/ini_catch.hpp"
 #include "gambit/Backends/backend_singleton.hpp"
 #include "gambit/Backends/python_helpers.hpp"
 #include "gambit/cmake/cmake_variables.hpp"
+
+#include <pybind11/pybind11.h>
+#include <pybind11/numpy.h>
 
 namespace Gambit
 {
