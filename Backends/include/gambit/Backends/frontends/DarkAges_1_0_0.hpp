@@ -28,7 +28,8 @@ LOAD_LIBRARY
 /* Include an extra header of pybind11.
  * Needed for casting of python list into std::vector and vice versa
  */
-#include <pybind11/stl.h> 
+#include <pybind11/stl.h>
+#include <pybind11/numpy.h>
 
 /* Syntax for BE_FUNCTION (same as for any other backend):
  * BE_FUNCTION([choose function name], [type], [arguement types], "[exact symbol name]", "[choose capability name]")
@@ -36,8 +37,8 @@ LOAD_LIBRARY
 
 BE_FUNCTION(initialize, void, (), "initialize", "DA_initialize")
 BE_FUNCTION(release_flag, void, (), "release_flag", "DA_reset")
-BE_FUNCTION(calc_f_decay, void, (pybind11::list, pybind11::list, pybind11::list, double, double), "calculate_f_for_decay", "DA_calc_f")
-BE_FUNCTION(get_result, pybind11::list, (str), "get_result","DA_get_result")
+BE_FUNCTION(calc_f_decay, void, (pybind11::array_t<double>, pybind11::array_t<double>, pybind11::array_t<double>, double, double), "calculate_f_for_decay", "DA_calc_f")
+BE_FUNCTION(get_result, pybind11::array_t<double>, (str), "get_result","DA_get_result")
 
 /* Syntax for BE_VARIABLE:
  * BE_VARIABLE([name], [type], "[exact symbol name]", "[choose capability name]")
