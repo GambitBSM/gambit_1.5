@@ -1242,7 +1242,6 @@ int spectra_init(
                  ) {
 
   /** Summary: */
-  printf("DEBUG: last seen in spectra_init \n");
   double TT_II,TT_RI,TT_RR;
   int l1,l2;
 
@@ -1420,7 +1419,6 @@ int spectra_init(
         /(1.+ppm->f_niv*ppm->f_niv*exp((ppm->n_niv-ppm->n_s)*log(0.1/ppm->k_pivot)));
     }
   }
-  printf("DEBUG: We are successfully out of the spectra_init.\n");
   return _SUCCESS_;
 }
 
@@ -1511,7 +1509,6 @@ int spectra_free(
   free(psp->ic_size);
   free(psp->ic_ic_size);
 
-  printf("DEBUG: returned from spectra_init successfully \n");
   return _SUCCESS_;
 
 }
@@ -1861,7 +1858,6 @@ int spectra_cls(
                 ) {
 
   /** Summary: */
-  printf("DEBUG: Last seen alive in spectra_cls \n");
 
   /** - define local variables */
 
@@ -2004,7 +2000,6 @@ int spectra_cls(
           } /* end of parallel region */
 
 		  if (abort == _TRUE_) {
-			printf("DEBUG: abort == _TRUE_, we are returning _FAILURE_\n");
 			return _FAILURE_;
 		  }
 
@@ -2038,7 +2033,6 @@ int spectra_cls(
                psp->error_message,
                psp->error_message);
   }
-  printf("DEBUG: we return success for spectra_cls!(?)\n");
   return _SUCCESS_;
 
 }
@@ -2113,10 +2107,10 @@ int spectra_compute_cl(
                ppm->error_message,
                psp->error_message);
 
-	if(k <= 0.5 && k >= 0.49) {
-	  printf("at k = %e -> primordial_pk[0] = %e  and ",k,primordial_pk[0]);
-	  printf(" primordial_pk[1] = %e\n",primordial_pk[1]);
-	}
+//	if(k <= 0.5 && k >= 0.49) {
+//	  printf("at k = %e -> primordial_pk[0] = %e  and ",k,primordial_pk[0]);
+//	  printf(" primordial_pk[1] = %e\n",primordial_pk[1]);
+//	}
     /* above routine checks that k>0: no possible division by zero below */
 
     for (index_tt=0; index_tt < ptr->tt_size[index_md]; index_tt++) {

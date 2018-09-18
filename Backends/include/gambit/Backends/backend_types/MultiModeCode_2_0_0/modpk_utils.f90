@@ -108,7 +108,7 @@ CONTAINS
     delp = y(size(y)/2+1 : size(y))
 
     Vpot = pot(p)
-	dVpot = dVdphi(p)
+		dVpot = dVdphi(p)
     !END MULTIFIELD
 
     if (.not. use_t) then
@@ -163,28 +163,28 @@ CONTAINS
 
       yprime(1 : size(y)/2) = delp
 
-      if (potential_choice == 18) then
-        yprime(size(y)/2+1: size(y)) = -3.0e0_dp*delp + &
-                         delp**3/2.0e0_dp - (3.0e0_dp - &
-                         delp**2/2.0e0_dp)* &
-                         sqrt(2.0e0_dp*getEps(p,delp))
+      ! if (potential_choice == 18) then
+      !  yprime(size(y)/2+1: size(y)) = -3.0e0_dp*delp + &
+      !                   delp**3/2.0e0_dp - (3.0e0_dp - &
+      !                   delp**2/2.0e0_dp)* &
+      !                   sqrt(2.0e0_dp*getEps(p,delp))
         ! print*, "hubble = ", hubble
         ! print*, "dhubble = ", dhubble
-		! print*, "delp = " , delp
-		! print*, "getEps(p,delp) = ", getEps(p,delp)
+				! print*, "delp = " , delp
+				! print*, "getEps(p,delp) = ", getEps(p,delp)
         ! print*, "-dhubble/hubble**2 = ", -dhubble/hubble**2
         ! print*, " -3.0e0_dp*delp(1) = ", -3.0e0_dp*delp(1)
         ! print*, " delp(1)**3/2.0e0_dp = ", delp(1)**3/2.0e0_dp
         ! print*, "y from inside utils = " , yprime(size(y)/2+1: size(y))
         ! print*, " sqrt(2eps) = ", sqrt(2.0e0_dp*dVpot(1)/Vpot)
 
-	  else
+	  ! else
         hubble=getH(p,delp)
         dhubble=getdHdalpha(p,delp)
 
         yprime(size(y)/2+1 : size(y)) = -((3.0e0_dp+dhubble/hubble)*delp+&
           dVdphi(p)/hubble/hubble)
-      end if
+    ! end if
     else
 
       !Derivs in cosmic time

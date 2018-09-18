@@ -88,31 +88,18 @@ START_MODEL
 DEFINEPARS(log10_xi,log10_beta,log10_lambda,N_pivot,omega_b,omega_cdm,H0,tau_reio)
 #undef MODEL
 
+#define MODEL inf_1naturalInf_LCDMt // N-flation (axions)
+START_MODEL
+DEFINEPARS(lambda,faxion,N_pivot,omega_b,omega_cdm,H0,tau_reio)
+#undef MODEL
+
+#define MODEL inf_1hilltopInf_LCDMt // Hilltop
+START_MODEL
+DEFINEPARS(lambda,mu,N_pivot,omega_b,omega_cdm,H0,tau_reio)
+#undef MODEL
+
+
 /*
-#define MODEL inf_SR1quad_LCDMt // m_i^2 phi_i^2 --- N-quadratic
- START_MODEL
- DEFINEPARS(phi0,dphi0,vparams1,vparams2,vparams3)
-#undef MODEL
-
- #define MODEL inf_axions // N-flation (axions)
-  START_MODEL
-  DEFINEPARS(phi0,dphi0,vparams1,vparams2,vparams3)
-#undef MODEL
-
-#define MODEL inf_nquar // lambda_i phi_i^4 --- N-quartic
-  START_MODEL
-  DEFINEPARS(phi0,dphi0,vparams1,vparams2,vparams3)
-#undef MODEL
-
-#define MODEL inf_nlinear // lambda_i phi_i --- N-linear
-  START_MODEL
-  DEFINEPARS(phi0,dphi0,vparams1,vparams2,vparams3)
-#undef MODEL
-
-#define MODEL inf_power23 // lambda_i phi_i^(2/3)
-  START_MODEL
-  DEFINEPARS(phi0,dphi0,vparams1,vparams2,vparams3)
-#undef MODEL
 
 #define MODEL inf_diff1 // Lambda^4 - mu*phi^4
   START_MODEL
