@@ -20,7 +20,7 @@
 #define __python_helpers_hpp__
 
 #include <pybind11/pybind11.h>
-
+#include <pybind11/numpy.h>
 
 namespace Gambit
 {
