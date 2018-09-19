@@ -13,7 +13,7 @@ for micrOMEGAs.
    again one for each module, start with MSSM 
 
 4. for each replaced function(ality) DS5->DS6, change/update:
-   - DarkBit_rollcall.hpp (always, unless same capability is same)
+   - DarkBit_rollcall.hpp (always, unless some capability is same)
    - src/.cpp files (if implementation / call changes)
    - include/gambit/Backends/backend_types/DarkSUSY.hpp (version ??)
 
