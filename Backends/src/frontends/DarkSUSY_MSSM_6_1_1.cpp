@@ -53,19 +53,21 @@ BE_INI_FUNCTION
     dsinit();
     mylock.release_lock();
 
-    dsrdinit();
+    // TB: should not be needed in DS6 anymore!
+    // dsrdinit();
 
-    // Initialize yield tables for use in cascade decays (initialize more if needed)
-    dshainit(151); // Initialize positron tables
-    dshainit(152); // Initialize gamma ray tables
-    dshainit(154); // Initialize antiproton tables
-    // Call dshayield for first call initialization of variables
-    double tmp1 = 100.0;
-    double tmp2 = 10.0;
-    int tmp3 = 15;
-    int tmp4 = 152;
-    int tmp5 = 0;
-    dshayield(tmp1,tmp2,tmp3,tmp4,tmp5);
+    // TB: also this should not be needed in DS6 anymore! CHECK
+    //// Initialize yield tables for use in cascade decays (initialize more if needed)
+    //dshainit(151); // Initialize positron tables
+    //dshainit(152); // Initialize gamma ray tables
+    //dshainit(154); // Initialize antiproton tables
+    //// Call dshayield for first call initialization of variables
+    //double tmp1 = 100.0;
+    //double tmp2 = 10.0;
+    //int tmp3 = 15;
+    //int tmp4 = 152;
+    //int tmp5 = 0;
+    //dshayield(tmp1,tmp2,tmp3,tmp4,tmp5);
 
     scan_level = false;
 
@@ -164,7 +166,7 @@ BE_NAMESPACE
   }
 
   /// Translates GAMBIT string identifiers to the SUSY
-  /// particle codes used internally in DS (as stored in common block /pacodes/)
+  /// particle codes used internally in DS (as stored in common block /pacodes_mssm/)
   // FIXME: add channel codes!
   int DSparticle_code(const str& particleID)
   {
@@ -286,7 +288,7 @@ BE_NAMESPACE
   {
     using SLHAea::to;
     const std::complex<double> imagi(0.0, 1.0);
-    DS_PACODES *DSpart = &(*pacodes);
+    DS_PACODES_MSSM *DSpart = &(*pacodes_mssm);
 
     // Define required blocks and raise an error if a block is missing
     required_block("SMINPUTS", mySLHA);
@@ -325,43 +327,43 @@ BE_NAMESPACE
     // mssmswitch->higwid = 1;  // tell DarkSUSY not to use FeynHiggs for Higgs widths.
 
     // Block SMINPUTS
-    couplingconstants->alphem           = 1./to<double>(mySLHA.at("SMINPUTS").at(1).at(1)); // 1/alpha_{QED}
-    smruseful->alph3mz                  = to<double>(mySLHA.at("SMINPUTS").at(3).at(1));    // alpha_s @ MZ
-    smruseful->gfermi                   = to<double>(mySLHA.at("SMINPUTS").at(2).at(1));    // Fermi constant
-    mspctm->mass(DSparticle_code("Z0")) = to<double>(mySLHA.at("SMINPUTS").at(4).at(1));    // Z boson mass
+    smcoupling->alphem                  = 1./to<double>(mySLHA.at("SMINPUTS").at(1).at(1)); // 1/alpha_{QED}
+    smcoupling->alph3mz                  = to<double>(mySLHA.at("SMINPUTS").at(3).at(1));    // alpha_s @ MZ
+    smcoupling->gfermi                   = to<double>(mySLHA.at("SMINPUTS").at(2).at(1));    // Fermi constant
+    pmasses->mass(DSparticle_code("Z0")) = to<double>(mySLHA.at("SMINPUTS").at(4).at(1));    // Z boson mass
 
-    // Here we set the masses to be used in DarkSUSY.  Note that all masses in the mspctm->mass block
+    // Here we set the masses to be used in DarkSUSY.  Note that all masses in the pmasses->mass block
     // must match those in the ProcessCatalog in DarkBit, as these are used to define the kinematic
     // edges used in relic density integrations and similar within DarkSUSY.  Mostly these should be
     // pole masses, except in cases where that is not possible (i.e. light quarks).
 
     // Lepton masses
-    mspctm->mass(DSpart->kl(1))  = to<double>(mySLHA.at("SMINPUTS").at(11).at(1));  // electron pole mass
-    mspctm->mass(DSpart->kl(2))  = to<double>(mySLHA.at("SMINPUTS").at(13).at(1));  // muon pole mass
-    mspctm->mass(DSpart->kl(3))  = to<double>(mySLHA.at("SMINPUTS").at(7).at(1));   // tau pole mass
-    mspctm->mass(DSpart->knu(1)) = to<double>(mySLHA.at("SMINPUTS").at(12).at(1));  // nu_1 pole mass
-    mspctm->mass(DSpart->knu(2)) = to<double>(mySLHA.at("SMINPUTS").at(14).at(1));  // nu_2 pole mass
-    mspctm->mass(DSpart->knu(3)) = to<double>(mySLHA.at("SMINPUTS").at(8).at(1));   // nu_3 pole mass
+    pmasses->mass(DSpart->kl(1))  = to<double>(mySLHA.at("SMINPUTS").at(11).at(1));  // electron pole mass
+    pmasses->mass(DSpart->kl(2))  = to<double>(mySLHA.at("SMINPUTS").at(13).at(1));  // muon pole mass
+    pmasses->mass(DSpart->kl(3))  = to<double>(mySLHA.at("SMINPUTS").at(7).at(1));   // tau pole mass
+    pmasses->mass(DSpart->knu(1)) = to<double>(mySLHA.at("SMINPUTS").at(12).at(1));  // nu_1 pole mass
+    pmasses->mass(DSpart->knu(2)) = to<double>(mySLHA.at("SMINPUTS").at(14).at(1));  // nu_2 pole mass
+    pmasses->mass(DSpart->knu(3)) = to<double>(mySLHA.at("SMINPUTS").at(8).at(1));   // nu_3 pole mass
 
     // Quark masses as defined in SLHA2
-    mspctm->mu2gev               = to<double>(mySLHA.at("SMINPUTS").at(22).at(1)); // up quark mass @ 2 GeV
-    mspctm->md2gev               = to<double>(mySLHA.at("SMINPUTS").at(21).at(1)); // down quark mass @ 2 GeV
-    mspctm->ms2gev               = to<double>(mySLHA.at("SMINPUTS").at(23).at(1)); // stange mass @ 2 GeV
-    mspctm->mcmc                 = to<double>(mySLHA.at("SMINPUTS").at(24).at(1)); // charm mass at m_c
-    mspctm->mbmb                 = to<double>(mySLHA.at("SMINPUTS").at(5).at(1));  // bottom mass at m_b
-    mspctm->mass(DSpart->kqu(3)) = to<double>(mySLHA.at("SMINPUTS").at(6).at(1));  // top pole mass
+    smquarkmasses->mu2gev        = to<double>(mySLHA.at("SMINPUTS").at(22).at(1)); // up quark mass @ 2 GeV
+    smquarkmasses->md2gev        = to<double>(mySLHA.at("SMINPUTS").at(21).at(1)); // down quark mass @ 2 GeV
+    smquarkmasses->ms2gev        = to<double>(mySLHA.at("SMINPUTS").at(23).at(1)); // stange mass @ 2 GeV
+    smquarkmasses->mcmc          = to<double>(mySLHA.at("SMINPUTS").at(24).at(1)); // charm mass at m_c
+    smquarkmasses->mbmb          = to<double>(mySLHA.at("SMINPUTS").at(5).at(1));  // bottom mass at m_b
+    pmasses->mass(DSpart->kqu(3)) = to<double>(mySLHA.at("SMINPUTS").at(6).at(1));  // top pole mass
 
     // Do the DarkSUSY-style sin^2 theta_W calculation (will be overwritten later).
-    smruseful->s2thw=dsgf2s2thw(smruseful->gfermi, couplingconstants->alphem, mspctm->mass(DSparticle_code("Z0")), mspctm->mass(DSpart->kqu(3)),1);
+    smcoupling->s2thw=dsgf2s2thw(smcoupling->gfermi, smcoupling->alphem, pmasses->mass(DSparticle_code("Z0")), pmasses->mass(DSpart->kqu(3)),1);
 
     // Set other internal quark masses for DarkSUSY
     dsfindmtmt();                                                                  // top mass at mt
-    mspctm->mass(DSpart->kqu(1)) = mspctm->mu2gev;                                 // use 2GeV u mass as proxy for pole
-    mspctm->mass(DSpart->kqd(1)) = mspctm->md2gev;                                 // use 2GeV d mass as proxy for pole
-    mspctm->mass(DSpart->kqd(2)) = mspctm->ms2gev;                                 // use 2GeV s mass as proxy for pole
-    mspctm->mass(DSpart->kqu(2)) = dsmqpole4loop(DSpart->kqu(2),mspctm->mcmc);     // use DarkSUSY internal routine to get mc pole
-    mspctm->mass(DSpart->kqd(3)) = to<double>(mySLHA.at("MASS").at(5).at(1));      // the GAMBIT way to get the bottom pole mass
-    //mspctm->mass(DSpart->kqd(3)) = dsmqpole4loop(DSpart->kqd(3),mspctm->mbmb);   // the DarkSUSY SLHAreader way to get mb pole
+    pmasses->mass(DSpart->kqu(1)) = smquarkmasses->mu2gev;                                 // use 2GeV u mass as proxy for pole
+    mspctm->mass(DSpart->kqd(1)) = smquarkmasses->md2gev;                                 // use 2GeV d mass as proxy for pole
+    pmasses->mass(DSpart->kqd(2)) = smquarkmasses->ms2gev;                                 // use 2GeV s mass as proxy for pole
+    pmasses->mass(DSpart->kqu(2)) = dsmqpole4loop(DSpart->kqu(2),smquarkmasses->mcmc);     // use DarkSUSY internal routine to get mc pole
+    pmasses->mass(DSpart->kqd(3)) = to<double>(mySLHA.at("MASS").at(5).at(1));      // the GAMBIT way to get the bottom pole mass
+    //pmasses->mass(DSpart->kqd(3)) = dsmqpole4loop(DSpart->kqd(3),smquarkmasses->mbmb);   // the DarkSUSY SLHAreader way to get mb pole
 
     // Block MINPAR we skip, it is not needed
 
@@ -390,8 +392,8 @@ BE_NAMESPACE
     mssmpar->tanbe = to<double>(mySLHA.at("HMIX").at(2).at(1));
 
     // A boson mass
-    mspctm->mass(DSparticle_code("A0")) = to<double>(mySLHA.at("MASS").at(36).at(1));
-    mssmpar->ma = mspctm->mass(DSparticle_code("A0"));
+    pmasses->mass(DSparticle_code("A0")) = to<double>(mySLHA.at("MASS").at(36).at(1));
+    mssmpar->ma = pmasses->mass(DSparticle_code("A0"));
 
     // Now set up some defaults (part of it will be overwritten later)
     dssuconst();
@@ -438,57 +440,57 @@ BE_NAMESPACE
     // We then have a choice of calculating both sin^2 theta_W and MW
     // from alpha, MZ and GF as we normally do in DarkSUSY. This line would
     // enforce that:
-    //  mspctm->mass(DSparticle_code("W+"))=mspctm->mass(DSparticle_code("Z0"))*sqrt(1.0-smruseful->s2thw);
+    //  pmasses->mass(DSparticle_code("W+"))=pmasses->mass(DSparticle_code("Z0"))*sqrt(1.0-smcoupling->s2thw);
     // However, it is more prudent to take the value of MW from the SLHA file
     // as given (read in earlier), and instead enforce the tree-level condition
     // by redefining sin^2 theta_W. That we do here:
-    mspctm->mass(DSparticle_code("W+"))  = to<double>(mySLHA.at("MASS").at(24).at(1));    // W boson mass
-    smruseful->s2thw=1.0-square(mspctm->mass(DSparticle_code("W+")))/square(mspctm->mass(DSparticle_code("Z0")));
+    pmasses->mass(DSparticle_code("W+"))  = to<double>(mySLHA.at("MASS").at(24).at(1));    // W boson mass
+    smcoupling->s2thw=1.0-square(pmasses->mass(DSparticle_code("W+")))/square(pmasses->mass(DSparticle_code("Z0")));
 
     // Higgs masses. Note h0_1 is the lightest CP-even neutral higgs, and h2_0 the heavier.
-    mspctm->mass(DSparticle_code("h0_1")) = to<double>(mySLHA.at("MASS").at(25).at(1));
-    mspctm->mass(DSparticle_code("h0_2")) = to<double>(mySLHA.at("MASS").at(35).at(1));
-    mspctm->mass(DSparticle_code("H+"))   = to<double>(mySLHA.at("MASS").at(37).at(1));
-    mspctm->mass(DSparticle_code("A0"))   = to<double>(mySLHA.at("MASS").at(36).at(1));
+    pmasses->mass(DSparticle_code("h0_1")) = to<double>(mySLHA.at("MASS").at(25).at(1));
+    pmasses->mass(DSparticle_code("h0_2")) = to<double>(mySLHA.at("MASS").at(35).at(1));
+    pmasses->mass(DSparticle_code("H+"))   = to<double>(mySLHA.at("MASS").at(37).at(1));
+    pmasses->mass(DSparticle_code("A0"))   = to<double>(mySLHA.at("MASS").at(36).at(1));
 
     // SUSY particles
-    mspctm->mass(DSpart->ksnu(1)) =  to<double>(mySLHA.at("MASS").at(1000012).at(1));
-    mspctm->mass(DSpart->ksnu(2)) =  to<double>(mySLHA.at("MASS").at(1000014).at(1));
-    mspctm->mass(DSpart->ksnu(3)) =  to<double>(mySLHA.at("MASS").at(1000016).at(1));
-    mspctm->mass(DSpart->ksl(1))  =  to<double>(mySLHA.at("MASS").at(1000011).at(1));
-    mspctm->mass(DSpart->ksl(2))  =  to<double>(mySLHA.at("MASS").at(1000013).at(1));
-    mspctm->mass(DSpart->ksl(3))  =  to<double>(mySLHA.at("MASS").at(1000015).at(1));
-    mspctm->mass(DSpart->ksl(4))  =  to<double>(mySLHA.at("MASS").at(2000011).at(1));
-    mspctm->mass(DSpart->ksl(5))  =  to<double>(mySLHA.at("MASS").at(2000013).at(1));
-    mspctm->mass(DSpart->ksl(6))  =  to<double>(mySLHA.at("MASS").at(2000015).at(1));
-    mspctm->mass(DSpart->ksqu(1)) =  to<double>(mySLHA.at("MASS").at(1000002).at(1));
-    mspctm->mass(DSpart->ksqu(2)) =  to<double>(mySLHA.at("MASS").at(1000004).at(1));
-    mspctm->mass(DSpart->ksqu(3)) =  to<double>(mySLHA.at("MASS").at(1000006).at(1));
-    mspctm->mass(DSpart->ksqu(4)) =  to<double>(mySLHA.at("MASS").at(2000002).at(1));
-    mspctm->mass(DSpart->ksqu(5)) =  to<double>(mySLHA.at("MASS").at(2000004).at(1));
-    mspctm->mass(DSpart->ksqu(6)) =  to<double>(mySLHA.at("MASS").at(2000006).at(1));
-    mspctm->mass(DSpart->ksqd(1)) =  to<double>(mySLHA.at("MASS").at(1000001).at(1));
-    mspctm->mass(DSpart->ksqd(2)) =  to<double>(mySLHA.at("MASS").at(1000003).at(1));
-    mspctm->mass(DSpart->ksqd(3)) =  to<double>(mySLHA.at("MASS").at(1000005).at(1));
-    mspctm->mass(DSpart->ksqd(4)) =  to<double>(mySLHA.at("MASS").at(2000001).at(1));
-    mspctm->mass(DSpart->ksqd(5)) =  to<double>(mySLHA.at("MASS").at(2000003).at(1));
-    mspctm->mass(DSpart->ksqd(6)) =  to<double>(mySLHA.at("MASS").at(2000005).at(1));
+    pmasses->mass(DSpart->ksnu(1)) =  to<double>(mySLHA.at("MASS").at(1000012).at(1));
+    pmasses->mass(DSpart->ksnu(2)) =  to<double>(mySLHA.at("MASS").at(1000014).at(1));
+    pmasses->mass(DSpart->ksnu(3)) =  to<double>(mySLHA.at("MASS").at(1000016).at(1));
+    pmasses->mass(DSpart->ksl(1))  =  to<double>(mySLHA.at("MASS").at(1000011).at(1));
+    pmasses->mass(DSpart->ksl(2))  =  to<double>(mySLHA.at("MASS").at(1000013).at(1));
+    pmasses->mass(DSpart->ksl(3))  =  to<double>(mySLHA.at("MASS").at(1000015).at(1));
+    pmasses->mass(DSpart->ksl(4))  =  to<double>(mySLHA.at("MASS").at(2000011).at(1));
+    pmasses->mass(DSpart->ksl(5))  =  to<double>(mySLHA.at("MASS").at(2000013).at(1));
+    pmasses->mass(DSpart->ksl(6))  =  to<double>(mySLHA.at("MASS").at(2000015).at(1));
+    pmasses->mass(DSpart->ksqu(1)) =  to<double>(mySLHA.at("MASS").at(1000002).at(1));
+    pmasses->mass(DSpart->ksqu(2)) =  to<double>(mySLHA.at("MASS").at(1000004).at(1));
+    pmasses->mass(DSpart->ksqu(3)) =  to<double>(mySLHA.at("MASS").at(1000006).at(1));
+    pmasses->mass(DSpart->ksqu(4)) =  to<double>(mySLHA.at("MASS").at(2000002).at(1));
+    pmasses->mass(DSpart->ksqu(5)) =  to<double>(mySLHA.at("MASS").at(2000004).at(1));
+    pmasses->mass(DSpart->ksqu(6)) =  to<double>(mySLHA.at("MASS").at(2000006).at(1));
+    pmasses->mass(DSpart->ksqd(1)) =  to<double>(mySLHA.at("MASS").at(1000001).at(1));
+    pmasses->mass(DSpart->ksqd(2)) =  to<double>(mySLHA.at("MASS").at(1000003).at(1));
+    pmasses->mass(DSpart->ksqd(3)) =  to<double>(mySLHA.at("MASS").at(1000005).at(1));
+    pmasses->mass(DSpart->ksqd(4)) =  to<double>(mySLHA.at("MASS").at(2000001).at(1));
+    pmasses->mass(DSpart->ksqd(5)) =  to<double>(mySLHA.at("MASS").at(2000003).at(1));
+    pmasses->mass(DSpart->ksqd(6)) =  to<double>(mySLHA.at("MASS").at(2000005).at(1));
 
     // Neutralinos carry the sign of the eigenvalue, as we need it for NMIX later
-    mspctm->mass(DSpart->kn(1)) =  to<double>(mySLHA.at("MASS").at(1000022).at(1));
-    mspctm->mass(DSpart->kn(2)) =  to<double>(mySLHA.at("MASS").at(1000023).at(1));
-    mspctm->mass(DSpart->kn(3)) =  to<double>(mySLHA.at("MASS").at(1000025).at(1));
-    mspctm->mass(DSpart->kn(4)) =  to<double>(mySLHA.at("MASS").at(1000035).at(1));
+    pmasses->mass(DSpart->kn(1)) =  to<double>(mySLHA.at("MASS").at(1000022).at(1));
+    pmasses->mass(DSpart->kn(2)) =  to<double>(mySLHA.at("MASS").at(1000023).at(1));
+    pmasses->mass(DSpart->kn(3)) =  to<double>(mySLHA.at("MASS").at(1000025).at(1));
+    pmasses->mass(DSpart->kn(4)) =  to<double>(mySLHA.at("MASS").at(1000035).at(1));
 
     // Charginos
-    mspctm->mass(DSpart->kcha(1)) =  to<double>(mySLHA.at("MASS").at(1000024).at(1));
-    mspctm->mass(DSpart->kcha(2)) =  to<double>(mySLHA.at("MASS").at(1000037).at(1));
+    pmasses->mass(DSpart->kcha(1)) =  to<double>(mySLHA.at("MASS").at(1000024).at(1));
+    pmasses->mass(DSpart->kcha(2)) =  to<double>(mySLHA.at("MASS").at(1000037).at(1));
 
     // Gluino
-    mspctm->mass(DSparticle_code("~g")) =  to<double>(mySLHA.at("MASS").at(1000021).at(1));
+    pmasses->mass(DSparticle_code("~g")) =  to<double>(mySLHA.at("MASS").at(1000021).at(1));
 
     // Gravitino (not implemented in DarkSUSY)
-    // mspctm->mass(DSpart->k...) =  to<double>(mySLHA.at("MASS").at(1000039).at(1));
+    // pmasses->mass(DSpart->k...) =  to<double>(mySLHA.at("MASS").at(1000039).at(1));
 
     // Block NMIX
     for (int i=1; i<=4; i++)
@@ -503,13 +505,13 @@ BE_NAMESPACE
     {
       for (int j=1; j<=4; j++)
       {
-        if (mspctm->mass(DSpart->kn(i)) < 0)
+        if (pmasses->mass(DSpart->kn(i)) < 0)
         {
           mssmmixing->neunmx(i,j).im = mssmmixing->neunmx(i,j).re;
           mssmmixing->neunmx(i,j).re = 0.0;
         }
       }
-      mspctm->mass(DSpart->kn(i)) = std::abs(mspctm->mass(DSpart->kn(i)));
+      pmasses->mass(DSpart->kn(i)) = std::abs(pmasses->mass(DSpart->kn(i)));
     }
 
     // Block UMIX
@@ -612,10 +614,10 @@ BE_NAMESPACE
     // which just fudge a few widths...but we won't do that, because we can get real decay widths from DecayBit.
 
     // Set up Higgs widths.  h1_0 is the lightest CP even Higgs in GAMBIT (opposite to DS).
-    widths->width(DSparticle_code("h0_1")) = myDecays.at(std::pair<int,int>(25,0)).width_in_GeV;
-    widths->width(DSparticle_code("h0_2")) = myDecays.at(std::pair<int,int>(35,0)).width_in_GeV;
-    widths->width(DSparticle_code("A0"))   = myDecays.at(std::pair<int,int>(36,0)).width_in_GeV;
-    widths->width(DSparticle_code("H+"))   = myDecays.at(std::pair<int,int>(37,0)).width_in_GeV;
+    pwidths->width(DSparticle_code("h0_1")) = myDecays.at(std::pair<int,int>(25,0)).width_in_GeV;
+    pwidths->width(DSparticle_code("h0_2")) = myDecays.at(std::pair<int,int>(35,0)).width_in_GeV;
+    pwidths->width(DSparticle_code("A0"))   = myDecays.at(std::pair<int,int>(36,0)).width_in_GeV;
+    pwidths->width(DSparticle_code("H+"))   = myDecays.at(std::pair<int,int>(37,0)).width_in_GeV;
 
     // Set up Higgs partial widths.
     const static std::vector< std::vector<str> > charged_channels = DS_charged_h_decay_channels();
@@ -629,76 +631,76 @@ BE_NAMESPACE
     for (unsigned int i = 0; i < neutral_channels.size(); i++)
     {
       const std::vector<str>& chan = neutral_channels[i];
-      mssmwidths->hdwidth(i+1,2) = (h01.has_channel(chan) ? widths->width(DSparticle_code("h0_1")) * h01.BF(chan) : 0.0);
-      mssmwidths->hdwidth(i+1,1) = (h02.has_channel(chan) ? widths->width(DSparticle_code("h0_2")) * h02.BF(chan) : 0.0);
-      mssmwidths->hdwidth(i+1,3) = (A0.has_channel(chan)  ? widths->width(DSparticle_code("A0"))   * A0.BF(chan)  : 0.0);
+      mssmwidths->hdwidth(i+1,2) = (h01.has_channel(chan) ? pwidths->width(DSparticle_code("h0_1")) * h01.BF(chan) : 0.0);
+      mssmwidths->hdwidth(i+1,1) = (h02.has_channel(chan) ? pwidths->width(DSparticle_code("h0_2")) * h02.BF(chan) : 0.0);
+      mssmwidths->hdwidth(i+1,3) = (A0.has_channel(chan)  ? pwidths->width(DSparticle_code("A0"))   * A0.BF(chan)  : 0.0);
       if (neutral_channels[i] == sister_chan)
       { // Add the missing W-H+ contributions.
-        mssmwidths->hdwidth(i+1,2) = (h01.has_channel(missing_chan) ? widths->width(DSparticle_code("h0_1")) * h01.BF(missing_chan) : 0.0);
-        mssmwidths->hdwidth(i+1,1) = (h02.has_channel(missing_chan) ? widths->width(DSparticle_code("h0_2")) * h02.BF(missing_chan) : 0.0);
-        mssmwidths->hdwidth(i+1,3) = (A0.has_channel(missing_chan)  ? widths->width(DSparticle_code("A0"))   * A0.BF(missing_chan)  : 0.0);
+        mssmwidths->hdwidth(i+1,2) = (h01.has_channel(missing_chan) ? pwidths->width(DSparticle_code("h0_1")) * h01.BF(missing_chan) : 0.0);
+        mssmwidths->hdwidth(i+1,1) = (h02.has_channel(missing_chan) ? pwidths->width(DSparticle_code("h0_2")) * h02.BF(missing_chan) : 0.0);
+        mssmwidths->hdwidth(i+1,3) = (A0.has_channel(missing_chan)  ? pwidths->width(DSparticle_code("A0"))   * A0.BF(missing_chan)  : 0.0);
       }
     }
     for (unsigned int i = 0; i < charged_channels.size(); i++)
     {
-      mssmwidths->hdwidth(i+1,4) = (Hpm.has_channel(charged_channels[i]) ? widths->width(DSparticle_code("H+")) * Hpm.BF(charged_channels[i]) : 0.0);
+      mssmwidths->hdwidth(i+1,4) = (Hpm.has_channel(charged_channels[i]) ? pwidths->width(DSparticle_code("H+")) * Hpm.BF(charged_channels[i]) : 0.0);
     }
 
     // Set up SM fermion widths
-    widths->width(DSparticle_code("t"))    = myDecays.at(std::pair<int,int>(6,1)).width_in_GeV;
-    widths->width(DSparticle_code("mu-"))  = myDecays.at(std::pair<int,int>(13,1)).width_in_GeV;
-    widths->width(DSparticle_code("tau-")) = myDecays.at(std::pair<int,int>(15,1)).width_in_GeV;
+    pwidths->width(DSparticle_code("t"))    = myDecays.at(std::pair<int,int>(6,1)).width_in_GeV;
+    pwidths->width(DSparticle_code("mu-"))  = myDecays.at(std::pair<int,int>(13,1)).width_in_GeV;
+    pwidths->width(DSparticle_code("tau-")) = myDecays.at(std::pair<int,int>(15,1)).width_in_GeV;
 
     // Set up SM gauge boson widths
-    widths->width(DSparticle_code("W+")) = myDecays.at(std::pair<int,int>(24,0)).width_in_GeV;
-    widths->width(DSparticle_code("Z0")) = myDecays.at(std::pair<int,int>(23,0)).width_in_GeV;
+    pwidths->width(DSparticle_code("W+")) = myDecays.at(std::pair<int,int>(24,0)).width_in_GeV;
+    pwidths->width(DSparticle_code("Z0")) = myDecays.at(std::pair<int,int>(23,0)).width_in_GeV;
 
     // Set up sfermion widths
-    widths->width(DSpart->ksnu(1)) = myDecays.at(std::pair<int,int>(1000012,0)).width_in_GeV;
-    widths->width(DSpart->ksnu(2)) = myDecays.at(std::pair<int,int>(1000014,0)).width_in_GeV;
-    widths->width(DSpart->ksnu(3)) = myDecays.at(std::pair<int,int>(1000016,0)).width_in_GeV;
-    widths->width(DSpart->ksl(1))  = myDecays.at(std::pair<int,int>(1000011,0)).width_in_GeV;
-    widths->width(DSpart->ksl(2))  = myDecays.at(std::pair<int,int>(1000013,0)).width_in_GeV;
-    widths->width(DSpart->ksl(3))  = myDecays.at(std::pair<int,int>(1000015,0)).width_in_GeV;
-    widths->width(DSpart->ksl(4))  = myDecays.at(std::pair<int,int>(2000011,0)).width_in_GeV;
-    widths->width(DSpart->ksl(5))  = myDecays.at(std::pair<int,int>(2000013,0)).width_in_GeV;
-    widths->width(DSpart->ksl(6))  = myDecays.at(std::pair<int,int>(2000015,0)).width_in_GeV;
-    widths->width(DSpart->ksqu(1)) = myDecays.at(std::pair<int,int>(1000002,0)).width_in_GeV;
-    widths->width(DSpart->ksqu(2)) = myDecays.at(std::pair<int,int>(1000004,0)).width_in_GeV;
-    widths->width(DSpart->ksqu(3)) = myDecays.at(std::pair<int,int>(1000006,0)).width_in_GeV;
-    widths->width(DSpart->ksqu(4)) = myDecays.at(std::pair<int,int>(2000002,0)).width_in_GeV;
-    widths->width(DSpart->ksqu(5)) = myDecays.at(std::pair<int,int>(2000004,0)).width_in_GeV;
-    widths->width(DSpart->ksqu(6)) = myDecays.at(std::pair<int,int>(2000006,0)).width_in_GeV;
-    widths->width(DSpart->ksqd(1)) = myDecays.at(std::pair<int,int>(1000001,0)).width_in_GeV;
-    widths->width(DSpart->ksqd(2)) = myDecays.at(std::pair<int,int>(1000003,0)).width_in_GeV;
-    widths->width(DSpart->ksqd(3)) = myDecays.at(std::pair<int,int>(1000005,0)).width_in_GeV;
-    widths->width(DSpart->ksqd(4)) = myDecays.at(std::pair<int,int>(2000001,0)).width_in_GeV;
-    widths->width(DSpart->ksqd(5)) = myDecays.at(std::pair<int,int>(2000003,0)).width_in_GeV;
-    widths->width(DSpart->ksqd(6)) = myDecays.at(std::pair<int,int>(2000005,0)).width_in_GeV;
+    pwidths->width(DSpart->ksnu(1)) = myDecays.at(std::pair<int,int>(1000012,0)).width_in_GeV;
+    pwidths->width(DSpart->ksnu(2)) = myDecays.at(std::pair<int,int>(1000014,0)).width_in_GeV;
+    pwidths->width(DSpart->ksnu(3)) = myDecays.at(std::pair<int,int>(1000016,0)).width_in_GeV;
+    pwidths->width(DSpart->ksl(1))  = myDecays.at(std::pair<int,int>(1000011,0)).width_in_GeV;
+    pwidths->width(DSpart->ksl(2))  = myDecays.at(std::pair<int,int>(1000013,0)).width_in_GeV;
+    pwidths->width(DSpart->ksl(3))  = myDecays.at(std::pair<int,int>(1000015,0)).width_in_GeV;
+    pwidths->width(DSpart->ksl(4))  = myDecays.at(std::pair<int,int>(2000011,0)).width_in_GeV;
+    pwidths->width(DSpart->ksl(5))  = myDecays.at(std::pair<int,int>(2000013,0)).width_in_GeV;
+    pwidths->width(DSpart->ksl(6))  = myDecays.at(std::pair<int,int>(2000015,0)).width_in_GeV;
+    pwidths->width(DSpart->ksqu(1)) = myDecays.at(std::pair<int,int>(1000002,0)).width_in_GeV;
+    pwidths->width(DSpart->ksqu(2)) = myDecays.at(std::pair<int,int>(1000004,0)).width_in_GeV;
+    pwidths->width(DSpart->ksqu(3)) = myDecays.at(std::pair<int,int>(1000006,0)).width_in_GeV;
+    pwidths->width(DSpart->ksqu(4)) = myDecays.at(std::pair<int,int>(2000002,0)).width_in_GeV;
+    pwidths->width(DSpart->ksqu(5)) = myDecays.at(std::pair<int,int>(2000004,0)).width_in_GeV;
+    pwidths->width(DSpart->ksqu(6)) = myDecays.at(std::pair<int,int>(2000006,0)).width_in_GeV;
+    pwidths->width(DSpart->ksqd(1)) = myDecays.at(std::pair<int,int>(1000001,0)).width_in_GeV;
+    pwidths->width(DSpart->ksqd(2)) = myDecays.at(std::pair<int,int>(1000003,0)).width_in_GeV;
+    pwidths->width(DSpart->ksqd(3)) = myDecays.at(std::pair<int,int>(1000005,0)).width_in_GeV;
+    pwidths->width(DSpart->ksqd(4)) = myDecays.at(std::pair<int,int>(2000001,0)).width_in_GeV;
+    pwidths->width(DSpart->ksqd(5)) = myDecays.at(std::pair<int,int>(2000003,0)).width_in_GeV;
+    pwidths->width(DSpart->ksqd(6)) = myDecays.at(std::pair<int,int>(2000005,0)).width_in_GeV;
 
     // Set up neutralino widths.  Note that the zero neutralino width is taken care of below.
-    widths->width(DSpart->kn(1)) = myDecays.at(std::pair<int,int>(1000022,0)).width_in_GeV;
-    widths->width(DSpart->kn(2)) = myDecays.at(std::pair<int,int>(1000023,0)).width_in_GeV;
-    widths->width(DSpart->kn(3)) = myDecays.at(std::pair<int,int>(1000025,0)).width_in_GeV;
-    widths->width(DSpart->kn(4)) = myDecays.at(std::pair<int,int>(1000035,0)).width_in_GeV;
+    pwidths->width(DSpart->kn(1)) = myDecays.at(std::pair<int,int>(1000022,0)).width_in_GeV;
+    pwidths->width(DSpart->kn(2)) = myDecays.at(std::pair<int,int>(1000023,0)).width_in_GeV;
+    pwidths->width(DSpart->kn(3)) = myDecays.at(std::pair<int,int>(1000025,0)).width_in_GeV;
+    pwidths->width(DSpart->kn(4)) = myDecays.at(std::pair<int,int>(1000035,0)).width_in_GeV;
 
     // Set up chargino widths.
-    widths->width(DSpart->kcha(1)) = myDecays.at(std::pair<int,int>(1000024,0)).width_in_GeV;
-    widths->width(DSpart->kcha(2)) = myDecays.at(std::pair<int,int>(1000037,0)).width_in_GeV;
+    pwidths->width(DSpart->kcha(1)) = myDecays.at(std::pair<int,int>(1000024,0)).width_in_GeV;
+    pwidths->width(DSpart->kcha(2)) = myDecays.at(std::pair<int,int>(1000037,0)).width_in_GeV;
 
     // Gluino width.
-    widths->width(DSparticle_code("~g")) = myDecays.at(std::pair<int,int>(1000021,0)).width_in_GeV;
+    pwidths->width(DSparticle_code("~g")) = myDecays.at(std::pair<int,int>(1000021,0)).width_in_GeV;
 
     // Gravitino width (not implemented in DS).
-    //widths->width(DSparticle_code("~G")) = ;
+    //pwidths->width(DSparticle_code("~G")) = ;
 
     // Integration routines in DS cannot handle very small sparticle widths.
     // Make sure not to fall below minimal value in order to avoid numerical issues.
     for (std::size_t i=21; i<49; i++)
     {
-      if (widths->width(i)<min_DS_rwidth *mspctm->mass(i))
+      if (pwidths->width(i)<min_DS_rwidth *pmasses->mass(i))
       {
-        widths->width(i)=min_DS_rwidth *mspctm->mass(i);
+        pwidths->width(i)=min_DS_rwidth *pmasses->mass(i);
       }
     }
 

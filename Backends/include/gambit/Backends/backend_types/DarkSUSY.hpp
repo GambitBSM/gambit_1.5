@@ -15,7 +15,7 @@
 ///
 ///  \author Torsten Bringmann
 ///          (torsten.bringmann@fys.uio.no)
-///  \date 2013 Jun, 2014 Mar, 2015 Apr
+///  \date 2013 Jun, 2014 Mar, 2015 Apr, 2018 Sep
 ///
 ///  \author Pat Scott
 ///          (patscott@physics.mcgill.ca)
@@ -44,22 +44,45 @@ namespace Gambit
       Finteger intch, intyield;
   };
 
+// this one only exists in DS 5
   struct DS_MSPCTM
   {
       Farray<Fdouble,0,50> mass, runnmann;
       Fdouble mu2gev,md2gev,ms2gev,mcmc,mbmb,mtmt;
   };
 
+// this one only exists in DS 6
+  struct DS_SMQUARKMASSES
+  {
+      Fdouble mu2gev,md2gev,ms2gev,mcmc,mbmb,mtmt;
+      Fstring<5> roption;
+  };
+// this one only exists in DS 6
+  struct DS_PMASSES
+  {
+      Farray<Fdouble,0,255> mass;
+  };
+
+
+// this one only exists in DS 5
   struct DS_WIDTHS
   {
       Farray<Fdouble,0,50> width;
   };
+
+// this one only exists in DS 6
+  struct DS_PWIDTHS
+  {
+      Farray<Fdouble,0,255> width;
+  };
+
 
   struct DS_INTDOF
   {
       Farray<Finteger,0,50> kdof;
   };
 
+// this one only exists in DS 5
   struct DS_PACODES
   {
       Farray<Finteger,1,2> kse,ksmu,kstau,ksu,ksd,ksc,kss,kst,ksb;
@@ -68,6 +91,16 @@ namespace Gambit
       Farray<Finteger,1,3> knu,kl,kqu,kqd;
       Farray<Finteger,1,6> ksnu,ksl,ksqu,ksqd;
 //      character*8 pname(0:numpartspecies)
+  };
+
+// this one only exists in DS 6+
+  struct DS_PACODES_mssm
+  {
+      Farray<Finteger,1,3> knu,kl,kqu,kqd;
+      Farray<Finteger,1,2> kse,ksmu,kstau,ksu,ksd,ksc,kss,kst,ksb;
+      Farray<Finteger,1,4> kn;
+      Farray<Finteger,1,2> kcha;
+      Farray<Finteger,1,6> ksnu,ksl,ksqu,ksqd;
   };
 
     struct DS_MSSMIUSEFUL
@@ -81,6 +114,8 @@ namespace Gambit
         Farray< Fdouble_complex,1,50,1,50,1,50 > gl;
         Farray< Fdouble_complex,1,50,1,50,1,50 > gr;
     };
+
+// this one only exists in DS 5
     struct DS_SMRUSEFUL
     {
         Fdouble s2thw;
@@ -93,6 +128,21 @@ namespace Gambit
         Fdouble swmz;
         Fdouble cwmz;
     };
+// this one only exists in DS 6
+    struct DS_SMCOUPLING
+    {
+        Fdouble alph3mz;
+        Fdouble gfermi;
+        Fdouble alphem;
+        Fdouble s2thw;
+        Fdouble sinthw;
+        Fdouble costhw;
+        Fdouble s2wmz;
+        Fdouble swmz;
+        Fdouble cwmz;
+    };
+
+// this one only exists in DS 5
     struct DS_SMCUSEFUL
     {
         Fstring<5> roption;
