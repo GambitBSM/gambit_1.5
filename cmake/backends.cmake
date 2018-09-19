@@ -887,6 +887,7 @@ set(dl "https://github.com/lesgourg/class_public/archive/v${ver}.tar.gz")
 set(md5 "e6eb0fd721bb1098e642f5d1970501ce")
 set(dir "${PROJECT_SOURCE_DIR}/Backends/installed/${name}/${ver}")
 set(CLASS_DLL_DIR "build")
+set(__CLASSDIR__ "${dir}/")
 set(CLASS_IFLAG "-I")
 if(NOT ditched_${name}_${ver})
   ExternalProject_Add(${name}_${ver}
