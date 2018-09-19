@@ -2883,13 +2883,13 @@ namespace Gambit
 
     //////////// Vector DM /////////////////////
 
-    /// Add the decay of Higgs to vectors for the VectorDM model (see arXiv:1512.06458v4)
-    void VectorDM_Higgs_decays (DecayTable::Entry& result)
+    /// Add the decay of Higgs to vectors for the VectorSingletDM_Z2 model (see arXiv:1512.06458v4)
+    void VectorSingletDM_Z2_Higgs_decays (DecayTable::Entry& result)
     {
-      using namespace Pipes::VectorDM_Higgs_decays;
+      using namespace Pipes::VectorSingletDM_Z2_Higgs_decays;
 
       // Get the spectrum information
-      const Spectrum& spec = *Dep::VectorDM_spectrum;
+      const Spectrum& spec = *Dep::VectorSingletDM_Z2_spectrum;
       const SubSpectrum& he = spec.get_HE();
       double mass = spec.get(Par::Pole_Mass,"V");
       double lambda = he.get(Par::dimensionless,"lambda_hV");
@@ -2925,13 +2925,13 @@ namespace Gambit
 
     //////////// Majorana fermion DM /////////////////////
 
-    /// Add the decay of Higgs to Majorana fermions for the MajoranaDM model (see arXiv:1512.06458v4)
-    void MajoranaDM_Higgs_decays (DecayTable::Entry& result)
+    /// Add the decay of Higgs to Majorana fermions for the MajoranaSingletDM_Z2 model (see arXiv:1512.06458v4)
+    void MajoranaSingletDM_Z2_Higgs_decays (DecayTable::Entry& result)
     {
-      using namespace Pipes::MajoranaDM_Higgs_decays;
+      using namespace Pipes::MajoranaSingletDM_Z2_Higgs_decays;
 
       // Get the spectrum information
-      const Spectrum& spec = *Dep::MajoranaDM_spectrum;
+      const Spectrum& spec = *Dep::MajoranaSingletDM_Z2_spectrum;
       const SubSpectrum& he = spec.get_HE();
       double mass = spec.get(Par::Pole_Mass,"X");
       double lambda = he.get(Par::dimensionless,"lX");
@@ -2968,13 +2968,13 @@ namespace Gambit
 
     //////////// Dirac fermion DM /////////////////////
 
-    /// Add the decay of Higgs to Dirac fermions for the DiracDM model (see arXiv:1512.06458v4)
-    void DiracDM_Higgs_decays (DecayTable::Entry& result)
+    /// Add the decay of Higgs to Dirac fermions for the DiracSingletDM_Z2 model (see arXiv:1512.06458v4)
+    void DiracSingletDM_Z2_Higgs_decays (DecayTable::Entry& result)
     {
-      using namespace Pipes::DiracDM_Higgs_decays;
+      using namespace Pipes::DiracSingletDM_Z2_Higgs_decays;
 
       // Get the spectrum information
-      const Spectrum& spec = *Dep::DiracDM_spectrum;
+      const Spectrum& spec = *Dep::DiracSingletDM_Z2_spectrum;
       const SubSpectrum& he = spec.get_HE();
       double mass = spec.get(Par::Pole_Mass,"F");
       double lambda = he.get(Par::dimensionless,"lF");
@@ -3428,33 +3428,33 @@ namespace Gambit
        BF = Dep::Higgs_decay_rates->BF("S", "S");
     }
 
-    void VectorDM_inv_Higgs_BF(double& BF)
+    void VectorSingletDM_Z2_inv_Higgs_BF(double& BF)
     {
        /**
           @brief Branching fraction for Higgs into vector singlet DM
           @param BF \f$\textrm{BR}(h\to V V)\f$
        */
-       using namespace Pipes::VectorDM_inv_Higgs_BF;
+       using namespace Pipes::VectorSingletDM_Z2_inv_Higgs_BF;
        BF = Dep::Higgs_decay_rates->BF("V", "V");
     }
 
-    void MajoranaDM_inv_Higgs_BF(double& BF)
+    void MajoranaSingletDM_Z2_inv_Higgs_BF(double& BF)
     {
        /**
           @brief Branching fraction for Higgs into Majorana singlet DM
           @param BF \f$\textrm{BR}(h\to X X)\f$
        */
-       using namespace Pipes::MajoranaDM_inv_Higgs_BF;
+       using namespace Pipes::MajoranaSingletDM_Z2_inv_Higgs_BF;
        BF = Dep::Higgs_decay_rates->BF("X", "X");
     }
 
-    void DiracDM_inv_Higgs_BF(double& BF)
+    void DiracSingletDM_Z2_inv_Higgs_BF(double& BF)
     {
        /**
           @brief Branching fraction for Higgs into Dirac singlet DM
           @param BF \f$\textrm{BR}(h\to F F)\f$
        */
-       using namespace Pipes::DiracDM_inv_Higgs_BF;
+       using namespace Pipes::DiracSingletDM_Z2_inv_Higgs_BF;
        BF = Dep::Higgs_decay_rates->BF("F", "F");
     }
 

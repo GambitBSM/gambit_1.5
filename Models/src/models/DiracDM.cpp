@@ -1,7 +1,7 @@
 ///  GAMBIT: Global and Modular BSM Inference Tool
 ///  *********************************************
 ///
-///  DiracDM model source file. 
+///  DiracSingletDM_Z2 model source file.
 ///
 ///  *********************************************
 ///
@@ -32,14 +32,14 @@
 #include "gambit/Logs/logger.hpp"
 #include "gambit/Utils/util_functions.hpp"
 
-#include "gambit/Models/models/DiracDM.hpp"
+#include "gambit/Models/models/DiracSingletDM_Z2.hpp"
 #include "gambit/Elements/spectrum.hpp"
 
 using namespace Gambit::Utils;
 
-#define MODEL DiracDM_sps
-#define PARENT DiracDM
-    void MODEL_NAMESPACE::DiracDM_sps_to_DiracDM (const ModelParameters &myparams, ModelParameters &parentparams)
+#define MODEL DiracSingletDM_Z2_sps
+#define PARENT DiracSingletDM_Z2
+    void MODEL_NAMESPACE::DiracSingletDM_Z2_sps_to_DiracSingletDM_Z2 (const ModelParameters &myparams, ModelParameters &parentparams)
     {
         double mF = myparams["mF"];
         double lF_s = myparams["lF_s"];

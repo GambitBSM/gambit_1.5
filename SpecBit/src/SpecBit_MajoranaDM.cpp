@@ -5,7 +5,7 @@
 ///  Functions of module SpecBit
 ///
 ///  SpecBit module functions related to the
-///  MajoranaDM model
+///  MajoranaSingletDM_Z2 model
 ///
 ///  *********************************************
 ///
@@ -36,7 +36,7 @@
 #include "gambit/SpecBit/SpecBit_helpers.hpp"
 #include "gambit/SpecBit/QedQcdWrapper.hpp"
 #include "gambit/Models/SimpleSpectra/SMHiggsSimpleSpec.hpp"
-#include "gambit/Models/SimpleSpectra/MajoranaDMSimpleSpec.hpp"
+#include "gambit/Models/SimpleSpectra/MajoranaSingletDM_Z2SimpleSpec.hpp"
 
 // Switch for debug mode
 //#define SPECBIT_DEBUG
@@ -48,14 +48,14 @@ namespace Gambit
   {
     using namespace LogTags;
 
-    /// Get a (simple) Spectrum object wrapper for the MajoranaDM model
-    void get_MajoranaDM_spectrum(Spectrum& result)
+    /// Get a (simple) Spectrum object wrapper for the MajoranaSingletDM_Z2 model
+    void get_MajoranaSingletDM_Z2_spectrum(Spectrum& result)
     {
-      namespace myPipe = Pipes::get_MajoranaDM_spectrum;
+      namespace myPipe = Pipes::get_MajoranaSingletDM_Z2_spectrum;
       const SMInputs& sminputs = *myPipe::Dep::SMINPUTS;
 
       // Initialise an object to carry the Majorana plus Higgs sector information
-      Models::MajoranaDMModel majoranamodel;
+      Models::MajoranaSingletDM_Z2Model majoranamodel;
 
       // quantities needed to fill container spectrum, intermediate calculations
       double alpha_em = 1.0 / sminputs.alphainv;
@@ -72,20 +72,20 @@ namespace Gambit
       majoranamodel.HiggsVEV        = vev;
       // majoranamodel.LambdaH   = GF*pow(mh,2)/pow(2,0.5) ;
 
-      // MajoranaDM sector
+      // MajoranaSingletDM_Z2 sector
       majoranamodel.MajoranaPoleMass = *myPipe::Param.at("mX");
       majoranamodel.MajoranaLambda   = *myPipe::Param.at("lX");
       majoranamodel.MajoranaXi       = *myPipe::Param.at("xi");
-      
+
       // Invalidate point if the EFT validity constraint is not satisfied
       // See https://arxiv.org/abs/1512.06458v4 for more details
       if (myPipe::runOptions->getValueOrDef<bool>(false,"impose_EFT_validity"))
       {
         // Different EFT validity constraints for different model parametrisations.
-        if (myPipe::ModelInUse("MajoranaDM_sps"))
+        if (myPipe::ModelInUse("MajoranaSingletDM_Z2_sps"))
         {
           // Invadlidate point if the EFT validity constraint is not satisfied,
-          // for each coupling independently. 
+          // for each coupling independently.
           double gs = majoranamodel.MajoranaLambda * std::cos(majoranamodel.MajoranaXi);
           double gp = majoranamodel.MajoranaLambda * std::sin(majoranamodel.MajoranaXi);
 
@@ -108,7 +108,7 @@ namespace Gambit
           }
         }
         else
-        {        
+        {
           // Parametrisation with lambda/Lambda, xi
           if (majoranamodel.MajoranaLambda >= (4*pi)/(2*majoranamodel.MajoranaPoleMass))
           {
@@ -141,7 +141,7 @@ namespace Gambit
       majoranamodel.Yd[2] = sqrt2v * sminputs.mBmB;
 
       // Create a SubSpectrum object to wrap the EW sector information
-      Models::MajoranaDMSimpleSpec majoranaspec(majoranamodel);
+      Models::MajoranaSingletDM_Z2SimpleSpec majoranaspec(majoranamodel);
 
       // Retrieve any mass cuts
       static const Spectrum::mc_info mass_cut = myPipe::runOptions->getValueOrDef<Spectrum::mc_info>(Spectrum::mc_info(), "mass_cut");
@@ -153,19 +153,19 @@ namespace Gambit
     }
 
     // print spectrum out, stripped down copy from MSSM version with variable names changed
-    void fill_map_from_MajoranaDMspectrum(std::map<std::string,double>&, const Spectrum&);
+    void fill_map_from_MajoranaSingletDM_Z2spectrum(std::map<std::string,double>&, const Spectrum&);
 
-    void get_MajoranaDM_spectrum_as_map (std::map<std::string,double>& specmap)
+    void get_MajoranaSingletDM_Z2_spectrum_as_map (std::map<std::string,double>& specmap)
     {
-      namespace myPipe = Pipes::get_MajoranaDM_spectrum_as_map;
-      const Spectrum& majoranadmspec(*myPipe::Dep::MajoranaDM_spectrum);
-      fill_map_from_MajoranaDMspectrum(specmap, majoranadmspec);
+      namespace myPipe = Pipes::get_MajoranaSingletDM_Z2_spectrum_as_map;
+      const Spectrum& majoranadmspec(*myPipe::Dep::MajoranaSingletDM_Z2_spectrum);
+      fill_map_from_MajoranaSingletDM_Z2spectrum(specmap, majoranadmspec);
     }
 
-    void fill_map_from_MajoranaDMspectrum(std::map<std::string,double>& specmap, const Spectrum& majoranadmspec)
+    void fill_map_from_MajoranaSingletDM_Z2spectrum(std::map<std::string,double>& specmap, const Spectrum& majoranadmspec)
     {
       /// Add everything... use spectrum contents routines to automate task
-      static const SpectrumContents::MajoranaDM contents;
+      static const SpectrumContents::MajoranaSingletDM_Z2 contents;
       static const std::vector<SpectrumParameter> required_parameters = contents.all_parameters();
 
       for(std::vector<SpectrumParameter>::const_iterator it = required_parameters.begin();
@@ -209,7 +209,7 @@ namespace Gambit
          {
            // ERROR
            std::ostringstream errmsg;
-           errmsg << "Error, invalid parameter received while converting MajoranaDMspectrum to map of strings! This should no be possible if the spectrum content verification routines were working correctly; they must be buggy, please report this.";
+           errmsg << "Error, invalid parameter received while converting MajoranaSingletDM_Z2spectrum to map of strings! This should no be possible if the spectrum content verification routines were working correctly; they must be buggy, please report this.";
            errmsg << "Problematic parameter was: "<< tag <<", " << name << ", shape="<< shape;
            utils_error().forced_throw(LOCAL_INFO,errmsg.str());
          }

@@ -1,7 +1,7 @@
 ///  GAMBIT: Global and Modular BSM Inference Tool
 ///  *********************************************
 ///
-///  VectorDM model source file. 
+///  VectorSingletDM_Z2 model source file.
 ///
 ///  *********************************************
 ///
@@ -24,13 +24,13 @@
 #include "gambit/Logs/logger.hpp"
 #include "gambit/Utils/util_functions.hpp"
 
-#include "gambit/Models/models/VectorDM.hpp"
+#include "gambit/Models/models/VectorSingletDM_Z2.hpp"
 #include "gambit/Elements/spectrum.hpp"
 
 using namespace Gambit::Utils;
 
 // Need to define MODEL and PARENT in order for helper macros to work correctly
-#define MODEL VectorDM
+#define MODEL VectorSingletDM_Z2
 
   // No translation function is required for the model
 

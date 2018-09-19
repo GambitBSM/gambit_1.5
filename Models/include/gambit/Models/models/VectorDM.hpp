@@ -15,10 +15,10 @@
 //
 //  *********************************************
 
-#ifndef __VectorDM_hpp__
-#define __VectorDM_hpp__
+#ifndef __VectorSingletDM_Z2_hpp__
+#define __VectorSingletDM_Z2_hpp__
 
-#define MODEL VectorDM
+#define MODEL VectorSingletDM_Z2
   START_MODEL
 
   DEFINEPARS(mV, lambda_hV)

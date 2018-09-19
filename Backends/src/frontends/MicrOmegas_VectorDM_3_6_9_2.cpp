@@ -2,7 +2,7 @@
 //   *********************************************
 ///  \file
 ///
-///  Frontend for MicrOmegas VectorDM 3.6.9.2 backend
+///  Frontend for MicrOmegas VectorSingletDM_Z2 3.6.9.2 backend
 ///
 ///  *********************************************
 ///
@@ -14,7 +14,7 @@
 ///  *********************************************
 
 #include "gambit/Backends/frontend_macros.hpp"
-#include "gambit/Backends/frontends/MicrOmegas_VectorDM_3_6_9_2.hpp"
+#include "gambit/Backends/frontends/MicrOmegas_VectorSingletDM_Z2_3_6_9_2.hpp"
 #include <unistd.h>
 
 // Convenience functions (definitions)
@@ -42,7 +42,7 @@ BE_INI_FUNCTION
      int error;
      char cdmName[10];
 
-     const Spectrum& spec = *Dep::VectorDM_spectrum;
+     const Spectrum& spec = *Dep::VectorSingletDM_Z2_spectrum;
      const SubSpectrum& he = spec.get_HE();
      const SubSpectrum& le = spec.get_LE();
      const SMInputs& sminputs = spec.get_SMInputs();
@@ -55,7 +55,7 @@ BE_INI_FUNCTION
      *VZdecay = VZdecayOpt;
      *VWdecay = VWdecayOpt;
 
-     logger() << LogTags::debug << "Initializing MicrOmegas VectorDM with ";
+     logger() << LogTags::debug << "Initializing MicrOmegas VectorSingletDM_Z2 with ";
      logger() << "VWdecay: " << VWdecay << " VZdecay: " << VZdecay << EOM;
 
      // Uncomment below to force MicrOmegas to do calculations in unitary gauge

@@ -21,19 +21,19 @@
 //
 //  *********************************************
 
-#ifndef __DiracDM_hpp__
-#define __DiracDM_hpp__
+#ifndef __DiracSingletDM_Z2_hpp__
+#define __DiracSingletDM_Z2_hpp__
 
-#define MODEL DiracDM
+#define MODEL DiracSingletDM_Z2
   START_MODEL
   DEFINEPARS(mF, lF, xi)
 #undef MODEL
 
-#define MODEL DiracDM_sps
-#define PARENT DiracDM
+#define MODEL DiracSingletDM_Z2_sps
+#define PARENT DiracSingletDM_Z2
   START_MODEL
   DEFINEPARS(mF, lF_s, lF_ps)
-  INTERPRET_AS_PARENT_FUNCTION(DiracDM_sps_to_DiracDM)
+  INTERPRET_AS_PARENT_FUNCTION(DiracSingletDM_Z2_sps_to_DiracSingletDM_Z2)
 #undef PARENT
 #undef MODEL
 

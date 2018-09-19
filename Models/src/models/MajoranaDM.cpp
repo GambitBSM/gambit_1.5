@@ -1,7 +1,7 @@
 ///  GAMBIT: Global and Modular BSM Inference Tool
 ///  *********************************************
 ///
-///  MajoranaDM model source file. 
+///  MajoranaSingletDM_Z2 model source file.
 ///
 ///  *********************************************
 ///
@@ -32,14 +32,14 @@
 #include "gambit/Logs/logger.hpp"
 #include "gambit/Utils/util_functions.hpp"
 
-#include "gambit/Models/models/MajoranaDM.hpp"
+#include "gambit/Models/models/MajoranaSingletDM_Z2.hpp"
 #include "gambit/Elements/spectrum.hpp"
 
 using namespace Gambit::Utils;
 
-#define MODEL MajoranaDM_sps
-#define PARENT MajoranaDM
-    void MODEL_NAMESPACE::MajoranaDM_sps_to_MajoranaDM (const ModelParameters &myparams, ModelParameters &parentparams)
+#define MODEL MajoranaSingletDM_Z2_sps
+#define PARENT MajoranaSingletDM_Z2
+    void MODEL_NAMESPACE::MajoranaSingletDM_Z2_sps_to_MajoranaSingletDM_Z2 (const ModelParameters &myparams, ModelParameters &parentparams)
     {
         double mX = myparams["mX"];
         double lX_s = myparams["lX_s"];

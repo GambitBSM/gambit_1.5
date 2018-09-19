@@ -143,25 +143,25 @@ START_MODULE
     ALLOW_MODELS(SingletDMZ3)
     #undef FUNCTION
 
-    #define FUNCTION VectorDM_Higgs_decays
+    #define FUNCTION VectorSingletDM_Z2_Higgs_decays
     START_FUNCTION(DecayTable::Entry)
     DEPENDENCY(Reference_SM_Higgs_decay_rates, DecayTable::Entry)
-    DEPENDENCY(VectorDM_spectrum, Spectrum)
-    ALLOW_MODELS(VectorDM)
+    DEPENDENCY(VectorSingletDM_Z2_spectrum, Spectrum)
+    ALLOW_MODELS(VectorSingletDM_Z2)
     #undef FUNCTION
 
-    #define FUNCTION MajoranaDM_Higgs_decays
+    #define FUNCTION MajoranaSingletDM_Z2_Higgs_decays
     START_FUNCTION(DecayTable::Entry)
     DEPENDENCY(Reference_SM_Higgs_decay_rates, DecayTable::Entry)
-    DEPENDENCY(MajoranaDM_spectrum, Spectrum)
-    ALLOW_MODELS(MajoranaDM)
+    DEPENDENCY(MajoranaSingletDM_Z2_spectrum, Spectrum)
+    ALLOW_MODELS(MajoranaSingletDM_Z2)
     #undef FUNCTION
 
-    #define FUNCTION DiracDM_Higgs_decays
+    #define FUNCTION DiracSingletDM_Z2_Higgs_decays
     START_FUNCTION(DecayTable::Entry)
     DEPENDENCY(Reference_SM_Higgs_decay_rates, DecayTable::Entry)
-    DEPENDENCY(DiracDM_spectrum, Spectrum)
-    ALLOW_MODELS(DiracDM)
+    DEPENDENCY(DiracSingletDM_Z2_spectrum, Spectrum)
+    ALLOW_MODELS(DiracSingletDM_Z2)
     #undef FUNCTION
 
     #define FUNCTION MSSM_h0_1_decays
@@ -859,22 +859,22 @@ START_MODULE
     ALLOW_MODELS(SingletDM, SingletDMZ3)
     #undef FUNCTION
 
-    #define FUNCTION VectorDM_inv_Higgs_BF
+    #define FUNCTION VectorSingletDM_Z2_inv_Higgs_BF
     START_FUNCTION(double)
     DEPENDENCY(Higgs_decay_rates, DecayTable::Entry)
-    ALLOW_MODELS(VectorDM)
+    ALLOW_MODELS(VectorSingletDM_Z2)
     #undef FUNCTION
 
-    #define FUNCTION MajoranaDM_inv_Higgs_BF
+    #define FUNCTION MajoranaSingletDM_Z2_inv_Higgs_BF
     START_FUNCTION(double)
     DEPENDENCY(Higgs_decay_rates, DecayTable::Entry)
-    ALLOW_MODELS(MajoranaDM)
+    ALLOW_MODELS(MajoranaSingletDM_Z2)
     #undef FUNCTION
 
-    #define FUNCTION DiracDM_inv_Higgs_BF
+    #define FUNCTION DiracSingletDM_Z2_inv_Higgs_BF
     START_FUNCTION(double)
     DEPENDENCY(Higgs_decay_rates, DecayTable::Entry)
-    ALLOW_MODELS(DiracDM)
+    ALLOW_MODELS(DiracSingletDM_Z2)
     #undef FUNCTION
 
     #define FUNCTION MSSM_inv_Higgs_BF

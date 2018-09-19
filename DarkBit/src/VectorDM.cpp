@@ -2,7 +2,7 @@
 //   *********************************************
 ///  \file
 ///
-///  Implementation of VectorDM routines.
+///  Implementation of VectorSingletDM_Z2 routines.
 ///
 ///  *********************************************
 ///
@@ -32,12 +32,12 @@ namespace Gambit
 
   namespace DarkBit
   {
-  
-    class VectorDM
+
+    class VectorSingletDM_Z2
     {
       public:
-        /// Initialize VectorDM object (branching ratios etc)
-        VectorDM(
+        /// Initialize VectorSingletDM_Z2 object (branching ratios etc)
+        VectorSingletDM_Z2(
             TH_ProcessCatalog* const catalog,
             double gammaH,
             double vev,
@@ -53,7 +53,7 @@ namespace Gambit
           mZ0  = catalog->getParticleProperty("Z0").mass;
           mW   = catalog->getParticleProperty("W+").mass;
         };
-        ~VectorDM() {}
+        ~VectorSingletDM_Z2() {}
 
         /// Helper function (Breit-Wigner)
         double Dh2 (double s)
@@ -75,7 +75,7 @@ namespace Gambit
           if ( sqrt_s < 90 )
           {
             piped_invalid_point.request(
-                "VectorDM sigmav called with sqrt_s < 90 GeV.");
+                "VectorSingletDM_Z2 sigmav called with sqrt_s < 90 GeV.");
             return 0;
           }
 
@@ -170,14 +170,14 @@ namespace Gambit
           double xG = Gamma_mh*mh/s;
           double beta =  (s - 2*pow(mh,2))/sqrt((s - 4*pow(mh,2))*(s - 4*pow(mass,2)));
           double vH = sqrt(1-4*xH);
-         
+
           return GeV2tocm3s1*(vH*pow(lambda,2)*pow(s,-3)*pow(xV,-4)*pow(pow(xG,2) + pow(-1 + xH,2),-1)*
-          ((4*lambda*s*xV*(1 - 6*xV + xH*(2 + 4*xV))*pow(v0,2)*(1 + xH + pow(xG,2) - 2*pow(xH,2))*(xV - 4*xH*xV + pow(xH,2)) + 
-          4*(1 + 4*xV*(-1 + 3*xV))*pow(s,2)*(xV - 4*xH*xV + pow(xH,2))*(pow(xG,2) + pow(1 + 2*xH,2))*pow(xV,2) + 
-          pow(lambda,2)*pow(v0,4)*(pow(xG,2) + pow(-1 + xH,2))*(xV + (1 + 12*xV*(-1 + 4*xV))*pow(xH,2) + (4 - 32*xV)*pow(xH,3) + 6*pow(xH,4) - 64*xH*pow(xV,3) + 
+          ((4*lambda*s*xV*(1 - 6*xV + xH*(2 + 4*xV))*pow(v0,2)*(1 + xH + pow(xG,2) - 2*pow(xH,2))*(xV - 4*xH*xV + pow(xH,2)) +
+          4*(1 + 4*xV*(-1 + 3*xV))*pow(s,2)*(xV - 4*xH*xV + pow(xH,2))*(pow(xG,2) + pow(1 + 2*xH,2))*pow(xV,2) +
+          pow(lambda,2)*pow(v0,4)*(pow(xG,2) + pow(-1 + xH,2))*(xV + (1 + 12*xV*(-1 + 4*xV))*pow(xH,2) + (4 - 32*xV)*pow(xH,3) + 6*pow(xH,4) - 64*xH*pow(xV,3) +
           96*pow(xV,4)))*pow(xV - 4*xH*xV + pow(xH,2),-1) - 8*beta*lambda*(-1 + 4*xH)*atanh(1/beta)*pow(v0,2)*pow(1 - 2*xH,-1)*
-          (2*s*(-1 + 2*xH)*xV*((-1 + xH)*(1 + 2*xH) - pow(xG,2))*(2*xV*pow(-1 + xH,2) + pow(xH,2) - 4*(1 + 2*xH)*pow(xV,2) + 24*pow(xV,3)) - 
-          lambda*pow(v0,2)*(pow(xG,2) + pow(-1 + xH,2))*(-8*xV*pow(xH,3) + 3*pow(xH,4) - pow(xH,2)*(1 + 8*pow(xV,2)) + 4*xH*(xV + 8*pow(xV,3)) - 
+          (2*s*(-1 + 2*xH)*xV*((-1 + xH)*(1 + 2*xH) - pow(xG,2))*(2*xV*pow(-1 + xH,2) + pow(xH,2) - 4*(1 + 2*xH)*pow(xV,2) + 24*pow(xV,3)) -
+          lambda*pow(v0,2)*(pow(xG,2) + pow(-1 + xH,2))*(-8*xV*pow(xH,3) + 3*pow(xH,4) - pow(xH,2)*(1 + 8*pow(xV,2)) + 4*xH*(xV + 8*pow(xV,3)) -
           2*xV*(1 - 2*xV + 24*pow(xV,3))))*pow(1 - 6*xH + 8*pow(xH,2),-1)))/(2304*M_PI);
         }
 
@@ -185,16 +185,16 @@ namespace Gambit
         double Gamma_mh, mh, v0, alpha_s, mb, mc, mtau, mt, mZ0, mW;
     };
 
-    void DarkMatter_ID_VectorDM(std::string& result) { result = "V"; }
+    void DarkMatter_ID_VectorSingletDM_Z2(std::string& result) { result = "V"; }
 
-    /// Direct detection couplings for the VectorDM model.
-    void DD_couplings_VectorDM(DM_nucleon_couplings &result)
+    /// Direct detection couplings for the VectorSingletDM_Z2 model.
+    void DD_couplings_VectorSingletDM_Z2(DM_nucleon_couplings &result)
     {
-      using namespace Pipes::DD_couplings_VectorDM;
-      const Spectrum& spec = *Dep::VectorDM_spectrum;
+      using namespace Pipes::DD_couplings_VectorSingletDM_Z2;
+      const Spectrum& spec = *Dep::VectorSingletDM_Z2_spectrum;
       const SubSpectrum& he = spec.get_HE();
       double mass = spec.get(Par::Pole_Mass,"V");
-      double lambda = he.get(Par::dimensionless,"lambda_hV");    
+      double lambda = he.get(Par::dimensionless,"lambda_hV");
       double mh = spec.get(Par::Pole_Mass,"h0_1");
 
       // Expressions taken from Cline et al. (2013, PRD 88:055025, arXiv:1306.4710)
@@ -212,19 +212,19 @@ namespace Gambit
       logger() << " gpa = " << result.gpa << std::endl;
       logger() << " gna = " << result.gna << EOM;
 
-    } // function DD_couplings_VectorDM
+    } // function DD_couplings_VectorSingletDM_Z2
 
-    /// Set up process catalog for the VectorDM model.
-    void TH_ProcessCatalog_VectorDM(DarkBit::TH_ProcessCatalog &result)
+    /// Set up process catalog for the VectorSingletDM_Z2 model.
+    void TH_ProcessCatalog_VectorSingletDM_Z2(DarkBit::TH_ProcessCatalog &result)
     {
-      using namespace Pipes::TH_ProcessCatalog_VectorDM;
+      using namespace Pipes::TH_ProcessCatalog_VectorSingletDM_Z2;
       using std::vector;
       using std::string;
 
       // Initialize empty catalog
       TH_ProcessCatalog catalog;
       TH_Process process_ann("V", "V");
-      
+
       // Explicitly state that Vector DM is self-conjugate
       process_ann.isSelfConj = true;
 
@@ -235,22 +235,22 @@ namespace Gambit
       // Convenience macros
       #define getSMmass(Name, spinX2)                                           \
        catalog.particleProperties.insert(std::pair<string, TH_ParticleProperty> \
-       (Name , TH_ParticleProperty(SM.get(Par::Pole_Mass,Name), spinX2)));    
+       (Name , TH_ParticleProperty(SM.get(Par::Pole_Mass,Name), spinX2)));
       #define addParticle(Name, Mass, spinX2)                                   \
        catalog.particleProperties.insert(std::pair<string, TH_ParticleProperty> \
        (Name , TH_ParticleProperty(Mass, spinX2)));
 
       // Import Spectrum objects
-      const Spectrum& spec = *Dep::VectorDM_spectrum;
+      const Spectrum& spec = *Dep::VectorSingletDM_Z2_spectrum;
       const SubSpectrum& he = spec.get_HE();
       const SubSpectrum& SM = spec.get_LE();
       const SMInputs& SMI   = spec.get_SMInputs();
-      
+
       // Import couplings
       double lambda = he.get(Par::dimensionless,"lambda_hV");
       double v = he.get(Par::mass1,"vev");
       double alpha_s = SMI.alphaS;      // alpha_s(mZ)^MSbar
-  
+
       // Get SM pole masses
       getSMmass("e-_1",     1)
       getSMmass("e+_1",     1)
@@ -329,8 +329,8 @@ namespace Gambit
       ImportDecays("h0_1", catalog, importedDecays, tbl, minBranching,
           daFunk::vec<std::string>("Z0", "W+", "W-", "e+_2", "e-_2", "e+_3", "e-_3"));
 
-      // Instantiate new VectorDM object
-      auto vectorDM = boost::make_shared<VectorDM>(&catalog, gammaH, v, alpha_s);
+      // Instantiate new VectorSingletDM_Z2 object
+      auto vectorDM = boost::make_shared<VectorSingletDM_Z2>(&catalog, gammaH, v, alpha_s);
 
       // Populate annihilation channel list and add thresholds to threshold
       // list.
@@ -353,7 +353,7 @@ namespace Gambit
           if ( mV*2 > mtot_final*0.5 )
           {
             daFunk::Funk kinematicFunction = daFunk::funcM(vectorDM,
-                &VectorDM::sv, channel[i], lambda, mV, daFunk::var("v"));
+                &VectorSingletDM_Z2::sv, channel[i], lambda, mV, daFunk::var("v"));
             TH_Channel new_channel(
                 daFunk::vec<string>(p1[i], p2[i]), kinematicFunction
                 );
@@ -378,6 +378,6 @@ namespace Gambit
 
       result = catalog;
 
-    } // function TH_ProcessCatalog_VectorDM
+    } // function TH_ProcessCatalog_VectorSingletDM_Z2
   }
 }

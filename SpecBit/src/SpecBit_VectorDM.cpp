@@ -5,7 +5,7 @@
 ///  Functions of module SpecBit
 ///
 ///  SpecBit module functions related to the
-///  VectorDM model.
+///  VectorSingletDM_Z2 model.
 ///
 ///  *********************************************
 ///
@@ -36,7 +36,7 @@
 #include "gambit/SpecBit/SpecBit_helpers.hpp"
 #include "gambit/SpecBit/QedQcdWrapper.hpp"
 #include "gambit/Models/SimpleSpectra/SMHiggsSimpleSpec.hpp"
-#include "gambit/Models/SimpleSpectra/VectorDMSimpleSpec.hpp"
+#include "gambit/Models/SimpleSpectra/VectorSingletDM_Z2SimpleSpec.hpp"
 
 // Switch for debug mode
 //#define SPECBIT_DEBUG
@@ -49,14 +49,14 @@ namespace Gambit
     using namespace LogTags;
     using namespace flexiblesusy;
 
-    /// Get a (simple) Spectrum object wrapper for the VectorDM model
-    void get_VectorDM_spectrum(Spectrum& result)
+    /// Get a (simple) Spectrum object wrapper for the VectorSingletDM_Z2 model
+    void get_VectorSingletDM_Z2_spectrum(Spectrum& result)
     {
-      namespace myPipe = Pipes::get_VectorDM_spectrum;
+      namespace myPipe = Pipes::get_VectorSingletDM_Z2_spectrum;
       const SMInputs& sminputs = *myPipe::Dep::SMINPUTS;
 
       // Initialise an object to carry the Singlet plus Higgs sector information
-      Models::VectorDMModel vectormodel;
+      Models::VectorSingletDM_Z2Model vectormodel;
 
       // quantities needed to fill container spectrum, intermediate calculations
       double alpha_em = 1.0 / sminputs.alphainv;
@@ -73,7 +73,7 @@ namespace Gambit
       vectormodel.HiggsVEV        = vev;
       //vectormodel.LambdaH   = GF*pow(mh,2)/pow(2,0.5) ;
 
-      // VectorDM sector
+      // VectorSingletDM_Z2 sector
       vectormodel.VectorPoleMass = *myPipe::Param.at("mV");
       vectormodel.VectorLambda   = *myPipe::Param.at("lambda_hV");
 
@@ -111,7 +111,7 @@ namespace Gambit
       vectormodel.Yd[2] = sqrt2v * sminputs.mBmB;
 
       // Create a SubSpectrum object to wrap the EW sector information
-      Models::VectorDMSimpleSpec vectorspec(vectormodel);
+      Models::VectorSingletDM_Z2SimpleSpec vectorspec(vectormodel);
 
       // Retrieve any mass cuts
       static const Spectrum::mc_info mass_cut = myPipe::runOptions->getValueOrDef<Spectrum::mc_info>(Spectrum::mc_info(), "mass_cut");
@@ -123,19 +123,19 @@ namespace Gambit
     }
 
     // print spectrum out, stripped down copy from MSSM version with variable names changed
-    void fill_map_from_VectorDMspectrum(std::map<std::string,double>&, const Spectrum&);
+    void fill_map_from_VectorSingletDM_Z2spectrum(std::map<std::string,double>&, const Spectrum&);
 
-    void get_VectorDM_spectrum_as_map (std::map<std::string,double>& specmap)
+    void get_VectorSingletDM_Z2_spectrum_as_map (std::map<std::string,double>& specmap)
     {
-      namespace myPipe = Pipes::get_VectorDM_spectrum_as_map;
-      const Spectrum& vectordmspec(*myPipe::Dep::VectorDM_spectrum);
-      fill_map_from_VectorDMspectrum(specmap, vectordmspec);
+      namespace myPipe = Pipes::get_VectorSingletDM_Z2_spectrum_as_map;
+      const Spectrum& vectordmspec(*myPipe::Dep::VectorSingletDM_Z2_spectrum);
+      fill_map_from_VectorSingletDM_Z2spectrum(specmap, vectordmspec);
     }
 
-    void fill_map_from_VectorDMspectrum(std::map<std::string,double>& specmap, const Spectrum& vectordmspec)
+    void fill_map_from_VectorSingletDM_Z2spectrum(std::map<std::string,double>& specmap, const Spectrum& vectordmspec)
     {
       /// Add everything... use spectrum contents routines to automate task
-      static const SpectrumContents::VectorDM contents;
+      static const SpectrumContents::VectorSingletDM_Z2 contents;
       static const std::vector<SpectrumParameter> required_parameters = contents.all_parameters();
 
       for(std::vector<SpectrumParameter>::const_iterator it = required_parameters.begin();
@@ -179,7 +179,7 @@ namespace Gambit
          {
            // ERROR
            std::ostringstream errmsg;
-           errmsg << "Error, invalid parameter received while converting VectorDMspectrum to map of strings! This should no be possible if the spectrum content verification routines were working correctly; they must be buggy, please report this.";
+           errmsg << "Error, invalid parameter received while converting VectorSingletDM_Z2spectrum to map of strings! This should no be possible if the spectrum content verification routines were working correctly; they must be buggy, please report this.";
            errmsg << "Problematic parameter was: "<< tag <<", " << name << ", shape="<< shape;
            utils_error().forced_throw(LOCAL_INFO,errmsg.str());
          }

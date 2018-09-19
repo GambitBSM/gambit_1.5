@@ -2,7 +2,7 @@
 //   *********************************************
 ///  \file
 ///
-///  Frontend for MicrOmegas MajoranaDM 3.6.9.2 backend
+///  Frontend for MicrOmegas MajoranaSingletDM_Z2 3.6.9.2 backend
 ///
 ///  *********************************************
 ///
@@ -15,7 +15,7 @@
 ///  *********************************************
 
 #include "gambit/Backends/frontend_macros.hpp"
-#include "gambit/Backends/frontends/MicrOmegas_MajoranaDM_3_6_9_2.hpp"
+#include "gambit/Backends/frontends/MicrOmegas_MajoranaSingletDM_Z2_3_6_9_2.hpp"
 #include <unistd.h>
 
 // Convenience functions (definitions)
@@ -43,7 +43,7 @@ BE_INI_FUNCTION
      int error;
      char cdmName[10];
 
-     const Spectrum& spec = *Dep::MajoranaDM_spectrum;
+     const Spectrum& spec = *Dep::MajoranaSingletDM_Z2_spectrum;
      const SubSpectrum& he = spec.get_HE();
      const SubSpectrum& le = spec.get_LE();
      const SMInputs& sminputs = spec.get_SMInputs();
@@ -56,7 +56,7 @@ BE_INI_FUNCTION
      *VZdecay = VZdecayOpt;
      *VWdecay = VWdecayOpt;
 
-     logger() << LogTags::debug << "Initializing MicrOmegas MajoranaDM with ";
+     logger() << LogTags::debug << "Initializing MicrOmegas MajoranaSingletDM_Z2 with ";
      logger() << "VWdecay: " << VWdecay << " VZdecay: " << VZdecay << EOM;
 
      // Uncomment below to force MicrOmegas to do calculations in unitary gauge
