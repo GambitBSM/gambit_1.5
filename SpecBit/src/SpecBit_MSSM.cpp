@@ -1663,15 +1663,6 @@ namespace Gambit
       fill_map_from_subspectrum<SpectrumContents::MSSM>(specmap, mssmspec.get_HE());
       add_extra_MSSM_parameter_combinations(specmap, mssmspec.get_HE());
     }
-    void get_MSSMslha_spectrum_as_map (std::map<std::string,double>& specmap)
-    {
-      namespace myPipe = Pipes::get_MSSMslha_spectrum_as_map;
-      const Spectrum& mssmspec(*myPipe::Dep::MSSM_spectrum);
-      fill_map_from_subspectrum<SpectrumContents::SM_slha>  (specmap, mssmspec.get_LE());
-      fill_map_from_subspectrum<SpectrumContents::MSSM>(specmap, mssmspec.get_HE());
-      add_extra_MSSM_parameter_combinations(specmap, mssmspec.get_HE());
-    }
-
     void get_unimproved_MSSM_spectrum_as_map (std::map<std::string,double>& specmap)
     {
       namespace myPipe = Pipes::get_unimproved_MSSM_spectrum_as_map;
