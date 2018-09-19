@@ -231,7 +231,7 @@ START_MODULE
  START_CAPABILITY
    #define FUNCTION AlterBBN_fill
    START_FUNCTION(relicparam)
-   //ALLOW_MODELS(LCDM)
+   ALLOW_MODELS(LCDM)
    BACKEND_OPTION( (AlterBBN, 2.0), (libbbn) )
    BACKEND_REQ(Init_cosmomodel, (libbbn), void, (relicparam*))
    #undef FUNCTION
@@ -243,11 +243,21 @@ START_MODULE
     START_FUNCTION(double)
     ALLOW_MODELS(LCDM)
     DEPENDENCY(AlterBBN_modelinfo, relicparam)
+    //BACKEND_REQ(nucl_err, (libbbn), int, (const relicparam*,(std::array<double,27>)&, (std::array<std::array<double,27>,27>)&))
+    BACKEND_REQ(nucl_err, (libbbn), int, (const relicparam*,double*,double*))
     #undef FUNCTION
   #undef CAPABILITY
 
-
-
+ // #define CAPABILITY BBN_LogLike
+ //   START_CAPABILITY
+ //   #define FUNCTION compute_BBN_LogLike
+ //   START_FUNCTION(double)
+ //   DEPENDENCY(AlterBBN_modelinfo, relicparam)
+ //   BACKEND_REQ(bbn_excluded_chi2, (libbbn), int, (const relicparam*))
+ //   ALLOW_MODELS(LCDM)
+//
+// //   #undef FUNCTION
+ // #undef CAPABILITY
 #undef MODULE
 
 #endif /* defined __CosmoBit_rollcall_hpp__ */

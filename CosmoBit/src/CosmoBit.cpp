@@ -1724,6 +1724,12 @@ namespace Gambit
       BEreq::Init_cosmomodel(&result);
 
       //result.eta0=runOptions->getValueOrDef<double>(6.11*pow(10,-10),"eta");
+      //std::cout << "omega b value:" << *Param["omega_b"] << std::endl;
+      //std::cout << "eta0 val: " << result.eta0 << std::endl;
+      result.eta0=*Param["omega_b"]*274.*pow(10,-10); 
+      result.dNnu=runOptions->getValue<double>("dNnu");
+      result.failsafe = 3;                            // set precision parameters
+      result.err = 3;
 
     }
 
@@ -1732,11 +1738,42 @@ namespace Gambit
     {
       using namespace Pipes::compute_BBN_abundances;
 
+      int NNUC =26;
+      int debug = -1;
+      double eta,H2_H,He3_H,Yp,Li7_H,Li6_H,Be7_H;
+      double sigma_H2_H,sigma_He3_H,sigma_Yp,sigma_Li7_H,sigma_Li6_H,sigma_Be7_H;
+      double ratioH [27];
+      double cov_ratioH [27][27];
+
       relicparam const& paramrelic = *Dep::AlterBBN_modelinfo;
       
-      std::cout << "Neff passed val (expected 3.046):" << (paramrelic.Nnu) << std::endl;
-      //std::cout << "wimp passed val (expected" << std::setw(10)<<"0):" << std::setw(13) <<(paramrelic.wimp) << std::endl;
-      //std::cout << "eta0 passed val (expected" << std::setw(10)<<"6.1e-10):" << std::setw(13) <<(paramrelic.eta0) << std::endl;
+      int nucl_err_res = BEreq::nucl_err(&paramrelic,byVal(ratioH), byVal(cov_ratioH[0]));
+
+      if(nucl_err_res){
+         std::cout << "Called nucl_err" << std::endl;
+
+        if(debug){
+          H2_H=ratioH[3];Yp=ratioH[6];Li7_H=ratioH[8];Be7_H=ratioH[9];He3_H=ratioH[5];Li6_H=ratioH[7];
+          sigma_H2_H=sqrt(cov_ratioH[3][3]);sigma_Yp=sqrt(cov_ratioH[6][6]);sigma_Li7_H=sqrt(cov_ratioH[8][8]);sigma_Be7_H=sqrt(cov_ratioH[9][9]);sigma_He3_H=sqrt(cov_ratioH[5][5]);sigma_Li6_H=sqrt(cov_ratioH[7][7]);
+  
+            printf("\t Yp\t\t H2/H\t\t He3/H\t\t Li7/H\t\t Li6/H\t\t Be7/H\n");
+            printf("value:\t %.3e\t %.3e\t %.3e\t %.3e\t %.3e\t %.3e\n",Yp,H2_H,He3_H,Li7_H,Li6_H,Be7_H); 
+            printf(" +/- :\t %.3e\t %.3e\t %.3e\t %.3e\t %.3e\t %.3e\n\n",sigma_Yp,sigma_H2_H,sigma_He3_H,sigma_Li7_H,sigma_Li6_H,sigma_Be7_H);
+  
+            double corr_ratioH[NNUC+1][NNUC+1];
+            for(int ie=1;ie<=NNUC;ie++) for(int je=1;je<=NNUC;je++) corr_ratioH[ie][je]=cov_ratioH[ie][je]/sqrt(cov_ratioH[ie][ie]*cov_ratioH[je][je]);
+            printf("Correlation matrix:\n");
+            printf("\t Yp\t\t H2/H\t\t He3/H\t\t Li7/H\t\t Li6/H\t\t Be7/H\n");
+            printf("Yp\t %f\t %f\t %f\t %f\t %f\t %f\n",corr_ratioH[6][6],corr_ratioH[6][3],corr_ratioH[6][5],corr_ratioH[6][8],corr_ratioH[6][7],corr_ratioH[6][9]);
+            printf("H2/H\t %f\t %f\t %f\t %f\t %f\t %f\n",corr_ratioH[3][6],corr_ratioH[3][3],corr_ratioH[3][5],corr_ratioH[3][8],corr_ratioH[3][7],corr_ratioH[3][9]);
+            printf("He3/H\t %f\t %f\t %f\t %f\t %f\t %f\n",corr_ratioH[5][6],corr_ratioH[5][3],corr_ratioH[5][5],corr_ratioH[5][8],corr_ratioH[5][7],corr_ratioH[5][9]);
+            printf("Li7/H\t %f\t %f\t %f\t %f\t %f\t %f\n",corr_ratioH[8][6],corr_ratioH[8][3],corr_ratioH[8][5],corr_ratioH[8][8],corr_ratioH[8][7],corr_ratioH[8][9]);
+            printf("Li6/H\t %f\t %f\t %f\t %f\t %f\t %f\n",corr_ratioH[7][6],corr_ratioH[7][3],corr_ratioH[7][5],corr_ratioH[7][8],corr_ratioH[7][7],corr_ratioH[7][9]);
+          printf("Be7/H\t %f\t %f\t %f\t %f\t %f\t %f\n\n",corr_ratioH[9][6],corr_ratioH[9][3],corr_ratioH[9][5],corr_ratioH[9][8],corr_ratioH[9][7],corr_ratioH[9][9]);
+        }
+      }
+      else std::cout <<" Call nucl_err failed" << std::endl; // TODO: throw proper error msg
+     
 
       result = 1.;
     }

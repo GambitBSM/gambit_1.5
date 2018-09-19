@@ -22,10 +22,16 @@
 #define VERSION 2.0
 #define SAFE_VERSION 2_0
 
+#define NNUC 26
+
 LOAD_LIBRARY
 
 
 BE_FUNCTION(Init_cosmomodel, void, (relicparam*), "Init_cosmomodel", "Init_cosmomodel")
+//BE_FUNCTION(nucl_err, int, (const relicparam*, std::array<double,27>, std::array<std::array<double,27>,27> ), "nucl_err", "nucl_err")
+BE_FUNCTION(nucl_err, int, (const relicparam*, double* , double* ), "nucl_err", "nucl_err")
+
+BE_FUNCTION(bbn_excluded_chi2, int, (const relicparam*), "bbn_excluded_chi2", "bbn_excluded_chi2")
 //BE_FUNCTION(nucl, int, (relicparam*, double*), "nucl", "nucl")
 
 //BE_FUNCTION(Init_cosmomodel_param, void, (double, double, double, double, double, double, double, double, const relicparam*), "Init_cosmomodel_param", "Init_cosmomodel_param")
