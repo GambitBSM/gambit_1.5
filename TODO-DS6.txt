@@ -4,6 +4,9 @@ for micrOMEGAs.
 
 1. extend cmake/backends.cmake along the same lines as for mO;
    start with just the MSSM module
+   DONE [JE]. Added DarkSUSY 6.1.1 as a base and then added
+   models. Currently all models in DS 6.1.1 have their separate models
+   in the cmake system, along the same lines as for mO.
 
 2. cp include/gambit/Backends/frontends/DarkSUSY_5_1_3.hpp  -> 6_0;
    again one for each module, start with MSSM 
