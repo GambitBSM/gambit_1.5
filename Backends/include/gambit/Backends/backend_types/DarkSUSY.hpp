@@ -94,7 +94,7 @@ namespace Gambit
   };
 
 // this one only exists in DS 6+
-  struct DS_PACODES_mssm
+  struct DS_PACODES_MSSM
   {
       Farray<Finteger,1,3> knu,kl,kqu,kqd;
       Farray<Finteger,1,2> kse,ksmu,kstau,ksu,ksd,ksc,kss,kst,ksb;

@@ -45,14 +45,13 @@ BE_FUNCTION(dswwidth, void, (int&), "dswwidth_", "dswwidth")
 
 
 // Convenience functions (registration)
+BE_CONV_FUNCTION(DSparticle_code, int, (const str&), "particle_code")
+BE_CONV_FUNCTION(DS_neutral_h_decay_channels, std::vector<std::vector<str>>, (), "get_DS_neutral_h_decay_channels")
+BE_CONV_FUNCTION(DS_charged_h_decay_channels, std::vector<std::vector<str>>, (), "get_DS_charged_h_decay_channels")
 // BE_CONV_FUNCTION(neutrino_yield, double, (const double&, const int&, void*&), "nuyield")
 // BE_CONV_FUNCTION(dsgenericwimp_nusetup, void, (const double(&)[29], const double(&)[29][3], const double(&)[15],
 //                                               const double(&)[3], const double&, const double&), "nuyield_setup")
-// BE_CONV_FUNCTION(DSparticle_code, int, (const str&), "particle_code")
 // BE_CONV_FUNCTION(init_diskless, int, (const SLHAstruct&, const DecayTable&), "initFromSLHAeaAndDecayTable")
-// BE_CONV_FUNCTION(DS_neutral_h_decay_channels, std::vector<std::vector<str>>, (), "get_DS_neutral_h_decay_channels")
-// BE_CONV_FUNCTION(DS_charged_h_decay_channels, std::vector<std::vector<str>>, (), "get_DS_charged_h_decay_channels")
-
 // Functions used by convenience functions
 // BE_FUNCTION(dsntmuonyield, double, (const double&, const double&, const char&, const int&, const int&, const int&, const int&), "dsntmuonyield_", "raw_muonyield")
 

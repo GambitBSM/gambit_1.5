@@ -139,6 +139,7 @@ BE_NAMESPACE
   ///   --> log10Enu log_10(neutrino energy/GeV)
   ///   --> p        p=1 for neutrino yield, p=2 for nubar yield
   ///   --> context  void pointer (ignored)
+
   double neutrino_yield(const double& log10E, const int& ptype, void*&)
   {
     int istat = 0;
@@ -359,7 +360,7 @@ BE_NAMESPACE
     // Set other internal quark masses for DarkSUSY
     dsfindmtmt();                                                                  // top mass at mt
     pmasses->mass(DSpart->kqu(1)) = smquarkmasses->mu2gev;                                 // use 2GeV u mass as proxy for pole
-    mspctm->mass(DSpart->kqd(1)) = smquarkmasses->md2gev;                                 // use 2GeV d mass as proxy for pole
+    pmasses->mass(DSpart->kqd(1)) = smquarkmasses->md2gev;                                 // use 2GeV d mass as proxy for pole
     pmasses->mass(DSpart->kqd(2)) = smquarkmasses->ms2gev;                                 // use 2GeV s mass as proxy for pole
     pmasses->mass(DSpart->kqu(2)) = dsmqpole4loop(DSpart->kqu(2),smquarkmasses->mcmc);     // use DarkSUSY internal routine to get mc pole
     pmasses->mass(DSpart->kqd(3)) = to<double>(mySLHA.at("MASS").at(5).at(1));      // the GAMBIT way to get the bottom pole mass
