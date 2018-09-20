@@ -20,30 +20,17 @@ if ! [ -d $1/castxml ] ; then
   $2 -E make_directory $1 >/dev/null
   # Go to wget/curl if axel is not present
   if command -v axel >/dev/null; then
-    # Go to wget/curl if POST data have been provided
-    if [ -z "$9" ]; then
-      if $2 -E chdir $1 axel $3; then
-        axel_worked=1
-      else
-        $2 -E echo "Axel failed! The link probably redirects to https. Falling back to wget/curl..."
-      fi
+    if $2 -E chdir $1 axel $3; then
+      axel_worked=1
+    else
+      $2 -E echo "Axel failed! The link probably redirects to https. Falling back to wget/curl..."
     fi
   fi
   if [ "${axel_worked}" = "0" ]; then
     if command -v wget >/dev/null; then
-      if [ -z "$9" ]; then
-        wget $3 -O $1/${filename}
-      else
-        wget --post-data "$9" ${10} -O $1/${filename}
-      fi
+      wget $3 -O $1/${filename}
     elif command -v curl >/dev/null; then
-      if [ -z "$9" ]; then
-        $2 -E chdir $1 curl -O $3
-      else
-        $2 -E chdir $1 curl -O -c $cfile --data "$9" ${10}
-        $2 -E chdir $1 curl -O -b $cfile $3
-        $2 -E remove $1/$cfile
-      fi
+      $2 -E chdir $1 curl -O $3
     else
       $2 -E cmake_echo_color --red --bold "ERROR: No axel, no wget, no curl?  What kind of OS are you running anyway?"
       exit 1
