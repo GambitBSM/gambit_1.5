@@ -172,14 +172,3 @@ else()
 endif()
 
 
-# Check for CastXML
-find_program(CASTXML_EXECUTABLE castxml)
-if(CASTXML_EXECUTABLE)
-  message("-- Found CastXML")
-else()
-  message("${BoldRed}   CastXML not found. Excluding BOSSed backends Pythia and gm2calc from GAMBIT configuration.${ColourReset}")
-  message("${Yellow}   CastXML can be installed by running 'apt install castxml' (Linux) or 'brew install castxml' (OSX).${ColourReset}")
-  set (itch "${itch}" "pythia" "gm2calc")
-endif()
-
-

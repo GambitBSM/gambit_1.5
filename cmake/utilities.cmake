@@ -568,11 +568,3 @@ macro(BOSS_backend name backend_version)
     )
   endif()
 endmacro()
-
-
-#      # Check if the castxml binary exists
-#      if(NOT EXISTS "${BOSS_dir}/castxml")
-#        message("${BoldRed}-- Did not find the castxml directory.")
-#      else()
-#        message("${BoldGreen}-- Found the castxml directory.")
-#      endif()
