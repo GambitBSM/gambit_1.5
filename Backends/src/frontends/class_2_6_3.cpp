@@ -12,6 +12,8 @@
 ///          (stoecker@physik.rwth-aachen.de)
 ///  \date 2018 Apr, May
 ///
+///  \author Selim Hotinli
+///  \date 2018 May-June
 ///  *********************************************
 
 #include "gambit/Backends/frontend_macros.hpp"
@@ -102,7 +104,7 @@ BE_NAMESPACE
       invalid_point().raise(error_printout);
     }
     last_success++;
-
+		
     /* If full pk is asked on the set parameter function; this sets ppm->primordial_spec_type
        to be equal to 'gambit_Pk'. Using this flag, we externally fill in the primordial power spectrum.
        (note alterative -without patching class at all- is to use text files and 'cat' command which we
@@ -118,8 +120,8 @@ BE_NAMESPACE
        cosmo.k_ar, cosmo.Pk_S, and cosmo.Pk_T are to be filled
        in the early step of setting the parameters. */
 
-      cosmo.pm.lnk_size = 100;
-	  cosmo.pm.md_size = cosmo.pt.md_size;
+			cosmo.pm.lnk_size = 30;
+	  	cosmo.pm.md_size = cosmo.pt.md_size;
 
       /** - Make room */
       cosmo.pm.lnk = (double *)malloc(cosmo.pm.lnk_size*sizeof(double));
@@ -137,10 +139,6 @@ BE_NAMESPACE
         cosmo.pm.ic_size[index_md] = cosmo.pt.ic_size[index_md];
         cosmo.pm.ic_ic_size[index_md] = (cosmo.pm.ic_size[index_md]*(cosmo.pm.ic_size[index_md]+1))/2;
 
-        // std::cout << "DEBUG: pm.ic_size["<<index_md<<"] =  " << cosmo.pt.ic_size[index_md] << std::endl;
-        // std::cout << "DEBUG: pm.ic_ic_size["<<index_md<<"] = " << cosmo.pm.ic_ic_size[index_md]<<std::endl;
-		// std::cout << "DEBUG: cosmo.pm.lnk_size["<<index_md<<"] =  " << cosmo.pm.lnk_size << std::endl;
-
         cosmo.pm.lnpk[index_md] = (double *)malloc(cosmo.pm.lnk_size*cosmo.pm.ic_ic_size[index_md]*sizeof(double));
         cosmo.pm.ddlnpk[index_md] = (double *)malloc(cosmo.pm.lnk_size*cosmo.pm.ic_ic_size[index_md]*sizeof(double));
         cosmo.pm.is_non_zero[index_md] = (short *)malloc(cosmo.pm.lnk_size*cosmo.pm.ic_ic_size[index_md]*sizeof(short));
@@ -149,18 +147,12 @@ BE_NAMESPACE
       /** - Store values */
       for (int index_k=0; index_k<cosmo.pm.lnk_size; index_k++)
       {
-		// std::cout << "DEBUG: k_array["<<index_k<<"]="<< cosmo.k_ar.at(index_k) <<std::endl;
-        // std::cout << "DEBUG: pks_array["<<index_k<<"]="<< cosmo.Pk_S.at(index_k)<<std::endl;
-        std::cout << "DEBUG: pkt_array["<<index_k<<"]="<< cosmo.Pk_T.at(index_k)<<std::endl;
+				 std::cout <<  cosmo.k_ar.at(index_k) << "," << cosmo.Pk_S.at(index_k)<<std::endl;
 
-        cosmo.pm.lnk[index_k] = std::log( cosmo.k_ar.at(index_k) );
-        cosmo.pm.lnpk[cosmo.pt.index_md_scalars][index_k] = std::log( cosmo.Pk_S.at(index_k) );
-        if (cosmo.pt.has_tensors == _TRUE_)
-          cosmo.pm.lnpk[cosmo.pt.index_md_tensors][index_k] = std::log( cosmo.Pk_T.at(index_k) );
-
-        // std::cout << "DEBUG: pm.lnk["<<index_k<<"]="<<cosmo.pm.lnk[index_k]<<std::endl;
-        // std::cout << "DEBUG: pm.lnpk["<<cosmo.pt.index_md_scalars<<"]["<<index_k<<"]="<<cosmo.pm.lnpk[cosmo.pt.index_md_scalars][index_k]<<std::endl;
-        // std::cout << "DEBUG: pm.lnpk["<<cosmo.pt.index_md_tensors<<"]["<<index_k<<"]="<<cosmo.pm.lnpk[cosmo.pt.index_md_tensors][index_k]<<std::endl;
+         cosmo.pm.lnk[index_k] = std::log( cosmo.k_ar.at(index_k) );
+         cosmo.pm.lnpk[cosmo.pt.index_md_scalars][index_k] = std::log( cosmo.Pk_S.at(index_k) );
+         if (cosmo.pt.has_tensors == _TRUE_)
+           cosmo.pm.lnpk[cosmo.pt.index_md_tensors][index_k] = std::log( cosmo.Pk_T.at(index_k) );
       }
 
       /** - Tell CLASS that there are scalar (and tensor) modes */
@@ -174,6 +166,7 @@ BE_NAMESPACE
       sprintf(error_printout,"Error in class_primordial_initialize\n=>%s\n",cosmo.pm.error_message);
       invalid_point().raise(error_printout);
     }
+		
     last_success++;
     if (class_nonlinear_initialize(&cosmo.pr,&cosmo.ba,&cosmo.th,&cosmo.pt,&cosmo.pm,&cosmo.nl) == _FAILURE_)
     {

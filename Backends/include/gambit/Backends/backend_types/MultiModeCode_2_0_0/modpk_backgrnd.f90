@@ -330,7 +330,7 @@ CONTAINS
              (1.e0_dp+SQRT(1.e0_dp+2.e0_dp/3.e0_dp* M_Pl**2 *&
              dot_product(dVdphi(phi_init_trial), dVdphi(phi_init_trial)) &
              / pot(phi_init_trial)**2.))
-        print*,"h_init",h_init
+        ! print*,"h_init",h_init
         if (h_init<0.0e0_dp) then
           print*, "MODECODE: h_init=", h_init
           call raise%fatal_code(&
@@ -349,7 +349,7 @@ CONTAINS
 
     else
       if (potential_choice==18) then
-        print*,"pot(phi_init_trial)=",pot(phi_init_trial)
+        ! print*,"pot(phi_init_trial)=",pot(phi_init_trial)
         h_init=pot(phi_init_trial)/(6.e0_dp*M_Pl**2) * &
                 (1.e0_dp+SQRT(1.e0_dp+2.e0_dp/3.e0_dp* M_Pl**2 *&
                 dot_product(dVdphi(phi_init_trial), dVdphi(phi_init_trial)) &
@@ -359,7 +359,7 @@ CONTAINS
                -dVdphi(phi_init_trial)/3.e0_dp/h_init/h_init
 
         dphi_init0 = y(size(y)/2+1 : (size(y)))
-        print*,"dphi_init=",dphi_init
+        ! print*,"dphi_init=",dphi_init
 	  else
 
         h_init = getH(phi_init_trial,dphi_init0)

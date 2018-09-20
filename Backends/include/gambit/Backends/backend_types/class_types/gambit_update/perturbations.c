@@ -536,8 +536,6 @@ int perturb_indices_of_perturbs(
   /** Summary: */
 
   /** - define local variables */
-
-  printf("\nDEGUB: we are inside perturb_indices_of_perturbs \n");
 	
   int index_type;
   int index_md;
@@ -551,8 +549,6 @@ int perturb_indices_of_perturbs(
   class_define_index(ppt->index_md_vectors,ppt->has_vectors,index_md,1);
   class_define_index(ppt->index_md_tensors,ppt->has_tensors,index_md,1);
   ppt->md_size = index_md;
-
-  printf("DEBUG: ppt->md_size = %d \n",ppt->md_size);
 
   class_test(index_md == 0,
              ppt->error_message,
@@ -632,8 +628,6 @@ int perturb_indices_of_perturbs(
   class_define_index(ppt->index_tp_perturbed_recombination_delta_temp,ppt->has_perturbed_recombination,index_type,1);
   class_define_index(ppt->index_tp_perturbed_recombination_delta_chi,ppt->has_perturbed_recombination,index_type,1);
 
-  // printf("DEBUG: entering perturb_get_k_list \n");
-
   /** - define k values with perturb_get_k_list() */
 
   class_call(perturb_get_k_list(ppr,
@@ -644,18 +638,13 @@ int perturb_indices_of_perturbs(
              ppt->error_message);
 
   /** - loop over modes. Initialize flags and indices which are specific to each mode. */
-  // printf("DEBUG: ppt->md_size = %d \n",ppt->md_size);
 
   for (index_md = 0; index_md < ppt->md_size; index_md++) {
-	  
-	// printf("DEBUG: we are entering (or not!) into scalars for loop!\n");
-
+		
     /** - (a) scalars */
 
     if (_scalars_) {
 		
-	  // printf("DEBUG: we are inside scalars\n");
-
       /** - --> source flags and indices, for sources that are specific to scalars */
 
       if ((ppt->has_cl_cmb_lensing_potential == _TRUE_) || (ppt->has_cl_lensing_potential)) {
@@ -856,7 +845,6 @@ int perturb_indices_of_perturbs(
                 ppt->error_message);
 
   }
-  // printf("DEBUG: we return with success from perturb_indices_of_perturbs!\n");
   return _SUCCESS_;
 
 }
@@ -1268,8 +1256,6 @@ int perturb_get_k_list(
 
   /** Summary: */
 	
-  // printf("DEBUG: we are inside perturb_get_k_list \n");
-
   class_test(ppr->k_step_transition == 0.,
              ppt->error_message,
              "stop to avoid division by zero");
@@ -1306,8 +1292,6 @@ int perturb_get_k_list(
 
   if (ppt->has_scalars == _TRUE_) {
 	  
-	// printf("DEBUG: ppt->has_scalars == _TRUE_ \n");
-
     /* first value */
     if (pba->sgnK == 0) {
       /* K<0 (flat)  : start close to zero */
@@ -1325,22 +1309,15 @@ int perturb_get_k_list(
       k_min = sqrt((8.-1.e-4)*pba->K);
     }
 
-	// printf("DEBUG: k_min = %e \n",k_min);
-  
     /** - --> find k_max (as well as k_max_cmb[ppt->index_md_scalars], k_max_cl[ppt->index_md_scalars]) */
 
     k_rec = 2. * _PI_ / pth->rs_rec; /* comoving scale corresponding to sound horizon at recombination */
 
-	// printf("DEBUG: k_rec = %e \n",k_rec);
-    // printf("DEBUG: pth->rs_rec = %e \n",pth->rs_rec);
-  
     k_max_cmb[ppt->index_md_scalars] = k_min;
     k_max_cl[ppt->index_md_scalars] = k_min;
     k_max = k_min;
 
     if (ppt->has_cls == _TRUE_) {
-		
-      // printf("DEBUG: ppt->has_cls == _TRUE_ \n");
 		
       /* find k_max_cmb[ppt->index_md_scalars] : */
 
@@ -1351,13 +1328,6 @@ int perturb_get_k_list(
 
       k_max_cmb[ppt->index_md_scalars] = ppr->k_max_tau0_over_l_max*ppt->l_scalar_max
         /pba->conformal_age/pth->angular_rescaling;
-		
-	  // printf("DEBUG: k_max_cmb[%d] = %e\n",ppt->index_md_scalars,k_max_cmb[ppt->index_md_scalars]);
-	  // printf("DEBUG: ppr->k_max_tau0_over_l_max = %e\n",ppr->k_max_tau0_over_l_max);
-	  // printf("DEBUG: ppt->l_scalar_max = %e\n",ppt->l_scalar_max);
-	  // printf("DEBUG: pba->conformal_age = %e\n",pba->conformal_age);
-	  // printf("DEBUG: pth->angular_rescaling (e) = %e\n",pth->angular_rescaling);
-	  // printf("DEBUG: pth->angular_rescaling (d) = %d\n",pth->angular_rescaling);
 		
       k_max_cl[ppt->index_md_scalars] = k_max_cmb[ppt->index_md_scalars];
       k_max     = k_max_cmb[ppt->index_md_scalars];
@@ -1427,8 +1397,6 @@ int perturb_get_k_list(
 
     /* first value */
 
-	// printf("DEBUG: k_max = %e\n",k_max);
-	  
     index_k=0;
     k = k_min;
     ppt->k[ppt->index_md_scalars][index_k] = k;
@@ -1436,14 +1404,8 @@ int perturb_get_k_list(
 
     /* values until k_max_cmb[ppt->index_md_scalars] */
 
-	// printf("DEBUG: k_max_cmb[%d] = %e\n",ppt->index_md_scalars,k_max_cmb[ppt->index_md_scalars]);
-
-    // printf("DEBUG: k (init) = %e\n",k);
-
     while (k < k_max_cmb[ppt->index_md_scalars]) {
 		
-//	  printf("DEBUG: k (first) = %e\n",k);
-
       /* the linear step is not constant, it has a step-like shape,
          centered around the characteristic scale set by the sound
          horizon at recombination (associated to the comoving wavenumber
@@ -1464,31 +1426,15 @@ int perturb_get_k_list(
          stepsize is still fixed by k_step_super, this is just a
          reduction factor. */
 		
-//	  printf("DEBUG: step (init) = %e\n",step);
-//	  printf("DEBUG: ppr->k_step_transition = %e\n",ppr->k_step_transition);
-//	  printf("DEBUG: k_rec = %e\n",k_rec);
-
       scale2 = pow(pba->a_today*pba->H0,2)+fabs(pba->K);
 
       step *= (k*k/scale2+1.)/(k*k/scale2+1./ppr->k_step_super_reduction);
-
-//	  printf("DEBUG: scale2 = %e\n",scale2);
-// 	  printf("DEBUG: ppr->k_step_sub = %e\n",ppr->k_step_sub);
-//	  printf("DEBUG: ppr->k_step_super_reduction = %e\n",ppr->k_step_super_reduction);
-//	  printf("DEBUG: ppr->k_step_super = %e\n",ppr->k_step_super);
-//	  printf("DEBUG: pba->H0 = %e\n",pba->H0);
-
-//	  printf("DEBUG: step = %e\n",step);
-		
-//      printf("DEBUG: step / k = %e\n",step / k);
 
       class_test(step / k < ppr->smallest_allowed_variation,
                  ppt->error_message,
                  "k step =%e < machine precision : leads either to numerical error or infinite loop",
                  step * k_rec);
 		
-//      printf("DEBUG: (passes!) step / k < ppr->smallest_allowed_variation \n",k);
-
       k += step;
 
       class_test(k <= ppt->k[ppt->index_md_scalars][index_k-1],
@@ -1498,8 +1444,6 @@ int perturb_get_k_list(
       ppt->k[ppt->index_md_scalars][index_k] = k;
 
       index_k++;
-	
-//      printf("DEBUG: k (second) = %e\n",k);
 	
     }
 
@@ -1677,8 +1621,6 @@ int perturb_get_k_list(
 
   if (ppt->has_tensors == _TRUE_) {
 	  
-    // printf("DEBUG: ppt->has_tensors == _TRUE_\n");
-
     /* first value */
     if (pba->sgnK == 0) {
       /* K<0 (flat)  : start close to zero */
@@ -1931,7 +1873,6 @@ int perturb_workspace_init(
                            int index_md,
                            struct perturb_workspace * ppw
                            ) {
-  // printf("DEBUG: We are inside the perturb_workspace_init function\n");
   /** Summary: */
 
   /** - define local variables */
@@ -2076,7 +2017,6 @@ int perturb_workspace_init(
     }
 
   }
-  // printf("DEBUG: We are outside the perturb_workspace_init function\n");
   return _SUCCESS_;
 }
 

@@ -29,7 +29,8 @@ enum linear_or_logarithmic {
 enum potential_shape {
   polynomial,
   natural,
-  higgs_inflation
+  higgs_inflation,
+	smash_inflation
 };
 
 /** enum defining which quantity plays the role of a target for evolving inflationary equations */
@@ -293,6 +294,30 @@ struct primordial {
   double phi_stop;       /**< in inflationary module, value of phi at the end of inflation */
 
   //@}
+
+	/** @name - added smash parameters */
+	
+	//@{
+	
+	int max_pot_smash; // need to set it properly
+	int last_index;
+	
+	double phi_init0; // need to set it properly
+	
+	double * rho_array;
+	double * chi_array;
+	double * d0V_array;
+	double * d1V_array;
+	double * d2V_array;
+	double * d3V_array;
+	
+	double * ddd0V_array;
+	double * ddd1V_array;
+	double * ddd2V_array;
+	double * ddd3V_array;
+
+	//@}
+
 
   /** @name - technical parameters */
 

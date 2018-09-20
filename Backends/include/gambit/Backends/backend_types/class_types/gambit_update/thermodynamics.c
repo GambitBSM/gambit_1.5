@@ -435,8 +435,6 @@ int thermodynamics_init(
 
   for (index_tau=0; index_tau < pth->tt_size; index_tau++) {
 
-//	printf("\nDEBUG: call for background_at_tau at index_tau = %d where the pth->tt_size = %e\n",index_tau,pth->tt_size);
-  
     class_call(background_at_tau(pba,
                                  tau_table[index_tau],
                                  pba->normal_info,
@@ -1146,14 +1144,9 @@ int thermodynamics_helium_from_bbn(
      omegab2 deltaN2 YHe
      .....
   */
-  // printf("DEBUG: we are begining to open ppr->sBBN_file = \n");
-  // printf("DEBUG: ppr->sBBN_file = %s\n",ppr->sBBN_file);
 
   class_open(fA,ppr->sBBN_file, "r",pth->error_message);
 	
-  // printf("DEBUG: we managed to open ppr->sBBN_file = %s\n",ppr->sBBN_file);
-  // printf("DEBUG: we are entering the while loop (quite pussibly) for reading the sBBN_file \n");
-
   /* go through each line */
   while (fgets(line,_LINE_LENGTH_MAX_-1,fA) != NULL) {
 
