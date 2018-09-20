@@ -14,7 +14,29 @@ namespace Gambit {
     static const double GeV = 1, MeV = 1e-3, TeV = 1e3;
 
 
-    /// @name Deterministic filtering by cuts
+    /// Use the HEPUtils Event without needing namespace qualification
+    using HEPUtils::Event;
+    /// Use the HEPUtils Particle without needing namespace qualification
+    using HEPUtils::Particle;
+    /// Use the HEPUtils Jet without needing namespace qualification
+    using HEPUtils::Jet;
+    /// Use the HEPUtils P4 four-vector without needing namespace qualification
+    using HEPUtils::P4;
+
+
+    /// Typedef for a vector of Particle pointers
+    typedef std::vector<HEPUtils::Particle*> ParticlePtrs;
+    /// Typedef for a vector of const Particle pointers
+    typedef std::vector<const HEPUtils::Particle*> ConstParticlePtrs;
+
+
+    /// Typedef for a vector of Jet pointers
+    typedef std::vector<HEPUtils::Jet*> JetPtrs;
+    /// Typedef for a vector of const Jet pointers
+    typedef std::vector<const HEPUtils::Jet*> ConstJetPtrs;
+
+
+    /// @name Particle-list filtering by cuts
     //@{
 
     /// Convenience combination of remove_if and erase
@@ -25,10 +47,9 @@ namespace Gambit {
     }
 
     /// In-place filter a supplied particle vector by rejecting those which fail a supplied cut
-    template <typename MOM>
-    inline void ifilter_reject(std::vector<MOM*>& particles,
-                               const std::function<bool(const MOM*)>& rejfn, bool do_delete=true) {
-      iremoveerase(particles, [&](HEPUtils::Particle* p) {
+    inline void ifilter_reject(ParticlePtrs& particles,
+                               const std::function<bool(const Particle*)>& rejfn, bool do_delete=true) {
+      iremoveerase(particles, [&](Particle* p) {
           const bool rm = rejfn(p);
           if (rm && do_delete) delete p;
           return rm;
@@ -36,58 +57,72 @@ namespace Gambit {
     }
 
     /// In-place filter a supplied particle vector by keeping those which pass a supplied cut
-    template <typename MOM>
-    void ifilter_select(std::vector<MOM*>& particles,
-                        const std::function<bool(const MOM*)>& selfn, bool do_delete=true) {
-      ifilter_reject(particles, [&](const MOM* p) { return !selfn(p); });
+    void ifilter_select(ParticlePtrs& particles,
+                        const std::function<bool(const Particle*)>& selfn, bool do_delete=true) {
+      ifilter_reject(particles, [&](const Particle* p) { return !selfn(p); });
     }
 
 
     /// Filter a supplied particle vector by rejecting those which fail a supplied cut
     /// @todo Optimise by only copying those which are selected (filter_select is canonical)
-    template <typename MOM>
-    std::vector<HEPUtils::Particle*> filter_reject(std::vector<MOM*>& particles,
-                                                   const std::function<bool(const MOM*)>& rejfn, bool do_delete=true) {
-      std::vector<MOM*> rtn = particles;
+    ParticlePtrs filter_reject(ParticlePtrs& particles,
+                               const std::function<bool(const Particle*)>& rejfn, bool do_delete=true) {
+      ParticlePtrs rtn = particles;
       ifilter_reject(rtn, rejfn);
       return rtn;
     }
 
     /// Filter a supplied particle vector by keeping those which pass a supplied cut
-    template <typename MOM>
-    std::vector<HEPUtils::Particle*> filter_select(const std::vector<MOM*>& particles,
-                                                   const std::function<bool(const MOM*)>& selfn, bool do_delete=true) {
-      return filter_reject(particles, [&](const MOM* p) { return !selfn(p); });
+    ParticlePtrs filter_select(const ParticlePtrs& particles,
+                               const std::function<bool(const Particle*)>& selfn, bool do_delete=true) {
+      return filter_reject(particles, [&](const Particle* p) { return !selfn(p); });
     }
 
+    //@}
+
+
+
+    /// @name Jet-list filtering by cuts
+    //@{
+
+    /// In-place filter a supplied jet vector by rejecting those which fail a supplied cut
+    inline void ifilter_reject(JetPtrs& jets,
+                               const std::function<bool(const Jet*)>& rejfn, bool do_delete=true) {
+      iremoveerase(jets, [&](Jet* j) {
+          const bool rm = rejfn(j);
+          if (rm && do_delete) delete j;
+          return rm;
+        });
+    }
+
+    /// In-place filter a supplied jet vector by keeping those which pass a supplied cut
+    void ifilter_select(JetPtrs& jets,
+                        const std::function<bool(const Jet*)>& selfn, bool do_delete=true) {
+      ifilter_reject(jets, [&](const Jet* j) { return !selfn(j); });
+    }
+
+
+    /// Filter a supplied particle vector by rejecting those which fail a supplied cut
+    /// @todo Optimise by only copying those which are selected (filter_select is canonical)
+    JetPtrs filter_reject(JetPtrs& jets,
+                          const std::function<bool(const Jet*)>& rejfn, bool do_delete=true) {
+      JetPtrs rtn = jets;
+      ifilter_reject(rtn, rejfn);
+      return rtn;
+    }
+
+    /// Filter a supplied particle vector by keeping those which pass a supplied cut
+    JetPtrs filter_select(const JetPtrs& jets,
+                          const std::function<bool(const Jet*)>& selfn, bool do_delete=true) {
+      return filter_reject(jets, [&](const Jet* j) { return !selfn(j); });
+    }
+
+    //@}
 
 
 
     /// @todo Provide random selection functors from const, 1D map, 2D map, and eff functor
 
-
-
-    // /// In-place filter a supplied particle vector by keeping those which pass a supplied cut
-    // void ifilter_select(std::vector<HEPUtils::Particle*>& particles,
-    //                     const std::function<bool(const HEPUtils::Particle*)>& selfn, bool do_delete=true);
-
-    // /// In-place filter a supplied particle vector by rejecting those which fail a supplied cut
-    // inline void ifilter_reject(std::vector<HEPUtils::Particle*>& particles,
-    //                            const std::function<bool(const HEPUtils::Particle*)>& rejfn, bool do_delete=true) {
-    //   ifilter_select(particles, [](const HEPUtils::Particle* p) { return !rejfn(p); });
-    // }
-
-    // /// Filter a supplied particle vector by keeping those which pass a supplied cut
-    // std::vector<HEPUtils::Particle*> filter_select(const std::vector<HEPUtils::Particle*>& particles,
-    //                                                const std::function<bool(const HEPUtils::Particle*)>& selfn, bool do_delete=true);
-
-    // /// Filter a supplied particle vector by rejecting those which fail a supplied cut
-    // std::vector<HEPUtils::Particle*> filter_reject(std::vector<HEPUtils::Particle*>& particles,
-    //                                                const std::function<bool(const HEPUtils::Particle*)>& rejfn, bool do_delete=true) {
-    //   return filter_select(particles, [](const HEPUtils::Particle* p) { return !rejfn(p); });
-    // }
-
-    //@}
 
 
     /// @name Random booleans sampled from efficiency maps
@@ -217,14 +252,24 @@ namespace Gambit {
     }
 
 
-    // Utility function for returning a collection of same-flavour, oppsosite-sign particle pairs
+    /// Utility function for returning a collection of same-flavour, oppsosite-sign particle pairs
     std::vector<std::vector<HEPUtils::Particle*>> getSFOSpairs(std::vector<HEPUtils::Particle*> particles);
 
-    // Utility function for returning a collection of oppsosite-sign particle pairs
+    /// Utility function for returning a collection of oppsosite-sign particle pairs
     std::vector<std::vector<HEPUtils::Particle*>> getOSpairs(std::vector<HEPUtils::Particle*> particles);
 
 
-    ///
+    /// @name Sorting
+    //@{
+
+    /// Comparison function to give a jets sorting order decreasing by pT
+    bool cmpJetsByPt(HEPUtils::Jet* jet1, HEPUtils::Jet* jet2) { return jet1->pT() > jet2->pT(); }
+
+    /// Comparison function to give a particles sorting order decreasing by pT
+    bool cmpParticlesByPt(HEPUtils::Particle* lep1, HEPUtils::Particle* lep2) { return lep1->pT() > lep2->pT(); }
+
+    //@}
+
 
   }
 }
