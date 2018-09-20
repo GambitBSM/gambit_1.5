@@ -24,3 +24,9 @@ for micrOMEGAs.
    Here: change explicitly to DS6 versions
    relevant TEST programs: 
    DarkBit_XXX_standalone -> modify by commenting out + replace ini
+   DarkBit_XXX_standalone -> modifiy by commenting out + replace ini
+
+6. Add FIXME wherever we see something that needs to be fixed later
+
+7. grep FIXME and fix them [TB]
+
