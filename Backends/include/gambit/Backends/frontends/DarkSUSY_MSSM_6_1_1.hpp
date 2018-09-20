@@ -25,15 +25,6 @@
 // Load the library
 LOAD_LIBRARY
 
-// Functions
-
-// the following definitions seem to be obsolete...
-// BE_FUNCTION(dsrdset, void, (char*, int&, char*, int&), "dsrdset_", "dsrdset")
-// BE_FUNCTION(dsIByieldone, double, (double&, int&, int&, int&), "dsibyieldone_", "dsibyieldone")
-// BE_FUNCTION(dsrdinit, void, (), "dsrdinit_", "dsrdinit")
-// BE_FUNCTION(dshainit, void, (const int&), "dshainit_", "dshainit")
-// BE_FUNCTION(dsspectrum, void, (int&, int&), "dsspectrum_", "dsspectrum")
-
 
 // Functions used in DS frontend
 BE_FUNCTION(dsinit, void, (), "dsinit_", "dsinit")
@@ -114,19 +105,8 @@ BE_FUNCTION(dswwidth, void, (int&), "dswwidth_", "dswwidth")
 // TODO: organize the list below in "DS main" and module-depednent part
 // UPDATE common blocks as necessary when going through the functions above!
 
-// BE_VARIABLE(intdof, DS_INTDOF, "intdof_", "intdof")
-// BE_VARIABLE(vrtxs, DS_VRTXS, "vrtxs_", "vrtxs")
 
-// BE_VARIABLE(smcuseful, DS_SMCUSEFUL, "smcuseful_", "smcuseful")
-// BE_VARIABLE(couplingconstants, DS_COUPLINGCONSTANTS, "couplingconstants_", "couplingconstants")
-// BE_VARIABLE(sckm, DS_SCKM, "sckm_", "sckm")
-// BE_VARIABLE(mixing, DS_MIXING, "mixing_", "mixing")
-// BE_VARIABLE(mssmtype, DS_MSSMTYPE, "mssmtype_", "mssmtype")
-// BE_VARIABLE(mssmpar, DS_MSSMPAR, "mssmpar_", "mssmpar")
-// BE_VARIABLE(mssmswitch, DS_MSSMSWITCH, "mssmswitch_", "mssmswitch")
-// BE_VARIABLE(sfermionmass, DS_SFERMIONMASS, "sfermionmass_", "sfermionmass")
-// BE_VARIABLE(mssmwidths, DS_MSSMWIDTHS, "mssmwidths_", "mssmwidths")
-// BE_VARIABLE(mssmmixing, DS_MSSMMIXING, "mssmmixing_", "mssmmixing")
+
 // Used in RD_eff_annrate_SUSY_DSprep_func, RD_oh2_general and RD_thresholds_resonances_SingletDM
 // BE_VARIABLE(rdmgev, DS_RDMGEV,     "rdmgev_",    "rdmgev")    // Contains information about coannihilation
 // Appears only in RD_oh2_general
@@ -138,6 +118,7 @@ BE_FUNCTION(dswwidth, void, (int&), "dswwidth_", "dswwidth")
 // BE_VARIABLE(rdlun, DS_RDLUN,       "rdlun_",     "rdlun")     // gRD I/O
 // BE_VARIABLE(rdpadd, DS_RDPADD,     "rdpadd_",    "rdpadd")    // gRD I/O
 // BE_VARIABLE(rdtime, DS_RDTIME,     "rdtime_",    "rdtime")    // gRD timeout
+// BE_VARIABLE(intdof, DS_INTDOF, "intdof_", "intdof")
 // IB stuff
 // BE_VARIABLE(IBintvars, DS_IBINTVARS,"ibintvars_", "IBintvars")
 // Direct detection
@@ -155,11 +136,35 @@ BE_FUNCTION(dswwidth, void, (int&), "dswwidth_", "dswwidth")
 
 // Common blocks in the MSSM module library
 BE_VARIABLE(smquarkmasses, DS_SMQUARKMASSES, "smquarkmasses_", "smquarkmasses")
+BE_VARIABLE(sckm, DS_SCKM, "sckm_", "sckm")
 BE_VARIABLE(pmasses, DS_PMASSES, "pmasses_", "pmasses")
 BE_VARIABLE(pwidths, DS_PWIDTHS, "pwidths_", "pwidths")
 BE_VARIABLE(smcoupling, DS_SMCOUPLING, "smcoupling_", "smcoupling")
+// only here starts the part that is really MSSM-specific (and not SM/generic)
 BE_VARIABLE(pacodes_mssm, DS_PACODES_MSSM, "pacodes_mssm_", "pacodes_mssm")
 BE_VARIABLE(mssmiuseful, DS_MSSMIUSEFUL, "mssmiuseful_", "mssmiuseful")
+BE_VARIABLE(couplingconstants, DS6_COUPLINGCONSTANTS, "couplingconstants_", "couplingconstants")
+BE_VARIABLE(mixing, DS_MIXING, "mixing_", "mixing")
+BE_VARIABLE(mssmtype, DS_MSSMTYPE, "mssmtype_", "mssmtype")
+BE_VARIABLE(mssmpar, DS_MSSMPAR, "mssmpar_", "mssmpar")
+BE_VARIABLE(mssmwidths, DS_MSSMWIDTHS, "mssmwidths_", "mssmwidths")
+BE_VARIABLE(mssmmixing, DS_MSSMMIXING, "mssmmixing_", "mssmmixing")
+
+
+
+// the following definitions seem to be obsolete...
+// BE_FUNCTION(dsrdset, void, (char*, int&, char*, int&), "dsrdset_", "dsrdset")
+// BE_FUNCTION(dsIByieldone, double, (double&, int&, int&, int&), "dsibyieldone_", "dsibyieldone")
+// BE_FUNCTION(dsrdinit, void, (), "dsrdinit_", "dsrdinit")
+// BE_FUNCTION(dshainit, void, (const int&), "dshainit_", "dshainit")
+// BE_FUNCTION(dsspectrum, void, (int&, int&), "dsspectrum_", "dsspectrum")
+// BE_VARIABLE(smcuseful, DS_SMCUSEFUL, "smcuseful_", "smcuseful")
+// BE_VARIABLE(mssmswitch, DS_MSSMSWITCH, "mssmswitch_", "mssmswitch")
+// BE_VARIABLE(sfermionmass, DS_SFERMIONMASS, "sfermionmass_", "sfermionmass")
+// BE_VARIABLE(vrtxs, DS_VRTXS, "vrtxs_", "vrtxs")
+
+
+
 
 
 

@@ -21,6 +21,6 @@ for micrOMEGAs.
    - include/gambit/Backends/backend_types/DarkSUSY.hpp (version ??)
 
 5. make copy of standalones (for testing)
-   Here: change explcitly to DS6 versions
+   Here: change explicitly to DS6 versions
    relevant TEST programs: 
-   DarkBit_XXX_standalone -> modifiy by commenting out + replace ini
+   DarkBit_XXX_standalone -> modify by commenting out + replace ini

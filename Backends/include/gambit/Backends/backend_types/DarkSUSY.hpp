@@ -147,12 +147,24 @@ namespace Gambit
     {
         Fstring<5> roption;
     };
+// this one only exists in DS 5
     struct DS_COUPLINGCONSTANTS
     {
         Fdouble g2weak;
         Fdouble gyweak;
         Fdouble g3stro;
         Fdouble alphem;
+        Fdouble alph3;
+        Farray< Fdouble,1,12 > yukawa;
+        Fdouble g2wmz;
+        Fdouble gywmz;
+    };
+// this one only exists in DS 5
+    struct DS6_COUPLINGCONSTANTS
+    {
+        Fdouble g2weak;
+        Fdouble gyweak;
+        Fdouble g3stro;
         Fdouble alph3;
         Farray< Fdouble,1,12 > yukawa;
         Fdouble g2wmz;
