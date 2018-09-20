@@ -41,8 +41,71 @@
 #          (j.mckay14@imperial.ac.uk)
 #  \date 2016 Aug
 #
+#  \author Ankit Beniwal
+#  	   (ankit.beniwal@adelaide.edu.au)
+#  \date 2016 Aug
+#  \date 2017 Jun
+#  \date 2018 Aug
+#
+#  \author Aaron Vincent
+#          (aaron.vincent@cparc.ca)
+#  \date 2017 Sep, Nov
+#
+#  \author Janina Renk
+#          (janina.renk@fysik.su.se)
+#  \data 2018 Jun
+#
 #************************************************
 
+# AlterBBN
+set(name "alterbbn")
+set(ver "2.0")
+set(lib "libbbn")
+set(dl "https://alterbbn.hepforge.org/downloads/?f=alterbbn_v2.0.tgz")
+set(md5 "cca5fb50440f25dc61fbfb6dbf61b32b")
+set(dir "${PROJECT_SOURCE_DIR}/Backends/installed/${name}/${ver}")
+check_ditch_status(${name} ${ver})
+if(NOT ditched_${name}_${ver})
+  ExternalProject_Add(${name}_${ver}
+    DOWNLOAD_COMMAND ${DL_BACKEND} ${dl} ${md5} ${dir} ${name} ${ver}
+    SOURCE_DIR ${dir}
+    BUILD_IN_SOURCE 1
+    CONFIGURE_COMMAND ""
+    #BUILD_COMMAND sed ${dashi} -e "s#CC = gcc#CC = ${CMAKE_C_COMPILER}#g" Makefile
+    BUILD_COMMAND sed ${dashi} -e "s#CC = gcc#CC = ${CMAKE_C_COMPILER}#g" Makefile
+          COMMAND sed ${dashi} -e "s#rcsU#rcs#g" Makefile
+          COMMAND sed ${dashi} -e "s/CFLAGS= -O3 -pipe -fomit-frame-pointer/CFLAGS= ${GAMBIT_C_FLAGS}/g" Makefile
+          COMMAND sed ${dashi} -e "s/CFLAGS_MP= -fopenmp/CFLAGS_MP= /g" Makefile
+          COMMAND ${CMAKE_MAKE_PROGRAM}
+          COMMAND ar x src/libbbn.a
+          COMMAND ${CMAKE_COMMAND} -E echo "${CMAKE_C_COMPILER} -shared -o ${lib}.so *.o" > make_so.sh
+          COMMAND chmod u+x make_so.sh
+          COMMAND ./make_so.sh
+    INSTALL_COMMAND ""
+  )
+  add_extra_targets("backend" ${name} ${ver} ${dir} ${dl} clean)
+  set_as_default_version("backend" ${name} ${ver})
+endif()
+
+# CaptnGeneral
+set(name "capgen")
+set(ver "1.0")
+set(lib "gencaplib")
+set(dl "null")
+set(dir "${PROJECT_SOURCE_DIR}/Backends/installed/${name}/${ver}")
+check_ditch_status(${name} ${ver})
+if(NOT ditched_${name}_${ver})
+  ExternalProject_Add(${name}_${ver}
+    GIT_REPOSITORY https://github.com/aaronvincent/captngen.git
+    SOURCE_DIR ${dir}
+    BUILD_IN_SOURCE 1
+    CONFIGURE_COMMAND ""
+    BUILD_COMMAND ${CMAKE_MAKE_PROGRAM} ${lib}.so FC=${CMAKE_Fortran_COMPILER} FOPT=${GAMBIT_Fortran_FLAGS} MODULE=${FMODULE}
+    INSTALL_COMMAND ""
+  )
+  add_extra_targets("backend" ${name} ${ver} ${dir} ${dl} clean)
+  set_as_default_version("backend" ${name} ${ver})
+endif()
 
 # DarkSUSY
 set(name "darksusy")
@@ -102,12 +165,11 @@ if(NOT ditched_${name}_${ver})
   set_as_default_version("backend" ${name} ${ver})
 endif()
 
-
 # DDCalc
 set(name "ddcalc")
 set(ver "1.0.0")
 set(lib "libDDCalc")
-set(dl "https://www.hepforge.org/archive/${name}/${name}-${ver}.tar.gz")
+set(dl "https://${name}.hepforge.org/downloads/${name}-${ver}.tar.gz")
 set(md5 "0c0da22b84721fc1d945f8039a4686c9")
 set(patch "${PROJECT_SOURCE_DIR}/Backends/patches/${name}/${ver}/patch_${name}_${ver}.dif")
 set(dir "${PROJECT_SOURCE_DIR}/Backends/installed/${name}/${ver}")
@@ -129,7 +191,7 @@ endif()
 set(name "ddcalc")
 set(ver "1.1.0")
 set(lib "libDDCalc")
-set(dl "https://www.hepforge.org/archive/${name}/${name}-${ver}.tar.gz")
+set(dl "https://${name}.hepforge.org/downloads/${name}-${ver}.tar.gz")
 set(md5 "47191564385379dd70aeba4811cd7c3b")
 set(dir "${PROJECT_SOURCE_DIR}/Backends/installed/${name}/${ver}")
 set(ddcalc_flags "${GAMBIT_Fortran_FLAGS} -${FMODULE} ${dir}/build")
@@ -149,9 +211,29 @@ endif()
 set(name "ddcalc")
 set(ver "1.2.0")
 set(lib "libDDCalc")
-set(dl "https://www.hepforge.org/archive/${name}/${name}-${ver}.tar.gz")
+set(dl "https://${name}.hepforge.org/downloads/${name}-${ver}.tar.gz")
 set(md5 "93b894b80b360159264f0d634cd7387e")
 set(dir "${PROJECT_SOURCE_DIR}/Backends/installed/${name}/${ver}")
+set(ddcalc_flags "${GAMBIT_Fortran_FLAGS} -${FMODULE} ${dir}/build")
+check_ditch_status(${name} ${ver})
+if(NOT ditched_${name}_${ver})
+  ExternalProject_Add(${name}_${ver}
+    DOWNLOAD_COMMAND ${DL_BACKEND} ${dl} ${md5} ${dir} ${name} ${ver}
+    SOURCE_DIR ${dir}
+    BUILD_IN_SOURCE 1
+    CONFIGURE_COMMAND ""
+    BUILD_COMMAND ${CMAKE_MAKE_PROGRAM} ${lib}.so FC=${CMAKE_Fortran_COMPILER} FOPT=${ddcalc_flags} DDCALC_DIR=${dir} OUTPUT_PIPE=>/dev/null
+    INSTALL_COMMAND ""
+  )
+  add_extra_targets("backend" ${name} ${ver} ${dir} ${dl} clean)
+endif()
+
+set(name "ddcalc")
+set(ver "2.0.0")
+set(lib "libDDCalc")
+set(dl "https://${name}.hepforge.org/downloads/${name}-${ver}.tar.gz")
+set(md5 "504cb95a298fa62d11097793dc318549")
+set(dir "${PROJECT_SOURCE_DIR}/Backends/installed/${name}/${ver}/")
 set(ddcalc_flags "${GAMBIT_Fortran_FLAGS} -${FMODULE} ${dir}/build")
 check_ditch_status(${name} ${ver})
 if(NOT ditched_${name}_${ver})
@@ -171,7 +253,7 @@ endif()
 # Gamlike
 set(name "gamlike")
 set(ver "1.0.0")
-set(dl "https://www.hepforge.org/archive/${name}/${name}-${ver}.tar.gz")
+set(dl "https://${name}.hepforge.org/downloads/${name}-${ver}.tar.gz")
 set(md5 "16b763a2e8b9d6c174d8b7ca2f4cb575")
 set(dir "${PROJECT_SOURCE_DIR}/Backends/installed/${name}/${ver}")
 if(GSL_FOUND)
@@ -275,6 +357,59 @@ if(NOT ditched_${name}_${model}_${ver})
   set_as_default_version("backend model" ${name}_${model} ${ver})
 endif()
 
+# MicrOmegas VectorDM model
+set(model "VectorDM")
+set(patch "${PROJECT_SOURCE_DIR}/Backends/patches/${name}/${ver}/patch_${name}_${ver}_${model}")
+check_ditch_status(${name}_${model} ${ver})
+if(NOT ditched_${name}_${model}_${ver})
+  ExternalProject_Add(${name}_${model}_${ver}
+    DOWNLOAD_COMMAND ""
+    SOURCE_DIR ${dir}
+    PATCH_COMMAND ./newProject ${model} && patch -p1 < ${patch}
+    BUILD_IN_SOURCE 1
+    CONFIGURE_COMMAND ""
+    BUILD_COMMAND ${CMAKE_COMMAND} -E chdir ${model} ${CMAKE_MAKE_PROGRAM} sharedlib main=main.c
+    INSTALL_COMMAND ""
+  )
+  add_extra_targets("backend model" ${name} ${ver} ${dir}/${model} ${model} "yes | clean")
+  set_as_default_version("backend model" ${name}_${model} ${ver})
+endif()
+
+# MicrOmegas MajoranaDM model
+set(model "MajoranaDM")
+set(patch "${PROJECT_SOURCE_DIR}/Backends/patches/${name}/${ver}/patch_${name}_${ver}_${model}")
+check_ditch_status(${name}_${model} ${ver})
+if(NOT ditched_${name}_${model}_${ver})
+  ExternalProject_Add(${name}_${model}_${ver}
+    DOWNLOAD_COMMAND ""
+    SOURCE_DIR ${dir}
+    PATCH_COMMAND ./newProject ${model} && patch -p1 < ${patch}
+    BUILD_IN_SOURCE 1
+    CONFIGURE_COMMAND ""
+    BUILD_COMMAND ${CMAKE_COMMAND} -E chdir ${model} ${CMAKE_MAKE_PROGRAM} sharedlib main=main.c
+    INSTALL_COMMAND ""
+  )
+  add_extra_targets("backend model" ${name} ${ver} ${dir}/${model} ${model} "yes | clean")
+  set_as_default_version("backend model" ${name}_${model} ${ver})
+endif()
+
+# MicrOmegas DiracDM model
+set(model "DiracDM")
+set(patch "${PROJECT_SOURCE_DIR}/Backends/patches/${name}/${ver}/patch_${name}_${ver}_${model}")
+check_ditch_status(${name}_${model} ${ver})
+if(NOT ditched_${name}_${model}_${ver})
+  ExternalProject_Add(${name}_${model}_${ver}
+    DOWNLOAD_COMMAND ""
+    SOURCE_DIR ${dir}
+    PATCH_COMMAND ./newProject ${model} && patch -p1 < ${patch}
+    BUILD_IN_SOURCE 1
+    CONFIGURE_COMMAND ""
+    BUILD_COMMAND ${CMAKE_COMMAND} -E chdir ${model} ${CMAKE_MAKE_PROGRAM} sharedlib main=main.c
+    INSTALL_COMMAND ""
+  )
+  add_extra_targets("backend model" ${name} ${ver} ${dir}/${model} ${model} "yes | clean")
+  set_as_default_version("backend model" ${name}_${model} ${ver})
+endif()
 
 # Pythia
 set(name "pythia")
@@ -363,7 +498,7 @@ endif()
 set(name "nulike")
 set(ver "1.0.4")
 set(lib "libnulike")
-set(dl "https://www.hepforge.org/archive/${name}/${name}-${ver}.tar.gz")
+set(dl "https://${name}.hepforge.org/downloads/${name}-${ver}.tar.gz")
 set(md5 "47649992d19984ee53df6a1655c48227")
 set(dir "${PROJECT_SOURCE_DIR}/Backends/installed/${name}/${ver}")
 check_ditch_status(${name} ${ver})
@@ -383,7 +518,7 @@ endif()
 set(name "nulike")
 set(ver "1.0.5")
 set(lib "libnulike")
-set(dl "https://www.hepforge.org/archive/${name}/${name}-${ver}.tar.gz")
+set(dl "https://${name}.hepforge.org/downloads/${name}-${ver}.tar.gz")
 set(md5 "20cee73a38fb3560298b6a3acdd4d83a")
 set(dir "${PROJECT_SOURCE_DIR}/Backends/installed/${name}/${ver}")
 check_ditch_status(${name} ${ver})
@@ -403,7 +538,7 @@ endif()
 set(name "nulike")
 set(ver "1.0.6")
 set(lib "libnulike")
-set(dl "https://www.hepforge.org/archive/${name}/${name}-${ver}.tar.gz")
+set(dl "https://${name}.hepforge.org/downloads/${name}-${ver}.tar.gz")
 set(md5 "fc4c35dc867bb1213d80acd12e5c1169")
 set(dir "${PROJECT_SOURCE_DIR}/Backends/installed/${name}/${ver}")
 check_ditch_status(${name} ${ver})
@@ -552,7 +687,7 @@ endif()
 # HiggsBounds tables
 set(name "higgsbounds_tables")
 set(ver "0.0")
-set(dl "https://www.hepforge.org/archive/higgsbounds/csboutput_trans_binary.tar.gz")
+set(dl "https://higgsbounds.hepforge.org/downloads/csboutput_trans_binary.tar.gz")
 set(md5 "004decca30335ddad95654a04dd034a6")
 set(dir "${PROJECT_SOURCE_DIR}/Backends/installed/${name}/${ver}")
 check_ditch_status(${name} ${ver})
@@ -574,7 +709,7 @@ endif()
 set(name "higgsbounds")
 set(ver "4.3.1")
 set(lib "libhiggsbounds")
-set(dl "https://www.hepforge.org/archive/higgsbounds/HiggsBounds-${ver}.tar.gz")
+set(dl "https://${name}.hepforge.org/downloads/HiggsBounds-${ver}.tar.gz")
 set(md5 "c1667613f814a9f0297d1f11a8b3ef34")
 set(dir "${PROJECT_SOURCE_DIR}/Backends/installed/${name}/${ver}")
 set(patch "${PROJECT_SOURCE_DIR}/Backends/patches/${name}/${ver}/patch_${name}_${ver}.dif")
@@ -614,7 +749,7 @@ endif()
 set(name "higgsbounds")
 set(ver "4.2.1")
 set(lib "libhiggsbounds")
-set(dl "https://www.hepforge.org/archive/higgsbounds/HiggsBounds-${ver}.tar.gz")
+set(dl "https://${name}.hepforge.org/downloads/HiggsBounds-${ver}.tar.gz")
 set(md5 "47b93330d4e0fddcc23b381548db355b")
 set(dir "${PROJECT_SOURCE_DIR}/Backends/installed/${name}/${ver}")
 set(hb_tab_name "higgsbounds_tables")
@@ -652,7 +787,7 @@ endif()
 set(name "higgssignals")
 set(ver "1.4.0")
 set(lib "libhiggssignals")
-set(dl "https://www.hepforge.org/archive/higgsbounds/HiggsSignals-${ver}.tar.gz")
+set(dl "https://higgsbounds.hepforge.org/downloads/HiggsSignals-${ver}.tar.gz")
 set(md5 "537d3885b1cbddbe1163dbc843ec2beb")
 set(dir "${PROJECT_SOURCE_DIR}/Backends/installed/${name}/${ver}")
 set(patch "${PROJECT_SOURCE_DIR}/Backends/patches/${name}/${ver}/patch_${name}_${ver}.dif")
@@ -694,7 +829,7 @@ endif()
 set(name "spheno")
 set(ver "3.3.8")
 set(lib "lib/libSPheno.so")
-set(dl "http://www.hepforge.org/archive/spheno/SPheno-${ver}.tar.gz")
+set(dl "https://${name}.hepforge.org/downloads/SPheno-${ver}.tar.gz")
 set(md5 "4307cb4b736cebca5e57ca6c5e0b5836")
 set(dir "${PROJECT_SOURCE_DIR}/Backends/installed/${name}/${ver}")
 set(patch "${PROJECT_SOURCE_DIR}/Backends/patches/${name}/${ver}/patch_${name}_${ver}.dif")
@@ -717,7 +852,7 @@ endif()
 # gm2calc
 set(name "gm2calc")
 set(ver "1.3.0")
-set(dl "https://www.hepforge.org/archive/${name}/${name}-${ver}.tar.gz")
+set(dl "https://${name}.hepforge.org/downloads/${name}-${ver}.tar.gz")
 set(md5 "1bddab5a411a895edd382a1f8a991c15")
 set(dir "${PROJECT_SOURCE_DIR}/Backends/installed/${name}/${ver}")
 set(patch "${PROJECT_SOURCE_DIR}/Backends/patches/${name}/${ver}/patch_${name}")
@@ -743,7 +878,7 @@ endif()
 # gm2calc
 set(name "gm2calc")
 set(ver "1.2.0")
-set(dl "https://www.hepforge.org/archive/${name}/${name}-${ver}.tar.gz")
+set(dl "https://${name}.hepforge.org/downloads/${name}-${ver}.tar.gz")
 set(md5 "07d55bbbd648b8ef9b2d69ad1dfd8326")
 set(dir "${PROJECT_SOURCE_DIR}/Backends/installed/${name}/${ver}")
 set(patch "${PROJECT_SOURCE_DIR}/Backends/patches/${name}/${ver}/patch_${name}")
@@ -803,7 +938,7 @@ if(NOT ditched_${name}_${ver})
     DOWNLOAD_COMMAND ${DL_BACKEND} ${dl} ${md5} ${dir}
     SOURCE_DIR ${dir}
     BUILD_IN_SOURCE 1
-    CONFIGURE_COMMAND ./configure FC=${CMAKE_Fortran_COMPILER} FCFLAGS=${CMAKE_Fortran_FLAGS} FFLAGS=${CMAKE_Fortran_FLAGS} CC=${CMAKE_C_COMPILER} CFLAGS=${CMAKE_C_FLAGS} CXX=${CMAKE_CXX_COMPILER} CXXFLAGS=${CMAKE_CXX_FLAGS} SHLIB_SUFFIX=${CFITSIO_SO}
+    CONFIGURE_COMMAND ./configure FC=${CMAKE_Fortran_COMPILER} FCFLAGS=${GAMBIT_Fortran_FLAGS} FFLAGS=${GAMBIT_Fortran_FLAGS} CC=${CMAKE_C_COMPILER} CFLAGS=${GAMBIT_C_FLAGS} CXX=${CMAKE_CXX_COMPILER} CXXFLAGS=${GAMBIT_CXX_FLAGS} SHLIB_SUFFIX=${CFITSIO_SO}
     BUILD_COMMAND ${CMAKE_MAKE_PROGRAM} shared SHLIB_SUFFIX=${CFITSIO_SO}
     INSTALL_COMMAND ${CMAKE_MAKE_PROGRAM} install SHLIB_SUFFIX=${CFITSIO_SO}
   )
@@ -846,31 +981,31 @@ endif()
 set(name "class")
 set(ver "2.6.3")
 set(lib "libclass")
-set(patch "${PROJECT_SOURCE_DIR}/Backends/patches/${name}/${ver}")
-set(dl "http://lesgourg.github.io/class_public/class_public-2.7.0.tar.gz")
-set(md5 "5b53e482420606205ef586e792b16d8e")
+#set(patch "${PROJECT_SOURCE_DIR}/Backends/patches/${name}/${ver}")
+set(dl "https://github.com/lesgourg/class_public/archive/v${ver}.tar.gz")
+set(md5 "e6eb0fd721bb1098e642f5d1970501ce")
 set(dir "${PROJECT_SOURCE_DIR}/Backends/installed/${name}/${ver}")
 set(CLASS_DLL_DIR "build")
+set(__CLASSDIR__ "${dir}/")
 set(CLASS_IFLAG "-I")
 if(NOT ditched_${name}_${ver})
   ExternalProject_Add(${name}_${ver}
     DOWNLOAD_COMMAND ${DL_BACKEND} ${dl} ${md5} ${dir}
     SOURCE_DIR ${dir}
     BUILD_IN_SOURCE 1
-    PATCH_COMMAND patch -p0 < ${patch}/primordial_header.dif
-    COMMAND patch -p0 < ${patch}/primordial_source.dif
-    COMMAND patch -p0 < ${patch}/input_source.dif
+    ## PATCH_COMMAND patch -p0 < ${patch}/primordial_header.dif
+    ## COMMAND patch -p0 < ${patch}/primordial_source.dif
+    ## COMMAND patch -p0 < ${patch}/input_source.dif
     ## COMMAND patch -p0 < ${patch}/output_source.dif
     ## COMMAND patch -p0 < ${patch}/spectra_source.dif
     ## COMMAND patch -p0 < ${patch}/transfer_source.dif
-    COMMAND patch -p0 < ${patch}/perturbations_source.dif
-    COMMAND patch -p0 < ${patch}/thermo_source.dif
-    COMMAND patch -p0 < ${patch}/backgrnd_source.dif
+    ## COMMAND patch -p0 < ${patch}/perturbations_source.dif
+    ## COMMAND patch -p0 < ${patch}/thermo_source.dif
+    ## COMMAND patch -p0 < ${patch}/backgrnd_source.dif
     CONFIGURE_COMMAND ""
-    #BUILD_COMMAND ${CMAKE_MAKE_PROGRAM} CC=${CMAKE_C_COMPILER} CCFLAG=${CMAKE_C_FLAGS} class
-    BUILD_COMMAND ${CMAKE_MAKE_PROGRAM} CC=${CMAKE_C_COMPILER} class
+    BUILD_COMMAND ${CMAKE_MAKE_PROGRAM} CC=${CMAKE_C_COMPILER} CCFLAG=${GAMBIT_C_FLAGS} OMPFLAG=${OpenMP_CXX_FLAGS} class
     COMMAND ${CMAKE_COMMAND} -E make_directory lib
-    COMMAND ${CMAKE_COMMAND} -E echo "${CMAKE_C_COMPILER} -shared ${CMAKE_C_FLAGS} -J${CLASS_DLL_DIR} ${CLASS_IFLAG}${CLASS_DLL_DIR}/ -o lib/${lib}.so ${CLASS_DLL_DIR}/*.o" > make_so.sh
+    COMMAND ${CMAKE_COMMAND} -E echo "${CMAKE_C_COMPILER} -shared ${GAMBIT_C_FLAGS} -J${CLASS_DLL_DIR} ${CLASS_IFLAG}${CLASS_DLL_DIR}/ -o lib/${lib}.so ${CLASS_DLL_DIR}/*.o" > make_so.sh
     COMMAND chmod u+x make_so.sh
     COMMAND ./make_so.sh
     INSTALL_COMMAND ""
@@ -919,13 +1054,13 @@ if(NOT ditched_${name}_${ver})
           COMMAND patch -p1 < ${patch}/modpk_utils.dif
           COMMAND patch -p1 < ${patch}/multimodecode_driver.dif
     CONFIGURE_COMMAND ""
-    BUILD_COMMAND ${CMAKE_MAKE_PROGRAM} FC=${CMAKE_Fortran_COMPILER} F90C=${CMAKE_Fortran_COMPILER} FFLAG=${CMAKE_Fortran_FLAGS}
+    BUILD_COMMAND ${CMAKE_MAKE_PROGRAM} FC=${CMAKE_Fortran_COMPILER} F90C=${CMAKE_Fortran_COMPILER} FFLAG=${GAMBIT_Fortran_FLAGS}
     COMMAND ${CMAKE_COMMAND} -E copy ${driver}/multimodecode_gambit.f90 ${dir}
-    COMMAND ${CMAKE_COMMAND} -E echo "${CMAKE_Fortran_COMPILER} ${CMAKE_Fortran_FLAGS} -c ${dir}/multimodecode_gambit.f90" > make_so1.sh
+    COMMAND ${CMAKE_COMMAND} -E echo "${CMAKE_Fortran_COMPILER} ${GAMBIT_Fortran_FLAGS} -c ${dir}/multimodecode_gambit.f90" > make_so1.sh
     COMMAND chmod u+x make_so1.sh
     COMMAND ./make_so1.sh
     COMMAND ${CMAKE_COMMAND} -E make_directory lib
-    COMMAND ${CMAKE_COMMAND} -E echo "${CMAKE_Fortran_COMPILER} -shared ${CMAKE_Fortran_FLAGS} -o lib/${lib}.so *.o" > make_so2.sh
+    COMMAND ${CMAKE_COMMAND} -E echo "${CMAKE_Fortran_COMPILER} -shared ${GAMBIT_Fortran_FLAGS} -o lib/${lib}.so *.o" > make_so2.sh
     COMMAND chmod u+x make_so2.sh
     COMMAND ./make_so2.sh
     INSTALL_COMMAND ""
