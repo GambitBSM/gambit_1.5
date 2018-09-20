@@ -280,9 +280,6 @@ VS_likelihood: |
 expected_lifetime: |
     Return the expected lifetime of the electroweak vacuum.
 
-print_SingletDM_spectrum: |
-    Print the spectrum contents to the output stream.
-
 #####  VectorDM  #####
 
 VectorDM_spectrum: |
