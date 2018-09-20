@@ -517,9 +517,6 @@ set(BOSS_dir "${PROJECT_SOURCE_DIR}/Backends/scripts/BOSS")
 set(needs_BOSSing "")
 set(needs_BOSSing_failed "")
 
-# Define some variables used to check for castxml binaries in BOSS
-set(have_checked_castxml_binary FALSE)
-
 macro(BOSS_backend name backend_version)
 
   # Replace "." by "_" in the backend version number
