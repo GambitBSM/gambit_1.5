@@ -132,7 +132,9 @@ START_MODULE
       START_FUNCTION(DarkBit::RD_spectrum_type)
       DEPENDENCY(TH_ProcessCatalog, DarkBit::TH_ProcessCatalog)
       DEPENDENCY(DarkMatter_ID, std::string)
-      ALLOW_MODELS(SingletDM, SingletDM_running, SingletDMZ3, DiracSingletDM_Z2, MajoranaSingletDM_Z2, VectorSingletDM_Z2)
+      ALLOW_MODELS(ScalarSingletDM_Z2, ScalarSingletDM_Z2_running,
+                   ScalarSingletDM_Z3, ScalarSingletDM_Z3_running,
+                   DiracSingletDM_Z2, MajoranaSingletDM_Z2, VectorSingletDM_Z2)
     #undef FUNCTION
   #undef CAPABILITY
 
@@ -164,7 +166,8 @@ START_MODULE
       START_FUNCTION(fptr_dd)
       DEPENDENCY(TH_ProcessCatalog, DarkBit::TH_ProcessCatalog)
       DEPENDENCY(DarkMatter_ID, std::string)
-      ALLOW_MODELS(SingletDM, DiracSingletDM_Z2, MajoranaSingletDM_Z2, VectorSingletDM_Z2)
+      ALLOW_MODELS(ScalarSingletDM_Z2, ScalarSingletDM_Z2_running,
+                   DiracSingletDM_Z2, MajoranaSingletDM_Z2, VectorSingletDM_Z2)
     #undef FUNCTION
   #undef CAPABILITY
 
@@ -219,8 +222,14 @@ START_MODULE
   START_CAPABILITY
     #define FUNCTION RD_oh2_Xf_MicrOmegas
       START_FUNCTION(ddpair)
-      BACKEND_REQ(oh2, (MicrOmegas_MSSM, MicrOmegas_SingletDM, MicrOmegas_SingletDMZ3, MicrOmegas_VectorSingletDM_Z2, MicrOmegas_MajoranaSingletDM_Z2, MicrOmegas_DiracSingletDM_Z2), double, (double*,int,double))
-      ALLOW_MODELS(MSSM63atQ, MSSM63atMGUT, SingletDM_running, SingletDMZ3, VectorSingletDM_Z2, MajoranaSingletDM_Z2, DiracSingletDM_Z2)
+      BACKEND_REQ(oh2, (MicrOmegas_MSSM,
+                        MicrOmegas_ScalarSingletDM_Z2, MicrOmegas_ScalarSingletDM_Z3,
+                        MicrOmegas_VectorSingletDM_Z2, MicrOmegas_MajoranaSingletDM_Z2, MicrOmegas_DiracSingletDM_Z2),
+                        double, (double*,int,double))
+      ALLOW_MODELS(MSSM63atQ, MSSM63atMGUT,
+                   ScalarSingletDM_Z2, ScalarSingletDM_Z2_running,
+                   ScalarSingletDM_Z3, ScalarSingletDM_Z3_running,
+                   DiracSingletDM_Z2, MajoranaSingletDM_Z2, VectorSingletDM_Z2)
     #undef FUNCTION
   #undef CAPABILITY
 
@@ -441,20 +450,20 @@ START_MODULE
       BACKEND_REQ(dsIBwwdxdy, (), double, (int&, double&, double&))
       BACKEND_REQ(IBintvars, (), DS_IBINTVARS)
     #undef FUNCTION
-    #define FUNCTION TH_ProcessCatalog_SingletDM
+    #define FUNCTION TH_ProcessCatalog_ScalarSingletDM_Z2
       START_FUNCTION(DarkBit::TH_ProcessCatalog)
       DEPENDENCY(decay_rates, DecayTable)
-      DEPENDENCY(SingletDM_spectrum, Spectrum)
-      ALLOW_MODELS(SingletDM,SingletDM_running)
+      DEPENDENCY(ScalarSingletDM_Z2_spectrum, Spectrum)
+      ALLOW_MODELS(ScalarSingletDM_Z2,ScalarSingletDM_Z2_running)
     #undef FUNCTION
-    #define FUNCTION TH_ProcessCatalog_SingletDMZ3
+    #define FUNCTION TH_ProcessCatalog_ScalarSingletDM_Z3
       START_FUNCTION(DarkBit::TH_ProcessCatalog)
-      DEPENDENCY(decay_rates,DecayTable)
-      DEPENDENCY(SingletDMZ3_spectrum, Spectrum)
+      DEPENDENCY(decay_rates, DecayTable)
+      DEPENDENCY(ScalarSingletDM_Z3_spectrum, Spectrum)
       BACKEND_REQ(calcSpectrum, (gimmemicro) , double,  (int, double*, double*, double*, double*, double*, double*, int*))
       BACKEND_REQ(vSigmaCh, (gimmemicro), MicrOmegas::aChannel*)
       FORCE_SAME_BACKEND(gimmemicro)
-      ALLOW_MODELS(SingletDMZ3)
+      ALLOW_MODELS(ScalarSingletDM_Z3,ScalarSingletDM_Z3_running)
     #undef FUNCTION
     #define FUNCTION TH_ProcessCatalog_VectorSingletDM_Z2
       START_FUNCTION(DarkBit::TH_ProcessCatalog)
@@ -613,31 +622,38 @@ START_MODULE
       BACKEND_REQ(nucleonAmplitudes, (gimmemicro), int, (double(*)(double,double,double,double), double*, double*, double*, double*))
       BACKEND_REQ(FeScLoop, (gimmemicro), double, (double, double, double, double))
       BACKEND_REQ(MOcommon, (gimmemicro), MicrOmegas::MOcommonSTR)
-      ALLOW_MODEL_DEPENDENCE(nuclear_params_fnq, MSSM63atQ, SingletDM, VectorSingletDM_Z2)
+      ALLOW_MODEL_DEPENDENCE(nuclear_params_fnq, MSSM63atQ,
+                             ScalarSingletDM_Z2, ScalarSingletDM_Z2_running,
+                             ScalarSingletDM_Z3, ScalarSingletDM_Z3_running,
+                             VectorSingletDM_Z2)
       MODEL_GROUP(group1, (nuclear_params_fnq))
-      MODEL_GROUP(group2, (MSSM63atQ, SingletDM, VectorSingletDM_Z2))
+      MODEL_GROUP(group2, (MSSM63atQ,
+                           ScalarSingletDM_Z2, ScalarSingletDM_Z2_running,
+                           ScalarSingletDM_Z3, ScalarSingletDM_Z3_running,
+                           VectorSingletDM_Z2))
       ALLOW_MODEL_COMBINATION(group1, group2)
       BACKEND_OPTION((MicrOmegas_MSSM),(gimmemicro))
-      BACKEND_OPTION((MicrOmegas_SingletDM),(gimmemicro))
+      BACKEND_OPTION((MicrOmegas_ScalarSingletDM_Z2),(gimmemicro))
+      BACKEND_OPTION((MicrOmegas_ScalarSingletDM_Z3),(gimmemicro))
       BACKEND_OPTION((MicrOmegas_VectorSingletDM_Z2),(gimmemicro))
       FORCE_SAME_BACKEND(gimmemicro)
     #undef FUNCTION
 
-    #define FUNCTION DD_couplings_SingletDM
+    #define FUNCTION DD_couplings_ScalarSingletDM_Z2
       START_FUNCTION(DM_nucleon_couplings)
-      DEPENDENCY(SingletDM_spectrum, Spectrum)
-      ALLOW_MODEL_DEPENDENCE(nuclear_params_fnq, SingletDM_running, SingletDM)
+      DEPENDENCY(ScalarSingletDM_Z2_spectrum, Spectrum)
+      ALLOW_MODEL_DEPENDENCE(nuclear_params_fnq, ScalarSingletDM_Z2, ScalarSingletDM_Z2_running)
       MODEL_GROUP(group1, (nuclear_params_fnq))
-      MODEL_GROUP(group2, (SingletDM_running, SingletDM))
+      MODEL_GROUP(group2, (ScalarSingletDM_Z2, ScalarSingletDM_Z2_running))
       ALLOW_MODEL_COMBINATION(group1, group2)
      #undef FUNCTION
 
-    #define FUNCTION DD_couplings_SingletDMZ3
+    #define FUNCTION DD_couplings_ScalarSingletDM_Z3
       START_FUNCTION(DM_nucleon_couplings)
-      DEPENDENCY(SingletDMZ3_spectrum, Spectrum)
-      ALLOW_MODEL_DEPENDENCE(nuclear_params_fnq, SingletDMZ3)
+      DEPENDENCY(ScalarSingletDM_Z3_spectrum, Spectrum)
+      ALLOW_MODEL_DEPENDENCE(nuclear_params_fnq, ScalarSingletDM_Z3, ScalarSingletDM_Z3_running)
       MODEL_GROUP(group1, (nuclear_params_fnq))
-      MODEL_GROUP(group2, (SingletDMZ3))
+      MODEL_GROUP(group2, (ScalarSingletDM_Z3, ScalarSingletDM_Z3_running))
       ALLOW_MODEL_COMBINATION(group1, group2)
      #undef FUNCTION
 
@@ -1214,19 +1230,19 @@ START_MODULE
 
   #define CAPABILITY DarkMatter_ID
   START_CAPABILITY
-    #define FUNCTION DarkMatter_ID_SingletDM
+    #define FUNCTION DarkMatter_ID_ScalarSingletDM
     START_FUNCTION(std::string)
-    ALLOW_MODELS(SingletDM, SingletDM_running, SingletDMZ3)
+    ALLOW_MODELS(ScalarSingletDM_Z2, ScalarSingletDM_Z2_running, ScalarSingletDM_Z3, ScalarSingletDM_Z3_running)
     #undef FUNCTION
-    #define FUNCTION DarkMatter_ID_VectorSingletDM_Z2
+    #define FUNCTION DarkMatter_ID_VectorSingletDM
     START_FUNCTION(std::string)
     ALLOW_MODELS(VectorSingletDM_Z2)
     #undef FUNCTION
-    #define FUNCTION DarkMatter_ID_MajoranaSingletDM_Z2
+    #define FUNCTION DarkMatter_ID_MajoranaSingletDM
     START_FUNCTION(std::string)
     ALLOW_MODELS(MajoranaSingletDM_Z2)
     #undef FUNCTION
-    #define FUNCTION DarkMatter_ID_DiracSingletDM_Z2
+    #define FUNCTION DarkMatter_ID_DiracSingletDM
     START_FUNCTION(std::string)
     ALLOW_MODELS(DiracSingletDM_Z2)
     #undef FUNCTION

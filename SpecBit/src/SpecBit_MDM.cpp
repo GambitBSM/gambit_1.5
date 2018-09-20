@@ -29,7 +29,6 @@
 #include "gambit/SpecBit/SpecBit_helpers.hpp"
 #include "gambit/SpecBit/QedQcdWrapper.hpp"
 #include "gambit/Models/SimpleSpectra/SMHiggsSimpleSpec.hpp"
-//#include "gambit/Models/SimpleSpectra/ScalarSingletDMSimpleSpec.hpp"
 #include "gambit/SpecBit/model_files_and_boxes.hpp"
 
 #include "gambit/SpecBit/MDMSpec.hpp"
@@ -90,7 +89,7 @@ namespace Gambit
       const typename MI::Problems& problems = spectrum_generator.get_problems();
       MI model_interface(spectrum_generator,oneset,input);
       SI mdmspec(model_interface, "FlexibleSUSY", "1.5.1");
-      
+
 
       mdmspec.set_override(Par::mass1,spectrum_generator.get_high_scale(),"high_scale",true);
       mdmspec.set_override(Par::mass1,spectrum_generator.get_susy_scale(),"susy_scale",true);
@@ -128,7 +127,7 @@ namespace Gambit
       }
 			double QEWSB  = *input_Param.at("QEWSB");
 			mdmspec.RunToScaleOverride(QEWSB);
-			
+
       // Retrieve any mass cuts
       static const Spectrum::mc_info mass_cut = runOptions.getValueOrDef<Spectrum::mc_info>(Spectrum::mc_info(), "mass_cut");
       static const Spectrum::mr_info mass_ratio_cut = runOptions.getValueOrDef<Spectrum::mr_info>(Spectrum::mr_info(), "mass_ratio_cut");
@@ -143,7 +142,7 @@ namespace Gambit
     {
       double mH = *Param.at("mH");
       double mChi = *Param.at("mChi");
-      
+
       //double QEFT  = mChi;
 			/*
       if (QEFT < sminputs.mT)
@@ -152,14 +151,14 @@ namespace Gambit
 			}
       */
       double QEFT  = sminputs.mT;
-      
+
       input.HiggsIN = 0.5*pow(mH,2);
-      
+
       input.YcIN = 0.5*mChi;
-      
+
       input.QEWSB = QEFT;  // scale where EWSB conditions are applied
       input.Qin = QEFT; //scale;  // highest scale at which model is run to
-      
+
     }
 
     bool check_perturb_MDM(const Spectrum& spec,double scale,int pts)
@@ -201,10 +200,10 @@ namespace Gambit
           const std::vector<int> shape = it->shape();
           std::ostringstream label;
           label << name <<" "<< Par::toString.at(tag);
-          
+
           if (name == "lambda_h"){ul =  2*Pi;}
           else {ul = 4.0 * Pi;}
-          
+
           if(shape.size()==1 and shape[0]==1)
           {
             if (abs(MDM->get(tag,name))>ul)
@@ -266,12 +265,12 @@ namespace Gambit
           invalid_point().raise(msg.str());
         }
       }
-      
+
 
     }
     #endif
 
-				
+
 		void find_non_perturb_scale_MDM(double &result)
 		{
 			using namespace flexiblesusy;
@@ -279,34 +278,34 @@ namespace Gambit
       namespace myPipe = Pipes::find_non_perturb_scale_MDM;
       using namespace Gambit;
       using namespace SpecBit;
-      
+
       const Spectrum& fullspectrum = *myPipe::Dep::MDM_spectrum;
-			
+
 		  // bound x by (a,b)
 		  // do all this is log space please
-		  
+
 		  double ms = *myPipe::Param.at("mS");
-		  
+
 		  double a = log10(ms);
-		  
+
 		  if (a > 20.0)
 		  {
 			  std::ostringstream msg;
         msg << "Scalar mass larger than 10^20 GeV " << std::endl;
         invalid_point().raise(msg.str());
       }
-		  
+
 		  double b = 20.0;
 		  double x = 0.5 * ( b + ms );
-		  
+
 		  while (abs(a-b)>1e-10)
 		  {
 		    //cout<< "\r" << "(a,b) = " << a << "  " << b << endl;
 		    //std::cout << std::flush;
-		    
+
 		    x=0.5*(b-a)+a;
-		    
-		    
+
+
 		    if (!check_perturb_MDM(fullspectrum,pow(10,x),3))
 		    {
 		      b=x;
@@ -318,9 +317,9 @@ namespace Gambit
 		  }
 		  result = pow(10,0.5*(a+b));
 		}
-		
 
-    /// Print singletDM spectrum out. Stripped down copy from MSSM version with variable names changed
+
+    /// Print MDM spectrum out. Stripped down copy from MSSM version with variable names changed
     void fill_map_from_MDMspectrum(std::map<std::string,double>&, const Spectrum&);
 
     void get_MDM_spectrum_as_map (std::map<std::string,double>& specmap)
@@ -384,7 +383,7 @@ namespace Gambit
       }
 
     }
-    
+
   } // end namespace SpecBit
 } // end namespace Gambit
 

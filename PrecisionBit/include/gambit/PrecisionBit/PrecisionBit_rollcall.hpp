@@ -111,7 +111,7 @@ START_MODULE
   QUICK_FUNCTION(PrecisionBit, mw, OLD_CAPABILITY, mw_from_ScalarSingletDM_Z3_spectrum,   triplet<double>, (ScalarSingletDM_Z3,ScalarSingletDM_Z3_running), (ScalarSingletDM_Z3_spectrum, Spectrum))
   QUICK_FUNCTION(PrecisionBit, mw, OLD_CAPABILITY, mw_from_VectorSingletDM_Z2_spectrum,   triplet<double>, (VectorSingletDM_Z2),                            (VectorSingletDM_Z2_spectrum, Spectrum))
   QUICK_FUNCTION(PrecisionBit, mw, OLD_CAPABILITY, mw_from_DiracSingletDM_Z2_spectrum,    triplet<double>, (DiracSingletDM_Z2),                             (DiracSingletDM_Z2_spectrum, Spectrum))
-  QUICK_FUNCTION(PrecisionBit, mw, OLD_CAPABILITY, mw_from_MajoranaSingletDM_Z2_spectrum, triplet<double>, (MajoranaSingletDM_Z2),                          (ScalarSingletDM_Z2_spectrum, Spectrum))
+  QUICK_FUNCTION(PrecisionBit, mw, OLD_CAPABILITY, mw_from_MajoranaSingletDM_Z2_spectrum, triplet<double>, (MajoranaSingletDM_Z2),                          (MajoranaSingletDM_Z2_spectrum, Spectrum))
   QUICK_FUNCTION(PrecisionBit, mw, OLD_CAPABILITY, mw_from_MSSM_spectrum,                 triplet<double>, (MSSM63atQ, MSSM63atMGUT),                       (MSSM_spectrum, Spectrum))
   QUICK_FUNCTION(PrecisionBit, mh, NEW_CAPABILITY, mh_from_SM_spectrum,                   triplet<double>, (),                                              (SM_spectrum, Spectrum))
   QUICK_FUNCTION(PrecisionBit, mh, OLD_CAPABILITY, mh_from_ScalarSingletDM_Z2_spectrum,   triplet<double>, (ScalarSingletDM_Z2,ScalarSingletDM_Z2_running), (ScalarSingletDM_Z2_spectrum, Spectrum))

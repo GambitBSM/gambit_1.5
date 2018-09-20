@@ -648,7 +648,7 @@ namespace Gambit
     void mw_from_ScalarSingletDM_Z3_spectrum(triplet<double> &result)
     {
       using namespace Pipes::mw_from_ScalarSingletDM_Z3_spectrum;
-      const SubSpectrum& LE = Dep::ScalarSingletDM_Z3_->get_LE();
+      const SubSpectrum& LE = Dep::ScalarSingletDM_Z3_spectrum->get_LE();
       result.central = LE.get(Par::Pole_Mass, "W+");;
       result.upper = result.central * LE.get(Par::Pole_Mass_1srd_high, "W+");
       result.lower = result.central * LE.get(Par::Pole_Mass_1srd_low, "W+");
@@ -696,7 +696,7 @@ namespace Gambit
     void mh_from_ScalarSingletDM_Z2_spectrum(triplet<double> &result)
     {
       using namespace Pipes::mh_from_ScalarSingletDM_Z2_spectrum;
-      const SubSpectrum& HE = Dep::SingletDM_spectrum->get_HE();
+      const SubSpectrum& HE = Dep::ScalarSingletDM_Z2_spectrum->get_HE();
       result.central = HE.get(Par::Pole_Mass, 25, 0);
       result.upper = result.central * HE.get(Par::Pole_Mass_1srd_high, 25, 0);
       result.lower = result.central * HE.get(Par::Pole_Mass_1srd_low, 25, 0);
@@ -704,7 +704,7 @@ namespace Gambit
     void mh_from_ScalarSingletDM_Z3_spectrum(triplet<double> &result)
     {
       using namespace Pipes::mh_from_ScalarSingletDM_Z3_spectrum;
-      const SubSpectrum& HE = Dep::SingletDMZ3_spectrum->get_HE();
+      const SubSpectrum& HE = Dep::ScalarSingletDM_Z3_spectrum->get_HE();
       result.central = HE.get(Par::Pole_Mass, 25, 0);
       result.upper = result.central * HE.get(Par::Pole_Mass_1srd_high, 25, 0);
       result.lower = result.central * HE.get(Par::Pole_Mass_1srd_low, 25, 0);

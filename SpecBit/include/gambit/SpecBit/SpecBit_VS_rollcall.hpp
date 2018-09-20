@@ -16,17 +16,17 @@
 ///
 ///  *********************************************
 
-#ifndef __SpecBit_SingletDMZ3_hpp__
-#define __SpecBit_SingletDMZ3_hpp__
+#ifndef __SpecBit_VS_rollcall_hpp__
+#define __SpecBit_VS_rollcall_hpp__
 
-  #define CAPABILITY check_EW_stability_SingletDMZ3
+  #define CAPABILITY check_EW_stability_ScalarSingletDM_Z3
   START_CAPABILITY
-    #define FUNCTION check_EW_stability_SingletDMZ3
+    #define FUNCTION check_EW_stability_ScalarSingletDM_Z3
     START_FUNCTION(double)
-    DEPENDENCY(SingletDMZ3_spectrum, Spectrum)
-    ALLOW_MODEL_DEPENDENCE(SingletDMZ3)
+    DEPENDENCY(ScalarSingletDM_Z3_spectrum, Spectrum)
+    ALLOW_MODEL_DEPENDENCE(ScalarSingletDM_Z3)
     MODEL_GROUP(higgs,   (StandardModel_Higgs_running))
-    MODEL_GROUP(singlet, (SingletDMZ3))
+    MODEL_GROUP(singlet, (ScalarSingletDM_Z3_running))
     ALLOW_MODEL_COMBINATION(higgs, singlet)
     #undef FUNCTION
   #undef CAPABILITY
@@ -34,23 +34,23 @@
   #define CAPABILITY vacuum_stability
   START_CAPABILITY
 
-    #define FUNCTION find_min_lambda_SingletDM
+    #define FUNCTION find_min_lambda_ScalarSingletDM_Z2
     START_FUNCTION(dbl_dbl_bool)
     DEPENDENCY(SMINPUTS, SMInputs)
-    DEPENDENCY(SingletDM_spectrum, Spectrum)
-    ALLOW_MODEL_DEPENDENCE(StandardModel_Higgs_running, SingletDM_running)
+    DEPENDENCY(ScalarSingletDM_Z2_spectrum, Spectrum)
+    ALLOW_MODEL_DEPENDENCE(StandardModel_Higgs_running, ScalarSingletDM_Z2_running)
     MODEL_GROUP(higgs,   (StandardModel_Higgs_running))
-    MODEL_GROUP(singlet, (SingletDM_running))
+    MODEL_GROUP(singlet, (ScalarSingletDM_Z2_running))
     ALLOW_MODEL_COMBINATION(higgs, singlet)
     #undef FUNCTION
 
-		#define FUNCTION find_min_lambda_SingletDMZ3
+		#define FUNCTION find_min_lambda_ScalarSingletDM_Z3
     START_FUNCTION(dbl_dbl_bool)
     DEPENDENCY(SMINPUTS, SMInputs)
-    DEPENDENCY(SingletDMZ3_spectrum, Spectrum)
-    ALLOW_MODEL_DEPENDENCE(StandardModel_Higgs_running, SingletDMZ3)
+    DEPENDENCY(ScalarSingletDM_Z3_spectrum, Spectrum)
+    ALLOW_MODEL_DEPENDENCE(StandardModel_Higgs_running, ScalarSingletDM_Z3)
     MODEL_GROUP(higgs,   (StandardModel_Higgs_running))
-    MODEL_GROUP(singlet, (SingletDMZ3))
+    MODEL_GROUP(singlet, (ScalarSingletDM_Z3_running))
     ALLOW_MODEL_COMBINATION(higgs, singlet)
     #undef FUNCTION
 

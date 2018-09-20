@@ -1,10 +1,8 @@
 ///  GAMBIT: Global and Modular BSM Inference Tool
 ///  *********************************************
 ///
-///  SingletDM to SingletDM_running translation function definitions
-///  We take mS to be the tree-level mass, and not pole mass, and use
-///  tree-level relation to determine mS2, lambda_S is set to zero
-///
+///  StandardModel_Higgs to StandardModel_Higgs_running
+///  translation function definitions.
 ///
 ///  *********************************************
 ///
@@ -46,22 +44,22 @@ void MODEL_NAMESPACE::StandardModel_Higgs_to_StandardModel_Higgs_running (const 
 {
   USE_MODEL_PIPE(PARENT) // get pipe for "interpret as PARENT" function
   logger()<<"Running interpret_as_parent calculations for SM_Higgs --> SM_Higgs_.."<<LogTags::info<<EOM;
-  
+
 
   targetP.setValue("mH", myP.getValue("mH"));
 
   targetP.setValue("QEWSB", 173.34); // default value top mass scale
-  
+
 
 
 //  double tree_level_H_mass,mh2;
 //  tree_level_H_mass=myP.getValue("mH");
-//  
+//
 //  mh2=0.5*pow(tree_level_H_mass,2);
-//  
+//
 //  targetP.setValue("mH2", mh2);
 
-  
+
    // Done! Check that everything is ok if desired.
    #ifdef SMHIGGS_DBUG
      std::cout << "SM_Higgs parameters:" << myP << std::endl;
