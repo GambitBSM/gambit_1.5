@@ -55,14 +55,14 @@ Scanner:
 #======== Observables of interest ========
 ObsLikes:
   - purpose:      LogLike
-    capability:   BBN_abundances
+    capability:   BBN_LogLike
     module:       CosmoBit
     type:         double
 
-# - purpose:      LogLike
-#   capability:   compute_Planck_lensing_loglike
-#   module:       CosmoBit
-#   type:         double
+  - purpose:       LogLike
+    capability:   Helium_abundance
+    module:       CosmoBit
+    type:         double
 
 # - purpose:      LogLike
 #   capability:   compute_Planck_lowp_TT_loglike
@@ -90,10 +90,10 @@ Rules:
 ####
 
 
- # - capability: compute_BBN_abundances
- #   options:
- #     eta: 5.3
- #     N_eff: 3.2
+  - capability: AlterBBN_modelinfo
+    options:
+      #eta: 5.3
+      dNeff: 0
       #planck_path: /home/janina/code/PlanckLike/plc_2.0
       #planck_path: /home/janina/code/gambit_devel/Backends/installed/plc/2.0/plc-2.0
 

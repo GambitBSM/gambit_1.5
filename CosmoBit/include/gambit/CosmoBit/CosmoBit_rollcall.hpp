@@ -240,7 +240,7 @@ START_MODULE
   #define CAPABILITY BBN_abundances
   START_CAPABILITY
     #define FUNCTION compute_BBN_abundances
-    START_FUNCTION(double)
+    START_FUNCTION(CosmoBit::BBN_container)
     ALLOW_MODELS(LCDM)
     DEPENDENCY(AlterBBN_modelinfo, relicparam)
     //BACKEND_REQ(nucl_err, (libbbn), int, (const relicparam*,(std::array<double,27>)&, (std::array<std::array<double,27>,27>)&))
@@ -248,16 +248,27 @@ START_MODULE
     #undef FUNCTION
   #undef CAPABILITY
 
- // #define CAPABILITY BBN_LogLike
- //   START_CAPABILITY
- //   #define FUNCTION compute_BBN_LogLike
- //   START_FUNCTION(double)
- //   DEPENDENCY(AlterBBN_modelinfo, relicparam)
- //   BACKEND_REQ(bbn_excluded_chi2, (libbbn), int, (const relicparam*))
- //   ALLOW_MODELS(LCDM)
-//
-// //   #undef FUNCTION
- // #undef CAPABILITY
+ #define CAPABILITY BBN_LogLike
+   START_CAPABILITY
+   #define FUNCTION compute_BBN_LogLike
+   START_FUNCTION(double)
+   DEPENDENCY(BBN_abundances, CosmoBit::BBN_container)
+   //BACKEND_REQ(bbn_excluded_chi2, (libbbn), int, (const relicparam*))
+   ALLOW_MODELS(LCDM)
+  #undef FUNCTION
+  #undef CAPABILITY
+
+#define CAPABILITY Helium_abundance
+   START_CAPABILITY
+   #define FUNCTION get_Helium_abundance
+   START_FUNCTION(double)
+   DEPENDENCY(BBN_abundances, CosmoBit::BBN_container)
+   //BACKEND_REQ(bbn_excluded_chi2, (libbbn), int, (const relicparam*))
+   ALLOW_MODELS(LCDM)
+  #undef FUNCTION
+  #undef CAPABILITY
+
+
 #undef MODULE
 
 #endif /* defined __CosmoBit_rollcall_hpp__ */

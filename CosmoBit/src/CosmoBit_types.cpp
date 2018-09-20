@@ -26,6 +26,14 @@ namespace Gambit
 {
   namespace CosmoBit
   {
+
+    BBN_container::BBN_container()
+    { 
+      int NNUC = 26; // amount of abundances
+      BBN_abund.resize(NNUC+1, 0.);
+      BBN_covmat.resize(NNUC+1, std::vector<double>(NNUC+1,0.));
+    }
+
     Class_container::Class_container() : lmax(2508)
     {
       input.clear();

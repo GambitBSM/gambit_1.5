@@ -512,8 +512,8 @@ namespace Gambit
 
       // std::cout << "DEBUG: observs.k_array = " << sizeof(observs.k_array) << std::endl;
       // std::cout << "DEBUG: observs.k_array[0] = " << observs.k_array[0] << std::endl;
-	  // std::cout << "DEBUG: observs.k_array = " << observs.k_array << std::endl;
-	  // std::cout << "DEBUG: observs.pks_array = " << observs.pks_array << std::endl;
+    // std::cout << "DEBUG: observs.k_array = " << observs.k_array << std::endl;
+    // std::cout << "DEBUG: observs.pks_array = " << observs.pks_array << std::endl;
       // std::cout << "DEBUG: observs.pkt_array = " << observs.pkt_array << std::endl;
 
       std::cout << "calc_full_pk = " << calc_full_pk << std::endl;
@@ -544,32 +544,32 @@ namespace Gambit
         cosmo.input.addEntry("tau_reio",*Param["tau_reio"]);
         cosmo.input.addEntry("r",observs.r);
       }
-	  else
-	  {
-		printf("DEBUG: we are inside P_k_ini type = gambit_Pk \n");
-		/* gambit_Pk type is set if full_spectra is asked. */
-		cosmo.input.addEntry("P_k_ini type","gambit_Pk");
-		  
-		cosmo.Pk_S.resize(steps+1, 0.);
-		cosmo.Pk_T.resize(steps+1, 0.);
-		cosmo.k_ar.resize(steps+1, 0.);
-		  
-		for (int ii=0; ii < steps; ii++)
-		{
-			// printf("DEBUG: observs.k_array[%d] = %e\n",ii,observs.k_array[ii+1]);
-			// printf("DEBUG: observs.pks_array[%d] = %e\n",ii,observs.pks_array[ii+1]);
-			// printf("DEBUG: observs.pkt_array[%d] = %e\n",ii,observs.pkt_array[ii+1]);
-			cosmo.k_ar.at(ii) = observs.k_array[ii];
-			cosmo.Pk_S.at(ii) = observs.pks_array[ii];
-			cosmo.Pk_T.at(ii) = observs.pkt_array[ii];
-		}
-		  
-		cosmo.input.addEntry("omega_b",*Param["omega_b"]);
-		cosmo.input.addEntry("omega_cdm",*Param["omega_cdm"]);
-		cosmo.input.addEntry("H0",*Param["H0"]);
-		cosmo.input.addEntry("tau_reio",*Param["tau_reio"]);
+    else
+    {
+    printf("DEBUG: we are inside P_k_ini type = gambit_Pk \n");
+    /* gambit_Pk type is set if full_spectra is asked. */
+    cosmo.input.addEntry("P_k_ini type","gambit_Pk");
+      
+    cosmo.Pk_S.resize(steps+1, 0.);
+    cosmo.Pk_T.resize(steps+1, 0.);
+    cosmo.k_ar.resize(steps+1, 0.);
+      
+    for (int ii=0; ii < steps; ii++)
+    {
+      // printf("DEBUG: observs.k_array[%d] = %e\n",ii,observs.k_array[ii+1]);
+      // printf("DEBUG: observs.pks_array[%d] = %e\n",ii,observs.pks_array[ii+1]);
+      // printf("DEBUG: observs.pkt_array[%d] = %e\n",ii,observs.pkt_array[ii+1]);
+      cosmo.k_ar.at(ii) = observs.k_array[ii];
+      cosmo.Pk_S.at(ii) = observs.pks_array[ii];
+      cosmo.Pk_T.at(ii) = observs.pkt_array[ii];
+    }
+      
+    cosmo.input.addEntry("omega_b",*Param["omega_b"]);
+    cosmo.input.addEntry("omega_cdm",*Param["omega_cdm"]);
+    cosmo.input.addEntry("H0",*Param["H0"]);
+    cosmo.input.addEntry("tau_reio",*Param["tau_reio"]);
 
-	  }
+    }
 
       YAML::Node class_dict;
       if (runOptions->hasKey("class_dict"))
@@ -1328,13 +1328,13 @@ namespace Gambit
           // For l >= 2 ask for the cl-spectra.
           if (BEreq::class_output_total_cl_at_l(&cosmo.sp,&cosmo.le,&cosmo.op,byVal(l),byVal(cl)) == _SUCCESS_)
           {
-			if(l==3) std::cout << "  cosmo.Cl_TT.at("<<l<<") = " << cosmo.Cl_TT.at(l) << std::endl;
+      if(l==3) std::cout << "  cosmo.Cl_TT.at("<<l<<") = " << cosmo.Cl_TT.at(l) << std::endl;
             cosmo.Cl_TT.at(l) = cl[cosmo.sp.index_ct_tt]*pow(cosmo.ba.T_cmb*1.e6,2);
             cosmo.Cl_TE.at(l) = cl[cosmo.sp.index_ct_te]*pow(cosmo.ba.T_cmb*1.e6,2);
             cosmo.Cl_EE.at(l) = cl[cosmo.sp.index_ct_ee]*pow(cosmo.ba.T_cmb*1.e6,2);
             cosmo.Cl_BB.at(l) = cl[cosmo.sp.index_ct_bb]*pow(cosmo.ba.T_cmb*1.e6,2);
             cosmo.Cl_PhiPhi.at(l) = cl[cosmo.sp.index_ct_pp];
-			if(l==3) std::cout << "  cosmo.Cl_TT.at("<<l<<") = " << cosmo.Cl_TT.at(l) << std::endl;
+      if(l==3) std::cout << "  cosmo.Cl_TT.at("<<l<<") = " << cosmo.Cl_TT.at(l) << std::endl;
           }
           else
           {
@@ -1722,62 +1722,85 @@ namespace Gambit
       using namespace Pipes::AlterBBN_fill;
 
       BEreq::Init_cosmomodel(&result);
-
-      //result.eta0=runOptions->getValueOrDef<double>(6.11*pow(10,-10),"eta");
+      result.eta0=runOptions->getValueOrDef<double>(6.11*pow(10,-10),"eta");
       //std::cout << "omega b value:" << *Param["omega_b"] << std::endl;
       //std::cout << "eta0 val: " << result.eta0 << std::endl;
-      result.eta0=*Param["omega_b"]*274.*pow(10,-10); 
-      result.dNnu=runOptions->getValue<double>("dNnu");
+      //result.eta0=*Param["omega_b"]*274.*pow(10,-10); 
+      result.dNnu=runOptions->getValue<double>("dNeff");
       result.failsafe = 3;                            // set precision parameters
       result.err = 3;
-
     }
 
-
-    void compute_BBN_abundances(double &result)
+    void compute_BBN_abundances(CosmoBit::BBN_container &result)
     {
       using namespace Pipes::compute_BBN_abundances;
 
       int NNUC =26;
-      int debug = -1;
-      double eta,H2_H,He3_H,Yp,Li7_H,Li6_H,Be7_H;
-      double sigma_H2_H,sigma_He3_H,sigma_Yp,sigma_Li7_H,sigma_Li6_H,sigma_Be7_H;
-      double ratioH [27];
-      double cov_ratioH [27][27];
-
+            
+      double ratioH [NNUC+1];
+      double cov_ratioH [NNUC+1][NNUC+1];
+      
       relicparam const& paramrelic = *Dep::AlterBBN_modelinfo;
       
-      int nucl_err_res = BEreq::nucl_err(&paramrelic,byVal(ratioH), byVal(cov_ratioH[0]));
-
-      if(nucl_err_res){
-         std::cout << "Called nucl_err" << std::endl;
-
-        if(debug){
-          H2_H=ratioH[3];Yp=ratioH[6];Li7_H=ratioH[8];Be7_H=ratioH[9];He3_H=ratioH[5];Li6_H=ratioH[7];
-          sigma_H2_H=sqrt(cov_ratioH[3][3]);sigma_Yp=sqrt(cov_ratioH[6][6]);sigma_Li7_H=sqrt(cov_ratioH[8][8]);sigma_Be7_H=sqrt(cov_ratioH[9][9]);sigma_He3_H=sqrt(cov_ratioH[5][5]);sigma_Li6_H=sqrt(cov_ratioH[7][7]);
-  
-            printf("\t Yp\t\t H2/H\t\t He3/H\t\t Li7/H\t\t Li6/H\t\t Be7/H\n");
-            printf("value:\t %.3e\t %.3e\t %.3e\t %.3e\t %.3e\t %.3e\n",Yp,H2_H,He3_H,Li7_H,Li6_H,Be7_H); 
-            printf(" +/- :\t %.3e\t %.3e\t %.3e\t %.3e\t %.3e\t %.3e\n\n",sigma_Yp,sigma_H2_H,sigma_He3_H,sigma_Li7_H,sigma_Li6_H,sigma_Be7_H);
-  
-            double corr_ratioH[NNUC+1][NNUC+1];
-            for(int ie=1;ie<=NNUC;ie++) for(int je=1;je<=NNUC;je++) corr_ratioH[ie][je]=cov_ratioH[ie][je]/sqrt(cov_ratioH[ie][ie]*cov_ratioH[je][je]);
-            printf("Correlation matrix:\n");
-            printf("\t Yp\t\t H2/H\t\t He3/H\t\t Li7/H\t\t Li6/H\t\t Be7/H\n");
-            printf("Yp\t %f\t %f\t %f\t %f\t %f\t %f\n",corr_ratioH[6][6],corr_ratioH[6][3],corr_ratioH[6][5],corr_ratioH[6][8],corr_ratioH[6][7],corr_ratioH[6][9]);
-            printf("H2/H\t %f\t %f\t %f\t %f\t %f\t %f\n",corr_ratioH[3][6],corr_ratioH[3][3],corr_ratioH[3][5],corr_ratioH[3][8],corr_ratioH[3][7],corr_ratioH[3][9]);
-            printf("He3/H\t %f\t %f\t %f\t %f\t %f\t %f\n",corr_ratioH[5][6],corr_ratioH[5][3],corr_ratioH[5][5],corr_ratioH[5][8],corr_ratioH[5][7],corr_ratioH[5][9]);
-            printf("Li7/H\t %f\t %f\t %f\t %f\t %f\t %f\n",corr_ratioH[8][6],corr_ratioH[8][3],corr_ratioH[8][5],corr_ratioH[8][8],corr_ratioH[8][7],corr_ratioH[8][9]);
-            printf("Li6/H\t %f\t %f\t %f\t %f\t %f\t %f\n",corr_ratioH[7][6],corr_ratioH[7][3],corr_ratioH[7][5],corr_ratioH[7][8],corr_ratioH[7][7],corr_ratioH[7][9]);
-          printf("Be7/H\t %f\t %f\t %f\t %f\t %f\t %f\n\n",corr_ratioH[9][6],corr_ratioH[9][3],corr_ratioH[9][5],corr_ratioH[9][8],corr_ratioH[9][7],corr_ratioH[9][9]);
+      int nucl_err = BEreq::nucl_err(&paramrelic, byVal(ratioH), byVal(cov_ratioH[0]));
+      
+      if (nucl_err){
+        for(int ie=1;ie<=NNUC;ie++){
+          result.BBN_abund.at(ie) = ratioH[ie];
+          for(int je=1;je<=NNUC;je++){
+            result.BBN_covmat.at(ie).at(je) =cov_ratioH[ie][je];
+          }
         }
       }
-      else std::cout <<" Call nucl_err failed" << std::endl; // TODO: throw proper error msg
-     
-
-      result = 1.;
+      else{
+        std::cout << "AlterBBN calculation failed"<<std::endl; //TODO: throw proper error msg
+      }
     }
 
+  void get_Helium_abundance(double &result){
+    using namespace Pipes::get_Helium_abundance;
+
+    CosmoBit::BBN_container BBN_res = *Dep::BBN_abundances;
+    result = BBN_res.BBN_abund.at(6);
+    std::cout << "Helium Abundane = " << result << std::endl;
+
+  }
+
+
+  void compute_BBN_LogLike(double &result){
+
+    using namespace Pipes::compute_BBN_LogLike;
+
+    CosmoBit::BBN_container BBN_res = *Dep::BBN_abundances;
+
+    int NNUC =26;
+    int debug = 1;
+    double eta,H2_H,He3_H,Yp,Li7_H,Li6_H,Be7_H;
+    double sigma_H2_H,sigma_He3_H,sigma_Yp,sigma_Li7_H,sigma_Li6_H,sigma_Be7_H;
+    
+    H2_H=BBN_res.BBN_abund.at(3);Yp=BBN_res.BBN_abund.at(6);Li7_H=BBN_res.BBN_abund.at(8);Be7_H=BBN_res.BBN_abund.at(9);He3_H=BBN_res.BBN_abund.at(5);Li6_H=BBN_res.BBN_abund.at(7);
+    sigma_H2_H=sqrt(BBN_res.BBN_covmat.at(3).at(3));sigma_Yp=sqrt(BBN_res.BBN_covmat.at(6).at(6));sigma_Li7_H=sqrt(BBN_res.BBN_covmat.at(8).at(8));sigma_Be7_H=sqrt(BBN_res.BBN_covmat.at(9).at(9));sigma_He3_H=sqrt(BBN_res.BBN_covmat.at(5).at(5));sigma_Li6_H=sqrt(BBN_res.BBN_covmat.at(7).at(7));
+    
+    printf("\t Yp\t\t H2/H\t\t He3/H\t\t Li7/H\t\t Li6/H\t\t Be7/H\n");
+    printf("value:\t %.3e\t %.3e\t %.3e\t %.3e\t %.3e\t %.3e\n",Yp,H2_H,He3_H,Li7_H,Li6_H,Be7_H); 
+    printf(" +/- :\t %.3e\t %.3e\t %.3e\t %.3e\t %.3e\t %.3e\n\n",sigma_Yp,sigma_H2_H,sigma_He3_H,sigma_Li7_H,sigma_Li6_H,sigma_Be7_H);
+  
+
+    double corr_ratioH[NNUC+1][NNUC+1];
+    for(int ie=1;ie<=NNUC;ie++) for(int je=1;je<=NNUC;je++) corr_ratioH[ie][je]=BBN_res.BBN_covmat.at(ie).at(je)/sqrt(BBN_res.BBN_covmat.at(ie).at(ie)*BBN_res.BBN_covmat.at(je).at(je));
+    printf("Correlation matrix:\n");
+    printf("\t Yp\t\t H2/H\t\t He3/H\t\t Li7/H\t\t Li6/H\t\t Be7/H\n");
+    printf("Yp\t %f\t %f\t %f\t %f\t %f\t %f\n",corr_ratioH[6][6],corr_ratioH[6][3],corr_ratioH[6][5],corr_ratioH[6][8],corr_ratioH[6][7],corr_ratioH[6][9]);
+    printf("H2/H\t %f\t %f\t %f\t %f\t %f\t %f\n",corr_ratioH[3][6],corr_ratioH[3][3],corr_ratioH[3][5],corr_ratioH[3][8],corr_ratioH[3][7],corr_ratioH[3][9]);
+    printf("He3/H\t %f\t %f\t %f\t %f\t %f\t %f\n",corr_ratioH[5][6],corr_ratioH[5][3],corr_ratioH[5][5],corr_ratioH[5][8],corr_ratioH[5][7],corr_ratioH[5][9]);
+    printf("Li7/H\t %f\t %f\t %f\t %f\t %f\t %f\n",corr_ratioH[8][6],corr_ratioH[8][3],corr_ratioH[8][5],corr_ratioH[8][8],corr_ratioH[8][7],corr_ratioH[8][9]);
+    printf("Li6/H\t %f\t %f\t %f\t %f\t %f\t %f\n",corr_ratioH[7][6],corr_ratioH[7][3],corr_ratioH[7][5],corr_ratioH[7][8],corr_ratioH[7][7],corr_ratioH[7][9]);
+    printf("Be7/H\t %f\t %f\t %f\t %f\t %f\t %f\n\n",corr_ratioH[9][6],corr_ratioH[9][3],corr_ratioH[9][5],corr_ratioH[9][8],corr_ratioH[9][7],corr_ratioH[9][9]);
+          
+
+
+    result =1.;
+  }
 
   }
 

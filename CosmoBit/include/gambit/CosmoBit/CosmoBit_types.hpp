@@ -28,13 +28,23 @@
 #ifndef __CosmoBit_types_hpp__
 #define __CosmoBit_types_hpp__
 
+
+
 #include "gambit/Backends/backend_types/class.hpp"
 
 namespace Gambit
 {
 
   namespace CosmoBit
-  {
+  {     
+    class BBN_container
+    {
+      public:
+        BBN_container();
+ 
+        std::vector<double> BBN_abund;
+        std::vector< std::vector<double> > BBN_covmat;
+    };
 
     // Forward declaration of warnings and errors
     error& CosmoBit_error();
