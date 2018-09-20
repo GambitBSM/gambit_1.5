@@ -1765,6 +1765,8 @@ namespace Gambit
 				cosmo.input.addEntry("V_2",-100.); //Hard coding \chi inflaton potential boundaries.
 //				cosmo.input.addEntry("N_star",*Param["N_pivot"]); //Hard coding \chi inflaton potential boundaries.
 				
+				cosmo.input.addEntry("primordial_verbose",1);
+				
 				cosmo.input.addEntry("omega_b",*Param["omega_b"]);
 				cosmo.input.addEntry("omega_cdm",*Param["omega_cdm"]);
 				cosmo.input.addEntry("H0",*Param["H0"]);
