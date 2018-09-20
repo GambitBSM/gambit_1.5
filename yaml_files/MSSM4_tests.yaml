@@ -21,21 +21,21 @@ Parameters:
     Au_3:
       fixed_value: 0
     M1:
-      fixed_value: -54.2001736776
+      fixed_value: -50.5805392859
     M2:
-      fixed_value: 142.915815872
+      fixed_value: 149.269818382
     M3:
       fixed_value: 5000
     Qin:
       fixed_value: 3000  # 3000 = sqrt(mQL3*mUR3) = mSUSY, since we have mQL3 = mUR3 = mq2 = (3000)^2
     TanBeta:
-      fixed_value: 30.842473818
+      fixed_value: 28.7085662456
     ml2:
       fixed_value: 9000000
     mq2:
       fixed_value: 9000000
     mu: 
-      fixed_value: -279.355471629
+      fixed_value: 252.672434156
     mA:
       fixed_value: 5000
 
@@ -394,6 +394,8 @@ Rules:
                     "CMS_13TeV_2LEPsoft_36invfb_nocovar",
                     "CMS_13TeV_MultiLEP_2SSLep_36invfb",
                     "CMS_13TeV_MultiLEP_3Lep_36invfb",
+		    "CMS_13TeV_MultiLEP_Full_2SSLep_36invfb",
+                    "CMS_13TeV_MultiLEP_Full_3Lep_36invfb",
                     "CMS_13TeV_2OSLEP_36invfb",
                     "CMS_13TeV_2OSLEP_36invfb_nocovar" ] ]
 
@@ -456,7 +458,7 @@ KeyValues:
     model_invalid_for_lnlike_below_alt: -1e5
 
   # Set the default output path
-  default_output_path: "runs/MSSMEW/"
+  default_output_path: "runs/MSSMEW_BF/"
 
   # We set the errors from the physics modules to be non-fatal
   # to avoid crashing the entire scan due to a rare problem point.
