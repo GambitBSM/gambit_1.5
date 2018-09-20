@@ -284,6 +284,49 @@ namespace Gambit
       }
     }
 
+    void class_set_parameter_LCDM_dNeff_Smu(Class_container& cosmo)
+    {
+      //std::cout << "Last seen alive in: class_set_parameter_LCDM" << std::endl;
+      using namespace Pipes::class_set_parameter_LCDM_dNeff_Smu;
+
+      int l_max=cosmo.lmax;
+
+      cosmo.input.clear();
+
+      cosmo.input.addEntry("output","tCl pCl lCl");
+      cosmo.input.addEntry("l_max_scalars",l_max);
+      cosmo.input.addEntry("lensing","yes");
+
+      cosmo.input.addEntry("omega_b",*Param["omega_b"]);
+      cosmo.input.addEntry("omega_cdm",*Param["omega_cdm"]);
+      cosmo.input.addEntry("H0",*Param["H0"]);
+      cosmo.input.addEntry("ln10^{10}A_s",*Param["ln10A_s"]);
+      cosmo.input.addEntry("n_s",*Param["n_s"]);
+      cosmo.input.addEntry("tau_reio",*Param["tau_reio"]);
+
+      cosmo.input.addEntry("N_ur",*Param["dNeff"]+0.00641);
+
+      cosmo.input.addEntry("N_ncdm",3);
+      std::stringstream sstream;
+      double numass = *Param["Smu"]/3.;
+      sstream << numass << ", " << numass << ", " << numass;
+      cosmo.input.addEntry("m_ncdm",sstream.str());
+
+      cosmo.input.addEntry("YHe",*Dep::Helium_abundance);
+
+      YAML::Node class_dict;
+      if (runOptions->hasKey("class_dict"))
+      {
+        class_dict = runOptions->getValue<YAML::Node>("class_dict");
+        for (auto it=class_dict.begin(); it != class_dict.end(); it++)
+        {
+          std::string name = it->first.as<std::string>();
+          std::string value = it->second.as<std::string>();
+          cosmo.input.addEntry(name,value);
+        }
+      }
+    }
+
     void class_set_parameter_LCDM_SingletDM(Class_container& cosmo)
     {
       //std::cout << "Last seen alive in: class_set_parameter_LCDM_SingletDM" << std::endl;
@@ -2210,7 +2253,7 @@ namespace Gambit
       //std::cout << "eta0 val: " << result.eta0 << std::endl;
 
       result.eta0=*Param["omega_b"]*274.*pow(10,-10);
-      result.dNnu=runOptions->getValue<double>("dNeff");
+      result.dNnu=*Param["dNeff"];
       result.failsafe = 3;                            // set precision parameters
       result.err = 3;
     }
