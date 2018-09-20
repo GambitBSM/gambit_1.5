@@ -993,15 +993,15 @@ if(NOT ditched_${name}_${ver})
     DOWNLOAD_COMMAND ${DL_BACKEND} ${dl} ${md5} ${dir}
     SOURCE_DIR ${dir}
     BUILD_IN_SOURCE 1
-    PATCH_COMMAND patch -p0 < ${patch}/primordial_header.dif
-    COMMAND patch -p0 < ${patch}/primordial_source.dif
-    COMMAND patch -p0 < ${patch}/input_source.dif
+    ## PATCH_COMMAND patch -p0 < ${patch}/primordial_header.dif
+    ## COMMAND patch -p0 < ${patch}/primordial_source.dif
+    ## COMMAND patch -p0 < ${patch}/input_source.dif
     ## COMMAND patch -p0 < ${patch}/output_source.dif
     ## COMMAND patch -p0 < ${patch}/spectra_source.dif
     ## COMMAND patch -p0 < ${patch}/transfer_source.dif
-    COMMAND patch -p0 < ${patch}/perturbations_source.dif
-    COMMAND patch -p0 < ${patch}/thermo_source.dif
-    COMMAND patch -p0 < ${patch}/backgrnd_source.dif
+    ## COMMAND patch -p0 < ${patch}/perturbations_source.dif
+    ## COMMAND patch -p0 < ${patch}/thermo_source.dif
+    ## COMMAND patch -p0 < ${patch}/backgrnd_source.dif
     CONFIGURE_COMMAND ""
     BUILD_COMMAND ${CMAKE_MAKE_PROGRAM} CC=${CMAKE_C_COMPILER} CCFLAG=${GAMBIT_C_FLAGS} OMPFLAG=${OpenMP_CXX_FLAGS} class
     COMMAND ${CMAKE_COMMAND} -E make_directory lib
