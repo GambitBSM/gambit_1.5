@@ -15,6 +15,8 @@ namespace Gambit {
     ///
     /// @author Andy Buckley
     ///
+    /// @warning NOT YET VALIDATED!!!
+    ///
     class Analysis_ATLAS_13TeV_ZGammaGrav_CONFNOTE_80invfb : public HEPUtilsAnalysis {
     public:
 
