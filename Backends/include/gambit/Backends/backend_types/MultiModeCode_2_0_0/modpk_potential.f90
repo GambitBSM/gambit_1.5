@@ -879,7 +879,7 @@ contains
        ii = locate(chiHarray,phi(1))
        call polint(chiHarray(ii:ii+4), d3potHarray(ii:ii+4), &
                          phi(1), third_deriv(1,1,1), derr(1))
-       print*,"third_deriv(1,1,1) = ", third_deriv(1,1,1), "derr(1)" , derr(1)
+       ! print*,"third_deriv(1,1,1) = ", third_deriv(1,1,1), "derr(1)" , derr(1)
 
     case default
 
@@ -1258,8 +1258,6 @@ contains
     power_adiab = dot_product(matmul(power_matrix,omega_z),omega_z)
     power_adiab = (1e0_dp/phi_dot_0_scaled**2)*power_adiab
     !------------------------------------------------------------
-
-    print*, "power_adiab = ", power_adiab
 
     !Isocurvature power spectra
     if (numb_infl>1) then

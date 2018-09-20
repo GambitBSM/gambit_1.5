@@ -25,7 +25,8 @@
 #include "gambit/cmake/cmake_variables.hpp"
 
 #ifdef HAVE_PYBIND11
-    #include <pybind11/pybind11.h>
+  #include <pybind11/pybind11.h>
+  #include <pybind11/numpy.h>
 #endif
 
 #include "gambit/Elements/ini_catch.hpp"

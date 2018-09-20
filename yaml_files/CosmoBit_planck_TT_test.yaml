@@ -17,19 +17,21 @@
 Parameters:
 
 ##  LCDM: !import include/LCDM_scan.yaml
-  inf_SR1quad_LCDMt: !import include/inf_SR1quad_LCDMt_scan.yaml
+##  inf_SR1quad_LCDMt: !import include/inf_SR1quad_LCDMt_scan.yaml
+  inf_smashInf_LCDMt: !import include/smash_inflation_rules.yaml
 
-  Planck_TT: !import include/Planck_TT_scan.yaml
+  Planck_TT: !import include/Planck_TT_scan_bestfit.yaml
 
 #======== Prior setup ========
 Priors:
 
 #======== Output setup ========
 Printer:
-  printer: ascii
+  printer: hdf5
   options:
-    output_file: "gambit_output.data"
-    buffer_length: 100
+    output_file: "results.hdf5"
+    group: “/smash_multinest_results”
+    delete_file_on_restart: false
 
 #======== Scanner setup ========
 Scanner:
@@ -39,8 +41,8 @@ Scanner:
     multinest:
       plugin: multinest
       like:  LogLike
-      nlive: 1000
-      tol: 0.01
+      nlive: 400
+      tol: 0.05
       aux_printer_txt_options:
       aux_printer_stats_options:
       aux_printer_live_options:

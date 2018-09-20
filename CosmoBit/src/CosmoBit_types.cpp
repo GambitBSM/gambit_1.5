@@ -14,6 +14,8 @@
 ///          (stoecker@physik.rwth-aachen.de)
 ///  \date 2017 Nov
 ///
+///  \author Selim Hotinli
+///	 \date 2018 Jan
 ///  *********************************************
 
 #include <string>

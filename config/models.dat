@@ -583,6 +583,12 @@ inf_smashInf_LCDMt: |
    8 parameter cosmology smash inflation model --- smash inflation
    A_s, n_s and r are given by inflationary model parameters: xi, m^2.
 
+inf_1naturalInf_LCDMt: |
+   7 parameter cosmology+inflation model with axion-like potential.
+
+inf_1hilltopInf_LCDMt: |
+   7 parameter cosmology+inflation model with hilltop potential.
+
 lowl_SMW_70_dx11d_2014_10_03_v5c_Ap: |
 
    Planck likelihood for low-p TT spectrum with a single nuisance parameter.
@@ -618,3 +624,23 @@ TestDecayingDM: |
   lifetime - lifetime of said DM candidate [in s]
   fraction - fraction of how much the decaying DM component contributes to all DM.
   BR       - the fraction of how much energy will be contributed in e+/e-. (1-BR will be asinged to photons)
+
+VectorDM: |
+
+   The vector DM model, with two parameters mV (the mass of the vector DM), and lambda_hV, the strength of the vector DM interaction with the SM Higgs. Note that mV should either be interpreted as the tree level mass or directly as the pole mass for V. This is analogous to the treatment of the SM Higgs mass in the model StandardModel_Higgs.
+
+MajoranaDM: |
+
+   The Majorana fermion DM model, with three parameters mX (the mass of the Majorana fermion DM), lX = lambda_{hX}/Lambda_X where Lambda_X is the EFT cut-off scale, and xi is a mixing angle, controlling the interaction between the Majorana fermion DM and the SM Higgs.
+
+MajoranaDM_sps: |
+
+   Same as MajoranaDM, but specifying instead the scalar and pseudoscalar couplings lX_s and lX_ps of DM to the Higgs.
+
+DiracDM: |
+
+   The Dirac fermion DM model, with three parameters mF (the mass of the Dirac fermion DM), lF = lambda_{hF}/Lambda_F where Lambda_F is the EFT cut-off scale, and xi is a mixing angle, controlling the scalar-pseudoscalar interaction between the Dirac fermion DM and the SM Higgs.
+
+DiracDM_sps: |
+
+   Same as DiracDM, but specifying instead the scalar and pseudoscalar couplings lF_s and lF_ps of DM to the Higgs.

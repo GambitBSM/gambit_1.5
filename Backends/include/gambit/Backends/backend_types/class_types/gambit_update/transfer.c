@@ -209,9 +209,6 @@ int transfer_init(
 
   ptr->angular_rescaling = pth->angular_rescaling;
 	
-  printf("DEBUG: ptr->angular_rescaling (e) = %e\n",ptr->angular_rescaling);
-  printf("DEBUG: ptr->angular_rescaling (d) = %d\n",ptr->angular_rescaling);
-
   /** - order of magnitude of the oscillation period of transfer functions */
 
   q_period = 2.*_PI_/(tau0-tau_rec)*ptr->angular_rescaling;
@@ -405,7 +402,6 @@ int transfer_init(
   class_call(hyperspherical_HIS_free(&BIS,ptr->error_message),
              ptr->error_message,
              ptr->error_message);
-  printf("DEBUG: We are successfully out of the transfer_init.\n");
   return _SUCCESS_;
 }
 
@@ -965,8 +961,6 @@ int transfer_get_l_list(
 
       ptr->l_size[index_md] = MAX(ptr->l_size[index_md],ptr->l_size_tt[index_md][index_tt]);
 		
-	  // printf("DEBUG: ptr->l_size[%d] = %d\n",index_md,ptr->l_size[index_md]);
-
     }
   }
 
