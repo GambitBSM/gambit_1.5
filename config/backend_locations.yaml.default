@@ -17,6 +17,21 @@ CaptnGeneral:
 DarkSUSY:
   5.1.3:       ./Backends/installed/darksusy/5.1.3/lib/libdarksusy.so
 
+DarkSUSY_MSSM:
+  6.1.1:       ./Backends/installed/darksusy/6.1.1/lib/libds_core_mssm.so
+
+DarkSUSY_generic_wimp:
+  6.1.1:       ./Backends/installed/darksusy/6.1.1/lib/libds_core_generic_wimp.so
+
+DarkSUSY_generic_decayingDM:
+  6.1.1:       ./Backends/installed/darksusy/6.1.1/lib/libds_core_generic_decayingDM.so
+
+DarkSUSY_silveira_zee:
+  6.1.1:       ./Backends/installed/darksusy/6.1.1/lib/libds_core_silveira_zee.so
+
+DarkSUSY_vdSIDM:
+  6.1.1:       ./Backends/installed/darksusy/6.1.1/lib/libds_vdSIDM.so
+
 SuperIso:
   3.6:         ./Backends/installed/superiso/3.6/libsuperiso.so
 
