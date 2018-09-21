@@ -7,13 +7,15 @@ for micrOMEGAs.
    DONE [JE]. Added DarkSUSY 6.1.1 as a base and then added
    models. Currently all models in DS 6.1.1 have their separate models
    in the cmake system, along the same lines as for mO.
+   config/backend_locations.yaml.default is also updated.
 
 2. cp include/gambit/Backends/frontends/DarkSUSY_5_1_3.hpp  -> 6_0;
    again one for each module, start with MSSM 
    (comment out everything but init, then comment in one by one)
 
 3. cp src/frontends/DarkSUSY_5_1_3.cpp -> 6_0;
-   again one for each module, start with MSSM 
+   again one for each module, start with MSSM
+   Partially done: SLHA intialization should be OK. neutrions still to go.
 
 4. for each replaced function(ality) DS5->DS6, change/update:
    - DarkBit_rollcall.hpp (always, unless some capability is same)

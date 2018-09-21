@@ -13,6 +13,10 @@
 ///          (torsten.bringmann@fys.uio.no)
 ///  \date 2018 September
 ///
+///  \author Joakim Edsjo
+///          (edsjo@fysik.su.se)
+///  \date 2018 September
+///
 ///
 ///  *********************************************
 
@@ -88,6 +92,7 @@ BE_NAMESPACE
     "then sort out your SLHA file so that it is readable by DarkSUSY!                      ");
   }
 
+  // FIXME. JE: This routine needs updating to new structure
   /// Function dsgenericwimp_nusetup sets DarkSUSY's internal common
   /// blocks with all the properties required to compute neutrino
   /// yields for a generic WIMP.
@@ -140,6 +145,7 @@ BE_NAMESPACE
   ///   --> p        p=1 for neutrino yield, p=2 for nubar yield
   ///   --> context  void pointer (ignored)
 
+  // FIXME: JE: This routine needs updating for new structure. New routine?
   double neutrino_yield(const double& log10E, const int& ptype, void*&)
   {
     int istat = 0;
@@ -168,7 +174,10 @@ BE_NAMESPACE
 
   /// Translates GAMBIT string identifiers to the SUSY
   /// particle codes used internally in DS (as stored in common block /pacodes_mssm/)
-  // FIXME: add channel codes!
+  // FIXME: add channel codes! JE: Already forgot, why do we need channel codes?
+  // Note: DarkSUSY use the opposite convention on h1_0 and h2_0. The names
+  // used here are the gamibt names where h1_0 hence refers to what DarkSUSY
+  // calls H2. 
   int DSparticle_code(const str& particleID)
   {
     int kpart;
@@ -718,7 +727,7 @@ BE_NAMESPACE
       dswwidth(u2);
     #endif
 
-    return 0;  // everything OK (hah. maybe.)
+    return 0;  // everything OK (hah. maybe. sure.)
   }
 
   /// Returns the vector of neutral Higgs decay channels in DarkSUSY

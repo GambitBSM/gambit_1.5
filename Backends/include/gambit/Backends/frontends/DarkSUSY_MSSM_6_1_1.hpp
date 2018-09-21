@@ -15,6 +15,10 @@
 ///          (torsten.bringmann@fys.uio.no)
 ///  \date 2018 September
 ///
+///  \author Joakim Edsjo
+///          (edsjo@fysik.su.se)
+///  \date 2018 September
+///
 ///  *********************************************
 
 #define BACKENDNAME DarkSUSY_MSSM

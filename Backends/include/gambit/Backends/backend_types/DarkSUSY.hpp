@@ -27,7 +27,7 @@
 ///
 ///  \author Joakim Edsjo
 ///          (edsjo@fysik.su.se)
-///  \date 2015 May
+///  \date 2015 May, 2018 Sep
 ///
 ///  *********************************************
 
@@ -159,7 +159,7 @@ namespace Gambit
         Fdouble g2wmz;
         Fdouble gywmz;
     };
-// this one only exists in DS 5
+// this one only exists in DS 6
     struct DS6_COUPLINGCONSTANTS
     {
         Fdouble g2weak;
