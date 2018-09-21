@@ -418,7 +418,7 @@ ScalarSingletDM_Z3_running: |
 
 StandardModel_Higgs_running: |
 
-   This model provides a description of the SM Higgs sector in terms of mH , the bare Higgs mass parameter in the SM Lagrangian at scale mZ. QEWSB specifies the scale at which the electroweak symmetry-breaking (EWSB) consistency condition that the Higgs potential possess a tree-level minimum is imposed. This model is intended for use in situations where the Higgs potential is run to different scales, e.g. for calculating pole masses or investigating vacuum stability.
+   This model provides a description of the SM Higgs sector in terms of mH, the bare Higgs mass parameter in the SM Lagrangian at scale mZ. QEWSB specifies the scale at which the electroweak symmetry-breaking (EWSB) consistency condition that the Higgs potential possess a tree-level minimum is imposed. This model is intended for use in situations where the Higgs potential is run to different scales, e.g. for calculating pole masses or investigating vacuum stability.
 
 Halo_Einasto: |
    Dark matter halo model corresponding to an Einasto density profile with scale density rhos,

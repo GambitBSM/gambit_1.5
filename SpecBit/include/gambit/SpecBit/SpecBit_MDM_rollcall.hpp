@@ -25,7 +25,7 @@
     START_FUNCTION(Spectrum)
     DEPENDENCY(SMINPUTS, SMInputs)
     ALLOW_MODEL_DEPENDENCE(StandardModel_Higgs_running, MDM)
-    MODEL_GROUP(higgs_running,   (StandardModel_Higgs_running))
+    MODEL_GROUP(higgs_running, (StandardModel_Higgs_running))
     MODEL_GROUP(mdm, (MDM))
     ALLOW_MODEL_COMBINATION(higgs_running, mdm)
     #undef FUNCTION

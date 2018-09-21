@@ -57,7 +57,7 @@ Parameters:
     mH:
       range: [124.1, 127.3]
 
-  SingletDM:
+  ScalarSingletDM_Z2:
     mS:
       range: [45., 10000.]
       prior_type: log
@@ -111,7 +111,7 @@ Printer:
 
   #printer: ascii
   #options:
-  #  output_file: "SingletDM.txt"
+  #  output_file: "ScalarSingletDM_Z2.txt"
   #  buffer_length: 10
   #  delete_file_on_restart: true
 
@@ -226,7 +226,7 @@ ObsLikes:
 Rules:
 
   # Options for Process Catalog setup
-  - function: TH_Process_Catalog_SingletDM
+  - function: TH_Process_Catalog_ScalarSingletDM_Z2
     options:
        ProcessCatalog_MinBranching: 0 # Minimum branching fraction of included processes
 
@@ -259,7 +259,7 @@ Rules:
 
   # Choose whether MicrOmegas calculates decays widths for the MSSM internally using CalcHEP (internal_decays=true) or uses
   # values from the GAMBIT decay table (internal_decays=false).
-  - function: MicrOmegas_SingletDM_3_6_9_2_init
+  - function: MicrOmegas_ScalarSingletDM_Z2_3_6_9_2_init
     options:
        VZdecay: 1 # 0 - no 3 body final states, 1 - virtual Z in annihilations, 2 - virtual Z in coannihilations
        VWdecay: 1 # 0 - no 3 body final states, 1 - virtual W in annihilations, 2 - virtual W in coannihilations
@@ -314,7 +314,7 @@ Rules:
 
   # Use DarkBit or MicrOmegas for calculating direct detection couplings
   - capability: DD_couplings
-    function: DD_couplings_SingletDM
+    function: DD_couplings_ScalarSingletDM_Z2
     #function: DD_couplings_MicrOmegas
 
   # Nuclear SI Parameter Likelihoods (All values in MeV)
@@ -384,6 +384,10 @@ Rules:
     options:
       nulike_speed: 3
 
+  - capability: capture_rate_Sun
+    function: capture_rate_Sun_const_xsec
+    module: DarkBit
+
   # Cascade decay MC options
   - function: cascadeMC_LoopManager
     options:
@@ -405,8 +409,8 @@ Rules:
       cMC_endCheckFrequency: 25 # number of events to wait between successive checks of the convergence criteria
 
   # Choose to get the spectrum from SpecBit proper, not an SLHA file.
-  - capability: SingletDM_spectrum
-    function: get_SingletDM_spectrum
+  - capability: ScalarSingletDM_Z2_spectrum
+    function: get_ScalarSingletDM_Z2_spectrum
 
   # Choose to get decays from DecayBit proper, not from an SLHA file.
   - capability: decay_rates
@@ -440,4 +444,4 @@ KeyValues:
   debug: true
 
   # Set the output path for the log files (relative to working directory unless absolute path is specified)
-  default_output_path: "runs/SingletDM-DarkBit/"
+  default_output_path: "runs/ScalarSingletDM_Z2-DarkBit/"

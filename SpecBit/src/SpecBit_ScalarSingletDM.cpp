@@ -407,6 +407,11 @@ namespace Gambit
       int check_perturb_pts = runOptions.getValueOrDef<double>(10,"check_perturb_pts");
       double do_check_perturb = runOptions.getValueOrDef<bool>(false,"check_perturb");
       double check_perturb_scale = runOptions.getValueOrDef<double>(1.22e19,"check_high_scale");
+      double input_scale_tolerance = runOptions.getValueOrDef<double>(1e-3,"input_scale_tolerance");
+
+      // Check that the Higgs MSbar parameter has been provided at the scale of the singlet MSbar mass
+      double Qin = *myPipe::Param.at("Qin");
+      if (abs((Qin - *myPipe::Param.at("mS"))/Qin) > input_scale_tolerance) SpecBit_error().raise(LOCAL_INFO, "SM_Higgs_running::Qin must equal ScalarSingletDM_Z2_running::mS");
 
       if (do_check_perturb)
       {
@@ -443,6 +448,11 @@ namespace Gambit
       int check_perturb_pts = runOptions.getValueOrDef<double>(10,"check_perturb_pts");
       double do_check_perturb = runOptions.getValueOrDef<bool>(false,"check_perturb");
       double check_perturb_scale = runOptions.getValueOrDef<double>(1.22e19,"check_high_scale");
+      double input_scale_tolerance = runOptions.getValueOrDef<double>(1e-3,"input_scale_tolerance");
+
+      // Check that the Higgs MSbar parameter has been provided at the scale of the singlet MSbar mass
+      double Qin = *myPipe::Param.at("Qin");
+      if (abs((Qin - *myPipe::Param.at("mS"))/Qin) > input_scale_tolerance) SpecBit_error().raise(LOCAL_INFO, "SM_Higgs_running::Qin must equal ScalarSingletDM_Z3_running::mS");
 
       if (do_check_perturb)
       {

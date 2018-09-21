@@ -60,7 +60,7 @@
     START_FUNCTION(dbl_dbl_bool)
     DEPENDENCY(SMINPUTS, SMInputs)
     DEPENDENCY(ScalarSingletDM_Z3_spectrum, Spectrum)
-    ALLOW_MODEL_DEPENDENCE(StandardModel_Higgs_running, ScalarSingletDM_Z3)
+    ALLOW_MODEL_DEPENDENCE(StandardModel_Higgs_running, ScalarSingletDM_Z3_running)
     MODEL_GROUP(higgs,   (StandardModel_Higgs_running))
     MODEL_GROUP(singlet, (ScalarSingletDM_Z3_running))
     ALLOW_MODEL_COMBINATION(higgs, singlet)
