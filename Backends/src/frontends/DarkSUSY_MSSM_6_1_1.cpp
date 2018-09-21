@@ -295,7 +295,7 @@ BE_NAMESPACE
       err << "Error from DarkSUSY::dsddgpgn function when calling DD_couplings().  ierr = " << ierr;
       piped_errors.request(LOCAL_INFO, err.str());
     } 
-    double *result;
+    double *result=0;
     result[0]=gg.gg(1,1).re; // gps
     result[1]=gg.gg(1,2).re; // gns
     result[2]=gg.gg(4,1).re; // gpa

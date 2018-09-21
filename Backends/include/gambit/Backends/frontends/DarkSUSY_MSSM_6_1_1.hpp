@@ -87,12 +87,9 @@ BE_FUNCTION(dsddgpgn, void, (DS_gg&, int&), "dsddgpgn_", "dsddgpgn")
 // BE_FUNCTION(dsIBwhdxdy, double, (int&, double&, double&), "dsibwhdxdy_", "dsIBwhdxdy")
 // BE_FUNCTION(dsIBwwdxdy, double, (int&, double&, double&), "dsibwwdxdy_", "dsIBwwdxdy")
 // BE_FUNCTION(dssusy, void, (int&,int&), "dssusy_", "dssusy")
-// also used in RelicDenisty.cpp
+// also used in RelicDensity.cpp
 // BE_FUNCTION(dsprep, void, (), "dsprep_", "dsprep")
 
-
-// Functions used in DirectDetection.cpp
-// BE_FUNCTION(dsddgpgn, void, (double&, double&, double&, double&), "dsddgpgn_", "dsddgpgn")
 
 // Functions used in GamYields.cpp
 // BE_FUNCTION(dshayield, double, (double&,double&,int&,int&,int&), "dshayield_", "dshayield")

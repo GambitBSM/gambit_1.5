@@ -548,7 +548,7 @@ START_MODULE
     #define FUNCTION DD_couplings_DarkSUSY
       START_FUNCTION(DM_nucleon_couplings)
       DEPENDENCY(DarkSUSY_PointInit, bool)
-      BACKEND_REQ(dsddgpgn, (), void, (double&, double&, double&, double&))
+      BACKEND_REQ(get_DD_couplings, (needs_DS), double*, ())
       BACKEND_REQ(mspctm, (), DS_MSPCTM)
       BACKEND_REQ(ddcom, (DarkSUSY), DS_DDCOM)
       ALLOW_JOINT_MODEL(nuclear_params_fnq,MSSM63atQ)
