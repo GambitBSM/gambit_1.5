@@ -2310,7 +2310,10 @@ namespace Gambit
     using namespace Pipes::get_Helium_abundance;
 
     CosmoBit::BBN_container BBN_res = *Dep::BBN_abundances;
+    std::map<std::string, int> abund_map = BBN_res.get_map();
+
     result = BBN_res.BBN_abund.at(6);           // TODO: use map to refer to Helium pos in array
+    result = BBN_res.BBN_abund.at(abund_map["Yp"]);           // TODO: use map to refer to Helium pos in array
     std::cout << "Helium Abundane = " << result << std::endl;
 
   }
@@ -2324,13 +2327,16 @@ namespace Gambit
 
     //CosmoBit::BBN_container abund_map
 
+    std::map<std::string, int> abund_map = BBN_res.get_map();
+    std::cout << " Abundane map Yp " << abund_map["Yp"] << " Abundane map H2 " << abund_map["H2"] << std::endl;
+    // TODO: if key error: throw error msg
     int NNUC =26;
     int debug = 1;
     double eta,H2_H,He3_H,Yp,Li7_H,Li6_H,Be7_H;
     double sigma_H2_H,sigma_He3_H,sigma_Yp,sigma_Li7_H,sigma_Li6_H,sigma_Be7_H;
     
-    H2_H=BBN_res.BBN_abund.at(3);Yp=BBN_res.BBN_abund.at(6);Li7_H=BBN_res.BBN_abund.at(8);Be7_H=BBN_res.BBN_abund.at(9);He3_H=BBN_res.BBN_abund.at(5);Li6_H=BBN_res.BBN_abund.at(7);
-    sigma_H2_H=sqrt(BBN_res.BBN_covmat.at(3).at(3));sigma_Yp=sqrt(BBN_res.BBN_covmat.at(6).at(6));sigma_Li7_H=sqrt(BBN_res.BBN_covmat.at(8).at(8));sigma_Be7_H=sqrt(BBN_res.BBN_covmat.at(9).at(9));sigma_He3_H=sqrt(BBN_res.BBN_covmat.at(5).at(5));sigma_Li6_H=sqrt(BBN_res.BBN_covmat.at(7).at(7));
+    H2_H=BBN_res.BBN_abund.at(abund_map["H2"]);Yp=BBN_res.BBN_abund.at(abund_map["Yp"]);Li7_H=BBN_res.BBN_abund.at(abund_map["Li7"]);Be7_H=BBN_res.BBN_abund.at(abund_map["Be7"]);He3_H=BBN_res.BBN_abund.at(abund_map["He3"]);Li6_H=BBN_res.BBN_abund.at(abund_map["Li6"]);
+    sigma_H2_H=sqrt(BBN_res.BBN_covmat.at(abund_map["H2"]).at(abund_map["H2"]));sigma_Yp=sqrt(BBN_res.BBN_covmat.at(abund_map["Yp"]).at(abund_map["Yp"]));sigma_Li7_H=sqrt(BBN_res.BBN_covmat.at(abund_map["Li7"]).at(abund_map["Li7"]));sigma_Be7_H=sqrt(BBN_res.BBN_covmat.at(abund_map["Be7"]).at(abund_map["Be7"]));sigma_He3_H=sqrt(BBN_res.BBN_covmat.at(abund_map["He3"]).at(abund_map["He3"]));sigma_Li6_H=sqrt(BBN_res.BBN_covmat.at(abund_map["Li6"]).at(abund_map["Li6"]));
     
     printf("\t Yp\t\t H2/H\t\t He3/H\t\t Li7/H\t\t Li6/H\t\t Be7/H\n");
     printf("value:\t %.3e\t %.3e\t %.3e\t %.3e\t %.3e\t %.3e\n",Yp,H2_H,He3_H,Li7_H,Li6_H,Be7_H); 
