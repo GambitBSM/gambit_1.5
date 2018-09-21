@@ -18,7 +18,7 @@ Parameters:
     QEWSB:
       same_as: StandardModel_SLHA2::mT
     Qin:
-      same_as: ScalarSingletDM_Z3::mS
+      same_as: ScalarSingletDM_Z3_running::mS
 
   # Nuclear matrix parameters.
   nuclear_params_sigmas_sigmal:
@@ -47,7 +47,7 @@ Parameters:
     gamma: 1
 
   # BSM parameters
-  ScalarSingletDM_Z3:
+  ScalarSingletDM_Z3_running:
     mS:
       range: [45., 20000.]
       prior_type: log
