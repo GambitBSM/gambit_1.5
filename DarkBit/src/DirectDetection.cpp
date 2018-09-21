@@ -123,14 +123,19 @@ namespace Gambit
       {
         // Calling DarkSUSY subroutine dsddgpgn(gps,gns,gpa,gna)
         // to set all four couplings.
-        BEreq::dsddgpgn(result.gps, result.gns, result.gpa, result.gna);
+
+        int ierr = 0;
+        double* DDcouplings;
+        BEreq::get_DD_couplings(DDcouplings);
+        ///This call is now replaced by the above call to a convenience function
+        //BEreq::dsddgpgn(result.gps, result.gns, result.gpa, result.gna);
         double factor =
         /// Option rescale_couplings<double>: Rescaling factor for WIMP-nucleon couplings (default 1.)
           runOptions->getValueOrDef<double>(1., "rescale_couplings");
-        result.gps *= factor;
-        result.gns *= factor;
-        result.gpa *= factor;
-        result.gna *= factor;
+        result.gps = factor*DDcouplings[0];// *= factor;
+        result.gns = factor*DDcouplings[1];// *= factor;
+        result.gpa = factor*DDcouplings[2];// *= factor;
+        result.gna = factor*DDcouplings[3];// *= factor;
         logger() << LogTags::debug << "DarkSUSY dsddgpgn gives:" << std::endl;
         logger() << LogTags::debug << " gps = " << result.gps << std::endl;
         logger() << LogTags::debug << " gns = " << result.gns << std::endl;

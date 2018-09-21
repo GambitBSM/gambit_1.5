@@ -49,6 +49,7 @@ BE_FUNCTION(dswwidth, void, (int&), "dswwidth_", "dswwidth")
 
 
 // Convenience functions (registration)
+BE_CONV_FUNCTION(DD_couplings, double*, (), "get_DD_couplings")
 BE_CONV_FUNCTION(DSparticle_code, int, (const str&), "particle_code")
 BE_CONV_FUNCTION(DS_neutral_h_decay_channels, std::vector<std::vector<str>>, (), "get_DS_neutral_h_decay_channels")
 BE_CONV_FUNCTION(DS_charged_h_decay_channels, std::vector<std::vector<str>>, (), "get_DS_charged_h_decay_channels")
@@ -58,13 +59,13 @@ BE_CONV_FUNCTION(DS_charged_h_decay_channels, std::vector<std::vector<str>>, (),
 // BE_CONV_FUNCTION(init_diskless, int, (const SLHAstruct&, const DecayTable&), "initFromSLHAeaAndDecayTable")
 // Functions used by convenience functions
 // BE_FUNCTION(dsntmuonyield, double, (const double&, const double&, const char&, const int&, const int&, const int&, const int&), "dsntmuonyield_", "raw_muonyield")
+BE_FUNCTION(dsddgpgn, void, (DS_gg&, int&), "dsddgpgn_", "dsddgpgn")
 
 
 
 // Functions used in RelicDensity.cpp
-
-// MAY have to be adapted
 // FIXME: pacodes -> pacodes_mssm, DS_MSPCTM -> smquarkmasses & pmasses, widths -> pwidths
+
 // BE_FUNCTION(dsrdomega, double, (int&,int&,double&,int&,int&,int&), "dsrdomega_", "dsrdomega")
 // BE_FUNCTION(dsrdwintp, double, (double&), "dsrdwintp_", "dsrdwintp")
 // BE_FUNCTION(dsanwx, double, (double&), "dsanwx_", "dsanwx")
@@ -74,9 +75,8 @@ BE_CONV_FUNCTION(DS_charged_h_decay_channels, std::vector<std::vector<str>>, (),
 // BE_FUNCTION(dsrdtab, void, (double(*)(double&),double&,int&), "dsrdtab_", "dsrdtab")
 // BE_FUNCTION(dsrdeqn, void, (double(*)(double&),double&,double&,double&,double&,int&), "dsrdeqn_", "dsrdeqn")
 
-// Functions used in MSSM.cpp
 
-// MAY have to be adapted
+// Functions used in MSSM.cpp
 // BE_FUNCTION(dssusy_isasugra, void, (int&,int&), "dssusy_isasugra_", "dssusy_isasugra")
 // BE_FUNCTION(dsgive_model_isasugra, void, (double&,double&,double&,double&,double&), "dsgive_model_isasugra_", "dsgive_model_isasugra")
 // BE_FUNCTION(dsSLHAread, void, (const char*, int&, int), "dsslharead_", "dsSLHAread")
@@ -92,8 +92,6 @@ BE_CONV_FUNCTION(DS_charged_h_decay_channels, std::vector<std::vector<str>>, (),
 
 
 // Functions used in DirectDetection.cpp
-
-// MAY have to be adapted
 // BE_FUNCTION(dsddgpgn, void, (double&, double&, double&, double&), "dsddgpgn_", "dsddgpgn")
 
 // Functions used in GamYields.cpp
@@ -101,13 +99,11 @@ BE_CONV_FUNCTION(DS_charged_h_decay_channels, std::vector<std::vector<str>>, (),
 
 
 // Functions used in SunNeutrinos.cpp
-// may need adjusting as well...
 // BE_FUNCTION(dsntcapsuntab, double, (const double&, const double&, const double&), "dsntcapsuntab_", "cap_Sun_v0q0_isoscalar")
 
 
 // TODO: organize the list below in "DS main" and module-depednent part
 // UPDATE common blocks as necessary when going through the functions above!
-
 
 
 // Used in RD_eff_annrate_SUSY_DSprep_func, RD_oh2_general and RD_thresholds_resonances_SingletDM

@@ -172,6 +172,29 @@ BE_NAMESPACE
     return result;
   }
 
+  /// Function DD_couplings returns direct detection couplings gps,gns,gpa,gna
+  /// (proton/neutron scalar/axial four-couplinngs)
+  /// Provided here because the signature of the corresponding DarkSUSY 
+  double* DD_couplings()
+  {
+    int ierr = 0;
+    DS_gg gg;
+    dsddgpgn(gg,ierr);
+    if (ierr > 0)
+    {
+      std::ostringstream err;
+      err << "Error from DarkSUSY::dsddgpgn function when calling DD_couplings().  ierr = " << ierr;
+      piped_errors.request(LOCAL_INFO, err.str());
+    } 
+    double *result;
+    result[0]=gg.gg(1,1).re; // gps
+    result[1]=gg.gg(1,2).re; // gns
+    result[2]=gg.gg(4,1).re; // gpa
+    result[3]=gg.gg(4,2).re; // gna
+    return result;
+  }
+
+
   /// Translates GAMBIT string identifiers to the SUSY
   /// particle codes used internally in DS (as stored in common block /pacodes_mssm/)
   // FIXME: add channel codes! JE: Already forgot, why do we need channel codes?

@@ -76,6 +76,11 @@ namespace Gambit
       Farray<Fdouble,0,255> width;
   };
 
+// this one only exists in DS 6 (returned by dsddgpgn)
+  struct DS_gg
+  {
+        Farray< Fdouble_complex,1,27,1,2 > gg;
+  };
 
   struct DS_INTDOF
   {

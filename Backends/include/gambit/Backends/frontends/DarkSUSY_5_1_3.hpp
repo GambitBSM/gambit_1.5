@@ -27,7 +27,7 @@
 ///
 ///  \author Torsten Bringmann
 ///          (torsten.bringmann@fys.uio.no)
-///  \date 2013 Jul, 2014 Mar, 2015 May
+///  \date 2013 Jul, 2014 Mar, 2015 May, 2018 Sep
 ///
 ///  \author Lars A. Dal
 ///          (l.a.dal@fys.uio.no)
@@ -130,6 +130,7 @@ BE_VARIABLE(dshmisodf, DS_HMISODF, "dshmisodf_", "dshmisodf")
 BE_VARIABLE(dshmnoclue, DS_HMNOCLUE, "dshmnoclue_", "dshmnoclue")
 
 // Convenience functions (registration)
+BE_CONV_FUNCTION(DD_couplings, double*, (), "get_DD_couplings")
 BE_CONV_FUNCTION(neutrino_yield, double, (const double&, const int&, void*&), "nuyield")
 BE_CONV_FUNCTION(dsgenericwimp_nusetup, void, (const double(&)[29], const double(&)[29][3], const double(&)[15],
                                                const double(&)[3], const double&, const double&), "nuyield_setup")
