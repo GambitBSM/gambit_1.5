@@ -40,8 +40,8 @@ BE_NAMESPACE
   std::vector<double> GAMBITparticle_mass;
   std::vector<double> DSanbr; // to have BR available to neutrino_yield
   double anmwimp; // to have WIMP mass available to neutrino_yield
-  std::vector<double> DSanpdg1;
-  std::vector<double> DSanpdg2;
+  std::vector<int> DSanpdg1;
+  std::vector<int> DSanpdg2;
 }
 END_BE_NAMESPACE
 
@@ -110,70 +110,73 @@ BE_NAMESPACE
 
     // Transfer branching fractions to WIMP annihilation common blocks.
     // For channel indices, see dswayieldone.f
+    DSanbr[0]=0.0; // not used, keep Fortran numbering below
     for (int i=1; i<=29; i++)
     {
-      dsanbr(i) = annihilation_bf[i-1];
+      DSanbr[i] = annihilation_bf[i-1];
     }
 
     // Setup PDG common blocks
-    DSanpdg1(1)=25;  // h h
-    DSanpdg2(1)=25;
-    DSanpdg1(2)=25;  // h H
-    DSanpdg2(2)=35;
-    DSanpdg1(3)=35;  // H H
-    DSanpdg2(3)=35;
-    DSanpdg1(4)=36;  // A A
-    DSanpdg2(4)=36;
-    DSanpdg1(5)=25;  // h A
-    DSanpdg2(5)=36;
-    DSanpdg1(6)=35;  // H A
-    DSanpdg2(6)=36;
-    DSanpdg1(7)=37;  // H+ H-
-    DSanpdg2(7)=-37;
-    DSanpdg1(8)=23;  // Z h
-    DSanpdg2(8)=25;
-    DSanpdg1(9)=23;  // Z H
-    DSanpdg2(9)=35;
-    DSanpdg1(10)=23;  // Z A
-    DSanpdg2(10)=36;
-    DSanpdg1(11)=24;  // W+ H-
-    DSanpdg2(11)=-37;
-    DSanpdg1(12)=23;  // Z Z
-    DSanpdg2(12)=23;
-    DSanpdg1(13)=24;  // W+ W-
-    DSanpdg2(13)=-24;
-    DSanpdg1(14)=12;  // nue nuebar
-    DSanpdg2(14)=-12;
-    DSanpdg1(15)=11;  // e- e+
-    DSanpdg2(15)=-11;
-    DSanpdg1(16)=14;  // numu numubar
-    DSanpdg2(16)=-14;
-    DSanpdg1(17)=13;  // mu- mu+
-    DSanpdg2(17)=-13;
-    DSanpdg1(18)=16;  // nutau nutaubar
-    DSanpdg2(18)=-16;
-    DSanpdg1(19)=15;  // tau- tau+
-    DSanpdg2(19)=-15;
-    DSanpdg1(20)=2;   // u ubar
-    DSanpdg2(20)=-2;
-    DSanpdg1(21)=1;   // d dbar
-    DSanpdg2(21)=-1;
-    DSanpdg1(22)=4;   // c cbar
-    DSanpdg2(22)=-4;
-    DSanpdg1(23)=3;   // s sbar
-    DSanpdg2(23)=-3;
-    DSanpdg1(24)=6;   // t tbar
-    DSanpdg2(24)=-6;
-    DSanpdg1(25)=5;   // b bbar
-    DSanpdg2(25)=-5;
-    DSanpdg1(26)=21;   // gluon gluon
-    DSanpdg2(26)=21;
-    DSanpdg1(27)=10000;   // (not used)
-    DSanpdg2(27)=10000;
-    DSanpdg1(28)=22;   // gamma gamma
-    DSanpdg2(28)=22;
-    DSanpdg1(29)=22;   // gamma Z
-    DSanpdg2(29)=23; 
+    DSanpdg1[0]=10000; // not used, as I keep the same numbering as for Fortran
+    DSanpdg2[0]=10000;  
+    DSanpdg1[1]=25;  // h h
+    DSanpdg2[1]=25;
+    DSanpdg1[2]=25;  // h H
+    DSanpdg2[2]=35;
+    DSanpdg1[3]=35;  // H H
+    DSanpdg2[3]=35;
+    DSanpdg1[4]=36;  // A A
+    DSanpdg2[4]=36;
+    DSanpdg1[5]=25;  // h A
+    DSanpdg2[5]=36;
+    DSanpdg1[6]=35;  // H A
+    DSanpdg2[6]=36;
+    DSanpdg1[7]=37;  // H+ H-
+    DSanpdg2[7]=-37;
+    DSanpdg1[8]=23;  // Z h
+    DSanpdg2[8]=25;
+    DSanpdg1[9]=23;  // Z H
+    DSanpdg2[9]=35;
+    DSanpdg1[10]=23;  // Z A
+    DSanpdg2[10]=36;
+    DSanpdg1[11]=24;  // W+ H-
+    DSanpdg2[11]=-37;
+    DSanpdg1[12]=23;  // Z Z
+    DSanpdg2[12]=23;
+    DSanpdg1[13]=24;  // W+ W-
+    DSanpdg2[13]=-24;
+    DSanpdg1[14]=12;  // nue nuebar
+    DSanpdg2[14]=-12;
+    DSanpdg1[15]=11;  // e- e+
+    DSanpdg2[15]=-11;
+    DSanpdg1[16]=14;  // numu numubar
+    DSanpdg2[16]=-14;
+    DSanpdg1[17]=13;  // mu- mu+
+    DSanpdg2[17]=-13;
+    DSanpdg1[18]=16;  // nutau nutaubar
+    DSanpdg2[18]=-16;
+    DSanpdg1[19]=15;  // tau- tau+
+    DSanpdg2[19]=-15;
+    DSanpdg1[20]=2;   // u ubar
+    DSanpdg2[20]=-2;
+    DSanpdg1[21]=1;   // d dbar
+    DSanpdg2[21]=-1;
+    DSanpdg1[22]=4;   // c cbar
+    DSanpdg2[22]=-4;
+    DSanpdg1[23]=3;   // s sbar
+    DSanpdg2[23]=-3;
+    DSanpdg1[24]=6;   // t tbar
+    DSanpdg2[24]=-6;
+    DSanpdg1[25]=5;   // b bbar
+    DSanpdg2[25]=-5;
+    DSanpdg1[26]=21;   // gluon gluon
+    DSanpdg2[26]=21;
+    DSanpdg1[27]=10000;   // (not used)
+    DSanpdg2[27]=10000;
+    DSanpdg1[28]=22;   // gamma gamma
+    DSanpdg2[28]=22;
+    DSanpdg1[29]=22;   // gamma Z
+    DSanpdg2[29]=23; 
 
       
     // Transfer Higgs decay branching fractions (not widths) to Higgs decay common blocks.
@@ -227,7 +230,7 @@ BE_NAMESPACE
     
     for (int i=1; i<=29; i++)
     {
-      if (dsanbr(i)>0) {
+      if (DSanbr[i]>0) {
 	if (i==13) { // W+ W-
 	  twos=2;
 	  twol=2;
@@ -236,23 +239,23 @@ BE_NAMESPACE
 	  twol=0;
 	}
 	if ((ptype == 1) or (ptype == 3)) { // particles
-	  tmp=dsseyield_sim_ls(anmwimp,pow(10.d0,log10E),dsanpdg1(i),dsanpdg2(i),twoj,cp,twos,twol,object[0],3,t1,iistat)
+	  tmp=dsseyield_sim_ls(anmwimp,pow(10.0,log10E),10.0,DSanpdg1[i],DSanpdg2[i],twoj,cp,twos,twol,object[0],3,t1,iistat);
 	    if ((iistat bitand 8) == 8) { // not simulated channel
-	      tmp=dsseyield_ch(anmwimp,pow(10.0,log10E),10.0,dsanpdg1(i),dsanpdg2(i),object[0],3,t1,iistat);
+	      tmp=dsseyield_ch(anmwimp,pow(10.0,log10E),10.0,DSanpdg1[i],DSanpdg2[i],object[0],3,t1,iistat);
 	    }
-	  result += 1e-30 * dsanbr(i) * tmp;
+	  result += 1e-30 * DSanbr[i] * tmp;
 	  istat=(istat bitor iistat);
 	}
 	if ((ptype == 2) or (ptype == 3)) { // anti-particles
-	  tmp=dsseyield_sim_ls(anmwimp,pow(10.d0,log10E),dsanpdg1(i),dsanpdg2(i),twoj,cp,twos,twol,object[0],3,t2,iistat)
+	  tmp=dsseyield_sim_ls(anmwimp,pow(10.0,log10E),10.0,DSanpdg1[i],DSanpdg2[i],twoj,cp,twos,twol,object[0],3,t2,iistat);
 	    if ((iistat bitand 8) == 8) { // not simulated channel
-	      tmp=dsseyield_ch(anmwimp,pow(10.0,log10E),10.0,dsanpdg1(i),dsanpdg2(i),object[0],3,t2,iistat);
+	      tmp=dsseyield_ch(anmwimp,pow(10.0,log10E),10.0,DSanpdg1[i],DSanpdg2[i],object[0],3,t2,iistat);
 	    }
-	  result += 1e-30 * dsanbr(i) * tmp;
+	  result += 1e-30 * DSanbr[i] * tmp;
 	  istat=(istat bitor iistat);
 	}
 
-      } // end if dsanbr>0
+      } // end if DSanbr>0
 
     } // end loop
       
