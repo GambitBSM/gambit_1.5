@@ -688,7 +688,7 @@ namespace Gambit
     {
       using namespace Pipes::RD_oh2_MicrOmegas;
 
-      ddpair oh2_Xf = *Dep::RD_oh2_Xf_MicrOmegas;
+      ddpair oh2_Xf = *Dep::RD_oh2_Xf;
       result = oh2_Xf.first;
     }
 
@@ -696,19 +696,19 @@ namespace Gambit
     {
       using namespace Pipes::Xf_MicrOmegas;
 
-      ddpair oh2_Xf = *Dep::RD_oh2_Xf_MicrOmegas;
+      ddpair oh2_Xf = *Dep::RD_oh2_Xf;
       result = oh2_Xf.second;
     }
 
 
-    void print_channels_MicrOmegas(double &result)
+    void print_channel_contributions_MicrOmegas(double &result)
     {
-      using namespace Pipes::print_channels_MicrOmegas;
+      using namespace Pipes::print_channel_contributions_MicrOmegas;
 
       double Beps;  // Beps=1e-5 recommended, Beps=1 switches coannihilation off
       Beps = runOptions->getValueOrDef<double>(1e-5, "Beps");
 
-      double Xf = *Dep::Xf_MicrOmegas;
+      double Xf = *Dep::Xf;
 
       double cut = runOptions->getValueOrDef<double>(1e-5, "cut");
 
@@ -716,14 +716,14 @@ namespace Gambit
     }
 
 
-    void get_channel_MicrOmegas(double &result)
+    void get_semi_ann_MicrOmegas(double &result)
     {
-      using namespace Pipes::get_channel_MicrOmegas;
+      using namespace Pipes::get_semi_ann_MicrOmegas;
 
       double Beps;  // Beps=1e-5 recommended, Beps=1 switches coannihilation off
       Beps = runOptions->getValueOrDef<double>(1e-5, "Beps");
 
-      double Xf = *Dep::Xf_MicrOmegas;
+      double Xf = *Dep::Xf;
 
       char*n1 =  (char *)"~SS";
       char*n2 = (char *)"~SS";

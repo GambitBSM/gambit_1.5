@@ -106,7 +106,7 @@
   #undef CAPABILITY
 
   // Find scale at which spectrum becomes non-perturbative
-  #define CAPABILITY find_non_perturb_scale
+  #define CAPABILITY scale_of_nonperturbativity
 	START_CAPABILITY
     #define FUNCTION find_non_perturb_scale_ScalarSingletDM_Z3
     START_FUNCTION(double)

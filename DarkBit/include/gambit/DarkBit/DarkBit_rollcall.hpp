@@ -211,21 +211,24 @@ START_MODULE
     // Routine for cross checking relic density results
     #define FUNCTION RD_oh2_MicrOmegas
       START_FUNCTION(double)
-      DEPENDENCY(RD_oh2_Xf_MicrOmegas, ddpair)
+      DEPENDENCY(RD_oh2_Xf, ddpair)
     #undef FUNCTION
 
   #undef CAPABILITY
 
 
-  // get oh2 and Xf from MicrOmegas
-  #define CAPABILITY RD_oh2_Xf_MicrOmegas
+  // get oh2 and Xf simultaneously
+  #define CAPABILITY RD_oh2_Xf
   START_CAPABILITY
     #define FUNCTION RD_oh2_Xf_MicrOmegas
       START_FUNCTION(ddpair)
-      BACKEND_REQ(oh2, (MicrOmegas_MSSM,
-                        MicrOmegas_ScalarSingletDM_Z2, MicrOmegas_ScalarSingletDM_Z3,
-                        MicrOmegas_VectorSingletDM_Z2, MicrOmegas_MajoranaSingletDM_Z2, MicrOmegas_DiracSingletDM_Z2),
-                        double, (double*,int,double))
+      BACKEND_REQ(oh2, (gimmemicro), double, (double*,int,double))
+      BACKEND_OPTION((MicrOmegas_MSSM), (gimmemicro))
+      BACKEND_OPTION((MicrOmegas_ScalarSingletDM_Z2), (gimmemicro))
+      BACKEND_OPTION((MicrOmegas_ScalarSingletDM_Z3), (gimmemicro))
+      BACKEND_OPTION((MicrOmegas_VectorSingletDM_Z2), (gimmemicro))
+      BACKEND_OPTION((MicrOmegas_MajoranaSingletDM_Z2), (gimmemicro))
+      BACKEND_OPTION((MicrOmegas_DiracSingletDM_Z2),(gimmemicro))
       ALLOW_MODELS(MSSM63atQ, MSSM63atMGUT,
                    ScalarSingletDM_Z2, ScalarSingletDM_Z2_running,
                    ScalarSingletDM_Z3, ScalarSingletDM_Z3_running,
@@ -234,38 +237,35 @@ START_MODULE
   #undef CAPABILITY
 
 
-  // get Xf from MicrOmegas
-  #define CAPABILITY Xf_MicrOmegas
+  // Xf = m_WIMP/T_freezeout
+  #define CAPABILITY Xf
   START_CAPABILITY
     #define FUNCTION Xf_MicrOmegas
       START_FUNCTION(double)
-      DEPENDENCY(RD_oh2_Xf_MicrOmegas, ddpair)
+      DEPENDENCY(RD_oh2_Xf, ddpair)
     #undef FUNCTION
   #undef CAPABILITY
 
-
-  #define CAPABILITY print_channels_MicrOmegas
+  // Contributions of different annihilation channels to the relic density
+  #define CAPABILITY relic_density_contributions
   START_CAPABILITY
-    #define FUNCTION print_channels_MicrOmegas
+    #define FUNCTION print_channel_contributions_MicrOmegas
       START_FUNCTION(double)
-      DEPENDENCY(Xf_MicrOmegas, double)
+      DEPENDENCY(Xf, double)
       BACKEND_REQ(momegas_print_channels, () , double,  (double, double, double, int, FILE*))
     #undef FUNCTION
   #undef CAPABILITY
 
-
-  #define CAPABILITY get_channel_MicrOmegas
+  // Contributions of semi-annihilation to the relic density
+  #define CAPABILITY semi_annihilation_fraction
   START_CAPABILITY
-    #define FUNCTION get_channel_MicrOmegas
+    #define FUNCTION get_semi_ann_MicrOmegas
       START_FUNCTION(double)
-      DEPENDENCY(Xf_MicrOmegas, double)
-      BACKEND_REQ(get_oneChannel, () , double,  (double,double,char*,char*,char*,char*))
+      DEPENDENCY(Xf, double)
+      BACKEND_REQ(get_oneChannel, (gimmemicro) , double,  (double,double,char*,char*,char*,char*))
+      BACKEND_OPTION((MicrOmegas_ScalarSingletDM_Z3),(gimmemicro))
     #undef FUNCTION
   #undef CAPABILITY
-
-
-
-
 
   // Fraction of the relic density constituted by the DM candidate under investigation
   #define CAPABILITY RD_fraction
