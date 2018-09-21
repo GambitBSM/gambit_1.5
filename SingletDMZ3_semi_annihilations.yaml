@@ -9,7 +9,7 @@ Parameters:
     StandardModel_Higgs_running:
       QEWSB: 173.0
       mH: 121.017120361
-    SingletDMZ3:
+    ScalarSingletDM_Z3_running:
       lambda_S: 3
       lambda_hS: 1.23250677584
       mS: 300.234640076
@@ -90,14 +90,14 @@ ObsLikes:
       purpose:    LogLike
 
     # Vacuum stability and perturbitivity
-    - capability: check_EW_stability_SingletDMZ3
+    - capability: lnL_EW_vacuum
       purpose: LogLike
 
-    - capability: VS_likelihood
+    - capability: lnL_high_scale_vacuum
       purpose: LogLike
 
-    #- capability: check_perturb_min_lambda
-    #  purpose: LogLike
+    - capability: check_perturbativity_to_lambda_min
+      purpose: LogLike
 
     # Dark matter likelihoods
     - capability: lnL_oh2

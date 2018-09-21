@@ -1,14 +1,14 @@
-diff -rupN ./MajoranaDM/work/models/extlib1.mdl ../../../installed/micromegas/3.6.9.2/MajoranaDM/MajoranaDM/work/models/extlib1.mdl
---- ./MajoranaDM/work/models/extlib1.mdl	1970-01-01 09:30:00.000000000 +0930
-+++ ../../../installed/micromegas/3.6.9.2/MajoranaDM/MajoranaDM/work/models/extlib1.mdl	2016-08-22 21:31:46.000000000 +0930
+diff -rupN ./MajoranaSingletDM_Z2/work/models/extlib1.mdl ../../../installed/micromegas/3.6.9.2/MajoranaSingletDM_Z2/MajoranaSingletDM_Z2/work/models/extlib1.mdl
+--- ./MajoranaSingletDM_Z2/work/models/extlib1.mdl	1970-01-01 09:30:00.000000000 +0930
++++ ../../../installed/micromegas/3.6.9.2/MajoranaSingletDM_Z2/MajoranaSingletDM_Z2/work/models/extlib1.mdl	2016-08-22 21:31:46.000000000 +0930
 @@ -0,0 +1,4 @@
 +Any Model
 +Libraries
 +External libraries and  function prototypes                             <|
 +========================================================================
-diff -rupN ./MajoranaDM/work/models/func1.mdl ../../../installed/micromegas/3.6.9.2/MajoranaDM/MajoranaDM/work/models/func1.mdl
---- ./MajoranaDM/work/models/func1.mdl	1970-01-01 09:30:00.000000000 +0930
-+++ ../../../installed/micromegas/3.6.9.2/MajoranaDM/MajoranaDM/work/models/func1.mdl	2016-08-22 21:31:46.000000000 +0930
+diff -rupN ./MajoranaSingletDM_Z2/work/models/func1.mdl ../../../installed/micromegas/3.6.9.2/MajoranaSingletDM_Z2/MajoranaSingletDM_Z2/work/models/func1.mdl
+--- ./MajoranaSingletDM_Z2/work/models/func1.mdl	1970-01-01 09:30:00.000000000 +0930
++++ ../../../installed/micromegas/3.6.9.2/MajoranaSingletDM_Z2/MajoranaSingletDM_Z2/work/models/func1.mdl	2016-08-22 21:31:46.000000000 +0930
 @@ -0,0 +1,18 @@
 +majoranaSPSmodel
 + Constraints 
@@ -28,9 +28,9 @@ diff -rupN ./MajoranaDM/work/models/func1.mdl ../../../installed/micromegas/3.6.
 +Vtb    |c23*c13 % C-K-M matrix element
 +sinXI  |sqrt(1-cosXI^2)
 +========================================================================
-diff -rupN ./MajoranaDM/work/models/lgrng1.mdl ../../../installed/micromegas/3.6.9.2/MajoranaDM/MajoranaDM/work/models/lgrng1.mdl
---- ./MajoranaDM/work/models/lgrng1.mdl	1970-01-01 09:30:00.000000000 +0930
-+++ ../../../installed/micromegas/3.6.9.2/MajoranaDM/MajoranaDM/work/models/lgrng1.mdl	2016-08-22 21:31:46.000000000 +0930
+diff -rupN ./MajoranaSingletDM_Z2/work/models/lgrng1.mdl ../../../installed/micromegas/3.6.9.2/MajoranaSingletDM_Z2/MajoranaSingletDM_Z2/work/models/lgrng1.mdl
+--- ./MajoranaSingletDM_Z2/work/models/lgrng1.mdl	1970-01-01 09:30:00.000000000 +0930
++++ ../../../installed/micromegas/3.6.9.2/MajoranaSingletDM_Z2/MajoranaSingletDM_Z2/work/models/lgrng1.mdl	2016-08-22 21:31:46.000000000 +0930
 @@ -0,0 +1,81 @@
 +majoranaSPSmodel
 + Lagrangian 
@@ -113,9 +113,9 @@ diff -rupN ./MajoranaDM/work/models/lgrng1.mdl ../../../installed/micromegas/3.6
 +W+   |W-   |Z    |Z    |-CW^2*EE^2/SW^2                                   |2*m1.m2*m3.m4-m1.m3*m2.m4-m1.m4*m2.m3
 +~X   |~X   |H    |H    |lX                                                |cosXI+i*sinXI*G5
 +================================================================================================================================================
-diff -rupN ./MajoranaDM/work/models/prtcls1.mdl ../../../installed/micromegas/3.6.9.2/MajoranaDM/MajoranaDM/work/models/prtcls1.mdl
---- ./MajoranaDM/work/models/prtcls1.mdl	1970-01-01 09:30:00.000000000 +0930
-+++ ../../../installed/micromegas/3.6.9.2/MajoranaDM/MajoranaDM/work/models/prtcls1.mdl	2016-08-22 21:31:46.000000000 +0930
+diff -rupN ./MajoranaSingletDM_Z2/work/models/prtcls1.mdl ../../../installed/micromegas/3.6.9.2/MajoranaSingletDM_Z2/MajoranaSingletDM_Z2/work/models/prtcls1.mdl
+--- ./MajoranaSingletDM_Z2/work/models/prtcls1.mdl	1970-01-01 09:30:00.000000000 +0930
++++ ../../../installed/micromegas/3.6.9.2/MajoranaSingletDM_Z2/MajoranaSingletDM_Z2/work/models/prtcls1.mdl	2016-08-22 21:31:46.000000000 +0930
 @@ -0,0 +1,22 @@
 +majoranaSPSmodel
 + Particles 
@@ -139,9 +139,9 @@ diff -rupN ./MajoranaDM/work/models/prtcls1.mdl ../../../installed/micromegas/3.
 +Higgs           |H  |H  |35        |0    |MH  |!wH  |1    |   |H               |H                   |
 +Majorana DM     |~X |~X |20        |1    |mX  |0    |1    |   |(X)             |(X)                 |
 +=======================================================================================================
-diff -rupN ./MajoranaDM/work/models/vars1.mdl ../../../installed/micromegas/3.6.9.2/MajoranaDM/MajoranaDM/work/models/vars1.mdl
---- ./MajoranaDM/work/models/vars1.mdl	1970-01-01 09:30:00.000000000 +0930
-+++ ../../../installed/micromegas/3.6.9.2/MajoranaDM/MajoranaDM/work/models/vars1.mdl	2016-08-22 21:31:46.000000000 +0930
+diff -rupN ./MajoranaSingletDM_Z2/work/models/vars1.mdl ../../../installed/micromegas/3.6.9.2/MajoranaSingletDM_Z2/MajoranaSingletDM_Z2/work/models/vars1.mdl
+--- ./MajoranaSingletDM_Z2/work/models/vars1.mdl	1970-01-01 09:30:00.000000000 +0930
++++ ../../../installed/micromegas/3.6.9.2/MajoranaSingletDM_Z2/MajoranaSingletDM_Z2/work/models/vars1.mdl	2016-08-22 21:31:46.000000000 +0930
 @@ -0,0 +1,29 @@
 +majoranaSPSmodel
 + Variables 
@@ -172,9 +172,9 @@ diff -rupN ./MajoranaDM/work/models/vars1.mdl ../../../installed/micromegas/3.6.
 +lX     |0.1          |Majorana-Higgs coupling
 +cosXI  |1            |cos(xi)
 +========================================================================
-diff -rupN ./MajoranaDM/Makefile ../../installed/micromegas/3.6.9.2/MajoranaDM/Makefile
---- ./MajoranaDM/Makefile	1970-01-01 09:30:00.000000000 +0930
-+++ ../../installed/micromegas/3.6.9.2/MajoranaDM/Makefile	2016-08-22 21:31:46.000000000 +0930
+diff -rupN ./MajoranaSingletDM_Z2/Makefile ../../installed/micromegas/3.6.9.2/MajoranaSingletDM_Z2/Makefile
+--- ./MajoranaSingletDM_Z2/Makefile	1970-01-01 09:30:00.000000000 +0930
++++ ../../installed/micromegas/3.6.9.2/MajoranaSingletDM_Z2/Makefile	2016-08-22 21:31:46.000000000 +0930
 @@ -45,7 +45,15 @@ libs:
  	$(MAKE) -C work
  	$(MAKE) -C lib

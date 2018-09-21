@@ -399,7 +399,15 @@ StandardModel_SLHA2: |
    theta12, theta13, theta23                    - mixing angles from PMNS matrix
    GF                                           - the Fermi coupling constant
 
-SingletDMZ3: |
+ScalarSingletDM_Z3: |
+
+   The singlet DM model with a Z3 symmetry. Note that mS should either be interpreted as the tree level mass or directly as the pole mass for S. This is analogous to the treatment of the SM Higgs mass in the model StandardModel_Higgs.
+
+   lambda_hS  - coupling for vertex connecting the SM Higgs to the new scalar
+   mS         - the mass of the scalar DM candidate
+   mu3        - coefficient of S^3 Lagrangian term
+
+ScalarSingletDM_Z3_running: |
 
    The singlet DM model with a Z3 symmetry.
 
@@ -468,11 +476,11 @@ nuclear_params_sigmas_sigmal: |
 
    The same as nuclear_params_fnq, but with the replacement of the six quark content matrix elements by the matrix element sigma0 and the strange quark content of the nucleon sigmas. See the GAMBIT core paper for details and definitions.
 
-SingletDM: |
+ScalarSingletDM_Z2: |
 
    The scalar singlet DM model, with two parameters mS (the mass of the scalar DM), and lambda_hS, the strength of the new scalar interaction with the SM Higgs. Note that mS should either be interpreted as the tree level mass or directly as the pole mass for S. This is analogous to the treatment of the SM Higgs mass in the model StandardModel_Higgs.
 
-SingletDM_running: |
+ScalarSingletDM_Z2_running: |
 
    The scalar singlet DM model with lambda_S (the scalar self-coupling), lambda_hS (the scalar-SM Higgs interaction strength) and mS (the mass of the new scalar) defined at the scale mZ as free parameters, allowing full calculation of pole masses, renormalisation group running and vacuum stability.
 

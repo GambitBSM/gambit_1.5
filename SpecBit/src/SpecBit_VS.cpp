@@ -75,10 +75,11 @@ namespace Gambit
 
       result = 0;
 
-      // if any condition not satisfied set bad likelihood
+      // if any condition not satisfied set bad likelihood and invalidate point
       if ( lambda_hs < 0 || lambda_s < 0 || check < 0 || check_2 < 0)
       {
-        result += -1e100;
+        invalid_point().raise("Electroweak vacuum is unstable at low scale.");
+        result = -1e100;
       }
     }
 
@@ -180,8 +181,9 @@ namespace Gambit
     }
 
 
-     void find_min_lambda_Helper( dbl_dbl_bool& vs_tuple, const Spectrum& fullspectrum,
-     double high_energy_limit, int check_perturb_pts,const std::vector<SpectrumParameter> required_parameters)
+     void find_min_lambda_Helper(dbl_dbl_bool& vs_tuple, const Spectrum& fullspectrum,
+                                 double high_energy_limit, int check_perturb_pts,
+                                 const std::vector<SpectrumParameter> required_parameters)
      {
 			 std::unique_ptr<SubSpectrum> speccloned = fullspectrum.clone_HE();
 
@@ -288,7 +290,7 @@ namespace Gambit
             cout<< "vacuum is metastable" << endl;
           }
         #endif
-              double pi2_8_over3 = 8.* pow ( pi , 2 ) / 3.;
+        double pi2_8_over3 = 8.* pow ( pi , 2 ) / 3.;
         double conversion = (6.5821195e-25)/(31536000);
         // top factor is hbar in units of GeV.s and bottom factor is number of seconds in a year
         lifetime=conversion/(exp(3*140-pi2_8_over3/(abs(0.5*lambda_min)))*pow(1/(1.2e19),3)*pow(LB,4));
@@ -348,10 +350,10 @@ namespace Gambit
     // the functions below are used to extract the desired outputs from find_min_lambda
 
     // gives expected lifetime in units of years, if stable give extremly large number (1e300)
-    void get_expected_lifetime(double &lifetime)
+    void get_expected_vacuum_lifetime(double &lifetime)
     {
-      namespace myPipe = Pipes::get_expected_lifetime;
-      dbl_dbl_bool vs_tuple =  *myPipe::Dep::vacuum_stability;
+      namespace myPipe = Pipes::get_expected_vacuum_lifetime;
+      dbl_dbl_bool vs_tuple =  *myPipe::Dep::high_scale_vacuum_info;
 
       if (vs_tuple.first<1e300)
       {
@@ -364,11 +366,10 @@ namespace Gambit
     }
 
     // log of the likelihood
-    void get_likelihood(double &result)
+    void lnL_highscale_vacuum_decay_single_field(double &result)
     {
-      namespace myPipe = Pipes::get_likelihood;
-      dbl_dbl_bool vs_tuple =  *myPipe::Dep::vacuum_stability;
-
+      namespace myPipe = Pipes::lnL_highscale_vacuum_decay_single_field;
+      dbl_dbl_bool vs_tuple =  *myPipe::Dep::high_scale_vacuum_info;
 
       const Options& runOptions=*myPipe::runOptions;
       bool demand_stable = runOptions.getValueOrDef<bool>(false,"demand_stable");
@@ -386,25 +387,25 @@ namespace Gambit
 
     }
 
-    // get the scale of the minimum
+    // Get the scale of the high-scale minimum
     void get_lambdaB(double &result)
     {
       namespace myPipe = Pipes::get_lambdaB;
-      dbl_dbl_bool vs_tuple =  *myPipe::Dep::vacuum_stability;
+      dbl_dbl_bool vs_tuple =  *myPipe::Dep::high_scale_vacuum_info;
       result=vs_tuple.second;
     }
 
 
-    // returns lnlike, very negative if pertub is 1, 0 otherwise
-    void get_check_perturb_min_lambda(double &result)
+    // Returns poor likelihood and invalidates point if couplings go non-perturbative at or below the scale of the high-scale minimum of the potential
+    void check_perturb_min_lambda(double &result)
     {
-      namespace myPipe = Pipes::get_check_perturb_min_lambda;
-      dbl_dbl_bool vs_tuple =  *myPipe::Dep::vacuum_stability;
+      namespace myPipe = Pipes::check_perturb_min_lambda;
+      dbl_dbl_bool vs_tuple =  *myPipe::Dep::high_scale_vacuum_info;
 
       if (vs_tuple.flag)
       {
         invalid_point().raise("Couplings are non-perturbative before scale of vacuum instability");
-        result = - 1e100;
+        result = -1e100;
       }
       else
       {

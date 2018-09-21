@@ -18,8 +18,8 @@
 ///
 ///  *********************************************
 
-#ifndef __ScalarSingletDM_Z3_hpp__
-#define __ScalarSingletDM_Z3_hpp__
+#ifndef __ScalarSingletDM_Z3_running_hpp__
+#define __ScalarSingletDM_Z3_running_hpp__
 
 #define MODEL ScalarSingletDM_Z3_running
   START_MODEL

@@ -1,14 +1,14 @@
-diff -rupN ./VectorDM/work/models/extlib1.mdl ../../../installed/micromegas/3.6.9.2/VectorDM/VectorDM/work/models/extlib1.mdl
---- ./VectorDM/work/models/extlib1.mdl	1970-01-01 09:30:00.000000000 +0930
-+++ ../../../installed/micromegas/3.6.9.2/VectorDM/VectorDM/work/models/extlib1.mdl	2016-08-22 21:31:34.000000000 +0930
+diff -rupN ./VectorSingletDM_Z2/work/models/extlib1.mdl ../../../installed/micromegas/3.6.9.2/VectorSingletDM_Z2/VectorSingletDM_Z2/work/models/extlib1.mdl
+--- ./VectorSingletDM_Z2/work/models/extlib1.mdl	1970-01-01 09:30:00.000000000 +0930
++++ ../../../installed/micromegas/3.6.9.2/VectorSingletDM_Z2/VectorSingletDM_Z2/work/models/extlib1.mdl	2016-08-22 21:31:34.000000000 +0930
 @@ -0,0 +1,4 @@
 +Any Model
 +Libraries
 +External libraries and  function prototypes                             <|
 +========================================================================
-diff -rupN ./VectorDM/work/models/func1.mdl ../../../installed/micromegas/3.6.9.2/VectorDM/VectorDM/work/models/func1.mdl
---- ./VectorDM/work/models/func1.mdl	1970-01-01 09:30:00.000000000 +0930
-+++ ../../../installed/micromegas/3.6.9.2/VectorDM/VectorDM/work/models/func1.mdl	2016-08-22 21:31:34.000000000 +0930
+diff -rupN ./VectorSingletDM_Z2/work/models/func1.mdl ../../../installed/micromegas/3.6.9.2/VectorSingletDM_Z2/VectorSingletDM_Z2/work/models/func1.mdl
+--- ./VectorSingletDM_Z2/work/models/func1.mdl	1970-01-01 09:30:00.000000000 +0930
++++ ../../../installed/micromegas/3.6.9.2/VectorSingletDM_Z2/VectorSingletDM_Z2/work/models/func1.mdl	2016-08-22 21:31:34.000000000 +0930
 @@ -0,0 +1,17 @@
 +vectorModel
 + Constraints 
@@ -27,9 +27,9 @@ diff -rupN ./VectorDM/work/models/func1.mdl ../../../installed/micromegas/3.6.9.
 +Vts    |-c12*s23-s12*c23*s13 % C-K-M matrix element
 +Vtb    |c23*c13 % C-K-M matrix element
 +========================================================================
-diff -rupN ./VectorDM/work/models/lgrng1.mdl ../../../installed/micromegas/3.6.9.2/VectorDM/VectorDM/work/models/lgrng1.mdl
---- ./VectorDM/work/models/lgrng1.mdl	1970-01-01 09:30:00.000000000 +0930
-+++ ../../../installed/micromegas/3.6.9.2/VectorDM/VectorDM/work/models/lgrng1.mdl	2016-08-22 21:31:34.000000000 +0930
+diff -rupN ./VectorSingletDM_Z2/work/models/lgrng1.mdl ../../../installed/micromegas/3.6.9.2/VectorSingletDM_Z2/VectorSingletDM_Z2/work/models/lgrng1.mdl
+--- ./VectorSingletDM_Z2/work/models/lgrng1.mdl	1970-01-01 09:30:00.000000000 +0930
++++ ../../../installed/micromegas/3.6.9.2/VectorSingletDM_Z2/VectorSingletDM_Z2/work/models/lgrng1.mdl	2016-08-22 21:31:34.000000000 +0930
 @@ -0,0 +1,82 @@
 +vectorModel
 + Lagrangian 
@@ -113,9 +113,9 @@ diff -rupN ./VectorDM/work/models/lgrng1.mdl ../../../installed/micromegas/3.6.9
 +W+   |W-   |Z    |Z    |-CW^2*EE^2/SW^2                                   |2*m1.m2*m3.m4-m1.m3*m2.m4-m1.m4*m2.m3
 +~V   |~V   |~V   |~V   |-lV/3                                             |m1.m2*m3.m4+m1.m3*m2.m4+m1.m4*m2.m3
 +================================================================================================================================================
-diff -rupN ./VectorDM/work/models/prtcls1.mdl ../../../installed/micromegas/3.6.9.2/VectorDM/VectorDM/work/models/prtcls1.mdl
---- ./VectorDM/work/models/prtcls1.mdl	1970-01-01 09:30:00.000000000 +0930
-+++ ../../../installed/micromegas/3.6.9.2/VectorDM/VectorDM/work/models/prtcls1.mdl	2016-08-22 21:31:34.000000000 +0930
+diff -rupN ./VectorSingletDM_Z2/work/models/prtcls1.mdl ../../../installed/micromegas/3.6.9.2/VectorSingletDM_Z2/VectorSingletDM_Z2/work/models/prtcls1.mdl
+--- ./VectorSingletDM_Z2/work/models/prtcls1.mdl	1970-01-01 09:30:00.000000000 +0930
++++ ../../../installed/micromegas/3.6.9.2/VectorSingletDM_Z2/VectorSingletDM_Z2/work/models/prtcls1.mdl	2016-08-22 21:31:34.000000000 +0930
 @@ -0,0 +1,22 @@
 +vectorModel
 + Particles 
@@ -139,9 +139,9 @@ diff -rupN ./VectorDM/work/models/prtcls1.mdl ../../../installed/micromegas/3.6.
 +Higgs           |H  |H  |35        |0    |MH  |!wH  |1    |   |H               |H                   |
 +vector DM       |~V |~V |19        |2    |mV  |0    |1    |   |(V)             |(V)                 |
 +======================================================================================================
-diff -rupN ./VectorDM/work/models/vars1.mdl ../../../installed/micromegas/3.6.9.2/VectorDM/VectorDM/work/models/vars1.mdl
---- ./VectorDM/work/models/vars1.mdl	1970-01-01 09:30:00.000000000 +0930
-+++ ../../../installed/micromegas/3.6.9.2/VectorDM/VectorDM/work/models/vars1.mdl	2016-08-22 21:31:34.000000000 +0930
+diff -rupN ./VectorSingletDM_Z2/work/models/vars1.mdl ../../../installed/micromegas/3.6.9.2/VectorSingletDM_Z2/VectorSingletDM_Z2/work/models/vars1.mdl
+--- ./VectorSingletDM_Z2/work/models/vars1.mdl	1970-01-01 09:30:00.000000000 +0930
++++ ../../../installed/micromegas/3.6.9.2/VectorSingletDM_Z2/VectorSingletDM_Z2/work/models/vars1.mdl	2016-08-22 21:31:34.000000000 +0930
 @@ -0,0 +1,30 @@
 +vectorModel
 + Variables 
@@ -173,9 +173,9 @@ diff -rupN ./VectorDM/work/models/vars1.mdl ../../../installed/micromegas/3.6.9.
 +muV    |120          |bare-mass term
 +mV     |150          |mass of vector DM
 +========================================================================
-diff -rupN ./VectorDM/Makefile ../../installed/micromegas/3.6.9.2/VectorDM/Makefile
---- ./VectorDM/Makefile	1970-01-01 09:30:00.000000000 +0930
-+++ ../../installed/micromegas/3.6.9.2/VectorDM/Makefile	21:31:34.000000000 +0930
+diff -rupN ./VectorSingletDM_Z2/Makefile ../../installed/micromegas/3.6.9.2/VectorSingletDM_Z2/Makefile
+--- ./VectorSingletDM_Z2/Makefile	1970-01-01 09:30:00.000000000 +0930
++++ ../../installed/micromegas/3.6.9.2/VectorSingletDM_Z2/Makefile	21:31:34.000000000 +0930
 @@ -45,7 +45,15 @@ libs:
  	$(MAKE) -C work
  	$(MAKE) -C lib

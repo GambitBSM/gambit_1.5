@@ -1,14 +1,14 @@
-diff -rupN ./DiracDM/work/models/extlib1.mdl ../../../installed/micromegas/3.6.9.2/DiracDM/DiracDM/work/models/extlib1.mdl
---- ./DiracDM/work/models/extlib1.mdl	1970-01-01 09:30:00.000000000 +0930
-+++ ../../../installed/micromegas/3.6.9.2/DiracDM/DiracDM/work/models/extlib1.mdl	2016-08-22 21:33:01.000000000 +0930
+diff -rupN ./DiracSingletDM_Z2/work/models/extlib1.mdl ../../../installed/micromegas/3.6.9.2/DiracSingletDM_Z2/DiracSingletDM_Z2/work/models/extlib1.mdl
+--- ./DiracSingletDM_Z2/work/models/extlib1.mdl	1970-01-01 09:30:00.000000000 +0930
++++ ../../../installed/micromegas/3.6.9.2/DiracSingletDM_Z2/DiracSingletDM_Z2/work/models/extlib1.mdl	2016-08-22 21:33:01.000000000 +0930
 @@ -0,0 +1,4 @@
 +Any Model
 +Libraries
 +External libraries and  function prototypes                             <|
 +========================================================================
-diff -rupN ./DiracDM/work/models/func1.mdl ../../../installed/micromegas/3.6.9.2/DiracDM/DiracDM/work/models/func1.mdl
---- ./DiracDM/work/models/func1.mdl	1970-01-01 09:30:00.000000000 +0930
-+++ ../../../installed/micromegas/3.6.9.2/DiracDM/DiracDM/work/models/func1.mdl	2016-08-22 21:33:01.000000000 +0930
+diff -rupN ./DiracSingletDM_Z2/work/models/func1.mdl ../../../installed/micromegas/3.6.9.2/DiracSingletDM_Z2/DiracSingletDM_Z2/work/models/func1.mdl
+--- ./DiracSingletDM_Z2/work/models/func1.mdl	1970-01-01 09:30:00.000000000 +0930
++++ ../../../installed/micromegas/3.6.9.2/DiracSingletDM_Z2/DiracSingletDM_Z2/work/models/func1.mdl	2016-08-22 21:33:01.000000000 +0930
 @@ -0,0 +1,18 @@
 +diracSPSmodel
 + Constraints 
@@ -28,9 +28,9 @@ diff -rupN ./DiracDM/work/models/func1.mdl ../../../installed/micromegas/3.6.9.2
 +Vtb    |c23*c13 % C-K-M matrix element
 +sinXI  |sqrt(1-cosXI^2)
 +============================================================================================
-diff -rupN ./DiracDM/work/models/lgrng1.mdl ../../../installed/micromegas/3.6.9.2/DiracDM/DiracDM/work/models/lgrng1.mdl
---- ./DiracDM/work/models/lgrng1.mdl	1970-01-01 09:30:00.000000000 +0930
-+++ ../../../installed/micromegas/3.6.9.2/DiracDM/DiracDM/work/models/lgrng1.mdl	2016-08-22 21:33:01.000000000 +0930
+diff -rupN ./DiracSingletDM_Z2/work/models/lgrng1.mdl ../../../installed/micromegas/3.6.9.2/DiracSingletDM_Z2/DiracSingletDM_Z2/work/models/lgrng1.mdl
+--- ./DiracSingletDM_Z2/work/models/lgrng1.mdl	1970-01-01 09:30:00.000000000 +0930
++++ ../../../installed/micromegas/3.6.9.2/DiracSingletDM_Z2/DiracSingletDM_Z2/work/models/lgrng1.mdl	2016-08-22 21:33:01.000000000 +0930
 @@ -0,0 +1,81 @@
 +diracSPSmodel
 + Lagrangian 
@@ -113,9 +113,9 @@ diff -rupN ./DiracDM/work/models/lgrng1.mdl ../../../installed/micromegas/3.6.9.
 +W+   |W-   |Z    |Z    |-CW^2*EE^2/SW^2                                   |2*m1.m2*m3.m4-m1.m3*m2.m4-m1.m4*m2.m3
 +~F   |~f   |H    |H    |-lF                                               |cosXI+i*sinXI*G5
 +==================================================================================================================================================
-diff -rupN ./DiracDM/work/models/prtcls1.mdl ../../../installed/micromegas/3.6.9.2/DiracDM/DiracDM/work/models/prtcls1.mdl
---- ./DiracDM/work/models/prtcls1.mdl	1970-01-01 09:30:00.000000000 +0930
-+++ ../../../installed/micromegas/3.6.9.2/DiracDM/DiracDM/work/models/prtcls1.mdl	2016-08-22 21:33:01.000000000 +0930
+diff -rupN ./DiracSingletDM_Z2/work/models/prtcls1.mdl ../../../installed/micromegas/3.6.9.2/DiracSingletDM_Z2/DiracSingletDM_Z2/work/models/prtcls1.mdl
+--- ./DiracSingletDM_Z2/work/models/prtcls1.mdl	1970-01-01 09:30:00.000000000 +0930
++++ ../../../installed/micromegas/3.6.9.2/DiracSingletDM_Z2/DiracSingletDM_Z2/work/models/prtcls1.mdl	2016-08-22 21:33:01.000000000 +0930
 @@ -0,0 +1,22 @@
 +diracSPSmodel
 + Particles 
@@ -139,9 +139,9 @@ diff -rupN ./DiracDM/work/models/prtcls1.mdl ../../../installed/micromegas/3.6.9
 +Higgs           |H  |H  |35        |0    |MH  |!wH  |1    |   |H               |H                   |
 +Dirac DM        |~f |~F |38        |1    |mF  |0    |1    |0  |(f)             |(F)                 |
 +==================================================================================================================
-diff -rupN ./DiracDM/work/models/vars1.mdl ../../../installed/micromegas/3.6.9.2/DiracDM/DiracDM/work/models/vars1.mdl
---- ./DiracDM/work/models/vars1.mdl	1970-01-01 09:30:00.000000000 +0930
-+++ ../../../installed/micromegas/3.6.9.2/DiracDM/DiracDM/work/models/vars1.mdl	2016-08-22 21:33:01.000000000 +0930
+diff -rupN ./DiracSingletDM_Z2/work/models/vars1.mdl ../../../installed/micromegas/3.6.9.2/DiracSingletDM_Z2/DiracSingletDM_Z2/work/models/vars1.mdl
+--- ./DiracSingletDM_Z2/work/models/vars1.mdl	1970-01-01 09:30:00.000000000 +0930
++++ ../../../installed/micromegas/3.6.9.2/DiracSingletDM_Z2/DiracSingletDM_Z2/work/models/vars1.mdl	2016-08-22 21:33:01.000000000 +0930
 @@ -0,0 +1,29 @@
 +diracSPSmodel
 + Variables 
@@ -172,9 +172,9 @@ diff -rupN ./DiracDM/work/models/vars1.mdl ../../../installed/micromegas/3.6.9.2
 +lF     |0.1          |Dirac-Higgs coupling
 +cosXI  |1            |cos(xi)
 +========================================================================
-diff -rupN ./DiracDM/Makefile ../../installed/micromegas/3.6.9.2/DiracDM/Makefile
---- ./DiracDM/Makefile	1970-01-01 09:30:00.000000000 +0930
-+++ ../../installed/micromegas/3.6.9.2/DiracDM/Makefile	21:33:01.000000000 +0930
+diff -rupN ./DiracSingletDM_Z2/Makefile ../../installed/micromegas/3.6.9.2/DiracSingletDM_Z2/Makefile
+--- ./DiracSingletDM_Z2/Makefile	1970-01-01 09:30:00.000000000 +0930
++++ ../../installed/micromegas/3.6.9.2/DiracSingletDM_Z2/Makefile	21:33:01.000000000 +0930
 @@ -45,7 +45,15 @@ libs:
  	$(MAKE) -C work
  	$(MAKE) -C lib
