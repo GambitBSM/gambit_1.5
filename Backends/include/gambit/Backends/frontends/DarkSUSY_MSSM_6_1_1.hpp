@@ -53,12 +53,12 @@ BE_CONV_FUNCTION(DD_couplings, double*, (), "get_DD_couplings")
 BE_CONV_FUNCTION(DSparticle_code, int, (const str&), "particle_code")
 BE_CONV_FUNCTION(DS_neutral_h_decay_channels, std::vector<std::vector<str>>, (), "get_DS_neutral_h_decay_channels")
 BE_CONV_FUNCTION(DS_charged_h_decay_channels, std::vector<std::vector<str>>, (), "get_DS_charged_h_decay_channels")
-// BE_CONV_FUNCTION(neutrino_yield, double, (const double&, const int&, void*&), "nuyield")
-// BE_CONV_FUNCTION(dsgenericwimp_nusetup, void, (const double(&)[29], const double(&)[29][3], const double(&)[15],
-//                                               const double(&)[3], const double&, const double&), "nuyield_setup")
+BE_CONV_FUNCTION(neutrino_yield, double, (const double&, const int&, void*&), "nuyield")
+BE_CONV_FUNCTION(dsgenericwimp_nusetup, void, (const double(&)[29], const double(&)[29][3], const double(&)[15], const double(&)[3], const double&, const double&), "nuyield_setup")
 // BE_CONV_FUNCTION(init_diskless, int, (const SLHAstruct&, const DecayTable&), "initFromSLHAeaAndDecayTable")
 // Functions used by convenience functions
-// BE_FUNCTION(dsntmuonyield, double, (const double&, const double&, const char&, const int&, const int&, const int&, const int&), "dsntmuonyield_", "raw_muonyield")
+BE_FUNCTION(dsseyield_sim_ls, double, (const double&, const double&, const double&, const int&, const int&, const int&, const int&, const int&, const int&, const char&, const int&, const int&, const int&), "dsseyield_sim_ls_", "raw_nuyield_sim")
+BE_FUNCTION(dsseyield_ch, double, (const double&, const double&, const double&, const int&, const int&, const char&, const int&, const int&, const int&), "dsseyield_ch_", "raw_nuyield_casc")
 BE_FUNCTION(dsddgpgn, void, (DS_gg&, int&), "dsddgpgn_", "dsddgpgn")
 
 
@@ -124,6 +124,7 @@ BE_FUNCTION(dsddgpgn, void, (DS_gg&, int&), "dsddgpgn_", "dsddgpgn")
 // BE_VARIABLE(ddcom, DS_DDCOM, "ddcom_",    "ddcom")
 // Neutrino detection
 // BE_VARIABLE(wabranch, DS_NUCOM, "wabranch_", "nu_common_block")
+BE_VARIABLE(anbranch,DS6_NUCOM, "anbranch_", "nu_common_block")
 // Halo model common blocks
 // BE_VARIABLE(dshmcom, DS_HMCOM, "dshmcom_", "dshmcom")
 // BE_VARIABLE(dshmframevelcom, DS_HMFRAMEVELCOM, "dshmframevelcom_", "dshmframevelcom")

@@ -330,6 +330,16 @@ namespace Gambit
       Flogical dswasetupcalled;
   };
 
+  struct DS6_NUCOM
+  {
+      Farray<Fdouble, 1, 29, 1, 3> ans0br;
+      Farray<Fdouble, 1, 15> anscbr;
+      Farray<Fdouble, 1, 3> ans0m;
+      Fdouble anscm;
+      Farray<Finteger, 1, 29,1, 6> anch_2body;
+      Farray<Finteger, 1, 29, 1, 2> yieldchannels_line;
+  };
+
   struct DS_HMCOM
   {
       Fdouble rho0;      // non-rescaled local density
