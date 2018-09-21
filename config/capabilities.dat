@@ -1132,6 +1132,14 @@ RD_fraction: |
 lnL_oh2: |
    Contains the log likelihood function constraining the relic density.
 
+relic_density_contributions: |
+   The contributions of different final states to the relic density of
+   dark matter.
+
+semi_annihilation_fraction: |
+   The contribution of semi-annihilation to the relic density of dark
+   matter.
+
 LocalHalo: |
    Provides the parameters of the Maxwell-Boltzmann velocity distribution,
    in terms of the strucutre LocalMaxwellianHalo containing the parameters
@@ -2611,10 +2619,6 @@ get_DS_charged_h_decay_channels: |
 #  MicrOmegas capabilities
 #-------------------------------------
 
-
-get_oneChannel: |
-   Get the contribution to the relic density from one channel
-
 MicrOmegas_MSSM_3_6_9_2_init: |
    Initialise MicrOmegas MSSM backend.
 
@@ -2632,6 +2636,12 @@ MicrOmegas_MajoranaSingletDM_Z2_3_6_9_2_init: |
 
 MicrOmegas_DiracSingletDM_Z2_3_6_9_2_init: |
    Initialise MicrOmegas DiracSingletDM_Z2 backend.
+
+get_oneChannel: |
+   Get the contribution to the relic density from one channel
+
+momegas_print_channels: |
+   Print the contributions to the relic density from all channels
 
 assignVal: |
    Assigns a value to a model parameter in MicrOmegas.

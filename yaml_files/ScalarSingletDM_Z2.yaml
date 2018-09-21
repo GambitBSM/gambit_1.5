@@ -25,7 +25,7 @@ Parameters:
     mH:
       range: [124.1, 127.3]
 
-  SingletDM:
+  ScalarSingletDM_Z2:
     mS:
       range: [45., 10000.]
       prior_type: log
@@ -56,8 +56,8 @@ Printer:
   printer: hdf5
 
   options:
-    output_file: "SingletDM.hdf5"
-    group: "/SingletDM"
+    output_file: "ScalarSingletDM_Z2.hdf5"
+    group: "/ScalarSingletDM_Z2"
 
 
 Scanner:
@@ -200,18 +200,18 @@ Rules:
   # Choose to use DarkSUSY for solar capture rate
   - capability: capture_rate_Sun
     function: capture_rate_Sun_const_xsec
-    
+
   # Use DarkBit's own calculations of the direct detection couplings
   - capability: DD_couplings
-    function: DD_couplings_SingletDM
+    function: DD_couplings_ScalarSingletDM_Z2
 
   # Choose to get decays from DecayBit proper, not from an SLHA file.
   - capability: decay_rates
     function: all_decays
 
   # Choose to get the spectrum from SpecBit proper, not an SLHA file.
-  - capability: SingletDM_spectrum
-    function: get_SingletDM_spectrum
+  - capability: ScalarSingletDM_Z2_spectrum
+    function: get_ScalarSingletDM_Z2_spectrum
 
 Logger:
 
@@ -232,4 +232,4 @@ KeyValues:
     model_invalid_for_lnlike_below: -5e5
     model_invalid_for_lnlike_below_alt: -1e5
 
-  default_output_path: "runs/singletDM/"
+  default_output_path: "runs/ScalarSingletDM_Z2/"
