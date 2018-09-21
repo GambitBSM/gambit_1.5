@@ -39,7 +39,7 @@ BE_NAMESPACE
   std::vector<double> DSparticle_mass;
   std::vector<double> GAMBITparticle_mass;
   std::vector<double> DSanbr; // to have BR available to neutrino_yield
-  std::double anmwimp; // to have WIMP mass available to neutrino_yield
+  double anmwimp; // to have WIMP mass available to neutrino_yield
   std::vector<double> DSanpdg1;
   std::vector<double> DSanpdg2;
 }
@@ -106,7 +106,7 @@ BE_NAMESPACE
   {
 
     // Transfer WIMP mass common block.
-    anmwimmp = mwimp;
+    anmwimp = mwimp;
 
     // Transfer branching fractions to WIMP annihilation common blocks.
     // For channel indices, see dswayieldone.f

@@ -743,7 +743,7 @@ BE_NAMESPACE
   {
     double gps,gns,gpa,gna;
     dsddgpgn(gps,gns,gpa,gna);
-    double *result;
+    double *result=0;
     result[0]=gps;
     result[1]=gns;
     result[2]=gpa;
