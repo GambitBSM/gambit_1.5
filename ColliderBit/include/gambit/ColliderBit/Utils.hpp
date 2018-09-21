@@ -48,7 +48,7 @@ namespace Gambit {
 
     /// In-place filter a supplied particle vector by rejecting those which fail a supplied cut
     inline void ifilter_reject(ParticlePtrs& particles,
-                               const std::function<bool(const Particle*)>& rejfn, bool do_delete=true) {
+                               std::function<bool(Particle*)> rejfn, bool do_delete=true) {
       iremoveerase(particles, [&](Particle* p) {
           const bool rm = rejfn(p);
           if (rm && do_delete) delete p;
@@ -58,15 +58,15 @@ namespace Gambit {
 
     /// In-place filter a supplied particle vector by keeping those which pass a supplied cut
     inline void ifilter_select(ParticlePtrs& particles,
-                               const std::function<bool(const Particle*)>& selfn, bool do_delete=true) {
-      ifilter_reject(particles, [&](const Particle* p) { return !selfn(p); }, do_delete);
+                               std::function<bool(Particle*)> selfn, bool do_delete=true) {
+      ifilter_reject(particles, [&](Particle* p) { return !selfn(p); }, do_delete);
     }
 
 
     /// Filter a supplied particle vector by rejecting those which fail a supplied cut
     /// @todo Optimise by only copying those which are selected (filter_select is canonical)
     inline ParticlePtrs filter_reject(const ParticlePtrs& particles,
-                                      const std::function<bool(const Particle*)>& rejfn, bool do_delete=true) {
+                                      std::function<bool(Particle*)> rejfn, bool do_delete=true) {
       ParticlePtrs rtn = particles;
       ifilter_reject(rtn, rejfn, do_delete);
       return rtn;
@@ -74,8 +74,8 @@ namespace Gambit {
 
     /// Filter a supplied particle vector by keeping those which pass a supplied cut
     inline ParticlePtrs filter_select(const ParticlePtrs& particles,
-                                      const std::function<bool(const Particle*)>& selfn, bool do_delete=true) {
-      return filter_reject(particles, [&](const Particle* p) { return !selfn(p); }, do_delete);
+                                      std::function<bool(Particle*)> selfn, bool do_delete=true) {
+      return filter_reject(particles, [&](Particle* p) { return !selfn(p); }, do_delete);
     }
 
     //@}
@@ -87,7 +87,7 @@ namespace Gambit {
 
     /// In-place filter a supplied jet vector by rejecting those which fail a supplied cut
     inline void ifilter_reject(JetPtrs& jets,
-                               const std::function<bool(const Jet*)>& rejfn, bool do_delete=true) {
+                               std::function<bool(Jet*)> rejfn, bool do_delete=true) {
       iremoveerase(jets, [&](Jet* j) {
           const bool rm = rejfn(j);
           if (rm && do_delete) delete j;
@@ -97,15 +97,15 @@ namespace Gambit {
 
     /// In-place filter a supplied jet vector by keeping those which pass a supplied cut
     inline void ifilter_select(JetPtrs& jets,
-                               const std::function<bool(const Jet*)>& selfn, bool do_delete=true) {
-      ifilter_reject(jets, [&](const Jet* j) { return !selfn(j); }, do_delete);
+                               std::function<bool(Jet*)> selfn, bool do_delete=true) {
+      ifilter_reject(jets, [&](Jet* j) { return !selfn(j); }, do_delete);
     }
 
 
     /// Filter a supplied particle vector by rejecting those which fail a supplied cut
     /// @todo Optimise by only copying those which are selected (filter_select is canonical)
     inline JetPtrs filter_reject(const JetPtrs& jets,
-                                 const std::function<bool(const Jet*)>& rejfn, bool do_delete=true) {
+                                 std::function<bool(Jet*)> rejfn, bool do_delete=true) {
       JetPtrs rtn = jets;
       ifilter_reject(rtn, rejfn, do_delete);
       return rtn;
@@ -113,8 +113,8 @@ namespace Gambit {
 
     /// Filter a supplied particle vector by keeping those which pass a supplied cut
     inline JetPtrs filter_select(const JetPtrs& jets,
-                                 const std::function<bool(const Jet*)>& selfn, bool do_delete=true) {
-      return filter_reject(jets, [&](const Jet* j) { return !selfn(j); }, do_delete);
+                                 std::function<bool(Jet*)> selfn, bool do_delete=true) {
+      return filter_reject(jets, [&](Jet* j) { return !selfn(j); }, do_delete);
     }
 
     //@}
@@ -230,6 +230,19 @@ namespace Gambit {
       for (const HEPUtils::Jet* j : e.jets())
         if (j->pT() > ptmin && HEPUtils::in_range(HEPUtils::deltaR_eta(p4, *j), rmin, rmax)) return true;
       return false;
+    }
+
+
+    /// Overlap removal -- discard from first list if within deltaRMax of any from the second list
+    template<typename MOMPTRS1, typename MOMPTRS2>
+    void removeOverlap(MOMPTRS1& momstofilter, const MOMPTRS2& momstocmp, double deltaRMax) {
+      ifilter_reject(momstofilter, [&](const typename MOMPTRS1::value_type& mom1) {
+          for (const typename MOMPTRS2::value_type& mom2 : momstocmp) {
+            const double dR = deltaR_eta(mom1->mom(), mom2->mom());
+            if (dR < deltaRMax) return true;
+          }
+          return false;
+        }, false);
     }
 
 

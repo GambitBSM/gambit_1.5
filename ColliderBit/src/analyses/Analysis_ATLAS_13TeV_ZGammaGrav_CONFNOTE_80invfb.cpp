@@ -21,7 +21,7 @@ namespace Gambit {
     public:
 
       Analysis_ATLAS_13TeV_ZGammaGrav_CONFNOTE_80invfb() {
-        set_analysis_name(ATLAS_13TeV_ZGammaGrav_CONFNOTE_80invfb);
+        set_analysis_name("ATLAS_13TeV_ZGammaGrav_CONFNOTE_80invfb");
         set_luminosity(79.8);
         nsig = 0;
 
@@ -36,28 +36,28 @@ namespace Gambit {
       void analyze(const Event* event) {
         HEPUtilsAnalysis::analyze(event);
 
-        // Baseline electrons
-        ParticlePtrs baselineElectrons;
+        // Electrons
+        ParticlePtrs electrons;
         for (Particle* e : event->electrons()) {
           const bool crack = e->abseta() > 1.37 && e->abseta() < 1.52;
           if (e->pT() > 10. && e->abseta() < 2.47 && !crack)
-            baselineElectrons.push_back(e);
+            electrons.push_back(e);
         }
-        ATLAS::applyMediumIDElectronSelection(baselineElectrons);
+        ATLAS::applyMediumIDElectronSelection(electrons);
 
-        // Baseline muons
+        // Muons
         // NB. medium muon ID for pT > 10 ~ 99%: https://cds.cern.ch/record/2047831/files/ATL-PHYS-PUB-2015-037.pdf
-        ParticlePtrs baselineMuons;
+        ParticlePtrs muons;
         for (Particle* m : event->muons())
           if (m->pT() > 10. && m->abseta() < 2.7 && random_bool(0.99))
-            baselineMuons.push_back(m);
+            muons.push_back(m);
 
         // Photons
-        ParticlePtrs baselinePhotons;
+        ParticlePtrs photons;
         for (Particle* y : event->photons())
           if (y->pT() > 20.)
-            baselinePhotons.push_back(y);
-        ATLAS::applyPhotonEfficiencyR2(baselinePhotons);
+            photons.push_back(y);
+        ATLAS::applyPhotonEfficiencyR2(photons);
         /// @todo Need to do some explicit isolation? Unlike leptons, there will be significant hadronic photons
 
         // Jets
@@ -67,18 +67,18 @@ namespace Gambit {
             jets.push_back(j);
 
         // Overlap removal
-        removeOverlap(jets, baselineElectrons, 0.2);
-        removeOverlap(baselineElectrons, jets, 0.4);
-        removeOverlap(baselineElectrons, jets, 0.4);
-        removeOverlap(baselinePhotons, baselineElectrons, 0.4);
-        removeOverlap(baselinePhotons, baselineMuons, 0.4);
-        removeOverlap(baselineJets, baselinePhotons, 0.4);
+        removeOverlap(jets, electrons, 0.2);
+        removeOverlap(electrons, jets, 0.4);
+        removeOverlap(electrons, jets, 0.4);
+        removeOverlap(photons, electrons, 0.4);
+        removeOverlap(photons, muons, 0.4);
+        removeOverlap(jets, photons, 0.4);
 
         // Put objects in pT order
         sortByPt(jets);
-        sortByPt(baselineElectrons);
-        sortByPt(baselineMuons);
-        sortByPt(baselinePhotons);
+        sortByPt(electrons);
+        sortByPt(muons);
+        sortByPt(photons);
 
         // Missing energy
         const double met = event->met();
@@ -89,12 +89,12 @@ namespace Gambit {
 
 
         // There must be a prompt photon
-        if (baselinePhotons.empty()) return;
+        if (photons.empty()) return;
 
         // Find the Z system
-        if (baselineElectrons.size() + baselineMuons.size() != 2) return; //< must be exactly two leptons
-        if (!baselineElectrons.empty() && !baselineMuons.empty()) return; //< the two leptons must be same-flavour
-        const ParticlePtrs& leps = baselineElectrons.empty() ? baselineMuons : baselineElectrons;
+        if (electrons.size() + muons.size() != 2) return; //< must be exactly two leptons
+        if (!electrons.empty() && !muons.empty()) return; //< the two leptons must be same-flavour
+        const ParticlePtrs& leps = electrons.empty() ? muons : electrons;
 
         // Check lepton pTs and require small delta_phi
         if (leps[0]->pT() < 25 || leps[1]->pT() < 20) return;
@@ -108,8 +108,8 @@ namespace Gambit {
         if (!jets.empty() && jets[0]->pT() > 30) return;
 
         // Require separation of the Z and the MET+photon(s) systems
-        const P4 pYMET = pmiss + baselinePhotons.[0]->mom() +
-          (baselinePhotons.size() > 1 ? baselinePhotons[1]->mom() : P4());
+        const P4 pYMET = pmiss + photons[0]->mom() +
+          (photons.size() > 1 ? photons[1]->mom() : P4());
         if (deltaPhi(pZ, pYMET) < 2.8) return;
         if (fabs(pZ.pT()-pYMET.pT())/pYMET.pT() > 0.2) return;
 
@@ -123,8 +123,8 @@ namespace Gambit {
         // The base class add function handles the signal region vector and total # events.
         HEPUtilsAnalysis::add(other);
 
-        Analysis_ATLAS_13TeV_PhotonGGM_36invfb* specificOther
-          = dynamic_cast<Analysis_ATLAS_13TeV_PhotonGGM_36invfb*>(other);
+        Analysis_ATLAS_13TeV_ZGammaGrav_CONFNOTE_80invfb* specificOther
+          = dynamic_cast<Analysis_ATLAS_13TeV_ZGammaGrav_CONFNOTE_80invfb*>(other);
 
         // // Here we will add the subclass member variables:
         // if (NCUTS != specificOther->NCUTS) NCUTS = specificOther->NCUTS;
@@ -140,12 +140,12 @@ namespace Gambit {
       void collect_results() {
 
         SignalRegionData results;
-        results_SRaa_SL.sr_label = "SR";
-        results_SRaa_SL.n_observed = 3.;
-        results_SRaa_SL.n_background = 2.1;
-        results_SRaa_SL.background_sys = 0.5;
-        results_SRaa_SL.signal_sys = 0.;
-        results_SRaa_SL.n_signal = nsig;
+        results.sr_label = "SR";
+        results.n_observed = 3.;
+        results.n_background = 2.1;
+        results.background_sys = 0.5;
+        results.signal_sys = 0.;
+        results.n_signal = nsig;
         add_result(results);
 
       }
@@ -166,20 +166,6 @@ namespace Gambit {
       // vector<int> cutFlowVector;
       // vector<string> cutFlowVector_str;
       // int NCUTS;
-
-
-      /// Overlap removal -- discard from first list if within deltaRMax of any from the second list
-      template<typename MOMS1, typename MOMS2>
-      void removeOverlap(MOMS1& momstofilter, const MOMS2& momstocmp, double deltaRMax) {
-        ifilter_reject(momstofilter, [&](const MOMS1::value_type& mom1) {
-            for (const MOMS2::value_type& mom2 : momstocmp) {
-              const double dR = mom1.deltaR_eta(mom2);
-              if (dR < deltaRMax) return true;
-            }
-            return false;
-          }, false);
-      }
-
 
     };
 
