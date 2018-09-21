@@ -16,7 +16,8 @@
 #======== Input parameter declarations =======
 Parameters:
 
- LCDM_dNeff_Smu: !import include/LCDM_dNeff_Smu_scan.yaml
+ #LCDM_dNeff_Smu: !import include/LCDM_dNeff_Smu_scan.yaml
+ LCDM_dNeff_Smu_etaBBN: !import include/LCDM_dNeff_Smu_etaBBN_scan.yaml
 
  #eta:
  #  prior_type: flat
@@ -60,11 +61,6 @@ ObsLikes:
     type:         double
 
   - purpose:      LogLike
-    capability:   Helium_abundance
-    module:       CosmoBit
-    type:         double
-
-  - purpose:      LogLike
     capability:   compute_Planck_high_TT_loglike
     module:       CosmoBit
     type:         double
@@ -98,13 +94,16 @@ Rules:
     function: function_Planck_high_TT_lite_loglike
     module: CosmoBit
 
+  - capability: BBN_LogLike
+    function: compute_BBN_LogLike
+    options:
+        Yp:  2.527e-5
+        Delta_Yp: 0.030e-5
+
   - capability: plc_2_0_init
     options:
       planck_path: /home/janina/code/PlanckLike/plc_2.0
-      #eta: 5.3
-     # dNeff: 0
-      #planck_path: /home/janina/code/gambit_devel/Backends/installed/plc/2.0/plc-2.0
-
+      
 #======== Logging setup ========
 Lxogger:
   redirection:

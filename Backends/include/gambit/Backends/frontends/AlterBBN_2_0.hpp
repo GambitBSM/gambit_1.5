@@ -26,7 +26,7 @@
 
 LOAD_LIBRARY
 
-BE_ALLOW_MODELS(LCDM, LCDM_dNeff_Smu)
+BE_ALLOW_MODELS(LCDM, LCDM_dNeff_Smu, LCDM_dNeff_Smu_etaBBN)
 
 BE_FUNCTION(Init_cosmomodel, void, (relicparam*), "Init_cosmomodel", "Init_cosmomodel")
 //BE_FUNCTION(nucl_err, int, (const relicparam*, std::array<double,27>, std::array<std::array<double,27>,27> ), "nucl_err", "nucl_err")

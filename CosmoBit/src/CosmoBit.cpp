@@ -49,6 +49,7 @@ namespace Gambit
   {
     using namespace LogTags;
 
+
     struct my_f_params { double a; double b; double c; double d; };
 
     // Utility functions (not rolcalled)
@@ -304,7 +305,7 @@ namespace Gambit
       cosmo.input.addEntry("n_s",*Param["n_s"]);
       cosmo.input.addEntry("tau_reio",*Param["tau_reio"]);
 
-      cosmo.input.addEntry("N_ur",*Param["dNeff"]+0.00641);
+      cosmo.input.addEntry("N_ur",*Param["dNeff"]+0.00641);  //TODO: explanation for value/change implementation?
 
       cosmo.input.addEntry("N_ncdm",3);
       std::stringstream sstream;
@@ -2248,13 +2249,33 @@ namespace Gambit
       using namespace Pipes::AlterBBN_fill;
 
       BEreq::Init_cosmomodel(&result);
-      result.eta0=runOptions->getValueOrDef<double>(6.11*pow(10,-10),"eta");
-      //std::cout << "omega b value:" << *Param["omega_b"] << std::endl;
-      //std::cout << "eta0 val: " << result.eta0 << std::endl;
 
       result.eta0=*Param["omega_b"]*274.*pow(10,-10);
+
+        // etaBBN = *Param["etaBBN"]
+      result.Nnu=0.00641;     // 3 massive neutrinos, Neff s.t. T_ncdm = 0.71611 yields m/omega of 93.14 eV
       result.dNnu=*Param["dNeff"];
-      result.failsafe = 3;                            // set precision parameters
+      //result.eta0=runOptions->getValueOrDef<double>(6.1*pow(10,-10),"eta");
+      //result.dNnu=runOptions->getValueOrDef<double>(0,"asdfk");
+      std::cout<< "eta = " << result.eta0 <<", Nu = " << result.Nnu <<", dNu = " << result.dNnu << std::endl;
+      result.failsafe = 3;                            // set precision parameters for AlterBBN
+      result.err = 3;
+    }
+
+    void AlterBBN_fill_etaBBN(relicparam &result)
+    {
+      using namespace Pipes::AlterBBN_fill_etaBBN;
+
+      BEreq::Init_cosmomodel(&result);
+      
+      result.eta0 = *Param["eta_BBN"];  // etaBBN = *Param["omega_b"]*274.*pow(10,-10);
+
+      result.Nnu=0.00641;     // 3 massive neutrinos, Neff s.t. T_ncdm = 0.71611 yields m/omega of 93.14 eV
+      result.dNnu=*Param["dNeff_BBN"];
+      //result.eta0=runOptions->getValueOrDef<double>(6.1*pow(10,-10),"eta");
+      //result.dNnu=runOptions->getValueOrDef<double>(0,"asdfk");
+      std::cout<< "eta = " << result.eta0 <<", Nu = " << result.Nnu <<", dNu = " << result.dNnu << std::endl;
+      result.failsafe = 3;                            // set precision parameters for AlterBBN
       result.err = 3;
     }
 
@@ -2289,7 +2310,7 @@ namespace Gambit
     using namespace Pipes::get_Helium_abundance;
 
     CosmoBit::BBN_container BBN_res = *Dep::BBN_abundances;
-    result = BBN_res.BBN_abund.at(6);
+    result = BBN_res.BBN_abund.at(6);           // TODO: use map to refer to Helium pos in array
     std::cout << "Helium Abundane = " << result << std::endl;
 
   }
@@ -2300,6 +2321,8 @@ namespace Gambit
     using namespace Pipes::compute_BBN_LogLike;
 
     CosmoBit::BBN_container BBN_res = *Dep::BBN_abundances;
+
+    //CosmoBit::BBN_container abund_map
 
     int NNUC =26;
     int debug = 1;
