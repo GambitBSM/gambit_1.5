@@ -69,7 +69,6 @@ if (CMAKE_CXX_COMPILER MATCHES "gcc$")
   message(FATAL_ERROR "\nYou have set CMAKE_CXX_COMPILER to gcc.  I don't think that means what you think it means.  Do you really want to compile C++ with gcc rather than g++?")
 endif()
 
-
 # Use ccache to speed up re-compiling if it is available
 #find_program(CCACHE_FOUND ccache)
 #if(CCACHE_FOUND)
@@ -147,7 +146,6 @@ endif()
 foreach(module yaml os re datetime sys getopt shutil itertools)
   find_python_module(${module} REQUIRED)
 endforeach()
-
 
 # Check for axel
 find_program(axel_FOUND axel)
@@ -323,6 +321,13 @@ else()
   set(GAMBIT_C_FLAGS "${CMAKE_C_FLAGS}")
   set(GAMBIT_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
   set(GAMBIT_Fortran_FLAGS "${CMAKE_Fortran_FLAGS}")
+endif()
+
+# Make symbols hidden by default when compiling GAMBIT source files
+if(${CMAKE_MAJOR_VERSION} MATCHES "2")
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fvisibility=hidden -fvisibility-inlines-hidden")
+else()
+  set(CMAKE_CXX_VISIBILITY_PRESET hidden)
 endif()
 
 # Check for optional packages and disable sections of GAMBIT accordingly

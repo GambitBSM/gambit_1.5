@@ -88,6 +88,7 @@ BE_NAMESPACE
     logger().send("Message from 'awesomenessNotByAnders' backend convenience function in LibSecond v1.1 wrapper",LogTags::info);
     initialize(a);
     someFunction();
+    cout << "someInt via direct access to LibSecond v1.1 python module (skipping frontend): " << LibSecond.attr("someInt") << endl;
     return returnResult();
   }
 }

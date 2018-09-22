@@ -79,16 +79,22 @@ SUSYHD:
   1.0.2:       ./Backends/installed/susyhd/1.0.2/SUSYHD.m
 
 
+# Example/debug backends
+
 LibFirst:
   1.0:         ./Backends/examples/libfirst.so
   1.1:         ./Backends/examples/libfirst.so
 
 LibSecond:
-  1.0:         ./Backends/examples/libsecond/1.0/libsecond.py
-  1.1:         ./Backends/examples/libsecond/1.1/libsecond.py
+  1.0:         ./Backends/examples/libsecond/1.0/libsecond_1_0.py
+  1.1:         ./Backends/examples/libsecond/1.1/libsecond_1_1.py
 
 LibThird:
   1.0:         ./Backends/examples/libthird.py
+
+LibFourth:
+  1.0:         ./Backends/examples/libfourth/1.0/libfourth_1_0
+  1.1:         ./Backends/examples/libfourth/1.1/libfourth_1_1
 
 LibFortran:
   1.0:         ./Backends/examples/libfortran.so

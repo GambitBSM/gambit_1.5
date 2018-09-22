@@ -296,7 +296,7 @@ namespace Gambit
       needsMathematica[be+ver] = false;
       needsPython[be+ver] = false;
       classloader[be+ver] = false;
- 
+
      // Now switch according to the language of the backend
       if (lang == "MATHEMATICA"
        or lang == "Mathematica")
