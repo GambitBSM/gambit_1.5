@@ -49,6 +49,9 @@ else()
   include_directories(${PROJECT_SOURCE_DIR}/contrib/yaml-cpp-0.6.2/src ${PROJECT_SOURCE_DIR}/contrib/yaml-cpp-0.6.2/include)
 endif()
 
+# Un-hide symbols so that dynamically-loaded scanner plugin libraries can access them.
+make_symbols_visible(yaml-cpp)
+
 set_target_properties(yaml-cpp PROPERTIES
   ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}"
 )

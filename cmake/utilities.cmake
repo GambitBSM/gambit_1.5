@@ -137,9 +137,18 @@ function(add_subdirectory_if_present dir)
   endif()
 endfunction()
 
+# Function to make symbols visible for a code component
+function(make_symbols_visible lib)
+  if(${CMAKE_MAJOR_VERSION} MATCHES "2")
+    set_target_properties(${lib} PROPERTIES COMPILE_OPTIONS "-fvisibility=default")
+  else()
+    set_target_properties(${lib} PROPERTIES CXX_VISIBILITY_PRESET default)
+  endif()
+endfunction()
+
 # Function to add static GAMBIT library
 function(add_gambit_library libraryname)
-  cmake_parse_arguments(ARG "" "OPTION" "SOURCES;HEADERS" ${ARGN})
+  cmake_parse_arguments(ARG "VISIBLE" "OPTION" "SOURCES;HEADERS" ${ARGN})
 
   add_library(${libraryname} ${ARG_OPTION} ${ARG_SOURCES} ${ARG_HEADERS})
   add_dependencies(${libraryname} model_harvest)
@@ -160,6 +169,11 @@ function(add_gambit_library libraryname)
 
   if(${ARG_OPTION} STREQUAL SHARED AND APPLE)
     set_property(TARGET ${libraryname} PROPERTY SUFFIX .so)
+  endif()
+
+  # Reveal symbols if requested
+  if(${ARG_VISIBLE})
+    make_symbols_visible(${libraryname})
   endif()
 
   # Cotire speeds up compilation by automatically generating and precompiling prefix headers for the targets

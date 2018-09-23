@@ -49,9 +49,9 @@ Rules:
 
   - capability:  nevents_postcuts
     backends:
-    - {capability: awesomeness, backend: LibSecond, version: 1.1}
-    - {capability: someFunction, backend: LibSecond, version: 1.1}
-    - {capability: SomeInt, backend: LibSecond, version: 1.1}
+    - {capability: awesomeness, backend: LibSecond, version: 1.0}
+    - {capability: someFunction, backend: LibSecond, version: 1.0}
+    - {capability: SomeInt, backend: LibSecond, version: 1.0}
 
   - capability:  function_pointer
     backends:
