@@ -571,6 +571,12 @@ namespace Gambit
       python_started = true;
     }
 
+    pybind11::module& Backends::backend_info::getPythonBackend(const str& be, const str& ver)
+    {
+      static pybind11::module empty_python_module;
+      return (works.at(be+ver) ? *loaded_python_backends.at(be+ver) : empty_python_module);
+    }
+
   #endif
 
 }
