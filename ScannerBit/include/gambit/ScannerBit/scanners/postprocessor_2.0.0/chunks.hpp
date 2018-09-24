@@ -23,10 +23,15 @@ struct Chunk
   std::size_t start; // Index of first point in this chunk
   std::size_t end;   // Index of last point in this chunk
   std::size_t eff_length; // Number of points in the chunk that are not marked to be skipped
+  Chunk(std::size_t s, std::size_t e, std::size_t el)
+   : start(s)
+   , end(e)
+   , eff_length(el)
+  {}
   Chunk(std::size_t s, std::size_t e)
    : start(s)
    , end(e)
-   , eff_length(0)
+   , eff_length(e-s) // Assume eff_length is actual length if not provided (can manually set it later)
   {}
   Chunk()
    : start(0)

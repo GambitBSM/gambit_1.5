@@ -61,8 +61,11 @@ scanner_plugin(postprocessor, version(2, 0, 0))
   like_ptr LogLike;
 
   /// MPI data
-  unsigned int numtasks;
-  unsigned int rank;
+  int numtasks;
+  int rank;
+
+  // Tags for messages
+  const int request_work_tag=10;
 
   /// The reader object in use for the scan
   Gambit::Printers::BaseBaseReader* reader;
@@ -109,9 +112,6 @@ scanner_plugin(postprocessor, version(2, 0, 0))
 #ifdef WITH_MPI
     MPI_Comm_size(MPI_COMM_WORLD, &s_numtasks); // MPI requires unsigned ints here, so we'll just convert afterwards
     MPI_Comm_rank(MPI_COMM_WORLD, &s_rank);
-
-    // Tags for messages
-    const int request_work_tag=10;
 
 #else
     s_numtasks = 1;
@@ -297,7 +297,7 @@ scanner_plugin(postprocessor, version(2, 0, 0))
          if(rank==0)
          { 
             // Master checks for work requests from other processes
-            for(int worker=1; worker<numtask; worker++)
+            for(int worker=1; worker<numtasks; worker++)
             {
                bool needs_work = ppComm.Iprobe(worker, request_work_tag);
                if(needs_work)
@@ -351,7 +351,7 @@ scanner_plugin(postprocessor, version(2, 0, 0))
                    <<") is before the chunk start ("<<mychunk.start
                    <<")! ended due to encountering the end of the input file."
                    <<" This indicates a bug in the postprocessor (or some "
-                   <<"bizarre corruption of the MPI message). Please report 
+                   <<"bizarre corruption of the MPI message). Please report"
                    <<"this.";
                std::cerr << err.str() << std::endl;
                scan_error().raise(LOCAL_INFO,err.str());

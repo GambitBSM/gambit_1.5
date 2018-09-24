@@ -74,6 +74,7 @@ namespace Gambit
          std::string root;
          unsigned int numtasks;
          unsigned int rank;
+         std::size_t chunksize;
          #ifdef WITH_MPI
          GMPI::Comm* comm;
          PPOptions() : comm(NULL) {}
@@ -89,15 +90,12 @@ namespace Gambit
             void check_settings();
             int run_main_loop(const Chunk& mychunks);
             bool get_ModelParameters(std::unordered_map<std::string, double>& outputMap);
-            bool check_for_redistribution_request();
-            void send_redistribution_request();
-            void clear_redistribution_requests();
-
+            Chunk get_new_chunk();
+            void set_done_chunks(const ChunkSet& done_chunks);
+ 
             // Message tags
             static const int REDIST_REQ = 0;
            
-            void set_done_chunks(const ChunkSet& done_chunks);
-
          private:
             /// Safe accessors for pointer data
             Printers::BaseBaseReader& getReader();
@@ -133,9 +131,6 @@ namespace Gambit
 
             /// Chunks describing the points that can be auto-skipped (because they have been processed previously)
             ChunkSet done_chunks;
-
-            /// Flag to trigger unique behaviour on first loop
-            bool firstloop;
 
             /// Names of all output that the primary printer knows about at startup (things GAMBIT plans to print from the likelihood loop)
             std::set<std::string> all_params;
@@ -176,6 +171,9 @@ namespace Gambit
 
             /// The label to assign to the results of add_to_like and subtract_from_like operations.
             std::string reweighted_loglike_name;
+
+            /// Flag to trigger unique behaviour on first loop
+            bool firstloop;
 
             /// Path to save resume files
             std::string root;

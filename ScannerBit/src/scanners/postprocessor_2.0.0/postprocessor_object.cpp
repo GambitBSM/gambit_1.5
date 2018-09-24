@@ -333,7 +333,6 @@ namespace Gambit
         , next_point(0)
         , chunksize(o.chunksize)
         , done_chunks()
-        , firstloop(true)
         , all_params                 (o.all_params                 )
         , data_labels                (o.data_labels                )
         , data_labels_copy           (o.data_labels_copy           )
@@ -347,6 +346,7 @@ namespace Gambit
         , discard_old_logl           (o.discard_old_logl           )
         , logl_purpose_name          (o.logl_purpose_name          )
         , reweighted_loglike_name    (o.reweighted_loglike_name    )
+        , firstloop(true)
         , root                       (o.root                       )
         , numtasks                   (o.numtasks                   )
         , rank                       (o.rank                       )
@@ -413,36 +413,6 @@ namespace Gambit
          return LogLike;
       }
       /// @}
-
-      bool PPDriver::check_for_redistribution_request()
-      {
-         bool request_seen = false;
-         #ifdef WITH_MPI
-         request_seen = comm->Iprobe(MPI_ANY_SOURCE, REDIST_REQ);
-         #endif
-         return request_seen;
-      }
-
-      void PPDriver::send_redistribution_request()
-      {
-         // Inform all processes of the resynchronisation request
-         #ifdef WITH_MPI
-         int nullbuf = 0;
-         comm->IsendToAll(&nullbuf, 0, REDIST_REQ);
-         #endif
-      }
-
-      void PPDriver::clear_redistribution_requests()
-      {
-         // Ensure all redistribution request messages are recv'd
-         #ifdef WITH_MPI
-         while(check_for_redistribution_request())
-         {
-           int nullbuf;
-           comm->Recv(&nullbuf, 1, MPI_ANY_SOURCE, REDIST_REQ);
-         }
-         #endif
-      }
 
       /// Check postprocessor settings for consistency and general validity
       void PPDriver::check_settings()
@@ -1147,7 +1117,7 @@ namespace Gambit
                {
                   // Chunk contains enough unprocessed points; stop adding more.
                   chunk_end = next_point;
-                  stop = true
+                  stop = true;
                }
                else if(next_point > total_length)
                {
