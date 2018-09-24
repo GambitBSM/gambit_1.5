@@ -49,18 +49,9 @@ def someFunction():
   else:
     print prefix, "Not initialized. Cannot perform calculation.";
 
-
-# 'byRefExample'
-#double byRefExample (double& input)
-#  std::cout << prefix << "This is function 'byRefExample'." << std::endl;
-#  input = someDouble = 2.0*someInt;
-#  return 2.1*someInt;
-
-
-# 'byRefExample2'
-#void byRefExample2 (double& input, double input2)
-#  std::cout << prefix << "This is function 'byRefExample2'." << std::endl;
-#  input = someDouble = 2.3*someInt + input2;
+# the 'hidden function'
+def hiddenFunction(x):
+  return pow(x,2.0)
 
 # return 'result'
 def returnResult():

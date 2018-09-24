@@ -150,7 +150,7 @@ namespace Gambit                                                            \
       int reg_log = register_backend_with_log(STRINGIFY(BACKENDNAME));      \
                                                                             \
       /* Make backend path easily available to convenience functions. */    \
-      const str backendDir = backendInfo().                                 \
+      extern const str backendDir = backendInfo().                          \
        path_dir(STRINGIFY(BACKENDNAME), STRINGIFY(VERSION));                \
                                                                             \
       /* Make an easy reference to the actual backend module if it is a */  \

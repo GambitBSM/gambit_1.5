@@ -17,7 +17,7 @@ someInt = 0
 someDouble = 0
 someVector = []
 isInitialized = False
-prefix = "libfourth 1.0: "
+prefix = "libthird 1.0: "
 
 #
 # Some functions:
@@ -64,5 +64,5 @@ def someFunction():
 
 # return 'result'
 def returnResult():
-  print "I'm returnResult() from libfourth.py, and I'm feeling well."
+  print "I'm returnResult() from libthird.py, and I'm feeling well."
   return someDouble
