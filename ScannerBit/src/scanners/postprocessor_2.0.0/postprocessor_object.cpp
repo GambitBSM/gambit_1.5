@@ -685,28 +685,31 @@ namespace Gambit
          std::size_t loopi = getReader().get_current_index(); // track true index of input file
          std::size_t ppi = 0; // track number of points actually processed
          std::size_t n_passed = 0; // Number which have passed any user-specified cuts.
+         bool found_chunk_start = false; // Make sure we start processing from the correct place
     
          if(mychunk.eff_length==0)  
          {
             // Don't bother doing any processing for zero length chunks
             // Just check whether the calling code wants us to shut down early
             quit = Gambit::Scanner::Plugins::plugin_info.early_shutdown_in_progress();
+            loopi=mychunk.end; // Set loop counter to end of batch to satisfy checks at end of this function
          }
          else
          {
             // Loop over the old points
-            PPIDpair current_point;
-            if(firstloop)
-            {
-               current_point = getReader().get_current_point(); // Get first point
-               firstloop = false;
-            }
-            else
-            {
-               current_point = getReader().get_next_point();
-               loopi++;
-            }
-
+            //PPIDpair current_point;
+            //if(firstloop)
+            //{
+            //   current_point = getReader().get_current_point(); // Get first point
+            //   firstloop = false;
+            //}
+            //else
+            //{
+            //   current_point = getReader().get_next_point();
+            //}
+            PPIDpair current_point = getReader().get_current_point();
+            loopi = getReader().get_current_index();
+ 
             if(rank==0) std::cout << "Starting loop over old points ("<<total_length<<" in total)" << std::endl;
             std::cout << "This task (rank "<<rank<<" of "<<numtasks<<"), will process iterations "<<mychunk.start<<" through to "<<mychunk.end<<", excluding any points that may have already been processed as recorded by resume data. This leaves "<<mychunk.eff_length<<" points for this rank to process."<<std::endl;
 
@@ -763,6 +766,21 @@ namespace Gambit
                   current_point = getReader().get_next_point();
                   loopi++;
                   continue;
+               }
+
+               // Make sure that the first point we *don't* skip is the correct starting point
+               if(not found_chunk_start)
+               {
+                  if(loopi==mychunk.start)
+                  {
+                     found_chunk_start=true;
+                  }
+                  else
+                  {
+                     std::ostringstream err;
+                     err<<"The first point in this batch to be processed does not have the correct index! (mychunk.start="<<mychunk.start<<", but loopi="<<loopi<<"). This is a bug, please report it.";
+                     Scanner::scan_error().raise(LOCAL_INFO,err.str());
+                  }
                }
 
                if((ppi % update_interval) == 0 and ppi!=0)
@@ -865,11 +883,14 @@ namespace Gambit
                   getLogLike()->setRank(MPIrank); // For purposes of printing only
                   getLogLike()->setPtID(pointID);
 
-
                   // We feed the unit hypercube and/or transformed parameter map into the likelihood container. ScannerBit
                   // interprets the map values as post-transformation and not apply a prior to those, and ensures that the
                   // length of the cube plus number of transformed parameters adds up to the total number of parameter.
                   double new_logL = getLogLike()(outputMap); // Here we supply *only* the map; no parameters to transform.
+
+                  // Print the index of the point in the input dataset, so that we can easily figure out later which ones
+                  // were postprocessed
+                  getPrinter().print(loopi, "input_dataset_index", MPIrank, pointID);
 
                   // Add old likelihood components as requested in the inifile
                   if (not add_to_logl.empty() or not subtract_from_logl.empty())
@@ -958,6 +979,11 @@ namespace Gambit
                   /// care of by the likelihood routine, which we never ran.
                   getPrinter().print(MPIrank, "MPIrank", MPIrank, pointID);
                   getPrinter().print(pointID, "pointID", MPIrank, pointID);
+
+                  // Print the index of the point in the input dataset, so that we can easily figure out later which ones
+                  // were postprocessed
+                  getPrinter().print(loopi, "input_dataset_index", MPIrank, pointID);
+
                   // Now the modelparameters
                   for(auto it=req_models.begin(); it!=req_models.end(); ++it)
                   {
@@ -1043,6 +1069,16 @@ namespace Gambit
          else if(getReader().eoi() and loopi!=mychunk.end)
          {
            exit_code = 2;
+         }
+         if(exit_code==0)
+         {
+            // Make sure the exit state makes sense
+            if(loopi!=mychunk.end)
+            {
+               std::ostringstream err;
+               err<<"According to the exit code, out batch is supposedly finished correctly, however the loopi counter is not equal to the proper end of our batch (loopi="<<loopi<<", mychunk.end="<<mychunk.end<<")";
+               Scanner::scan_error().raise(LOCAL_INFO,err.str());
+            }
          }
          return exit_code;
       }
@@ -1162,9 +1198,9 @@ namespace Gambit
          }
 
          // Return to the chunk to be processed
-         std::cout<<"chunk_start :"<<chunk_start<<std::endl;
-         std::cout<<"chunk_end   :"<<chunk_end<<std::endl;
-         std::cout<<"chunk_length:"<<chunk_length<<std::endl;          
+         //std::cout<<"chunk_start :"<<chunk_start<<std::endl;
+         //std::cout<<"chunk_end   :"<<chunk_end<<std::endl;
+         //std::cout<<"chunk_length:"<<chunk_length<<std::endl;          
          return Chunk(chunk_start,chunk_end,chunk_length);
       }
 

@@ -402,7 +402,7 @@ scanner_plugin(postprocessor, version(2, 0, 0))
           // 1 - Saw quit flag and so stopped prematurely
           // 2 - Encountered end of input file unexpectedly
           exit_code = driver.run_main_loop(mychunk);
-          std::cout << "Rank "<<rank<<": exited loop with code "<<exit_code<<std::endl;
+          //std::cout << "Rank "<<rank<<": exited loop with code "<<exit_code<<std::endl;
        }
        else
        {
@@ -415,7 +415,7 @@ scanner_plugin(postprocessor, version(2, 0, 0))
           #ifdef WITH_MPI
             I_am_finished = true;
           #endif
-          std::cout << "Rank "<<rank<<" has finished processing its batch." << std::endl;
+          //std::cout << "Rank "<<rank<<" has finished processing its batch." << std::endl;
        }
        else if(exit_code==1)
        {
