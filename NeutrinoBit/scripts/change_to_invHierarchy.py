@@ -23,7 +23,7 @@ def main(argv):
             shutil.copy2(directory+filename, invert+filenameINV)
 
 
-            replaceAll(invert+filenameINV, '      range: [-3e-3, -2e-3]', '      range: [2e-3, 3e-3]')
+            replaceAll(invert+filenameINV, '      range: [2e-3, 3e-3]', '      range: [-3e-3, -2e-3]')
                     
 
 
