@@ -16,4 +16,10 @@ do
     fi
     echo 'mpiexec -outfile-pattern=runs/RHN_'$f1'.out -errfile-pattern=runs/RHN'$f1'.err ./gambit -f '$f >> run_$f1.sh
 
+    
+    if [[ ! -d  'runs/RHN/'$f1'/samples/RHN.hdf5' ]]; then
+	echo 'Submitting '$f1
+	sbatch run_$f1.sh
+    if
+
 done
