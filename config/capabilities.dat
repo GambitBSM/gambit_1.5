@@ -124,6 +124,12 @@ LibSecond_1_0_init: |
 LibSecond_1_1_init: |
    Initialize the Python testing LibSecond backend, version 1.1.
 
+LibThird_1_0_init: |
+   Initialize the Python package testing LibThird backend, version 1.0.
+
+LibThird_1_1_init: |
+   Initialize the Python package testing LibThird backend, version 1.1.
+
 initialize_capability: |
    Tester function for the initialization of backends.
 
@@ -169,6 +175,9 @@ SomeDouble: |
 SomeInt: |
    Example integer in libfirst and friends.
 
+SomeOtherInt: |
+   Another example integer; in libthird.
+
 funcBE: |
    Example Fortran backend function that simulates a backend function
    in a Fortran library.
@@ -185,6 +194,9 @@ refex2: |
 
 someFunction: |
    Example void function that does nothing.
+
+someOtherFunction: |
+   An example function that just multiplies two numbers.
 
 varex: |
    Return value of a nasty example variadic function in libfirst.

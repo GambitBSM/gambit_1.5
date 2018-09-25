@@ -49,9 +49,9 @@ Rules:
 
   - capability:  nevents_postcuts
     backends:
-    - {capability: awesomeness, backend: LibSecond, version: 1.1}
-    - {capability: someFunction, backend: LibSecond, version: 1.1}
-    - {capability: SomeInt, backend: LibSecond, version: 1.1}
+    - {capability: awesomeness, backend: LibThird, version: 1.1}
+    - {capability: someFunction, backend: LibThird, version: 1.1}
+    - {capability: SomeInt, backend: LibThird, version: 1.1}
 
   - capability:  function_pointer
     backends:
@@ -60,6 +60,10 @@ Rules:
   - capability: nevents
     type: int
     function: event_count
+    module: ExampleBit_B
+
+  - capability: particle_id
+    function: particle_identity
     module: ExampleBit_B
 
 Logger:
