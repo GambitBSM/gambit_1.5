@@ -24,7 +24,7 @@ def main(argv):
 
 
             replaceAll(invert+filenameINV, '      range: [2e-3, 3e-3]', '      range: [-3e-3, -2e-3]')
-                    
+            replaceAll(invert+filenameINV, 'default_output_path: "runs/RHN', 'default_output_path: "runs/RHN_inv')
 
 
 if __name__=="__main__":
