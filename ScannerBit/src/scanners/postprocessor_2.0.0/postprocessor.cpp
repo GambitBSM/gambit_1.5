@@ -239,6 +239,10 @@ scanner_plugin(postprocessor, version(2, 0, 0))
 
     // Ask the printer if this is a resumed run or not, and check that the necessary files exist if so.
     bool resume = get_printer().resume_mode();
+ 
+    // Vector to record which processes have been told by the master to stop. 
+    // Master cannot stop until all other processes have stopped.
+    std::vector<bool> process_has_stopped(numtasks);
 
     // Rank 0 needs to figure out which points are already processesed (if resuming)
     if(resume)
@@ -294,7 +298,12 @@ scanner_plugin(postprocessor, version(2, 0, 0))
 
        #ifdef WITH_MPI
          bool I_am_finished = false;
-         if(rank==0)
+         if(rank==0 and numtasks==1)
+         {
+            // Compute new work for this one process.
+            mychunk = driver.get_new_chunk(); //TODO: Rewrite this function. Make sure to update done_chunks as we go.
+         }
+         else if(rank==0)
          { 
             // Master checks for work requests from other processes
             for(int worker=1; worker<numtasks; worker++)
@@ -316,7 +325,30 @@ scanner_plugin(postprocessor, version(2, 0, 0))
                   chunkdata[1] = newchunk.end;
                   chunkdata[2] = newchunk.eff_length;
                   ppComm.Send(&chunkdata, 3, worker, request_work_tag);
+
+                  // Check if we just sent the 'stop' signal.
+                  if(newchunk==stopchunk)
+                  {
+                     process_has_stopped[worker] = true;
+                  }
                }
+            }
+
+            // Set zero-length chunk for master
+            bool any_still_running=false;
+            for(std::size_t i=1; i<numtasks; i++)
+            {
+               if(process_has_stopped[i]==false) any_still_running=true;
+            }
+
+            if(any_still_running)
+            {
+               mychunk = Chunk(1,1); // Zero-length chunk; master doesn't process anything, but need to continue looping
+            }
+            else
+            {
+               // Everyone has been told to stop! So now master should stop too.
+               mychunk = stopchunk;
             }
          }
          else
@@ -335,32 +367,33 @@ scanner_plugin(postprocessor, version(2, 0, 0))
             mychunk.start      = chunkdata[0];
             mychunk.end        = chunkdata[1];
             mychunk.eff_length = chunkdata[2];
-
-            if(mychunk.start==0 and mychunk.end==0)
-            {
-               // Finished!
-               continue_processing = false;
-            }
-
-            if(mychunk.start > mychunk.end)
-            {
-               // End after start, error!
-               std::ostringstream err;
-               err << "Work assignment for rank "<<rank
-                   <<" process is invalid! Chunk end ("<<mychunk.end
-                   <<") is before the chunk start ("<<mychunk.start
-                   <<")! ended due to encountering the end of the input file."
-                   <<" This indicates a bug in the postprocessor (or some "
-                   <<"bizarre corruption of the MPI message). Please report"
-                   <<"this.";
-               std::cerr << err.str() << std::endl;
-               scan_error().raise(LOCAL_INFO,err.str());
-            }
          }
        #else
          // Compute new work for this one process.
          mychunk = driver.get_new_chunk(); //TODO: Rewrite this function. Make sure to update done_chunks as we go.
        #endif
+       std::cout << "Rank "<<rank<<": Chunk to process is ["<<mychunk.start<<", "<<mychunk.end<<"; eff_len="<<mychunk.eff_length<<"]"<<std::endl;
+
+       if(mychunk==stopchunk)
+       {
+          // Finished!
+          continue_processing = false;
+       }
+
+       if(mychunk.start > mychunk.end)
+       {
+          // End after start, error!
+          std::ostringstream err;
+          err << "Work assignment for rank "<<rank
+              <<" process is invalid! Chunk end ("<<mychunk.end
+              <<") is before the chunk start ("<<mychunk.start
+              <<")! ended due to encountering the end of the input file."
+              <<" This indicates a bug in the postprocessor (or some "
+              <<"bizarre corruption of the MPI message). Please report"
+              <<"this.";
+          std::cerr << err.str() << std::endl;
+          scan_error().raise(LOCAL_INFO,err.str());
+       }
 
        int exit_code;
        if(continue_processing)

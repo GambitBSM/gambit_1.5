@@ -48,6 +48,12 @@ struct Chunk
   {
     return end - start + 1;
   }
+
+  bool operator == (const Chunk& other) const 
+  {
+    return (this->start == other.start and this->end == other.end and this->eff_length == other.eff_length);
+  }
+
 };
 
 // To use Chunk in std::unordered_map/set, need to provide hashing and equality functions

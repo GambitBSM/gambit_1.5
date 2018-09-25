@@ -681,320 +681,343 @@ namespace Gambit
       /// The main run loop
       int PPDriver::run_main_loop(const Chunk& mychunk)
       {
-         // Loop over the old points
-         PPIDpair current_point;
-         if(firstloop)
+         bool quit = false; // Flag to abort 'scan' early.
+         std::size_t loopi = getReader().get_current_index(); // track true index of input file
+         std::size_t ppi = 0; // track number of points actually processed
+         std::size_t n_passed = 0; // Number which have passed any user-specified cuts.
+    
+         if(mychunk.eff_length==0)  
          {
-            current_point = getReader().get_current_point(); // Get first point
-            firstloop = false;
+            // Don't bother doing any processing for zero length chunks
+            // Just check whether the calling code wants us to shut down early
+            quit = Gambit::Scanner::Plugins::plugin_info.early_shutdown_in_progress();
          }
          else
          {
-            current_point = getReader().get_next_point();
-         }
+            // Loop over the old points
+            PPIDpair current_point;
+            if(firstloop)
+            {
+               current_point = getReader().get_current_point(); // Get first point
+               firstloop = false;
+            }
+            else
+            {
+               current_point = getReader().get_next_point();
+               loopi++;
+            }
 
-         std::size_t loopi = 0; // track true index of input file
-         std::size_t ppi = 0; // track number of points actually processed
-         if(rank==0) std::cout << "Starting loop over old points ("<<total_length<<" in total)" << std::endl;
-         std::cout << "This task (rank "<<rank<<" of "<<numtasks<<"), will process iterations "<<mychunk.start<<" through to "<<mychunk.end<<", excluding any points that may have already been processed as recorded by resume data. This leaves "<<mychunk.eff_length<<" points for this rank to process."<<std::endl;
+            if(rank==0) std::cout << "Starting loop over old points ("<<total_length<<" in total)" << std::endl;
+            std::cout << "This task (rank "<<rank<<" of "<<numtasks<<"), will process iterations "<<mychunk.start<<" through to "<<mychunk.end<<", excluding any points that may have already been processed as recorded by resume data. This leaves "<<mychunk.eff_length<<" points for this rank to process."<<std::endl;
 
-         std::size_t n_passed = 0; // Number which have passed any user-specified cuts.
+            // Disable auto-incrementing of pointID's in the likelihood container. We will set these manually.
+            Gambit::Printers::auto_increment() = false;
 
-         // Disable auto-incrementing of pointID's in the likelihood container. We will set these manually.
-         Gambit::Printers::auto_increment() = false;
+            bool stop_loop = false;
 
-         bool quit = false; // Flag to abort 'scan' early.
-         bool stop_loop = false;
+            if(getReader().eoi())
+            {
+               std::cout << "Postprocessor (rank "<<rank<<") immediately reached end of input file! Skipping execution of main loop, ..."<<std::endl;
+               // We should exit with the "unexpected finish" error code if this has happened.
+            }
 
-         if(getReader().eoi())
-         {
-            std::cout << "Postprocessor (rank "<<rank<<") immediately reached end of input file! Skipping execution of main loop, ..."<<std::endl;
-            // We should exit with the "unexpected finish" error code if this has happened.
-         }
+            ChunkSet::iterator current_done_chunk=done_chunks.begin(); // Used to skip past points that are already done
+            while(not getReader().eoi() and not stop_loop) // while not end of input
+            {
+               unsigned int       MPIrank = current_point.rank;
+               unsigned long long pointID = current_point.pointID; 
 
-         ChunkSet::iterator current_done_chunk=done_chunks.begin(); // Used to skip past points that are already done
-         while(not getReader().eoi() and not stop_loop) // while not end of input
-         {
-           loopi++;
-           // Make sure we didn't somehow get desynchronised from the reader's internal index
-           if(loopi!=getReader().get_current_index())
-           {
-              std::ostringstream err;
-              err << "The postprocessor has become desynchronised with its assigned reader object! The postprocessor index is "<<loopi<<" but the reader index is "<<getReader().get_current_index()<<"! This indicates a bug in either the postprocessor or the reader, please report it";
-              Scanner::scan_error().raise(LOCAL_INFO,err.str());
-           }
+               std::cout << "Current point: "<<MPIrank<<", "<<pointID<<std::endl;
+               std::cout << "Current index: "<<getReader().get_current_index()<<std::endl;
+               std::cout << "Current loopi: "<<loopi<<std::endl;
 
-           // Cancel processing of iterations beyoud our assigned range
-           if(loopi>mychunk.end)
-           {
-              std::cout << "Rank "<<rank<<" has reached the end of its batch, stopping iteration." << std::endl;
-              loopi--; // Return counter to the last index that we actually processed.
-              break;
-           }
-
-           // If we have moved past the end of the currently selected batch of "done"
-           // points, then select the next batch (if there are any left)
-           //if(current_done_chunk!=done_chunks.end()) std::cout << "Rank "<<rank<<": loopi="<<loopi<<", current_done_chunk=["<<current_done_chunk->start<<","<<current_done_chunk->end<<"]"<<std::endl;
-           if(current_done_chunk!=done_chunks.end() and loopi > current_done_chunk->end)
-           {
-              ++current_done_chunk;
-           }
-
-           // Skip loop ahead to the batch of points we are assigned to process,
-           // and skip any points that are already processed;
-           if(loopi<mychunk.start or (current_done_chunk!=done_chunks.end() and current_done_chunk->iContain(loopi)))
-           {
-              current_point = getReader().get_next_point();
-              continue;
-           }
-
-           if((ppi % update_interval) == 0 and ppi!=0)
-           {
-              // Progress report
-              std::cout << "Rank "<<rank<<" has processed "<<ppi<<" of "<<mychunk.eff_length<<" points ("<<100*ppi/mychunk.eff_length<<"%, with "<<100*n_passed/ppi<<"% passing all cuts)"<<std::endl;
-           }
-           ppi++; // Processing is go, update counter.
-
-           // Data about current point in input file
-           if(current_point == Printers::nullpoint)
-           {
-              // No valid data here, go to next point
-              current_point = getReader().get_next_point();
-              continue;
-           }
-           unsigned int       MPIrank = current_point.rank;
-           unsigned long long pointID = current_point.pointID;
-           //std::cout << "Rank: "<<rank<<", current iteration: "<<loopi<<", current point:" << MPIrank << ", " << pointID << std::endl;
-
-           /// @{ Retrieve the old parameter values from previous output
-
-           // Storage for retrieved parameters
-           std::unordered_map<std::string, double> outputMap;
-
-           // Extract the model parameters
-           bool valid_modelparams = get_ModelParameters(outputMap);
-
-           // Check if valid model parameters were extracted. If not, something may be wrong with the input file, or we could just be at the end of a buffer (e.g. in HDF5 case). Can't tell the difference, so just skip the point and continue.
-           if(not valid_modelparams)
-           {
-              std::cout << "Skipping point "<<loopi<<" as it has no valid ModelParameters" <<std::endl;
-              current_point = getReader().get_next_point();
-              continue;
-           }
-
-           /// @}
-
-           // Determine if model point passes the user-requested cuts
-           // This is a little tricky because we don't know the type of the input dataset.
-           // For now we will restrict the system so that it only works for datasets with
-           // type 'double' (which is most stuff). We check for this earlier, so here we
-           // can just assume that the requested datasets have the correct type.
-
-           bool cuts_passed = true; // Will be set to false if any cut is failed, or a required entry is invalid
-           for(std::map<std::string,double>::iterator it = cut_less_than.begin();
-                it!=cut_less_than.end(); ++it)
-           {
-             if(cuts_passed)
-             {
-               std::string in_label = it->first;
-               double cut_value = it->second;
-               double buffer;
-               bool valid = getReader().retrieve(buffer, in_label);
-               if(valid)
+               // Make sure we didn't somehow get desynchronised from the reader's internal index
+               if(loopi!=getReader().get_current_index())
                {
-                  cuts_passed = (buffer <= cut_value);
+                  std::ostringstream err;
+                  err << "The postprocessor has become desynchronised with its assigned reader object! The postprocessor index is "<<loopi<<" but the reader index is "<<getReader().get_current_index()<<"! This indicates a bug in either the postprocessor or the reader, please report it";
+                  Scanner::scan_error().raise(LOCAL_INFO,err.str());
+               }
+
+               // Cancel processing of iterations beyoud our assigned range
+               if(loopi>mychunk.end)
+               {
+                  std::cout << "Rank "<<rank<<" has reached the end of its batch, stopping iteration." << std::endl;
+                  loopi--; // Return counter to the last index that we actually processed.
+                  break;
+               }
+
+               // If we have moved past the end of the currently selected batch of "done"
+               // points, then select the next batch (if there are any left)
+               //if(current_done_chunk!=done_chunks.end()) std::cout << "Rank "<<rank<<": loopi="<<loopi<<", current_done_chunk=["<<current_done_chunk->start<<","<<current_done_chunk->end<<"]"<<std::endl;
+               if(current_done_chunk!=done_chunks.end() and loopi > current_done_chunk->end)
+               {
+                  ++current_done_chunk;
+               }
+
+               // Skip loop ahead to the batch of points we are assigned to process,
+               // and skip any points that are already processed;
+               if(loopi<mychunk.start or (current_done_chunk!=done_chunks.end() and current_done_chunk->iContain(loopi)))
+               {
+                  std::cout<<"Skipping point (not in our batch)"<<std::endl;
+                  current_point = getReader().get_next_point();
+                  loopi++;
+                  continue;
+               }
+
+               if((ppi % update_interval) == 0 and ppi!=0)
+               {
+                  // Progress report
+                  std::cout << "Rank "<<rank<<" has processed "<<ppi<<" of "<<mychunk.eff_length<<" points ("<<100*ppi/mychunk.eff_length<<"%, with "<<100*n_passed/ppi<<"% passing all cuts)"<<std::endl;
+               }
+               ppi++; // Processing is go, update counter.
+
+               // Data about current point in input file
+               if(current_point == Printers::nullpoint)
+               {
+                  // No valid data here, go to next point
+                  std::cout<<"Skipping point (no valid data)"<<std::endl;
+                  current_point = getReader().get_next_point();
+                  loopi++;
+                  continue;
+               }
+               //std::cout << "Rank: "<<rank<<", current iteration: "<<loopi<<", current point:" << MPIrank << ", " << pointID << std::endl;
+
+               /// @{ Retrieve the old parameter values from previous output
+
+               // Storage for retrieved parameters
+               std::unordered_map<std::string, double> outputMap;
+
+               // Extract the model parameters
+               bool valid_modelparams = get_ModelParameters(outputMap);
+
+               // Check if valid model parameters were extracted. If not, something may be wrong with the input file, or we could just be at the end of a buffer (e.g. in HDF5 case). Can't tell the difference, so just skip the point and continue.
+               if(not valid_modelparams)
+               {
+                  std::cout << "Skipping point "<<loopi<<" as it has no valid ModelParameters" <<std::endl;
+                  current_point = getReader().get_next_point();
+                  loopi++;
+                  continue;
+               }
+
+               /// @}
+
+               // Determine if model point passes the user-requested cuts
+               // This is a little tricky because we don't know the type of the input dataset.
+               // For now we will restrict the system so that it only works for datasets with
+               // type 'double' (which is most stuff). We check for this earlier, so here we
+               // can just assume that the requested datasets have the correct type.
+
+               bool cuts_passed = true; // Will be set to false if any cut is failed, or a required entry is invalid
+               for(std::map<std::string,double>::iterator it = cut_less_than.begin();
+                    it!=cut_less_than.end(); ++it)
+               {
+                 if(cuts_passed)
+                 {
+                   std::string in_label = it->first;
+                   double cut_value = it->second;
+                   double buffer;
+                   bool valid = getReader().retrieve(buffer, in_label);
+                   if(valid)
+                   {
+                      cuts_passed = (buffer <= cut_value);
+                   }
+                   else
+                   {
+                      cuts_passed = false;
+                   }
+                 }
+               }
+
+               for(std::map<std::string,double>::iterator it = cut_greater_than.begin();
+                    it!=cut_greater_than.end(); ++it)
+               {
+                 if(cuts_passed)
+                 {
+                   std::string in_label = it->first;
+                   double cut_value = it->second;
+                   double buffer;
+                   bool valid = getReader().retrieve(buffer, in_label);
+                   if(valid)
+                   {
+                      cuts_passed = (buffer >= cut_value);
+                   }
+                   else
+                   {
+                      cuts_passed = false;
+                   }
+                 }
+               }
+
+               if(cuts_passed) // Else skip new calculations and go straight to copying old results
+               {
+                  n_passed += 1; // Counter for number of points which have passed all the cuts.
+                  // Before calling the likelihood function, we need to set up the printer to
+                  // output correctly. The auto-incrementing of pointID's cannot be used,
+                  // because we need to match the old scan results. So we must set it manually.
+                  // This is currently a little clunky but it works. Make sure to have turned
+                  // off auto incrementing (see above).
+                  // The printer should still print to files split according to the actual rank, this
+                  // should only change the assigned pointID pair tag. Which should already be
+                  // properly unambiguous if the original scan was done properly.
+                  // Note: This might fail for merged datasets from separate runs. Not sure what the solution
+                  // for that is.
+                  getLogLike()->setRank(MPIrank); // For purposes of printing only
+                  getLogLike()->setPtID(pointID);
+
+
+                  // We feed the unit hypercube and/or transformed parameter map into the likelihood container. ScannerBit
+                  // interprets the map values as post-transformation and not apply a prior to those, and ensures that the
+                  // length of the cube plus number of transformed parameters adds up to the total number of parameter.
+                  double new_logL = getLogLike()(outputMap); // Here we supply *only* the map; no parameters to transform.
+
+                  // Add old likelihood components as requested in the inifile
+                  if (not add_to_logl.empty() or not subtract_from_logl.empty())
+                  {
+
+                    double combined_logL = new_logL;
+                    bool is_valid(true);
+
+                    for(auto it=add_to_logl.begin(); it!=add_to_logl.end(); ++it)
+                    {
+                        std::string old_logl = *it;
+                        if(std::find(data_labels.begin(), data_labels.end(), old_logl)
+                            == data_labels.end())
+                        {
+                           std::ostringstream err;
+                           err << "In the input YAML file, you requested to 'add_to_like' the component '"<<old_logl<<"' from your input data file, however this does not match any of the data labels retrieved from the input data file you specified. Please check the spelling, path, etc. and try again.";
+                           Scanner::scan_error().raise(LOCAL_INFO,err.str());
+                        }
+                        if(getReader().get_type(*it) != Gambit::Printers::getTypeID<double>())
+                        {
+                           std::ostringstream err;
+                           err << "In the input YAML file, you requested 'add_to_like' component '"<<old_logl<<"' from your input data file, however this data cannot be retrieved as type 'double', therefore it cannot be used as a likelihood component. Please enter a different data label and try again.";
+                           Scanner::scan_error().raise(LOCAL_INFO,err.str());
+                        }
+
+                        double old_logl_value;
+                        is_valid = is_valid and getReader().retrieve(old_logl_value, old_logl);
+                        if(is_valid)
+                        {
+                           // Combine with the new logL component
+                           combined_logL += old_logl_value;
+                        }
+                        // Else old likelihood value didn't exist for this point; cannot combine with non-existent likelihood, so don't print the reweighted value.
+                    }
+
+                    // Now do the same thing for the components we want to subtract.
+                    for(auto it=subtract_from_logl.begin(); it!=subtract_from_logl.end(); ++it)
+                    {
+                        std::string old_logl = *it;
+                        if(std::find(data_labels.begin(), data_labels.end(), old_logl)
+                            == data_labels.end())
+                        {
+                           std::ostringstream err;
+                           err << "In the input YAML file, you requested to 'subtract_from_like' the component '"<<old_logl<<"' from your input data file, however this does not match any of the data labels retrieved from the input data file you specified. Please check the spelling, path, etc. and try again.";
+                           Scanner::scan_error().raise(LOCAL_INFO,err.str());
+                        }
+                        if(getReader().get_type(*it) != Gambit::Printers::getTypeID<double>())
+                        {
+                           std::ostringstream err;
+                           err << "In the input YAML file, you requested 'subtract_from_like' component '"<<old_logl<<"' from your input data file, however this data cannot be retrieved as type 'double', therefore it cannot be used as a likelihood component. Please enter a different data label and try again.";
+                           Scanner::scan_error().raise(LOCAL_INFO,err.str());
+                        }
+
+                        double old_logl_value;
+                        is_valid = is_valid and getReader().retrieve(old_logl_value, old_logl);
+                        if(is_valid)
+                        {
+                           // Combine with the new logL component, subtracting this time
+                           combined_logL -= old_logl_value;
+                        }
+                        // Else old likelihood value didn't exist for this point; cannot combine with non-existent likelihood, so don't print the reweighted value.
+                    }
+
+                    // Output the new reweighted likelihood (if all components were valid)
+                    if(is_valid) getPrinter().print(combined_logL, reweighted_loglike_name, MPIrank, pointID);
+
+                  }
+
+                  ///  In the future would be nice if observables could be reconstructed from the
+                  ///  output file, but that is a big job, need to automatically create functors
+                  ///  for them which provide the capabilities they are supposed to correspond to,
+                  ///  which is possible since this information is stored in the labels, but
+                  ///  would take quite a bit of setting up I think...
+                  ///  Would need the reader to provide virtual functions for retrieving all the
+                  ///  observable metadata from the output files.
+                  ///
+                  ///  UPDATE: TODO: What happens in case of invalid point? Does this copying etc. just get skipped?
+                  ///  Or do I need to check that the output LogL was valid somehow?
+                  ///  Answer: Loglike function just returns a default low value in that case, scanner plugins do
+                  ///  not see the invalid point exceptions, they are caught inside the likelihood container.
+               }
+               else if(not discard_points_outside_cuts)
+               {
+                  /// No postprocessing to be done, but we still should copy across the modelparameters
+                  /// and point ID data, since the copying routines below assume that these were taken
+                  /// care of by the likelihood routine, which we never ran.
+                  getPrinter().print(MPIrank, "MPIrank", MPIrank, pointID);
+                  getPrinter().print(pointID, "pointID", MPIrank, pointID);
+                  // Now the modelparameters
+                  for(auto it=req_models.begin(); it!=req_models.end(); ++it)
+                  {
+                    ModelParameters modelparameters;
+                    std::string model = it->first;
+                    bool is_valid = getReader().retrieve(modelparameters, model);
+                    if(is_valid)
+                    {
+                       // Use the OutputName set by the reader to preserve the original naming of the modelparameters.
+                       getPrinter().print(modelparameters, modelparameters.getOutputName(), MPIrank, pointID);
+                    }
+                  }
+               }
+
+               /// Copy selected data from input file
+               if(not cuts_passed and discard_points_outside_cuts)
+               {
+                  // Don't copy in this case, just discard the old data.
                }
                else
                {
-                  cuts_passed = false;
+                  for(std::set<std::string>::iterator it = data_labels_copy.begin(); it!=data_labels_copy.end(); ++it)
+                  {
+                     // Check if this input label has been mapped to a different output label.
+                     std::string in_label = *it;
+                     std::map<std::string,std::string>::iterator jt = renaming_scheme.find(in_label);
+                     if(jt != renaming_scheme.end())
+                     {
+                        // Found match! Do the renaming
+                        std::string out_label = jt->second;
+                        //std::cout << "Copying data from "<<in_label<<", to output name "<<out_label<<", for point ("<<MPIrank<<", "<<pointID<<")" <<std::endl;
+                        getReader().retrieve_and_print(in_label,out_label,getPrinter(), MPIrank, pointID);
+                     }
+                     else
+                     {
+                        // No match, keep the old name
+                        //std::cout << "Copying data from "<<in_label<<" for point ("<<MPIrank<<", "<<pointID<<")" <<std::endl;
+                        getReader().retrieve_and_print(in_label,getPrinter(), MPIrank, pointID);
+                     }
+                  }
                }
-             }
-           }
 
-           for(std::map<std::string,double>::iterator it = cut_greater_than.begin();
-                it!=cut_greater_than.end(); ++it)
-           {
-             if(cuts_passed)
-             {
-               std::string in_label = it->first;
-               double cut_value = it->second;
-               double buffer;
-               bool valid = getReader().retrieve(buffer, in_label);
-               if(valid)
+               // Check whether the calling code wants us to shut down early
+               quit = Gambit::Scanner::Plugins::plugin_info.early_shutdown_in_progress();
+
+               if(quit)
                {
-                  cuts_passed = (buffer >= cut_value);
+                  // Need to save data about which points have been processed, so we
+                  // can resume processing from here.
+                  //std::cout << "Postprocessor (rank "<<rank<<") received quit signal! Aborting run." << std::endl;
+                  stop_loop = true;
                }
-               else
-               {
-                  cuts_passed = false;
+
+               /// Go to next point
+               if(not stop_loop)
+               { 
+                  current_point = getReader().get_next_point();
+                  loopi++;
                }
-             }
-           }
-
-           if(cuts_passed) // Else skip new calculations and go straight to copying old results
-           {
-              n_passed += 1; // Counter for number of points which have passed all the cuts.
-              // Before calling the likelihood function, we need to set up the printer to
-              // output correctly. The auto-incrementing of pointID's cannot be used,
-              // because we need to match the old scan results. So we must set it manually.
-              // This is currently a little clunky but it works. Make sure to have turned
-              // off auto incrementing (see above).
-              // The printer should still print to files split according to the actual rank, this
-              // should only change the assigned pointID pair tag. Which should already be
-              // properly unambiguous if the original scan was done properly.
-              // Note: This might fail for merged datasets from separate runs. Not sure what the solution
-              // for that is.
-              getLogLike()->setRank(MPIrank); // For purposes of printing only
-              getLogLike()->setPtID(pointID);
-
-
-              // We feed the unit hypercube and/or transformed parameter map into the likelihood container. ScannerBit
-              // interprets the map values as post-transformation and not apply a prior to those, and ensures that the
-              // length of the cube plus number of transformed parameters adds up to the total number of parameter.
-              double new_logL = getLogLike()(outputMap); // Here we supply *only* the map; no parameters to transform.
-
-              // Add old likelihood components as requested in the inifile
-              if (not add_to_logl.empty() or not subtract_from_logl.empty())
-              {
-
-                double combined_logL = new_logL;
-                bool is_valid(true);
-
-                for(auto it=add_to_logl.begin(); it!=add_to_logl.end(); ++it)
-                {
-                    std::string old_logl = *it;
-                    if(std::find(data_labels.begin(), data_labels.end(), old_logl)
-                        == data_labels.end())
-                    {
-                       std::ostringstream err;
-                       err << "In the input YAML file, you requested to 'add_to_like' the component '"<<old_logl<<"' from your input data file, however this does not match any of the data labels retrieved from the input data file you specified. Please check the spelling, path, etc. and try again.";
-                       Scanner::scan_error().raise(LOCAL_INFO,err.str());
-                    }
-                    if(getReader().get_type(*it) != Gambit::Printers::getTypeID<double>())
-                    {
-                       std::ostringstream err;
-                       err << "In the input YAML file, you requested 'add_to_like' component '"<<old_logl<<"' from your input data file, however this data cannot be retrieved as type 'double', therefore it cannot be used as a likelihood component. Please enter a different data label and try again.";
-                       Scanner::scan_error().raise(LOCAL_INFO,err.str());
-                    }
-
-                    double old_logl_value;
-                    is_valid = is_valid and getReader().retrieve(old_logl_value, old_logl);
-                    if(is_valid)
-                    {
-                       // Combine with the new logL component
-                       combined_logL += old_logl_value;
-                    }
-                    // Else old likelihood value didn't exist for this point; cannot combine with non-existent likelihood, so don't print the reweighted value.
-                }
-
-                // Now do the same thing for the components we want to subtract.
-                for(auto it=subtract_from_logl.begin(); it!=subtract_from_logl.end(); ++it)
-                {
-                    std::string old_logl = *it;
-                    if(std::find(data_labels.begin(), data_labels.end(), old_logl)
-                        == data_labels.end())
-                    {
-                       std::ostringstream err;
-                       err << "In the input YAML file, you requested to 'subtract_from_like' the component '"<<old_logl<<"' from your input data file, however this does not match any of the data labels retrieved from the input data file you specified. Please check the spelling, path, etc. and try again.";
-                       Scanner::scan_error().raise(LOCAL_INFO,err.str());
-                    }
-                    if(getReader().get_type(*it) != Gambit::Printers::getTypeID<double>())
-                    {
-                       std::ostringstream err;
-                       err << "In the input YAML file, you requested 'subtract_from_like' component '"<<old_logl<<"' from your input data file, however this data cannot be retrieved as type 'double', therefore it cannot be used as a likelihood component. Please enter a different data label and try again.";
-                       Scanner::scan_error().raise(LOCAL_INFO,err.str());
-                    }
-
-                    double old_logl_value;
-                    is_valid = is_valid and getReader().retrieve(old_logl_value, old_logl);
-                    if(is_valid)
-                    {
-                       // Combine with the new logL component, subtracting this time
-                       combined_logL -= old_logl_value;
-                    }
-                    // Else old likelihood value didn't exist for this point; cannot combine with non-existent likelihood, so don't print the reweighted value.
-                }
-
-                // Output the new reweighted likelihood (if all components were valid)
-                if(is_valid) getPrinter().print(combined_logL, reweighted_loglike_name, MPIrank, pointID);
-
-              }
-
-              ///  In the future would be nice if observables could be reconstructed from the
-              ///  output file, but that is a big job, need to automatically create functors
-              ///  for them which provide the capabilities they are supposed to correspond to,
-              ///  which is possible since this information is stored in the labels, but
-              ///  would take quite a bit of setting up I think...
-              ///  Would need the reader to provide virtual functions for retrieving all the
-              ///  observable metadata from the output files.
-              ///
-              ///  UPDATE: TODO: What happens in case of invalid point? Does this copying etc. just get skipped?
-              ///  Or do I need to check that the output LogL was valid somehow?
-              ///  Answer: Loglike function just returns a default low value in that case, scanner plugins do
-              ///  not see the invalid point exceptions, they are caught inside the likelihood container.
-           }
-           else if(not discard_points_outside_cuts)
-           {
-              /// No postprocessing to be done, but we still should copy across the modelparameters
-              /// and point ID data, since the copying routines below assume that these were taken
-              /// care of by the likelihood routine, which we never ran.
-              getPrinter().print(MPIrank, "MPIrank", MPIrank, pointID);
-              getPrinter().print(pointID, "pointID", MPIrank, pointID);
-              // Now the modelparameters
-              for(auto it=req_models.begin(); it!=req_models.end(); ++it)
-              {
-                ModelParameters modelparameters;
-                std::string model = it->first;
-                bool is_valid = getReader().retrieve(modelparameters, model);
-                if(is_valid)
-                {
-                   // Use the OutputName set by the reader to preserve the original naming of the modelparameters.
-                   getPrinter().print(modelparameters, modelparameters.getOutputName(), MPIrank, pointID);
-                }
-              }
-           }
-
-           /// Copy selected data from input file
-           if(not cuts_passed and discard_points_outside_cuts)
-           {
-              // Don't copy in this case, just discard the old data.
-           }
-           else
-           {
-              for(std::set<std::string>::iterator it = data_labels_copy.begin(); it!=data_labels_copy.end(); ++it)
-              {
-                 // Check if this input label has been mapped to a different output label.
-                 std::string in_label = *it;
-                 std::map<std::string,std::string>::iterator jt = renaming_scheme.find(in_label);
-                 if(jt != renaming_scheme.end())
-                 {
-                    // Found match! Do the renaming
-                    std::string out_label = jt->second;
-                    //std::cout << "Copying data from "<<in_label<<", to output name "<<out_label<<", for point ("<<MPIrank<<", "<<pointID<<")" <<std::endl;
-                    getReader().retrieve_and_print(in_label,out_label,getPrinter(), MPIrank, pointID);
-                 }
-                 else
-                 {
-                    // No match, keep the old name
-                    //std::cout << "Copying data from "<<in_label<<" for point ("<<MPIrank<<", "<<pointID<<")" <<std::endl;
-                    getReader().retrieve_and_print(in_label,getPrinter(), MPIrank, pointID);
-                 }
-              }
-           }
-
-           // Check whether the calling code wants us to shut down early
-           quit = Gambit::Scanner::Plugins::plugin_info.early_shutdown_in_progress();
-
-           if(quit)
-           {
-              // Need to save data about which points have been processed, so we
-              // can resume processing from here.
-              //std::cout << "Postprocessor (rank "<<rank<<") received quit signal! Aborting run." << std::endl;
-              stop_loop = true;
-           }
-
-           /// Go to next point
-           if(not stop_loop) current_point = getReader().get_next_point();
+            }
          }
 
          // Check if we finished because of reaching the end of the input
@@ -1089,7 +1112,9 @@ namespace Gambit
 
          if(next_point > total_length)
          {
-            // Do nothing, no points left to process. Return zero-length chunk.
+            // Do nothing, no points left to process. Return special stop-signal chunk.
+            chunk_start = 0;
+            chunk_end   = 0;
          }
          else
          {
@@ -1137,6 +1162,9 @@ namespace Gambit
          }
 
          // Return to the chunk to be processed
+         std::cout<<"chunk_start :"<<chunk_start<<std::endl;
+         std::cout<<"chunk_end   :"<<chunk_end<<std::endl;
+         std::cout<<"chunk_length:"<<chunk_length<<std::endl;          
          return Chunk(chunk_start,chunk_end,chunk_length);
       }
 

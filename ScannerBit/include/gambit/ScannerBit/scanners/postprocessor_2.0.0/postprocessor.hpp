@@ -43,7 +43,10 @@ namespace Gambit
      
       /// Simplify a ChunkSet by merging chunks which overlap.
       ChunkSet merge_chunks(const ChunkSet&);
- 
+
+      // This chunk signals that the run is finished.
+      const Chunk stopchunk = Chunk(0,0);
+
       /// Write resume data files
       /// These specify which chunks of points have been processed during this run
       void record_done_points(const ChunkSet& done_chunks, const Chunk& mydone, const std::string& filebase, unsigned int rank, unsigned int size);
