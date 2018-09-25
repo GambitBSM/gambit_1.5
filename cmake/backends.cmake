@@ -321,8 +321,8 @@ if(NOT ditched_${name}_${model}_${ver})
   set_as_default_version("backend model" ${name}_${model} ${ver})
 endif()
 
-# MicrOmegas SingletDM model
-set(model "SingletDM")
+# MicrOmegas ScalarSingletDM_Z2 model
+set(model "ScalarSingletDM_Z2")
 set(patch "${PROJECT_SOURCE_DIR}/Backends/patches/${name}/${ver}/patch_${name}_${ver}_${model}")
 check_ditch_status(${name}_${model} ${ver})
 if(NOT ditched_${name}_${model}_${ver})
@@ -339,8 +339,8 @@ if(NOT ditched_${name}_${model}_${ver})
   set_as_default_version("backend model" ${name}_${model} ${ver})
 endif()
 
-# MicrOmegas VectorDM model
-set(model "VectorDM")
+# MicrOmegas ScalarSingletDM_Z3 model
+set(model "ScalarSingletDM_Z3")
 set(patch "${PROJECT_SOURCE_DIR}/Backends/patches/${name}/${ver}/patch_${name}_${ver}_${model}")
 check_ditch_status(${name}_${model} ${ver})
 if(NOT ditched_${name}_${model}_${ver})
@@ -357,8 +357,8 @@ if(NOT ditched_${name}_${model}_${ver})
   set_as_default_version("backend model" ${name}_${model} ${ver})
 endif()
 
-# MicrOmegas MajoranaDM model
-set(model "MajoranaDM")
+# MicrOmegas VectorSingletDM_Z2 model
+set(model "VectorSingletDM_Z2")
 set(patch "${PROJECT_SOURCE_DIR}/Backends/patches/${name}/${ver}/patch_${name}_${ver}_${model}")
 check_ditch_status(${name}_${model} ${ver})
 if(NOT ditched_${name}_${model}_${ver})
@@ -375,8 +375,26 @@ if(NOT ditched_${name}_${model}_${ver})
   set_as_default_version("backend model" ${name}_${model} ${ver})
 endif()
 
-# MicrOmegas DiracDM model
-set(model "DiracDM")
+# MicrOmegas MajoranaSingletDM_Z2 model
+set(model "MajoranaSingletDM_Z2")
+set(patch "${PROJECT_SOURCE_DIR}/Backends/patches/${name}/${ver}/patch_${name}_${ver}_${model}")
+check_ditch_status(${name}_${model} ${ver})
+if(NOT ditched_${name}_${model}_${ver})
+  ExternalProject_Add(${name}_${model}_${ver}
+    DOWNLOAD_COMMAND ""
+    SOURCE_DIR ${dir}
+    PATCH_COMMAND ./newProject ${model} && patch -p1 < ${patch}
+    BUILD_IN_SOURCE 1
+    CONFIGURE_COMMAND ""
+    BUILD_COMMAND ${CMAKE_COMMAND} -E chdir ${model} ${CMAKE_MAKE_PROGRAM} sharedlib main=main.c
+    INSTALL_COMMAND ""
+  )
+  add_extra_targets("backend model" ${name} ${ver} ${dir}/${model} ${model} "yes | clean")
+  set_as_default_version("backend model" ${name}_${model} ${ver})
+endif()
+
+# MicrOmegas DiracSingletDM_Z2 model
+set(model "DiracSingletDM_Z2")
 set(patch "${PROJECT_SOURCE_DIR}/Backends/patches/${name}/${ver}/patch_${name}_${ver}_${model}")
 check_ditch_status(${name}_${model} ${ver})
 if(NOT ditched_${name}_${model}_${ver})
