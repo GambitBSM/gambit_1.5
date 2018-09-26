@@ -1,3 +1,8 @@
+
+#include "gambit/cmake/cmake_variables.hpp"
+#ifndef EXCLUDE_ROOT
+#ifndef EXCLUDE_RESTFRAMES
+
 #include <vector>
 #include <cmath>
 #include <memory>
@@ -8,6 +13,9 @@
 #include "gambit/ColliderBit/ATLASEfficiencies.hpp"
 #include "gambit/ColliderBit/mt2_bisect.h"
 
+
+
+
 #include "RestFrames/RestFrames.hh"
 #include "TLorentzVector.h"
 
@@ -16,8 +24,6 @@ using namespace std;
 /* The ATLAS 13 TeV 3 lepton low mass recursive jigsaw search
 
    Based on code kindly supplied by Abhishek Sharma
-
-   Data numbers are made up for now to do some basic sanity checks.
 
    Note that use of ROOT is compulsory for the RestFrames package
 
@@ -2216,3 +2222,5 @@ namespace Gambit {
   } // end namespace ColliderBit
 } // end namespace Gambit
 
+#endif
+#endif

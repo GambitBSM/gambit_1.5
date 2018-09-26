@@ -1,3 +1,4 @@
+#include "gambit/cmake/cmake_variables.hpp"
 #include "gambit/ColliderBit/ColliderBit_macros.hpp"
 #include "gambit/ColliderBit/analyses/HEPUtilsAnalysisContainer.hpp"
 #include "gambit/ColliderBit/analyses/BaseAnalysis.hpp"
@@ -13,7 +14,16 @@ namespace Gambit
   {
 
     // Add analysis names here and only here (trick to avoid duplication)
-    #define MAP_ANALYSES(F)                          \
+    // - If the analysis depends on RestFrames (which uses ROOT), add it to MAP_ANALYSES_WITH_ROOT_RESTFRAMES
+    // - If the analysis only depends on ROOT, add it to MAP_ANALYSES_WITH_ROOT
+    // - Else, add the analysis to MAP_ANALYSES
+    #define MAP_ANALYSES_WITH_ROOT_RESTFRAMES(F)     \
+      F(ATLAS_13TeV_RJ3L_lowmass_36invfb)            
+
+    #define MAP_ANALYSES_WITH_ROOT(F)                \
+      // F()            
+    
+    #define MAP_ANALYSES(F)             \
       F(Minimum)                                     \
       F(Covariance)                                  \
       F(Perf)                                        \
@@ -21,7 +31,6 @@ namespace Gambit
       F(ATLAS_13TeV_0LEP_36invfb)                    \
       F(ATLAS_13TeV_0LEPStop_36invfb)                \
       F(ATLAS_13TeV_2LEPStop_36invfb)                \
-      F(ATLAS_13TeV_RJ3L_lowmass_36invfb)            \
       F(ATLAS_13TeV_RJ3L_2Lep2Jets_36invfb)          \
       F(ATLAS_13TeV_RJ3L_3Lep_36invfb)               \
       F(ATLAS_13TeV_MultiLEP_confnote_36invfb)       \
@@ -69,11 +78,23 @@ namespace Gambit
 
     /// Forward declarations using #DECLARE_ANALYSIS_FACTORY(ANAME)
 
+    #ifndef EXCLUDE_ROOT
+      #ifndef EXCLUDE_RESTFRAMES
+        MAP_ANALYSES_WITH_ROOT_RESTFRAMES(DECLARE_ANALYSIS_FACTORY)
+      #endif
+      MAP_ANALYSES_WITH_ROOT(DECLARE_ANALYSIS_FACTORY)
+    #endif
     MAP_ANALYSES(DECLARE_ANALYSIS_FACTORY)
 
     // Factory definition
     HEPUtilsAnalysis* mkAnalysis(const std::string& name)
     {
+      #ifndef EXCLUDE_ROOT
+        #ifndef EXCLUDE_RESTFRAMES
+          MAP_ANALYSES_WITH_ROOT_RESTFRAMES(IF_X_RTN_CREATE_ANA_X)
+        #endif
+        MAP_ANALYSES_WITH_ROOT(IF_X_RTN_CREATE_ANA_X)
+      #endif
       MAP_ANALYSES(IF_X_RTN_CREATE_ANA_X)
 
       throw std::runtime_error("The analysis " + name + " is not a known ColliderBit analysis.");
@@ -83,6 +104,12 @@ namespace Gambit
     /// Check that an analysis exists for a given analysis name
     bool checkAnalysis(const string& name)
     {
+      #ifndef EXCLUDE_ROOT
+        #ifndef EXCLUDE_RESTFRAMES
+          MAP_ANALYSES_WITH_ROOT_RESTFRAMES(IF_X_RTN_TRUE)
+        #endif
+        MAP_ANALYSES_WITH_ROOT(IF_X_RTN_TRUE)
+      #endif
       MAP_ANALYSES(IF_X_RTN_TRUE)
 
       // If we end up here the analysis has not been found
