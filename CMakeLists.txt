@@ -49,6 +49,7 @@ foreach(p
   CMP0042 # CMake 3.0
   CMP0051 # CMake 3.1
   CMP0054 # CMake 3.1
+  CMP0063 # CMake 3.3.2
   CMP0068 # CMake 3.9.1
   )
   if(POLICY ${p})
@@ -331,6 +332,7 @@ if(${CMAKE_MAJOR_VERSION} MATCHES "2")
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fvisibility=hidden -fvisibility-inlines-hidden")
 else()
   set(CMAKE_CXX_VISIBILITY_PRESET hidden)
+  set(CMAKE_VISIBILITY_INLINES_HIDDEN TRUE)
 endif()
 
 # Check for optional packages and disable sections of GAMBIT accordingly
