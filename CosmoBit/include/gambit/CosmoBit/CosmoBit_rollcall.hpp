@@ -104,6 +104,12 @@ START_MODULE
     ALLOW_MODELS(LCDM)
     #undef FUNCTION
 
+    #define FUNCTION class_set_parameter_LCDM_dNeff_Smu
+    START_FUNCTION(CosmoBit::Class_container)
+    DEPENDENCY(Helium_abundance,double)
+    ALLOW_MODELS(LCDM_dNeff_Smu,LCDM_dNeff_Smu_etaBBN)
+    #undef FUNCTION
+
     #define FUNCTION class_set_parameter_LCDM_SingletDM
     START_FUNCTION(CosmoBit::Class_container)
     DEPENDENCY(mwimp,double)
@@ -241,7 +247,14 @@ START_MODULE
  START_CAPABILITY
    #define FUNCTION AlterBBN_fill
    START_FUNCTION(relicparam)
-   ALLOW_MODELS(LCDM)
+   ALLOW_MODELS(LCDM, LCDM_dNeff_Smu)
+   BACKEND_OPTION( (AlterBBN, 2.0), (libbbn) )
+   BACKEND_REQ(Init_cosmomodel, (libbbn), void, (relicparam*))
+   #undef FUNCTION
+
+  #define FUNCTION AlterBBN_fill_etaBBN
+   START_FUNCTION(relicparam)
+   ALLOW_MODELS(LCDM_dNeff_Smu_etaBBN)
    BACKEND_OPTION( (AlterBBN, 2.0), (libbbn) )
    BACKEND_REQ(Init_cosmomodel, (libbbn), void, (relicparam*))
    #undef FUNCTION
@@ -251,9 +264,8 @@ START_MODULE
   START_CAPABILITY
     #define FUNCTION compute_BBN_abundances
     START_FUNCTION(CosmoBit::BBN_container)
-    ALLOW_MODELS(LCDM)
+    //ALLOW_MODELS(LCDM, LCDM_dNeff_Smu)
     DEPENDENCY(AlterBBN_modelinfo, relicparam)
-    //BACKEND_REQ(nucl_err, (libbbn), int, (const relicparam*,(std::array<double,27>)&, (std::array<std::array<double,27>,27>)&))
     BACKEND_REQ(nucl_err, (libbbn), int, (const relicparam*,double*,double*))
     #undef FUNCTION
   #undef CAPABILITY
@@ -263,8 +275,7 @@ START_MODULE
    #define FUNCTION compute_BBN_LogLike
    START_FUNCTION(double)
    DEPENDENCY(BBN_abundances, CosmoBit::BBN_container)
-   //BACKEND_REQ(bbn_excluded_chi2, (libbbn), int, (const relicparam*))
-   ALLOW_MODELS(LCDM)
+   //ALLOW_MODELS(LCDM, LCDM_dNeff_Smu)
   #undef FUNCTION
   #undef CAPABILITY
 
@@ -273,8 +284,7 @@ START_MODULE
    #define FUNCTION get_Helium_abundance
    START_FUNCTION(double)
    DEPENDENCY(BBN_abundances, CosmoBit::BBN_container)
-   //BACKEND_REQ(bbn_excluded_chi2, (libbbn), int, (const relicparam*))
-   ALLOW_MODELS(LCDM)
+   //ALLOW_MODELS(LCDM, LCDM_dNeff_Smu)
   #undef FUNCTION
   #undef CAPABILITY
 
@@ -282,11 +292,3 @@ START_MODULE
 #undef MODULE
 
 #endif /* defined __CosmoBit_rollcall_hpp__ */
-
-    //BACKEND_REQ(Init_cosmomodel, (), void, (relicparam*))
-    //BACKEND_REQ(Init_cosmomodel_param, (libbbnm), void, (double, double, double, double, double, double, double, double, relicparam*))
-    //BACKEND_REQ(Init_cosmomodel, (libbbn), void, (relicparam*))
-
-    //BACKEND_OPTION( (AlterBBN, 2.0), (libbbn) )
-    //BACKEND_REQ(nucl, (libbbn), int, (relicparam*, double*))
-    //BACKEND_REQ(Init_cosmomodel, (libbbn), void, (relicparam*))

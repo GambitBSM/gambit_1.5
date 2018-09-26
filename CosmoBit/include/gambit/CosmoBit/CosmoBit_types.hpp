@@ -41,9 +41,11 @@ namespace Gambit
     {
       public:
         BBN_container();
- 
+        std::map<std::string,int> get_map(); 
+        
         std::vector<double> BBN_abund;
         std::vector< std::vector<double> > BBN_covmat;
+        std::map<std::string, int> abund_map;
     };
 
     // Forward declaration of warnings and errors

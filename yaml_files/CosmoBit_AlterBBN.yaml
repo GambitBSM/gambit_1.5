@@ -16,12 +16,13 @@
 #======== Input parameter declarations =======
 Parameters:
 
- LCDM: !import include/LCDM_scan.yaml
+ #LCDM_dNeff_Smu: !import include/LCDM_dNeff_Smu_scan.yaml
+ LCDM_dNeff_Smu_etaBBN: !import include/LCDM_dNeff_Smu_etaBBN_scan.yaml
 
  #eta:
  #  prior_type: flat
  #  range: [4,8]
-  #Planck_lite: !import include/Planck_lite_scan.yaml
+ Planck_lite: !import include/Planck_lite_scan.yaml
 
 #======== Prior setup ========
 Priors:
@@ -59,15 +60,10 @@ ObsLikes:
     module:       CosmoBit
     type:         double
 
-  - purpose:       LogLike
-    capability:   Helium_abundance
+  - purpose:      LogLike
+    capability:   compute_Planck_high_TT_loglike
     module:       CosmoBit
     type:         double
-
-# - purpose:      LogLike
-#   capability:   compute_Planck_lowp_TT_loglike
-#   module:       CosmoBit
-#   type:         double
 
 #======== Rule entries ========
 Rules:
@@ -88,15 +84,26 @@ Rules:
 ##  CLASS. (k_pivot = 0.05 is needed for the right
 ##  value of A_s, according to J. Lesgourgues)
 ####
-
-
-  - capability: AlterBBN_modelinfo
+  - capability: class_set_parameter
     options:
-      #eta: 5.3
-      dNeff: 0
-      #planck_path: /home/janina/code/PlanckLike/plc_2.0
-      #planck_path: /home/janina/code/gambit_devel/Backends/installed/plc/2.0/plc-2.0
+      class_dict:
+        T_ncdm: 0.71611
+        k_pivot: 0.05
 
+  - capability: compute_Planck_high_TT_loglike
+    function: function_Planck_high_TT_lite_loglike
+    module: CosmoBit
+
+  - capability: BBN_LogLike
+    function: compute_BBN_LogLike
+    options:
+        Yp:  2.527e-5
+        Delta_Yp: 0.030e-5
+
+  - capability: plc_2_0_init
+    options:
+      planck_path: /home/janina/code/PlanckLike/plc_2.0
+      
 #======== Logging setup ========
 Lxogger:
   redirection:

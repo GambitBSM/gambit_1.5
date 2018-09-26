@@ -25,6 +25,16 @@
   DEFINEPARS(omega_b,omega_cdm,H0,ln10A_s,n_s,tau_reio)
 #undef MODEL
 
+#define MODEL LCDM_dNeff_Smu
+  START_MODEL
+  DEFINEPARS(omega_b,omega_cdm,H0,ln10A_s,n_s,tau_reio,dNeff,Smu)
+#undef MODEL
+
+#define MODEL LCDM_dNeff_Smu_etaBBN
+  START_MODEL
+  DEFINEPARS(omega_b,omega_cdm,H0,ln10A_s,n_s,tau_reio,dNeff,Smu,eta_BBN,dNeff_BBN)
+#undef MODEL
+
 /*
 #define MODEL rLCDM
 START_MODEL

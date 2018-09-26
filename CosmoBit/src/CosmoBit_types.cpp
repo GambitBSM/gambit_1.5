@@ -34,7 +34,21 @@ namespace Gambit
       int NNUC = 26; // amount of abundances
       BBN_abund.resize(NNUC+1, 0.);
       BBN_covmat.resize(NNUC+1, std::vector<double>(NNUC+1,0.));
+      //std::map<std::string, int> abund_map;
+      abund_map["H2"] = 3;
+      abund_map["H3"] = 4;
+      abund_map["He3"] = 5;
+      abund_map["Yp"] = 6;
+      abund_map["Li6"] = 7;
+      abund_map["Li7"] = 8;
+      abund_map["Be7"] = 9;
+      abund_map["Li8"] = 10;
     }
+    
+    std::map<std::string,int> BBN_container::get_map()
+    {
+      return abund_map;
+    }   
 
     Class_container::Class_container() : lmax(2508)
     {
@@ -84,5 +98,7 @@ namespace Gambit
     {
       return input_list;
     }
+
+
   }
 }

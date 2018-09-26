@@ -49,6 +49,7 @@ namespace Gambit
   {
     using namespace LogTags;
 
+
     struct my_f_params { double a; double b; double c; double d; };
 
     // Utility functions (not rolcalled)
@@ -270,6 +271,49 @@ namespace Gambit
       cosmo.input.addEntry("ln10^{10}A_s",*Param["ln10A_s"]);
       cosmo.input.addEntry("n_s",*Param["n_s"]);
       cosmo.input.addEntry("tau_reio",*Param["tau_reio"]);
+
+      YAML::Node class_dict;
+      if (runOptions->hasKey("class_dict"))
+      {
+        class_dict = runOptions->getValue<YAML::Node>("class_dict");
+        for (auto it=class_dict.begin(); it != class_dict.end(); it++)
+        {
+          std::string name = it->first.as<std::string>();
+          std::string value = it->second.as<std::string>();
+          cosmo.input.addEntry(name,value);
+        }
+      }
+    }
+
+    void class_set_parameter_LCDM_dNeff_Smu(Class_container& cosmo)
+    {
+      //std::cout << "Last seen alive in: class_set_parameter_LCDM" << std::endl;
+      using namespace Pipes::class_set_parameter_LCDM_dNeff_Smu;
+
+      int l_max=cosmo.lmax;
+
+      cosmo.input.clear();
+
+      cosmo.input.addEntry("output","tCl pCl lCl");
+      cosmo.input.addEntry("l_max_scalars",l_max);
+      cosmo.input.addEntry("lensing","yes");
+
+      cosmo.input.addEntry("omega_b",*Param["omega_b"]);
+      cosmo.input.addEntry("omega_cdm",*Param["omega_cdm"]);
+      cosmo.input.addEntry("H0",*Param["H0"]);
+      cosmo.input.addEntry("ln10^{10}A_s",*Param["ln10A_s"]);
+      cosmo.input.addEntry("n_s",*Param["n_s"]);
+      cosmo.input.addEntry("tau_reio",*Param["tau_reio"]);
+
+      cosmo.input.addEntry("N_ur",*Param["dNeff"]+0.00641);  //TODO: explanation for value/change implementation?
+
+      cosmo.input.addEntry("N_ncdm",3);
+      std::stringstream sstream;
+      double numass = *Param["Smu"]/3.;
+      sstream << numass << ", " << numass << ", " << numass;
+      cosmo.input.addEntry("m_ncdm",sstream.str());
+
+      cosmo.input.addEntry("YHe",*Dep::Helium_abundance);
 
       YAML::Node class_dict;
       if (runOptions->hasKey("class_dict"))
@@ -2205,13 +2249,33 @@ namespace Gambit
       using namespace Pipes::AlterBBN_fill;
 
       BEreq::Init_cosmomodel(&result);
-      result.eta0=runOptions->getValueOrDef<double>(6.11*pow(10,-10),"eta");
-      //std::cout << "omega b value:" << *Param["omega_b"] << std::endl;
-      //std::cout << "eta0 val: " << result.eta0 << std::endl;
 
       result.eta0=*Param["omega_b"]*274.*pow(10,-10);
-      result.dNnu=runOptions->getValue<double>("dNeff");
-      result.failsafe = 3;                            // set precision parameters
+
+        // etaBBN = *Param["etaBBN"]
+      result.Nnu=0.00641;     // 3 massive neutrinos, Neff s.t. T_ncdm = 0.71611 yields m/omega of 93.14 eV
+      result.dNnu=*Param["dNeff"];
+      //result.eta0=runOptions->getValueOrDef<double>(6.1*pow(10,-10),"eta");
+      //result.dNnu=runOptions->getValueOrDef<double>(0,"asdfk");
+      std::cout<< "eta = " << result.eta0 <<", Nu = " << result.Nnu <<", dNu = " << result.dNnu << std::endl;
+      result.failsafe = 3;                            // set precision parameters for AlterBBN
+      result.err = 3;
+    }
+
+    void AlterBBN_fill_etaBBN(relicparam &result)
+    {
+      using namespace Pipes::AlterBBN_fill_etaBBN;
+
+      BEreq::Init_cosmomodel(&result);
+      
+      result.eta0 = *Param["eta_BBN"];  // etaBBN = *Param["omega_b"]*274.*pow(10,-10);
+
+      result.Nnu=0.00641;     // 3 massive neutrinos, Neff s.t. T_ncdm = 0.71611 yields m/omega of 93.14 eV
+      result.dNnu=*Param["dNeff_BBN"];
+      //result.eta0=runOptions->getValueOrDef<double>(6.1*pow(10,-10),"eta");
+      //result.dNnu=runOptions->getValueOrDef<double>(0,"asdfk");
+      std::cout<< "eta = " << result.eta0 <<", Nu = " << result.Nnu <<", dNu = " << result.dNnu << std::endl;
+      result.failsafe = 3;                            // set precision parameters for AlterBBN
       result.err = 3;
     }
 
@@ -2246,7 +2310,10 @@ namespace Gambit
     using namespace Pipes::get_Helium_abundance;
 
     CosmoBit::BBN_container BBN_res = *Dep::BBN_abundances;
-    result = BBN_res.BBN_abund.at(6);
+    std::map<std::string, int> abund_map = BBN_res.get_map();
+
+    result = BBN_res.BBN_abund.at(6);           // TODO: use map to refer to Helium pos in array
+    result = BBN_res.BBN_abund.at(abund_map["Yp"]);           // TODO: use map to refer to Helium pos in array
     std::cout << "Helium Abundane = " << result << std::endl;
 
   }
@@ -2258,13 +2325,18 @@ namespace Gambit
 
     CosmoBit::BBN_container BBN_res = *Dep::BBN_abundances;
 
+    //CosmoBit::BBN_container abund_map
+
+    std::map<std::string, int> abund_map = BBN_res.get_map();
+    std::cout << " Abundane map Yp " << abund_map["Yp"] << " Abundane map H2 " << abund_map["H2"] << std::endl;
+    // TODO: if key error: throw error msg
     int NNUC =26;
     int debug = 1;
     double eta,H2_H,He3_H,Yp,Li7_H,Li6_H,Be7_H;
     double sigma_H2_H,sigma_He3_H,sigma_Yp,sigma_Li7_H,sigma_Li6_H,sigma_Be7_H;
     
-    H2_H=BBN_res.BBN_abund.at(3);Yp=BBN_res.BBN_abund.at(6);Li7_H=BBN_res.BBN_abund.at(8);Be7_H=BBN_res.BBN_abund.at(9);He3_H=BBN_res.BBN_abund.at(5);Li6_H=BBN_res.BBN_abund.at(7);
-    sigma_H2_H=sqrt(BBN_res.BBN_covmat.at(3).at(3));sigma_Yp=sqrt(BBN_res.BBN_covmat.at(6).at(6));sigma_Li7_H=sqrt(BBN_res.BBN_covmat.at(8).at(8));sigma_Be7_H=sqrt(BBN_res.BBN_covmat.at(9).at(9));sigma_He3_H=sqrt(BBN_res.BBN_covmat.at(5).at(5));sigma_Li6_H=sqrt(BBN_res.BBN_covmat.at(7).at(7));
+    H2_H=BBN_res.BBN_abund.at(abund_map["H2"]);Yp=BBN_res.BBN_abund.at(abund_map["Yp"]);Li7_H=BBN_res.BBN_abund.at(abund_map["Li7"]);Be7_H=BBN_res.BBN_abund.at(abund_map["Be7"]);He3_H=BBN_res.BBN_abund.at(abund_map["He3"]);Li6_H=BBN_res.BBN_abund.at(abund_map["Li6"]);
+    sigma_H2_H=sqrt(BBN_res.BBN_covmat.at(abund_map["H2"]).at(abund_map["H2"]));sigma_Yp=sqrt(BBN_res.BBN_covmat.at(abund_map["Yp"]).at(abund_map["Yp"]));sigma_Li7_H=sqrt(BBN_res.BBN_covmat.at(abund_map["Li7"]).at(abund_map["Li7"]));sigma_Be7_H=sqrt(BBN_res.BBN_covmat.at(abund_map["Be7"]).at(abund_map["Be7"]));sigma_He3_H=sqrt(BBN_res.BBN_covmat.at(abund_map["He3"]).at(abund_map["He3"]));sigma_Li6_H=sqrt(BBN_res.BBN_covmat.at(abund_map["Li6"]).at(abund_map["Li6"]));
     
     printf("\t Yp\t\t H2/H\t\t He3/H\t\t Li7/H\t\t Li6/H\t\t Be7/H\n");
     printf("value:\t %.3e\t %.3e\t %.3e\t %.3e\t %.3e\t %.3e\n",Yp,H2_H,He3_H,Li7_H,Li6_H,Be7_H); 
