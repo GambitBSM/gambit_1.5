@@ -21,6 +21,9 @@
 #include "gambit/Utils/model_parameters.hpp"
 #include "gambit/Utils/util_functions.hpp"
 
+// Need this to allow Master process to manually check for shutdown signals without calling the likelihood container
+#include "gambit/Utils/signal_handling.hpp"
+
 using Gambit::Printers::PPIDpair;
 
 namespace Gambit
@@ -691,6 +694,19 @@ namespace Gambit
          {
             // Don't bother doing any processing for zero length chunks
             // Just check whether the calling code wants us to shut down early
+            // NOTE: A trick here is that the Master process never runs the likelihood container
+            // in this Master/Slave setup. So we have to manually check for the signal,
+            // which is a little clumsy because I ideally wanted to leave this up to the
+            // likelihood container. But doing this locks the postprocessor into using
+            // the GAMBIT signal handling methods. TODO: is there another way?
+  
+            // Inelegant bit @{
+            if(signaldata().check_if_shutdown_begun())
+            {
+               Gambit::Scanner::Plugins::plugin_info.set_early_shutdown_in_progress();
+            }
+            // @}
+
             quit = Gambit::Scanner::Plugins::plugin_info.early_shutdown_in_progress();
             loopi=mychunk.end; // Set loop counter to end of batch to satisfy checks at end of this function
          }
@@ -748,6 +764,16 @@ namespace Gambit
                   std::cout << "Rank "<<rank<<" has reached the end of its batch, stopping iteration." << std::endl;
                   loopi--; // Return counter to the last index that we actually processed.
                   break;
+               }
+
+               // Check whether the calling code wants us to shut down early
+               quit = Gambit::Scanner::Plugins::plugin_info.early_shutdown_in_progress();
+               if(quit)
+               {
+                  // Need to save data about which points have been processed, so we
+                  // can resume processing from here.
+                  std::cout << "Postprocessor (rank "<<rank<<") received quit signal! Aborting run." << std::endl;
+                  stop_loop = true;
                }
 
                // If we have moved past the end of the currently selected batch of "done"
@@ -1026,17 +1052,6 @@ namespace Gambit
                   }
                }
 
-               // Check whether the calling code wants us to shut down early
-               quit = Gambit::Scanner::Plugins::plugin_info.early_shutdown_in_progress();
-
-               if(quit)
-               {
-                  // Need to save data about which points have been processed, so we
-                  // can resume processing from here.
-                  //std::cout << "Postprocessor (rank "<<rank<<") received quit signal! Aborting run." << std::endl;
-                  stop_loop = true;
-               }
-
                /// Go to next point
                if(not stop_loop)
                { 
@@ -1065,6 +1080,7 @@ namespace Gambit
          if(quit)
          {
            exit_code = 1;
+           std::cout << "Postprocessor (rank "<<rank<<") received quit signal! Aborting run." << std::endl;
          }
          else if(getReader().eoi() and loopi!=mychunk.end)
          {

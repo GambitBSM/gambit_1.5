@@ -66,6 +66,7 @@ scanner_plugin(postprocessor, version(2, 0, 0))
 
   // Tags for messages
   const int request_work_tag=10;
+  const int quit_tag=11;
 
   /// The reader object in use for the scan
   Gambit::Printers::BaseBaseReader* reader;
@@ -242,7 +243,7 @@ scanner_plugin(postprocessor, version(2, 0, 0))
  
     // Vector to record which processes have been told by the master to stop. 
     // Master cannot stop until all other processes have stopped.
-    std::vector<bool> process_has_stopped(numtasks);
+    std::vector<bool> process_has_stopped(numtasks); // For end of run
 
     // Rank 0 needs to figure out which points are already processesed (if resuming)
     if(resume)
@@ -301,7 +302,7 @@ scanner_plugin(postprocessor, version(2, 0, 0))
          if(rank==0 and numtasks==1)
          {
             // Compute new work for this one process.
-            mychunk = driver.get_new_chunk(); //TODO: Rewrite this function. Make sure to update done_chunks as we go.
+            mychunk = driver.get_new_chunk();
          }
          else if(rank==0)
          { 
@@ -312,12 +313,26 @@ scanner_plugin(postprocessor, version(2, 0, 0))
                if(needs_work)
                {
                   // Receive the work request message (no information, just cleaning up)
-                  int nullint = 0; // Buffer for null message
-                  ppComm.Recv(&nullint,1,worker,request_work_tag);
+                  int quit_flag = 0; // The message itself propagates quit flags, if seen by workers
+                  std::cout<<"Master waiting for message from "<<worker<<std::endl;
+                  ppComm.Recv(&quit_flag,1,worker,request_work_tag);
 
-                  // Compute new work assignment
-                  Chunk newchunk = driver.get_new_chunk(); //TODO: Rewrite this function.
-                  // TODO: Make sure to return Chunk(0,0) to trigger end of processing.
+                  if(quit_flag==1)
+                  {
+                     quit_flag_seen = true;
+                  }
+
+                  Chunk newchunk;
+                  if(quit_flag_seen)
+                  {
+                     // Send stop signal to worker
+                     newchunk = stopchunk;
+                  }
+                  else
+                  {
+                     // Compute new work assignment
+                     newchunk = driver.get_new_chunk();
+                  }
 
                   // Send work assignment
                   std::size_t chunkdata[3]; // Raw form of chunk information
@@ -354,11 +369,15 @@ scanner_plugin(postprocessor, version(2, 0, 0))
          else
          {
             // Worker processes request more work from master
-            int nullint = 0; // Buffer for null message
-            ppComm.Send(&nullint,1,0,request_work_tag);
+            int quit_flag = 0; // Use this message to propagate quit flag, if it has been seen
+            if(quit_flag_seen) quit_flag = 1;
+
+            std::cout<<"Rank "<<rank<<" sending message to Master "<<std::endl;
+            ppComm.Send(&quit_flag,1,0,request_work_tag);
 
             // Receive the work assignment
             std::size_t chunkdata[3]; // Raw form of chunk information
+            std::cout<<"Rank "<<rank<<" receiveing message from Master "<<std::endl;
             ppComm.Recv(&chunkdata,3,0,request_work_tag);
 
             // Check if any work in the work assignment
@@ -372,11 +391,11 @@ scanner_plugin(postprocessor, version(2, 0, 0))
          // Compute new work for this one process.
          mychunk = driver.get_new_chunk(); //TODO: Rewrite this function. Make sure to update done_chunks as we go.
        #endif
-       std::cout << "Rank "<<rank<<": Chunk to process is ["<<mychunk.start<<", "<<mychunk.end<<"; eff_len="<<mychunk.eff_length<<"]"<<std::endl;
+       //std::cout << "Rank "<<rank<<": Chunk to process is ["<<mychunk.start<<", "<<mychunk.end<<"; eff_len="<<mychunk.eff_length<<"]"<<std::endl;
 
        if(mychunk==stopchunk)
        {
-          // Finished!
+          // Finished! (or was told to stop via quit flag)
           continue_processing = false;
        }
 
@@ -406,8 +425,15 @@ scanner_plugin(postprocessor, version(2, 0, 0))
        }
        else
        {
-          // No points assigned, in shutdown mode
-          exit_code=0;
+          if(quit_flag_seen)
+          {
+             exit_code=1;
+          }
+          else
+          {
+             // No points assigned, in shutdown mode
+             exit_code=0;
+          }
        }
 
        if(exit_code==0)
@@ -419,11 +445,9 @@ scanner_plugin(postprocessor, version(2, 0, 0))
        }
        else if(exit_code==1)
        {
-          // Saw quit flag, time to stop
-          #ifdef WITH_MPI
-            quit_flag_seen = true;
-          #endif
-          continue_processing = false;
+          // Saw quit flag. Should be stopping, but we need to continue
+          // until the master process explicitly tells us to stop.
+          // So do nothing until "continue_processing" flag gets set to false.
        }
        else if(exit_code==2)
        {
