@@ -290,9 +290,8 @@ scanner_plugin(postprocessor, version(2, 0, 0))
 
     //MAIN LOOP HERE
     bool continue_processing = true;
-    #ifdef WITH_MPI
-      bool quit_flag_seen = false;
-    #endif
+    bool quit_flag_seen = false;
+
     while(continue_processing)
     {
        Chunk mychunk; // Work to be performed this loop
@@ -448,6 +447,7 @@ scanner_plugin(postprocessor, version(2, 0, 0))
           // Saw quit flag. Should be stopping, but we need to continue
           // until the master process explicitly tells us to stop.
           // So do nothing until "continue_processing" flag gets set to false.
+          quit_flag_seen = true;
        }
        else if(exit_code==2)
        {
