@@ -23,6 +23,12 @@
 
 namespace Gambit
 {
+  /// Forward declaration
+  namespace Printers
+  {
+      class BaseBaseReader;
+  }
+
   namespace PostProcessor
   {
       /// @{ Helper functions for performing resume related tasks
@@ -39,7 +45,7 @@ namespace Gambit
       Chunk get_my_chunk(const std::size_t dset_length, const ChunkSet& done_chunks, const int rank, const int numtasks);
       
       /// Read through resume data files and reconstruct which chunks of points have already been processed
-      ChunkSet get_done_points(const std::string& filebase);
+      ChunkSet get_done_points(Gambit::Printers::BaseBaseReader& filebase);
      
       /// Simplify a ChunkSet by merging chunks which overlap.
       ChunkSet merge_chunks(const ChunkSet&);

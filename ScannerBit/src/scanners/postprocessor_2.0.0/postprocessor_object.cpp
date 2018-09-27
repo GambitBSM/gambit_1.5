@@ -74,68 +74,133 @@ namespace Gambit
          return Chunk(start,end);
       }
 
-
-      /// Read through resume data files and reconstruct which chunks of points have already been processed
-      ChunkSet get_done_points(const std::string& filebase)
+      /// Read through any pre-existing output and reconstruct which chunks of points have already been processed
+      ChunkSet get_done_points(Gambit::Printers::BaseBaseReader& resume_reader)
       {
-        ChunkSet done_chunks;
+         ChunkSet done_chunks;
 
-        // First read collated chunk data from past resumes, and the number of processes used in the last run
-        std::string inprev = filebase+"_prev.dat";
+         // Need to iterate through the pre-existing output and figure out what points it
+         // has processed. We cannot tell what points were purposefully skipped (if the user
+         // chose not to copy them into the output), but that shouldn't be a big deal since deciding
+         // to skip a point doesn't cost much CPU, so we can just do it again.
 
-        // Check if it exists (it will not exist on the first resume)
-        if(Utils::file_exists(inprev))
-        {
-           std::ifstream finprev(inprev);
-           if(finprev)
-           {
-              unsigned int prev_size;
-              finprev >> prev_size;
-              Chunk nextchunk;
-              while( finprev >> nextchunk.start >> nextchunk.end )
-              {
-                done_chunks.insert(nextchunk);
-              }
+         // We build up the set of "done" points as chunks.
+         
+         std::size_t previous_index = 0;
+         bool building_chunk = false;
+         std::size_t chunk_start;
+         std::size_t chunk_end;
+         while(not resume_reader.eoi()) // while not end of input
+         {
+            std::size_t input_index;
+            bool is_valid = resume_reader.retrieve(input_index, "input_dataset_index");
 
-              // Now read each of the chunk files left by each process during previous run
-              for(unsigned int i=0; i<prev_size; ++i)
-              {
-                std::ostringstream inname;
-                inname << filebase << "_" << i << ".dat";
-                std::string in = inname.str();
-                if(Utils::file_exists(in))
-                {
-                  std::ifstream fin(in);
-                  if(fin)
-                  {
-                    fin >> nextchunk.start >> nextchunk.end;
-                    done_chunks.insert(nextchunk);
-                  }
-                  else
-                  {
-                    std::ostringstream err;
-                    err << "Tried to read postprocessor resume data from "<<in<<" but encountered a read error of some kind (the file seems to exist but appears to be unreadable";
-                    Scanner::scan_error().raise(LOCAL_INFO,err.str());
-                  }
-                }
-                else
-                {
+            if(is_valid)
+            {
+               if(not building_chunk)
+               {
+                  // Not building a chunk, and this point is valid, so start new (will be the first) chunk
+                  building_chunk = true;
+                  chunk_start = input_index;
+               }
+               else if(input_index==(previous_index+1))
+               {
+                  // Point is just an increment by one, so still part of this chunk
+                  // Do nothing.
+               }
+               else if(input_index==previous_index)
+               {
+                  // Reader didn't progress, error.
                   std::ostringstream err;
-                  err << "Tried to read postprocessor resume data from "<<in<<" but the file does not exist or is unreadable. We require this file because according to "<<inprev<<" there were "<<prev_size<<" processes in use during the last run, and we require the resume data from all of them";
-                  Scanner::scan_error().raise(LOCAL_INFO,err.str());
-                }
-              }
-           }
-           else
-           {
-              std::ostringstream err;
-              err << "Tried to read postprocessor resume data from "<<inprev<<" but encountered a read error of some kind (the file seems to exist but appears to be unreadable";
-              Scanner::scan_error().raise(LOCAL_INFO,err.str());
-           }
-        }
-        // Else there is no resume data, assume that this is a new run started without the --restart flag.
-        return merge_chunks(done_chunks); // Simplify the chunks and return them
+                  err << "'resume_reader' object returned the same value for 'input_dataset_index' twice! This means that it either didn't increment properly during this postprocessor run, or the input dataset contains the same point twice! Either case indicates a bug in the postprocessor, please report it.";
+                  Scanner::scan_error().raise(LOCAL_INFO,err.str()); 
+               }
+               else
+               {
+                  // Non-incremental change in input_index! Could be higher or lower, either way, we
+                  // close the previous chunk and start a new one.
+                  chunk_end = previous_index;
+                  done_chunks.insert(Chunk(chunk_start,chunk_end));
+                  chunk_start = input_index;
+               }
+
+               previous_index = input_index;
+            }
+
+            resume_reader.get_next_point(); // Move reader to next previously processed point
+         } 
+         // Need to close off last chunk
+         if(building_chunk)
+         {
+            chunk_end = previous_index;
+            done_chunks.insert(Chunk(chunk_start,chunk_end));
+         }
+ 
+         return merge_chunks(done_chunks); // Simplify the chunks and return them
       }
+ 
+      /// Read through resume data files and reconstruct which chunks of points have already been processed
+      /// OLD VERSION!
+      // ChunkSet get_done_points(const std::string& filebase)
+      // {
+      //   ChunkSet done_chunks;
+
+      //   // First read collated chunk data from past resumes, and the number of processes used in the last run
+      //   std::string inprev = filebase+"_prev.dat";
+
+      //   // Check if it exists (it will not exist on the first resume)
+      //   if(Utils::file_exists(inprev))
+      //   {
+      //      std::ifstream finprev(inprev);
+      //      if(finprev)
+      //      {
+      //         unsigned int prev_size;
+      //         finprev >> prev_size;
+      //         Chunk nextchunk;
+      //         while( finprev >> nextchunk.start >> nextchunk.end )
+      //         {
+      //           done_chunks.insert(nextchunk);
+      //         }
+
+      //         // Now read each of the chunk files left by each process during previous run
+      //         for(unsigned int i=0; i<prev_size; ++i)
+      //         {
+      //           std::ostringstream inname;
+      //           inname << filebase << "_" << i << ".dat";
+      //           std::string in = inname.str();
+      //           if(Utils::file_exists(in))
+      //           {
+      //             std::ifstream fin(in);
+      //             if(fin)
+      //             {
+      //               fin >> nextchunk.start >> nextchunk.end;
+      //               done_chunks.insert(nextchunk);
+      //             }
+      //             else
+      //             {
+      //               std::ostringstream err;
+      //               err << "Tried to read postprocessor resume data from "<<in<<" but encountered a read error of some kind (the file seems to exist but appears to be unreadable";
+      //               Scanner::scan_error().raise(LOCAL_INFO,err.str());
+      //             }
+      //           }
+      //           else
+      //           {
+      //             std::ostringstream err;
+      //             err << "Tried to read postprocessor resume data from "<<in<<" but the file does not exist or is unreadable. We require this file because according to "<<inprev<<" there were "<<prev_size<<" processes in use during the last run, and we require the resume data from all of them";
+      //             Scanner::scan_error().raise(LOCAL_INFO,err.str());
+      //           }
+      //         }
+      //      }
+      //      else
+      //      {
+      //         std::ostringstream err;
+      //         err << "Tried to read postprocessor resume data from "<<inprev<<" but encountered a read error of some kind (the file seems to exist but appears to be unreadable";
+      //         Scanner::scan_error().raise(LOCAL_INFO,err.str());
+      //      }
+      //   }
+      //   // Else there is no resume data, assume that this is a new run started without the --restart flag.
+      //   return merge_chunks(done_chunks); // Simplify the chunks and return them
+      // }
 
       /// Simplify a ChunkSet by merging chunks which overlap.
       ChunkSet merge_chunks(const ChunkSet& input_chunks)

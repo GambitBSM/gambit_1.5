@@ -251,8 +251,24 @@ scanner_plugin(postprocessor, version(2, 0, 0))
         if(rank==0)
         {
             std::cout << "Analysing previous output to determine remaining postprocessing work (may take a little time for large datasets)..." << std::endl;
-            done_chunks = get_done_points(settings.root);
+ 
+            // Set up reader object for temporary output file, if one exists 
+            Gambit::Options resume_reader_options = get_inifile_node("resume_reader");
+            get_printer().new_reader("done_points",resume_reader_options);
+            Gambit::Printers::BaseBaseReader* resume_reader = get_printer().get_reader("done_points");
+
+            done_chunks = get_done_points(*resume_reader);
+
             std::cout << "Distributing information about remaining work to all processes..." << std::endl;
+            // TODO: I guess the reader object will not necessarily be destroyed here,
+            // so file handles etc may not be released.
+            // Not sure if that is going to cause problems or not...
+            // Might be an issue because we have to mess with the temp files when the run finishes.
+            // I think we can just 'delete' it (assuming it knows how to destruct itself properly), 
+            // but the PrinterManager object won't know
+            // that we did this. So it will segfault if we try to access this reader again.
+            // Ideally need to add functions to PrinterManager for deleting readers and printers.
+            delete resume_reader;
         }
 
         // Need to distribute these to all processes
@@ -350,7 +366,7 @@ scanner_plugin(postprocessor, version(2, 0, 0))
 
             // Set zero-length chunk for master
             bool any_still_running=false;
-            for(std::size_t i=1; i<numtasks; i++)
+            for(int i=1; i<numtasks; i++)
             {
                if(process_has_stopped[i]==false) any_still_running=true;
             }

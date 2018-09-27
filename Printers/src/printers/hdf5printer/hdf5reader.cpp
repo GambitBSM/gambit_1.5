@@ -19,6 +19,7 @@
 
 #include "gambit/Printers/printers/hdf5reader.hpp"
 #include "gambit/Printers/printers/hdf5printer.hpp"
+#include "gambit/Printers/printers/hdf5printer/hdf5tools.hpp"
 #include "gambit/Utils/util_functions.hpp"
 #include "gambit/Logs/logger.hpp"
 
@@ -34,7 +35,7 @@ namespace Gambit
 
      hid_t openfile_read(std::string file)
      {
-        hid_t file_id = H5Fopen(file.c_str(), H5F_ACC_RDONLY, H5P_DEFAULT);
+        hid_t file_id = HDF5::openFile(file);
         if(file_id<0)
         {
             std::ostringstream errmsg;
