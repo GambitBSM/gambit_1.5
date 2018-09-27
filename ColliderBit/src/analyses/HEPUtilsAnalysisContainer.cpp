@@ -18,7 +18,9 @@ namespace Gambit
     // - If the analysis only depends on ROOT, add it to MAP_ANALYSES_WITH_ROOT
     // - Else, add the analysis to MAP_ANALYSES
     #define MAP_ANALYSES_WITH_ROOT_RESTFRAMES(F)     \
-      F(ATLAS_13TeV_RJ3L_lowmass_36invfb)            
+      F(ATLAS_13TeV_RJ3L_2Lep2Jets_36invfb)          \
+      F(ATLAS_13TeV_RJ3L_3Lep_36invfb)               \
+      F(ATLAS_13TeV_RJ3L_lowmass_36invfb)            \
 
     #define MAP_ANALYSES_WITH_ROOT(F)                \
       // F()            
@@ -31,8 +33,6 @@ namespace Gambit
       F(ATLAS_13TeV_0LEP_36invfb)                    \
       F(ATLAS_13TeV_0LEPStop_36invfb)                \
       F(ATLAS_13TeV_2LEPStop_36invfb)                \
-      F(ATLAS_13TeV_RJ3L_2Lep2Jets_36invfb)          \
-      F(ATLAS_13TeV_RJ3L_3Lep_36invfb)               \
       F(ATLAS_13TeV_MultiLEP_confnote_36invfb)       \
       F(ATLAS_13TeV_MultiLEP_36invfb)                \
       F(ATLAS_13TeV_MultiLEP_2Lep0Jets_36invfb)      \
@@ -45,6 +45,7 @@ namespace Gambit
       F(ATLAS_13TeV_3b_36invfb)                      \
       F(ATLAS_13TeV_3b_discoverySR_36invfb)          \
       F(ATLAS_13TeV_PhotonGGM_36invfb)               \
+      F(ATLAS_13TeV_ZGammaGrav_CONFNOTE_80invfb)     \
       F(ATLAS_8TeV_0LEP_20invfb)                     \
       F(ATLAS_8TeV_0LEPStop_20invfb)                 \
       F(ATLAS_8TeV_1LEPStop_20invfb)                 \
@@ -74,10 +75,10 @@ namespace Gambit
       F(CMS_8TeV_2LEPDMTOP_20invfb)                  \
       F(CMS_8TeV_3LEPEW_20invfb)                     \
       F(CMS_8TeV_MONOJET_20invfb)
-    
+
+
 
     /// Forward declarations using #DECLARE_ANALYSIS_FACTORY(ANAME)
-
     #ifndef EXCLUDE_ROOT
       #ifndef EXCLUDE_RESTFRAMES
         MAP_ANALYSES_WITH_ROOT_RESTFRAMES(DECLARE_ANALYSIS_FACTORY)
@@ -121,13 +122,13 @@ namespace Gambit
     std::map<string,std::map<int,HEPUtilsAnalysisContainer*> > HEPUtilsAnalysisContainer::instances_map;
 
     /// Constructor
-    HEPUtilsAnalysisContainer::HEPUtilsAnalysisContainer() : 
+    HEPUtilsAnalysisContainer::HEPUtilsAnalysisContainer() :
       current_collider(""),
       ready(false),
       is_registered(false),
       n_threads(omp_get_max_threads()),
       base_key("")
-    { 
+    {
       #ifdef ANALYSISCONTAINER_DEBUG
         std::cout << "DEBUG: thread " << omp_get_thread_num() << ": HEPUtilsAnalysisContainer::ctor: created at " << this << std::endl;
       #endif
@@ -135,9 +136,9 @@ namespace Gambit
 
 
     /// Destructor
-    HEPUtilsAnalysisContainer::~HEPUtilsAnalysisContainer() 
-    { 
-      clear(); 
+    HEPUtilsAnalysisContainer::~HEPUtilsAnalysisContainer()
+    {
+      clear();
     }
 
 
@@ -241,7 +242,7 @@ namespace Gambit
         analyses_map[collider_name].clear();
       }
 
-      // Create analysis pointers and add to the map 
+      // Create analysis pointers and add to the map
       for (auto& aname : analysis_names)
       {
         analyses_map[collider_name][aname] = mkAnalysis(aname);
@@ -316,7 +317,7 @@ namespace Gambit
 
     /// Pass event through specific analysis
     void HEPUtilsAnalysisContainer::analyze(const HEPUtils::Event& event, string collider_name, string analysis_name) const
-    { 
+    {
       analyses_map.at(collider_name).at(analysis_name)->do_analysis(event);
     }
 
@@ -331,7 +332,7 @@ namespace Gambit
 
     /// Pass event through all analysis for the current collider
     void HEPUtilsAnalysisContainer::analyze(const HEPUtils::Event& event) const
-    { 
+    {
       analyze(event, current_collider);
     }
 
@@ -386,9 +387,9 @@ namespace Gambit
     }
 
 
-    // 
+    //
     // @todo Add the 'collect_and_add_signal' functions
-    // 
+    //
 
     /// Collect signal predictions from other threads and add to this one,
     /// for specific analysis
@@ -475,7 +476,7 @@ namespace Gambit
       {
         string analysis_name = analysis_pointer_pair.first;
         scale(collider_name, analysis_name, factor);
-      }      
+      }
     }
 
     /// Scale results for all analyses for the current collider
