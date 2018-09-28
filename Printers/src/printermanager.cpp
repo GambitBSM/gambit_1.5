@@ -75,6 +75,48 @@ namespace Gambit
       }
     }
 
+    /// Destruct printer/reader objects
+    void PrinterManager::delete_stream(const std::string& name)
+    {
+      if(name=="")
+      {
+         std::ostringstream os;
+         os << "Tried to delete primary printer stream! Currently you are not permitted to do this. Why do you want to?";
+         printer_error().raise(LOCAL_INFO,os.str());
+      }
+      else
+      {
+         auto it = auxprinters.find(name);
+         if(it!=auxprinters.end())
+         {
+            delete it->second;
+            auxprinters.erase(it);
+         }
+         else
+         {
+            std::ostringstream os;
+            os << "Tried to delete printer stream '"<<name<<"', but could not find a print stream with that name! Perhaps it was never created, or was deleted already?";
+            printer_error().raise(LOCAL_INFO,os.str());
+         }
+      }
+    }
+
+    void PrinterManager::delete_reader(const std::string& name)
+    { 
+      auto it = readers.find(name);
+      if(it!=readers.end())
+      {
+         delete it->second;
+         readers.erase(it);
+      }
+      else
+      {
+         std::ostringstream os;
+         os << "Tried to delete reader object '"<<name<<"', but could not find a reader object with that name! Perhaps it was never created, or was deleted already?";
+         printer_error().raise(LOCAL_INFO,os.str());
+      }
+    }
+ 
     PrinterManager::~PrinterManager()
     {
       // Delete all the printer objects

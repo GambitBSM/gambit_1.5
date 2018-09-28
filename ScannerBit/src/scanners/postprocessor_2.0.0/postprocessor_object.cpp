@@ -755,6 +755,8 @@ namespace Gambit
          std::size_t n_passed = 0; // Number which have passed any user-specified cuts.
          bool found_chunk_start = false; // Make sure we start processing from the correct place
     
+         //std::cout << "Chunk to process: "<<mychunk.start<<" -> "<<mychunk.end<<std::endl;
+ 
          if(mychunk.eff_length==0)  
          {
             // Don't bother doing any processing for zero length chunks
@@ -873,6 +875,7 @@ namespace Gambit
                   if(loopi<mychunk.start or (current_done_chunk!=done_chunks.end() and current_done_chunk->iContain(loopi)))
                   {
                      std::cout<<"Skipping point (not in our batch)"<<std::endl;
+                     std::cout<<"(loopi=="<<loopi<<", mychunk.start="<<mychunk.start<<", current_done_chunk.start="<<current_done_chunk->start<<", current_done_chunk.end="<<current_done_chunk->end<<")"<<std::endl;
                      current_point = getReader().get_next_point();
                      loopi++;
                      continue;
@@ -1250,6 +1253,7 @@ namespace Gambit
          std::size_t chunk_end   = next_point;
          std::size_t chunk_length = 0;
          bool stop = false;
+         bool found_start = false;
 
          if(next_point > total_length)
          {
@@ -1271,7 +1275,15 @@ namespace Gambit
                   if(donechunk->iContain(next_point)) point_is_done = true;
                }
 
-               if(not point_is_done) chunk_length++; // Point needs to be processed, count it towards total processing length
+               if(not point_is_done) 
+               {
+                  chunk_length++; // Point needs to be processed, count it towards total processing length
+                  if(not found_start)
+                  {
+                     chunk_start = next_point; // Marking the starting point if this is the first unprocessed point to be found
+                     found_start = true;
+                  }
+               }
 
                if(next_point == total_length)
                {

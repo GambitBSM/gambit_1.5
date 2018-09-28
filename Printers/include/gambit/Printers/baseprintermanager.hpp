@@ -59,6 +59,10 @@ namespace Gambit
         /// Getter for readers
         virtual BaseBaseReader* get_reader(const std::string&) = 0;
 
+        /// Delete reader and printer objects (does not harm output, just deletes the objects)
+        virtual void delete_stream(const std::string& = "") = 0;
+        virtual void delete_reader(const std::string&) = 0;
+ 
         /// Instruct printers that scan has finished and to perform cleanup
         virtual void finalise(bool abnormal=false) = 0;
 

@@ -74,6 +74,10 @@ namespace Gambit
         /// Getter for reader objects
         BaseBaseReader* get_reader(const std::string&);
 
+        /// Destruct printer/reader objects
+        void delete_stream(const std::string& = "");
+        void delete_reader(const std::string&);
+ 
         /// Instruct printers that scan has finished and to perform cleanup
         void finalise(bool abnormal=false);
 

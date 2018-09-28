@@ -259,46 +259,71 @@ scanner_plugin(postprocessor, version(2, 0, 0))
 
             done_chunks = get_done_points(*resume_reader);
 
-            std::cout << "Distributing information about remaining work to all processes..." << std::endl;
-            // TODO: I guess the reader object will not necessarily be destroyed here,
-            // so file handles etc may not be released.
-            // Not sure if that is going to cause problems or not...
-            // Might be an issue because we have to mess with the temp files when the run finishes.
-            // I think we can just 'delete' it (assuming it knows how to destruct itself properly), 
-            // but the PrinterManager object won't know
-            // that we did this. So it will segfault if we try to access this reader again.
-            // Ideally need to add functions to PrinterManager for deleting readers and printers.
-            delete resume_reader;
+            // Delete the reader object
+            get_printer().delete_reader("done_points");
+
+            std::cout << "Distributing information about remaining work to all processes..." << std::endl; 
         }
-
-        // Need to distribute these to all processes
-        // It is a bit hard to distribute them in one message, so we will do it
-        // one chunk at a time. Hopefully this isn't a big deal in terms of the
-        // delivery times. TODO: review this if startup is too slow.
-        for(ChunkSet::iterator chunk=done_chunks.begin();
-               chunk!=done_chunks.end(); ++chunk)
+ 
+        #ifdef WITH_MPI
+        if(numtasks>1)
         {
-            std::size_t chunkdata[3]; // Raw form of chunk information
-            chunkdata[0] = chunk->start;
-            chunkdata[1] = chunk->end;
-            chunkdata[2] = chunk->eff_length;
-   
-            ppComm.Bcast(chunkdata, 0); // Broadcast to all workers from master
+            // Need to distribute these to all processes
+            // It is a bit hard to distribute them in one message, so we will do it
+            // one chunk at a time. Hopefully this isn't a big deal in terms of the
+            // delivery times. TODO: review this if startup is too slow.
 
-            if(rank!=0)
+            // First tell all processes how many chunks to expect
+            std::size_t num_chunks;
+            if(rank==0) num_chunks = done_chunks.size();
+            ppComm.Bcast(num_chunks, 1, 0); // Broadcast to all workers from master
+
+            ChunkSet::iterator chunk=done_chunks.begin();
+            for(std::size_t i=0; i<num_chunks; i++)
             {
-               Chunk newchunk;
-               newchunk.start      = chunkdata[0];
-               newchunk.end        = chunkdata[1];
-               newchunk.eff_length = chunkdata[2];
-               done_chunks.insert(newchunk);
+                std::size_t chunkdata[3]; // Raw form of chunk information
+                if(rank==0)
+                {
+                   if(chunk!=done_chunks.end())
+                   {
+                      chunkdata[0] = chunk->start;
+                      chunkdata[1] = chunk->end;
+                      chunkdata[2] = chunk->eff_length;
+                      chunk++;
+                   } 
+                   else
+                   {
+                      std::ostringstream err;
+                      err << "Iterated past end of done_chunks!";
+                      scan_error().raise(LOCAL_INFO,err.str()); 
+                   }
+                }   
+
+                ppComm.Bcast(chunkdata, 3, 0); // Broadcast to all workers from master
+
+                if(rank!=0)
+                {
+                   Chunk newchunk;
+                   newchunk.start      = chunkdata[0];
+                   newchunk.end        = chunkdata[1];
+                   newchunk.eff_length = chunkdata[2];
+                   done_chunks.insert(newchunk);
+                }
             }
         }
+        #endif
 
         if(rank==0) 
         {
             std::cout << "Postprocessing resume analysis completed." << std::endl;
         }
+
+        std::cout << "Rank "<<rank<<" believes that the following chunks have already been processed:"<<std::endl;
+        for(auto chunk=done_chunks.begin(); chunk!=done_chunks.end(); ++chunk)
+        {
+           std::cout << "   "<<chunk->start<<" -> "<<chunk->end<<std::endl;
+        } 
+
     }
 
     // Tell the driver routine what points it can automatically skip
@@ -373,7 +398,7 @@ scanner_plugin(postprocessor, version(2, 0, 0))
 
             if(any_still_running)
             {
-               mychunk = Chunk(1,1); // Zero-length chunk; master doesn't process anything, but need to continue looping
+               mychunk = Chunk(1,1,0); // Zero-length chunk; master doesn't process anything, but need to continue looping
             }
             else
             {
@@ -392,7 +417,7 @@ scanner_plugin(postprocessor, version(2, 0, 0))
 
             // Receive the work assignment
             std::size_t chunkdata[3]; // Raw form of chunk information
-            std::cout<<"Rank "<<rank<<" receiveing message from Master "<<std::endl;
+            std::cout<<"Rank "<<rank<<" receiving message from Master "<<std::endl;
             ppComm.Recv(&chunkdata,3,0,request_work_tag);
 
             // Check if any work in the work assignment
@@ -403,10 +428,22 @@ scanner_plugin(postprocessor, version(2, 0, 0))
             mychunk.eff_length = chunkdata[2];
          }
        #else
-         // Compute new work for this one process.
-         mychunk = driver.get_new_chunk(); //TODO: Rewrite this function. Make sure to update done_chunks as we go.
+       // Compute new work for this one process.
+       if(quit_flag_seen)
+       {
+          // Send stop signal
+          newchunk = stopchunk;
+       } 
+       else
+       {
+          mychunk = driver.get_new_chunk(); 
+       }
        #endif
-       //std::cout << "Rank "<<rank<<": Chunk to process is ["<<mychunk.start<<", "<<mychunk.end<<"; eff_len="<<mychunk.eff_length<<"]"<<std::endl;
+
+       if((rank==0 and numtasks==1) or (rank!=0 and numtasks>1))
+       {
+          std::cout << "Rank "<<rank<<": Chunk to process is ["<<mychunk.start<<", "<<mychunk.end<<"; eff_len="<<mychunk.eff_length<<"]"<<std::endl;
+       }
 
        if(mychunk==stopchunk)
        {
@@ -464,6 +501,11 @@ scanner_plugin(postprocessor, version(2, 0, 0))
           // until the master process explicitly tells us to stop.
           // So do nothing until "continue_processing" flag gets set to false.
           quit_flag_seen = true;
+          if(rank==0 and numtasks==1)
+          {
+             // If we are the only process then just stop.
+             continue_processing = false;
+          }
        }
        else if(exit_code==2)
        {

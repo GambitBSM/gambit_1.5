@@ -748,7 +748,7 @@ namespace Gambit
 #ifdef WITH_MPI
         int resume_int = resume;
         myComm.Barrier();
-        myComm.Bcast(resume_int, 0);
+        myComm.Bcast(resume_int, 1, 0);
         resume = resume_int;
 
         if (resume)
