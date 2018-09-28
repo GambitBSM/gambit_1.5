@@ -1,3 +1,8 @@
+
+#include "gambit/cmake/cmake_variables.hpp"
+#ifndef EXCLUDE_ROOT
+#ifndef EXCLUDE_RESTFRAMES
+
 #include <vector>
 #include <cmath>
 #include <memory>
@@ -8,6 +13,9 @@
 #include "gambit/ColliderBit/ATLASEfficiencies.hpp"
 #include "gambit/ColliderBit/mt2_bisect.h"
 
+
+
+
 #include "RestFrames/RestFrames.hh"
 #include "TLorentzVector.h"
 
@@ -17,11 +25,9 @@ using namespace std;
 
    Based on code kindly supplied by Abhishek Sharma
 
-   Data numbers are made up for now to do some basic sanity checks.
-
    Note that use of ROOT is compulsory for the RestFrames package
 
-   Based on: arXiv link N/A at present
+   Based on: https://arxiv.org/pdf/1806.02293.pdf
   
    Code adapted by Martin White
 
@@ -65,8 +71,8 @@ namespace Gambit {
     
     
     class Analysis_ATLAS_13TeV_RJ3L_lowmass_36invfb : public HEPUtilsAnalysis {
-    private:
-
+    
+    protected:
       // Numbers passing cuts
       int _num2L2JHIGH;
       int _num2L2JINT;
@@ -76,7 +82,9 @@ namespace Gambit {
       int _num3LINT;
       int _num3LLOW;
       int _num3LCOMP;
-
+    
+    private:
+    
       vector<int> cutFlowVector;
       vector<string> cutFlowVector_str;
       int NCUTS; //=16;
@@ -272,286 +280,346 @@ namespace Gambit {
           cutFlowVector_str.push_back("");
         }
   
+
         // Recursive jigsaw stuff
-        LAB_2L2J.reset(new RestFrames::LabRecoFrame("LAB_2L2J","lab2L2J"));
-        C1N2_2L2J.reset(new RestFrames::DecayRecoFrame("C1N2_2L2J","#tilde{#chi}^{ #pm}_{1} #tilde{#chi}^{ 0}_{2}"));
-        C1a_2L2J.reset(new RestFrames::DecayRecoFrame("C1a_2L2J","#tilde{#chi}^{ #pm}_{1}"));
-        N2b_2L2J.reset(new RestFrames::DecayRecoFrame("N2b_2L2J","#tilde{#chi}^{ 0}_{2}"));
-        
-        Wa_2L2J.reset(new RestFrames::DecayRecoFrame("Wa_2L2J","W_{a}"));
-        Zb_2L2J.reset(new RestFrames::DecayRecoFrame("Zb_2L2J","Z_{b}"));
-        
-        J1_2L2J.reset(new RestFrames::VisibleRecoFrame("J1_2L2J","#it{j}_{1}"));
-        J2_2L2J.reset(new RestFrames::VisibleRecoFrame("J2_2L2J","#it{j}_{2}"));
-        L1_2L2J.reset(new RestFrames::VisibleRecoFrame("L1_2L2J","#it{l}_{1}"));
-        L2_2L2J.reset(new RestFrames::VisibleRecoFrame("L2_2L2J","#it{l}_{2}"));
-        
-        X1a_2L2J.reset(new RestFrames::InvisibleRecoFrame("X1a_2L2J","#tilde{#chi}^{ 0}_{1 a}"));
-        X1b_2L2J.reset(new RestFrames::InvisibleRecoFrame("X1b_2L2J","#tilde{#chi}^{ 0}_{1 b}"));
-  
-        LAB_2L2J->SetChildFrame(*C1N2_2L2J);
+        #pragma omp critical (init_ATLAS_13TeV_RJ3L_lowmass_36invfb)
+        {
 
-        C1N2_2L2J->AddChildFrame(*C1a_2L2J);
-        C1N2_2L2J->AddChildFrame(*N2b_2L2J);
+          // // DEBUG:
+          // RestFrames::SetLogPrint(RestFrames::LogDebug, true);
+          // RestFrames::SetLogPrint(RestFrames::LogVerbose, true);
 
-        C1a_2L2J->AddChildFrame(*Wa_2L2J);
-        C1a_2L2J->AddChildFrame(*X1a_2L2J);
-
-        N2b_2L2J->AddChildFrame(*Zb_2L2J);
-        N2b_2L2J->AddChildFrame(*X1b_2L2J);
-
-        Wa_2L2J->AddChildFrame(*J1_2L2J);
-        Wa_2L2J->AddChildFrame(*J2_2L2J);
-
-        Zb_2L2J->AddChildFrame(*L1_2L2J);
-        Zb_2L2J->AddChildFrame(*L2_2L2J);
-
-
-        if(LAB_2L2J->InitializeTree())
-          std::cout << "...2L2J Successfully initialized reconstruction trees" << std::endl;
-        else
-          std::cout << "...2L2J Failed initializing reconstruction trees" << std::endl;
-  
-  
-        //////////////////////////////
-        //Setting the invisible
-        //////////////////////////////
-        INV_2L2J.reset(new RestFrames::InvisibleGroup("INV_2L2J","#tilde{#chi}_{1}^{ 0} Jigsaws"));
-        INV_2L2J->AddFrame(*X1a_2L2J); 
-        INV_2L2J->AddFrame(*X1b_2L2J);
-
-        // Set di-LSP mass to minimum Lorentz-invariant expression
-        X1_mass_2L2J.reset(new RestFrames::SetMassInvJigsaw("X1_mass_2L2J", "Set M_{#tilde{#chi}_{1}^{ 0} #tilde{#chi}_{1}^{ 0}} to minimum"));
-        INV_2L2J->AddJigsaw(*X1_mass_2L2J);
-
-        // Set di-LSP rapidity to that of visible particles
-        X1_eta_2L2J.reset(new RestFrames::SetRapidityInvJigsaw("X1_eta_2L2J", "#eta_{#tilde{#chi}_{1}^{ 0} #tilde{#chi}_{1}^{ 0}} = #eta_{2jet+2#it{l}}"));
-        INV_2L2J->AddJigsaw(*X1_eta_2L2J);
-        X1_eta_2L2J->AddVisibleFrames(C1N2_2L2J->GetListVisibleFrames());
-
-
-        X1X1_contra_2L2J.reset(new RestFrames::ContraBoostInvJigsaw("X1X1_contra_2L2J","Contraboost invariant Jigsaw"));
-        INV_2L2J->AddJigsaw(*X1X1_contra_2L2J);
-        X1X1_contra_2L2J->AddVisibleFrames(C1a_2L2J->GetListVisibleFrames(), 0);
-        X1X1_contra_2L2J->AddVisibleFrames(N2b_2L2J->GetListVisibleFrames(), 1);
-        X1X1_contra_2L2J->AddInvisibleFrame(*X1a_2L2J, 0);
-        X1X1_contra_2L2J->AddInvisibleFrame(*X1b_2L2J, 1);
+          LAB_2L2J.reset(new RestFrames::LabRecoFrame("LAB_2L2J","lab2L2J"));
+          C1N2_2L2J.reset(new RestFrames::DecayRecoFrame("C1N2_2L2J","#tilde{#chi}^{ #pm}_{1} #tilde{#chi}^{ 0}_{2}"));
+          C1a_2L2J.reset(new RestFrames::DecayRecoFrame("C1a_2L2J","#tilde{#chi}^{ #pm}_{1}"));
+          N2b_2L2J.reset(new RestFrames::DecayRecoFrame("N2b_2L2J","#tilde{#chi}^{ 0}_{2}"));
           
-        LAB_2L2J->InitializeAnalysis(); 
+          Wa_2L2J.reset(new RestFrames::DecayRecoFrame("Wa_2L2J","W_{a}"));
+          Zb_2L2J.reset(new RestFrames::DecayRecoFrame("Zb_2L2J","Z_{b}"));
           
-        LAB_3L.reset(new RestFrames::LabRecoFrame("LAB_3L","lab"));
-        C1N2_3L.reset(new RestFrames::DecayRecoFrame("C1N2_3L","#tilde{#chi}^{ #pm}_{1} #tilde{#chi}^{ 0}_{2}"));
-        C1a_3L.reset(new RestFrames::DecayRecoFrame("C1a_3L","#tilde{#chi}^{ #pm}_{1}"));
-        N2b_3L.reset(new RestFrames::DecayRecoFrame("N2b_3L","#tilde{#chi}^{ 0}_{2}"));
+          J1_2L2J.reset(new RestFrames::VisibleRecoFrame("J1_2L2J","#it{j}_{1}"));
+          J2_2L2J.reset(new RestFrames::VisibleRecoFrame("J2_2L2J","#it{j}_{2}"));
+          L1_2L2J.reset(new RestFrames::VisibleRecoFrame("L1_2L2J","#it{l}_{1}"));
+          L2_2L2J.reset(new RestFrames::VisibleRecoFrame("L2_2L2J","#it{l}_{2}"));
+          
+          X1a_2L2J.reset(new RestFrames::InvisibleRecoFrame("X1a_2L2J","#tilde{#chi}^{ 0}_{1 a}"));
+          X1b_2L2J.reset(new RestFrames::InvisibleRecoFrame("X1b_2L2J","#tilde{#chi}^{ 0}_{1 b}"));
+    
+          LAB_2L2J->SetChildFrame(*C1N2_2L2J);
 
-        L1a_3L.reset(new RestFrames::VisibleRecoFrame("L1a_3L","#it{l}_{1a}"));
-        L1b_3L.reset(new RestFrames::VisibleRecoFrame("L1b_3L","#it{l}_{1b}"));
-        L2b_3L.reset(new RestFrames::VisibleRecoFrame("L2b_3L","#it{l}_{2b}"));
+          C1N2_2L2J->AddChildFrame(*C1a_2L2J);
+          C1N2_2L2J->AddChildFrame(*N2b_2L2J);
 
-        X1a_3L.reset(new RestFrames::InvisibleRecoFrame("X1a_3L","#tilde{#chi}^{ 0}_{1 a} + #nu_{a}"));
-        X1b_3L.reset(new RestFrames::InvisibleRecoFrame("X1b_3L","#tilde{#chi}^{ 0}_{1 b}"));
+          C1a_2L2J->AddChildFrame(*Wa_2L2J);
+          C1a_2L2J->AddChildFrame(*X1a_2L2J);
+
+          N2b_2L2J->AddChildFrame(*Zb_2L2J);
+          N2b_2L2J->AddChildFrame(*X1b_2L2J);
+
+          Wa_2L2J->AddChildFrame(*J1_2L2J);
+          Wa_2L2J->AddChildFrame(*J2_2L2J);
+
+          Zb_2L2J->AddChildFrame(*L1_2L2J);
+          Zb_2L2J->AddChildFrame(*L2_2L2J);
 
 
-        LAB_3L->SetChildFrame(*C1N2_3L);
+          if(!LAB_2L2J->InitializeTree())
+          {
+            str errmsg;
+            errmsg  = "Some problem occurred when calling LAB_2L2J->InitializeTree() from the Analysis_ATLAS_13TeV_RJ3L_lowmass_36invfb analysis class.\n";
+            piped_errors.request(LOCAL_INFO, errmsg);
+          }
 
-        C1N2_3L->AddChildFrame(*C1a_3L);
-        C1N2_3L->AddChildFrame(*N2b_3L);
+    
+          //////////////////////////////
+          //Setting the invisible
+          //////////////////////////////
+          INV_2L2J.reset(new RestFrames::InvisibleGroup("INV_2L2J","#tilde{#chi}_{1}^{ 0} Jigsaws"));
+          INV_2L2J->AddFrame(*X1a_2L2J); 
+          INV_2L2J->AddFrame(*X1b_2L2J);
 
-        C1a_3L->AddChildFrame(*L1a_3L);
-        C1a_3L->AddChildFrame(*X1a_3L);
+          // Set di-LSP mass to minimum Lorentz-invariant expression
+          X1_mass_2L2J.reset(new RestFrames::SetMassInvJigsaw("X1_mass_2L2J", "Set M_{#tilde{#chi}_{1}^{ 0} #tilde{#chi}_{1}^{ 0}} to minimum"));
+          INV_2L2J->AddJigsaw(*X1_mass_2L2J);
 
-        N2b_3L->AddChildFrame(*L1b_3L);
-        N2b_3L->AddChildFrame(*L2b_3L);
-        N2b_3L->AddChildFrame(*X1b_3L);
-  
-  
-        if(LAB_3L->InitializeTree())
-          std::cout << "...Contructor::3L Successfully initialized reconstruction trees" << std::endl;
-        else
-          std::cout << "...Constructor::3L Failed initializing reconstruction trees" << std::endl;
-        
-        //setting the invisible components
-        INV_3L.reset(new RestFrames::InvisibleGroup("INV_3L","Invisible system LSP mass Jigsaw"));
-        INV_3L->AddFrame(*X1a_3L); 
-        INV_3L->AddFrame(*X1b_3L);
-        
-        
-        // Set di-LSP mass to minimum Lorentz-invariant expression
-        X1_mass_3L.reset(new RestFrames::SetMassInvJigsaw("X1_mass_3L", "Set M_{#tilde{#chi}_{1}^{ 0} #tilde{#chi}_{1}^{ 0}} to minimum"));
-        INV_3L->AddJigsaw(*X1_mass_3L);
-        
-        // Set di-LSP rapidity to that of visible particles and neutrino
-        X1_eta_3L.reset(new RestFrames::SetRapidityInvJigsaw("X1_eta_3L", "#eta_{#tilde{#chi}_{1}^{ 0} #tilde{#chi}_{1}^{ 0}} = #eta_{3#it{l}}"));
-        INV_3L->AddJigsaw(*X1_eta_3L);
-        X1_eta_3L->AddVisibleFrames(C1N2_3L->GetListVisibleFrames());
-  
+          // Set di-LSP rapidity to that of visible particles
+          X1_eta_2L2J.reset(new RestFrames::SetRapidityInvJigsaw("X1_eta_2L2J", "#eta_{#tilde{#chi}_{1}^{ 0} #tilde{#chi}_{1}^{ 0}} = #eta_{2jet+2#it{l}}"));
+          INV_2L2J->AddJigsaw(*X1_eta_2L2J);
+          X1_eta_2L2J->AddVisibleFrames(C1N2_2L2J->GetListVisibleFrames());
 
-        X1X1_contra_3L.reset(new RestFrames::ContraBoostInvJigsaw("X1X1_contra_3L","Contraboost invariant Jigsaw"));
-        INV_3L->AddJigsaw(*X1X1_contra_3L);
-        X1X1_contra_3L->AddVisibleFrames(C1a_3L->GetListVisibleFrames(),0);
-        X1X1_contra_3L->AddVisibleFrames(N2b_3L->GetListVisibleFrames(),1);
-        X1X1_contra_3L->AddInvisibleFrames(C1a_3L->GetListInvisibleFrames(),0);
-        X1X1_contra_3L->AddInvisibleFrames(N2b_3L->GetListInvisibleFrames(),1);
-        
-        LAB_3L->InitializeAnalysis();
-  
-        /////////////////////////// INTERMEDIATE ///////////////////////////////////
-        // RestFrames stuff
-        
-        // combinatoric (transverse) tree
-        // for jet assignment
-        LAB_comb.reset(new RestFrames::LabRecoFrame("LAB_comb","LAB"));
-        CM_comb.reset(new RestFrames::DecayRecoFrame("CM_comb","CM"));
-        S_comb.reset(new RestFrames::DecayRecoFrame("S_comb","S"));
-        ISR_comb.reset(new RestFrames::VisibleRecoFrame("ISR_comb","ISR"));
-        J_comb.reset(new RestFrames::VisibleRecoFrame("J_comb","Jets"));
-        L_comb.reset(new RestFrames::VisibleRecoFrame("L_comb","#it{l}'s"));
-        I_comb.reset(new RestFrames::InvisibleRecoFrame("I_comb","Inv"));
-        //cout << "test 5" << endl;
-        LAB_comb->SetChildFrame(*CM_comb);
-        CM_comb->AddChildFrame(*ISR_comb);
-        CM_comb->AddChildFrame(*S_comb);
-        S_comb->AddChildFrame(*L_comb);
-        S_comb->AddChildFrame(*J_comb);
-        S_comb->AddChildFrame(*I_comb);
-        // cout << "test 6" << endl;
-        LAB_comb->InitializeTree();
-        // cout << "test 7" << endl;
-        // 2L+NJ tree (Z->ll + W/Z->qq)
-        LAB_2LNJ.reset(new RestFrames::LabRecoFrame("LAB_2LNJ","LAB"));
-        CM_2LNJ.reset(new RestFrames::DecayRecoFrame("CM_2LNJ","CM"));
-        S_2LNJ.reset(new RestFrames::DecayRecoFrame("S_2LNJ","S"));
-        ISR_2LNJ.reset(new RestFrames::VisibleRecoFrame("ISR_2LNJ","ISR"));
-        Ca_2LNJ.reset(new RestFrames::DecayRecoFrame("Ca_2LNJ","C_{a}"));
-        Z_2LNJ.reset(new RestFrames::DecayRecoFrame("Z_2LNJ","Z"));
-        L1_2LNJ.reset(new RestFrames::VisibleRecoFrame("L1_2LNJ","#it{l}_{1}"));
-        L2_2LNJ.reset(new RestFrames::VisibleRecoFrame("L2_2LNJ","#it{l}_{2}"));
-        Cb_2LNJ.reset(new RestFrames::DecayRecoFrame("Cb_2LNJ","C_{b}"));
-        JSA_2LNJ.reset(new RestFrames::SelfAssemblingRecoFrame("JSA_2LNJ", "J"));
-        J_2LNJ.reset(new RestFrames::VisibleRecoFrame("J_2LNJ","Jets"));
-        Ia_2LNJ.reset(new RestFrames::InvisibleRecoFrame("Ia_2LNJ","I_{a}"));
-        Ib_2LNJ.reset(new RestFrames::InvisibleRecoFrame("Ib_2LNJ","I_{b}"));
-  
-        LAB_2LNJ->SetChildFrame(*CM_2LNJ);
-        CM_2LNJ->AddChildFrame(*ISR_2LNJ);
-        CM_2LNJ->AddChildFrame(*S_2LNJ);
-        S_2LNJ->AddChildFrame(*Ca_2LNJ);
-        S_2LNJ->AddChildFrame(*Cb_2LNJ);
-        Ca_2LNJ->AddChildFrame(*Z_2LNJ);
-        Ca_2LNJ->AddChildFrame(*Ia_2LNJ);
-        Cb_2LNJ->AddChildFrame(*JSA_2LNJ);
-        Cb_2LNJ->AddChildFrame(*Ib_2LNJ);
-        Z_2LNJ->AddChildFrame(*L1_2LNJ);
-        Z_2LNJ->AddChildFrame(*L2_2LNJ);
-        JSA_2LNJ->AddChildFrame(*J_2LNJ);
-        
-        LAB_2LNJ->InitializeTree();
-  
-  
-        // 2L+1L tree (Z->ll + Z/W->l)
-        LAB_2L1L.reset(new RestFrames::LabRecoFrame("LAB_2L1L","LAB"));
-        CM_2L1L.reset(new RestFrames::DecayRecoFrame("CM_2L1L","CM"));
-        S_2L1L.reset(new RestFrames::DecayRecoFrame("S_2L1L","S"));
-        ISR_2L1L.reset(new RestFrames::VisibleRecoFrame("ISR_2L1L","ISR"));
-        Ca_2L1L.reset(new RestFrames::DecayRecoFrame("Ca_2L1L","C_{a}"));
-        Z_2L1L.reset(new RestFrames::DecayRecoFrame("Z_2L1L","Z"));
-        L1_2L1L.reset(new RestFrames::VisibleRecoFrame("L1_2L1L","#it{l}_{1}"));
-        L2_2L1L.reset(new RestFrames::VisibleRecoFrame("L2_2L1L","#it{l}_{2}"));
-        Cb_2L1L.reset(new RestFrames::DecayRecoFrame("Cb_2L1L","C_{b}"));
-        Lb_2L1L.reset(new RestFrames::VisibleRecoFrame("Lb_2L1L","#it{l}_{b}"));
-        Ia_2L1L.reset(new RestFrames::InvisibleRecoFrame("Ia_2L1L","I_{a}"));
-        Ib_2L1L.reset(new RestFrames::InvisibleRecoFrame("Ia_2L1L","I_{b}"));
-        
-        LAB_2L1L->SetChildFrame(*CM_2L1L);
-        CM_2L1L->AddChildFrame(*ISR_2L1L);
-        CM_2L1L->AddChildFrame(*S_2L1L);
-        S_2L1L->AddChildFrame(*Ca_2L1L);
-        S_2L1L->AddChildFrame(*Cb_2L1L);
-        Ca_2L1L->AddChildFrame(*Z_2L1L);
-        Ca_2L1L->AddChildFrame(*Ia_2L1L);
-        Z_2L1L->AddChildFrame(*L1_2L1L);
-        Z_2L1L->AddChildFrame(*L2_2L1L);
-        Cb_2L1L->AddChildFrame(*Lb_2L1L);
-        Cb_2L1L->AddChildFrame(*Ib_2L1L);
-        
-        LAB_2L1L->InitializeTree();
 
-        ////////////// Jigsaw rules set-up /////////////////
-        
-        // combinatoric (transverse) tree
-        // for jet assignment
-        INV_comb.reset(new RestFrames::InvisibleGroup("INV_comb","Invisible System"));
-        INV_comb->AddFrame(*I_comb);
-        
-        InvMass_comb.reset(new RestFrames::SetMassInvJigsaw("InvMass_comb", "Invisible system mass Jigsaw"));
-        INV_comb->AddJigsaw(*InvMass_comb);
-        
-        JETS_comb.reset(new RestFrames::CombinatoricGroup("JETS_comb","Jets System"));
-        JETS_comb->AddFrame(*ISR_comb);
-        JETS_comb->SetNElementsForFrame(*ISR_comb, 1);
-        JETS_comb->AddFrame(*J_comb);
-        JETS_comb->SetNElementsForFrame(*J_comb, 0);
-        
-        SplitJETS_comb.reset(new RestFrames::MinMassesCombJigsaw("SplitJETS_comb", "Minimize M_{ISR} and M_{S} Jigsaw"));
-        JETS_comb->AddJigsaw(*SplitJETS_comb);
-        SplitJETS_comb->AddCombFrame(*ISR_comb, 0);
-        SplitJETS_comb->AddCombFrame(*J_comb, 1);
-        SplitJETS_comb->AddObjectFrame(*ISR_comb,0);
-        SplitJETS_comb->AddObjectFrame(*S_comb,1);
-        
-        if(!LAB_comb->InitializeAnalysis()){
-          cout << "Problem initializing \"comb\" analysis" << endl;
+          X1X1_contra_2L2J.reset(new RestFrames::ContraBoostInvJigsaw("X1X1_contra_2L2J","Contraboost invariant Jigsaw"));
+          INV_2L2J->AddJigsaw(*X1X1_contra_2L2J);
+          X1X1_contra_2L2J->AddVisibleFrames(C1a_2L2J->GetListVisibleFrames(), 0);
+          X1X1_contra_2L2J->AddVisibleFrames(N2b_2L2J->GetListVisibleFrames(), 1);
+          X1X1_contra_2L2J->AddInvisibleFrame(*X1a_2L2J, 0);
+          X1X1_contra_2L2J->AddInvisibleFrame(*X1b_2L2J, 1);
+            
+          if(!LAB_2L2J->InitializeAnalysis())
+          {
+            str errmsg;
+            errmsg  = "Some problem occurred when calling LAB_2L2J->InitializeAnalysis() from the Analysis_ATLAS_13TeV_RJ3L_lowmass_36invfb analysis class.\n";
+            piped_errors.request(LOCAL_INFO, errmsg);
+          }
+
+
+          LAB_3L.reset(new RestFrames::LabRecoFrame("LAB_3L","lab"));
+          C1N2_3L.reset(new RestFrames::DecayRecoFrame("C1N2_3L","#tilde{#chi}^{ #pm}_{1} #tilde{#chi}^{ 0}_{2}"));
+          C1a_3L.reset(new RestFrames::DecayRecoFrame("C1a_3L","#tilde{#chi}^{ #pm}_{1}"));
+          N2b_3L.reset(new RestFrames::DecayRecoFrame("N2b_3L","#tilde{#chi}^{ 0}_{2}"));
+
+          L1a_3L.reset(new RestFrames::VisibleRecoFrame("L1a_3L","#it{l}_{1a}"));
+          L1b_3L.reset(new RestFrames::VisibleRecoFrame("L1b_3L","#it{l}_{1b}"));
+          L2b_3L.reset(new RestFrames::VisibleRecoFrame("L2b_3L","#it{l}_{2b}"));
+
+          X1a_3L.reset(new RestFrames::InvisibleRecoFrame("X1a_3L","#tilde{#chi}^{ 0}_{1 a} + #nu_{a}"));
+          X1b_3L.reset(new RestFrames::InvisibleRecoFrame("X1b_3L","#tilde{#chi}^{ 0}_{1 b}"));
+
+
+          LAB_3L->SetChildFrame(*C1N2_3L);
+
+          C1N2_3L->AddChildFrame(*C1a_3L);
+          C1N2_3L->AddChildFrame(*N2b_3L);
+
+          C1a_3L->AddChildFrame(*L1a_3L);
+          C1a_3L->AddChildFrame(*X1a_3L);
+
+          N2b_3L->AddChildFrame(*L1b_3L);
+          N2b_3L->AddChildFrame(*L2b_3L);
+          N2b_3L->AddChildFrame(*X1b_3L);
+    
+    
+          if(!LAB_3L->InitializeTree())
+          {
+            str errmsg;
+            errmsg  = "Some problem occurred when calling LAB_3L->InitializeTree() from the Analysis_ATLAS_13TeV_RJ3L_lowmass_36invfb analysis class.\n";
+            piped_errors.request(LOCAL_INFO, errmsg);
+          }
+
+         
+          //setting the invisible components
+          INV_3L.reset(new RestFrames::InvisibleGroup("INV_3L","Invisible system LSP mass Jigsaw"));
+          INV_3L->AddFrame(*X1a_3L); 
+          INV_3L->AddFrame(*X1b_3L);
+          
+          
+          // Set di-LSP mass to minimum Lorentz-invariant expression
+          X1_mass_3L.reset(new RestFrames::SetMassInvJigsaw("X1_mass_3L", "Set M_{#tilde{#chi}_{1}^{ 0} #tilde{#chi}_{1}^{ 0}} to minimum"));
+          INV_3L->AddJigsaw(*X1_mass_3L);
+          
+          // Set di-LSP rapidity to that of visible particles and neutrino
+          X1_eta_3L.reset(new RestFrames::SetRapidityInvJigsaw("X1_eta_3L", "#eta_{#tilde{#chi}_{1}^{ 0} #tilde{#chi}_{1}^{ 0}} = #eta_{3#it{l}}"));
+          INV_3L->AddJigsaw(*X1_eta_3L);
+          X1_eta_3L->AddVisibleFrames(C1N2_3L->GetListVisibleFrames());
+    
+
+          X1X1_contra_3L.reset(new RestFrames::ContraBoostInvJigsaw("X1X1_contra_3L","Contraboost invariant Jigsaw"));
+          INV_3L->AddJigsaw(*X1X1_contra_3L);
+          X1X1_contra_3L->AddVisibleFrames(C1a_3L->GetListVisibleFrames(),0);
+          X1X1_contra_3L->AddVisibleFrames(N2b_3L->GetListVisibleFrames(),1);
+          X1X1_contra_3L->AddInvisibleFrames(C1a_3L->GetListInvisibleFrames(),0);
+          X1X1_contra_3L->AddInvisibleFrames(N2b_3L->GetListInvisibleFrames(),1);
+          
+          if(!LAB_3L->InitializeAnalysis())
+          {
+            str errmsg;
+            errmsg  = "Some problem occurred when calling LAB_3L->InitializeAnalysis() from the Analysis_ATLAS_13TeV_RJ3L_lowmass_36invfb analysis class.\n";
+            piped_errors.request(LOCAL_INFO, errmsg);
+          }
+
+    
+          /////////////////////////// INTERMEDIATE ///////////////////////////////////
+          // RestFrames stuff
+          
+          // combinatoric (transverse) tree
+          // for jet assignment
+          LAB_comb.reset(new RestFrames::LabRecoFrame("LAB_comb","LAB"));
+          CM_comb.reset(new RestFrames::DecayRecoFrame("CM_comb","CM"));
+          S_comb.reset(new RestFrames::DecayRecoFrame("S_comb","S"));
+          ISR_comb.reset(new RestFrames::VisibleRecoFrame("ISR_comb","ISR"));
+          J_comb.reset(new RestFrames::VisibleRecoFrame("J_comb","Jets"));
+          L_comb.reset(new RestFrames::VisibleRecoFrame("L_comb","#it{l}'s"));
+          I_comb.reset(new RestFrames::InvisibleRecoFrame("I_comb","Inv"));
+
+          LAB_comb->SetChildFrame(*CM_comb);
+          CM_comb->AddChildFrame(*ISR_comb);
+          CM_comb->AddChildFrame(*S_comb);
+          S_comb->AddChildFrame(*L_comb);
+          S_comb->AddChildFrame(*J_comb);
+          S_comb->AddChildFrame(*I_comb);
+
+          if(!LAB_comb->InitializeTree())
+          {
+            str errmsg;
+            errmsg  = "Some problem occurred when calling LAB_comb->InitializeTree() from the Analysis_ATLAS_13TeV_RJ3L_lowmass_36invfb analysis class.\n";
+            piped_errors.request(LOCAL_INFO, errmsg);
+          }
+
+          // 2L+NJ tree (Z->ll + W/Z->qq)
+          LAB_2LNJ.reset(new RestFrames::LabRecoFrame("LAB_2LNJ","LAB"));
+          CM_2LNJ.reset(new RestFrames::DecayRecoFrame("CM_2LNJ","CM"));
+          S_2LNJ.reset(new RestFrames::DecayRecoFrame("S_2LNJ","S"));
+          ISR_2LNJ.reset(new RestFrames::VisibleRecoFrame("ISR_2LNJ","ISR"));
+          Ca_2LNJ.reset(new RestFrames::DecayRecoFrame("Ca_2LNJ","C_{a}"));
+          Z_2LNJ.reset(new RestFrames::DecayRecoFrame("Z_2LNJ","Z"));
+          L1_2LNJ.reset(new RestFrames::VisibleRecoFrame("L1_2LNJ","#it{l}_{1}"));
+          L2_2LNJ.reset(new RestFrames::VisibleRecoFrame("L2_2LNJ","#it{l}_{2}"));
+          Cb_2LNJ.reset(new RestFrames::DecayRecoFrame("Cb_2LNJ","C_{b}"));
+          JSA_2LNJ.reset(new RestFrames::SelfAssemblingRecoFrame("JSA_2LNJ", "J"));
+          J_2LNJ.reset(new RestFrames::VisibleRecoFrame("J_2LNJ","Jets"));
+          Ia_2LNJ.reset(new RestFrames::InvisibleRecoFrame("Ia_2LNJ","I_{a}"));
+          Ib_2LNJ.reset(new RestFrames::InvisibleRecoFrame("Ib_2LNJ","I_{b}"));
+    
+          LAB_2LNJ->SetChildFrame(*CM_2LNJ);
+          CM_2LNJ->AddChildFrame(*ISR_2LNJ);
+          CM_2LNJ->AddChildFrame(*S_2LNJ);
+          S_2LNJ->AddChildFrame(*Ca_2LNJ);
+          S_2LNJ->AddChildFrame(*Cb_2LNJ);
+          Ca_2LNJ->AddChildFrame(*Z_2LNJ);
+          Ca_2LNJ->AddChildFrame(*Ia_2LNJ);
+          Cb_2LNJ->AddChildFrame(*JSA_2LNJ);
+          Cb_2LNJ->AddChildFrame(*Ib_2LNJ);
+          Z_2LNJ->AddChildFrame(*L1_2LNJ);
+          Z_2LNJ->AddChildFrame(*L2_2LNJ);
+          JSA_2LNJ->AddChildFrame(*J_2LNJ);
+          
+          if(!LAB_2LNJ->InitializeTree())
+          {
+            str errmsg;
+            errmsg  = "Some problem occurred when calling LAB_2LNJ->InitializeTree() from the Analysis_ATLAS_13TeV_RJ3L_lowmass_36invfb analysis class.\n";
+            piped_errors.request(LOCAL_INFO, errmsg);
+          }
+
+    
+          // 2L+1L tree (Z->ll + Z/W->l)
+          LAB_2L1L.reset(new RestFrames::LabRecoFrame("LAB_2L1L","LAB"));
+          CM_2L1L.reset(new RestFrames::DecayRecoFrame("CM_2L1L","CM"));
+          S_2L1L.reset(new RestFrames::DecayRecoFrame("S_2L1L","S"));
+          ISR_2L1L.reset(new RestFrames::VisibleRecoFrame("ISR_2L1L","ISR"));
+          Ca_2L1L.reset(new RestFrames::DecayRecoFrame("Ca_2L1L","C_{a}"));
+          Z_2L1L.reset(new RestFrames::DecayRecoFrame("Z_2L1L","Z"));
+          L1_2L1L.reset(new RestFrames::VisibleRecoFrame("L1_2L1L","#it{l}_{1}"));
+          L2_2L1L.reset(new RestFrames::VisibleRecoFrame("L2_2L1L","#it{l}_{2}"));
+          Cb_2L1L.reset(new RestFrames::DecayRecoFrame("Cb_2L1L","C_{b}"));
+          Lb_2L1L.reset(new RestFrames::VisibleRecoFrame("Lb_2L1L","#it{l}_{b}"));
+          Ia_2L1L.reset(new RestFrames::InvisibleRecoFrame("Ia_2L1L","I_{a}"));
+          Ib_2L1L.reset(new RestFrames::InvisibleRecoFrame("Ia_2L1L","I_{b}"));
+          
+          LAB_2L1L->SetChildFrame(*CM_2L1L);
+          CM_2L1L->AddChildFrame(*ISR_2L1L);
+          CM_2L1L->AddChildFrame(*S_2L1L);
+          S_2L1L->AddChildFrame(*Ca_2L1L);
+          S_2L1L->AddChildFrame(*Cb_2L1L);
+          Ca_2L1L->AddChildFrame(*Z_2L1L);
+          Ca_2L1L->AddChildFrame(*Ia_2L1L);
+          Z_2L1L->AddChildFrame(*L1_2L1L);
+          Z_2L1L->AddChildFrame(*L2_2L1L);
+          Cb_2L1L->AddChildFrame(*Lb_2L1L);
+          Cb_2L1L->AddChildFrame(*Ib_2L1L);
+          
+          if(!LAB_2L1L->InitializeTree())
+          {
+            str errmsg;
+            errmsg  = "Some problem occurred when calling LAB_2L1L->InitializeTree() from the Analysis_ATLAS_13TeV_RJ3L_lowmass_36invfb analysis class.\n";
+            piped_errors.request(LOCAL_INFO, errmsg);
+          }
+
+
+          ////////////// Jigsaw rules set-up /////////////////
+          
+          // combinatoric (transverse) tree
+          // for jet assignment
+          INV_comb.reset(new RestFrames::InvisibleGroup("INV_comb","Invisible System"));
+          INV_comb->AddFrame(*I_comb);
+          
+          InvMass_comb.reset(new RestFrames::SetMassInvJigsaw("InvMass_comb", "Invisible system mass Jigsaw"));
+          INV_comb->AddJigsaw(*InvMass_comb);
+          
+          JETS_comb.reset(new RestFrames::CombinatoricGroup("JETS_comb","Jets System"));
+          JETS_comb->AddFrame(*ISR_comb);
+          JETS_comb->SetNElementsForFrame(*ISR_comb, 1);
+          JETS_comb->AddFrame(*J_comb);
+          JETS_comb->SetNElementsForFrame(*J_comb, 0);
+          
+          SplitJETS_comb.reset(new RestFrames::MinMassesCombJigsaw("SplitJETS_comb", "Minimize M_{ISR} and M_{S} Jigsaw"));
+          JETS_comb->AddJigsaw(*SplitJETS_comb);
+          SplitJETS_comb->AddCombFrame(*ISR_comb, 0);
+          SplitJETS_comb->AddCombFrame(*J_comb, 1);
+          SplitJETS_comb->AddObjectFrame(*ISR_comb,0);
+          SplitJETS_comb->AddObjectFrame(*S_comb,1);
+          
+          if(!LAB_comb->InitializeAnalysis())
+          {
+            str errmsg;
+            errmsg  = "Some problem occurred when calling LAB_comb->InitializeAnalysis() from the Analysis_ATLAS_13TeV_RJ3L_lowmass_36invfb analysis class.\n";
+            piped_errors.request(LOCAL_INFO, errmsg);
+          }
+          
+          // 2L+NJ tree (Z->ll + W/Z->qq)
+          INV_2LNJ.reset(new RestFrames::InvisibleGroup("INV_2LNJ","Invisible System"));
+          INV_2LNJ->AddFrame(*Ia_2LNJ);
+          INV_2LNJ->AddFrame(*Ib_2LNJ);
+          
+          InvMass_2LNJ.reset(new RestFrames::SetMassInvJigsaw("InvMass_2LNJ", "Invisible system mass Jigsaw"));
+          INV_2LNJ->AddJigsaw(*InvMass_2LNJ);
+          InvRapidity_2LNJ.reset(new RestFrames::SetRapidityInvJigsaw("InvRapidity_2LNJ", "Set inv. system rapidity"));
+          INV_2LNJ->AddJigsaw(*InvRapidity_2LNJ);
+          InvRapidity_2LNJ->AddVisibleFrames(S_2LNJ->GetListVisibleFrames());
+          SplitINV_2LNJ.reset(new RestFrames::ContraBoostInvJigsaw("SplitINV_2LNJ", "INV -> I_{a}+ I_{b} jigsaw"));
+          INV_2LNJ->AddJigsaw(*SplitINV_2LNJ);
+          SplitINV_2LNJ->AddVisibleFrames(Ca_2LNJ->GetListVisibleFrames(), 0);
+          SplitINV_2LNJ->AddVisibleFrames(Cb_2LNJ->GetListVisibleFrames(), 1);
+          SplitINV_2LNJ->AddInvisibleFrame(*Ia_2LNJ, 0);
+          SplitINV_2LNJ->AddInvisibleFrame(*Ib_2LNJ, 1);
+          
+          JETS_2LNJ.reset(new RestFrames::CombinatoricGroup("JETS_comb","Jets System"));
+          JETS_2LNJ->AddFrame(*J_2LNJ);
+          JETS_2LNJ->SetNElementsForFrame(*J_2LNJ, 0);
+          
+          if(!LAB_2LNJ->InitializeAnalysis())
+          {
+            str errmsg;
+            errmsg  = "Some problem occurred when calling LAB_2LNJ->InitializeAnalysis() from the Analysis_ATLAS_13TeV_RJ3L_lowmass_36invfb analysis class.\n";
+            piped_errors.request(LOCAL_INFO, errmsg);
+          }
+
+          // 2L+1L tree (Z->ll + Z/W->l)
+          INV_2L1L.reset(new RestFrames::InvisibleGroup("INV_2L1L","Invisible System"));
+          INV_2L1L->AddFrame(*Ia_2L1L);
+          INV_2L1L->AddFrame(*Ib_2L1L);
+          
+          InvMass_2L1L.reset(new RestFrames::SetMassInvJigsaw("InvMass_2L1L", "Invisible system mass Jigsaw"));
+          INV_2L1L->AddJigsaw(*InvMass_2L1L);
+          InvRapidity_2L1L.reset(new RestFrames::SetRapidityInvJigsaw("InvRapidity_2L1L", "Set inv. system rapidity"));
+          INV_2L1L->AddJigsaw(*InvRapidity_2L1L);
+          InvRapidity_2L1L->AddVisibleFrames(S_2L1L->GetListVisibleFrames());
+          SplitINV_2L1L.reset(new RestFrames::ContraBoostInvJigsaw("SplitINV_2L1L", "INV -> I_{a}+ I_{b} jigsaw"));
+          INV_2L1L->AddJigsaw(*SplitINV_2L1L);
+          SplitINV_2L1L->AddVisibleFrames(Ca_2L1L->GetListVisibleFrames(), 0);
+          SplitINV_2L1L->AddVisibleFrames(Cb_2L1L->GetListVisibleFrames(), 1);
+          SplitINV_2L1L->AddInvisibleFrame(*Ia_2L1L, 0);
+          SplitINV_2L1L->AddInvisibleFrame(*Ib_2L1L, 1);
+          
+          if(!LAB_2L1L->InitializeAnalysis())
+          {
+            str errmsg;
+            errmsg  = "Some problem occurred when calling LAB_2L1L->InitializeAnalysis() from the Analysis_ATLAS_13TeV_RJ3L_lowmass_36invfb analysis class.\n";
+            piped_errors.request(LOCAL_INFO, errmsg);
+          }
+ 
         }
-        
-        // 2L+NJ tree (Z->ll + W/Z->qq)
-        INV_2LNJ.reset(new RestFrames::InvisibleGroup("INV_2LNJ","Invisible System"));
-        INV_2LNJ->AddFrame(*Ia_2LNJ);
-        INV_2LNJ->AddFrame(*Ib_2LNJ);
-        
-        InvMass_2LNJ.reset(new RestFrames::SetMassInvJigsaw("InvMass_2LNJ", "Invisible system mass Jigsaw"));
-        INV_2LNJ->AddJigsaw(*InvMass_2LNJ);
-        InvRapidity_2LNJ.reset(new RestFrames::SetRapidityInvJigsaw("InvRapidity_2LNJ", "Set inv. system rapidity"));
-        INV_2LNJ->AddJigsaw(*InvRapidity_2LNJ);
-        InvRapidity_2LNJ->AddVisibleFrames(S_2LNJ->GetListVisibleFrames());
-        SplitINV_2LNJ.reset(new RestFrames::ContraBoostInvJigsaw("SplitINV_2LNJ", "INV -> I_{a}+ I_{b} jigsaw"));
-        INV_2LNJ->AddJigsaw(*SplitINV_2LNJ);
-        SplitINV_2LNJ->AddVisibleFrames(Ca_2LNJ->GetListVisibleFrames(), 0);
-        SplitINV_2LNJ->AddVisibleFrames(Cb_2LNJ->GetListVisibleFrames(), 1);
-        SplitINV_2LNJ->AddInvisibleFrame(*Ia_2LNJ, 0);
-        SplitINV_2LNJ->AddInvisibleFrame(*Ib_2LNJ, 1);
-        
-        JETS_2LNJ.reset(new RestFrames::CombinatoricGroup("JETS_comb","Jets System"));
-        JETS_2LNJ->AddFrame(*J_2LNJ);
-        JETS_2LNJ->SetNElementsForFrame(*J_2LNJ, 0);
-        
-        if(!LAB_2LNJ->InitializeAnalysis()){
-          cout << "Problem initializing \"2LNJ\" analysis" << endl;
-        }
-        // 2L+1L tree (Z->ll + Z/W->l)
-        INV_2L1L.reset(new RestFrames::InvisibleGroup("INV_2L1L","Invisible System"));
-        INV_2L1L->AddFrame(*Ia_2L1L);
-        INV_2L1L->AddFrame(*Ib_2L1L);
-        
-        InvMass_2L1L.reset(new RestFrames::SetMassInvJigsaw("InvMass_2L1L", "Invisible system mass Jigsaw"));
-        INV_2L1L->AddJigsaw(*InvMass_2L1L);
-        InvRapidity_2L1L.reset(new RestFrames::SetRapidityInvJigsaw("InvRapidity_2L1L", "Set inv. system rapidity"));
-        INV_2L1L->AddJigsaw(*InvRapidity_2L1L);
-        InvRapidity_2L1L->AddVisibleFrames(S_2L1L->GetListVisibleFrames());
-        SplitINV_2L1L.reset(new RestFrames::ContraBoostInvJigsaw("SplitINV_2L1L", "INV -> I_{a}+ I_{b} jigsaw"));
-        INV_2L1L->AddJigsaw(*SplitINV_2L1L);
-        SplitINV_2L1L->AddVisibleFrames(Ca_2L1L->GetListVisibleFrames(), 0);
-        SplitINV_2L1L->AddVisibleFrames(Cb_2L1L->GetListVisibleFrames(), 1);
-        SplitINV_2L1L->AddInvisibleFrame(*Ia_2L1L, 0);
-        SplitINV_2L1L->AddInvisibleFrame(*Ib_2L1L, 1);
-        
-        if(!LAB_2L1L->InitializeAnalysis()){
-          cout << "Problem initializing \"2L1L\" analysis" << endl;
-        }
-  
       }
       
 
       void analyze(const HEPUtils::Event* event) {
+
+        // Clear 
+        LAB_2L2J->ClearEvent();
+        LAB_comb->ClearEvent();
+        LAB_2LNJ->ClearEvent();
+        LAB_2L1L->ClearEvent();
+        LAB_3L->ClearEvent();
+
 
         HEPUtilsAnalysis::analyze(event);
 
@@ -597,7 +665,7 @@ namespace Gambit {
         HEPUtils::BinnedFn2D<double> _eff2d(a,b,c);
         for (HEPUtils::Jet* jet : event->jets()) {
           bool hasTag=has_tag(_eff2d, jet->eta(), jet->pT());
-          if (jet->pT() > 20. && fabs(jet->eta()) < 4.5) {
+          if (jet->pT() > 20. && fabs(jet->eta()) < 2.4) {
             if(jet->btag() && hasTag && fabs(jet->eta()) < 2.4 && jet->pT() > 20.){
               bJets.push_back(jet);
             } else {
@@ -978,7 +1046,7 @@ namespace Gambit {
         //else return;
   
         if(m_is2Lep && m_nJets>1 ) m_is2Lep2Jet = true; 
-        if(m_is2Lep && m_nJets>2 ) m_is2L2JInt = true;
+        if(m_is2Lep && m_nJets>2 && m_nJets<5) m_is2L2JInt = true;
         if(m_is3Lep && m_nJets>0 ) m_is3LInt = true;
         // if(m_is3Lep && m_nJets>1)  m_is3Lep2Jet = true; //
         // if(m_is3Lep && m_nJets>2)  m_is3Lep3Jet = true; //
@@ -1026,10 +1094,8 @@ namespace Gambit {
 
         if(m_is2Lep2Jet)
         {
-          //Creating the Lab Frame
-          LAB_2L2J->ClearEvent();
       
-          if(myLeptons[0].first.Pt()<25.0 || myLeptons[1].first.Pt()<25.0) return;
+          // if(myLeptons[0].first.Pt()<25.0 || myLeptons[1].first.Pt()<25.0) return;
       
           //Setting the Standard Variables
           //Di-Lepton System:
@@ -1162,7 +1228,17 @@ namespace Gambit {
           //////////////////////////////////////////////////
           //Lotentz vectors have been set, now do the boosts
           //////////////////////////////////////////////////
-          LAB_2L2J->AnalyzeEvent();                               //analyze the event
+
+          // Analyze the event
+          if(!LAB_2L2J->AnalyzeEvent())
+          {
+            str errmsg;
+            errmsg  = "Some problem occurred when calling LAB_2L2J->AnalyzeEvent() from the Analysis_ATLAS_13TeV_RJ3L_lowmass_36invfb analysis class.\n";
+            piped_warnings.request(LOCAL_INFO, errmsg);
+            return;
+          }
+
+
           //cout << L1_2L2J->GetFourVector(*LAB_2L2J).Pt() << endl;
           if (L1_2L2J->GetFourVector(*LAB_2L2J).Pt() > L2_2L2J->GetFourVector(*LAB_2L2J).Pt()){
             // m_Zlep1Pt = L1_2L2J->GetFourVector(*LAB_2L2J).Pt();
@@ -1405,7 +1481,14 @@ namespace Gambit {
             L1b_3L->SetLabFrameFourVector(Leptons[1]); // Set lepton1 from Z
             L2b_3L->SetLabFrameFourVector(Leptons[2]); // Set lepton2 from Z
 
-            if(!LAB_3L->AnalyzeEvent()) cout << "FillEvent:: Something went wrong..." << endl;
+            if(!LAB_3L->AnalyzeEvent())
+            {
+              str errmsg;
+              errmsg  = "Some problem occurred when calling LAB_3L->AnalyzeEvent() from the Analysis_ATLAS_13TeV_RJ3L_lowmass_36invfb analysis class.\n";
+              piped_warnings.request(LOCAL_INFO, errmsg);
+              return;
+            }
+
             
             TLorentzVector l1;
             TLorentzVector l2;
@@ -1531,7 +1614,6 @@ namespace Gambit {
           m_minDphi = mindphi;//cleaning variable for missmeasured jets;
           //if( fabs(mindphi)<0.4) return;
           
-          LAB_comb->ClearEvent();
 
       
           vector<RestFrames::RFKey> jetID;
@@ -1554,8 +1636,14 @@ namespace Gambit {
           L_comb->SetLabFrameFourVector(lepSys);
     
           INV_comb->SetLabFrameThreeVector(ETMiss);
+
           if(!LAB_comb->AnalyzeEvent())
-            cout << "Something went wrong with \"INTERMEDIATE\" tree event analysis" << endl;
+          {
+            str errmsg;
+            errmsg  = "Some problem occurred when calling LAB_comb->AnalyzeEvent() from the Analysis_ATLAS_13TeV_RJ3L_lowmass_36invfb analysis class.\n";
+            piped_warnings.request(LOCAL_INFO, errmsg);
+            return;
+          }
 
           for(int i = 0; i < int(signalJets.size()); i++){
             if(JETS_comb->GetFrame(jetID[i]) == *J_comb){
@@ -1569,7 +1657,6 @@ namespace Gambit {
 
           // 2LNJ analysis
           if(m_is2L2JInt){
-            LAB_2LNJ->ClearEvent();
       
             // put jets in their place
             int NJ = jetID.size();
@@ -1591,12 +1678,17 @@ namespace Gambit {
             INV_2LNJ->SetLabFrameThreeVector(ETMiss);
       
             if(!LAB_2LNJ->AnalyzeEvent())
-              cout << "Something went wrong with \"2LNJ\" tree event analysis" << endl;
+            {
+              str errmsg;
+              errmsg  = "Some problem occurred when calling LAB_2LNJ->AnalyzeEvent() from the Analysis_ATLAS_13TeV_RJ3L_lowmass_36invfb analysis class.\n";
+              piped_warnings.request(LOCAL_INFO, errmsg);
+              return;
+            }
+
           }
 
           // 2L1L analysis
           if(m_is3LInt){
-            LAB_2L1L->ClearEvent();
       
             // put jets in their place
             int NJ = jetID.size();
@@ -1642,7 +1734,13 @@ namespace Gambit {
             INV_2L1L->SetLabFrameThreeVector(ETMiss);
       
             if(!LAB_2L1L->AnalyzeEvent())
-              cout << "Something went wrong with \"2L1L\" tree event analysis" << endl;
+            {
+              str errmsg;
+              errmsg  = "Some problem occurred when calling LAB_2L1L->AnalyzeEvent() from the Analysis_ATLAS_13TeV_RJ3L_lowmass_36invfb analysis class.\n";
+              piped_warnings.request(LOCAL_INFO, errmsg);
+              return;
+            }
+
           }
     
           TLorentzVector vP_CM;
@@ -1903,21 +2001,21 @@ namespace Gambit {
           cutFlowVector_str[34] = "2L2JCOMP: p_IT ";
           cutFlowVector_str[35] = "2L2JCOMP: pT_CM ";*/
 
-          (j==28 && m_is2L2JInt && m_lept1sign*m_lept2sign<0 && abs(m_lept1sign)==abs(m_lept2sign) && m_lept1Pt>25. && m_lept2Pt>25. && m_jet1Pt>30. && m_jet2Pt>30. && signalBJets.size()==0 && m_NjS==2 && m_NjISR<3) ||
+          (j==28 && m_is2L2JInt && m_lept1sign*m_lept2sign<0 && abs(m_lept1sign)==abs(m_lept2sign) && m_lept1Pt>25. && m_lept2Pt>25. && m_jet1Pt>30. && m_jet2Pt>30. && signalBJets.size()==0 && m_NjS==2 && m_NjISR>0) ||
 
-          (j==29 && m_is2L2JInt && m_lept1sign*m_lept2sign<0 && abs(m_lept1sign)==abs(m_lept2sign) && m_lept1Pt>25. && m_lept2Pt>25. && m_jet1Pt>30. && m_jet2Pt>30. && signalBJets.size()==0 && m_NjS==2 && m_NjISR<3 && m_MZ>80. && m_MZ<100.) ||
+          (j==29 && m_is2L2JInt && m_lept1sign*m_lept2sign<0 && abs(m_lept1sign)==abs(m_lept2sign) && m_lept1Pt>25. && m_lept2Pt>25. && m_jet1Pt>30. && m_jet2Pt>30. && signalBJets.size()==0 && m_NjS==2 && m_NjISR>0 && m_MZ>80. && m_MZ<100.) ||
 
-          (j==30 && m_is2L2JInt && m_lept1sign*m_lept2sign<0 && abs(m_lept1sign)==abs(m_lept2sign) && m_lept1Pt>25. && m_lept2Pt>25. && m_jet1Pt>30. && m_jet2Pt>30. && signalBJets.size()==0 && m_NjS==2 && m_NjISR<3 && m_MZ>80. && m_MZ<100. && m_MJ>50. && m_MJ<110.) ||
+          (j==30 && m_is2L2JInt && m_lept1sign*m_lept2sign<0 && abs(m_lept1sign)==abs(m_lept2sign) && m_lept1Pt>25. && m_lept2Pt>25. && m_jet1Pt>30. && m_jet2Pt>30. && signalBJets.size()==0 && m_NjS==2 && m_NjISR>0 && m_MZ>80. && m_MZ<100. && m_MJ>50. && m_MJ<110.) ||
 
-          (j==31 && m_is2L2JInt && m_lept1sign*m_lept2sign<0 && abs(m_lept1sign)==abs(m_lept2sign) && m_lept1Pt>25. && m_lept2Pt>25. && m_jet1Pt>30. && m_jet2Pt>30. && signalBJets.size()==0 && m_NjS==2 && m_NjISR<3 && m_MZ>80. && m_MZ<100. && m_MJ>50. && m_MJ<110. && m_dphiISRI>2.8) ||
+          (j==31 && m_is2L2JInt && m_lept1sign*m_lept2sign<0 && abs(m_lept1sign)==abs(m_lept2sign) && m_lept1Pt>25. && m_lept2Pt>25. && m_jet1Pt>30. && m_jet2Pt>30. && signalBJets.size()==0 && m_NjS==2 && m_NjISR>0 && m_MZ>80. && m_MZ<100. && m_MJ>50. && m_MJ<110. && m_dphiISRI>2.8) ||
 
-          (j==32 && m_is2L2JInt && m_lept1sign*m_lept2sign<0 && abs(m_lept1sign)==abs(m_lept2sign) && m_lept1Pt>25. && m_lept2Pt>25. && m_jet1Pt>30. && m_jet2Pt>30. && signalBJets.size()==0 && m_NjS==2 && m_NjISR<3 && m_MZ>80. && m_MZ<100. && m_MJ>50. && m_MJ<110. && m_dphiISRI>2.8 && m_RISR > 0.40 && m_RISR < 0.75 ) ||
+          (j==32 && m_is2L2JInt && m_lept1sign*m_lept2sign<0 && abs(m_lept1sign)==abs(m_lept2sign) && m_lept1Pt>25. && m_lept2Pt>25. && m_jet1Pt>30. && m_jet2Pt>30. && signalBJets.size()==0 && m_NjS==2 && m_NjISR>0 && m_MZ>80. && m_MZ<100. && m_MJ>50. && m_MJ<110. && m_dphiISRI>2.8 && m_RISR > 0.40 && m_RISR < 0.75 ) ||
 
-          (j==33 && m_is2L2JInt && m_lept1sign*m_lept2sign<0 && abs(m_lept1sign)==abs(m_lept2sign) && m_lept1Pt>25. && m_lept2Pt>25. && m_jet1Pt>30. && m_jet2Pt>30. && signalBJets.size()==0 && m_NjS==2 && m_NjISR<3 && m_MZ>80. && m_MZ<100. && m_MJ>50. && m_MJ<110. && m_dphiISRI>2.8 && m_RISR > 0.40 && m_RISR < 0.75  &&  m_PTISR > 180.) ||
+          (j==33 && m_is2L2JInt && m_lept1sign*m_lept2sign<0 && abs(m_lept1sign)==abs(m_lept2sign) && m_lept1Pt>25. && m_lept2Pt>25. && m_jet1Pt>30. && m_jet2Pt>30. && signalBJets.size()==0 && m_NjS==2 && m_NjISR>0 && m_MZ>80. && m_MZ<100. && m_MJ>50. && m_MJ<110. && m_dphiISRI>2.8 && m_RISR > 0.40 && m_RISR < 0.75  &&  m_PTISR > 180.) ||
 
-          (j==34 && m_is2L2JInt && m_lept1sign*m_lept2sign<0 && abs(m_lept1sign)==abs(m_lept2sign) && m_lept1Pt>25. && m_lept2Pt>25. && m_jet1Pt>30. && m_jet2Pt>30. && signalBJets.size()==0 && m_NjS==2 && m_NjISR<3 && m_MZ>80. && m_MZ<100. && m_MJ>50. && m_MJ<110. && m_dphiISRI>2.8 && m_RISR > 0.40 && m_RISR < 0.75  &&  m_PTISR > 180. && m_PTI > 100.) ||
+          (j==34 && m_is2L2JInt && m_lept1sign*m_lept2sign<0 && abs(m_lept1sign)==abs(m_lept2sign) && m_lept1Pt>25. && m_lept2Pt>25. && m_jet1Pt>30. && m_jet2Pt>30. && signalBJets.size()==0 && m_NjS==2 && m_NjISR>0 && m_MZ>80. && m_MZ<100. && m_MJ>50. && m_MJ<110. && m_dphiISRI>2.8 && m_RISR > 0.40 && m_RISR < 0.75  &&  m_PTISR > 180. && m_PTI > 100.) ||
 
-          (j==35 && m_is2L2JInt && m_lept1sign*m_lept2sign<0 && abs(m_lept1sign)==abs(m_lept2sign) && m_lept1Pt>25. && m_lept2Pt>25. && m_jet1Pt>30. && m_jet2Pt>30. && signalBJets.size()==0 && m_NjS==2 && m_NjISR<3 && m_MZ>80. && m_MZ<100. && m_MJ>50. && m_MJ<110. && m_dphiISRI>2.8 && m_RISR > 0.40 && m_RISR < 0.75  &&  m_PTISR > 180. && m_PTI > 100. && m_PTCM < 20.) ||
+          (j==35 && m_is2L2JInt && m_lept1sign*m_lept2sign<0 && abs(m_lept1sign)==abs(m_lept2sign) && m_lept1Pt>25. && m_lept2Pt>25. && m_jet1Pt>30. && m_jet2Pt>30. && signalBJets.size()==0 && m_NjS==2 && m_NjISR>0 && m_MZ>80. && m_MZ<100. && m_MJ>50. && m_MJ<110. && m_dphiISRI>2.8 && m_RISR > 0.40 && m_RISR < 0.75  &&  m_PTISR > 180. && m_PTI > 100. && m_PTCM < 20.) ||
 
 
           /* cutFlowVector_str[36] = "3LHIGH: Preselection ";
@@ -1952,21 +2050,21 @@ namespace Gambit {
           cutFlowVector_str[49] = "3LCOMP: p_IT ";
           cutFlowVector_str[50] = "3LCOMP: pT_CM ";*/
 
-          (j==43 && m_is3Lep && (((m_lept1sign*m_lept2sign<0 && abs(m_lept1sign)==abs(m_lept2sign)) || (m_lept1sign*m_lept3sign<0 && abs(m_lept1sign)==abs(m_lept3sign)) || (m_lept2sign*m_lept3sign<0 && abs(m_lept2sign)==abs(m_lept3sign)))) && m_lept1Pt>60. && m_lept2Pt>50. && m_lept3Pt>30. && signalBJets.size()==0 && signalJets.size()<3) ||
+          (j==43 && m_is3LInt && ((m_lept1sign*m_lept2sign<0 && abs(m_lept1sign)==abs(m_lept2sign)) || (m_lept1sign*m_lept3sign<0 && abs(m_lept1sign)==abs(m_lept3sign)) || (m_lept2sign*m_lept3sign<0 && abs(m_lept2sign)==abs(m_lept3sign))) && m_lept1Pt>25. && m_lept2Pt>25. && m_lept3Pt>20. && signalBJets.size()==0 && signalJets.size()<4) ||
 
-          (j==44 && m_is3Lep && (((m_lept1sign*m_lept2sign<0 && abs(m_lept1sign)==abs(m_lept2sign)) || (m_lept1sign*m_lept3sign<0 && abs(m_lept1sign)==abs(m_lept3sign)) || (m_lept2sign*m_lept3sign<0 && abs(m_lept2sign)==abs(m_lept3sign)))) && m_lept1Pt>60. && m_lept2Pt>50. && m_lept3Pt>30. && signalBJets.size()==0 && signalJets.size()<3 && m_mll>75. && m_mll<105.) ||
+          (j==44 && m_is3LInt && (((m_lept1sign*m_lept2sign<0 && abs(m_lept1sign)==abs(m_lept2sign)) || (m_lept1sign*m_lept3sign<0 && abs(m_lept1sign)==abs(m_lept3sign)) || (m_lept2sign*m_lept3sign<0 && abs(m_lept2sign)==abs(m_lept3sign)))) && m_lept1Pt>25. && m_lept2Pt>25. && m_lept3Pt>20. && signalBJets.size()==0 && signalJets.size()<4 && m_mll>75. && m_mll<105.) ||
 
-          (j==45 && m_is3Lep && (((m_lept1sign*m_lept2sign<0 && abs(m_lept1sign)==abs(m_lept2sign)) || (m_lept1sign*m_lept3sign<0 && abs(m_lept1sign)==abs(m_lept3sign)) || (m_lept2sign*m_lept3sign<0 && abs(m_lept2sign)==abs(m_lept3sign)))) && m_lept1Pt>60. && m_lept2Pt>50. && m_lept3Pt>30. && signalBJets.size()==0 && signalJets.size()<3 && m_mll>75. && m_mll<105. && m_mTW>100.) ||
+          (j==45 && m_is3LInt && (((m_lept1sign*m_lept2sign<0 && abs(m_lept1sign)==abs(m_lept2sign)) || (m_lept1sign*m_lept3sign<0 && abs(m_lept1sign)==abs(m_lept3sign)) || (m_lept2sign*m_lept3sign<0 && abs(m_lept2sign)==abs(m_lept3sign)))) && m_lept1Pt>25. && m_lept2Pt>25. && m_lept3Pt>20. && signalBJets.size()==0 && signalJets.size()<4 && m_mll>75. && m_mll<105. && m_mTW>100.) ||
 
-          (j==46 && m_is3Lep && (((m_lept1sign*m_lept2sign<0 && abs(m_lept1sign)==abs(m_lept2sign)) || (m_lept1sign*m_lept3sign<0 && abs(m_lept1sign)==abs(m_lept3sign)) || (m_lept2sign*m_lept3sign<0 && abs(m_lept2sign)==abs(m_lept3sign)))) && m_lept1Pt>60. && m_lept2Pt>50. && m_lept3Pt>30. && signalBJets.size()==0 && signalJets.size()<3 && m_mll>75. && m_mll<105. && m_mTW>100. && m_dphiISRI>2.0) ||
+          (j==46 && m_is3LInt && (((m_lept1sign*m_lept2sign<0 && abs(m_lept1sign)==abs(m_lept2sign)) || (m_lept1sign*m_lept3sign<0 && abs(m_lept1sign)==abs(m_lept3sign)) || (m_lept2sign*m_lept3sign<0 && abs(m_lept2sign)==abs(m_lept3sign)))) && m_lept1Pt>25. && m_lept2Pt>25. && m_lept3Pt>20. && signalBJets.size()==0 && signalJets.size()<4 && m_mll>75. && m_mll<105. && m_mTW>100. && m_dphiISRI>2.0) ||
 
-          (j==47 && m_is3Lep && (((m_lept1sign*m_lept2sign<0 && abs(m_lept1sign)==abs(m_lept2sign)) || (m_lept1sign*m_lept3sign<0 && abs(m_lept1sign)==abs(m_lept3sign)) || (m_lept2sign*m_lept3sign<0 && abs(m_lept2sign)==abs(m_lept3sign)))) && m_lept1Pt>60. && m_lept2Pt>50. && m_lept3Pt>30. && signalBJets.size()==0 && signalJets.size()<3 && m_mll>75. && m_mll<105. && m_mTW>100. && m_dphiISRI>2.0 && m_RISR>0.55 && m_RISR<1.0) ||
+          (j==47 && m_is3LInt && (((m_lept1sign*m_lept2sign<0 && abs(m_lept1sign)==abs(m_lept2sign)) || (m_lept1sign*m_lept3sign<0 && abs(m_lept1sign)==abs(m_lept3sign)) || (m_lept2sign*m_lept3sign<0 && abs(m_lept2sign)==abs(m_lept3sign)))) && m_lept1Pt>25. && m_lept2Pt>25. && m_lept3Pt>20. && signalBJets.size()==0 && signalJets.size()<4 && m_mll>75. && m_mll<105. && m_mTW>100. && m_dphiISRI>2.0 && m_RISR>0.55 && m_RISR<1.0) ||
 
-          (j==48 && m_is3Lep && (((m_lept1sign*m_lept2sign<0 && abs(m_lept1sign)==abs(m_lept2sign)) || (m_lept1sign*m_lept3sign<0 && abs(m_lept1sign)==abs(m_lept3sign)) || (m_lept2sign*m_lept3sign<0 && abs(m_lept2sign)==abs(m_lept3sign)))) && m_lept1Pt>60. && m_lept2Pt>50. && m_lept3Pt>30. && signalBJets.size()==0 && signalJets.size()<3 && m_mll>75. && m_mll<105. && m_mTW>100. && m_dphiISRI>2.0 && m_RISR>0.55 && m_RISR<1.0 &&  m_PTISR>100.) ||
+          (j==48 && m_is3LInt && (((m_lept1sign*m_lept2sign<0 && abs(m_lept1sign)==abs(m_lept2sign)) || (m_lept1sign*m_lept3sign<0 && abs(m_lept1sign)==abs(m_lept3sign)) || (m_lept2sign*m_lept3sign<0 && abs(m_lept2sign)==abs(m_lept3sign)))) && m_lept1Pt>25. && m_lept2Pt>25. && m_lept3Pt>20. && signalBJets.size()==0 && signalJets.size()<4 && m_mll>75. && m_mll<105. && m_mTW>100. && m_dphiISRI>2.0 && m_RISR>0.55 && m_RISR<1.0 &&  m_PTISR>100.) ||
 
-          (j==49 && m_is3Lep && (((m_lept1sign*m_lept2sign<0 && abs(m_lept1sign)==abs(m_lept2sign)) || (m_lept1sign*m_lept3sign<0 && abs(m_lept1sign)==abs(m_lept3sign)) || (m_lept2sign*m_lept3sign<0 && abs(m_lept2sign)==abs(m_lept3sign)))) && m_lept1Pt>60. && m_lept2Pt>50. && m_lept3Pt>30. && signalBJets.size()==0 && signalJets.size()<3 && m_mll>75. && m_mll<105. && m_mTW>100. && m_dphiISRI>2.0 && m_RISR>0.55 && m_RISR<1.0 &&  m_PTISR>100. && m_PTI>80.) ||
+          (j==49 && m_is3LInt && (((m_lept1sign*m_lept2sign<0 && abs(m_lept1sign)==abs(m_lept2sign)) || (m_lept1sign*m_lept3sign<0 && abs(m_lept1sign)==abs(m_lept3sign)) || (m_lept2sign*m_lept3sign<0 && abs(m_lept2sign)==abs(m_lept3sign)))) && m_lept1Pt>25. && m_lept2Pt>25. && m_lept3Pt>20. && signalBJets.size()==0 && signalJets.size()<4 && m_mll>75. && m_mll<105. && m_mTW>100. && m_dphiISRI>2.0 && m_RISR>0.55 && m_RISR<1.0 &&  m_PTISR>100. && m_PTI>80.) ||
 
-          (j==50 && m_is3Lep && (((m_lept1sign*m_lept2sign<0 && abs(m_lept1sign)==abs(m_lept2sign)) || (m_lept1sign*m_lept3sign<0 && abs(m_lept1sign)==abs(m_lept3sign)) || (m_lept2sign*m_lept3sign<0 && abs(m_lept2sign)==abs(m_lept3sign)))) && m_lept1Pt>60. && m_lept2Pt>50. && m_lept3Pt>30. && signalBJets.size()==0 && signalJets.size()<3 && m_mll>75. && m_mll<105. && m_mTW>100. && m_dphiISRI>2.0 && m_RISR>0.55 && m_RISR<1.0 &&  m_PTISR>100. && m_PTI>80. && m_PTCM<25.) ||
+          (j==50 && m_is3LInt && (((m_lept1sign*m_lept2sign<0 && abs(m_lept1sign)==abs(m_lept2sign)) || (m_lept1sign*m_lept3sign<0 && abs(m_lept1sign)==abs(m_lept3sign)) || (m_lept2sign*m_lept3sign<0 && abs(m_lept2sign)==abs(m_lept3sign)))) && m_lept1Pt>25. && m_lept2Pt>25. && m_lept3Pt>20. && signalBJets.size()==0 && signalJets.size()<4 && m_mll>75. && m_mll<105. && m_mTW>100. && m_dphiISRI>2.0 && m_RISR>0.55 && m_RISR<1.0 &&  m_PTISR>100. && m_PTI>80. && m_PTCM<25.) ||
 
           /* cutFlowVector_str[51] = "3LINT: Preselection ";
           cutFlowVector_str[52] = "3LINT: mll ";
@@ -2002,7 +2100,7 @@ namespace Gambit {
 
         if(m_is2Lep2Jet && m_lept1sign*m_lept2sign<0 && abs(m_lept1sign)==abs(m_lept2sign) && m_lept1Pt>25. && m_lept2Pt>25. && m_jet1Pt>30. && m_jet2Pt>30. && signalBJets.size()==0 && signalJets.size()==2 && m_mll>80. && m_mll<100. && m_mjj>70. && m_mjj<90. && m_H2PP/m_H5PP>0.35 && m_H2PP/m_H5PP<0.6 && m_RPT_HT5PP<0.05 && m_minDphi>2.4 && m_H5PP>400.)_num2L2JLOW++;
 
-        if(m_is2L2JInt && m_lept1sign*m_lept2sign<0 && abs(m_lept1sign)==abs(m_lept2sign) && m_lept1Pt>25. && m_lept2Pt>25. && m_jet1Pt>30. && m_jet2Pt>30. && signalBJets.size()==0 && m_NjS==2 && m_NjISR<3 && m_MZ>80. && m_MZ<100. &&  m_MJ>50. && m_MJ<110. && m_dphiISRI>2.8 && m_RISR > 0.40 && m_RISR < 0.75 && m_PTISR > 180. && m_PTI > 100. && m_PTCM < 20.)_num2L2JCOMP++;
+        if(m_is2L2JInt && m_lept1sign*m_lept2sign<0 && abs(m_lept1sign)==abs(m_lept2sign) && m_lept1Pt>25. && m_lept2Pt>25. && m_jet1Pt>30. && m_jet2Pt>30. && signalBJets.size()==0 && m_NjS==2 && m_NjISR>0 && m_MZ>80. && m_MZ<100. &&  m_MJ>50. && m_MJ<110. && m_dphiISRI>2.8 && m_RISR > 0.40 && m_RISR < 0.75 && m_PTISR > 180. && m_PTI > 100. && m_PTCM < 20.)_num2L2JCOMP++;
 
         if(m_is3Lep && (((m_lept1sign*m_lept2sign<0 && abs(m_lept1sign)==abs(m_lept2sign)) || (m_lept1sign*m_lept3sign<0 && abs(m_lept1sign)==abs(m_lept3sign)) || (m_lept2sign*m_lept3sign<0 && abs(m_lept2sign)==abs(m_lept3sign)))) && m_lept1Pt>60. && m_lept2Pt>60. && m_lept3Pt>40. && signalBJets.size()==0 && signalJets.size()<3 && m_mll>75. && m_mll<105. && m_mTW>150. && m_HT4PP/m_H4PP > 0.75 && m_R_minH2P_minH3P>0.8 && m_H4PP > 550. && m_RPT_HT4PP < 0.2)_num3LHIGH++;
 
@@ -2036,41 +2134,32 @@ namespace Gambit {
       }
 
 
-      void collect_results() {
+      virtual void collect_results() {
+/*
+          double scale_by=1.;
+          cout << "------------------------------------------------------------------------------------------------------------------------------ "<<endl;
+          cout << "CUT FLOW: ATLAS 13 TeV 3 lep low mass RJ signal region "<<endl;
+          cout << "------------------------------------------------------------------------------------------------------------------------------"<<endl;
+          cout << right << setw(40) << "CUT" << setw(20) << "RAW" << setw(20) << "SCALED"
+               << setw(20) << "%" << setw(20) << "clean adj RAW"<< setw(20) << "clean adj %" << endl;
+          for (int j=0; j<NCUTS; j++) {
+            cout << right << setw(40) << cutFlowVector_str[j].c_str() << setw(20)
+                 << cutFlowVector[j] << setw(20) << cutFlowVector[j]*scale_by << setw(20)
+                 << 100.*cutFlowVector[j]/cutFlowVector[0] << "%" << setw(20)
+                 << cutFlowVector[j]*scale_by << setw(20) << 100.*cutFlowVector[j]/cutFlowVector[0]<< "%" << endl;
+          }
+          cout << "------------------------------------------------------------------------------------------------------------------------------ "<<endl;
+*/
+        // add_result(SignalRegionData("SR label", n_obs, {s, s_sys}, {b, b_sys}));
+        add_result(SignalRegionData("2L2JHIGH", 0,  {_num2L2JHIGH,  0.}, {1.9, 0.8}));     
+        add_result(SignalRegionData("2L2JINT",  1,  {_num2L2JINT,   0.}, {2.4, 0.9})); 
+        add_result(SignalRegionData("2L2JLOW",  19, {_num2L2JLOW,   0.}, {8.4, 5.8})); 
+        add_result(SignalRegionData("2L2JCOMP", 11, {_num2L2JCOMP,  0.}, {2.7, 2.7}));     
+        add_result(SignalRegionData("3LHIGH",   2,  {_num3LHIGH,    0.}, {1.1, 0.5})); 
+        add_result(SignalRegionData("3LINT",    1,  {_num3LINT,     0.}, {2.3, 0.5})); 
+        add_result(SignalRegionData("3LLOW",    20, {_num3LLOW,     0.}, {10., 2.0})); 
+        add_result(SignalRegionData("3LCOMP",   12, {_num3LCOMP,    0.}, {3.9, 1.0})); 
 
-        // double scale_by=1.;
-        // cout << "------------------------------------------------------------------------------------------------------------------------------ "<<endl;
-        // cout << "CUT FLOW: ATLAS 13 TeV 3 lep low mass RJ signal region "<<endl;
-        // cout << "------------------------------------------------------------------------------------------------------------------------------"<<endl;
-        // cout << right << setw(40) << "CUT" << setw(20) << "RAW" << setw(20) << "SCALED"
-        //      << setw(20) << "%" << setw(20) << "clean adj RAW"<< setw(20) << "clean adj %" << endl;
-        // for (int j=0; j<NCUTS; j++) {
-        //   cout << right << setw(40) << cutFlowVector_str[j].c_str() << setw(20)
-        //        << cutFlowVector[j] << setw(20) << cutFlowVector[j]*scale_by << setw(20)
-        //        << 100.*cutFlowVector[j]/cutFlowVector[0] << "%" << setw(20)
-        //        << cutFlowVector[j]*scale_by << setw(20) << 100.*cutFlowVector[j]/cutFlowVector[0]<< "%" << endl;
-        // }
-        // cout << "------------------------------------------------------------------------------------------------------------------------------ "<<endl;
-
-        /// Register results objects with the results for each SR; obs & bkg numbers from the paper
-
-        /*int _numSRA_TT, _numSRA_TW, _numSRA_T0;
-        int _numSRB_TT, _numSRB_TW, _numSRB_T0;
-        int _numSRC1, _numSRC2, _numSRC3, _numSRC4, _numSRC5;
-        int _numSRD_low, _numSRD_high, _numSRE;*/
-  
-        add_result(SignalRegionData("3LLOW", 20, {_num3LLOW,  0.}, {10.31, 1.96}));     
-  
-        /*SignalRegionData results_SRA_TT;
-        results_SRA_TT.sr_label = "SRA_TT";
-        results_SRA_TT.n_observed = 11.;
-        results_SRA_TT.n_background = 15.8;
-        results_SRA_TT.background_sys = 1.9;
-        results_SRA_TT.signal_sys = 0.;
-        results_SRA_TT.n_signal = _numSRA1;
-
-        add_result(results_SRA_TT);*/
-   
         return;
       }
 
@@ -2093,6 +2182,45 @@ namespace Gambit {
 
     DEFINE_ANALYSIS_FACTORY(ATLAS_13TeV_RJ3L_lowmass_36invfb)
 
+
+    // 
+    // Derived analysis class for the RJ3L_lowmass SRs
+    // 
+    class Analysis_ATLAS_13TeV_RJ3L_2Lep2Jets_36invfb : public Analysis_ATLAS_13TeV_RJ3L_lowmass_36invfb {
+    public:
+      Analysis_ATLAS_13TeV_RJ3L_2Lep2Jets_36invfb() {
+        set_analysis_name("ATLAS_13TeV_RJ3L_2Lep2Jets_36invfb");
+      }
+      virtual void collect_results() {
+        add_result(SignalRegionData("2L2JHIGH", 0,  {_num2L2JHIGH,  0.}, {1.9, 0.8}));     
+        add_result(SignalRegionData("2L2JINT",  1,  {_num2L2JINT,   0.}, {2.4, 0.9})); 
+        add_result(SignalRegionData("2L2JLOW",  19, {_num2L2JLOW,   0.}, {8.4, 5.8})); 
+        add_result(SignalRegionData("2L2JCOMP", 11, {_num2L2JCOMP,  0.}, {2.7, 2.7}));    
+      }
+
+    };
+    // Factory fn
+    DEFINE_ANALYSIS_FACTORY(ATLAS_13TeV_RJ3L_2Lep2Jets_36invfb)
+    
+    class Analysis_ATLAS_13TeV_RJ3L_3Lep_36invfb : public Analysis_ATLAS_13TeV_RJ3L_lowmass_36invfb {
+    public:
+      Analysis_ATLAS_13TeV_RJ3L_3Lep_36invfb() {
+        set_analysis_name("ATLAS_13TeV_RJ3L_3Lep_36invfb");
+      }
+      virtual void collect_results() {
+        add_result(SignalRegionData("3LHIGH",   2,  {_num3LHIGH,    0.}, {1.1, 0.5})); 
+        add_result(SignalRegionData("3LINT",    1,  {_num3LINT,     0.}, {2.3, 0.5})); 
+        add_result(SignalRegionData("3LLOW",    20, {_num3LLOW,     0.}, {10., 2.0})); 
+        add_result(SignalRegionData("3LCOMP",   12, {_num3LCOMP,    0.}, {3.9, 1.0}));   
+      }
+
+    };
+    // Factory fn
+    DEFINE_ANALYSIS_FACTORY(ATLAS_13TeV_RJ3L_3Lep_36invfb)
+
+
   } // end namespace ColliderBit
 } // end namespace Gambit
 
+#endif
+#endif

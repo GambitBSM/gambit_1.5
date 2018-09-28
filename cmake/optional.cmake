@@ -21,6 +21,10 @@
 #          (benjamin.farmer@fysik.su.se)
 #  \date 2015 May
 #
+#  \author Will Handley
+#          (wh260@cam.ac.uk)
+#  \date 2018 May
+#
 #************************************************
 
 # Check for MPI libraries; disable manually with "cmake -DMPI=OFF .."
@@ -71,6 +75,32 @@ if(MPI)
   else()
     message("${BoldRed}   Missing Fortran MPI installation.  Fortran scanners will not be MPI-enabled.${ColourReset}")
   endif()
+
+    # Do things for C++ backends and scanners
+  if(MPI_CXX_FOUND)
+    if(MPI_C_FOUND)
+      message("${BoldYellow}-- MPI C++ libraries found. C++ scanners will be MPI-enabled.${ColourReset}")
+      # Includes
+      foreach(dir ${MPI_CXX_INCLUDE_PATH})
+        set(GAMBIT_MPI_CXX_INC "${GAMBIT_MPI_CXX_INC} -I${dir}")
+      endforeach()
+      string(STRIP "${GAMBIT_MPI_CXX_INC}" GAMBIT_MPI_CXX_INC)
+      set(GAMBIT_CXX_FLAGS_PLUS_MPI "${MPI_CXX_COMPILE_FLAGS} ${GAMBIT_CXX_FLAGS} -DMPI ${GAMBIT_MPI_CXX_INC}")
+      string(STRIP "${GAMBIT_CXX_FLAGS_PLUS_MPI}" GAMBIT_CXX_FLAGS_PLUS_MPI)
+      # Libraries
+      foreach(lib ${MPI_CXX_LIBRARIES})
+        set(GAMBIT_MPI_CXX_LIB "${GAMBIT_MPI_CXX_LIB} ${lib}")
+      endforeach()
+      if (NOT ${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
+        set(GAMBIT_MPI_CXX_LIB "-Wl,--no-as-needed ${GAMBIT_MPI_CXX_LIB}")
+      endif()
+      string(STRIP "${GAMBIT_MPI_CXX_LIB}" GAMBIT_MPI_CXX_LIB)
+      set(CMAKE_CXX_MPI_SO_LINK_FLAGS "${MPI_CXX_LINK_FLAGS} ${GAMBIT_MPI_F_LIB}")
+      string(STRIP "${CMAKE_CXX_MPI_SO_LINK_FLAGS}" CMAKE_CXX_MPI_SO_LINK_FLAGS)
+    endif()
+  else()
+    message("${BoldRed}   Missing C++ MPI installation.  C++ scanners will not be MPI-enabled.${ColourReset}")
+  endif()
 else()
   message("${BoldCyan} X MPI manually disabled. Executables will not be parallelised via MPI.${ColourReset}")
 endif()
@@ -113,18 +143,39 @@ endif()
 unset(ROOT_CONFIG_EXECUTABLE CACHE)
 find_package(ROOT)
 if (NOT ROOT_FOUND OR ROOT_VERSION VERSION_GREATER 6)
-  # Excluding Delphes and GreAT from GAMBIT
+  # Excluding GreAT, Delphes and RestFrames from GAMBIT
   if (NOT ROOT_FOUND)
-    message("${BoldRed}   No ROOT installation found. Excluding Delphes and GreAT from GAMBIT configuration. ${ColourReset}")
+    message("${BoldRed}   No ROOT installation found. Excluding GreAT, Delphes and RestFrames from GAMBIT configuration. ${ColourReset}")
+    set (EXCLUDE_ROOT TRUE)
+    set (EXCLUDE_DELPHES TRUE)
+    set (itch "${itch}" "Delphes" "great" "RestFrames")
     set (itch "${itch}" "Delphes" "great")
   else()
     message("${BoldRed}   Unsupported ROOT version found: ${ROOT_VERSION}. Delphes needs ROOT 5. Excluding Delphes from GAMBIT configuration. ${ColourReset}")
     set (itch "${itch}" "Delphes")
     set (ROOT_6_OR_LATER_FOUND 1)
     include_directories(${ROOT_INCLUDE_DIR})
+    set (EXCLUDE_ROOT FALSE)
   endif()
 else()
   include_directories(${ROOT_INCLUDE_DIR})
+  set (EXCLUDE_ROOT FALSE)
+endif()
+
+# If ROOT was found, check for RestFrames. Else, exlude it.
+if(ROOT_FOUND)
+  find_package(RestFrames)
+  if(RestFrames_FOUND)
+    message("-- Found RestFrames library ${RestFrames_LIBRARY}.")
+    set(EXCLUDE_RESTFRAMES FALSE)
+  else()
+    message("-- RestFrames not found. RestFrames-dependent analyses in ColliderBit will be deactivated.")
+    message("   To install RestFrames, run 'make restframes'.")
+    set(EXCLUDE_RESTFRAMES TRUE)
+  endif()
+else()
+    message("-- RestFrames-dependent analyses in ColliderBit will be deactivated since ROOT was not found.")
+    set (EXCLUDE_RESTFRAMES TRUE)
 endif()
 
 # Check for HDF5 libraries
@@ -140,3 +191,4 @@ else()
   message("${BoldRed}   No HDF5 C libraries found. Excluding hdf5printer and hdf5reader from GAMBIT configuration.${ColourReset}")
   set (itch "${itch}" "hdf5printer" "hdf5reader")
 endif()
+

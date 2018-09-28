@@ -33,6 +33,7 @@
 #include "gambit/Printers/baseprinter.hpp"
 #include "gambit/Printers/printers/asciitypes.hpp"
 #include "gambit/Utils/yaml_options.hpp"
+#include "gambit/Utils/stream_overloads.hpp"
 
 // BOOST_PP
 #include <boost/preprocessor/seq/for_each_i.hpp>

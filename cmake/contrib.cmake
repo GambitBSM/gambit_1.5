@@ -92,30 +92,38 @@ else()
   add_dependencies(distclean clean-delphes)
 endif()
 
+
 #contrib/RestFrames; include only if ColliderBit is in use and RestFrames is not intentionally ditched.
-set (RESTFRAMES_DIR "${PROJECT_SOURCE_DIR}/contrib/RestFrames")
 string(REGEX MATCH ";Res;|;Rest;|;RestF;|;RestFr;|;RestFra;|;RestFram;|;RestFrame;|;RestFrames" DITCH_RESTFRAMES ";${itch};")
-include_directories("${RESTFRAMES_DIR}" "${RESTFRAMES_DIR}/include")
 if(DITCH_RESTFRAMES OR NOT ";${GAMBIT_BITS};" MATCHES ";ColliderBit;")
-  set (EXCLUDE_RESTFRAMES TRUE)
   add_custom_target(clean-restframes COMMAND "")
   message("${BoldCyan} X Excluding RestFrames from GAMBIT configuration.${ColourReset}")
 else()
-  set (EXCLUDE_RESTFRAMES FALSE)
-  set (RESTFRAMES_LDFLAGS "-L${RESTFRAMES_DIR}/lib -lRestFrames")
-  set (CMAKE_INSTALL_RPATH "${RESTFRAMES_DIR}")
+  set(name "restframes")
+  set(ver "1.0.1")
+  set(dir "${PROJECT_SOURCE_DIR}/contrib/RestFrames-${ver}")
+  set(dl_dir "${PROJECT_SOURCE_DIR}/contrib/")
+  set(dl "https://github.com/crogan/RestFrames/archive/v${ver}.tar.gz")
+  set (RESTFRAMES_LDFLAGS "-L${dir}/lib -lRestFrames")
+  set (CMAKE_INSTALL_RPATH "${dir}")
+  include_directories("${dir}" "${dir}/include")
   ExternalProject_Add(restframes
-    SOURCE_DIR ${RESTFRAMES_DIR}
+    # AK: For some reason I can't get the md5 check to work for restframes, so I can't use cmake/scripts/safe_dl.sh for downloading.
+    # Will use wget for now...
+    DOWNLOAD_COMMAND wget ${dl} -O ${dl_dir}/${name}-${ver}.tar.gz
+             COMMAND ${CMAKE_COMMAND} -E chdir ${dl_dir} tar -xf ${name}-${ver}.tar.gz
+    SOURCE_DIR ${dir}
     BUILD_IN_SOURCE 1
-    CONFIGURE_COMMAND ./configure -prefix=${RESTFRAMES_DIR}
+    CONFIGURE_COMMAND ./configure -prefix=${dir}
     BUILD_COMMAND ${CMAKE_MAKE_PROGRAM} 
     INSTALL_COMMAND ${CMAKE_MAKE_PROGRAM} install
     )
   set(rmstring "${CMAKE_BINARY_DIR}/restframes-prefix/src/restframes-stamp/restframes")
   add_custom_target(clean-restframes COMMAND ${CMAKE_COMMAND} -E remove -f ${rmstring}-configure ${rmstring}-build ${rmstring}-install ${rmstring}-done
-    COMMAND cd ${RESTFRAMES_DIR} && ([ -e makefile ] || [ -e Makefile ] && ${CMAKE_MAKE_PROGRAM} distclean) || true)
+    COMMAND cd ${dir} && ([ -e makefile ] || [ -e Makefile ] && ${CMAKE_MAKE_PROGRAM} distclean) || true)
   add_dependencies(distclean clean-restframes)
 endif()
+
 
 #contrib/fjcore-3.2.0; compile only if Delphes is ditched and ColliderBit is not.
 set(fjcore_INCLUDE_DIR "${PROJECT_SOURCE_DIR}/contrib/fjcore-3.2.0")
@@ -179,7 +187,7 @@ if(";${GAMBIT_BITS};" MATCHES ";SpecBit;")
   set(ALL_FS_MODELS CMSSM MSSM MSSMatMGUT MSSM_mAmu MSSMatMSUSY_mAmu MSSMatMGUT_mAmu MSSMEFTHiggs MSSMEFTHiggs_mAmu MSSMatMSUSYEFTHiggs_mAmu SingletDMZ3 SingletDM)
 
   # Check if there has been command line instructions to only build with certain models. Default is to build everything!
-  if(BUILD_FS_MODELS)
+  if(BUILD_FS_MODELS AND NOT ";${BUILD_FS_MODELS};" MATCHES ";ALL_FS_MODELS;")
     # Use whatever the user has supplied!
   else()
     set(BUILD_FS_MODELS ${ALL_FS_MODELS})
