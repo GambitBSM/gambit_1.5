@@ -708,6 +708,7 @@ int main(int argc, char* argv[])
           DDCalc_2_0_0_init.reset_and_calculate();
           LZ_Calc.reset_and_calculate();
           LZ_GetLogLikelihood.reset_and_calculate();
+
           XENON1T_2017_Calc.reset_and_calculate();
           XENON1T_2017_GetLogLikelihood.reset_and_calculate();
           PandaX_2017_Calc.reset_and_calculate();
