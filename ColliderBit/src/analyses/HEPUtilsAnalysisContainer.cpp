@@ -23,7 +23,7 @@ namespace Gambit
       F(ATLAS_13TeV_RJ3L_lowmass_36invfb)            \
 
     #define MAP_ANALYSES_WITH_ROOT(F)                \
-      // F()            
+      F(ATLAS_13TeV_1LEPStop_36invfb)                \
     
     #define MAP_ANALYSES(F)             \
       F(Minimum)                                     \
@@ -74,7 +74,7 @@ namespace Gambit
       F(CMS_8TeV_1LEPDMTOP_20invfb)                  \
       F(CMS_8TeV_2LEPDMTOP_20invfb)                  \
       F(CMS_8TeV_3LEPEW_20invfb)                     \
-      F(CMS_8TeV_MONOJET_20invfb)
+      F(CMS_8TeV_MONOJET_20invfb)                    \
 
 
 
