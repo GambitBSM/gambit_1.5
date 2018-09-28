@@ -9,17 +9,23 @@
 
 using namespace std;
 
-/* The ATLAS 2 lepton direct stop analysis (36.1fb^-1) - `heavy stop'.
+/// @brief ATLAS 2 lepton direct stop analysis (36.1fb^-1) - `heavy stop'
+///
+/// Based on:
+///  - https://atlas.web.cern.ch/Atlas/GROUPS/PHYSICS/PAPERS/SUSY-2016-27/
+///
+/// @author Martin White
+///
+/// Known issues: 
+///
+/// 1) Photon isolation requirement is missing
+/// 2) They use a bizarre HT definition where they don't apply overlap removal 
+///    between photons and jets. This might not work for us, since jets won't be 
+///    made by photons in our events.
+///
+/// @warning Not yet validated!
+///
 
-   Based on: https://atlas.web.cern.ch/Atlas/GROUPS/PHYSICS/PAPERS/SUSY-2016-27/
-   Author: Martin White
- 
-   Known issues: 
-
-   1) Photon isolation requirement is missing
-   2) They use a bizarre HT definition where they don't apply overlap removal between photons and jets. This might not work for us, since jets won't be made by photons in our events.
-
-*/
 
 namespace Gambit {
   namespace ColliderBit {
