@@ -14,8 +14,6 @@
 ///
 ///  *********************************************
 
-
-
 #include <vector>
 #include <algorithm>
 
@@ -23,12 +21,12 @@
 #include "gambit/ColliderBit/ATLASEfficiencies.hpp"
 #include "gambit/cmake/cmake_variables.hpp"
 
-// ROOT
-#ifndef EXCLUDE_DELPHES
-#include <TH1.h>
-#include <TVirtualPad.h>
-#include <TApplication.h>
-#include <TFile.h>
+// Only include these headers if ROOT is present
+#ifndef EXCLUDE_ROOT
+#include "TH1.h"
+#include "TVirtualPad.h"
+#include "TApplication.h"
+#include "TFile.h"
 #endif
 
 using namespace std;
@@ -43,7 +41,7 @@ namespace Gambit {
     class Analysis_Perf : public HEPUtilsAnalysis {
     private:
 
-      #ifndef EXCLUDE_DELPHES
+      #ifndef EXCLUDE_ROOT
       TH1F *_hElectron1Pt, *_hElectron1Eta, *_hElectron1Phi;
       TH1F *_hElectron2Pt, *_hElectron2Eta, *_hElectron2Phi;
       TH1F *_hMuon1Pt;
@@ -68,10 +66,11 @@ namespace Gambit {
       static bool _openTFile;
       bool _hasTFile;
       #endif
+
     public:
 
       ~Analysis_Perf() {
-        #ifndef EXCLUDE_DELPHES
+        #ifndef EXCLUDE_ROOT
         if(_hasTFile)
           delete _ROOToutFile;
         #endif
@@ -79,11 +78,11 @@ namespace Gambit {
 
 
       Analysis_Perf() {
-        #ifndef EXCLUDE_DELPHES
+        #ifndef EXCLUDE_ROOT
 
         _output_filename = "SimOutput.root";
         _hasTFile = false;
-        if(!Analysis_Perf::_openTFile) {
+        if (!Analysis_Perf::_openTFile) {
           std::cout << "Opening ROOT file" << _output_filename << endl;
           _ROOToutFile = new TFile(_output_filename.c_str(), "RECREATE");
           Analysis_Perf::_openTFile = true;
@@ -235,7 +234,7 @@ namespace Gambit {
         // We now have the signal electrons, muons and jets; fill the histograms
 
 
-        #ifndef EXCLUDE_DELPHES
+        #ifndef EXCLUDE_ROOT
 
         // MET
         _hmet->Fill(event->met());
@@ -348,8 +347,7 @@ namespace Gambit {
         HEPUtilsAnalysis::add(other);
 
         // Add the subclass member variables
-        /// @todo Why do we require Delphes for these? Analysis_Perf does not require Delphes...
-        #ifndef EXCLUDE_DELPHES
+        #ifndef EXCLUDE_ROOT
         Analysis_Perf* specificOther = dynamic_cast<Analysis_Perf*>(other);
         _hElectron1Pt->Add(specificOther->_hElectron1Pt);
         _hElectron1Eta->Add(specificOther->_hElectron1Eta);
@@ -405,44 +403,12 @@ namespace Gambit {
       void scale(double) {
         // NOTE: previously called finalize, but I got rid of that crap. --Abram
 
-        // std::cout << "Writing histograms " << _hElectron1Pt->GetTitle() << std::endl;
-
-        /// @todo Can delete this? Aren't they automatically all written from the current file?
-        /*_ROOToutFile->cd();
-          _hElectron1Pt->Write();
-          _hElectron1Eta->Write();
-          _hElectron1Phi->Write();
-
-          _hElectron2Pt->Write();
-          _hElectron2Eta->Write();
-          _hElectron2Phi->Write();
-
-          _hNelec->Write();
-          _hNjet->Write();
-          _hmet->Write();
-
-          _hElectronPt->Write();
-          _hElectronEta->Write();
-          _hElectronPhi->Write();
-          _hElectronE->Write();
-          _hMuonPt->Write();
-          _hMuonEta->Write();
-          _hMuonPhi->Write();
-          _hMuonE->Write();
-
-          _hJetPt->Write();
-          _hJetEta->Write();
-          _hJetPhi->Write();
-          _hJetE->Write();
-
-          _hNmuon->Write();*/
-        #ifndef EXCLUDE_DELPHES
-
-        if(_hasTFile)
+        #ifndef EXCLUDE_ROOT
+        if (_hasTFile)
           _ROOToutFile->Write();
         //_ROOToutFile->Close();
-        #endif
         /// @todo We should close the file. Shouldn't we also delete the histo pointers?... or are they owned by the file?
+        #endif
       }
 
 
@@ -461,12 +427,75 @@ namespace Gambit {
       }
 
 
+   protected:
+      void clear() {
+        #ifndef EXCLUDE_ROOT
+        _hElectron1Pt->Reset();
+        _hElectron1Eta->Reset();
+        _hElectron1Phi->Reset();
+        _hElectron2Pt->Reset();
+        _hElectron2Eta->Reset();
+        _hElectron2Phi->Reset();
+        _hMuon1Pt->Reset();
+        _hMuon2Pt->Reset();
+        _hNelec->Reset();
+        _hNelec30->Reset();
+        _hNelec100->Reset();
+        _hNelec500->Reset();
+        _hNtau->Reset();
+        _hNtau30->Reset();
+        _hNtau100->Reset();
+        _hNtau500->Reset();
+        _hNmuon->Reset();
+        _hNmuon30->Reset();
+        _hNmuon100->Reset();
+        _hNmuon500->Reset();
+        _hNjet30->Reset();
+        _hNjet100->Reset();
+        _hNjet500->Reset();
+        _hNcentraljet30->Reset();
+        _hNcentraljet100->Reset();
+        _hNcentraljet500->Reset();
+        _hNbjet30->Reset();
+        _hNbjet100->Reset();
+        _hNbjet500->Reset();
+        _hinv->Reset();
+        _hmet->Reset();
+        _hmet_1_muon->Reset();
+        _hmet_1_electron->Reset();
+        _hinv_truth->Reset();
+        _hmet_truth->Reset();
+        _hElectronPt->Reset();
+        _hElectronEta->Reset();
+        _hElectronPhi->Reset();
+        _hElectronE->Reset();
+        _hTauPt->Reset();
+        _hTauEta->Reset();
+        _hTauPhi->Reset();
+        _hTauE->Reset();
+        _hMuonPt->Reset();
+        _hMuonEta->Reset();
+        _hMuonPhi->Reset();
+        _hMuonE->Reset();
+        _hJetPt->Reset();
+        _hJetEta->Reset();
+        _hJetPhi->Reset();
+        _hJetE->Reset();
+        _hCentralJetPt->Reset();
+        _hCentralJetE->Reset();
+        _hBJetPt->Reset();
+        _hBJetEta->Reset();
+        _hBJetPhi->Reset();
+        _hBJetE->Reset();
+        #endif
+      }
+
     };
 
 
     DEFINE_ANALYSIS_FACTORY(Perf);
 
-    #ifndef EXCLUDE_DELPHES
+    #ifndef EXCLUDE_ROOT
     // Static member initialization
     bool Analysis_Perf::_openTFile = false;
     #endif

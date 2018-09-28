@@ -164,7 +164,7 @@ START_MODULE
         DEPENDENCY(MSSM_spectrum, Spectrum)
       #endif
       BACKEND_REQ(dsrdthlim, (), void, ())
-      BACKEND_REQ(dsrdtab, (), void, (double(*)(double&), double&))
+      BACKEND_REQ(dsrdtab, (), void, (double(*)(double&), double&, int&))
       BACKEND_REQ(dsrdeqn, (), void, (double(*)(double&),double&,double&,double&,double&,int&))
       BACKEND_REQ(dsrdwintp, (), double, (double&))
       BACKEND_REQ(particle_code, (), int, (const str&))
@@ -177,17 +177,20 @@ START_MODULE
       BACKEND_REQ(rdpadd, (), DS_RDPADD)
       BACKEND_REQ(rddof, (), DS_RDDOF)
       BACKEND_REQ(rderrors, (), DS_RDERRORS)
+      BACKEND_REQ(rdtime, (), DS_RDTIME)
     #undef FUNCTION
 
-    // Routine for cross checking RD density results
+    // Routine for cross checking relic density results
     #define FUNCTION RD_oh2_DarkSUSY
       START_FUNCTION(double)
       ALLOW_MODELS(MSSM63atQ)
       DEPENDENCY(DarkSUSY_PointInit, bool)
       BACKEND_REQ(dsrdomega, (), double, (int&,int&,double&,int&,int&,int&))
+      BACKEND_REQ(rderrors, (), DS_RDERRORS)
+      BACKEND_REQ(rdtime, (), DS_RDTIME)
     #undef FUNCTION
 
-    // Routine for cross checking RD density results
+    // Routine for cross checking relic density results
     #define FUNCTION RD_oh2_MicrOmegas
       START_FUNCTION(double)
       BACKEND_REQ(oh2, (MicrOmegas_MSSM, MicrOmegas_SingletDM), double, (double*,int,double))
@@ -574,6 +577,21 @@ START_MODULE
    CAT_3(EXPERIMENT,_Get,NAME), DD_Experiment, (DDCalc), int, (const str&))   \
   LONG_BACKEND_REQ(MODULE, CAT_3(EXPERIMENT,_,NAME),                          \
    CAT_3(EXPERIMENT,_Get,NAME), CAT(DD_,NAME), (DDCalc), TYPE, (const int&))
+
+  #define DD_DECLARE_BIN_FUNCTION(EXPERIMENT,TYPE,NAME)                       \
+  LONG_START_CAPABILITY(MODULE, CAT_3(EXPERIMENT,_,NAME))                     \
+  LONG_DECLARE_FUNCTION(MODULE, CAT_3(EXPERIMENT,_,NAME),                     \
+   CAT_3(EXPERIMENT,_Get,NAME), std::vector<double>, 0)                       \
+  LONG_DEPENDENCY(MODULE, CAT_3(EXPERIMENT,_Get,NAME),                        \
+   CAT(EXPERIMENT,_Calculate), bool)                                          \
+  LONG_BACKEND_REQ(MODULE, CAT_3(EXPERIMENT,_,NAME),                          \
+   CAT_3(EXPERIMENT,_Get,NAME), DD_Experiment, (DDCalc), int, (const str&))   \
+  LONG_BACKEND_REQ(MODULE, CAT_3(EXPERIMENT,_,NAME),                          \
+   CAT_3(EXPERIMENT,_Get,NAME), DD_Bins, (DDCalc), int, (const int&))         \
+  LONG_BACKEND_REQ(MODULE, CAT_3(EXPERIMENT,_,NAME),                          \
+   CAT_3(EXPERIMENT,_Get,NAME), CAT(DD_,NAME), (DDCalc), TYPE, (const int&,   \
+   const int&))
+
   #define DD_DECLARE_EXPERIMENT(EXPERIMENT)                                   \
   LONG_START_CAPABILITY(MODULE, CAT(EXPERIMENT,_Calculate))                   \
   LONG_DECLARE_FUNCTION(MODULE, CAT(EXPERIMENT,_Calculate),                   \
@@ -587,22 +605,36 @@ START_MODULE
   DD_DECLARE_RESULT_FUNCTION(EXPERIMENT,double,Signal)                        \
   DD_DECLARE_RESULT_FUNCTION(EXPERIMENT,double,SignalSI)                      \
   DD_DECLARE_RESULT_FUNCTION(EXPERIMENT,double,SignalSD)                      \
+  DD_DECLARE_RESULT_FUNCTION(EXPERIMENT,int,Bins)                             \
   DD_DECLARE_RESULT_FUNCTION(EXPERIMENT,double,LogLikelihood)                 \
+  DD_DECLARE_BIN_FUNCTION(EXPERIMENT,int,BinEvents)                           \
+  DD_DECLARE_BIN_FUNCTION(EXPERIMENT,double,BinBackground)                    \
+  DD_DECLARE_BIN_FUNCTION(EXPERIMENT,double,BinSignal)                        \
 
   // Declare different DD experiments that exist in DDCalc.
-  DD_DECLARE_EXPERIMENT(XENON100_2012)
-  DD_DECLARE_EXPERIMENT(LUX_2013)
-  DD_DECLARE_EXPERIMENT(SuperCDMS_2014)
-  DD_DECLARE_EXPERIMENT(SIMPLE_2014)
+  DD_DECLARE_EXPERIMENT(XENON100_2012)        // Aprile et al., PRL 109, 181301 (2013) [arxiv:1207.5988]
+  DD_DECLARE_EXPERIMENT(XENON1T_2017)         // Aprile et al., PRL 119, 181301 (2017) [arxiv:1705.06655]
+  DD_DECLARE_EXPERIMENT(XENON1T_2018)         // Aprile et al., May 28 talk at Gran Sasso.
   DD_DECLARE_EXPERIMENT(DARWIN_Ar)
   DD_DECLARE_EXPERIMENT(DARWIN_Xe)
-  DD_DECLARE_EXPERIMENT(LUX_2016)
-  DD_DECLARE_EXPERIMENT(PandaX_2016)
-  DD_DECLARE_EXPERIMENT(LUX_2015)
-  DD_DECLARE_EXPERIMENT(PICO_2L)
-  DD_DECLARE_EXPERIMENT(PICO_60_F)
-  DD_DECLARE_EXPERIMENT(PICO_60_I)
-
+  DD_DECLARE_EXPERIMENT(DARWIN)               // M. Schumann et al., [arXiv:1506.08309]
+  DD_DECLARE_EXPERIMENT(LUX_2013)             // Akerib et al., PRL 112, 091303 (2014) [arxiv:1310.8214]
+  DD_DECLARE_EXPERIMENT(LUX_2015)             // D.S. Akerib et al., PRL 116, 161301 (2016) [arXiv:1512.03506]
+  DD_DECLARE_EXPERIMENT(LUX_2016)             // D.S. Akerib et al., PRL 118, 021303 (2017) [arxiv:1608.07648]
+  DD_DECLARE_EXPERIMENT(LZ)                   // LZ TDR, [arXiv:1509.02910]
+  DD_DECLARE_EXPERIMENT(PandaX_2016)          // A. Tan et al., PRL 117, 121303 (2016) [arxiv:1607.07400]
+  DD_DECLARE_EXPERIMENT(PandaX_2017)          // X. Cui et al., PRL 119, 181302 (2017) [arxiv:1708.06917]
+  DD_DECLARE_EXPERIMENT(DarkSide_50)          // P. Agnes et al., [arXiv:1802.07198]
+  DD_DECLARE_EXPERIMENT(CRESST_II)            // G. Angloher et al., [arXiv:1509.01515]
+  DD_DECLARE_EXPERIMENT(SuperCDMS_2014)       // Agnese et al., PRL 112, 241302 (2014) [arxiv:1402.7137]
+  DD_DECLARE_EXPERIMENT(CDMSlite)             // Agnese et al., PRL 116, 071301 (2015) [arxiv:1509.02448]
+  DD_DECLARE_EXPERIMENT(SIMPLE_2014)          // Felizardo et al., PRD 89, 072013 (2014) [arxiv:1404.4309]
+  DD_DECLARE_EXPERIMENT(PICO_2L)              // C. Amole et al., PRD 93, 061101 (2016) [arXiv:1601.03729]
+  DD_DECLARE_EXPERIMENT(PICO_60_F)            // C. Amole et al., PRD 93, 052014 (2016) [arXiv:1510.07754]
+  DD_DECLARE_EXPERIMENT(PICO_60_I)            // C. Amole et al., PRD 93, 052014 (2016) [arXiv:1510.07754]
+  DD_DECLARE_EXPERIMENT(PICO_60)              // C. Amole et al., PRD 93, 052014 (2016) [arXiv:1510.07754]
+  DD_DECLARE_EXPERIMENT(PICO_60_2017)         // C. Amole et al., arXiv:1702.07666
+  DD_DECLARE_EXPERIMENT(PICO_500)             // S. Fallows, talk at TAUP 2017
 
   // INDIRECT DETECTION: NEUTRINOS =====================================
 

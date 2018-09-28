@@ -16,7 +16,7 @@
 // <http://www.gnu.org/licenses/>.
 // ====================================================================
 
-// File generated at Sat 27 Aug 2016 12:47:56
+// File generated at Thu 10 May 2018 15:06:03
 
 #ifndef lowMSSM_INPUT_PARAMETERS_H
 #define lowMSSM_INPUT_PARAMETERS_H
@@ -27,31 +27,21 @@
 namespace flexiblesusy {
 
 struct lowMSSM_input_parameters {
-   double TanBeta;
-   double MuInput;
-   Eigen::Matrix<double,3,3> TYdInput;
-   Eigen::Matrix<double,3,3> TYeInput;
-   Eigen::Matrix<double,3,3> TYuInput;
-   double BMuInput;
-   Eigen::Matrix<double,3,3> mq2Input;
-   Eigen::Matrix<double,3,3> ml2Input;
-   Eigen::Matrix<double,3,3> md2Input;
-   Eigen::Matrix<double,3,3> mu2Input;
-   Eigen::Matrix<double,3,3> me2Input;
-   double MassBInput;
-   double MassWBInput;
-   double MassGInput;
+   double TanBeta{};
+   double MuInput{};
+   Eigen::Matrix<double,3,3> TYdInput{Eigen::Matrix<double,3,3>::Zero()};
+   Eigen::Matrix<double,3,3> TYeInput{Eigen::Matrix<double,3,3>::Zero()};
+   Eigen::Matrix<double,3,3> TYuInput{Eigen::Matrix<double,3,3>::Zero()};
+   double BMuInput{};
+   Eigen::Matrix<double,3,3> mq2Input{Eigen::Matrix<double,3,3>::Zero()};
+   Eigen::Matrix<double,3,3> ml2Input{Eigen::Matrix<double,3,3>::Zero()};
+   Eigen::Matrix<double,3,3> md2Input{Eigen::Matrix<double,3,3>::Zero()};
+   Eigen::Matrix<double,3,3> mu2Input{Eigen::Matrix<double,3,3>::Zero()};
+   Eigen::Matrix<double,3,3> me2Input{Eigen::Matrix<double,3,3>::Zero()};
+   double MassBInput{};
+   double MassWBInput{};
+   double MassGInput{};
 
-   lowMSSM_input_parameters()
-      : TanBeta(0), MuInput(0), TYdInput(Eigen::Matrix<double,3,3>::Zero()),
-   TYeInput(Eigen::Matrix<double,3,3>::Zero()), TYuInput(Eigen::Matrix<double,3
-   ,3>::Zero()), BMuInput(0), mq2Input(Eigen::Matrix<double,3,3>::Zero()),
-   ml2Input(Eigen::Matrix<double,3,3>::Zero()), md2Input(Eigen::Matrix<double,3
-   ,3>::Zero()), mu2Input(Eigen::Matrix<double,3,3>::Zero()), me2Input(
-   Eigen::Matrix<double,3,3>::Zero()), MassBInput(0), MassWBInput(0),
-   MassGInput(0)
-
-   {}
 
    Eigen::ArrayXd get() const;
    void set(const Eigen::ArrayXd&);

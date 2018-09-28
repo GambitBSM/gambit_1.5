@@ -54,6 +54,18 @@ model `MSSM` together with the sub-model `CPV` is used:
 FSDefaultSARAHModel = MSSM/CPV;
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
+_____________________________________________________________________
+
+__Symbol__: `FSBVPSolvers`
+
+__Default value__: `{ TwoScaleSolver }`
+
+__Description__:
+
+A list of algorithms to use for solving the boundary value problem.
+One or both of `TwoScaleSolver` or `SemiAnalyticSolver` may be
+specified in the list.
+
 \section input_parameters Input parameters
 
 _____________________________________________________________________
@@ -112,7 +124,7 @@ __Description__:
 The `EXTPAR` variable is a list of input parameters for the spectrum
 generator, which is read of the `EXTPAR` block of the SLHA input file.
 The list assigned to the `EXTPAR` variable must have the same form as
-`MINPAR` variable.
+the `MINPAR` variable.
 
 __Example__: In the NUTNMSSM the `EXTPAR` block has the form
 
@@ -142,37 +154,128 @@ _Note_: Unspecified parameters are assumed to be zero.
 
 _____________________________________________________________________
 
-__Symbol__: `FSExtraInputParameters`
+__Symbol__: `IMMINPAR`
 
 __Default value__: `{}`
 
 __Description__:
 
-In the `FSExtraInputParameters` variable vector- or matrix-like input
-parameters can be given.  `FSExtraInputParameters` is contains a list,
-whose elements are three-component lists.  The first element of this
-list is a symbol, which represents the input parameter.  The second
-element is the name of the block, from which the input parameter is
-read.  The third element is a list specifying the vector- or
-matrix-type of the input parameter.  A list of the form `{N,M}` with
-`N` and `M` being integer numbers defines a NxM matrix.  A list of the
-form `{N}`, with `N` > 1 defines a vector with `N` rows.  A list of
-the form `{1}` or `{}` defines a scalar.
+The `IMMINPAR` variable is a list of input parameters for the spectrum
+generator, which is read of the `IMMINPAR` block of the SLHA input
+file.  The list assigned to the `IMMINPAR` variable must have the same
+form as the `MINPAR` variable.
 
-__Example__: In the MSSM the `FSExtraInputParameters` block has the
-form
+__Example__: In the CP-violating MSSM (`CMSSMCPV`) the `IMMINPAR` block
+has the form
 
 ~~~~~~~~~~~~~~~~~~~~{.m}
-FSExtraInputParameters = {
-    {Aeij, AeijIN, {3,3}}, (* 3x3 matrix *)
-    {Adij, AdijIN, {3,3}}, (* 3x3 matrix *)
-    {Auij, AuijIN, {3,3}}  (* 3x3 matrix *)
+IMMINPAR = {
+    {2, Imm12},
+    {5, ImAzero}
 };
 ~~~~~~~~~~~~~~~~~~~~
 
-Here, three 3x3 matrix-valued input parameters are specified: `Aeij`,
-`Adij` and `Auij`.  These matrices are read from the blocks `AeijIN`,
-`AdijIN` and `AuijIN`, respectively.
+In this case the input parameters can be given in the SLHA input file
+as
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Block IMMINPAR
+    2   10                   # Imm12
+    5   10                   # ImAzero
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+_Note_: Unspecified parameters are assumed to be zero.
+
+_____________________________________________________________________
+
+__Symbol__: `IMEXTPAR`
+
+__Default value__: `{}`
+
+__Description__:
+
+The `IMEXTPAR` variable is a list of input parameters for the spectrum
+generator, which is read of the `IMEXTPAR` block of the SLHA input
+file.  The list assigned to the `IMEXTPAR` variable must have the same
+form as the `MINPAR` variable.
+
+__Example__: In the CP-violating MSSM (`MSSMCPV`) the `IMEXTPAR` block
+has the form
+
+~~~~~~~~~~~~~~~~~~~~{.m}
+IMEXTPAR = {
+    {1, ImM1Input},
+    {2, ImM2Input},
+    {3, ImM3Input},
+    {23, ImMuInput}
+};
+~~~~~~~~~~~~~~~~~~~~
+
+In this case the input parameters can be given in the SLHA input file
+as
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Block IMEXTPAR
+    1    100                 # Im(M1(MSUSY))
+    2    100                 # Im(M2(MSUSY))
+    3    100                 # Im(M3(MSUSY))
+   23    100                 # Im(Mu(MSUSY))
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+_Note_: Unspecified parameters are assumed to be zero.
+
+_____________________________________________________________________
+
+__Symbol__: `FSAuxiliaryParameterInfo`
+
+__Default value__: `{}`
+
+__Description__:
+
+In the `FSAuxiliaryParameterInfo` variable additional input or extra
+parameters can be defined, and extra information provided can be
+provided about existing input parameters.  `FSAuxiliaryParameterInfo`
+is expected to be a list, whose element are two-component lists.  The
+first element of this list is a symbol representing the parameter.
+The second element is a list of properties for that parameter,
+specified as replacement rules.  The supported properties are
+
+ - `InputParameter`: A value of `True` or `False` indicating if the
+   parameter is an input parameter.
+ - `LesHouches`: The name of the SLHA block from which the
+   parameter should be read, if it is an input parameter.
+ - `MassDimension`: A number specifying the mass dimension of the
+   parameter.
+ - `ParameterDimensions`: A list specifying the vector- or
+   matrix-type of the input parameter.  A list of the form `{N,M}`
+   with `N` and `M` being integer numbers defines a NxM matrix.  A
+   list of the form `{N}`, with `N` > 1 defines a vector with `N`
+   rows.  A list of the form `{1}` or `{}` defines a scalar.
+
+__Example__: In the MSSM the `FSAuxiliaryParameterInfo` variable has
+the form
+
+~~~~~~~~~~~~~~~~~~~~{.m}
+FSAuxiliaryParameterInfo = {
+    {Aeij, { LesHouches -> AeijIN,
+             ParameterDimensions -> {3,3},
+             InputParameter -> True
+           } },
+    {Adij, { LesHouches -> AdijIN,
+             ParameterDimensions -> {3,3},
+             InputParameter -> True
+           } },
+    {Auij, { LesHouches -> AuijIN,
+             ParameterDimensions -> {3,3},
+             InputParameter -> True
+           } }
+};
+~~~~~~~~~~~~~~~~~~~~
+
+Here, three 3x3 matrix-valued parameters are specified: `Aeij`,
+`Adij` and `Auij`.  They are defined as input parameters.  These
+matrices are read from the blocks `AeijIN`, `AdijIN` and `AuijIN`,
+respectively.
 
 These input parameters can be given in the SLHA input file as
 
@@ -245,16 +348,16 @@ RealParameters = { B[\[Mu]] };
 
 \section boundary_conditions Boundary conditions
 
-In FlexibleSUSY, spectrum generators with two or three boundary
-conditions can be generated.  (Future versions will support more than
-three boundary conditions.)  By default, a spectrum generator with
-three boundary conditions is generated.  These boundary conditions are
-named "high-scale", "susy-scale" and "low-scale" boundary condition
-and are described in the following.  In order to generate a spectrum
-generator with only two boundary conditions, set
+In FlexibleSUSY, spectrum generators with maximum 3 boundary
+conditions can be generated.  These boundary conditions are named
+"high-scale", "susy-scale" and "low-scale" boundary condition and are
+described in the following.
+
+However, it is possible to disable the high-scale boundary condition.
+In order to do so, set
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~{.m}
-OnlyLowEnergyFlexibleSUSY = True;  (* only 2 BCs, default: False *)
+OnlyLowEnergyFlexibleSUSY = True;  (* disable high-scale BC, default: False *)
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 _____________________________________________________________________
@@ -267,6 +370,8 @@ __Description__:
 
 The scale of the low-scale boundary condition, at which the model is
 matched to the Standard Model.
+
+\note `LowScale` is ignored if `FlexibleEFTHiggs == True`
 
 Example: In the CMSSM the low-energy scale should be set to the Z or
 top pole mass.  This choice is achieved by the following expression:
@@ -284,6 +389,8 @@ __Default value__: _unset_
 __Description__:
 
 First guess of the low-energy scale.
+
+\note `LowScaleFirstGuess` is ignored if `FlexibleEFTHiggs == True`
 
 Example: In the CMSSM the first guess for the low-energy scale should
 be set to the Z or top pole mass:
@@ -308,8 +415,7 @@ At the low-energy scale, FlexibleSUSY automatically determines the
 three gauge couplings from the SLHA input parameters
 \f$\alpha_{em}\f$, \f$M_Z\f$ and \f$G_F\f$ or \f$M_W\f$.
 
-_TODO_: Add note about how the the user can chose between \f$G_F\f$ or
-\f$M_W\f$ as input.
+\note `LowScaleInput` is ignored if `FlexibleEFTHiggs == True`
 
 Example: In the CMSSM `LowScaleInput` is given as follows:
 
@@ -322,6 +428,30 @@ LowScaleInput = {
    {vu, 2 MZDRbar / Sqrt[GUTNormalization[g1]^2 g1^2 + g2^2] Sin[ArcTan[TanBeta]]}
 };
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+The method to determine the weak mixing angle can be chosen by setting
+the variable `FSWeakMixingAngleInput` to either `Automatic`,
+`FSFermiConstant` or `FSMassW`.  `FSWeakMixingAngleInput` is set to
+`Automatic` by default.
+
+| Value of `FSWeakMixingAngleInput`  | Parameters from which weak mixing angle is determined |
+|------------------------------------|-------------------------------------------------------|
+| `FSFermiConstant`                  | \f$G_F\f$ and \f$M_Z\f$                               |
+| `FSMassW`                          | \f$M_W\f$ and \f$M_Z\f$                               |
+| `Automatic` (default) (recommended)| chose most precise method automatically               |
+
+Example: Automatically chose most precise method to determine the weak
+mixing angle
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+FSWeakMixingAngleInput = Automatic; (* recommended *)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+\note If `FSWeakMixingAngleInput = FSMassW;` is chosen, FlexibleSUSY
+looks for the definition of the weak mixing angle in the symbol \c
+SARAH\`Weinberg.  If \c SARAH\`Weinberg is not defined, FlexibleSUSY
+uses the expression assigned to `FSWeakMixingAngleExpr`, which is by
+default set to \c ArcSin[Sqrt[1-Mass[SARAH`VectorW]^2/Mass[SARAH`VectorZ]^2]].
 
 _____________________________________________________________________
 
@@ -495,8 +625,10 @@ __Default value__: `{}`
 __Description__:
 
 With the `InitialGuessAtLowScale` variable initial values for the
-model MS-bar parameters can be given at the low-energy scale
+model MS-bar/DR-bar parameters can be given at the low-energy scale
 `LowScale`.
+
+\note `InitialGuessAtLowScale` is ignored if `FlexibleEFTHiggs == True`
 
 Example: In the CMSSM `InitialGuessAtLowScale` is given as follows:
 
@@ -512,6 +644,44 @@ InitialGuessAtLowScale = {
 
 _____________________________________________________________________
 
+__Symbol__: `InitialGuessAtSUSYScale`
+
+__Default value__: `{}`
+
+__Description__:
+
+\note `InitialGuessAtSUSYScale` is only used if `FlexibleEFTHiggs == True`
+
+With the `InitialGuessAtSUSYScale` variable initial values for the
+model MS-bar/DR-bar parameters can be given at the SUSY scale
+`SUSYScale`.
+
+Example: In the MSSMEFTHiggs `InitialGuessAtSUSYScale` is given as follows:
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+InitialGuessAtSUSYScale = {
+    {Yu, Automatic},
+    {Yd, Automatic},
+    {Ye, Automatic}
+    {MassB, Ms},
+    {MassWB, Ms},
+    {MassG, Ms},
+    {mq2, UNITMATRIX[3] Ms^2},
+    {mu2, UNITMATRIX[3] Ms^2},
+    {md2, UNITMATRIX[3] Ms^2},
+    {ml2, UNITMATRIX[3] Ms^2},
+    {me2, UNITMATRIX[3] Ms^2},
+    {\[Mu], Ms},
+    {B[\[Mu]], Sqr[Ms]/(TanBeta + 1/TanBeta)},
+    {T[Yu], Ms/TanBeta Yu},
+    {T[Yd], Ms TanBeta Yd},
+    {T[Ye], Ms TanBeta Ye},
+    {T[Yu][3,3], (Ms/TanBeta + Xtt Ms) Yu[3,3]}
+};
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+_____________________________________________________________________
+
 __Symbol__: `InitialGuessAtHighScale`
 
 __Default value__: `{}`
@@ -519,7 +689,7 @@ __Default value__: `{}`
 __Description__:
 
 With the `InitialGuessAtHighScale` variable initial values for the
-model MS-bar parameters can be given at the high-energy scale
+model MS-bar/DR-bar parameters can be given at the high-energy scale
 `HighScale`.
 
 Example: In the CMSSM `InitialGuessAtHighScale` is given as follows:
@@ -561,6 +731,50 @@ EWSBOutputParameters = { Re[B[\[Mu]]], Im[B[\[Mu]]], \[Mu] };
 
 _____________________________________________________________________
 
+__Symbol__: `EWSBInitialGuess`
+
+__Default value__: `{}`
+
+__Description__:
+
+In the `EWSBInitialGuess` variable initial guesses for some or all
+of the EWSB output parameters can be specified.
+
+Example: In the VCMSSM `EWSBInitialGuess` is defined as
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+EWSBInitialGuess = {
+   {TanBeta, vu / vd},
+   {MuSq, \[Mu]^2}
+};
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+_____________________________________________________________________
+
+__Symbol__: `EWSBSubstitutions`
+
+__Default value__: `{}`
+
+__Description__:
+
+In the `EWSBSubstitutions` variable, substitutions for model
+parameters in terms of other parameters can be given.
+`EWSBSubstitutions` should be a list of two-component lists, in which
+the first element is the parameter to be substituted for, and the
+second element is the expression to be substituted in its place.
+
+Example: In the VCMSSM `EWSBSubstitutions` is defined as
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+EWSBSubstitutions = {
+   {vd, vMSSM Cos[ArcTan[TanBeta]]},
+   {vu, vMSSM Sin[ArcTan[TanBeta]]},
+   {\[Mu], Sign[\[Mu]] Sqrt[MuSq]}
+};
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+_____________________________________________________________________
+
 __Symbol__: `FSSolveEWSBTreeLevelFor`
 
 __Default value__: `{}`
@@ -583,6 +797,63 @@ output parameters are chosen automatically as follows:
   `EWSBOutputParameters` are fixed by the tree-level EWSB equation
   temporarily when the running (tree-level) masses are calculated.
 
+_____________________________________________________________________
+
+__Symbol__: `MatchingScaleInput`
+
+__Default value__: `{}`
+
+__Description__:
+
+\note `MatchingScaleInput` is only used if `FlexibleEFTHiggs == True`
+
+In the `MatchingScaleInput` variable, relations between the parameters
+of the full model and the Standard Model (the EFT) at the `SUSYScale`
+can be specified.
+
+An important application is the relation between the vacuum
+expectation values (VEVs) in a SUSY model and \f$v\f$ in the Standard
+Model: In `FlexibleEFTHiggs` the running Yukawa couplings of the full
+model are determined from a pole mass matching of the Standard Model
+fermions (which need to be present in both models).  For this
+determination the running VEVs of the full model must be known and
+non-zero.  `MatchingScaleInput` allows the user for example to fix the
+running VEVs of the full model as a function of the running SM-like
+VEV \f$v\f$ in the full model.
+
+_Example:_ In the MSSM the vacuum expectation values \f$v_u\f$ and
+\f$v_d\f$ are related to the MSSM SM-like VEV \f$v = \sqrt{v_u^2 +
+v_d^2}\f$ as
+\f{align*}{
+  v_u &= v \sin\beta , \\
+  v_d &= v \cos\beta .
+\f}
+
+To fix \f$v_u\f$ and \f$v_d\f$ in the MSSM in this way,
+`MatchingScaleInput` can be used:
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~{.m}
+MatchingScaleInput = {
+    {vu, VEV Sin[ArcTan[TanBeta]]},
+    {vd, VEV Cos[ArcTan[TanBeta]]}
+};
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+where `TanBeta` is an input parameter.  The symbol `VEV` is a
+FlexibleSUSY constant which is assigned the value
+\f{align*}{
+   \text{VEV} = \frac{2 m_Z}{\sqrt{g_Y^2 + g_2^2}} ,
+\f}
+where \f$m_Z\f$ is the running Z boson mass in the full model,
+detetermined by requiring the equality of the Z boson pole masses of
+the full model and the Standard Model.  \f$g_Y\f$ and \f$g_2\f$ are
+the running gauge couplings of \f$U(1)_Y\f$ and \f$SU(2)_L\f$ in the
+full model, respectively.  These two gauge couplings are calculated
+using the 1-loop threshold correction for \f$\alpha_{\text{em}}\f$ and
+the running weak mixing angle, \f$\cos\theta_W = m_W / m_Z\f$.
+\f$m_W\f$ is the running W boson mass in the full model, detetermined
+by requiring the equality of the W boson pole masses of the full model
+and the Standard Model.
 
 \subsection input_format Boundary condition format
 
@@ -644,7 +915,7 @@ parameter input blocks are named after the model parameter output
 blocks concatenated with an additionan "IN" (see the SLHA-2 standard,
 arXiv:0801.0045, Section 4.1.3).  To refer to such an input model
 parameter on the r.h.s. of an assignment one can either add an entry
-in `FSExtraInputParameters` or use the `LHInput[p]` symbol, where `p`
+in `FSAuxiliaryParameterInfo` or use the `LHInput[p]` symbol, where `p`
 is the name of the model parameter.
 
 Example:
@@ -656,6 +927,20 @@ SUSYScaleInput = {
    {mq2, 2 g2^2 LHInput[mq2]}
 };
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+It is also possible to access the \f$\beta\f$ functions on the
+r.h.s. of an assignment using the `BETA` head: `BETA[p]` represents
+the \f$\beta\f$ function of the parameter `p` using the loop level
+given in the SLHA input.  `BETA[l,p]` represents the `l`-loop
+\f$\beta\f$ function of the parameter `p`.
+
+Example:
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~{.m}
+HighScaleInput = {
+    {\[Lambda], BETA[g1] + BETA[g2] + BETA[1,Yu][3,3]}
+};
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 ### Temporary parameter re-definitions ###
 
@@ -843,27 +1128,6 @@ Example:
 FSRGELoopOrder = 2; (* generate two-loop RGEs using SARAH *)
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-### Three-loop RGEs for specific models ###
-
-#### Standard Model ####
-
-In the Standard Model the known three-loop RGEs from [arxiv:1303.4364,
-arXiv:1307.3536] can be used by setting in the model file
-
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~{.m}
-UseSM3LoopRGEs = True; (* use three-loop SM RGEs *)
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-#### MSSM ####
-
-In the MSSM the known three-loop RGEs from [arxiv:hep-ph/0308231,
-http://www.liv.ac.uk/~dij/betas/allgennb.log] can be used by setting
-in the model file
-
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~{.m}
-UseMSSM3LoopRGEs = True; (* use three-loop MSSM RGEs *)
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
 \section pole_masses Pole masses
 
 In order to tune the spectrum generator for speed, the precision of
@@ -899,6 +1163,124 @@ Example: In the MSSM the lightest supersymmetric particles might be
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~{.m}
 PotentialLSPParticles = { Chi, Sv, Su, Sd, Se, Cha, Glu };
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+\section calc_obervables Observables
+
+FlexibleSUSY can calculate various observables.  To enable the
+calculation of a specific observable, the corresponding symbol must be
+added to an extra SLHA output block, see @ref output_blocks .  In the
+following the supported observables are listed.
+
+\subsection eff_higgs_cp Effective Higgs-Photon-Photon and Higgs-Gluon-Gluon couplings
+
+In the context of [<a
+href="https://arxiv.org/abs/1602.05581">arxiv:1602.05581</a>],
+FlexibleSUSY has been extended to calculate the effective couplings of
+CP-even and CP-odd Higgs bosons to two photons or two gluons up to
+NNNLO.  The following table lists the Mathematica symbols to enable
+the calculation of these effective couplings.
+
+| Coupling                                                     | Symbol                                                |
+|--------------------------------------------------------------|-------------------------------------------------------|
+| CP-even Higgs to two photons, \f$h\rightarrow\gamma\gamma\f$ | \c FlexibleSUSYObservable\`CpHiggsPhotonPhoton        |
+| CP-odd  Higgs to two photons, \f$A\rightarrow\gamma\gamma\f$ | \c FlexibleSUSYObservable\`CpPseudoScalarPhotonPhoton |
+| CP-even Higgs to two gluons,  \f$h\rightarrow gg\f$          | \c FlexibleSUSYObservable\`CpHiggsGluonGluon          |
+| CP-odd  Higgs to two gluons,  \f$A\rightarrow gg\f$          | \c FlexibleSUSYObservable\`CpPseudoScalarGluonGluon   |
+
+Example:
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~{.m}
+ExtraSLHAOutputBlocks = {
+   {EFFHIGGSCOUPLINGS, NoScale,
+           {{1, FlexibleSUSYObservable`CpHiggsPhotonPhoton},
+            {2, FlexibleSUSYObservable`CpHiggsGluonGluon},
+            {3, FlexibleSUSYObservable`CpPseudoScalarPhotonPhoton},
+            {4, FlexibleSUSYObservable`CpPseudoScalarGluonGluon} } }
+};
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+\subsection amu_FS BSM contributions to the anomalous magnetic moment of the muon
+
+Since version 2.0, FlexibleSUSY can calculate the BSM contributions to
+the anomalous magnetic moment of the muon, \f$a_\mu^{\text{BSM}}\f$ at
+the 1-loop level, including the leading 2-loop QED logarithmic
+corrections.  The following table lists the Mathematica symbols to
+enable the calculation of \f$a_\mu^{\text{BSM}}\f$.
+
+| Observable                      | Symbol                                      |
+|---------------------------------|---------------------------------------------|
+| \f$a_\mu^{\text{BSM}}\f$        | \c FlexibleSUSYObservable\`aMuon            |
+| \f$\Delta a_\mu^{\text{BSM}}\f$ | \c FlexibleSUSYObservable\`aMuonUncertainty |
+
+\f$\Delta a_\mu^{\text{BSM}}\f$ is obtained by varying the
+renormalization scale by a factor 2.  It therefore represents a \a
+lower \a bound of the theoretical uncertainty.
+
+Example:
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~{.m}
+ExtraSLHAOutputBlocks = {
+   {FlexibleSUSYLowEnergy,
+           {{0, FlexibleSUSYObservable`aMuon},
+            {1, FlexibleSUSYObservable`aMuonUncertainty} } }
+};
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+\subsection amu_GM2Calc MSSM contributions to the anomalous magnetic moment of the muon with GM2Calc
+
+FlexibleSUSY contains an interface to <a
+href="https://gm2calc.hepforge.org/">GM2Calc</a> [<a
+href="https://arxiv.org/abs/1510.08071">arxiv:1510.08071</a>], which
+can be used to calculate the MSSM contributions to the anomalous
+magnetic moment of the muon, \f$a_\mu^{\text{MSSM}}\f$.  GM2Calc
+calculates \f$a_\mu^{\text{MSSM}}\f$ at the 1-loop level, takes all
+known 2-loop contributions into account and performs a resummation of
+\f$\tan\beta\f$-enhanced contributions.
+
+\note GM2Calc 1.*.* is restricted to CP-conserving MSSM without
+sfermion flavour violation.  Thus, the GM2Calc interface in
+FlexibleSUSY can only be used for MSSM models with CP and sfermion
+flavour conservation.
+
+| Observable                       | Symbol                                             |
+|----------------------------------|----------------------------------------------------|
+| \f$a_\mu^{\text{MSSM}}\f$        | \c FlexibleSUSYObservable\`aMuonGM2Calc            |
+| \f$\Delta a_\mu^{\text{MSSM}}\f$ | \c FlexibleSUSYObservable\`aMuonGM2CalcUncertainty |
+
+Example:
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~{.m}
+ExtraSLHAOutputBlocks = {
+   {FlexibleSUSYLowEnergy,
+           {{2, FlexibleSUSYObservable`aMuonGM2Calc},
+            {3, FlexibleSUSYObservable`aMuonGM2CalcUncertainty} } }
+};
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+\subsection edm_FS BSM contributions to the electric dipole moment (EDM)
+
+Since version 2.0 FlexibleSUSY can calculate the BSM contributions to
+the electric dipole moments (EDM) of fermions at the 1-loop level in
+models with complex parameters.  The following table lists the
+Mathematica symbols to enable the calculation of the EDM
+\f$d_f^{\text{BSM}}\f$ of the fermion \f$f\f$.
+
+| Observable                      | Symbol                                      |
+|---------------------------------|---------------------------------------------|
+| \f$d_f^{\text{BSM}}\f$          | \c FlexibleSUSYObservable\`EDM[f]           |
+
+Example: To calculate the EDMs of the electron, muon and tau lepton in
+the CP-violating MSSM, add the following to the FlexibleSUSY model file:
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~{.m}
+ExtraSLHAOutputBlocks = {
+   {FlexibleSUSYLowEnergy,
+           {{23, FlexibleSUSYObservable`EDM[Fe[1]]},
+            {24, FlexibleSUSYObservable`EDM[Fe[2]]},
+            {25, FlexibleSUSYObservable`EDM[Fe[3]]} } }
+};
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
 
 \section output_blocks Output blocks
 
@@ -940,6 +1322,8 @@ ExtraSLHAOutputBlocks = {
            {{0, Hold[HighScale]},
             {1, Hold[SUSYScale]},
             {2, Hold[LowScale]} } },
+   {FlexibleSUSYLowEnergy,
+           {{21, FlexibleSUSYObservable`aMuon} } },
    {EFFHIGGSCOUPLINGS, NoScale,
            {{1, FlexibleSUSYObservable`CpHiggsPhotonPhoton},
             {2, FlexibleSUSYObservable`CpHiggsGluonGluon},
@@ -1001,11 +1385,45 @@ the model file
 UseHiggs2LoopMSSM = True; (* use 2-loop Higgs corrections *)
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-In addition, the effective \f$\mu\f$ parameter must be specified using
-the `EffectiveMu` variable:
+The known 3-loop Higgs pole mass corrections of the order
+\f$O(\alpha_t\alpha_s^2 + \alpha_b\alpha_s^2)\f$
+[arxiv:hep-ph/0803.0672, arxiv:hep-ph/1005.5709, arxiv:1409.2297,
+arxiv:1708.05720] can be used by setting in the model file
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~{.m}
+UseHiggs3LoopMSSM = True; (* use 3-loop Higgs corrections *)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+\note The Himalaya library [<a
+href="https://github.com/jklappert/Himalaya">https://github.com/jklappert/Himalaya</a>]
+must be linked to FlexibleSUSY in order to enable the 3-loop
+contributions:
+\code{.sh}
+./configure \
+   --with-models=MSSMNoFVatMGUTHimalaya \
+   --enable-himalaya \
+   --with-himalaya-incdir=${HIMALAYA_DIR}/source/include \
+   --with-himalaya-libdir=${HIMALAYA_DIR}/build
+\endcode
+`MSSMNoFVatMGUTHimalaya` is a pre-defined FlexibleSUSY model which
+includes the 3-loop contributions to the light CP-even Higgs mass from
+Himalaya.  `${HIMALAYA_DIR}` is the path to the Himalaya directory.
+
+To make use of the 2-loop and/or 3-loop corrections the effective
+\f$\mu\f$ parameter must be specified using the `EffectiveMu`
+variable:
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~{.m}
 EffectiveMu = \[Mu];
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+\note When the 3-loop corrections are used, the following switches
+will be set automatically for consistency:
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~{.m}
+SARAH`UseHiggs2LoopMSSM = True;
+UseMSSMYukawa2Loop = True; (* use 2-loop SQCD corrections to yt and yb *)
+UseMSSMAlphaS2Loop = True; (* use 2-loop SQCD corrections to alpha_s *)
+UseMSSM3LoopRGEs = True;   (* use 3-loop RGEs *)
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 #### NMSSM ####
@@ -1031,12 +1449,30 @@ EffectiveMASqr = (T[\[Lambda]] vS / Sqrt[2] + 0.5 \[Lambda] \[Kappa] vS^2) (vu^2
 
 #### Standard Model (SM) ####
 
-In the Standard Model the two-loop Higgs pole mass corrections
-[arxiv:1205.6497, Eq.(20)] of the order \f$O(\alpha_t\alpha_s +
-\alpha_t^2)\f$ can be used by setting in the model file
+In the Standard Model the two-loop Higgs pole mass corrections of the
+order \f$O(\alpha_t\alpha_s)\f$ [arxiv:1407.4336, Eq.(2.47)] and
+\f$O(\alpha_t^2)\f$ [arxiv:1205.6497, Eq.(20)] can be used by setting
+in the model file
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~{.m}
 UseHiggs2LoopSM = True;
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+The Standard Model the three-loop Higgs pole mass corrections of the
+order \f$O(\alpha_t\alpha_s^2 + \alpha_t^2\alpha_s + \alpha_t^3)\f$
+[arxiv:1407.4336, Eq.(3.2)] can be used by setting in the model file
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~{.m}
+UseHiggs3LoopSM = True;
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+\note When the 3-loop corrections are used, the following switches
+will be set automatically for consistency:
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~{.m}
+UseHiggs2LoopSM = True;
+UseSMAlphaS3Loop = True;    (* use 2- and 3-loop QCD corrections to alpha_s *)
+UseYukawa3LoopQCD = True;   (* use 2- and 3-loop QCD corrections to m_t *)
+UseSM3LoopRGEs = True;      (* use 3-loop RGEs *)
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 #### Split-MSSM (SplitMSSM) ####
@@ -1067,5 +1503,62 @@ UseYukawa3LoopQCD = True;
 Note, that these 3-loop corrections are only applied at run-time if
 the threshold correction loop order (block `FlexibleSUSY[7]`) is set
 to a value > 2.
+
+### Three-loop RGEs for specific models ###
+
+#### Standard Model ####
+
+In the Standard Model the known three-loop RGEs from [arxiv:1303.4364,
+arXiv:1307.3536] can be used by setting in the model file
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~{.m}
+UseSM3LoopRGEs = True; (* use three-loop SM RGEs *)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+#### MSSM ####
+
+In the MSSM the known three-loop RGEs from [arxiv:hep-ph/0308231,
+http://www.liv.ac.uk/~dij/betas/allgennb.log] can be used by setting
+in the model file
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~{.m}
+UseMSSM3LoopRGEs = True; (* use three-loop MSSM RGEs *)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+### Two-loop threshold corrections ###
+
+#### SM ####
+
+The known SM 2- and 3-loop QCD threshold corrections of order
+\f$O(\alpha_s^2 + \alpha_s^3)\f$ to the strong coupling constant are
+known by [hep-ph/0004189].  They can be taken into account by setting
+in the model file:
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~{.m}
+UseSMAlphaS3Loop = True; (* use 2- and 3- threshold for alpha_s *)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+#### MSSM ####
+
+In the MSSM the known two-loop SQCD relation between the top pole mass
+and the DR-bar top mass from
+[arxiv:hep-ph/0210258,arxiv:hep-ph/0507139] as well as between the
+MS-bar bottom mass in the Standard Model and the DR-bar bottom mass in
+the MSSM [arxiv:0707.0650] can be used by setting in the model file
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~{.m}
+UseMSSMYukawa2Loop = True; (* use two-loop threshold for yt and yb *)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+The known MSSM two-loop corrections of order \f$O(\alpha_s^2 +
+\alpha_s\alpha_t + \alpha_s\alpha_b)\f$ to the strong coupling
+constant are known by [hep-ph/0509048, arXiv:0810.5101,
+arXiv:1009.5455]. They can be taken into account by setting in the
+model file:
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~{.m}
+UseMSSMAlphaS2Loop = True; (* use two-loop threshold for alpha_s *)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 */

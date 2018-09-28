@@ -21,16 +21,22 @@
 ///  \author Pat Scott
 ///          (p.scott@imperial.ac.uk)
 ///  \date 2014 Aug
+///
 ///  \author Csaba Balazs
 ///  \date 2015 Jan-May
+///   \author Tomas Gonzalo
+///           (t.e.gonzalo@fys.uio.no)
+///  \date 2018 Feb
+///  \author Andrew Fowlie
+///  \date 2018 May
+///  \author Peter Athron
+///  \date 2018 May
 ///
 ///  *********************************************
 
 
 #ifndef __DecayBit_rollcall_hpp__
 #define __DecayBit_rollcall_hpp__
-
-#include "gambit/DecayBit/DecayBit_types.hpp"
 
 
 #define MODULE DecayBit
@@ -62,9 +68,9 @@ START_MODULE
 
     #define FUNCTION Ref_SM_Higgs_decays_FH
     START_FUNCTION(DecayTable::Entry)
-    DEPENDENCY(SMlike_Higgs_PDG_code, int)
+    DEPENDENCY(MSSM_spectrum, Spectrum)
     DEPENDENCY(FH_Couplings_output, fh_Couplings)
-    DEPENDENCY(SLHA_pseudonyms, DecayBit::mass_es_pseudonyms)
+    DEPENDENCY(SLHA_pseudonyms, mass_es_pseudonyms)
     ALLOW_MODELS(MSSM63atQ, MSSM63atMGUT)
     #undef FUNCTION
 
@@ -76,16 +82,15 @@ START_MODULE
 
     #define FUNCTION Ref_SM_other_Higgs_decays_table
     START_FUNCTION(DecayTable::Entry)
-    DEPENDENCY(SMlike_Higgs_PDG_code, int)
     DEPENDENCY(MSSM_spectrum, Spectrum)
     ALLOW_MODELS(MSSM63atQ, MSSM63atMGUT)
     #undef FUNCTION
 
     #define FUNCTION Ref_SM_other_Higgs_decays_FH
     START_FUNCTION(DecayTable::Entry)
-    DEPENDENCY(SMlike_Higgs_PDG_code, int)
+    DEPENDENCY(MSSM_spectrum, Spectrum)
     DEPENDENCY(FH_Couplings_output, fh_Couplings)
-    DEPENDENCY(SLHA_pseudonyms, DecayBit::mass_es_pseudonyms)
+    DEPENDENCY(SLHA_pseudonyms, mass_es_pseudonyms)
     ALLOW_MODELS(MSSM63atQ, MSSM63atMGUT)
     #undef FUNCTION
 
@@ -104,7 +109,7 @@ START_MODULE
     #define FUNCTION Ref_SM_A0_decays_FH
     START_FUNCTION(DecayTable::Entry)
     DEPENDENCY(FH_Couplings_output, fh_Couplings)
-    DEPENDENCY(SLHA_pseudonyms, DecayBit::mass_es_pseudonyms)
+    DEPENDENCY(SLHA_pseudonyms, mass_es_pseudonyms)
     ALLOW_MODELS(MSSM63atQ, MSSM63atMGUT)
     #undef FUNCTION
 
@@ -128,7 +133,7 @@ START_MODULE
 
     #define FUNCTION MSSM_h0_1_decays
     START_FUNCTION(DecayTable::Entry)
-    DEPENDENCY(SLHA_pseudonyms, DecayBit::mass_es_pseudonyms)
+    DEPENDENCY(SLHA_pseudonyms, mass_es_pseudonyms)
     BACKEND_REQ(cb_widthhl_hdec, (sh_reqd), widthhl_hdec_type)
     BACKEND_REQ(cb_wisusy_hdec, (sh_reqd), wisusy_hdec_type)
     BACKEND_REQ(cb_wisfer_hdec, (sh_reqd), wisfer_hdec_type)
@@ -139,7 +144,7 @@ START_MODULE
     #define FUNCTION FH_MSSM_h0_1_decays
     START_FUNCTION(DecayTable::Entry)
     DEPENDENCY(FH_Couplings_output, fh_Couplings)
-    DEPENDENCY(SLHA_pseudonyms, DecayBit::mass_es_pseudonyms)
+    DEPENDENCY(SLHA_pseudonyms, mass_es_pseudonyms)
     ALLOW_MODELS(MSSM63atQ, MSSM63atMGUT)
     #undef FUNCTION
 
@@ -150,7 +155,7 @@ START_MODULE
 
     #define FUNCTION h0_2_decays
     START_FUNCTION(DecayTable::Entry)
-    DEPENDENCY(SLHA_pseudonyms, DecayBit::mass_es_pseudonyms)
+    DEPENDENCY(SLHA_pseudonyms, mass_es_pseudonyms)
     BACKEND_REQ(cb_widthhh_hdec, (sh_reqd), widthhh_hdec_type)
     BACKEND_REQ(cb_wisusy_hdec, (sh_reqd), wisusy_hdec_type)
     BACKEND_REQ(cb_wisfer_hdec, (sh_reqd), wisfer_hdec_type)
@@ -160,7 +165,7 @@ START_MODULE
 
     #define FUNCTION FH_h0_2_decays
     START_FUNCTION(DecayTable::Entry)
-    DEPENDENCY(SLHA_pseudonyms, DecayBit::mass_es_pseudonyms)
+    DEPENDENCY(SLHA_pseudonyms, mass_es_pseudonyms)
     DEPENDENCY(FH_Couplings_output, fh_Couplings)
     ALLOW_MODELS(MSSM63atQ, MSSM63atMGUT)
     #undef FUNCTION
@@ -172,7 +177,7 @@ START_MODULE
 
     #define FUNCTION A0_decays
     START_FUNCTION(DecayTable::Entry)
-    DEPENDENCY(SLHA_pseudonyms, DecayBit::mass_es_pseudonyms)
+    DEPENDENCY(SLHA_pseudonyms, mass_es_pseudonyms)
     BACKEND_REQ(cb_widtha_hdec, (sh_reqd), widtha_hdec_type)
     BACKEND_REQ(cb_wisusy_hdec, (sh_reqd), wisusy_hdec_type)
     BACKEND_OPTION( (SUSY_HIT), (sh_reqd) )
@@ -182,7 +187,7 @@ START_MODULE
     #define FUNCTION FH_A0_decays
     START_FUNCTION(DecayTable::Entry)
     DEPENDENCY(FH_Couplings_output, fh_Couplings)
-    DEPENDENCY(SLHA_pseudonyms, DecayBit::mass_es_pseudonyms)
+    DEPENDENCY(SLHA_pseudonyms, mass_es_pseudonyms)
     ALLOW_MODELS(MSSM63atQ, MSSM63atMGUT)
     #undef FUNCTION
 
@@ -193,7 +198,7 @@ START_MODULE
 
     #define FUNCTION H_plus_decays
     START_FUNCTION(DecayTable::Entry)
-    DEPENDENCY(SLHA_pseudonyms, DecayBit::mass_es_pseudonyms)
+    DEPENDENCY(SLHA_pseudonyms, mass_es_pseudonyms)
     BACKEND_REQ(cb_widthhc_hdec, (sh_reqd), widthhc_hdec_type)
     BACKEND_REQ(cb_wisusy_hdec, (sh_reqd), wisusy_hdec_type)
     BACKEND_REQ(cb_wisfer_hdec, (sh_reqd), wisfer_hdec_type)
@@ -203,7 +208,7 @@ START_MODULE
 
     #define FUNCTION FH_H_plus_decays
     START_FUNCTION(DecayTable::Entry)
-    DEPENDENCY(SLHA_pseudonyms, DecayBit::mass_es_pseudonyms)
+    DEPENDENCY(SLHA_pseudonyms, mass_es_pseudonyms)
     DEPENDENCY(FH_Couplings_output, fh_Couplings)
     ALLOW_MODELS(MSSM63atQ, MSSM63atMGUT)
     #undef FUNCTION
@@ -215,7 +220,7 @@ START_MODULE
 
     #define FUNCTION gluino_decays
     START_FUNCTION(DecayTable::Entry)
-    DEPENDENCY(SLHA_pseudonyms, DecayBit::mass_es_pseudonyms)
+    DEPENDENCY(SLHA_pseudonyms, mass_es_pseudonyms)
     BACKEND_REQ(cb_sd_gluiwidth, (sh_reqd), sd_gluiwidth_type)
     BACKEND_REQ(cb_sd_glui2body, (sh_reqd), sd_glui2body_type)
     BACKEND_REQ(cb_sd_gluiloop, (sh_reqd), sd_gluiloop_type)
@@ -231,7 +236,7 @@ START_MODULE
 
     #define FUNCTION stop_1_decays
     START_FUNCTION(DecayTable::Entry)
-    DEPENDENCY(SLHA_pseudonyms, DecayBit::mass_es_pseudonyms)
+    DEPENDENCY(SLHA_pseudonyms, mass_es_pseudonyms)
     BACKEND_REQ(cb_sd_stopwidth, (sh_reqd), sd_stopwidth_type)
     BACKEND_REQ(cb_sd_stop2body, (sh_reqd), sd_stop2body_type)
     BACKEND_REQ(cb_sd_stoploop, (sh_reqd), sd_stoploop_type)
@@ -247,7 +252,7 @@ START_MODULE
 
     #define FUNCTION stop_2_decays
     START_FUNCTION(DecayTable::Entry)
-    DEPENDENCY(SLHA_pseudonyms, DecayBit::mass_es_pseudonyms)
+    DEPENDENCY(SLHA_pseudonyms, mass_es_pseudonyms)
     BACKEND_REQ(cb_sd_stopwidth, (sh_reqd), sd_stopwidth_type)
     BACKEND_REQ(cb_sd_stop2body, (sh_reqd), sd_stop2body_type)
     BACKEND_REQ(cb_sd_stop3body, (sh_reqd), sd_stop3body_type)
@@ -262,7 +267,7 @@ START_MODULE
 
     #define FUNCTION sbottom_1_decays
     START_FUNCTION(DecayTable::Entry)
-    DEPENDENCY(SLHA_pseudonyms, DecayBit::mass_es_pseudonyms)
+    DEPENDENCY(SLHA_pseudonyms, mass_es_pseudonyms)
     BACKEND_REQ(cb_sd_sbotwidth, (sh_reqd), sd_sbotwidth_type)
     BACKEND_REQ(cb_sd_sbot2body, (sh_reqd), sd_sbot2body_type)
     BACKEND_REQ(cb_sd_sbot3body, (sh_reqd), sd_sbot3body_type)
@@ -277,7 +282,7 @@ START_MODULE
 
     #define FUNCTION sbottom_2_decays
     START_FUNCTION(DecayTable::Entry)
-    DEPENDENCY(SLHA_pseudonyms, DecayBit::mass_es_pseudonyms)
+    DEPENDENCY(SLHA_pseudonyms, mass_es_pseudonyms)
     BACKEND_REQ(cb_sd_sbotwidth, (sh_reqd), sd_sbotwidth_type)
     BACKEND_REQ(cb_sd_sbot2body, (sh_reqd), sd_sbot2body_type)
     BACKEND_REQ(cb_sd_sbot3body, (sh_reqd), sd_sbot3body_type)
@@ -448,7 +453,19 @@ START_MODULE
 
     #define FUNCTION stau_1_decays
     START_FUNCTION(DecayTable::Entry)
-    DEPENDENCY(SLHA_pseudonyms, DecayBit::mass_es_pseudonyms)
+    DEPENDENCY(stau_1_decay_rates_SH, DecayTable::Entry)
+    DEPENDENCY(stau_1_decay_rates_smallsplit, DecayTable::Entry)
+    ALLOW_MODELS(MSSM63atQ, MSSM63atMGUT)
+    #undef FUNCTION
+
+  #undef CAPABILITY
+
+  #define CAPABILITY stau_1_decay_rates_SH
+  START_CAPABILITY
+
+    #define FUNCTION stau_1_decays_SH
+    START_FUNCTION(DecayTable::Entry)
+    DEPENDENCY(SLHA_pseudonyms, mass_es_pseudonyms)
     BACKEND_REQ(cb_sd_stauwidth, (sh_reqd), sd_stauwidth_type)
     BACKEND_REQ(cb_sd_stau2body, (sh_reqd), sd_stau2body_type)
     BACKEND_REQ(cb_sd_stau2bodygrav, (sh_reqd), sd_stau2bodygrav_type)
@@ -458,12 +475,30 @@ START_MODULE
 
   #undef CAPABILITY
 
+  #define CAPABILITY stau_1_decay_rates_smallsplit
+  START_CAPABILITY
+
+    #define FUNCTION stau_1_decays_smallsplit
+    START_FUNCTION(DecayTable::Entry)
+    DEPENDENCY(SLHA_pseudonyms, mass_es_pseudonyms)
+    DEPENDENCY(MSSM_spectrum, Spectrum)
+    DEPENDENCY(tau_minus_decay_rates, DecayTable::Entry)
+    ALLOW_MODEL_DEPENDENCE(MSSM63atQ, MSSM63atMGUT, StandardModel_SLHA2)
+    MODEL_GROUP(group1, (StandardModel_SLHA2))
+    MODEL_GROUP(group2, (MSSM63atQ, MSSM63atMGUT))
+    ALLOW_MODEL_COMBINATION(group1,group2)
+    #undef FUNCTION
+
+  #undef CAPABILITY
+
+
+
   #define CAPABILITY stau_2_decay_rates
   START_CAPABILITY
 
     #define FUNCTION stau_2_decays
     START_FUNCTION(DecayTable::Entry)
-    DEPENDENCY(SLHA_pseudonyms, DecayBit::mass_es_pseudonyms)
+    DEPENDENCY(SLHA_pseudonyms, mass_es_pseudonyms)
     BACKEND_REQ(cb_sd_stauwidth, (sh_reqd), sd_stauwidth_type)
     BACKEND_REQ(cb_sd_stau2body, (sh_reqd), sd_stau2body_type)
     BACKEND_OPTION( (SUSY_HIT), (sh_reqd) )
@@ -503,7 +538,7 @@ START_MODULE
 
     #define FUNCTION snu_taul_decays
     START_FUNCTION(DecayTable::Entry)
-    DEPENDENCY(SLHA_pseudonyms, DecayBit::mass_es_pseudonyms)
+    DEPENDENCY(SLHA_pseudonyms, mass_es_pseudonyms)
     BACKEND_REQ(cb_sd_sntauwidth, (sh_reqd), sd_sntauwidth_type)
     BACKEND_REQ(cb_sd_sntau2body, (sh_reqd), sd_sntau2body_type)
     BACKEND_OPTION( (SUSY_HIT), (sh_reqd) )
@@ -517,7 +552,20 @@ START_MODULE
 
     #define FUNCTION chargino_plus_1_decays
     START_FUNCTION(DecayTable::Entry)
-    DEPENDENCY(SLHA_pseudonyms, DecayBit::mass_es_pseudonyms)
+    DEPENDENCY(chargino_plus_1_decay_rates_SH, DecayTable::Entry)
+    DEPENDENCY(chargino_plus_1_decay_rates_smallsplit, DecayTable::Entry)
+    ALLOW_MODELS(MSSM63atQ, MSSM63atMGUT)
+    #undef FUNCTION
+
+  #undef CAPABILITY
+
+  #define CAPABILITY chargino_plus_1_decay_rates_SH
+  START_CAPABILITY
+
+    #define FUNCTION chargino_plus_1_decays_SH
+    START_FUNCTION(DecayTable::Entry)
+    DEPENDENCY(SLHA_pseudonyms, mass_es_pseudonyms)
+    DEPENDENCY(MSSM_spectrum, Spectrum)
     BACKEND_REQ(cb_sd_charwidth, (sh_reqd), sd_charwidth_type)
     BACKEND_REQ(cb_sd_char2body, (sh_reqd), sd_char2body_type)
     BACKEND_REQ(cb_sd_char2bodygrav, (sh_reqd), sd_char2bodygrav_type)
@@ -528,12 +576,29 @@ START_MODULE
 
   #undef CAPABILITY
 
+  #define CAPABILITY chargino_plus_1_decay_rates_smallsplit
+  START_CAPABILITY
+
+    #define FUNCTION chargino_plus_1_decays_smallsplit
+    START_FUNCTION(DecayTable::Entry)
+    DEPENDENCY(SLHA_pseudonyms, mass_es_pseudonyms)
+    DEPENDENCY(MSSM_spectrum, Spectrum)
+    DEPENDENCY(rho_0_decay_rates, DecayTable::Entry)
+    DEPENDENCY(rho1450_decay_rates, DecayTable::Entry)
+    ALLOW_MODEL_DEPENDENCE(MSSM63atQ, MSSM63atMGUT, StandardModel_SLHA2)
+    MODEL_GROUP(group1, (StandardModel_SLHA2))
+    MODEL_GROUP(group2, (MSSM63atQ, MSSM63atMGUT))
+    ALLOW_MODEL_COMBINATION(group1,group2)
+    #undef FUNCTION
+
+  #undef CAPABILITY
+
   #define CAPABILITY chargino_plus_2_decay_rates
   START_CAPABILITY
 
     #define FUNCTION chargino_plus_2_decays
     START_FUNCTION(DecayTable::Entry)
-    DEPENDENCY(SLHA_pseudonyms, DecayBit::mass_es_pseudonyms)
+    DEPENDENCY(SLHA_pseudonyms, mass_es_pseudonyms)
     BACKEND_REQ(cb_sd_charwidth, (sh_reqd), sd_charwidth_type)
     BACKEND_REQ(cb_sd_char2body, (sh_reqd), sd_char2body_type)
     BACKEND_REQ(cb_sd_char2bodygrav, (sh_reqd), sd_char2bodygrav_type)
@@ -549,7 +614,7 @@ START_MODULE
 
     #define FUNCTION neutralino_1_decays
     START_FUNCTION(DecayTable::Entry)
-    DEPENDENCY(SLHA_pseudonyms, DecayBit::mass_es_pseudonyms)
+    DEPENDENCY(SLHA_pseudonyms, mass_es_pseudonyms)
     BACKEND_REQ(cb_sd_neutwidth, (sh_reqd), sd_neutwidth_type)
     BACKEND_REQ(cb_sd_neut2body, (sh_reqd), sd_neut2body_type)
     BACKEND_REQ(cb_sd_neut2bodygrav, (sh_reqd), sd_neut2bodygrav_type)
@@ -565,7 +630,7 @@ START_MODULE
 
     #define FUNCTION neutralino_2_decays
     START_FUNCTION(DecayTable::Entry)
-    DEPENDENCY(SLHA_pseudonyms, DecayBit::mass_es_pseudonyms)
+    DEPENDENCY(SLHA_pseudonyms, mass_es_pseudonyms)
     BACKEND_REQ(cb_sd_neutwidth, (sh_reqd), sd_neutwidth_type)
     BACKEND_REQ(cb_sd_neut2body, (sh_reqd), sd_neut2body_type)
     BACKEND_REQ(cb_sd_neut2bodygrav, (sh_reqd), sd_neut2bodygrav_type)
@@ -582,7 +647,7 @@ START_MODULE
 
     #define FUNCTION neutralino_3_decays
     START_FUNCTION(DecayTable::Entry)
-    DEPENDENCY(SLHA_pseudonyms, DecayBit::mass_es_pseudonyms)
+    DEPENDENCY(SLHA_pseudonyms, mass_es_pseudonyms)
     BACKEND_REQ(cb_sd_neutwidth, (sh_reqd), sd_neutwidth_type)
     BACKEND_REQ(cb_sd_neut2body, (sh_reqd), sd_neut2body_type)
     BACKEND_REQ(cb_sd_neut2bodygrav, (sh_reqd), sd_neut2bodygrav_type)
@@ -599,7 +664,7 @@ START_MODULE
 
     #define FUNCTION neutralino_4_decays
     START_FUNCTION(DecayTable::Entry)
-    DEPENDENCY(SLHA_pseudonyms, DecayBit::mass_es_pseudonyms)
+    DEPENDENCY(SLHA_pseudonyms, mass_es_pseudonyms)
     BACKEND_REQ(cb_sd_neutwidth, (sh_reqd), sd_neutwidth_type)
     BACKEND_REQ(cb_sd_neut2body, (sh_reqd), sd_neut2body_type)
     BACKEND_REQ(cb_sd_neut2bodygrav, (sh_reqd), sd_neut2bodygrav_type)
@@ -610,7 +675,6 @@ START_MODULE
     #undef FUNCTION
 
   #undef CAPABILITY
-
 
   #define CAPABILITY decay_rates
   START_CAPABILITY
@@ -639,8 +703,9 @@ START_MODULE
     DEPENDENCY(rho_minus_decay_rates, DecayTable::Entry)
     DEPENDENCY(rho_plus_decay_rates, DecayTable::Entry)
     DEPENDENCY(omega_decay_rates, DecayTable::Entry)
+    DEPENDENCY(rho1450_decay_rates, DecayTable::Entry)
     MODEL_CONDITIONAL_DEPENDENCY(MSSM_spectrum, Spectrum, MSSM63atQ, MSSM63atMGUT)
-    MODEL_CONDITIONAL_DEPENDENCY(SLHA_pseudonyms, DecayBit::mass_es_pseudonyms, MSSM63atQ, MSSM63atMGUT)
+    MODEL_CONDITIONAL_DEPENDENCY(SLHA_pseudonyms, mass_es_pseudonyms, MSSM63atQ, MSSM63atMGUT)
     MODEL_CONDITIONAL_DEPENDENCY(h0_2_decay_rates, DecayTable::Entry, MSSM63atQ, MSSM63atMGUT)
     MODEL_CONDITIONAL_DEPENDENCY(A0_decay_rates, DecayTable::Entry, MSSM63atQ, MSSM63atMGUT)
     MODEL_CONDITIONAL_DEPENDENCY(H_plus_decay_rates, DecayTable::Entry, MSSM63atQ, MSSM63atMGUT)
@@ -713,19 +778,69 @@ START_MODULE
   #define CAPABILITY SLHA_pseudonyms
   START_CAPABILITY
     #define FUNCTION get_mass_es_pseudonyms
-    START_FUNCTION(DecayBit::mass_es_pseudonyms)
+    START_FUNCTION(mass_es_pseudonyms)
     DEPENDENCY(MSSM_spectrum, Spectrum)
     #undef FUNCTION
   #undef CAPABILITY
 
+  #define CAPABILITY Z_gamma_nu
+  START_CAPABILITY
+    #define FUNCTION Z_gamma_nu_SM_2l
+    START_FUNCTION(triplet<double>)
+    DEPENDENCY(SM_spectrum, Spectrum)
+    #undef FUNCTION
+  #undef CAPABILITY
+
+  #define CAPABILITY Z_gamma_chi_0
+  START_CAPABILITY
+    #define FUNCTION Z_gamma_chi_0_MSSM_tree
+    START_FUNCTION(triplet<double>)
+    DEPENDENCY(MSSM_spectrum, Spectrum)
+    ALLOW_MODELS(MSSM63atQ, MSSM63atMGUT)
+    #undef FUNCTION
+  #undef CAPABILITY
+
+  #define CAPABILITY lnL_Z_inv
+  START_CAPABILITY
+    #define FUNCTION lnL_Z_inv_MSSMlike
+    START_FUNCTION(double)
+    DEPENDENCY(Z_gamma_nu, triplet<double>)
+    DEPENDENCY(Z_gamma_chi_0, triplet<double>)
+    #undef FUNCTION
+  #undef CAPABILITY
+
+  #define CAPABILITY lnL_Higgs_invWidth
+  START_CAPABILITY
+    #define FUNCTION lnL_Higgs_invWidth_SMlike
+    START_FUNCTION(double)
+    DEPENDENCY(inv_Higgs_BF, double)
+    ALLOW_MODELS(SingletDM, SingletDMZ3, MSSM63atQ, MSSM63atMGUT)
+    #undef FUNCTION
+  #undef CAPABILITY
+
+  #define CAPABILITY inv_Higgs_BF
+  START_CAPABILITY
+
+    #define FUNCTION SingletDM_inv_Higgs_BF
+    START_FUNCTION(double)
+    DEPENDENCY(Higgs_decay_rates, DecayTable::Entry)
+    ALLOW_MODELS(SingletDM, SingletDMZ3)
+    #undef FUNCTION
+
+    #define FUNCTION MSSM_inv_Higgs_BF
+    START_FUNCTION(double)
+    DEPENDENCY(MSSM_spectrum, Spectrum)
+    ALLOW_MODELS(MSSM63atQ, MSSM63atMGUT)
+    #undef FUNCTION
+
+  #undef CAPABILITY
 
 #undef MODULE
-
 
 // SM decay rate functions
 QUICK_FUNCTION(DecayBit, W_plus_decay_rates,    NEW_CAPABILITY, W_plus_decays,    DecayTable::Entry)
 QUICK_FUNCTION(DecayBit, W_minus_decay_rates ,  NEW_CAPABILITY, W_minus_decays,   DecayTable::Entry, (), (W_plus_decay_rates,   DecayTable::Entry))
-QUICK_FUNCTION(DecayBit, Z_decay_rates,         NEW_CAPABILITY, Z_decays,         DecayTable::Entry)
+QUICK_FUNCTION(DecayBit, Z_decay_rates,         OLD_CAPABILITY, Z_decays,         DecayTable::Entry)
 QUICK_FUNCTION(DecayBit, tbar_decay_rates,      NEW_CAPABILITY, tbar_decays,      DecayTable::Entry, (), (t_decay_rates,        DecayTable::Entry))
 QUICK_FUNCTION(DecayBit, mu_plus_decay_rates,   NEW_CAPABILITY, mu_plus_decays,   DecayTable::Entry)
 QUICK_FUNCTION(DecayBit, mu_minus_decay_rates,  NEW_CAPABILITY, mu_minus_decays,  DecayTable::Entry, (), (mu_plus_decay_rates,  DecayTable::Entry))
@@ -739,6 +854,7 @@ QUICK_FUNCTION(DecayBit, rho_0_decay_rates,     NEW_CAPABILITY, rho_0_decays,   
 QUICK_FUNCTION(DecayBit, rho_plus_decay_rates,  NEW_CAPABILITY, rho_plus_decays,  DecayTable::Entry)
 QUICK_FUNCTION(DecayBit, rho_minus_decay_rates, NEW_CAPABILITY, rho_minus_decays, DecayTable::Entry, (), (rho_plus_decay_rates, DecayTable::Entry))
 QUICK_FUNCTION(DecayBit, omega_decay_rates,     NEW_CAPABILITY, omega_decays,     DecayTable::Entry)
+QUICK_FUNCTION(DecayBit, rho1450_decay_rates,   NEW_CAPABILITY, rho1450_decays,   DecayTable::Entry)
 
 // CP-conserving MSSM antiparticle decay rate functions
 QUICK_FUNCTION(DecayBit, H_minus_decay_rates,          NEW_CAPABILITY, H_minus_decays,          DecayTable::Entry, (MSSM63atQ, MSSM63atMGUT), (H_plus_decay_rates,          DecayTable::Entry))
@@ -765,9 +881,6 @@ QUICK_FUNCTION(DecayBit, snubar_muonl_decay_rates,     NEW_CAPABILITY, snubar_mu
 QUICK_FUNCTION(DecayBit, snubar_taul_decay_rates,      NEW_CAPABILITY, snubar_taul_decays,      DecayTable::Entry, (MSSM63atQ, MSSM63atMGUT), (snu_taul_decay_rates,       DecayTable::Entry))
 QUICK_FUNCTION(DecayBit, chargino_minus_1_decay_rates, NEW_CAPABILITY, chargino_minus_1_decays, DecayTable::Entry, (MSSM63atQ, MSSM63atMGUT), (chargino_plus_1_decay_rates,DecayTable::Entry))
 QUICK_FUNCTION(DecayBit, chargino_minus_2_decay_rates, NEW_CAPABILITY, chargino_minus_2_decays, DecayTable::Entry, (MSSM63atQ, MSSM63atMGUT), (chargino_plus_2_decay_rates,DecayTable::Entry))
-
-// Likelihoods
-QUICK_FUNCTION(DecayBit, lnL_Higgs_invWidth, NEW_CAPABILITY, lnL_Higgs_invWidth_SMlike, double, (SingletDM, SingletDMZ3), (Higgs_decay_rates, DecayTable::Entry))
 
 #endif /* defined(__DecayBit_rollcall_hpp__) */
 

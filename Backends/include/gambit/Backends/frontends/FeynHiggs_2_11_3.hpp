@@ -18,6 +18,7 @@
 
 
 #define BACKENDNAME FeynHiggs
+#define BACKENDLANG FORTRAN
 #define VERSION 2.11.3
 #define SAFE_VERSION 2_11_3
 
@@ -25,6 +26,8 @@
  * when this header file is included somewhere. */
 
 LOAD_LIBRARY
+
+BE_ALLOW_MODELS(MSSM63atQ, MSSM63atMGUT)
 
 /* Next we use macros BE_VARIABLE and BE_FUNCTION to load pointers
  * (using dlsym) to the variables and functions within the library.
@@ -37,11 +40,7 @@ LOAD_LIBRARY
  * to the modules via the rollcall system */
 
 /* Syntax for BE_FUNCTION:
- * BE_FUNCTION([choose function name], [type], [arguement types], "[exact symbol name]", "[choose capability name]")
- *
- * The last argument (capability name) is optional.
- * If left out (as done below) it will default to "[backend name]_[function name]_capability"
- * (e.g. "LibFirst_initialize_capability")  */
+ * BE_FUNCTION([choose function name], [type], [arguement types], "[exact symbol name]", "[choose capability name]") */
 
 
 BE_FUNCTION(FHSetFlags, void, (int&,int&,int&,int&,int&,int&,int&,int&,int&,int&), "fhsetflags_", "FHSetFlags")

@@ -16,7 +16,7 @@
 // <http://www.gnu.org/licenses/>.
 // ====================================================================
 
-// File generated at Sat 27 Aug 2016 12:49:06
+// File generated at Thu 10 May 2018 15:06:35
 
 /**
  * @file lowMSSM_two_scale_model.cpp
@@ -26,25 +26,18 @@
  * which solve EWSB and calculate pole masses and mixings from DRbar
  * parameters.
  *
- * This file was generated at Sat 27 Aug 2016 12:49:06 with FlexibleSUSY
- * 1.5.1 (git commit: 8356bacd26e8aecc6635607a32835d534ea3cf01) and SARAH 4.9.0 .
+ * This file was generated at Thu 10 May 2018 15:06:35 with FlexibleSUSY
+ * 2.0.1 (git commit: unknown) and SARAH 4.12.2 .
  */
 
 #include "lowMSSM_two_scale_model.hpp"
 
 namespace flexiblesusy {
 
-using namespace lowMSSM_info;
-
 #define CLASSNAME lowMSSM<Two_scale>
 
 CLASSNAME::lowMSSM(const lowMSSM_input_parameters& input_)
-   : Two_scale_model()
-   , lowMSSM_mass_eigenstates(input_)
-{
-}
-
-CLASSNAME::~lowMSSM()
+   : lowMSSM_mass_eigenstates(input_)
 {
 }
 

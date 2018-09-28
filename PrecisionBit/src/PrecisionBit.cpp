@@ -21,6 +21,7 @@
 #include <algorithm>
 
 #include "gambit/Elements/gambit_module_headers.hpp"
+#include "gambit/Elements/smlike_higgs.hpp"
 #include "gambit/PrecisionBit/PrecisionBit_rollcall.hpp"
 #include "gambit/Utils/statistics.hpp"
 #include "gambit/Elements/mssm_slhahelp.hpp"
@@ -164,8 +165,14 @@ namespace Gambit
     /// @}
 
     /// Helper function to set W masses
-    void update_W_masses(SubSpectrum& HE, SubSpectrum& LE, const triplet<double>& prec_mw)
+    void update_W_masses(SubSpectrum& HE, SubSpectrum& LE, const triplet<double>& prec_mw, bool allow_fallback)
     {
+      if (prec_mw.central <= 0.0 or Utils::isnan(prec_mw.central))
+      {
+        if (allow_fallback) return;
+        invalid_point().raise("Precison W mass NaN or <= 0.  To allow fallback to the unimproved value, "
+                              "set option allow_fallback_to_unimproved_masses=true in your YAML file.");
+      }
       HE.set_override(Par::Pole_Mass, prec_mw.central, "W+", true); // "true" flag causes overrides to be written even if no native quantity exists to override.
       HE.set_override(Par::Pole_Mass_1srd_high, prec_mw.upper/prec_mw.central, "W+", true);
       HE.set_override(Par::Pole_Mass_1srd_low, prec_mw.lower/prec_mw.central, "W+", true);
@@ -174,84 +181,58 @@ namespace Gambit
       LE.set_override(Par::Pole_Mass_1srd_low, prec_mw.lower/prec_mw.central, "W+", true);
     }
 
-    /// Precision MSSM spectrum manufacturer that does nothing but relabel the unimproved spectrum
-    void make_MSSM_precision_spectrum_none(Spectrum& improved_spec /*(result)*/)
+    /// Helper function to set arbitrary number of H masses
+    void update_H_masses(SubSpectrum& HE, int n_higgs, const str* higgses, int central, int error, std::vector<triplet<double> >& MH, bool allow_fallback)
     {
-      using namespace Pipes::make_MSSM_precision_spectrum_none;
-      improved_spec = *Dep::unimproved_MSSM_spectrum; // Does copy
-      improved_spec.drop_SLHAs_if_requested(runOptions, "GAMBIT_spectrum");
-    }
 
-    /// Precision MSSM spectrum manufacturer with precision W mass only
-    void make_MSSM_precision_spectrum_W(Spectrum& improved_spec /*(result)*/)
-    {
-      using namespace Pipes::make_MSSM_precision_spectrum_W;
-      improved_spec = *Dep::unimproved_MSSM_spectrum; // Does copy
-      update_W_masses(improved_spec.get_HE(), improved_spec.get_LE(), *Dep::prec_mw);
-      improved_spec.drop_SLHAs_if_requested(runOptions, "GAMBIT_spectrum");
-    }
-
-    /// Precision MSSM spectrum manufacturer with precision H and W masses
-    void make_MSSM_precision_spectrum_H_W(Spectrum& improved_spec /*(result)*/)
-    {
-      using namespace Pipes::make_MSSM_precision_spectrum_H_W;
-      improved_spec = *Dep::unimproved_MSSM_spectrum; // Does copy
-      SubSpectrum& HE = improved_spec.get_HE();
-      SubSpectrum& LE = improved_spec.get_LE();
-
-      // W mass
-      update_W_masses(HE, LE, *Dep::prec_mw);
-
-      // Higgs masses
-      //-------------
+      for (int i = 0; i < n_higgs; ++i)
+      {
+        if (MH[i].central <= 0.0 or Utils::isnan(MH[i].central))
+        {
+          if (allow_fallback) return;
+          invalid_point().raise("Precison "+higgses[i]+" mass NaN or <= 0.  To allow fallback to the unimproved value, "
+                                "set option allow_fallback_to_unimproved_masses=true in your YAML file.");
+        }
+      }
 
       // Central value:
       //  1 = from precision calculator
       //  2 = from spectrum calculator
       //  3 = mean of precision mass and mass from spectrum calculator
-      static int central = runOptions->getValueOrDef<int>(1, "Higgs_predictions_source");
-      // FIXME switch to this once the setters take pdg pairs
-      //const std::pair<int,int> higgses[4] = {std::pair<int,int>(25,0),
-      //                                 std::pair<int,int>(35,0),
-      //                                 std::pair<int,int>(36,0),
-      //                                 std::pair<int,int>(37,0)};
-      const str higgses[4] = {"h0_1", "h0_2", "A0", "H+"};
-      const double mh_s[4] = {HE.get(Par::Pole_Mass, higgses[0]),
-                              HE.get(Par::Pole_Mass, higgses[1]),
-                              HE.get(Par::Pole_Mass, higgses[2]),
-                              HE.get(Par::Pole_Mass, higgses[3])};
-      double mh[4];
-
+      std::vector<double> mh_s;
+      for (int i = 0; i < n_higgs; ++i) mh_s.push_back(HE.get(Par::Pole_Mass, higgses[i]));
+      double mh[n_higgs];
 
       #ifdef PRECISIONBIT_DEBUG
-        for (int i = 0; i < 4; i++) cout << "h masses, FS: "<< mh_s[i] << endl;
-        for (int i = 0; i < 4; i++) cout << "h masses, FS error low: "<< HE.get(Par::Pole_Mass_1srd_low, higgses[i])*mh_s[i] << endl;
-        for (int i = 0; i < 4; i++) cout << "h masses, FS error high: "<< HE.get(Par::Pole_Mass_1srd_high, higgses[i])*mh_s[i] << endl;
-        for (int i = 0; i < 4; i++) cout << "h masses, FH: "<< Dep::prec_HiggsMasses->MH[i] << endl;
-        for (int i = 0; i < 4; i++) cout << "h masses, FH error: "<< Dep::prec_HiggsMasses->deltaMH[i] << endl;
+        for (int i = 0; i < n_higgs; i++) cout << "h masses, spectrum generator: "<< mh_s[i] << endl;
+        for (int i = 0; i < n_higgs; i++) cout << "h masses, spectrum generator error low: "<< HE.get(Par::Pole_Mass_1srd_low, higgses[i])*mh_s[i] << endl;
+        for (int i = 0; i < n_higgs; i++) cout << "h masses, spectrum generator error high: "<< HE.get(Par::Pole_Mass_1srd_high, higgses[i])*mh_s[i] << endl;
+        for (int i = 0; i < n_higgs; i++) cout << "h masses, precision calculation: "<< MH[i].central << endl;
+        for (int i = 0; i < n_higgs; i++) cout << "h masses, precision calculation error low: "<< MH[i].lower << endl;
+        for (int i = 0; i < n_higgs; i++) cout << "h masses, precision calculation error high: "<< MH[i].upper << endl;
       #endif
 
       if (central == 1)
       {
-        for (int i = 0; i < 4; i++) mh[i] = Dep::prec_HiggsMasses->MH[i];
+        for (int i = 0; i < n_higgs; i++) mh[i] = MH[i].central;
       }
       else if (central == 2)
       {
-        for (int i = 0; i < 4; i++) mh[i] = mh_s[i];
+        for (int i = 0; i < n_higgs; i++) mh[i] = mh_s[i];
       }
       else if (central == 3)
       {
-        for (int i = 0; i < 4; i++) mh[i] = 0.5*(Dep::prec_HiggsMasses->MH[i] + mh_s[i]);
+        for (int i = 0; i < n_higgs; i++) mh[i] = 0.5*(MH[i].central + mh_s[i]);
       }
       else
       {
         std::stringstream msg;
-        msg << "Unrecognised Higgs_predictions_source option specified for make_MSSM_precision_spectrum: " << central;
+        msg << "Unrecognised Higgs_predictions_source option specified for making MSSM precision spectrum: " << central;
         PrecisionBit_error().raise(LOCAL_INFO,msg.str());
       }
       if (central != 2)
       {
-        for (int i = 0; i < 4; i++) HE.set_override(Par::Pole_Mass, mh[i], higgses[i]);
+        for (int i = 0; i < n_higgs; i++) HE.set_override(Par::Pole_Mass, mh[i], higgses[i]);
       }
 
       // Uncertainties:
@@ -263,44 +244,43 @@ namespace Gambit
       //  3 = RACC, with 1/2 * D_g taken at both edges.
       //  4 = RACC, with 1/2 * D_g taken at the spectrum-generator edge, D_p taken at the other edge.
       //  5 = RACC, with 1/2 * D_g taken at the precision-calculator edge, D_s taken at the other edge.
-      static int error = runOptions->getValueOrDef<int>(2, "Higgs_predictions_error_method");
-      const double D_g[4] = {Dep::prec_HiggsMasses->MH[0] - mh_s[0],
-                             Dep::prec_HiggsMasses->MH[1] - mh_s[1],
-                             Dep::prec_HiggsMasses->MH[2] - mh_s[2],
-                             Dep::prec_HiggsMasses->MH[3] - mh_s[3]};
-      double mh_low[4], mh_high[4];
+      std::vector<double> D_g;
+      for (int i = 0; i < n_higgs; ++i) D_g.push_back(MH[i].central - mh_s[i]);
+      double mh_low[n_higgs], mh_high[n_higgs];
 
       //  1 = sum in quadrature of D_s, D_p and D_g
       if (error == 1)
       {
-        for (int i = 0; i < 4; i++)
+        for (int i = 0; i < n_higgs; i++)
         {
           double D_s_low = HE.get(Par::Pole_Mass_1srd_low, higgses[i])*mh_s[i];
           double D_s_high = HE.get(Par::Pole_Mass_1srd_high, higgses[i])*mh_s[i];
-          double D_p = Dep::prec_HiggsMasses->deltaMH[i];
-          mh_low[i] = sqrt(D_s_low*D_s_low + D_p*D_p + D_g[i]*D_g[i]);
-          mh_high[i] = sqrt(D_s_high*D_s_high + D_p*D_p + D_g[i]*D_g[i]);
+          double D_p_low = MH[i].lower;
+          double D_p_high = MH[i].upper;
+          mh_low[i] = sqrt(D_s_low*D_s_low + D_p_low*D_p_low + D_g[i]*D_g[i]);
+          mh_high[i] = sqrt(D_s_high*D_s_high + D_p_high*D_p_high + D_g[i]*D_g[i]);
         }
       }
 
       //  2 = range around chosen central (RACC), with D_s and D_p taken at their respective edges.
       else if (error == 2)
       {
-        for (int i = 0; i < 4; i++)
+        for (int i = 0; i < n_higgs; i++)
         {
           double D_s_low = mh_s[i]*HE.get(Par::Pole_Mass_1srd_low, higgses[i]);
           double D_s_high = mh_s[i]*HE.get(Par::Pole_Mass_1srd_high, higgses[i]);
-          double D_p = Dep::prec_HiggsMasses->deltaMH[i];
+          double D_p_low = MH[i].lower;
+          double D_p_high = MH[i].upper;
           if (central == 1) // Using precision calculator mass as central value
           {
             if (D_g[i] >= 0) // Precision calculator mass is higher than spectrum generator mass
             {
               mh_low[i] = D_g[i] + D_s_low;
-              mh_high[i] = D_p;
+              mh_high[i] = D_p_high;
             }
             else // Precision calculator mass is lower than spectrum generator mass
             {
-              mh_low[i] = D_p;
+              mh_low[i] = D_p_low;
               mh_high[i] = D_s_high-D_g[i];
             }
           }
@@ -309,11 +289,11 @@ namespace Gambit
             if (D_g[i] >= 0) // Precision calculator mass is higher than spectrum generator mass
             {
               mh_low[i] = D_s_low;
-              mh_high[i] = D_g[i] + D_p;
+              mh_high[i] = D_g[i] + D_p_high;
             }
             else // Precision calculator mass is lower than spectrum generator mass
             {
-              mh_low[i] = D_p-D_g[i];
+              mh_low[i] = D_p_low-D_g[i];
               mh_high[i] = D_s_high;
             }
           }
@@ -322,11 +302,11 @@ namespace Gambit
             if (D_g[i] >= 0) // Precision calculator mass is higher than spectrum generator mass
             {
               mh_low[i] = 0.5*D_g[i] + D_s_low;
-              mh_high[i] = 0.5*D_g[i] + D_p;
+              mh_high[i] = 0.5*D_g[i] + D_p_high;
             }
             else // Precision calculator mass is lower than spectrum generator mass
             {
-              mh_low[i] = D_p - 0.5*D_g[i];
+              mh_low[i] = D_p_low - 0.5*D_g[i];
               mh_high[i] = D_s_high - 0.5*D_g[i];
             }
           }
@@ -336,7 +316,7 @@ namespace Gambit
       //  3 = RACC, with 1/2 * D_g taken at both edges.
       else if (error == 3)
       {
-        for (int i = 0; i < 4; i++)
+        for (int i = 0; i < n_higgs; i++)
         {
           if (central == 1) // Using precision calculator mass as central value
           {
@@ -375,19 +355,20 @@ namespace Gambit
       //  4 = RACC, with 1/2 * D_g taken at the spectrum-generator edge, D_p taken at the other edge.
       else if (error == 4)
       {
-        for (int i = 0; i < 4; i++)
+        for (int i = 0; i < n_higgs; i++)
         {
-          double D_p = Dep::prec_HiggsMasses->deltaMH[i];
+          double D_p_low = MH[i].lower;
+          double D_p_high = MH[i].upper;
           if (central == 1) // Using precision calculator mass as central value
           {
             if (D_g[i] >= 0) // Precision calculator mass is higher than spectrum generator mass
             {
               mh_low[i] = 1.5*D_g[i];
-              mh_high[i] = D_p;
+              mh_high[i] = D_p_high;
             }
             else // Precision calculator mass is lower than spectrum generator mass
             {
-              mh_low[i] = D_p;
+              mh_low[i] = D_p_low;
               mh_high[i] = -1.5*D_g[i];
             }
           }
@@ -396,11 +377,11 @@ namespace Gambit
             if (D_g[i] >= 0) // Precision calculator mass is higher than spectrum generator mass
             {
               mh_low[i] = 0.5*D_g[i];
-              mh_high[i] = D_g[i] + D_p;
+              mh_high[i] = D_g[i] + D_p_high;
             }
             else // Precision calculator mass is lower than spectrum generator mass
             {
-              mh_low[i] = D_p-D_g[i];
+              mh_low[i] = D_p_low-D_g[i];
               mh_high[i] = -0.5*D_g[i];
             }
           }
@@ -409,11 +390,11 @@ namespace Gambit
             if (D_g[i] >= 0) // Precision calculator mass is higher than spectrum generator mass
             {
               mh_low[i] = D_g[i];
-              mh_high[i] = 0.5*D_g[i] + D_p;
+              mh_high[i] = 0.5*D_g[i] + D_p_high;
             }
             else // Precision calculator mass is lower than spectrum generator mass
             {
-              mh_low[i] = D_p - 0.5*D_g[i];
+              mh_low[i] = D_p_low - 0.5*D_g[i];
               mh_high[i] = -D_g[i];
             }
           }
@@ -423,7 +404,7 @@ namespace Gambit
       //  5 = RACC, with 1/2 * D_g taken at the precision-calculator edge, D_s taken at the other edge.
       else if (error == 5)
       {
-        for (int i = 0; i < 4; i++)
+        for (int i = 0; i < n_higgs; i++)
         {
           double D_s_low = mh_s[i]*HE.get(Par::Pole_Mass_1srd_low, higgses[i]);
           double D_s_high = mh_s[i]*HE.get(Par::Pole_Mass_1srd_high, higgses[i]);
@@ -478,18 +459,61 @@ namespace Gambit
       }
 
       // Finally, set the errors.
-      for (int i = 0; i < 4; i++) HE.set_override(Par::Pole_Mass_1srd_low, mh_low[i]/mh[i], higgses[i], true);
-      for (int i = 0; i < 4; i++) HE.set_override(Par::Pole_Mass_1srd_high, mh_high[i]/mh[i], higgses[i], true);
+      for (int i = 0; i < n_higgs; i++) HE.set_override(Par::Pole_Mass_1srd_low, mh_low[i]/mh[i], higgses[i], true);
+      for (int i = 0; i < n_higgs; i++) HE.set_override(Par::Pole_Mass_1srd_high, mh_high[i]/mh[i], higgses[i], true);
 
       #ifdef PRECISIONBIT_DEBUG
-        for (int i = 0; i < 4; i++) cout << "h masses, central: "<< HE.get(Par::Pole_Mass, higgses[i])<< endl;
-        for (int i = 0; i < 4; i++) cout << "h masses, fractional low: "<< HE.get(Par::Pole_Mass_1srd_low, higgses[i])<< endl;
-        for (int i = 0; i < 4; i++) cout << "h masses, fractional high: " << HE.get(Par::Pole_Mass_1srd_high, higgses[i])<<endl;
+        for (int i = 0; i < n_higgs; i++) cout << "h masses, central: "<< HE.get(Par::Pole_Mass, higgses[i])<< endl;
+        for (int i = 0; i < n_higgs; i++) cout << "h masses, fractional low: "<< HE.get(Par::Pole_Mass_1srd_low, higgses[i])<< endl;
+        for (int i = 0; i < n_higgs; i++) cout << "h masses, fractional high: " << HE.get(Par::Pole_Mass_1srd_high, higgses[i])<<endl;
       #endif
+    }
+
+    /// Precision MSSM spectrum manufacturer that does nothing but relabel the unimproved spectrum
+    void make_MSSM_precision_spectrum_none(Spectrum& improved_spec /*(result)*/)
+    {
+      using namespace Pipes::make_MSSM_precision_spectrum_none;
+      improved_spec = *Dep::unimproved_MSSM_spectrum; // Does copy
+      improved_spec.drop_SLHAs_if_requested(runOptions, "GAMBIT_spectrum");
+    }
+
+    /// Precision MSSM spectrum manufacturer with precision W mass only
+    void make_MSSM_precision_spectrum_W(Spectrum& improved_spec /*(result)*/)
+    {
+      using namespace Pipes::make_MSSM_precision_spectrum_W;
+      improved_spec = *Dep::unimproved_MSSM_spectrum; // Does copy
+      static bool allow_fallback = runOptions->getValueOrDef<bool>(false, "allow_fallback_to_unimproved_masses");
+      update_W_masses(improved_spec.get_HE(), improved_spec.get_LE(), *Dep::prec_mw, allow_fallback);
+      improved_spec.drop_SLHAs_if_requested(runOptions, "GAMBIT_spectrum");
+    }
+
+    /// Precision MSSM spectrum manufacturer with precision SM-like Higgs mass
+    void make_MSSM_precision_spectrum_H(Spectrum& improved_spec /*(result)*/)
+    {
+      using namespace Pipes::make_MSSM_precision_spectrum_H;
+      improved_spec = *Dep::unimproved_MSSM_spectrum; // Does copy
+      SubSpectrum& HE = improved_spec.get_HE();
+      static bool allow_fallback = runOptions->getValueOrDef<bool>(false, "allow_fallback_to_unimproved_masses");
+
+      // Higgs masses
+      // FIXME switch to this once the setters take pdg pairs
+      //const std::pair<int,int> higgses[4] = {std::pair<int,int>(25,0),
+      //                                 std::pair<int,int>(35,0),
+      //                                 std::pair<int,int>(36,0),
+      //                                 std::pair<int,int>(37,0)};
+      str higgses[1];
+      std::vector< triplet<double> > MH = {*Dep::prec_mh};
+      int smlike_pdg = SMlike_higgs_PDG_code(HE);
+      if (smlike_pdg == 25) higgses[0] = "h0_1";
+      else if (smlike_pdg == 35) higgses[0] = "h0_2";
+      else PrecisionBit_error().raise(LOCAL_INFO, "Urecognised SM-like Higgs PDG code!");
+      static int central = runOptions->getValueOrDef<int>(1, "Higgs_predictions_source");
+      static int error = runOptions->getValueOrDef<int>(2, "Higgs_predictions_error_method");
+      update_H_masses(HE, 1, higgses, central, error, MH, allow_fallback);
 
       // Save the identity/identities of the calculator(s) used for the central value.
-      const str& p_calc = Dep::prec_HiggsMasses.name();
-      const str& p_orig = Dep::prec_HiggsMasses.origin();
+      const str& p_calc = Dep::prec_mh.name();
+      const str& p_orig = Dep::prec_mh.origin();
       const str& s_calc = Dep::unimproved_MSSM_spectrum.name();
       const str& s_orig = Dep::unimproved_MSSM_spectrum.origin();
       if (central == 1) HE.set_override(Par::dimensionless, 1.0, "h mass from: "+p_orig+"::"+p_calc, true);
@@ -500,6 +524,104 @@ namespace Gambit
       improved_spec.drop_SLHAs_if_requested(runOptions, "GAMBIT_spectrum");
 
     }
+
+    /// Precision MSSM spectrum manufacturer with precision W and SM-like Higgs masses
+    void make_MSSM_precision_spectrum_H_W(Spectrum& improved_spec /*(result)*/)
+    {
+      using namespace Pipes::make_MSSM_precision_spectrum_H_W;
+      improved_spec = *Dep::unimproved_MSSM_spectrum; // Does copy
+      SubSpectrum& HE = improved_spec.get_HE();
+      SubSpectrum& LE = improved_spec.get_LE();
+      static bool allow_fallback = runOptions->getValueOrDef<bool>(false, "allow_fallback_to_unimproved_masses");
+
+      // W mass
+      update_W_masses(HE, LE, *Dep::prec_mw, allow_fallback);
+
+      // Higgs masses
+      // FIXME switch to this once the setters take pdg pairs
+      //const std::pair<int,int> higgses[4] = {std::pair<int,int>(25,0),
+      //                                 std::pair<int,int>(35,0),
+      //                                 std::pair<int,int>(36,0),
+      //                                 std::pair<int,int>(37,0)};
+      str higgses[1];
+      std::vector< triplet<double> > MH = {*Dep::prec_mh};
+      int smlike_pdg = SMlike_higgs_PDG_code(HE);
+      if (smlike_pdg == 25) higgses[0] = "h0_1";
+      else if (smlike_pdg == 35) higgses[0] = "h0_2";
+      else PrecisionBit_error().raise(LOCAL_INFO, "Urecognised SM-like Higgs PDG code!");
+      static int central = runOptions->getValueOrDef<int>(1, "Higgs_predictions_source");
+      static int error = runOptions->getValueOrDef<int>(2, "Higgs_predictions_error_method");
+      update_H_masses(HE, 1, higgses, central, error, MH, allow_fallback);
+
+      // Save the identity/identities of the calculator(s) used for the central value.
+      const str& p_calc = Dep::prec_mh.name();
+      const str& p_orig = Dep::prec_mh.origin();
+      const str& s_calc = Dep::unimproved_MSSM_spectrum.name();
+      const str& s_orig = Dep::unimproved_MSSM_spectrum.origin();
+      if (central == 1) HE.set_override(Par::dimensionless, 1.0, "h mass from: "+p_orig+"::"+p_calc, true);
+      if (central == 2) HE.set_override(Par::dimensionless, 1.0, "h mass from: "+s_orig+"::"+s_calc, true);
+      if (central == 3) HE.set_override(Par::dimensionless, 1.0, "h mass from: "+p_orig+"::"+p_calc+", "+s_orig+"::"+s_calc, true);
+
+      // Check if an SLHA file needs to be excreted.
+      improved_spec.drop_SLHAs_if_requested(runOptions, "GAMBIT_spectrum");
+
+    }
+
+    /// Precision MSSM spectrum manufacturer with precision W and 2HDM (4x) Higgs masses
+    void make_MSSM_precision_spectrum_4H_W(Spectrum& improved_spec /*(result)*/)
+    {
+      using namespace Pipes::make_MSSM_precision_spectrum_4H_W;
+      improved_spec = *Dep::unimproved_MSSM_spectrum; // Does copy
+      SubSpectrum& HE = improved_spec.get_HE();
+      SubSpectrum& LE = improved_spec.get_LE();
+      static bool allow_fallback = runOptions->getValueOrDef<bool>(false, "allow_fallback_to_unimproved_masses");
+
+      // W mass
+      update_W_masses(HE, LE, *Dep::prec_mw, allow_fallback);
+
+      // Higgs masses
+      // FIXME switch to this once the setters take pdg pairs
+      //const std::pair<int,int> higgses[4] = {std::pair<int,int>(25,0),
+      //                                 std::pair<int,int>(35,0),
+      //                                 std::pair<int,int>(36,0),
+      //                                 std::pair<int,int>(37,0)};
+      const str higgses[4] = {"h0_1", "h0_2", "A0", "H+"};
+      std::vector< triplet<double> > MH;
+      int smlike_pdg = SMlike_higgs_PDG_code(HE);
+      if (smlike_pdg == 25)
+      { //h0_1
+        MH.push_back(*Dep::prec_mh);
+        MH.push_back(Dep::prec_HeavyHiggsMasses->at(35));
+      }
+      else if (smlike_pdg == 35)
+      { //h0_2
+        MH.push_back(Dep::prec_HeavyHiggsMasses->at(25));
+        MH.push_back(*Dep::prec_mh);
+      }
+      else PrecisionBit_error().raise(LOCAL_INFO, "Urecognised SM-like Higgs PDG code!");
+      MH.push_back(Dep::prec_HeavyHiggsMasses->at(36)); //A_0
+      MH.push_back(Dep::prec_HeavyHiggsMasses->at(37)); //H+
+
+      static int central = runOptions->getValueOrDef<int>(1, "Higgs_predictions_source");
+      static int error = runOptions->getValueOrDef<int>(2, "Higgs_predictions_error_method");
+      update_H_masses(HE, 4, higgses, central, error, MH, allow_fallback);
+
+      // Save the identity/identities of the calculator(s) used for the central value.
+      const str& p1_calc = Dep::prec_mh.name();
+      const str& p1_orig = Dep::prec_mh.origin();
+      const str& p2_calc = Dep::prec_HeavyHiggsMasses.name();
+      const str& p2_orig = Dep::prec_HeavyHiggsMasses.origin();
+      const str& s_calc = Dep::unimproved_MSSM_spectrum.name();
+      const str& s_orig = Dep::unimproved_MSSM_spectrum.origin();
+      if (central == 1) HE.set_override(Par::dimensionless, 1.0, "h mass from: "+p1_orig+"::"+p1_calc+", "+p2_orig+"::"+p2_calc, true);
+      if (central == 2) HE.set_override(Par::dimensionless, 1.0, "h mass from: "+s_orig+"::"+s_calc, true);
+      if (central == 3) HE.set_override(Par::dimensionless, 1.0, "h mass from: "+p1_orig+"::"+p1_calc+", "+p2_orig+"::"+p2_calc+", "+s_orig+"::"+s_calc, true);
+
+      // Check if an SLHA file needs to be excreted.
+      improved_spec.drop_SLHAs_if_requested(runOptions, "GAMBIT_spectrum");
+
+    }
+
 
     /// Basic mass extractors for different types of spectra, for use with precision likelihoods and other things not needing a whole spectrum object.
     /// @{
@@ -547,15 +669,16 @@ namespace Gambit
     {
       using namespace Pipes::mh_from_MSSM_spectrum;
       const SubSpectrum& HE = Dep::MSSM_spectrum->get_HE();
-      result.central = HE.get(Par::Pole_Mass, *Dep::SMlike_Higgs_PDG_code, 0);
-      result.upper = result.central * HE.get(Par::Pole_Mass_1srd_high, *Dep::SMlike_Higgs_PDG_code, 0);
-      result.lower = result.central * HE.get(Par::Pole_Mass_1srd_low, *Dep::SMlike_Higgs_PDG_code, 0);
+      int smlike_pdg = SMlike_higgs_PDG_code(HE);
+      result.central = HE.get(Par::Pole_Mass, smlike_pdg, 0);
+      result.upper = result.central * HE.get(Par::Pole_Mass_1srd_high, smlike_pdg, 0);
+      result.lower = result.central * HE.get(Par::Pole_Mass_1srd_low, smlike_pdg, 0);
     }
     /// @}
 
     /// Z boson mass likelihood
     /// M_Z (Breit-Wigner mass parameter ~ pole) = 91.1876 +/- 0.0021 GeV (1 sigma), Gaussian.
-    /// Reference: http://pdg.lbl.gov/2014/listings/rpp2014-list-z-boson.pdf = K.A. Olive et al. (Particle Data Group), Chin. Phys. C38, 090001 (2014)
+    /// Reference: http://pdg.lbl.gov/2016/reviews/rpp2016-rev-qcd.pdf = C. Patrignani et al. (Particle Data Group), Chin. Phys. C, 40, 100001 (2016).
     void lnL_Z_mass_chi2(double &result)
     {
       using namespace Pipes::lnL_Z_mass_chi2;
@@ -577,7 +700,7 @@ namespace Gambit
 
     /// b quark mass likelihood
     /// m_b (mb)^MSbar = 4.18 +/- 0.03 GeV (1 sigma), Gaussian.
-    /// Reference: http://pdg.lbl.gov/2014/listings/rpp2014-list-b-quark.pdf = K.A. Olive et al. (Particle Data Group), Chin. Phys. C38, 090001 (2014)
+    /// Reference: http://pdg.lbl.gov/2016/reviews/rpp2016-rev-qcd.pdf = C. Patrignani et al. (Particle Data Group), Chin. Phys. C, 40, 100001 (2016).
     void lnL_mbmb_chi2(double &result)
     {
       using namespace Pipes::lnL_mbmb_chi2;
@@ -587,22 +710,22 @@ namespace Gambit
     }
 
     /// c quark mass likelihood
-    /// m_c (mc)^MSbar = 1.275 +/- 0.025 GeV (1 sigma), Gaussian.
-    /// Reference: http://pdg.lbl.gov/2014/listings/rpp2014-list-c-quark.pdf = K.A. Olive et al. (Particle Data Group), Chin. Phys. C38, 090001 (2014)
+    /// m_c (mc)^MSbar = 1.28 +/- 0.03 GeV (1 sigma), Gaussian.
+    ///  Reference: http://pdg.lbl.gov/2016/reviews/rpp2016-rev-qcd.pdf = C. Patrignani et al. (Particle Data Group), Chin. Phys. C, 40, 100001 (2016).
     void lnL_mcmc_chi2(double &result)
     {
       using namespace Pipes::lnL_mcmc_chi2;
       /// Option profile_systematics<bool>: Use likelihood version that has been profiled over systematic errors (default false)
       bool profile = runOptions->getValueOrDef<bool>(false, "profile_systematics");
-      result = Stats::gaussian_loglikelihood(Dep::SMINPUTS->mCmC, 1.275, 0.0, 0.025, profile);
+      result = Stats::gaussian_loglikelihood(Dep::SMINPUTS->mCmC, 1.28, 0.0, 0.03, profile);
     }
 
     /// \brief Likelihoods for light quark mass ratios. At the moment, all are just gaussians.
-    /// Default data from PDG http://PDG.LBL.GOV 10/6/2015.
+    /// Default data from PDG http://PDG.LBL.GOV 26/06/2017.
     /// Likelihoods apply to MSbar masses at the scale mu = 2 GeV.
     /// m_u/m_d = 0.38-0.58
-    /// m_s / ((m_u + m_d)/2) = 27.5 +/- 1.0
-    /// m_s = 95 +/- 5 GeV
+    /// m_s / ((m_u + m_d)/2) = 27.3 +/- 0.7
+    /// m_s = (96 +/- 4) MeV
     void lnL_light_quark_masses_chi2 (double &result)
     {
         using namespace Pipes::lnL_light_quark_masses_chi2;
@@ -610,10 +733,10 @@ namespace Gambit
 
         double mud_obs = runOptions->getValueOrDef<double>(0.48, "mud_obs");
         double mud_obserror = runOptions->getValueOrDef<double>(0.10, "mud_obserr");
-        double msud_obs = runOptions->getValueOrDef<double>(27.5, "msud_obs");
-        double msud_obserror = runOptions->getValueOrDef<double>(1.0, "msud_obserr");
-        double ms_obs = runOptions->getValueOrDef<double>(95.E-03, "ms_obs");
-        double ms_obserror = runOptions->getValueOrDef<double>(5.E-03, "ms_obserr");
+        double msud_obs = runOptions->getValueOrDef<double>(27.3, "msud_obs");
+        double msud_obserror = runOptions->getValueOrDef<double>(0.7, "msud_obserr");
+        double ms_obs = runOptions->getValueOrDef<double>(96.E-03, "ms_obs");
+        double ms_obserror = runOptions->getValueOrDef<double>(4.E-03, "ms_obserr");
 
         /// Option profile_systematics<bool>: Use likelihood version that has been profiled over systematic errors (default false)
         bool profile = runOptions->getValueOrDef<bool>(false, "profile_systematics");
@@ -625,30 +748,30 @@ namespace Gambit
     }
 
     /// alpha^{-1}(mZ)^MSbar likelihood
-    /// alpha^{-1}(mZ)^MSbar = 127.940 +/- 0.014 (1 sigma), Gaussian.  (PDG global SM fit)
-    /// Reference: http://pdg.lbl.gov/2014/reviews/rpp2014-rev-standard-model.pdf = K.A. Olive et al. (Particle Data Group), Chin. Phys. C38, 090001 (2014)
+    /// alpha^{-1}(mZ)^MSbar = 127.950 +/- 0.017 (1 sigma), Gaussian.  (PDG global SM fit)
+    /// Reference: http://pdg.lbl.gov/2016/reviews/rpp2016-rev-standard-model.pdf = C. Patrignani et al. (Particle Data Group), Chin. Phys. C, 40, 100001 (2016).
     void lnL_alpha_em_chi2(double &result)
     {
       using namespace Pipes::lnL_alpha_em_chi2;
       /// Option profile_systematics<bool>: Use likelihood version that has been profiled over systematic errors (default false)
       bool profile = runOptions->getValueOrDef<bool>(false, "profile_systematics");
-      result = Stats::gaussian_loglikelihood(Dep::SMINPUTS->alphainv, 127.94, 0.0, 0.014, profile);
+      result = Stats::gaussian_loglikelihood(Dep::SMINPUTS->alphainv, 127.950, 0.0, 0.017, profile);
     }
 
     /// alpha_s(mZ)^MSbar likelihood
-    /// alpha_s(mZ)^MSbar = 0.1185 +/- 0.0006 (1 sigma), Gaussian.
-    /// Reference: http://pdg.lbl.gov/2014/reviews/rpp2014-rev-qcd.pdf = K.A. Olive et al. (Particle Data Group), Chin. Phys. C38, 090001 (2014)
+    /// alpha_s(mZ)^MSbar = 0.1181 +/- 0.0011 (1 sigma), Gaussian.
+    /// Reference: http://pdg.lbl.gov/2016/reviews/rpp2016-rev-qcd.pdf = C. Patrignani et al. (Particle Data Group), Chin. Phys. C, 40, 100001 (2016).
     void lnL_alpha_s_chi2(double &result)
     {
       using namespace Pipes::lnL_alpha_s_chi2;
       /// Option profile_systematics<bool>: Use likelihood version that has been profiled over systematic errors (default false)
       bool profile = runOptions->getValueOrDef<bool>(false, "profile_systematics");
-      result = Stats::gaussian_loglikelihood(Dep::SMINPUTS->alphaS, 0.1185, 0.0, 0.0006, profile);
+      result = Stats::gaussian_loglikelihood(Dep::SMINPUTS->alphaS, 0.1181, 0.0, 0.0011, profile);
     }
 
     /// G_Fermi likelihood
     /// G_Fermi = (1.1663787 +/- 0.0000006) * 10^-5 GeV^-2 (1 sigma), Gaussian.
-    /// Reference: http://pdg.lbl.gov/2014/reviews/rpp2014-rev-qcd.pdf = K.A. Olive et al. (Particle Data Group), Chin. Phys. C38, 090001 (2014)
+    ///  Reference: http://pdg.lbl.gov/2016/reviews/rpp2016-rev-qcd.pdf = C. Patrignani et al. (Particle Data Group), Chin. Phys. C, 40, 100001 (2016).
     void lnL_GF_chi2(double &result)
     {
       using namespace Pipes::lnL_GF_chi2;
@@ -668,7 +791,8 @@ namespace Gambit
     }
 
     /// Simple, naive h boson mass likelihood
-    /// Reference: http://pdg.lbl.gov/2015/tables/rpp2015-sum-gauge-higgs-bosons.pdf = K.A. Olive et al. (Particle Data Group), Chin. Phys. C38, 090001 (2014)
+    /// Reference: D. Aad et al arxiv:1503.07589, Phys.Rev.Lett. 114 (2015) 191803 (ATLAS + CMS combination)
+    /// Also used dierctly in http://pdg.lbl.gov/2016/tables/rpp2016-sum-gauge-higgs-bosons.pdf = C. Patrignani et al. (Particle Data Group), Chin. Phys. C, 40, 100001 (2016).
     void lnL_h_mass_chi2(double &result)
     {
       using namespace Pipes::lnL_h_mass_chi2;
@@ -680,7 +804,7 @@ namespace Gambit
 
     /// Effective leptonic sin^2(theta_W) likelihood
     /// sin^2theta_W^leptonic_effective~ sin^2theta_W(mZ)^MSbar + 0.00029 = 0.23155 +/- 0.00005    (1 sigma), Gaussian.  (PDG global SM fit)
-    /// Reference: http://pdg.lbl.gov/2014/reviews/rpp2014-rev-standard-model.pdf = K.A. Olive et al. (Particle Data Group), Chin. Phys. C38, 090001 (2014)
+   ///  Reference: http://pdg.lbl.gov/2016/reviews/rpp2016-rev-qcd.pdf = C. Patrignani et al. (Particle Data Group), Chin. Phys. C, 40, 100001 (2016).
     void lnL_sinW2_eff_chi2(double &result)
     {
       using namespace Pipes::lnL_sinW2_eff_chi2;
@@ -691,15 +815,15 @@ namespace Gambit
     }
 
     /// Delta rho likelihood
-    /// Delta rho = 0.00040 +/- 0.00024 (1 sigma), Gaussian.  (PDG global SM fit)
-    /// Reference: http://pdg.lbl.gov/2014/reviews/rpp2014-rev-standard-model.pdf = K.A. Olive et al. (Particle Data Group), Chin. Phys. C38, 090001 (2014)
+    /// Delta rho = 0.00037 +/- 0.00023 (1 sigma), Gaussian.  (PDG global SM fit)
+    ///  Reference: http://pdg.lbl.gov/2016/reviews/rpp2016-rev-qcd.pdf = C. Patrignani et al. (Particle Data Group), Chin. Phys. C, 40, 100001 (2016).
     void lnL_deltarho_chi2(double &result)
     {
       using namespace Pipes::lnL_deltarho_chi2;
       double theory_uncert = std::max(Dep::deltarho->upper, Dep::deltarho->lower);
       /// Option profile_systematics<bool>: Use likelihood version that has been profiled over systematic errors (default false)
       bool profile = runOptions->getValueOrDef<bool>(false, "profile_systematics");
-      result = Stats::gaussian_loglikelihood(Dep::deltarho->central, 0.00040, theory_uncert, 0.00024, profile);
+      result = Stats::gaussian_loglikelihood(Dep::deltarho->central, 0.00037, theory_uncert, 0.00023, profile);
     }
 
 
@@ -731,8 +855,8 @@ namespace Gambit
       double amu_bsm_error = 0.5*std::max(Dep::muon_gm2->upper, Dep::muon_gm2->lower);
       double amu_theory = amu_sm + amu_bsm;
       double amu_theory_err = sqrt(Gambit::Utils::sqr(amu_sm_error) + Gambit::Utils::sqr(amu_bsm_error));
-      // From hep-ex/0602035, as updated in PDG 2010. Error combines statistical (5.4) and systematic (3.3) uncertainties in quadrature.
-      double amu_exp = 11659208.9e-10;
+      // From hep-ex/0602035, as updated in PDG 2016 (C. Patrignani et al, Chin. Phys. C, 40, 100001 (2016). ). Error combines statistical (5.4) and systematic (3.3) uncertainties in quadrature.
+      double amu_exp = 11659209.1e-10;
       double amu_exp_error = 6.3e-10;
       /// Option profile_systematics<bool>: Use likelihood version that has been profiled over systematic errors (default false)
       bool profile = runOptions->getValueOrDef<bool>(false, "profile_systematics");
@@ -823,18 +947,20 @@ namespace Gambit
         model.get_physical().MFu =smin.mU; //MSbar
         model.get_physical().MFc =smin.mCmC; // MSbar
 
-        /// Use hardcoded values as reccommended by GM2Calc authours
-        /// unless the user really wants to change these
-        double alpha_MZ = runOptions->getValueOrDef
-        <double>(0.00729735, "GM2Calc_extra_alpha_e_MZ");
-        double alpha_thompson = runOptions->getValueOrDef
-        <double>(0.00775531, "GM2Calc_extra_alpha_e_thompson_limit");
+        /// alpha_MZ := alpha(0) (1 - \Delta^{OS}(M_Z) ) where
+        /// \Delta^{OS}(M_Z) = quark and lepton contributions to
+        // on-shell renormalized photon vacuum polarization
+        // default value recommended by GM2calc from arxiv:1105.3149  
+        const double alpha_MZ = runOptions->getValueOrDef
+        <double>(alpha_e_OS_MZ, "GM2Calc_extra_alpha_e_MZ");
+        const double alpha_thomson = runOptions->getValueOrDef
+        <double>(alpha_e_OS_thomson_limit, "GM2Calc_extra_alpha_e_thomson_limit");
 
         if (alpha_MZ > std::numeric_limits<double>::epsilon())
           model.set_alpha_MZ(alpha_MZ);
 
-        if (alpha_thompson > std::numeric_limits<double>::epsilon())
-          model.set_alpha_thompson(alpha_thompson);
+        if (alpha_thomson > std::numeric_limits<double>::epsilon())
+          model.set_alpha_thompson(alpha_thomson);
 
         model.set_scale(mssm.GetScale());                   // 2L
 
@@ -875,10 +1001,10 @@ namespace Gambit
         invalid_point().raise(err.str());
       }
 
-      double error = BEreq::calculate_uncertainty_amu_2loop(model);
+      const double error = BEreq::calculate_uncertainty_amu_2loop(model);
 
-      double amumssm = BEreq::calculate_amu_1loop(model)
-                       + BEreq::calculate_amu_2loop(model);
+      const double amumssm = BEreq::calculate_amu_1loop(model)
+         + BEreq::calculate_amu_2loop(model);
 
       // Convert from a_mu to g-2
       result.central = 2.0*amumssm;

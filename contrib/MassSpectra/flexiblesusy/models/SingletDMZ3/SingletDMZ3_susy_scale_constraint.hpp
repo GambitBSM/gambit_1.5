@@ -16,7 +16,7 @@
 // <http://www.gnu.org/licenses/>.
 // ====================================================================
 
-// File generated at Sat 27 Aug 2016 12:43:56
+// File generated at Thu 10 May 2018 14:42:38
 
 #ifndef SingletDMZ3_SUSY_SCALE_CONSTRAINT_H
 #define SingletDMZ3_SUSY_SCALE_CONSTRAINT_H

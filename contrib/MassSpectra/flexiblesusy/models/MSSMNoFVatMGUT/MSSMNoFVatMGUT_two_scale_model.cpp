@@ -16,7 +16,7 @@
 // <http://www.gnu.org/licenses/>.
 // ====================================================================
 
-// File generated at Sat 27 Aug 2016 12:50:19
+// File generated at Thu 10 May 2018 14:52:01
 
 /**
  * @file MSSMNoFVatMGUT_two_scale_model.cpp
@@ -26,25 +26,18 @@
  * which solve EWSB and calculate pole masses and mixings from DRbar
  * parameters.
  *
- * This file was generated at Sat 27 Aug 2016 12:50:19 with FlexibleSUSY
- * 1.5.1 (git commit: 8356bacd26e8aecc6635607a32835d534ea3cf01) and SARAH 4.9.0 .
+ * This file was generated at Thu 10 May 2018 14:52:01 with FlexibleSUSY
+ * 2.0.1 (git commit: unknown) and SARAH 4.12.2 .
  */
 
 #include "MSSMNoFVatMGUT_two_scale_model.hpp"
 
 namespace flexiblesusy {
 
-using namespace MSSMNoFVatMGUT_info;
-
 #define CLASSNAME MSSMNoFVatMGUT<Two_scale>
 
 CLASSNAME::MSSMNoFVatMGUT(const MSSMNoFVatMGUT_input_parameters& input_)
-   : Two_scale_model()
-   , MSSMNoFVatMGUT_mass_eigenstates(input_)
-{
-}
-
-CLASSNAME::~MSSMNoFVatMGUT()
+   : MSSMNoFVatMGUT_mass_eigenstates(input_)
 {
 }
 

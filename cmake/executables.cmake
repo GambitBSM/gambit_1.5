@@ -32,6 +32,9 @@ if(EXISTS "${PROJECT_SOURCE_DIR}/Core/")
   if (NOT EXCLUDE_DELPHES)
     set(gambit_XTRA ${gambit_XTRA} ${DELPHES_LDFLAGS} ${ROOT_LIBRARIES} ${ROOT_LIBRARY_DIR}/libEG.so)
   endif()
+  if (NOT EXCLUDE_RESTFRAMES)
+    set(gambit_XTRA ${gambit_XTRA} ${RESTFRAMES_LDFLAGS} ${ROOT_LIBRARIES})
+  endif()
   add_gambit_executable(${PROJECT_NAME} "${gambit_XTRA}"
                         SOURCES ${PROJECT_SOURCE_DIR}/Core/src/gambit.cpp
                                 ${GAMBIT_ALL_COMMON_OBJECTS}
@@ -45,6 +48,10 @@ if(EXISTS "${PROJECT_SOURCE_DIR}/Core/")
   endif()
   if (NOT EXCLUDE_DELPHES)
     add_dependencies(gambit delphes)
+  endif()
+  # If Mathematica is present and the system is OS X, absolutize paths to avoid dylib errors
+  if (${HAVE_MATHEMATICA} AND ${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
+    Mathematica_ABSOLUTIZE_LIBRARY_DEPENDENCIES(gambit)
   endif()
 endif()
 

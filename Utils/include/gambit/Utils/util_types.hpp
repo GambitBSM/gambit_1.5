@@ -10,7 +10,7 @@
 ///
 ///  \author Pat Scott
 ///          (patscott@physics.mcgill.ca)
-///  \date 2013 Apr
+///  \date 2013 Apr++
 ///
 ///  \author Ben Farmer
 ///          (benjamin.farmer@monash.edu)
@@ -31,7 +31,8 @@
 ///
 ///  \author Tomas Gonzalo
 ///          (t.e.gonzalo@fys.uio.no)
-///  \date 2016 May
+///  \date 2016 May, Dec
+///
 ///  *********************************************
 
 #ifndef __util_types_hpp__
@@ -59,9 +60,14 @@ namespace Gambit
   typedef std::pair<double, double> ddpair;
   /// Shorthand for a string-to-double map
   typedef std::map<std::string,double> map_str_dbl;
+  /// Shorthand for a string-to-string-to-double map
+  typedef std::map<std::string,std::map<std::string,double> > map_str_map_str_dbl;
+  /// Shorthand for a string-to-string map
+  typedef std::map<std::string,std::string> map_str_str;
 
   // Useful unqualified functions
   using std::cout;
+  using std::cerr;
   using std::endl;
 
   // A simple triplet class for holding a central value and aysmmetric +/- variations
@@ -101,6 +107,9 @@ namespace Gambit
       return *this;
     }
   };
+
+  /// Shorthand for an int-to-double triplet map
+  typedef std::map<int,triplet<double> > map_int_triplet_dbl;
 
   // a tuple containg two doubles and a bool
   struct dbl_dbl_bool
@@ -616,6 +625,16 @@ namespace Gambit
   typedef float             Freal4;
   typedef double            Freal8;
   typedef long double       Freal16;
+
+
+  /// Types used for Mathematica backends
+  typedef void         MVoid;
+  typedef int          MInteger;
+  typedef double       MReal;
+  typedef bool         MBool;
+  typedef char         MChar;
+  typedef std::string  MString;
+  template <typename T> using MList = std::vector<T>;
 
 
 }

@@ -92,6 +92,39 @@ else()
   add_dependencies(distclean clean-delphes)
 endif()
 
+
+#contrib/RestFrames; include only if ColliderBit is in use and RestFrames is not intentionally ditched.
+string(REGEX MATCH ";Res;|;Rest;|;RestF;|;RestFr;|;RestFra;|;RestFram;|;RestFrame;|;RestFrames" DITCH_RESTFRAMES ";${itch};")
+if(DITCH_RESTFRAMES OR NOT ";${GAMBIT_BITS};" MATCHES ";ColliderBit;")
+  add_custom_target(clean-restframes COMMAND "")
+  message("${BoldCyan} X Excluding RestFrames from GAMBIT configuration.${ColourReset}")
+else()
+  set(name "restframes")
+  set(ver "1.0.1")
+  set(dir "${PROJECT_SOURCE_DIR}/contrib/RestFrames-${ver}")
+  set(dl_dir "${PROJECT_SOURCE_DIR}/contrib/")
+  set(dl "https://github.com/crogan/RestFrames/archive/v${ver}.tar.gz")
+  set (RESTFRAMES_LDFLAGS "-L${dir}/lib -lRestFrames")
+  set (CMAKE_INSTALL_RPATH "${dir}")
+  include_directories("${dir}" "${dir}/include")
+  ExternalProject_Add(restframes
+    # AK: For some reason I can't get the md5 check to work for restframes, so I can't use cmake/scripts/safe_dl.sh for downloading.
+    # Will use wget for now...
+    DOWNLOAD_COMMAND wget ${dl} -O ${dl_dir}/${name}-${ver}.tar.gz
+             COMMAND ${CMAKE_COMMAND} -E chdir ${dl_dir} tar -xf ${name}-${ver}.tar.gz
+    SOURCE_DIR ${dir}
+    BUILD_IN_SOURCE 1
+    CONFIGURE_COMMAND ./configure -prefix=${dir}
+    BUILD_COMMAND ${CMAKE_MAKE_PROGRAM} 
+    INSTALL_COMMAND ${CMAKE_MAKE_PROGRAM} install
+    )
+  set(rmstring "${CMAKE_BINARY_DIR}/restframes-prefix/src/restframes-stamp/restframes")
+  add_custom_target(clean-restframes COMMAND ${CMAKE_COMMAND} -E remove -f ${rmstring}-configure ${rmstring}-build ${rmstring}-install ${rmstring}-done
+    COMMAND cd ${dir} && ([ -e makefile ] || [ -e Makefile ] && ${CMAKE_MAKE_PROGRAM} distclean) || true)
+  add_dependencies(distclean clean-restframes)
+endif()
+
+
 #contrib/fjcore-3.2.0; compile only if Delphes is ditched and ColliderBit is not.
 set(fjcore_INCLUDE_DIR "${PROJECT_SOURCE_DIR}/contrib/fjcore-3.2.0")
 include_directories("${fjcore_INCLUDE_DIR}")
@@ -108,8 +141,8 @@ if(";${GAMBIT_BITS};" MATCHES ";SpecBit;")
 
   set (EXCLUDE_FLEXIBLESUSY FALSE)
 
-  # Always use -O2 for flexiblesusy because it's so damn slow otherwise.
-  set(FS_CXX_FLAGS "${GAMBIT_CXX_FLAGS}")
+  # Always use -O2 for flexiblesusy to ensure fast spectrum generation.
+  set(FS_CXX_FLAGS "${GAMBIT_CXX_FLAGS} -Wno-missing-field-initializers")
   set(FS_Fortran_FLAGS "${GAMBIT_Fortran_FLAGS}")
   if (CMAKE_BUILD_TYPE STREQUAL "Debug")
     set(FS_CXX_FLAGS "${FS_CXX_FLAGS} -O2")
@@ -124,7 +157,7 @@ if(";${GAMBIT_BITS};" MATCHES ";SpecBit;")
   elseif(CMAKE_Fortran_COMPILER MATCHES "ifort")
     set(flexiblesusy_extralibs "${flexiblesusy_extralibs} -lifcore -limf -ldl -lintlc -lsvml")
   endif()
-  message("${BoldYellow}-- Determined FlexibleSUSY compiler library dependencies: ${flexiblesusy_extralibs}${ColourReset}")
+  #message("${Yellow}-- Determined FlexibleSUSY compiler library dependencies: ${flexiblesusy_extralibs}${ColourReset}")
   set(flexiblesusy_LDFLAGS "${flexiblesusy_LDFLAGS} ${flexiblesusy_extralibs}")
 
   # Silence the deprecated-declarations warnings comming from Eigen3
@@ -138,7 +171,7 @@ if(";${GAMBIT_BITS};" MATCHES ";SpecBit;")
   set(FS_OPTIONS ${FS_OPTIONS}
        --with-cxx=${CMAKE_CXX_COMPILER}
        --with-cxxflags=${FS_CXX_FLAGS}
-       --with-ldflags=${OpenMP_CXX_FLAGS}
+       --with-shared-ldflags=${OpenMP_CXX_FLAGS}
        --with-fc=${CMAKE_Fortran_COMPILER}
        --with-fflags=${FS_Fortran_FLAGS}
        --with-eigen-incdir=${EIGEN3_INCLUDE_DIR}
@@ -146,26 +179,60 @@ if(";${GAMBIT_BITS};" MATCHES ";SpecBit;")
        --with-boost-incdir=${Boost_INCLUDE_DIR}
        --with-lapack-libs=${LAPACK_LINKLIBS}
        --with-blas-libs=${LAPACK_LINKLIBS}
+       --disable-librarylink
       #--enable-verbose flag causes verbose output at runtime as well. Maybe set it dynamically somehow in future.
      )
-  message("FS OPTIONS = ${FS_OPTIONS}")
 
   # Set the models (spectrum generators) existing in flexiblesusy (could autogen this, but that would build some things we don't need)
-  set(BUILT_FS_MODELS CMSSM MSSMatMGUT MSSM SingletDMZ3 SingletDM)
+  set(ALL_FS_MODELS CMSSM MSSM MSSMatMGUT MSSM_mAmu MSSMatMSUSY_mAmu MSSMatMGUT_mAmu MSSMEFTHiggs MSSMEFTHiggs_mAmu MSSMatMSUSYEFTHiggs_mAmu SingletDMZ3 SingletDM)
+
+  # Check if there has been command line instructions to only build with certain models. Default is to build everything!
+  if(BUILD_FS_MODELS AND NOT ";${BUILD_FS_MODELS};" MATCHES ";ALL_FS_MODELS;")
+    # Use whatever the user has supplied!
+  else()
+    set(BUILD_FS_MODELS ${ALL_FS_MODELS})
+  endif()
+
+  #set(BUILD_FS_MODELS CMSSM MSSM MSSMatMGUT)
+  set(EXCLUDED_FS_MODELS "")
+
+  # Check that all the models the user asked for are in fact valid models
+  foreach(MODELNAME ${BUILD_FS_MODELS})
+    if(";${ALL_FS_MODELS};" MATCHES ";${MODELNAME};")
+      # everything ok
+    else()
+      message(FATAL_ERROR "Configuring FlexibleSUSY failed. You asked for a model which is not known to GAMBIT! (saw request for ${MODELNAME} via -D BUILD_FS_MODELS=<list> flag).\n The models currently known to GAMBIT are as follows, please make sure your list of choices comes from this list, separated by semicolons: ${ALL_FS_MODELS}")
+    endif()
+  endforeach()
+
+  # Loop through ALL_FS_MODELS and define C preprocessor tokens which tell us which ones have and haven't been built, so that we can check what models are available within the code.
+  foreach(MODELNAME ${ALL_FS_MODELS})
+    if(";${BUILD_FS_MODELS};" MATCHES ";${MODELNAME};")
+      add_definitions(-DFS_MODEL_${MODELNAME}_IS_BUILT=1) # i.e. it IS available
+    else()
+      add_definitions(-DFS_MODEL_${MODELNAME}_IS_BUILT=0) # this model is turned off
+      list(APPEND EXCLUDED_FS_MODELS ${MODELNAME})
+    endif()
+  endforeach()
 
   # Explain how to build each of the flexiblesusy spectrum generators we need.  Configure now, serially, to prevent parallel build issues.
-  string (REPLACE ";" "," BUILT_FS_MODELS_COMMAS "${BUILT_FS_MODELS}")
-  set(config_command ./configure ${FS_OPTIONS} --with-models=${BUILT_FS_MODELS_COMMAS})
+  string (REPLACE ";" "," BUILD_FS_MODELS_COMMAS "${BUILD_FS_MODELS}")
+  string (REPLACE ";" "," EXCLUDED_FS_MODELS_COMMAS "${EXCLUDED_FS_MODELS}")
+   set(config_command ./configure ${FS_OPTIONS} --with-models=${BUILD_FS_MODELS_COMMAS})
   add_custom_target(configure-flexiblesusy COMMAND cd ${FS_DIR} && ${config_command})
-  message("${Yellow}-- Configuring FlexibleSUSY for models: ${BoldYellow}${BUILT_FS_MODELS_COMMAS}${ColourReset}")
+  message("${Yellow}-- Configuring FlexibleSUSY for models: ${BoldYellow}${BUILD_FS_MODELS_COMMAS}${ColourReset}")
+  if (NOT "${EXCLUDED_FS_MODELS_COMMAS}" STREQUAL "")
+    message("${Red}   Switching OFF FlexibleSUSY support for models: ${BoldRed}${EXCLUDED_FS_MODELS_COMMAS}${ColourReset}")
+  endif()
+  #message("${Yellow}-- Using configure command \n${config_command}${output}${ColourReset}" )
   execute_process(COMMAND ${config_command}
                   WORKING_DIRECTORY ${FS_DIR}
                   RESULT_VARIABLE result
                   OUTPUT_VARIABLE output
                  )
   if (NOT "${result}" STREQUAL "0")
-    message("${BoldRed}-- Configuring FlexibleSUSY failed.  Here's what I tried to do:\n${config_command}\n${output}${ColourReset}" )
-    message(FATAL_ERROR "Configuring FlexibleSUSY failed." )
+     message("${BoldRed}-- Configuring FlexibleSUSY failed.  Here's what I tried to do:\n${config_command}\n${output}${ColourReset}" )
+     message(FATAL_ERROR "Configuring FlexibleSUSY failed." )
   endif()
   set(rmstring "${CMAKE_BINARY_DIR}/flexiblesusy-prefix/src/flexiblesusy-stamp/flexiblesusy")
   execute_process(COMMAND ${CMAKE_COMMAND} -E touch ${rmstring}-configure)
@@ -182,8 +249,9 @@ if(";${GAMBIT_BITS};" MATCHES ";SpecBit;")
   )
 
   # Set linking commands.  Link order matters! The core flexiblesusy libraries need to come after the model libraries but before the other link flags.
-  set(flexiblesusy_LDFLAGS "-L${FS_DIR}/src -lflexisusy -L${FS_DIR}/legacy -llegacy ${flexiblesusy_LDFLAGS}")
-  foreach(_MODEL ${BUILT_FS_MODELS})
+  # for v 1.5.1 add "-L${FS_DIR}/legacy -llegacy"  after "-lflexiblesusy"
+  set(flexiblesusy_LDFLAGS "-L${FS_DIR}/src -lflexisusy ${flexiblesusy_LDFLAGS}")
+  foreach(_MODEL ${BUILD_FS_MODELS})
     set(flexiblesusy_LDFLAGS "-L${FS_DIR}/models/${_MODEL} -l${_MODEL} ${flexiblesusy_LDFLAGS}")
   endforeach()
 
@@ -195,7 +263,7 @@ if(";${GAMBIT_BITS};" MATCHES ";SpecBit;")
   include_directories("${FS_DIR}/slhaea")
   # Dig through flexiblesusy "models" directory and add all subdirectories to the include list
   # (these contain the headers for the generated spectrum generators)
-  foreach(_MODEL ${BUILT_FS_MODELS})
+  foreach(_MODEL ${BUILD_FS_MODELS})
     include_directories("${FS_DIR}/models/${_MODEL}")
   endforeach()
 
@@ -207,6 +275,7 @@ else()
   set (EXCLUDE_FLEXIBLESUSY TRUE)
 
 endif()
+
 
 # Add clean info
 add_custom_target(clean-flexiblesusy COMMAND ${CMAKE_COMMAND} -E remove -f ${rmstring}-configure ${rmstring}-build ${rmstring}-install ${rmstring}-done

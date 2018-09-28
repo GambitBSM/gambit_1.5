@@ -2,76 +2,172 @@
 
 # Author: Alexander Voigt
 
-models="@MODELS@"
-addons="@ADDONS@"
-boostflags="@BOOSTFLAGS@"
+BASEDIR=$(dirname $0)
+ABSBASEDIR=$(cd ${BASEDIR}; pwd)
+CONFIGDIR="${BASEDIR}/config"
+
+packagename="@PKGNAME@"
 version="@FLEXIBLESUSY_VERSION@"
-cppflags="@CPPFLAGS@"
+
+solvers="@ALGORITHMS@"
+addons="@ADDONS@"
+blaslibs="@BLASLIBS@"
+boostflags="@BOOSTFLAGS@"
+boosttestlibs="@BOOSTTESTLIBS@"
+boostthreadlibs="@BOOSTTHREADLIBS@"
+cppflags_from_configure="@CPPFLAGS@"
+cxx="@CXX@"
 cxxflags="@CXXFLAGS@"
 eigenflags="@EIGENFLAGS@"
+fc="@FC@"
 fflags="@FFLAGS@"
+flibs="@FLIBS@"
 gslflags="@GSLFLAGS@"
 gsllibs="@GSLLIBS@"
+himalayaflags="@HIMALAYAFLAGS@"
+himalayalibs="@HIMALAYALIBS@"
+lapacklibs="@LAPACKLIBS@"
 ldflags="@LDFLAGS@"
 ldlibs="@LDLIBS@"
 loopfuncflags="@LOOPFUNCFLAGS@"
-cxx="@CXX@"
-fc="@FC@"
-flibs="@FLIBS@"
-makelib="@MAKELIB@"
+loopfunclibs="@LOOPFUNCLIBS@"
 math="@MATH@"
-packagename="@PKGNAME@"
+models="@MODELS@"
+module_make_lib_cmd="@MODULE_MAKE_LIB_CMD@"
+module_lib_ext="@MODULE_LIBEXT@"
+optional_modules="@OPTIONAL_MODULES@"
+shared_lib_cmd="@SHARED_LIB_CMD@"
+solvers="@SOLVERS@"
+sqliteflags="@SQLITEFLAGS@"
+sqlitelibs="@SQLITELIBS@"
+static_lib_cmd="@STATIC_LIB_CMD@"
 threadlibs="@THREADLIBS@"
+tsilflags="@TSILFLAGS@"
+tsillibs="@TSILLIBS@"
+gm2calclibs="${ABSBASEDIR}/addons/GM2Calc/libGM2Calc${module_lib_ext}"
 
-usage="\
-Usage: `basename $0`\
- [--all-addons]\
- [--all-models]\
- [--boostflags]\
- [--cxx]\
- [--cxxflags]\
- [--cppflags]\
- [--eigenflags]\
- [--fc]\
- [--fflags]\
- [--flibs]\
- [--gslflags]\
- [--gsllibs]\
- [--ldflags]\
- [--ldlibs]\
- [--loopfuncflags]\
- [--make-lib-cmd]\
- [--math-cmd]\
- [--threadlibs]\
- [--with-<addon>]\
- [--with-<model>]\
- [--help]\
- [--version]\
-"
+create_module_list() {
+    echo "config src fflite slhaea doc $models $addons $optional_modules"
+}
+
+create_include_directives_for_FS_modules() {
+    local incl=
+
+    for m in $(create_module_list) ; do
+        incl="$incl -I${m}"
+    done
+
+    echo "$incl"
+}
+
+create_include_directives_for_external_modules() {
+    local incl="$gslflags $eigenflags $boostflags"
+
+    [ "x@ENABLE_HIMALAYA@" = xyes ] && \
+        incl="$incl $himalayaflags"
+
+    [ "x@ENABLE_TSIL@" = xyes ] && \
+        incl="$incl $tsilflags"
+
+    [ "x@ENABLE_LOOPTOOLS@" = xyes -a "x@ENABLE_FFLITE@" = xyes ] && \
+        incl="$incl $loopfuncflags"
+
+    [ "x@ENABLE_LIBRARYLINK@" = xyes ] && \
+        incl="$incl $(${CONFIGDIR}/mathematica_include_paths.sh --math-cmd="$math" -I --librarylink --mathlink)"
+
+    echo "$incl"
+}
+
+# creates list of FlexibleSUSY module libraries
+create_flexiblesusy_libs() {
+    local flexiblesusylibs=
+
+    for a in $addons $models ; do
+        [ "x$(basename $a)" = "xGM2Calc" ] && continue
+        flexiblesusylibs="$flexiblesusylibs ${ABSBASEDIR}/${a}/lib$(basename $a)${module_lib_ext}"
+    done
+
+    flexiblesusylibs="$flexiblesusylibs ${ABSBASEDIR}/src/libflexisusy${module_lib_ext}"
+
+    echo "$flexiblesusylibs"
+}
+
+incl_FS_modules="$(create_include_directives_for_FS_modules)"
+incl_external_modules="$(create_include_directives_for_external_modules)"
+cppflags_without_modules="$cppflags_from_configure $incl_external_modules"
+cppflags="$cppflags_from_configure $incl_FS_modules $incl_external_modules"
+flexiblesusy_libs="$(create_flexiblesusy_libs)"
+compile_cmd="$cxx $cppflags $cxxflags"
+libs="$ldflags $flexiblesusy_libs $gm2calclibs $loopfunclibs $himalayalibs $gsllibs $boostthreadlibs $lapacklibs $blaslibs $flibs $sqlitelibs $tsillibs $threadlibs $ldlibs"
+modules="$(create_module_list)"
 
 help() {
 cat <<EOF
 Usage: `basename $0` [options]
 Options:
-  --all-addons          Print all addons that are build
-  --all-models          Print all models that are build
-  --boostflags          Print compiler flags for BOOST
-  --cxx                 Print C++ compiler
-  --cxxflags            Print CXXFLAGS
-  --cppflags            Print CPPFLAGS
-  --eigenflags          Print compiler flags for Eigen
-  --fc                  Print Fortran compiler
-  --fflags              Print FFLAGS
-  --flibs               Print FLIBS
-  --gslflags            Print compiler flags for GSL
-  --gsllibs             Print linker flags for GSL
-  --ldflags             Print LDFLAGS
-  --ldlibs              Print LDLIBS
-  --loopfuncflags       Print compiler flags for loop function library
-  --make-lib-cmd        Print make library command
-  --math-cmd            Print Mathematica kernel command
-  --threadlibs          Print thread library
+  --addons              Print all addons that are build
+  --blaslibs            Print BLAS libraries, BLASLIBS
+  --boostflags          Print compiler flags for BOOST, BOOSTFLAGS
+  --boosttestlibs       Print BOOST test libraries, BOOSTTESTLIBS
+  --boostthreadlibs     Print BOOST thread libraries, BOOSTTHREADLIBS
+  --compile-cmd         Print compilation command for object files
+  --cppflags            Print C preprocessor flags, CPPFLAGS
+  --cppflags-without-modules
+                        Print C preprocessor flags without -I directives
+                        for FlexibleSUSY models and addons
+  --cxx                 Print C++ compiler, CXX
+  --cxxflags            Print C++ compiler flags, CXXFLAGS
+  --eigenflags          Print compiler flags for Eigen, EIGENFLAGS
+  --enable-colors       Test if colors are enabled
+  --enable-compile      Test if compilation is enabled
+  --enable-compiler-warnings
+                        Test if compiler warnings are enabled
+  --enable-debug        Test if debug mode is enabled
+  --enable-fflite       Test if FFlite is enabled
+  --enable-himalaya     Test if Himalaya is enabled
+  --enable-lapack       Test if LAPACK is enabled
+  --enable-librarylink  Test if LibraryLink is enabled
+  --enable-looptools    Test if LoopTools is enabled
+  --enable-mass-error-check
+                        Test if mass error check is enabled
+  --enable-ilp64mkl-workaround
+                        Test if ilp64 MKL workaround is enabled
+  --enable-silent       Test if silet mode is enabled
+  --enable-shared-libs  Test if shared libraries are build
+  --enable-sqlite       Test if SQLite is enabled
+  --enable-static       Test if static executables are build
+  --enable-threads      Test if multi-threading is enabled
+  --enable-tsil         Test if TSIL is linked in
+  --enable-verbose      Test if verbose mode is enabled
+  --fc                  Print Fortran compiler, FC
+  --fflags              Print Fortran flags, FFLAGS
+  --flexiblesusylibs    Print FlexibleSUSY module libraries
+  --flibs               Print Fortran libraries, FLIBS
+  --gslflags            Print compiler flags for GSL, GSLFLAGS
+  --gsllibs             Print GSL libraries, GSLLIBS
+  --himalayaflags       Print compiler flags for Himalaya, HIMALAYAFLAGS
+  --himalayalibs        Print Himalaya library, HIMALAYALIBS
+  --lapacklibs          Print LAPACK libraries, LAPACKLIBS
+  --ldflags             Print flags for optional libraries, LDFLAGS
+  --ldlibs              Print optional libraries, LDLIBS
+  --libs                Print all libraries linked to an executable
+  --loopfuncflags       Print compiler flags for loop function library, LOOPFUNCFLAGS
+  --loopfunclibs        Print loop function libraries, LOOPFUNCLIBS
+  --math-cmd            Print Mathematica kernel command, MATH
+  --models              Print all models that are build
+  --modules             Print list of all makefile modules
+  --module-make-lib-cmd Print command to build module libraries, MODULE_MAKE_LIB_CMD
+  --module-lib-ext      Print file name extension for module libraries, MODULE_LIBEXT
+  --shared-lib-cmd      Print command to build shared library, SHARED_LIB_CMD
+  --solvers             Print all solvers that are used
+  --sqliteflags         Print SQLite flags, SQLITEFLAGS, SQLITEFLAGS
+  --sqlitelibs          Print SQLite libararies, SQLITELIBS, SQLITELIBS
+  --static-lib-cmd      Print command to build static library, STATIC_LIB_CMD
+  --threadlibs          Print thread library, THREADLIBS
+  --tsilflags           Print TSIL flags, TSILFLAGS
+  --tsillibs            Print TSIL libraries, TSILLIBS
   --with-<addon>        Test if <addon> is compiled in
+  --with-<solver>       Test if BVP <solver> is compiled in
   --with-<model>        Test if <model> is compiled in
   --version             Print the $packagename version
   --help                Print this message
@@ -87,28 +183,49 @@ while test $# -gt 0; do
     esac
 
     case $1 in
-        --all-addons)    out="$out $addons"   ;;
-        --all-models)    out="$out $models"   ;;
-        --boostflags)    out="$out $boostflags" ;;
-        --cxx)           out="$out $cxx"      ;;
-        --cxxflags)      out="$out $cxxflags" ;;
-        --cppflags)      out="$out $cppflags" ;;
-        --eigenflags)    out="$out $eigenflags" ;;
-        --fc)            out="$out $fc"       ;;
-        --fflags)        out="$out $fflags"   ;;
-        --flibs)         out="$out $flibs"    ;;
-        --gslflags)      out="$out $gslflags" ;;
-        --gsllibs)       out="$out $gsllibs"  ;;
-        --ldflags)       out="$out $ldflags"  ;;
-        --ldlibs)        out="$out $ldlibs"   ;;
-        --loopfuncflags) out="$out $loopfuncflags" ;;
-        --make-lib-cmd)  out="$out $makelib"  ;;
-        --math-cmd)      out="$out $math"     ;;
-        --threadlibs)    out="$out $threadlibs" ;;
+        --addons)                out="$out $addons" ;;
+        --solvers)               out="$out $solvers" ;;
+        --blaslibs)              out="$out $blaslibs" ;;
+        --boostflags)            out="$out $boostflags" ;;
+        --boosttestlibs)         out="$out $boosttestlibs" ;;
+        --boostthreadlibs)       out="$out $boostthreadlibs" ;;
+        --compile-cmd)           out="$out $compile_cmd" ;;
+        --cppflags)              out="$out $cppflags" ;;
+        --cppflags-without-modules) out="$out $cppflags_without_modules" ;;
+        --cxx)                   out="$out $cxx" ;;
+        --cxxflags)              out="$out $cxxflags" ;;
+        --eigenflags)            out="$out $eigenflags" ;;
+        --fc)                    out="$out $fc" ;;
+        --fflags)                out="$out $fflags" ;;
+        --flexiblesusylibs)      out="$out $flexiblesusy_libs" ;;
+        --flibs)                 out="$out $flibs" ;;
+        --gslflags)              out="$out $gslflags" ;;
+        --gsllibs)               out="$out $gsllibs" ;;
+        --himalayaflags)         out="$out $himalayaflags" ;;
+        --himalayalibs)          out="$out $himalayalibs" ;;
+        --lapacklibs)            out="$out $lapacklibs" ;;
+        --ldflags)               out="$out $ldflags" ;;
+        --ldlibs)                out="$out $ldlibs" ;;
+        --libs)                  out="$out $libs" ;;
+        --loopfuncflags)         out="$out $loopfuncflags" ;;
+        --loopfunclibs)          out="$out $loopfunclibs" ;;
+        --math-cmd)              out="$out $math" ;;
+        --models)                out="$out $models" ;;
+        --modules)               out="$out $modules" ;;
+        --module-make-lib-cmd)   out="$out $module_make_lib_cmd" ;;
+        --module-lib-ext)        out="$out $module_lib_ext" ;;
+        --shared-lib-cmd)        out="$out $shared_lib_cmd" ;;
+        --solvers)               out="$out $solvers" ;;
+        --sqliteflags)           out="$out $sqliteflags" ;;
+        --sqlitelibs)            out="$out $sqlitelibs" ;;
+        --static-lib-cmd)        out="$out $static_lib_cmd" ;;
+        --threadlibs)            out="$out $threadlibs" ;;
+        --tsilflags)             out="$out $tsilflags" ;;
+        --tsillibs)              out="$out $tsillibs" ;;
         --with-*)
-      ### Check for model
+      ### Check for models and addons
             f=`echo $1 | sed 's/--with-//'`
-            for c in $models $addons ; do
+            for c in $models $addons $optional_modules $solvers ; do
                 if test "x`basename $c`" = "x$f" ; then
                     out="$out yes"
                     break
@@ -119,16 +236,34 @@ while test $# -gt 0; do
                 out="$out no"
             fi
             ;;
-        --version)       out="$out $version"  ;;
+      ### flags
+        --enable-colors)              out="$out @ENABLE_COLORS@" ;;
+        --enable-compile)             out="$out @ENABLE_COMPILE@" ;;
+        --enable-compiler-warnings)   out="$out @ENABLE_COMPILER_WARNINGS@" ;;
+        --enable-debug)               out="$out @ENABLE_DEBUG@" ;;
+        --enable-fflite)              out="$out @ENABLE_FFLITE@" ;;
+        --enable-himalaya)            out="$out @ENABLE_HIMALAYA@" ;;
+        --enable-lapack)              out="$out @ENABLE_LAPACK@" ;;
+        --enable-librarylink)         out="$out @ENABLE_LIBRARYLINK@" ;;
+        --enable-looptools)           out="$out @ENABLE_LOOPTOOLS@" ;;
+        --enable-mass-error-check)    out="$out @ENABLE_CHECK_EIGENVALUE_ERROR@" ;;
+        --enable-ilp64mkl-workaround) out="$out @ENABLE_ILP64MKL_WORKAROUND@" ;;
+        --enable-silent)              out="$out @ENABLE_SILENT@" ;;
+        --enable-shared-libs)         out="$out @ENABLE_SHARED_LIBS@" ;;
+        --enable-sqlite)              out="$out @ENABLE_SQLITE@" ;;
+        --enable-static)              out="$out @ENABLE_STATIC@" ;;
+        --enable-threads)             out="$out @ENABLE_THREADS@" ;;
+        --enable-tsil)                out="$out @ENABLE_TSIL@" ;;
+        --enable-verbose)             out="$out @ENABLE_VERBOSE@" ;;
+
+        --version)                    out="$out $version"  ;;
         --help)
-      ### Print a help message
             help
             exit 0
             ;;
         *)
-      ### Give an error
             echo "Unknown argument: $1" 1>&2
-            echo "${usage}" 1>&2
+            help
             exit 1
             ;;
     esac

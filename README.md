@@ -8,19 +8,20 @@ Citation(s)
 
 Please cite the following GAMBIT papers, depending on your use of different modules:
 
- - GAMBIT Collaboration: P. Athron, C. Balazs, et. al., **GAMBIT**: The Global and Modular Beyond-the-Standard-Model Inference Tool, Eur. Phys. J. C submitted (2017), arXiv:1705.xxxxx
- - GAMBIT Collider Workgroup: C. Balazs, A. Buckley, et. al., **ColliderBit**: A GAMBIT module for the calculation of high energy collider observables and likelihoods, Eur. Phys. J. C submitted (2017), arXiv:1705.xxxxx
- - GAMBIT Models Workgroup: P. Athron, C. Balazs, et. al., **SpecBit, DecayBit and PrecisionBit**: GAMBIT modules for computing mass spectra, particle decay rates and precision observables, Eur. Phys. J. C submitted (2017), arXiv:1705.xxxxx
- - GAMBIT Flavour Workgroup: F. U. Bernlochner, M. Chrzaszcz, et. al., **FlavBit**: A GAMBIT module for computing flavour observables and likelihoods, Eur. Phys. J. C, submitted (2017), arXiv:1705.xxxxx
- - GAMBIT Scanner Workgroup: G. D. Martinez, J. McKay, et. al., Comparison of statistical sampling methods with **ScannerBit**, the GAMBIT scanning module, Eur. Phys. J. C submitted (2017), arXiv:1705.xxxxx
- - GAMBIT Dark Matter Workgroup: T. Bringmann, J. Conrad, et. al., **DarkBit**: A GAMBIT module for computing dark matter observables and likelihoods, Eur. Phys. J. C submitted (2017), arXiv:1705.xxxxx
+ - GAMBIT Collaboration: P. Athron, C. Balazs, et. al., **GAMBIT**: The Global and Modular Beyond-the-Standard-Model Inference Tool, Eur. Phys. J. C (2017), arXiv:1705.07908
+ - GAMBIT Collider Workgroup: C. Balazs, A. Buckley, et. al., **ColliderBit**: A GAMBIT module for the calculation of high energy collider observables and likelihoods, Eur. Phys. J. C (2017), arXiv:1705.07919
+ - GAMBIT Models Workgroup: P. Athron, C. Balazs, et. al., **SpecBit, DecayBit and PrecisionBit**: GAMBIT modules for computing mass spectra, particle decay rates and precision observables, Eur. Phys. J. C (2017), arXiv:1705.07936
+ - GAMBIT Flavour Workgroup: F. U. Bernlochner, M. Chrzaszcz, et. al., **FlavBit**: A GAMBIT module for computing flavour observables and likelihoods, Eur. Phys. J. C, (2017), arXiv:1705.07933
+ - GAMBIT Scanner Workgroup: G. D. Martinez, J. McKay, et. al., Comparison of statistical sampling methods with **ScannerBit**, the GAMBIT scanning module, Eur. Phys. J. C (2017), arXiv:1705.07959
+ - GAMBIT Dark Matter Workgroup: T. Bringmann, J. Conrad, et. al., **DarkBit**: A GAMBIT module for computing dark matter observables and likelihoods, Eur. Phys. J. C (2017), arXiv:1705.07920
 
 GAMBIT contains interfaces to various external codes, along with scripts for downloading and configuring them. Please cite as appropriate if you use those codes:
 
- - **DDCalc:** GAMBIT Dark Matter Workgroup: T. Bringmann, J. Conrad, et. al., DarkBit: A GAMBIT module for computing dark matter observables and likelihoods, Eur. Phys. J. C submitted, arXiv:1705.xxxxx
+ - **DDCalc:** GAMBIT Dark Matter Workgroup: T. Bringmann, J. Conrad, et. al., DarkBit: A GAMBIT module for computing dark matter observables and likelihoods, Eur. Phys. J. C, arXiv:1705.07920
  - **Multinest:** F. Feroz, M. P. Hobson, and M. Bridges, MULTINEST: an efficient and robust Bayesian inference tool for cosmology and particle physics, MNRAS 398 (2009) 1601–1614, arXiv:0809.3437
+ - **PolyChord:** W. J. Handley, M. P. Hobson, M. P., and A. N. Lasenby, POLYCHORD: next-generation nested sampling, MNRAS 453 (2015) 4384–4398, arXiv:1506.00171
  - **FlexibleSUSY:** P. Athron, J.-h. Park, D. Stöckinger, and A. Voigt, FlexibleSUSY - A spectrum generator generator for supersymmetric models, Comp. Phys. Comm. 190 (2015) 139–172, arXiv:1406.2319
- - **GamLike:** GAMBIT Dark Matter Workgroup: T. Bringmann, J. Conrad, et. al., DarkBit: A GAMBIT module for computing dark matter observables and likelihoods, Eur. Phys. J. C submitted (2017), arXiv:1705.xxxxxx
+ - **GamLike:** GAMBIT Dark Matter Workgroup: T. Bringmann, J. Conrad, et. al., DarkBit: A GAMBIT module for computing dark matter observables and likelihoods, Eur. Phys. J. C (2017), arXiv:1705.07920
  - **GM2Calc:** P. Athron, M. Bach, et. al., GM2Calc: precise MSSM prediction for (g-2) of the muon, Eur. Phys. J. C 76 (2016) 62, arXiv:1510.08071
  - **HiggsBounds:** **(i)** P. Bechtle, O. Brein, S. Heinemeyer, G. Weiglein, and K. E. Williams, HiggsBounds: Confronting Arbitrary Higgs Sectors with Exclusion Bounds from LEP and the Tevatron, Comp. Phys. Comm. 181 (2010) 138–167, arXiv:0811.4169, **(ii)** P. Bechtle, O. Brein, S. Heinemeyer, G. Weiglein, and K. E. Williams, HiggsBounds 2.0.0: Confronting Neutral and Charged Higgs Sector Predictions with Exclusion Bounds from LEP and the Tevatron, Comp. Phys. Comm. 182 (2011) 2605–2631, arXiv:1102.1898, **(iii)** P. Bechtle, O. Brein, et. al., HiggsBounds - 4: Improved Tests of Extended Higgs Sectors against Exclusion Bounds from LEP, the Tevatron and the LHC, Eur. Phys. J. C 74 (2014) 2693, arXiv:1311.0055
  - **HiggsSignals:** P. Bechtle, S. Heinemeyer, O. Stal, T. Stefaniak, and G. Weiglein, HiggsSignals: Confronting arbitrary Higgs sectors with measurements at the Tevatron and the LHC, Eur. Phys. J. C 74 (2014) 2711, arXiv:1305.1933
@@ -41,7 +42,7 @@ Please see the above list of GAMBIT papers for the main documentation on the des
 Supported Compilers and Library Dependencies
 --
 
-GAMBIT is built using the CMake system. The following libraries and packages must be installed prior to configuration:
+GAMBIT is built using the CMake system (version 2.8.5 or greater required). The following libraries and packages must be installed prior to configuration:
 
 COMPULSORY:
 
@@ -121,6 +122,10 @@ To run an example GAMBIT MSSM7 scan, do:
 Other examples are provided in the yaml_files folder.  Further readmes and documentation can also be found in the doc folder.
 
 
+Licensing
+--
+
+The BSD license below applies to all source files in the GAMBIT distribution, except for those contained in the contrib/fjcore-3.1.3 and contrib/MassSpectra directories.  The files in those directories belong to the FastJet and FlexibleSUSY/SOFTSUSY projects respectively, and are distributed under the GNU General Public License, with special exception (granted by the authors of these packages to GAMBIT) that their inclusion in GAMBIT does not require that the rest of GAMBIT be distributed under the GPL.  Note that all provisions of the GPL continue to apply to any further redistribution of the files in contrib/fjcore-3.1.3 and contrib/MassSpectra, whether in source or binary form.
 
 License
 --

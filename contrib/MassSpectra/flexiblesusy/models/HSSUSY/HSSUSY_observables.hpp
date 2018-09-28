@@ -16,7 +16,7 @@
 // <http://www.gnu.org/licenses/>.
 // ====================================================================
 
-// File generated at Sat 27 Aug 2016 12:40:55
+// File generated at Thu 10 May 2018 14:47:57
 
 #ifndef HSSUSY_OBSERVABLES_H
 #define HSSUSY_OBSERVABLES_H
@@ -35,7 +35,7 @@ class HSSUSY_mass_eigenstates;
 class Physical_input;
 
 struct HSSUSY_observables {
-   static const unsigned NUMBER_OF_OBSERVABLES = 4;
+   static const int NUMBER_OF_OBSERVABLES = 4;
 
    HSSUSY_observables();
    Eigen::ArrayXd get() const; ///< returns vector of all observables
@@ -48,7 +48,13 @@ struct HSSUSY_observables {
 
 };
 
-HSSUSY_observables calculate_observables(const HSSUSY_mass_eigenstates&, const softsusy::QedQcd&, const Physical_input&);
+HSSUSY_observables calculate_observables(
+   const HSSUSY_mass_eigenstates&, const softsusy::QedQcd&,
+   const Physical_input&);
+
+HSSUSY_observables calculate_observables(
+   const HSSUSY_mass_eigenstates&, const softsusy::QedQcd&,
+   const Physical_input&, double scale);
 
 } // namespace flexiblesusy
 

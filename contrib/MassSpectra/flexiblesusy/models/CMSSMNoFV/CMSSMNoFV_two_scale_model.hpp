@@ -16,16 +16,16 @@
 // <http://www.gnu.org/licenses/>.
 // ====================================================================
 
-// File generated at Sat 27 Aug 2016 12:50:16
+// File generated at Thu 10 May 2018 14:56:07
 
 /**
  * @file CMSSMNoFV_two_scale_model.hpp
  * @brief contains class for model with routines needed to solve boundary
- *        value problem using the two_scale solver by solvingt EWSB
+ *        value problem using the two_scale solver by solving EWSB
  *        and determine the pole masses and mixings
  *
- * This file was generated at Sat 27 Aug 2016 12:50:16 with FlexibleSUSY
- * 1.5.1 (git commit: 8356bacd26e8aecc6635607a32835d534ea3cf01) and SARAH 4.9.0 .
+ * This file was generated at Thu 10 May 2018 14:56:07 with FlexibleSUSY
+ * 2.0.1 (git commit: unknown) and SARAH 4.12.2 .
  */
 
 #ifndef CMSSMNoFV_TWO_SCALE_H
@@ -33,28 +33,33 @@
 
 #include "CMSSMNoFV_model.hpp"
 #include "CMSSMNoFV_mass_eigenstates.hpp"
-#include "two_scale_model.hpp"
+
+#include "model.hpp"
 
 namespace flexiblesusy {
 
 class Two_scale;
 /**
  * @class CMSSMNoFV<Two_scale>
- * @brief model class with routines for determing masses and mixinga and EWSB
+ * @brief model class with routines for determining masses and mixings and EWSB
  */
 template<>
-class CMSSMNoFV<Two_scale> : public Two_scale_model, public CMSSMNoFV_mass_eigenstates {
+class CMSSMNoFV<Two_scale> : public Model, public CMSSMNoFV_mass_eigenstates {
 public:
    explicit CMSSMNoFV(const CMSSMNoFV_input_parameters& input_ = CMSSMNoFV_input_parameters());
-   virtual ~CMSSMNoFV();
+   CMSSMNoFV(const CMSSMNoFV&) = default;
+   CMSSMNoFV(CMSSMNoFV&&) = default;
+   virtual ~CMSSMNoFV() = default;
+   CMSSMNoFV& operator=(const CMSSMNoFV&) = default;
+   CMSSMNoFV& operator=(CMSSMNoFV&&) = default;
 
    // interface functions
-   virtual void calculate_spectrum();
-   virtual void clear_problems();
-   virtual std::string name() const;
-   virtual void run_to(double scale, double eps = -1.0);
-   virtual void print(std::ostream& out = std::cout) const;
-   virtual void set_precision(double);
+   virtual void calculate_spectrum() override;
+   virtual void clear_problems() override;
+   virtual std::string name() const override;
+   virtual void run_to(double scale, double eps = -1.0) override;
+   virtual void print(std::ostream& out = std::cerr) const override;
+   virtual void set_precision(double) override;
 };
 
 std::ostream& operator<<(std::ostream&, const CMSSMNoFV<Two_scale>&);

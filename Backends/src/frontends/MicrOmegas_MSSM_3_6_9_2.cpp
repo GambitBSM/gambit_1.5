@@ -76,11 +76,11 @@ BE_INI_FUNCTION
         ofs << mySLHA;
 
         // Also write out decay block, if internal_decays option is set to false
-        if(!(runOptions->getValueOrDef<bool>(true,"internal_decays")))
+        if(!(runOptions->getValueOrDef<bool>(false,"internal_decays")))
         {
             ofs << endl;
             const DecayTable& myDecays = *Dep::decay_rates;
-            SLHAstruct decayBlock = myDecays.getSLHAea(true);
+            SLHAstruct decayBlock = myDecays.getSLHAea(1,true,*Dep::SLHA_pseudonyms);
             ofs << decayBlock;
         }
         ofs.close();

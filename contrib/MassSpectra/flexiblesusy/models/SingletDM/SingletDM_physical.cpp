@@ -16,7 +16,7 @@
 // <http://www.gnu.org/licenses/>.
 // ====================================================================
 
-// File generated at Sat 27 Aug 2016 12:44:12
+// File generated at Thu 10 May 2018 14:42:59
 
 #include "SingletDM_physical.hpp"
 #include "slha_io.hpp"
@@ -26,21 +26,6 @@
 #define LOCALPHYSICAL(p) p
 
 namespace flexiblesusy {
-
-SingletDM_physical::SingletDM_physical()
-   :
-    MVG(0), MHp(0), Mss(0), MFv(Eigen::Array<double,3,1>::Zero()), MAh(0), Mhh
-       (0), MFd(Eigen::Array<double,3,1>::Zero()), MFu(Eigen::Array<double,3,1>
-       ::Zero()), MFe(Eigen::Array<double,3,1>::Zero()), MVWp(0), MVP(0), MVZ(0)
-
-   , Vd(Eigen::Matrix<std::complex<double>,3,3>::Zero()), Ud(Eigen::Matrix<
-      std::complex<double>,3,3>::Zero()), Vu(Eigen::Matrix<std::complex<double>,3,
-      3>::Zero()), Uu(Eigen::Matrix<std::complex<double>,3,3>::Zero()), Ve(
-      Eigen::Matrix<std::complex<double>,3,3>::Zero()), Ue(Eigen::Matrix<
-      std::complex<double>,3,3>::Zero()), ZZ(Eigen::Matrix<double,2,2>::Zero())
-
-{
-}
 
 void SingletDM_physical::clear()
 {
@@ -341,6 +326,8 @@ void SingletDM_physical::print(std::ostream& ostr) const
    ostr << "MFu = " << MFu.transpose() << '\n';
    ostr << "MFe = " << MFe.transpose() << '\n';
    ostr << "MVWp = " << MVWp << '\n';
+   ostr << "MVP = " << MVP << '\n';
+   ostr << "MVZ = " << MVZ << '\n';
 
    ostr << "----------------------------------------\n"
            "pole mass mixing matrices:\n"

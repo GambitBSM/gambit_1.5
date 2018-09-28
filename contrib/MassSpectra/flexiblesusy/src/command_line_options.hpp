@@ -19,8 +19,10 @@
 #ifndef COMMAND_LINE_OPTIONS_H
 #define COMMAND_LINE_OPTIONS_H
 
+#include <cstdlib>
 #include <iosfwd>
 #include <string>
+#include "array_view.hpp"
 #include "error.hpp"
 
 namespace flexiblesusy {
@@ -31,7 +33,7 @@ namespace flexiblesusy {
  *
  * Usage:
  * @code
- * int main(int argc, const char* argv[])
+ * int main(int argc, char* argv[])
  * {
  *    using namespace flexiblesusy;
  *    Command_line_options options(argc, argv);
@@ -43,14 +45,14 @@ namespace flexiblesusy {
  */
 class Command_line_options {
 public:
-   Command_line_options();
-   Command_line_options(int, const char*[]);
-   ~Command_line_options();
+   Command_line_options() = default;
+   Command_line_options(int, char*[]);
+   Command_line_options(const Dynamic_array_view<char*>&);
 
    bool must_exit() const { return do_exit; }
    bool must_print_model_info() const { return do_print_model_info; }
    int status() const { return exit_status; }
-   void parse(int, const char*[]);
+   void parse(const Dynamic_array_view<char*>&);
    void print_build_info(std::ostream&) const;
    void print_usage(std::ostream&) const;
    void print_version(std::ostream&) const;
@@ -68,15 +70,15 @@ public:
    static bool starts_with(const std::string&, const std::string&);
 
 private:
-   bool do_exit;
-   bool do_print_model_info;
-   int exit_status;
-   std::string program;
-   std::string database_output_file;
-   std::string rgflow_file;
-   std::string slha_input_file;
-   std::string slha_output_file;
-   std::string spectrum_file;
+   bool do_exit{false};
+   bool do_print_model_info{false};
+   int exit_status{EXIT_SUCCESS};
+   std::string program{};
+   std::string database_output_file{};
+   std::string rgflow_file{};
+   std::string slha_input_file{};
+   std::string slha_output_file{"-"};
+   std::string spectrum_file{};
 };
 
 } // namespace flexiblesusy

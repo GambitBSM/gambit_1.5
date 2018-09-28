@@ -40,8 +40,7 @@
 #include "flexiblesusy/src/ew_input.hpp"
 #include "flexiblesusy/src/lowe.h"
 #include "flexiblesusy/src/numerics2.hpp"
-#include "flexiblesusy/src/two_loop_corrections.hpp"
-
+#include "flexiblesusy/src/spectrum_generator_settings.hpp"
 // Switch for debug mode
 //#define SPECBIT_DEBUG
 
@@ -70,17 +69,16 @@ namespace Gambit
       double e = pow( 4*Pi*( alpha_em ),0.5) ;
 
       // Higgs sector
-      double mh   = *myPipe::Param.at("mH");
-      singletmodel.HiggsPoleMass   = mh;
+      double mh = *myPipe::Param.at("mH");
+      singletmodel.HiggsPoleMass = mh;
 
-      double vev        = 1. / sqrt(sqrt(2.)*sminputs.GF);
-      singletmodel.HiggsVEV        = vev;
-      //singletmodel.LambdaH   = GF*pow(mh,2)/pow(2,0.5) ;
+      double vev = 1. / sqrt(sqrt(2.)*sminputs.GF);
+      singletmodel.HiggsVEV = vev;
 
       // Scalar singlet sector
       singletmodel.SingletPoleMass = *myPipe::Param.at("mS");
-      singletmodel.SingletLambda   = *myPipe::Param.at("lambda_hS");
-      singletmodel.SingletLambdaS   = 0;
+      singletmodel.SingletLambda = *myPipe::Param.at("lambda_hS");
+      singletmodel.SingletLambdaS = 0;
 
       // Standard model
       singletmodel.sinW2 = sinW2;
@@ -156,34 +154,20 @@ namespace Gambit
       // | higgs_2loop_correction_at_at     | 0, 1                         | 1 (= enabled)   |
       // | higgs_2loop_correction_atau_atau | 0, 1                         | 1 (= enabled)   |
 
-      #define SPECGEN_SET(NAME,TYPE,DEFAULTVAL) \
-         CAT_2(spectrum_generator.set_, NAME) BOOST_PP_LPAREN() runOptions.getValueOrDef<TYPE> \
-               BOOST_PP_LPAREN() DEFAULTVAL BOOST_PP_COMMA() STRINGIFY(NAME) \
-               BOOST_PP_RPAREN() BOOST_PP_RPAREN()
+      Spectrum_generator_settings settings;
+      settings.set(Spectrum_generator_settings::precision, runOptions.getValueOrDef<double>(1.0e-4,"precision_goal"));
+      settings.set(Spectrum_generator_settings::max_iterations, runOptions.getValueOrDef<double>(0,"max_iterations"));
+      settings.set(Spectrum_generator_settings::calculate_sm_masses, runOptions.getValueOrDef<bool> (false, "calculate_sm_masses"));
+      settings.set(Spectrum_generator_settings::pole_mass_loop_order, runOptions.getValueOrDef<int>(2,"pole_mass_loop_order"));
+      settings.set(Spectrum_generator_settings::pole_mass_loop_order, runOptions.getValueOrDef<int>(2,"ewsb_loop_order"));
+      settings.set(Spectrum_generator_settings::beta_loop_order, runOptions.getValueOrDef<int>(2,"beta_loop_order"));
+      settings.set(Spectrum_generator_settings::threshold_corrections_loop_order, runOptions.getValueOrDef<int>(2,"threshold_corrections_loop_order"));
+      settings.set(Spectrum_generator_settings::higgs_2loop_correction_at_as, runOptions.getValueOrDef<int>(1,"higgs_2loop_correction_at_as"));
+      settings.set(Spectrum_generator_settings::higgs_2loop_correction_ab_as, runOptions.getValueOrDef<int>(1,"higgs_2loop_correction_ab_as"));
+      settings.set(Spectrum_generator_settings::higgs_2loop_correction_at_at, runOptions.getValueOrDef<int>(1,"higgs_2loop_correction_at_at"));
+      settings.set(Spectrum_generator_settings::higgs_2loop_correction_atau_atau, runOptions.getValueOrDef<int>(1,"higgs_2loop_correction_atau_atau"));
 
-      SPECGEN_SET(precision_goal,                    double, 1.0e-4);
-      SPECGEN_SET(max_iterations,                    double, 0 );
-      SPECGEN_SET(calculate_sm_masses,               bool, false );
-      SPECGEN_SET(pole_mass_loop_order,              int, 2 );
-      SPECGEN_SET(ewsb_loop_order,                   int, 2 );
-      SPECGEN_SET(beta_loop_order,                   int, 2 );
-      SPECGEN_SET(threshold_corrections_loop_order,  int, 1 );
-
-      #undef SPECGEN_SET
-
-      // Higgs loop corrections are a little different... sort them out now
-      Two_loop_corrections two_loop_settings;
-
-       two_loop_settings.higgs_at_as
-         = runOptions.getValueOrDef<bool>(true,"use_higgs_2loop_at_as");
-      two_loop_settings.higgs_ab_as
-         = runOptions.getValueOrDef<bool>(true,"use_higgs_2loop_ab_as");
-      two_loop_settings.higgs_at_at
-         = runOptions.getValueOrDef<bool>(true,"use_higgs_2loop_at_at");
-      two_loop_settings.higgs_atau_atau
-         = runOptions.getValueOrDef<bool>(true,"use_higgs_2loop_atau_atau");
-
-      spectrum_generator.set_two_loop_corrections(two_loop_settings);
+      spectrum_generator.set_settings(settings);
 
       // Generate spectrum
       spectrum_generator.run(oneset, input);
@@ -319,6 +303,7 @@ namespace Gambit
 
     }
 
+    #if(FS_MODEL_SingletDM_IS_BUILT)   
     void get_SingletDM_spectrum_pole(Spectrum& result)
     {
       using namespace softsusy;
@@ -349,7 +334,9 @@ namespace Gambit
       }
 
     }
+    #endif
 
+    #if(FS_MODEL_SingletDMZ3_IS_BUILT)    
     void get_SingletDMZ3_spectrum(Spectrum& result)
     {
       using namespace softsusy;
@@ -382,6 +369,7 @@ namespace Gambit
       }
 
     }
+    #endif
 
     /// Put together the Higgs couplings for the SingletDM, from partial widths only
     void SingletDM_higgs_couplings_pwid(HiggsCouplingsTable &result)

@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/env python
 
 ########################################
 #                                      #
@@ -193,7 +193,7 @@ def main():
     # If additional include paths are given at the command line,
     # add them to the list given in cfg.
     if options.cmdline_include_paths:
-        cfg.include_paths = options.cmdline_include_paths + cfg.include_paths
+        cfg.include_paths = cfg.include_paths + options.cmdline_include_paths
 
 
     #
@@ -204,19 +204,13 @@ def main():
             gb.classes_done, gb.factory_info = pickle.load(f)
 
         print '(Continuing from saved state.)'
-        print
-        print
-        print utils.modifyText('Parsing the generated factory function source files:','underline')
-        print
-
-        factory_xml_files = filehandling.parseFactoryFunctionFiles()
 
         print
         print
         print utils.modifyText('Generating file loaded_types.hpp:','underline')
         print
 
-        filehandling.createLoadedTypesHeader(factory_xml_files)
+        filehandling.createLoadedTypesHeader()
 
         print
         print utils.modifyText('Done!','bold')
@@ -240,10 +234,10 @@ def main():
         sys.exit()
 
 
-    #   
-    # Check if backend source tree has already been BOSSed. (Look for the backend_undefs.hpp header file.) 
-    # 
-    check_file = os.path.join(cfg.header_files_to, gb.gambit_backend_incl_dir, 'backend_undefs.hpp') 
+    #
+    # Check if backend source tree has already been BOSSed. (Look for the backend_undefs.hpp header file.)
+    #
+    check_file = os.path.join(cfg.header_files_to, gb.gambit_backend_incl_dir, 'backend_undefs.hpp')
     if os.path.isfile(check_file):
         print
         print utils.modifyText('The backend source tree seems to already have been BOSSed.','yellow')
@@ -259,7 +253,7 @@ def main():
     # If the output directory is to be used, delete the current one if it exists.
     if (not options.list_flag) and (not options.types_header_flag):
         try:
-            shutil.rmtree(cfg.extra_output_dir)
+            shutil.rmtree(gb.boss_output_dir)
         except OSError, e:
             if e.errno == 2:
                 pass
@@ -585,7 +579,7 @@ def main():
         # Create header with forward declarations of all abstract classes
         #
 
-        abs_frwd_decls_header_path = os.path.join(cfg.extra_output_dir, gb.frwd_decls_abs_fname + cfg.header_extension)
+        abs_frwd_decls_header_path = os.path.join(gb.boss_output_dir, gb.frwd_decls_abs_fname + cfg.header_extension)
         utils.constrAbsForwardDeclHeader(abs_frwd_decls_header_path)
 
 
@@ -593,7 +587,7 @@ def main():
         # Create header with forward declarations of all wrapper classes
         #
 
-        wrp_frwd_decls_header_path = os.path.join(cfg.extra_output_dir, gb.frwd_decls_wrp_fname + cfg.header_extension)
+        wrp_frwd_decls_header_path = os.path.join(gb.boss_output_dir, gb.frwd_decls_wrp_fname + cfg.header_extension)
         utils.constrWrpForwardDeclHeader(wrp_frwd_decls_header_path)
 
 
@@ -601,7 +595,7 @@ def main():
         # # Create header with declarations of all enum types
         # #
 
-        # enum_decls_header_path = os.path.join(cfg.extra_output_dir, gb.enum_decls_wrp_fname + cfg.header_extension)
+        # enum_decls_header_path = os.path.join(gb.boss_output_dir, gb.enum_decls_wrp_fname + cfg.header_extension)
         # utils.constrEnumDeclHeader(root.findall('Enumeration'), enum_decls_header_path)
 
 
@@ -643,7 +637,7 @@ def main():
 
         code_tuples.sort( key=lambda x : x[0], reverse=True )
 
-        new_src_file_name  = os.path.join(cfg.extra_output_dir, os.path.basename(src_file_name))
+        new_src_file_name  = os.path.join(gb.boss_output_dir, os.path.basename(src_file_name))
 
         if code_tuples == []:
             continue
@@ -725,7 +719,7 @@ def main():
     # Run through all the generated files and remove tags that are no longer needed
     #
 
-    all_generated_files = glob.glob(os.path.join(cfg.extra_output_dir,'*')) + glob.glob(os.path.join(gb.backend_types_dir_complete, '*')) + glob.glob(os.path.join(gb.for_gambit_backend_types_dir_complete,'*'))
+    all_generated_files = glob.glob(os.path.join(gb.boss_output_dir,'*')) + glob.glob(os.path.join(gb.backend_types_dir_complete, '*')) + glob.glob(os.path.join(gb.for_gambit_backend_types_dir_complete,'*'))
     remove_tags_list = [ '__START_GAMBIT_NAMESPACE__',
                          '__END_GAMBIT_NAMESPACE__',
                          '__INSERT_CODE_HERE__' ]
@@ -770,19 +764,6 @@ def main():
 
 
     #
-    # Parse all factory function source files using castxml
-    #
-
-    print
-    print
-    print utils.modifyText('Parsing the generated factory function source files:','underline')
-    print
-
-    factory_xml_files = filehandling.parseFactoryFunctionFiles()
-
-
-
-    #
     # Generate header file 'loaded_types.hpp'
     #
 
@@ -791,7 +772,7 @@ def main():
     print utils.modifyText('Generating file loaded_types.hpp:','underline')
     print
 
-    filehandling.createLoadedTypesHeader(factory_xml_files)
+    filehandling.createLoadedTypesHeader()
 
 
     #
