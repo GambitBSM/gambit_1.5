@@ -255,48 +255,62 @@ MathTest_deltabar: |
 #  SpecBit
 #-------------------------------------
 
-#####  SingletDM  #####
+#####  Scalar singlet Higgs-portal models  #####
 
-SingletDM_spectrum: |
+ScalarSingletDM_Z2_spectrum: |
     Create spectrum object for scalar singlet dark matter model, available functions
     are a simple container spectrum and one produced by a spectrum generator.
 
-SingletDMZ3_spectrum: |
+ScalarSingletDM_Z3_spectrum: |
     Create spectrum object for scalar singlet dark matter model with a Z3 symmetry.
 
-vacuum_stability: |
+high_scale_vacuum_info: |
     Run the quartic Higgs coupling to high scales, in order to determine
     the expected lifetime of the electroweak vacuum, the instability scale, and
     the perturbativity of the couplings up to the necessary scale.
 
-check_perturb_min_lambda: |
+check_perturbativity_to_lambda_min: |
     Check that dimensionless couplings are sufficiently small up to the smaller
     of the Planck scale and the scale at which the quartic Higgs coupling is
     minimised and non-positive.
 
-VS_likelihood: |
-    Compute likelihood of no electroweak vacuum decays in the past light cone.
+lnL_high_scale_vacuum: |
+    Compute likelihood of no decays of the electroweak vacuum to high-scale minima in the past light cone.
 
-expected_lifetime: |
+lnL_EW_vacuum: |
+    Check that the scalar potential is bounded from below at the electroweak scale and
+    compute the likelihood of the EW vacuum decaying to other low-scale minima.
+
+expected_vacuum_lifetime: |
     Return the expected lifetime of the electroweak vacuum.
 
-#####  VectorDM  #####
+lambdaB: |
+    The scale at which the Higgs quartic coupling is minimised (in GeV).
 
-VectorDM_spectrum: |
+scale_of_nonperturbativity: |
+    The lowest scale at which one or more couplings become non-perturbative.
+
+
+#####   Other Higgs-portal models  #####
+
+VectorSingletDM_Z2_spectrum: |
     Create spectrum object for the vector dark matter model, available functions
     are a simple container spectrum and one produced by a spectrum generator.
 
-#####  MajoranaDM  #####
-
-MajoranaDM_spectrum: |
+MajoranaSingletDM_Z2_spectrum: |
     Create spectrum object for the Majorana fermion dark matter model, available functions
     are a simple container spectrum and one produced by a spectrum generator.
 
-#####  DiracDM  #####
-
-DiracDM_spectrum: |
+DiracSingletDM_Z2_spectrum: |
     Create spectrum object for the Dirac fermion dark matter model, available functions
     are a simple container spectrum and one produced by a spectrum generator.
+
+
+#####   Minimal Dark Matter  #####
+
+MDM_spectrum: |
+    Create a spectrum object for the mimimal electroweak fermionic quintuplet dark matter model.
+
 
 #####   Standard model  #####
 
@@ -1101,7 +1115,15 @@ RD_eff_annrate: |
    of the thermally averaged cross section <sv>.
 
 RD_oh2: |
-   Contains the dark matter relic density for a given model point.
+   The dark matter relic density.
+
+Xf: |
+   X_f = m_DM / T_f, where T_f is the freezeout temperature of the
+   thermal relic DM.
+
+RD_oh2_Xf: |
+   The dark matter relic density and the X_f = m_DM / T_f, where T_f
+   is the freezeout temperature of the thermal relic DM.
 
 RD_fraction: |
    Contains the fraction of the observed dark matter density that is
@@ -1109,6 +1131,14 @@ RD_fraction: |
 
 lnL_oh2: |
    Contains the log likelihood function constraining the relic density.
+
+relic_density_contributions: |
+   The contributions of different final states to the relic density of
+   dark matter.
+
+semi_annihilation_fraction: |
+   The contribution of semi-annihilation to the relic density of dark
+   matter.
 
 LocalHalo: |
    Provides the parameters of the Maxwell-Boltzmann velocity distribution,
@@ -2592,17 +2622,26 @@ get_DS_charged_h_decay_channels: |
 MicrOmegas_MSSM_3_6_9_2_init: |
    Initialise MicrOmegas MSSM backend.
 
-MicrOmegas_SingletDM_3_6_9_2_init: |
-   Initialise MicrOmegas SingletDM backend.
+MicrOmegas_ScalarSingletDM_Z2_3_6_9_2_init: |
+   Initialise MicrOmegas ScalarSingletDM_Z2 backend.
 
-MicrOmegas_VectorDM_3_6_9_2_init: |
-   Initialise MicrOmegas VectorDM backend.
+MicrOmegas_ScalarSingletDM_Z3_3_6_9_2_init: |
+   Initialise MicrOmegas ScalarSingletDM_Z3 backend.
 
-MicrOmegas_MajoranaDM_3_6_9_2_init: |
-   Initialise MicrOmegas MajoranaDM backend.
+MicrOmegas_VectorSingletDM_Z2_3_6_9_2_init: |
+   Initialise MicrOmegas VectorSingletDM_Z2 backend.
 
-MicrOmegas_DiracDM_3_6_9_2_init: |
-   Initialise MicrOmegas DiracDM backend.
+MicrOmegas_MajoranaSingletDM_Z2_3_6_9_2_init: |
+   Initialise MicrOmegas MajoranaSingletDM_Z2 backend.
+
+MicrOmegas_DiracSingletDM_Z2_3_6_9_2_init: |
+   Initialise MicrOmegas DiracSingletDM_Z2 backend.
+
+get_oneChannel: |
+   Get the contribution to the relic density from one channel
+
+momegas_print_channels: |
+   Print the contributions to the relic density from all channels
 
 assignVal: |
    Assigns a value to a model parameter in MicrOmegas.
@@ -3667,29 +3706,35 @@ CMSSM_parameters: |
 NormalDist_parameters: |
    Parameters for the model NormalDist (see ./gambit NormalDist)
 
-SingletDMZ3_parameters: |
-   Parameters for the model SingletDMZ3 (see ./gambit SingletDMZ3)
+ScalarSingletDM_Z3_parameters: |
+   Parameters for the model ScalarSingletDM_Z3 (see ./gambit ScalarSingletDM_Z3)
 
-SingletDM_parameters: |
-   Parameters for the model SingletDM (see ./gambit SingletDM)
+ScalarSingletDM_Z3_running_parameters: |
+   Parameters for the model ScalarSingletDM_Z3_running (see ./gambit ScalarSingletDM_Z3)
 
-SingletDM_running_parameters: |
-   Parameters for the model SingletDM_running (see ./gambit SingletDM_running)
+ScalarSingletDM_Z2_parameters: |
+   Parameters for the model ScalarSingletDM_Z2 (see ./gambit ScalarSingletDM_Z2)
 
-VectorDM_parameters: |
-   Parameters for the model VectorDM (see ./gambit VectorDM)
+ScalarSingletDM_Z2_running_parameters: |
+   Parameters for the model ScalarSingletDM_Z2_running (see ./gambit ScalarSingletDM_Z2_running)
 
-MajoranaDM_parameters: |
-   Parameters for the model MajoranaDM (see ./gambit MajoranaDM)
+VectorSingletDM_Z2_parameters: |
+   Parameters for the model VectorSingletDM_Z2 (see ./gambit VectorSingletDM_Z2)
 
-MajoranaDM_sps_parameters: |
-   Parameters for the model MajoranaDM_sps (see ./gambit MajoranaDM_sps)
+MajoranaSingletDM_Z2_parameters: |
+   Parameters for the model MajoranaSingletDM_Z2 (see ./gambit MajoranaSingletDM_Z2)
 
-DiracDM_parameters: |
-   Parameters for the model DiracDM (see ./gambit DiracDM)
+MajoranaSingletDM_Z2_sps_parameters: |
+   Parameters for the model MajoranaSingletDM_Z2_sps (see ./gambit MajoranaSingletDM_Z2_sps)
 
-DiracDM_sps_parameters: |
-   Parameters for the model DiracDM_sps (see ./gambit DiracDM_sps)
+DiracSingletDM_Z2_parameters: |
+   Parameters for the model DiracSingletDM_Z2 (see ./gambit DiracSingletDM_Z2)
+
+DiracSingletDM_Z2_sps_parameters: |
+   Parameters for the model DiracSingletDM_Z2_sps (see ./gambit DiracSingletDM_Z2_sps)
+
+MDM_parameters: |
+   Parameters for the mimimal dark matter (MDM) model (see ./gambit MDM)
 
 StandardModel_Higgs_parameters: |
    Parameters for the model StandardModel_Higgs (see ./gambit StandardModel_Higgs)
