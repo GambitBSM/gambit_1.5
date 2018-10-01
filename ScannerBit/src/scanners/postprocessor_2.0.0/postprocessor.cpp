@@ -201,6 +201,20 @@ scanner_plugin(postprocessor, version(2, 0, 0))
     std::string defpath = get_inifile_value<std::string>("default_output_path");
     settings.root = Utils::ensure_path_exists(defpath+"/postprocessor/resume");
     if(rank==0) std::cout << "root: " << settings.root << std::endl;
+
+    // Do not allow recording of timing information
+    // Currently we cannot tell what the names will be for this, and they may
+    // collide with previous timing data in a way that we cannot presently
+    // predict. So for now it is just not allowed to record timing data whilst
+    // using the postprocessor
+    if(get_inifile_value<bool>("print_timing_data"))
+    {
+        std::ostringstream err;
+        err<<"Detected 'print_timing_data: true' in master YAML file. At present this option is not compatible with\
+ the postprocessor, sorry! Please set 'print_timing_data: false' and try again"<<std::endl;
+        Scanner::scan_error().raise(LOCAL_INFO,err.str()); 
+    }
+ 
   }
 
   /// Main run function
