@@ -318,11 +318,11 @@ scanner_plugin(postprocessor, version(2, 0, 0))
             std::cout << "Postprocessing resume analysis completed." << std::endl;
         }
 
-        std::cout << "Rank "<<rank<<" believes that the following chunks have already been processed:"<<std::endl;
-        for(auto chunk=done_chunks.begin(); chunk!=done_chunks.end(); ++chunk)
-        {
-           std::cout << "   "<<chunk->start<<" -> "<<chunk->end<<std::endl;
-        } 
+        //std::cout << "Rank "<<rank<<" believes that the following chunks have already been processed:"<<std::endl;
+        //for(auto chunk=done_chunks.begin(); chunk!=done_chunks.end(); ++chunk)
+        //{
+        //   std::cout << "   "<<chunk->start<<" -> "<<chunk->end<<std::endl;
+        //} 
 
     }
 
@@ -332,6 +332,7 @@ scanner_plugin(postprocessor, version(2, 0, 0))
     //MAIN LOOP HERE
     bool continue_processing = true;
     bool quit_flag_seen = false;
+    unsigned long long ri = 0; // Counter for reporting intervals
 
     while(continue_processing)
     {
@@ -354,7 +355,7 @@ scanner_plugin(postprocessor, version(2, 0, 0))
                {
                   // Receive the work request message (no information, just cleaning up)
                   int quit_flag = 0; // The message itself propagates quit flags, if seen by workers
-                  std::cout<<"Master waiting for message from "<<worker<<std::endl;
+                  //std::cout<<"Master waiting for message from "<<worker<<std::endl;
                   ppComm.Recv(&quit_flag,1,worker,request_work_tag);
 
                   if(quit_flag==1)
@@ -412,12 +413,12 @@ scanner_plugin(postprocessor, version(2, 0, 0))
             int quit_flag = 0; // Use this message to propagate quit flag, if it has been seen
             if(quit_flag_seen) quit_flag = 1;
 
-            std::cout<<"Rank "<<rank<<" sending message to Master "<<std::endl;
+            //std::cout<<"Rank "<<rank<<" sending message to Master "<<std::endl;
             ppComm.Send(&quit_flag,1,0,request_work_tag);
 
             // Receive the work assignment
             std::size_t chunkdata[3]; // Raw form of chunk information
-            std::cout<<"Rank "<<rank<<" receiving message from Master "<<std::endl;
+            //std::cout<<"Rank "<<rank<<" receiving message from Master "<<std::endl;
             ppComm.Recv(&chunkdata,3,0,request_work_tag);
 
             // Check if any work in the work assignment
@@ -440,9 +441,20 @@ scanner_plugin(postprocessor, version(2, 0, 0))
        }
        #endif
 
-       if((rank==0 and numtasks==1) or (rank!=0 and numtasks>1))
+       //if((rank==0 and numtasks==1) or (rank!=0 and numtasks>1))
+       //{
+       //   std::cout << "Rank "<<rank<<": Chunk to process is ["<<mychunk.start<<", "<<mychunk.end<<"; eff_len="<<mychunk.eff_length<<"]"<<std::endl;
+       //}
+
+       // Progress report
+       unsigned long long npi = driver.next_point_index();
+       unsigned long long this_ri = npi / settings.update_interval;       
+       if(this_ri > ri)
        {
-          std::cout << "Rank "<<rank<<": Chunk to process is ["<<mychunk.start<<", "<<mychunk.end<<"; eff_len="<<mychunk.eff_length<<"]"<<std::endl;
+          // Issue progress report if we have crossed into a new reporting interval
+          std::cout << npi <<" of "<<driver.get_total_length()<<" points ("
+                    <<100*npi/driver.get_total_length()<<"%) have been distributed for processing"<<std::endl;
+          ri = this_ri;
        }
 
        if(mychunk==stopchunk)

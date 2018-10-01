@@ -202,7 +202,7 @@ namespace Gambit
       //   return merge_chunks(done_chunks); // Simplify the chunks and return them
       // }
 
-      /// Simplify a ChunkSet by merging chunks which overlap.
+      /// Simplify a ChunkSet by merging chunks which overlap (or are directly adjacent).
       ChunkSet merge_chunks(const ChunkSet& input_chunks)
       {
         ChunkSet merged_chunks;
@@ -214,7 +214,7 @@ namespace Gambit
            for(ChunkSet::const_iterator it=input_chunks.begin();
                 it!=input_chunks.end(); ++it)
            {
-              if(prev_chunk_end!=0 and it->start > prev_chunk_end)
+              if(prev_chunk_end!=0 and it->start > prev_chunk_end+1)
               {
                  // Gap detected; close the existing chunk and start a new one.
                  new_chunk.end = prev_chunk_end;
@@ -798,7 +798,7 @@ namespace Gambit
             loopi = getReader().get_current_index();
  
             if(rank==0) std::cout << "Starting loop over old points ("<<total_length<<" in total)" << std::endl;
-            std::cout << "This task (rank "<<rank<<" of "<<numtasks<<"), will process iterations "<<mychunk.start<<" through to "<<mychunk.end<<", excluding any points that may have already been processed as recorded by resume data. This leaves "<<mychunk.eff_length<<" points for this rank to process."<<std::endl;
+            //std::cout << "This task (rank "<<rank<<" of "<<numtasks<<"), will process iterations "<<mychunk.start<<" through to "<<mychunk.end<<", excluding any points that may have already been processed as recorded by resume data. This leaves "<<mychunk.eff_length<<" points for this rank to process."<<std::endl;
 
             // Disable auto-incrementing of pointID's in the likelihood container. We will set these manually.
             Gambit::Printers::auto_increment() = false;
@@ -832,9 +832,9 @@ namespace Gambit
                   unsigned int       MPIrank = current_point.rank;
                   unsigned long long pointID = current_point.pointID; 
 
-                  std::cout << "Current point: "<<MPIrank<<", "<<pointID<<std::endl;
-                  std::cout << "Current index: "<<getReader().get_current_index()<<std::endl;
-                  std::cout << "Current loopi: "<<loopi<<std::endl;
+                  //std::cout << "Current point: "<<MPIrank<<", "<<pointID<<std::endl;
+                  //std::cout << "Current index: "<<getReader().get_current_index()<<std::endl;
+                  //std::cout << "Current loopi: "<<loopi<<std::endl;
 
                   // Make sure we didn't somehow get desynchronised from the reader's internal index
                   if(loopi!=getReader().get_current_index())
@@ -847,7 +847,7 @@ namespace Gambit
                   // Cancel processing of iterations beyoud our assigned range
                   if(loopi>mychunk.end)
                   {
-                     std::cout << "Rank "<<rank<<" has reached the end of its batch, stopping iteration." << std::endl;
+                     //std::cout << "Rank "<<rank<<" has reached the end of its batch, stopping iteration." << std::endl;
                      loopi--; // Return counter to the last index that we actually processed.
                      break;
                   }
@@ -874,8 +874,8 @@ namespace Gambit
                   // and skip any points that are already processed;
                   if(loopi<mychunk.start or (current_done_chunk!=done_chunks.end() and current_done_chunk->iContain(loopi)))
                   {
-                     std::cout<<"Skipping point (not in our batch)"<<std::endl;
-                     std::cout<<"(loopi=="<<loopi<<", mychunk.start="<<mychunk.start<<", current_done_chunk.start="<<current_done_chunk->start<<", current_done_chunk.end="<<current_done_chunk->end<<")"<<std::endl;
+                     //std::cout<<"Skipping point (not in our batch)"<<std::endl;
+                     //std::cout<<"(loopi=="<<loopi<<", mychunk.start="<<mychunk.start<<", current_done_chunk.start="<<current_done_chunk->start<<", current_done_chunk.end="<<current_done_chunk->end<<")"<<std::endl;
                      current_point = getReader().get_next_point();
                      loopi++;
                      continue;
@@ -907,7 +907,7 @@ namespace Gambit
                   if(current_point == Printers::nullpoint)
                   {
                      // No valid data here, go to next point
-                     std::cout<<"Skipping point (no valid data)"<<std::endl;
+                     //std::cout<<"Skipping point (no valid data)"<<std::endl;
                      current_point = getReader().get_next_point();
                      loopi++;
                      continue;
@@ -925,7 +925,7 @@ namespace Gambit
                   // Check if valid model parameters were extracted. If not, something may be wrong with the input file, or we could just be at the end of a buffer (e.g. in HDF5 case). Can't tell the difference, so just skip the point and continue.
                   if(not valid_modelparams)
                   {
-                     std::cout << "Skipping point "<<loopi<<" as it has no valid ModelParameters" <<std::endl;
+                     //std::cout << "Skipping point "<<loopi<<" as it has no valid ModelParameters" <<std::endl;
                      current_point = getReader().get_next_point();
                      loopi++;
                      continue;
@@ -1320,6 +1320,19 @@ namespace Gambit
          //std::cout<<"chunk_length:"<<chunk_length<<std::endl;          
          return Chunk(chunk_start,chunk_end,chunk_length);
       }
+
+      /// Return index of next point to be distributed for processing (mainly to track progress)
+      unsigned long long PPDriver::next_point_index()
+      {
+         return next_point;
+      }
+
+      /// Return total length of input dataset (mainly to track progress)
+      unsigned long long PPDriver::get_total_length()
+      {
+         return total_length;
+      }
+
 
       /// @}
    }

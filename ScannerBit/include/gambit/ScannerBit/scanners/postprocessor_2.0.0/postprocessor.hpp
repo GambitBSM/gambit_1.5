@@ -101,7 +101,9 @@ namespace Gambit
             bool get_ModelParameters(std::unordered_map<std::string, double>& outputMap);
             Chunk get_new_chunk();
             void set_done_chunks(const ChunkSet& done_chunks);
- 
+            unsigned long long next_point_index();
+            unsigned long long get_total_length();
+  
             // Message tags
             static const int REDIST_REQ = 0;
            

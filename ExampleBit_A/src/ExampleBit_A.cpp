@@ -199,13 +199,13 @@ namespace Gambit
       // Artificially slow down likelihood evaluations
       // Important for debugging new scanner plugins.
       double eval_time = runOptions->getValueOrDef<double>(-1, "eval_time"); // Measured in seconds
-      std::cout << "eval_time:" << eval_time <<std::endl;
+      //std::cout << "eval_time:" << eval_time <<std::endl;
       if(eval_time>0)
       {          
          struct timespec sleeptime;
          sleeptime.tv_sec = floor(eval_time);
          sleeptime.tv_nsec = floor((eval_time-floor(eval_time))*1e9); // Allow user to choose fractions of second
-         std::cout << "Sleeping for "<<sleeptime.tv_sec<<" seconds and "<<sleeptime.tv_nsec<<" nanoseconds" <<std::endl;
+         //std::cout << "Sleeping for "<<sleeptime.tv_sec<<" seconds and "<<sleeptime.tv_nsec<<" nanoseconds" <<std::endl;
          nanosleep(&sleeptime,NULL);
       }
 
