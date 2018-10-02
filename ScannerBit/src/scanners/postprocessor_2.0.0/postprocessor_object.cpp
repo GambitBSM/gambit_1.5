@@ -797,7 +797,7 @@ namespace Gambit
             PPIDpair current_point = getReader().get_current_point();
             loopi = getReader().get_current_index();
  
-            if(rank==0) std::cout << "Starting loop over old points ("<<total_length<<" in total)" << std::endl;
+            //if(rank==0) std::cout << "Starting loop over old points ("<<total_length<<" in total)" << std::endl;
             //std::cout << "This task (rank "<<rank<<" of "<<numtasks<<"), will process iterations "<<mychunk.start<<" through to "<<mychunk.end<<", excluding any points that may have already been processed as recorded by resume data. This leaves "<<mychunk.eff_length<<" points for this rank to process."<<std::endl;
 
             // Disable auto-incrementing of pointID's in the likelihood container. We will set these manually.
@@ -812,8 +812,25 @@ namespace Gambit
             }
 
             ChunkSet::iterator current_done_chunk=done_chunks.begin(); // Used to skip past points that are already done
-            while(not getReader().eoi() and not stop_loop) // while not end of input
+            while(not stop_loop) // while not end of input
             {
+               //std::cout << "Current index: "<<getReader().get_current_index()<<std::endl;
+               //std::cout << "Current loopi: "<<loopi<<std::endl;
+
+               // Cancel processing of iterations beyond our assigned range
+               if(loopi>mychunk.end)
+               {
+                  //std::cout << "Rank "<<rank<<" has reached the end of its batch, stopping iteration. (loopi:"<<loopi<<", mychunk.end:"<<mychunk.end<<")" << std::endl;
+                  loopi--; // Return counter to the last index that we actually processed.
+                  break; // Exit the loop
+               }
+
+               // Send early quit signal if we unexpectedly hit the end of the input file
+               if(getReader().eoi())
+               {
+                  quit = true;
+               }   
+ 
                // Inelegant signal checking. TODO: Think about how this can be shifted over to ScannerBit
                quit = Gambit::Scanner::Plugins::plugin_info.early_shutdown_in_progress();
                if(not quit)
@@ -826,7 +843,7 @@ namespace Gambit
                   }
                   // @}
                }
-               
+           
                if(not quit)
                {
                   unsigned int       MPIrank = current_point.rank;
@@ -842,14 +859,6 @@ namespace Gambit
                      std::ostringstream err;
                      err << "The postprocessor has become desynchronised with its assigned reader object! The postprocessor index is "<<loopi<<" but the reader index is "<<getReader().get_current_index()<<"! This indicates a bug in either the postprocessor or the reader, please report it";
                      Scanner::scan_error().raise(LOCAL_INFO,err.str());
-                  }
-
-                  // Cancel processing of iterations beyoud our assigned range
-                  if(loopi>mychunk.end)
-                  {
-                     //std::cout << "Rank "<<rank<<" has reached the end of its batch, stopping iteration." << std::endl;
-                     loopi--; // Return counter to the last index that we actually processed.
-                     break;
                   }
 
                   // Check whether the calling code wants us to shut down early
