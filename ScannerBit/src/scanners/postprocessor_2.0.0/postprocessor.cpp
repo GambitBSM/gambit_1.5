@@ -267,15 +267,18 @@ scanner_plugin(postprocessor, version(2, 0, 0))
             std::cout << "Analysing previous output to determine remaining postprocessing work (may take a little time for large datasets)..." << std::endl;
  
             // Set up reader object for temporary output file, if one exists 
-            Gambit::Options resume_reader_options = get_inifile_node("resume_reader");
-            get_printer().new_reader("done_points",resume_reader_options);
-            Gambit::Printers::BaseBaseReader* resume_reader = get_printer().get_reader("done_points");
+            //Gambit::Options resume_reader_options = get_inifile_node("resume_reader");
+            //get_printer().new_reader("done_points",resume_reader_options);
 
+            // Create reader object for previous output, if it exists.
+            // There is a special function for this
+            // Resume reader is always called "resume".
+            get_printer().create_resume_reader();
+            Gambit::Printers::BaseBaseReader* resume_reader = get_printer().get_reader("resume"); 
             done_chunks = get_done_points(*resume_reader);
 
             // Delete the reader object
-            get_printer().delete_reader("done_points");
-
+            get_printer().delete_reader("resume"); 
             std::cout << "Distributing information about remaining work to all processes..." << std::endl; 
         }
  

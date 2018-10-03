@@ -169,6 +169,16 @@ namespace Gambit
        readers[readstreamname] = reader_creators.at(whichreader)(options);
     }
 
+    /// Create for reader object for previous print output ("resume reader")
+    void PrinterManager::create_resume_reader()
+    {
+       // The only difficulty here is to get the options needed to build
+       // the reader (filenames etc). This varies between different types
+       // of printers, so we have to ask the primary printer object to
+       // give us these options.  
+       new_reader("resume", get_stream()->resume_reader_options()); 
+    }
+ 
     // Retrieve pointer to named printer object
     BaseBasePrinter* PrinterManager::get_stream(const std::string& streamname)
     {

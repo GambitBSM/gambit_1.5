@@ -56,17 +56,6 @@ Scanner:
         type: hdf5
         file: "runs/spartan/samples/results.hdf5"
         group: "/spartan"
-      # Information about pre-existing run output (i.e. want to
-      # resume from this. Must match info in the "Printer" settings.
-      # Unfortunately this cannot be automatically inferred in a clean
-      # way at present. TODO: find some way to figure this out internally;
-      # the problem though is that different printers are free to handle
-      # their resuming process differently, i.e. they can name the
-      # temporary files whatever they like.
-      resume_reader:
-        type: hdf5
-        file: "runs/postprocessor_v2/samples/pp_results.hdf5_temp_combined"
-        group: "/ppv2"
 
 ObsLikes:
 

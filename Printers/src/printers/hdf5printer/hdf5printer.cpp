@@ -500,6 +500,19 @@ namespace Gambit
       common_constructor(options);
     }
 
+    // Get options required to construct a reader object that can read
+    // the previous output of this printer.
+    Options HDF5Printer::resume_reader_options()
+    {
+      Options options;
+      // Set options that we need later to construct a reader object for
+      // previous output, if required.
+      options.setValue("type", "hdf5");
+      options.setValue("file", tmp_comb_file);
+      options.setValue("group", group);
+      return options;
+    }
+
     void HDF5Printer::common_constructor(const Options& options)
     {
 #ifdef WITH_MPI

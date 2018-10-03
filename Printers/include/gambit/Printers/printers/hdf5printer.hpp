@@ -155,6 +155,10 @@ namespace Gambit
         void reset(bool force=false);
         void finalise(bool abnormal=false);
 
+        // Get options required to construct a reader object that can read
+        // the previous output of this printer.
+        Options resume_reader_options();
+ 
         ///@}
 
         ///@{ Print functions

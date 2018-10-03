@@ -89,6 +89,10 @@ namespace Gambit
         void                  setPrintList(std::set<std::string>& in) {print_list = in;}
         void                  addToPrintList(std::string& in) {print_list.insert(in);}
 
+        // Get options required to construct a reader object that can read
+        // the previous output of this printer.
+        virtual Options resume_reader_options() = 0;
+ 
         /// Signal printer that scan is finished, and final output needs to be performed
         virtual void finalise(bool abnormal=false) = 0;
 

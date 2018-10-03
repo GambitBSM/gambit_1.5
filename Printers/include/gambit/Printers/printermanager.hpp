@@ -68,6 +68,9 @@ namespace Gambit
         /// Create reader object
         void new_reader(const std::string&, const Options&);
 
+        /// Create for reader object for previous print output ("resume reader")
+        void create_resume_reader();
+
         /// Getter for auxiliary printer objects
         BaseBasePrinter* get_stream(const std::string& = "");
   
