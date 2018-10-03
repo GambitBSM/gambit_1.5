@@ -197,11 +197,6 @@ scanner_plugin(postprocessor, version(2, 0, 0))
     // the 'plugin_info.early_shutdown_in_progress()' function.
     LogLike->disable_external_shutdown();
 
-    // Path to save resume files
-    std::string defpath = get_inifile_value<std::string>("default_output_path");
-    settings.root = Utils::ensure_path_exists(defpath+"/postprocessor/resume");
-    if(rank==0) std::cout << "root: " << settings.root << std::endl;
-
     // Do not allow recording of timing information
     // Currently we cannot tell what the names will be for this, and they may
     // collide with previous timing data in a way that we cannot presently

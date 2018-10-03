@@ -138,69 +138,6 @@ namespace Gambit
  
          return merge_chunks(done_chunks); // Simplify the chunks and return them
       }
- 
-      /// Read through resume data files and reconstruct which chunks of points have already been processed
-      /// OLD VERSION!
-      // ChunkSet get_done_points(const std::string& filebase)
-      // {
-      //   ChunkSet done_chunks;
-
-      //   // First read collated chunk data from past resumes, and the number of processes used in the last run
-      //   std::string inprev = filebase+"_prev.dat";
-
-      //   // Check if it exists (it will not exist on the first resume)
-      //   if(Utils::file_exists(inprev))
-      //   {
-      //      std::ifstream finprev(inprev);
-      //      if(finprev)
-      //      {
-      //         unsigned int prev_size;
-      //         finprev >> prev_size;
-      //         Chunk nextchunk;
-      //         while( finprev >> nextchunk.start >> nextchunk.end )
-      //         {
-      //           done_chunks.insert(nextchunk);
-      //         }
-
-      //         // Now read each of the chunk files left by each process during previous run
-      //         for(unsigned int i=0; i<prev_size; ++i)
-      //         {
-      //           std::ostringstream inname;
-      //           inname << filebase << "_" << i << ".dat";
-      //           std::string in = inname.str();
-      //           if(Utils::file_exists(in))
-      //           {
-      //             std::ifstream fin(in);
-      //             if(fin)
-      //             {
-      //               fin >> nextchunk.start >> nextchunk.end;
-      //               done_chunks.insert(nextchunk);
-      //             }
-      //             else
-      //             {
-      //               std::ostringstream err;
-      //               err << "Tried to read postprocessor resume data from "<<in<<" but encountered a read error of some kind (the file seems to exist but appears to be unreadable";
-      //               Scanner::scan_error().raise(LOCAL_INFO,err.str());
-      //             }
-      //           }
-      //           else
-      //           {
-      //             std::ostringstream err;
-      //             err << "Tried to read postprocessor resume data from "<<in<<" but the file does not exist or is unreadable. We require this file because according to "<<inprev<<" there were "<<prev_size<<" processes in use during the last run, and we require the resume data from all of them";
-      //             Scanner::scan_error().raise(LOCAL_INFO,err.str());
-      //           }
-      //         }
-      //      }
-      //      else
-      //      {
-      //         std::ostringstream err;
-      //         err << "Tried to read postprocessor resume data from "<<inprev<<" but encountered a read error of some kind (the file seems to exist but appears to be unreadable";
-      //         Scanner::scan_error().raise(LOCAL_INFO,err.str());
-      //      }
-      //   }
-      //   // Else there is no resume data, assume that this is a new run started without the --restart flag.
-      //   return merge_chunks(done_chunks); // Simplify the chunks and return them
-      // }
 
       /// Simplify a ChunkSet by merging chunks which overlap (or are directly adjacent).
       ChunkSet merge_chunks(const ChunkSet& input_chunks)
@@ -254,77 +191,6 @@ namespace Gambit
         }
         // else there are no input chunks, just return an empty ChunkSet
         return merged_chunks;
-      }
-
-      /// Write resume data files
-      /// These specify which chunks of points have been processed during this run
-      void record_done_points(const ChunkSet& done_chunks, const Chunk& mydone, const std::string& filebase, unsigned int rank, unsigned int size)
-      {
-        if(rank == 0)
-        {
-          // If we are rank 0, output any old chunks from previous resumes to a special file
-          // (deleting it first)
-          std::string outprev = filebase+"_prev.dat";
-          if( Gambit::Utils::file_exists(outprev) )
-          {
-            if( remove(outprev.c_str()) != 0 )
-            {
-              perror( ("Error deleting file "+outprev).c_str() );
-              std::ostringstream err;
-              err << "Unknown error removing old resume data file '"<<outprev<<"'!";
-              Scanner::scan_error().raise(LOCAL_INFO,err.str());
-            }
-          }
-          // else was deleted no problem
-          std::ofstream foutprev(outprev);
-          foutprev << size << std::endl;
-          for(ChunkSet::const_iterator it=done_chunks.begin();
-               it!=done_chunks.end(); ++it)
-          {
-            foutprev << it->start << " " << it->end << std::endl;
-          }
-          // check that the write succeeded
-          foutprev.close();
-          if (!foutprev)
-          {
-              std::ostringstream err;
-              err << "Unknown IO error while writing resume data file '"<<outprev<<"'!";
-              Scanner::scan_error().raise(LOCAL_INFO,err.str());
-          }
-        }
-        // Now output what we have done (could overlap with old chunks, but that doesn't really matter)
-        std::ostringstream outname;
-        outname << filebase << "_" << rank <<".dat";
-        std::string out = outname.str();
-        if( Gambit::Utils::file_exists(out) )
-        {
-          if( remove(out.c_str()) != 0 )
-          {
-            perror( ("Error deleting file "+out).c_str() );
-            std::ostringstream err;
-            err << "Unknown error removing old resume data file '"<<out<<"'!";
-            Scanner::scan_error().raise(LOCAL_INFO,err.str());
-          }
-        }
-        // else was deleted no problem, write new file
-        std::ofstream fout(out);
-        fout << mydone.start << " " << mydone.end << std::endl;
-        // let's just make sure the files had no errors while closing because they are important.
-        fout.close();
-        if (!fout)
-        {
-            std::ostringstream err;
-            err << "Unknown IO error while writing resume data file '"<<out<<"'!";
-            Scanner::scan_error().raise(LOCAL_INFO,err.str());
-        }
-        // Gah, data could apparantly still be buffered by the OS and not yet written to disk
-        // Apparantly on POSIX fsync can be used to ensure this happens, but I am not
-        // sure if the following works. This answer on StackOverflow seems to say it doesn't?
-        // http://stackoverflow.com/questions/676787/how-to-do-fsync-on-an-ofstream
-        //int fd = open(filename, O_APPEND);
-        //fsync(fd);
-        //close(fd);
-        // I may need to convert all these operations to old-school C operations
       }
 
       // Gather a bunch of ints from all processes (COLLECTIVE OPERATION)
@@ -1167,11 +1033,6 @@ namespace Gambit
          {
             std::cout << "Postprocessor (rank "<<rank<<") reached the end of the input file! (debug: was this the end of our batch? (loopi="<<loopi<<", mychunk.end="<<mychunk.end<<", total_length = "<<total_length<<")"<<std::endl;
          }
-
-         // Write resume data (even if we finished; other processes might not have)
-         //std::cout<<"Writing resume data (rank "<<rank<<")...."<< std::endl;
-         Chunk mydonechunk(mychunk.start,loopi);
-         record_done_points(done_chunks, mydonechunk, root, rank, numtasks);
 
          // We now set the return code to inform the calling code of why we stopped.
          // 0 - Finished processing all the points we were assigned
