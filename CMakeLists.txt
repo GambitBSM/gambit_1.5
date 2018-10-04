@@ -459,9 +459,6 @@ add_subdirectory_if_present(Models)
 add_subdirectory_if_present(Backends)
 add_subdirectory_if_present(Elements)
 add_subdirectory_if_present(Printers)
-make_symbols_visible(Logs)
-make_symbols_visible(Utils)
-make_symbols_visible(Printers)
 
 # Lists of different GAMBIT object files to link
 set(GAMBIT_BASIC_COMMON_OBJECTS "${GAMBIT_BASIC_COMMON_OBJECTS}" $<TARGET_OBJECTS:Logs> $<TARGET_OBJECTS:Utils>)

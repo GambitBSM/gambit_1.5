@@ -37,14 +37,14 @@ Printer:
 
 Scanner:
 
-  use_scanner: twalk
+  use_scanner: de
 
   scanners:
 
     de:
       plugin: diver
       like: LogLike
-      NP: 5000
+      NP: 500
 
     multinest:
       plugin: multinest
@@ -89,7 +89,7 @@ KeyValues:
 
   rng: ranlux48
 
-  print_timing_data: true 
+  print_timing_data: true
 
   likelihood:
     model_invalid_for_lnlike_below: -1e6

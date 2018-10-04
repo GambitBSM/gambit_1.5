@@ -41,6 +41,7 @@ set(GAMBIT_BASIC_COMMON_OBJECTS "${GAMBIT_BASIC_COMMON_OBJECTS}" $<TARGET_OBJECT
 #contrib/yaml-cpp-0.6.2
 set(yaml_INCLUDE_DIR ${PROJECT_SOURCE_DIR}/contrib/yaml-cpp-0.6.2/include)
 include_directories("${yaml_INCLUDE_DIR}")
+add_definitions(-DYAML_CPP_DLL)
 add_subdirectory(${PROJECT_SOURCE_DIR}/contrib/yaml-cpp-0.6.2 EXCLUDE_FROM_ALL)
 
 #contrib/Delphes-3.1.2; include only if ColliderBit is in use and Delphes is not intentionally ditched.
@@ -67,7 +68,7 @@ else()
     SOURCE_DIR ${DELPHES_DIR}
     BUILD_IN_SOURCE 1
     CONFIGURE_COMMAND ./configure
-              COMMAND sed ${dashi} "/^CXXFLAGS += .* -Iexternal\\/tcl/ s/$/ ${BACKEND_CXX_FLAGS}/" <SOURCE_DIR>/Makefile
+              COMMAND sed ${dashi} "/^CXXFLAGS += .* -Iexternal\\/tcl/ s/$/ ${CMAKE_CXX_FLAGS}/" <SOURCE_DIR>/Makefile
               COMMAND sed ${dashi} "s,\ ..EXECUTABLE.,,g" <SOURCE_DIR>/Makefile
               COMMAND sed ${dashi} "s/${DELPHES_BAD_LINE}/\\1/g" <SOURCE_DIR>/Makefile
     BUILD_COMMAND ${CMAKE_MAKE_PROGRAM} all
@@ -109,8 +110,8 @@ if(";${GAMBIT_BITS};" MATCHES ";SpecBit;")
   set (EXCLUDE_FLEXIBLESUSY FALSE)
 
   # Always use -O2 for flexiblesusy to ensure fast spectrum generation.
-  set(FS_CXX_FLAGS "${BACKEND_CXX_FLAGS} -Wno-missing-field-initializers")
-  set(FS_Fortran_FLAGS "${BACKEND_Fortran_FLAGS}")
+  set(FS_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-missing-field-initializers")
+  set(FS_Fortran_FLAGS "${CMAKE_Fortran_FLAGS}")
   if (CMAKE_BUILD_TYPE STREQUAL "Debug")
     set(FS_CXX_FLAGS "${FS_CXX_FLAGS} -O2")
     set(FS_Fortran_FLAGS "${FS_Fortran_FLAGS} -O2")
