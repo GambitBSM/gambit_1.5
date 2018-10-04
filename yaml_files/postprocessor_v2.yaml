@@ -9,11 +9,22 @@
 
 Parameters:
   # In this example we will simply be fitting the mean and standard deviation of a normal distribution.
+  # Parameters to be read from the input data file need to have prior_type: none.
   NormalDist:
     mu:
       prior_type: none
     sigma:
       prior_type: none
+
+  # These parameters don't exist in the original data file, but we
+  # can still use them to satisfy dependencies because they have fixed values.
+  NUHM1:
+    A0: 1
+    M0: 2
+    mH: 3
+    M12: 4 
+    SignMu: 5
+    TanBeta: 6
  
 Priors:
 
@@ -65,6 +76,14 @@ ObsLikes:
     module:       ExampleBit_A
     type:         double
 
+    # Test activation of new fixed model parameters that
+    # don't exist in the input file (this function requires
+    # e.g. NUHM1 parameters to run)
+  - purpose:      LogLike
+    capability:   Example_lnL_B
+    type:         double
+    function:     ""
+    module:       ""
 
 Rules:
 
@@ -73,6 +92,25 @@ Rules:
     options:
        # Set sleep time between evaluations (in seconds)
        #eval_time: 0.01
+
+  # Rules for satisfying dependencies related to Example_lnL_B
+  # (Just lifted from spartan_NUHM1.yaml)
+  - capability:   LibFirst_1_1_init
+    dependencies:
+    - {capability: nevents, module: ExampleBit_A}
+
+  - capability:    nevents_postcuts
+    type: int
+    dependencies:
+    - {capability: particle_id, module: ExampleBit_B}
+    backends:
+    - {capability: awesomeness, backend: LibFirst, version: 1.1}
+    - {capability: someFunction, backend: LibFirst, version: 1.1}
+
+  - capability:    function_pointer
+    backends:
+    - {function: externalFunction2}
+
 
 Logger:
 

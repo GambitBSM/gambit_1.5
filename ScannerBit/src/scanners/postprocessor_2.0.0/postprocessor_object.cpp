@@ -288,8 +288,10 @@ namespace Gambit
         , comm                       (o.comm                       )
         #endif
     {
-         // Retrieve parameter and model names
-         std::vector<std::string> keys = getLogLike()->getPrior().getParameters(); // use to use get_keys() in the objective (prior) plugin;
+         // Retrieve "visibile" parameter and model names
+         // This will ignore parameters with fixed values in the yaml file, 
+         // allowing those to be input or overridden manually    
+         std::vector<std::string> keys = getLogLike()->getPrior().getShownParameters();
 
          // Pull the keys apart into model-name, parameter-name pairs
          if(rank==0) std::cout << "Number of model parameters to be retrieved from previous output: "<< keys.size() <<std::endl;
