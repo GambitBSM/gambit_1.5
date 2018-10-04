@@ -18,13 +18,13 @@ Parameters:
 
   # These parameters don't exist in the original data file, but we
   # can still use them to satisfy dependencies because they have fixed values.
-  NUHM1:
-    A0: 1
-    M0: 2
-    mH: 3
-    M12: 4 
-    SignMu: 5
-    TanBeta: 6
+  #NUHM1:
+  #  A0: 1
+  #  M0: 2
+  #  mH: 3
+  #  M12: 4 
+  #  SignMu: 5
+  #  TanBeta: 6
  
 Priors:
 
@@ -79,11 +79,11 @@ ObsLikes:
     # Test activation of new fixed model parameters that
     # don't exist in the input file (this function requires
     # e.g. NUHM1 parameters to run)
-  - purpose:      LogLike
-    capability:   Example_lnL_B
-    type:         double
-    function:     ""
-    module:       ""
+    # - purpose:      LogLike
+    # - capability:   Example_lnL_B
+    # - type:         double
+    # - function:     ""
+    # - module:       ""
 
 Rules:
 
