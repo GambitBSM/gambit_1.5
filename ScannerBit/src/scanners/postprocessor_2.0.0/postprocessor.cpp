@@ -247,7 +247,7 @@ scanner_plugin(postprocessor, version(2, 0, 0))
     // Points which have already been processed in a previous (aborted) run
     ChunkSet done_chunks; // Empty by default
 
-    // Ask the printer if this is a resumed run or not, and check that the necessary files exist if so.
+    // Ask the printer if this is a resumed run or not
     bool resume = get_printer().resume_mode();
  
     // Vector to record which processes have been told by the master to stop. 
@@ -255,6 +255,7 @@ scanner_plugin(postprocessor, version(2, 0, 0))
     std::vector<bool> process_has_stopped(numtasks); // For end of run
 
     // Rank 0 needs to figure out which points are already processesed (if resuming)
+    std::cout << "PP resume flag? "<<resume<<std::endl;
     if(resume)
     { 
         if(rank==0)

@@ -47,6 +47,10 @@ namespace Gambit
         /// Getter for "resume" mode flag
         bool resume_mode() { return resume; }
 
+        /// Setter for "resume" mode flag
+        /// (printer may override user choice if no previous output exists)
+        void set_resume_mode(bool rflag) { resume = rflag; }
+
         /// Create auxiliary printer object
         virtual void new_stream(const std::string&, const Options&) = 0;
 

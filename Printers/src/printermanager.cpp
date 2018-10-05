@@ -59,6 +59,9 @@ namespace Gambit
 
          BasePrinter* null(NULL);
          printerptr = printer_creators.at(tag)(mod_options,null);
+  
+         // Update resume flag (primary printer may have switched it off due to lack of existing output)
+         set_resume_mode(printerptr->get_resume());
       }
       else
       {
