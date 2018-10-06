@@ -215,7 +215,6 @@ if(";${GAMBIT_BITS};" MATCHES ";SpecBit;")
   )
 
   # Set linking commands.  Link order matters! The core flexiblesusy libraries need to come after the model libraries but before the other link flags.
-  # for v 1.5.1 add "-L${FS_DIR}/legacy -llegacy"  after "-lflexiblesusy"
   set(flexiblesusy_LDFLAGS "-L${FS_DIR}/src -lflexisusy ${flexiblesusy_LDFLAGS}")
   foreach(_MODEL ${BUILD_FS_MODELS})
     set(flexiblesusy_LDFLAGS "-L${FS_DIR}/models/${_MODEL} -l${_MODEL} ${flexiblesusy_LDFLAGS}")
