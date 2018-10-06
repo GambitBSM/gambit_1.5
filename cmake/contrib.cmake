@@ -68,7 +68,7 @@ else()
     SOURCE_DIR ${DELPHES_DIR}
     BUILD_IN_SOURCE 1
     CONFIGURE_COMMAND ./configure
-              COMMAND sed ${dashi} "/^CXXFLAGS += .* -Iexternal\\/tcl/ s/$/ ${CMAKE_CXX_FLAGS}/" <SOURCE_DIR>/Makefile
+              COMMAND sed ${dashi} "/^CXXFLAGS += .* -Iexternal\\/tcl/ s/$/ ${BACKEND_CXX_FLAGS}/" <SOURCE_DIR>/Makefile
               COMMAND sed ${dashi} "s,\ ..EXECUTABLE.,,g" <SOURCE_DIR>/Makefile
               COMMAND sed ${dashi} "s/${DELPHES_BAD_LINE}/\\1/g" <SOURCE_DIR>/Makefile
     BUILD_COMMAND ${CMAKE_MAKE_PROGRAM} all
@@ -110,8 +110,8 @@ if(";${GAMBIT_BITS};" MATCHES ";SpecBit;")
   set (EXCLUDE_FLEXIBLESUSY FALSE)
 
   # Always use -O2 for flexiblesusy to ensure fast spectrum generation.
-  set(FS_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-missing-field-initializers")
-  set(FS_Fortran_FLAGS "${CMAKE_Fortran_FLAGS}")
+  set(FS_CXX_FLAGS "${BACKEND_CXX_FLAGS} -Wno-missing-field-initializers")
+  set(FS_Fortran_FLAGS "${BACKEND_Fortran_FLAGS}")
   if (CMAKE_BUILD_TYPE STREQUAL "Debug")
     set(FS_CXX_FLAGS "${FS_CXX_FLAGS} -O2")
     set(FS_Fortran_FLAGS "${FS_Fortran_FLAGS} -O2")
@@ -135,6 +135,9 @@ if(";${GAMBIT_BITS};" MATCHES ";SpecBit;")
   set_compiler_warning("no-unused-parameter" FS_CXX_FLAGS)
   set_compiler_warning("no-unused-variable" FS_CXX_FLAGS)
 
+  # Construct the command to create the shared library
+  set(FS_SO_LINK_COMMAND "${CMAKE_CXX_COMPILER} ${CMAKE_SHARED_LINKER_FLAGS} -shared -o")
+
   # FlexibleSUSY configure options
   set(FS_OPTIONS ${FS_OPTIONS}
        --with-cxx=${CMAKE_CXX_COMPILER}
@@ -148,6 +151,9 @@ if(";${GAMBIT_BITS};" MATCHES ";SpecBit;")
        --with-lapack-libs=${LAPACK_LINKLIBS}
        --with-blas-libs=${LAPACK_LINKLIBS}
        --disable-librarylink
+       --enable-shared-libs
+       --with-shared-lib-ext=.so
+       --with-shared-lib-cmd=${FS_SO_LINK_COMMAND}
       #--enable-verbose flag causes verbose output at runtime as well. Maybe set it dynamically somehow in future.
      )
 
@@ -215,10 +221,15 @@ if(";${GAMBIT_BITS};" MATCHES ";SpecBit;")
   )
 
   # Set linking commands.  Link order matters! The core flexiblesusy libraries need to come after the model libraries but before the other link flags.
+  set(CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_RPATH};${FS_DIR}/src")
   set(flexiblesusy_LDFLAGS "-L${FS_DIR}/src -lflexisusy ${flexiblesusy_LDFLAGS}")
   foreach(_MODEL ${BUILD_FS_MODELS})
+    set(CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_RPATH};${FS_DIR}/models/${_MODEL}")
     set(flexiblesusy_LDFLAGS "-L${FS_DIR}/models/${_MODEL} -l${_MODEL} ${flexiblesusy_LDFLAGS}")
   endforeach()
+
+  # Strip out leading and trailing whitespace
+  string(STRIP "${flexiblesusy_LDFLAGS}" flexiblesusy_LDFLAGS)
 
   # Set up include paths
   include_directories("${FS_DIR}/..")
@@ -231,9 +242,6 @@ if(";${GAMBIT_BITS};" MATCHES ";SpecBit;")
   foreach(_MODEL ${BUILD_FS_MODELS})
     include_directories("${FS_DIR}/models/${_MODEL}")
   endforeach()
-
-  # Strip out leading and trailing whitespace
-  string(STRIP "${flexiblesusy_LDFLAGS}" flexiblesusy_LDFLAGS)
 
 else()
 
