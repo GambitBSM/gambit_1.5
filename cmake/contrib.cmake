@@ -63,7 +63,7 @@ else()
   set (EXCLUDE_DELPHES FALSE)
   set (DELPHES_LDFLAGS "-L${DELPHES_DIR} -lDelphes")
   set (DELPHES_BAD_LINE "\\(..CC)\ ..patsubst\ -std=%,,..CXXFLAGS))\\)\ \\(..CXXFLAGS.\\)")
-  set (CMAKE_INSTALL_RPATH "${DELPHES_DIR}")
+  set (CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_RPATH};${DELPHES_DIR}")
   ExternalProject_Add(delphes
     SOURCE_DIR ${DELPHES_DIR}
     BUILD_IN_SOURCE 1
