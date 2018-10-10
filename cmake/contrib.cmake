@@ -119,14 +119,13 @@ if(";${GAMBIT_BITS};" MATCHES ";SpecBit;")
 
   # Determine compiler libraries needed by flexiblesusy.
   if(CMAKE_Fortran_COMPILER MATCHES "gfortran*")
-    set(flexiblesusy_extralibs "${flexiblesusy_extralibs} -lgfortran -lm")
+    set(flexiblesusy_compilerlibs "-lgfortran -lm")
   elseif(CMAKE_Fortran_COMPILER MATCHES "g77" OR CMAKE_Fortran_COMPILER MATCHES "f77")
-    set(flexiblesusy_extralibs "${flexiblesusy_extralibs} -lg2c -lm")
+    set(flexiblesusy_compilerlibs "-lg2c -lm")
   elseif(CMAKE_Fortran_COMPILER MATCHES "ifort")
-    set(flexiblesusy_extralibs "${flexiblesusy_extralibs} -lifcore -limf -ldl -lintlc -lsvml")
+    set(flexiblesusy_compilerlibs "-lifcore -limf -ldl -lintlc -lsvml")
   endif()
-  #message("${Yellow}-- Determined FlexibleSUSY compiler library dependencies: ${flexiblesusy_extralibs}${ColourReset}")
-  set(flexiblesusy_LDFLAGS "${flexiblesusy_LDFLAGS} ${flexiblesusy_extralibs}")
+  set(flexiblesusy_LDFLAGS ${flexiblesusy_LDFLAGS} ${flexiblesusy_compilerlibs})
 
   # Silence the deprecated-declarations warnings comming from Eigen3
   set_compiler_warning("no-deprecated-declarations" FS_CXX_FLAGS)
@@ -211,25 +210,33 @@ if(";${GAMBIT_BITS};" MATCHES ";SpecBit;")
 
   message("${Yellow}-- Configuring FlexibleSUSY - done.${ColourReset}")
 
+  # Set linking commands.  Link order matters! The core flexiblesusy libraries need to come after the model libraries but before the other link flags.
+  set(CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_RPATH};${FS_DIR}/src")
+  set(flexiblesusy_LDFLAGS "-L${FS_DIR}/src -lflexisusy ${flexiblesusy_LDFLAGS}")
+  set(FS_OSX_INSTALL_PATH_CORRECTION "install_path_tool -ia \"@rpath/libflexisusy.so\" src/libflexisusy.so")
+  foreach(_MODEL ${BUILD_FS_MODELS})
+    set(CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_RPATH};${FS_DIR}/models/${_MODEL}")
+    set(flexiblesusy_LDFLAGS "-L${FS_DIR}/models/${_MODEL} -l${_MODEL} ${flexiblesusy_LDFLAGS}")
+    set(FS_OSX_INSTALL_PATH_CORRECTION ${FS_OSX_INSTALL_PATH_CORRECTION} " && install_path_tool -ia \"@rpath/lib${_MODEL}.so\" models/${_MODEL}/lib${_MODEL}.so")
+  endforeach()
+  if (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
+    set(APPLY_FS_OSX_INSTALL_PATH_CORRECTION ${FS_OSX_INSTALL_PATH_CORRECTION})
+  else()
+    set(APPLY_FS_OSX_INSTALL_PATH_CORRECTION "")
+  endif()
+
+  # Strip out leading and trailing whitespace
+  string(STRIP "${flexiblesusy_LDFLAGS}" flexiblesusy_LDFLAGS)
+
   # Add FlexibleSUSY as an external project
   ExternalProject_Add(flexiblesusy
     SOURCE_DIR ${FS_DIR}
     BUILD_IN_SOURCE 1
     BUILD_COMMAND $(MAKE) alllib
+          COMMAND ${APPLY_FS_OSX_INSTALL_PATH_CORRECTION}
     CONFIGURE_COMMAND ${config_command}
     INSTALL_COMMAND ""
   )
-
-  # Set linking commands.  Link order matters! The core flexiblesusy libraries need to come after the model libraries but before the other link flags.
-  set(CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_RPATH};${FS_DIR}/src")
-  set(flexiblesusy_LDFLAGS "-L${FS_DIR}/src -lflexisusy ${flexiblesusy_LDFLAGS}")
-  foreach(_MODEL ${BUILD_FS_MODELS})
-    set(CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_RPATH};${FS_DIR}/models/${_MODEL}")
-    set(flexiblesusy_LDFLAGS "-L${FS_DIR}/models/${_MODEL} -l${_MODEL} ${flexiblesusy_LDFLAGS}")
-  endforeach()
-
-  # Strip out leading and trailing whitespace
-  string(STRIP "${flexiblesusy_LDFLAGS}" flexiblesusy_LDFLAGS)
 
   # Set up include paths
   include_directories("${FS_DIR}/..")
