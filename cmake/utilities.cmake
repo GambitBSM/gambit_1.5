@@ -146,6 +146,19 @@ function(make_symbols_visible lib)
   endif()
 endfunction()
 
+# Function to reset the install_name of a library compiled in an external project on OSX
+function(add_install_name_tool_step proj path lib)
+  if (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
+    ExternalProject_Add_Step(${proj}
+      change-install-name-${lib}
+      COMMENT "Fixing install name for ${lib}"
+      COMMAND install_name_tool -id \"@rpath/"${lib}"\" ${path}/${lib}
+      DEPENDEES install
+    )
+  endif()
+endfunction()
+
+
 # Function to add static GAMBIT library
 function(add_gambit_library libraryname)
   cmake_parse_arguments(ARG "VISIBLE" "OPTION" "SOURCES;HEADERS" ${ARGN})

@@ -210,33 +210,27 @@ if(";${GAMBIT_BITS};" MATCHES ";SpecBit;")
 
   message("${Yellow}-- Configuring FlexibleSUSY - done.${ColourReset}")
 
-  # Set linking commands.  Link order matters! The core flexiblesusy libraries need to come after the model libraries but before the other link flags.
-  set(CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_RPATH};${FS_DIR}/src")
-  set(flexiblesusy_LDFLAGS "-L${FS_DIR}/src -lflexisusy ${flexiblesusy_LDFLAGS}")
-  set(FS_OSX_INSTALL_PATH_CORRECTION "install_name_tool -id \"@rpath/libflexisusy.so\" ${FS_DIR}/src/libflexisusy.so")
-  foreach(_MODEL ${BUILD_FS_MODELS})
-    set(CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_RPATH};${FS_DIR}/models/${_MODEL}")
-    set(flexiblesusy_LDFLAGS "-L${FS_DIR}/models/${_MODEL} -l${_MODEL} ${flexiblesusy_LDFLAGS}")
-    set(FS_OSX_INSTALL_PATH_CORRECTION ${FS_OSX_INSTALL_PATH_CORRECTION} " && install_name_tool -id \"@rpath/lib${_MODEL}.so\" ${FS_DIR}/models/${_MODEL}/lib${_MODEL}.so")
-  endforeach()
-  if (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
-    set(APPLY_FS_OSX_INSTALL_PATH_CORRECTION ${FS_OSX_INSTALL_PATH_CORRECTION})
-  else()
-    set(APPLY_FS_OSX_INSTALL_PATH_CORRECTION "")
-  endif()
-
-  # Strip out leading and trailing whitespace
-  string(STRIP "${flexiblesusy_LDFLAGS}" flexiblesusy_LDFLAGS)
-
   # Add FlexibleSUSY as an external project
   ExternalProject_Add(flexiblesusy
     SOURCE_DIR ${FS_DIR}
     BUILD_IN_SOURCE 1
-    BUILD_COMMAND $(MAKE) alllib
-          COMMAND ${APPLY_FS_OSX_INSTALL_PATH_CORRECTION}
     CONFIGURE_COMMAND ${config_command}
+    BUILD_COMMAND $(MAKE) alllib
     INSTALL_COMMAND ""
   )
+
+  # Set linking commands.  Link order matters! The core flexiblesusy libraries need to come after the model libraries but before the other link flags.
+  set(CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_RPATH};${FS_DIR}/src")
+  set(flexiblesusy_LDFLAGS "-L${FS_DIR}/src -lflexisusy ${flexiblesusy_LDFLAGS}")
+  add_install_name_tool_step(flexiblesusy ${FS_DIR}/src libflexisusy.so)
+  foreach(_MODEL ${BUILD_FS_MODELS})
+    set(CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_RPATH};${FS_DIR}/models/${_MODEL}")
+    set(flexiblesusy_LDFLAGS "-L${FS_DIR}/models/${_MODEL} -l${_MODEL} ${flexiblesusy_LDFLAGS}")
+    add_install_name_tool_step(flexiblesusy ${FS_DIR}/models/${_MODEL} lib${_MODEL}.so)
+  endforeach()
+
+  # Strip out leading and trailing whitespace
+  string(STRIP "${flexiblesusy_LDFLAGS}" flexiblesusy_LDFLAGS)
 
   # Set up include paths
   include_directories("${FS_DIR}/..")
