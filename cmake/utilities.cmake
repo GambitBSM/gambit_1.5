@@ -152,7 +152,7 @@ function(add_install_name_tool_step proj path lib)
     ExternalProject_Add_Step(${proj}
       change-install-name-${lib}
       COMMENT "Fixing install name for ${lib}"
-      COMMAND install_name_tool -id \"@rpath/"${lib}"\" ${path}/${lib}
+      COMMAND install_name_tool -id "@rpath/${lib}" ${path}/${lib}
       DEPENDEES install
     )
   endif()
