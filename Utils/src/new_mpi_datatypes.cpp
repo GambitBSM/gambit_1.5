@@ -141,6 +141,9 @@ namespace Gambit
        return stream;
      }
 
+     /// Define 'nullpoint' const
+     const PPIDpair nullpoint = PPIDpair();
+
   }
 
   // /// Definition needed for specialisation of GMPI::get_mpi_data_type<T>() to VBIDpair type

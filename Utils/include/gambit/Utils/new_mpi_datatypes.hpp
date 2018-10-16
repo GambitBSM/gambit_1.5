@@ -79,7 +79,7 @@ namespace Gambit
     /// pointID / process number pair
     /// Used to identify a single parameter space point
     //typedef std::pair<unsigned long int, unsigned int> PPIDpair;
-    struct PPIDpair
+    struct EXPORT_SYMBOLS PPIDpair
     {
       unsigned long long int pointID;
       unsigned int rank;
@@ -98,18 +98,18 @@ namespace Gambit
     };
 
     // Needed by std::map for comparison of keys of type VBIDpair
-    bool operator<(const PPIDpair& l, const PPIDpair& r);
-    bool operator==(const PPIDpair& l, const PPIDpair& r);
-    bool operator!=(const PPIDpair& l, const PPIDpair& r);
+    EXPORT_SYMBOLS bool operator<(const PPIDpair& l, const PPIDpair& r);
+    EXPORT_SYMBOLS bool operator==(const PPIDpair& l, const PPIDpair& r);
+    EXPORT_SYMBOLS bool operator!=(const PPIDpair& l, const PPIDpair& r);
 
     // To use PPIDpairs in std::unordered_map/set, need to provide hashing and equality functions
-    struct PPIDHash{ 
+    struct EXPORT_SYMBOLS PPIDHash{ 
       size_t operator()(const PPIDpair &key) const 
       { 
         return std::hash<unsigned long long int>()(key.pointID) ^ std::hash<unsigned int>()(key.rank) ^ std::hash<unsigned int>()(key.valid);      }
     };
 
-    struct PPIDEqual{
+    struct EXPORT_SYMBOLS PPIDEqual{
       bool operator()(const PPIDpair &lhs, const PPIDpair &rhs) const {
         return lhs == rhs; // use the operator we already defined (why doesn't the STL do this?)
       }
@@ -117,7 +117,7 @@ namespace Gambit
 
     // stream overloads (for easy std::out)
     // Null pointID object, use for unassigned pointIDs
-    const PPIDpair nullpoint = PPIDpair();
+    EXPORT_SYMBOLS extern const PPIDpair nullpoint;
 
   } // end namespace Printers
 

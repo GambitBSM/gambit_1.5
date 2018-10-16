@@ -190,6 +190,7 @@ namespace Gambit
       std::ostringstream err;
       err << "Sorry, the asciiPrinter is currently in a state of neglect, and lacks features necessary for constructing reader objects for resume data. If you really want these features then please file a bug to make your desires known :)." << std::endl;
       printer_error().raise(LOCAL_INFO, err.str());
+      return Options();
     }
  
     /// Do final buffer dumps

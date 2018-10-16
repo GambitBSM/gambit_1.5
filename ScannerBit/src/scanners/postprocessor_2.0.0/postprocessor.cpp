@@ -352,7 +352,6 @@ scanner_plugin(postprocessor, version(2, 0, 0))
        Chunk mychunk; // Work to be performed this loop
 
        #ifdef WITH_MPI
-         bool I_am_finished = false;
          if(rank==0 and numtasks==1)
          {
             // Compute new work for this one process.
@@ -515,9 +514,6 @@ scanner_plugin(postprocessor, version(2, 0, 0))
 
        if(exit_code==0)
        {
-          #ifdef WITH_MPI
-            I_am_finished = true;
-          #endif
           //std::cout << "Rank "<<rank<<" has finished processing its batch." << std::endl;
        }
        else if(exit_code==1)

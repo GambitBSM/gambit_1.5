@@ -75,6 +75,7 @@ namespace Gambit
         std::ostringstream err;
         err << "The cout printer is intrinsically incapable of reading from previous output, since the previous output just goes to cout. So you cannot use the 'resume_reader_options' function with this printer. This means that the coutPrinter cannot be used with e.g. the postprocessor v2 whilst also resuming. Sorry! (Note, postprocessor v1 should be able to resume with the coutPrinter)" << std::endl; 
         printer_error().raise(LOCAL_INFO, err.str());
+        return Options();
     }
  
   } // end namespace printers

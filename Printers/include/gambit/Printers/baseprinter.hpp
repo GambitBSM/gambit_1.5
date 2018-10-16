@@ -32,6 +32,10 @@
 #include "gambit/Utils/boost_fallbacks.hpp"
 #include "gambit/Utils/factory_registry.hpp"
 #include "gambit/Utils/model_parameters.hpp"
+#include "gambit/Utils/export_symbols.hpp"
+
+// Boost
+#include <boost/preprocessor/seq/for_each_i.hpp>
 
 // Printable types
 #ifndef SCANNER_STANDALONE
@@ -65,6 +69,12 @@ namespace Gambit
     /// For debugging; print to stdout all the typeIDs for all types.
     void printAllTypeIDs(void);
 
+    /// Declare specialisations of type ID getters
+    #define DECLARE_GETTYPEID(r,data,i,elem) \
+      template<> \
+      EXPORT_SYMBOLS std::size_t getTypeID<elem>(void);
+    BOOST_PP_SEQ_FOR_EACH_I(DECLARE_GETTYPEID, _, PRINTABLE_TYPES)
+    #undef DECLARE_GETTYPEID
 
     //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     //% Printer class declarations                          %
