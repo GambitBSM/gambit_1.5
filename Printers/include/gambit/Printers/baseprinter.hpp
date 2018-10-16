@@ -95,6 +95,10 @@ namespace Gambit
         // Run by dependency resolver, which supplies the functors with a vector of VertexIDs whose requiresPrinting flags are set to true. (TODO: probably extend this to be a list of functors THIS printer is supposed to print, since we may want several printers handling different functors, for SLHA output or some such perhaps).
         virtual void initialise(const std::vector<int>&) = 0;
 
+        // Get options required to construct a reader object that can read
+        // the previous output of this printer.
+        virtual Options resume_reader_options() = 0;
+
         /// Set this as an auxilliary printer
         void set_as_aux() { is_aux = true; }
 

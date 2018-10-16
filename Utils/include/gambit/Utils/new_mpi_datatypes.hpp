@@ -83,13 +83,16 @@ namespace Gambit
     {
       unsigned long long int pointID;
       unsigned int rank;
+      unsigned int valid; // Set to 0 to flag pair as uninitialised
       PPIDpair() 
         : pointID(0)
         , rank(0)
+        , valid(0)
       {}
       PPIDpair(const unsigned long long int p, const int r)
         : pointID(p)
         , rank(r)
+        , valid(1)
       {}
       friend std::ostream& operator<<(std::ostream&, const PPIDpair&);
     };
@@ -101,9 +104,9 @@ namespace Gambit
 
     // To use PPIDpairs in std::unordered_map/set, need to provide hashing and equality functions
     struct PPIDHash{ 
-      size_t operator()(const PPIDpair &key) const { 
-        return std::hash<long int>()(key.pointID) ^ std::hash<unsigned int>()(key.rank);
-      }
+      size_t operator()(const PPIDpair &key) const 
+      { 
+        return std::hash<unsigned long long int>()(key.pointID) ^ std::hash<unsigned int>()(key.rank) ^ std::hash<unsigned int>()(key.valid);      }
     };
 
     struct PPIDEqual{
@@ -114,7 +117,7 @@ namespace Gambit
 
     // stream overloads (for easy std::out)
     // Null pointID object, use for unassigned pointIDs
-    const PPIDpair nullpoint;
+    const PPIDpair nullpoint = PPIDpair();
 
   } // end namespace Printers
 
