@@ -96,8 +96,8 @@ Printer:
 
   printer: hdf5
   options:
-    output_file: "MSSM20atMSUSY.hdf5"
-    group: "MSSM20_atMSUSY"
+    output_file: "MSSM20atMGUT.hdf5"
+    group: "MSSM20_atMGUT"
 
 
 Scanner:
