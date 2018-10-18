@@ -97,8 +97,8 @@ Rules:
   - capability: BBN_LogLike
     function: compute_BBN_LogLike
     options:
-        Yp:  2.527e-5
-        Delta_Yp: 0.030e-5
+        DataFile: PDG_2017.dat
+        
 
   - capability: plc_2_0_init
     options:

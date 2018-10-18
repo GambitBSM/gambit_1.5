@@ -243,6 +243,8 @@ START_MODULE
     #undef FUNCTION
   #undef CAPABILITY
 
+
+// AlterBBN functions & capabilities
  #define CAPABILITY AlterBBN_modelinfo
  START_CAPABILITY
    #define FUNCTION AlterBBN_fill
@@ -260,6 +262,17 @@ START_MODULE
    #undef FUNCTION
  #undef CAPABILITY
 
+
+
+#define CAPABILITY Helium_abundance
+   START_CAPABILITY
+   #define FUNCTION get_Helium_abundance
+   START_FUNCTION(double)
+   DEPENDENCY(BBN_abundances, CosmoBit::BBN_container)
+   //ALLOW_MODELS(LCDM, LCDM_dNeff_Smu)
+  #undef FUNCTION
+  #undef CAPABILITY
+
   #define CAPABILITY BBN_abundances
   START_CAPABILITY
     #define FUNCTION compute_BBN_abundances
@@ -269,21 +282,22 @@ START_MODULE
     BACKEND_REQ(nucl_err, (libbbn), int, (const relicparam*,double*,double*))
     #undef FUNCTION
   #undef CAPABILITY
+    
+#define CAPABILITY BBN_data
+   START_CAPABILITY
+   #define FUNCTION read_BBN_data
+   START_FUNCTION(CosmoBit::BBN_container)
+   //DEPENDENCY(BBN_abundances, CosmoBit::BBN_container)
+   //ALLOW_MODELS(LCDM, LCDM_dNeff_Smu)
+  #undef FUNCTION
+  #undef CAPABILITY
 
  #define CAPABILITY BBN_LogLike
    START_CAPABILITY
    #define FUNCTION compute_BBN_LogLike
    START_FUNCTION(double)
    DEPENDENCY(BBN_abundances, CosmoBit::BBN_container)
-   //ALLOW_MODELS(LCDM, LCDM_dNeff_Smu)
-  #undef FUNCTION
-  #undef CAPABILITY
-
-#define CAPABILITY Helium_abundance
-   START_CAPABILITY
-   #define FUNCTION get_Helium_abundance
-   START_FUNCTION(double)
-   DEPENDENCY(BBN_abundances, CosmoBit::BBN_container)
+   DEPENDENCY(BBN_data, CosmoBit::BBN_container)
    //ALLOW_MODELS(LCDM, LCDM_dNeff_Smu)
   #undef FUNCTION
   #undef CAPABILITY

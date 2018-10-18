@@ -46,6 +46,10 @@ namespace Gambit
         std::vector<double> BBN_abund;
         std::vector< std::vector<double> > BBN_covmat;
         std::map<std::string, int> abund_map;
+        std::map<std::string,std::vector<double>> BBN_obs_dict;
+        void fill_obs_dict(std::map<std::string,std::vector<double>> dict);
+        std::map<std::string,std::vector<double>> get_obs_dict();
+    
     };
 
     // Forward declaration of warnings and errors

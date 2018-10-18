@@ -37,6 +37,8 @@
 #include <stdlib.h>     /* malloc, free, rand */
 #include "gambit/Utils/yaml_options.hpp"
 #include "gambit/Utils/statistics.hpp"
+#include "gambit/Utils/ascii_table_reader.hpp"
+#include "gambit/Utils/ascii_dict_reader.hpp"
 #include "gambit/Elements/gambit_module_headers.hpp"
 #include "gambit/CosmoBit/CosmoBit_rollcall.hpp"
 #include "gambit/CosmoBit/CosmoBit_types.hpp"
@@ -2268,15 +2270,15 @@ namespace Gambit
 
       BEreq::Init_cosmomodel(&result);
       
-      result.eta0 = *Param["eta_BBN"];  // etaBBN = *Param["omega_b"]*274.*pow(10,-10);
+      result.eta0 = *Param["eta_BBN"];  // etaBBN = *Param["omega_b"]*274.*pow(10,-10); eta AFTER BBN (variable during)
 
-      result.Nnu=0.00641;     // 3 massive neutrinos, Neff s.t. T_ncdm = 0.71611 yields m/omega of 93.14 eV
+      result.Nnu=3.046;     // 3 massive neutrinos, Neff s.t. T_ncdm = 0.71611 yields m/omega of 93.14 eV
       result.dNnu=*Param["dNeff_BBN"];
       //result.eta0=runOptions->getValueOrDef<double>(6.1*pow(10,-10),"eta");
       //result.dNnu=runOptions->getValueOrDef<double>(0,"asdfk");
       std::cout<< "eta = " << result.eta0 <<", Nu = " << result.Nnu <<", dNu = " << result.dNnu << std::endl;
-      result.failsafe = 3;                            // set precision parameters for AlterBBN
-      result.err = 3;
+      result.failsafe = 1;                            // set precision parameters for AlterBBN
+      result.err = 3;  // WARNING: change back to 3
     }
 
     void compute_BBN_abundances(CosmoBit::BBN_container &result)
@@ -2312,10 +2314,25 @@ namespace Gambit
     CosmoBit::BBN_container BBN_res = *Dep::BBN_abundances;
     std::map<std::string, int> abund_map = BBN_res.get_map();
 
-    result = BBN_res.BBN_abund.at(6);           // TODO: use map to refer to Helium pos in array
-    result = BBN_res.BBN_abund.at(abund_map["Yp"]);           // TODO: use map to refer to Helium pos in array
+    result = BBN_res.BBN_abund.at(abund_map["Yp"]);
     std::cout << "Helium Abundane = " << result << std::endl;
 
+  }
+// std::map<std::string,std::vector<std::vector<double>>>
+  void read_BBN_data(CosmoBit::BBN_container &result){
+    using namespace Pipes::read_BBN_data;
+
+    std::string filename = "CosmoBit/data/BBN/";
+    filename.append(runOptions->getValueOrDef<std::string>("PDG_2017.dat","DataFile"));
+    
+    
+    ASCIIdictReader table(filename);
+    result.fill_obs_dict(table.get_dict());
+
+    std::map<std::string,std::vector<double>> dict = result.get_obs_dict();
+
+    std::cout << "in read BBN_data:"  << dict["Yp"][0] <<dict["Yp"][1]<< std::endl;
+    
   }
 
 
@@ -2323,13 +2340,35 @@ namespace Gambit
 
     using namespace Pipes::compute_BBN_LogLike;
 
-    CosmoBit::BBN_container BBN_res = *Dep::BBN_abundances;
 
-    //CosmoBit::BBN_container abund_map
+    std::cout << "enter compute_BBN_LogLike"<< std::endl;
+
+    CosmoBit::BBN_container BBN_res = *Dep::BBN_data;
 
     std::map<std::string, int> abund_map = BBN_res.get_map();
+    std::map<std::string,std::vector<double>> BBN_obs_dict = BBN_res.get_obs_dict();
+    
+    BBN_res = *Dep::BBN_abundances;
+
     std::cout << " Abundane map Yp " << abund_map["Yp"] << " Abundane map H2 " << abund_map["H2"] << std::endl;
     // TODO: if key error: throw error msg
+    //dict = BBN_res.get_obs_dict();
+    std::cout << BBN_obs_dict["Yp"] << std::endl;
+    std::cout << BBN_obs_dict["Yp"][0] << std::endl;
+    std::cout << BBN_obs_dict["Yp"][1] << std::endl;
+    std::cout << BBN_obs_dict["Li7"] << std::endl;
+    std::cout << BBN_obs_dict["D"] << std::endl;
+
+    std::cout << "after BBN_res"<< std::endl;
+    //std::cout<<BBN_res.BBN_obs_dict["Ye"][0][0]<< std::endl;
+    // std::map<std::string,std::vector<std::vector<double> >>
+    //std::string filename = "DarkBit/data/AtProductionNoEW_gammas.dat";
+    //    PPPC_gam_object = PPPC_interpolation(filename);
+    //    initialized = true;
+    //    DarkBit_error().raise(LOCAL_INFO,
+    //        "SimYieldTable_PPPC is not implemented yet.  Use e.g. SimYieldTable_DarkSUSY instead.");
+    //CosmoBit::BBN_container abund_map
+
     int NNUC =26;
     int debug = 1;
     double eta,H2_H,He3_H,Yp,Li7_H,Li6_H,Be7_H;
@@ -2341,7 +2380,7 @@ namespace Gambit
     printf("\t Yp\t\t H2/H\t\t He3/H\t\t Li7/H\t\t Li6/H\t\t Be7/H\n");
     printf("value:\t %.3e\t %.3e\t %.3e\t %.3e\t %.3e\t %.3e\n",Yp,H2_H,He3_H,Li7_H,Li6_H,Be7_H); 
     printf(" +/- :\t %.3e\t %.3e\t %.3e\t %.3e\t %.3e\t %.3e\n\n",sigma_Yp,sigma_H2_H,sigma_He3_H,sigma_Li7_H,sigma_Li6_H,sigma_Be7_H);
-  
+    
     double corr_ratioH[NNUC+1][NNUC+1];
     for(int ie=1;ie<=NNUC;ie++) for(int je=1;je<=NNUC;je++) corr_ratioH[ie][je]=BBN_res.BBN_covmat.at(ie).at(je)/sqrt(BBN_res.BBN_covmat.at(ie).at(ie)*BBN_res.BBN_covmat.at(je).at(je));
     printf("Correlation matrix:\n");
@@ -2362,3 +2401,6 @@ namespace Gambit
 
 
 }
+
+
+// helium 3:nur upper limit. Yp & deuterium;
