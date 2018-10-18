@@ -3063,7 +3063,6 @@ namespace Gambit
         cout << debug_prefix() << "calc_combined_LHC_LogLike: LHC_Combined_LogLike = " << result << endl;
       #endif
 
-      // _Anders 
       // If using capped likelihood, set result = min(result,0)
       static const bool use_cap_loglike = runOptions->getValueOrDef<bool>(false, "cap_loglike");
       if (use_cap_loglike)
