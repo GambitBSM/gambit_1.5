@@ -39,6 +39,7 @@ namespace Gambit
     public:
       ASCIIdictReader(std::string filename)
       {
+        duplicate = false;
         read(filename);
       };
       ASCIIdictReader() {};  // Dummy initializer
@@ -47,12 +48,13 @@ namespace Gambit
       int read(std::string filename);
       std::vector<std::string> get_keys() {return keys;}
       std::map<std::string,std::vector<double>> get_dict(){return dict;}
+      bool duplicated_keys() {return duplicate;}
+      int nrow() {return keys.size();}
 
     private:
       std::map<std::string,std::vector<double>> dict;
       std::vector<std::string> keys;
-      int ncol;
-      int nrow;
+      bool duplicate;
   };
 }
 

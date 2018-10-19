@@ -2329,10 +2329,11 @@ namespace Gambit
     ASCIIdictReader table(filename);
     result.fill_obs_dict(table.get_dict());
 
-    std::map<std::string,std::vector<double>> dict = result.get_obs_dict();
-
-    std::cout << "in read BBN_data:"  << dict["Yp"][0] <<dict["Yp"][1]<< std::endl;
-    
+    if(table.duplicated_keys()==true){ // check for double key entries
+      std::cout << "ERROR: Double entry for element in BBN data file "<< filename<<". Aborting now.." << std::endl;
+        // TODO: Throw proper IO error
+      exit(-1);
+    }    
   }
 
 

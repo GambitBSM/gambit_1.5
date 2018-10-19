@@ -42,16 +42,14 @@ namespace Gambit
       ss >> key;
       while(ss >> tmp)
       {
-        std::cout << "tmp "<<tmp<< std::endl;
         data_tmp.push_back(tmp);
       }
   
 
-      if (std::find(keys.begin(), keys.end(), key) != keys.end()){
-        std::cout << "ERROR: Double entry for key "<<key<<" in "<< filename<<". Aborting now.." << std::endl;
-        // TODO: Throw proper IO error
-        exit(-1);
-        }
+      if (std::find(keys.begin(), keys.end(), key) != keys.end())
+      {
+        duplicate = true;
+      }
 
       else {
       dict[key] = data_tmp;
