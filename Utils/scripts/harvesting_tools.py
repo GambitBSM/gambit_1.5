@@ -34,6 +34,7 @@ import sys
 import getopt
 import itertools
 import shutil
+import ctypes
 
 default_bossed_versions = "./Backends/include/gambit/Backends/default_bossed_versions.hpp"
 equiv_config = "./config/resolution_type_equivalency_classes.yaml"
