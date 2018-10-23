@@ -41,6 +41,7 @@ namespace Gambit
     {
       public:
         BBN_container();
+        std::map<std::string, int> abund_map;
         
         std::vector<double> BBN_abund;
         std::map<std::string,int> get_map(); 
@@ -49,7 +50,6 @@ namespace Gambit
         std::map<std::string,std::vector<double>> get_obs_dict();
         
       private:
-        std::map<std::string, int> abund_map;
         std::map<std::string,std::vector<double>> BBN_obs_dict;
 
         

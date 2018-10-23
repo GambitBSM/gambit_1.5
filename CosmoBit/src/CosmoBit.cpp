@@ -2331,6 +2331,7 @@ namespace Gambit
     
     ASCIIdictReader table(filename);
     result.fill_obs_dict(table.get_dict());
+    std::cout << "BBN data read from "<< filename<< std::endl;
 
     if(table.duplicated_keys()==true){ // check for double key entries
       std::cout << "ERROR: Double entry for element in BBN data file "<< filename<<". Aborting now.." << std::endl;
@@ -2366,10 +2367,10 @@ namespace Gambit
     int ie, je, s;
 
     CosmoBit::BBN_container BBN_res = *Dep::BBN_data; // fill BBN_container with observations
-    std::map<std::string, int> abund_map = BBN_res.get_map();
+    std::map<std::string, int> abund_map = BBN_res.get_map(); // delte after print statements deleted
     std::map<std::string,std::vector<double>> BBN_obs_dict = BBN_res.get_obs_dict();
     
-    BBN_res = *Dep::BBN_abundances; // abundance results from AlterBBN
+    BBN_res = *Dep::BBN_abundances; // fill BBN_container with abundance results from AlterBBN
 
     int nobs = BBN_obs_dict.size();
     gsl_matrix *cov = gsl_matrix_alloc(nobs, nobs);
@@ -2409,7 +2410,8 @@ namespace Gambit
     for(ie=0;ie<nobs;ie++) for(je=0;je<nobs;je++) chi2+=(prediction[ie]-observed[ie])*gsl_matrix_get(invcov,ie,je)*(prediction[je]-observed[je]);
 
     
-    std::cout << "Chi2 Gambit = " << chi2<< std::endl;
+    std::cout << "nobs "<< nobs <<"Chi2 Gambit = " << chi2<< std::endl;
+    std::cout << "nobs "<< nobs <<"Chi2 AlterBBN = " << paramrelic.chi2<< std::endl;
     std::cout << " Abundane map Yp " << abund_map["Yp"] << " Abundane map H2 " << abund_map["H2"] << std::endl;
     
 

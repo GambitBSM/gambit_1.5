@@ -96,8 +96,12 @@ Rules:
 
   - capability: BBN_LogLike
     function: compute_BBN_LogLike
+
+    
+  - capability: BBN_data
+    function: read_BBN_data
     options:
-        DataFile: PDG_2017.dat
+        DataFile: AlterBBN.dat
         
 
   - capability: plc_2_0_init
