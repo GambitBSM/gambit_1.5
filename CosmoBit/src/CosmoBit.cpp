@@ -33,6 +33,9 @@
 #include <gsl/gsl_math.h>
 #include <gsl/gsl_min.h>
 #include <gsl/gsl_spline.h>
+#include <gsl/gsl_matrix_double.h>
+#include <gsl/gsl_linalg.h>
+
 
 #include <stdlib.h>     /* malloc, free, rand */
 #include "gambit/Utils/yaml_options.hpp"
@@ -2336,43 +2339,82 @@ namespace Gambit
     }    
   }
 
+//gsl_matrix get_inverse_matrix(gsl_matrix &matrix)
+//{
+//    gsl_permutation p = gsl_permutation_alloc(*matrix->size1);
+//    int s;
+//
+//    // Compute the LU decomposition of this matrix
+//    gsl_linalg_LU_decomp(matrix, p, &s);
+//
+//    // Compute the  inverse of the LU decomposition
+//    gsl_matrix inv = gsl_matrix_alloc(matrix->size1, matrix->size1);
+//    gsl_linalg_LU_invert(matrix, p, inv);
+//
+//    gsl_permutation_free(p);
+//
+//    return inv;
+//}
+
 
   void compute_BBN_LogLike(double &result){
 
     using namespace Pipes::compute_BBN_LogLike;
 
+    double chi2 = 0;
+    int ii = 0;
+    int ie, je, s;
 
-    std::cout << "enter compute_BBN_LogLike"<< std::endl;
-
-    CosmoBit::BBN_container BBN_res = *Dep::BBN_data;
-
+    CosmoBit::BBN_container BBN_res = *Dep::BBN_data; // fill BBN_container with observations
     std::map<std::string, int> abund_map = BBN_res.get_map();
     std::map<std::string,std::vector<double>> BBN_obs_dict = BBN_res.get_obs_dict();
     
-    BBN_res = *Dep::BBN_abundances;
+    BBN_res = *Dep::BBN_abundances; // abundance results from AlterBBN
 
+    int nobs = BBN_obs_dict.size();
+    gsl_matrix *cov = gsl_matrix_alloc(nobs, nobs);
+    gsl_matrix *invcov = gsl_matrix_alloc(nobs, nobs);
+    gsl_permutation *p = gsl_permutation_alloc(nobs);
+    double prediction[nobs],observed[nobs],sigmaobs[nobs],translate[nobs],mean,sigma;
+
+    // iterate through observation dictionary to fill observed, sigmaobs and prediction arrays
+    for(std::map<std::string,std::vector<double>>::iterator iter = BBN_obs_dict.begin(); iter != BBN_obs_dict.end(); ++iter)
+    {
+      std::string key = iter->first;
+      mean = iter->second[0];
+      sigma = iter->second[1];
+      translate[ii]=abund_map[key];
+      observed[ii]=mean;
+      sigmaobs[ii]=sigma;
+      prediction[ii]= BBN_res.BBN_abund.at(abund_map[key]);
+      ii++;
+    }
+    // TODO: if key error in abundance map throw error msg
+
+    for(ie=0;ie<nobs;ie++){ // fill covmat
+       for(je=0;je<nobs;je++){
+          gsl_matrix_set(cov, ie, je,pow(sigmaobs[ie],2.)*(ie==je)+BBN_res.BBN_covmat.at(translate[ie]).at(translate[je]));
+          //std::cout << "ie: " << ie << " je: " << " cov: " << gsl_matrix_get(cov, ie, je) << std::endl;
+        }
+    }
+    // Compute the LU decomposition and inverse of cov mat
+    gsl_linalg_LU_decomp(cov, p, &s);
+    gsl_linalg_LU_invert(cov,p, invcov);
+
+    // just to test if AlterBBN and GAMBIT output match
+    relicparam const & paramrelic = *Dep::AlterBBN_modelinfo;
+    int i = BEreq::bbn_excluded_chi2(&paramrelic);
+
+    // compute chi2
+    for(ie=0;ie<nobs;ie++) for(je=0;je<nobs;je++) chi2+=(prediction[ie]-observed[ie])*gsl_matrix_get(invcov,ie,je)*(prediction[je]-observed[je]);
+
+    
+    std::cout << "Chi2 Gambit = " << chi2<< std::endl;
     std::cout << " Abundane map Yp " << abund_map["Yp"] << " Abundane map H2 " << abund_map["H2"] << std::endl;
-    // TODO: if key error: throw error msg
-    //dict = BBN_res.get_obs_dict();
-    std::cout << BBN_obs_dict["Yp"] << std::endl;
-    std::cout << BBN_obs_dict["Yp"][0] << std::endl;
-    std::cout << BBN_obs_dict["Yp"][1] << std::endl;
-    std::cout << BBN_obs_dict["Li7"] << std::endl;
-    std::cout << BBN_obs_dict["D"] << std::endl;
-
-    std::cout << "after BBN_res"<< std::endl;
-    //std::cout<<BBN_res.BBN_obs_dict["Ye"][0][0]<< std::endl;
-    // std::map<std::string,std::vector<std::vector<double> >>
-    //std::string filename = "DarkBit/data/AtProductionNoEW_gammas.dat";
-    //    PPPC_gam_object = PPPC_interpolation(filename);
-    //    initialized = true;
-    //    DarkBit_error().raise(LOCAL_INFO,
-    //        "SimYieldTable_PPPC is not implemented yet.  Use e.g. SimYieldTable_DarkSUSY instead.");
-    //CosmoBit::BBN_container abund_map
+    
 
     int NNUC =26;
-    int debug = 1;
-    double eta,H2_H,He3_H,Yp,Li7_H,Li6_H,Be7_H;
+    double H2_H,He3_H,Yp,Li7_H,Li6_H,Be7_H;
     double sigma_H2_H,sigma_He3_H,sigma_Yp,sigma_Li7_H,sigma_Li6_H,sigma_Be7_H;
     
     H2_H=BBN_res.BBN_abund.at(abund_map["H2"]);Yp=BBN_res.BBN_abund.at(abund_map["Yp"]);Li7_H=BBN_res.BBN_abund.at(abund_map["Li7"]);Be7_H=BBN_res.BBN_abund.at(abund_map["Be7"]);He3_H=BBN_res.BBN_abund.at(abund_map["He3"]);Li6_H=BBN_res.BBN_abund.at(abund_map["Li6"]);

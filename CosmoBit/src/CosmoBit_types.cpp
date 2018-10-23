@@ -56,13 +56,10 @@ namespace Gambit
     void BBN_container::fill_obs_dict(std::map<std::string,std::vector<double>> dict)
     {
       BBN_obs_dict = dict;
-      std::cout << "in fill container:"  << BBN_obs_dict["Yp"][0] <<BBN_obs_dict["Yp"][1]<< std::endl;
-    }
+     }
 
     std::map<std::string,std::vector<double>> BBN_container::get_obs_dict()
     {
-      std::cout << "in get obs_dict:"  << std::endl;
-      std::cout<< BBN_obs_dict["Yp"][0] <<BBN_obs_dict["Yp"][1]<< std::endl;
       return BBN_obs_dict;
     }  
 

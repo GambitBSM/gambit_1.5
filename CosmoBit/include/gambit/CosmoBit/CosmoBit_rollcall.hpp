@@ -298,7 +298,10 @@ START_MODULE
    START_FUNCTION(double)
    DEPENDENCY(BBN_abundances, CosmoBit::BBN_container)
    DEPENDENCY(BBN_data, CosmoBit::BBN_container)
-   //ALLOW_MODELS(LCDM, LCDM_dNeff_Smu)
+   BACKEND_OPTION( (AlterBBN, 2.0), (libbbn) )
+  DEPENDENCY(AlterBBN_modelinfo, relicparam)
+   BACKEND_REQ(bbn_excluded_chi2, (libbbn), int, (const relicparam*))
+   ALLOW_MODELS(LCDM, LCDM_dNeff_Smu,LCDM_dNeff_Smu_etaBBN)
   #undef FUNCTION
   #undef CAPABILITY
 
