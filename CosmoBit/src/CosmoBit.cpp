@@ -2412,8 +2412,47 @@ namespace Gambit
          
   }
 
+
+  void compute_H0_LogLike(double &result){
+      using namespace Pipes::compute_H0_LogLike;
+  
+      std::string filename = "CosmoBit/data/H0/";
+      filename.append(runOptions->getValue<std::string>("DataFile"));
+      
+      ASCIItableReader table(filename);
+      std::vector<std::string> colnames = initVector<std::string>("mean", "sigma");
+      table.setcolnames(colnames);
+      std::cout << "H0 data read from "<< filename << std::endl;
+
+      if(table.getnrow() != 1){
+        std::cout << table.getnrow() << "data points for H0 measurement data read from "<< filename<< std::endl;
+        std::cout << "Only one expected. Aborting now..  " << std::endl;
+        exit(-1);
+        // TODO: throw proper error 
+      }
+  
+      result = -0.5 * pow(*Param["H0"] - table["mean"][0],2)/ pow(table["sigma"][0],2);
+    }
+
+  void compute_BAO_LogLike(double &result){
+      using namespace Pipes::compute_BAO_LogLike;
+  
+      std::string filename = "CosmoBit/data/BAO/";
+      filename.append(runOptions->getValue<std::string>("DataFile"));
+      
+      ASCIItableReader table(filename);
+      std::vector<std::string> colnames = initVector<std::string>("z", "mean","sigma","type");
+      table.setcolnames(colnames);
+      std::cout << "BAO data read from "<< filename << std::endl;
+
+      result = 1.;
+  
   }
 
+
+
+
+  }
 
 }
 

@@ -299,6 +299,23 @@ START_MODULE
   #undef FUNCTION
   #undef CAPABILITY
 
+#define CAPABILITY H0_LogLike
+   START_CAPABILITY
+   #define FUNCTION compute_H0_LogLike
+   START_FUNCTION(double)
+   ALLOW_MODELS(LCDM, LCDM_dNeff_Smu,LCDM_dNeff_Smu_etaBBN,LCDMtensor)
+  #undef FUNCTION
+  #undef CAPABILITY
+
+#define CAPABILITY BAO_LogLike
+   START_CAPABILITY
+   #define FUNCTION compute_BAO_LogLike
+   START_FUNCTION(double)
+   ALLOW_MODELS(LCDM, LCDM_dNeff_Smu,LCDM_dNeff_Smu_etaBBN,LCDMtensor)
+  #undef FUNCTION
+  #undef CAPABILITY
+
+
 
 #undef MODULE
 

@@ -59,6 +59,11 @@ ObsLikes:
     capability:   BBN_LogLike
     module:       CosmoBit
     type:         double
+  
+  - purpose:      LogLike
+    capability:   H0_LogLike
+    module:       CosmoBit
+    type:         double
 
   - purpose:      LogLike
     capability:   compute_Planck_high_TT_loglike
@@ -94,15 +99,15 @@ Rules:
     function: function_Planck_high_TT_lite_loglike
     module: CosmoBit
 
-  - capability: BBN_LogLike
-    function: compute_BBN_LogLike
-
-    
   - capability: BBN_data
     function: read_BBN_data
     options:
-        DataFile: AlterBBN.dat
-        
+        DataFile: PDG_2017.dat
+  
+  - capability: H0_LogLike
+    function: compute_H0_LogLike
+    options:
+      DataFile:  SH0ES.dat
 
   - capability: plc_2_0_init
     options:

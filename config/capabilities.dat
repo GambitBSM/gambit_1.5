@@ -4262,7 +4262,7 @@ nucl_err: |
     AlterBBN function that computes element abundances and their covariance during BBN.
 
 BBN_LogLike: |
-    Returns likelihood for BBN data.
+    Compute likelihood for BBN data.
 
 BBN_abundances: |
     Fills BBN_container with theoretically expected element abundances and covariance matrix from BBN. 
@@ -4271,8 +4271,10 @@ BBN_data: |
     Read data file with BBN observations for likelihood computation & feed them into BBN_container. 
 
 Helium_abundance: |
-    Returns predicted Helium abundance from BBN.
+    Compute predicted Helium abundance from BBN.
 
+H0_LogLike: |
+    Compute likelihood for local H0 measurements from specified data file.
 
 #-------------------------------------
 #  Capgen capabilities

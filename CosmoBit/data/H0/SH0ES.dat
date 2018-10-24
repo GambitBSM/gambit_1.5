@@ -1,0 +1,12 @@
+# Data file for compuation of likelihood from local H_0 measurements  
+# 
+# Specify the data to use for the scan in .yaml file via the Rule
+# - capability: H0_data
+#    function: read_H0_data
+#    options:
+#      DataFile:  SH0ES.dat
+#
+# Source https://arxiv.org/abs/1604.01424 
+# 
+# Mean \t 1 sigma uncertainty
+73.24	1.74
