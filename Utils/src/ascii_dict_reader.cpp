@@ -51,10 +51,10 @@ namespace Gambit
         duplicate = true;
       }
 
-      else {
+      //else {
       dict[key] = data_tmp;
       keys.push_back(key); 
-      }
+      //}
       
     }
     in.close();

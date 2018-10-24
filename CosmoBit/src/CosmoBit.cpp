@@ -2255,15 +2255,11 @@ namespace Gambit
 
       BEreq::Init_cosmomodel(&result);
 
-      result.eta0=*Param["omega_b"]*274.*pow(10,-10);
-
-        // etaBBN = *Param["etaBBN"]
-      result.Nnu=0.00641;     // 3 massive neutrinos, Neff s.t. T_ncdm = 0.71611 yields m/omega of 93.14 eV
+      result.eta0=*Param["omega_b"]*274.*pow(10,-10); // eta0 = eta_BBN = eta_CMB
+      result.Nnu=3.046;     // 3 massive neutrinos
       result.dNnu=*Param["dNeff"];
-      //result.eta0=runOptions->getValueOrDef<double>(6.1*pow(10,-10),"eta");
-      //result.dNnu=runOptions->getValueOrDef<double>(0,"asdfk");
       std::cout<< "eta = " << result.eta0 <<", Nu = " << result.Nnu <<", dNu = " << result.dNnu << std::endl;
-      result.failsafe = 3;                            // set precision parameters for AlterBBN
+      result.failsafe = 3;   // set precision parameters for AlterBBN
       result.err = 3;
     }
 
@@ -2273,22 +2269,19 @@ namespace Gambit
 
       BEreq::Init_cosmomodel(&result);
       
-      result.eta0 = *Param["eta_BBN"];  // etaBBN = *Param["omega_b"]*274.*pow(10,-10); eta AFTER BBN (variable during)
-
-      result.Nnu=3.046;     // 3 massive neutrinos, Neff s.t. T_ncdm = 0.71611 yields m/omega of 93.14 eV
+      result.eta0 = *Param["eta_BBN"];  // eta AFTER BBN (variable during)
+      result.Nnu=3.046;     // 3 massive neutrinos
       result.dNnu=*Param["dNeff_BBN"];
-      //result.eta0=runOptions->getValueOrDef<double>(6.1*pow(10,-10),"eta");
-      //result.dNnu=runOptions->getValueOrDef<double>(0,"asdfk");
       std::cout<< "eta = " << result.eta0 <<", Nu = " << result.Nnu <<", dNu = " << result.dNnu << std::endl;
-      result.failsafe = 1;                            // set precision parameters for AlterBBN
-      result.err = 3;  // WARNING: change back to 3
+      result.failsafe = 3; // set precision parameters for AlterBBN
+      result.err = 3; 
     }
 
     void compute_BBN_abundances(CosmoBit::BBN_container &result)
     {
       using namespace Pipes::compute_BBN_abundances;
 
-      int NNUC =26;
+      int NNUC =26;  // global vaiable of AlterBBN (# computed element abundances)
             
       double ratioH [NNUC+1];
       double cov_ratioH [NNUC+1][NNUC+1];
@@ -2297,6 +2290,7 @@ namespace Gambit
       
       int nucl_err = BEreq::nucl_err(&paramrelic, byVal(ratioH), byVal(cov_ratioH[0]));
       
+      // fill abundances and covariance matrix of BBN_container with results from AlterBBN
       if (nucl_err){
         for(int ie=1;ie<=NNUC;ie++){
           result.BBN_abund.at(ie) = ratioH[ie];
@@ -2318,45 +2312,26 @@ namespace Gambit
     std::map<std::string, int> abund_map = BBN_res.get_map();
 
     result = BBN_res.BBN_abund.at(abund_map["Yp"]);
-    std::cout << "Helium Abundane = " << result << std::endl;
+    std::cout << "Helium Abundane from AlterBBN = " << result << std::endl;
 
   }
-// std::map<std::string,std::vector<std::vector<double>>>
+
   void read_BBN_data(CosmoBit::BBN_container &result){
     using namespace Pipes::read_BBN_data;
 
     std::string filename = "CosmoBit/data/BBN/";
-    filename.append(runOptions->getValueOrDef<std::string>("PDG_2017.dat","DataFile"));
-    
+    filename.append(runOptions->getValue<std::string>("DataFile"));
     
     ASCIIdictReader table(filename);
     result.fill_obs_dict(table.get_dict());
     std::cout << "BBN data read from "<< filename<< std::endl;
 
-    if(table.duplicated_keys()==true){ // check for double key entries
+    if(table.duplicated_keys()==true){ // check for double key entries in data file
       std::cout << "ERROR: Double entry for element in BBN data file "<< filename<<". Aborting now.." << std::endl;
         // TODO: Throw proper IO error
       exit(-1);
     }    
   }
-
-//gsl_matrix get_inverse_matrix(gsl_matrix &matrix)
-//{
-//    gsl_permutation p = gsl_permutation_alloc(*matrix->size1);
-//    int s;
-//
-//    // Compute the LU decomposition of this matrix
-//    gsl_linalg_LU_decomp(matrix, p, &s);
-//
-//    // Compute the  inverse of the LU decomposition
-//    gsl_matrix inv = gsl_matrix_alloc(matrix->size1, matrix->size1);
-//    gsl_linalg_LU_invert(matrix, p, inv);
-//
-//    gsl_permutation_free(p);
-//
-//    return inv;
-//}
-
 
   void compute_BBN_LogLike(double &result){
 
@@ -2367,7 +2342,7 @@ namespace Gambit
     int ie, je, s;
 
     CosmoBit::BBN_container BBN_res = *Dep::BBN_data; // fill BBN_container with observations
-    std::map<std::string, int> abund_map = BBN_res.get_map(); // delte after print statements deleted
+    std::map<std::string, int> abund_map = BBN_res.get_map(); 
     std::map<std::string,std::vector<double>> BBN_obs_dict = BBN_res.get_obs_dict();
     
     BBN_res = *Dep::BBN_abundances; // fill BBN_container with abundance results from AlterBBN
@@ -2376,17 +2351,15 @@ namespace Gambit
     gsl_matrix *cov = gsl_matrix_alloc(nobs, nobs);
     gsl_matrix *invcov = gsl_matrix_alloc(nobs, nobs);
     gsl_permutation *p = gsl_permutation_alloc(nobs);
-    double prediction[nobs],observed[nobs],sigmaobs[nobs],translate[nobs],mean,sigma;
+    double prediction[nobs],observed[nobs],sigmaobs[nobs],translate[nobs];
 
     // iterate through observation dictionary to fill observed, sigmaobs and prediction arrays
-    for(std::map<std::string,std::vector<double>>::iterator iter = BBN_obs_dict.begin(); iter != BBN_obs_dict.end(); ++iter)
-    {
+    for(std::map<std::string,std::vector<double>>::iterator iter = BBN_obs_dict.begin(); iter != BBN_obs_dict.end(); ++iter){ 
+      // iter = ["element key", [mean, sigma]]
       std::string key = iter->first;
-      mean = iter->second[0];
-      sigma = iter->second[1];
-      translate[ii]=abund_map[key];
-      observed[ii]=mean;
-      sigmaobs[ii]=sigma;
+      translate[ii]=abund_map[key]; // to order observed and predicted abundances consistently
+      observed[ii]=iter->second[0];
+      sigmaobs[ii]=iter->second[1];
       prediction[ii]= BBN_res.BBN_abund.at(abund_map[key]);
       ii++;
     }
@@ -2395,25 +2368,25 @@ namespace Gambit
     for(ie=0;ie<nobs;ie++){ // fill covmat
        for(je=0;je<nobs;je++){
           gsl_matrix_set(cov, ie, je,pow(sigmaobs[ie],2.)*(ie==je)+BBN_res.BBN_covmat.at(translate[ie]).at(translate[je]));
-          //std::cout << "ie: " << ie << " je: " << " cov: " << gsl_matrix_get(cov, ie, je) << std::endl;
-        }
+          }
     }
     // Compute the LU decomposition and inverse of cov mat
     gsl_linalg_LU_decomp(cov, p, &s);
     gsl_linalg_LU_invert(cov,p, invcov);
 
+    // compute chi2
+    for(ie=0;ie<nobs;ie++) for(je=0;je<nobs;je++) chi2+=(prediction[ie]-observed[ie])*gsl_matrix_get(invcov,ie,je)*(prediction[je]-observed[je]);
+
+    result = -0.5*chi2;
+
+    // ----------------- delete when everthing is tested -----
+    
     // just to test if AlterBBN and GAMBIT output match
     relicparam const & paramrelic = *Dep::AlterBBN_modelinfo;
     int i = BEreq::bbn_excluded_chi2(&paramrelic);
 
-    // compute chi2
-    for(ie=0;ie<nobs;ie++) for(je=0;je<nobs;je++) chi2+=(prediction[ie]-observed[ie])*gsl_matrix_get(invcov,ie,je)*(prediction[je]-observed[je]);
-
-    
     std::cout << "nobs "<< nobs <<"Chi2 Gambit = " << chi2<< std::endl;
     std::cout << "nobs "<< nobs <<"Chi2 AlterBBN = " << paramrelic.chi2<< std::endl;
-    std::cout << " Abundane map Yp " << abund_map["Yp"] << " Abundane map H2 " << abund_map["H2"] << std::endl;
-    
 
     int NNUC =26;
     double H2_H,He3_H,Yp,Li7_H,Li6_H,Be7_H;
@@ -2436,10 +2409,7 @@ namespace Gambit
     printf("Li7/H\t %f\t %f\t %f\t %f\t %f\t %f\n",corr_ratioH[8][6],corr_ratioH[8][3],corr_ratioH[8][5],corr_ratioH[8][8],corr_ratioH[8][7],corr_ratioH[8][9]);
     printf("Li6/H\t %f\t %f\t %f\t %f\t %f\t %f\n",corr_ratioH[7][6],corr_ratioH[7][3],corr_ratioH[7][5],corr_ratioH[7][8],corr_ratioH[7][7],corr_ratioH[7][9]);
     printf("Be7/H\t %f\t %f\t %f\t %f\t %f\t %f\n\n",corr_ratioH[9][6],corr_ratioH[9][3],corr_ratioH[9][5],corr_ratioH[9][8],corr_ratioH[9][7],corr_ratioH[9][9]);
-          
-
-
-    result =1.;
+         
   }
 
   }

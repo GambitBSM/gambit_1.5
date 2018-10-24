@@ -4144,8 +4144,19 @@ LCDM_parameters: |
    tau_reio, reionization optical depth.
 
 LCDMtensor_parameters: |
-   in addition to the above, r_tensor, amplitute of
+   in addition to the above, r_tensor, amplitude of
    tensor power spectrum over scalar power spectrum.
+
+LCDM_dNeff_Smu_parameters: |
+   in addition to LCDM_parameters:
+   neutrino mass sum (three massive neutrinos with degenerate masses)
+   dNeff, extra relativistic degrees of freedom (Neff=3.064+Neff)
+
+LCDM_dNeff_Smu_etaBBN_parameters: |
+   in addition to LCDM_parameters:
+   neutrino mass sum (three massive neutrinos with degenerate masses)
+   dNeff, extra relativistic degrees of freedom (Neff=3.064+Neff)
+   etaBBN, baryon to photon ratio at BBN (eta at CMB set by omega_b)
 
 inf_SR1quad_LCDMt_parameters: |
    omega_b, baryon density parameter.
@@ -4153,7 +4164,7 @@ inf_SR1quad_LCDMt_parameters: |
    H0, Hubble constant.
    tau_reio, reionization optical depth.
    N_pivot, number of efolds before the end of inflation.
-   mass, inflaton mass.
+   mass, inflation mass.
 
 inf_1quarInf_LCDMt_parameters: |
     6 parameter cosmology+inflation model: 0.25 lambda phi^4
@@ -4231,12 +4242,37 @@ injection_spectrum: |
 PyTest_cap_1: |
     First test of the mapping of std::vector onto python lists
     and vice versa.
-    Recieves an std::vector from the PyArrayTest and computes
+    Receives an std::vector from the PyArrayTest and computes
     the sum of its entries.
 
 PyTest_cap_2: |
     As 'PyTest_cap_2', but the sum will be performed by the
     PyArrayTest backend and the result is taken.
+
+AlterBBN_2_0_init: |
+    Initialise AlterBBN.
+
+AlterBBN_modelinfo: |
+     Holds internal AlterBBN parameters in structure relicparam. 
+
+Init_cosmomodel: |
+     Initialise AlterBBN internal structure.
+
+nucl_err: |
+    AlterBBN function that computes element abundances and their covariance during BBN.
+
+BBN_LogLike: |
+    Returns likelihood for BBN data.
+
+BBN_abundances: |
+    Fills BBN_container with theoretically expected element abundances and covariance matrix from BBN. 
+
+BBN_data: |
+    Read data file with BBN observations for likelihood computation & feed them into BBN_container. 
+
+Helium_abundance: |
+    Returns predicted Helium abundance from BBN.
+
 
 #-------------------------------------
 #  Capgen capabilities
