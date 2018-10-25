@@ -18,6 +18,10 @@
 ///          (stoecker@physik.rwth-aachen.de)
 ///  \date 2017 Nov
 ///  \date 2018 Apr, May
+///  
+///	 \author Janina Renk
+///          (janina.renk@fysik.su.se)
+///  \date 2018 Oct
 ///
 ///  *********************************************
 
@@ -49,6 +53,13 @@ BE_FUNCTION(class_primordial_free, int, (Class::primordial*), "primordial_free",
 BE_FUNCTION(class_perturb_free, int, (Class::perturbs*), "perturb_free", "class_perturb_free")
 BE_FUNCTION(class_thermodynamics_free, int, (Class::thermo*), "thermodynamics_free", "class_thermodynamics_free")
 BE_FUNCTION(class_background_free, int, (Class::background*), "background_free", "class_background_free")
+
+
+BE_FUNCTION(background_tau_of_z, int, (Class::background*,double,double*), "background_tau_of_z", "class_background_tau_of_z")
+BE_FUNCTION(background_at_tau, int, (Class::background*,double,short,short,int*,double*), "background_at_tau", "class_background_at_tau")
+
+BE_CONV_FUNCTION(class_get_Da, double, (double), "class_get_Da")
+BE_CONV_FUNCTION(class_get_Hz, double, (double), "class_get_Hz")
 
 BE_CONV_FUNCTION(class_2_6_3_run, void, (), "class_run_internal")
 BE_CONV_FUNCTION(class_2_6_3_free, void, (), "class_free_internal")

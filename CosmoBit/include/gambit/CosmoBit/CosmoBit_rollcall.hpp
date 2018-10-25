@@ -311,7 +311,11 @@ START_MODULE
    START_CAPABILITY
    #define FUNCTION compute_BAO_LogLike
    START_FUNCTION(double)
+   DEPENDENCY(class_get_spectra,CosmoBit::Class_container)
+   //BACKEND_REQ(get_ptr_to_class,(class_tag),CosmoBit::Class_container,())
    ALLOW_MODELS(LCDM, LCDM_dNeff_Smu,LCDM_dNeff_Smu_etaBBN,LCDMtensor)
+   BACKEND_REQ(class_get_Da,(class_tag),double,(double))
+   BACKEND_REQ(class_get_Hz,(class_tag),double,(double))
   #undef FUNCTION
   #undef CAPABILITY
 

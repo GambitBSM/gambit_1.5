@@ -14,6 +14,10 @@
 ///
 ///  \author Selim Hotinli
 ///  \date 2018 May-June
+///
+///  \author Janina Renk
+///          (janina.renk@fysik.su.se)
+///  \date 2018 Oct
 ///  *********************************************
 
 #include "gambit/Backends/frontend_macros.hpp"
@@ -211,6 +215,49 @@ BE_NAMESPACE
       std::strncpy(cosmo.fc.value[pos], iter->second.c_str(), sizeof(Class::FileArg));
     }
   }
+
+  double class_get_Da(double z){
+
+    double tau;
+    int index;
+    double *pvecback;
+    //transform redshift in conformal time
+    background_tau_of_z(&cosmo.ba,z,&tau);
+
+    //pvecback must be allocated 
+    pvecback=(double *)malloc(cosmo.ba.bg_size*sizeof(double));
+
+    //call to fill pvecback
+    background_at_tau(&cosmo.ba,tau,cosmo.ba.long_info,cosmo.ba.inter_normal, &index, pvecback);
+
+
+    double H_z=pvecback[cosmo.ba.index_bg_H];
+    double D_ang=pvecback[cosmo.ba.index_bg_ang_distance];
+
+    return D_ang;
+  }
+
+  double class_get_Hz(double z)
+  {
+    double tau;
+    int index;
+    double *pvecback;
+    //transform redshift in conformal time
+    background_tau_of_z(&cosmo.ba,z,&tau);
+
+    //pvecback must be allocated 
+    pvecback=(double *)malloc(cosmo.ba.bg_size*sizeof(double));
+
+    //call to fill pvecback
+    background_at_tau(&cosmo.ba,tau,cosmo.ba.long_info,cosmo.ba.inter_normal, &index, pvecback);
+
+
+    double H_z=pvecback[cosmo.ba.index_bg_H];
+
+    return(H_z);
+  }
+
+
 }
 END_BE_NAMESPACE
 

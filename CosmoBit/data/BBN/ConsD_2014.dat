@@ -1,3 +1,8 @@
+# -------------------------
+#
+# 		BBN data file 
+#
+# -------------------------
 # Data file for compuation of BBN likelihood
 # 
 # Specify the data to use for the scan in .yaml file via the Rule

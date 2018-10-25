@@ -2312,7 +2312,7 @@ namespace Gambit
     std::map<std::string, int> abund_map = BBN_res.get_map();
 
     result = BBN_res.BBN_abund.at(abund_map["Yp"]);
-    std::cout << "Helium Abundane from AlterBBN = " << result << std::endl;
+    std::cout << "Helium Abundance from AlterBBN = " << result << std::endl;
 
   }
 
@@ -2436,6 +2436,15 @@ namespace Gambit
 
   void compute_BAO_LogLike(double &result){
       using namespace Pipes::compute_BAO_LogLike;
+
+      double tau;
+      int index, type;
+      double *pvecback;
+
+      double da,dr,dv,rs,Hz,z,theo; // cosmo distances and sound horizon at drag,Hubble, theoretical prediction
+      double chi2 =0;
+
+      Class_container cosmo = *Dep::class_get_spectra;
   
       std::string filename = "CosmoBit/data/BAO/";
       filename.append(runOptions->getValue<std::string>("DataFile"));
@@ -2444,8 +2453,30 @@ namespace Gambit
       std::vector<std::string> colnames = initVector<std::string>("z", "mean","sigma","type");
       table.setcolnames(colnames);
       std::cout << "BAO data read from "<< filename << std::endl;
+  
+      for(int ie=0;ie<table.getnrow();ie++){
+        type = table["type"][ie];
+        z = table["z"][ie];
+        da = BEreq::class_get_Da(byVal(z));
+        Hz = BEreq::class_get_Hz(byVal(z));
+        dr = z/Hz;
+        dv = pow(da*da*(1.+z)*(1.+z)*dr, 1./3.);
+        rs = cosmo.th.rs_d;
 
-      result = 1.;
+        switch(type){
+          case 3: theo = dv /rs; break;
+          case 4: theo = dv; break;
+          case 5: theo = da / rs; break;
+          case 6: theo = 1./Hz/rs; break;
+          case 7: theo = rs/dv; break;
+          default: std::cout << "Type " << type << " in "<< ie+1 <<". data point in BAO data file not recognised\n Aborting now... " << std::endl; // TODO sent proper error message
+        }
+
+        chi2 += pow((theo - table["mean"][ie]) / table["sigma"][ie],2);
+      }
+
+      std::cout << "BAO chi2 "<< chi2 << std::endl;
+      result = -0.5*chi2;
   
   }
 
@@ -2455,6 +2486,3 @@ namespace Gambit
   }
 
 }
-
-
-// helium 3:nur upper limit. Yp & deuterium;
