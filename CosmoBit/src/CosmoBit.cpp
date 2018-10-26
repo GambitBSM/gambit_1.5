@@ -2257,11 +2257,26 @@ namespace Gambit
 
       result.eta0=*Param["omega_b"]*274.*pow(10,-10); // eta0 = eta_BBN = eta_CMB
       result.Nnu=3.046;     // 3 massive neutrinos
-      result.dNnu=*Param["dNeff"];
-      std::cout<< "eta = " << result.eta0 <<", Nu = " << result.Nnu <<", dNu = " << result.dNnu << std::endl;
+      result.dNnu=0;        // no extra rel. d.o.f. in  base LCDM
       result.failsafe = 3;   // set precision parameters for AlterBBN
       result.err = 3;
+      std::cout<< "eta = " << result.eta0 <<", Nu = " << result.Nnu <<", dNu = " << result.dNnu << std::endl; // TODO: remove after testing
     }
+
+    void AlterBBN_fill_dNeff(relicparam &result)
+    {
+      using namespace Pipes::AlterBBN_fill_dNeff;
+
+      BEreq::Init_cosmomodel(&result);
+
+      result.eta0=*Param["omega_b"]*274.*pow(10,-10); // eta0 = eta_BBN = eta_CMB
+      result.Nnu=3.046;     // 3 massive neutrinos
+      result.dNnu=*Param["dNeff"];        // no extra rel. d.o.f. in  base LCDM
+      result.failsafe = 3;   // set precision parameters for AlterBBN
+      result.err = 3;
+      std::cout<< "eta = " << result.eta0 <<", Nu = " << result.Nnu <<", dNu = " << result.dNnu << std::endl; // TODO: remove after testing
+    }
+
 
     void AlterBBN_fill_etaBBN(relicparam &result)
     {
@@ -2272,51 +2287,54 @@ namespace Gambit
       result.eta0 = *Param["eta_BBN"];  // eta AFTER BBN (variable during)
       result.Nnu=3.046;     // 3 massive neutrinos
       result.dNnu=*Param["dNeff_BBN"];
-      std::cout<< "eta = " << result.eta0 <<", Nu = " << result.Nnu <<", dNu = " << result.dNnu << std::endl;
       result.failsafe = 3; // set precision parameters for AlterBBN
       result.err = 3; 
+      std::cout<< "eta = " << result.eta0 <<", Nu = " << result.Nnu <<", dNu = " << result.dNnu << std::endl; // TODO: remove after testing
     }
 
     void compute_BBN_abundances(CosmoBit::BBN_container &result)
     {
       using namespace Pipes::compute_BBN_abundances;
 
-      int NNUC =26;  // global vaiable of AlterBBN (# computed element abundances)
-            
-      double ratioH [NNUC+1];
-      double cov_ratioH [NNUC+1][NNUC+1];
+      int NNUC =26;  // global vaiable of AlterBBN (# computed element abundances)  
+      double ratioH [NNUC+1], cov_ratioH [NNUC+1][NNUC+1];
       
       relicparam const& paramrelic = *Dep::AlterBBN_modelinfo;
-      
       int nucl_err = BEreq::nucl_err(&paramrelic, byVal(ratioH), byVal(cov_ratioH[0]));
       
       // fill abundances and covariance matrix of BBN_container with results from AlterBBN
-      if (nucl_err){
-        for(int ie=1;ie<=NNUC;ie++){
+      if (nucl_err)
+      {
+        for(int ie=1;ie<=NNUC;ie++)
+        {
           result.BBN_abund.at(ie) = ratioH[ie];
-          for(int je=1;je<=NNUC;je++){
-            result.BBN_covmat.at(ie).at(je) =cov_ratioH[ie][je];
-          }
+          for(int je=1;je<=NNUC;je++) result.BBN_covmat.at(ie).at(je) =cov_ratioH[ie][je];
         }
       }
-      else{
-        std::cout << "AlterBBN calculation failed"<<std::endl; //TODO: throw proper error msg
+      else
+      {
+        std::ostringstream err;
+        err << "AlterBBN calculation for primordial element abundances failed.";
+        invalid_point().raise(err.str());
       }
     }
 
 
-  void get_Helium_abundance(double &result){
+  void get_Helium_abundance(double &result)
+  {
     using namespace Pipes::get_Helium_abundance;
 
     CosmoBit::BBN_container BBN_res = *Dep::BBN_abundances;
     std::map<std::string, int> abund_map = BBN_res.get_map();
 
     result = BBN_res.BBN_abund.at(abund_map["Yp"]);
-    std::cout << "Helium Abundance from AlterBBN = " << result << std::endl;
+    logger() << "Helium Abundance from AlterBBN = " << result << EOM;
+    std::cout << "Helium Abundance from AlterBBN = " << result << std::endl; // TODO: remove after testing
 
   }
 
-  void read_BBN_data(CosmoBit::BBN_container &result){
+  void read_BBN_data(CosmoBit::BBN_container &result)
+  {
     using namespace Pipes::read_BBN_data;
 
     std::string filename = "CosmoBit/data/BBN/";
@@ -2326,15 +2344,16 @@ namespace Gambit
     result.fill_obs_dict(table.get_dict());
     std::cout << "BBN data read from "<< filename<< std::endl;
 
-    if(table.duplicated_keys()==true){ // check for double key entries in data file
-      std::cout << "ERROR: Double entry for element in BBN data file "<< filename<<". Aborting now.." << std::endl;
-        // TODO: Throw proper IO error
-      exit(-1);
+    if(table.duplicated_keys()==true) // check for double key entries in data file
+    { 
+      std::ostringstream err;
+      err << "Double entry for one element in BBN data file "<< filename<<". \n You can only enter one measurement per element.";
+      CosmoBit_error().raise(LOCAL_INFO, err.str());
     }    
   }
 
-  void compute_BBN_LogLike(double &result){
-
+  void compute_BBN_LogLike(double &result)
+  {
     using namespace Pipes::compute_BBN_LogLike;
 
     double chi2 = 0;
@@ -2354,7 +2373,8 @@ namespace Gambit
     double prediction[nobs],observed[nobs],sigmaobs[nobs],translate[nobs];
 
     // iterate through observation dictionary to fill observed, sigmaobs and prediction arrays
-    for(std::map<std::string,std::vector<double>>::iterator iter = BBN_obs_dict.begin(); iter != BBN_obs_dict.end(); ++iter){ 
+    for(std::map<std::string,std::vector<double>>::iterator iter = BBN_obs_dict.begin(); iter != BBN_obs_dict.end(); ++iter)
+    { 
       // iter = ["element key", [mean, sigma]]
       std::string key = iter->first;
       translate[ii]=abund_map[key]; // to order observed and predicted abundances consistently
@@ -2365,10 +2385,9 @@ namespace Gambit
     }
     // TODO: if key error in abundance map throw error msg
 
-    for(ie=0;ie<nobs;ie++){ // fill covmat
-       for(je=0;je<nobs;je++){
-          gsl_matrix_set(cov, ie, je,pow(sigmaobs[ie],2.)*(ie==je)+BBN_res.BBN_covmat.at(translate[ie]).at(translate[je]));
-          }
+    for(ie=0;ie<nobs;ie++) // fill covmat
+    { 
+       for(je=0;je<nobs;je++) gsl_matrix_set(cov, ie, je,pow(sigmaobs[ie],2.)*(ie==je)+BBN_res.BBN_covmat.at(translate[ie]).at(translate[je]));
     }
     // Compute the LU decomposition and inverse of cov mat
     gsl_linalg_LU_decomp(cov, p, &s);
@@ -2413,71 +2432,88 @@ namespace Gambit
   }
 
 
-  void compute_H0_LogLike(double &result){
+  void compute_H0_LogLike(double &result)
+  {
       using namespace Pipes::compute_H0_LogLike;
-  
-      std::string filename = "CosmoBit/data/H0/";
-      filename.append(runOptions->getValue<std::string>("DataFile"));
-      
-      ASCIItableReader table(filename);
-      std::vector<std::string> colnames = initVector<std::string>("mean", "sigma");
-      table.setcolnames(colnames);
-      std::cout << "H0 data read from "<< filename << std::endl;
 
-      if(table.getnrow() != 1){
-        std::cout << table.getnrow() << "data points for H0 measurement data read from "<< filename<< std::endl;
-        std::cout << "Only one expected. Aborting now..  " << std::endl;
-        exit(-1);
-        // TODO: throw proper error 
+      const str filename = runOptions->getValue<std::string>("DataFile");
+      const str path_to_file = GAMBIT_DIR "/CosmoBit/data/H0/" + runOptions->getValue<std::string>("DataFile");
+      static ASCIItableReader data(path_to_file);
+      static bool read_data = false;
+  
+      if(read_data == false)
+      {
+        std::vector<std::string> colnames = initVector<std::string>("mean", "sigma");
+        data.setcolnames(colnames);
+        logger() << "H0 data read from file '"<<filename<<"'." << EOM;
+        std::cout << "H0 data read from file '"<<filename<<"'." << std::endl; // TODO: remove later
+
+        if(data.getnrow() != 1)
+         {
+           std::ostringstream err;
+           err << data.getnrow() << " data points for H0 measurement data read from '"<< filename << "'.\n Only one expected.";
+           CosmoBit_error().raise(LOCAL_INFO, err.str());
+        }
       }
   
-      result = -0.5 * pow(*Param["H0"] - table["mean"][0],2)/ pow(table["sigma"][0],2);
+      result = -0.5 * pow(*Param["H0"] - data["mean"][0],2)/ pow(data["sigma"][0],2);
     }
 
-  void compute_BAO_LogLike(double &result){
+  void compute_BAO_LogLike(double &result)
+  {
       using namespace Pipes::compute_BAO_LogLike;
 
-      double tau;
-      int index, type;
-      double *pvecback;
-
+      int type,nrow;
       double da,dr,dv,rs,Hz,z,theo; // cosmo distances and sound horizon at drag,Hubble, theoretical prediction
       double chi2 =0;
-
-      Class_container cosmo = *Dep::class_get_spectra;
-  
-      std::string filename = "CosmoBit/data/BAO/";
-      filename.append(runOptions->getValue<std::string>("DataFile"));
       
-      ASCIItableReader table(filename);
-      std::vector<std::string> colnames = initVector<std::string>("z", "mean","sigma","type");
-      table.setcolnames(colnames);
-      std::cout << "BAO data read from "<< filename << std::endl;
-  
-      for(int ie=0;ie<table.getnrow();ie++){
-        type = table["type"][ie];
-        z = table["z"][ie];
+      const str filename = runOptions->getValue<std::string>("DataFile");
+      const str path_to_file = GAMBIT_DIR "/CosmoBit/data/BAO/" + runOptions->getValue<std::string>("DataFile");
+      static ASCIItableReader data(path_to_file);
+      static bool read_data = false;
+      
+      Class_container cosmo = *Dep::class_get_spectra;
+    
+      if(read_data == false)
+      {
+        std::vector<std::string> colnames = initVector<std::string>("z", "mean","sigma","type");
+        data.setcolnames(colnames);
+        nrow=data.getnrow();
+
+        logger() << "BAO data read from file '"<<filename<<"'." << EOM;
+        std::cout << "BAO data read from file '"<<filename<<"'." << std::endl; // TODO: remove later
+        read_data = true;
+      }
+      
+      
+      for(int ie=0;ie<nrow;ie++)
+      { 
+        z = data["z"][ie];
+        type = data["type"][ie];
         da = BEreq::class_get_Da(byVal(z));
         Hz = BEreq::class_get_Hz(byVal(z));
         dr = z/Hz;
         dv = pow(da*da*(1.+z)*(1.+z)*dr, 1./3.);
         rs = cosmo.th.rs_d;
 
-        switch(type){
+        switch(type)
+        {
           case 3: theo = dv /rs; break;
           case 4: theo = dv; break;
           case 5: theo = da / rs; break;
           case 6: theo = 1./Hz/rs; break;
           case 7: theo = rs/dv; break;
-          default: std::cout << "Type " << type << " in "<< ie+1 <<". data point in BAO data file not recognised\n Aborting now... " << std::endl; // TODO sent proper error message
+          default: 
+            std::ostringstream err;
+            err << data.getnrow() << "Type " << type << " in "<< ie+1 <<". data point in BAO data file not recognised.";
+            CosmoBit_error().raise(LOCAL_INFO, err.str());
         }
 
-        chi2 += pow((theo - table["mean"][ie]) / table["sigma"][ie],2);
+        chi2 += pow((theo - data["mean"][ie]) / data["sigma"][ie],2);
       }
 
-      std::cout << "BAO chi2 "<< chi2 << std::endl;
+      std::cout << "BAO chi2 "<< chi2 << std::endl; // TODO: remove after testing
       result = -0.5*chi2;
-  
   }
 
 

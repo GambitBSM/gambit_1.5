@@ -216,8 +216,8 @@ BE_NAMESPACE
     }
   }
 
-  double class_get_Da(double z){
-
+  double class_get_Da(double z)
+  {
     double tau;
     int index;
     double *pvecback;
@@ -230,8 +230,7 @@ BE_NAMESPACE
     //call to fill pvecback
     background_at_tau(&cosmo.ba,tau,cosmo.ba.long_info,cosmo.ba.inter_normal, &index, pvecback);
 
-
-    double H_z=pvecback[cosmo.ba.index_bg_H];
+    //double H_z=pvecback[cosmo.ba.index_bg_H];
     double D_ang=pvecback[cosmo.ba.index_bg_ang_distance];
 
     return D_ang;
@@ -250,10 +249,8 @@ BE_NAMESPACE
 
     //call to fill pvecback
     background_at_tau(&cosmo.ba,tau,cosmo.ba.long_info,cosmo.ba.inter_normal, &index, pvecback);
-
-
+    
     double H_z=pvecback[cosmo.ba.index_bg_H];
-
     return(H_z);
   }
 

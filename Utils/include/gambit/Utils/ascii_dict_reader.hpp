@@ -22,6 +22,9 @@
 #include <sstream>
 #include <algorithm>
 
+#include "gambit/Utils/standalone_error_handlers.hpp"
+#include "gambit/Utils/local_info.hpp"
+
 #ifndef __ASCIIdictReader__
 #define __ASCIIdictReader__
 

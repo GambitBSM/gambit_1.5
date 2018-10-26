@@ -249,7 +249,14 @@ START_MODULE
  START_CAPABILITY
    #define FUNCTION AlterBBN_fill
    START_FUNCTION(relicparam)
-   ALLOW_MODELS(LCDM, LCDM_dNeff_Smu)
+   ALLOW_MODELS(LCDM)
+   BACKEND_OPTION( (AlterBBN, 2.0), (libbbn) )
+   BACKEND_REQ(Init_cosmomodel, (libbbn), void, (relicparam*))
+   #undef FUNCTION
+
+#define FUNCTION AlterBBN_fill_dNeff
+   START_FUNCTION(relicparam)
+   ALLOW_MODELS(LCDM_dNeff_Smu)
    BACKEND_OPTION( (AlterBBN, 2.0), (libbbn) )
    BACKEND_REQ(Init_cosmomodel, (libbbn), void, (relicparam*))
    #undef FUNCTION
@@ -312,7 +319,6 @@ START_MODULE
    #define FUNCTION compute_BAO_LogLike
    START_FUNCTION(double)
    DEPENDENCY(class_get_spectra,CosmoBit::Class_container)
-   //BACKEND_REQ(get_ptr_to_class,(class_tag),CosmoBit::Class_container,())
    ALLOW_MODELS(LCDM, LCDM_dNeff_Smu,LCDM_dNeff_Smu_etaBBN,LCDMtensor)
    BACKEND_REQ(class_get_Da,(class_tag),double,(double))
    BACKEND_REQ(class_get_Hz,(class_tag),double,(double))
