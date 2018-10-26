@@ -2,7 +2,7 @@
 
 for f in /net/archive/groups/plgghbt/gambit/gambit_RHN/yaml/*.yaml
 do
-    echo 'Preparing'$f
+    echo 'Preparing' $f
     f1=`echo $f  | rev | cut -d '/' -f 1 | rev | cut -d '.' -f  1 `
     echo $f1
     cp run.sh run_$f1.sh
@@ -14,7 +14,7 @@ do
     echo 'mpiexec -outfile-pattern=runs/RHN_'$f1'.out -errfile-pattern=runs/RHN'$f1'.err ./gambit -f '$f >> run_$f1.sh
 
     
-    if [[ ! -d  'runs/RHN/'$f1'/samples/RHN.hdf5' ]]; then
+    if [[ ! -f  'runs/RHN/'$f1'/samples/RHN.hdf5' ]]; then
 	echo 'Submitting '$f1
 	sbatch run_$f1.sh
     fi
