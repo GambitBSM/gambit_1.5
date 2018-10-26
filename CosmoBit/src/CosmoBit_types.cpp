@@ -45,23 +45,12 @@ namespace Gambit
       abund_map["Be7"] = 9;
       abund_map["Li8"] = 10;
 
-      std::map<std::string,std::vector<double>> BBN_obs_dict;
     }
     
     std::map<std::string,int> BBN_container::get_map()
     {
       return abund_map;
     }   
-
-    void BBN_container::fill_obs_dict(std::map<std::string,std::vector<double>> dict)
-    {
-      BBN_obs_dict = dict;
-     }
-
-    std::map<std::string,std::vector<double>> BBN_container::get_obs_dict()
-    {
-      return BBN_obs_dict;
-    }  
 
     Class_container::Class_container() : lmax(2508)
     {

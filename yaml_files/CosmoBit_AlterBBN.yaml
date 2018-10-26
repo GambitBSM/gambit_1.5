@@ -16,13 +16,14 @@
 #======== Input parameter declarations =======
 Parameters:
 
- #LCDM_dNeff_Smu: !import include/LCDM_dNeff_Smu_scan.yaml
- LCDM_dNeff_Smu_etaBBN: !import include/LCDM_dNeff_Smu_etaBBN_scan.yaml
+ LCDM_dNeff_Smu: !import include/LCDM_dNeff_Smu_scan.yaml
+ #LCDM_dNeff_Smu_etaBBN: !import include/LCDM_dNeff_Smu_etaBBN_scan.yaml
+ #LCDM: !import include/LCDM_scan.yaml
 
  #eta:
  #  prior_type: flat
  #  range: [4,8]
- Planck_lite: !import include/Planck_lite_scan.yaml
+ #Planck_lite: !import include/Planck_lite_scan.yaml
 
 #======== Prior setup ========
 Priors:
@@ -66,9 +67,14 @@ ObsLikes:
     type:         double
 
   - purpose:      LogLike
-    capability:   compute_Planck_high_TT_loglike
+    capability:   BAO_LogLike
     module:       CosmoBit
     type:         double
+
+ # - purpose:      LogLike
+ #   capability:   compute_Planck_high_TT_loglike
+ #   module:       CosmoBit
+ #   type:         double
 
 #======== Rule entries ========
 Rules:
@@ -89,25 +95,30 @@ Rules:
 ##  CLASS. (k_pivot = 0.05 is needed for the right
 ##  value of A_s, according to J. Lesgourgues)
 ####
-  - capability: class_set_parameter
-    options:
-      class_dict:
-        T_ncdm: 0.71611
-        k_pivot: 0.05
+ # - capability: class_set_parameter
+ #   options:
+ #     class_dict:
+ #       T_ncdm: 0.71611
+ #       k_pivot: 0.05
 
   - capability: compute_Planck_high_TT_loglike
     function: function_Planck_high_TT_lite_loglike
     module: CosmoBit
 
-  - capability: BBN_data
-    function: read_BBN_data
+  - capability: BBN_LogLike
+    function: compute_BBN_LogLike
     options:
-        DataFile: PDG_2017.dat
+        DataFile: AlterBBN.dat
   
   - capability: H0_LogLike
     function: compute_H0_LogLike
     options:
       DataFile:  SH0ES.dat
+
+  - capability: BAO_LogLike
+    function: compute_BAO_LogLike
+    options:
+      DataFile:  BAO_2014.dat
 
   - capability: plc_2_0_init
     options:

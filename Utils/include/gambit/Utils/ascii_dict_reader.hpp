@@ -53,7 +53,7 @@ namespace Gambit
       std::map<std::string,std::vector<double>> get_dict(){return dict;}
       bool duplicated_keys() {return duplicate;}
       int nrow() {return keys.size();}
-
+ 
     private:
       std::map<std::string,std::vector<double>> dict;
       std::vector<std::string> keys;

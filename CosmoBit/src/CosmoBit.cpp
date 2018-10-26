@@ -2333,24 +2333,6 @@ namespace Gambit
 
   }
 
-  void read_BBN_data(CosmoBit::BBN_container &result)
-  {
-    using namespace Pipes::read_BBN_data;
-
-    std::string filename = "CosmoBit/data/BBN/";
-    filename.append(runOptions->getValue<std::string>("DataFile"));
-    
-    ASCIIdictReader table(filename);
-    result.fill_obs_dict(table.get_dict());
-    std::cout << "BBN data read from "<< filename<< std::endl;
-
-    if(table.duplicated_keys()==true) // check for double key entries in data file
-    { 
-      std::ostringstream err;
-      err << "Double entry for one element in BBN data file "<< filename<<". \n You can only enter one measurement per element.";
-      CosmoBit_error().raise(LOCAL_INFO, err.str());
-    }    
-  }
 
   void compute_BBN_LogLike(double &result)
   {
@@ -2358,22 +2340,37 @@ namespace Gambit
 
     double chi2 = 0;
     int ii = 0;
-    int ie, je, s;
-
-    CosmoBit::BBN_container BBN_res = *Dep::BBN_data; // fill BBN_container with observations
-    std::map<std::string, int> abund_map = BBN_res.get_map(); 
-    std::map<std::string,std::vector<double>> BBN_obs_dict = BBN_res.get_obs_dict();
+    int ie, je, s,nobs;
     
-    BBN_res = *Dep::BBN_abundances; // fill BBN_container with abundance results from AlterBBN
+    CosmoBit::BBN_container BBN_res = *Dep::BBN_abundances; // fill BBN_container with abundance results from AlterBBN
+    std::map<std::string, int> abund_map = BBN_res.get_map(); 
 
-    int nobs = BBN_obs_dict.size();
+    const str filename = runOptions->getValue<std::string>("DataFile"); // read in BBN data file
+    const str path_to_file = GAMBIT_DIR "/CosmoBit/data/BBN/" + runOptions->getValue<std::string>("DataFile");
+    static ASCIIdictReader data(path_to_file);
+    static bool read_data = false;
+    static std::map<std::string,std::vector<double>> dict;
+    
+    if(read_data == false)
+    {
+      nobs = data.nrow();
+      dict = data.get_dict();
+      if(data.duplicated_keys()==true) // check for double key entries in data file
+      { 
+        std::ostringstream err;
+        err << "Double entry for one element in BBN data file '"<< filename<<"'. \n You can only enter one measurement per element.";
+        CosmoBit_error().raise(LOCAL_INFO, err.str());
+      }    
+      read_data = true;
+    }
+
+    double prediction[nobs],observed[nobs],sigmaobs[nobs],translate[nobs]; // init vectors with observations, predictions and covmat
     gsl_matrix *cov = gsl_matrix_alloc(nobs, nobs);
     gsl_matrix *invcov = gsl_matrix_alloc(nobs, nobs);
     gsl_permutation *p = gsl_permutation_alloc(nobs);
-    double prediction[nobs],observed[nobs],sigmaobs[nobs],translate[nobs];
-
+    
     // iterate through observation dictionary to fill observed, sigmaobs and prediction arrays
-    for(std::map<std::string,std::vector<double>>::iterator iter = BBN_obs_dict.begin(); iter != BBN_obs_dict.end(); ++iter)
+    for(std::map<std::string,std::vector<double>>::iterator iter = dict.begin(); iter != dict.end(); ++iter)
     { 
       // iter = ["element key", [mean, sigma]]
       std::string key = iter->first;
@@ -2383,7 +2380,7 @@ namespace Gambit
       prediction[ii]= BBN_res.BBN_abund.at(abund_map[key]);
       ii++;
     }
-    // TODO: if key error in abundance map throw error msg
+    // TODO: check if key error in abundance map. If not throw error msg
 
     for(ie=0;ie<nobs;ie++) // fill covmat
     { 
@@ -2393,7 +2390,6 @@ namespace Gambit
     gsl_linalg_LU_decomp(cov, p, &s);
     gsl_linalg_LU_invert(cov,p, invcov);
 
-    // compute chi2
     for(ie=0;ie<nobs;ie++) for(je=0;je<nobs;je++) chi2+=(prediction[ie]-observed[ie])*gsl_matrix_get(invcov,ie,je)*(prediction[je]-observed[je]);
 
     result = -0.5*chi2;
@@ -2454,6 +2450,7 @@ namespace Gambit
            err << data.getnrow() << " data points for H0 measurement data read from '"<< filename << "'.\n Only one expected.";
            CosmoBit_error().raise(LOCAL_INFO, err.str());
         }
+        read_data = true;
       }
   
       result = -0.5 * pow(*Param["H0"] - data["mean"][0],2)/ pow(data["sigma"][0],2);
@@ -2505,7 +2502,7 @@ namespace Gambit
           case 7: theo = rs/dv; break;
           default: 
             std::ostringstream err;
-            err << data.getnrow() << "Type " << type << " in "<< ie+1 <<". data point in BAO data file not recognised.";
+            err << "Type " << type << " in "<< ie+1 <<". data point in BAO data file '"<<filename <<"' not recognised.";
             CosmoBit_error().raise(LOCAL_INFO, err.str());
         }
 

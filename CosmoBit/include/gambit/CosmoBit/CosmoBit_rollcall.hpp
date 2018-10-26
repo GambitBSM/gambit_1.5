@@ -286,21 +286,13 @@ START_MODULE
     #undef FUNCTION
   #undef CAPABILITY
     
-#define CAPABILITY BBN_data
-   START_CAPABILITY
-   #define FUNCTION read_BBN_data
-   START_FUNCTION(CosmoBit::BBN_container)
-  #undef FUNCTION
-  #undef CAPABILITY
-
  #define CAPABILITY BBN_LogLike
    START_CAPABILITY
    #define FUNCTION compute_BBN_LogLike
    START_FUNCTION(double)
    DEPENDENCY(BBN_abundances, CosmoBit::BBN_container)
-   DEPENDENCY(BBN_data, CosmoBit::BBN_container)
    BACKEND_OPTION( (AlterBBN, 2.0), (libbbn) )
-  DEPENDENCY(AlterBBN_modelinfo, relicparam)
+   DEPENDENCY(AlterBBN_modelinfo, relicparam)
    BACKEND_REQ(bbn_excluded_chi2, (libbbn), int, (const relicparam*))
    ALLOW_MODELS(LCDM, LCDM_dNeff_Smu,LCDM_dNeff_Smu_etaBBN)
   #undef FUNCTION

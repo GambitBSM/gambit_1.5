@@ -4069,6 +4069,19 @@ class_free_internal: |
 get_ptr_to_class: |
    Returns a pointer to the Backend internal instance of CosmoBit::Class_container
 
+class_background_at_tau: |
+    Evaluates all background quantities at a given value of conformal time tau by reading the pre-computed background table and interpolating.
+
+class_background_tau_of_z: |
+    Returns tau(z) by interpolation from pre-computed background table.
+
+class_get_Da: |
+    Returns angular diameter distance at given z.
+
+class_get_Hz: |
+    Returns Hubble parameter at given z.
+
+
 #----------------------------
 #  DarkAges
 #----------------------------
@@ -4267,11 +4280,11 @@ BBN_LogLike: |
 BBN_abundances: |
     Fills BBN_container with theoretically expected element abundances and covariance matrix from BBN. 
 
-BBN_data: |
-    Read data file with BBN observations for likelihood computation & feed them into BBN_container. 
-
 Helium_abundance: |
     Compute predicted Helium abundance from BBN.
+
+BAO_LogLike: |
+    Compute likelihood for BAO measurements from specified data file.
 
 H0_LogLike: |
     Compute likelihood for local H0 measurements from specified data file.
