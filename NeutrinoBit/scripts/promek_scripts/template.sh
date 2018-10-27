@@ -2,9 +2,9 @@
 #
 #SBATCH --nodes 1                              # Number of nodes
 #SBATCH --ntasks-per-node 1                # Number of MPI processes per node.
-#SBATCH --mem 3G
-#SBATCH -t 0-20:00                         # Runtime in D-HH:MM
-#SBATCH -p plgrid                          # Partition to submit to
+#SBATCH --mem 25G
+#SBATCH -t 0-1:00                         # Runtime in D-HH:MM
+#SBATCH -p plgrid-testing                          # Partition to submit to
 #SBATCH -A hbtv1                           # Account to charge
 #SBATCH --signal=SIGUSR1@300               # Signal and time before walltime to send
 #SBATCH --mail-type=ALL                    # Type of email notification- BEGIN,END,FAIL,ALL
