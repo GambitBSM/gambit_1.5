@@ -259,7 +259,6 @@ namespace Gambit
 
     void class_set_parameter_LCDM(Class_container& cosmo)
     {
-      //std::cout << "Last seen alive in: class_set_parameter_LCDM" << std::endl;
       using namespace Pipes::class_set_parameter_LCDM;
 
       int l_max=cosmo.lmax;
@@ -277,6 +276,11 @@ namespace Gambit
       cosmo.input.addEntry("n_s",*Param["n_s"]);
       cosmo.input.addEntry("tau_reio",*Param["tau_reio"]);
 
+      // cosmo.input.addEntry("YHe",*Dep::Helium_abundance); 
+      // JR: compute helium abundance also for base LCDM? 
+      // Then Neutrinos + dNeff also need to be set. accordingly
+
+
       YAML::Node class_dict;
       if (runOptions->hasKey("class_dict"))
       {
@@ -292,8 +296,8 @@ namespace Gambit
 
     void class_set_parameter_LCDM_dNeff_Smu(Class_container& cosmo)
     {
-      //std::cout << "Last seen alive in: class_set_parameter_LCDM" << std::endl;
       using namespace Pipes::class_set_parameter_LCDM_dNeff_Smu;
+      // on the level of class the model LCDM_dNeff_Smu and LCDM_dNeff_Smu_etaBBN are identical
 
       int l_max=cosmo.lmax;
 
@@ -310,8 +314,7 @@ namespace Gambit
       cosmo.input.addEntry("n_s",*Param["n_s"]);
       cosmo.input.addEntry("tau_reio",*Param["tau_reio"]);
 
-      cosmo.input.addEntry("N_ur",*Param["dNeff"]+0.00641);  //TODO: explanation for value/change implementation?
-
+      cosmo.input.addEntry("N_ur",*Param["dNeff"]+0.00641);  // dNeff= 0.00641 for 3 massive neutrinos at CMB release
       cosmo.input.addEntry("N_ncdm",3);
       std::stringstream sstream;
       double numass = *Param["Smu"]/3.;
@@ -335,7 +338,6 @@ namespace Gambit
 
     void class_set_parameter_LCDM_SingletDM(Class_container& cosmo)
     {
-      //std::cout << "Last seen alive in: class_set_parameter_LCDM_SingletDM" << std::endl;
       using namespace Pipes::class_set_parameter_LCDM_SingletDM;
 
       int l_max = cosmo.lmax;
@@ -2248,9 +2250,12 @@ namespace Gambit
 //      std::cout << "Log likelihood (of lowp_TT) is : " << result << std::endl;
     }
 
-   /// Fill AlterBBN model info structure
-    void AlterBBN_fill(relicparam &result)
+/// -----------
+/// BBN related functions
+/// -----------
+    void AlterBBN_fill(relicparam &result) 
     {
+      // fill AlterBBN structure for LCDM
       using namespace Pipes::AlterBBN_fill;
 
       BEreq::Init_cosmomodel(&result);
@@ -2258,45 +2263,44 @@ namespace Gambit
       result.eta0=*Param["omega_b"]*274.*pow(10,-10); // eta0 = eta_BBN = eta_CMB
       result.Nnu=3.046;     // 3 massive neutrinos
       result.dNnu=0;        // no extra rel. d.o.f. in  base LCDM
-      result.failsafe = 3;   // set precision parameters for AlterBBN
+      result.failsafe = 3;  // set precision parameters for AlterBBN
       result.err = 3;
-      std::cout<< "eta = " << result.eta0 <<", Nu = " << result.Nnu <<", dNu = " << result.dNnu << std::endl; // TODO: remove after testing
     }
 
     void AlterBBN_fill_dNeff(relicparam &result)
     {
+      // fill AlterBBN structure for LCDM_dNeff_Smu
       using namespace Pipes::AlterBBN_fill_dNeff;
 
       BEreq::Init_cosmomodel(&result);
 
       result.eta0=*Param["omega_b"]*274.*pow(10,-10); // eta0 = eta_BBN = eta_CMB
-      result.Nnu=3.046;     // 3 massive neutrinos
-      result.dNnu=*Param["dNeff"];        // no extra rel. d.o.f. in  base LCDM
-      result.failsafe = 3;   // set precision parameters for AlterBBN
+      result.Nnu=3.046;            // 3 massive neutrinos
+      result.dNnu=*Param["dNeff"]; // no extra rel. d.o.f. in  base LCDM
+      result.failsafe = 3;         // set precision parameters for AlterBBN
       result.err = 3;
-      std::cout<< "eta = " << result.eta0 <<", Nu = " << result.Nnu <<", dNu = " << result.dNnu << std::endl; // TODO: remove after testing
     }
 
 
     void AlterBBN_fill_etaBBN(relicparam &result)
     {
+      // fill AlterBBN structure for LCDM__dNeff_Smu_etaBBN
       using namespace Pipes::AlterBBN_fill_etaBBN;
 
       BEreq::Init_cosmomodel(&result);
       
       result.eta0 = *Param["eta_BBN"];  // eta AFTER BBN (variable during)
-      result.Nnu=3.046;     // 3 massive neutrinos
+      result.Nnu=3.046;                 // 3 massive neutrinos
       result.dNnu=*Param["dNeff_BBN"];
-      result.failsafe = 3; // set precision parameters for AlterBBN
+      result.failsafe = 3;              // set precision parameters for AlterBBN
       result.err = 3; 
-      std::cout<< "eta = " << result.eta0 <<", Nu = " << result.Nnu <<", dNu = " << result.dNnu << std::endl; // TODO: remove after testing
     }
 
     void compute_BBN_abundances(CosmoBit::BBN_container &result)
     {
       using namespace Pipes::compute_BBN_abundances;
 
-      int NNUC =26;  // global vaiable of AlterBBN (# computed element abundances)  
+      int NNUC =26;  // global variable of AlterBBN (# computed element abundances)  
       double ratioH [NNUC+1], cov_ratioH [NNUC+1][NNUC+1];
       
       relicparam const& paramrelic = *Dep::AlterBBN_modelinfo;
@@ -2320,144 +2324,121 @@ namespace Gambit
     }
 
 
-  void get_Helium_abundance(double &result)
-  {
-    using namespace Pipes::get_Helium_abundance;
-
-    CosmoBit::BBN_container BBN_res = *Dep::BBN_abundances;
-    std::map<std::string, int> abund_map = BBN_res.get_map();
-
-    result = BBN_res.BBN_abund.at(abund_map["Yp"]);
-    logger() << "Helium Abundance from AlterBBN = " << result << EOM;
-    std::cout << "Helium Abundance from AlterBBN = " << result << std::endl; // TODO: remove after testing
-
-  }
-
-
-  void compute_BBN_LogLike(double &result)
-  {
-    using namespace Pipes::compute_BBN_LogLike;
-
-    double chi2 = 0;
-    int ii = 0;
-    int ie, je, s,nobs;
-    
-    CosmoBit::BBN_container BBN_res = *Dep::BBN_abundances; // fill BBN_container with abundance results from AlterBBN
-    std::map<std::string, int> abund_map = BBN_res.get_map(); 
-
-    const str filename = runOptions->getValue<std::string>("DataFile"); // read in BBN data file
-    const str path_to_file = GAMBIT_DIR "/CosmoBit/data/BBN/" + runOptions->getValue<std::string>("DataFile");
-    static ASCIIdictReader data(path_to_file);
-    static bool read_data = false;
-    static std::map<std::string,std::vector<double>> dict;
-    
-    if(read_data == false)
+    void get_Helium_abundance(double &result)
     {
-      nobs = data.nrow();
-      dict = data.get_dict();
-      if(data.duplicated_keys()==true) // check for double key entries in data file
-      { 
-        std::ostringstream err;
-        err << "Double entry for one element in BBN data file '"<< filename<<"'. \n You can only enter one measurement per element.";
-        CosmoBit_error().raise(LOCAL_INFO, err.str());
-      }    
-      read_data = true;
-    }
-
-    double prediction[nobs],observed[nobs],sigmaobs[nobs],translate[nobs]; // init vectors with observations, predictions and covmat
-    gsl_matrix *cov = gsl_matrix_alloc(nobs, nobs);
-    gsl_matrix *invcov = gsl_matrix_alloc(nobs, nobs);
-    gsl_permutation *p = gsl_permutation_alloc(nobs);
-    
-    // iterate through observation dictionary to fill observed, sigmaobs and prediction arrays
-    for(std::map<std::string,std::vector<double>>::iterator iter = dict.begin(); iter != dict.end(); ++iter)
-    { 
-      // iter = ["element key", [mean, sigma]]
-      std::string key = iter->first;
-      translate[ii]=abund_map[key]; // to order observed and predicted abundances consistently
-      observed[ii]=iter->second[0];
-      sigmaobs[ii]=iter->second[1];
-      prediction[ii]= BBN_res.BBN_abund.at(abund_map[key]);
-      ii++;
-    }
-    // TODO: check if key error in abundance map. If not throw error msg
-
-    for(ie=0;ie<nobs;ie++) // fill covmat
-    { 
-       for(je=0;je<nobs;je++) gsl_matrix_set(cov, ie, je,pow(sigmaobs[ie],2.)*(ie==je)+BBN_res.BBN_covmat.at(translate[ie]).at(translate[je]));
-    }
-    // Compute the LU decomposition and inverse of cov mat
-    gsl_linalg_LU_decomp(cov, p, &s);
-    gsl_linalg_LU_invert(cov,p, invcov);
-
-    for(ie=0;ie<nobs;ie++) for(je=0;je<nobs;je++) chi2+=(prediction[ie]-observed[ie])*gsl_matrix_get(invcov,ie,je)*(prediction[je]-observed[je]);
-
-    result = -0.5*chi2;
-
-    // ----------------- delete when everthing is tested -----
-    
-    // just to test if AlterBBN and GAMBIT output match
-    relicparam const & paramrelic = *Dep::AlterBBN_modelinfo;
-    int i = BEreq::bbn_excluded_chi2(&paramrelic);
-
-    std::cout << "nobs "<< nobs <<"Chi2 Gambit = " << chi2<< std::endl;
-    std::cout << "nobs "<< nobs <<"Chi2 AlterBBN = " << paramrelic.chi2<< std::endl;
-
-    int NNUC =26;
-    double H2_H,He3_H,Yp,Li7_H,Li6_H,Be7_H;
-    double sigma_H2_H,sigma_He3_H,sigma_Yp,sigma_Li7_H,sigma_Li6_H,sigma_Be7_H;
-    
-    H2_H=BBN_res.BBN_abund.at(abund_map["H2"]);Yp=BBN_res.BBN_abund.at(abund_map["Yp"]);Li7_H=BBN_res.BBN_abund.at(abund_map["Li7"]);Be7_H=BBN_res.BBN_abund.at(abund_map["Be7"]);He3_H=BBN_res.BBN_abund.at(abund_map["He3"]);Li6_H=BBN_res.BBN_abund.at(abund_map["Li6"]);
-    sigma_H2_H=sqrt(BBN_res.BBN_covmat.at(abund_map["H2"]).at(abund_map["H2"]));sigma_Yp=sqrt(BBN_res.BBN_covmat.at(abund_map["Yp"]).at(abund_map["Yp"]));sigma_Li7_H=sqrt(BBN_res.BBN_covmat.at(abund_map["Li7"]).at(abund_map["Li7"]));sigma_Be7_H=sqrt(BBN_res.BBN_covmat.at(abund_map["Be7"]).at(abund_map["Be7"]));sigma_He3_H=sqrt(BBN_res.BBN_covmat.at(abund_map["He3"]).at(abund_map["He3"]));sigma_Li6_H=sqrt(BBN_res.BBN_covmat.at(abund_map["Li6"]).at(abund_map["Li6"]));
-    
-    printf("\t Yp\t\t H2/H\t\t He3/H\t\t Li7/H\t\t Li6/H\t\t Be7/H\n");
-    printf("value:\t %.3e\t %.3e\t %.3e\t %.3e\t %.3e\t %.3e\n",Yp,H2_H,He3_H,Li7_H,Li6_H,Be7_H); 
-    printf(" +/- :\t %.3e\t %.3e\t %.3e\t %.3e\t %.3e\t %.3e\n\n",sigma_Yp,sigma_H2_H,sigma_He3_H,sigma_Li7_H,sigma_Li6_H,sigma_Be7_H);
-    
-    double corr_ratioH[NNUC+1][NNUC+1];
-    for(int ie=1;ie<=NNUC;ie++) for(int je=1;je<=NNUC;je++) corr_ratioH[ie][je]=BBN_res.BBN_covmat.at(ie).at(je)/sqrt(BBN_res.BBN_covmat.at(ie).at(ie)*BBN_res.BBN_covmat.at(je).at(je));
-    printf("Correlation matrix:\n");
-    printf("\t Yp\t\t H2/H\t\t He3/H\t\t Li7/H\t\t Li6/H\t\t Be7/H\n");
-    printf("Yp\t %f\t %f\t %f\t %f\t %f\t %f\n",corr_ratioH[6][6],corr_ratioH[6][3],corr_ratioH[6][5],corr_ratioH[6][8],corr_ratioH[6][7],corr_ratioH[6][9]);
-    printf("H2/H\t %f\t %f\t %f\t %f\t %f\t %f\n",corr_ratioH[3][6],corr_ratioH[3][3],corr_ratioH[3][5],corr_ratioH[3][8],corr_ratioH[3][7],corr_ratioH[3][9]);
-    printf("He3/H\t %f\t %f\t %f\t %f\t %f\t %f\n",corr_ratioH[5][6],corr_ratioH[5][3],corr_ratioH[5][5],corr_ratioH[5][8],corr_ratioH[5][7],corr_ratioH[5][9]);
-    printf("Li7/H\t %f\t %f\t %f\t %f\t %f\t %f\n",corr_ratioH[8][6],corr_ratioH[8][3],corr_ratioH[8][5],corr_ratioH[8][8],corr_ratioH[8][7],corr_ratioH[8][9]);
-    printf("Li6/H\t %f\t %f\t %f\t %f\t %f\t %f\n",corr_ratioH[7][6],corr_ratioH[7][3],corr_ratioH[7][5],corr_ratioH[7][8],corr_ratioH[7][7],corr_ratioH[7][9]);
-    printf("Be7/H\t %f\t %f\t %f\t %f\t %f\t %f\n\n",corr_ratioH[9][6],corr_ratioH[9][3],corr_ratioH[9][5],corr_ratioH[9][8],corr_ratioH[9][7],corr_ratioH[9][9]);
-         
-  }
-
-
-  void compute_H0_LogLike(double &result)
-  {
-      using namespace Pipes::compute_H0_LogLike;
-
-      const str filename = runOptions->getValue<std::string>("DataFile");
-      const str path_to_file = GAMBIT_DIR "/CosmoBit/data/H0/" + runOptions->getValue<std::string>("DataFile");
-      static ASCIItableReader data(path_to_file);
-      static bool read_data = false;
+      using namespace Pipes::get_Helium_abundance;
   
+        CosmoBit::BBN_container BBN_res = *Dep::BBN_abundances;
+        std::map<std::string, int> abund_map = BBN_res.get_map();
+  
+        result = BBN_res.BBN_abund.at(abund_map["Yp"]);
+        logger() << "Helium Abundance from AlterBBN = " << result << EOM;
+    }
+
+
+    void compute_BBN_LogLike(double &result)
+    {
+      using namespace Pipes::compute_BBN_LogLike;
+
+      double chi2 = 0;
+      int ii = 0;
+      int ie, je,s,nobs;
+    
+      CosmoBit::BBN_container BBN_res = *Dep::BBN_abundances; // fill BBN_container with abundance results from AlterBBN
+      std::map<std::string, int> abund_map = BBN_res.get_map(); 
+
+      const str filename = runOptions->getValue<std::string>("DataFile"); // read in BBN data file
+      const str path_to_file = GAMBIT_DIR "/CosmoBit/data/BBN/" + runOptions->getValue<std::string>("DataFile");
+      static ASCIIdictReader data(path_to_file);
+      static bool read_data = false;
+      static std::map<std::string,std::vector<double>> dict;
+    
       if(read_data == false)
       {
-        std::vector<std::string> colnames = initVector<std::string>("mean", "sigma");
-        data.setcolnames(colnames);
-        logger() << "H0 data read from file '"<<filename<<"'." << EOM;
-        std::cout << "H0 data read from file '"<<filename<<"'." << std::endl; // TODO: remove later
-
-        if(data.getnrow() != 1)
-         {
-           std::ostringstream err;
-           err << data.getnrow() << " data points for H0 measurement data read from '"<< filename << "'.\n Only one expected.";
-           CosmoBit_error().raise(LOCAL_INFO, err.str());
+        logger() << "BBN data read from file '"<<filename<<"'." << EOM;
+        nobs = data.nrow();
+        dict = data.get_dict();
+        if(data.duplicated_keys()==true) // check for double key entries in data file
+        { 
+          std::ostringstream err;
+          err << "Double entry for one element in BBN data file '"<< filename<<"'. \nYou can only enter one measurement per element.";
+          CosmoBit_error().raise(LOCAL_INFO, err.str());
+        }
+        if((dict.count("Yp")>0 and dict.count("He4")>0) or (dict.count("D")>0 and dict.count("H2")>0))
+        {
+          std::ostringstream err;
+          err << "Double entry for 'Yp' and 'He4' or 'D' and 'H2' in BBN data file '"<< filename<<"'. \nYou can only enter one measurement per element ('Yp' OR 'He4', 'D' OR 'H2').";
+          CosmoBit_error().raise(LOCAL_INFO, err.str());
         }
         read_data = true;
       }
-  
-      result = -0.5 * pow(*Param["H0"] - data["mean"][0],2)/ pow(data["sigma"][0],2);
+
+      // init vectors with observations, predictions and covmat
+      double prediction[nobs],observed[nobs],sigmaobs[nobs],translate[nobs]; 
+      gsl_matrix *cov = gsl_matrix_alloc(nobs, nobs);
+      gsl_matrix *invcov = gsl_matrix_alloc(nobs, nobs);
+      gsl_permutation *p = gsl_permutation_alloc(nobs);
+    
+      // iterate through observation dictionary to fill observed, sigmaobs and prediction arrays
+      for(std::map<std::string,std::vector<double>>::iterator iter = dict.begin(); iter != dict.end(); ++iter)
+      { 
+        std::string key = iter->first; // iter = ["element key", [mean, sigma]]
+        if(abund_map.count(key)!=1)   // throw error if element not contained in abundance map was entered in data file
+       {
+        std::ostringstream err;
+         err << "Unknown element '"<< key <<"' in BBN data file '"<< filename<<"'. \nYou can only enter 'Yp' or 'He4', 'D' or 'H2', 'He3', 'Li7'.";
+         CosmoBit_error().raise(LOCAL_INFO, err.str());
+        }
+        translate[ii]=abund_map[key]; // to order observed and predicted abundances consistently
+        observed[ii]=iter->second[0];
+        sigmaobs[ii]=iter->second[1];
+       prediction[ii]= BBN_res.BBN_abund.at(abund_map[key]);
+       ii++;
+      }
+
+    // fill covmat
+    for(ie=0;ie<nobs;ie++) {for(je=0;je<nobs;je++) gsl_matrix_set(cov, ie, je,pow(sigmaobs[ie],2.)*(ie==je)+BBN_res.BBN_covmat.at(translate[ie]).at(translate[je]));}
+    
+      // Compute the LU decomposition and inverse of cov mat
+      gsl_linalg_LU_decomp(cov,p,&s);
+      gsl_linalg_LU_invert(cov,p,invcov);
+
+      // compute chi2
+      for(ie=0;ie<nobs;ie++) for(je=0;je<nobs;je++) chi2+=(prediction[ie]-observed[ie])*gsl_matrix_get(invcov,ie,je)*(prediction[je]-observed[je]);
+      result = -0.5*chi2;
     }
 
-  void compute_BAO_LogLike(double &result)
-  {
+/// -----------
+/// Background Likelihoods (H0 + BAO)
+/// -----------
+    void compute_H0_LogLike(double &result)
+    {
+        using namespace Pipes::compute_H0_LogLike;
+
+        const str filename = runOptions->getValue<std::string>("DataFile");
+        const str path_to_file = GAMBIT_DIR "/CosmoBit/data/H0/" + runOptions->getValue<std::string>("DataFile");
+        static ASCIItableReader data(path_to_file);
+        static bool read_data = false;
+  
+        if(read_data == false)
+        {
+          logger() << "H0 data read from file '"<<filename<<"'." << EOM;
+          std::vector<std::string> colnames = initVector<std::string>("mean", "sigma");
+          data.setcolnames(colnames);
+          
+          if(data.getnrow() != 1)
+           {
+             std::ostringstream err;
+             err << data.getnrow() << " data points for H0 measurement data read from '"<< filename << "'.\n Only one expected.";
+             CosmoBit_error().raise(LOCAL_INFO, err.str());
+          }
+          read_data = true;
+        }
+        result = -0.5 * pow(*Param["H0"] - data["mean"][0],2)/ pow(data["sigma"][0],2);
+      }
+
+    void compute_BAO_LogLike(double &result)
+    {
       using namespace Pipes::compute_BAO_LogLike;
 
       int type,nrow;
@@ -2473,22 +2454,20 @@ namespace Gambit
     
       if(read_data == false)
       {
+        logger() << "BAO data read from file '"<<filename<<"'." << EOM;
         std::vector<std::string> colnames = initVector<std::string>("z", "mean","sigma","type");
         data.setcolnames(colnames);
         nrow=data.getnrow();
 
-        logger() << "BAO data read from file '"<<filename<<"'." << EOM;
-        std::cout << "BAO data read from file '"<<filename<<"'." << std::endl; // TODO: remove later
         read_data = true;
       }
-      
       
       for(int ie=0;ie<nrow;ie++)
       { 
         z = data["z"][ie];
         type = data["type"][ie];
-        da = BEreq::class_get_Da(byVal(z));
-        Hz = BEreq::class_get_Hz(byVal(z));
+        da = BEreq::class_get_Da(byVal(z)); // angular diam. dist as function of redshift
+        Hz = BEreq::class_get_Hz(byVal(z)); // Hubble parameter as function of redshift (in 1/Mpc)
         dr = z/Hz;
         dv = pow(da*da*(1.+z)*(1.+z)*dr, 1./3.);
         rs = cosmo.th.rs_d;
@@ -2505,15 +2484,11 @@ namespace Gambit
             err << "Type " << type << " in "<< ie+1 <<". data point in BAO data file '"<<filename <<"' not recognised.";
             CosmoBit_error().raise(LOCAL_INFO, err.str());
         }
-
+        std::cout << "BAO chi2 for z = "<<z<<" type = "<< type <<" is:  " << pow((theo - data["mean"][ie]) / data["sigma"][ie],2) << std::endl;
         chi2 += pow((theo - data["mean"][ie]) / data["sigma"][ie],2);
       }
-
-      std::cout << "BAO chi2 "<< chi2 << std::endl; // TODO: remove after testing
       result = -0.5*chi2;
-  }
-
-
+    }
 
 
   }

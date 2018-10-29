@@ -11,11 +11,10 @@
 #    options:
 #      DataFile:  AlterBBN.dat
 #
-# Matches observations used in AlterBBN 2.0 to compute BBN likelihood. 
+# Matches observations used in AlterBBN 2.0 to compute BBN likelihood. (arXiv:1106.1363, arXiv:1806.11095)
 #
 # Specify the measured abundance of the elements (options: Yp or He4, D or H2, He3, Li7) normalized to the Hydrogen abundance below. 
 #
 # Element \t central value \t 1 sigma uncertainty
 D	2.527e-5	0.030e-5
 Yp	0.2449	0.0040
-Y	0.2449	0.0040

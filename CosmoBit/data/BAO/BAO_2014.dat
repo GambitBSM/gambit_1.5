@@ -34,7 +34,6 @@
 # Omega_m = 0.27, h = 0.7, omega_b = 0.02227
 # Note that the reduction of the error bar still rounds up to 0.015
 0.106	0.327	0.015	7
-0.106	0.327	0.015	2
 #
 #
 # ----- BOSS LOWZ ----- 
