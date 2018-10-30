@@ -26,6 +26,10 @@
 #          (t.e.gonzalo@fys.uio.no)
 #  \date 2016 Sep
 #
+#  \author Ben Farmer
+#          (b.farmer@imperial.ac.uk)
+#  \date 2018 Oct
+#
 #************************************************
 
 # Require a minimum cmake version of 2.8.5
