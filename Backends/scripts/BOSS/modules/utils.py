@@ -548,8 +548,23 @@ def removeComments(content, insert_blanks=False):
 
         # Find start of comment
         search_pos = content[temp_startpos:].find('/*')
+
+        # Are we done?
         if search_pos == -1:
             break
+        # Check for the potentially confusing case of comments starting with "//*"
+        elif (search_pos > 0) and (content[search_pos-1] == '/'):
+            # This is really a single-line comment which has been dealt with above,
+            # so we don't add it to the list of comment positions
+            comment_start= temp_startpos + search_pos
+            search_pos = content[comment_start:].find('\n')
+            if search_pos == -1:
+                comment_end = content_lenght - 1
+            else:
+                comment_end = comment_start + search_pos
+            # Update loop variable
+            temp_startpos = comment_end
+        # Now for the proper multi-line comments
         else:
             comment_start = temp_startpos + search_pos
 
