@@ -251,8 +251,8 @@ def constrAbstractClassHeaderCode(class_el, class_name, abstr_class_name, namesp
     class_decl = ''
 
     # Add include statements
-    ilude_statements  = []
-    include_statements  = ['#include "' + os.path.join(gb.gambit_backend_incl_dir, 'abstractbase.hpp') + '"']
+    include_statements  = []
+    include_statements += ['#include "' + os.path.join(gb.gambit_backend_incl_dir, 'abstractbase.hpp') + '"']
     include_statements += ['#include "' + gb.frwd_decls_abs_fname + cfg.header_extension + '"']
     include_statements += ['#include "' + gb.frwd_decls_wrp_fname + cfg.header_extension + '"']
     include_statements += utils.getIncludeStatements(class_el, convert_loaded_to='wrapper_decl', exclude_types=[class_name], include_parents=True, use_full_path=False, forward_declared='include')
