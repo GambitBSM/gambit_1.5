@@ -16,7 +16,7 @@ do
     
     if [[ ! -f  'runs/RHN_inv/'$f1'/samples/RHN.hdf5' ]]; then
 	echo 'Submitting '$f1
-	sbatch run_$f1.sh
+	#sbatch run_$f1.sh
     fi
 
 done
