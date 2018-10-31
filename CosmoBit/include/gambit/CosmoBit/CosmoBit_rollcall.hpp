@@ -267,6 +267,7 @@ START_MODULE
    BACKEND_OPTION( (AlterBBN, 2.0), (libbbn) )
    BACKEND_REQ(Init_cosmomodel, (libbbn), void, (relicparam*))
    #undef FUNCTION
+#undef CAPABILITY
 
 #define CAPABILITY Helium_abundance
    START_CAPABILITY
