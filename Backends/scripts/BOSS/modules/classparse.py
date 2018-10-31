@@ -4,6 +4,7 @@
 #                          #
 ############################
 
+from __future__ import print_function
 from collections import OrderedDict
 import os
 
@@ -49,8 +50,8 @@ def run():
         abstr_class_name = classutils.getClassNameDict(class_el, abstract=True)
 
         # Print current class
-        print
-        print '  ' + utils.modifyText('Class:','underline') + ' ' + class_name['long_templ']
+        print()
+        print('  ' + utils.modifyText('Class:','underline') + ' ' + class_name['long_templ'])
 
         # Check if this is a template class
         is_template = utils.isTemplateClass(class_el)
@@ -227,7 +228,7 @@ def run():
                 templ_spec_done.append(class_name['long'])
         
 
-        print
+        print()
 
     #
     # END: Loop over all classes in gb.loaded_classes_in_xml
