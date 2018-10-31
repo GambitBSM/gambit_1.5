@@ -254,7 +254,7 @@ START_MODULE
    BACKEND_REQ(Init_cosmomodel, (libbbn), void, (relicparam*))
    #undef FUNCTION
 
-#define FUNCTION AlterBBN_fill_dNeff
+  #define FUNCTION AlterBBN_fill_dNeff
    START_FUNCTION(relicparam)
    ALLOW_MODELS(LCDM_dNeff_Smu)
    BACKEND_OPTION( (AlterBBN, 2.0), (libbbn) )
@@ -267,7 +267,6 @@ START_MODULE
    BACKEND_OPTION( (AlterBBN, 2.0), (libbbn) )
    BACKEND_REQ(Init_cosmomodel, (libbbn), void, (relicparam*))
    #undef FUNCTION
- #undef CAPABILITY
 
 #define CAPABILITY Helium_abundance
    START_CAPABILITY
@@ -275,7 +274,7 @@ START_MODULE
    START_FUNCTION(double)
    DEPENDENCY(BBN_abundances, CosmoBit::BBN_container)
   #undef FUNCTION
-  #undef CAPABILITY
+#undef CAPABILITY
 
   #define CAPABILITY BBN_abundances
   START_CAPABILITY
@@ -283,6 +282,7 @@ START_MODULE
     START_FUNCTION(CosmoBit::BBN_container)
     DEPENDENCY(AlterBBN_modelinfo, relicparam)
     BACKEND_REQ(nucl_err, (libbbn), int, (const relicparam*,double*,double*))
+    //BACKEND_REQ(NNUC, (libbbn), int)
     #undef FUNCTION
   #undef CAPABILITY
     
@@ -293,7 +293,7 @@ START_MODULE
    DEPENDENCY(BBN_abundances, CosmoBit::BBN_container)
    BACKEND_OPTION( (AlterBBN, 2.0), (libbbn) )
    DEPENDENCY(AlterBBN_modelinfo, relicparam)
-   BACKEND_REQ(bbn_excluded_chi2, (libbbn), int, (const relicparam*))
+   //BACKEND_REQ(bbn_excluded_chi2, (libbbn), int, (const relicparam*))
    ALLOW_MODELS(LCDM,LCDM_dNeff_Smu,LCDM_dNeff_Smu_etaBBN)
   #undef FUNCTION
   #undef CAPABILITY
@@ -316,7 +316,6 @@ START_MODULE
    BACKEND_REQ(class_get_Hz,(class_tag),double,(double))
   #undef FUNCTION
   #undef CAPABILITY
-
 
 
 #undef MODULE

@@ -42,6 +42,7 @@
 #include "gambit/Utils/statistics.hpp"
 #include "gambit/Utils/ascii_table_reader.hpp"
 #include "gambit/Utils/ascii_dict_reader.hpp"
+#include "gambit/Utils/numerical_constants.hpp"
 #include "gambit/Elements/gambit_module_headers.hpp"
 #include "gambit/CosmoBit/CosmoBit_rollcall.hpp"
 #include "gambit/CosmoBit/CosmoBit_types.hpp"
@@ -2296,11 +2297,15 @@ namespace Gambit
       result.err = 3; 
     }
 
+
     void compute_BBN_abundances(CosmoBit::BBN_container &result)
     {
       using namespace Pipes::compute_BBN_abundances;
 
       int NNUC =26;  // global variable of AlterBBN (# computed element abundances)  
+      //int NNUC =*BEreq::NNUC;  // global variable of AlterBBN (# computed element abundances)  
+      //std::cout << "NNUC " << NNUC << std::endl;
+      
       double ratioH [NNUC+1], cov_ratioH [NNUC+1][NNUC+1];
       
       relicparam const& paramrelic = *Dep::AlterBBN_modelinfo;
@@ -2342,7 +2347,7 @@ namespace Gambit
 
       double chi2 = 0;
       int ii = 0;
-      int ie, je,s,nobs;
+      int ie,je,s;
     
       CosmoBit::BBN_container BBN_res = *Dep::BBN_abundances; // fill BBN_container with abundance results from AlterBBN
       std::map<std::string, int> abund_map = BBN_res.get_map(); 
@@ -2352,7 +2357,8 @@ namespace Gambit
       static ASCIIdictReader data(path_to_file);
       static bool read_data = false;
       static std::map<std::string,std::vector<double>> dict;
-    
+      static int nobs;
+
       if(read_data == false)
       {
         logger() << "BBN data read from file '"<<filename<<"'." << EOM;
@@ -2396,8 +2402,8 @@ namespace Gambit
        ii++;
       }
 
-    // fill covmat
-    for(ie=0;ie<nobs;ie++) {for(je=0;je<nobs;je++) gsl_matrix_set(cov, ie, je,pow(sigmaobs[ie],2.)*(ie==je)+BBN_res.BBN_covmat.at(translate[ie]).at(translate[je]));}
+      // fill covmat
+      for(ie=0;ie<nobs;ie++) {for(je=0;je<nobs;je++) gsl_matrix_set(cov, ie, je,pow(sigmaobs[ie],2.)*(ie==je)+BBN_res.BBN_covmat.at(translate[ie]).at(translate[je]));}
     
       // Compute the LU decomposition and inverse of cov mat
       gsl_linalg_LU_decomp(cov,p,&s);
@@ -2406,6 +2412,10 @@ namespace Gambit
       // compute chi2
       for(ie=0;ie<nobs;ie++) for(je=0;je<nobs;je++) chi2+=(prediction[ie]-observed[ie])*gsl_matrix_get(invcov,ie,je)*(prediction[je]-observed[je]);
       result = -0.5*chi2;
+      
+      gsl_matrix_free(cov);
+      gsl_matrix_free(invcov);
+      gsl_permutation_free(p);
     }
 
 /// -----------
