@@ -22,6 +22,10 @@
 #    \date 2014 Jan, Nov
 #    \date 2015 Feb
 #
+#  \author Tomas Gonzalo
+#          (tomas.gonzalo@monash.edu)
+#    \date 2018 Oct
+#
 #*********************************************
 import os
 import re
@@ -29,6 +33,8 @@ import datetime
 import sys
 import getopt
 import itertools
+import shutil
+import ctypes
 
 default_bossed_versions = "./Backends/include/gambit/Backends/default_bossed_versions.hpp"
 equiv_config = "./config/resolution_type_equivalency_classes.yaml"
@@ -65,8 +71,14 @@ def get_type_equivalencies(nses):
               for key in nses:
                 ns = key+"_"+nses[key]+"::"
                 if member.startswith(ns): member = member[len(ns):]
+                if member.startswith(ns): member = member[len(ns):]
                 member = re.sub("\s"+ns," ",member)
-                equivalency_class.add(member)
+
+              # If the type is an alias of a native int then add int to the equivalency class
+              if re.match("int[0-9]+_t", member):
+                if ( ctypes.sizeof(ctypes.c_int) == 4 and re.search("32", member) ) or ( ctypes.sizeof(ctypes.c_int) == 2 and re.search("16", member) ) :
+                  equivalency_class.add('int')
+              equivalency_class.add(member)
             for member in equivalency_class: result[member] = list(equivalency_class)
     return result
 
@@ -540,13 +552,13 @@ def same(f1,f2):
 # Compare a candidate file to an existing file, replacing only if they differ.
 def update_only_if_different(existing, candidate):
     if not os.path.isfile(existing):
-         os.rename(candidate,existing)
+         shutil.move(candidate,existing)
          print "\033[1;33m   Created "+re.sub("\\.\\/","",existing)+"\033[0m"
     elif same(existing, candidate):
          os.remove(candidate)
          print "\033[1;33m   Existing "+re.sub("\\.\\/","",existing)+" is identical to candidate; leaving it untouched\033[0m"
     else:
-         os.rename(candidate,existing)
+         shutil.move(candidate,existing)
          print "\033[1;33m   Updated "+re.sub("\\.\\/","",existing)+"\033[0m"
 
 #Create the module_rollcall header in the Core directory

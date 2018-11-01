@@ -27,6 +27,7 @@
 #ifdef HAVE_PYBIND11
   #include <pybind11/pybind11.h>
   #include <pybind11/numpy.h>
+  #include "gambit/Backends/python_helpers.hpp"
 #endif
 
 #include "gambit/Elements/ini_catch.hpp"
@@ -58,7 +59,7 @@ namespace Gambit
     public:
 
       /// Constructor
-      python_variable(const str& be, const str& ver, const str& symbol) : _symbol(symbol), handle_works(false)
+      python_variable(const str& be, const str& ver, const str& symbol) : handle_works(false)
       {
         #ifdef HAVE_PYBIND11
           using namespace Backends;
@@ -76,10 +77,22 @@ namespace Gambit
               return;
             }
 
+            // Work out if this is a variable in the main part of the package, or in a sub-module
+            sspair module_and_name = split_qualified_python_name(symbol, backendInfo().lib_name(be, ver));
+            _symbol = module_and_name.second;
+
             // Extract the wrapper to the module's internal dictionary
             try
             {
-              _dict = mod->attr("__dict__");
+              if (module_and_name.first.empty())
+              {
+                _dict = mod->attr("__dict__");
+              }
+              else
+              {
+                pybind11::module sub_module = pybind11::module::import(module_and_name.first.c_str());
+                _dict = sub_module.attr("__dict__");
+              }
               handle_works = true;
             }
             catch (std::exception& e)
