@@ -96,7 +96,8 @@ KeyValues:
 
   print_timing_data: true
 
-  prefer_model_specific_functions: false
+  dependency_resolution:
+    prefer_model_specific_functions: false
 
   likelihood:
     model_invalid_for_lnlike_below: -1e6
