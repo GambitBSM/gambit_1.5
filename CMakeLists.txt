@@ -104,22 +104,24 @@ include(cmake/utilities.cmake)
 # Check for Python interpreter
 # Use Python 3 if available, otherwise look for Python 2.7
 # We also need to search for PythonLibs before letting pybind11 look for them,
-# otherwise it seems to get it wrong.
+# otherwise it seems to get it wrong.  Also, we need to add versions of python
+# greater than 3.3 manually, for compatibility with CMake 2.8.12.
+set(Python_ADDITIONAL_VERSIONS 3.4 3.5 3.6 3.7)
 find_package(PythonInterp 3)
-if(PythonInterp_FOUND)
+if(PYTHONINTERP_FOUND)
    find_package(PythonLibs 3)
 else()
     message("${BoldYellow}   Python 3 not found, searching for Python 2.7${ColourReset}")
     find_package(PythonInterp 2 REQUIRED)
-    if (PYTHON_VERSION_MAJOR GREATER 2 OR PYTHON_VERSION_MINOR LESS 7)
-      message(FATAL_ERROR "\nGAMBIT requires Python 2.7 or greater.  \nIf you need to set the path to the Python interpreter manually, "
+    if (PYTHON_VERSION_MINOR LESS 7)
+      message(FATAL_ERROR "\nGAMBIT requires Python 2.7.  \nIf you need to set the path to the Python interpreter manually, "
                           "please use -DPYTHON_EXECUTABLE:FILEPATH=path/to/preferred/python.")
     endif()
     find_package(PythonLibs 2)
 endif()
 
 # Check for pybind11 if PythonLibs were found
-if(NOT PythonLibs_FOUND)
+if(NOT PYTHONLIBS_FOUND)
     message("${BoldRed}   PythonLibs NOT found, so pybind11 cannot be used${ColourReset}")
 else()
     set(MIN_pybind11_VERSION "2.2.0")
