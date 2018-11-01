@@ -100,6 +100,11 @@ namespace Gambit
         std::vector<double> Pk_S; // Primordial Scalar Power Spectrum
         std::vector<double> Pk_T; // Primordial Tensor Power Spectrum
         std::vector<double> k_ar; // Corresponding wavenumbers.
+			
+				int set_class_stop; /* do we wish to stop class in the middle? for only BG: set this to 2; 
+														 anything else; CLASS will run all the initializations now. */
+			
+			
     };
 
     // Generic class for cosmological likelihoods

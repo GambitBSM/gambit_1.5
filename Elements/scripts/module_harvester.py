@@ -39,6 +39,9 @@
 #    \date 2014 Jan, Nov
 #    \date 2015 Feb
 #
+#  \author Tomas Gonzalo
+#          (tomas.gonzalo@monash.edu)
+#    \date 2018 Oct
 #*********************************************
 
 import pickle

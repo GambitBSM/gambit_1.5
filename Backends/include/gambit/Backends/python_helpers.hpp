@@ -22,6 +22,8 @@
 #include <pybind11/pybind11.h>
 #include <pybind11/numpy.h>
 
+#include "gambit/Utils/util_types.hpp"
+
 namespace Gambit
 {
 
@@ -35,6 +37,10 @@ namespace Gambit
     template <>
     void return_cast<void>(pybind11::object o);
     /// @}
+
+    /// Takes a function or variable name as a full path within a package, and returns the path to the containing submodule.
+    /// Returns an empty string when the function or variable is not inside a submodule.
+    sspair split_qualified_python_name(str, str);
 
   }
 
