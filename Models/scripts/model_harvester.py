@@ -57,12 +57,13 @@ def main(argv):
     # Get lists of model type header files
     model_type_headers.update(retrieve_generic_headers(verbose,"./Models/include/gambit/Models/model_types","model type",exclude_models))
 
-    print("Model headers identified:")
-    for h in model_headers:
-        print('  gambit/Models/models/'+h)
-    print("Model type headers identified:")
-    for h in model_type_headers:
-        print('  gambit/Models/model_types/'+h)
+    if verbose:
+        print("Model headers identified:")
+        for h in model_headers:
+            print('  gambit/Models/models/'+h)
+        print("Model type headers identified:")
+        for h in model_type_headers:
+            print('  gambit/Models/model_types/'+h)
 
     # Generate a c++ header containing all the model headers we have just harvested.
     towrite = "\

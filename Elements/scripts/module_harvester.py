@@ -112,15 +112,16 @@ def main(argv):
     # Get list of module type header files to search
     module_type_headers.update(retrieve_module_type_headers(verbose,".",exclude_header))
 
-    print("Module rollcall headers identified:")
-    for h in module_rollcall_headers:
-        print(' ',h)
-        h_parts = neatsplit('\/',h)
-        modules.add(h_parts[1])
-    print("Module type headers identified:")
-    for h in module_type_headers:
-        print(' ',h)
-    if verbose: print()
+    if verbose:
+        print("Module rollcall headers identified:")
+        for h in module_rollcall_headers:
+            print(' ',h)
+            h_parts = neatsplit('\/',h)
+            modules.add(h_parts[1])
+        print("Module type headers identified:")
+        for h in module_type_headers:
+            print(' ',h)
+
 
     # Generate a c++ header containing all the module type headers we have just harvested.
     towrite = "\
@@ -192,9 +193,10 @@ def main(argv):
                 addiffunctormacro(continued_line,module,modules,returned_types,full_type_headers,intrinsic_types,exclude_types,equiv_classes,equiv_ns,verbose=verbose)
                 continued_line = ""
 
-    print("Found types for module functions:")
-    for t in types:
-        print(' ',t)
+    if verbose:
+        print("Found types for module functions:")
+        for t in types:
+            print(' ',t)
 
     # Search through rollcall and frontend headers and look for macro calls that create backend_functors or safe pointers to them
     be_types=set()
@@ -210,9 +212,10 @@ def main(argv):
                 addifbefunctormacro(continued_line,be_types,type_packs,equiv_classes,equiv_ns,verbose=verbose)
                 continued_line = ""
 
-    print("Found types for backend functions and variables:")
-    for t in be_types:
-        if t != "": print(' ',t)
+    if verbose:
+        print("Found types for backend functions and variables:")
+        for t in be_types:
+            if t != "": print(' ',t)
 
     # Generate a c++ header containing the backend functor template specialisations, using all the backend types we have harvested.
     towrite = "\
