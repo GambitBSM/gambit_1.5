@@ -88,11 +88,11 @@ if(NOT ditched_${name}_${ver})
     #BUILD_COMMAND sed ${dashi} -e "s#CC = gcc#CC = ${CMAKE_C_COMPILER}#g" Makefile
     BUILD_COMMAND sed ${dashi} -e "s#CC = gcc#CC = ${CMAKE_C_COMPILER}#g" Makefile
           COMMAND sed ${dashi} -e "s#rcsU#rcs#g" Makefile
-          COMMAND sed ${dashi} -e "s/CFLAGS= -O3 -pipe -fomit-frame-pointer/CFLAGS= ${GAMBIT_C_FLAGS}/g" Makefile
+          COMMAND sed ${dashi} -e "s/CFLAGS= -O3 -pipe -fomit-frame-pointer/CFLAGS= ${BACKEND_C_FLAGS}/g" Makefile
           COMMAND sed ${dashi} -e "s/CFLAGS_MP= -fopenmp/CFLAGS_MP= ${OpenMP_C_FLAGS}/g" Makefile
           COMMAND ${CMAKE_MAKE_PROGRAM}
           COMMAND ar x src/libbbn.a
-          COMMAND ${CMAKE_COMMAND} -E echo "${CMAKE_C_COMPILER} -shared -o ${lib}.so *.o" > make_so.sh
+          COMMAND ${CMAKE_COMMAND} -E echo "${CMAKE_C_COMPILER} ${CMAKE_SHARED_LIBRARY_CREATE_C_FLAGS} -o ${lib}.so *.o" > make_so.sh
           COMMAND chmod u+x make_so.sh
           COMMAND ./make_so.sh
     INSTALL_COMMAND ""
@@ -167,7 +167,7 @@ if(NOT ditched_${name}_${ver})
           COMMAND sed ${dashi} -e "s/CFLAGS= -O3 -pipe -fomit-frame-pointer/CFLAGS= -fPIC ${BACKEND_C_FLAGS}/g" Makefile
           COMMAND ${CMAKE_MAKE_PROGRAM}
           COMMAND ar x src/libisospin.a
-          COMMAND ${CMAKE_COMMAND} -E echo "${CMAKE_C_COMPILER} -shared -o ${lib}.so *.o" > make_so.sh
+          COMMAND ${CMAKE_COMMAND} -E echo "${CMAKE_C_COMPILER} ${CMAKE_SHARED_LIBRARY_CREATE_C_FLAGS} -o ${lib}.so *.o" > make_so.sh
           COMMAND chmod u+x make_so.sh
           COMMAND ./make_so.sh
     INSTALL_COMMAND ""
@@ -636,7 +636,7 @@ if(NOT ditched_${name}_${ver})
               COMMAND ./configure FC=${CMAKE_Fortran_COMPILER} FFLAGS=${FH_Fortran_FLAGS} CC=${CMAKE_C_COMPILER} CFLAGS=${FH_C_FLAGS} CXX=${CMAKE_CXX_COMPILER} CXXFLAGS=${FH_CXX_FLAGS}
     BUILD_COMMAND ${CMAKE_MAKE_PROGRAM}
           COMMAND ${CMAKE_COMMAND} -E make_directory lib
-          COMMAND ${CMAKE_COMMAND} -E echo "${CMAKE_Fortran_COMPILER} -shared -o lib/${lib}.so build/*.o" > make_so.sh
+          COMMAND ${CMAKE_COMMAND} -E echo "${CMAKE_Fortran_COMPILER} ${CMAKE_SHARED_LIBRARY_CREATE_C_FLAGS} -o lib/${lib}.so build/*.o" > make_so.sh
           COMMAND chmod u+x make_so.sh
           COMMAND ./make_so.sh
     INSTALL_COMMAND ""
@@ -665,7 +665,7 @@ if(NOT ditched_${name}_${ver})
               COMMAND ./configure FC=${CMAKE_Fortran_COMPILER} FFLAGS=${FH_Fortran_FLAGS} CC=${CMAKE_C_COMPILER} CFLAGS=${FH_C_FLAGS} CXX=${CMAKE_CXX_COMPILER} CXXFLAGS=${FH_CXX_FLAGS}
     BUILD_COMMAND ${CMAKE_MAKE_PROGRAM}
           COMMAND ${CMAKE_COMMAND} -E make_directory lib
-          COMMAND ${CMAKE_COMMAND} -E echo "${CMAKE_Fortran_COMPILER} -shared -o lib/${lib}.so build/*.o" > make_so.sh
+          COMMAND ${CMAKE_COMMAND} -E echo "${CMAKE_Fortran_COMPILER} ${CMAKE_SHARED_LIBRARY_CREATE_C_FLAGS} -o lib/${lib}.so build/*.o" > make_so.sh
           COMMAND chmod u+x make_so.sh
           COMMAND ./make_so.sh
     INSTALL_COMMAND ""
@@ -695,7 +695,7 @@ if(NOT ditched_${name}_${ver})
               COMMAND ./configure FC=${CMAKE_Fortran_COMPILER} FFLAGS=${FH_Fortran_FLAGS} CC=${CMAKE_C_COMPILER} CFLAGS=${FH_C_FLAGS} CXX=${CMAKE_CXX_COMPILER} CXXFLAGS=${FH_CXX_FLAGS}
     BUILD_COMMAND ${CMAKE_MAKE_PROGRAM}
           COMMAND ${CMAKE_COMMAND} -E make_directory lib
-          COMMAND ${CMAKE_COMMAND} -E echo "${CMAKE_Fortran_COMPILER} -shared -o lib/${lib}.so build/*.o" > make_so.sh
+          COMMAND ${CMAKE_COMMAND} -E echo "${CMAKE_Fortran_COMPILER} ${CMAKE_SHARED_LIBRARY_CREATE_C_FLAGS} -o lib/${lib}.so build/*.o" > make_so.sh
           COMMAND chmod u+x make_so.sh
           COMMAND ./make_so.sh
     INSTALL_COMMAND ""
@@ -756,7 +756,7 @@ if(NOT ditched_${name}_${ver})
               COMMAND ./my_configure
     BUILD_COMMAND ${CMAKE_MAKE_PROGRAM}
           COMMAND ${CMAKE_COMMAND} -E make_directory lib
-          COMMAND ${CMAKE_COMMAND} -E echo "${CMAKE_Fortran_COMPILER} -shared -o lib/${lib}.so *.o" > make_so.sh
+          COMMAND ${CMAKE_COMMAND} -E echo "${CMAKE_Fortran_COMPILER} ${CMAKE_SHARED_LIBRARY_CREATE_C_FLAGS} -o lib/${lib}.so *.o" > make_so.sh
           COMMAND chmod u+x make_so.sh
           COMMAND ./make_so.sh
     INSTALL_COMMAND ""
@@ -794,7 +794,7 @@ if(NOT ditched_${name}_${ver})
               COMMAND ./my_configure
     BUILD_COMMAND ${CMAKE_MAKE_PROGRAM}
           COMMAND ${CMAKE_COMMAND} -E make_directory lib
-          COMMAND ${CMAKE_COMMAND} -E echo "${CMAKE_Fortran_COMPILER} -shared -o lib/${lib}.so *.o" > make_so.sh
+          COMMAND ${CMAKE_COMMAND} -E echo "${CMAKE_Fortran_COMPILER} ${CMAKE_SHARED_LIBRARY_CREATE_C_FLAGS} -o lib/${lib}.so *.o" > make_so.sh
           COMMAND chmod u+x make_so.sh
           COMMAND ./make_so.sh
     INSTALL_COMMAND ""
@@ -835,7 +835,7 @@ if(NOT ditched_${name}_${ver})
     BUILD_COMMAND ${CMAKE_MAKE_PROGRAM}
           COMMAND ${CMAKE_COMMAND} -E make_directory lib
           COMMAND ${CMAKE_COMMAND} -E remove HiggsSignals.o
-          COMMAND ${CMAKE_COMMAND} -E echo "${CMAKE_Fortran_COMPILER} -shared -o lib/${lib}.so ./*.o ../../${hb_name}/${hb_ver}/*.o" > make_so.sh
+          COMMAND ${CMAKE_COMMAND} -E echo "${CMAKE_Fortran_COMPILER} ${CMAKE_SHARED_LIBRARY_CREATE_C_FLAGS} -o lib/${lib}.so ./*.o ../../${hb_name}/${hb_ver}/*.o" > make_so.sh
           COMMAND chmod u+x make_so.sh
           COMMAND ./make_so.sh
     INSTALL_COMMAND ""
@@ -958,7 +958,7 @@ if(NOT ditched_${name}_${ver})
     DOWNLOAD_COMMAND ${DL_BACKEND} ${dl} ${md5} ${dir}
     SOURCE_DIR ${dir}
     BUILD_IN_SOURCE 1
-    CONFIGURE_COMMAND ./configure FC=${CMAKE_Fortran_COMPILER} FCFLAGS=${GAMBIT_Fortran_FLAGS} FFLAGS=${GAMBIT_Fortran_FLAGS} CC=${CMAKE_C_COMPILER} CFLAGS=${GAMBIT_C_FLAGS} CXX=${CMAKE_CXX_COMPILER} CXXFLAGS=${GAMBIT_CXX_FLAGS} SHLIB_SUFFIX=${CFITSIO_SO}
+    CONFIGURE_COMMAND ./configure FC=${CMAKE_Fortran_COMPILER} FCFLAGS=${BACKEND_Fortran_FLAGS} FFLAGS=${BACKEND_Fortran_FLAGS} CC=${CMAKE_C_COMPILER} CFLAGS=${BACKEND_C_FLAGS} CXX=${CMAKE_CXX_COMPILER} CXXFLAGS=${BACKEND_CXX_FLAGS} SHLIB_SUFFIX=${CFITSIO_SO}
     BUILD_COMMAND ${CMAKE_MAKE_PROGRAM} shared SHLIB_SUFFIX=${CFITSIO_SO}
     INSTALL_COMMAND ${CMAKE_MAKE_PROGRAM} install SHLIB_SUFFIX=${CFITSIO_SO}
   )
@@ -1005,9 +1005,6 @@ set(lib "libclass")
 set(dl "https://github.com/lesgourg/class_public/archive/v${ver}.tar.gz")
 set(md5 "e6eb0fd721bb1098e642f5d1970501ce")
 set(dir "${PROJECT_SOURCE_DIR}/Backends/installed/${name}/${ver}")
-set(CLASS_DLL_DIR "build")
-set(__CLASSDIR__ "${dir}/")
-set(CLASS_IFLAG "-I")
 if(NOT ditched_${name}_${ver})
   ExternalProject_Add(${name}_${ver}
     DOWNLOAD_COMMAND ${DL_BACKEND} ${dl} ${md5} ${dir}
@@ -1023,9 +1020,9 @@ if(NOT ditched_${name}_${ver})
     ## COMMAND patch -p0 < ${patch}/thermo_source.dif
     ## COMMAND patch -p0 < ${patch}/backgrnd_source.dif
     CONFIGURE_COMMAND ""
-    BUILD_COMMAND ${CMAKE_MAKE_PROGRAM} CC=${CMAKE_C_COMPILER} CCFLAG=${GAMBIT_C_FLAGS} OMPFLAG=${OpenMP_CXX_FLAGS} class
+    BUILD_COMMAND ${CMAKE_MAKE_PROGRAM} CC=${CMAKE_C_COMPILER} OMPFLAG= OPTFLAG= CCFLAG=${BACKEND_C_FLAGS} LDFLAG=${BACKEND_C_FLAGS} class
     COMMAND ${CMAKE_COMMAND} -E make_directory lib
-    COMMAND ${CMAKE_COMMAND} -E echo "${CMAKE_C_COMPILER} -shared ${GAMBIT_C_FLAGS} -J${CLASS_DLL_DIR} ${CLASS_IFLAG}${CLASS_DLL_DIR}/ -o lib/${lib}.so ${CLASS_DLL_DIR}/*.o" > make_so.sh
+    COMMAND ${CMAKE_COMMAND} -E echo "${CMAKE_C_COMPILER} ${CMAKE_SHARED_LIBRARY_CREATE_C_FLAGS} ${BACKEND_C_FLAGS} -o lib/${lib}.so build/*.o" > make_so.sh
     COMMAND chmod u+x make_so.sh
     COMMAND ./make_so.sh
     INSTALL_COMMAND ""
@@ -1074,13 +1071,13 @@ if(NOT ditched_${name}_${ver})
           COMMAND patch -p1 < ${patch}/modpk_utils.dif
           COMMAND patch -p1 < ${patch}/multimodecode_driver.dif
     CONFIGURE_COMMAND ""
-    BUILD_COMMAND ${CMAKE_MAKE_PROGRAM} FC=${CMAKE_Fortran_COMPILER} F90C=${CMAKE_Fortran_COMPILER} FFLAG=${GAMBIT_Fortran_FLAGS}
+    BUILD_COMMAND ${CMAKE_MAKE_PROGRAM} FC=${CMAKE_Fortran_COMPILER} F90C=${CMAKE_Fortran_COMPILER} FFLAG=${BACKEND_Fortran_FLAGS}
     COMMAND ${CMAKE_COMMAND} -E copy ${driver}/multimodecode_gambit.f90 ${dir}
-    COMMAND ${CMAKE_COMMAND} -E echo "${CMAKE_Fortran_COMPILER} ${GAMBIT_Fortran_FLAGS} -c ${dir}/multimodecode_gambit.f90" > make_so1.sh
+    COMMAND ${CMAKE_COMMAND} -E echo "${CMAKE_Fortran_COMPILER} ${BACKEND_Fortran_FLAGS} -c ${dir}/multimodecode_gambit.f90" > make_so1.sh
     COMMAND chmod u+x make_so1.sh
     COMMAND ./make_so1.sh
     COMMAND ${CMAKE_COMMAND} -E make_directory lib
-    COMMAND ${CMAKE_COMMAND} -E echo "${CMAKE_Fortran_COMPILER} -shared ${GAMBIT_Fortran_FLAGS} -o lib/${lib}.so *.o" > make_so2.sh
+    COMMAND ${CMAKE_COMMAND} -E echo "${CMAKE_Fortran_COMPILER} ${CMAKE_SHARED_LIBRARY_CREATE_C_FLAGS} ${BACKEND_Fortran_FLAGS} -o lib/${lib}.so *.o" > make_so2.sh
     COMMAND chmod u+x make_so2.sh
     COMMAND ./make_so2.sh
     INSTALL_COMMAND ""
