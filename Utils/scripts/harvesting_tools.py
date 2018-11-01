@@ -90,8 +90,10 @@ def get_type_equivalencies(nses):
               if member not in equivalency_class:
                 equivalency_class += [member]
             for member in equivalency_class: result[member] = equivalency_class
-    print('Type equivalencies:')
-    print(result)
+
+    # Debug output
+    # print('Type equivalencies:')
+    # print(result)
     return result
 
 # Remove C/C++ comments from 'text' (From http://stackoverflow.com/questions/241327/python-snippet-to-remove-c-and-c-comments)
