@@ -103,7 +103,7 @@ Rules:
 
   - capability: BBN_LogLike
     options:
-        DataFile: AlterBBN.dat
+        DataFile: PDG_2017.dat
   
   - capability: H0_LogLike
     options:
