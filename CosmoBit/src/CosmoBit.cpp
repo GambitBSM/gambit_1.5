@@ -282,8 +282,8 @@ namespace Gambit
       // JR: heads-up! Neutrinos + dNeff also need to be set. accordingly for base model we want to scan
       // Planck baseline should be 
       cosmo.input.addEntry("N_ur",2.0328);  //1 massive neutrinos 
-      cosmo.input.addEntry("N_ncdm",3);
-      cosmo.input.addEntry("m_ncdm","0.06,0,6");
+      cosmo.input.addEntry("N_ncdm",1);
+      cosmo.input.addEntry("m_ncdm","0.06");
 
 
       YAML::Node class_dict;

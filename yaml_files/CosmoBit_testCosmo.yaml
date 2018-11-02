@@ -8,6 +8,13 @@
 ##   - Using Sigma8 Likelihood
 ##   - Computing local H0 Likelihood as observable
 ##
+##  To test this you need to make the backends 'class', 'alterbbn' and 'plc'.
+##  You also need to download the Planck data and set the path to it in the
+##  rules for 
+##  - capability: plc_2_0_init
+##    options:
+##      planck_path: path/to/your/planck/data
+##
 ## Janina Renk <janina.renk@fysik.su.se>
 ## 2018 Nov
 ##########################################################################
@@ -17,8 +24,8 @@
 Parameters:
  
  # --- import model parameters for models to scan over ---
- #LCDM: !import include/LCDM_scan.yaml        # base LCDM
- LCDM_dNeff_Smu: !import include/LCDM_dNeff_Smu_scan.yaml   
+ LCDM: !import include/LCDM_scan.yaml        # base LCDM
+ #LCDM_dNeff_Smu: !import include/LCDM_dNeff_Smu_scan.yaml   
  #LCDM_dNeff_Smu_etaBBN: !import include/LCDM_dNeff_Smu_etaBBN_scan.yaml
 
  # nuisance parameters in Planck likelihood
