@@ -60,6 +60,7 @@ BE_FUNCTION(background_at_tau, int, (Class::background*,double,short,short,int*,
 
 BE_CONV_FUNCTION(class_get_Da, double, (double), "class_get_Da")
 BE_CONV_FUNCTION(class_get_Hz, double, (double), "class_get_Hz")
+BE_CONV_FUNCTION(class_get_sigma8, double, (double), "class_get_sigma8")
 
 BE_CONV_FUNCTION(class_2_6_3_run, void, (), "class_run_internal")
 BE_CONV_FUNCTION(class_2_6_3_free, void, (), "class_free_internal")
