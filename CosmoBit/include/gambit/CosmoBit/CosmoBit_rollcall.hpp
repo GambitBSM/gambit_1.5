@@ -283,7 +283,7 @@ START_MODULE
     START_FUNCTION(CosmoBit::BBN_container)
     DEPENDENCY(AlterBBN_modelinfo, relicparam)
     BACKEND_REQ(nucl_err, (libbbn), int, (const relicparam*,double*,double*))
-    //BACKEND_REQ(NNUC, (libbbn), int)
+    BACKEND_REQ(get_NNUC, (libbbn), int, ())
     #undef FUNCTION
   #undef CAPABILITY
     

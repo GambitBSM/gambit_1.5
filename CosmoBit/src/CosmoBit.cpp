@@ -2302,10 +2302,8 @@ namespace Gambit
     {
       using namespace Pipes::compute_BBN_abundances;
 
-      int NNUC =26;  // global variable of AlterBBN (# computed element abundances)  
-      //int NNUC =*BEreq::NNUC;  // global variable of AlterBBN (# computed element abundances)  
-      //std::cout << "NNUC " << NNUC << std::endl;
-      
+      int NNUC = BEreq::get_NNUC();  // global variable of AlterBBN (# computed element abundances)  
+      result.init_arr(NNUC);         // init arrays in BBN_container with right length
       double ratioH [NNUC+1], cov_ratioH [NNUC+1][NNUC+1];
       
       relicparam const& paramrelic = *Dep::AlterBBN_modelinfo;
@@ -2332,7 +2330,7 @@ namespace Gambit
     void get_Helium_abundance(double &result)
     {
       using namespace Pipes::get_Helium_abundance;
-  
+        
         CosmoBit::BBN_container BBN_res = *Dep::BBN_abundances;
         std::map<std::string, int> abund_map = BBN_res.get_map();
   
@@ -2348,7 +2346,7 @@ namespace Gambit
       double chi2 = 0;
       int ii = 0;
       int ie,je,s;
-    
+
       CosmoBit::BBN_container BBN_res = *Dep::BBN_abundances; // fill BBN_container with abundance results from AlterBBN
       std::map<std::string, int> abund_map = BBN_res.get_map(); 
 
@@ -2451,7 +2449,7 @@ namespace Gambit
     {
       using namespace Pipes::compute_BAO_LogLike;
 
-      int type,nrow;
+      int type;
       double da,dr,dv,rs,Hz,z,theo; // cosmo distances and sound horizon at drag,Hubble, theoretical prediction
       double chi2 =0;
       
@@ -2459,6 +2457,7 @@ namespace Gambit
       const str path_to_file = GAMBIT_DIR "/CosmoBit/data/BAO/" + runOptions->getValue<std::string>("DataFile");
       static ASCIItableReader data(path_to_file);
       static bool read_data = false;
+      static int nrow;
       
       Class_container cosmo = *Dep::class_get_spectra;
     

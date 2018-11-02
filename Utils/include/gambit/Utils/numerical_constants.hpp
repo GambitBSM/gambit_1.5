@@ -40,6 +40,14 @@ namespace Gambit
   const double m_neutron_amu = 1.0086649156;                    // neutron mass (amu)
   const double m_proton = m_proton_amu * atomic_mass_unit;      // proton mass (GeV/c^2)
   const double m_neutron = m_neutron_amu * atomic_mass_unit;    // neutron mass (GeV/c^2)
+  const double zeta3 = 1.2020569031595942855;                   // Riemann zeta function of 3
+  const double Gn = 6.67428e-8;                                 // newton's constant in cm^3.g^-1.s^-2
+  const double hc = 1.23984193*pow(10,-4);                      // Planck const. x speed of light in eV cm
+  const double kb = 8.617330350*pow(10,-5);                     // Boltzmann constant in eV/K
+  const double m_proton_g = 1.67262189821*pow(10,-24);          // proton mass in g
+  const double Mpc = 969394202136*pow(10,11)/pi;                // Mpc in m
+  const double K_to_GeV = 8.617330637338339*pow(10,-5);         // conversion factor T(10**9 K) * K_to_GeV = T(GeV) */
+
 
   /**
      @brief Thomson limit of \f$\alpha_e\f$ in OS scheme from

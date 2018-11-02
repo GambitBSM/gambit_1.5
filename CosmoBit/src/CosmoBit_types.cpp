@@ -31,9 +31,6 @@ namespace Gambit
 
     BBN_container::BBN_container()
     { 
-      int NNUC = 26; // amount of abundances, global param in AlterBBN
-      BBN_abund.resize(NNUC+1, 0.);
-      BBN_covmat.resize(NNUC+1, std::vector<double>(NNUC+1,0.));
       abund_map["H2"] = 3;
       abund_map["D"] = 3;
       abund_map["H3"] = 4;
@@ -44,13 +41,15 @@ namespace Gambit
       abund_map["Li7"] = 8;
       abund_map["Be7"] = 9;
       abund_map["Li8"] = 10;
+    }
 
+    void BBN_container::init_arr(int nnuc)
+    {
+      NNUC = nnuc;
+      BBN_abund.resize(NNUC+1, 0.);
+      BBN_covmat.resize(NNUC+1, std::vector<double>(NNUC+1,0.));
     }
     
-    std::map<std::string,int> BBN_container::get_map()
-    {
-      return abund_map;
-    }   
 
     Class_container::Class_container() : lmax(2508)
     {

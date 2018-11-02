@@ -51,7 +51,7 @@ Scanner:
 
     random:
       plugin: random
-      point_number: 1
+      point_number: 2
       like:  LogLike
 
 #======== Observables of interest ========
