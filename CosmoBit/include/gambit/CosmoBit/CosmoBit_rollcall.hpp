@@ -246,55 +246,55 @@ START_MODULE
 
 
 // BBN related functions & capabilities
-#define CAPABILITY eta
- START_CAPABILITY
-   #define FUNCTION calculate_eta
-   START_FUNCTION(double)
-   ALLOW_MODELS(LCDM, LCDM_dNeff_Smu,LCDM_dNeff_Smu_etaBBN,LCDMtensor)
-   #undef FUNCTION
-#undef CAPABILITY
+  #define CAPABILITY eta
+    START_CAPABILITY
+    #define FUNCTION calculate_eta
+      START_FUNCTION(double)
+      ALLOW_MODELS(LCDM, LCDM_dNeff_Smu,LCDM_dNeff_Smu_etaBBN,LCDMtensor)
+    #undef FUNCTION
+  #undef CAPABILITY
 
  #define CAPABILITY AlterBBN_modelinfo
- START_CAPABILITY
-   #define FUNCTION AlterBBN_fill
-   START_FUNCTION(relicparam)
-   ALLOW_MODELS(LCDM)
-   DEPENDENCY(eta, double)
-   BACKEND_OPTION( (AlterBBN, 2.0), (libbbn) )
-   BACKEND_REQ(Init_cosmomodel, (libbbn), void, (relicparam*))
-   #undef FUNCTION
+  START_CAPABILITY
+    #define FUNCTION AlterBBN_fill
+      START_FUNCTION(relicparam)
+      ALLOW_MODELS(LCDM)
+      DEPENDENCY(eta, double)
+      BACKEND_OPTION( (AlterBBN, 2.0), (libbbn) )
+      BACKEND_REQ(Init_cosmomodel, (libbbn), void, (relicparam*))
+    #undef FUNCTION
 
-  #define FUNCTION AlterBBN_fill_dNeff
-   START_FUNCTION(relicparam)
-   ALLOW_MODELS(LCDM_dNeff_Smu)
-   BACKEND_OPTION( (AlterBBN, 2.0), (libbbn) )
-   DEPENDENCY(eta, double)
-   BACKEND_REQ(Init_cosmomodel, (libbbn), void, (relicparam*))
-   #undef FUNCTION
+    #define FUNCTION AlterBBN_fill_dNeff
+     START_FUNCTION(relicparam)
+     ALLOW_MODELS(LCDM_dNeff_Smu)
+     BACKEND_OPTION( (AlterBBN, 2.0), (libbbn) )
+     DEPENDENCY(eta, double)
+     BACKEND_REQ(Init_cosmomodel, (libbbn), void, (relicparam*))
+    #undef FUNCTION
 
-  #define FUNCTION AlterBBN_fill_etaBBN
-   START_FUNCTION(relicparam)
-   ALLOW_MODELS(LCDM_dNeff_Smu_etaBBN)
-   BACKEND_OPTION( (AlterBBN, 2.0), (libbbn) )
-   BACKEND_REQ(Init_cosmomodel, (libbbn), void, (relicparam*))
-   #undef FUNCTION
-#undef CAPABILITY
+    #define FUNCTION AlterBBN_fill_etaBBN
+     START_FUNCTION(relicparam)
+     ALLOW_MODELS(LCDM_dNeff_Smu_etaBBN)
+     BACKEND_OPTION( (AlterBBN, 2.0), (libbbn) )
+     BACKEND_REQ(Init_cosmomodel, (libbbn), void, (relicparam*))
+    #undef FUNCTION
+  #undef CAPABILITY
 
-#define CAPABILITY Helium_abundance
+  #define CAPABILITY Helium_abundance
    START_CAPABILITY
-   #define FUNCTION get_Helium_abundance
-   START_FUNCTION(double)
-   DEPENDENCY(BBN_abundances, CosmoBit::BBN_container)
-  #undef FUNCTION
-#undef CAPABILITY
+    #define FUNCTION get_Helium_abundance
+      START_FUNCTION(double)
+      DEPENDENCY(BBN_abundances, CosmoBit::BBN_container)
+    #undef FUNCTION
+  #undef CAPABILITY
 
   #define CAPABILITY BBN_abundances
   START_CAPABILITY
     #define FUNCTION compute_BBN_abundances
-    START_FUNCTION(CosmoBit::BBN_container)
-    DEPENDENCY(AlterBBN_modelinfo, relicparam)
-    BACKEND_REQ(nucl_err, (libbbn), int, (const relicparam*,double*,double*))
-    BACKEND_REQ(get_NNUC, (libbbn), int, ())
+      START_FUNCTION(CosmoBit::BBN_container)
+      DEPENDENCY(AlterBBN_modelinfo, relicparam)
+      BACKEND_REQ(nucl_err, (libbbn), int, (const relicparam*,double*,double*))
+      BACKEND_REQ(get_NNUC, (libbbn), int, ())
     #undef FUNCTION
   #undef CAPABILITY
     
@@ -310,24 +310,37 @@ START_MODULE
   #undef FUNCTION
   #undef CAPABILITY
 
-#define CAPABILITY H0_LogLike
+  #define CAPABILITY H0_LogLike
    START_CAPABILITY
-   #define FUNCTION compute_H0_LogLike
-   START_FUNCTION(double)
-   ALLOW_MODELS(LCDM, LCDM_dNeff_Smu,LCDM_dNeff_Smu_etaBBN,LCDMtensor)
-  #undef FUNCTION
+    #define FUNCTION compute_H0_LogLike
+    START_FUNCTION(double)
+    ALLOW_MODELS(LCDM, LCDM_dNeff_Smu,LCDM_dNeff_Smu_etaBBN,LCDMtensor)
+    #undef FUNCTION
   #undef CAPABILITY
 
-#define CAPABILITY BAO_LogLike
+  #define CAPABILITY BAO_LogLike
    START_CAPABILITY
    #define FUNCTION compute_BAO_LogLike
-   START_FUNCTION(double)
-   DEPENDENCY(class_get_spectra,CosmoBit::Class_container)
-   ALLOW_MODELS(LCDM, LCDM_dNeff_Smu,LCDM_dNeff_Smu_etaBBN,LCDMtensor)
-   BACKEND_REQ(class_get_Da,(class_tag),double,(double))
-   BACKEND_REQ(class_get_Hz,(class_tag),double,(double))
-  #undef FUNCTION
+    START_FUNCTION(double)
+    DEPENDENCY(class_get_spectra,CosmoBit::Class_container)
+    ALLOW_MODELS(LCDM, LCDM_dNeff_Smu,LCDM_dNeff_Smu_etaBBN,LCDMtensor)
+    BACKEND_REQ(class_get_Da,(class_tag),double,(double))
+    BACKEND_REQ(class_get_Hz,(class_tag),double,(double))
+   #undef FUNCTION
   #undef CAPABILITY
+
+  #define CAPABILITY sigma8_LogLike
+     START_CAPABILITY
+     #define FUNCTION compute_sigma8_LogLike
+      START_FUNCTION(double)
+      DEPENDENCY(class_get_spectra,CosmoBit::Class_container)
+      ALLOW_MODELS(LCDM, LCDM_dNeff_Smu,LCDM_dNeff_Smu_etaBBN,LCDMtensor)
+      BACKEND_REQ(class_get_sigma8,(class_tag),double,(double))
+     #undef FUNCTION
+  #undef CAPABILITY
+
+
+
 
 
 #undef MODULE

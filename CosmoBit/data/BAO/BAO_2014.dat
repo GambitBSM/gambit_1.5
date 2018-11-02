@@ -3,7 +3,7 @@
 # 		BAO data file 
 #
 # -------------------------
-# (adopted from bao_2014.txt from MonePython, 1804.07261)
+# (file adopted from bao_2014.txt from MonePython, 1804.07261) 
 #
 # include into yaml file with 
 #
@@ -49,12 +49,12 @@
 #
 # -----  LyaQSO ----- 
 # BOSS LyaQSO (DA/rs) Font-Ribera et al. 1311.1767
-2.36	10.8	 0.4	 5
+#2.36	10.8	 0.4	 5
 #
 #
 # ----- LyaQSO ----- 
 # BOSS LyaQSO c/(H rs) Font-Ribera et al. 1311.1767
-2.36	9.0	 0.3	 6
+#2.36	9.0	 0.3	 6
 #
 #
 # ----- MGS ----	 

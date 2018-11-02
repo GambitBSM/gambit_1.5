@@ -16,10 +16,10 @@
 #======== Input parameter declarations =======
 Parameters:
  
- # import model parameters for models to scan over 
- LCDM_dNeff_Smu: !import include/LCDM_dNeff_Smu_scan.yaml
+ # --- import model parameters for models to scan over ---
+ #LCDM: !import include/LCDM_scan.yaml        # base LCDM
+ LCDM_dNeff_Smu: !import include/LCDM_dNeff_Smu_scan.yaml   
  #LCDM_dNeff_Smu_etaBBN: !import include/LCDM_dNeff_Smu_etaBBN_scan.yaml
- #LCDM: !import include/LCDM_scan.yaml
 
  # nuisance parameters in Planck likelihood
  Planck_lite: !import include/Planck_lite_scan.yaml
@@ -50,11 +50,16 @@ Scanner:
 
     random:
       plugin: random
-      point_number: 1
+      point_number: 2
       like:  LogLike
 
 #======== Observables of interest ========
 ObsLikes:
+  - purpose:      LogLike
+    capability:   BAO_LogLike
+    module:       CosmoBit
+    type:         double
+
   - purpose:      LogLike
     capability:   BBN_LogLike
     module:       CosmoBit
@@ -66,12 +71,12 @@ ObsLikes:
     type:         double
 
   - purpose:      LogLike
-    capability:   BAO_LogLike
+    capability:   compute_Planck_high_TT_loglike
     module:       CosmoBit
     type:         double
-
+  
   - purpose:      LogLike
-    capability:   compute_Planck_high_TT_loglike
+    capability:   sigma8_LogLike
     module:       CosmoBit
     type:         double
 
@@ -87,22 +92,14 @@ Rules:
 
 
 #####
-##  To reproduce the LCDM results of Planck it is
-##  apparently needed to include one massive neutrino
-##  species with a mass of 0.06 eV. To include this
-##  the following optional inputs must be given to
-##  CLASS. (k_pivot = 0.05 is needed for the right
-##  value of A_s, according to J. Lesgourgues)
+##
+##  Specify data files for BAO, BBN, H0 and sigma8 Likelihoods
+##
 ####
- # - capability: class_set_parameter
- #   options:
- #     class_dict:
- #       T_ncdm: 0.71611
- #       k_pivot: 0.05
 
-  - capability: compute_Planck_high_TT_loglike
-    function: function_Planck_high_TT_lite_loglike
-    module: CosmoBit
+  - capability: BAO_LogLike
+    options:
+      DataFile:  BAO_2014.dat
 
   - capability: BBN_LogLike
     options:
@@ -112,14 +109,24 @@ Rules:
     options:
       DataFile:  SH0ES.dat
 
-  - capability: BAO_LogLike
-    options:
-      DataFile:  BAO_2014.dat
-
   - capability: plc_2_0_init
     options:
-      planck_path: /home/janina/code/PlanckLike/plc_2.0
+      planck_path: /home/janina/code/PlanckLike/plc_2.0 # set by hand: path/to/your/planck/data
       
+  - capability: compute_Planck_high_TT_loglike
+    function: function_Planck_high_TT_lite_loglike
+    module: CosmoBit
+
+  - capability: sigma8_LogLike
+    options:
+        DataFile: Planck_SZ.dat
+
+  - capability: class_set_parameter
+    options:
+      class_dict: 
+        output: "tCl pCl lCl mPk" # need to add matter power spectrum for sigma8 computation
+        k_pivot: 0.05
+
 #======== Logging setup ========
 Lxogger:
   redirection:
@@ -133,7 +140,7 @@ KeyValues:
 
   debug: true
 
-  default_output_path: "runs/CosmoBit_CMB_BAO_H0_BBN"
+  default_output_path: "runs/CosmoBit_testScan"
 
   rng: ranlux48
 

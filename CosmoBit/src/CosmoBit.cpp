@@ -279,11 +279,11 @@ namespace Gambit
       cosmo.input.addEntry("tau_reio",*Param["tau_reio"]);
 
       cosmo.input.addEntry("YHe",*Dep::Helium_abundance); 
-      // JR: heads-up! Neutrinos + dNeff also need to be set. accordingly for base model we want
+      // JR: heads-up! Neutrinos + dNeff also need to be set. accordingly for base model we want to scan
       // Planck baseline should be 
-      //cosmo.input.addEntry("N_ur",2.0328);  //1 massive neutrinos 
-      //cosmo.input.addEntry("N_ncdm",3);
-      //cosmo.input.addEntry("m_ncdm","0.06,0,6");
+      cosmo.input.addEntry("N_ur",2.0328);  //1 massive neutrinos 
+      cosmo.input.addEntry("N_ncdm",3);
+      cosmo.input.addEntry("m_ncdm","0.06,0,6");
 
 
       YAML::Node class_dict;
@@ -2510,12 +2510,44 @@ namespace Gambit
             err << "Type " << type << " in "<< ie+1 <<". data point in BAO data file '"<<filename <<"' not recognised.";
             CosmoBit_error().raise(LOCAL_INFO, err.str());
         }
-        std::cout << "BAO chi2 for z = "<<z<<" type = "<< type <<" is:  " << pow((theo - data["mean"][ie]) / data["sigma"][ie],2) << std::endl;
         chi2 += pow((theo - data["mean"][ie]) / data["sigma"][ie],2);
       }
       result = -0.5*chi2;
     }
 
+    void compute_sigma8_LogLike(double &result)
+    {
+      using namespace Pipes::compute_sigma8_LogLike;
+
+      double sigma8,Omega_m; // cosmo distances and sound horizon at drag,Hubble, theoretical prediction
+      double chi2 =0;
+      
+      const str filename = runOptions->getValue<std::string>("DataFile");
+      const str path_to_file = GAMBIT_DIR "/CosmoBit/data/sigma8/" + runOptions->getValue<std::string>("DataFile");
+      static ASCIItableReader data(path_to_file);
+      static bool read_data = false;
+      static int nrow;
+      
+      Class_container cosmo = *Dep::class_get_spectra;
+      sigma8 = BEreq::class_get_sigma8(0.);
+      Omega_m = cosmo.ba.Omega0_cdm+cosmo.ba.Omega0_dcdmdr+cosmo.ba.Omega0_b+cosmo.ba.Omega0_ncdm_tot;
+    
+      if(read_data == false)
+        {
+          logger() << "Sigma8 data read from file '"<<filename<<"'." << EOM;
+          std::vector<std::string> colnames = initVector<std::string>("Omega_m_ref","Omega_m_index", "bestfit","sigma");
+          data.setcolnames(colnames);
+          nrow=data.getnrow();
+          
+          read_data = true;
+        }
+      
+      for(int ie=0;ie<nrow;ie++)
+      { 
+        chi2 += pow(( sigma8*pow(Omega_m/data["Omega_m_ref"][ie], data["Omega_m_index"][ie]) - data["bestfit"][ie])/ data["sigma"][ie],2);
+      }
+      result = -0.5*chi2;
+    }
 
   }
 

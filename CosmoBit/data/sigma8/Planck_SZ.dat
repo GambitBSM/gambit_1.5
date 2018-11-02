@@ -3,10 +3,11 @@
 # 		Sigma8 data File 
 #
 # -------------------------
-# Data file for compuation of Sigma8 likelihood, (adopted from Planck_SZ.txt from MonePython, 1804.07261)
+# Data file for compuation of Sigma8 likelihood
+# (adopted from Planck_SZ.txt from MonePython, 1804.07261)
 # 
 # Specify the data to use for the scan in .yaml file via the run option
-#   - capability: Sigma8_LogLike
+#   - capability: sigma8_LogLike
 #	  options:
 #      DataFile:  Planck_SZ.dat
 #
