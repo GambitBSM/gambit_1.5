@@ -101,6 +101,7 @@ START_MODULE
   START_CAPABILITY
     #define FUNCTION class_set_parameter_LCDM
     START_FUNCTION(CosmoBit::Class_container)
+    DEPENDENCY(Helium_abundance,double)
     ALLOW_MODELS(LCDM)
     #undef FUNCTION
 
@@ -245,11 +246,20 @@ START_MODULE
 
 
 // BBN related functions & capabilities
+#define CAPABILITY eta
+ START_CAPABILITY
+   #define FUNCTION calculate_eta
+   START_FUNCTION(double)
+   ALLOW_MODELS(LCDM, LCDM_dNeff_Smu,LCDM_dNeff_Smu_etaBBN,LCDMtensor)
+   #undef FUNCTION
+#undef CAPABILITY
+
  #define CAPABILITY AlterBBN_modelinfo
  START_CAPABILITY
    #define FUNCTION AlterBBN_fill
    START_FUNCTION(relicparam)
    ALLOW_MODELS(LCDM)
+   DEPENDENCY(eta, double)
    BACKEND_OPTION( (AlterBBN, 2.0), (libbbn) )
    BACKEND_REQ(Init_cosmomodel, (libbbn), void, (relicparam*))
    #undef FUNCTION
@@ -258,6 +268,7 @@ START_MODULE
    START_FUNCTION(relicparam)
    ALLOW_MODELS(LCDM_dNeff_Smu)
    BACKEND_OPTION( (AlterBBN, 2.0), (libbbn) )
+   DEPENDENCY(eta, double)
    BACKEND_REQ(Init_cosmomodel, (libbbn), void, (relicparam*))
    #undef FUNCTION
 

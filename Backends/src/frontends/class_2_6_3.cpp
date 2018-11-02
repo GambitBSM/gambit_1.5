@@ -254,14 +254,15 @@ BE_NAMESPACE
     return(H_z);
   }
 
-  double ClassEngine::get_sigma8(double z)
+  double class_get_sigma8(double z)
   {
     double tau;
     int index;
     double *pvecback;
     double sigma8 = 0.;
+    int success;
     //transform redshift in conformal time
-    background_tau_of_z(&cosmo.ba,z,&cosmo.tau);
+    background_tau_of_z(&cosmo.ba,z,&tau);
 
     //pvecback must be allocated 
     pvecback=(double *)malloc(cosmo.ba.bg_size*sizeof(double));
@@ -269,7 +270,7 @@ BE_NAMESPACE
     //call to fill pvecback
     background_at_tau(&cosmo.ba,tau,cosmo.ba.long_info,cosmo.ba.inter_normal, &index, pvecback);
     //background_at_tau(pba,tau,pba->long_info,pba->inter_normal,&last_index,pvecback);
-    spectra_sigma(&cosmo.ba,&cosmo.pm,&cosmo.sp,8./cosmo.ba.h,z,&sigma8);
+    success=spectra_sigma(&cosmo.ba,&cosmo.pm,&cosmo.sp,8./cosmo.ba.h,z,&sigma8);
 
     return sigma8;
 

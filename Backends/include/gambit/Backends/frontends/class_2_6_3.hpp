@@ -57,6 +57,7 @@ BE_FUNCTION(class_background_free, int, (Class::background*), "background_free",
 
 BE_FUNCTION(background_tau_of_z, int, (Class::background*,double,double*), "background_tau_of_z", "class_background_tau_of_z")
 BE_FUNCTION(background_at_tau, int, (Class::background*,double,short,short,int*,double*), "background_at_tau", "class_background_at_tau")
+BE_FUNCTION(spectra_sigma, int, (Class::background*,Class::primordial*,Class::spectra*,double,double,double*), "spectra_sigma", "class_spectra_sigma")
 
 BE_CONV_FUNCTION(class_get_Da, double, (double), "class_get_Da")
 BE_CONV_FUNCTION(class_get_Hz, double, (double), "class_get_Hz")

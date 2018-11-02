@@ -54,6 +54,7 @@ namespace Gambit
   namespace CosmoBit
   {
     using namespace LogTags;
+    static double T_cmb = 2.7255;
 
 
     struct my_f_params { double a; double b; double c; double d; };
@@ -277,9 +278,12 @@ namespace Gambit
       cosmo.input.addEntry("n_s",*Param["n_s"]);
       cosmo.input.addEntry("tau_reio",*Param["tau_reio"]);
 
-      // cosmo.input.addEntry("YHe",*Dep::Helium_abundance); 
-      // JR: compute helium abundance also for base LCDM? 
-      // Then Neutrinos + dNeff also need to be set. accordingly
+      cosmo.input.addEntry("YHe",*Dep::Helium_abundance); 
+      // JR: heads-up! Neutrinos + dNeff also need to be set. accordingly for base model we want
+      // Planck baseline should be 
+      //cosmo.input.addEntry("N_ur",2.0328);  //1 massive neutrinos 
+      //cosmo.input.addEntry("N_ncdm",3);
+      //cosmo.input.addEntry("m_ncdm","0.06,0,6");
 
 
       YAML::Node class_dict;
@@ -2254,6 +2258,19 @@ namespace Gambit
 /// -----------
 /// BBN related functions
 /// -----------
+
+    void calculate_eta(double &result)
+    {
+      using namespace Pipes::calculate_eta;
+
+      double ngamma, nb;
+      ngamma = 16*pi*zeta3*pow(kb*T_cmb/hc,3); // photon number density today
+      nb = *Param["omega_b"]*3*pow(100*pow(10,3)/Mpc,2)/(8*pi*Gn*m_proton_g); // baryon number density today
+
+      result =  nb/ngamma;
+      logger() << "Baryon to photon ratio (eta) computed to be " << result << EOM;
+    }
+
     void AlterBBN_fill(relicparam &result) 
     {
       // fill AlterBBN structure for LCDM
@@ -2261,7 +2278,7 @@ namespace Gambit
 
       BEreq::Init_cosmomodel(&result);
 
-      result.eta0=*Param["omega_b"]*274.*pow(10,-10); // eta0 = eta_BBN = eta_CMB
+      result.eta0=*Dep::eta; // eta0 = eta_BBN = eta_CMB
       result.Nnu=3.046;     // 3 massive neutrinos
       result.dNnu=0;        // no extra rel. d.o.f. in  base LCDM
       result.failsafe = 3;  // set precision parameters for AlterBBN
@@ -2275,7 +2292,7 @@ namespace Gambit
 
       BEreq::Init_cosmomodel(&result);
 
-      result.eta0=*Param["omega_b"]*274.*pow(10,-10); // eta0 = eta_BBN = eta_CMB
+      result.eta0=*Dep::eta; // eta0 = eta_BBN = eta_CMB
       result.Nnu=3.046;            // 3 massive neutrinos
       result.dNnu=*Param["dNeff"]; // no extra rel. d.o.f. in  base LCDM
       result.failsafe = 3;         // set precision parameters for AlterBBN
@@ -2409,7 +2426,7 @@ namespace Gambit
 
       // compute chi2
       for(ie=0;ie<nobs;ie++) for(je=0;je<nobs;je++) chi2+=(prediction[ie]-observed[ie])*gsl_matrix_get(invcov,ie,je)*(prediction[je]-observed[je]);
-      result = -0.5*chi2;
+      result = -0.5*chi2;  
       
       gsl_matrix_free(cov);
       gsl_matrix_free(invcov);

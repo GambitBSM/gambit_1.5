@@ -15,8 +15,7 @@
 # and set the run option
 #
 #	- capability: BAO_LogLike
-#		function: compute_BAO_LogLike
-#		options:
+#	  options:
 #	  	DataFile:  BAO_2014.dat
 # 
 # FORMAT:

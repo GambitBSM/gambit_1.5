@@ -1,28 +1,27 @@
 ##########################################################################
-## Minimal CosmoBit application  (in YAML)
+## Test CosmoBit Likelihoods
+##   - Using random sampler
 ##   - Using the Planck-lite likelihood for high-l
 ##     (Either TT or TTTEEE -> Specified in 'Rules')
-##   - Using Multinest as sampler
+##   - Using BBN Likelihood
+##   - Using BAO Likelihood
+##   - Using Sigma8 Likelihood
+##   - Computing local H0 Likelihood as observable
 ##
-## Selim Hotinli <selim.hotinli14@imperial.ac.uk>
-## 2016-17
-##
-## Patrick Stoecker <stoecker@physik.rwth-aachen.de>
-## 2017 Nov
-## 2018 Jan,Feb
+## Janina Renk <janina.renk@fysik.su.se>
+## 2018 Nov
 ##########################################################################
 
 
 #======== Input parameter declarations =======
 Parameters:
-
+ 
+ # import model parameters for models to scan over 
  LCDM_dNeff_Smu: !import include/LCDM_dNeff_Smu_scan.yaml
  #LCDM_dNeff_Smu_etaBBN: !import include/LCDM_dNeff_Smu_etaBBN_scan.yaml
  #LCDM: !import include/LCDM_scan.yaml
 
- #eta:
- #  prior_type: flat
- #  range: [4,8]
+ # nuisance parameters in Planck likelihood
  Planck_lite: !import include/Planck_lite_scan.yaml
 
 #======== Prior setup ========
@@ -51,7 +50,7 @@ Scanner:
 
     random:
       plugin: random
-      point_number: 2
+      point_number: 1
       like:  LogLike
 
 #======== Observables of interest ========
@@ -61,7 +60,7 @@ ObsLikes:
     module:       CosmoBit
     type:         double
   
-  - purpose:      LogLike
+  - purpose:      Observable
     capability:   H0_LogLike
     module:       CosmoBit
     type:         double
@@ -107,7 +106,7 @@ Rules:
 
   - capability: BBN_LogLike
     options:
-        DataFile: PDG_2017.dat
+        DataFile: AlterBBN.dat
   
   - capability: H0_LogLike
     options:

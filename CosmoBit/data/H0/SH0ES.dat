@@ -6,8 +6,7 @@
 # Data file for compuation of likelihood from local H_0 measurements  
 # 
 # Specify the data to use for the scan in .yaml file via the run option
-# - capability: H0_data
-#    function: read_H0_data
+# - capability: H0_LogLike
 #    options:
 #      DataFile:  SH0ES.dat
 #
