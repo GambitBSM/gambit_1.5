@@ -75,7 +75,7 @@
 set(name "alterbbn")
 set(ver "2.0")
 set(lib "libbbn")
-set(dl "https://alterbbn.hepforge.org/downloads/?f=alterbbn_v2.0.tgz")
+set(dl "https://alterbbn.hepforge.org/downloads/alterbbn_v2.0.tgz")
 set(md5 "cca5fb50440f25dc61fbfb6dbf61b32b")
 set(dir "${PROJECT_SOURCE_DIR}/Backends/installed/${name}/${ver}")
 check_ditch_status(${name} ${ver})
@@ -92,7 +92,7 @@ if(NOT ditched_${name}_${ver})
           COMMAND sed ${dashi} -e "s/CFLAGS_MP= -fopenmp/CFLAGS_MP= ${OpenMP_C_FLAGS}/g" Makefile
           COMMAND ${CMAKE_MAKE_PROGRAM}
           COMMAND ar x src/libbbn.a
-          COMMAND ${CMAKE_COMMAND} -E echo "${CMAKE_C_COMPILER} ${CMAKE_SHARED_LIBRARY_CREATE_C_FLAGS} -o ${lib}.so *.o" > make_so.sh
+          COMMAND ${CMAKE_COMMAND} -E echo "${CMAKE_C_COMPILER} ${OpenMP_C_FLAGS} ${CMAKE_SHARED_LIBRARY_CREATE_C_FLAGS} -o ${lib}.so *.o" > make_so.sh
           COMMAND chmod u+x make_so.sh
           COMMAND ./make_so.sh
     INSTALL_COMMAND ""
