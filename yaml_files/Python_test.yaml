@@ -49,9 +49,9 @@ Rules:
 
   - capability:  nevents_postcuts
     backends:
-    - {capability: awesomeness, backend: LibThird, version: 1.1}
-    - {capability: someFunction, backend: LibThird, version: 1.1}
-    - {capability: SomeInt, backend: LibThird, version: 1.1}
+    - {capability: awesomeness, backend: LibThird, version: 1.2}
+    - {capability: someFunction, backend: LibThird, version: 1.2}
+    - {capability: SomeInt, backend: LibThird, version: 1.2}
 
   - capability:  function_pointer
     backends:
@@ -62,6 +62,9 @@ Rules:
     function: event_count
     module: ExampleBit_B
 
+  - capability: xsection
+    function: test_sigma
+
   - capability: particle_id
     function: particle_identity
     module: ExampleBit_B
@@ -69,7 +72,7 @@ Rules:
 Logger:
 
   redirection:
-    [Default]      : stdout
+    [Default]      : "default.log"
     [ExampleBit_A] : "ExampleBit_A.log"
     [Scanner]      : "Scanner.log"
 
