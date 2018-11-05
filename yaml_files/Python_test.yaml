@@ -69,7 +69,7 @@ Rules:
 Logger:
 
   redirection:
-    [Default]      : "default.log"
+    [Default]      : stdout
     [ExampleBit_A] : "ExampleBit_A.log"
     [Scanner]      : "Scanner.log"
 

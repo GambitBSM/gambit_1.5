@@ -3,7 +3,7 @@
 # Mimics the functionality of libfirst
 #
 # \author Pat Scott
-# \date 2017-12
+# \date 2018-10
 #
 #
 
@@ -17,7 +17,7 @@ someInt = 0
 someDouble = 0
 someVector = []
 isInitialized = False
-prefix = "libthird 1.1: "
+prefix = "libthird 1.2: "
 
 #
 # Some functions:
@@ -30,7 +30,6 @@ def initialize(a):
   global isInitialized
   print
   print(prefix, "This is function 'initialize'.")
-  x, y, *rest = range(10) # haha don't load this in python2 malaka.
   someInt = a
   someArray = np.array([2.0*x for x in range(array_length)])
   someVector.append(1.5)

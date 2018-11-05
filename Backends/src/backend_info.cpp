@@ -532,14 +532,17 @@ namespace Gambit
         return;
       }
 
+      cout << be << " " << ver << ": " << "loc1" << endl;
       // Fire up the Python interpreter if it hasn't been started yet.
       if (not python_started) start_python();
 
+      cout << be << " " << ver << ": " << "loc2, python_started? " << python_started << endl;
       // Add the path to the backend to the Python system path
       pybind11::object sys_path = sys->attr("path");
       pybind11::object sys_path_append = sys_path.attr("append");
       sys_path_append(path_dir(be, ver));
 
+      cout << be << " " << ver << ": " << "loc3" << endl;
       // Attempt to import the module
       const str name = lib_name(be, ver);
       pybind11::module* new_module;
@@ -568,12 +571,18 @@ namespace Gambit
     /// Fire up the Python interpreter
     void Backends::backend_info::start_python()
     {
+      cout << "stary_python loc1" << endl;
       // Create an instance of the interpreter.
       python_interpreter = new pybind11::scoped_interpreter;
+      cout << "stary_python loc3" << endl;
       // Import the sys module, and save a wrapper to it for later.
+      cout << "stary_python loc4" << endl;
       static pybind11::module local_sys = pybind11::module::import("sys");
+      cout << "stary_python loc5" << endl;
       sys = &local_sys;
+      cout << "stary_python loc6" << endl;
       logger() << LogTags::backends << LogTags::debug << "Python interpreter successfully started." << EOM;
+      cout << "stary_python loc7" << endl;
       python_started = true;
     }
 
