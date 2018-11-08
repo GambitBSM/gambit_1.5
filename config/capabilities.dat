@@ -4138,6 +4138,12 @@ class_get_Da: |
 class_get_Hz: |
     Returns Hubble parameter at given z.
 
+class_get_sigma8: |
+    Returns sigma8 computed by class.
+
+class_spectra_sigma: |
+    Get spectra from class needed to calculate sigma8.
+
 
 #----------------------------
 #  DarkAges
@@ -4198,6 +4204,12 @@ arrayLen: |
 #----------------------------
 #  CosmoBit
 #----------------------------
+
+T_cmb: |
+  Sets CMB temperature (to 2.7255 if not specified in yaml file via runOption).
+
+eta:  |
+  Calculate baryon to photon ratio eta from Omega_b and T_cmb. 
 
 TestDecayingDM_parameters: |
    mass, mass of the dark matter candidate [in GeV]
@@ -4328,6 +4340,9 @@ AlterBBN_modelinfo: |
 Init_cosmomodel: |
      Initialise AlterBBN internal structure.
 
+get_NNUC: |
+    Return global AlterBBN parameter NNUC (# computed element abundances).
+
 nucl_err: |
     AlterBBN function that computes element abundances and their covariance during BBN.
 
@@ -4345,6 +4360,9 @@ BAO_LogLike: |
 
 H0_LogLike: |
     Compute likelihood for local H0 measurements from specified data file.
+
+sigma8_LogLike: |
+    Compute likelihood for Simga8 measurements from specified data file.
 
 #-------------------------------------
 #  Capgen capabilities

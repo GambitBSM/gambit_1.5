@@ -27,9 +27,9 @@ BE_ALLOW_MODELS(LCDM, LCDM_dNeff_Smu, LCDM_dNeff_Smu_etaBBN)
 BE_FUNCTION(Init_cosmomodel, void, (relicparam*), "Init_cosmomodel", "Init_cosmomodel")
 BE_FUNCTION(nucl_err, int, (const relicparam*, double* , double* ), "nucl_err", "nucl_err")
 
-BE_FUNCTION(heff, double, (double, relicparam*), "heff", "heff")
-BE_FUNCTION(geff, double, (double, relicparam*), "geff", "geff")
-BE_FUNCTION(sgStar, double, (double, relicparam*), "sgStar", "sgStar")
+//BE_FUNCTION(heff, double, (double, relicparam*), "heff", "heff")
+//BE_FUNCTION(geff, double, (double, relicparam*), "geff", "geff")
+//BE_FUNCTION(sgStar, double, (double, relicparam*), "sgStar", "sgStar")
 
 BE_CONV_FUNCTION(get_NNUC, int, (), "get_NNUC")
 
