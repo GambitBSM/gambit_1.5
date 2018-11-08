@@ -54,8 +54,6 @@ namespace Gambit
   namespace CosmoBit
   {
     using namespace LogTags;
-    static double T_cmb = 2.7255;
-
 
     struct my_f_params { double a; double b; double c; double d; };
 
@@ -271,6 +269,7 @@ namespace Gambit
       cosmo.input.addEntry("l_max_scalars",l_max);
       cosmo.input.addEntry("lensing","yes");
 
+      cosmo.input.addEntry("T_cmb",*Dep::T_cmb);
       cosmo.input.addEntry("omega_b",*Param["omega_b"]);
       cosmo.input.addEntry("omega_cdm",*Param["omega_cdm"]);
       cosmo.input.addEntry("H0",*Param["H0"]);
@@ -312,6 +311,7 @@ namespace Gambit
       cosmo.input.addEntry("l_max_scalars",l_max);
       cosmo.input.addEntry("lensing","yes");
 
+      cosmo.input.addEntry("T_cmb",*Dep::T_cmb);
       cosmo.input.addEntry("omega_b",*Param["omega_b"]);
       cosmo.input.addEntry("omega_cdm",*Param["omega_cdm"]);
       cosmo.input.addEntry("H0",*Param["H0"]);
@@ -358,6 +358,7 @@ namespace Gambit
       cosmo.input.addEntry("l_max_scalars",l_max);
       cosmo.input.addEntry("lensing","yes");
 
+      cosmo.input.addEntry("T_cmb",*Dep::T_cmb);
       cosmo.input.addEntry("omega_b",*Param["omega_b"]);
       cosmo.input.addEntry("omega_cdm",*Param["omega_cdm"]);
       cosmo.input.addEntry("H0",*Param["H0"]);
@@ -402,6 +403,7 @@ namespace Gambit
       cosmo.input.addEntry("lensing","yes");
       cosmo.input.addEntry("modes","s,t");
 
+      cosmo.input.addEntry("T_cmb",*Dep::T_cmb);
       cosmo.input.addEntry("omega_b",*Param["omega_b"]);
       cosmo.input.addEntry("omega_cdm",*Param["omega_cdm"]);
       cosmo.input.addEntry("H0",*Param["H0"]);
@@ -441,6 +443,7 @@ namespace Gambit
 
       cosmo.input.clear();
 
+      cosmo.input.addEntry("T_cmb",*Dep::T_cmb);
       cosmo.input.addEntry("output","tCl pCl lCl");
       cosmo.input.addEntry("l_max_scalars",l_max);
       cosmo.input.addEntry("modes","s,t");
@@ -644,6 +647,7 @@ namespace Gambit
       cosmo.input.addEntry("modes","s,t");
       cosmo.input.addEntry("lensing","yes");
 
+      cosmo.input.addEntry("T_cmb",*Dep::T_cmb);
       // Parameters to be passed to the potential                       //
       //---------------------------------------------------------------//
       std::vector<double> vparams = runOptions->getValue<std::vector<double> >("vparams");
@@ -843,6 +847,7 @@ namespace Gambit
       cosmo.input.addEntry("modes","s,t");
       cosmo.input.addEntry("lensing","yes");
 
+      cosmo.input.addEntry("T_cmb",*Dep::T_cmb);
       // Parameters to be passed to the potential                       //
       //---------------------------------------------------------------//
       std::vector<double> vparams = runOptions->getValue<std::vector<double> >("vparams");
@@ -1043,6 +1048,7 @@ namespace Gambit
       cosmo.input.addEntry("modes","s,t");
       cosmo.input.addEntry("lensing","yes");
 
+      cosmo.input.addEntry("T_cmb",*Dep::T_cmb);
       // Parameters to be passed to the potential                       //
       //---------------------------------------------------------------//
       std::vector<double> vparams = runOptions->getValue<std::vector<double> >("vparams");
@@ -1242,6 +1248,7 @@ namespace Gambit
       cosmo.input.addEntry("modes","s,t");
       cosmo.input.addEntry("lensing","yes");
 
+      cosmo.input.addEntry("T_cmb",*Dep::T_cmb);
       // Parameters to be passed to the potential                       //
       //---------------------------------------------------------------//
       std::vector<double> vparams = runOptions->getValue<std::vector<double> >("vparams");
@@ -1445,6 +1452,7 @@ namespace Gambit
       cosmo.input.addEntry("modes","s,t");
       cosmo.input.addEntry("lensing","yes");
 
+      cosmo.input.addEntry("T_cmb",*Dep::T_cmb);
       // Parameters to be passed to the potential                       //
       //---------------------------------------------------------------//
       std::vector<double> vparams = runOptions->getValue<std::vector<double> >("vparams");
@@ -1661,6 +1669,7 @@ namespace Gambit
       cosmo.input.addEntry("modes","s,t");
       cosmo.input.addEntry("lensing","yes");
 
+      cosmo.input.addEntry("T_cmb",*Dep::T_cmb);
 
 
       if (calc_tech==0){
@@ -1839,6 +1848,7 @@ namespace Gambit
         }
       }
     }
+      
 
     void class_get_spectra_func(Class_container& cosmo)
     {
@@ -2259,13 +2269,22 @@ namespace Gambit
 /// BBN related functions
 /// -----------
 
+    void set_T_cmb(double &result)
+    {
+      using namespace Pipes::set_T_cmb;
+
+      // use COBE/FIRAS (0911.1955) mes. if not specified otherwise
+      result = runOptions->getValueOrDef<double>(2.7255,"T_cmb"); 
+
+    }
+
     void calculate_eta(double &result)
     {
       using namespace Pipes::calculate_eta;
 
       double ngamma, nb;
-      ngamma = 16*pi*zeta3*pow(kb*T_cmb/hc,3); // photon number density today
-      nb = *Param["omega_b"]*3*pow(100*pow(10,3)/Mpc,2)/(8*pi*Gn*m_proton_g); // baryon number density today
+      ngamma = 16*pi*zeta3*pow(*Dep::T_cmb*kb/hc,3); // photon number density today
+      nb = *Param["omega_b"]*3*100*1e3*100*1e3/Mpc/Mpc/(8*pi*Gn*m_proton_g); // baryon number density today
 
       result =  nb/ngamma;
       logger() << "Baryon to photon ratio (eta) computed to be " << result << EOM;

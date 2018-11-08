@@ -24,8 +24,8 @@
 Parameters:
  
  # --- import model parameters for models to scan over ---
- LCDM: !import include/LCDM_scan.yaml        # base LCDM
- #LCDM_dNeff_Smu: !import include/LCDM_dNeff_Smu_scan.yaml   
+ #LCDM: !import include/LCDM_scan.yaml        # base LCDM
+ LCDM_dNeff_Smu: !import include/LCDM_dNeff_Smu_scan.yaml   
  #LCDM_dNeff_Smu_etaBBN: !import include/LCDM_dNeff_Smu_etaBBN_scan.yaml
 
  # nuisance parameters in Planck likelihood
@@ -103,6 +103,10 @@ Rules:
 ##  Specify data files for BAO, BBN, H0 and sigma8 Likelihoods
 ##
 ####
+  
+  - capability: T_cmb
+    options:
+      T_cmb: 2.7255
 
   - capability: BAO_LogLike
     options:

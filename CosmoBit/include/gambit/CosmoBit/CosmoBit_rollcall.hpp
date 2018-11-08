@@ -102,17 +102,20 @@ START_MODULE
     #define FUNCTION class_set_parameter_LCDM
     START_FUNCTION(CosmoBit::Class_container)
     DEPENDENCY(Helium_abundance,double)
+    DEPENDENCY(T_cmb, double)
     ALLOW_MODELS(LCDM)
     #undef FUNCTION
 
     #define FUNCTION class_set_parameter_LCDM_dNeff_Smu
     START_FUNCTION(CosmoBit::Class_container)
     DEPENDENCY(Helium_abundance,double)
+    DEPENDENCY(T_cmb, double)
     ALLOW_MODELS(LCDM_dNeff_Smu,LCDM_dNeff_Smu_etaBBN)
     #undef FUNCTION
 
     #define FUNCTION class_set_parameter_LCDM_SingletDM
     START_FUNCTION(CosmoBit::Class_container)
+    DEPENDENCY(T_cmb, double)
     DEPENDENCY(mwimp,double)
     DEPENDENCY(sigmav,double)
     ALLOW_MODEL_DEPENDENCE(LCDM,SingletDM)
@@ -123,36 +126,42 @@ START_MODULE
 
     #define FUNCTION class_set_parameter_LCDMtensor
     START_FUNCTION(CosmoBit::Class_container)
+    DEPENDENCY(T_cmb, double)
     ALLOW_MODELS(LCDMtensor)
     #undef FUNCTION
 
     #define FUNCTION class_set_parameter_inf_SR1quad_LCDMt
     START_FUNCTION(CosmoBit::Class_container)
     ALLOW_MODELS(inf_SR1quad_LCDMt)
+    DEPENDENCY(T_cmb, double)
     BACKEND_REQ(multimodecode_gambit_driver,(modecode_tag), void, (gambit_inflation_observables*,int& ,int& ,  int& ,  int& ,int& ,  int& ,  int& ,  int& ,  int& ,int& ,double& ,int& ,  int& ,double& ,int& ,double*,double*,  int& ,  int& ,double*,double*,double*,double& ,double& ,double& ,  int& ,int& ,double& ,double*,double*,double*,double*,double& ,double&))
     #undef FUNCTION
 
     #define FUNCTION class_set_parameter_inf_1quarInf_LCDMt
     START_FUNCTION(CosmoBit::Class_container)
     ALLOW_MODELS(inf_1quarInf_LCDMt)
+    DEPENDENCY(T_cmb, double)
     BACKEND_REQ(multimodecode_gambit_driver,(modecode_tag), void, (gambit_inflation_observables*,int& ,int& ,  int& ,  int& ,int& ,  int& ,  int& ,  int& ,  int& ,int& ,double& ,int& ,  int& ,double& ,int& ,double*,double*,  int& ,  int& ,double*,double*,double*,double& ,double& ,double& ,  int& ,int& ,double& ,double*,double*,double*,double*,double& ,double&))
     #undef FUNCTION
 
     #define FUNCTION class_set_parameter_inf_1mono32Inf_LCDMt
     START_FUNCTION(CosmoBit::Class_container)
     ALLOW_MODELS(inf_1mono32Inf_LCDMt)
+    DEPENDENCY(T_cmb, double)
     BACKEND_REQ(multimodecode_gambit_driver,(modecode_tag), void, (gambit_inflation_observables*,int& ,int& ,  int& ,  int& ,int& ,  int& ,  int& ,  int& ,  int& ,int& ,double& ,int& ,  int& ,double& ,int& ,double*,double*,  int& ,  int& ,double*,double*,double*,double& ,double& ,double& ,  int& ,int& ,double& ,double*,double*,double*,double*,double& ,double&))
     #undef FUNCTION
 
     #define FUNCTION class_set_parameter_inf_1linearInf_LCDMt
     START_FUNCTION(CosmoBit::Class_container)
     ALLOW_MODELS(inf_1linearInf_LCDMt)
+    DEPENDENCY(T_cmb, double)
     BACKEND_REQ(multimodecode_gambit_driver,(modecode_tag), void, (gambit_inflation_observables*,int& ,int& ,  int& ,  int& ,int& ,  int& ,  int& ,  int& ,  int& ,int& ,double& ,int& ,  int& ,double& ,int& ,double*,double*,  int& ,  int& ,double*,double*,double*,double& ,double& ,double& ,  int& ,int& ,double& ,double*,double*,double*,double*,double& ,double&))
     #undef FUNCTION
 
     #define FUNCTION class_set_parameter_inf_1naturalInf_LCDMt
     START_FUNCTION(CosmoBit::Class_container)
     ALLOW_MODELS(inf_1naturalInf_LCDMt)
+    DEPENDENCY(T_cmb, double)
     BACKEND_REQ(multimodecode_gambit_driver,(modecode_tag), void, (gambit_inflation_observables*,int& ,int& ,  int& ,  int& ,int& ,  int& ,  int& ,  int& ,  int& ,int& ,double& ,int& ,  int& ,double& ,int& ,double*,double*,  int& ,  int& ,double*,double*,double*,double& ,double& ,double& ,  int& ,int& ,double& ,double*,double*,double*,double*,double& ,double&))
     #undef FUNCTION
 
@@ -160,6 +169,7 @@ START_MODULE
     #define FUNCTION class_set_parameter_inf_1hilltopInf_LCDMt
     START_FUNCTION(CosmoBit::Class_container)
     ALLOW_MODELS(inf_1hilltopInf_LCDMt)
+    DEPENDENCY(T_cmb, double)
     BACKEND_REQ(multimodecode_gambit_driver,(modecode_tag), void, (gambit_inflation_observables*,int& ,int& ,  int& ,  int& ,int& ,  int& ,  int& ,  int& ,  int& ,int& ,double& ,int& ,  int& ,double& ,int& ,double*,double*,  int& ,  int& ,double*,double*,double*,double& ,double& ,double& ,  int& ,int& ,double& ,double*,double*,double*,double*,double& ,double&))
     #undef FUNCTION
 
@@ -167,6 +177,7 @@ START_MODULE
     #define FUNCTION class_set_parameter_inf_smashInf_LCDMt
     START_FUNCTION(CosmoBit::Class_container)
     ALLOW_MODELS(inf_smashInf_LCDMt)
+    DEPENDENCY(T_cmb, double)
     BACKEND_REQ(multimodecode_gambit_driver,(modecode_tag), void, (gambit_inflation_observables*,int& ,int& ,  int& ,  int& ,int& ,  int& ,  int& ,  int& ,  int& ,int& ,double& ,int& ,  int& ,double& ,int& ,double*,double*,  int& ,  int& ,double*,double*,double*,double& ,double& ,double& ,  int& ,int& ,double& ,double*,double*,double*,double*,double& ,double&))
     #undef FUNCTION
   #undef CAPABILITY
@@ -250,12 +261,21 @@ START_MODULE
     START_CAPABILITY
     #define FUNCTION calculate_eta
       START_FUNCTION(double)
+      DEPENDENCY(T_cmb, double)
+      ALLOW_MODELS(LCDM, LCDM_dNeff_Smu,LCDM_dNeff_Smu_etaBBN,LCDMtensor)
+    #undef FUNCTION
+  #undef CAPABILITY
+  
+  #define CAPABILITY T_cmb
+    START_CAPABILITY
+    #define FUNCTION set_T_cmb
+      START_FUNCTION(double)
       ALLOW_MODELS(LCDM, LCDM_dNeff_Smu,LCDM_dNeff_Smu_etaBBN,LCDMtensor)
     #undef FUNCTION
   #undef CAPABILITY
 
- #define CAPABILITY AlterBBN_modelinfo
-  START_CAPABILITY
+  #define CAPABILITY AlterBBN_modelinfo
+    START_CAPABILITY
     #define FUNCTION AlterBBN_fill
       START_FUNCTION(relicparam)
       ALLOW_MODELS(LCDM)
@@ -338,10 +358,6 @@ START_MODULE
       BACKEND_REQ(class_get_sigma8,(class_tag),double,(double))
      #undef FUNCTION
   #undef CAPABILITY
-
-
-
-
 
 #undef MODULE
 
