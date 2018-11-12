@@ -408,7 +408,7 @@ namespace Gambit
         slha.clear();
         spectrum.clear();
         slha = Dep::decay_rates->getSLHAea(2);
-        if (ModelInUse("MSSM63atQ") or ModelInUse("MSSM63atMGUT"))
+        if (ModelInUse("MSSM63atQ") or ModelInUse("MSSM63atMGUT") or ModelInUse("MSSM63atQ_lightgravitino") or ModelInUse("MSSM63atMGUT_lightgravitino"))
         {
           // MSSM-specific.  SLHAea in SLHA2 format, please.
           spectrum = Dep::MSSM_spectrum->getSLHAea(2);
@@ -2560,31 +2560,30 @@ namespace Gambit
           #endif
 
 
-          // Ben: DISABLED FOR TESTING
-          // // Shortcut: if all SRs have 0 signal prediction, we know the Delta LogLike is 0.
-          // bool all_zero_signal = true;
-          // for (size_t SR = 0; SR < adata.size(); ++SR)
-          // {
-          //   if (adata[SR].n_signal != 0)
-          //   {
-          //     all_zero_signal = false;
-          //     break;
-          //   }
-          // }
-          // if (all_zero_signal)
-          // {
-          //   // Store result
-          //   result[adata.analysis_name].combination_sr_label = "all";
-          //   result[adata.analysis_name].combination_sr_index = -1;
-          //   result[adata.analysis_name].combination_loglike = 0.0;
+          // Shortcut: if all SRs have 0 signal prediction, we know the Delta LogLike is 0.
+          bool all_zero_signal = true;
+          for (size_t SR = 0; SR < adata.size(); ++SR)
+          {
+            if (adata[SR].n_signal != 0)
+            {
+              all_zero_signal = false;
+              break;
+            }
+          }
+          if (all_zero_signal)
+          {
+            // Store result
+            result[adata.analysis_name].combination_sr_label = "all";
+            result[adata.analysis_name].combination_sr_index = -1;
+            result[adata.analysis_name].combination_loglike = 0.0;
 
-          //   #ifdef COLLIDERBIT_DEBUG
-          //   cout << debug_prefix() << "calc_LHC_LogLikes: " << adata.analysis_name << "_LogLike : " << 0.0 << " (No signal predicted. Skipped covariance calculation.)" <<endl;
-          //   #endif
+            #ifdef COLLIDERBIT_DEBUG
+            cout << debug_prefix() << "calc_LHC_LogLikes: " << adata.analysis_name << "_LogLike : " << 0.0 << " (No signal predicted. Skipped covariance calculation.)" <<endl;
+            #endif
 
-          //   // Continue to next analysis
-          //   continue;
-          // }
+            // Continue to next analysis
+            continue;
+          }
 
           // Construct vectors of SR numbers
           Eigen::ArrayXd n_obs(adata.size()), logfact_n_obs(adata.size()), n_pred_b(adata.size()), n_pred_sb(adata.size()), abs_unc_s(adata.size());
@@ -2856,6 +2855,7 @@ namespace Gambit
           double bestexp_dll_exp = 0, bestexp_dll_obs = 0;
           str bestexp_sr_label;
           int bestexp_sr_index;
+          double nocovar_srsum_dll_obs = 0;
 
           for (size_t SR = 0; SR < adata.size(); ++SR)
           {
@@ -2914,6 +2914,9 @@ namespace Gambit
             // Store "observed LogLike" result for this SR
             result[adata.analysis_name].sr_indices[srData.sr_label] = SR;
             result[adata.analysis_name].sr_loglikes[srData.sr_label] = llsb_obs - llb_obs;
+
+            // Add loglike to the no-correlations loglike sum over SRs
+            nocovar_srsum_dll_obs += llsb_obs - llb_obs;
           }
 
           // Check for problem
@@ -2942,6 +2945,14 @@ namespace Gambit
           result[adata.analysis_name].combination_sr_label = bestexp_sr_label;
           result[adata.analysis_name].combination_sr_index = bestexp_sr_index;
           result[adata.analysis_name].combination_loglike = -bestexp_dll_obs;
+
+          // Should we use the naive sum of SR loglikes (without correlations), instead of the best-expected SR?
+          // _Anders
+          static const bool combine_nocovar_SRs = runOptions->getValueOrDef<bool>(false, "combine_SRs_without_covariances");
+          if (combine_nocovar_SRs)
+          {
+            result[adata.analysis_name].combination_loglike = nocovar_srsum_dll_obs;
+          }
 
           #ifdef COLLIDERBIT_DEBUG
           cout << debug_prefix() << "calc_LHC_LogLikes: " << adata.analysis_name << "_" << bestexp_sr_label << "_LogLike : " << -bestexp_dll_obs << endl;
