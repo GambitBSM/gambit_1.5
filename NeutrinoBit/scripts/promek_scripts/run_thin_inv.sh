@@ -32,7 +32,7 @@ do
     cp template_long.sh lunch_thin_inv/$name.sh
     echo 'python /net/archive/groups/plgghbt/gambit/gambit_RHN/NeutrinoBit/scripts/thin_datasets.py -v '$f $fout '/RHN "#RightHandedNeutrinos_diff_parameters @RightHandedNeutrinos_diff::primary_parameters::M_1" ' $case 1e-5   >> lunch_thin_inv/$name.sh
     
-    sbatch lunch_thin_inv/$name.sh
+    #sbatch lunch_thin_inv/$name.sh
 
 
 done
