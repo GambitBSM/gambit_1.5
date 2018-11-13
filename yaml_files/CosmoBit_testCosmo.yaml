@@ -57,7 +57,7 @@ Scanner:
 
     random:
       plugin: random
-      point_number: 2
+      point_number: 3
       like:  LogLike
 
 #======== Observables of interest ========
@@ -87,6 +87,10 @@ ObsLikes:
     module:       CosmoBit
     type:         double
   
+  - purpose:      Obs
+    capability:   Helium_abundance
+    module:       CosmoBit
+    type:         std::vector<double>
   - purpose:      Obs
     capability:   Deuterium_abundance
     module:       CosmoBit

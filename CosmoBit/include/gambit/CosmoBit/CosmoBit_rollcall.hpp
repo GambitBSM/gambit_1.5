@@ -101,14 +101,14 @@ START_MODULE
   START_CAPABILITY
     #define FUNCTION class_set_parameter_LCDM
     START_FUNCTION(CosmoBit::Class_container)
-    DEPENDENCY(Helium_abundance,double)
+    DEPENDENCY(Helium_abundance,std::vector<double>)
     DEPENDENCY(T_cmb, double)
     ALLOW_MODELS(LCDM)
     #undef FUNCTION
 
     #define FUNCTION class_set_parameter_LCDM_dNeff_Smu
     START_FUNCTION(CosmoBit::Class_container)
-    DEPENDENCY(Helium_abundance,double)
+    DEPENDENCY(Helium_abundance,std::vector<double>)
     DEPENDENCY(T_cmb, double)
     ALLOW_MODELS(LCDM_dNeff_Smu,LCDM_dNeff_Smu_etaBBN)
     #undef FUNCTION
@@ -299,11 +299,12 @@ START_MODULE
      BACKEND_REQ(Init_cosmomodel, (libbbn), void, (relicparam*))
     #undef FUNCTION
   #undef CAPABILITY
+     
 
   #define CAPABILITY Helium_abundance
    START_CAPABILITY
     #define FUNCTION get_Helium_abundance
-      START_FUNCTION(double)
+      START_FUNCTION(std::vector<double>)
       DEPENDENCY(BBN_abundances, CosmoBit::BBN_container)
     #undef FUNCTION
   #undef CAPABILITY

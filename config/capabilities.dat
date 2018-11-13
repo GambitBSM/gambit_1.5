@@ -4353,7 +4353,19 @@ BBN_abundances: |
     Fills BBN_container with theoretically expected element abundances and covariance matrix from BBN. 
 
 Helium_abundance: |
-    Compute predicted Helium abundance from BBN.
+    Compute predicted Helium mass fraction, Yp, and theoretical error from BBN. First vector entry mean, second standard deviation. 
+
+Helium3_abundance: |
+    Compute predicted Helium3 abundance (by number w.r.t. hydrogen) and theoretical error from BBN. First vector entry mean, second standard deviation. 
+
+Deuterium_abundance: |
+    Compute predicted Deuterium abundance (by number w.r.t. hydrogen) and theoretical error from BBN. First vector entry mean, second standard deviation. 
+
+Lithium7_abundance: |
+    Compute predicted Lithium7 abundance (by number w.r.t. hydrogen) and theoretical error from BBN. First vector entry mean, second standard deviation. 
+
+Beryllium7_abundance: |
+    Compute predicted Beryllium7 abundance (by number w.r.t. hydrogen) and theoretical error from BBN. First vector entry mean, second standard deviation. 
 
 BAO_LogLike: |
     Compute likelihood for BAO measurements from specified data file.

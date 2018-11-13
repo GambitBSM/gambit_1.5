@@ -277,7 +277,9 @@ namespace Gambit
       cosmo.input.addEntry("n_s",*Param["n_s"]);
       cosmo.input.addEntry("tau_reio",*Param["tau_reio"]);
 
-      cosmo.input.addEntry("YHe",*Dep::Helium_abundance); 
+      std::vector<double> Helium_abund = *Dep::Helium_abundance; // .at(0): mean, .at(1): uncertainty
+      cosmo.input.addEntry("YHe",Helium_abund.at(0)); 
+
       // JR: heads-up! Neutrinos + dNeff also need to be set. accordingly for base model we want to scan
       // Planck baseline should be 
       cosmo.input.addEntry("N_ur",2.0328);  //1 massive neutrinos 
@@ -326,7 +328,8 @@ namespace Gambit
       sstream << numass << ", " << numass << ", " << numass;
       cosmo.input.addEntry("m_ncdm",sstream.str());
 
-      cosmo.input.addEntry("YHe",*Dep::Helium_abundance);
+      std::vector<double> Helium_abund = *Dep::Helium_abundance; // .at(0): mean, .at(1): uncertainty
+      cosmo.input.addEntry("YHe",Helium_abund.at(0)); 
 
       YAML::Node class_dict;
       if (runOptions->hasKey("class_dict"))
@@ -2363,15 +2366,18 @@ namespace Gambit
     }
 
 
-    void get_Helium_abundance(double &result)
+    void get_Helium_abundance(std::vector<double> &result)
     {
       using namespace Pipes::get_Helium_abundance;
         
         CosmoBit::BBN_container BBN_res = *Dep::BBN_abundances;
         std::map<std::string, int> abund_map = BBN_res.get_map();
-  
-        result = BBN_res.BBN_abund.at(abund_map["Yp"]);
-        logger() << "Helium Abundance from AlterBBN = " << result << EOM;
+ 
+        result.clear();
+        result.push_back(BBN_res.BBN_abund.at(abund_map["Yp"]));
+        result.push_back(sqrt(BBN_res.BBN_covmat.at(abund_map["Yp"]).at(abund_map["Yp"])));
+
+        logger() << "Helium Abundance from AlterBBN: " << result.at(0) << " +/- " << result.at(1) << EOM;
     }
     
     void get_Helium3_abundance(std::vector<double> &result)
@@ -2380,11 +2386,10 @@ namespace Gambit
         
         CosmoBit::BBN_container BBN_res = *Dep::BBN_abundances;
         std::map<std::string, int> abund_map = BBN_res.get_map();
-  
+    
+        result.clear();
         result.push_back(BBN_res.BBN_abund.at(abund_map["He3"]));
         result.push_back(sqrt(BBN_res.BBN_covmat.at(abund_map["He3"]).at(abund_map["He3"])));
-
-        std::cout << "Helium3 mean " << result.at(0) << " plus " << result.at(1)  << std::endl;
 
         logger() << "Helium 3 Abundance from AlterBBN: " << result.at(0) << " +/- " << result.at(1) << EOM;
     }
@@ -2395,11 +2400,10 @@ namespace Gambit
         
         CosmoBit::BBN_container BBN_res = *Dep::BBN_abundances;
         std::map<std::string, int> abund_map = BBN_res.get_map();
-  
+        
+        result.clear(); 
         result.push_back(BBN_res.BBN_abund.at(abund_map["D"]));
         result.push_back(sqrt(BBN_res.BBN_covmat.at(abund_map["D"]).at(abund_map["D"])));
-
-        std::cout << "Deuterium mean " << result.at(0) << " plus " << result.at(1)  << std::endl;
 
         logger() << "Deuterium Abundance from AlterBBN: " << result.at(0) << " +/- " << result.at(1) << EOM;
     }
@@ -2410,12 +2414,11 @@ namespace Gambit
         
         CosmoBit::BBN_container BBN_res = *Dep::BBN_abundances;
         std::map<std::string, int> abund_map = BBN_res.get_map();
-  
+        
+        result.clear();
         result.push_back(BBN_res.BBN_abund.at(abund_map["Li7"]));
         result.push_back(sqrt(BBN_res.BBN_covmat.at(abund_map["Li7"]).at(abund_map["Li7"])));
-
-        std::cout << "Lithium 7 mean " << result.at(0) << " plus " << result.at(1)  << std::endl;
-
+        
         logger() << "Lithium Abundance from AlterBBN: " << result.at(0) << " +/- " << result.at(1) << EOM;
     }
 
@@ -2425,11 +2428,10 @@ namespace Gambit
         
         CosmoBit::BBN_container BBN_res = *Dep::BBN_abundances;
         std::map<std::string, int> abund_map = BBN_res.get_map();
-  
+        
+        result.clear();
         result.push_back(BBN_res.BBN_abund.at(abund_map["Be7"]));
         result.push_back(sqrt(BBN_res.BBN_covmat.at(abund_map["Be7"]).at(abund_map["Be7"])));
-
-        std::cout << "Beryllium mean " << result.at(0) << " plus " << result.at(1)  << std::endl;
 
         logger() << "Beryllium Abundance from AlterBBN: " << result.at(0) << " +/- " << result.at(1) << EOM;
     }
