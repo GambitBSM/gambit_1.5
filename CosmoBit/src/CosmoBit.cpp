@@ -2373,6 +2373,66 @@ namespace Gambit
         result = BBN_res.BBN_abund.at(abund_map["Yp"]);
         logger() << "Helium Abundance from AlterBBN = " << result << EOM;
     }
+    
+    void get_Helium3_abundance(std::vector<double> &result)
+    {
+      using namespace Pipes::get_Helium3_abundance;
+        
+        CosmoBit::BBN_container BBN_res = *Dep::BBN_abundances;
+        std::map<std::string, int> abund_map = BBN_res.get_map();
+  
+        result.push_back(BBN_res.BBN_abund.at(abund_map["He3"]));
+        result.push_back(sqrt(BBN_res.BBN_covmat.at(abund_map["He3"]).at(abund_map["He3"])));
+
+        std::cout << "Helium3 mean " << result.at(0) << " plus " << result.at(1)  << std::endl;
+
+        logger() << "Helium 3 Abundance from AlterBBN: " << result.at(0) << " +/- " << result.at(1) << EOM;
+    }
+
+    void get_Deuterium_abundance(std::vector<double> &result)
+    {
+      using namespace Pipes::get_Deuterium_abundance;
+        
+        CosmoBit::BBN_container BBN_res = *Dep::BBN_abundances;
+        std::map<std::string, int> abund_map = BBN_res.get_map();
+  
+        result.push_back(BBN_res.BBN_abund.at(abund_map["D"]));
+        result.push_back(sqrt(BBN_res.BBN_covmat.at(abund_map["D"]).at(abund_map["D"])));
+
+        std::cout << "Deuterium mean " << result.at(0) << " plus " << result.at(1)  << std::endl;
+
+        logger() << "Deuterium Abundance from AlterBBN: " << result.at(0) << " +/- " << result.at(1) << EOM;
+    }
+    
+    void get_Lithium7_abundance(std::vector<double> &result)
+    {
+      using namespace Pipes::get_Lithium7_abundance;
+        
+        CosmoBit::BBN_container BBN_res = *Dep::BBN_abundances;
+        std::map<std::string, int> abund_map = BBN_res.get_map();
+  
+        result.push_back(BBN_res.BBN_abund.at(abund_map["Li7"]));
+        result.push_back(sqrt(BBN_res.BBN_covmat.at(abund_map["Li7"]).at(abund_map["Li7"])));
+
+        std::cout << "Lithium 7 mean " << result.at(0) << " plus " << result.at(1)  << std::endl;
+
+        logger() << "Lithium Abundance from AlterBBN: " << result.at(0) << " +/- " << result.at(1) << EOM;
+    }
+
+    void get_Beryllium7_abundance(std::vector<double> &result)
+    {
+      using namespace Pipes::get_Beryllium7_abundance;
+        
+        CosmoBit::BBN_container BBN_res = *Dep::BBN_abundances;
+        std::map<std::string, int> abund_map = BBN_res.get_map();
+  
+        result.push_back(BBN_res.BBN_abund.at(abund_map["Be7"]));
+        result.push_back(sqrt(BBN_res.BBN_covmat.at(abund_map["Be7"]).at(abund_map["Be7"])));
+
+        std::cout << "Beryllium mean " << result.at(0) << " plus " << result.at(1)  << std::endl;
+
+        logger() << "Beryllium Abundance from AlterBBN: " << result.at(0) << " +/- " << result.at(1) << EOM;
+    }
 
 
     void compute_BBN_LogLike(double &result)

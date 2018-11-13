@@ -308,6 +308,38 @@ START_MODULE
     #undef FUNCTION
   #undef CAPABILITY
 
+  #define CAPABILITY Deuterium_abundance
+   START_CAPABILITY
+    #define FUNCTION get_Deuterium_abundance
+      START_FUNCTION(std::vector<double>)
+      DEPENDENCY(BBN_abundances, CosmoBit::BBN_container)
+    #undef FUNCTION
+  #undef CAPABILITY
+
+  #define CAPABILITY Helium3_abundance
+   START_CAPABILITY
+    #define FUNCTION get_Helium3_abundance
+      START_FUNCTION(std::vector<double>)
+      DEPENDENCY(BBN_abundances, CosmoBit::BBN_container)
+    #undef FUNCTION
+  #undef CAPABILITY
+
+  #define CAPABILITY Lithium7_abundance
+   START_CAPABILITY
+    #define FUNCTION get_Lithium7_abundance
+      START_FUNCTION(std::vector<double>)
+      DEPENDENCY(BBN_abundances, CosmoBit::BBN_container)
+    #undef FUNCTION
+  #undef CAPABILITY
+  
+  #define CAPABILITY Beryllium7_abundance
+   START_CAPABILITY
+    #define FUNCTION get_Beryllium7_abundance
+      START_FUNCTION(std::vector<double>)
+      DEPENDENCY(BBN_abundances, CosmoBit::BBN_container)
+    #undef FUNCTION
+  #undef CAPABILITY
+
   #define CAPABILITY BBN_abundances
   START_CAPABILITY
     #define FUNCTION compute_BBN_abundances

@@ -86,6 +86,23 @@ ObsLikes:
     capability:   sigma8_LogLike
     module:       CosmoBit
     type:         double
+  
+  - purpose:      Obs
+    capability:   Deuterium_abundance
+    module:       CosmoBit
+    type:         std::vector<double>
+  - purpose:      Obs
+    capability:   Helium3_abundance
+    module:       CosmoBit
+    type:         std::vector<double>
+  - purpose:      Obs
+    capability:   Lithium7_abundance
+    module:       CosmoBit
+    type:         std::vector<double>
+  - purpose:      Obs
+    capability:   Beryllium7_abundance
+    module:       CosmoBit
+    type:         std::vector<double>
 
 #======== Rule entries ========
 Rules:
