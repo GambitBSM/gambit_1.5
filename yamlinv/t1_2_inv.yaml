@@ -30,7 +30,6 @@ Parameters:
     CKM_etabar  :  0.353
 
     mNu_light:
-#      range: [1E-7, 0.23]
       range: [0.03, 0.23]
       prior_type: log
     dmNu21:
@@ -41,11 +40,11 @@ Parameters:
       prior_type: flat
 
     alpha1:
-      range: [3,5]
-#      range: [0, 6.283]
+#      range: [3,5]
+      range: [0, 6.283]
     alpha2:
-      range: [2,3.5]
-#      range: [0, 6.283]
+#      range: [2,3.5]
+      range: [0, 6.283]
     delta13:
       range: [0, 6.283] # 3-sigma range from NuFit
     theta12:
@@ -67,34 +66,25 @@ Parameters:
       prior_type: log
     delta_M21:
       range: [1E-7, 1E-2]
-#      range: [1E-10, 1]
       prior_type: log
     M_3:
       same_as: RightHandedNeutrinos_diff::M_1
-#      range: [1,2]
-#      range: [0.06, 500]
       prior_type: log
     ReOm23:
       range: [2.5,5]
-#      range: [0, 6.283]
     ImOm23:
       range: [2,10]
-#      range: [-15, 15]
     ReOm13:
       range: [4,10]
-#      range: [0, 6.283]
     ImOm13:
       range: [-2,2]
-#      range: [-15, 15]
     ReOm12:
       range: [0,4]
-#      range: [0, 6.283]
     ImOm12:
       range: [-10,-2]
-#      range: [-15, 15]
     Rorder:
       fixed_value: 3
-#      range: [0, 6]
+
 
 Priors:
 
@@ -185,7 +175,7 @@ ObsLikes:
     purpose: LogLike
 
   - capability: l2lgamma_lnL
-    purpose: LogLike
+    purpose: LogLike 
 
   - capability: l2lll_lnL
     purpose: LogLike
@@ -371,17 +361,6 @@ Rules:
   - capability: RK
     function: RHN_RK
 
-  - function: Ut1
-    options:
-      upper_limit: 1e-3
-
-  - function: Ut2
-    options:
-      upper_limit: 1e-3
-
-  - function: Ut3
-    options:
-      upper_limit: 1e-3
 
 KeyValues:
 
