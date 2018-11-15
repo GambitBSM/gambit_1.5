@@ -93,7 +93,7 @@ if(HDF5_FOUND)
        add_gambit_executable(hdf5combine ${HDF5_LIBRARIES}
                         SOURCES ${PROJECT_SOURCE_DIR}/Printers/standalone/manual_hdf5_combine.cpp
                                 $<TARGET_OBJECTS:Printers>
-                                ${GAMBIT_BASIC_COMMON_OBJECTS} 
+                                ${GAMBIT_BASIC_COMMON_OBJECTS}
                                 )
        set_target_properties(hdf5combine PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${PROJECT_SOURCE_DIR}/Printers/bin")
     endif()

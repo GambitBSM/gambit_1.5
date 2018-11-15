@@ -98,6 +98,9 @@ namespace Gambit
         std::map<str,bool> needsPython;
 
         /// Key: backend name + version
+        std::map<str,int> missingPythonVersion;
+
+        /// Key: backend name + version
         std::map<str,bool> classloader;
 
         /// Key: backend name + version
@@ -150,6 +153,9 @@ namespace Gambit
         #ifdef HAVE_PYBIND11
           /// Python backends that have been successfully loaded (Key: name+version)
           std::map<str, pybind11::module*> loaded_python_backends;
+
+          /// Return the python module corresponding to a given backend name and version, or the empty module if that backend is not loaded.
+          pybind11::module& getPythonBackend(const str&, const str&);
         #endif
 
       private:
@@ -185,7 +191,7 @@ namespace Gambit
 
         #ifdef HAVE_PYBIND11
           /// Load a Python backend module
-          void loadLibrary_Python(const str&, const str&, const str&);
+          void loadLibrary_Python(const str&, const str&, const str&, const str&);
 
           /// Python sys modudle
           pybind11::module* sys;

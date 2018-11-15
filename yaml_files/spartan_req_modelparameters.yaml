@@ -1,7 +1,7 @@
 ##########################################################################
-## GAMBIT configuration for an ultra-minimal PolyChord scan of a toy model.
+## GAMBIT configuration for an ultra-minimal MultiNest scan of a toy model.
 ##
-## Only needs ExampleBit_A and a scanner (Diver, MultiNest, PolyChord, GreAT or TWalk).
+## Only needs ExampleBit_A and a scanner (Diver, MultiNest, GreAT or TWalk).
 ##########################################################################
 
 
@@ -24,7 +24,7 @@ Printer:
   printer: hdf5
   options:
     output_file: "results.hdf5"
-    group: "/spartan_polychord"
+    group: "/spartan"
     delete_file_on_restart: true
 
   #printer: ascii
@@ -33,28 +33,24 @@ Printer:
   #  buffer_length: 10
   #  delete_file_on_restart: true
 
+  #printer: cout
 
 Scanner:
 
-  use_scanner: polychord
+  use_scanner: twalk
 
   scanners:
 
     de:
       plugin: diver
       like: LogLike
-      NP: 1000
+      NP: 500
 
     multinest:
       plugin: multinest
       like:  LogLike
-      nlive: 1000
-      tol: 0.1
-
-    polychord:
-      plugin: polychord
-      like:  LogLike
-      tol: 0.1
+      nlive: 500
+      tol: 0.5
 
     mcmc:
       plugin: great
@@ -65,19 +61,24 @@ Scanner:
     twalk:
       plugin: twalk
 
+    polychord:
+      plugin: polychord
+      like:  LogLike
+      tol: 0.1
+
 
 ObsLikes:
 
   - purpose:      LogLike
-    capability:   normaldist_loglike
+    capability:   Example_lnL_A
     module:       ExampleBit_A
     type:         double
 
 
 Rules:
 
-  # None required, since no module dependencies to be resolved.
-
+  - capability: xsection
+    function: sigma_example_req_pars
 
 Logger:
 
@@ -89,9 +90,14 @@ Logger:
 
 KeyValues:
 
-  default_output_path: "runs/spartan_polychord/"
+  default_output_path: "runs/spartan"
 
   rng: ranlux48
+
+  print_timing_data: true
+
+  dependency_resolution:
+    prefer_model_specific_functions: false
 
   likelihood:
     model_invalid_for_lnlike_below: -1e6

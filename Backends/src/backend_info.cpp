@@ -81,7 +81,16 @@ namespace Gambit
   Backends::backend_info::~backend_info()
   {
     #ifdef HAVE_PYBIND11
-      if (python_started) delete python_interpreter;
+      if (python_started)
+      {
+        for (auto it = loaded_python_backends.begin();
+                  it != loaded_python_backends.end();
+                  it++)
+        {
+          delete it->second;
+        }
+        delete python_interpreter;
+      }
     #endif
   }
 
@@ -187,7 +196,7 @@ namespace Gambit
     int i, end = p.length();
     for (i = end-1; i >= 0; --i)
     {
-      if (p[i] == '.') end = i;
+      if (p[i] == '.') end = i-1;
       if (p[i] == '/') break;
     }
     return p.substr(i+1,end-i);
@@ -296,7 +305,8 @@ namespace Gambit
       needsMathematica[be+ver] = false;
       needsPython[be+ver] = false;
       classloader[be+ver] = false;
- 
+      missingPythonVersion[be+ver] = -1;
+
      // Now switch according to the language of the backend
       if (lang == "MATHEMATICA"
        or lang == "Mathematica")
@@ -314,12 +324,13 @@ namespace Gambit
         #endif
       }
       // and so on.
-      else if (lang == "PYTHON"
-            or lang == "Python")
+      else if (lang == "PYTHON" or lang == "Python" or
+               lang == "PYTHON2" or lang == "Python2" or
+               lang == "PYTHON3" or lang == "Python3")
       {
         needsPython[be+ver] = true;
         #ifdef HAVE_PYBIND11
-         loadLibrary_Python(be, ver, sv);
+          loadLibrary_Python(be, ver, sv, lang);
         #else
           works[be+ver] = false;
           err << "GAMBIT requires pybind11 to interface with Python, but it was not found in "
@@ -503,16 +514,13 @@ namespace Gambit
   #ifdef HAVE_PYBIND11
 
     /// Load a Python backend module
-    void Backends::backend_info::loadLibrary_Python(const str& be, const str& ver, const str& sv)
+    void Backends::backend_info::loadLibrary_Python(const str& be, const str& ver, const str& sv, const str& lang)
     {
       // Set the internal info for this backend
       const str path = corrected_path(be,ver);
       link_versions(be, ver, sv);
-      classloader[be+ver] = false;
-      needsMathematica[be+ver] = false;
-      needsPython[be+ver] = true;
 
-      // If the backend is not present, bail now.
+      // Bail now if the backend is not present.
       std::ifstream f(path.c_str());
       std::ostringstream err;
       if(!f.good())
@@ -523,9 +531,32 @@ namespace Gambit
         return;
       }
 
-      // Set up a persistent place to store the wrappers to the modules (we don't want to have to
-      // import the pybind11 headers in the main class declaration, so we make it static here rather than private there.)
-      static std::vector<pybind11::module> local_loaded_python_backends;
+      // Bail now if the backend requires a version of Python that GAMBIT is not configured with.
+      if (PYTHON_VERSION_MAJOR < 2 or PYTHON_VERSION_MAJOR > 3)
+      {
+        err << "Unrecognised version of Python: " << PYTHON_VERSION_MAJOR << endl;
+        backend_error().raise(LOCAL_INFO, err.str());
+        works[be+ver] = false;
+        return;
+      }
+      if (PYTHON_VERSION_MAJOR != 2 and (lang == "Python2" or lang == "PYTHON2"))
+      {
+        err << "Failed loading Python backend " << be << " " << ver << "." << endl
+            << "GAMBIT was configured with Python " << PYTHON_VERSION_MAJOR << " but this backend needs Python 2." << endl;
+        backend_warning().raise(LOCAL_INFO, err.str());
+        works[be+ver] = false;
+        missingPythonVersion[be+ver] = 2;
+        return;
+      }
+      if (PYTHON_VERSION_MAJOR != 3 and (lang == "Python3" or lang == "PYTHON3"))
+      {
+        err << "Failed loading Python backend " << be << "." << endl
+            << "GAMBIT was configured with Python " << PYTHON_VERSION_MAJOR << " but this backend needs Python 3." << endl;
+        backend_warning().raise(LOCAL_INFO, err.str());
+        works[be+ver] = false;
+        missingPythonVersion[be+ver] = 3;
+        return;
+      }
 
       // Fire up the Python interpreter if it hasn't been started yet.
       if (not python_started) start_python();
@@ -537,9 +568,10 @@ namespace Gambit
 
       // Attempt to import the module
       const str name = lib_name(be, ver);
+      pybind11::module* new_module;
       try
       {
-        local_loaded_python_backends.push_back(pybind11::module::import(name.c_str()));
+        new_module = new pybind11::module(pybind11::module::import(name.c_str()));
       }
       catch (std::exception& e)
       {
@@ -556,7 +588,7 @@ namespace Gambit
 
       logger() << "Succeeded in loading " << path << LogTags::backends << LogTags::info << EOM;
       works[be+ver] = true;
-      loaded_python_backends[be+ver] = &local_loaded_python_backends.back();
+      loaded_python_backends[be+ver] = new_module;
     }
 
     /// Fire up the Python interpreter
@@ -569,6 +601,12 @@ namespace Gambit
       sys = &local_sys;
       logger() << LogTags::backends << LogTags::debug << "Python interpreter successfully started." << EOM;
       python_started = true;
+    }
+
+    pybind11::module& Backends::backend_info::getPythonBackend(const str& be, const str& ver)
+    {
+      static pybind11::module empty_python_module;
+      return (works.at(be+ver) ? *loaded_python_backends.at(be+ver) : empty_python_module);
     }
 
   #endif

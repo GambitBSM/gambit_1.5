@@ -53,6 +53,7 @@
 #include <random>
 #include <chrono>
 
+#include "gambit/Utils/util_macros.hpp"
 #include "gambit/Utils/util_types.hpp"
 
 
@@ -66,7 +67,7 @@ namespace Gambit
     /// Must conform to the requirements of UniformRandomBitGenerator,
     /// see e.g. https://en.cppreference.com/w/cpp/named_req/UniformRandomBitGenerator
     /// Importantly, operator() must return UNSIGNED INTEGERS!
-    class threadsafe_rng
+    class EXPORT_SYMBOLS threadsafe_rng
     {
 
       public:
@@ -81,7 +82,7 @@ namespace Gambit
 
         /// Operators for compliance with RandomNumberEngine interface -> random distribution sampling
         virtual result_type min() = 0; // Needs to connect to equivalent function in underlying rng class
-        virtual result_type max() = 0; // "   " 
+        virtual result_type max() = 0; // "   "
     };
 
     /// Give an inline implementation of the destructor, to prevent link errors but keep base class pure virtual.
@@ -131,7 +132,7 @@ namespace Gambit
 
   }
 
-  class Random
+  class EXPORT_SYMBOLS Random
   {
 
     public:
