@@ -58,12 +58,11 @@ namespace Gambit
     public:
 
       /// Constructor
-      python_variable(const str& be, const str& ver, const str& symbol)
-      #ifdef HAVE_PYBIND11
-        : handle_works(false)
-      #endif
-      {
-        #ifdef HAVE_PYBIND11
+      #ifndef HAVE_PYBIND11
+        python_variable(const str&, const str&, const str&) {}
+      #else
+        python_variable(const str& be, const str& ver, const str& symbol) : handle_works(false)
+        {
           using namespace Backends;
           try
           {
@@ -108,8 +107,8 @@ namespace Gambit
             }
           }
           catch (std::exception& e) { ini_catch(e); }
-        #endif
-      }
+        }
+      #endif
 
       /// Assignment operator for python_variable from equivalent C++ type
       #ifdef HAVE_PYBIND11

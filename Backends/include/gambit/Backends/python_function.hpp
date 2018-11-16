@@ -52,12 +52,11 @@ namespace Gambit
       public:
 
         /// Constructor
-        python_function(const str& be, const str& ver, const str& symbol)
-        #ifdef HAVE_PYBIND11
-          : handle_works(false)
-        #endif
-        {
-          #ifdef HAVE_PYBIND11
+        #ifndef HAVE_PYBIND11
+          python_function(const str&, const str&, const str&) {}
+        #else
+          python_function(const str& be, const str& ver, const str& symbol) : handle_works(false)
+          {
             try
             {
               // Extract the backend module pointer from the backendInfo object
@@ -100,21 +99,24 @@ namespace Gambit
               }
             }
             catch (std::exception& e) { ini_catch(e); }
-          #endif
-        }
+          }
+        #endif
 
         /// Operation (execute function and return value)
-        TYPE operator()(ARGS&&... args)
-        {
-          #ifdef HAVE_PYBIND11
+        #ifdef HAVE_PYBIND11
+          TYPE operator()(ARGS&&... args)
+          {
             if (not handle_works) backend_error().raise(LOCAL_INFO, "Attempted to call a Python backend function that was not successfully loaded.");
             pybind11::object result = func(std::forward<ARGS>(args)...);
             return return_cast<TYPE>(result);
-          #else
+          }
+        #else
+          TYPE operator()(ARGS&&...)
+          {
             backend_error().raise(LOCAL_INFO, "Attempted to call a python function from C++ without pybind11.");
             return TYPE();
-          #endif
-        }
+          }
+        #endif
 
     };
 
