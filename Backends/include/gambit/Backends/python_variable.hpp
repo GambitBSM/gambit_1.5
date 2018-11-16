@@ -58,7 +58,10 @@ namespace Gambit
     public:
 
       /// Constructor
-      python_variable(const str& be, const str& ver, const str& symbol) : handle_works(false)
+      python_variable(const str& be, const str& ver, const str& symbol)
+      #ifdef HAVE_PYBIND11
+        : handle_works(false)
+      #endif
       {
         #ifdef HAVE_PYBIND11
           using namespace Backends;

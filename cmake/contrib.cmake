@@ -21,6 +21,11 @@
 
 include(ExternalProject)
 
+# Define the newline strings to use for OSX-safe substitution.
+# This can be moved into externals.cmake if ever it is no longer used in this file.
+set(nl "___totally_unlikely_to_occur_naturally___")
+set(true_nl \"\\n\")
+
 #contrib/slhaea
 include_directories("${PROJECT_SOURCE_DIR}/contrib/slhaea/include")
 
@@ -105,18 +110,24 @@ else()
   set(dir "${PROJECT_SOURCE_DIR}/contrib/RestFrames-${ver}")
   set(dl_dir "${PROJECT_SOURCE_DIR}/contrib/")
   set(dl "https://github.com/crogan/RestFrames/archive/v${ver}.tar.gz")
-  set (RESTFRAMES_LDFLAGS "-L${dir}/lib -lRestFrames")
-  set (CMAKE_INSTALL_RPATH "${dir}")
+  set(patch "${PROJECT_SOURCE_DIR}/contrib/patches/${name}/${ver}/patch_${name}_${ver}.dif")
+  set(RESTFRAMES_LDFLAGS "-L${dir}/lib -lRestFrames")
+  set(CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_RPATH};${dir}/lib")
+  add_install_name_tool_step(${name} ${dir}/lib libRestFrames.so)
   include_directories("${dir}" "${dir}/include")
   ExternalProject_Add(restframes
+    # FIXME: needs to revert to curl on osx
     # AK: For some reason I can't get the md5 check to work for restframes, so I can't use cmake/scripts/safe_dl.sh for downloading.
     # Will use wget for now...
     DOWNLOAD_COMMAND wget ${dl} -O ${dl_dir}/${name}-${ver}.tar.gz
              COMMAND ${CMAKE_COMMAND} -E chdir ${dl_dir} tar -xf ${name}-${ver}.tar.gz
     SOURCE_DIR ${dir}
     BUILD_IN_SOURCE 1
+    PATCH_COMMAND patch -p1 < ${patch}
+          COMMAND sed ${dashi} -e "s|____replace_with_GAMBIT_version____|${GAMBIT_VERSION_FULL}|g" src/RFBase.cc src/RFBase.cc
+          COMMAND sed ${dashi} -e "s|____replace_with_RestFrames_path____|${dir}|g" src/RFBase.cc
     CONFIGURE_COMMAND ./configure -prefix=${dir}
-    BUILD_COMMAND ${CMAKE_MAKE_PROGRAM} 
+    BUILD_COMMAND ${CMAKE_MAKE_PROGRAM}
     INSTALL_COMMAND ${CMAKE_MAKE_PROGRAM} install
     )
   set(rmstring "${CMAKE_BINARY_DIR}/restframes-prefix/src/restframes-stamp/restframes")
