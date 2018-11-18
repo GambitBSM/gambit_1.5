@@ -99,55 +99,34 @@ else()
 endif()
 
 
-#contrib/RestFrames; include only if ColliderBit is in use and WITH_RESTFRAMES=True.
+#contrib/RestFrames; include only if ColliderBit is in use, ROOT is found and WITH_RESTFRAMES=True.
 set(restframes_VERSION "1.0.2")
 set(restframes_CONTRIB_DIR "${PROJECT_SOURCE_DIR}/contrib/RestFrames-${restframes_VERSION}")
-if(ROOT_FOUND)
-  if(WITH_RESTFRAMES)
-    message("-- RestFrames-dependent analyses in ColliderBit will be activated.")
-    set(EXCLUDE_RESTFRAMES FALSE)
-  else()
-    message("-- RestFrames-dependent analyses in ColliderBit will be deactivated since WITH_RESTFRAMES is set to False.")
-    set(EXCLUDE_RESTFRAMES TRUE)
-  endif()
-else()
-  message("-- RestFrames-dependent analyses in ColliderBit will be deactivated since ROOT was not found.")
+if(NOT ";${GAMBIT_BITS};" MATCHES ";ColliderBit;")
+  message("${BoldCyan} X Excluding RestFrames from GAMBIT configuration. (ColliderBit is not in use.)${ColourReset}")
   set(EXCLUDE_RESTFRAMES TRUE)
-endif()
-
-if(NOT EXCLUDE_RESTFRAMES)
+elseif(NOT WITH_RESTFRAMES)
+  message("${BoldCyan} X Excluding RestFrames from GAMBIT configuration. (WITH_RESTFRAMES is set to False.)${ColourReset}")
+  message("   RestFrames-dependent analyses in ColliderBit will be deactivated.")
+  set(EXCLUDE_RESTFRAMES TRUE)
+elseif(NOT ROOT_FOUND)
+  message("${BoldCyan} X Excluding RestFrames from GAMBIT configuration. (ROOT was not found.)${ColourReset}")
+  message("   RestFrames-dependent analyses in ColliderBit will be deactivated.")
+  set(EXCLUDE_RESTFRAMES TRUE)
+else() # OK, let's include RestFrames then
+  message("-- RestFrames-dependent analyses in ColliderBit will be activated.")
+  set(EXCLUDE_RESTFRAMES FALSE)
+  # Check if the RestFrames library already exists and print info message
   unset(RestFrames_LIBRARY CACHE)
   find_library(RestFrames_LIBRARY RestFrames ${restframes_CONTRIB_DIR}/lib/)
   if(RestFrames_LIBRARY STREQUAL "RestFrames_LIBRARY-NOTFOUND")
-    set(RestFrames_FOUND FALSE)
-    message("-- RestFrames library not found.")
+    message("   RestFrames library not found. RestFrames v${restframes_VERSION} will be downloaded and installed when building GAMBIT.")
   else()
-    message("-- Found RestFrames library: ${RestFrames_LIBRARY}")
-    set(RestFrames_FOUND TRUE)
+    message("   Found RestFrames library: ${RestFrames_LIBRARY}")
   endif()
 endif()
 
-if(NOT EXCLUDE_RESTFRAMES AND NOT RestFrames_FOUND)
-  if(EXISTS "${restframes_CONTRIB_DIR}")
-    message("${BoldYellow}   Found exisiting RestFrames directory: ${restframes_CONTRIB_DIR}.${ColourReset}")  
-  else()
-    message("${BoldRed}   RestFrames v${restframes_VERSION} will be downloaded and installed when building GAMBIT.${ColourReset}")
-    # message("${BoldRed}   CMake will now download RestFrames v${restframes_VERSION}.${ColourReset}")
-    # execute_process(RESULT_VARIABLE result COMMAND git clone https://github.com/crogan/RestFrames ${restframes_CONTRIB_DIR})
-    # if(${result} STREQUAL "0")
-    #   execute_process(COMMAND ${CMAKE_COMMAND} -E chdir ${restframes_CONTRIB_DIR} git checkout -q v${restframes_VERSION})
-    # else()
-    #   message("${BoldRed}   Attempt to clone git repository for RestFrames failed.  This may be because you are disconnected from the internet.\n   "
-    #           "Otherwise, your git installation may be faulty. Errors about missing .so files are usually due to\n   "
-    #           "your git installation being linked to a buggy version of libcurl.  In that case, try reinstalling libcurl.\n   "
-    #           "RestFrames-dependent analyses in ColliderBit are now disabled.${ColourReset}")
-    #   set(EXCLUDE_RESTFRAMES TRUE)
-      # message(FATAL_ERROR "Failed to build GAMBIT with RestFrames. If you want to build GAMBIT without RestFrames, re-run cmake with -DWITH_RESTFRAMES=False.")
-    # endif()
-  endif()
-endif()
-
-# OK, we can now add RestFrames as an external project that GAMBIT can depend on
+# Add RestFrames as an external project that GAMBIT can depend on
 if(NOT EXCLUDE_RESTFRAMES)
   set(name "restframes")
   set(ver "${restframes_VERSION}")
@@ -157,21 +136,22 @@ if(NOT EXCLUDE_RESTFRAMES)
   set(CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_RPATH};${dir}/lib")
   add_install_name_tool_step(${name} ${dir}/lib libRestFrames.so)
   include_directories("${dir}" "${dir}/inc")
-  # Here
   ExternalProject_Add(restframes
     DOWNLOAD_COMMAND git clone https://github.com/crogan/RestFrames ${dir}
              COMMAND ${CMAKE_COMMAND} -E chdir ${dir} git checkout -q v${ver}
     SOURCE_DIR ${dir}
     BUILD_IN_SOURCE 1
     CONFIGURE_COMMAND ./configure -prefix=${dir}
+    # Patch RestFrames to set the CPLUS_INCLUDE_PATH environment variable correctly when RestFrames is loaded.
+    # This avoids having to run setup_RestFrames.sh.
     PATCH_COMMAND patch -p1 < ${patch}
           COMMAND sed ${dashi} -e "s|____replace_with_GAMBIT_version____|${GAMBIT_VERSION_FULL}|g" src/RFBase.cc src/RFBase.cc
           COMMAND sed ${dashi} -e "s|____replace_with_RestFrames_path____|${dir}|g" src/RFBase.cc
     BUILD_COMMAND ${CMAKE_MAKE_PROGRAM} 
     INSTALL_COMMAND ${CMAKE_MAKE_PROGRAM} install
     )
-  set(rmstring "${CMAKE_BINARY_DIR}/restframes-prefix/src/restframes-stamp/restframes")
   # Add clean-restframes and nuke-restframes
+  set(rmstring "${CMAKE_BINARY_DIR}/restframes-prefix/src/restframes-stamp/restframes")
   add_custom_target(clean-restframes COMMAND ${CMAKE_COMMAND} -E remove -f ${rmstring}-configure ${rmstring}-build ${rmstring}-install ${rmstring}-done
     COMMAND cd ${dir} && ([ -e makefile ] || [ -e Makefile ] && ${CMAKE_MAKE_PROGRAM} distclean) || true)
   add_dependencies(distclean clean-restframes)
@@ -181,54 +161,6 @@ if(NOT EXCLUDE_RESTFRAMES)
   add_dependencies(nuke-contrib nuke-restframes)
   add_dependencies(nuke-all nuke-restframes)
 endif()
-
-# add_custom_target(clean-flexiblesusy COMMAND ${CMAKE_COMMAND} -E remove -f ${rmstring}-configure ${rmstring}-build ${rmstring}-install ${rmstring}-done
-#                                      COMMAND [ -e ${FS_DIR} ] && cd ${dir} && ([ -e makefile ] || [ -e Makefile ] && ${CMAKE_MAKE_PROGRAM} clean) || true)
-# add_custom_target(distclean-flexiblesusy COMMAND cd ${FS_DIR} && ([ -e makefile ] || [ -e Makefile ] && ${CMAKE_MAKE_PROGRAM} distclean) || true)
-# add_custom_target(nuke-flexiblesusy)
-# add_dependencies(distclean-flexiblesusy clean-flexiblesusy)
-# add_dependencies(nuke-flexiblesusy distclean-flexiblesusy)
-# add_dependencies(distclean distclean-flexiblesusy)
-# add_dependencies(nuke-all nuke-flexiblesusy)
-
-# _Anders
-
-
-# string(REGEX MATCH ";Res;|;Rest;|;RestF;|;RestFr;|;RestFra;|;RestFram;|;RestFrame;|;RestFrames" DITCH_RESTFRAMES ";${itch};")
-# if(DITCH_RESTFRAMES OR NOT ";${GAMBIT_BITS};" MATCHES ";ColliderBit;")
-#   add_custom_target(clean-restframes COMMAND "")
-#   message("${BoldCyan} X Excluding RestFrames from GAMBIT configuration.${ColourReset}")
-# else()
-#   set(name "restframes")
-#   set(ver "1.0.1")
-#   set(dir "${PROJECT_SOURCE_DIR}/contrib/RestFrames-${ver}")
-#   set(dl_dir "${PROJECT_SOURCE_DIR}/contrib/")
-#   set(dl "https://github.com/crogan/RestFrames/archive/v${ver}.tar.gz")
-#   set(patch "${PROJECT_SOURCE_DIR}/contrib/patches/${name}/${ver}/patch_${name}_${ver}.dif")
-#   set(RESTFRAMES_LDFLAGS "-L${dir}/lib -lRestFrames")
-#   set(CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_RPATH};${dir}/lib")
-#   add_install_name_tool_step(${name} ${dir}/lib libRestFrames.so)
-#   include_directories("${dir}" "${dir}/include")
-#   ExternalProject_Add(restframes
-#     # FIXME: needs to revert to curl on osx
-#     # AK: For some reason I can't get the md5 check to work for restframes, so I can't use cmake/scripts/safe_dl.sh for downloading.
-#     # Will use wget for now...
-#     DOWNLOAD_COMMAND wget ${dl} -O ${dl_dir}/${name}-${ver}.tar.gz
-#              COMMAND ${CMAKE_COMMAND} -E chdir ${dl_dir} tar -xf ${name}-${ver}.tar.gz
-#     SOURCE_DIR ${dir}
-#     BUILD_IN_SOURCE 1
-#     PATCH_COMMAND patch -p1 < ${patch}
-#           COMMAND sed ${dashi} -e "s|____replace_with_GAMBIT_version____|${GAMBIT_VERSION_FULL}|g" src/RFBase.cc src/RFBase.cc
-#           COMMAND sed ${dashi} -e "s|____replace_with_RestFrames_path____|${dir}|g" src/RFBase.cc
-#     CONFIGURE_COMMAND ./configure -prefix=${dir}
-#     BUILD_COMMAND ${CMAKE_MAKE_PROGRAM}
-#     INSTALL_COMMAND ${CMAKE_MAKE_PROGRAM} install
-#     )
-#   set(rmstring "${CMAKE_BINARY_DIR}/restframes-prefix/src/restframes-stamp/restframes")
-#   add_custom_target(clean-restframes COMMAND ${CMAKE_COMMAND} -E remove -f ${rmstring}-configure ${rmstring}-build ${rmstring}-install ${rmstring}-done
-#     COMMAND cd ${dir} && ([ -e makefile ] || [ -e Makefile ] && ${CMAKE_MAKE_PROGRAM} distclean) || true)
-#   add_dependencies(distclean clean-restframes)
-# endif()
 
 
 #contrib/fjcore-3.2.0; compile only if Delphes is ditched and ColliderBit is not.
