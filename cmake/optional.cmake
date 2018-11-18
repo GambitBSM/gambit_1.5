@@ -161,22 +161,6 @@ else()
   set (EXCLUDE_ROOT FALSE)
 endif()
 
-# If ROOT was found, check for RestFrames. Else, exlude it.
-if(ROOT_FOUND)
-  find_package(RestFrames)
-  if(RestFrames_FOUND)
-    message("-- Found RestFrames library ${RestFrames_LIBRARY}.")
-    set(EXCLUDE_RESTFRAMES FALSE)
-  else()
-    message("-- RestFrames not found. RestFrames-dependent analyses in ColliderBit will be deactivated.")
-    message("   To install RestFrames, run 'make restframes'.")
-    set(EXCLUDE_RESTFRAMES TRUE)
-  endif()
-else()
-    message("-- RestFrames-dependent analyses in ColliderBit will be deactivated since ROOT was not found.")
-    set (EXCLUDE_RESTFRAMES TRUE)
-endif()
-
 # Check for HDF5 libraries
 find_package(HDF5 QUIET COMPONENTS C)
 if(HDF5_FOUND)

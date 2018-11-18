@@ -376,6 +376,9 @@ function(add_standalone executablename)
     if (NOT EXCLUDE_DELPHES)
       set(ARG_LIBRARIES ${ARG_LIBRARIES} ${DELPHES_LDFLAGS} ${ROOT_LIBRARIES} ${ROOT_LIBRARY_DIR}/libEG.so)
     endif()
+    if (NOT EXCLUDE_RESTFRAMES)
+      set(ARG_LIBRARIES ${ARG_LIBRARIES} ${RESTFRAMES_LDFLAGS})
+    endif()
 
     add_gambit_executable(${executablename} "${ARG_LIBRARIES}"
                           SOURCES ${STANDALONE_SOURCES}
@@ -389,6 +392,9 @@ function(add_standalone executablename)
     endif()
     if (NOT EXCLUDE_DELPHES)
       add_dependencies(${executablename} delphes)
+    endif()
+    if (NOT EXCLUDE_RESTFRAMES)
+      add_dependencies(${executablename} restframes)
     endif()
 
     # Add the new executable to the standalones target
