@@ -2505,10 +2505,13 @@ namespace Gambit
       gsl_linalg_LU_decomp(cov,p,&s);
       gsl_linalg_LU_invert(cov,p,invcov);
 
+      // Compute the determinant of the inverse of the covmat
+      double det_cov = gsl_linalg_LU_det(cov,s);
+
       // compute chi2
       for(ie=0;ie<nobs;ie++) for(je=0;je<nobs;je++) chi2+=(prediction[ie]-observed[ie])*gsl_matrix_get(invcov,ie,je)*(prediction[je]-observed[je]);
-      result = -0.5*chi2;  
-      
+      result = -0.5*(chi2 + log(pow(2*pi,nobs)*det_cov));
+
       gsl_matrix_free(cov);
       gsl_matrix_free(invcov);
       gsl_permutation_free(p);
