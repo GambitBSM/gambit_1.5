@@ -49,55 +49,6 @@ include_directories("${yaml_INCLUDE_DIR}")
 add_definitions(-DYAML_CPP_DLL)
 add_subdirectory(${PROJECT_SOURCE_DIR}/contrib/yaml-cpp-0.6.2 EXCLUDE_FROM_ALL)
 
-#contrib/Delphes-3.1.2; include only if ColliderBit is in use and Delphes is not intentionally ditched.
-set (DELPHES_DIR "${PROJECT_SOURCE_DIR}/contrib/Delphes-3.1.2")
-set (DELPHES_DICTS "${PROJECT_SOURCE_DIR}/ColliderBit/src/delphes/BTaggingWithTruthModule_dict.cc"
-                   "${PROJECT_SOURCE_DIR}/ColliderBit/src/delphes/AbsoluteIsolationModule_dict.cc"
-                   "${PROJECT_SOURCE_DIR}/ColliderBit/include/gambit/ColliderBit/delphes/BTaggingWithTruthModule_dict.h"
-                   "${PROJECT_SOURCE_DIR}/ColliderBit/include/gambit/ColliderBit/delphes/AbsoluteIsolationModule_dict.h")
-string(REGEX MATCH ";D;|;De;|;Del;|;Delp;|;Delph;|;Delphe;|;Delphes" DITCH_DELPHES ";${itch};")
-include_directories("${DELPHES_DIR}" "${DELPHES_DIR}/external" "${PROJECT_SOURCE_DIR}/ColliderBit/include/gambit/ColliderBit/delphes")
-if(DITCH_DELPHES OR NOT ";${GAMBIT_BITS};" MATCHES ";ColliderBit;")
-  set (EXCLUDE_DELPHES TRUE)
-  add_custom_target(clean-delphes COMMAND "")
-  message("${BoldCyan} X Excluding Delphes from GAMBIT configuration.${ColourReset}")
-  foreach(DICT ${DELPHES_DICTS})
-    execute_process(COMMAND ${CMAKE_COMMAND} -E remove ${DICT})
-  endforeach()
-else()
-  set (EXCLUDE_DELPHES FALSE)
-  set (DELPHES_LDFLAGS "-L${DELPHES_DIR} -lDelphes")
-  set (DELPHES_BAD_LINE "\\(..CC)\ ..patsubst\ -std=%,,..CXXFLAGS))\\)\ \\(..CXXFLAGS.\\)")
-  set (CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_RPATH};${DELPHES_DIR}")
-  ExternalProject_Add(delphes
-    SOURCE_DIR ${DELPHES_DIR}
-    BUILD_IN_SOURCE 1
-    CONFIGURE_COMMAND ./configure
-              COMMAND sed ${dashi} "/^CXXFLAGS += .* -Iexternal\\/tcl/ s/$/ ${BACKEND_CXX_FLAGS}/" <SOURCE_DIR>/Makefile
-              COMMAND sed ${dashi} "s,\ ..EXECUTABLE.,,g" <SOURCE_DIR>/Makefile
-              COMMAND sed ${dashi} "s/${DELPHES_BAD_LINE}/\\1/g" <SOURCE_DIR>/Makefile
-    BUILD_COMMAND ${CMAKE_MAKE_PROGRAM} all
-    INSTALL_COMMAND ""
-  )
-  message("${Yellow}-- Generating Delphes ROOT dictionaries...${ColourReset}")
-  execute_process(COMMAND ./make_dicts.sh
-                  WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}/ColliderBit/src/delphes
-                  RESULT_VARIABLE result
-                 )
-  if (NOT "${result}" STREQUAL "0")
-    message(FATAL_ERROR "Could not automatically generate Delphes ROOT dictionaries.  Blame ROOT.")
-  endif()
-  message("${Yellow}-- Generating Delphes ROOT dictionaries - done.${ColourReset}")
-  # Add clean info
-  foreach(DICT ${DELPHES_DICTS})
-    set(clean_files ${clean_files} ${DICT})
-  endforeach()
-  set(rmstring "${CMAKE_BINARY_DIR}/delphes-prefix/src/delphes-stamp/delphes")
-  add_custom_target(clean-delphes COMMAND ${CMAKE_COMMAND} -E remove -f ${rmstring}-configure ${rmstring}-build ${rmstring}-install ${rmstring}-done
-                                  COMMAND cd ${DELPHES_DIR} && ([ -e makefile ] || [ -e Makefile ] && ${CMAKE_MAKE_PROGRAM} distclean) || true)
-  add_dependencies(distclean clean-delphes)
-endif()
-
 
 #contrib/RestFrames; include only if ColliderBit is in use, ROOT is found and WITH_RESTFRAMES=True.
 set(restframes_VERSION "1.0.2")
@@ -163,7 +114,7 @@ if(NOT EXCLUDE_RESTFRAMES)
 endif()
 
 
-#contrib/fjcore-3.2.0; compile only if Delphes is ditched and ColliderBit is not.
+#contrib/fjcore-3.2.0
 set(fjcore_INCLUDE_DIR "${PROJECT_SOURCE_DIR}/contrib/fjcore-3.2.0")
 include_directories("${fjcore_INCLUDE_DIR}")
 add_definitions(-DFJCORE)
