@@ -107,18 +107,17 @@ include(cmake/utilities.cmake)
 # otherwise it seems to get it wrong.  Also, we need to add versions of python
 # greater than 3.3 manually, for compatibility with CMake 2.8.12.
 set(Python_ADDITIONAL_VERSIONS 3.4 3.5 3.6 3.7)
-find_package(PythonInterp 3)
-if(PYTHONINTERP_FOUND)
-   find_package(PythonLibs 3)
+if (USE_PYTHON2)
+  message("${BoldYellow}   Python 2 requested; searching for Python 2.7${ColourReset}")
+  find_package(PythonInterp 2.7 REQUIRED)
 else()
+  find_package(PythonInterp 3)
+  if(NOT PYTHONINTERP_FOUND)
     message("${BoldYellow}   Python 3 not found, searching for Python 2.7${ColourReset}")
-    find_package(PythonInterp 2 REQUIRED)
-    if (PYTHON_VERSION_MINOR LESS 7)
-      message(FATAL_ERROR "\nGAMBIT requires Python 2.7.  \nIf you need to set the path to the Python interpreter manually, "
-                          "please use -DPYTHON_EXECUTABLE:FILEPATH=path/to/preferred/python.")
-    endif()
-    find_package(PythonLibs 2)
+    find_package(PythonInterp 2.7 REQUIRED)
+  endif()
 endif()
+find_package(PythonLibs ${PYTHON_VERSION_STRING} EXACT)
 
 # Check for pybind11 if PythonLibs were found
 if(NOT PYTHONLIBS_FOUND)
