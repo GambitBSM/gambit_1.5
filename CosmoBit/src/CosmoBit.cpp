@@ -2305,7 +2305,6 @@ namespace Gambit
       result.dNnu=0;        // no extra rel. d.o.f. in  base LCDM
       //result.failsafe = 3;  // set precision parameters for AlterBBN
       //result.err = 3;
-      result.life_neutron_error = runOptions->getValueOrDef<double>(1.0,"life_neutron_error");
       result.failsafe = runOptions->getValueOrDef<int>(3,"failsafe");
       result.err = runOptions->getValueOrDef<int>(3,"err");
     }
@@ -2320,8 +2319,10 @@ namespace Gambit
       result.eta0=*Dep::eta; // eta0 = eta_BBN = eta_CMB
       result.Nnu=3.046;            // 3 massive neutrinos
       result.dNnu=*Param["dNeff"]; // no extra rel. d.o.f. in  base LCDM
-      result.failsafe = 3;         // set precision parameters for AlterBBN
-      result.err = 3;
+      //result.failsafe = 3;  // set precision parameters for AlterBBN
+      //result.err = 3;
+      result.failsafe = runOptions->getValueOrDef<int>(3,"failsafe");
+      result.err = runOptions->getValueOrDef<int>(3,"err");
     }
 
 
@@ -2335,8 +2336,10 @@ namespace Gambit
       result.eta0 = *Param["eta_BBN"];  // eta AFTER BBN (variable during)
       result.Nnu=3.046;                 // 3 massive neutrinos
       result.dNnu=*Param["dNeff_BBN"];
-      result.failsafe = 3;              // set precision parameters for AlterBBN
-      result.err = 3; 
+      //result.failsafe = 3;  // set precision parameters for AlterBBN
+      //result.err = 3;
+      result.failsafe = runOptions->getValueOrDef<int>(3,"failsafe");
+      result.err = runOptions->getValueOrDef<int>(3,"err");
     }
 
 
