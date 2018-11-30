@@ -2350,17 +2350,152 @@ namespace Gambit
       int NNUC = BEreq::get_NNUC();  // global variable of AlterBBN (# computed element abundances)  
       result.init_arr(NNUC);         // init arrays in BBN_container with right length
       double ratioH [NNUC+1], cov_ratioH [NNUC+1][NNUC+1];
+
+      static bool first = true;
+      const bool use_fudged_correlations = (runOptions->hasKey("correlation_matrix") && runOptions->hasKey("elements"));
+      const bool use_relative_errors = runOptions->hasKey("relative_errors");
+      static std::vector<double> relerr(NNUC+1, -1.0);
+      static std::vector<std::vector<double>> corr(NNUC+1, std::vector<double>(NNUC+1, 0.0));
+      if (use_fudged_correlations && first)
+      {
+        for (int ie = 1; ie < NNUC; ie++) corr.at(ie).at(ie) = 1.;
+        std::vector<str> elements =  runOptions->getValue< std::vector<str> >("elements");
+        std::vector<std::vector<double>> tmp_corr = runOptions->getValue< std::vector<std::vector<double>> >("correlation_matrix");
+        std::vector<double> tmp_relerr;
+
+        unsigned int nelements = elements.size();
+
+        // Check if the size of the list of elements and the size of the correlation matrix agree
+        if (nelements != tmp_corr.size())
+        {
+          std::ostringstream err;
+          err << "The length of the list \'elements\' and the size of the correlation matrix \'correlation_matrix\' do not agree";
+          CosmoBit_error().raise(LOCAL_INFO, err.str());
+        }
+
+        // If the relative errors are also given, then do also a check if the length of the list is correct and if the entries are positive.
+        if (use_relative_errors)
+        {
+          tmp_relerr = runOptions->getValue< std::vector<double> >("relative_errors");
+          if (nelements != tmp_relerr.size())
+          {
+            std::ostringstream err;
+            err << "The length of the list \'elements\' and the length of \'relative_errors\' do not agree";
+            CosmoBit_error().raise(LOCAL_INFO, err.str());
+          }
+          for (std::vector<double>::iterator it = tmp_relerr.begin(); it != tmp_relerr.end(); it++)
+          {
+            if (*it <= 0.0)
+            {
+              std::ostringstream err;
+              err << "One entry for the relative error is not positive";
+              CosmoBit_error().raise(LOCAL_INFO, err.str());
+            }
+          }
+        }
+
+        // Check if the correlation matrix is symmetric
+        for (std::vector<std::vector<double>>::iterator it = tmp_corr.begin(); it != tmp_corr.end(); it++)
+        {
+          if (it->size() != nelements)
+          {
+            std::ostringstream err;
+            err << "The correlation matirx is not a square matrix";
+            CosmoBit_error().raise(LOCAL_INFO, err.str());
+          }
+        }
+
+        // Check if the entries in the correlation matrix are reasonable
+        for (int ie=0; ie<nelements; ie++)
+        {
+          //Check if the diagonal entries are equal to 1.
+          if (std::abs(tmp_corr.at(ie).at(ie) - 1.) > 1e-6)
+          {
+            std::ostringstream err;
+            err << "Not all diagonal elements of the correlation matirx are 1.";
+            CosmoBit_error().raise(LOCAL_INFO, err.str());
+          }
+          for (int je=0; je<=ie; je++)
+          {
+            //Check for symmetry
+            if (std::abs(tmp_corr.at(ie).at(je) - tmp_corr.at(je).at(ie)) > 1e-6)
+            {
+              std::ostringstream err;
+              err << "The correlation matirx is not symmetric";
+              CosmoBit_error().raise(LOCAL_INFO, err.str());
+            }
+            // Check if the off-diagonal elements are between -1 and 1.
+            if (std::abs(tmp_corr.at(ie).at(je)) >= 1. && (ie != je))
+            {
+              std::ostringstream err;
+              err << "The off-diagonal elements of the correlation matrix are not sensible (abs(..) > 1)";
+              CosmoBit_error().raise(LOCAL_INFO, err.str());
+            }
+          }
+        }
+
+        // Check if the elements which are passed via runOptions are actually known.
+        std::map<std::string, int> abund_map = result.get_map();
+        for (std::vector<str>::iterator it = elements.begin(); it != elements.end(); it++)
+        {
+          if (abund_map.count(*it) == 0)
+          {
+            std::ostringstream err;
+            err << "I do not recognise the element \'" << *it << "\'";
+            CosmoBit_error().raise(LOCAL_INFO, err.str());
+          }
+        }
+
+        // Populate the correlation matrix
+        for (std::vector<str>::iterator it1 = elements.begin(); it1 != elements.end(); it1++)
+        {
+          int ie  =  abund_map[*it1];
+          int i = std::distance( elements.begin(), it1 );
+          // If the relative errors are given fill it with the respective values (-1.0 refers to no errors given).
+          if (use_relative_errors) relerr.at(ie) = tmp_relerr.at(i);
+          for (std::vector<str>::iterator it2 = elements.begin(); it2 != elements.end(); it2++)
+          {
+            int je  =  abund_map[*it2];
+            int j = std::distance( elements.begin(), it2 );
+            corr.at(ie).at(je) = tmp_corr.at(i).at(j);
+          }
+        }
+
+        first = false;
+      }
       
       relicparam const& paramrelic = *Dep::AlterBBN_modelinfo;
       int nucl_err = BEreq::nucl_err(&paramrelic, byVal(ratioH), byVal(cov_ratioH[0]));
       
+      std::vector<double> err_ratio(NNUC+1,0);
+      if (use_fudged_correlations)
+      {
+        for (int ie=1;ie<=NNUC;ie++)
+        {
+          if (use_relative_errors && (relerr.at(ie) > 0.0))
+          {
+            err_ratio.at(ie) =  relerr.at(ie) * ratioH[ie];
+          }
+          else
+          {
+            err_ratio.at(ie) = sqrt(cov_ratioH[ie][ie]);
+          }
+        }
+      }
+
       // fill abundances and covariance matrix of BBN_container with results from AlterBBN
       if (nucl_err)
       {
         for(int ie=1;ie<=NNUC;ie++)
         {
           result.BBN_abund.at(ie) = ratioH[ie];
-          for(int je=1;je<=NNUC;je++) result.BBN_covmat.at(ie).at(je) =cov_ratioH[ie][je];
+          for(int je=1;je<=NNUC;je++)
+          {
+            if (use_fudged_correlations)
+                result.BBN_covmat.at(ie).at(je) = corr.at(ie).at(je) * err_ratio.at(ie) * err_ratio.at(je);
+            else
+                result.BBN_covmat.at(ie).at(je) = cov_ratioH[ie][je];
+          }
         }
       }
       else

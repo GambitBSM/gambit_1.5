@@ -25,7 +25,7 @@ Parameters:
  
  # --- import model parameters for models to scan over ---
  #LCDM: !import include/LCDM_scan.yaml        # base LCDM
- LCDM_dNeff_Smu: !import include/LCDM_dNeff_Smu_scan.yaml   
+ LCDM_dNeff_Smu: !import include/LCDM_dNeff_Smu_scan.yaml
  #LCDM_dNeff_Smu_etaBBN: !import include/LCDM_dNeff_Smu_etaBBN_scan.yaml
 
  # nuisance parameters in Planck likelihood
@@ -158,6 +158,12 @@ Rules:
       class_dict: 
         output: "tCl pCl lCl mPk" # need to add matter power spectrum for sigma8 computation
         k_pivot: 0.05
+
+  - capability: BBN_abundances
+    options:
+      correlation_matrix: [[1.0,0.2],[0.2,1.0]]
+      relative_errors: [1e-3,1e-2]
+      elements: [Yp,D]
 
 #======== Logging setup ========
 Lxogger:
