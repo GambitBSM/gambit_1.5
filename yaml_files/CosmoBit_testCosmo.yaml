@@ -87,23 +87,27 @@ ObsLikes:
     module:       CosmoBit
     type:         double
   
-  - purpose:      Obs
+  - purpose:      Observable
     capability:   Helium_abundance
     module:       CosmoBit
     type:         std::vector<double>
-  - purpose:      Obs
+
+  - purpose:      Observable
     capability:   Deuterium_abundance
     module:       CosmoBit
     type:         std::vector<double>
-  - purpose:      Obs
+
+  - purpose:      Observable
     capability:   Helium3_abundance
     module:       CosmoBit
     type:         std::vector<double>
-  - purpose:      Obs
+
+  - purpose:      Observable
     capability:   Lithium7_abundance
     module:       CosmoBit
     type:         std::vector<double>
-  - purpose:      Obs
+
+  - purpose:      Observable
     capability:   Beryllium7_abundance
     module:       CosmoBit
     type:         std::vector<double>
@@ -118,6 +122,9 @@ Rules:
 ##  this ambiguity manually.
 #####
 
+  - capability: compute_Planck_high_TT_loglike
+    function: function_Planck_high_TT_lite_loglike
+    module: CosmoBit
 
 #####
 ##
@@ -145,10 +152,6 @@ Rules:
     options:
       planck_path: /home/janina/code/PlanckLike/plc_2.0 # set by hand: path/to/your/planck/data
       
-  - capability: compute_Planck_high_TT_loglike
-    function: function_Planck_high_TT_lite_loglike
-    module: CosmoBit
-
   - capability: sigma8_LogLike
     options:
         DataFile: Planck_SZ.dat
@@ -158,6 +161,11 @@ Rules:
       class_dict: 
         output: "tCl pCl lCl mPk" # need to add matter power spectrum for sigma8 computation
         k_pivot: 0.05
+
+  - capability: AlterBBN_modelinfo
+    options:
+      failsafe: 1
+      err: 0
 
   - capability: BBN_abundances
     options:
