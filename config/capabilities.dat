@@ -124,11 +124,17 @@ LibSecond_1_0_init: |
 LibSecond_1_1_init: |
    Initialize the Python testing LibSecond backend, version 1.1.
 
+LibSecond_1_2_init: |
+   Initialize the Python testing LibSecond backend, version 1.2.
+
 LibThird_1_0_init: |
    Initialize the Python package testing LibThird backend, version 1.0.
 
 LibThird_1_1_init: |
    Initialize the Python package testing LibThird backend, version 1.1.
+
+LibThird_1_2_init: |
+   Initialize the Python package testing LibThird backend, version 1.2.
 
 initialize_capability: |
    Tester function for the initialization of backends.
