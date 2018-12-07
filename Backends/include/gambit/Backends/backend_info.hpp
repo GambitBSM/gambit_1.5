@@ -34,7 +34,7 @@
 #ifdef HAVE_MATHEMATICA
   #if WSREVISION > 25
     #ifndef __MLINK__
-      typedef struct WSLink* WSLINK;
+      typedef struct MLink* WSLINK;
       #define __MLINK__
     #endif
   #else
