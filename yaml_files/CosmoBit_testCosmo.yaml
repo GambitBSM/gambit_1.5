@@ -142,7 +142,8 @@ Rules:
 
   - capability: BBN_LogLike
     options:
-        DataFile: PDG_2017.dat
+      DataFile: PDG_2017.dat # Use both, the Yp and D/H measurement as given in PDG 2017
+      #DataFile: PDG_2017_updated.dat # Use the Yp measurement from PDG 2017 and the updated D/H measurement of 1801.08023
   
   - capability: H0_LogLike
     options:
