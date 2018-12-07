@@ -32,8 +32,16 @@
 
 // Forward declarations
 #ifdef HAVE_MATHEMATICA
-  #ifndef __WSLINK__
-    typedef struct WSLink* WSLINK;
+  #if WSREVISION > 25
+    #ifndef __MLINK__
+      typedef struct WSLink* WSLINK;
+      #define __MLINK__
+    #endif
+  #else
+    #ifndef __WSLINK__
+      typedef struct WSLink* WSLINK;
+      #define __WSLINK__
+    #endif
   #endif
 #endif
 #ifdef HAVE_PYBIND11
