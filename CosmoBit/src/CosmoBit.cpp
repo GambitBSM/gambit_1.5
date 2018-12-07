@@ -2774,6 +2774,15 @@ namespace Gambit
       result = -0.5*chi2;
     }
 
-  }
+    void compute_Sigma8(double &result)
+    {
+      using namespace Pipes::compute_Sigma8;
 
+      Class_container cosmo = *Dep::class_get_spectra;
+      double sigma8 = BEreq::class_get_sigma8(0.);
+      double Omega_m = cosmo.ba.Omega0_cdm+cosmo.ba.Omega0_dcdmdr+cosmo.ba.Omega0_b+cosmo.ba.Omega0_ncdm_tot;
+
+      result = sigma8*pow(Omega_m/0.3, 0.5);
+    }
+  }
 }

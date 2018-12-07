@@ -112,6 +112,11 @@ ObsLikes:
     module:       CosmoBit
     type:         std::vector<double>
 
+  - purpose:      Observable
+    capability:   Sigma8
+    module:       CosmoBit
+    type:         double
+
 #======== Rule entries ========
 Rules:
 

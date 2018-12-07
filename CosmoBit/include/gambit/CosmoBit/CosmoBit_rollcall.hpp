@@ -392,6 +392,16 @@ START_MODULE
      #undef FUNCTION
   #undef CAPABILITY
 
+  #define CAPABILITY Sigma8
+     START_CAPABILITY
+     #define FUNCTION compute_Sigma8
+      START_FUNCTION(double)
+      DEPENDENCY(class_get_spectra,CosmoBit::Class_container)
+      ALLOW_MODELS(LCDM, LCDM_dNeff_Smu,LCDM_dNeff_Smu_etaBBN,LCDMtensor)
+      BACKEND_REQ(class_get_sigma8,(class_tag),double,(double))
+     #undef FUNCTION
+  #undef CAPABILITY
+
 #undef MODULE
 
 #endif /* defined __CosmoBit_rollcall_hpp__ */
