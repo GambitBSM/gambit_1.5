@@ -32,7 +32,7 @@
 
 // Forward declarations
 #ifdef HAVE_MATHEMATICA
-  #if WSREVISION > 25
+  #if MATHEMATICA_WSTP_VERSION_MAJOR > 4 || (MATHEMATICA_WSTP_VERSION_MAJOR == 4 && MATHEMATICA_WSTP_VERSION_MINOR > 25)
     #ifndef __MLINK__
       typedef struct MLink* WSLINK;
       #define __MLINK__
