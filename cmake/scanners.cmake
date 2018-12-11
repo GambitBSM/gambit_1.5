@@ -26,7 +26,7 @@
 #  \date 2016 Jan
 #
 #  \author Will Handley (wh260@cam.ac.uk)
-#  \date 2018 May
+#  \date 2018 May, Dec
 #
 #************************************************
 

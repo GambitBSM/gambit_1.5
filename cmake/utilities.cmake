@@ -26,6 +26,10 @@
 #          (t.e.gonzalo@fys.uio.no)
 #  \date 2016 Sep
 #
+#  \author Will Handley
+#          (wh260@cam.ac.uk)
+#  \date 2018 Dec
+#
 #************************************************
 
 include(CMakeParseArguments)
