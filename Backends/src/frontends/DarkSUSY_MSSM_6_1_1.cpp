@@ -746,6 +746,10 @@ BE_NAMESPACE
     }
 
     // Do flavour reordering for SLHA2 compatibility
+    // FIXME. The call to dsorder_flavour and dsvertex needs to go AFTER
+    // the widhts are read. Move this later. It requires that we use
+    // a version of dsorder_flavour that also orders widths, dvs a version
+    // of DarkSUSY later than 6.1.1.
     dsorder_flavour();
     // Set up SUSY vertices
     dsvertx();
