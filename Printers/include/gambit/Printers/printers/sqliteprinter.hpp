@@ -88,6 +88,15 @@ namespace Gambit
         // Bool to record if we already have a database file open
         bool db_is_open;
 
+        // Bool to record if an output table exists yet
+        bool results_table_exists;
+
+        // Set to record whether table columns have been created 
+        std::map<std::string,std::string> column_record; 
+
+        // Check if the outbase database is open and the results table exists
+        bool output_ready(); 
+
         // Open database and 'attach' it to this object
         // A database will be created if it doesn't exist
         void open_db(const std::string&);
@@ -97,7 +106,11 @@ namespace Gambit
 
         // Create results table
         void make_table(const std::string&);
-  
+
+        // Check that a table column exists, and create it if needed
+        void ensure_column_exists(const std::string&);
+
+        // Create table insert operation  
     }
 
     // Register printer so it can be constructed via inifile instructions
