@@ -45,7 +45,7 @@ namespace Gambit
         // Initialisation function
         // Run by dependency resolver, which supplies the functors with a vector of VertexIDs whose requiresPrinting flags are set to true.
         void initialise(const std::vector<int>&);
-        void flush();
+        //void flush();
         void reset(bool force=false);
         void finalise(bool abnormal=false);
 
@@ -94,6 +94,22 @@ namespace Gambit
         // Set to record whether table columns have been created 
         std::map<std::string,std::string> column_record; 
 
+        /// @{ Buffer variable
+        
+        std::size_t max_buffer_length;        
+        
+        // Map from column name to (buffer column position, column type) pair
+        std::map<std::string,std::pair<std::size_t,std::string>> buffer_info;
+
+        // "Header" vector for buffer, recording column names for each vector position
+        std::vector<std::string> buffer_header;
+
+        // Buffer for SQLite insertions. Kind of a 2D "array" of column data 
+        // to be transformed into one big INSERT operation once full.
+        std::map<std::size_t,std::vector<std::string>> transaction_data_buffer;
+
+        /// @}
+
         // Check if the outbase database is open and the results table exists
         bool output_ready(); 
 
@@ -110,7 +126,14 @@ namespace Gambit
         // Check that a table column exists, and create it if needed
         void ensure_column_exists(const std::string&);
 
-        // Create table insert operation  
+        // Queue a table insert operation, and submit the queue if it is filled
+        void insert_data(const unsigned int mpirank, const unsigned long pointID, const std::string& col_name, const std::string& col_type, const std::string& data);
+
+        // Submit and clear insert operation queue 
+        void dump_buffer();
+
+        // Delete all buffer data and reset all buffer variables
+        void reset_buffer();
     }
 
     // Register printer so it can be constructed via inifile instructions
