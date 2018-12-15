@@ -18,8 +18,40 @@
 #ifndef __sqliteprinter_hpp__
 #define __sqliteprinter_hpp__
 
+#include <vector>
+#include <map>
+#include <string>
+#include <limits>
+#include <sqlite3.h> // SQLite3 C interface 
+
 // Gambit
 #include "gambit/Printers/baseprinter.hpp"
+
+// Sequence of all types printable by the SQLitePrinter,
+// except those that require special backend types
+#define SQL_TYPES           \
+  (int)                     \
+  (uint)                    \
+  (long)                    \
+  (ulong)                   \
+  (longlong)                \
+  (ulonglong)               \
+  (float)                   \
+  (double)                  \
+
+  //(std::vector<double>)     \
+  //(bool)                    \
+  //(map_str_dbl)             \
+  //(ModelParameters)         \
+  //(triplet<double>)         \
+  //(map_intpair_dbl)         \
+
+// Printable types that need to be excluded in
+// standalone builds
+#define SQL_MODULE_BACKEND_TYPES \
+
+  //(DM_nucleon_couplings)    \
+  //(Flav_KstarMuMu_obs)      \
 
 namespace Gambit
 {
@@ -34,7 +66,7 @@ namespace Gambit
     {
       public:
         /// Constructor (for construction via inifile options)
-        HDF5Printer(const Options&, BasePrinter* const primary = NULL);
+        SQLitePrinter(const Options&, BasePrinter* const primary = NULL);
 
         /// Destructor
         ~SQLitePrinter() {}
@@ -57,10 +89,10 @@ namespace Gambit
 
         ///@{ Print functions
         using BasePrinter::_print; // Tell compiler we are using some of the base class overloads of this on purpose.
-        #define DECLARE_PRINT(r,data,i,elem) void _print(elem const&, const std::string&, const int, const uint, const ulong);
-        BOOST_PP_SEQ_FOR_EACH_I(DECLARE_PRINT, , HDF5_TYPES)
+        #define DECLARE_PRINT(r,data,i,elem) void _print(elem const&, const std::string&, const int, const unsigned int, const unsigned long);
+        BOOST_PP_SEQ_FOR_EACH_I(DECLARE_PRINT, , SQL_TYPES)
         #ifndef SCANNER_STANDALONE
-          BOOST_PP_SEQ_FOR_EACH_I(DECLARE_PRINT, , HDF5_MODULE_BACKEND_TYPES)
+          BOOST_PP_SEQ_FOR_EACH_I(DECLARE_PRINT, , SQL_MODULE_BACKEND_TYPES)
         #endif
         #undef DECLARE_PRINT
         ///@}
@@ -68,10 +100,15 @@ namespace Gambit
          /// Helper print functions
         // Used to reduce repetition in definitions of virtual function overloads
         // (useful since there is no automatic type conversion possible)
+        // This template should work for any simple numeric type
         template<class T>
-        void template_print(T const& value, const std::string& label, const int IDcode, const unsigned int mpirank, const unsigned long pointID)
+        void template_print(T const& value, const std::string& label, const int IDcode, const unsigned int mpirank, const unsigned long pointID, const std::string& col_type)
         {
- 
+            typedef std::numeric_limits<T> lims;
+            std::stringstream sdata;
+            sdata.precision(lims::max_digits10);
+            sdata<<value;
+            insert_data(mpirank, pointID, label, col_type, sdata.str()); 
         } 
 
      private:
@@ -134,8 +171,8 @@ namespace Gambit
 
         // Delete all buffer data and reset all buffer variables
         void reset_buffer();
-    }
-
+    };
+    
     // Register printer so it can be constructed via inifile instructions
     // First argument is string label for inifile access, second is class from which to construct printer
     LOAD_PRINTER(sqlite, SQLitePrinter)

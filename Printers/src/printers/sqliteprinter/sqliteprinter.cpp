@@ -72,14 +72,13 @@ namespace Gambit
     // Constructor
     SQLitePrinter::SQLitePrinter(const Options& options, BasePrinter* const primary)
     : BasePrinter(primary,options.getValueOrDef<bool>(false,"auxilliary"))
-    , printer_name("Primary printer")
     , database_file("uninitialised")
     , table_name("uninitialised")
     , db(NULL)
     , db_is_open(false)
     , results_table_exists(false)
     , column_record()
-    , max_buffer_length(options.getValueOrDef<std::size_t>(1,"buffer_length")
+    , max_buffer_length(options.getValueOrDef<std::size_t>(1,"buffer_length"))
     , buffer_info()
     , buffer_header() 
     , transaction_data_buffer()
@@ -162,7 +161,7 @@ namespace Gambit
         {
             std::stringstream err
             err << "Failed to open database file '"<<path<<"':" << sqlite3_errmsg(db);
-            printer_error.raise(LOCAL_INFO, err.str());
+            printer_error().raise(LOCAL_INFO, err.str());
         }
         else
         {
@@ -225,7 +224,7 @@ namespace Gambit
             std::stringstream err;
             err << "SQL error: " << zErrMsg;
             sqlite3_free(zErrMsg);
-            printer_error.raise(LOCAL_INFO,err.str());
+            printer_error().raise(LOCAL_INFO,err.str());
        }
     }
 
@@ -272,7 +271,7 @@ namespace Gambit
                     err << "  Second SQL error was: " << zErrMsg2 << std::endl;
                     sqlite3_free(zErrMsg);
                     sqlite3_free(zErrMsg2);
-                    printer_error.raise(LOCAL_INFO,err.str());
+                    printer_error().raise(LOCAL_INFO,err.str());
                 }
 
                 // Operation successful, check if our column name exists and has the correct type
@@ -283,7 +282,7 @@ namespace Gambit
                     std::stringstream err;
                     err << "Failed to add new column '"<<sql_col_name<<"' to output SQL table! The ALTER TABLE operation failed, however it was not because the column already existed (we successfully checked and the column was not found). The SQL error was: " << zErrMsg << std::endl; 
                     sqlite3_free(zErrMsg);
-                    printer_error.raise(LOCAL_INFO,err.str());
+                    printer_error().raise(LOCAL_INFO,err.str());
                 }
                 else if(jt->second != sql_col_type);
                 {
@@ -291,7 +290,7 @@ namespace Gambit
                     std::stringstream err;
                     err << "Failed to add new column '"<<sql_col_name<<"' to output SQL table! The column already exists, but it has the wrong type (existing column has type '"<<jt->second<<"', but we expected it to have type '"<<sql_col_type<<"'!";
                     sqlite3_free(zErrMsg);
-                    printer_error.raise(LOCAL_INFO.err.str());
+                    printer_error().raise(LOCAL_INFO.err.str());
                 }
 
                 // Column exists and has the right type! So everything is ok after all.
@@ -305,7 +304,7 @@ namespace Gambit
             // Records say column exists, but not with the type requested!
             std::stringstream err;
             err << "SQLitePrinter records indicated that the column '"<<sql_col_name<<"' already exists in the output table, but with a different type than has been requested (existing type is '"<<it->second<<"', requested type was '"<<sql_col_type<<"'). This indicates either duplicate names in the printer output, or an inconsistency in how the print commands have been issued.";
-            printer_error.raise(LOCAL_INFO.err.str()); 
+            printer_error().raise(LOCAL_INFO.err.str()); 
         }
         // else column exists and type matches, proceed!
     }
@@ -335,7 +334,7 @@ namespace Gambit
             {
                 std::stringstream err;
                 err<<"Size of buffer_header ("<<buffer_header.size()<<") does not match buffer_info ("<<buffer_info.size()<<"). This is a bug, please report it.";
-                printer_error.raise(LOCAL_INFO.err.str());    
+                printer_error().raise(LOCAL_INFO.err.str());    
             }
 
             // Add buffer space
@@ -351,7 +350,7 @@ namespace Gambit
                {
                    std::stringstream err;
                    err<<"Size of a row in the transaction_data_buffer ("<<jt->size()<<") does not match buffer_header ("<<buffer_info.size()<<"). This is a bug, please report it.";
-                   printer_error.raise(LOCAL_INFO.err.str());    
+                   printer_error().raise(LOCAL_INFO.err.str());    
                }
             }
 
@@ -367,7 +366,7 @@ namespace Gambit
             {
                 std::stringstream err;
                 err<<"Attempted to add data for column '"<<col_name<<"' to SQLitePrinter transaction buffer, but the type of the new data ("<<col_type<<") does not match the type already recorded for this column in the buffer ("<<buffer_col_type<<").";
-                printer_error.raise(LOCAL_INFO.err.str());   
+                printer_error().raise(LOCAL_INFO.err.str());   
             }
         }
 
@@ -435,12 +434,29 @@ namespace Gambit
             std::stringstream err;
             err<<"Failed to write transaction buffer for SQLitePrinter to database! SQL error was: "<<zErrMsg;
             sqlite3_free(zErrMsg);
-            printer_error.raise(LOCAL_INFO.err.str());        
+            printer_error().raise(LOCAL_INFO.err.str());        
         }
 
         // Clear all the buffer data
         reset_buffer(); 
     }
      
+    /// @{ PRINT FUNCTIONS
+    /// Need to define one of these for every type we want to print!
+
+    /// Templatable print functions
+    #define PRINT(TYPE,SQLTYPE) _print(TYPE const& value, const std::string& label, const int vID, const uint rank, const ulong pID) \
+       { template_print(value,label,vID,rank,pID,SQLTYPE); }
+    void SQLitePrinter::PRINT(int      ,"INTEGER")
+    void SQLitePrinter::PRINT(uint     ,"INTEGER")
+    void SQLitePrinter::PRINT(long     ,"INTEGER")
+    void SQLitePrinter::PRINT(ulong    ,"INTEGER")
+    void SQLitePrinter::PRINT(longlong ,"INTEGER")
+    void SQLitePrinter::PRINT(ulonglong,"INTEGER")
+    void SQLitePrinter::PRINT(float    ,"REAL")
+    void SQLitePrinter::PRINT(double   ,"REAL")
+    #undef PRINT
+
+
   }
 }
