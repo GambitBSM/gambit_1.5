@@ -39,19 +39,20 @@
   (float)                   \
   (double)                  \
 
-  //(std::vector<double>)     \
-  //(bool)                    \
-  //(map_str_dbl)             \
-  //(ModelParameters)         \
-  //(triplet<double>)         \
-  //(map_intpair_dbl)         \
-
+  /*(std::vector<double>)     \
+  (bool)                    \
+  (map_str_dbl)             \
+  (ModelParameters)         \
+  (triplet<double>)         \
+  (map_intpair_dbl)         \
+  */
 // Printable types that need to be excluded in
 // standalone builds
 #define SQL_MODULE_BACKEND_TYPES \
 
-  //(DM_nucleon_couplings)    \
-  //(Flav_KstarMuMu_obs)      \
+  /*(DM_nucleon_couplings)    \
+    (Flav_KstarMuMu_obs)      \
+  */
 
 namespace Gambit
 {
@@ -147,9 +148,9 @@ namespace Gambit
 
         /// @}
 
-        // Check if the outbase database is open and the results table exists
-        bool output_ready(); 
-
+        // Verify that the outbase database is open and the results table exists
+        void require_output_ready();
+ 
         // Open database and 'attach' it to this object
         // A database will be created if it doesn't exist
         void open_db(const std::string&);
@@ -161,7 +162,7 @@ namespace Gambit
         void make_table(const std::string&);
 
         // Check that a table column exists, and create it if needed
-        void ensure_column_exists(const std::string&);
+        void ensure_column_exists(const std::string&, const std::string&);
 
         // Queue a table insert operation, and submit the queue if it is filled
         void insert_data(const unsigned int mpirank, const unsigned long pointID, const std::string& col_name, const std::string& col_type, const std::string& data);

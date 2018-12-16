@@ -172,3 +172,16 @@ else()
   set (itch "${itch}" "hdf5printer" "hdf5reader")
 endif()
 
+# Check for SQLite libraries
+find_package(SQLite3 QUIET COMPONENTS C)
+if(SQLite3_FOUND)
+  include_directories(${SQLITE3_INCLUDE_DIRS})
+  message("-- Found SQLite3 libraries: ${SQLITE3_LIBRARIES}")
+  if (VERBOSE)
+      message(STATUS ${SQLITE3_INCLUDE_DIRS})
+  endif()
+else()
+  message("${BoldRed}   No SQLite C libraries found. Excluding sqliteprinter and sqlitereader from GAMBIT configuration.${ColourReset}")
+  set (itch "${itch}" "sqliteprinter" "sqlitereader")
+endif()
+

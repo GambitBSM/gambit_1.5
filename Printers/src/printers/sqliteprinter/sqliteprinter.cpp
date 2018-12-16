@@ -34,12 +34,16 @@ namespace Gambit
         return ((i+j)*(i+j+1))/2 + j; 
     }
 
-    // Return a comma if iterator is the last in the supplied iterable
+    // Return a comma unless iterator is the last in the supplied iterable
+    // (or if it points to end())
     template <typename Iter, typename Cont>
     std::string comma_unless_last(Iter it, Cont c)
     { 
        std::string out("");
-       if(it + 1 != c.end()) out = ",";
+       if((it != c.end()) && (it == --c.end()))
+       { /* this is the second last element or end(), do nothing */ }
+       else
+       { out = ","; }
        return out;
     }
 
@@ -53,7 +57,7 @@ namespace Gambit
      *     data - The row's data
      *  columns - The column names
      */
-    static int col_name_callback(void *colmap_in, int count, char **data, char **columns)
+    static int col_name_callback(void* colmap_in, int /*count*/, char** data, char** /* columns */)
     {
         typedef std::map<std::string, std::string> mymaptype;
         mymaptype *colmap = static_cast<mymaptype*>(colmap_in);
@@ -106,13 +110,13 @@ namespace Gambit
         database_file = ff.str();
 
         // Get the name of the data table for this run
-        table_name = options.getValueOrDef("table_name","results");
+        table_name = options.getValueOrDef<std::string>("table_name","results");
         
         // Create/open the database file 
         open_db(database_file);
 
-        // Create/open the results table in the database
-        open_table(table_name);
+        // Create the results table in the database (if it doesn't already exist)
+        make_table(table_name);
     }
 
     void SQLitePrinter::initialise(const std::vector<int>&)
@@ -120,16 +124,16 @@ namespace Gambit
         // Don't need to initialise anything for this printer
     }
 
-    void SQLitePrinter::reset(bool force=false)
+    void SQLitePrinter::reset(bool /*force*/)
     {
         // Not sure if this is really allowed anymore in GAMBIT.
         // Let's throw an error if it gets called.
-        std::stringstream err
+        std::stringstream err;
         err<<"reset() function in SQLitePrinter was called! This printer is not currently capable of resetting the output!";
         printer_error().raise(LOCAL_INFO,err.str()); 
     }
 
-    void SQLitePrinter::finalise(bool /*abnormal*/);
+    void SQLitePrinter::finalise(bool /*abnormal*/)
     {
         // Dump buffer to disk. Nothing special needed for early shutdown.
         SQLitePrinter::dump_buffer();
@@ -141,25 +145,25 @@ namespace Gambit
         // Check if we already have an open database
         if(db!=NULL)
         {
-            std::stringstream err
+            std::stringstream err;
             err << "Refused to open database file '"<<path<<"'; a database file pointer has already been attached to the SQLite printer!";
             printer_error().raise(LOCAL_INFO,err.str()); 
         }
 
         if(db_is_open)
         {
-            std::stringstream err
+            std::stringstream err;
             err << "Refused to open database file '"<<path<<"'; a database file is already flagged by the SQLite printer as open!";
             printer_error().raise(LOCAL_INFO,err.str());  
         }
 
         int rc; // return code
 
-        rc = sqlite3_open(path, &db);
+        rc = sqlite3_open(path.c_str(), &db);
    
         if( rc ) 
         {
-            std::stringstream err
+            std::stringstream err;
             err << "Failed to open database file '"<<path<<"':" << sqlite3_errmsg(db);
             printer_error().raise(LOCAL_INFO, err.str());
         }
@@ -181,7 +185,7 @@ namespace Gambit
     {
         if(db==NULL || !db_is_open || !results_table_exists)
         {
-            std::stringstream err
+            std::stringstream err;
             // Something was not ready, check further and throw an error
             if(db==NULL)
             {
@@ -209,7 +213,7 @@ namespace Gambit
     {
         // Construct the SQLite3 statement
         std::stringstream sql;
-        sql << "CREATE TABLE "<<table_name<<"("
+        sql << "CREATE TABLE IF NOT EXISTS"<<name<<"("
             << "pairID   INT PRIMARY KEY NOT NULL,"
             << "MPIrank  INT             NOT NULL,"
             << "PointID  INT             NOT NULL,"
@@ -262,7 +266,7 @@ namespace Gambit
                 int rc2;
                 char *zErrMsg2 = 0;
                 std::map<std::string, std::string> colnames; // Will be passed to and filled by the callback function
-                rc2 = sqlite3_exec(db, sql2.str().c_str(), col_name_callback, &colnames, &zErrMsg2);
+                rc2 = sqlite3_exec(db, sql2.str().c_str(), &col_name_callback, &colnames, &zErrMsg2);
  
                 if( rc2 != SQLITE_OK ){
                     std::stringstream err;
@@ -290,7 +294,7 @@ namespace Gambit
                     std::stringstream err;
                     err << "Failed to add new column '"<<sql_col_name<<"' to output SQL table! The column already exists, but it has the wrong type (existing column has type '"<<jt->second<<"', but we expected it to have type '"<<sql_col_type<<"'!";
                     sqlite3_free(zErrMsg);
-                    printer_error().raise(LOCAL_INFO.err.str());
+                    printer_error().raise(LOCAL_INFO,err.str());
                 }
 
                 // Column exists and has the right type! So everything is ok after all.
@@ -304,7 +308,7 @@ namespace Gambit
             // Records say column exists, but not with the type requested!
             std::stringstream err;
             err << "SQLitePrinter records indicated that the column '"<<sql_col_name<<"' already exists in the output table, but with a different type than has been requested (existing type is '"<<it->second<<"', requested type was '"<<sql_col_type<<"'). This indicates either duplicate names in the printer output, or an inconsistency in how the print commands have been issued.";
-            printer_error().raise(LOCAL_INFO.err.str()); 
+            printer_error().raise(LOCAL_INFO,err.str()); 
         }
         // else column exists and type matches, proceed!
     }
@@ -334,45 +338,48 @@ namespace Gambit
             {
                 std::stringstream err;
                 err<<"Size of buffer_header ("<<buffer_header.size()<<") does not match buffer_info ("<<buffer_info.size()<<"). This is a bug, please report it.";
-                printer_error().raise(LOCAL_INFO.err.str());    
+                printer_error().raise(LOCAL_INFO,err.str());    
             }
 
             // Add buffer space
             for(auto jt=transaction_data_buffer.begin(); 
                      jt!=transaction_data_buffer.end(); ++jt)
             {
+               std::vector<std::string>& row = jt->second;
+
                // Add new empty column to every row
                // Values are null until we add them 
-               jt->push_back("null");
+               row.push_back("null");
 
                // Make sure size is correct
-               if(jt->size()!=buffer_header.size())
+               if(row.size()!=buffer_header.size())
                {
                    std::stringstream err;
-                   err<<"Size of a row in the transaction_data_buffer ("<<jt->size()<<") does not match buffer_header ("<<buffer_info.size()<<"). This is a bug, please report it.";
-                   printer_error().raise(LOCAL_INFO.err.str());    
+                   err<<"Size of a row in the transaction_data_buffer ("<<row.size()<<") does not match buffer_header ("<<buffer_info.size()<<"). This is a bug, please report it.";
+                   printer_error().raise(LOCAL_INFO,err.str());    
                }
             }
 
             // Now point the map iterator to the right place
+
             it=buffer_info.find(col_name);
         }
         else
         {
             // Column exists in buffer, but we should also make sure the 
             // type is consistent with the new data we are adding
-            std::string buffer_col_type = it->second->second;
+            std::string buffer_col_type = it->second.second;
             if(buffer_col_type != col_type)
             {
                 std::stringstream err;
                 err<<"Attempted to add data for column '"<<col_name<<"' to SQLitePrinter transaction buffer, but the type of the new data ("<<col_type<<") does not match the type already recorded for this column in the buffer ("<<buffer_col_type<<").";
-                printer_error().raise(LOCAL_INFO.err.str());   
+                printer_error().raise(LOCAL_INFO,err.str());   
             }
         }
 
         // Check if a row for this data exists in the transaction buffer
         auto buf_it=transaction_data_buffer.find(rowID);
-        if(buf_it=transaction_data_buffer.end())
+        if(buf_it==transaction_data_buffer.end())
         {
             // Nope, no row yet for this rowID. Add it.
             // Data is set to 'null' until we add some.
@@ -382,7 +389,7 @@ namespace Gambit
         }
 
         // Add the data to the transaction buffer
-        std::size_t col_index = it->second->first;
+        std::size_t col_index = it->second.first;
         transaction_data_buffer.at(rowID).at(col_index) = data;
 
         // If the buffer is full, execute a transaction to write
@@ -413,12 +420,13 @@ namespace Gambit
             sql<<(*col_name_it)<<comma_unless_last(col_name_it,buffer_header);
         }
         sql<<") VALUES (";
-        for(auto row_it=transaction_data_buffer.begin(),
+        for(auto row_it=transaction_data_buffer.begin();
                  row_it!=transaction_data_buffer.end(); ++row_it)
         {
-            for(auto col_it=row_it->begin(); col_it!=row_it->end(); ++col_it)
+            std::vector<std::string>& row = row_it->second;
+            for(auto col_it=row.begin(); col_it!=row.end(); ++col_it)
             {
-                sql<<(*col_it)<<comma_unless_last(col_it,(*row_it));   
+                sql<<(*col_it)<<comma_unless_last(col_it,row);   
             }
             sql<<")"<<comma_unless_last(row_it,transaction_data_buffer);
         }
@@ -434,7 +442,7 @@ namespace Gambit
             std::stringstream err;
             err<<"Failed to write transaction buffer for SQLitePrinter to database! SQL error was: "<<zErrMsg;
             sqlite3_free(zErrMsg);
-            printer_error().raise(LOCAL_INFO.err.str());        
+            printer_error().raise(LOCAL_INFO,err.str());        
         }
 
         // Clear all the buffer data
