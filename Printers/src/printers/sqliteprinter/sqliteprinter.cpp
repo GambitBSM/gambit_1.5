@@ -41,14 +41,21 @@ namespace Gambit
         return ((i+j)*(i+j+1))/2 + j; 
     }
 
+    // Returns new iterator pointing to next element
+    template <typename Iter>
+    Iter next_el(Iter iter)
+    {
+        return ++iter;
+    }
+
     // Return a comma unless iterator is the last in the supplied iterable
     // (or if it points to end())
     template <typename Iter, typename Cont>
-    std::string comma_unless_last(Iter it, Cont c)
+    std::string comma_unless_last(Iter it, const Cont& c)
     { 
        std::string out("");
-       if((it == c.end()) || (it == --c.end()))
-       { /* this is the second last element or end(), do nothing */ }
+       if((it == c.end()) || (next_el(it) == c.end()))
+       { /* this is the last element or end(), do nothing */ }
        else
        { out = ","; }
        return out;
@@ -66,7 +73,7 @@ namespace Gambit
      */
     static int col_name_callback(void* colmap_in, int /*count*/, char** data, char** /* columns */)
     {
-        typedef std::map<std::string, std::string> mymaptype;
+        typedef std::map<std::string, std::string, Utils::ci_less> mymaptype;
         mymaptype *colmap = static_cast<mymaptype*>(colmap_in);
    
         // We know that the column name is the second column of the results set, and the
@@ -294,7 +301,7 @@ namespace Gambit
                 /* Execute SQL statement */
                 int rc2;
                 char *zErrMsg2 = 0;
-                std::map<std::string, std::string> colnames; // Will be passed to and filled by the callback function
+                std::map<std::string, std::string, Utils::ci_less> colnames; // Will be passed to and filled by the callback function
                 rc2 = sqlite3_exec(db, sql2.str().c_str(), &col_name_callback, &colnames, &zErrMsg2);
  
                 if( rc2 != SQLITE_OK ){
@@ -331,11 +338,14 @@ namespace Gambit
                 }
                 else if(!Utils::iequals(jt->second,sql_col_type))
                 {
-                    // Column found, but has the wrong type
-                    std::stringstream err;
-                    err << "Failed to add new column '"<<sql_col_name<<"' to output SQL table! The column already exists, but it has the wrong type (existing column has type '"<<jt->second<<"', but we expected it to have type '"<<sql_col_type<<"'!";
-                    sqlite3_free(zErrMsg);
-                    printer_error().raise(LOCAL_INFO,err.str());
+                    // NOTE: All sorts of type names are equivalent, so this simple string checking is
+                    // totally unreliable! 
+
+                    // // Column found, but has the wrong type
+                    // std::stringstream err;
+                    // err << "Failed to add new column '"<<sql_col_name<<"' to output SQL table! The column already exists, but it has the wrong type (existing column has type '"<<jt->second<<"', but we expected it to have type '"<<sql_col_type<<"'!";
+                    // sqlite3_free(zErrMsg);
+                    // printer_error().raise(LOCAL_INFO,err.str());
                 }
 
                 // Column exists and has the right type! So everything is ok after all.
@@ -346,10 +356,13 @@ namespace Gambit
         } 
         else if(!Utils::iequals(it->second,sql_col_type))
         {
-            // Records say column exists, but not with the type requested!
-            std::stringstream err;
-            err << "SQLitePrinter records indicated that the column '"<<sql_col_name<<"' already exists in the output table, but with a different type than has been requested (existing type is '"<<it->second<<"', requested type was '"<<sql_col_type<<"'). This indicates either duplicate names in the printer output, or an inconsistency in how the print commands have been issued.";
-            printer_error().raise(LOCAL_INFO,err.str()); 
+            // // Records say column exists, but not with the type requested!
+            // NOTE: All sorts of type names are equivalent, so this simple string checking is
+            // totally unreliable! 
+
+            // std::stringstream err;
+            // err << "SQLitePrinter records indicated that the column '"<<sql_col_name<<"' already exists in the output table, but with a different type than has been requested (existing type is '"<<it->second<<"', requested type was '"<<sql_col_type<<"'). This indicates either duplicate names in the printer output, or an inconsistency in how the print commands have been issued.";
+            // printer_error().raise(LOCAL_INFO,err.str()); 
         }
         // else column exists and type matches, proceed!
     }
@@ -457,23 +470,25 @@ namespace Gambit
         require_output_ready(); 
         std::stringstream sql;
 
-        sql<<"INSERT INTO "<<table_name<<" (";
+        sql<<"INSERT INTO "<<table_name<<" (pairID,";
         for(auto col_name_it=buffer_header.begin(); col_name_it!=buffer_header.end(); ++col_name_it)
         {
-            sql<<(*col_name_it)<<comma_unless_last(col_name_it,buffer_header);
+            sql<<"`"<<(*col_name_it)<<"`"<<comma_unless_last(col_name_it,buffer_header);
         }
         sql<<") VALUES (";
         for(auto row_it=transaction_data_buffer.begin();
                  row_it!=transaction_data_buffer.end(); ++row_it)
         {
+            std::size_t pairID = row_it->first;
             std::vector<std::string>& row = row_it->second;
+            sql<<pairID<<",";
             for(auto col_it=row.begin(); col_it!=row.end(); ++col_it)
             {
                 sql<<(*col_it)<<comma_unless_last(col_it,row);   
             }
             sql<<")"<<comma_unless_last(row_it,transaction_data_buffer);
         }
-        sql<<")";
+        sql<<";"; // End statement
 
         /* Execute SQL statement */
         int rc;
