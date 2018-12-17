@@ -91,6 +91,14 @@ namespace Gambit
  
         ///@}
 
+        /// @{ Internal information required by auxilliary printer constructors
+
+        std::string get_database_file();
+        std::string get_table_name();
+        std::size_t get_max_buffer_length();
+
+        /// @} 
+
         ///@{ Print functions
         using BasePrinter::_print; // Tell compiler we are using some of the base class overloads of this on purpose.
         #define DECLARE_PRINT(r,data,i,elem) void _print(elem const&, const std::string&, const int, const unsigned int, const unsigned long);
@@ -116,6 +124,9 @@ namespace Gambit
         } 
 
      private:
+   
+        // Pointer to primary printer object, for retrieving setup information.
+        SQLitePrinter* primary_printer;
 
         // Path to output SQLite database file
         std::string database_file;

@@ -25,6 +25,7 @@ Printer:
   options:
     output_file: "results.sql"
     table_name: "spartan"
+    buffer_length: 1000
 
   #printer: hdf5
   #options:
@@ -42,14 +43,14 @@ Printer:
 
 Scanner:
 
-  use_scanner: random
+  use_scanner: twalk
 
   scanners:
 
     random:
       plugin: random
       like: LogLike
-      point_number: 10
+      point_number: 10000
 
     de:
       plugin: diver

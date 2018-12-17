@@ -81,7 +81,7 @@ namespace Gambit
         std::string column_name(data[1]);
         std::string column_type(data[2]);
 
-        std::cout<<"Reading existing columns: name: "<<column_name<<", type: "<<column_type<<std::endl;
+        //std::cout<<"Reading existing columns: name: "<<column_name<<", type: "<<column_type<<std::endl;
 
         // Add to map
         (*colmap)[column_name] = column_type;
@@ -92,6 +92,7 @@ namespace Gambit
     // Constructor
     SQLitePrinter::SQLitePrinter(const Options& options, BasePrinter* const primary)
     : BasePrinter(primary,options.getValueOrDef<bool>(false,"auxilliary"))
+    , primary_printer(NULL)
     , database_file("uninitialised")
     , table_name("uninitialised")
     , db(NULL)
@@ -103,37 +104,56 @@ namespace Gambit
     , buffer_header() 
     , transaction_data_buffer()
     {
-        // Get path of database file where results should ultimately end up
-        std::ostringstream ff;
-        if(options.hasKey("output_path"))
+        // Test options?
+        //std::cout << "options:" << std::endl<<options.getNode()<<std::endl;
+
+        if(options.getValueOrDef<bool>(false,"auxilliary"))
         {
-            ff << options.getValue<std::string>("output_path") << "/";
+            // If this is an "auxilliary" printer then we need to get some
+            // of our options from the primary printer
+            primary_printer = dynamic_cast<SQLitePrinter*>(this->get_primary_printer());
+            database_file     = primary_printer->get_database_file(); 
+            table_name        = primary_printer->get_table_name();
+            max_buffer_length = primary_printer->get_max_buffer_length();
         }
         else
         {
-            ff << options.getValue<std::string>("default_output_path") << "/";
-        }
+            // Get path of database file where results should ultimately end up
+            std::ostringstream ff;
+            if(options.hasKey("output_path"))
+            {
+                ff << options.getValue<std::string>("output_path") << "/";
+            }
+            else
+            {
+                ff << options.getValue<std::string>("default_output_path") << "/";
+            }
 
-        if(options.hasKey("output_file"))
-        {
-            ff << options.getValue<std::string>("output_file");
-        }
-        else
-        {
-            printer_error().raise(LOCAL_INFO, "No 'output_file' entry specified in the options section of the Printer category of the input YAML file. Please add a name there for the output sqlite database file of the scan.");
-        }
+            if(options.hasKey("output_file"))
+            {
+                ff << options.getValue<std::string>("output_file");
+            }
+            else
+            {
+                printer_error().raise(LOCAL_INFO, "No 'output_file' entry specified in the options section of the Printer category of the input YAML file. Please add a name there for the output sqlite database file of the scan.");
+            }
 
-        database_file = ff.str();
+            database_file = ff.str();
 
-        // Get the name of the data table for this run
-        table_name = options.getValueOrDef<std::string>("results","table_name");
-        
+            // Get the name of the data table for this run
+            table_name = options.getValueOrDef<std::string>("results","table_name");
+        }       
+ 
         // Create/open the database file 
         open_db(database_file);
 
         // Create the results table in the database (if it doesn't already exist)
         make_table(table_name);
     }
+
+    std::string SQLitePrinter::get_database_file() {return database_file;}
+    std::string SQLitePrinter::get_table_name() {return table_name;}
+    std::size_t SQLitePrinter::get_max_buffer_length() {return max_buffer_length;}
 
     void SQLitePrinter::initialise(const std::vector<int>&)
     {
@@ -244,8 +264,8 @@ namespace Gambit
         std::stringstream sql;
         sql << "CREATE TABLE IF NOT EXISTS "<<name<<"("
             << "pairID   INT PRIMARY KEY NOT NULL,"
-            << "MPIrank  INT             NOT NULL,"
-            << "pointID  INT             NOT NULL"
+            << "MPIrank  INT,"
+            << "pointID  INT"
             << ");";
 
         /* Execute SQL statement */
@@ -406,7 +426,7 @@ namespace Gambit
             buffer_info[col_name] = std::make_pair(next_col_index,col_type);
        
             // Add header data
-            std::cout<<"Adding column to buffer: "<<col_name<<std::endl;
+            //std::cout<<"Adding column to buffer: "<<col_name<<std::endl;
             buffer_header.push_back(col_name);
             if(buffer_info.size()!=buffer_header.size())
             {
@@ -475,10 +495,11 @@ namespace Gambit
         {
             sql<<"`"<<(*col_name_it)<<"`"<<comma_unless_last(col_name_it,buffer_header);
         }
-        sql<<") VALUES (";
+        sql<<") VALUES ";
         for(auto row_it=transaction_data_buffer.begin();
                  row_it!=transaction_data_buffer.end(); ++row_it)
         {
+            sql<<"(";
             std::size_t pairID = row_it->first;
             std::vector<std::string>& row = row_it->second;
             sql<<pairID<<",";
