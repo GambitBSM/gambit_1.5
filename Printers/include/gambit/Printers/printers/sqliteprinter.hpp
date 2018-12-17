@@ -14,7 +14,6 @@
 ///
 ///  *********************************************
 
-
 #ifndef __sqliteprinter_hpp__
 #define __sqliteprinter_hpp__
 
@@ -26,6 +25,7 @@
 
 // Gambit
 #include "gambit/Printers/baseprinter.hpp"
+#include "gambit/Utils/util_functions.hpp" // Need Utils::ci_less to make map find() functions case-insensitive, since SQLite is case insensitive
 
 // Sequence of all types printable by the SQLitePrinter,
 // except those that require special backend types
@@ -38,8 +38,11 @@
   (ulonglong)               \
   (float)                   \
   (double)                  \
-
-  /*(std::vector<double>)     \
+  (std::vector<double>)     \
+  (map_str_dbl)             \
+  (ModelParameters)         \
+ 
+/*(std::vector<double>)     \
   (bool)                    \
   (map_str_dbl)             \
   (ModelParameters)         \
@@ -103,7 +106,7 @@ namespace Gambit
         // (useful since there is no automatic type conversion possible)
         // This template should work for any simple numeric type
         template<class T>
-        void template_print(T const& value, const std::string& label, const int IDcode, const unsigned int mpirank, const unsigned long pointID, const std::string& col_type)
+        void template_print(T const& value, const std::string& label, const int /*IDcode*/, const unsigned int mpirank, const unsigned long pointID, const std::string& col_type)
         {
             typedef std::numeric_limits<T> lims;
             std::stringstream sdata;
@@ -130,14 +133,14 @@ namespace Gambit
         bool results_table_exists;
 
         // Set to record whether table columns have been created 
-        std::map<std::string,std::string> column_record; 
+        std::map<std::string,std::string,Utils::ci_less> column_record; 
 
         /// @{ Buffer variable
         
         std::size_t max_buffer_length;        
         
         // Map from column name to (buffer column position, column type) pair
-        std::map<std::string,std::pair<std::size_t,std::string>> buffer_info;
+        std::map<std::string,std::pair<std::size_t,std::string>,Utils::ci_less> buffer_info;
 
         // "Header" vector for buffer, recording column names for each vector position
         std::vector<std::string> buffer_header;

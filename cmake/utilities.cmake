@@ -306,7 +306,7 @@ function(add_gambit_executable executablename LIBRARIES)
   if(pybind11_FOUND)
     set(LIBRARIES ${LIBRARIES} ${PYTHON_LIBRARIES})
   endif()
-  if(SQLite3_FOUND)
+  if(SQLITE3_FOUND)
       set(LIBRARIES ${LIBRARIES} ${SQLITE3_LIBRARIES})
   endif()
 

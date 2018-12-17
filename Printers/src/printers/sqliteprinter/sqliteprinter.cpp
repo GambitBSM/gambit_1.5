@@ -13,6 +13,10 @@
 ///  \date 2018 Dec
 ///
 ///  *********************************************
+///
+///  TODO: Turns out SQLite is case-insensitive, so need
+///  to change various string comparisons here to also be
+///  case-insensitive.
 
 #include <iostream>
 #include <sstream>
@@ -20,6 +24,9 @@
 
 // Gambit
 #include "gambit/Printers/printers/sqliteprinter.hpp"
+
+// Define this macro to dump attempted SQL statements during exceptions
+#define SQL_DEBUG
 
 namespace Gambit
 {
@@ -40,7 +47,7 @@ namespace Gambit
     std::string comma_unless_last(Iter it, Cont c)
     { 
        std::string out("");
-       if((it != c.end()) && (it == --c.end()))
+       if((it == c.end()) || (it == --c.end()))
        { /* this is the second last element or end(), do nothing */ }
        else
        { out = ","; }
@@ -66,6 +73,8 @@ namespace Gambit
         // type is the third column
         std::string column_name(data[1]);
         std::string column_type(data[2]);
+
+        std::cout<<"Reading existing columns: name: "<<column_name<<", type: "<<column_type<<std::endl;
 
         // Add to map
         (*colmap)[column_name] = column_type;
@@ -110,7 +119,7 @@ namespace Gambit
         database_file = ff.str();
 
         // Get the name of the data table for this run
-        table_name = options.getValueOrDef<std::string>("table_name","results");
+        table_name = options.getValueOrDef<std::string>("results","table_name");
         
         // Create/open the database file 
         open_db(database_file);
@@ -137,6 +146,19 @@ namespace Gambit
     {
         // Dump buffer to disk. Nothing special needed for early shutdown.
         SQLitePrinter::dump_buffer();
+    }
+
+    // Reader construction options for constructing a reader
+    // object that can read the output we are printing
+    Options SQLitePrinter::resume_reader_options()
+    {
+        Options options;
+        // Set options that we need later to construct a reader object for
+        // previous output, if required.
+        options.setValue("type", "sqlite");
+        options.setValue("file", database_file);
+        options.setValue("table", table_name);
+        return options;
     }
 
     // Open database and 'attach' it to this object
@@ -213,10 +235,10 @@ namespace Gambit
     {
         // Construct the SQLite3 statement
         std::stringstream sql;
-        sql << "CREATE TABLE IF NOT EXISTS"<<name<<"("
+        sql << "CREATE TABLE IF NOT EXISTS "<<name<<"("
             << "pairID   INT PRIMARY KEY NOT NULL,"
             << "MPIrank  INT             NOT NULL,"
-            << "PointID  INT             NOT NULL,"
+            << "pointID  INT             NOT NULL"
             << ");";
 
         /* Execute SQL statement */
@@ -226,10 +248,17 @@ namespace Gambit
   
         if( rc != SQLITE_OK ){
             std::stringstream err;
-            err << "SQL error: " << zErrMsg;
+            err << "SQL error: " << zErrMsg << std::endl;
+#ifdef SQL_DEBUG
+            err << "The attempted SQL statement was:"<<std::endl;
+            err << sql.str() << std::endl;; 
+#endif
             sqlite3_free(zErrMsg);
             printer_error().raise(LOCAL_INFO,err.str());
        }
+
+       // Flag the results table as existing
+       results_table_exists = true;
     }
 
     // Check that a table column exists with the correct type, and create it if needed
@@ -248,7 +277,7 @@ namespace Gambit
             // the column already existed, and not some other reason.
 
             std::stringstream sql;
-            sql<<"ALTER TABLE "<<table_name<<" ADD COLUMN "<<sql_col_name<<" "<<sql_col_type<<";";
+            sql<<"ALTER TABLE "<<table_name<<" ADD COLUMN `"<<sql_col_name<<"` "<<sql_col_type<<";";
 
             /* Execute SQL statement */
             int rc;
@@ -272,7 +301,15 @@ namespace Gambit
                     std::stringstream err;
                     err << "Failed to check SQL column names in output table, after failing to add a new column '"<<sql_col_name<<"' to that table."<<std::endl; 
                     err << "  First  SQL error was: " << zErrMsg << std::endl;
+#ifdef SQL_DEBUG
+                    err << "  The attempted SQL statement was:"<<std::endl;
+                    err << sql.str() << std::endl; 
+#endif
                     err << "  Second SQL error was: " << zErrMsg2 << std::endl;
+#ifdef SQL_DEBUG
+                    err << "  The attempted SQL statement was:"<<std::endl;
+                    err << sql2.str() << std::endl; 
+#endif
                     sqlite3_free(zErrMsg);
                     sqlite3_free(zErrMsg2);
                     printer_error().raise(LOCAL_INFO,err.str());
@@ -285,10 +322,14 @@ namespace Gambit
                     // Column not found
                     std::stringstream err;
                     err << "Failed to add new column '"<<sql_col_name<<"' to output SQL table! The ALTER TABLE operation failed, however it was not because the column already existed (we successfully checked and the column was not found). The SQL error was: " << zErrMsg << std::endl; 
+#ifdef SQL_DEBUG
+                    err << "The attempted SQL statement was:"<<std::endl;
+                    err << sql.str() << std::endl;
+#endif
                     sqlite3_free(zErrMsg);
                     printer_error().raise(LOCAL_INFO,err.str());
                 }
-                else if(jt->second != sql_col_type);
+                else if(!Utils::iequals(jt->second,sql_col_type))
                 {
                     // Column found, but has the wrong type
                     std::stringstream err;
@@ -303,7 +344,7 @@ namespace Gambit
             // Column should exist now. Need to add the fact of this columns existence to our internal record.
             column_record[sql_col_name] = sql_col_type;     
         } 
-        else if(it->second != sql_col_type)
+        else if(!Utils::iequals(it->second,sql_col_type))
         {
             // Records say column exists, but not with the type requested!
             std::stringstream err;
@@ -323,6 +364,25 @@ namespace Gambit
         // Create it if needed.  
         ensure_column_exists(col_name, col_type);
 
+        // Check if a row for this data exists in the transaction buffer
+        auto buf_it=transaction_data_buffer.find(rowID);
+        if(buf_it==transaction_data_buffer.end())
+        {
+            // Nope, no row yet for this rowID. Add it.
+            // But we should first dump the buffer if it was full
+        
+            // If the buffer is full, execute a transaction to write
+            // data to disk, and clear the buffer
+            if(transaction_data_buffer.size()>=max_buffer_length)
+            {
+                dump_buffer();         
+            }
+    
+            // Data is set to 'null' until we add some.
+            std::size_t current_row_size=buffer_info.size();
+            transaction_data_buffer.emplace(rowID,std::vector<std::string>(current_row_size,"null"));
+        }
+
         // Check if this column exists in the current output buffer
         // Create it if needed
         auto it=buffer_info.find(col_name);
@@ -333,6 +393,7 @@ namespace Gambit
             buffer_info[col_name] = std::make_pair(next_col_index,col_type);
        
             // Add header data
+            std::cout<<"Adding column to buffer: "<<col_name<<std::endl;
             buffer_header.push_back(col_name);
             if(buffer_info.size()!=buffer_header.size())
             {
@@ -369,7 +430,7 @@ namespace Gambit
             // Column exists in buffer, but we should also make sure the 
             // type is consistent with the new data we are adding
             std::string buffer_col_type = it->second.second;
-            if(buffer_col_type != col_type)
+            if(!Utils::iequals(buffer_col_type,col_type))
             {
                 std::stringstream err;
                 err<<"Attempted to add data for column '"<<col_name<<"' to SQLitePrinter transaction buffer, but the type of the new data ("<<col_type<<") does not match the type already recorded for this column in the buffer ("<<buffer_col_type<<").";
@@ -377,27 +438,9 @@ namespace Gambit
             }
         }
 
-        // Check if a row for this data exists in the transaction buffer
-        auto buf_it=transaction_data_buffer.find(rowID);
-        if(buf_it==transaction_data_buffer.end())
-        {
-            // Nope, no row yet for this rowID. Add it.
-            // Data is set to 'null' until we add some.
-            std::size_t current_row_size=buffer_info.size();
-            transaction_data_buffer.emplace(rowID,std::vector<std::string>(current_row_size,"null"));
-            auto buf_it=transaction_data_buffer.find(rowID);
-        }
-
         // Add the data to the transaction buffer
         std::size_t col_index = it->second.first;
         transaction_data_buffer.at(rowID).at(col_index) = data;
-
-        // If the buffer is full, execute a transaction to write
-        // data to disk, and clear the buffer
-        if(transaction_data_buffer.size()>=max_buffer_length)
-        {
-            dump_buffer();         
-        }
     }
 
     // Delete all buffer data and reset all buffer variables
@@ -440,7 +483,11 @@ namespace Gambit
         if(rc != SQLITE_OK)
         {
             std::stringstream err;
-            err<<"Failed to write transaction buffer for SQLitePrinter to database! SQL error was: "<<zErrMsg;
+            err<<"Failed to write transaction buffer for SQLitePrinter to database! SQL error was: "<<zErrMsg<<std::endl;
+#ifdef SQL_DEBUG
+            err << "The attempted SQL statement was:"<<std::endl;
+            err << sql.str() << std::endl;  
+#endif
             sqlite3_free(zErrMsg);
             printer_error().raise(LOCAL_INFO,err.str());        
         }
@@ -464,6 +511,34 @@ namespace Gambit
     void SQLitePrinter::PRINT(float    ,"REAL")
     void SQLitePrinter::PRINT(double   ,"REAL")
     #undef PRINT
+
+    void SQLitePrinter::_print(ModelParameters const& value, const std::string& label, const int vID, const unsigned int mpirank, const unsigned long pointID)
+    {
+      std::map<std::string, double> parameter_map = value.getValues();
+      _print(parameter_map, label, vID, mpirank, pointID);
+    }
+
+    void SQLitePrinter::_print(const map_str_dbl& map, const std::string& label, const int vID, const unsigned int mpirank, const unsigned long pointID)
+    {
+      for (std::map<std::string, double>::const_iterator
+           it = map.begin(); it != map.end(); it++)
+      {
+        std::stringstream ss;
+        ss<<label<<"::"<<it->first;
+        _print(it->second, ss.str(), vID, mpirank, pointID);
+      }
+    }
+
+    void SQLitePrinter::_print(std::vector<double> const& value, const std::string& label, const int vID, const unsigned int mpirank, const unsigned long pointID)
+    {
+      for(unsigned int i=0;i<value.size();i++)
+      {
+        std::stringstream ss;
+        ss<<label<<"["<<i<<"]";
+        _print(value.at(i), ss.str(), vID, mpirank, pointID);  
+      }
+    }
+
 
 
   }
