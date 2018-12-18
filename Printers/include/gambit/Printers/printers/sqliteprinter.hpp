@@ -162,6 +162,9 @@ namespace Gambit
 
         /// @}
 
+        // Determines whether output is new row insertions, or updates previously existing rows
+        bool synchronised;
+
         // Verify that the outbase database is open and the results table exists
         void require_output_ready();
  
@@ -178,12 +181,18 @@ namespace Gambit
         // Check that a table column exists, and create it if needed
         void ensure_column_exists(const std::string&, const std::string&);
 
+        // Create an SQL table insert operation for the current transaction_data_buffer
+        // Modifies 'sql' stringstream in-place
+        void turn_buffer_into_insert(std::stringstream& sql, const std::string& table);
+
         // Queue a table insert operation, and submit the queue if it is filled
         void insert_data(const unsigned int mpirank, const unsigned long pointID, const std::string& col_name, const std::string& col_type, const std::string& data);
 
         // Submit and clear insert operation queue 
         void dump_buffer();
-
+        void dump_buffer_as_INSERT();
+        void dump_buffer_as_UPDATE();
+ 
         // Delete all buffer data and reset all buffer variables
         void reset_buffer();
     };

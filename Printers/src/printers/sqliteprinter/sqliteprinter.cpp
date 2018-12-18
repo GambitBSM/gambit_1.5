@@ -103,11 +103,12 @@ namespace Gambit
     , buffer_info()
     , buffer_header() 
     , transaction_data_buffer()
+    , synchronised(!options.getValueOrDef<bool>(false,"auxilliary"))
     {
         // Test options?
         //std::cout << "options:" << std::endl<<options.getNode()<<std::endl;
 
-        if(options.getValueOrDef<bool>(false,"auxilliary"))
+        if(is_auxilliary_printer())
         {
             // If this is an "auxilliary" printer then we need to get some
             // of our options from the primary printer
@@ -118,6 +119,9 @@ namespace Gambit
         }
         else
         {
+            // Tell scannerbit if we are resuming
+            set_resume(options.getValue<bool>("resume"));
+
             // Get path of database file where results should ultimately end up
             std::ostringstream ff;
             if(options.hasKey("output_path"))
@@ -142,6 +146,35 @@ namespace Gambit
 
             // Get the name of the data table for this run
             table_name = options.getValueOrDef<std::string>("results","table_name");
+
+            // Delete final target file if one with same name already exists? (and if we are restarting the run)
+            // Mostly for convenience during testing. Recommend to use 'false' for serious runs to avoid
+            // accidentally deleting valuable output.
+            bool overwrite_file  = options.getValueOrDef<bool>(false,"delete_file_on_restart");
+ 
+            if(overwrite_file and not get_resume())
+            {
+              // Note: "not resume" means "start or restart"
+              // Delete existing output file
+              std::ostringstream command;
+              command << "rm -f "<<database_file;
+              logger() << LogTags::printers << LogTags::info << "Running shell command: " << command.str() << EOM;
+              FILE* fp = popen(command.str().c_str(), "r");
+              if(fp==NULL)
+              {
+                // Error running popen
+                std::ostringstream errmsg;
+                errmsg << "rank "<<myRank<<": Error deleting existing output file (requested by 'delete_file_on_restart' printer option; target filename is "<<database_file<<")! popen failed to run the command (command was '"<<command.str()<<"')";
+                printer_error().raise(LOCAL_INFO, errmsg.str());
+              }
+              else if(pclose(fp)!=0)
+              {
+                // Command returned exit code!=0, or pclose failed
+                std::ostringstream errmsg;
+                errmsg << "rank "<<myRank<<": Error deleting existing output file (requested by 'delete_file_on_restart' printer option; target filename is "<<database_file<<")! Shell command failed to executed successfully, see stderr (command was '"<<command.str()<<"').";
+                printer_error().raise(LOCAL_INFO, errmsg.str());
+              }
+            } 
         }       
  
         // Create/open the database file 
@@ -484,13 +517,11 @@ namespace Gambit
         transaction_data_buffer.clear();
     }
 
-    // Execute an SQLite transaction to write the buffer to the output table
-    void SQLitePrinter::dump_buffer()
+    // Create an SQL table insert operation for the current transaction_data_buffer
+    // Modifies 'sql' stringstream in-place
+    void SQLitePrinter::turn_buffer_into_insert(std::stringstream& sql, const std::string& table)
     {
-        require_output_ready(); 
-        std::stringstream sql;
-
-        sql<<"INSERT INTO "<<table_name<<" (pairID,";
+        sql<<"INSERT INTO "<<table<<" (pairID,";
         for(auto col_name_it=buffer_header.begin(); col_name_it!=buffer_header.end(); ++col_name_it)
         {
             sql<<"`"<<(*col_name_it)<<"`"<<comma_unless_last(col_name_it,buffer_header);
@@ -510,6 +541,14 @@ namespace Gambit
             sql<<")"<<comma_unless_last(row_it,transaction_data_buffer);
         }
         sql<<";"; // End statement
+    }
+
+    // Execute an SQLite transaction to write the buffer to the output table
+    void SQLitePrinter::dump_buffer_as_INSERT()
+    {
+        // Add the table INSERT operation to a stream
+        std::stringstream sql;
+        turn_buffer_into_insert(sql,table_name);
 
         /* Execute SQL statement */
         int rc;
@@ -527,11 +566,80 @@ namespace Gambit
             sqlite3_free(zErrMsg);
             printer_error().raise(LOCAL_INFO,err.str());        
         }
+    }
+ 
+    void SQLitePrinter::dump_buffer_as_UPDATE()
+    {
+        std::stringstream sql;
+        // So for this is seems like the best thing to do is create a temporary
+        // table with this new data, and then update the main output table from
+        // this. Otherwise we have to write tonnes of separate 'update' statements,
+        // which is probably not very fast.
+        // So first we need to create the temporary table.
+        sql << "DROP TABLE IF EXISTS temp_table;"
+            << "CREATE TEMPORARY TABLE temp_table("
+            << "pairID   INT PRIMARY KEY NOT NULL,";
+        for(auto col_it=buffer_info.begin(); col_it!=buffer_info.end(); ++col_it)
+        { 
+            const std::string& col_name(col_it->first);
+            const std::string& col_type(col_it->second.second);
+            sql<<"`"<<col_name<<"`   "<<col_type<<comma_unless_last(col_it,buffer_info);
+        }
+        sql <<");";
 
+        // Insert data into the temporary table
+        turn_buffer_into_insert(sql,"temp_table");
+
+        // Update the primary output table using the temporary table
+        // Following: https://stackoverflow.com/a/47753166/1447953
+        sql<<"UPDATE "<<table_name<<" SET (";
+        for(auto col_name_it=buffer_header.begin(); col_name_it!=buffer_header.end(); ++col_name_it)
+        { 
+            sql<<*col_name_it<<comma_unless_last(col_name_it,buffer_header);
+        }
+        sql<<") = (SELECT ";
+        for(auto col_name_it=buffer_header.begin(); col_name_it!=buffer_header.end(); ++col_name_it)
+        { 
+            sql<<"temp_table."<<*col_name_it<<comma_unless_last(col_name_it,buffer_header);
+        }
+        sql<<" FROM temp_table WHERE temp_table.pairID = "<<table_name<<".pairID)";
+        sql<<" WHERE EXISTS ( SELECT * FROM temp_table WHERE temp_table.pairID = "<<table_name<<".pairID);";
+
+        /* Execute SQL statement */
+        int rc;
+        char *zErrMsg = 0;
+        rc = sqlite3_exec(db, sql.str().c_str(), NULL, NULL, &zErrMsg);
+  
+        if(rc != SQLITE_OK)
+        {
+            std::stringstream err;
+            err<<"Failed to write asynchronous transaction buffer for SQLitePrinter to database! SQL error was: "<<zErrMsg<<std::endl;
+#ifdef SQL_DEBUG
+            err << "The attempted SQL statement was:"<<std::endl;
+            err << sql.str() << std::endl;  
+#endif
+            sqlite3_free(zErrMsg);
+            printer_error().raise(LOCAL_INFO,err.str());        
+        }
+    }
+   
+    void SQLitePrinter::dump_buffer()
+    {
+        require_output_ready(); 
+        if(synchronised)
+        {
+            // Primary dataset writes can be performed as INSERT operations
+            dump_buffer_as_INSERT();
+        }
+        else
+        {
+            // Asynchronous ('auxilliary') writes need to be performed as UPDATE operations
+            dump_buffer_as_UPDATE();
+        }
         // Clear all the buffer data
         reset_buffer(); 
     }
-     
+ 
     /// @{ PRINT FUNCTIONS
     /// Need to define one of these for every type we want to print!
 
