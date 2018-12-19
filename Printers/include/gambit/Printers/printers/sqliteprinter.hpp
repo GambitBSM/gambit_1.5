@@ -65,6 +65,9 @@ namespace Gambit
     // We use this to turn MPI rank and point ID integers into an SQLite row ID
     inline std::size_t pairfunc(const std::size_t i, const std::size_t j);
  
+    // Type of function pointer for SQLite callback function
+    typedef int sql_callback_fptr(void*, int, char**, char**);
+ 
     /// The main printer class for output to SQLite database
     class SQLitePrinter : public BasePrinter
     {
@@ -124,7 +127,12 @@ namespace Gambit
         } 
 
      private:
-   
+ 
+        #ifdef WITH_MPI
+        // Gambit MPI communicator context for use within the SQLite printer system
+        GMPI::Comm myComm;
+        #endif
+  
         // Pointer to primary printer object, for retrieving setup information.
         SQLitePrinter* primary_printer;
 
@@ -175,6 +183,9 @@ namespace Gambit
         // Close the database file that is attached to this object
         void close_db();
 
+        // Submit an SQL statement to the database
+        int submit_sql(const std::string& local_info, const std::string& sqlstr, bool allow_fail=false, sql_callback_fptr callback=NULL, void* data=NULL, char **zErrMsg=NULL);
+ 
         // Create results table
         void make_table(const std::string&);
 

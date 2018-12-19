@@ -20,7 +20,11 @@
 
 #include <iostream>
 #include <sstream>
-#include <sqlite3.h> // SQLite3 C interface 
+#include <chrono>
+#include <thread>
+
+// SQLite3 C interface 
+#include <sqlite3.h> 
 
 // Gambit
 #include "gambit/Printers/printers/sqliteprinter.hpp"
@@ -92,6 +96,9 @@ namespace Gambit
     // Constructor
     SQLitePrinter::SQLitePrinter(const Options& options, BasePrinter* const primary)
     : BasePrinter(primary,options.getValueOrDef<bool>(false,"auxilliary"))
+#ifdef WITH_MPI
+    , myComm() // initially attaches to MPI_COMM_WORLD
+#endif
     , primary_printer(NULL)
     , database_file("uninitialised")
     , table_name("uninitialised")
@@ -119,6 +126,11 @@ namespace Gambit
         }
         else
         {
+            // MPI setup
+#ifdef WITH_MPI 
+            this->setRank(myComm.Get_rank()); // tells base class about rank
+#endif
+
             // Tell scannerbit if we are resuming
             set_resume(options.getValue<bool>("resume"));
 
@@ -151,8 +163,8 @@ namespace Gambit
             // Mostly for convenience during testing. Recommend to use 'false' for serious runs to avoid
             // accidentally deleting valuable output.
             bool overwrite_file  = options.getValueOrDef<bool>(false,"delete_file_on_restart");
- 
-            if(overwrite_file and not get_resume())
+
+            if(getRank()==0 and overwrite_file and not get_resume())
             {
               // Note: "not resume" means "start or restart"
               // Delete existing output file
@@ -164,17 +176,21 @@ namespace Gambit
               {
                 // Error running popen
                 std::ostringstream errmsg;
-                errmsg << "rank "<<myRank<<": Error deleting existing output file (requested by 'delete_file_on_restart' printer option; target filename is "<<database_file<<")! popen failed to run the command (command was '"<<command.str()<<"')";
+                errmsg << "rank "<<getRank()<<": Error deleting existing output file (requested by 'delete_file_on_restart' printer option; target filename is "<<database_file<<")! popen failed to run the command (command was '"<<command.str()<<"')";
                 printer_error().raise(LOCAL_INFO, errmsg.str());
               }
               else if(pclose(fp)!=0)
               {
                 // Command returned exit code!=0, or pclose failed
                 std::ostringstream errmsg;
-                errmsg << "rank "<<myRank<<": Error deleting existing output file (requested by 'delete_file_on_restart' printer option; target filename is "<<database_file<<")! Shell command failed to executed successfully, see stderr (command was '"<<command.str()<<"').";
+                errmsg << "rank "<<getRank()<<": Error deleting existing output file (requested by 'delete_file_on_restart' printer option; target filename is "<<database_file<<")! Shell command failed to executed successfully, see stderr (command was '"<<command.str()<<"').";
                 printer_error().raise(LOCAL_INFO, errmsg.str());
               }
-            } 
+            }
+#ifdef WITH_MPI
+            // Make sure no processes try to open database until we are sure it won't be deleted and replaced
+            myComm.Barrier();
+#endif
         }       
  
         // Create/open the database file 
@@ -290,6 +306,36 @@ namespace Gambit
         // Else we are good to go!
     } 
 
+    // Function to repeatedly attempt an SQLite statement if the database is locked/busy
+    int SQLitePrinter::submit_sql(const std::string& local_info, const std::string& sqlstr, bool allow_fail, sql_callback_fptr callback, void* data, char **zErrMsg)
+    {
+        int rc;
+        do
+        {
+            rc = sqlite3_exec(db, sqlstr.c_str(), callback, data, zErrMsg);
+            if(rc==SQLITE_BUSY)
+            {
+                // Wait at least a short time to avoid slamming the filesystem too much
+                std::chrono::milliseconds timespan(10);
+                std::this_thread::sleep_for(timespan);
+            }
+        }
+        while (rc == SQLITE_BUSY);
+
+        // if allow_fail is true then we don't catch this error, we allow the caller of this function to hander it.
+        if( (rc != SQLITE_OK) and not allow_fail ){
+            std::stringstream err;
+            err << "SQL error: " << *zErrMsg << std::endl;
+#ifdef SQL_DEBUG
+            err << "The attempted SQL statement was:"<<std::endl;
+            err << sqlstr << std::endl;; 
+#endif
+            sqlite3_free(*zErrMsg);
+            printer_error().raise(local_info,err.str());
+       }
+       return rc;
+    }
+
     // Create results table
     void SQLitePrinter::make_table(const std::string& name)
     {
@@ -302,23 +348,10 @@ namespace Gambit
             << ");";
 
         /* Execute SQL statement */
-        int rc;
-        char *zErrMsg = 0;
-        rc = sqlite3_exec(db, sql.str().c_str(), NULL, NULL, &zErrMsg);
-  
-        if( rc != SQLITE_OK ){
-            std::stringstream err;
-            err << "SQL error: " << zErrMsg << std::endl;
-#ifdef SQL_DEBUG
-            err << "The attempted SQL statement was:"<<std::endl;
-            err << sql.str() << std::endl;; 
-#endif
-            sqlite3_free(zErrMsg);
-            printer_error().raise(LOCAL_INFO,err.str());
-       }
+        submit_sql(LOCAL_INFO, sql.str());
 
-       // Flag the results table as existing
-       results_table_exists = true;
+        // Flag the results table as existing
+        results_table_exists = true;
     }
 
     // Check that a table column exists with the correct type, and create it if needed
@@ -342,7 +375,8 @@ namespace Gambit
             /* Execute SQL statement */
             int rc;
             char *zErrMsg = 0;
-            rc = sqlite3_exec(db, sql.str().c_str(), NULL, NULL, &zErrMsg);
+            // Need allow_fail=true for this case
+            rc = submit_sql(LOCAL_INFO, sql.str(), true, NULL, NULL, &zErrMsg);
   
             if( rc != SQLITE_OK ){
                 // Operation failed for some reason. Probably because the column already
@@ -351,16 +385,16 @@ namespace Gambit
                 std::stringstream sql2;
                 sql2<<"PRAGMA table_info("<<table_name<<");";
 
-                /* Execute SQL statement */
+                /* Execute SQL statement */ 
                 int rc2;
                 char *zErrMsg2 = 0;
                 std::map<std::string, std::string, Utils::ci_less> colnames; // Will be passed to and filled by the callback function
-                rc2 = sqlite3_exec(db, sql2.str().c_str(), &col_name_callback, &colnames, &zErrMsg2);
+                rc2 = submit_sql(LOCAL_INFO, sql2.str(), true, &col_name_callback, &colnames, &zErrMsg2);
  
                 if( rc2 != SQLITE_OK ){
                     std::stringstream err;
                     err << "Failed to check SQL column names in output table, after failing to add a new column '"<<sql_col_name<<"' to that table."<<std::endl; 
-                    err << "  First  SQL error was: " << zErrMsg << std::endl;
+                    err << "  First SQL error was: " << zErrMsg << std::endl;
 #ifdef SQL_DEBUG
                     err << "  The attempted SQL statement was:"<<std::endl;
                     err << sql.str() << std::endl; 
@@ -551,21 +585,7 @@ namespace Gambit
         turn_buffer_into_insert(sql,table_name);
 
         /* Execute SQL statement */
-        int rc;
-        char *zErrMsg = 0;
-        rc = sqlite3_exec(db, sql.str().c_str(), NULL, NULL, &zErrMsg);
-  
-        if(rc != SQLITE_OK)
-        {
-            std::stringstream err;
-            err<<"Failed to write transaction buffer for SQLitePrinter to database! SQL error was: "<<zErrMsg<<std::endl;
-#ifdef SQL_DEBUG
-            err << "The attempted SQL statement was:"<<std::endl;
-            err << sql.str() << std::endl;  
-#endif
-            sqlite3_free(zErrMsg);
-            printer_error().raise(LOCAL_INFO,err.str());        
-        }
+        submit_sql(LOCAL_INFO,sql.str());
     }
  
     void SQLitePrinter::dump_buffer_as_UPDATE()
@@ -606,21 +626,7 @@ namespace Gambit
         sql<<" WHERE EXISTS ( SELECT * FROM temp_table WHERE temp_table.pairID = "<<table_name<<".pairID);";
 
         /* Execute SQL statement */
-        int rc;
-        char *zErrMsg = 0;
-        rc = sqlite3_exec(db, sql.str().c_str(), NULL, NULL, &zErrMsg);
-  
-        if(rc != SQLITE_OK)
-        {
-            std::stringstream err;
-            err<<"Failed to write asynchronous transaction buffer for SQLitePrinter to database! SQL error was: "<<zErrMsg<<std::endl;
-#ifdef SQL_DEBUG
-            err << "The attempted SQL statement was:"<<std::endl;
-            err << sql.str() << std::endl;  
-#endif
-            sqlite3_free(zErrMsg);
-            printer_error().raise(LOCAL_INFO,err.str());        
-        }
+        submit_sql(LOCAL_INFO,sql.str());
     }
    
     void SQLitePrinter::dump_buffer()
