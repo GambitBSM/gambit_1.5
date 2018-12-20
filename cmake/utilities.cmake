@@ -26,6 +26,10 @@
 #          (t.e.gonzalo@fys.uio.no)
 #  \date 2016 Sep
 #
+#  \author Will Handley
+#          (wh260@cam.ac.uk)
+#  \date 2018 Dec
+#
 #************************************************
 
 include(CMakeParseArguments)
@@ -280,6 +284,12 @@ function(add_gambit_executable executablename LIBRARIES)
     set(LIBRARIES ${LIBRARIES} ${MPI_C_LIBRARIES})
     if(MPI_C_LINK_FLAGS)
       set_target_properties(${executablename} PROPERTIES LINK_FLAGS ${MPI_C_LINK_FLAGS})
+    endif()
+  endif()
+  if(MPI_Fortran_FOUND)
+    set(LIBRARIES ${LIBRARIES} ${MPI_Fortran_LIBRARIES})
+    if(MPI_Fortran_LINK_FLAGS)
+        set_target_properties(${executablename} PROPERTIES LINK_FLAGS ${MPI_Fortran_LINK_FLAGS})
     endif()
   endif()
   if (LIBDL_FOUND)
