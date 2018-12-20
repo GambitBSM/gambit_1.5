@@ -385,7 +385,7 @@ Rules:
   - capability: CMSnoeffAnalysisContainer
     function: getCMSnoeffAnalysisContainer
     options:
-      analyses: [ [ "CMS_13TeV_2OSLEP_stop_36invfb"] ]
+      analyses: [ [ "CMS_13TeV_2OSLEP_chargino_stop_36invfb"] ]
 
 
   # List any analyses that should *NOT* be included in the total log-likelihood!
