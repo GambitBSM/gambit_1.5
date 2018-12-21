@@ -267,7 +267,7 @@ int main(int argc, char* argv[])
     // Specify which analyses to run and which detectors to use.
     //
     // Note: Adding more detectors and analysis containers
-    //       will require additions to the manual dependecy 
+    //       will require additions to the manual dependecy
     //       resolution at the top.
     //
 
