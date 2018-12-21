@@ -289,23 +289,28 @@ namespace Gambit
         // Don't need to initialise anything for this printer
     }
 
-    void SQLitePrinter::reset(bool /*force*/)
+    void SQLitePrinter::reset(bool force)
     {
         // This is needed by e.g. MultiNest to delete old weights and replace them
         // with new ones.
 
-        // Should put a check so that only auxilliary printers can delete stuff, unless 'force' is set
-
-        // Read through header to see what columns this printer has been touching. These are
-        // the ones that we will reset/delete.
-        // (a more nuanced reset might be required in the future?)
-        sql<<"INSERT INTO "<<table<<" (pairID,";
-        for(auto col_name_it=buffer_header.begin(); col_name_it!=buffer_header.end(); ++col_name_it)
+        // Primary printers aren't allowed to delete stuff unless 'force' is set to true
+        if(is_auxilliary() or force) 
         {
-            sql<<"`"<<(*col_name_it)<<"`"<<comma_unless_last(col_name_it,buffer_header);
-        }
-        sql<<") VALUES ";
+            // Read through header to see what columns this printer has been touching. These are
+            // the ones that we will reset/delete.
+            // (a more nuanced reset might be required in the future?)
+            std::stringstream sql;
+            sql<<"UPDATE "<<table_name<<" SET "<<
+            for(auto col_name_it=buffer_header.begin(); col_name_it!=buffer_header.end(); ++col_name_it)
+            {
+                sql<<"`"<<(*col_name_it)<<"`=null"<<comma_unless_last(col_name_it,buffer_header);
+            }
+            sql<<";";
  
+            /* Execute SQL statement */
+            submit_sql(LOCAL_INFO, sql.str());
+        }
     }
 
     void SQLitePrinter::finalise(bool /*abnormal*/)
