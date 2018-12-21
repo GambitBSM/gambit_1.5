@@ -99,6 +99,8 @@ namespace Gambit
 #ifdef WITH_MPI
     , myComm() // initially attaches to MPI_COMM_WORLD
 #endif
+    , mpiRank(0)
+    , mpiSize(1)
     , primary_printer(NULL)
     , database_file("uninitialised")
     , table_name("uninitialised")
@@ -129,6 +131,8 @@ namespace Gambit
             // MPI setup
 #ifdef WITH_MPI 
             this->setRank(myComm.Get_rank()); // tells base class about rank
+            mpiRank = myComm.Get_rank();
+            mpiSize = myComm.Get_size();
 #endif
 
             // Tell scannerbit if we are resuming
@@ -166,27 +170,28 @@ namespace Gambit
 
             if(getRank()==0 and overwrite_file and not get_resume())
             {
-              // Note: "not resume" means "start or restart"
-              // Delete existing output file
-              std::ostringstream command;
-              command << "rm -f "<<database_file;
-              logger() << LogTags::printers << LogTags::info << "Running shell command: " << command.str() << EOM;
-              FILE* fp = popen(command.str().c_str(), "r");
-              if(fp==NULL)
-              {
-                // Error running popen
-                std::ostringstream errmsg;
-                errmsg << "rank "<<getRank()<<": Error deleting existing output file (requested by 'delete_file_on_restart' printer option; target filename is "<<database_file<<")! popen failed to run the command (command was '"<<command.str()<<"')";
-                printer_error().raise(LOCAL_INFO, errmsg.str());
-              }
-              else if(pclose(fp)!=0)
-              {
-                // Command returned exit code!=0, or pclose failed
-                std::ostringstream errmsg;
-                errmsg << "rank "<<getRank()<<": Error deleting existing output file (requested by 'delete_file_on_restart' printer option; target filename is "<<database_file<<")! Shell command failed to executed successfully, see stderr (command was '"<<command.str()<<"').";
-                printer_error().raise(LOCAL_INFO, errmsg.str());
-              }
+                // Note: "not resume" means "start or restart"
+                // Delete existing output file
+                std::ostringstream command;
+                command << "rm -f "<<database_file;
+                logger() << LogTags::printers << LogTags::info << "Running shell command: " << command.str() << EOM;
+                FILE* fp = popen(command.str().c_str(), "r");
+                if(fp==NULL)
+                {
+                    // Error running popen
+                    std::ostringstream errmsg;
+                    errmsg << "rank "<<getRank()<<": Error deleting existing output file (requested by 'delete_file_on_restart' printer option; target filename is "<<database_file<<")! popen failed to run the command (command was '"<<command.str()<<"')";
+                    printer_error().raise(LOCAL_INFO, errmsg.str());
+                }
+                else if(pclose(fp)!=0)
+                {
+                    // Command returned exit code!=0, or pclose failed
+                    std::ostringstream errmsg;
+                    errmsg << "rank "<<getRank()<<": Error deleting existing output file (requested by 'delete_file_on_restart' printer option; target filename is "<<database_file<<")! Shell command failed to executed successfully, see stderr (command was '"<<command.str()<<"').";
+                    printer_error().raise(LOCAL_INFO, errmsg.str());
+                }
             }
+
 #ifdef WITH_MPI
             // Make sure no processes try to open database until we are sure it won't be deleted and replaced
             myComm.Barrier();
@@ -198,6 +203,81 @@ namespace Gambit
 
         // Create the results table in the database (if it doesn't already exist)
         make_table(table_name);
+
+        // If we are rank 0 and also resuming (and this is the primary printer), need to read the database and find the previous
+        // highest pointID numbers used.
+        if(not is_auxilliary_printer())
+        { 
+            // Record of the highest pointIDs in previous run that are relevant for *this* run
+            std::vector<std::size_t> highests(mpiSize);
+
+            if(getRank()==0 and get_resume())
+            {
+                // Map from ranks to highest pointIDs in previous output
+                std::map<std::size_t, std::size_t> highest_pointIDs;
+  
+                // Construct the SQLite3 statement to retrieve previous ranks and pointIDs from the database
+                std::stringstream sql;
+                sql << "SELECT MPIrank,pointID FROM "<<table_name;
+    
+                /* Execute SQL statement and iterate through results*/ 
+                sqlite3_stmt *stmt;
+                int rc = sqlite3_prepare_v2(db, sql.str().c_str(), -1, &stmt, NULL);
+                if (rc != SQLITE_OK) {
+                    std::stringstream err;
+                    err<<"Encountered SQLite error while preparing to retrieve previous pointIDs: "<<sqlite3_errmsg(db);
+                    printer_error().raise(LOCAL_INFO, err.str());
+                }
+                while ((rc = sqlite3_step(stmt)) == SQLITE_ROW) {
+                    std::size_t rank = sqlite3_column_int(stmt, 0);
+                    std::size_t pID  = sqlite3_column_int(stmt, 1);
+                    if( pID > highest_pointIDs[rank] )
+                    {
+                        highest_pointIDs[rank] = pID;
+                    }
+                }
+                if (rc != SQLITE_DONE) {
+                    std::stringstream err;
+                    err<<"Encountered SQLite error while retrieving previous pointIDs: "<<sqlite3_errmsg(db);
+                    printer_error().raise(LOCAL_INFO, err.str());
+                }
+                sqlite3_finalize(stmt);
+ 
+                // Grab only the highest pointIDs for ranks that we are using THIS run.              
+                for (size_t rank = 0; rank < myComm.Get_size(); rank++ )
+                {
+                    auto it = highest_pointIDs.find(rank);
+                    if (it != highest_pointIDs.end())
+                        highests[rank] = it->second;
+                    else
+                        highests[rank] = 0;
+                }
+            } 
+
+            // Need to communicate these to ScannerBit so it doesn't start assigning them
+            // again from zero.
+#ifdef WITH_MPI
+            int resume_int = get_resume();
+            myComm.Barrier();
+            // Make sure everyone agrees on the resume status. Not really needed, but I
+            // just copied it from the HDF5 printer.
+            myComm.Bcast(resume_int, 1, 0);
+            set_resume(resume_int);
+
+            if (get_resume())
+            {
+                std::size_t my_highest;
+                myComm.Barrier();
+                myComm.Scatter(highests, my_highest, 0);
+                get_point_id() = my_highest;
+            }
+#else
+            if (get_resume())
+            {
+                get_point_id() = highests[0];
+            }
+#endif
+        }
     }
 
     std::string SQLitePrinter::get_database_file() {return database_file;}
@@ -211,11 +291,21 @@ namespace Gambit
 
     void SQLitePrinter::reset(bool /*force*/)
     {
-        // Not sure if this is really allowed anymore in GAMBIT.
-        // Let's throw an error if it gets called.
-        std::stringstream err;
-        err<<"reset() function in SQLitePrinter was called! This printer is not currently capable of resetting the output!";
-        printer_error().raise(LOCAL_INFO,err.str()); 
+        // This is needed by e.g. MultiNest to delete old weights and replace them
+        // with new ones.
+
+        // Should put a check so that only auxilliary printers can delete stuff, unless 'force' is set
+
+        // Read through header to see what columns this printer has been touching. These are
+        // the ones that we will reset/delete.
+        // (a more nuanced reset might be required in the future?)
+        sql<<"INSERT INTO "<<table<<" (pairID,";
+        for(auto col_name_it=buffer_header.begin(); col_name_it!=buffer_header.end(); ++col_name_it)
+        {
+            sql<<"`"<<(*col_name_it)<<"`"<<comma_unless_last(col_name_it,buffer_header);
+        }
+        sql<<") VALUES ";
+ 
     }
 
     void SQLitePrinter::finalise(bool /*abnormal*/)
@@ -543,11 +633,10 @@ namespace Gambit
         transaction_data_buffer.at(rowID).at(col_index) = data;
     }
 
-    // Delete all buffer data and reset all buffer variables
-    void SQLitePrinter::reset_buffer()
+    // Delete all buffer data. Leaves the header intact so that we know what columns
+    // this printer has been working with (needed so we can reset them if needed!)
+    void SQLitePrinter::clear_buffer()
     {
-        buffer_info.clear();
-        buffer_header.clear();
         transaction_data_buffer.clear();
     }
 
@@ -643,7 +732,7 @@ namespace Gambit
             dump_buffer_as_UPDATE();
         }
         // Clear all the buffer data
-        reset_buffer(); 
+        clear_buffer(); 
     }
  
     /// @{ PRINT FUNCTIONS

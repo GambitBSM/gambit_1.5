@@ -132,6 +132,9 @@ namespace Gambit
         // Gambit MPI communicator context for use within the SQLite printer system
         GMPI::Comm myComm;
         #endif
+
+        std::size_t mpiRank;
+        std::size_t mpiSize;
   
         // Pointer to primary printer object, for retrieving setup information.
         SQLitePrinter* primary_printer;
