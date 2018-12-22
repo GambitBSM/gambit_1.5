@@ -426,7 +426,7 @@ int main(int argc, char* argv[])
 
 
     // -- Calculate relic density --
-    RD_eff_annrate_from_ProcessCatalog.notifyOfModel("SingletDM");
+    RD_eff_annrate_from_ProcessCatalog.notifyOfModel("ScalarSingletDM_Z2");
     RD_eff_annrate_from_ProcessCatalog.resolveDependency(&TH_ProcessCatalog_WIMP);
     RD_eff_annrate_from_ProcessCatalog.resolveDependency(&DarkMatter_ID_WIMP);
 
