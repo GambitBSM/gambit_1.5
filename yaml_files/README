@@ -8,8 +8,7 @@ Functionality/configuration demos and minimal examples
 spartan.yaml                     --- Simplest example of using GAMBIT: a toy-model MultiNest scan
 spartan_NUHM1.yaml               --- Simple example of using GAMBIT in a random scan of NUHM1 params
 
-pp_demo.yaml                     --- Simple example of using the postprocessor scanner to add a new likelihood component
-pp_strip.yaml                    --- Simple example of using the postprocessor scanner to strip 'invalid' points out of an output file
+postprocessor_demo.yaml          --- Simple example of using the postprocessor scanner to add a new likelihood component
 
 ColliderBit_CMSSM.yaml           --- LEP and LHC direct search observables in a MultiNest scan of the CMSSM
 ColliderBit_ExternalModel.yaml   --- LHC likelihood demo on a single point of a Pythia external model
