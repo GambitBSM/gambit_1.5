@@ -38,14 +38,12 @@
   (ulonglong)               \
   (float)                   \
   (double)                  \
+  (bool)                    \
   (std::vector<double>)     \
   (map_str_dbl)             \
   (ModelParameters)         \
  
 /*(std::vector<double>)     \
-  (bool)                    \
-  (map_str_dbl)             \
-  (ModelParameters)         \
   (triplet<double>)         \
   (map_intpair_dbl)         \
   */

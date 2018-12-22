@@ -244,7 +244,7 @@ namespace Gambit
                 sqlite3_finalize(stmt);
  
                 // Grab only the highest pointIDs for ranks that we are using THIS run.              
-                for (size_t rank = 0; rank < myComm.Get_size(); rank++ )
+                for (int rank = 0; rank < myComm.Get_size(); rank++ )
                 {
                     auto it = highest_pointIDs.find(rank);
                     if (it != highest_pointIDs.end())
@@ -295,7 +295,7 @@ namespace Gambit
         // with new ones.
 
         // Primary printers aren't allowed to delete stuff unless 'force' is set to true
-        if(is_auxilliary_printer() or force) 
+        if((is_auxilliary_printer() or force) and (buffer_header.size()>0)) 
         {
             // Read through header to see what columns this printer has been touching. These are
             // the ones that we will reset/delete.
@@ -402,12 +402,23 @@ namespace Gambit
     } 
 
     // Function to repeatedly attempt an SQLite statement if the database is locked/busy
-    int SQLitePrinter::submit_sql(const std::string& local_info, const std::string& sqlstr, bool allow_fail, sql_callback_fptr callback, void* data, char **zErrMsg)
+    int SQLitePrinter::submit_sql(const std::string& local_info, const std::string& sqlstr, bool allow_fail, sql_callback_fptr callback, void* data, char **zErrMsg_in)
     {
         int rc;
+        char *zErrMsg;
+        char **zErrMsg_ptr;
+        if(zErrMsg_in==NULL) 
+        {
+           zErrMsg_ptr = &zErrMsg;
+        }
+        else
+        {
+           zErrMsg_ptr = zErrMsg_in;
+        }
+
         do
         {
-            rc = sqlite3_exec(db, sqlstr.c_str(), callback, data, zErrMsg);
+            rc = sqlite3_exec(db, sqlstr.c_str(), callback, data, zErrMsg_ptr);
             if(rc==SQLITE_BUSY)
             {
                 // Wait at least a short time to avoid slamming the filesystem too much
@@ -420,12 +431,12 @@ namespace Gambit
         // if allow_fail is true then we don't catch this error, we allow the caller of this function to hander it.
         if( (rc != SQLITE_OK) and not allow_fail ){
             std::stringstream err;
-            err << "SQL error: " << *zErrMsg << std::endl;
+            err << "SQL error: " << *zErrMsg_ptr << std::endl;
 #ifdef SQL_DEBUG
             err << "The attempted SQL statement was:"<<std::endl;
             err << sqlstr << std::endl;; 
 #endif
-            sqlite3_free(*zErrMsg);
+            sqlite3_free(*zErrMsg_ptr);
             printer_error().raise(local_info,err.str());
        }
        return rc;
@@ -725,19 +736,23 @@ namespace Gambit
    
     void SQLitePrinter::dump_buffer()
     {
-        require_output_ready(); 
-        if(synchronised)
-        {
-            // Primary dataset writes can be performed as INSERT operations
-            dump_buffer_as_INSERT();
+        require_output_ready();
+        // Don't try to dump the buffer if it is empty!
+        if(transaction_data_buffer.size()>0)
+        { 
+            if(synchronised)
+            {
+                // Primary dataset writes can be performed as INSERT operations
+                dump_buffer_as_INSERT();
+            }
+            else
+            {
+                // Asynchronous ('auxilliary') writes need to be performed as UPDATE operations
+                dump_buffer_as_UPDATE();
+            }
+            // Clear all the buffer data
+            clear_buffer(); 
         }
-        else
-        {
-            // Asynchronous ('auxilliary') writes need to be performed as UPDATE operations
-            dump_buffer_as_UPDATE();
-        }
-        // Clear all the buffer data
-        clear_buffer(); 
     }
  
     /// @{ PRINT FUNCTIONS
@@ -746,6 +761,7 @@ namespace Gambit
     /// Templatable print functions
     #define PRINT(TYPE,SQLTYPE) _print(TYPE const& value, const std::string& label, const int vID, const uint rank, const ulong pID) \
        { template_print(value,label,vID,rank,pID,SQLTYPE); }
+    void SQLitePrinter::PRINT(bool     ,"INTEGER")
     void SQLitePrinter::PRINT(int      ,"INTEGER")
     void SQLitePrinter::PRINT(uint     ,"INTEGER")
     void SQLitePrinter::PRINT(long     ,"INTEGER")
