@@ -208,7 +208,7 @@ namespace Gambit
         void dump_buffer_as_UPDATE();
  
         // Delete all buffer data and reset all buffer variables
-        void reset_buffer();
+        void clear_buffer();
     };
     
     // Register printer so it can be constructed via inifile instructions

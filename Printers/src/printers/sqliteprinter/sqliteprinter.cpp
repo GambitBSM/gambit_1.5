@@ -295,13 +295,13 @@ namespace Gambit
         // with new ones.
 
         // Primary printers aren't allowed to delete stuff unless 'force' is set to true
-        if(is_auxilliary() or force) 
+        if(is_auxilliary_printer() or force) 
         {
             // Read through header to see what columns this printer has been touching. These are
             // the ones that we will reset/delete.
             // (a more nuanced reset might be required in the future?)
             std::stringstream sql;
-            sql<<"UPDATE "<<table_name<<" SET "<<
+            sql<<"UPDATE "<<table_name<<" SET ";
             for(auto col_name_it=buffer_header.begin(); col_name_it!=buffer_header.end(); ++col_name_it)
             {
                 sql<<"`"<<(*col_name_it)<<"`=null"<<comma_unless_last(col_name_it,buffer_header);
