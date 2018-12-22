@@ -123,6 +123,10 @@ if(NOT LAPACK_LINKLIBS)
     foreach(lib ${LAPACK_LIBRARIES})
       string(REGEX REPLACE "^(.*)/(.*)\\..*$" "\\1" BLAS_LAPACK_LOCATION ${lib})
       if(NOT ${FOUND_MKL} EQUAL -1)
+        # Add the library location to the rpath, in case it wants to dynamically load other libs
+        if(EXISTS BLAS_LAPACK_LOCATION)
+          set(CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_RPATH};${BLAS_LAPACK_LOCATION}")
+        endif()
         # Add the silver-bullet SDL mkl_rt.so if possible.
         set(SDL "${BLAS_LAPACK_LOCATION}/libmkl_rt.so")
         if(NOT SDL_ADDED AND EXISTS ${SDL})
