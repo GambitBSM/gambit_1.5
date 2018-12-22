@@ -141,14 +141,18 @@ if(NOT LAPACK_LINKLIBS)
             set(lib "")
           endif()
           if(NOT ${IS_MKLINTELTHREAD} EQUAL -1)
+            string(REGEX REPLACE "intel_thread" "def" DEF ${lib})
             string(REGEX REPLACE "intel_thread" "gnu_thread" lib ${lib})
-            if(NOT EXISTS ${lib})
+            if(NOT EXISTS ${lib} OR NOT EXISTS ${DEF})
               message(FATAL_ERROR "${BoldRed}You are using the GNU C++ compiler, but cmake's automatic FindLAPACK.cmake"
                                   "script is trying to link to the intel MKL library, using the intel OpenMP implementation."
-                                  "I tried to force MKL to use the GNU OpenMP implementation, but I can't find libmkl_gnu_thread.so."
-                                  "Please rerun cmake, manually specifying what LAPACK libraries to use, via e.g."
+                                  "I tried to force MKL to use the GNU OpenMP implementation, but I cannot find one or both of "
+                                  "libmkl_def.so and libmkl_gnu_thread.so.  Please rerun cmake, manually specifying what LAPACK"
+                                  "libraries to use, via e.g."
                                   "  cmake -DLAPACK_LINKLIBS=\"<your libs>\" ..${ColourReset}")
             endif()
+            # Add the mkl_def.so library needed by mkl_gnu_thread.  Let mkl_gnu_thread get added below.
+            set(LAPACK_LINKLIBS "${LAPACK_LINKLIBS} ${DEF}")
           endif()
         endif()
       endif()
