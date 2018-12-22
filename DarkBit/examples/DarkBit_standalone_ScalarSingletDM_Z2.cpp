@@ -218,7 +218,10 @@ int main()
     // ---- Relic density ----
 
     // Relic density calculation with MicrOmegas
-    RD_oh2_MicrOmegas.resolveBackendReq(&Backends::MicrOmegas_ScalarSingletDM_Z2_3_6_9_2::Functown::darkOmega);
+    RD_oh2_Xf_MicrOmegas.notifyOfModel("ScalarSingletDM_Z2");
+    RD_oh2_Xf_MicrOmegas.resolveBackendReq(&Backends::MicrOmegas_ScalarSingletDM_Z2_3_6_9_2::Functown::darkOmega);
+    RD_oh2_Xf_MicrOmegas.reset_and_calculate();
+    RD_oh2_MicrOmegas.resolveDependency(&RD_oh2_Xf_MicrOmegas);
     RD_oh2_MicrOmegas.reset_and_calculate();
 
     // Retrieve and print MicrOmegas result
@@ -252,6 +255,7 @@ int main()
     RD_oh2_general.resolveBackendReq(&Backends::DarkSUSY_5_1_3::Functown::rdpadd);
     RD_oh2_general.resolveBackendReq(&Backends::DarkSUSY_5_1_3::Functown::rddof);
     RD_oh2_general.resolveBackendReq(&Backends::DarkSUSY_5_1_3::Functown::rderrors);
+    RD_oh2_general.resolveBackendReq(&Backends::DarkSUSY_5_1_3::Functown::rdtime);
     RD_oh2_general.setOption<int>("fast", 1);  // 0: normal; 1: fast; 2: dirty
     RD_oh2_general.reset_and_calculate();
 
@@ -422,7 +426,8 @@ int main()
 
 
     // Infer WIMP equilibration time in Sun
-    equilibration_time_Sun.resolveDependency(&sigmav_late_universe);
+    equilibration_time_Sun.resolveDependency(&TH_ProcessCatalog_ScalarSingletDM_Z2);
+    equilibration_time_Sun.resolveDependency(&DarkMatter_ID_ScalarSingletDM);
     equilibration_time_Sun.resolveDependency(&mwimp_generic);
     equilibration_time_Sun.resolveDependency(&capture_rate_Sun_const_xsec);
     equilibration_time_Sun.reset_and_calculate();
@@ -436,8 +441,6 @@ int main()
     nuyield_from_DS.resolveDependency(&TH_ProcessCatalog_ScalarSingletDM_Z2);
     nuyield_from_DS.resolveDependency(&mwimp_generic);
     nuyield_from_DS.resolveDependency(&sigmav_late_universe);
-    nuyield_from_DS.resolveDependency(&sigma_SI_p_simple);
-    nuyield_from_DS.resolveDependency(&sigma_SD_p_simple);
     nuyield_from_DS.resolveDependency(&DarkMatter_ID_ScalarSingletDM);
     nuyield_from_DS.resolveBackendReq(&Backends::DarkSUSY_5_1_3::Functown::dsgenericwimp_nusetup);
     nuyield_from_DS.resolveBackendReq(&Backends::DarkSUSY_5_1_3::Functown::neutrino_yield);
