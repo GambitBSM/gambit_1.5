@@ -93,10 +93,10 @@ namespace Gambit
     EXPORT_SYMBOLS bool endsWith(const std::string& str, const std::string& suffix);
 
     /// Checks whether `str' begins with `prefix'
-    EXPORT_SYMBOLS bool startsWith(const std::string& str, const std::string& prefix);
+    EXPORT_SYMBOLS bool startsWith(const std::string& str, const std::string& prefix, bool case_sensitive=true);
 
-    /// Perform a case-insensitive string comparison
-    EXPORT_SYMBOLS bool iequals(const std::string& a, const std::string& b);
+    /// Perform a (possibly) case-insensitive string comparison
+    EXPORT_SYMBOLS bool iequals(const std::string& a, const std::string& b, bool case_sensitive=false);
 
     /************************************************************************/
     /* Comparator for case-insensitive comparison in STL assos. containers  */

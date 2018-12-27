@@ -684,6 +684,7 @@ namespace Gambit
             {
                //std::cout << "Current index: "<<getReader().get_current_index()<<std::endl;
                //std::cout << "Current loopi: "<<loopi<<std::endl;
+               //std::cout << "eoi?: "<<getReader().eoi()<<std::endl;
 
                // Cancel processing of iterations beyond our assigned range
                if(loopi>mychunk.end)
@@ -700,7 +701,11 @@ namespace Gambit
                }   
  
                // Inelegant signal checking. TODO: Think about how this can be shifted over to ScannerBit
-               quit = Gambit::Scanner::Plugins::plugin_info.early_shutdown_in_progress();
+               if(not quit)
+               {
+                  quit = Gambit::Scanner::Plugins::plugin_info.early_shutdown_in_progress();
+               }
+
                if(not quit)
                {
                   // Inelegant bit @{
@@ -802,7 +807,7 @@ namespace Gambit
                   // Check if valid model parameters were extracted. If not, something may be wrong with the input file, or we could just be at the end of a buffer (e.g. in HDF5 case). Can't tell the difference, so just skip the point and continue.
                   if(not valid_modelparams)
                   {
-                     //std::cout << "Skipping point "<<loopi<<" as it has no valid ModelParameters" <<std::endl;
+                     std::cout << "Skipping point "<<loopi<<" as it has no valid ModelParameters" <<std::endl;
                      current_point = getReader().get_next_point();
                      loopi++;
                      continue;

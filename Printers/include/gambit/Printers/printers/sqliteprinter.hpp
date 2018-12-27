@@ -25,6 +25,8 @@
 
 // Gambit
 #include "gambit/Printers/baseprinter.hpp"
+#include "gambit/Printers/printers/sqlitebase.hpp"
+#include "gambit/Printers/printers/sqlitetypes.hpp"
 #include "gambit/Utils/util_functions.hpp" // Need Utils::ci_less to make map find() functions case-insensitive, since SQLite is case insensitive
 
 // Sequence of all types printable by the SQLitePrinter,
@@ -59,15 +61,9 @@ namespace Gambit
 {
   namespace Printers
   {
-    // Compute unique integer from two integers
-    // We use this to turn MPI rank and point ID integers into an SQLite row ID
-    inline std::size_t pairfunc(const std::size_t i, const std::size_t j);
- 
-    // Type of function pointer for SQLite callback function
-    typedef int sql_callback_fptr(void*, int, char**, char**);
- 
+  
     /// The main printer class for output to SQLite database
-    class SQLitePrinter : public BasePrinter
+    class SQLitePrinter : public BasePrinter, SQLiteBase
     {
       public:
         /// Constructor (for construction via inifile options)
@@ -92,20 +88,14 @@ namespace Gambit
  
         ///@}
 
-        /// @{ Internal information required by auxilliary printer constructors
-
-        std::string get_database_file();
-        std::string get_table_name();
-        std::size_t get_max_buffer_length();
-
-        /// @} 
+       std::size_t get_max_buffer_length();
 
         ///@{ Print functions
         using BasePrinter::_print; // Tell compiler we are using some of the base class overloads of this on purpose.
         #define DECLARE_PRINT(r,data,i,elem) void _print(elem const&, const std::string&, const int, const unsigned int, const unsigned long);
-        BOOST_PP_SEQ_FOR_EACH_I(DECLARE_PRINT, , SQL_TYPES)
+        BOOST_PP_SEQ_FOR_EACH_I(DECLARE_PRINT, , SQLITE_TYPES)
         #ifndef SCANNER_STANDALONE
-          BOOST_PP_SEQ_FOR_EACH_I(DECLARE_PRINT, , SQL_MODULE_BACKEND_TYPES)
+          BOOST_PP_SEQ_FOR_EACH_I(DECLARE_PRINT, , SQLITE_MODULE_BACKEND_TYPES)
         #endif
         #undef DECLARE_PRINT
         ///@}
@@ -137,21 +127,6 @@ namespace Gambit
         // Pointer to primary printer object, for retrieving setup information.
         SQLitePrinter* primary_printer;
 
-        // Path to output SQLite database file
-        std::string database_file;
-
-        // Name of data table to store results for this run
-        std::string table_name;
-
-        // Pointer to output sqlite3 database
-        sqlite3* db;
-
-        // Bool to record if we already have a database file open
-        bool db_is_open;
-
-        // Bool to record if an output table exists yet
-        bool results_table_exists;
-
         // Set to record whether table columns have been created 
         std::map<std::string,std::string,Utils::ci_less> column_record; 
 
@@ -174,19 +149,6 @@ namespace Gambit
         // Determines whether output is new row insertions, or updates previously existing rows
         bool synchronised;
 
-        // Verify that the outbase database is open and the results table exists
-        void require_output_ready();
- 
-        // Open database and 'attach' it to this object
-        // A database will be created if it doesn't exist
-        void open_db(const std::string&);
-    
-        // Close the database file that is attached to this object
-        void close_db();
-
-        // Submit an SQL statement to the database
-        int submit_sql(const std::string& local_info, const std::string& sqlstr, bool allow_fail=false, sql_callback_fptr callback=NULL, void* data=NULL, char **zErrMsg=NULL);
- 
         // Create results table
         void make_table(const std::string&);
 

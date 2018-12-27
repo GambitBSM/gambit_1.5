@@ -36,77 +36,17 @@ namespace Gambit
 {
   namespace Printers
   {
-    // Compute unique integer from two integers
-    // We use this to turn MPI rank and point ID integers into an SQLite row ID
-    std::size_t pairfunc(const std::size_t i, const std::size_t j)
-    {
-        // The Cantor pairing function should be good enough for this purpose I think
-        // If we exceed the maximum size of size_t then we'll have to use a more space-efficient pairing function
-        return ((i+j)*(i+j+1))/2 + j; 
-    }
-
-    // Returns new iterator pointing to next element
-    template <typename Iter>
-    Iter next_el(Iter iter)
-    {
-        return ++iter;
-    }
-
-    // Return a comma unless iterator is the last in the supplied iterable
-    // (or if it points to end())
-    template <typename Iter, typename Cont>
-    std::string comma_unless_last(Iter it, const Cont& c)
-    { 
-       std::string out("");
-       if((it == c.end()) || (next_el(it) == c.end()))
-       { /* this is the last element or end(), do nothing */ }
-       else
-       { out = ","; }
-       return out;
-    }
-
-    /* Callback function for retrieving the column names and types of a table
-     * Called for each row of the results table
-     *
-     * Arguments:
-     *
-     *     list - Pointer to a map from column names to types
-     *    count - The number of columns in the result set
-     *     data - The row's data
-     *  columns - The column names
-     */
-    static int col_name_callback(void* colmap_in, int /*count*/, char** data, char** /* columns */)
-    {
-        typedef std::map<std::string, std::string, Utils::ci_less> mymaptype;
-        mymaptype *colmap = static_cast<mymaptype*>(colmap_in);
-   
-        // We know that the column name is the second column of the results set, and the
-        // type is the third column
-        std::string column_name(data[1]);
-        std::string column_type(data[2]);
-
-        //std::cout<<"Reading existing columns: name: "<<column_name<<", type: "<<column_type<<std::endl;
-
-        // Add to map
-        (*colmap)[column_name] = column_type;
-    
-        return 0;
-    }
-
+ 
     // Constructor
     SQLitePrinter::SQLitePrinter(const Options& options, BasePrinter* const primary)
     : BasePrinter(primary,options.getValueOrDef<bool>(false,"auxilliary"))
+    , SQLiteBase()
 #ifdef WITH_MPI
     , myComm() // initially attaches to MPI_COMM_WORLD
 #endif
     , mpiRank(0)
     , mpiSize(1)
     , primary_printer(NULL)
-    , database_file("uninitialised")
-    , table_name("uninitialised")
-    , db(NULL)
-    , db_is_open(false)
-    , results_table_exists(false)
     , column_record()
     , max_buffer_length(options.getValueOrDef<std::size_t>(1,"buffer_length"))
     , buffer_info()
@@ -114,8 +54,8 @@ namespace Gambit
     , transaction_data_buffer()
     , synchronised(!options.getValueOrDef<bool>(false,"auxilliary"))
     {
-        // Test options?
-        //std::cout << "options:" << std::endl<<options.getNode()<<std::endl;
+        std::string database_file;
+        std::string table_name;
 
         if(is_auxilliary_printer())
         {
@@ -134,6 +74,10 @@ namespace Gambit
             mpiRank = myComm.Get_rank();
             mpiSize = myComm.Get_size();
 #endif
+
+            // Register dataset names that this printer needs to use itself
+            // ("MPIrank" and "pointID" are always automatically registered)
+            addToPrintList("pairID");
 
             // Tell scannerbit if we are resuming
             set_resume(options.getValue<bool>("resume"));
@@ -198,11 +142,12 @@ namespace Gambit
 #endif
         }       
  
-        // Create/open the database file 
-        open_db(database_file);
+        // Create/open the database file
+        open_db(database_file,'+');
 
         // Create the results table in the database (if it doesn't already exist)
         make_table(table_name);
+        set_table_name(table_name); // Inform base class of table name
 
         // If we are rank 0 and also resuming (and this is the primary printer), need to read the database and find the previous
         // highest pointID numbers used.
@@ -218,14 +163,14 @@ namespace Gambit
   
                 // Construct the SQLite3 statement to retrieve previous ranks and pointIDs from the database
                 std::stringstream sql;
-                sql << "SELECT MPIrank,pointID FROM "<<table_name;
+                sql << "SELECT MPIrank,pointID FROM "<<get_table_name();
     
                 /* Execute SQL statement and iterate through results*/ 
                 sqlite3_stmt *stmt;
-                int rc = sqlite3_prepare_v2(db, sql.str().c_str(), -1, &stmt, NULL);
+                int rc = sqlite3_prepare_v2(get_db(), sql.str().c_str(), -1, &stmt, NULL);
                 if (rc != SQLITE_OK) {
                     std::stringstream err;
-                    err<<"Encountered SQLite error while preparing to retrieve previous pointIDs: "<<sqlite3_errmsg(db);
+                    err<<"Encountered SQLite error while preparing to retrieve previous pointIDs: "<<sqlite3_errmsg(get_db());
                     printer_error().raise(LOCAL_INFO, err.str());
                 }
                 while ((rc = sqlite3_step(stmt)) == SQLITE_ROW) {
@@ -238,7 +183,7 @@ namespace Gambit
                 }
                 if (rc != SQLITE_DONE) {
                     std::stringstream err;
-                    err<<"Encountered SQLite error while retrieving previous pointIDs: "<<sqlite3_errmsg(db);
+                    err<<"Encountered SQLite error while retrieving previous pointIDs: "<<sqlite3_errmsg(get_db());
                     printer_error().raise(LOCAL_INFO, err.str());
                 }
                 sqlite3_finalize(stmt);
@@ -280,8 +225,6 @@ namespace Gambit
         }
     }
 
-    std::string SQLitePrinter::get_database_file() {return database_file;}
-    std::string SQLitePrinter::get_table_name() {return table_name;}
     std::size_t SQLitePrinter::get_max_buffer_length() {return max_buffer_length;}
 
     void SQLitePrinter::initialise(const std::vector<int>&)
@@ -301,7 +244,7 @@ namespace Gambit
             // the ones that we will reset/delete.
             // (a more nuanced reset might be required in the future?)
             std::stringstream sql;
-            sql<<"UPDATE "<<table_name<<" SET ";
+            sql<<"UPDATE "<<get_table_name()<<" SET ";
             for(auto col_name_it=buffer_header.begin(); col_name_it!=buffer_header.end(); ++col_name_it)
             {
                 sql<<"`"<<(*col_name_it)<<"`=null"<<comma_unless_last(col_name_it,buffer_header);
@@ -327,119 +270,9 @@ namespace Gambit
         // Set options that we need later to construct a reader object for
         // previous output, if required.
         options.setValue("type", "sqlite");
-        options.setValue("file", database_file);
-        options.setValue("table", table_name);
+        options.setValue("file", get_database_file());
+        options.setValue("table", get_table_name());
         return options;
-    }
-
-    // Open database and 'attach' it to this object
-    void SQLitePrinter::open_db(const std::string& path)
-    { 
-        // Check if we already have an open database
-        if(db!=NULL)
-        {
-            std::stringstream err;
-            err << "Refused to open database file '"<<path<<"'; a database file pointer has already been attached to the SQLite printer!";
-            printer_error().raise(LOCAL_INFO,err.str()); 
-        }
-
-        if(db_is_open)
-        {
-            std::stringstream err;
-            err << "Refused to open database file '"<<path<<"'; a database file is already flagged by the SQLite printer as open!";
-            printer_error().raise(LOCAL_INFO,err.str());  
-        }
-
-        int rc; // return code
-
-        rc = sqlite3_open(path.c_str(), &db);
-   
-        if( rc ) 
-        {
-            std::stringstream err;
-            err << "Failed to open database file '"<<path<<"':" << sqlite3_errmsg(db);
-            printer_error().raise(LOCAL_INFO, err.str());
-        }
-        else
-        {
-           db_is_open = true;
-        }
-    }
-
-    void SQLitePrinter::close_db()
-    {
-        sqlite3_close(db); // Check error code?
-        db_is_open = false;
-    }
-
-    // Make sure the outbase database is open and the results table exists
-    // Throws an error if it isn't
-    void SQLitePrinter::require_output_ready()
-    {
-        if(db==NULL || !db_is_open || !results_table_exists)
-        {
-            std::stringstream err;
-            // Something was not ready, check further and throw an error
-            if(db==NULL)
-            {
-                err << "Output readiness check failed! Database pointer was NULL!";
-                printer_error().raise(LOCAL_INFO,err.str());  
-            }   
-
-            if(!db_is_open)
-            {
-                err << "Output readiness check failed! Database is not flagged as open!";
-                printer_error().raise(LOCAL_INFO,err.str());  
-            }
-
-            if(!results_table_exists)
-            {
-                err << "Output readiness check failed! Results table is not flagged as existing!";
-                printer_error().raise(LOCAL_INFO,err.str());  
-            }
-        }
-        // Else we are good to go!
-    } 
-
-    // Function to repeatedly attempt an SQLite statement if the database is locked/busy
-    int SQLitePrinter::submit_sql(const std::string& local_info, const std::string& sqlstr, bool allow_fail, sql_callback_fptr callback, void* data, char **zErrMsg_in)
-    {
-        int rc;
-        char *zErrMsg;
-        char **zErrMsg_ptr;
-        if(zErrMsg_in==NULL) 
-        {
-           zErrMsg_ptr = &zErrMsg;
-        }
-        else
-        {
-           zErrMsg_ptr = zErrMsg_in;
-        }
-
-        do
-        {
-            rc = sqlite3_exec(db, sqlstr.c_str(), callback, data, zErrMsg_ptr);
-            if(rc==SQLITE_BUSY)
-            {
-                // Wait at least a short time to avoid slamming the filesystem too much
-                std::chrono::milliseconds timespan(10);
-                std::this_thread::sleep_for(timespan);
-            }
-        }
-        while (rc == SQLITE_BUSY);
-
-        // if allow_fail is true then we don't catch this error, we allow the caller of this function to hander it.
-        if( (rc != SQLITE_OK) and not allow_fail ){
-            std::stringstream err;
-            err << "SQL error: " << *zErrMsg_ptr << std::endl;
-#ifdef SQL_DEBUG
-            err << "The attempted SQL statement was:"<<std::endl;
-            err << sqlstr << std::endl;; 
-#endif
-            sqlite3_free(*zErrMsg_ptr);
-            printer_error().raise(local_info,err.str());
-       }
-       return rc;
     }
 
     // Create results table
@@ -457,7 +290,7 @@ namespace Gambit
         submit_sql(LOCAL_INFO, sql.str());
 
         // Flag the results table as existing
-        results_table_exists = true;
+        set_table_exists();
     }
 
     // Check that a table column exists with the correct type, and create it if needed
@@ -476,7 +309,7 @@ namespace Gambit
             // the column already existed, and not some other reason.
 
             std::stringstream sql;
-            sql<<"ALTER TABLE "<<table_name<<" ADD COLUMN `"<<sql_col_name<<"` "<<sql_col_type<<";";
+            sql<<"ALTER TABLE "<<get_table_name()<<" ADD COLUMN `"<<sql_col_name<<"` "<<sql_col_type<<";";
 
             /* Execute SQL statement */
             int rc;
@@ -489,7 +322,7 @@ namespace Gambit
                 // exists, but we better make sure.
 
                 std::stringstream sql2;
-                sql2<<"PRAGMA table_info("<<table_name<<");";
+                sql2<<"PRAGMA table_info("<<get_table_name()<<");";
 
                 /* Execute SQL statement */ 
                 int rc2;
@@ -687,7 +520,7 @@ namespace Gambit
     {
         // Add the table INSERT operation to a stream
         std::stringstream sql;
-        turn_buffer_into_insert(sql,table_name);
+        turn_buffer_into_insert(sql,get_table_name());
 
         /* Execute SQL statement */
         submit_sql(LOCAL_INFO,sql.str());
@@ -717,7 +550,7 @@ namespace Gambit
 
         // Update the primary output table using the temporary table
         // Following: https://stackoverflow.com/a/47753166/1447953
-        sql<<"UPDATE "<<table_name<<" SET (";
+        sql<<"UPDATE "<<get_table_name()<<" SET (";
         for(auto col_name_it=buffer_header.begin(); col_name_it!=buffer_header.end(); ++col_name_it)
         { 
             sql<<*col_name_it<<comma_unless_last(col_name_it,buffer_header);
@@ -727,8 +560,8 @@ namespace Gambit
         { 
             sql<<"temp_table."<<*col_name_it<<comma_unless_last(col_name_it,buffer_header);
         }
-        sql<<" FROM temp_table WHERE temp_table.pairID = "<<table_name<<".pairID)";
-        sql<<" WHERE EXISTS ( SELECT * FROM temp_table WHERE temp_table.pairID = "<<table_name<<".pairID);";
+        sql<<" FROM temp_table WHERE temp_table.pairID = "<<get_table_name()<<".pairID)";
+        sql<<" WHERE EXISTS ( SELECT * FROM temp_table WHERE temp_table.pairID = "<<get_table_name()<<".pairID);";
 
         /* Execute SQL statement */
         submit_sql(LOCAL_INFO,sql.str());
@@ -755,51 +588,5 @@ namespace Gambit
         }
     }
  
-    /// @{ PRINT FUNCTIONS
-    /// Need to define one of these for every type we want to print!
-
-    /// Templatable print functions
-    #define PRINT(TYPE,SQLTYPE) _print(TYPE const& value, const std::string& label, const int vID, const uint rank, const ulong pID) \
-       { template_print(value,label,vID,rank,pID,SQLTYPE); }
-    void SQLitePrinter::PRINT(bool     ,"INTEGER")
-    void SQLitePrinter::PRINT(int      ,"INTEGER")
-    void SQLitePrinter::PRINT(uint     ,"INTEGER")
-    void SQLitePrinter::PRINT(long     ,"INTEGER")
-    void SQLitePrinter::PRINT(ulong    ,"INTEGER")
-    void SQLitePrinter::PRINT(longlong ,"INTEGER")
-    void SQLitePrinter::PRINT(ulonglong,"INTEGER")
-    void SQLitePrinter::PRINT(float    ,"REAL")
-    void SQLitePrinter::PRINT(double   ,"REAL")
-    #undef PRINT
-
-    void SQLitePrinter::_print(ModelParameters const& value, const std::string& label, const int vID, const unsigned int mpirank, const unsigned long pointID)
-    {
-      std::map<std::string, double> parameter_map = value.getValues();
-      _print(parameter_map, label, vID, mpirank, pointID);
-    }
-
-    void SQLitePrinter::_print(const map_str_dbl& map, const std::string& label, const int vID, const unsigned int mpirank, const unsigned long pointID)
-    {
-      for (std::map<std::string, double>::const_iterator
-           it = map.begin(); it != map.end(); it++)
-      {
-        std::stringstream ss;
-        ss<<label<<"::"<<it->first;
-        _print(it->second, ss.str(), vID, mpirank, pointID);
-      }
-    }
-
-    void SQLitePrinter::_print(std::vector<double> const& value, const std::string& label, const int vID, const unsigned int mpirank, const unsigned long pointID)
-    {
-      for(unsigned int i=0;i<value.size();i++)
-      {
-        std::stringstream ss;
-        ss<<label<<"["<<i<<"]";
-        _print(value.at(i), ss.str(), vID, mpirank, pointID);  
-      }
-    }
-
-
-
   }
 }
