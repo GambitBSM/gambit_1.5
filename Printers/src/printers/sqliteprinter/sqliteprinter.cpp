@@ -149,79 +149,53 @@ namespace Gambit
         make_table(table_name);
         set_table_name(table_name); // Inform base class of table name
 
-        // If we are rank 0 and also resuming (and this is the primary printer), need to read the database and find the previous
-        // highest pointID numbers used.
-        if(not is_auxilliary_printer())
+        // If we are resuming and this is the primary printer, need to read the database and find the previous
+        // highest pointID numbers used for this rank
+        std::size_t my_highest_pointID=0;
+        if(not is_auxilliary_printer() and get_resume())
         { 
-            // Record of the highest pointIDs in previous run that are relevant for *this* run
-            std::vector<std::size_t> highests(mpiSize);
-
-            if(getRank()==0 and get_resume())
-            {
-                // Map from ranks to highest pointIDs in previous output
-                std::map<std::size_t, std::size_t> highest_pointIDs;
-  
-                // Construct the SQLite3 statement to retrieve previous ranks and pointIDs from the database
-                std::stringstream sql;
-                sql << "SELECT MPIrank,pointID FROM "<<get_table_name();
+            // Construct the SQLite3 statement to retrieve highest existing pointID in the database for this rank
+            std::stringstream sql;
+            sql << "SELECT MAX(pointID) FROM "<<get_table_name()<<" WHERE MPIrank="<<mpiRank;
     
-                /* Execute SQL statement and iterate through results*/ 
-                sqlite3_stmt *stmt;
-                int rc = sqlite3_prepare_v2(get_db(), sql.str().c_str(), -1, &stmt, NULL);
-                if (rc != SQLITE_OK) {
-                    std::stringstream err;
-                    err<<"Encountered SQLite error while preparing to retrieve previous pointIDs: "<<sqlite3_errmsg(get_db());
-                    printer_error().raise(LOCAL_INFO, err.str());
-                }
-                while ((rc = sqlite3_step(stmt)) == SQLITE_ROW) {
-                    std::size_t rank = sqlite3_column_int(stmt, 0);
-                    std::size_t pID  = sqlite3_column_int(stmt, 1);
-                    if( pID > highest_pointIDs[rank] )
-                    {
-                        highest_pointIDs[rank] = pID;
-                    }
-                }
-                if (rc != SQLITE_DONE) {
-                    std::stringstream err;
-                    err<<"Encountered SQLite error while retrieving previous pointIDs: "<<sqlite3_errmsg(get_db());
-                    printer_error().raise(LOCAL_INFO, err.str());
-                }
-                sqlite3_finalize(stmt);
- 
-                // Grab only the highest pointIDs for ranks that we are using THIS run.              
-                for (int rank = 0; rank < myComm.Get_size(); rank++ )
+            /* Execute SQL statement and iterate through results*/ 
+            sqlite3_stmt *stmt;
+            int rc = sqlite3_prepare_v2(get_db(), sql.str().c_str(), -1, &stmt, NULL);
+            if (rc != SQLITE_OK) {
+                std::stringstream err;
+                err<<"Encountered SQLite error while preparing to retrieve previous pointIDs: "<<sqlite3_errmsg(get_db());
+                printer_error().raise(LOCAL_INFO, err.str());
+            }
+            int colcount=0;
+            while ((rc = sqlite3_step(stmt)) == SQLITE_ROW) {
+                my_highest_pointID = sqlite3_column_int64(stmt, 0);
+                colcount++;
+                if(colcount>1)
                 {
-                    auto it = highest_pointIDs.find(rank);
-                    if (it != highest_pointIDs.end())
-                        highests[rank] = it->second;
-                    else
-                        highests[rank] = 0;
+                    std::stringstream err;
+                    err<<"SQLite statement to retrieve highest existing pointID returned more than one result! This doesn't make sense, so there is probably a bug in the statement that was used. Statement was: "<<sql.str();
+                    printer_error().raise(LOCAL_INFO, err.str());
                 }
-            } 
-
-            // Need to communicate these to ScannerBit so it doesn't start assigning them
-            // again from zero.
+            }
+            if (rc != SQLITE_DONE) {
+                std::stringstream err;
+                err<<"Encountered SQLite error while retrieving previous pointIDs: "<<sqlite3_errmsg(get_db());
+                printer_error().raise(LOCAL_INFO, err.str());
+            }
+            sqlite3_finalize(stmt);
+ 
+            // Need to make sure no other processes start adding new stuff before everyone has figured out
+            // their next unused pointID  
 #ifdef WITH_MPI
-            int resume_int = get_resume();
             myComm.Barrier();
-            // Make sure everyone agrees on the resume status. Not really needed, but I
-            // just copied it from the HDF5 printer.
-            myComm.Bcast(resume_int, 1, 0);
-            set_resume(resume_int);
-
-            if (get_resume())
-            {
-                std::size_t my_highest;
-                myComm.Barrier();
-                myComm.Scatter(highests, my_highest, 0);
-                get_point_id() = my_highest;
-            }
-#else
-            if (get_resume())
-            {
-                get_point_id() = highests[0];
-            }
 #endif
+            if (get_resume())
+            {
+                get_point_id() = my_highest_pointID;
+            }
+
+            // DEBUG
+            //std::cout<<"Highest pointID retrieved for rank "<<mpiRank<<" was: "<<get_point_id();
         }
     }
 
@@ -493,24 +467,24 @@ namespace Gambit
     // Modifies 'sql' stringstream in-place
     void SQLitePrinter::turn_buffer_into_insert(std::stringstream& sql, const std::string& table)
     {
-        sql<<"INSERT INTO "<<table<<" (pairID,";
+        sql<<"INSERT INTO "<<table<<" (\npairID,\n";
         for(auto col_name_it=buffer_header.begin(); col_name_it!=buffer_header.end(); ++col_name_it)
         {
-            sql<<"`"<<(*col_name_it)<<"`"<<comma_unless_last(col_name_it,buffer_header);
+            sql<<"`"<<(*col_name_it)<<"`"<<comma_unless_last(col_name_it,buffer_header)<<"\n";
         }
         sql<<") VALUES ";
         for(auto row_it=transaction_data_buffer.begin();
                  row_it!=transaction_data_buffer.end(); ++row_it)
         {
-            sql<<"(";
+            sql<<"(\n";
             std::size_t pairID = row_it->first;
             std::vector<std::string>& row = row_it->second;
-            sql<<pairID<<",";
+            sql<<pairID<<",\n";
             for(auto col_it=row.begin(); col_it!=row.end(); ++col_it)
             {
-                sql<<(*col_it)<<comma_unless_last(col_it,row);   
+                sql<<(*col_it)<<comma_unless_last(col_it,row)<<"\n";   
             }
-            sql<<")"<<comma_unless_last(row_it,transaction_data_buffer);
+            sql<<")\n"<<comma_unless_last(row_it,transaction_data_buffer);
         }
         sql<<";"; // End statement
     }
@@ -521,6 +495,8 @@ namespace Gambit
         // Add the table INSERT operation to a stream
         std::stringstream sql;
         turn_buffer_into_insert(sql,get_table_name());
+
+        //std::cout<<sql.str(); // DEBUG
 
         /* Execute SQL statement */
         submit_sql(LOCAL_INFO,sql.str());
@@ -534,34 +510,34 @@ namespace Gambit
         // this. Otherwise we have to write tonnes of separate 'update' statements,
         // which is probably not very fast.
         // So first we need to create the temporary table.
-        sql << "DROP TABLE IF EXISTS temp_table;"
+        sql << "DROP TABLE IF EXISTS temp_table;\n"
             << "CREATE TEMPORARY TABLE temp_table("
-            << "pairID   INT PRIMARY KEY NOT NULL,";
+            << "pairID   INT PRIMARY KEY NOT NULL,\n";
         for(auto col_it=buffer_info.begin(); col_it!=buffer_info.end(); ++col_it)
         { 
             const std::string& col_name(col_it->first);
             const std::string& col_type(col_it->second.second);
-            sql<<"`"<<col_name<<"`   "<<col_type<<comma_unless_last(col_it,buffer_info);
+            sql<<"`"<<col_name<<"`   "<<col_type<<comma_unless_last(col_it,buffer_info)<<"\n";
         }
-        sql <<");";
+        sql <<");\n";
 
         // Insert data into the temporary table
         turn_buffer_into_insert(sql,"temp_table");
 
         // Update the primary output table using the temporary table
         // Following: https://stackoverflow.com/a/47753166/1447953
-        sql<<"UPDATE "<<get_table_name()<<" SET (";
+        sql<<"UPDATE "<<get_table_name()<<" SET (\n";
         for(auto col_name_it=buffer_header.begin(); col_name_it!=buffer_header.end(); ++col_name_it)
         { 
-            sql<<*col_name_it<<comma_unless_last(col_name_it,buffer_header);
+            sql<<*col_name_it<<comma_unless_last(col_name_it,buffer_header)<<"\n";
         }
-        sql<<") = (SELECT ";
+        sql<<") = (SELECT \n";
         for(auto col_name_it=buffer_header.begin(); col_name_it!=buffer_header.end(); ++col_name_it)
         { 
-            sql<<"temp_table."<<*col_name_it<<comma_unless_last(col_name_it,buffer_header);
+            sql<<"temp_table."<<*col_name_it<<comma_unless_last(col_name_it,buffer_header)<<"\n";
         }
-        sql<<" FROM temp_table WHERE temp_table.pairID = "<<get_table_name()<<".pairID)";
-        sql<<" WHERE EXISTS ( SELECT * FROM temp_table WHERE temp_table.pairID = "<<get_table_name()<<".pairID);";
+        sql<<" FROM temp_table WHERE temp_table.pairID = "<<get_table_name()<<".pairID)\n";
+        sql<<" WHERE EXISTS ( SELECT * FROM temp_table WHERE temp_table.pairID = "<<get_table_name()<<".pairID);\n";
 
         /* Execute SQL statement */
         submit_sql(LOCAL_INFO,sql.str());

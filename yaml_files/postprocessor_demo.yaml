@@ -34,18 +34,18 @@ Priors:
 
 Printer:
 
-  #printer: hdf5
-  #options:
-  #  output_file: "pp_results.hdf5"
-  #  group: "/ppv2"
-  #  delete_file_on_restart: true
-
-  printer: sqlite
+  printer: hdf5
   options:
-    output_file: "pp_results.sql"
-    table_name: "ppv2"
-    buffer_length: 1
+    output_file: "pp_results.hdf5"
+    group: "/ppv2"
     delete_file_on_restart: true
+
+  #printer: sqlite
+  #options:
+  #  output_file: "pp_results.sql"
+  #  table_name: "ppv2"
+  #  buffer_length: 100
+  #  delete_file_on_restart: true
 
 
 Scanner:
