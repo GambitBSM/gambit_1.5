@@ -363,10 +363,8 @@ namespace Gambit {
 
         // Calculate HT
         for (size_t iJet=0; iJet<signalJets.size(); iJet++){
-          double jetpT = signalJets.at(iJet).pT();
-          if (jetpT > 30.){
-            HT += jetpT;           
-          }
+          double jetpT = signalJets.at(iJet)->pT();
+          if (jetpT > 30.) HT += jetpT;           
         }
 
         // // Calculate mT2
