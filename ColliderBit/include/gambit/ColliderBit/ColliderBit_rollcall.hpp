@@ -179,6 +179,7 @@ START_MODULE
     #define FUNCTION smearEventATLAS
     START_FUNCTION(HEPUtils::Event)
     NEEDS_MANAGER_WITH_CAPABILITY(ColliderOperator)
+    NEEDS_CLASSES_FROM(Pythia, default)
     DEPENDENCY(HardScatteringEvent, Pythia8::Event)
     DEPENDENCY(SimpleSmearingSim, Gambit::ColliderBit::BuckFastSmearATLAS)
     #undef FUNCTION
@@ -189,6 +190,7 @@ START_MODULE
     #define FUNCTION smearEventATLASnoeff
     START_FUNCTION(HEPUtils::Event)
     NEEDS_MANAGER_WITH_CAPABILITY(ColliderOperator)
+    NEEDS_CLASSES_FROM(Pythia, default)
     DEPENDENCY(HardScatteringEvent, Pythia8::Event)
     DEPENDENCY(SimpleSmearingSim, Gambit::ColliderBit::BuckFastSmearATLASnoeff)
     #undef FUNCTION
@@ -199,6 +201,7 @@ START_MODULE
     #define FUNCTION smearEventCMS
     START_FUNCTION(HEPUtils::Event)
     NEEDS_MANAGER_WITH_CAPABILITY(ColliderOperator)
+    NEEDS_CLASSES_FROM(Pythia, default)
     DEPENDENCY(HardScatteringEvent, Pythia8::Event)
     DEPENDENCY(SimpleSmearingSim, Gambit::ColliderBit::BuckFastSmearCMS)
     #undef FUNCTION
@@ -209,6 +212,7 @@ START_MODULE
     #define FUNCTION smearEventCMSnoeff
     START_FUNCTION(HEPUtils::Event)
     NEEDS_MANAGER_WITH_CAPABILITY(ColliderOperator)
+    NEEDS_CLASSES_FROM(Pythia, default)
     DEPENDENCY(HardScatteringEvent, Pythia8::Event)
     DEPENDENCY(SimpleSmearingSim, Gambit::ColliderBit::BuckFastSmearCMSnoeff)
     #undef FUNCTION
@@ -219,6 +223,7 @@ START_MODULE
     #define FUNCTION copyEvent
     START_FUNCTION(HEPUtils::Event)
     NEEDS_MANAGER_WITH_CAPABILITY(ColliderOperator)
+    NEEDS_CLASSES_FROM(Pythia, default)
     DEPENDENCY(HardScatteringEvent, Pythia8::Event)
     DEPENDENCY(SimpleSmearingSim, Gambit::ColliderBit::BuckFastIdentity)
     #undef FUNCTION
