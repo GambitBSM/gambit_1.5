@@ -81,7 +81,7 @@ int main(int argc, char* argv[])
 
     // Check that required backends are present
     if (not Backends::backendInfo().works["Pythia8.212.EM"]) backend_error().raise(LOCAL_INFO, "Pythia 8.212.EM is missing!");
-    if (not Backends::backendInfo().works["nulike1.0.6"]) backend_error().raise(LOCAL_INFO, "nulike 1.0.6 is missing!");
+    if (not Backends::backendInfo().works["nulike1.0.7"]) backend_error().raise(LOCAL_INFO, "nulike 1.0.7 is missing!");
 
     // Output some info about ColliderBit
     cout << endl << "My name is " << name() << endl;
@@ -103,7 +103,7 @@ int main(int argc, char* argv[])
     // Set up the LHC likelihood calculations
     calc_combined_LHC_LogLike.resolveDependency(&get_LHC_LogLike_per_analysis);
 
-    get_LHC_LogLike_per_analysis.resolveDependency(&calc_LHC_LogLikes); 
+    get_LHC_LogLike_per_analysis.resolveDependency(&calc_LHC_LogLikes);
 
     calc_LHC_LogLikes.resolveDependency(&CollectAnalyses);
     calc_LHC_LogLikes.resolveBackendReq(&Backends::nulike_1_0_6::Functown::nulike_lnpiln); //treat systematics with a log normal distribution
@@ -115,7 +115,7 @@ int main(int argc, char* argv[])
     CollectAnalyses.resolveDependency(&runCMSnoeffAnalyses);
     CollectAnalyses.resolveDependency(&runIdentityAnalyses);
 
-    
+
 
     runATLASAnalyses.resolveDependency(&getATLASAnalysisContainer);
     runATLASAnalyses.resolveDependency(&getPythiaFileReader);
@@ -136,7 +136,7 @@ int main(int argc, char* argv[])
     runCMSnoeffAnalyses .resolveDependency(&getPythiaFileReader);
     runCMSnoeffAnalyses .resolveDependency(&smearEventCMSnoeff);
     runCMSnoeffAnalyses .resolveDependency(&MC_ConvergenceSettings_from_YAML);
-    
+
     runIdentityAnalyses.resolveDependency(&getIdentityAnalysisContainer);
     runIdentityAnalyses.resolveDependency(&getPythiaFileReader);
     runIdentityAnalyses.resolveDependency(&copyEvent);
@@ -392,7 +392,7 @@ int main(int argc, char* argv[])
     operateLHCLoop.reset_and_calculate();
     CollectAnalyses.reset_and_calculate();
     calc_LHC_LogLikes.reset_and_calculate();
-    get_LHC_LogLike_per_analysis.reset_and_calculate(); 
+    get_LHC_LogLike_per_analysis.reset_and_calculate();
     calc_combined_LHC_LogLike.reset_and_calculate();
 
     // Retrieve and print the LHC likelihood
