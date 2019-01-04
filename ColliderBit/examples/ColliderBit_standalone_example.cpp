@@ -106,8 +106,8 @@ int main(int argc, char* argv[])
     get_LHC_LogLike_per_analysis.resolveDependency(&calc_LHC_LogLikes);
 
     calc_LHC_LogLikes.resolveDependency(&CollectAnalyses);
-    calc_LHC_LogLikes.resolveBackendReq(&Backends::nulike_1_0_6::Functown::nulike_lnpiln); //treat systematics with a log normal distribution
-    // calc_LHC_LogLikes.resolveBackendReq(&Backends::nulike_1_0_6::Functown::nulike_lnpin); //treat systematics with a normal distribution
+    calc_LHC_LogLikes.resolveBackendReq(&Backends::nulike_1_0_7::Functown::nulike_lnpiln); //treat systematics with a log normal distribution
+    // calc_LHC_LogLikes.resolveBackendReq(&Backends::nulike_1_0_7::Functown::nulike_lnpin); //treat systematics with a normal distribution
 
     CollectAnalyses.resolveDependency(&runATLASAnalyses);
     CollectAnalyses.resolveDependency(&runATLASnoeffAnalyses);
@@ -384,7 +384,7 @@ int main(int argc, char* argv[])
     //
 
     // Call the initialisation functions for all backends that are in use.
-    nulike_1_0_6_init.reset_and_calculate();
+    nulike_1_0_7_init.reset_and_calculate();
     Pythia_8_212_EM_init.reset_and_calculate();
 
     // Run the simulation loop and calculate the LHC likelihood.
