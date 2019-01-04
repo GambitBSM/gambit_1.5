@@ -67,8 +67,9 @@ START_MODULE
   /// Collider sim capabilities
   #define CAPABILITY HardScatteringSim
   START_CAPABILITY
+
     #define FUNCTION getPythia
-    START_FUNCTION(Gambit::ColliderBit::SpecializablePythia)
+    START_FUNCTION(Gambit::ColliderBit::SpecializablePythia<Pythia_default::Pythia8::Pythia>)
     NEEDS_MANAGER_WITH_CAPABILITY(ColliderOperator)
     NEEDS_CLASSES_FROM(Pythia, default)
     DEPENDENCY(decay_rates, DecayTable)
@@ -76,10 +77,25 @@ START_MODULE
     #undef FUNCTION
 
     #define FUNCTION getPythiaFileReader
-    START_FUNCTION(Gambit::ColliderBit::SpecializablePythia)
+    START_FUNCTION(Gambit::ColliderBit::SpecializablePythia<Pythia_default::Pythia8::Pythia>)
     NEEDS_MANAGER_WITH_CAPABILITY(ColliderOperator)
     NEEDS_CLASSES_FROM(Pythia, default)
     #undef FUNCTION
+
+    #define FUNCTION getPythia_EM
+    START_FUNCTION(Gambit::ColliderBit::SpecializablePythia<Pythia_EM_default::Pythia8::Pythia>)
+    NEEDS_MANAGER_WITH_CAPABILITY(ColliderOperator)
+    NEEDS_CLASSES_FROM(Pythia_EM, default)
+    DEPENDENCY(decay_rates, DecayTable)
+    MODEL_CONDITIONAL_DEPENDENCY(MSSM_spectrum, Spectrum, MSSM63atQ, MSSM63atMGUT)
+    #undef FUNCTION
+
+    #define FUNCTION getPythiaFileReader_EM
+    START_FUNCTION(Gambit::ColliderBit::SpecializablePythia<Pythia_EM_default::Pythia8::Pythia>)
+    NEEDS_MANAGER_WITH_CAPABILITY(ColliderOperator)
+    NEEDS_CLASSES_FROM(Pythia_EM, default)
+    #undef FUNCTION
+
   #undef CAPABILITY
 
 
@@ -165,68 +181,127 @@ START_MODULE
   /// Event capabilities
   #define CAPABILITY HardScatteringEvent
   START_CAPABILITY
+
     #define FUNCTION generatePythia8Event
-    START_FUNCTION(Pythia8::Event)
+    START_FUNCTION(Pythia_default::Pythia8::Event)
     NEEDS_MANAGER_WITH_CAPABILITY(ColliderOperator)
     NEEDS_CLASSES_FROM(Pythia, default)
-    DEPENDENCY(HardScatteringSim, Gambit::ColliderBit::SpecializablePythia)
+    DEPENDENCY(HardScatteringSim, Gambit::ColliderBit::SpecializablePythia<Pythia_default::Pythia8::Pythia>)
     #undef FUNCTION
+
+    #define FUNCTION generatePythia8Event_EM
+    START_FUNCTION(Pythia_EM_default::Pythia8::Event)
+    NEEDS_MANAGER_WITH_CAPABILITY(ColliderOperator)
+    NEEDS_CLASSES_FROM(Pythia_EM, default)
+    DEPENDENCY(HardScatteringSim, Gambit::ColliderBit::SpecializablePythia<Pythia_EM_default::Pythia8::Pythia>)
+    #undef FUNCTION
+
   #undef CAPABILITY
 
   /// Detector simulators that directly produce the standard event format
   #define CAPABILITY ATLASSmearedEvent
   START_CAPABILITY
+
     #define FUNCTION smearEventATLAS
     START_FUNCTION(HEPUtils::Event)
     NEEDS_MANAGER_WITH_CAPABILITY(ColliderOperator)
     NEEDS_CLASSES_FROM(Pythia, default)
-    DEPENDENCY(HardScatteringEvent, Pythia8::Event)
+    DEPENDENCY(HardScatteringEvent, Pythia_default::Pythia8::Event)
     DEPENDENCY(SimpleSmearingSim, Gambit::ColliderBit::BuckFastSmearATLAS)
     #undef FUNCTION
+
+    #define FUNCTION smearEventATLAS_EM
+    START_FUNCTION(HEPUtils::Event)
+    NEEDS_MANAGER_WITH_CAPABILITY(ColliderOperator)
+    NEEDS_CLASSES_FROM(Pythia_EM, default)
+    DEPENDENCY(HardScatteringEvent, Pythia_EM_default::Pythia8::Event)
+    DEPENDENCY(SimpleSmearingSim, Gambit::ColliderBit::BuckFastSmearATLAS)
+    #undef FUNCTION
+
   #undef CAPABILITY
 
   #define CAPABILITY ATLASnoeffSmearedEvent
   START_CAPABILITY
+
     #define FUNCTION smearEventATLASnoeff
     START_FUNCTION(HEPUtils::Event)
     NEEDS_MANAGER_WITH_CAPABILITY(ColliderOperator)
     NEEDS_CLASSES_FROM(Pythia, default)
-    DEPENDENCY(HardScatteringEvent, Pythia8::Event)
+    DEPENDENCY(HardScatteringEvent, Pythia_default::Pythia8::Event)
     DEPENDENCY(SimpleSmearingSim, Gambit::ColliderBit::BuckFastSmearATLASnoeff)
     #undef FUNCTION
+
+    #define FUNCTION smearEventATLASnoeff_EM
+    START_FUNCTION(HEPUtils::Event)
+    NEEDS_MANAGER_WITH_CAPABILITY(ColliderOperator)
+    NEEDS_CLASSES_FROM(Pythia_EM, default)
+    DEPENDENCY(HardScatteringEvent, Pythia_EM_default::Pythia8::Event)
+    DEPENDENCY(SimpleSmearingSim, Gambit::ColliderBit::BuckFastSmearATLASnoeff)
+    #undef FUNCTION
+
   #undef CAPABILITY
 
   #define CAPABILITY CMSSmearedEvent
   START_CAPABILITY
+
     #define FUNCTION smearEventCMS
     START_FUNCTION(HEPUtils::Event)
     NEEDS_MANAGER_WITH_CAPABILITY(ColliderOperator)
     NEEDS_CLASSES_FROM(Pythia, default)
-    DEPENDENCY(HardScatteringEvent, Pythia8::Event)
+    DEPENDENCY(HardScatteringEvent, Pythia_default::Pythia8::Event)
     DEPENDENCY(SimpleSmearingSim, Gambit::ColliderBit::BuckFastSmearCMS)
     #undef FUNCTION
+
+    #define FUNCTION smearEventCMS
+    START_FUNCTION(HEPUtils::Event)
+    NEEDS_MANAGER_WITH_CAPABILITY(ColliderOperator)
+    NEEDS_CLASSES_FROM(Pythia_EM, default)
+    DEPENDENCY(HardScatteringEvent, Pythia_EM_default::Pythia8::Event)
+    DEPENDENCY(SimpleSmearingSim, Gambit::ColliderBit::BuckFastSmearCMS)
+    #undef FUNCTION
+
   #undef CAPABILITY
 
   #define CAPABILITY CMSnoeffSmearedEvent
   START_CAPABILITY
+
     #define FUNCTION smearEventCMSnoeff
     START_FUNCTION(HEPUtils::Event)
     NEEDS_MANAGER_WITH_CAPABILITY(ColliderOperator)
     NEEDS_CLASSES_FROM(Pythia, default)
-    DEPENDENCY(HardScatteringEvent, Pythia8::Event)
+    DEPENDENCY(HardScatteringEvent, Pythia_default::Pythia8::Event)
     DEPENDENCY(SimpleSmearingSim, Gambit::ColliderBit::BuckFastSmearCMSnoeff)
     #undef FUNCTION
+
+    #define FUNCTION smearEventCMSnoeff
+    START_FUNCTION(HEPUtils::Event)
+    NEEDS_MANAGER_WITH_CAPABILITY(ColliderOperator)
+    NEEDS_CLASSES_FROM(Pythia_EM, default)
+    DEPENDENCY(HardScatteringEvent, Pythia_EM_default::Pythia8::Event)
+    DEPENDENCY(SimpleSmearingSim, Gambit::ColliderBit::BuckFastSmearCMSnoeff)
+    #undef FUNCTION
+
   #undef CAPABILITY
 
   #define CAPABILITY CopiedEvent
   START_CAPABILITY
+
     #define FUNCTION copyEvent
     START_FUNCTION(HEPUtils::Event)
     NEEDS_MANAGER_WITH_CAPABILITY(ColliderOperator)
     NEEDS_CLASSES_FROM(Pythia, default)
-    DEPENDENCY(HardScatteringEvent, Pythia8::Event)
+    DEPENDENCY(HardScatteringEvent, Pythia_default::Pythia8::Event)
     DEPENDENCY(SimpleSmearingSim, Gambit::ColliderBit::BuckFastIdentity)
     #undef FUNCTION
+
+    #define FUNCTION copyEvent
+    START_FUNCTION(HEPUtils::Event)
+    NEEDS_MANAGER_WITH_CAPABILITY(ColliderOperator)
+    NEEDS_CLASSES_FROM(Pythia_EM, default)
+    DEPENDENCY(HardScatteringEvent, Pythia_EM_default::Pythia8::Event)
+    DEPENDENCY(SimpleSmearingSim, Gambit::ColliderBit::BuckFastIdentity)
+    #undef FUNCTION
+
   #undef CAPABILITY
 
   // A capability that calculates the log likelihood

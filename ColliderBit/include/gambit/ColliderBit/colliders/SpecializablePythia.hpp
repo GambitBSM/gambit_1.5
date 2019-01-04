@@ -1,38 +1,54 @@
-#pragma once
 //   GAMBIT: Global and Modular BSM Inference Tool
 //   *********************************************
 ///  \file
 ///
 ///  The SpecializablePythia class.
+///
+///  *********************************************
+///
+///  Authors (add name and date if you modify):
+///
+///  \author Abram Krislock
+///  \date July 2016
+///
+///  *********************************************
+
+#pragma once
 
 #include <ostream>
-// #include "gambit/Elements/gambit_module_headers.hpp"
-// #include "gambit/ColliderBit/ColliderBit_rollcall.hpp"
+#include <stdexcept>
 #include "gambit/ColliderBit/colliders/BaseCollider.hpp"
+#include "gambit/ColliderBit/ColliderBit_macros.hpp"
+#include "gambit/ColliderBit/colliders/collider_rollcall.hpp")
 #include "SLHAea/slhaea.h"
 
-namespace Gambit {
-  namespace ColliderBit {
+namespace Gambit
+{
+  namespace ColliderBit
+  {
 
     /// A specializable, recyclable class interfacing ColliderBit and Pythia.
-    class SpecializablePythia : public BaseCollider<Pythia8::Event>
+    template <typename PythiaT , typename EventT>
+    class SpecializablePythia<PythiaT, EventT> : public BaseCollider<EventT>
     {
+
       protected:
-        Pythia8::Pythia* _pythiaInstance;
-        Pythia8::Pythia* _pythiaBase;
+
+        PythiaT* _pythiaInstance;
+        PythiaT* _pythiaBase;
         std::vector<std::string> _pythiaSettings;
-        void (*_specialInit)(SpecializablePythia*);
+        void (*_specialInit)(SpecializablePythia<PythiaT, EventT>*);
 
-      /// @name Getters:
-      //@{
+
       public:
+
         /// Get the Pythia instance.
-        const Pythia8::Pythia* pythia() const { return _pythiaInstance; }
-      //@}
+        const PythiaT* pythia() const { return _pythiaInstance; }
 
-      /// @name Custom exceptions:
-      ///@{
-      public:
+
+        /// @name Custom exceptions:
+        ///@{
+
         /// An exception for when Pythia fails to initialize.
         class InitializationError : public std::exception
         {
@@ -49,23 +65,42 @@ namespace Gambit {
             return "Pythia could not make the next event.";
           }
         };
-      ///@}
 
-      /// @name Construction, Destruction, and Recycling:
-      ///@{
-      public:
+        ///@}
+
+
+        /// @name Construction, Destruction, and Recycling:
+        ///@{
+
         SpecializablePythia() : _pythiaInstance(nullptr), _pythiaBase(nullptr) {}
-        ~SpecializablePythia();
-        void clear();
-      ///@}
 
-      /// @name (Re-)Initialization functions
-      ///@{
-      public:
+        ~SpecializablePythia()
+        {
+          _pythiaSettings.clear();
+          if (_pythiaInstance) delete _pythiaInstance;
+          if (_pythiaBase) delete _pythiaBase;
+        }
+
+        void clear()
+        {
+          _pythiaSettings.clear();
+          if (_pythiaInstance)
+          {
+            delete _pythiaInstance;
+            _pythiaInstance=nullptr;
+          }
+        }
+
+        ///@}
+
+
+        /// @name (Re-)Initialization functions
+        ///@{
+
         /// Add a command to the list of settings used by "init".
         void addToSettings(const std::string& command) { _pythiaSettings.push_back(command); }
         /// Create a useless Pythia instance just to print the banner.
-        void banner(const std::string pythiaDocPath) { Pythia8::Pythia myPythia(pythiaDocPath); }
+        void banner(const std::string pythiaDocPath) { PythiaT myPythia(pythiaDocPath); }
         /// Initialize with no settings (error): override version.
         void init() { std::cout<<"No settings given to Pythia!\n\n"; throw InitializationError(); }
 
@@ -85,10 +120,67 @@ namespace Gambit {
         void init(const std::string pythiaDocPath,
                   const std::vector<std::string>& externalSettings,
                   const SLHAea::Coll* slhaea=nullptr, std::ostream& os=std::cout);
+        {
+          // Settings acquired externally (ex from a gambit yaml file)
+          for(const auto command : externalSettings) _pythiaSettings.push_back(command);
+
+          // Specialized settings:
+          _specialInit(this);
+
+          if (!_pythiaBase)
+          {
+            _pythiaBase = new PythiaT(pythiaDocPath, false);
+          }
+
+          // Pass all settings to _pythiaBase
+          for(const auto command : _pythiaSettings) _pythiaBase->readString(command);
+
+          // Create new _pythiaInstance from _pythiaBase
+          if (_pythiaInstance) delete _pythiaInstance;
+          _pythiaInstance = new PythiaT(_pythiaBase->particleData, _pythiaBase->settings);
+
+          // Send along the SLHAea::Coll pointer, if it exists
+          if (slhaea) _pythiaInstance->slhaInterface.slha.setSLHAea(slhaea);
+
+          // Read command again to get SM decay table change from yaml file
+          for(const auto command : _pythiaSettings)
+          {
+            _pythiaInstance->readString(command);
+          }
+
+          if (!_pythiaInstance->init(os)) throw InitializationError();
+        }
+
         /// Initialize from some external settings.
+        /// Special version of the init function for user defined models
+        /// Needs to directly construct the new matrix elements (rather than use flags)
         void init_user_model(const std::string pythiaDocPath,
                              const std::vector<std::string>& externalSettings,
-                             const SLHAea::Coll* slhaea=nullptr, std::ostream& os=std::cout);
+                             const SLHAea::Coll* slhaea=nullptr, std::ostream& os=std::cout)
+        {
+          // Settings acquired externally (for example, from a gambit yaml file)
+          for(const auto command : externalSettings) _pythiaSettings.push_back(command);
+
+          // Specialized settings:
+          _specialInit(this);
+
+          if (!_pythiaBase)
+          {
+            _pythiaBase = new PythiaT(pythiaDocPath, false);
+          }
+
+          // Pass all settings to _pythiaBase
+          for(const auto command : _pythiaSettings) _pythiaBase->readString(command);
+
+          // Create new _pythiaInstance from _pythiaBase
+          if (_pythiaInstance) delete _pythiaInstance;
+          _pythiaInstance = new PythiaT(_pythiaBase->particleData, _pythiaBase->settings);
+
+          // Send along the SLHAea::Coll pointer, if it exists
+          if (slhaea) _pythiaInstance->slhaInterface.slha.setSLHAea(slhaea);
+
+          if (!_pythiaInstance->init(os)) throw InitializationError();
+        }
 
         /// Initialize from some external settings, assuming no given SLHAea instance.
         void init(const std::string pythiaDocPath,
@@ -96,6 +188,7 @@ namespace Gambit {
         {
           init(pythiaDocPath, externalSettings, nullptr, os);
         }
+
         /// Initialize from some external settings, assuming no given SLHAea instance.
         void init_user_model(const std::string pythiaDocPath,
                              const std::vector<std::string>& externalSettings, std::ostream& os)
@@ -104,12 +197,27 @@ namespace Gambit {
         }
 
         /// Specialize this Pythia interface to Gambit with a specialization function.
-        void resetSpecialization(const std::string&);
-      ///@}
+        void resetSpecialization(const std::string&)
+        {
+          clear();
+          IF_X_SPECIALIZEX(Pythia_external)
+          IF_X_SPECIALIZEX(Pythia_SUSY_LHC_8TeV)
+          IF_X_SPECIALIZEX(Pythia_glusq_LHC_8TeV)
+          IF_X_SPECIALIZEX(Pythia_SUSY_LHC_13TeV)
+          // default to a Pythia instance configured entirely by external (yaml) settings:
+          _specialInit = Pythia_external::init;
+          std::cout<<"\n\n\n"
+                   <<"COLLIDERBIT WARNING: Pythia named "<<specName<<" is not coded in SpecializablePythia."
+                   <<"                     Now trying to configure Pythia entirely by yaml input..."
+                   <<"\n\n\n";
+        }
 
-      /// @name Event generation and cross section functions
-      ///@{
-      public:
+        ///@}
+
+
+        /// @name Event generation and cross section functions
+        ///@{
+
         /// Event generation for any Pythia interface to Gambit.
         void nextEvent(EventType& event) const
         {
@@ -124,9 +232,12 @@ namespace Gambit {
 
         /// Report the cross section (in pb) at the end of the subprocess.
         double xsec_pb() const { return _pythiaInstance->info.sigmaGen() * 1e9; }
+
         /// Report the cross section uncertainty (in pb) at the end of the subprocess.
         double xsecErr_pb() const { return _pythiaInstance->info.sigmaErr() * 1e9; }
-      ///@}
+
+        ///@}
+
      };
 
   }

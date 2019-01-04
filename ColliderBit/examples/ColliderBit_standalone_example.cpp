@@ -115,8 +115,6 @@ int main(int argc, char* argv[])
     CollectAnalyses.resolveDependency(&runCMSnoeffAnalyses);
     CollectAnalyses.resolveDependency(&runIdentityAnalyses);
 
-
-
     runATLASAnalyses.resolveDependency(&getATLASAnalysisContainer);
     runATLASAnalyses.resolveDependency(&getPythiaFileReader);
     runATLASAnalyses.resolveDependency(&smearEventATLAS);
@@ -385,7 +383,7 @@ int main(int argc, char* argv[])
 
     // Call the initialisation functions for all backends that are in use.
     nulike_1_0_7_init.reset_and_calculate();
-    Pythia_8_212_EM_init.reset_and_calculate();
+    Pythia_EM_8_212_init.reset_and_calculate();
 
     // Run the simulation loop and calculate the LHC likelihood.
     MC_ConvergenceSettings_from_YAML.reset_and_calculate();

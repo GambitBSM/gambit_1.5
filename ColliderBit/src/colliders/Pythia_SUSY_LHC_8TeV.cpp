@@ -1,0 +1,45 @@
+//   GAMBIT: Global and Modular BSM Inference Tool
+//   *********************************************
+///  \file
+///
+///  A SpecializablePythia init function for a basic
+///  SUSY @ 8TeV LHC scenario. Note that additional
+///  Pythia settings may still be applied externally
+///  via yaml file input.
+///
+///  *********************************************
+///
+///  Authors (add name and date if you modify):
+///
+///  \author Pat Scott
+///  (p.scott@imperial.ac.uk)
+///  \date Jan 2019
+///
+///  *********************************************
+
+
+#include "gambit/ColliderBit/colliders/SpecializablePythia.hpp"
+
+
+namespace Gambit
+{
+
+  namespace ColliderBit
+  {
+
+    namespace Pythia_SUSY_LHC_8TeV
+    {
+
+      void init(SpecializablePythia<Pythia_default::Pythia8::Pythia, Pythia_default::Pythia8::Event> * specializeMe)
+      {
+        specializeMe->addToSettings("Beams:eCM = 8000");
+        specializeMe->addToSettings("Main:timesAllowErrors = 1000");
+        specializeMe->addToSettings("SUSY:all = on");
+        specializeMe->addToSettings("Random:setSeed = on");
+      }
+
+    }
+
+  }
+
+}
