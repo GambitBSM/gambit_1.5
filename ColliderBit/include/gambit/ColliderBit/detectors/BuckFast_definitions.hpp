@@ -16,156 +16,58 @@
 ///
 ///  *********************************************
 
-#include "gambit/Elements/gambit_module_headers.hpp"
-#include "gambit/ColliderBit/ColliderBit_rollcall.hpp"
-#include "gambit/ColliderBit/detectors/BuckFastSmear.hpp"
-#include "gambit/ColliderBit/ATLASEfficiencies.hpp"
-#include "gambit/ColliderBit/CMSEfficiencies.hpp"
+#include "gambit/ColliderBit/detectors/BuckFast.hpp"
+#include "gambit/ColliderBit/Py8Utils.hpp"
 
-namespace Gambit {
-  namespace ColliderBit {
+#include "HEPUtils/Event.h"
+#include "HEPUtils/Particle.h"
+#include "HEPUtils/Jet.h"
+#include "MCUtils/PIDCodes.h"
 
+namespace Gambit
+{
 
-    /// BuckFastIdentity definition
-    void BuckFastIdentity::processEvent(const Pythia8::Event& eventIn, HEPUtils::Event& eventOut) const {
+  namespace ColliderBit
+  {
+
+    /// Process an event with BuckFast
+    template<typename EventT>
+    void BuckFast<EventT>::processEvent(const EventT& eventIn, HEPUtils::Event& eventOut) const
+    {
       if (partonOnly)
-        convertPythia8PartonEvent(eventIn, eventOut);
+        convertPartonEvent(eventIn, eventOut);
       else
-        convertPythia8ParticleEvent(eventIn, eventOut);
-    }
-
-
-    /// BuckFastSmearATLAS definitions
-    void BuckFastSmearATLAS::processEvent(const Pythia8::Event& eventIn, HEPUtils::Event& eventOut) const {
-      if (partonOnly)
-        convertPythia8PartonEvent(eventIn, eventOut);
-      else
-        convertPythia8ParticleEvent(eventIn, eventOut);
+        convertParticleEvent(eventIn, eventOut);
 
       // Electron smearing and efficiency
       /// @todo Run-dependence?
-      //ATLAS::applyElectronTrackingEff(eventOut.electrons());
-      ATLAS::smearElectronEnergy(eventOut.electrons());
-      ATLAS::applyElectronEff(eventOut.electrons());
+      if (smearElectronEnergy != NULL) smearElectronEnergy(eventOut.electrons());
+      if (applyElectronEff !=NULL) applyElectronEff(eventOut.electrons());
 
       // Muon smearing and efficiency
       /// @todo Run-dependence?
-      //ATLAS::applyMuonTrackEff(eventOut.muons());
-      ATLAS::smearMuonMomentum(eventOut.muons());
-      ATLAS::applyMuonEff(eventOut.muons());
+      if (smearMuonMomentum != NULL) smearMuonMomentum(eventOut.muons());
+      if (applyMuonEff != NULL) applyMuonEff(eventOut.muons());
 
-      // Apply hadronic tau reco efficiency *in the analyses* -- it's specific to LHC run & working-point
-      //ATLAS::applyTauEfficiency(eventOut.taus());
       //Smear taus
-      ATLAS::smearTaus(eventOut.taus());
+      if (smearTaus != NULL) smearTaus(eventOut.taus());
+      // Note that we apply the hadronic tau reconstruction efficiency *in the analyses*, as it is specific to the LHC run and working point.
 
       // Smear jet momenta
-      ATLAS::smearJets(eventOut.jets());
+      if (smearJets != NULL) smearJets(eventOut.jets());
 
       // Unset b-tags outside |eta|=2.5
-      for (HEPUtils::Jet* j : eventOut.jets()) {
+      for (HEPUtils::Jet* j : eventOut.jets())
+      {
         if (j->abseta() > 2.5) j->set_btag(false);
       }
     }
 
-
-    /// BuckFastSmearATLASnoeff definitions
-    void BuckFastSmearATLASnoeff::processEvent(const Pythia8::Event& eventIn, HEPUtils::Event& eventOut) const {
-      if (partonOnly)
-        convertPythia8PartonEvent(eventIn, eventOut);
-      else
-        convertPythia8ParticleEvent(eventIn, eventOut);
-
-      // Electron smearing
-      /// @todo Run-dependence?
-      //ATLAS::applyElectronTrackingEff(eventOut.electrons());
-      ATLAS::smearElectronEnergy(eventOut.electrons());
-
-      // Muon smearing
-      /// @todo Run-dependence?
-      //ATLAS::applyMuonTrackEff(eventOut.muons());
-      ATLAS::smearMuonMomentum(eventOut.muons());
-
-      // Apply hadronic tau reco efficiency *in the analyses* -- it's specific to LHC run & working-point
-      //Smear taus
-      ATLAS::smearTaus(eventOut.taus());
-
-      // Smear jet momenta
-      ATLAS::smearJets(eventOut.jets());
-
-      // Unset b-tags outside |eta|=2.5
-      for (HEPUtils::Jet* j : eventOut.jets()) {
-        if (j->abseta() > 2.5) j->set_btag(false);
-      }
-    }
-
-
-    /// BuckFastSmearCMS definition
-    void BuckFastSmearCMS::processEvent(const Pythia8::Event& eventIn, HEPUtils::Event& eventOut) const {
-      if (partonOnly)
-        convertPythia8PartonEvent(eventIn, eventOut);
-      else
-        convertPythia8ParticleEvent(eventIn, eventOut);
-
-      //MJW debug- make this the same as ATLAS temporarily
-      // Electron smearing and efficiency
-      //CMS::applyElectronTrackingEff(eventOut.electrons());
-      CMS::smearElectronEnergy(eventOut.electrons());
-      CMS::applyElectronEff(eventOut.electrons());
-
-      // Muon smearing and efficiency
-      //CMS::applyMuonTrackEff(eventOut.muons());
-      CMS::smearMuonMomentum(eventOut.muons());
-      CMS::applyMuonEff(eventOut.muons());
-
-      // Apply hadronic tau reco efficiency *in the analyses* -- it's specific to LHC run & working-point
-      //CMS::applyTauEfficiency(eventOut.taus());
-      //Smear taus
-      CMS::smearTaus(eventOut.taus());
-
-      // Smear jet momenta
-      CMS::smearJets(eventOut.jets());
-
-      // Unset b-tags outside |eta|=2.5
-      for (HEPUtils::Jet* j : eventOut.jets()) {
-        if (j->abseta() > 2.5) j->set_btag(false);
-      }
-    }
-
-
-    /// BuckFastSmearCMSnoeff definition
-    void BuckFastSmearCMSnoeff::processEvent(const Pythia8::Event& eventIn, HEPUtils::Event& eventOut) const {
-      if (partonOnly)
-        convertPythia8PartonEvent(eventIn, eventOut);
-      else
-        convertPythia8ParticleEvent(eventIn, eventOut);
-
-      //MJW debug- make this the same as ATLAS temporarily
-      // Electron smearing
-      //CMS::applyElectronTrackingEff(eventOut.electrons());
-      CMS::smearElectronEnergy(eventOut.electrons());
-
-      // Muon smearing
-      //CMS::applyMuonTrackEff(eventOut.muons());
-      CMS::smearMuonMomentum(eventOut.muons());
-
-      // Apply hadronic tau reco efficiency *in the analyses* -- it's specific to LHC run & working-point
-      //Smear taus
-      CMS::smearTaus(eventOut.taus());
-
-      // Smear jet momenta
-      CMS::smearJets(eventOut.jets());
-
-      // Unset b-tags outside |eta|=2.5
-      for (HEPUtils::Jet* j : eventOut.jets()) {
-        if (j->abseta() > 2.5) j->set_btag(false);
-      }
-    }
-
-
-    /// Convert a hadron-level Pythia8::Event into an unsmeared HEPUtils::Event
+    /// Convert a hadron-level EventT into an unsmeared HEPUtils::Event
     /// @todo Overlap between jets and prompt containers: need some isolation in MET calculation
-    void BuckFastBase::convertPythia8ParticleEvent(const Pythia8::Event& pevt, HEPUtils::Event& result) const {
+    template<typename EventT>
+    void BuckFast<EventT>::convertParticleEvent(const EventT& pevt, HEPUtils::Event& result) const
+    {
       result.clear();
 
       std::vector<FJNS::PseudoJet> bhadrons; //< for input to FastJet b-tagging
@@ -173,16 +75,18 @@ namespace Gambit {
       HEPUtils::P4 pout; //< Sum of momenta outside acceptance
 
       // Make a first pass of non-final particles to gather b-hadrons and taus
-      for (int i = 0; i < pevt.size(); ++i) {
-        const Pythia8::Particle& p = pevt[i];
+      for (int i = 0; i < pevt.size(); ++i)
+      {
+        const auto& p = pevt[i];
 
         // Find last b-hadrons in b decay chains as the best proxy for b-tagging
         /// @todo Temporarily using quark-based tagging instead -- fix
         if (p.idAbs() == 5) {
           bool isGoodB = true;
           const std::vector<int> bDaughterList = p.daughterList();
-          for (size_t daughter = 0; daughter < bDaughterList.size(); daughter++) {
-            const Pythia8::Particle& pDaughter = pevt[bDaughterList[daughter]];
+          for (size_t daughter = 0; daughter < bDaughterList.size(); daughter++)
+          {
+            const auto& pDaughter = pevt[bDaughterList[daughter]];
             int daughterID = pDaughter.idAbs();
             if (daughterID == 5) isGoodB = false;
           }
@@ -195,8 +99,9 @@ namespace Gambit {
         if (p.idAbs() == 4) {
           bool isGoodC = true;
           const std::vector<int> cDaughterList = p.daughterList();
-          for (size_t daughter = 0; daughter < cDaughterList.size(); daughter++) {
-            const Pythia8::Particle& pDaughter = pevt[cDaughterList[daughter]];
+          for (size_t daughter = 0; daughter < cDaughterList.size(); daughter++)
+          {
+            const auto& pDaughter = pevt[cDaughterList[daughter]];
             int daughterID = pDaughter.idAbs();
             if (daughterID == 4) isGoodC = false;
           }
@@ -209,8 +114,9 @@ namespace Gambit {
           HEPUtils::P4 tmpMomentum;
           bool isGoodTau=true;
           const std::vector<int> tauDaughterList = p.daughterList();
-          for (size_t daughter = 0; daughter < tauDaughterList.size(); daughter++) {
-            const Pythia8::Particle& pDaughter = pevt[tauDaughterList[daughter]];
+          for (size_t daughter = 0; daughter < tauDaughterList.size(); daughter++)
+          {
+            const auto& pDaughter = pevt[tauDaughterList[daughter]];
             int daughterID = pDaughter.idAbs();
             // Veto leptonic taus
             /// @todo What's wrong with having a W daughter? Doesn't that just mark a final tau?
@@ -228,8 +134,9 @@ namespace Gambit {
 
       // Loop over final state particles for jet inputs and MET
       std::vector<FJNS::PseudoJet> jetparticles;
-      for (int i = 0; i < pevt.size(); ++i) {
-        const Pythia8::Particle& p = pevt[i];
+      for (int i = 0; i < pevt.size(); ++i)
+      {
+        const auto& p = pevt[i];
 
         // Only consider final state particles
         if (!p.isFinal()) continue;
@@ -265,12 +172,12 @@ namespace Gambit {
         }
 
         // All particles other than invisibles and muons are jet constituents
-	// Matthias added test to keep non-prompt particles
+        // Matthias added test to keep non-prompt particles
         if (visible && p.idAbs() != MCUtils::PID::MUON) jetparticles.push_back(mk_pseudojet(p.p()));
-	// next case are visible non-prompt muons
-	//if (visible && p.idAbs() == MCUtils::PID::MUON && !prompt) jetparticles.push_back(mk_pseudojet(p.p()));
-	// next case are non-prompt neutrinos
-	//if (!visible && !prompt) jetparticles.push_back(mk_pseudojet(p.p()));
+        // next case are visible non-prompt muons
+        //if (visible && p.idAbs() == MCUtils::PID::MUON && !prompt) jetparticles.push_back(mk_pseudojet(p.p()));
+        // next case are non-prompt neutrinos
+        //if (!visible && !prompt) jetparticles.push_back(mk_pseudojet(p.p()));
       }
 
       /// Jet finding
@@ -340,15 +247,18 @@ namespace Gambit {
       result.set_missingmom(pout);
     }
 
-    /// Convert a partonic (no hadrons) Pythia8::Event into an unsmeared HEPUtils::Event
-    void BuckFastBase::convertPythia8PartonEvent(const Pythia8::Event& pevt, HEPUtils::Event& result) const {
+    /// Convert a partonic (no hadrons) EventT into an unsmeared HEPUtils::Event
+    template<typename EventT>
+    void BuckFast<EventT>::convertPartonEvent(const EventT& pevt, HEPUtils::Event& result) const
+    {
       result.clear();
 
       std::vector<HEPUtils::Particle> tauCandidates;
 
       // Make a first pass of non-final particles to gather taus
-      for (int i = 0; i < pevt.size(); ++i) {
-        const Pythia8::Particle& p = pevt[i];
+      for (int i = 0; i < pevt.size(); ++i)
+      {
+        const auto& p = pevt[i];
 
         // Find last tau in prompt tau replica chains as a proxy for tau-tagging
         if (p.idAbs() == MCUtils::PID::TAU) {
@@ -356,8 +266,9 @@ namespace Gambit {
           HEPUtils::P4 tmpMomentum;
           bool isGoodTau=true;
 
-          for (size_t daughter = 0; daughter < tauDaughterList.size(); daughter++) {
-            const Pythia8::Particle& pDaughter = pevt[tauDaughterList[daughter]];
+          for (size_t daughter = 0; daughter < tauDaughterList.size(); daughter++)
+          {
+            const auto& pDaughter = pevt[tauDaughterList[daughter]];
             int daughterID = pDaughter.idAbs();
             if (daughterID == MCUtils::PID::ELECTRON || daughterID == MCUtils::PID::MUON ||
                 daughterID == MCUtils::PID::WPLUSBOSON || daughterID == MCUtils::PID::TAU)
@@ -375,8 +286,9 @@ namespace Gambit {
       HEPUtils::P4 pout; //< Sum of momenta outside acceptance
 
       // Make a single pass over the event to gather final leptons, partons, and photons
-      for (int i = 0; i < pevt.size(); ++i) {
-        const Pythia8::Particle& p = pevt[i];
+      for (int i = 0; i < pevt.size(); ++i)
+      {
+        const auto& p = pevt[i];
 
         // We only use "final" partons, i.e. those with no children. So Py8 must have hadronization disabled
         if (!p.isFinal()) continue;
@@ -462,4 +374,5 @@ namespace Gambit {
 
 
   }
+
 }

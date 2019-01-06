@@ -1,9 +1,24 @@
-#pragma once
 //   GAMBIT: Global and Modular BSM Inference Tool
-//   *********************************************
-///  \file
+//  *********************************************
 ///
-///  Functions that do super fast ATLAS detector simulation based on four-vector smearing.
+///  \file
+///  Functions that do super fast ATLAS detector
+///  simulation based on four-vector smearing.
+///
+///  *********************************************
+///
+///  Authors (add name and date if you modify):
+///
+///  \author Andy Buckley
+///  \author Abram Krislock
+///  \author Anders Kvellestad
+///  \author Matthias Danninger
+///  \author Rose Kudzman-Blais
+///
+///  *********************************************
+
+
+#pragma once
 
 #include "gambit/ColliderBit/Utils.hpp"
 #include "gambit/Utils/threadsafe_rng.hpp"
@@ -12,16 +27,19 @@
 #include "HEPUtils/BinnedFn.h"
 #include "HEPUtils/Event.h"
 
-namespace Gambit {
-  namespace ColliderBit {
+namespace Gambit
+{
+
+  namespace ColliderBit
+  {
 
 
     /// ATLAS-specific efficiency and smearing functions for super fast detector simulation
-    /// @note See also BuckFastSmearATLAS
-    namespace ATLAS {
+    namespace ATLAS
+    {
 
       /// @name ATLAS detector efficiency functions
-      //@{
+      ///@{
 
         // /// Randomly filter the supplied particle list by parameterised electron tracking efficiency
         // /// @todo Remove? This is not the electron efficiency
@@ -481,7 +499,7 @@ namespace Gambit {
         }
 
 
-        //@}
+        ///@}
 
       }
    }

@@ -103,7 +103,7 @@ START_MODULE
     NEEDS_CLASSES_FROM(Pythia_EM, default)
     #undef FUNCTION
 
-    #define FUNCTION getPythiaAsBaseCollider_EM
+    #define FUNCTION getPythia_EMAsBaseCollider
     START_FUNCTION(BaseCollider*)
     NEEDS_MANAGER_WITH_CAPABILITY(ColliderOperator)
     DEPENDENCY(HardScatteringSim, ColliderPythia_EM_defaultversion)
@@ -115,32 +115,272 @@ START_MODULE
 
   /// Detector sim capabilities
 
-  #define CAPABILITY SimpleSmearingSim
+  #define CAPABILITY ATLASDetectorSim
   START_CAPABILITY
-    #define FUNCTION getBuckFastATLAS
-    START_FUNCTION(BuckFastSmearATLAS)
+    #define FUNCTION getBuckFastATLASPythia
+    START_FUNCTION(BuckFast<Pythia_default::Pythia8::Event>)
     NEEDS_MANAGER_WITH_CAPABILITY(ColliderOperator)
+    NEEDS_CLASSES_FROM(Pythia, default)
+    #undef FUNCTION
+    #define FUNCTION getBuckFastATLASPythiaAsBaseDetector
+    START_FUNCTION(BaseDetector<Pythia_default::Pythia8::Event>*)
+    NEEDS_MANAGER_WITH_CAPABILITY(ColliderOperator)
+    NEEDS_CLASSES_FROM(Pythia, default)
+    #undef FUNCTION
+  #undef CAPABILITY
+
+  #define CAPABILITY ATLASnoeffDetectorSim
+  START_CAPABILITY
+    #define FUNCTION getBuckFastATLASnoeffPythia
+    START_FUNCTION(BuckFast<Pythia_default::Pythia8::Event>)
+    NEEDS_MANAGER_WITH_CAPABILITY(ColliderOperator)
+    NEEDS_CLASSES_FROM(Pythia, default)
+    #undef FUNCTION
+    #define FUNCTION getBuckFastATLASnoeffPythiaAsBaseDetector
+    START_FUNCTION(BaseDetector<Pythia_default::Pythia8::Event>*)
+    NEEDS_MANAGER_WITH_CAPABILITY(ColliderOperator)
+    NEEDS_CLASSES_FROM(Pythia, default)
+    #undef FUNCTION
+  #undef CAPABILITY
+
+  #define CAPABILITY CMSDetectorSim
+  START_CAPABILITY
+    #define FUNCTION getBuckFastCMSPythia
+    START_FUNCTION(BuckFast<Pythia_default::Pythia8::Event>)
+    NEEDS_MANAGER_WITH_CAPABILITY(ColliderOperator)
+    NEEDS_CLASSES_FROM(Pythia, default)
+    #undef FUNCTION
+    #define FUNCTION getBuckFastCMSPythiaAsBaseDetector
+    START_FUNCTION(BaseDetector<Pythia_default::Pythia8::Event>*)
+    NEEDS_MANAGER_WITH_CAPABILITY(ColliderOperator)
+    NEEDS_CLASSES_FROM(Pythia, default)
+    #undef FUNCTION
+  #undef CAPABILITY
+
+  #define CAPABILITY CMSnoeffDetectorSim
+  START_CAPABILITY
+    #define FUNCTION getBuckFastCMSnoeffPythia
+    START_FUNCTION(BuckFast<Pythia_default::Pythia8::Event>)
+    NEEDS_MANAGER_WITH_CAPABILITY(ColliderOperator)
+    NEEDS_CLASSES_FROM(Pythia, default)
+    #undef FUNCTION
+    #define FUNCTION getBuckFastCMSnoeffPythiaAsBaseDetector
+    START_FUNCTION(BaseDetector<Pythia_default::Pythia8::Event>)
+    NEEDS_MANAGER_WITH_CAPABILITY(ColliderOperator)
+    NEEDS_CLASSES_FROM(Pythia, default)
+    #undef FUNCTION
+  #undef CAPABILITY
+
+  #define CAPABILITY IdentityDetectorSim
+  START_CAPABILITY
+    #define FUNCTION getBuckFastIdentityPythia
+    START_FUNCTION(BuckFast<Pythia_default::Pythia8::Event>)
+    NEEDS_MANAGER_WITH_CAPABILITY(ColliderOperator)
+    NEEDS_CLASSES_FROM(Pythia, default)
+    #undef FUNCTION
+    #define FUNCTION getBuckFastIdentityPythiaAsBaseDetector
+    START_FUNCTION(BaseDetector<Pythia_default::Pythia8::Event>*)
+    NEEDS_MANAGER_WITH_CAPABILITY(ColliderOperator)
+    NEEDS_CLASSES_FROM(Pythia, default)
+    #undef FUNCTION
+  #undef CAPABILITY
+
+
+  #define CAPABILITY ATLASDetectorSim
+  START_CAPABILITY
+    #define FUNCTION getBuckFastATLASPythia_EM
+    START_FUNCTION(BuckFast<Pythia_EM_default::Pythia8::Event>)
+    NEEDS_MANAGER_WITH_CAPABILITY(ColliderOperator)
+    NEEDS_CLASSES_FROM(Pythia_EM, default)
+    #undef FUNCTION
+    #define FUNCTION getBuckFastATLASPythia_EMAsBaseDetector
+    START_FUNCTION(BaseDetector<Pythia_EM_default::Pythia8::Event>*)
+    NEEDS_MANAGER_WITH_CAPABILITY(ColliderOperator)
+    NEEDS_CLASSES_FROM(Pythia_EM, default)
+    #undef FUNCTION
+  #undef CAPABILITY
+
+  #define CAPABILITY ATLASnoeffDetectorSim
+  START_CAPABILITY
+    #define FUNCTION getBuckFastATLASnoeffPythia_EM
+    START_FUNCTION(BuckFast<Pythia_EM_default::Pythia8::Event>)
+    NEEDS_MANAGER_WITH_CAPABILITY(ColliderOperator)
+    NEEDS_CLASSES_FROM(Pythia_EM, default)
+    #undef FUNCTION
+    #define FUNCTION getBuckFastATLASnoeffPythia_EMAsBaseDetector
+    START_FUNCTION(BaseDetector<Pythia_EM_default::Pythia8::Event>*)
+    NEEDS_MANAGER_WITH_CAPABILITY(ColliderOperator)
+    NEEDS_CLASSES_FROM(Pythia_EM, default)
+    #undef FUNCTION
+  #undef CAPABILITY
+
+  #define CAPABILITY CMSDetectorSim
+  START_CAPABILITY
+    #define FUNCTION getBuckFastCMSPythia_EM
+    START_FUNCTION(BuckFast<Pythia_EM_default::Pythia8::Event>)
+    NEEDS_MANAGER_WITH_CAPABILITY(ColliderOperator)
+    NEEDS_CLASSES_FROM(Pythia_EM, default)
+    #undef FUNCTION
+    #define FUNCTION getBuckFastCMSPythia_EMAsBaseDetector
+    START_FUNCTION(BaseDetector<Pythia_EM_default::Pythia8::Event>*)
+    NEEDS_MANAGER_WITH_CAPABILITY(ColliderOperator)
+    NEEDS_CLASSES_FROM(Pythia_EM, default)
+    #undef FUNCTION
+  #undef CAPABILITY
+
+  #define CAPABILITY CMSnoeffDetectorSim
+  START_CAPABILITY
+    #define FUNCTION getBuckFastCMSnoeffPythia_EM
+    START_FUNCTION(BuckFast<Pythia_EM_default::Pythia8::Event>)
+    NEEDS_MANAGER_WITH_CAPABILITY(ColliderOperator)
+    NEEDS_CLASSES_FROM(Pythia_EM, default)
+    #undef FUNCTION
+    #define FUNCTION getBuckFastCMSnoeffPythia_EMAsBaseDetector
+    START_FUNCTION(BaseDetector<Pythia_EM_default::Pythia8::Event>)
+    NEEDS_MANAGER_WITH_CAPABILITY(ColliderOperator)
+    NEEDS_CLASSES_FROM(Pythia_EM, default)
+    #undef FUNCTION
+  #undef CAPABILITY
+
+  #define CAPABILITY IdentityDetectorSim
+  START_CAPABILITY
+    #define FUNCTION getBuckFastIdentityPythia_EM
+    START_FUNCTION(BuckFast<Pythia_EM_default::Pythia8::Event>)
+    NEEDS_MANAGER_WITH_CAPABILITY(ColliderOperator)
+    NEEDS_CLASSES_FROM(Pythia_EM, default)
+    #undef FUNCTION
+    #define FUNCTION getBuckFastIdentityPythia_EMAsBaseDetector
+    START_FUNCTION(BaseDetector<Pythia_EM_default::Pythia8::Event>*)
+    NEEDS_MANAGER_WITH_CAPABILITY(ColliderOperator)
+    NEEDS_CLASSES_FROM(Pythia_EM, default)
+    #undef FUNCTION
+  #undef CAPABILITY
+
+
+  /// Event capabilities
+  #define CAPABILITY HardScatteringEvent
+  START_CAPABILITY
+
+    #define FUNCTION generateEventPythia
+    START_FUNCTION(Pythia_default::Pythia8::Event)
+    NEEDS_MANAGER_WITH_CAPABILITY(ColliderOperator)
+    NEEDS_CLASSES_FROM(Pythia, default)
+    DEPENDENCY(HardScatteringSim, ColliderPythia_defaultversion)
     #undef FUNCTION
 
-    #define FUNCTION getBuckFastATLASnoeff
-    START_FUNCTION(BuckFastSmearATLASnoeff)
+    #define FUNCTION generateEventPythia_EM
+    START_FUNCTION(Pythia_EM_default::Pythia8::Event)
     NEEDS_MANAGER_WITH_CAPABILITY(ColliderOperator)
+    NEEDS_CLASSES_FROM(Pythia_EM, default)
+    DEPENDENCY(HardScatteringSim, ColliderPythia_EM_defaultversion)
     #undef FUNCTION
 
-    #define FUNCTION getBuckFastCMS
-    START_FUNCTION(BuckFastSmearCMS)
+  #undef CAPABILITY
+
+  /// Detector simulators that directly produce the standard event format
+  #define CAPABILITY ATLASSmearedEvent
+  START_CAPABILITY
+
+    #define FUNCTION smearEventATLAS
+    START_FUNCTION(HEPUtils::Event)
     NEEDS_MANAGER_WITH_CAPABILITY(ColliderOperator)
+    NEEDS_CLASSES_FROM(Pythia, default)
+    DEPENDENCY(HardScatteringEvent, Pythia_default::Pythia8::Event)
+    DEPENDENCY(ATLASDetectorSim, BaseDetector<Pythia_default::Pythia8::Event>*)
     #undef FUNCTION
 
-    #define FUNCTION getBuckFastCMSnoeff
-    START_FUNCTION(BuckFastSmearCMSnoeff)
+    #define FUNCTION smearEventATLAS_EM
+    START_FUNCTION(HEPUtils::Event)
     NEEDS_MANAGER_WITH_CAPABILITY(ColliderOperator)
+    NEEDS_CLASSES_FROM(Pythia_EM, default)
+    DEPENDENCY(HardScatteringEvent, Pythia_EM_default::Pythia8::Event)
+    DEPENDENCY(ATLASDetectorSim, BaseDetector<Pythia_EM_default::Pythia8::Event>*)
     #undef FUNCTION
 
-    #define FUNCTION getBuckFastIdentity
-    START_FUNCTION(BuckFastIdentity)
+  #undef CAPABILITY
+
+  #define CAPABILITY ATLASnoeffSmearedEvent
+  START_CAPABILITY
+
+    #define FUNCTION smearEventATLASnoeff
+    START_FUNCTION(HEPUtils::Event)
     NEEDS_MANAGER_WITH_CAPABILITY(ColliderOperator)
+    NEEDS_CLASSES_FROM(Pythia, default)
+    DEPENDENCY(HardScatteringEvent, Pythia_default::Pythia8::Event)
+    DEPENDENCY(ATLASnoeffDetectorSim, BaseDetector<Pythia_default::Pythia8::Event>*)
     #undef FUNCTION
+
+    #define FUNCTION smearEventATLASnoeff_EM
+    START_FUNCTION(HEPUtils::Event)
+    NEEDS_MANAGER_WITH_CAPABILITY(ColliderOperator)
+    NEEDS_CLASSES_FROM(Pythia_EM, default)
+    DEPENDENCY(HardScatteringEvent, Pythia_EM_default::Pythia8::Event)
+    DEPENDENCY(ATLASnoeffDetectorSim, BaseDetector<Pythia_EM_default::Pythia8::Event>*)
+    #undef FUNCTION
+
+  #undef CAPABILITY
+
+  #define CAPABILITY CMSSmearedEvent
+  START_CAPABILITY
+
+    #define FUNCTION smearEventCMS
+    START_FUNCTION(HEPUtils::Event)
+    NEEDS_MANAGER_WITH_CAPABILITY(ColliderOperator)
+    NEEDS_CLASSES_FROM(Pythia, default)
+    DEPENDENCY(HardScatteringEvent, Pythia_default::Pythia8::Event)
+    DEPENDENCY(SimpleSmearingSim, BuckFastCMS<Pythia_default::Pythia8::Event>*)
+    #undef FUNCTION
+
+    #define FUNCTION smearEventCMS_EM
+    START_FUNCTION(HEPUtils::Event)
+    NEEDS_MANAGER_WITH_CAPABILITY(ColliderOperator)
+    NEEDS_CLASSES_FROM(Pythia_EM, default)
+    DEPENDENCY(HardScatteringEvent, Pythia_EM_default::Pythia8::Event)
+    DEPENDENCY(SimpleSmearingSim, BuckFastCMS<Pythia_EM_default::Pythia8::Event>*)
+    #undef FUNCTION
+
+  #undef CAPABILITY
+
+  #define CAPABILITY CMSnoeffSmearedEvent
+  START_CAPABILITY
+
+    #define FUNCTION smearEventCMSnoeff
+    START_FUNCTION(HEPUtils::Event)
+    NEEDS_MANAGER_WITH_CAPABILITY(ColliderOperator)
+    NEEDS_CLASSES_FROM(Pythia, default)
+    DEPENDENCY(HardScatteringEvent, Pythia_default::Pythia8::Event)
+    DEPENDENCY(CMSnoeffDetectorSim, BaseDetector<Pythia_default::Pythia8::Event>*)
+    #undef FUNCTION
+
+    #define FUNCTION smearEventCMSnoeff_EM
+    START_FUNCTION(HEPUtils::Event)
+    NEEDS_MANAGER_WITH_CAPABILITY(ColliderOperator)
+    NEEDS_CLASSES_FROM(Pythia_EM, default)
+    DEPENDENCY(HardScatteringEvent, Pythia_EM_default::Pythia8::Event)
+    DEPENDENCY(CMSnoeffDetectorSim, BaseDetector<Pythia_EM_default::Pythia8::Event>*)
+    #undef FUNCTION
+
+  #undef CAPABILITY
+
+  #define CAPABILITY CopiedEvent
+  START_CAPABILITY
+
+    #define FUNCTION copyEvent
+    START_FUNCTION(HEPUtils::Event)
+    NEEDS_MANAGER_WITH_CAPABILITY(ColliderOperator)
+    NEEDS_CLASSES_FROM(Pythia, default)
+    DEPENDENCY(HardScatteringEvent, Pythia_default::Pythia8::Event)
+    DEPENDENCY(IdentityDetectorSim, BaseDetector<Pythia_default::Pythia8::Event>*)
+    #undef FUNCTION
+
+    #define FUNCTION copyEvent_EM
+    START_FUNCTION(HEPUtils::Event)
+    NEEDS_MANAGER_WITH_CAPABILITY(ColliderOperator)
+    NEEDS_CLASSES_FROM(Pythia_EM, default)
+    DEPENDENCY(HardScatteringEvent, Pythia_EM_default::Pythia8::Event)
+    DEPENDENCY(IdentityDetectorSim, BaseDetector<Pythia_EM_default::Pythia8::Event>*)
+    #undef FUNCTION
+
   #undef CAPABILITY
 
 
@@ -191,133 +431,6 @@ START_MODULE
     #undef FUNCTION
   #undef CAPABILITY
 
-
-  /// Event capabilities
-  #define CAPABILITY HardScatteringEvent
-  START_CAPABILITY
-
-    #define FUNCTION generatePythia8Event
-    START_FUNCTION(Pythia_default::Pythia8::Event)
-    NEEDS_MANAGER_WITH_CAPABILITY(ColliderOperator)
-    NEEDS_CLASSES_FROM(Pythia, default)
-    DEPENDENCY(HardScatteringSim, ColliderPythia_defaultversion)
-    #undef FUNCTION
-
-    #define FUNCTION generatePythia8Event_EM
-    START_FUNCTION(Pythia_EM_default::Pythia8::Event)
-    NEEDS_MANAGER_WITH_CAPABILITY(ColliderOperator)
-    NEEDS_CLASSES_FROM(Pythia_EM, default)
-    DEPENDENCY(HardScatteringSim, ColliderPythia_EM_defaultversion)
-    #undef FUNCTION
-
-  #undef CAPABILITY
-
-  /// Detector simulators that directly produce the standard event format
-  #define CAPABILITY ATLASSmearedEvent
-  START_CAPABILITY
-
-    #define FUNCTION smearEventATLAS
-    START_FUNCTION(HEPUtils::Event)
-    NEEDS_MANAGER_WITH_CAPABILITY(ColliderOperator)
-    NEEDS_CLASSES_FROM(Pythia, default)
-    DEPENDENCY(HardScatteringEvent, Pythia_default::Pythia8::Event)
-    DEPENDENCY(SimpleSmearingSim, BuckFastSmearATLAS)
-    #undef FUNCTION
-
-    #define FUNCTION smearEventATLAS_EM
-    START_FUNCTION(HEPUtils::Event)
-    NEEDS_MANAGER_WITH_CAPABILITY(ColliderOperator)
-    NEEDS_CLASSES_FROM(Pythia_EM, default)
-    DEPENDENCY(HardScatteringEvent, Pythia_EM_default::Pythia8::Event)
-    DEPENDENCY(SimpleSmearingSim, BuckFastSmearATLAS)
-    #undef FUNCTION
-
-  #undef CAPABILITY
-
-  #define CAPABILITY ATLASnoeffSmearedEvent
-  START_CAPABILITY
-
-    #define FUNCTION smearEventATLASnoeff
-    START_FUNCTION(HEPUtils::Event)
-    NEEDS_MANAGER_WITH_CAPABILITY(ColliderOperator)
-    NEEDS_CLASSES_FROM(Pythia, default)
-    DEPENDENCY(HardScatteringEvent, Pythia_default::Pythia8::Event)
-    DEPENDENCY(SimpleSmearingSim, BuckFastSmearATLASnoeff)
-    #undef FUNCTION
-
-    #define FUNCTION smearEventATLASnoeff_EM
-    START_FUNCTION(HEPUtils::Event)
-    NEEDS_MANAGER_WITH_CAPABILITY(ColliderOperator)
-    NEEDS_CLASSES_FROM(Pythia_EM, default)
-    DEPENDENCY(HardScatteringEvent, Pythia_EM_default::Pythia8::Event)
-    DEPENDENCY(SimpleSmearingSim, BuckFastSmearATLASnoeff)
-    #undef FUNCTION
-
-  #undef CAPABILITY
-
-  #define CAPABILITY CMSSmearedEvent
-  START_CAPABILITY
-
-    #define FUNCTION smearEventCMS
-    START_FUNCTION(HEPUtils::Event)
-    NEEDS_MANAGER_WITH_CAPABILITY(ColliderOperator)
-    NEEDS_CLASSES_FROM(Pythia, default)
-    DEPENDENCY(HardScatteringEvent, Pythia_default::Pythia8::Event)
-    DEPENDENCY(SimpleSmearingSim, BuckFastSmearCMS)
-    #undef FUNCTION
-
-    #define FUNCTION smearEventCMS_EM
-    START_FUNCTION(HEPUtils::Event)
-    NEEDS_MANAGER_WITH_CAPABILITY(ColliderOperator)
-    NEEDS_CLASSES_FROM(Pythia_EM, default)
-    DEPENDENCY(HardScatteringEvent, Pythia_EM_default::Pythia8::Event)
-    DEPENDENCY(SimpleSmearingSim, BuckFastSmearCMS)
-    #undef FUNCTION
-
-  #undef CAPABILITY
-
-  #define CAPABILITY CMSnoeffSmearedEvent
-  START_CAPABILITY
-
-    #define FUNCTION smearEventCMSnoeff
-    START_FUNCTION(HEPUtils::Event)
-    NEEDS_MANAGER_WITH_CAPABILITY(ColliderOperator)
-    NEEDS_CLASSES_FROM(Pythia, default)
-    DEPENDENCY(HardScatteringEvent, Pythia_default::Pythia8::Event)
-    DEPENDENCY(SimpleSmearingSim, BuckFastSmearCMSnoeff)
-    #undef FUNCTION
-
-    #define FUNCTION smearEventCMSnoeff_EM
-    START_FUNCTION(HEPUtils::Event)
-    NEEDS_MANAGER_WITH_CAPABILITY(ColliderOperator)
-    NEEDS_CLASSES_FROM(Pythia_EM, default)
-    DEPENDENCY(HardScatteringEvent, Pythia_EM_default::Pythia8::Event)
-    DEPENDENCY(SimpleSmearingSim, BuckFastSmearCMSnoeff)
-    #undef FUNCTION
-
-  #undef CAPABILITY
-
-  #define CAPABILITY CopiedEvent
-  START_CAPABILITY
-
-    #define FUNCTION copyEvent
-    START_FUNCTION(HEPUtils::Event)
-    NEEDS_MANAGER_WITH_CAPABILITY(ColliderOperator)
-    NEEDS_CLASSES_FROM(Pythia, default)
-    DEPENDENCY(HardScatteringEvent, Pythia_default::Pythia8::Event)
-    DEPENDENCY(SimpleSmearingSim, BuckFastIdentity)
-    #undef FUNCTION
-
-    #define FUNCTION copyEvent_EM
-    START_FUNCTION(HEPUtils::Event)
-    NEEDS_MANAGER_WITH_CAPABILITY(ColliderOperator)
-    NEEDS_CLASSES_FROM(Pythia_EM, default)
-    DEPENDENCY(HardScatteringEvent, Pythia_EM_default::Pythia8::Event)
-    DEPENDENCY(SimpleSmearingSim, BuckFastIdentity)
-    #undef FUNCTION
-
-  #undef CAPABILITY
-
   // A capability that calculates the log likelihood
   // Runs all analyses and fills vector of analysis results
 
@@ -328,7 +441,6 @@ START_MODULE
     NEEDS_MANAGER_WITH_CAPABILITY(ColliderOperator)
     DEPENDENCY(MC_ConvergenceSettings, convergence_settings)
     DEPENDENCY(ATLASSmearedEvent, HEPUtils::Event)
-    DEPENDENCY(HardScatteringSim, BaseCollider*)
     DEPENDENCY(ATLASAnalysisContainer, HEPUtilsAnalysisContainer)
     #undef FUNCTION
   #undef CAPABILITY
@@ -340,7 +452,6 @@ START_MODULE
     NEEDS_MANAGER_WITH_CAPABILITY(ColliderOperator)
     DEPENDENCY(MC_ConvergenceSettings, convergence_settings)
     DEPENDENCY(ATLASnoeffSmearedEvent, HEPUtils::Event)
-    DEPENDENCY(HardScatteringSim, BaseCollider*)
     DEPENDENCY(ATLASnoeffAnalysisContainer, HEPUtilsAnalysisContainer)
     #undef FUNCTION
   #undef CAPABILITY
@@ -352,7 +463,6 @@ START_MODULE
     NEEDS_MANAGER_WITH_CAPABILITY(ColliderOperator)
     DEPENDENCY(MC_ConvergenceSettings, convergence_settings)
     DEPENDENCY(CMSSmearedEvent, HEPUtils::Event)
-    DEPENDENCY(HardScatteringSim, BaseCollider*)
     DEPENDENCY(CMSAnalysisContainer, HEPUtilsAnalysisContainer)
     #undef FUNCTION
   #undef CAPABILITY
@@ -364,7 +474,6 @@ START_MODULE
     NEEDS_MANAGER_WITH_CAPABILITY(ColliderOperator)
     DEPENDENCY(MC_ConvergenceSettings, convergence_settings)
     DEPENDENCY(CMSnoeffSmearedEvent, HEPUtils::Event)
-    DEPENDENCY(HardScatteringSim, BaseCollider*)
     DEPENDENCY(CMSnoeffAnalysisContainer, HEPUtilsAnalysisContainer)
     #undef FUNCTION
   #undef CAPABILITY
@@ -376,7 +485,6 @@ START_MODULE
     NEEDS_MANAGER_WITH_CAPABILITY(ColliderOperator)
     DEPENDENCY(MC_ConvergenceSettings, convergence_settings)
     DEPENDENCY(CopiedEvent, HEPUtils::Event)
-    DEPENDENCY(HardScatteringSim, BaseCollider*)
     DEPENDENCY(IdentityAnalysisContainer, HEPUtilsAnalysisContainer)
     #undef FUNCTION
   #undef CAPABILITY

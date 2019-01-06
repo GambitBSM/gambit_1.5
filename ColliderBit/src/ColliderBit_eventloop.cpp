@@ -44,9 +44,11 @@
 #include <vector>
 
 #include "gambit/Elements/gambit_module_headers.hpp"
+#include "gambit/ColliderBit/ColliderBit_rollcall.hpp"
 #include "gambit/ColliderBit/ColliderBit_eventloop.hpp"
 #include "gambit/ColliderBit/MC_convergence.hpp"
-#include "gambit/ColliderBit/ColliderBit_rollcall.hpp"
+#include "gambit/ColliderBit/detectors/ATLASEfficiencies.hpp"
+#include "gambit/ColliderBit/detectors/CMSEfficiencies.hpp"
 #include "gambit/ColliderBit/analyses/BaseAnalysis.hpp"
 
 #include "boost/math/distributions/poisson.hpp"
@@ -62,9 +64,9 @@ namespace Gambit
   {
 
 
-    /// **************************************************
-    /// Non-rollcalled functions and module-wide variables
-    /// **************************************************
+    // **************************************************
+    // Non-rollcalled functions and module-wide variables
+    // **************************************************
 
 
     //#ifdef COLLIDERBIT_DEBUG
@@ -120,6 +122,271 @@ namespace Gambit
     bool haveUsedBuckFastIdentityDetector;
 
     /// @}
+
+
+    // *************************************************
+    // Non-rollcalled, non-templated helper functions
+    // *************************************************
+
+    /// Get a BuckFast detector simulation
+    void getBuckFast(BuckFast& result, const str& detname, bool use_effs, bool& useThisDetector, bool& haveUsedThisDetector, int iteration, const Options& runOptions)
+    {
+      static std::vector<bool> useDetector;
+      static std::vector<bool> partonOnly;
+      static std::vector<double> antiktR;
+
+      if (iteration == BASE_INIT)
+      {
+        // Read options
+        std::vector<bool> default_useDetector(pythiaNames.size(), use_effs); //Default is to use the detector if efficiencies are turned on.
+        useDetector = runOptions->getValueOrDef<std::vector<bool> >(default_useDetector, "useDetector");
+        CHECK_EQUAL_VECTOR_LENGTH(useDetector,pythiaNames)
+
+        std::vector<bool> default_partonOnly(pythiaNames.size(), false);
+        partonOnly = runOptions->getValueOrDef<std::vector<bool> >(default_partonOnly, "partonOnly");
+        CHECK_EQUAL_VECTOR_LENGTH(partonOnly,pythiaNames)
+
+        std::vector<double> default_antiktR(pythiaNames.size(), 0.4);
+        antiktR = runOptions->getValueOrDef<std::vector<double> >(default_antiktR, "antiktR");
+        CHECK_EQUAL_VECTOR_LENGTH(antiktR,pythiaNames)
+
+        return;
+      }
+
+      if (iteration == COLLIDER_INIT)
+      {
+        // Get useDetector setting for the current collider
+        useThisDetector = useDetector[indexPythiaNames];
+        if (useThisDetector) haveUsedThisDetector = true;
+        return;
+      }
+
+      if (iteration == START_SUBPROCESS and useThisDetector)
+      {
+        // Each thread gets its own copy of the detector sim, so it is initialised *after* COLLIDER_INIT, within omp parallel.
+        result.init(partonOnly[indexPythiaNames], antiktR[indexPythiaNames]);
+        // Assign detector functions
+        if (detname == "ATLAS")
+        {
+          result.smearElectronEnergy = &ATLAS::smearElectronEnergy;
+          result.smearMuonMomentum   = &ATLAS::smearMuonMomentum;
+          result.smearTaus           = &ATLAS::smearTaus;
+          result.smearJets           = &ATLAS::smearJets;
+          if (use_effs)
+          {
+            result.applyElectronEff  = &ATLAS::applyElectronEff;
+            result.applyMuonEff      = &ATLAS::applyMuonEff;
+          }
+        }
+        else if (detname == "CMS")
+        {
+          result.smearElectronEnergy = &CMS::smearElectronEnergy;
+          result.smearMuonMomentum   = &CMS::smearMuonMomentum;
+          result.smearTaus           = &CMS::smearTaus;
+          result.smearJets           = &CMS::smearJets;
+          if (use_effs)
+          {
+            result.applyElectronEff  = &CMS::applyElectronEff;
+            result.applyMuonEff      = &CMS::applyMuonEff;
+          }
+        }
+        else if (detname == "Identity") { /* relax */ }
+        else
+        {
+          ColliderBit_error().raise(LOCAL_INFO, "Unrecognised detector name.");
+        }
+        return;
+      }
+
+    }
+
+    /// Retrieve an analysis container for a specific detector
+    void getAnalysisContainer(HEPUtilsAnalysisContainer& result, const BaseCollider& HardScatteringSim, const str& detname, bool useThisDetector, int iteration, const Options& runOptions)
+    {
+      static std::vector<std::vector<str> > analyses;
+      static bool first = true;
+
+      if (iteration == BASE_INIT)
+      {
+        // Only run this once
+        if (first)
+        {
+          // Read analysis names from the yaml file
+          std::vector<std::vector<str> > default_analyses;  // The default is empty lists of analyses
+          analyses = runOptions->getValueOrDef<std::vector<std::vector<str> > >(default_analyses, "analyses");
+
+          // Check that the analsis names listed in the yaml file all correspond to actual ColliderBit analyses
+          for (std::vector<str> collider_specific_analyses : analyses)
+          {
+            for (str& analysis_name : collider_specific_analyses)
+            {
+              if (!checkAnalysis(analysis_name))
+              {
+                str errmsg = "The analysis " + analysis_name + " is not a known ColliderBit analysis.";
+                ColliderBit_error().raise(LOCAL_INFO, errmsg);
+              }
+            }
+          }
+
+          first = false;
+        }
+      }
+
+      if (iteration == COLLIDER_INIT)
+      {
+        if (!useThisDetector) return;
+
+        // Check that there are some analyses to run if the detector is switched on
+        if (analyses[indexPythiaNames].empty() and useThisDetector)
+        {
+          str errmsg = "The option 'useBuckFast'"+detname+"Detector' (for function with name starting 'getBuckFast"+detname+"') is set to true\n";
+          errmsg    += "for the collider '";
+          errmsg    += *iterPythiaNames;
+          errmsg    += "', but the corresponding list of analyses\n";
+          errmsg    += "(in option 'analyses' for function 'get"+detname+"AnalysisContainer') is empty.\n";
+          errmsg    += "Please correct your settings.\n";
+          ColliderBit_error().raise(LOCAL_INFO, errmsg);
+        }
+
+        return;
+      }
+
+      if (!useThisDetector) return;
+
+      if (iteration == START_SUBPROCESS)
+      {
+        // Register analysis container
+        result.register_thread(detname+"AnalysisContainer");
+
+        // Set current collider
+        result.set_current_collider(*iterPythiaNames);
+
+        // Initialize analysis container or reset all the contained analyses
+        if (!result.has_analyses())
+        {
+          try
+          {
+            result.init(analyses[indexPythiaNames]);
+          }
+          catch (std::runtime_error& e)
+          {
+            piped_errors.request(LOCAL_INFO, e.what());
+          }
+        }
+        else result.reset();
+
+        return;
+      }
+
+      if (iteration == END_SUBPROCESS && eventsGenerated && nFailedEvents <= maxFailedEvents)
+      {
+        const double xs_fb = HardScatteringSim.xsec_pb() * 1000.;
+        const double xserr_fb = HardScatteringSim.xsecErr_pb() * 1000.;
+        result.add_xsec(xs_fb, xserr_fb);
+
+        #ifdef COLLIDERBIT_DEBUG
+        cout << debug_prefix() << "xs_fb = " << xs_fb << " +/- " << xserr_fb << endl;
+        #endif
+        return;
+      }
+
+      if (iteration == COLLIDER_FINALIZE)
+      {
+        result.collect_and_add_signal();
+        result.collect_and_improve_xsec();
+        result.scale();
+        return;
+      }
+
+    }
+
+    /// Run all the analyses in a given container
+    void runAnalyses(AnalysisDataPointers& result,
+                     const str& detname,
+                     const HEPUtilsAnalysisContainer& AnalysisContainer,
+                     const HEPUtils::Event& SmearedEvent,
+                     const convergence_settings& MC_ConvergenceSettings,
+                     bool useThisDetector,
+                     int iteration,
+                     void(*wrapup)(),)
+    {
+      if (iteration == BASE_INIT)
+      {
+        result.clear();
+        return;
+      }
+
+      if (!useThisDetector) return;
+
+      static MC_convergence_checker convergence;
+      if (iteration == COLLIDER_INIT)
+      {
+        convergence.init(indexPythiaNames, MC_ConvergenceSettings);
+        return;
+      }
+
+      if (iteration == COLLECT_CONVERGENCE_DATA)
+      {
+        // Update the convergence tracker with the new results
+        convergence.update(AnalysisContainer);
+        return;
+      }
+
+      if (iteration == CHECK_CONVERGENCE)
+      {
+        // Call quits on the event loop if every analysis in every analysis container has sufficient statistics
+        if (convergence.achieved(AnalysisContainer)) wrapup();
+        return;
+      }
+
+      // #ifdef COLLIDERBIT_DEBUG
+      // if (iteration == END_SUBPROCESS)
+      // {
+      //   for (auto& analysis_pointer_pair : AnalysisContainer.get_current_analyses_map())
+      //   {
+      //     for (auto& sr : analysis_pointer_pair.second->get_results().srdata)
+      //     {
+      //       cout << debug_prefix() << "run"+detname+"Analyses: signal region " << sr.sr_label << ", n_signal = " << sr.n_signal << endl;
+      //     }
+      //   }
+      // }
+      // #endif
+
+      if (iteration == COLLIDER_FINALIZE)
+      {
+        // The final iteration for this collider: collect results
+        for (auto& analysis_pointer_pair : AnalysisContainer.get_current_analyses_map())
+        {
+          #ifdef COLLIDERBIT_DEBUG
+          cout << debug_prefix() << "run"+detname+"Analyses: Collecting result from " << analysis_pointer_pair.first << endl;
+          #endif
+
+          str warning;
+          result.push_back(analysis_pointer_pair.second->get_results_ptr(warning));
+          if (eventsGenerated && nFailedEvents <= maxFailedEvents && !warning.empty())
+          {
+            ColliderBit_error().raise(LOCAL_INFO, warning);
+          }
+        }
+        return;
+      }
+
+      if (iteration == BASE_FINALIZE)
+      {
+        // Final iteration. Just return.
+        #ifdef COLLIDERBIT_DEBUG
+        cout << debug_prefix() << "run"+detname+"Analyses: 'result' contains " << result.size() << " results." << endl;
+        #endif
+        return;
+      }
+
+      if (iteration <= BASE_INIT) return;
+
+      // Loop over analyses and run them... Managed by HEPUtilsAnalysisContainer
+      AnalysisContainer.analyze(SmearedEvent);
+
+    }
+
 
     // *************************************************
     // Rollcalled functions properly hooked up to Gambit
@@ -355,7 +622,7 @@ namespace Gambit
         Loop::executeIteration(COLLIDER_FINALIZE);
       }
 
-      // Nicely thank the loop for being quiet, and restore everyone's vocal cords
+      // Nicely thank the loop for being quiet, and restore everyone's vocal chords
       if (silenceLoop) std::cout.rdbuf(coutbuf);
 
       // Check for exceptions
@@ -365,1244 +632,7 @@ namespace Gambit
     }
 
 
-
-    // *** Hard Scattering Collider Simulators ***
-
-    // Regular Pythia version
-    void getPythia(ColliderPythia_defaultversion &result)
-    {
-      using namespace Pipes::getPythia;
-      getPythia_template<Pythia_default::Pythia8::Pythia, Pythia_default::Pythia8::Event>
-       (result, *Dep::MSSM_spectrum, *Dep::decay_table, *Loop::iteration, Loop::wrapup, *runOptions, ModelInUse);
-    }
-    void getPythiaFileReader(ColliderPythia_defaultversion &result)
-    {
-      using namespace Pipes::getPythiaFileReader;
-      getPythiaFileReader_template<Pythia_default::Pythia8::Pythia, Pythia_default::Pythia8::Event>
-       (result, *Loop::iteration, Loop::wrapup);
-    }
-    void getPythiaAsBaseCollider(BaseCollider*& result) { result = &(*Dep::HardScatteringSim); }
-
-    // EM Pythia version
-    void getPythia_EM(ColliderPythia_EM_defaultversion &result)
-    {
-      using namespace Pipes::getPythia_EM;
-      getPythia_template<Pythia_EM_default::Pythia8::Pythia, Pythia_EM_default::Pythia8::Event>
-       (result, *Dep::MSSM_spectrum, *Dep::decay_table, *Loop::iteration, Loop::wrapup, *runOptions, ModelInUse);
-    }
-    void getPythiaFileReader_EM(ColliderPythia_EM_defaultversion &result)
-    {
-      using namespace Pipes::getPythiaFileReader_EM;
-      getPythiaFileReader_template<Pythia_EM_default::Pythia8::Pythia, Pythia_EM_default::Pythia8::Event>
-       (result, *Loop::iteration, Loop::wrapup);
-    }
-    void getPythiaAsBaseCollider_EM(BaseCollider*& result) { result = &(*Dep::HardScatteringSim); }
-
-
-
-    // *** Hard Scattering Event Generators ***
-
-    // Regular Pythia version
-    void generatePythia8Event(Pythia_default::Pythia8::Event& result)
-    {
-      using namespace Pipes::generatePythia8Event;
-      generatePythia8Event_template<Pythia_default::Pythia8::Pythia, Pythia_default::Pythia8::Event>
-       (result, *Dep::HardScatteringSim, *Loop::iteration, Loop::wrapup);
-    }
-
-    // EM Pythia version
-    void generatePythia8Event_EM(Pythia_EM_default::Pythia8::Event& result)
-    {
-      using namespace Pipes::generatePythia8Event_EM;
-      generatePythia8Event_template<Pythia_EM_default::Pythia8::Pythia, Pythia_EM_default::Pythia8::Event>
-       (result, *Dep::HardScatteringSim, *Loop::iteration, Loop::wrapup);
-    }
-
-
-
-    // *** Standard Event Format Functions ***
-
-    void smearEventATLAS(HEPUtils::Event& result)
-    {
-
-    }
-
-
-    void smearEventATLASnoeff(HEPUtils::Event& result)
-    {
-
-    }
-
-
-    void smearEventCMS(HEPUtils::Event& result)
-    {
-
-    }
-
-
-    void smearEventCMSnoeff(HEPUtils::Event& result)
-    {
-
-    }
-
-
-    void copyEvent(HEPUtils::Event& result)
-    {
-
-    }
-
-
-
-    // *** Detector Simulators ***
-
-    void getBuckFastATLAS(BuckFastSmearATLAS &result)
-    {
-      using namespace Pipes::getBuckFastATLAS;
-      static std::vector<bool> useDetector;
-      static std::vector<bool> partonOnly;
-      static std::vector<double> antiktR;
-
-      if (*Loop::iteration == BASE_INIT)
-      {
-        // Read options
-        std::vector<bool> default_useDetector(pythiaNames.size(), true);  // BuckFastATLAS is switched on by default
-        useDetector = runOptions->getValueOrDef<std::vector<bool> >(default_useDetector, "useDetector");
-        CHECK_EQUAL_VECTOR_LENGTH(useDetector,pythiaNames)
-
-        std::vector<bool> default_partonOnly(pythiaNames.size(), false);
-        partonOnly = runOptions->getValueOrDef<std::vector<bool> >(default_partonOnly, "partonOnly");
-        CHECK_EQUAL_VECTOR_LENGTH(partonOnly,pythiaNames)
-
-        std::vector<double> default_antiktR(pythiaNames.size(), 0.4);
-        antiktR = runOptions->getValueOrDef<std::vector<double> >(default_antiktR, "antiktR");
-        CHECK_EQUAL_VECTOR_LENGTH(antiktR,pythiaNames)
-
-        return;
-      }
-
-      if (*Loop::iteration == COLLIDER_INIT)
-      {
-        // Get useDetector setting for the current collider
-        useBuckFastATLASDetector = useDetector[indexPythiaNames];
-        if (useBuckFastATLASDetector)
-          haveUsedBuckFastATLASDetector = true;
-
-        return;
-      }
-
-      if (*Loop::iteration == START_SUBPROCESS and useBuckFastATLASDetector)
-      {
-        // Each thread gets its own BuckFastSmearATLAS.
-        // Thus, their initialization is *after* COLLIDER_INIT, within omp parallel.
-        result.init(partonOnly[indexPythiaNames], antiktR[indexPythiaNames]);
-
-        return;
-      }
-
-    }
-
-
-    void getBuckFastATLASnoeff(BuckFastSmearATLASnoeff &result)
-    {
-      using namespace Pipes::getBuckFastATLASnoeff;
-      static std::vector<bool> useDetector;
-      static std::vector<bool> partonOnly;
-      static std::vector<double> antiktR;
-
-      if (*Loop::iteration == BASE_INIT)
-      {
-        // Read options
-        std::vector<bool> default_useDetector(pythiaNames.size(), false);  // BuckFastATLASnoeff is switched off by default
-        useDetector = runOptions->getValueOrDef<std::vector<bool> >(default_useDetector, "useDetector");
-        CHECK_EQUAL_VECTOR_LENGTH(useDetector,pythiaNames)
-
-        std::vector<bool> default_partonOnly(pythiaNames.size(), false);
-        partonOnly = runOptions->getValueOrDef<std::vector<bool> >(default_partonOnly, "partonOnly");
-        CHECK_EQUAL_VECTOR_LENGTH(partonOnly,pythiaNames)
-
-        std::vector<double> default_antiktR(pythiaNames.size(), 0.4);
-        antiktR = runOptions->getValueOrDef<std::vector<double> >(default_antiktR, "antiktR");
-        CHECK_EQUAL_VECTOR_LENGTH(antiktR,pythiaNames)
-
-        return;
-      }
-
-      if (*Loop::iteration == COLLIDER_INIT)
-      {
-        // Get useDetector setting for the current collider
-        useBuckFastATLASnoeffDetector = useDetector[indexPythiaNames];
-        if (useBuckFastATLASnoeffDetector)
-          haveUsedBuckFastATLASnoeffDetector = true;
-
-        return;
-      }
-
-      if (*Loop::iteration == START_SUBPROCESS and useBuckFastATLASnoeffDetector)
-      {
-        // Each thread gets its own BuckFastSmearATLASnoeff.
-        // Thus, their initialization is *after* COLLIDER_INIT, within omp parallel.
-        result.init(partonOnly[indexPythiaNames], antiktR[indexPythiaNames]);
-
-        return;
-      }
-
-    }
-
-
-    void getBuckFastCMS(BuckFastSmearCMS &result)
-    {
-      using namespace Pipes::getBuckFastCMS;
-      static std::vector<bool> useDetector;
-      static std::vector<bool> partonOnly;
-      static std::vector<double> antiktR;
-
-      if (*Loop::iteration == BASE_INIT)
-      {
-        // Read options
-        std::vector<bool> default_useDetector(pythiaNames.size(), true);  // BuckFastCMS is switched on by default
-        useDetector = runOptions->getValueOrDef<std::vector<bool> >(default_useDetector, "useDetector");
-        CHECK_EQUAL_VECTOR_LENGTH(useDetector,pythiaNames)
-
-        std::vector<bool> default_partonOnly(pythiaNames.size(), false);
-        partonOnly = runOptions->getValueOrDef<std::vector<bool> >(default_partonOnly, "partonOnly");
-        CHECK_EQUAL_VECTOR_LENGTH(partonOnly,pythiaNames)
-
-        std::vector<double> default_antiktR(pythiaNames.size(), 0.4);
-        antiktR = runOptions->getValueOrDef<std::vector<double> >(default_antiktR, "antiktR");
-        CHECK_EQUAL_VECTOR_LENGTH(antiktR,pythiaNames)
-
-        return;
-      }
-
-      if (*Loop::iteration == COLLIDER_INIT)
-      {
-        // Get useDetector setting for the current collider
-        useBuckFastCMSDetector = useDetector[indexPythiaNames];
-        if (useBuckFastCMSDetector) haveUsedBuckFastCMSDetector = true;
-        return;
-      }
-
-      if (*Loop::iteration == START_SUBPROCESS and useBuckFastCMSDetector)
-      {
-        // Each thread gets its own BuckFastSmearCMS.
-        // Thus, their initialization is *after* COLLIDER_INIT, within omp parallel.
-        result.init(partonOnly[indexPythiaNames], antiktR[indexPythiaNames]);
-        return;
-      }
-
-    }
-
-
-    void getBuckFastCMSnoeff(BuckFastSmearCMSnoeff &result)
-    {
-      using namespace Pipes::getBuckFastCMSnoeff;
-      static std::vector<bool> useDetector;
-      static std::vector<bool> partonOnly;
-      static std::vector<double> antiktR;
-
-      if (*Loop::iteration == BASE_INIT)
-      {
-        // Read options
-        std::vector<bool> default_useDetector(pythiaNames.size(), false);  // BuckFastCMSnoeff is switched off by default
-        useDetector = runOptions->getValueOrDef<std::vector<bool> >(default_useDetector, "useDetector");
-        CHECK_EQUAL_VECTOR_LENGTH(useDetector,pythiaNames)
-
-        std::vector<bool> default_partonOnly(pythiaNames.size(), false);
-        partonOnly = runOptions->getValueOrDef<std::vector<bool> >(default_partonOnly, "partonOnly");
-        CHECK_EQUAL_VECTOR_LENGTH(partonOnly,pythiaNames)
-
-        std::vector<double> default_antiktR(pythiaNames.size(), 0.4);
-        antiktR = runOptions->getValueOrDef<std::vector<double> >(default_antiktR, "antiktR");
-        CHECK_EQUAL_VECTOR_LENGTH(antiktR,pythiaNames)
-
-        return;
-      }
-
-      if (*Loop::iteration == COLLIDER_INIT)
-      {
-        // Get useDetector setting for the current collider
-        useBuckFastCMSnoeffDetector = useDetector[indexPythiaNames];
-        if (useBuckFastCMSnoeffDetector) haveUsedBuckFastCMSnoeffDetector = true;
-        return;
-      }
-
-      if (*Loop::iteration == START_SUBPROCESS and useBuckFastCMSnoeffDetector)
-      {
-        // Each thread gets its own BuckFastSmearCMSnoeff.
-        // Thus, their initialization is *after* COLLIDER_INIT, within omp parallel.
-        result.init(partonOnly[indexPythiaNames], antiktR[indexPythiaNames]);
-        return;
-      }
-
-    }
-
-
-    void getBuckFastIdentity(BuckFastIdentity &result)
-    {
-      using namespace Pipes::getBuckFastIdentity;
-      static std::vector<bool> useDetector;
-      static std::vector<bool> partonOnly;
-      static std::vector<double> antiktR;
-
-      if (*Loop::iteration == BASE_INIT)
-      {
-        // Read options
-        std::vector<bool> default_useDetector(pythiaNames.size(), false);  // BuckFastIdentity is switched off by default
-        useDetector = runOptions->getValueOrDef<std::vector<bool> >(default_useDetector, "useDetector");
-        CHECK_EQUAL_VECTOR_LENGTH(useDetector,pythiaNames)
-
-        std::vector<bool> default_partonOnly(pythiaNames.size(), false);
-        partonOnly = runOptions->getValueOrDef<std::vector<bool> >(default_partonOnly, "partonOnly");
-        CHECK_EQUAL_VECTOR_LENGTH(partonOnly,pythiaNames)
-
-        std::vector<double> default_antiktR(pythiaNames.size(), 0.4);
-        antiktR = runOptions->getValueOrDef<std::vector<double> >(default_antiktR, "antiktR");
-        CHECK_EQUAL_VECTOR_LENGTH(antiktR,pythiaNames)
-
-        return;
-      }
-
-      if (*Loop::iteration == COLLIDER_INIT)
-      {
-        // Get useDetector setting for the current collider
-        useBuckFastIdentityDetector = useDetector[indexPythiaNames];
-        if (useBuckFastIdentityDetector) haveUsedBuckFastIdentityDetector = true;
-        return;
-      }
-
-      if (*Loop::iteration == START_SUBPROCESS and useBuckFastIdentityDetector)
-      {
-        // Each thread gets its own BuckFastSmearIdentity.
-        // Thus, their initialization is *after* COLLIDER_INIT, within omp parallel.
-        result.init(partonOnly[indexPythiaNames], antiktR[indexPythiaNames]);
-        return;
-      }
-    }
-
-
-
-    // *** Initialization for analyses ***
-
-    void getATLASAnalysisContainer(HEPUtilsAnalysisContainer& result)
-    {
-      using namespace Pipes::getATLASAnalysisContainer;
-      static std::vector<std::vector<str> > analyses;
-      static bool first = true;
-
-      if (*Loop::iteration == BASE_INIT)
-      {
-        // Only run this once
-        if (first)
-        {
-          // Read analysis names from the yaml file
-          std::vector<std::vector<str> > default_analyses;  // The default is empty lists of analyses
-          analyses = runOptions->getValueOrDef<std::vector<std::vector<str> > >(default_analyses, "analyses");
-
-          // Check that the analsis names listed in the yaml file all correspond to actual ColliderBit analyses
-          for (std::vector<str> collider_specific_analyses : analyses)
-          {
-            for (str& analysis_name : collider_specific_analyses)
-            {
-              if (!checkAnalysis(analysis_name))
-              {
-                str errmsg = "The analysis " + analysis_name + " is not a known ColliderBit analysis.";
-                ColliderBit_error().raise(LOCAL_INFO, errmsg);
-              }
-            }
-          }
-
-          first = false;
-        }
-      }
-
-      if (*Loop::iteration == COLLIDER_INIT)
-      {
-        if (!useBuckFastATLASDetector) return;
-
-        // Check that there are some analyses to run if the detector is switched on
-        if (analyses[indexPythiaNames].empty() and useBuckFastATLASDetector)
-        {
-          str errmsg = "The option 'useDetector' for function 'getBuckFastATLAS' is set to true\n";
-          errmsg    += "for the collider '";
-          errmsg    += *iterPythiaNames;
-          errmsg    += "', but the corresponding list of analyses\n";
-          errmsg    += "(in option 'analyses' for function 'getATLASAnalysisContainer') is empty.\n";
-          errmsg    += "Please correct your settings.\n";
-          ColliderBit_error().raise(LOCAL_INFO, errmsg);
-        }
-
-        return;
-      }
-
-      if (!useBuckFastATLASDetector) return;
-
-      if (*Loop::iteration == START_SUBPROCESS)
-      {
-        // Register analysis container
-        result.register_thread("ATLASAnalysisContainer");
-
-        // Set current collider
-        result.set_current_collider(*iterPythiaNames);
-
-        // Initialize analysis container or reset all the contained analyses
-        if (!result.has_analyses())
-        {
-          try
-          {
-            result.init(analyses[indexPythiaNames]);
-          }
-          catch (std::runtime_error& e)
-          {
-            piped_errors.request(LOCAL_INFO, e.what());
-          }
-        }
-        else result.reset();
-
-        return;
-      }
-
-      if (*Loop::iteration == END_SUBPROCESS && eventsGenerated && nFailedEvents <= maxFailedEvents)
-      {
-        const double xs_fb = (*Dep::HardScatteringSim)->xsec_pb() * 1000.;
-        const double xserr_fb = (*Dep::HardScatteringSim)->xsecErr_pb() * 1000.;
-        result.add_xsec(xs_fb, xserr_fb);
-
-        #ifdef COLLIDERBIT_DEBUG
-        cout << debug_prefix() << "xs_fb = " << xs_fb << " +/- " << xserr_fb << endl;
-        #endif
-        return;
-      }
-
-      if (*Loop::iteration == COLLIDER_FINALIZE)
-      {
-        result.collect_and_add_signal();
-        result.collect_and_improve_xsec();
-        result.scale();
-        return;
-      }
-
-    }
-
-
-    void getATLASnoeffAnalysisContainer(HEPUtilsAnalysisContainer& result)
-    {
-      using namespace Pipes::getATLASnoeffAnalysisContainer;
-      static std::vector<std::vector<str> > analyses;
-      static bool first = true;
-
-      if (*Loop::iteration == BASE_INIT)
-      {
-        // Only run this once
-        if (first)
-        {
-          // Read analysis names from the yaml file
-          std::vector<std::vector<str> > default_analyses;  // The default is empty lists of analyses
-          analyses = runOptions->getValueOrDef<std::vector<std::vector<str> > >(default_analyses, "analyses");
-
-          // Check that the analsis names listed in the yaml file all correspond to actual ColliderBit analyses
-          for (std::vector<str> collider_specific_analyses : analyses)
-          {
-            for (str& analysis_name : collider_specific_analyses)
-            {
-              if (!checkAnalysis(analysis_name))
-              {
-                str errmsg = "The analysis " + analysis_name + " is not a known ColliderBit analysis.";
-                ColliderBit_error().raise(LOCAL_INFO, errmsg);
-              }
-            }
-          }
-
-          first = false;
-        }
-      }
-
-      if (*Loop::iteration == COLLIDER_INIT)
-      {
-        if (!useBuckFastATLASnoeffDetector) return;
-
-        // Check that there are some analyses to run if the detector is switched on
-        if (analyses[indexPythiaNames].empty() and useBuckFastATLASnoeffDetector)
-        {
-          str errmsg = "The option 'useDetector' for function 'getBuckFastATLASnoeff' is set to true\n";
-          errmsg    += "for the collider '";
-          errmsg    += *iterPythiaNames;
-          errmsg    += "', but the corresponding list of analyses\n";
-          errmsg    += "(in option 'analyses' for function 'getATLASnoeffAnalysisContainer') is empty.\n";
-          errmsg    += "Please correct your settings.\n";
-          ColliderBit_error().raise(LOCAL_INFO, errmsg);
-        }
-
-        return;
-      }
-
-      if (!useBuckFastATLASnoeffDetector) return;
-
-      if (*Loop::iteration == START_SUBPROCESS)
-      {
-        // Register analysis container
-        result.register_thread("ATLASnoeffAnalysisContainer");
-
-        // Set current collider
-        result.set_current_collider(*iterPythiaNames);
-
-        // Initialize analysis container or reset all the contained analyses
-        if (!result.has_analyses())
-        {
-          try
-          {
-            result.init(analyses[indexPythiaNames]);
-          }
-          catch (std::runtime_error& e)
-          {
-            piped_errors.request(LOCAL_INFO, e.what());
-          }
-        }
-        else result.reset();
-
-        return;
-      }
-
-      if (*Loop::iteration == END_SUBPROCESS && eventsGenerated && nFailedEvents <= maxFailedEvents)
-      {
-        const double xs_fb = (*Dep::HardScatteringSim)->xsec_pb() * 1000.;
-        const double xserr_fb = (*Dep::HardScatteringSim)->xsecErr_pb() * 1000.;
-        result.add_xsec(xs_fb, xserr_fb);
-
-        #ifdef COLLIDERBIT_DEBUG
-        cout << debug_prefix() << "xs_fb = " << xs_fb << " +/- " << xserr_fb << endl;
-        #endif
-        return;
-      }
-
-      if (*Loop::iteration == COLLIDER_FINALIZE)
-      {
-        result.collect_and_add_signal();
-        result.collect_and_improve_xsec();
-        result.scale();
-        return;
-      }
-
-    }
-
-
-    void getCMSAnalysisContainer(HEPUtilsAnalysisContainer& result)
-    {
-      using namespace Pipes::getCMSAnalysisContainer;
-      static std::vector<std::vector<str> > analyses;
-      static bool first = true;
-
-      if (*Loop::iteration == BASE_INIT)
-      {
-        // Only run this once
-        if (first)
-        {
-          // Read analysis names from the yaml file
-          std::vector<std::vector<str> > default_analyses;  // The default is empty lists of analyses
-          analyses = runOptions->getValueOrDef<std::vector<std::vector<str> > >(default_analyses, "analyses");
-
-          // Check that the analsis names listed in the yaml file all correspond to actual ColliderBit analyses
-          for (std::vector<str> collider_specific_analyses : analyses)
-          {
-            for (str& analysis_name : collider_specific_analyses)
-            {
-              if (!checkAnalysis(analysis_name))
-              {
-                str errmsg = "The analysis " + analysis_name + " is not a known ColliderBit analysis.";
-                ColliderBit_error().raise(LOCAL_INFO, errmsg);
-              }
-            }
-          }
-
-          first = false;
-        }
-      }
-
-      if (*Loop::iteration == COLLIDER_INIT)
-      {
-        if (!useBuckFastCMSDetector) return;
-
-        // Check that there are some analyses to run if the detector is switched on
-        if (analyses[indexPythiaNames].empty() and useBuckFastCMSDetector)
-        {
-          str errmsg = "The option 'useDetector' for function 'getBuckFastCMS' is set to true\n";
-          errmsg    += "for the collider '";
-          errmsg    += *iterPythiaNames;
-          errmsg    += "', but the corresponding list of analyses\n";
-          errmsg    += "(in option 'analyses' for function 'getCMSAnalysisContainer') is empty.\n";
-          errmsg    += "Please correct your settings.\n";
-          ColliderBit_error().raise(LOCAL_INFO, errmsg);
-        }
-
-        return;
-      }
-
-      if (!useBuckFastCMSDetector) return;
-
-      if (*Loop::iteration == START_SUBPROCESS)
-      {
-        // Register analysis container
-        result.register_thread("CMSAnalysisContainer");
-
-        // Set current collider
-        result.set_current_collider(*iterPythiaNames);
-
-        // Initialize analysis container or reset all the contained analyses
-        if (!result.has_analyses())
-        {
-          try
-          {
-            result.init(analyses[indexPythiaNames]);
-          }
-          catch (std::runtime_error& e)
-          {
-            piped_errors.request(LOCAL_INFO, e.what());
-          }
-        }
-        else result.reset();
-
-        return;
-      }
-
-      if (*Loop::iteration == END_SUBPROCESS && eventsGenerated && nFailedEvents <= maxFailedEvents)
-      {
-        const double xs_fb = (*Dep::HardScatteringSim)->xsec_pb() * 1000.;
-        const double xserr_fb = (*Dep::HardScatteringSim)->xsecErr_pb() * 1000.;
-        result.add_xsec(xs_fb, xserr_fb);
-
-        #ifdef COLLIDERBIT_DEBUG
-        cout << debug_prefix() << "xs_fb = " << xs_fb << " +/- " << xserr_fb << endl;
-        #endif
-        return;
-      }
-
-      if (*Loop::iteration == COLLIDER_FINALIZE)
-      {
-        result.collect_and_add_signal();
-        result.collect_and_improve_xsec();
-        result.scale();
-        return;
-      }
-
-    }
-
-
-    void getCMSnoeffAnalysisContainer(HEPUtilsAnalysisContainer& result)
-    {
-      using namespace Pipes::getCMSnoeffAnalysisContainer;
-      static std::vector<std::vector<str> > analyses;
-      static bool first = true;
-
-      if (*Loop::iteration == BASE_INIT)
-      {
-        // Only run this once
-        if (first)
-        {
-          // Read analysis names from the yaml file
-          std::vector<std::vector<str> > default_analyses;  // The default is empty lists of analyses
-          analyses = runOptions->getValueOrDef<std::vector<std::vector<str> > >(default_analyses, "analyses");
-
-          // Check that the analsis names listed in the yaml file all correspond to actual ColliderBit analyses
-          for (std::vector<str> collider_specific_analyses : analyses)
-          {
-            for (str& analysis_name : collider_specific_analyses)
-            {
-              if (!checkAnalysis(analysis_name))
-              {
-                str errmsg = "The analysis " + analysis_name + " is not a known ColliderBit analysis.";
-                ColliderBit_error().raise(LOCAL_INFO, errmsg);
-              }
-            }
-          }
-
-          first = false;
-        }
-      }
-
-      if (*Loop::iteration == COLLIDER_INIT)
-      {
-        if (!useBuckFastCMSnoeffDetector) return;
-
-        // Check that there are some analyses to run if the detector is switched on
-        if (analyses[indexPythiaNames].empty() and useBuckFastCMSnoeffDetector)
-        {
-          str errmsg = "The option 'useDetector' for function 'getBuckFastCMSnoeff' is set to true\n";
-          errmsg    += "for the collider '";
-          errmsg    += *iterPythiaNames;
-          errmsg    += "', but the corresponding list of analyses\n";
-          errmsg    += "(in option 'analyses' for function 'getCMSnoeffAnalysisContainer') is empty.\n";
-          errmsg    += "Please correct your settings.\n";
-          ColliderBit_error().raise(LOCAL_INFO, errmsg);
-        }
-
-        return;
-      }
-
-      if (!useBuckFastCMSnoeffDetector) return;
-
-      if (*Loop::iteration == START_SUBPROCESS)
-      {
-        // Register analysis container
-        result.register_thread("CMSnoeffAnalysisContainer");
-
-        // Set current collider
-        result.set_current_collider(*iterPythiaNames);
-
-        // Initialize analysis container or reset all the contained analyses
-        if (!result.has_analyses())
-        {
-          try
-          {
-            result.init(analyses[indexPythiaNames]);
-          }
-          catch (std::runtime_error& e)
-          {
-            piped_errors.request(LOCAL_INFO, e.what());
-          }
-        }
-        else result.reset();
-
-        return;
-      }
-
-      if (*Loop::iteration == END_SUBPROCESS && eventsGenerated && nFailedEvents <= maxFailedEvents)
-      {
-        const double xs_fb = (*Dep::HardScatteringSim)->xsec_pb() * 1000.;
-        const double xserr_fb = (*Dep::HardScatteringSim)->xsecErr_pb() * 1000.;
-        result.add_xsec(xs_fb, xserr_fb);
-
-        #ifdef COLLIDERBIT_DEBUG
-        cout << debug_prefix() << "xs_fb = " << xs_fb << " +/- " << xserr_fb << endl;
-        #endif
-        return;
-      }
-
-      if (*Loop::iteration == COLLIDER_FINALIZE)
-      {
-        result.collect_and_add_signal();
-        result.collect_and_improve_xsec();
-        result.scale();
-        return;
-      }
-
-    }
-
-
-    void getIdentityAnalysisContainer(HEPUtilsAnalysisContainer& result)
-    {
-      using namespace Pipes::getIdentityAnalysisContainer;
-      static std::vector<std::vector<str> > analyses;
-      static bool first = true;
-
-      if (*Loop::iteration == BASE_INIT)
-      {
-        // Only run this once
-        if (first)
-        {
-          // Read analysis names from the yaml file
-          std::vector<std::vector<str> > default_analyses;  // The default is empty lists of analyses
-          analyses = runOptions->getValueOrDef<std::vector<std::vector<str> > >(default_analyses, "analyses");
-
-          // Check that the analsis names listed in the yaml file all correspond to actual ColliderBit analyses
-          for (std::vector<str> collider_specific_analyses : analyses)
-          {
-            for (str& analysis_name : collider_specific_analyses)
-            {
-              if (!checkAnalysis(analysis_name))
-              {
-                str errmsg = "The analysis " + analysis_name + " is not a known ColliderBit analysis.";
-                ColliderBit_error().raise(LOCAL_INFO, errmsg);
-              }
-            }
-          }
-
-          first = false;
-        }
-      }
-
-
-      if (*Loop::iteration == COLLIDER_INIT)
-      {
-        if (!useBuckFastIdentityDetector) return;
-
-        // Check that there are some analyses to run if the detector is switched on
-        if (analyses[indexPythiaNames].empty() and useBuckFastIdentityDetector)
-        {
-          str errmsg = "The option 'useDetector' for function 'getBuckFastIdentity' is set to true\n";
-          errmsg    += "for the collider '";
-          errmsg    += *iterPythiaNames;
-          errmsg    += "', but the corresponding list of analyses\n";
-          errmsg    += "(in option 'analyses' for function 'getIdentityAnalysisContainer') is empty.\n";
-          errmsg    += "Please correct your settings.\n";
-          ColliderBit_error().raise(LOCAL_INFO, errmsg);
-        }
-
-        return;
-      }
-
-      if (!useBuckFastIdentityDetector) return;
-
-      if (*Loop::iteration == START_SUBPROCESS)
-      {
-        // Register analysis container
-        result.register_thread("IdentityAnalysisContainer");
-
-        // Set current collider
-        result.set_current_collider(*iterPythiaNames);
-
-        // Initialize analysis container or reset all the contained analyses
-        if (!result.has_analyses())
-        {
-          try
-          {
-            result.init(analyses[indexPythiaNames]);
-          }
-          catch (std::runtime_error& e)
-          {
-            piped_errors.request(LOCAL_INFO, e.what());
-          }
-        }
-        else result.reset();
-
-        return;
-      }
-
-      if (*Loop::iteration == END_SUBPROCESS && eventsGenerated && nFailedEvents <= maxFailedEvents)
-      {
-        const double xs_fb = (*Dep::HardScatteringSim)->xsec_pb() * 1000.;
-        const double xserr_fb = (*Dep::HardScatteringSim)->xsecErr_pb() * 1000.;
-        result.add_xsec(xs_fb, xserr_fb);
-
-        #ifdef COLLIDERBIT_DEBUG
-        cout << debug_prefix() << "xs_fb = " << xs_fb << " +/- " << xserr_fb << endl;
-        #endif
-        return;
-      }
-
-      if (*Loop::iteration == COLLIDER_FINALIZE)
-      {
-        result.collect_and_add_signal();
-        result.collect_and_improve_xsec();
-        result.scale();
-        return;
-      }
-
-    }
-
-
-
-    // *** Analysis Accumulators ***
-
-    void runATLASAnalyses(AnalysisDataPointers& result)
-    {
-      using namespace Pipes::runATLASAnalyses;
-
-      if (*Loop::iteration == BASE_INIT)
-      {
-        result.clear();
-        return;
-      }
-
-      if (!useBuckFastATLASDetector) return;
-
-      static MC_convergence_checker convergence;
-      if (*Loop::iteration == COLLIDER_INIT)
-      {
-        convergence.init(indexPythiaNames, *Dep::MC_ConvergenceSettings);
-        return;
-      }
-
-      if (*Loop::iteration == COLLECT_CONVERGENCE_DATA)
-      {
-        // Update the convergence tracker with the new results
-        convergence.update(*Dep::ATLASAnalysisContainer);
-        return;
-      }
-
-      if (*Loop::iteration == CHECK_CONVERGENCE)
-      {
-        // Call quits on the event loop if every analysis in every analysis container has sufficient statistics
-        if (convergence.achieved(*Dep::ATLASAnalysisContainer)) Loop::wrapup();
-        return;
-      }
-
-      // #ifdef COLLIDERBIT_DEBUG
-      // if (*Loop::iteration == END_SUBPROCESS)
-      // {
-      //   for (auto& analysis_pointer_pair : Dep::ATLASAnalysisContainer->get_current_analyses_map())
-      //   {
-      //     for (auto& sr : analysis_pointer_pair.second->get_results().srdata)
-      //     {
-      //       cout << debug_prefix() << "runATLASAnalyses: signal region " << sr.sr_label << ", n_signal = " << sr.n_signal << endl;
-      //     }
-      //   }
-      // }
-      // #endif
-
-      if (*Loop::iteration == COLLIDER_FINALIZE)
-      {
-        // The final iteration for this collider: collect results
-        for (auto& analysis_pointer_pair : Dep::ATLASAnalysisContainer->get_current_analyses_map())
-        {
-          #ifdef COLLIDERBIT_DEBUG
-          cout << debug_prefix() << "runATLASAnalyses: Collecting result from " << analysis_pointer_pair.first << endl;
-          #endif
-
-          str warning;
-          result.push_back(analysis_pointer_pair.second->get_results_ptr(warning));
-          if (eventsGenerated && nFailedEvents <= maxFailedEvents && !warning.empty())
-          {
-            ColliderBit_error().raise(LOCAL_INFO, warning);
-          }
-        }
-        return;
-      }
-
-      if (*Loop::iteration == BASE_FINALIZE)
-      {
-        // Final iteration. Just return.
-        #ifdef COLLIDERBIT_DEBUG
-        cout << debug_prefix() << "runATLASAnalyses: 'result' contains " << result.size() << " results." << endl;
-        #endif
-        return;
-      }
-
-      if (*Loop::iteration <= BASE_INIT) return;
-
-      // Loop over analyses and run them... Managed by HEPUtilsAnalysisContainer
-      Dep::ATLASAnalysisContainer->analyze(*Dep::ATLASSmearedEvent);
-
-    }
-
-
-    void runATLASnoeffAnalyses(AnalysisDataPointers& result)
-    {
-      using namespace Pipes::runATLASnoeffAnalyses;
-
-      if (*Loop::iteration == BASE_INIT)
-      {
-        result.clear();
-        return;
-      }
-
-      if (!useBuckFastATLASnoeffDetector) return;
-
-      static MC_convergence_checker convergence;
-      if (*Loop::iteration == COLLIDER_INIT)
-      {
-        convergence.init(indexPythiaNames, *Dep::MC_ConvergenceSettings);
-        return;
-      }
-
-      if (*Loop::iteration == COLLECT_CONVERGENCE_DATA)
-      {
-        // Update the convergence tracker with the new results
-        convergence.update(*Dep::ATLASnoeffAnalysisContainer);
-        return;
-      }
-
-      if (*Loop::iteration == CHECK_CONVERGENCE)
-      {
-        // Call quits on the event loop if every analysis in every analysis container has sufficient statistics
-        if (convergence.achieved(*Dep::ATLASnoeffAnalysisContainer)) Loop::wrapup();
-        return;
-      }
-
-      // #ifdef COLLIDERBIT_DEBUG
-      // if (*Loop::iteration == END_SUBPROCESS)
-      // {
-      //   for (auto& analysis_pointer_pair : Dep::ATLASnoeffAnalysisContainer->get_current_analyses_map())
-      //   {
-      //     for (auto& sr : analysis_pointer_pair.second->get_results().srdata)
-      //     {
-      //       cout << debug_prefix() << "runATLASnoeffAnalyses: signal region " << sr.sr_label << ", n_signal = " << sr.n_signal << endl;
-      //     }
-      //   }
-      // }
-      // #endif
-
-      if (*Loop::iteration == COLLIDER_FINALIZE)
-      {
-        // The final iteration for this collider: collect results
-        for (auto& analysis_pointer_pair : Dep::ATLASnoeffAnalysisContainer->get_current_analyses_map())
-        {
-          #ifdef COLLIDERBIT_DEBUG
-          cout << debug_prefix() << "runATLASnoeffAnalyses: Collecting result from " << analysis_pointer_pair.first << endl;
-          #endif
-
-          str warning;
-          result.push_back(analysis_pointer_pair.second->get_results_ptr(warning));
-          if (eventsGenerated && nFailedEvents <= maxFailedEvents && !warning.empty())
-          {
-            ColliderBit_error().raise(LOCAL_INFO, warning);
-          }
-        }
-        return;
-      }
-
-      if (*Loop::iteration == BASE_FINALIZE)
-      {
-        // Final iteration. Just return.
-        #ifdef COLLIDERBIT_DEBUG
-        cout << debug_prefix() << "runATLASnoeffAnalyses: 'result' contains " << result.size() << " results." << endl;
-        #endif
-        return;
-      }
-
-      if (*Loop::iteration <= BASE_INIT) return;
-
-      // Loop over analyses and run them... Managed by HEPUtilsAnalysisContainer
-      Dep::ATLASnoeffAnalysisContainer->analyze(*Dep::ATLASnoeffSmearedEvent);
-
-    }
-
-
-    void runCMSAnalyses(AnalysisDataPointers& result)
-    {
-      using namespace Pipes::runCMSAnalyses;
-
-      if (*Loop::iteration == BASE_INIT)
-      {
-        result.clear();
-        return;
-      }
-
-      if (!useBuckFastCMSDetector) return;
-
-      static MC_convergence_checker convergence;
-      if (*Loop::iteration == COLLIDER_INIT)
-      {
-        convergence.init(indexPythiaNames, *Dep::MC_ConvergenceSettings);
-        return;
-      }
-
-      if (*Loop::iteration == COLLECT_CONVERGENCE_DATA)
-      {
-        // Update the convergence tracker with the new results
-        convergence.update(*Dep::CMSAnalysisContainer);
-        return;
-      }
-
-      if (*Loop::iteration == CHECK_CONVERGENCE)
-      {
-        // Call quits on the event loop if every analysis in every analysis container has sufficient statistics
-        if (convergence.achieved(*Dep::CMSAnalysisContainer)) Loop::wrapup();
-        return;
-      }
-
-      // #ifdef COLLIDERBIT_DEBUG
-      // if (*Loop::iteration == END_SUBPROCESS)
-      // {
-      //   for (auto& analysis_pointer_pair : Dep::CMSAnalysisContainer->get_current_analyses_map())
-      //   {
-      //     for (auto& sr : analysis_pointer_pair.second->get_results().srdata)
-      //     {
-      //       cout << debug_prefix() << "runCMSAnalyses: signal region " << sr.sr_label << ", n_signal = " << sr.n_signal << endl;
-      //     }
-      //   }
-      // }
-      // #endif
-
-      if (*Loop::iteration == COLLIDER_FINALIZE)
-      {
-        // The final iteration for this collider: collect results
-        for (auto& analysis_pointer_pair : Dep::CMSAnalysisContainer->get_current_analyses_map())
-        {
-          #ifdef COLLIDERBIT_DEBUG
-          cout << debug_prefix() << "runCMSAnalyses: Collecting result from " << analysis_pointer_pair.first << endl;
-          #endif
-
-          str warning;
-          result.push_back(analysis_pointer_pair.second->get_results_ptr(warning));
-          if (eventsGenerated && nFailedEvents <= maxFailedEvents && !warning.empty())
-          {
-            ColliderBit_error().raise(LOCAL_INFO, warning);
-          }
-        }
-        return;
-      }
-
-      if (*Loop::iteration == BASE_FINALIZE)
-      {
-        // Final iteration. Just return.
-        #ifdef COLLIDERBIT_DEBUG
-        cout << debug_prefix() << "runCMSAnalyses: 'result' contains " << result.size() << " results." << endl;
-        #endif
-        return;
-      }
-
-      if (*Loop::iteration <= BASE_INIT) return;
-
-      // Loop over analyses and run them... Managed by HEPUtilsAnalysisContainer
-      Dep::CMSAnalysisContainer->analyze(*Dep::CMSSmearedEvent);
-
-    }
-
-
-    void runCMSnoeffAnalyses(AnalysisDataPointers& result)
-    {
-      using namespace Pipes::runCMSnoeffAnalyses;
-
-      if (*Loop::iteration == BASE_INIT)
-      {
-        result.clear();
-        return;
-      }
-
-      if (!useBuckFastCMSnoeffDetector) return;
-
-      static MC_convergence_checker convergence;
-      if (*Loop::iteration == COLLIDER_INIT)
-      {
-        convergence.init(indexPythiaNames, *Dep::MC_ConvergenceSettings);
-        return;
-      }
-
-      if (*Loop::iteration == COLLECT_CONVERGENCE_DATA)
-      {
-        // Update the convergence tracker with the new results
-        convergence.update(*Dep::CMSnoeffAnalysisContainer);
-        return;
-      }
-
-      if (*Loop::iteration == CHECK_CONVERGENCE)
-      {
-        // Call quits on the event loop if every analysis in every analysis container has sufficient statistics
-        if (convergence.achieved(*Dep::CMSnoeffAnalysisContainer)) Loop::wrapup();
-        return;
-      }
-
-      // #ifdef COLLIDERBIT_DEBUG
-      // if (*Loop::iteration == END_SUBPROCESS)
-      // {
-      //   for (auto& analysis_pointer_pair : Dep::CMSnoeffAnalysisContainer->get_current_analyses_map())
-      //   {
-      //     for (auto& sr : analysis_pointer_pair.second->get_results().srdata)
-      //     {
-      //       cout << debug_prefix() << "runCMSnoeffAnalyses: signal region " << sr.sr_label << ", n_signal = " << sr.n_signal << endl;
-      //     }
-      //   }
-      // }
-      // #endif
-
-      if (*Loop::iteration == COLLIDER_FINALIZE)
-      {
-        // The final iteration for this collider: collect results
-        for (auto& analysis_pointer_pair : Dep::CMSnoeffAnalysisContainer->get_current_analyses_map())
-        {
-          #ifdef COLLIDERBIT_DEBUG
-          cout << debug_prefix() << "runCMSnoeffAnalyses: Collecting result from " << analysis_pointer_pair.first << endl;
-          #endif
-
-          str warning;
-          result.push_back(analysis_pointer_pair.second->get_results_ptr(warning));
-          if (eventsGenerated && nFailedEvents <= maxFailedEvents && !warning.empty())
-          {
-            ColliderBit_error().raise(LOCAL_INFO, warning);
-          }
-        }
-        return;
-      }
-
-      if (*Loop::iteration == BASE_FINALIZE)
-      {
-        // Final iteration. Just return.
-        #ifdef COLLIDERBIT_DEBUG
-        cout << debug_prefix() << "runCMSnoeffAnalyses: 'result' contains " << result.size() << " results." << endl;
-        #endif
-        return;
-      }
-
-      if (*Loop::iteration <= BASE_INIT) return;
-
-      // Loop over analyses and run them... Managed by HEPUtilsAnalysisContainer
-      Dep::CMSnoeffAnalysisContainer->analyze(*Dep::CMSnoeffSmearedEvent);
-
-    }
-
-
-    void runIdentityAnalyses(AnalysisDataPointers& result)
-    {
-      using namespace Pipes::runIdentityAnalyses;
-
-      if (*Loop::iteration == BASE_INIT)
-      {
-        result.clear();
-        return;
-      }
-
-      if (!useBuckFastIdentityDetector) return;
-
-      static MC_convergence_checker convergence;
-      if (*Loop::iteration == COLLIDER_INIT)
-      {
-        convergence.init(indexPythiaNames, *Dep::MC_ConvergenceSettings);
-        return;
-      }
-
-      if (*Loop::iteration == COLLECT_CONVERGENCE_DATA)
-      {
-        // Update the convergence tracker with the new results
-        convergence.update(*Dep::IdentityAnalysisContainer);
-        return;
-      }
-
-      if (*Loop::iteration == CHECK_CONVERGENCE)
-      {
-        // Call quits on the event loop if every analysis in every analysis container has sufficient statistics
-        if (convergence.achieved(*Dep::IdentityAnalysisContainer)) Loop::wrapup();
-        return;
-      }
-
-      // #ifdef COLLIDERBIT_DEBUG
-      // if (*Loop::iteration == END_SUBPROCESS)
-      // {
-      //   for (auto& analysis_pointer_pair : Dep::IdentityAnalysisContainer->get_current_analyses_map())
-      //   {
-      //     for (auto& sr : analysis_pointer_pair.second->get_results().srdata)
-      //     {
-      //       cout << debug_prefix() << "runIdentityAnalyses: signal region " << sr.sr_label << ", n_signal = " << sr.n_signal << endl;
-      //     }
-      //   }
-      // }
-      // #endif
-
-      if (*Loop::iteration == COLLIDER_FINALIZE)
-      {
-        // The final iteration for this collider: collect results
-        for (auto& analysis_pointer_pair : Dep::IdentityAnalysisContainer->get_current_analyses_map())
-        {
-          #ifdef COLLIDERBIT_DEBUG
-          cout << debug_prefix() << "runIdentityAnalyses: Collecting result from " << analysis_pointer_pair.first << endl;
-          #endif
-
-          str warning;
-          result.push_back(analysis_pointer_pair.second->get_results_ptr(warning));
-          if (eventsGenerated && nFailedEvents <= maxFailedEvents && !warning.empty())
-          {
-            ColliderBit_error().raise(LOCAL_INFO, warning);
-          }
-        }
-        return;
-      }
-
-      if (*Loop::iteration == BASE_FINALIZE)
-      {
-        // Final iteration. Just return.
-        #ifdef COLLIDERBIT_DEBUG
-        cout << debug_prefix() << "runIdentityAnalyses: 'result' contains " << result.size() << " results." << endl;
-        #endif
-        return;
-      }
-
-      if (*Loop::iteration <= BASE_INIT) return;
-
-      // Loop over analyses and run them... Managed by HEPUtilsAnalysisContainer
-      Dep::IdentityAnalysisContainer->analyze(*Dep::CopiedEvent);
-
-    }
-
-
-    // Loop over all analyses and fill a map of predicted counts
+    /// Loop over all analyses and collect them in one place
     void CollectAnalyses(AnalysisDataPointers& result)
     {
       using namespace Pipes::CollectAnalyses;
@@ -1674,7 +704,7 @@ namespace Gambit
     }
 
 
-    // Loop over all analyses and fill a map of predictions
+    /// Loop over all analyses and fill a map of predicted counts
     void calc_LHC_signals(map_str_dbl& result)
     {
       using namespace Pipes::calc_LHC_signals;
@@ -1712,7 +742,7 @@ namespace Gambit
     }
 
 
-    // Loop over all analyses and fill a map of AnalysisLogLikes objects
+    /// Loop over all analyses and fill a map of AnalysisLogLikes objects
     void calc_LHC_LogLikes(map_str_AnalysisLogLikes& result)
     {
       using namespace Pipes::calc_LHC_LogLikes;
@@ -2097,9 +1127,9 @@ namespace Gambit
 
         else
         {
-          // No SR-correlation info, or user chose not to use it. 
-          // Then we either take the result from the SR *expected* to be most constraining 
-          // under the s=0 assumption (default), or naively combine the loglikes for 
+          // No SR-correlation info, or user chose not to use it.
+          // Then we either take the result from the SR *expected* to be most constraining
+          // under the s=0 assumption (default), or naively combine the loglikes for
           // all SRs (if combine_SRs_without_covariances=true).
           #ifdef COLLIDERBIT_DEBUG
           cout << debug_prefix() << "calc_LHC_LogLikes: Analysis " << analysis << " has no covariance matrix: computing single best-expected loglike." << endl;
@@ -2215,7 +1245,8 @@ namespace Gambit
 
     }
 
-    // Extract the combined log likelihood for each analysis
+
+    /// Extract the combined log likelihood for each analysis
     void get_LHC_LogLike_per_analysis(map_str_dbl& result)
     {
       using namespace Pipes::get_LHC_LogLike_per_analysis;
@@ -2236,7 +1267,7 @@ namespace Gambit
     }
 
 
-    // Extract the log likelihood for each SR
+    /// Extract the log likelihood for each SR
     void get_LHC_LogLike_per_SR(map_str_dbl& result)
     {
       using namespace Pipes::get_LHC_LogLike_per_SR;
@@ -2271,7 +1302,7 @@ namespace Gambit
     }
 
 
-    // Extract the labels for the SRs used in the analysis loglikes
+    /// Extract the labels for the SRs used in the analysis loglikes
     void get_LHC_LogLike_SR_labels(map_str_str& result)
     {
       using namespace Pipes::get_LHC_LogLike_per_SR;
@@ -2285,8 +1316,8 @@ namespace Gambit
     }
 
 
-    // Extract the indices for the SRs used in the analysis loglikes
-    // @todo Switch result type to map_str_int once we have implemented a printer for this type
+    /// Extract the indices for the SRs used in the analysis loglikes
+    /// @todo Switch result type to map_str_int once we have implemented a printer for this type
     void get_LHC_LogLike_SR_indices(map_str_dbl& result)
     {
       using namespace Pipes::get_LHC_LogLike_per_SR;
@@ -2308,7 +1339,7 @@ namespace Gambit
     }
 
 
-    // Compute the total likelihood combining all analyses
+    /// Compute the total likelihood combining all analyses
     void calc_combined_LHC_LogLike(double& result)
     {
       using namespace Pipes::calc_combined_LHC_LogLike;
@@ -2373,7 +1404,7 @@ namespace Gambit
     }
 
 
-    // Store some information about the event generation
+    /// Store some information about the event generation
     void getLHCEventLoopInfo(map_str_dbl& result)
     {
       using namespace Pipes::getLHCEventLoopInfo;
@@ -2392,6 +1423,369 @@ namespace Gambit
       }
 
     }
+
+
+    // *** Hard Scattering Collider Simulators ***
+
+    // ** Regular Pythia version **
+
+    /// Retrieve a Pythia hard-scattering Monte Carlo simulation
+    void getPythia(ColliderPythia_defaultversion &result)
+    {
+      using namespace Pipes::getPythia;
+      getColliderPythia(result, *Dep::MSSM_spectrum, *Dep::decay_table, *Loop::iteration, Loop::wrapup, *runOptions, ModelInUse);
+    }
+
+    /// Retrieve a Pythia hard-scattering Monte Carlo simulation, initialised from an SLHA file
+    void getPythiaFileReader(ColliderPythia_defaultversion &result)
+    {
+      using namespace Pipes::getPythiaFileReader;
+      getColliderPythiaFileReader(result, *Loop::iteration, Loop::wrapup);
+    }
+
+    /// Retrieve a Pythia hard-scattering Monte Carlo simulation as a pointer to a BaseCollider
+    void getPythiaAsBaseCollider(BaseCollider*& result) { result = &(*Pipes::getPythiaAsBaseCollider::Dep::HardScatteringSim); }
+
+    // ** EM Pythia version **
+
+    /// Retrieve a Pythia hard-scattering Monte Carlo simulation
+    void getPythia_EM(ColliderPythia_EM_defaultversion &result)
+    {
+      using namespace Pipes::getPythia_EM;
+      getColliderPythia(result, *Dep::MSSM_spectrum, *Dep::decay_table, *Loop::iteration, Loop::wrapup, *runOptions, ModelInUse);
+    }
+
+    /// Retrieve a Pythia hard-scattering Monte Carlo simulation, initialised from an SLHA file
+    void getPythia_EMFileReader(ColliderPythia_EM_defaultversion &result)
+    {
+      using namespace Pipes::getPythia_EMFileReader;
+      getColliderPythiaFileReader(result, *Loop::iteration, Loop::wrapup);
+    }
+
+    /// Retrieve a Pythia hard-scattering Monte Carlo simulation as a pointer to a BaseCollider
+    void getPythia_EMAsBaseCollider(BaseCollider*& result) { result = &(*Pipes::getPythia_EMAsBaseCollider::Dep::HardScatteringSim); }
+
+
+
+    // *** Hard Scattering Event Generators ***
+
+    // ** Regular Pythia versions **
+
+    /// Generate a hard scattering event with regular Pythia
+    void generateEventPythia(Pythia_default::Pythia8::Event& result)
+    {
+      using namespace Pipes::generatePythia8Event;
+      generateEventColliderPythia(result, *Dep::HardScatteringSim, *Loop::iteration, Loop::wrapup);
+    }
+
+    // ** Pythia EM versions **
+
+    /// Generate a hard scattering event with the EM version of Pythia
+    void generateEventPythia_EM(Pythia_EM_default::Pythia8::Event& result)
+    {
+      using namespace Pipes::generatePythia8Event_EM;
+      generateEventColliderPythia(result, *Dep::HardScatteringSim, *Loop::iteration, Loop::wrapup);
+    }
+
+
+    // *** Detector Simulators ***
+
+    // ** Regular Pythia versions **
+
+    /// Retrieve a simple smearing sim of ATLAS, BuckFast form
+    void getBuckFastATLASPythia(BuckFast<Pythia_default::Pythia8::Event> &result)
+    {
+      using namespace Pipes::getBuckFastATLASPythia;
+      getBuckFast(result, "ATLAS", true, useBuckFastATLASDetector, haveUsedBuckFastATLASDetector, *Loop::iteration, runOptions);
+    }
+
+    /// Retrieve a simple smearing sim of ATLAS, BaseDetector form
+    void getBuckFastATLASPythiaAsBaseDetector(BaseDetector<Pythia_default::Pythia8::Event>*& result)
+    {
+      result = &(*Pipes::getBuckFastATLASPythiaAsBaseDetector::Dep::ATLASDetectorSim);
+    }
+
+    /// Retrieve a simple smearing sim of ATLAS, no efficiency, BuckFast form
+    void getBuckFastATLASnoeffPythia(BuckFast<Pythia_default::Pythia8::Event> &result)
+    {
+      using namespace Pipes::getBuckFastATLASnoeffPythia;
+      getBuckFast(result, "ATLAS", false, useBuckFastATLASnoeffDetector, haveUsedBuckFastATLASnoeffDetector, *Loop::iteration, runOptions);
+    }
+
+    /// Retrieve a simple smearing sim of ATLAS, no efficiency, BaseDetector form
+    void getBuckFastATLASnoeffPythiaAsBaseDetector(BaseDetector<Pythia_default::Pythia8::Event>*& result)
+    {
+      result = &(*Pipes::getBuckFastATLASnoeffPythiaAsBaseDetector::Dep::ATLASnoeffDetectorSim);
+    }
+
+    /// Retrieve a simple smearing sim of CMS, BuckFast form
+    void getBuckFastCMSPythia(BuckFast<Pythia_default::Pythia8::Event> &result)
+    {
+      using namespace Pipes::getBuckFastCMSPythia;
+      getBuckFast(result, "CMS", true, useBuckFastCMSDetector, haveUsedBuckFastCMSDetector, *Loop::iteration, runOptions);
+    }
+
+    /// Retrieve a simple smearing sim of CMS, BaseDetector form
+    void getBuckFastCMSPythiaAsBaseDetector(BaseDetector<Pythia_default::Pythia8::Event>*& result)
+    {
+      result = &(*Pipes::getBuckFastCMSPythiaAsBaseDetector::Dep::CMSDetectorSim);
+    }
+
+    /// Retrieve a simple smearing sim of CMS, no efficiency, BuckFast form
+    void getBuckFastCMSnoeffPythia(BuckFast<Pythia_default::Pythia8::Event> &result)
+    {
+      using namespace Pipes::getBuckFastCMSnoeffPythia;
+      getBuckFast(result, "CMS", false, useBuckFastCMSnoeffDetector, haveUsedBuckFastCMSnoeffDetector, *Loop::iteration, runOptions);
+    }
+
+    /// Retrieve a simple smearing sim of CMS, no efficiency, BaseDetector form
+    void getBuckFastCMSnoeffPythiaAsBaseDetector(BaseDetector<Pythia_default::Pythia8::Event>*& result)
+    {
+      result = &(*Pipes::getBuckFastCMSnoeffPythiaAsBaseDetector::Dep::CMSnoeffDetectorSim);
+    }
+
+    /// Retrieve an Identity pseudo-sim (truth level, no sim), BuckFast form
+    void getBuckFastIdentityPythia(BuckFast<Pythia_default::Pythia8::Event> &result)
+    {
+      using namespace Pipes::getBuckFastIdentityPythia;
+      getBuckFast(result, "Identity", false, useBuckFastIdentityDetector, haveUsedBuckFastIdentityDetector, *Loop::iteration, runOptions);
+    }
+
+    /// Retrieve an Identity pseudo-sim (truth level, no sim), BaseDetector form
+    void getBuckFastIdentityPythiaAsBaseDetector(BaseDetector<Pythia_default::Pythia8::Event>*& result)
+    {
+      result = &(*Pipes::getBuckFastIdentyPythiaAsBaseDetector::Dep::IdentityDetectorSim);
+    }
+
+    // ** Pythia EM versions **
+
+    /// Retrieve a simple smearing sim of ATLAS, BuckFast form
+    void getBuckFastATLASPythia_EM(BuckFast<Pythia_EM_default::Pythia8::Event> &result)
+    {
+      using namespace Pipes::getBuckFastATLASPythia_EM;
+      getBuckFast(result, "ATLAS", true, useBuckFastATLASDetector, haveUsedBuckFastATLASDetector, *Loop::iteration, runOptions);
+    }
+
+    /// Retrieve a simple smearing sim of ATLAS, BaseDetector form
+    void getBuckFastATLASPythia_EMAsBaseDetector(BaseDetector<Pythia_EM_default::Pythia8::Event>*& result)
+    {
+      result = &(*Pipes::getBuckFastATLASPythia_EMAsBaseDetector::Dep::ATLASDetectorSim);
+    }
+
+    /// Retrieve a simple smearing sim of ATLAS, no efficiency, BuckFast form
+    void getBuckFastATLASnoeffPythia_EM(BuckFast<Pythia_EM_default::Pythia8::Event> &result)
+    {
+      using namespace Pipes::getBuckFastATLASnoeffPythia_EM;
+      getBuckFast(result, "ATLAS", false, useBuckFastATLASnoeffDetector, haveUsedBuckFastATLASnoeffDetector, *Loop::iteration, runOptions);
+    }
+
+    /// Retrieve a simple smearing sim of ATLAS, no efficiency, BaseDetector form
+    void getBuckFastATLASnoeffPythia_EMAsBaseDetector(BaseDetector<Pythia_EM_default::Pythia8::Event>*& result)
+    {
+      result = &(*Pipes::getBuckFastATLASnoeffPythia_EMAsBaseDetector::Dep::ATLASnoeffDetectorSim);
+    }
+
+    /// Retrieve a simple smearing sim of CMS, BuckFast form
+    void getBuckFastCMSPythia_EM(BuckFast<Pythia_EM_default::Pythia8::Event> &result)
+    {
+      using namespace Pipes::getBuckFastCMSPythia_EM;
+      getBuckFast(result, "CMS", true, useBuckFastCMSDetector, haveUsedBuckFastCMSDetector, *Loop::iteration, runOptions);
+    }
+
+    /// Retrieve a simple smearing sim of CMS, BaseDetector form
+    void getBuckFastCMSPythia_EMAsBaseDetector(BaseDetector<Pythia_EM_default::Pythia8::Event>*& result)
+    {
+      result = &(*Pipes::getBuckFastCMSPythia_EMAsBaseDetector::Dep::CMSDetectorSim);
+    }
+
+    /// Retrieve a simple smearing sim of CMS, no efficiency, BuckFast form
+    void getBuckFastCMSnoeffPythia_EM(BuckFast<Pythia_EM_default::Pythia8::Event> &result)
+    {
+      using namespace Pipes::getBuckFastCMSnoeffPythia_EM;
+      getBuckFast(result, "CMS", false, useBuckFastCMSnoeffDetector, haveUsedBuckFastCMSnoeffDetector, *Loop::iteration, runOptions);
+    }
+
+    /// Retrieve a simple smearing sim of CMS, no efficiency, BaseDetector form
+    void getBuckFastCMSnoeffPythia_EMAsBaseDetector(BaseDetector<Pythia_EM_default::Pythia8::Event>*& result)
+    {
+      result = &(*Pipes::getBuckFastCMSnoeffPythia_EMAsBaseDetector::Dep::CMSnoeffDetectorSim);
+    }
+
+    /// Retrieve an Identity pseudo-sim (truth level, no sim), BuckFast form
+    void getBuckFastIdentityPythia_EM(BuckFast<Pythia_EM_default::Pythia8::Event> &result)
+    {
+      using namespace Pipes::getBuckFastIdentityPythia_EM;
+      getBuckFast(result, "Identity", false, useBuckFastIdentityDetector, haveUsedBuckFastIdentityDetector, *Loop::iteration, runOptions);
+    }
+
+    /// Retrieve an Identity pseudo-sim (truth level, no sim), BaseDectector form
+    void getBuckFastIdentityPythia_EMAsBaseDetector(BaseDetector<Pythia_EM_default::Pythia8::Event>*& result)
+    {
+      result = &(*Pipes::getBuckFastIdentyPythia_EMAsBaseDetector::Dep::IdentityDetectorSim);
+    }
+
+
+    // *** Standard Event Format Functions ***
+
+    // ** Regular Pythia versions **
+
+    /// Smear an event using a simulation of ATLAS
+    void smearEventATLAS(HEPUtils::Event& result)
+    {
+      using namespace Pipes::smearEventATLAS;
+      smearEvent(result, *Dep::HardScatteringEvent, *Dep::ATLASDetectorSim, *Loop::iteration, useBuckFastATLASDetector, "smearEventATLAS");
+    }
+
+    /// Smear an event using a simulation of ATLAS, no efficiency
+    void smearEventATLASnoeff(HEPUtils::Event& result)
+    {
+      using namespace Pipes::smearEventATLASnoeff;
+      smearEvent(result, *Dep::HardScatteringEvent, *Dep::ATLASnoeffDetectorSim, *Loop::iteration, useBuckFastATLASnoeffDetector, "smearEventATLASnoeff");
+    }
+
+    /// Smear an event using a simulation of CMS
+    void smearEventCMS(HEPUtils::Event& result)
+    {
+      using namespace Pipes::smearEventCMS;
+      smearEvent(result, *Dep::HardScatteringEvent, *Dep::CMSDetectorSim, *Loop::iteration, useBuckFastCMSDetector, "smearEventCMS");
+    }
+
+    /// Smear an event using a simulation of CMS, no efficiency
+    void smearEventCMSnoeff(HEPUtils::Event& result)
+    {
+      using namespace Pipes::smearEventCMSnoeff;
+      smearEvent(result, *Dep::HardScatteringEvent, *Dep::CMSnoeffDetectorSim, *Loop::iteration, useBuckFastCMSnoeffDetector, "smearEventCMSnoeff");
+    }
+
+    /// Pretend to smear an event, but really just convert it to a HEPUtils::Event
+    void copyEvent(HEPUtils::Event& result)
+    {
+      using namespace Pipes::copyEvent;
+      smearEvent(result, *Dep::HardScatteringEvent, *Dep::IdentityDetectorSim, *Loop::iteration, useBuckFastIdentityDetector, "copyEvent");
+    }
+
+    // ** Pythia EM versions **
+
+    /// Smear an event using a simulation of ATLAS
+    void smearEventATLAS_EM(HEPUtils::Event& result)
+    {
+      using namespace Pipes::smearEventATLAS_EM;
+      smearEvent(result, *Dep::HardScatteringEvent, *Dep::ATLASDetectorSim, *Loop::iteration, useBuckFastATLASDetector, "smearEventATLAS_EM");
+    }
+
+    /// Smear an event using a simulation of ATLAS, no efficiency
+    void smearEventATLASnoeff_EM(HEPUtils::Event& result)
+    {
+      using namespace Pipes::smearEventATLASnoeff_EM;
+      smearEvent(result, *Dep::HardScatteringEvent, *Dep::ATLASnoeffDetectorSim, *Loop::iteration, useBuckFastATLASnoeffDetector, "smearEventATLASnoeff_EM");
+    }
+
+    /// Smear an event using a simulation of CMS
+    void smearEventCMS_EM(HEPUtils::Event& result)
+    {
+      using namespace Pipes::smearEventCMS_EM;
+      smearEvent(result, *Dep::HardScatteringEvent, *Dep::CMSDetectorSim, *Loop::iteration, useBuckFastCMSDetector, "smearEventCMS_EM");
+    }
+
+    /// Smear an event using a simulation of CMS, no efficiency
+    void smearEventCMSnoeff_EM(HEPUtils::Event& result)
+    {
+      using namespace Pipes::smearEventCMSnoeff_EM;
+      smearEvent(result, *Dep::HardScatteringEvent, *Dep::CMSnoeffDetectorSim, *Loop::iteration, useBuckFastCMSnoeffDetector, "smearEventCMSnoeff_EM");
+    }
+
+    /// Pretend to smear an event, but really just convert it to a HEPUtils::Event
+    void copyEvent_EM(HEPUtils::Event& result)
+    {
+      using namespace Pipes::copyEvent_EM;
+      smearEvent(result, *Dep::HardScatteringEvent, *Dep::IdentityDetectorSim, *Loop::iteration, useBuckFastIdentityDetector, "copyEvent_EM");
+    }
+
+
+    // *** Initialization for analyses ***
+
+    ///@todo These functions should not be referring to 'useBuckFastXXXXDetector' flags, as they should be independent of the package used to do detector simulation.
+
+    /// Retrieve a container for ATLAS analyses
+    void getATLASAnalysisContainer(HEPUtilsAnalysisContainer& result)
+    {
+      using namespace Pipes::getATLASAnalysisContainer;
+      getAnalysisContainer(result, "ATLAS", *Dep::HardScatteringSim, useBuckFastATLASDetector, *Loop::iteration, runOptions);
+    }
+
+    /// Retrieve a container for ATLAS analyses ignoring efficiencies
+    void getATLASnoeffAnalysisContainer(HEPUtilsAnalysisContainer& result)
+    {
+      using namespace Pipes::getATLASnoeffAnalysisContainer;
+      getAnalysisContainer(result, "ATLASnoeff", *Dep::HardScatteringSim, useBuckFastATLASnoeffDetector, *Loop::iteration, runOptions);
+    }
+
+    /// Retrieve a container for CMS analyses
+    void getCMSAnalysisContainer(HEPUtilsAnalysisContainer& result)
+    {
+      using namespace Pipes::getCMSAnalysisContainer;
+      getAnalysisContainer(result, "CMS", *Dep::HardScatteringSim, useBuckFastCMSDetector, *Loop::iteration, runOptions);
+    }
+
+    /// Retrieve a container for CMS analyses ignoring efficiencies
+    void getCMSnoeffAnalysisContainer(HEPUtilsAnalysisContainer& result)
+    {
+      using namespace Pipes::getCMSnoeffAnalysisContainer;
+      getAnalysisContainer(result, "CMSnoeff", *Dep::HardScatteringSim, useBuckFastCMSnoeffDetector, *Loop::iteration, runOptions);
+    }
+
+    /// Retrieve a container for analyses ignoring detector effects entirely
+    void getIdentityAnalysisContainer(HEPUtilsAnalysisContainer& result)
+    {
+      using namespace Pipes::getIdentityAnalysisContainer;
+      getAnalysisContainer(result, "Identity", *Dep::HardScatteringSim, useBuckFastIdentityDetector, *Loop::iteration, runOptions);
+    }
+
+
+    // *** Analysis Accumulators ***
+
+    ///@todo These functions should not be referring to 'useBuckFastXXXXDetector' flags, as they should be independent of the package used to do detector simulation.
+
+    /// Run all ATLAS analyses
+    void runATLASAnalyses(AnalysisDataPointers& result)
+    {
+      using namespace Pipes::runATLASAnalyses;
+      runAnalyses(result, "ATLAS", *Dep::ATLASAnalysisContainer, *Dep::ATLASSmearedEvent, *Dep::MC_ConvergenceSettings,
+                  useBuckFastATLASDetector, *Loop::iteration, Loop::wrapup);
+    }
+
+    /// Run all ATLAS analyses ignoring efficiencies
+    void runATLASnoeffAnalyses(AnalysisDataPointers& result)
+    {
+      using namespace Pipes::runATLASnoeffAnalyses;
+      runAnalyses(result, "ATLASnoeff", *Dep::ATLASnoeffAnalysisContainer, *Dep::ATLASnoeffSmearedEvent, *Dep::MC_ConvergenceSettings,
+                  useBuckFastATLASnoeffDetector, *Loop::iteration, Loop::wrapup);
+    }
+
+    /// Run all CMS analyses
+    void runCMSAnalyses(AnalysisDataPointers& result)
+    {
+      using namespace Pipes::runCMSAnalyses;
+      runAnalyses(result, "CMS", *Dep::CMSAnalysisContainer, *Dep::CMSSmearedEvent, *Dep::MC_ConvergenceSettings,
+                  useBuckFastCMSDetector, *Loop::iteration, Loop::wrapup);
+    }
+
+    /// Run all CMS analyses ignoring efficiencies
+    void runCMSnoeffAnalyses(AnalysisDataPointers& result)
+    {
+      using namespace Pipes::runCMSnoeffAnalyses;
+      runAnalyses(result, "CMSnoeff", *Dep::CMSnoeffAnalysisContainer, *Dep::CMSnoeffSmearedEvent, *Dep::MC_ConvergenceSettings,
+                  useBuckFastCMSnoeffDetector, *Loop::iteration, Loop::wrapup);
+    }
+
+    /// Run all analyses totally ignoring detector effects
+    void runIdentityAnalyses(AnalysisDataPointers& result)
+    {
+      using namespace Pipes::runIdentityAnalyses;
+      runAnalyses(result, "Identity", *Dep::IdentityAnalysisContainer, *Dep::IdentitySmearedEvent, *Dep::MC_ConvergenceSettings,
+                  useBuckFastIdentityDetector, *Loop::iteration, Loop::wrapup);
+    }
+
 
   }
 }

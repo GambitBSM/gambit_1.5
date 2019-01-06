@@ -4,7 +4,8 @@
 ///
 ///  Useful ColliderBit specific macros.
 ///
-///  @todo Wouldn't the analysis ones be better in the single .cpp file where they're used?
+///  @todo Wouldn't the analysis ones be better in
+///  the single .cpp file where they're used?
 ///
 ///  *********************************************
 ///
