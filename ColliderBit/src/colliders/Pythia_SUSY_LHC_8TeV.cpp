@@ -2,7 +2,7 @@
 //   *********************************************
 ///  \file
 ///
-///  A SpecializablePythia init function for a basic
+///  A ColliderPythia init function for a basic
 ///  SUSY @ 8TeV LHC scenario. Note that additional
 ///  Pythia settings may still be applied externally
 ///  via yaml file input.
@@ -18,7 +18,7 @@
 ///  *********************************************
 
 
-#include "gambit/ColliderBit/colliders/SpecializablePythia.hpp"
+#include "gambit/ColliderBit/colliders/ColliderPythia.hpp"
 
 
 namespace Gambit
@@ -30,7 +30,7 @@ namespace Gambit
     namespace Pythia_SUSY_LHC_8TeV
     {
 
-      void init(SpecializablePythia<Pythia_default::Pythia8::Pythia, Pythia_default::Pythia8::Event> * specializeMe)
+      void init(ColliderPythia<Pythia_default::Pythia8::Pythia, Pythia_default::Pythia8::Event> * specializeMe)
       {
         specializeMe->addToSettings("Beams:eCM = 8000");
         specializeMe->addToSettings("Main:timesAllowErrors = 1000");

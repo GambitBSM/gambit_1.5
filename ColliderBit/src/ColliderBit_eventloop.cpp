@@ -24,6 +24,7 @@
 ///          (p.scott@imperial.ac.uk)
 ///  \date 2015 Jul
 ///  \date 2018 Jan
+///  \date 2019 Jan
 ///
 ///  \author Anders Kvellestad
 ///          (anders.kvellestad@fys.uio.no)
@@ -43,6 +44,7 @@
 #include <vector>
 
 #include "gambit/Elements/gambit_module_headers.hpp"
+#include "gambit/ColliderBit/ColliderBit_eventloop.hpp"
 #include "gambit/ColliderBit/MC_convergence.hpp"
 #include "gambit/ColliderBit/ColliderBit_rollcall.hpp"
 #include "gambit/ColliderBit/analyses/BaseAnalysis.hpp"
@@ -366,341 +368,89 @@ namespace Gambit
 
     // *** Hard Scattering Collider Simulators ***
 
-    void getPythia(SpecializablePythia &result)
+    // Regular Pythia version
+    void getPythia(ColliderPythia_defaultversion &result)
     {
       using namespace Pipes::getPythia;
-
-      static str pythia_doc_path;
-      static str default_doc_path;
-      static bool pythia_doc_path_needs_setting = true;
-      static std::vector<str> pythiaCommonOptions;
-      static SLHAstruct slha;
-      static SLHAstruct spectrum;
-      static std::vector<double> xsec_vetos;
-
-      if (*Loop::iteration == BASE_INIT)
-      {
-        // Setup the Pythia documentation path
-        if (pythia_doc_path_needs_setting)
-        {
-          default_doc_path = GAMBIT_DIR "/Backends/installed/Pythia/" +
-            Backends::backendInfo().default_version("Pythia") +
-            "/share/Pythia8/xmldoc/";
-          pythia_doc_path = runOptions->getValueOrDef<str>(default_doc_path, "Pythia_doc_path");
-          // Print the Pythia banner once.
-          result.banner(pythia_doc_path);
-          pythia_doc_path_needs_setting = false;
-        }
-
-        // SLHAea object constructed from dependencies on the spectrum and decays.
-        slha.clear();
-        spectrum.clear();
-        slha = Dep::decay_rates->getSLHAea(2);
-        if (ModelInUse("MSSM63atQ") or ModelInUse("MSSM63atMGUT"))
-        {
-          // MSSM-specific.  SLHAea in SLHA2 format, please.
-          spectrum = Dep::MSSM_spectrum->getSLHAea(2);
-          SLHAea::Block block("MODSEL");
-          block.push_back("BLOCK MODSEL              # Model selection");
-          SLHAea::Line line;
-          line << 1 << 0 << "# General MSSM";
-          block.push_back(line);
-          slha.insert(slha.begin(), spectrum.begin(), spectrum.end());
-          slha.push_front(block);
-        }
-        else
-        {
-          ColliderBit_error().raise(LOCAL_INFO, "No spectrum object available for this model.");
-        }
-
-        // Read xsec veto values and store in static variable 'xsec_vetos'
-        std::vector<double> default_xsec_vetos(pythiaNames.size(), 0.0);
-        xsec_vetos = runOptions->getValueOrDef<std::vector<double> >(default_xsec_vetos, "xsec_vetos");
-        CHECK_EQUAL_VECTOR_LENGTH(xsec_vetos, pythiaNames)
-      }
-
-      else if (*Loop::iteration == COLLIDER_INIT)
-      {
-        // Collect Pythia options that are common across all OMP threads
-        pythiaCommonOptions.clear();
-
-        // By default we tell Pythia to be quiet. (Can be overridden from yaml settings)
-        pythiaCommonOptions.push_back("Print:quiet = on");
-        pythiaCommonOptions.push_back("SLHA:verbose = 0");
-
-        // Get options from yaml file. If the SpecializablePythia specialization is hard-coded, okay with no options.
-        if (runOptions->hasKey(*iterPythiaNames))
-        {
-          std::vector<str> addPythiaOptions = runOptions->getValue<std::vector<str>>(*iterPythiaNames);
-          pythiaCommonOptions.insert(pythiaCommonOptions.end(), addPythiaOptions.begin(), addPythiaOptions.end());
-        }
-
-        // We need showProcesses for the xsec veto.
-        pythiaCommonOptions.push_back("Init:showProcesses = on");
-
-        // We need "SLHA:file = slhaea" for the SLHAea interface.
-        pythiaCommonOptions.push_back("SLHA:file = slhaea");
-      }
-
-      else if (*Loop::iteration == START_SUBPROCESS)
-      {
-        // Variables needed for the xsec veto
-        std::stringstream processLevelOutput;
-        str _junk, readline;
-        int code, nxsec;
-        double xsec, totalxsec;
-
-        // Each thread needs an independent Pythia instance at the start
-        // of each event generation loop.
-        // Thus, the actual Pythia initialization is
-        // *after* COLLIDER_INIT, within omp parallel.
-
-        result.clear();
-
-        // Get the Pythia options that are common across all OMP threads ('pythiaCommonOptions')
-        // and then add the thread-specific seed
-        std::vector<str> pythiaOptions = pythiaCommonOptions;
-        pythiaOptions.push_back("Random:seed = " + std::to_string(seedBase + omp_get_thread_num()));
-
-        #ifdef COLLIDERBIT_DEBUG
-        cout << debug_prefix() << "getPythia: My Pythia seed is: " << std::to_string(seedBase + omp_get_thread_num()) << endl;
-        #endif
-
-        result.resetSpecialization(*iterPythiaNames);
-
-        try
-        {
-          result.init(pythia_doc_path, pythiaOptions, &slha, processLevelOutput);
-        }
-        catch (SpecializablePythia::InitializationError &e)
-        {
-          // Append new seed to override the previous one
-          int newSeedBase = int(Random::draw() * 899990000.);
-          pythiaOptions.push_back("Random:seed = " + std::to_string(newSeedBase));
-          try
-          {
-            result.init(pythia_doc_path, pythiaOptions, &slha, processLevelOutput);
-          }
-          catch (SpecializablePythia::InitializationError &e)
-          {
-            #ifdef COLLIDERBIT_DEBUG
-            cout << debug_prefix() << "SpecializablePythia::InitializationError caught in getPythia. Will discard this point." << endl;
-            #endif
-            piped_invalid_point.request("Bad point: Pythia can't initialize");
-            Loop::wrapup();
-            return;
-          }
-        }
-
-        // Should we apply the xsec veto and skip event generation?
-
-        // - Get the xsec veto value for the current collider
-        double totalxsec_fb_veto = xsec_vetos[indexPythiaNames];
-
-        // - Get the upper limt xsec as estimated by Pythia
-        code = -1;
-        nxsec = 0;
-        totalxsec = 0.;
-        while(true)
-        {
-          std::getline(processLevelOutput, readline);
-          std::istringstream issPtr(readline);
-          issPtr.seekg(47, issPtr.beg);
-          issPtr >> code;
-          if (!issPtr.good() && nxsec > 0) break;
-          issPtr >> _junk >> xsec;
-          if (issPtr.good())
-          {
-            totalxsec += xsec;
-            nxsec++;
-          }
-        }
-
-        #ifdef COLLIDERBIT_DEBUG
-        cout << debug_prefix() << "totalxsec [fb] = " << totalxsec * 1e12 << ", veto limit [fb] = " << totalxsec_fb_veto << endl;
-        #endif
-
-        // - Check for NaN xsed
-        if (Utils::isnan(totalxsec))
-        {
-          #ifdef COLLIDERBIT_DEBUG
-          cout << debug_prefix() << "Got NaN cross-section estimate from Pythia." << endl;
-          #endif
-          piped_invalid_point.request("Got NaN cross-section estimate from Pythia.");
-          Loop::wrapup();
-          return;
-        }
-
-        // - Wrap up loop if veto applies
-        if (totalxsec * 1e12 < totalxsec_fb_veto)
-        {
-          #ifdef COLLIDERBIT_DEBUG
-          cout << debug_prefix() << "Cross-section veto applies. Will now call Loop::wrapup() to skip event generation for this collider." << endl;
-          #endif
-          Loop::wrapup();
-        }
-      }
+      getPythia_template<Pythia_default::Pythia8::Pythia, Pythia_default::Pythia8::Event>
+       (result, *Dep::MSSM_spectrum, *Dep::decay_table, *Loop::iteration, Loop::wrapup, *runOptions, ModelInUse);
     }
-
-
-
-    void getPythiaFileReader(SpecializablePythia &result)
+    void getPythiaFileReader(ColliderPythia_defaultversion &result)
     {
       using namespace Pipes::getPythiaFileReader;
+      getPythiaFileReader_template<Pythia_default::Pythia8::Pythia, Pythia_default::Pythia8::Event>
+       (result, *Loop::iteration, Loop::wrapup);
+    }
+    void getPythiaAsBaseCollider(BaseCollider*& result) { result = &(*Dep::HardScatteringSim); }
 
-      static std::vector<str> filenames;
-      static str default_doc_path;
-      static str pythia_doc_path;
-      static std::vector<str> pythiaCommonOptions;
-      static bool pythia_doc_path_needs_setting = true;
-      static unsigned int fileCounter = 0;
-      static std::vector<double> xsec_vetos;
+    // EM Pythia version
+    void getPythia_EM(ColliderPythia_EM_defaultversion &result)
+    {
+      using namespace Pipes::getPythia_EM;
+      getPythia_template<Pythia_EM_default::Pythia8::Pythia, Pythia_EM_default::Pythia8::Event>
+       (result, *Dep::MSSM_spectrum, *Dep::decay_table, *Loop::iteration, Loop::wrapup, *runOptions, ModelInUse);
+    }
+    void getPythiaFileReader_EM(ColliderPythia_EM_defaultversion &result)
+    {
+      using namespace Pipes::getPythiaFileReader_EM;
+      getPythiaFileReader_template<Pythia_EM_default::Pythia8::Pythia, Pythia_EM_default::Pythia8::Event>
+       (result, *Loop::iteration, Loop::wrapup);
+    }
+    void getPythiaAsBaseCollider_EM(BaseCollider*& result) { result = &(*Dep::HardScatteringSim); }
 
-      if (*Loop::iteration == BASE_INIT)
-      {
-        // Setup the Pythia documentation path
-        if (pythia_doc_path_needs_setting)
-        {
-          default_doc_path = GAMBIT_DIR "/Backends/installed/Pythia/" +
-            Backends::backendInfo().default_version("Pythia") +
-            "/share/Pythia8/xmldoc/";
-          pythia_doc_path = runOptions->getValueOrDef<str>(default_doc_path, "Pythia_doc_path");
-          // Print the Pythia banner once.
-          result.banner(pythia_doc_path);
-          pythia_doc_path_needs_setting = false;
-        }
 
-        // Get SLHA file(s)
-        filenames = runOptions->getValue<std::vector<str> >("SLHA_filenames");
-        if (filenames.empty())
-        {
-          str errmsg = "No SLHA files are listed for ColliderBit function getPythiaFileReader.\n";
-          errmsg    += "Please correct the option 'SLHA_filenames' or use getPythia instead.";
-          ColliderBit_error().raise(LOCAL_INFO, errmsg);
-        }
 
-        if (filenames.size() <= fileCounter) invalid_point().raise("No more SLHA files. My work is done.");
+    // *** Hard Scattering Event Generators ***
 
-        // Read xsec veto values and store in static variable 'xsec_vetos'
-        std::vector<double> default_xsec_vetos(pythiaNames.size(), 0.0);
-        xsec_vetos = runOptions->getValueOrDef<std::vector<double> >(default_xsec_vetos, "xsec_vetos");
-        CHECK_EQUAL_VECTOR_LENGTH(xsec_vetos, pythiaNames)
-      }
+    // Regular Pythia version
+    void generatePythia8Event(Pythia_default::Pythia8::Event& result)
+    {
+      using namespace Pipes::generatePythia8Event;
+      generatePythia8Event_template<Pythia_default::Pythia8::Pythia, Pythia_default::Pythia8::Event>
+       (result, *Dep::HardScatteringSim, *Loop::iteration, Loop::wrapup);
+    }
 
-      if (*Loop::iteration == COLLIDER_INIT)
-      {
-        // Collect Pythia options that are common across all OMP threads
-        pythiaCommonOptions.clear();
+    // EM Pythia version
+    void generatePythia8Event_EM(Pythia_EM_default::Pythia8::Event& result)
+    {
+      using namespace Pipes::generatePythia8Event_EM;
+      generatePythia8Event_template<Pythia_EM_default::Pythia8::Pythia, Pythia_EM_default::Pythia8::Event>
+       (result, *Dep::HardScatteringSim, *Loop::iteration, Loop::wrapup);
+    }
 
-        // By default we tell Pythia to be quiet. (Can be overridden from yaml settings)
-        pythiaCommonOptions.push_back("Print:quiet = on");
-        pythiaCommonOptions.push_back("SLHA:verbose = 0");
 
-        // Get options from yaml file. If the SpecializablePythia specialization is hard-coded, okay with no options.
-        if (runOptions->hasKey(*iterPythiaNames))
-        {
-          std::vector<str> addPythiaOptions = runOptions->getValue<std::vector<str>>(*iterPythiaNames);
-          pythiaCommonOptions.insert(pythiaCommonOptions.end(), addPythiaOptions.begin(), addPythiaOptions.end());
-        }
 
-        // We need showProcesses for the xsec veto.
-        pythiaCommonOptions.push_back("Init:showProcesses = on");
+    // *** Standard Event Format Functions ***
 
-        // We need to control "SLHA:file" for the SLHA interface.
-        pythiaCommonOptions.push_back("SLHA:file = " + filenames.at(fileCounter));
-      }
-
-      if (*Loop::iteration == START_SUBPROCESS)
-      {
-        // variables for xsec veto
-        std::stringstream processLevelOutput;
-        str _junk, readline;
-        int code, nxsec;
-        double xsec, totalxsec;
-
-        // Each thread needs an independent Pythia instance at the start
-        // of each event generation loop.
-        // Thus, the actual Pythia initialization is
-        // *after* COLLIDER_INIT, within omp parallel.
-
-        result.clear();
-
-        if (omp_get_thread_num() == 0) logger() << "Reading SLHA file: " << filenames.at(fileCounter) << EOM;
-
-        // Get the Pythia options that are common across all OMP threads ('pythiaCommonOptions')
-        // and then add the thread-specific seed
-        std::vector<str> pythiaOptions = pythiaCommonOptions;
-        pythiaOptions.push_back("Random:seed = " + std::to_string(seedBase + omp_get_thread_num()));
-
-        #ifdef COLLIDERBIT_DEBUG
-        cout << debug_prefix() << "getPythiaFileReader: My Pythia seed is: " << std::to_string(seedBase + omp_get_thread_num()) << endl;
-        #endif
-
-        result.resetSpecialization(*iterPythiaNames);
-
-        try
-        {
-          result.init(pythia_doc_path, pythiaOptions, processLevelOutput);
-        }
-        catch (SpecializablePythia::InitializationError &e)
-        {
-          // Append new seed to override the previous one
-          int newSeedBase = int(Random::draw() * 899990000.);
-          pythiaOptions.push_back("Random:seed = " + std::to_string(newSeedBase));
-          try
-          {
-            result.init(pythia_doc_path, pythiaOptions, processLevelOutput);
-          }
-          catch (SpecializablePythia::InitializationError &e)
-          {
-            piped_invalid_point.request("Bad point: Pythia can't initialize");
-            Loop::wrapup();
-            return;
-          }
-        }
-
-        // Should we apply the xsec veto and skip event generation?
-
-        // - Get the xsec veto value for the current collider
-        double totalxsec_fb_veto = xsec_vetos[indexPythiaNames];
-
-        // - Get the upper limt xsec as estimated by Pythia
-        code = -1;
-        nxsec = 0;
-        totalxsec = 0.;
-        while(true)
-        {
-          std::getline(processLevelOutput, readline);
-          std::istringstream issPtr(readline);
-          issPtr.seekg(47, issPtr.beg);
-          issPtr >> code;
-          if (!issPtr.good() && nxsec > 0) break;
-          issPtr >> _junk >> xsec;
-          if (issPtr.good())
-          {
-            totalxsec += xsec;
-            nxsec++;
-          }
-        }
-
-        #ifdef COLLIDERBIT_DEBUG
-        cout << debug_prefix() << "totalxsec [fb] = " << totalxsec * 1e12 << ", veto limit [fb] = " << totalxsec_fb_veto << endl;
-        #endif
-
-        // - Wrap up loop if veto applies
-        if (totalxsec * 1e12 < totalxsec_fb_veto)
-        {
-          #ifdef COLLIDERBIT_DEBUG
-          cout << debug_prefix() << "Cross-section veto applies. Will now call Loop::wrapup() to skip event generation for this collider." << endl;
-          #endif
-          Loop::wrapup();
-        }
-
-      }
-
-      if (*Loop::iteration == BASE_FINALIZE) fileCounter++;
+    void smearEventATLAS(HEPUtils::Event& result)
+    {
 
     }
+
+
+    void smearEventATLASnoeff(HEPUtils::Event& result)
+    {
+
+    }
+
+
+    void smearEventCMS(HEPUtils::Event& result)
+    {
+
+    }
+
+
+    void smearEventCMSnoeff(HEPUtils::Event& result)
+    {
+
+    }
+
+
+    void copyEvent(HEPUtils::Event& result)
+    {
+
+    }
+
 
 
     // *** Detector Simulators ***
@@ -887,7 +637,7 @@ namespace Gambit
     }
 
 
-    void getBuckFastIdentity(Gambit::ColliderBit::BuckFastIdentity &result)
+    void getBuckFastIdentity(BuckFastIdentity &result)
     {
       using namespace Pipes::getBuckFastIdentity;
       static std::vector<bool> useDetector;
@@ -1013,8 +763,8 @@ namespace Gambit
 
       if (*Loop::iteration == END_SUBPROCESS && eventsGenerated && nFailedEvents <= maxFailedEvents)
       {
-        const double xs_fb = Dep::HardScatteringSim->xsec_pb() * 1000.;
-        const double xserr_fb = Dep::HardScatteringSim->xsecErr_pb() * 1000.;
+        const double xs_fb = (*Dep::HardScatteringSim)->xsec_pb() * 1000.;
+        const double xserr_fb = (*Dep::HardScatteringSim)->xsecErr_pb() * 1000.;
         result.add_xsec(xs_fb, xserr_fb);
 
         #ifdef COLLIDERBIT_DEBUG
@@ -1032,7 +782,6 @@ namespace Gambit
       }
 
     }
-
 
 
     void getATLASnoeffAnalysisContainer(HEPUtilsAnalysisContainer& result)
@@ -1115,8 +864,8 @@ namespace Gambit
 
       if (*Loop::iteration == END_SUBPROCESS && eventsGenerated && nFailedEvents <= maxFailedEvents)
       {
-        const double xs_fb = Dep::HardScatteringSim->xsec_pb() * 1000.;
-        const double xserr_fb = Dep::HardScatteringSim->xsecErr_pb() * 1000.;
+        const double xs_fb = (*Dep::HardScatteringSim)->xsec_pb() * 1000.;
+        const double xserr_fb = (*Dep::HardScatteringSim)->xsecErr_pb() * 1000.;
         result.add_xsec(xs_fb, xserr_fb);
 
         #ifdef COLLIDERBIT_DEBUG
@@ -1134,7 +883,6 @@ namespace Gambit
       }
 
     }
-
 
 
     void getCMSAnalysisContainer(HEPUtilsAnalysisContainer& result)
@@ -1217,8 +965,8 @@ namespace Gambit
 
       if (*Loop::iteration == END_SUBPROCESS && eventsGenerated && nFailedEvents <= maxFailedEvents)
       {
-        const double xs_fb = Dep::HardScatteringSim->xsec_pb() * 1000.;
-        const double xserr_fb = Dep::HardScatteringSim->xsecErr_pb() * 1000.;
+        const double xs_fb = (*Dep::HardScatteringSim)->xsec_pb() * 1000.;
+        const double xserr_fb = (*Dep::HardScatteringSim)->xsecErr_pb() * 1000.;
         result.add_xsec(xs_fb, xserr_fb);
 
         #ifdef COLLIDERBIT_DEBUG
@@ -1318,8 +1066,8 @@ namespace Gambit
 
       if (*Loop::iteration == END_SUBPROCESS && eventsGenerated && nFailedEvents <= maxFailedEvents)
       {
-        const double xs_fb = Dep::HardScatteringSim->xsec_pb() * 1000.;
-        const double xserr_fb = Dep::HardScatteringSim->xsecErr_pb() * 1000.;
+        const double xs_fb = (*Dep::HardScatteringSim)->xsec_pb() * 1000.;
+        const double xserr_fb = (*Dep::HardScatteringSim)->xsecErr_pb() * 1000.;
         result.add_xsec(xs_fb, xserr_fb);
 
         #ifdef COLLIDERBIT_DEBUG
@@ -1420,8 +1168,8 @@ namespace Gambit
 
       if (*Loop::iteration == END_SUBPROCESS && eventsGenerated && nFailedEvents <= maxFailedEvents)
       {
-        const double xs_fb = Dep::HardScatteringSim->xsec_pb() * 1000.;
-        const double xserr_fb = Dep::HardScatteringSim->xsecErr_pb() * 1000.;
+        const double xs_fb = (*Dep::HardScatteringSim)->xsec_pb() * 1000.;
+        const double xserr_fb = (*Dep::HardScatteringSim)->xsecErr_pb() * 1000.;
         result.add_xsec(xs_fb, xserr_fb);
 
         #ifdef COLLIDERBIT_DEBUG
@@ -1438,211 +1186,6 @@ namespace Gambit
         return;
       }
 
-    }
-
-
-    // *** Hard Scattering Event Generators ***
-
-    void generatePythia8Event(Pythia8::Event& result)
-    {
-      using namespace Pipes::generatePythia8Event;
-
-      if (*Loop::iteration <= BASE_INIT) return;
-      result.clear();
-
-      while(nFailedEvents <= maxFailedEvents)
-      {
-        try
-        {
-          Dep::HardScatteringSim->nextEvent(result);
-          break;
-        }
-        catch (SpecializablePythia::EventGenerationError& e)
-        {
-          #ifdef COLLIDERBIT_DEBUG
-          cout << debug_prefix() << "SpecializablePythia::EventGenerationError caught in generatePythia8Event. Check the ColliderBit log for event details." << endl;
-          #endif
-          #pragma omp critical (pythia_event_failure)
-          {
-            // Update global counter
-            nFailedEvents += 1;
-            // Store Pythia event record in the logs
-            std::stringstream ss;
-            result.list(ss, 1);
-            logger() << LogTags::debug << "SpecializablePythia::EventGenerationError error caught in generatePythia8Event. Pythia record for event that failed:\n" << ss.str() << EOM;
-          }
-        }
-      }
-      // Wrap up event loop if too many events fail.
-      if(nFailedEvents > maxFailedEvents)
-      {
-        Loop::wrapup();
-        return;
-      }
-
-    }
-
-
-
-    // *** Standard Event Format Functions ***
-
-    void smearEventATLAS(HEPUtils::Event& result)
-    {
-      using namespace Pipes::smearEventATLAS;
-      if (*Loop::iteration <= BASE_INIT or !useBuckFastATLASDetector) return;
-      result.clear();
-
-      // Get the next event from Pythia8, convert to HEPUtils::Event, and smear it
-      try
-      {
-        (*Dep::SimpleSmearingSim).processEvent(*Dep::HardScatteringEvent, result);
-      }
-      catch (Gambit::exception& e)
-      {
-        #ifdef COLLIDERBIT_DEBUG
-        cout << debug_prefix() << "Gambit::exception caught during event conversion in smearEventATLAS. Check the ColliderBit log for details." << endl;
-        #endif
-        #pragma omp critical (event_conversion_error)
-        {
-          // Store Pythia event record in the logs
-          std::stringstream ss;
-          Dep::HardScatteringEvent->list(ss, 1);
-          logger() << LogTags::debug << "Gambit::exception error caught in smearEventATLAS. Pythia record for event that failed:\n" << ss.str() << EOM;
-        }
-        str errmsg = "Bad point: smearEventATLAS caught the following runtime error: ";
-        errmsg    += e.what();
-        piped_invalid_point.request(errmsg);
-        Loop::wrapup();
-        return;
-      }
-    }
-
-
-    void smearEventATLASnoeff(HEPUtils::Event& result)
-    {
-      using namespace Pipes::smearEventATLASnoeff;
-      if (*Loop::iteration <= BASE_INIT or !useBuckFastATLASnoeffDetector) return;
-      result.clear();
-
-      // Get the next event from Pythia8, convert to HEPUtils::Event, and smear it
-      try
-      {
-        (*Dep::SimpleSmearingSim).processEvent(*Dep::HardScatteringEvent, result);
-      }
-      catch (Gambit::exception& e)
-      {
-        #ifdef COLLIDERBIT_DEBUG
-        cout << debug_prefix() << "Gambit::exception caught during event conversion in smearEventATLASnoeff. Check the ColliderBit log for details." << endl;
-        #endif
-        #pragma omp critical (event_conversion_error)
-        {
-          // Store Pythia event record in the logs
-          std::stringstream ss;
-          Dep::HardScatteringEvent->list(ss, 1);
-          logger() << LogTags::debug << "Gambit::exception error caught in smearEventATLASnoeff. Pythia record for event that failed:\n" << ss.str() << EOM;
-        }
-        str errmsg = "Bad point: smearEventATLASnoeff caught the following runtime error: ";
-        errmsg    += e.what();
-        piped_invalid_point.request(errmsg);
-        Loop::wrapup();
-        return;
-      }
-    }
-
-
-    void smearEventCMS(HEPUtils::Event& result)
-    {
-      using namespace Pipes::smearEventCMS;
-      if (*Loop::iteration <= BASE_INIT or !useBuckFastCMSDetector) return;
-      result.clear();
-
-      // Get the next event from Pythia8, convert to HEPUtils::Event, and smear it
-      try
-      {
-        (*Dep::SimpleSmearingSim).processEvent(*Dep::HardScatteringEvent, result);
-      }
-      catch (Gambit::exception& e)
-      {
-        #ifdef COLLIDERBIT_DEBUG
-        cout << debug_prefix() << "Gambit::exception caught during event conversion in smearEventCMS. Check the ColliderBit log for details." << endl;
-        #endif
-        #pragma omp critical (event_conversion_error)
-        {
-          // Store Pythia event record in the logs
-          std::stringstream ss;
-          Dep::HardScatteringEvent->list(ss, 1);
-          logger() << LogTags::debug << "Gambit::exception error caught in smearEventCMS. Pythia record for event that failed:\n" << ss.str() << EOM;
-        }
-        str errmsg = "Bad point: smearEventCMS caught the following runtime error: ";
-        errmsg    += e.what();
-        piped_invalid_point.request(errmsg);
-        Loop::wrapup();
-        return;
-      }
-    }
-
-
-    void smearEventCMSnoeff(HEPUtils::Event& result)
-    {
-      using namespace Pipes::smearEventCMSnoeff;
-      if (*Loop::iteration <= BASE_INIT or !useBuckFastCMSnoeffDetector) return;
-      result.clear();
-
-      // Get the next event from Pythia8, convert to HEPUtils::Event, and smear it
-      try
-      {
-        (*Dep::SimpleSmearingSim).processEvent(*Dep::HardScatteringEvent, result);
-      }
-      catch (Gambit::exception& e)
-      {
-        #ifdef COLLIDERBIT_DEBUG
-        cout << debug_prefix() << "Gambit::exception caught during event conversion in smearEventCMSnoeff. Check the ColliderBit log for details." << endl;
-        #endif
-        #pragma omp critical (event_conversion_error)
-        {
-          // Store Pythia event record in the logs
-          std::stringstream ss;
-          Dep::HardScatteringEvent->list(ss, 1);
-          logger() << LogTags::debug << "Gambit::exception error caught in smearEventCMSnoeff. Pythia record for event that failed:\n" << ss.str() << EOM;
-        }
-        str errmsg = "Bad point: smearEventCMSnoeff caught the following runtime error: ";
-        errmsg    += e.what();
-        piped_invalid_point.request(errmsg);
-        Loop::wrapup();
-        return;
-      }
-    }
-
-
-    void copyEvent(HEPUtils::Event& result)
-    {
-      using namespace Pipes::copyEvent;
-      if (*Loop::iteration <= BASE_INIT or !useBuckFastIdentityDetector) return;
-      result.clear();
-
-      // Get the next event from Pythia8 and convert to HEPUtils::Event
-      try
-      {
-        (*Dep::SimpleSmearingSim).processEvent(*Dep::HardScatteringEvent, result);
-      }
-      catch (Gambit::exception& e)
-      {
-        #ifdef COLLIDERBIT_DEBUG
-        cout << debug_prefix() << "Gambit::exception caught during event conversion in copyEvent. Check the ColliderBit log for details." << endl;
-        #endif
-        #pragma omp critical (event_conversion_error)
-        {
-          // Store Pythia event record in the logs
-          std::stringstream ss;
-          Dep::HardScatteringEvent->list(ss, 1);
-          logger() << LogTags::debug << "Gambit::exception error caught in copyEvent. Pythia record for event that failed:\n" << ss.str() << EOM;
-        }
-        str errmsg = "Bad point: copyEvent caught the following runtime error: ";
-        errmsg    += e.what();
-        piped_invalid_point.request(errmsg);
-        Loop::wrapup();
-        return;
-      }
     }
 
 
@@ -2359,7 +1902,7 @@ namespace Gambit
           long double lsum_sb_prev = 0;
 
           std::normal_distribution<double> unitnormdbn(0,1);
- 
+
           // Check absolute difference between independent estimates
           /// @todo Should also implement a check of relative difference
           while ((diff_abs > CONVERGENCE_TOLERANCE_ABS && diff_rel > CONVERGENCE_TOLERANCE_REL) || 1.0/sqrt(NSAMPLE) > CONVERGENCE_TOLERANCE_ABS)

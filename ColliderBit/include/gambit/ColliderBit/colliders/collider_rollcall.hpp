@@ -18,9 +18,9 @@
 
 #pragma once
 
-// Forward declare the SpecializablePythia template; we don't care about its implementations at this stage.
+// Forward declare the ColliderPythia template; we don't care about its implementations at this stage.
 template<T1, T2>
-class SpecializablePythia;
+class ColliderPythia;
 
 #define DECLARE_COLLIDER(NS, TYPE) namespace NS { void init(TYPE*); }
 
@@ -30,10 +30,10 @@ namespace Gambit
   namespace ColliderBit
   {
 
-    DECLARE_COLLIDER(Pythia_external,       SpecializablePythia<Pythia_EM_default::Pythia8::Pythia, Pythia_EM_default::Pythia8::Event>)
-    DECLARE_COLLIDER(Pythia_SUSY_LHC_8TeV,  SpecializablePythia<Pythia_default::Pythia8::Pythia, Pythia_default::Pythia8::Event>)
-    DECLARE_COLLIDER(Pythia_glusq_LHC_8TeV, SpecializablePythia<Pythia_default::Pythia8::Pythia, Pythia_default::Pythia8::Event>)
-    DECLARE_COLLIDER(Pythia_SUSY_LHC_13TeV, SpecializablePythia<Pythia_default::Pythia8::Pythia, Pythia_default::Pythia8::Event>)
+    DECLARE_COLLIDER(Pythia_external,       ColliderPythia<Pythia_EM_default::Pythia8::Pythia, Pythia_EM_default::Pythia8::Event>)
+    DECLARE_COLLIDER(Pythia_SUSY_LHC_8TeV,  ColliderPythia<Pythia_default::Pythia8::Pythia, Pythia_default::Pythia8::Event>)
+    DECLARE_COLLIDER(Pythia_glusq_LHC_8TeV, ColliderPythia<Pythia_default::Pythia8::Pythia, Pythia_default::Pythia8::Event>)
+    DECLARE_COLLIDER(Pythia_SUSY_LHC_13TeV, ColliderPythia<Pythia_default::Pythia8::Pythia, Pythia_default::Pythia8::Event>)
 
   }
 }

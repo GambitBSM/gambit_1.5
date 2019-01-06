@@ -2,7 +2,7 @@
 //   *********************************************
 ///  \file
 ///
-///  The SpecializablePythia class.
+///  The ColliderPythia class.
 ///
 ///  *********************************************
 ///
@@ -10,6 +10,9 @@
 ///
 ///  \author Abram Krislock
 ///  \date July 2016
+///
+///  \author Pat Scott
+///  \date Jan 2019
 ///
 ///  *********************************************
 
@@ -19,17 +22,18 @@
 #include <stdexcept>
 #include "gambit/ColliderBit/colliders/BaseCollider.hpp"
 #include "gambit/ColliderBit/ColliderBit_macros.hpp"
-#include "gambit/ColliderBit/colliders/collider_rollcall.hpp")
+#include "gambit/ColliderBit/colliders/collider_rollcall.hpp"
 #include "SLHAea/slhaea.h"
 
 namespace Gambit
 {
+
   namespace ColliderBit
   {
 
     /// A specializable, recyclable class interfacing ColliderBit and Pythia.
-    template <typename PythiaT , typename EventT>
-    class SpecializablePythia<PythiaT, EventT> : public BaseCollider<EventT>
+    template <typename PythiaT, typename EventT>
+    class ColliderPythia<PythiaT, EventT> : public BaseCollider
     {
 
       protected:
@@ -37,7 +41,7 @@ namespace Gambit
         PythiaT* _pythiaInstance;
         PythiaT* _pythiaBase;
         std::vector<std::string> _pythiaSettings;
-        void (*_specialInit)(SpecializablePythia<PythiaT, EventT>*);
+        void (*_specialInit)(ColliderPythia<PythiaT, EventT>*);
 
 
       public:
@@ -72,9 +76,9 @@ namespace Gambit
         /// @name Construction, Destruction, and Recycling:
         ///@{
 
-        SpecializablePythia() : _pythiaInstance(nullptr), _pythiaBase(nullptr) {}
+        ColliderPythia() : _pythiaInstance(nullptr), _pythiaBase(nullptr) {}
 
-        ~SpecializablePythia()
+        ~ColliderPythia()
         {
           _pythiaSettings.clear();
           if (_pythiaInstance) delete _pythiaInstance;
@@ -200,6 +204,7 @@ namespace Gambit
         void resetSpecialization(const std::string&)
         {
           clear();
+          #define IF_X_SPECIALIZEX(X) if (specName == #X) { _specialInit = X::init; return; }
           IF_X_SPECIALIZEX(Pythia_external)
           IF_X_SPECIALIZEX(Pythia_SUSY_LHC_8TeV)
           IF_X_SPECIALIZEX(Pythia_glusq_LHC_8TeV)
@@ -207,7 +212,7 @@ namespace Gambit
           // default to a Pythia instance configured entirely by external (yaml) settings:
           _specialInit = Pythia_external::init;
           std::cout<<"\n\n\n"
-                   <<"COLLIDERBIT WARNING: Pythia named "<<specName<<" is not coded in SpecializablePythia."
+                   <<"COLLIDERBIT WARNING: Pythia named "<<specName<<" is not coded in ColliderPythia."
                    <<"                     Now trying to configure Pythia entirely by yaml input..."
                    <<"\n\n\n";
         }
@@ -219,7 +224,7 @@ namespace Gambit
         ///@{
 
         /// Event generation for any Pythia interface to Gambit.
-        void nextEvent(EventType& event) const
+        void nextEvent(EventT& event) const
         {
           // Try to make and populate an event
           bool accepted_event = _pythiaInstance->next();

@@ -2,7 +2,7 @@
 //   *********************************************
 ///  \file
 ///
-///  A SpecializablePythia init function for
+///  A ColliderPythia init function for
 ///  gluino-squark production @ 8TeV LHC scenario.
 ///  This "inherits" Pythia_SUSY_LHC_8TeV by
 ///  explicitly calling its init before changing
@@ -21,7 +21,7 @@
 ///  *********************************************
 
 
-#include "gambit/ColliderBit/colliders/SpecializablePythia.hpp"
+#include "gambit/ColliderBit/colliders/ColliderPythia.hpp"
 
 namespace Gambit
 {
@@ -32,7 +32,7 @@ namespace Gambit
     namespace Pythia_glusq_LHC_8TeV
     {
 
-      void init(SpecializablePythia<Pythia_default::Pythia8::Pythia, Pythia_default::Pythia8::Event>* specializeMe)
+      void init(ColliderPythia<Pythia_default::Pythia8::Pythia, Pythia_default::Pythia8::Event>* specializeMe)
       {
         Pythia_SUSY_LHC_8TeV::init(specializeMe);
         specializeMe->addToSettings("SUSY:idA = 1000021");

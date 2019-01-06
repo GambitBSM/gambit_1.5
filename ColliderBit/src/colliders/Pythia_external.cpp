@@ -16,7 +16,7 @@
 ///  *********************************************
 
 
-#include "gambit/ColliderBit/colliders/SpecializablePythia.hpp"
+#include "gambit/ColliderBit/colliders/ColliderPythia.hpp"
 
 namespace Gambit
 {
@@ -26,7 +26,7 @@ namespace Gambit
 
     namespace Pythia_external
     {
-      void init(SpecializablePythia<Pythia_EM_default::Pythia8::Pythia, Pythia_EM_default::Pythia8::Event>*) {}
+      void init(ColliderPythia<Pythia_EM_default::Pythia8::Pythia, Pythia_EM_default::Pythia8::Event>*) {}
     }
 
   }

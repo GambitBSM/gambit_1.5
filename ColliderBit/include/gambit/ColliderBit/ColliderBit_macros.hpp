@@ -34,10 +34,6 @@
 #define IF_X_RTN_TRUE(A)                                                   \
   if (name == #A) return true;
 
-/// For the string based SpecializablePythia function resetSpecialization()
-#define IF_X_SPECIALIZEX(X)                                                \
-  if (specName == #X) { _specialInit = X::init; return; }
-
 /// Raise (local) exception if two vectors are not of equal length
 #define CHECK_EQUAL_VECTOR_LENGTH(VEC1, VEC2)                              \
 if (VEC1.size() != VEC2.size())                                            \
