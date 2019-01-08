@@ -33,7 +33,7 @@ namespace Gambit
 
     /// A specializable, recyclable class interfacing ColliderBit and Pythia.
     template <typename PythiaT, typename EventT>
-    class ColliderPythia<PythiaT, EventT> : public BaseCollider
+    class ColliderPythia : public BaseCollider
     {
 
       protected:
@@ -123,7 +123,7 @@ namespace Gambit
         /// @note This override is most commonly used in ColliderBit.
         void init(const std::string pythiaDocPath,
                   const std::vector<std::string>& externalSettings,
-                  const SLHAea::Coll* slhaea=nullptr, std::ostream& os=std::cout);
+                  const SLHAea::Coll* slhaea=nullptr, std::ostream& os=std::cout)
         {
           // Settings acquired externally (ex from a gambit yaml file)
           for(const auto command : externalSettings) _pythiaSettings.push_back(command);
@@ -201,7 +201,7 @@ namespace Gambit
         }
 
         /// Specialize this Pythia interface to Gambit with a specialization function.
-        void resetSpecialization(const std::string&)
+        void resetSpecialization(const std::string& specName)
         {
           clear();
           #define IF_X_SPECIALIZEX(X) if (specName == #X) { _specialInit = X::init; return; }

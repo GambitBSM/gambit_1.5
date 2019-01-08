@@ -87,7 +87,7 @@
                                                                                       \
       }                                                                               \
                                                                                       \
-      namespace BOOST_PP_SEQ_ELEM(2,data)_default                                     \
+      namespace CAT(BOOST_PP_SEQ_ELEM(2,data),_default)                               \
       {                                                                               \
         BOOST_PP_SEQ_FOR_EACH_I(START_NAMESPACE, ,                                    \
          BOOST_PP_SEQ_SUBSEQ(elem,0,BOOST_PP_SUB(BOOST_PP_SEQ_SIZE(elem),1)))         \
@@ -109,7 +109,7 @@
   #define TYPEDEFAULT(r,data,elem)                                                    \
     namespace Gambit                                                                  \
     {                                                                                 \
-      namespace BOOST_PP_SEQ_ELEM(2,data)_default                                     \
+      namespace CAT(BOOST_PP_SEQ_ELEM(2,data),_default)                               \
       {                                                                               \
         BOOST_PP_SEQ_FOR_EACH_I(START_NAMESPACE, ,                                    \
          BOOST_PP_SEQ_SUBSEQ(elem,0,BOOST_PP_SUB(BOOST_PP_SEQ_SIZE(elem),1)))         \

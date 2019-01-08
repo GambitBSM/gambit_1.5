@@ -2,6 +2,10 @@
 
 #include "gambit/ColliderBit/detectors/BaseDetector.hpp"
 
+#include "HEPUtils/Event.h"
+#include "HEPUtils/Particle.h"
+#include "HEPUtils/Jet.h"
+
 namespace Gambit
 {
 
@@ -10,7 +14,7 @@ namespace Gambit
 
     /// A base class for BuckFast simple smearing simulations within ColliderBit.
     template<typename EventT>
-    class BuckFast : BaseDetector<EventT>
+    class BuckFast : public BaseDetector<EventT>
     {
 
       public:
@@ -38,6 +42,9 @@ namespace Gambit
         /// A converter for a Pythia8::Event which considers only partonic final states.
         /// @note Also performs the jet clustering algorithm.
         void convertPartonEvent(const EventT&, HEPUtils::Event&) const;
+
+        /// Process an event with BuckFast
+        void processEvent(const EventT&, HEPUtils::Event&) const;
 
         ///@}
 

@@ -32,24 +32,16 @@ namespace Gambit
     ///@{
 
     template<typename Vec4T>
-    inline FJNS::PseudoJet mk_pseudojet(const Vec4& p)
+    inline FJNS::PseudoJet mk_pseudojet(const Vec4T& p)
     {
       return FJNS::PseudoJet(p.px(), p.py(), p.pz(), p.e());
     }
 
     template<typename Vec4T>
-    inline HEPUtils::P4 mk_p4(const Vec4& p)
+    inline HEPUtils::P4 mk_p4(const Vec4T& p)
     {
       const double m = p.mCalc();
       if (m < -5e-3) throw std::domain_error("Negative mass vector from Pythia8");
-      return HEPUtils::P4::mkXYZM(p.px(), p.py(), p.pz(), (m > 0) ? m : 0);
-    }
-
-    template<typename ParticleT>
-    inline HEPUtils::P4 mk_p4(const ParticleT& p)
-    {
-      const double m = p.m();
-      if (m < -5e-3) throw std::domain_error("Negative mass Particle from Pythia8");
       return HEPUtils::P4::mkXYZM(p.px(), p.py(), p.pz(), (m > 0) ? m : 0);
     }
 

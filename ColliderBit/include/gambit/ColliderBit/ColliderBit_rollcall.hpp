@@ -69,7 +69,7 @@ START_MODULE
   START_CAPABILITY
 
     #define FUNCTION getPythia
-    START_FUNCTION(ColliderPythia_defaultversion)
+    START_FUNCTION(BaseCollider*)
     NEEDS_MANAGER_WITH_CAPABILITY(ColliderOperator)
     NEEDS_CLASSES_FROM(Pythia, default)
     DEPENDENCY(decay_rates, DecayTable)
@@ -77,36 +77,22 @@ START_MODULE
     #undef FUNCTION
 
     #define FUNCTION getPythiaFileReader
-    START_FUNCTION(ColliderPythia_defaultversion)
-    NEEDS_MANAGER_WITH_CAPABILITY(ColliderOperator)
-    NEEDS_CLASSES_FROM(Pythia, default)
-    #undef FUNCTION
-
-    #define FUNCTION getPythiaAsBaseCollider
     START_FUNCTION(BaseCollider*)
     NEEDS_MANAGER_WITH_CAPABILITY(ColliderOperator)
-    DEPENDENCY(HardScatteringSim, ColliderPythia_defaultversion)
     NEEDS_CLASSES_FROM(Pythia, default)
     #undef FUNCTION
 
     #define FUNCTION getPythia_EM
-    START_FUNCTION(ColliderPythia_EM_defaultversion)
+    START_FUNCTION(BaseCollider*)
     NEEDS_MANAGER_WITH_CAPABILITY(ColliderOperator)
     NEEDS_CLASSES_FROM(Pythia_EM, default)
     DEPENDENCY(decay_rates, DecayTable)
     MODEL_CONDITIONAL_DEPENDENCY(MSSM_spectrum, Spectrum, MSSM63atQ, MSSM63atMGUT)
     #undef FUNCTION
 
-    #define FUNCTION getPythiaFileReader_EM
-    START_FUNCTION(ColliderPythia_EM_defaultversion)
-    NEEDS_MANAGER_WITH_CAPABILITY(ColliderOperator)
-    NEEDS_CLASSES_FROM(Pythia_EM, default)
-    #undef FUNCTION
-
-    #define FUNCTION getPythia_EMAsBaseCollider
+    #define FUNCTION getPythia_EMFileReader
     START_FUNCTION(BaseCollider*)
     NEEDS_MANAGER_WITH_CAPABILITY(ColliderOperator)
-    DEPENDENCY(HardScatteringSim, ColliderPythia_EM_defaultversion)
     NEEDS_CLASSES_FROM(Pythia_EM, default)
     #undef FUNCTION
 
@@ -118,11 +104,6 @@ START_MODULE
   #define CAPABILITY ATLASDetectorSim
   START_CAPABILITY
     #define FUNCTION getBuckFastATLASPythia
-    START_FUNCTION(BuckFast<Pythia_default::Pythia8::Event>)
-    NEEDS_MANAGER_WITH_CAPABILITY(ColliderOperator)
-    NEEDS_CLASSES_FROM(Pythia, default)
-    #undef FUNCTION
-    #define FUNCTION getBuckFastATLASPythiaAsBaseDetector
     START_FUNCTION(BaseDetector<Pythia_default::Pythia8::Event>*)
     NEEDS_MANAGER_WITH_CAPABILITY(ColliderOperator)
     NEEDS_CLASSES_FROM(Pythia, default)
@@ -132,11 +113,6 @@ START_MODULE
   #define CAPABILITY ATLASnoeffDetectorSim
   START_CAPABILITY
     #define FUNCTION getBuckFastATLASnoeffPythia
-    START_FUNCTION(BuckFast<Pythia_default::Pythia8::Event>)
-    NEEDS_MANAGER_WITH_CAPABILITY(ColliderOperator)
-    NEEDS_CLASSES_FROM(Pythia, default)
-    #undef FUNCTION
-    #define FUNCTION getBuckFastATLASnoeffPythiaAsBaseDetector
     START_FUNCTION(BaseDetector<Pythia_default::Pythia8::Event>*)
     NEEDS_MANAGER_WITH_CAPABILITY(ColliderOperator)
     NEEDS_CLASSES_FROM(Pythia, default)
@@ -146,11 +122,6 @@ START_MODULE
   #define CAPABILITY CMSDetectorSim
   START_CAPABILITY
     #define FUNCTION getBuckFastCMSPythia
-    START_FUNCTION(BuckFast<Pythia_default::Pythia8::Event>)
-    NEEDS_MANAGER_WITH_CAPABILITY(ColliderOperator)
-    NEEDS_CLASSES_FROM(Pythia, default)
-    #undef FUNCTION
-    #define FUNCTION getBuckFastCMSPythiaAsBaseDetector
     START_FUNCTION(BaseDetector<Pythia_default::Pythia8::Event>*)
     NEEDS_MANAGER_WITH_CAPABILITY(ColliderOperator)
     NEEDS_CLASSES_FROM(Pythia, default)
@@ -160,12 +131,7 @@ START_MODULE
   #define CAPABILITY CMSnoeffDetectorSim
   START_CAPABILITY
     #define FUNCTION getBuckFastCMSnoeffPythia
-    START_FUNCTION(BuckFast<Pythia_default::Pythia8::Event>)
-    NEEDS_MANAGER_WITH_CAPABILITY(ColliderOperator)
-    NEEDS_CLASSES_FROM(Pythia, default)
-    #undef FUNCTION
-    #define FUNCTION getBuckFastCMSnoeffPythiaAsBaseDetector
-    START_FUNCTION(BaseDetector<Pythia_default::Pythia8::Event>)
+    START_FUNCTION(BaseDetector<Pythia_default::Pythia8::Event>*)
     NEEDS_MANAGER_WITH_CAPABILITY(ColliderOperator)
     NEEDS_CLASSES_FROM(Pythia, default)
     #undef FUNCTION
@@ -174,11 +140,6 @@ START_MODULE
   #define CAPABILITY IdentityDetectorSim
   START_CAPABILITY
     #define FUNCTION getBuckFastIdentityPythia
-    START_FUNCTION(BuckFast<Pythia_default::Pythia8::Event>)
-    NEEDS_MANAGER_WITH_CAPABILITY(ColliderOperator)
-    NEEDS_CLASSES_FROM(Pythia, default)
-    #undef FUNCTION
-    #define FUNCTION getBuckFastIdentityPythiaAsBaseDetector
     START_FUNCTION(BaseDetector<Pythia_default::Pythia8::Event>*)
     NEEDS_MANAGER_WITH_CAPABILITY(ColliderOperator)
     NEEDS_CLASSES_FROM(Pythia, default)
@@ -189,11 +150,6 @@ START_MODULE
   #define CAPABILITY ATLASDetectorSim
   START_CAPABILITY
     #define FUNCTION getBuckFastATLASPythia_EM
-    START_FUNCTION(BuckFast<Pythia_EM_default::Pythia8::Event>)
-    NEEDS_MANAGER_WITH_CAPABILITY(ColliderOperator)
-    NEEDS_CLASSES_FROM(Pythia_EM, default)
-    #undef FUNCTION
-    #define FUNCTION getBuckFastATLASPythia_EMAsBaseDetector
     START_FUNCTION(BaseDetector<Pythia_EM_default::Pythia8::Event>*)
     NEEDS_MANAGER_WITH_CAPABILITY(ColliderOperator)
     NEEDS_CLASSES_FROM(Pythia_EM, default)
@@ -203,11 +159,6 @@ START_MODULE
   #define CAPABILITY ATLASnoeffDetectorSim
   START_CAPABILITY
     #define FUNCTION getBuckFastATLASnoeffPythia_EM
-    START_FUNCTION(BuckFast<Pythia_EM_default::Pythia8::Event>)
-    NEEDS_MANAGER_WITH_CAPABILITY(ColliderOperator)
-    NEEDS_CLASSES_FROM(Pythia_EM, default)
-    #undef FUNCTION
-    #define FUNCTION getBuckFastATLASnoeffPythia_EMAsBaseDetector
     START_FUNCTION(BaseDetector<Pythia_EM_default::Pythia8::Event>*)
     NEEDS_MANAGER_WITH_CAPABILITY(ColliderOperator)
     NEEDS_CLASSES_FROM(Pythia_EM, default)
@@ -217,11 +168,6 @@ START_MODULE
   #define CAPABILITY CMSDetectorSim
   START_CAPABILITY
     #define FUNCTION getBuckFastCMSPythia_EM
-    START_FUNCTION(BuckFast<Pythia_EM_default::Pythia8::Event>)
-    NEEDS_MANAGER_WITH_CAPABILITY(ColliderOperator)
-    NEEDS_CLASSES_FROM(Pythia_EM, default)
-    #undef FUNCTION
-    #define FUNCTION getBuckFastCMSPythia_EMAsBaseDetector
     START_FUNCTION(BaseDetector<Pythia_EM_default::Pythia8::Event>*)
     NEEDS_MANAGER_WITH_CAPABILITY(ColliderOperator)
     NEEDS_CLASSES_FROM(Pythia_EM, default)
@@ -231,11 +177,6 @@ START_MODULE
   #define CAPABILITY CMSnoeffDetectorSim
   START_CAPABILITY
     #define FUNCTION getBuckFastCMSnoeffPythia_EM
-    START_FUNCTION(BuckFast<Pythia_EM_default::Pythia8::Event>)
-    NEEDS_MANAGER_WITH_CAPABILITY(ColliderOperator)
-    NEEDS_CLASSES_FROM(Pythia_EM, default)
-    #undef FUNCTION
-    #define FUNCTION getBuckFastCMSnoeffPythia_EMAsBaseDetector
     START_FUNCTION(BaseDetector<Pythia_EM_default::Pythia8::Event>)
     NEEDS_MANAGER_WITH_CAPABILITY(ColliderOperator)
     NEEDS_CLASSES_FROM(Pythia_EM, default)
@@ -245,11 +186,6 @@ START_MODULE
   #define CAPABILITY IdentityDetectorSim
   START_CAPABILITY
     #define FUNCTION getBuckFastIdentityPythia_EM
-    START_FUNCTION(BuckFast<Pythia_EM_default::Pythia8::Event>)
-    NEEDS_MANAGER_WITH_CAPABILITY(ColliderOperator)
-    NEEDS_CLASSES_FROM(Pythia_EM, default)
-    #undef FUNCTION
-    #define FUNCTION getBuckFastIdentityPythia_EMAsBaseDetector
     START_FUNCTION(BaseDetector<Pythia_EM_default::Pythia8::Event>*)
     NEEDS_MANAGER_WITH_CAPABILITY(ColliderOperator)
     NEEDS_CLASSES_FROM(Pythia_EM, default)
@@ -328,7 +264,7 @@ START_MODULE
     NEEDS_MANAGER_WITH_CAPABILITY(ColliderOperator)
     NEEDS_CLASSES_FROM(Pythia, default)
     DEPENDENCY(HardScatteringEvent, Pythia_default::Pythia8::Event)
-    DEPENDENCY(SimpleSmearingSim, BuckFastCMS<Pythia_default::Pythia8::Event>*)
+    DEPENDENCY(CMSDetectorSim, BaseDetector<Pythia_default::Pythia8::Event>*)
     #undef FUNCTION
 
     #define FUNCTION smearEventCMS_EM
@@ -336,7 +272,7 @@ START_MODULE
     NEEDS_MANAGER_WITH_CAPABILITY(ColliderOperator)
     NEEDS_CLASSES_FROM(Pythia_EM, default)
     DEPENDENCY(HardScatteringEvent, Pythia_EM_default::Pythia8::Event)
-    DEPENDENCY(SimpleSmearingSim, BuckFastCMS<Pythia_EM_default::Pythia8::Event>*)
+    DEPENDENCY(CMSDetectorSim, BaseDetector<Pythia_EM_default::Pythia8::Event>*)
     #undef FUNCTION
 
   #undef CAPABILITY

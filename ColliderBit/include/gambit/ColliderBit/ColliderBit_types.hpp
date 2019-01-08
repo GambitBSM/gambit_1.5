@@ -41,7 +41,7 @@
 
 #include "gambit/ColliderBit/MC_convergence.hpp"
 #include "gambit/ColliderBit/colliders/ColliderPythia.hpp"
-#include "gambit/ColliderBit/detectors/BuckFastSmear.hpp"
+#include "gambit/ColliderBit/detectors/BuckFast.hpp"
 #include "gambit/ColliderBit/analyses/HEPUtilsAnalysisContainer.hpp"
 #include "gambit/ColliderBit/analyses/AnalysisData.hpp"
 

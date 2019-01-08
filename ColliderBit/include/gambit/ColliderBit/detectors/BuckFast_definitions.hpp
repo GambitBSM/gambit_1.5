@@ -17,11 +17,8 @@
 ///  *********************************************
 
 #include "gambit/ColliderBit/detectors/BuckFast.hpp"
-#include "gambit/ColliderBit/Py8Utils.hpp"
+#include "gambit/ColliderBit/detectors/Py8Utils.hpp"
 
-#include "HEPUtils/Event.h"
-#include "HEPUtils/Particle.h"
-#include "HEPUtils/Jet.h"
 #include "MCUtils/PIDCodes.h"
 
 namespace Gambit
