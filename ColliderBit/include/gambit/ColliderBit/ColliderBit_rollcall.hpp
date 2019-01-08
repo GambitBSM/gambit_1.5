@@ -83,7 +83,7 @@ START_MODULE
     #undef FUNCTION
 
     #define FUNCTION getPythiaAsBase
-    START_FUNCTION(const BaseCollider*)
+    START_FUNCTION(const ColliderBit::BaseCollider*)
     NEEDS_MANAGER_WITH_CAPABILITY(ColliderOperator)
     NEEDS_CLASSES_FROM(Pythia, default)
     DEPENDENCY(HardScatteringSim, ColliderPythia_defaultversion)
@@ -104,7 +104,7 @@ START_MODULE
     #undef FUNCTION
 
     #define FUNCTION getPythia_EMAsBase
-    START_FUNCTION(const BaseCollider*)
+    START_FUNCTION(const ColliderBit::BaseCollider*)
     NEEDS_MANAGER_WITH_CAPABILITY(ColliderOperator)
     NEEDS_CLASSES_FROM(Pythia_EM, default)
     DEPENDENCY(HardScatteringSim, ColliderPythia_EM_defaultversion)
@@ -118,7 +118,7 @@ START_MODULE
   #define CAPABILITY ATLASDetectorSim
   START_CAPABILITY
     #define FUNCTION getBuckFastATLASPythia
-    START_FUNCTION(BaseDetector<Pythia_default::Pythia8::Event>*)
+    START_FUNCTION(ColliderBit::BaseDetector<Pythia_default::Pythia8::Event>*)
     NEEDS_MANAGER_WITH_CAPABILITY(ColliderOperator)
     NEEDS_CLASSES_FROM(Pythia, default)
     #undef FUNCTION
@@ -127,7 +127,7 @@ START_MODULE
   #define CAPABILITY ATLASnoeffDetectorSim
   START_CAPABILITY
     #define FUNCTION getBuckFastATLASnoeffPythia
-    START_FUNCTION(BaseDetector<Pythia_default::Pythia8::Event>*)
+    START_FUNCTION(ColliderBit::BaseDetector<Pythia_default::Pythia8::Event>*)
     NEEDS_MANAGER_WITH_CAPABILITY(ColliderOperator)
     NEEDS_CLASSES_FROM(Pythia, default)
     #undef FUNCTION
@@ -136,7 +136,7 @@ START_MODULE
   #define CAPABILITY CMSDetectorSim
   START_CAPABILITY
     #define FUNCTION getBuckFastCMSPythia
-    START_FUNCTION(BaseDetector<Pythia_default::Pythia8::Event>*)
+    START_FUNCTION(ColliderBit::BaseDetector<Pythia_default::Pythia8::Event>*)
     NEEDS_MANAGER_WITH_CAPABILITY(ColliderOperator)
     NEEDS_CLASSES_FROM(Pythia, default)
     #undef FUNCTION
@@ -145,7 +145,7 @@ START_MODULE
   #define CAPABILITY CMSnoeffDetectorSim
   START_CAPABILITY
     #define FUNCTION getBuckFastCMSnoeffPythia
-    START_FUNCTION(BaseDetector<Pythia_default::Pythia8::Event>*)
+    START_FUNCTION(ColliderBit::BaseDetector<Pythia_default::Pythia8::Event>*)
     NEEDS_MANAGER_WITH_CAPABILITY(ColliderOperator)
     NEEDS_CLASSES_FROM(Pythia, default)
     #undef FUNCTION
@@ -154,7 +154,7 @@ START_MODULE
   #define CAPABILITY IdentityDetectorSim
   START_CAPABILITY
     #define FUNCTION getBuckFastIdentityPythia
-    START_FUNCTION(BaseDetector<Pythia_default::Pythia8::Event>*)
+    START_FUNCTION(ColliderBit::BaseDetector<Pythia_default::Pythia8::Event>*)
     NEEDS_MANAGER_WITH_CAPABILITY(ColliderOperator)
     NEEDS_CLASSES_FROM(Pythia, default)
     #undef FUNCTION
@@ -164,7 +164,7 @@ START_MODULE
   #define CAPABILITY ATLASDetectorSim
   START_CAPABILITY
     #define FUNCTION getBuckFastATLASPythia_EM
-    START_FUNCTION(BaseDetector<Pythia_EM_default::Pythia8::Event>*)
+    START_FUNCTION(ColliderBit::BaseDetector<Pythia_EM_default::Pythia8::Event>*)
     NEEDS_MANAGER_WITH_CAPABILITY(ColliderOperator)
     NEEDS_CLASSES_FROM(Pythia_EM, default)
     #undef FUNCTION
@@ -173,7 +173,7 @@ START_MODULE
   #define CAPABILITY ATLASnoeffDetectorSim
   START_CAPABILITY
     #define FUNCTION getBuckFastATLASnoeffPythia_EM
-    START_FUNCTION(BaseDetector<Pythia_EM_default::Pythia8::Event>*)
+    START_FUNCTION(ColliderBit::BaseDetector<Pythia_EM_default::Pythia8::Event>*)
     NEEDS_MANAGER_WITH_CAPABILITY(ColliderOperator)
     NEEDS_CLASSES_FROM(Pythia_EM, default)
     #undef FUNCTION
@@ -182,7 +182,7 @@ START_MODULE
   #define CAPABILITY CMSDetectorSim
   START_CAPABILITY
     #define FUNCTION getBuckFastCMSPythia_EM
-    START_FUNCTION(BaseDetector<Pythia_EM_default::Pythia8::Event>*)
+    START_FUNCTION(ColliderBit::BaseDetector<Pythia_EM_default::Pythia8::Event>*)
     NEEDS_MANAGER_WITH_CAPABILITY(ColliderOperator)
     NEEDS_CLASSES_FROM(Pythia_EM, default)
     #undef FUNCTION
@@ -191,7 +191,7 @@ START_MODULE
   #define CAPABILITY CMSnoeffDetectorSim
   START_CAPABILITY
     #define FUNCTION getBuckFastCMSnoeffPythia_EM
-    START_FUNCTION(BaseDetector<Pythia_EM_default::Pythia8::Event>)
+    START_FUNCTION(ColliderBit::BaseDetector<Pythia_EM_default::Pythia8::Event>*)
     NEEDS_MANAGER_WITH_CAPABILITY(ColliderOperator)
     NEEDS_CLASSES_FROM(Pythia_EM, default)
     #undef FUNCTION
@@ -200,7 +200,7 @@ START_MODULE
   #define CAPABILITY IdentityDetectorSim
   START_CAPABILITY
     #define FUNCTION getBuckFastIdentityPythia_EM
-    START_FUNCTION(BaseDetector<Pythia_EM_default::Pythia8::Event>*)
+    START_FUNCTION(ColliderBit::BaseDetector<Pythia_EM_default::Pythia8::Event>*)
     NEEDS_MANAGER_WITH_CAPABILITY(ColliderOperator)
     NEEDS_CLASSES_FROM(Pythia_EM, default)
     #undef FUNCTION
@@ -341,7 +341,7 @@ START_MODULE
     #define FUNCTION getATLASAnalysisContainer
     START_FUNCTION(HEPUtilsAnalysisContainer)
     NEEDS_MANAGER_WITH_CAPABILITY(ColliderOperator)
-    DEPENDENCY(HardScatteringSim, const BaseCollider*)
+    DEPENDENCY(HardScatteringSim, const ColliderBit::BaseCollider*)
     #undef FUNCTION
   #undef CAPABILITY
 
@@ -350,7 +350,7 @@ START_MODULE
     #define FUNCTION getATLASnoeffAnalysisContainer
     START_FUNCTION(HEPUtilsAnalysisContainer)
     NEEDS_MANAGER_WITH_CAPABILITY(ColliderOperator)
-    DEPENDENCY(HardScatteringSim, const BaseCollider*)
+    DEPENDENCY(HardScatteringSim, const ColliderBit::BaseCollider*)
     #undef FUNCTION
   #undef CAPABILITY
 
@@ -359,7 +359,7 @@ START_MODULE
     #define FUNCTION getCMSAnalysisContainer
     START_FUNCTION(HEPUtilsAnalysisContainer)
     NEEDS_MANAGER_WITH_CAPABILITY(ColliderOperator)
-    DEPENDENCY(HardScatteringSim, const BaseCollider*)
+    DEPENDENCY(HardScatteringSim, const ColliderBit::BaseCollider*)
     #undef FUNCTION
   #undef CAPABILITY
 
@@ -368,7 +368,7 @@ START_MODULE
     #define FUNCTION getCMSnoeffAnalysisContainer
     START_FUNCTION(HEPUtilsAnalysisContainer)
     NEEDS_MANAGER_WITH_CAPABILITY(ColliderOperator)
-    DEPENDENCY(HardScatteringSim, const BaseCollider*)
+    DEPENDENCY(HardScatteringSim, const ColliderBit::BaseCollider*)
     #undef FUNCTION
   #undef CAPABILITY
 
@@ -377,7 +377,7 @@ START_MODULE
     #define FUNCTION getIdentityAnalysisContainer
     START_FUNCTION(HEPUtilsAnalysisContainer)
     NEEDS_MANAGER_WITH_CAPABILITY(ColliderOperator)
-    DEPENDENCY(HardScatteringSim, const BaseCollider*)
+    DEPENDENCY(HardScatteringSim, const ColliderBit::BaseCollider*)
     #undef FUNCTION
   #undef CAPABILITY
 

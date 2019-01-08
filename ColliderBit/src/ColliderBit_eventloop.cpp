@@ -89,22 +89,6 @@ namespace Gambit
     int maxFailedEvents;
     int seedBase;
 
-    /// Analysis stuff
-    bool useBuckFastATLASDetector;
-    bool haveUsedBuckFastATLASDetector;
-
-    bool useBuckFastATLASnoeffDetector;
-    bool haveUsedBuckFastATLASnoeffDetector;
-
-    bool useBuckFastCMSDetector;
-    bool haveUsedBuckFastCMSDetector;
-
-    bool useBuckFastCMSnoeffDetector;
-    bool haveUsedBuckFastCMSnoeffDetector;
-
-    bool useBuckFastIdentityDetector;
-    bool haveUsedBuckFastIdentityDetector;
-
     /// @}
 
 
@@ -123,9 +107,8 @@ namespace Gambit
 
     /// Retrieve an analysis container for a specific detector
     void getAnalysisContainer(HEPUtilsAnalysisContainer& result,
-                              const BaseCollider& HardScatteringSim,
                               const str& detname,
-                              bool useThisDetector,
+                              const BaseCollider& HardScatteringSim,
                               int iteration,
                               const Options& runOptions)
     {
@@ -141,7 +124,7 @@ namespace Gambit
           std::vector<std::vector<str> > default_analyses;  // The default is empty lists of analyses
           analyses = runOptions.getValueOrDef<std::vector<std::vector<str> > >(default_analyses, "analyses");
 
-          // Check that the analsis names listed in the yaml file all correspond to actual ColliderBit analyses
+          // Check that the analysis names listed in the yaml file all correspond to actual ColliderBit analyses
           for (std::vector<str> collider_specific_analyses : analyses)
           {
             for (str& analysis_name : collider_specific_analyses)
@@ -158,26 +141,7 @@ namespace Gambit
         }
       }
 
-      if (iteration == COLLIDER_INIT)
-      {
-        if (!useThisDetector) return;
-
-        // Check that there are some analyses to run if the detector is switched on
-        if (analyses[indexPythiaNames].empty() and useThisDetector)
-        {
-          str errmsg = "The option 'useBuckFast'"+detname+"Detector' (for function with name starting 'getBuckFast"+detname+"') is set to true\n";
-          errmsg    += "for the collider '";
-          errmsg    += *iterPythiaNames;
-          errmsg    += "', but the corresponding list of analyses\n";
-          errmsg    += "(in option 'analyses' for function 'get"+detname+"AnalysisContainer') is empty.\n";
-          errmsg    += "Please correct your settings.\n";
-          ColliderBit_error().raise(LOCAL_INFO, errmsg);
-        }
-
-        return;
-      }
-
-      if (!useThisDetector) return;
+      if (analyses.empty()) return;
 
       if (iteration == START_SUBPROCESS)
       {
@@ -200,11 +164,9 @@ namespace Gambit
           }
         }
         else result.reset();
-
-        return;
       }
 
-      if (iteration == END_SUBPROCESS && eventsGenerated && nFailedEvents <= maxFailedEvents)
+      else if (iteration == END_SUBPROCESS && eventsGenerated && nFailedEvents <= maxFailedEvents)
       {
         const double xs_fb = HardScatteringSim.xsec_pb() * 1000.;
         const double xserr_fb = HardScatteringSim.xsecErr_pb() * 1000.;
@@ -213,15 +175,13 @@ namespace Gambit
         #ifdef COLLIDERBIT_DEBUG
         cout << debug_prefix() << "xs_fb = " << xs_fb << " +/- " << xserr_fb << endl;
         #endif
-        return;
       }
 
-      if (iteration == COLLIDER_FINALIZE)
+      else if (iteration == COLLIDER_FINALIZE)
       {
         result.collect_and_add_signal();
         result.collect_and_improve_xsec();
         result.scale();
-        return;
       }
 
     }
@@ -236,7 +196,6 @@ namespace Gambit
                      const HEPUtilsAnalysisContainer& AnalysisContainer,
                      const HEPUtils::Event& SmearedEvent,
                      const convergence_settings& MC_ConvergenceSettings,
-                     bool useThisDetector,
                      int iteration,
                      void(*wrapup)())
     {
@@ -246,7 +205,7 @@ namespace Gambit
         return;
       }
 
-      if (!useThisDetector) return;
+      if (not AnalysisContainer.has_analyses()) return;
 
       static MC_convergence_checker convergence;
       if (iteration == COLLIDER_INIT)
@@ -717,26 +676,20 @@ namespace Gambit
     template<typename EventT>
     BaseDetector<EventT>* getBuckFast(const str& detname,
                                       bool use_effs,
-                                      bool& useThisDetector,
-                                      bool& haveUsedThisDetector,
                                       int iteration,
                                       const Options& runOptions)
     {
-      static std::vector<bool> useDetector;
       static std::vector<bool> partonOnly;
       static std::vector<double> antiktR;
 
       // Where the real action is
-      static BuckFast<EventT> bucky[omp_get_num_threads()];
+      /// @todo this memory leaks when GAMBIT shuts down.  Delete the buckies somehow.
+      static BuckFast<EventT>* bucky = new BuckFast<EventT>[omp_get_max_threads()];
       int mine = omp_get_thread_num();
 
       if (iteration == BASE_INIT)
       {
         // Read options
-        std::vector<bool> default_useDetector(pythiaNames.size(), use_effs); //Default is to use the detector if efficiencies are turned on.
-        useDetector = runOptions.getValueOrDef<std::vector<bool> >(default_useDetector, "useDetector");
-        CHECK_EQUAL_VECTOR_LENGTH(useDetector,pythiaNames)
-
         std::vector<bool> default_partonOnly(pythiaNames.size(), false);
         partonOnly = runOptions.getValueOrDef<std::vector<bool> >(default_partonOnly, "partonOnly");
         CHECK_EQUAL_VECTOR_LENGTH(partonOnly,pythiaNames)
@@ -746,14 +699,7 @@ namespace Gambit
         CHECK_EQUAL_VECTOR_LENGTH(antiktR,pythiaNames)
       }
 
-      if (iteration == COLLIDER_INIT)
-      {
-        // Get useDetector setting for the current collider
-        useThisDetector = useDetector[indexPythiaNames];
-        if (useThisDetector) haveUsedThisDetector = true;
-      }
-
-      if (iteration == START_SUBPROCESS and useThisDetector)
+      if (iteration == START_SUBPROCESS)
       {
         // Each thread gets its own copy of the detector sim, so it is initialised *after* COLLIDER_INIT, within omp parallel.
         bucky[mine].init(partonOnly[indexPythiaNames], antiktR[indexPythiaNames]);
@@ -798,14 +744,18 @@ namespace Gambit
     /// Smear an event
     template<typename EventT>
     void smearEvent(HEPUtils::Event& result,
-                    EventT& HardScatteringEvent,
-                    const BaseDetector<EventT>*& Smearer,
+                    const EventT& HardScatteringEvent,
+                    const BaseDetector<EventT>& Smearer,
                     const int iteration,
-                    bool flag,
                     const str& ID,
                     void(*wrapup)())
     {
-      if (iteration <= BASE_INIT or !flag) return;
+      bool useDetector = true; /// @todo this needs to instead be determined by polling a new global option collider_analyses containing *all* analyses.
+                               /// If collider_analyses[indexPythiaNames] is empty of analyses that use detector Smearer [as determined by
+                               /// a new function to be added to the analysis class, e.g. uses_detector(str& detname) and which tests against
+                               /// new analysis metadata indicating which detector the analysis is for], then useDetector should be set false.
+
+      if (iteration <= BASE_INIT or !useDetector) return;
       result.clear();
 
       // Attempt to get the next event from Pythia8, convert to HEPUtils::Event, and smear it
@@ -826,7 +776,7 @@ namespace Gambit
         {
           // Store Pythia event record in the logs
           std::stringstream ss;
-          HardScatteringEvent->list(ss, 1);
+          HardScatteringEvent.list(ss, 1);
           logger() << LogTags::debug << "Gambit::exception caught in "+ID+". Pythia record for event that failed:\n" << ss.str() << EOM;
         }
 
@@ -903,18 +853,6 @@ namespace Gambit
       eventsGenerated = false;
       // - Keep track of the number of failed events
       nFailedEvents = 0;
-
-      useBuckFastATLASDetector = false;
-      useBuckFastATLASnoeffDetector = false;
-      useBuckFastCMSDetector = false;
-      useBuckFastCMSnoeffDetector = false;
-      useBuckFastIdentityDetector = false;
-
-      haveUsedBuckFastATLASDetector = false;
-      haveUsedBuckFastATLASnoeffDetector = false;
-      haveUsedBuckFastCMSDetector = false;
-      haveUsedBuckFastCMSnoeffDetector = false;
-      haveUsedBuckFastIdentityDetector = false;
 
       // Retrieve run options from the YAML file (or standalone code)
       pythiaNames = runOptions->getValue<std::vector<str> >("pythiaNames");
@@ -1095,29 +1033,19 @@ namespace Gambit
       result.clear();
 
       #ifdef COLLIDERBIT_DEBUG
-      if (haveUsedBuckFastATLASDetector)
         cout << debug_prefix() << "CollectAnalyses: Dep::ATLASAnalysisNumbers->size()    = " << Dep::ATLASAnalysisNumbers->size() << endl;
-      if (haveUsedBuckFastATLASnoeffDetector)
         cout << debug_prefix() << "CollectAnalyses: Dep::ATLASnoeffAnalysisNumbers->size()    = " << Dep::ATLASnoeffAnalysisNumbers->size() << endl;
-      if (haveUsedBuckFastCMSDetector)
         cout << debug_prefix() << "CollectAnalyses: Dep::CMSAnalysisNumbers->size()      = " << Dep::CMSAnalysisNumbers->size() << endl;
-      if (haveUsedBuckFastCMSnoeffDetector)
         cout << debug_prefix() << "CollectAnalyses: Dep::CMSnoeffAnalysisNumbers->size() = " << Dep::CMSnoeffAnalysisNumbers->size() << endl;
-      if (haveUsedBuckFastIdentityDetector)
         cout << debug_prefix() << "CollectAnalyses: Dep::IdentityAnalysisNumbers->size() = " << Dep::IdentityAnalysisNumbers->size() << endl;
       #endif
 
       // Add results
-      if (haveUsedBuckFastATLASDetector)
-        result.insert(result.end(), Dep::ATLASAnalysisNumbers->begin(), Dep::ATLASAnalysisNumbers->end());
-      if (haveUsedBuckFastATLASnoeffDetector)
-        result.insert(result.end(), Dep::ATLASnoeffAnalysisNumbers->begin(), Dep::ATLASnoeffAnalysisNumbers->end());
-      if (haveUsedBuckFastCMSDetector)
-        result.insert(result.end(), Dep::CMSAnalysisNumbers->begin(), Dep::CMSAnalysisNumbers->end());
-      if (haveUsedBuckFastCMSnoeffDetector)
-        result.insert(result.end(), Dep::CMSnoeffAnalysisNumbers->begin(), Dep::CMSnoeffAnalysisNumbers->end());
-      if (haveUsedBuckFastIdentityDetector)
-        result.insert(result.end(), Dep::IdentityAnalysisNumbers->begin(), Dep::IdentityAnalysisNumbers->end());
+      if (Dep::ATLASAnalysisNumbers->size() != 0) result.insert(result.end(), Dep::ATLASAnalysisNumbers->begin(), Dep::ATLASAnalysisNumbers->end());
+      if (Dep::ATLASnoeffAnalysisNumbers->size() != 0) result.insert(result.end(), Dep::ATLASnoeffAnalysisNumbers->begin(), Dep::ATLASnoeffAnalysisNumbers->end());
+      if (Dep::CMSAnalysisNumbers->size() != 0) result.insert(result.end(), Dep::CMSAnalysisNumbers->begin(), Dep::CMSAnalysisNumbers->end());
+      if (Dep::CMSnoeffAnalysisNumbers->size() != 0) result.insert(result.end(), Dep::CMSnoeffAnalysisNumbers->begin(), Dep::CMSnoeffAnalysisNumbers->end());
+      if (Dep::IdentityAnalysisNumbers->size() != 0) result.insert(result.end(), Dep::IdentityAnalysisNumbers->begin(), Dep::IdentityAnalysisNumbers->end());
 
       // When first called, check that all analyses contain at least one signal region.
       if (first)
@@ -1707,9 +1635,9 @@ namespace Gambit
       std::stringstream summary_line;
       summary_line << "LHC loglikes per analysis: ";
 
-      for (const std::pair<string,AnalysisLogLikes>& pair : *Dep::LHC_LogLikes)
+      for (const std::pair<str,AnalysisLogLikes>& pair : *Dep::LHC_LogLikes)
       {
-        const string& analysis_name = pair.first;
+        const str& analysis_name = pair.first;
         const AnalysisLogLikes& analysis_loglikes = pair.second;
 
         result[analysis_name] = analysis_loglikes.combination_loglike;
@@ -1728,20 +1656,20 @@ namespace Gambit
       std::stringstream summary_line;
       summary_line << "LHC loglikes per SR: ";
 
-      for (const std::pair<string,AnalysisLogLikes>& pair_i : *Dep::LHC_LogLikes)
+      for (const std::pair<str,AnalysisLogLikes>& pair_i : *Dep::LHC_LogLikes)
       {
-        const string& analysis_name = pair_i.first;
+        const str& analysis_name = pair_i.first;
         const AnalysisLogLikes& analysis_loglikes = pair_i.second;
 
         summary_line << analysis_name << ": ";
 
-        for (const std::pair<string,double>& pair_j : analysis_loglikes.sr_loglikes)
+        for (const std::pair<str,double>& pair_j : analysis_loglikes.sr_loglikes)
         {
-          const string& sr_label = pair_j.first;
+          const str& sr_label = pair_j.first;
           const double& sr_loglike = pair_j.second;
           const int sr_index = analysis_loglikes.sr_indices.at(sr_label);
 
-          const string key = analysis_name + "__" + sr_label + "__i" + std::to_string(sr_index) + "__LogLike";
+          const str key = analysis_name + "__" + sr_label + "__i" + std::to_string(sr_index) + "__LogLike";
           result[key] = sr_loglike;
 
           summary_line << sr_label + "__i" + std::to_string(sr_index) << ":" << sr_loglike << ", ";
@@ -1759,9 +1687,9 @@ namespace Gambit
     void get_LHC_LogLike_SR_labels(map_str_str& result)
     {
       using namespace Pipes::get_LHC_LogLike_per_SR;
-      for (const std::pair<string,AnalysisLogLikes>& pair_i : *Dep::LHC_LogLikes)
+      for (const std::pair<str,AnalysisLogLikes>& pair_i : *Dep::LHC_LogLikes)
       {
-        const string& analysis_name = pair_i.first;
+        const str& analysis_name = pair_i.first;
         const AnalysisLogLikes& analysis_loglikes = pair_i.second;
 
         result[analysis_name] = analysis_loglikes.combination_sr_label;
@@ -1779,9 +1707,9 @@ namespace Gambit
       summary_line << "LHC loglike SR indices: ";
 
       // Loop over analyses
-      for (const std::pair<string,AnalysisLogLikes>& pair_i : *Dep::LHC_LogLikes)
+      for (const std::pair<str,AnalysisLogLikes>& pair_i : *Dep::LHC_LogLikes)
       {
-        const string& analysis_name = pair_i.first;
+        const str& analysis_name = pair_i.first;
         const AnalysisLogLikes& analysis_loglikes = pair_i.second;
 
         result[analysis_name] = (double) analysis_loglikes.combination_sr_index;
@@ -1814,7 +1742,7 @@ namespace Gambit
       // Loop over analyses and calculate the total observed dLL
       for (auto const& analysis_loglike_pair : *Dep::LHC_LogLike_per_analysis)
       {
-        const string& analysis_name = analysis_loglike_pair.first;
+        const str& analysis_name = analysis_loglike_pair.first;
         const double& analysis_loglike = analysis_loglike_pair.second;
 
         // If the analysis name is in skip_analyses, don't add its loglike to the total loglike.
@@ -1881,32 +1809,30 @@ namespace Gambit
     // *** Hard Scattering Collider Simulators ***
 
     /// Retrieve a specific Pythia hard-scattering Monte Carlo simulation
-    #define GET_SPECIFIC_PYTHIA(NAME, PYTHIA_NS)                           \
-    void NAME(ColliderPythia<PYTHIA_NS::Pythia8::Pythia,                   \
-                             PYTHIA_NS::Pythia8::Event &result)            \
-    {                                                                      \
-      using namespace Pipes::NAME;                                         \
-      result = getColliderPythia<PYTHIA_NS::Pythia8::Pythia,               \
-       PYTHIA_NS::Pythia8::Event>(*Dep::MSSM_spectrum, *Dep::decay_rates,  \
-       *Loop::iteration, Loop::wrapup, *runOptions, ModelInUse);           \
+    #define GET_SPECIFIC_PYTHIA(NAME, PYTHIA_NS)                         \
+    void NAME(ColliderPythia<PYTHIA_NS::Pythia8::Pythia,                 \
+                             PYTHIA_NS::Pythia8::Event> &result)         \
+    {                                                                    \
+      using namespace Pipes::NAME;                                       \
+      getColliderPythia(result, *Dep::MSSM_spectrum, *Dep::decay_rates,  \
+       *Loop::iteration, Loop::wrapup, *runOptions, ModelInUse);         \
     }
 
     /// Retrieve a specific Pythia hard-scattering Monte Carlo simulation, initialised from an SLHA file
-    #define GET_SPECIFIC_PYTHIA_FROM_SLHA(NAME, PYTHIA_NS, MODEL_EXTENSION)        \
-    void NAME(ColliderPythia<PYTHIA_NS::Pythia8::Pythia,                           \
-                             PYTHIA_NS::Pythia8::Event &result)                    \
-    {                                                                              \
-      using namespace Pipes::NAME;                                                 \
-      result = getColliderPythiaFileReader<PYTHIA_NS::Pythia8::Pythia,             \
-       PYTHIA_NS::Pythia8::Event>(#MODEL_EXTENSION, *Loop::iteration, Loop::wrapup,\
-       *runOptions);                                                               \
+    #define GET_SPECIFIC_PYTHIA_FROM_SLHA(NAME, PYTHIA_NS, MODEL_EXTENSION)\
+    void NAME(ColliderPythia<PYTHIA_NS::Pythia8::Pythia,                   \
+                             PYTHIA_NS::Pythia8::Event> &result)           \
+    {                                                                      \
+      using namespace Pipes::NAME;                                         \
+      getColliderPythiaFileReader(result, #MODEL_EXTENSION,                \
+       *Loop::iteration, Loop::wrapup, *runOptions);                       \
     }
 
     /// Get a specific Pythia hard-scattering sim as a generator-independent pointer-to-BaseCollider
     #define GET_PYTHIA_AS_BASE_COLLIDER(NAME)           \
-    void NAME(const BaseCollider*)                      \
+    void NAME(const BaseCollider* &result)              \
     {                                                   \
-      result = &(*Pipes::NAME::Dep::HardScatteringSim;  \
+      result = &(*Pipes::NAME::Dep::HardScatteringSim); \
     }                                                   \
 
     GET_SPECIFIC_PYTHIA(getPythia, Pythia_default)
@@ -1940,8 +1866,6 @@ namespace Gambit
     {                                                                           \
       using namespace Pipes::NAME;                                              \
       result = getBuckFast<EVENT>(#EXPERIMENT, IF_ELSE_EMPTY(SUFFIX,true,false),\
-       CAT_4(useBuckFast,EXPERIMENT,SUFFIX,Detector),                           \
-       CAT_4(haveUsedBuckFast,EXPERIMENT,SUFFIX,Detector),                      \
        *Loop::iteration, *runOptions);                                          \
     }
 
@@ -1966,7 +1890,7 @@ namespace Gambit
     {                                                                                    \
       using namespace Pipes::NAME;                                                       \
       smearEvent(result, *Dep::HardScatteringEvent, *(*Dep::CAT(EXPERIMENT,DetectorSim)),\
-       *Loop::iteration, CAT_3(useBuckFast,EXPERIMENT,Detector), #NAME, Loop::wrapup);   \
+       *Loop::iteration, #NAME, Loop::wrapup);                                           \
     }
 
     SMEAR_EVENT(smearEventATLAS, ATLAS)
@@ -1984,15 +1908,13 @@ namespace Gambit
 
     // *** Initialization for analyses ***
 
-    ///@todo These functions should not be referring to 'useBuckFastXXXXDetector' flags, as they should be independent of the package used to do detector simulation.
-
     /// Retrieve a container for analyses with EXPERIMENT
     #define GET_ANALYSIS_CONTAINER(NAME, EXPERIMENT)                          \
     void NAME(HEPUtilsAnalysisContainer& result)                              \
     {                                                                         \
       using namespace Pipes::NAME;                                            \
       getAnalysisContainer(result, #EXPERIMENT, *(*Dep::HardScatteringSim),   \
-       CAT_3(useBuckFast,EXPERIMENT,Detector), *Loop::iteration, *runOptions);\
+       *Loop::iteration, *runOptions);                                        \
     }
 
     GET_ANALYSIS_CONTAINER(getATLASAnalysisContainer, ATLAS)
@@ -2004,23 +1926,21 @@ namespace Gambit
 
     // *** Analysis Accumulators ***
 
-    ///@todo These functions should not be referring to 'useBuckFastXXXXDetector' flags, as they should be independent of the package used to do detector simulation.
-
     /// Run all analyses for EXPERIMENT
-    #define RUN_ANALYSES(NAME, EXPERIMENT)                                     \
-    void NAME(AnalysisDataPointers& result)                                    \
-    {                                                                          \
-      using namespace Pipes::NAME;                                             \
-      runAnalyses(result, #NAME, *Dep::CAT(EXPERIMENT,AnalysisContainer),      \
-       *Dep::CAT(EXPERIMENT,SmearedEvent), *Dep::MC_ConvergenceSettings,       \
-       CAT_3(useBuckFast,EXPERIMENT,Detector), *Loop::iteration, Loop::wrapup);\
+    #define RUN_ANALYSES(NAME, EXPERIMENT, SMEARED_EVENT_DEP)                 \
+    void NAME(AnalysisDataPointers& result)                                   \
+    {                                                                         \
+      using namespace Pipes::NAME;                                            \
+      runAnalyses(result, #NAME, *Dep::CAT(EXPERIMENT,AnalysisContainer),     \
+       *Dep::SMEARED_EVENT_DEP, *Dep::MC_ConvergenceSettings,                 \
+       *Loop::iteration, Loop::wrapup);                                       \
     }
 
-    RUN_ANALYSES(runATLASAnalyses, ATLAS)
-    RUN_ANALYSES(runATLASnoeffAnalyses, ATLASnoeff)
-    RUN_ANALYSES(runCMSAnalyses, CMS)
-    RUN_ANALYSES(runCMSnoeffAnalyses, CMSnoeff)
-    RUN_ANALYSES(runIdentityAnalyses, Identity)
+    RUN_ANALYSES(runATLASAnalyses, ATLAS, ATLASSmearedEvent)
+    RUN_ANALYSES(runATLASnoeffAnalyses, ATLASnoeff, ATLASnoeffSmearedEvent)
+    RUN_ANALYSES(runCMSAnalyses, CMS, CMSSmearedEvent)
+    RUN_ANALYSES(runCMSnoeffAnalyses, CMSnoeff, CMSnoeffSmearedEvent)
+    RUN_ANALYSES(runIdentityAnalyses, Identity, CopiedEvent)
 
     /// @}
 

@@ -19,6 +19,11 @@ namespace Gambit
 
       public:
 
+        /// Chooses between parton only and full event conversion.
+        bool partonOnly;
+        ///The jet radius used for the anti-kt jet clustering.
+        double antiktR;
+
         /// Pointers to actual detector response functions
         /// @{
         void(*smearElectronEnergy)(std::vector<HEPUtils::Particle*>&);
@@ -26,14 +31,8 @@ namespace Gambit
         void(*smearMuonMomentum)(std::vector<HEPUtils::Particle*>&);
         void(*applyMuonEff)(std::vector<HEPUtils::Particle*>&);
         void(*smearTaus)(std::vector<HEPUtils::Particle*>&);
-        void(*smearJets)(std::vector<HEPUtils::Particle*>&);
+        void(*smearJets)(std::vector<HEPUtils::Jet*>&);
         /// @}
-
-        /// @name Event detection simulation.
-        ///@{
-
-        bool partonOnly; ///< Chooses between parton only and full event conversion.
-        double antiktR; ///< The jet radius used for the anti-kt jet clustering.
 
         /// A converter for a Pythia8::Event which considers all final state particles.
         /// @note Also performs the jet clustering algorithm.

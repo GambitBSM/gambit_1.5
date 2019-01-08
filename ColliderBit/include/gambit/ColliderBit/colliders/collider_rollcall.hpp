@@ -18,28 +18,41 @@
 
 #pragma once
 
-#define DECLARE_COLLIDER(NS, TYPE) namespace NS { void init(TYPE*); }
-
-
 namespace Gambit
 {
 
   namespace ColliderBit
   {
 
-    template<typename T1, typename T2>
-    class ColliderPythia;
+    template<typename ColliderPythiaT>
+    void Pythia_external_init(ColliderPythiaT*) {}
 
-    /// Typedefs for each Pythia collider
-    /// @{
-    typedef ColliderPythia<Pythia_default::Pythia8::Pythia, Pythia_default::Pythia8::Event>       ColliderPythia_defaultversion;
-    typedef ColliderPythia<Pythia_EM_default::Pythia8::Pythia, Pythia_EM_default::Pythia8::Event> ColliderPythia_EM_defaultversion;
-    /// @{
+    template<typename ColliderPythiaT>
+    void Pythia_SUSY_LHC_8TeV_init(ColliderPythiaT* specializeMe)
+    {
+      specializeMe->addToSettings("Beams:eCM = 8000");
+      specializeMe->addToSettings("Main:timesAllowErrors = 1000");
+      specializeMe->addToSettings("SUSY:all = on");
+      specializeMe->addToSettings("Random:setSeed = on");
+    }
 
-    DECLARE_COLLIDER(Pythia_external,       ColliderPythia_EM_defaultversion)
-    DECLARE_COLLIDER(Pythia_SUSY_LHC_8TeV,  ColliderPythia_defaultversion)
-    DECLARE_COLLIDER(Pythia_glusq_LHC_8TeV, ColliderPythia_defaultversion)
-    DECLARE_COLLIDER(Pythia_SUSY_LHC_13TeV, ColliderPythia_defaultversion)
+    template<typename ColliderPythiaT>
+    void Pythia_glusq_LHC_8TeV_init(ColliderPythiaT* specializeMe)
+    {
+      Pythia_SUSY_LHC_8TeV_init(specializeMe);
+      specializeMe->addToSettings("SUSY:idA = 1000021");
+      specializeMe->addToSettings("SUSY:idVecB = 1000001, 1000002, 1000003, 1000004, 2000001, 2000002, 2000003, 2000004");
+    }
+
+    template<typename ColliderPythiaT>
+    void Pythia_SUSY_LHC_13TeV_init(ColliderPythiaT* specializeMe)
+    {
+      specializeMe->addToSettings("Beams:eCM = 13000");
+      specializeMe->addToSettings("Main:timesAllowErrors = 1000");
+      specializeMe->addToSettings("SUSY:all = on");
+      specializeMe->addToSettings("Random:setSeed = on");
+    }
+
 
   }
 }

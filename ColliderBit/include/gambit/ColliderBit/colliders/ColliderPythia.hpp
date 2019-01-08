@@ -20,6 +20,7 @@
 
 #include <ostream>
 #include <stdexcept>
+#include "gambit/Elements/shared_types.hpp"
 #include "gambit/ColliderBit/colliders/BaseCollider.hpp"
 #include "gambit/ColliderBit/ColliderBit_macros.hpp"
 #include "gambit/ColliderBit/colliders/collider_rollcall.hpp"
@@ -204,13 +205,14 @@ namespace Gambit
         void resetSpecialization(const std::string& specName)
         {
           clear();
-          #define IF_X_SPECIALIZEX(X) if (specName == #X) { _specialInit = X::init; return; }
+          /// @todo move this out to a yaml file, find some way to enforce that specialisation must match the template parameter
+          #define IF_X_SPECIALIZEX(X) if (specName == #X) { _specialInit = CAT(X,_init); return; }
           IF_X_SPECIALIZEX(Pythia_external)
           IF_X_SPECIALIZEX(Pythia_SUSY_LHC_8TeV)
           IF_X_SPECIALIZEX(Pythia_glusq_LHC_8TeV)
           IF_X_SPECIALIZEX(Pythia_SUSY_LHC_13TeV)
           // default to a Pythia instance configured entirely by external (yaml) settings:
-          _specialInit = Pythia_external::init;
+          _specialInit = Pythia_external_init;
           std::cout<<"\n\n\n"
                    <<"COLLIDERBIT WARNING: Pythia named "<<specName<<" is not coded in ColliderPythia."
                    <<"                     Now trying to configure Pythia entirely by yaml input..."

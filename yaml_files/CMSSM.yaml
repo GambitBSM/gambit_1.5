@@ -502,22 +502,16 @@ Rules:
       ms_error: 5.E-03
 
   # ATLAS detector simulation
-  - capability: SimpleSmearingSim
-    type: "ColliderBit::BuckFastSmearATLAS"
-    function: getBuckFastATLAS
+  - capability: ATLASDetectorSim
     options:
       partonOnly: [false]
       antiktR: [0.4]
-      useDetector: [true]
 
   # CMS detector simulation
-  - capability: SimpleSmearingSim
-    type: "ColliderBit::BuckFastSmearCMS"
-    function: getBuckFastCMS
+  - capability: CMSDetectorSim
     options:
       partonOnly: [false]
       antiktR: [0.4]
-      useDetector: [true]
 
   # ATLAS analysis setup.
   - capability: ATLASAnalysisContainer

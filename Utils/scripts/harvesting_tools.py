@@ -75,12 +75,12 @@ def get_type_equivalencies(nses):
             equivalency_class = list()
             for member in re.findall("[^,]*?\(.*?\)[^,]*?\(.*?\).*?,|[^,]*?<.*?>.*?,|[^,]*?\(.*?\).*?,|[^>\)]*?,", newline+","):
               member = re.sub("\"","",member[:-1].strip())
-              # Strip off the leading BOSSed namespace from all type equivalencies pertaining to the default version
+              # Convert the leading BOSSed namespace for the default version to the explicit namespace of the actual version
               for key in nses:
-                ns = key+"_"+nses[key]+"::"
-                if member.startswith(ns): member = member[len(ns):]
-                if member.startswith(ns): member = member[len(ns):]
-                member = re.sub("\s"+ns," ",member)
+                ns_default = key+"_default"+"::"
+                ns_true = key+"_"+nses[key]+"::"
+                if member.startswith(ns_default): member = ns_true+member[len(ns_default):]
+                member = re.sub("\s"+ns_default," "+ns_true,member)
 
               # If the type is an alias of a native int then add int to the equivalency class
               if re.match("int[0-9]+_t", member):
@@ -212,11 +212,12 @@ def first_simple_type_equivalent(candidate_in, equivs, nses, existing):
     if candidate_in in existing: return candidate_in
     candidate = candidate_in
     candidate.strip()
-    # Strip off the leading BOSSed namespace if it's from the default version
+    # Convert the leading BOSSed namespace for the default version to the explicit namespace of the actual version
     for key in nses:
-      ns = key+"_"+nses[key]+"::"
-      candidate = re.sub("\s"+ns," ",candidate)
-      if candidate.startswith(ns): candidate = cadidate[len(ns):]
+      ns_default = key+"_default"+"::"
+      ns_true = key+"_"+nses[key]+"::"
+      if candidate.startswith(ns_default): candidate = ns_true+candidate[len(ns_default):]
+      candidate = re.sub("\s"+ns_default," "+ns_true,candidate)
     # Exists in the equivalency classes
     if candidate in equivs:
         candidate_suffix = ""
