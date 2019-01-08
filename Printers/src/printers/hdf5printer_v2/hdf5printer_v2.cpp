@@ -1138,7 +1138,7 @@ namespace Gambit
             std::size_t final_size = buffermaster.get_next_free_position();
             buffermaster.close_and_unlock_file();
 
-            std::cout<<"Final dataset size should be "<<final_size<<std::endl;
+            if(myRank==0) std::cout<<"Final dataset size is "<<final_size<<std::endl;
 
             for(auto it=aux_buffers.begin(); it!=aux_buffers.end(); ++it)
             {

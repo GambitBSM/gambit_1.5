@@ -296,7 +296,7 @@ namespace Gambit
                      coords[j] = it->first;
                  }
                  // Write buffer to disk
-                 write_RA_buffer(buffer,coords,j);
+                 if(j>0) write_RA_buffer(buffer,coords,j);
                  if(it==data.end()) all_data_written = true;
              }
              close_dataset();
