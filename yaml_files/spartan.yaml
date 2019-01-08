@@ -28,6 +28,7 @@ Printer:
     output_file: "results.hdf5"
     group: "/spartan"
     delete_file_on_restart: true
+    buffer_length: 100
 
   #printer: ascii
   #options:

@@ -35,6 +35,7 @@
 #include <algorithm>
 #include <set>
 #include <iterator>
+#include <string>
 
 // BOOST_PP
 #include <boost/preprocessor/seq/for_each_i.hpp>
@@ -92,6 +93,10 @@ namespace Gambit
          /// Close dataset on disk and release handles
          void close_dataset();
 
+         /// Create a new dataset at the specified location
+         /// (implemented in derived class since need to know the type)
+         virtual void create_dataset(hid_t location_id) = 0;
+
          /// Retrieve the current size of the dataset on disk
          std::size_t get_dset_length() const;
 
@@ -133,12 +138,8 @@ namespace Gambit
          hid_t get_dset_id() const;
 
          /// Set the variable that tracks the (virtual) dataset size on disk
-         void set_dset_length(const std::size_t newsize);
+         //void set_dset_length(const std::size_t newsize);
   
-         /// Create a new dataset at the specified location
-         /// (implemented in derived class since need to know the type)
-         virtual void create_dataset(hid_t location_id) = 0;
-
          /// Extend dataset by the specified amount
          void extend_dset_by(const std::size_t extend_by);
  
@@ -168,8 +169,8 @@ namespace Gambit
              bool all_data_written=false;
              T buffer[MAX_BUFFER_SIZE];
              std::size_t i = 0;
-             std::size_t new_dset_size;
              std::size_t offset = target_pos;
+             //std::cout<<"Preparing to write "<<data.size()<<" elements to dataset "<<myname()<<" at position "<<target_pos<<std::endl;
              while(not all_data_written)
              {
                  std::size_t j;
@@ -178,14 +179,16 @@ namespace Gambit
                      (j<MAX_BUFFER_SIZE) && (i<data.size());
                      ++j, ++i)
                  {
-                     buffer[j] = data[i];
+                     buffer[j] = data.at(i);
                  }
+                 //std::cout<<"    i="<<i<<", j="<<j<<", data.size()="<<data.size()<<", MAX_BUFFER_SIZE="<<MAX_BUFFER_SIZE<<std::endl;
                  // Write buffer to disk
-                 write_buffer(buffer,j+1,offset,force);
-                 offset += j+1;
-                 if(i+1==data.size()) all_data_written = true;
+                 //std::cout<<"Writing "<<j<<" elements to dataset "<<myname()<<" at position "<<offset<<std::endl; 
+                 write_buffer(buffer,j,offset,force);
+                 offset += j;
+                 if(i==data.size()) all_data_written = true;
              }
-             new_dset_size = get_dset_length();
+             std::size_t new_dset_size = get_dset_length();
              close_dataset();
 
              // Report new size of the dataset so that we can check that all datasets are the same length
@@ -225,18 +228,31 @@ namespace Gambit
                  printer_error().raise(LOCAL_INFO, errmsg.str());
              }
 
+             std::size_t required_size = target_pos+length;
              // Check that target position is allowed
-             if(not force and (target_pos < get_dset_length()))
+             if(target_pos < get_dset_length())
              {
-                 std::ostringstream errmsg;
-                 errmsg << "Error! Tried to write block to dataset (name="<<myname()<<"), but target index ("<<target_pos<<") is inside the current dataset extents (dset size="<<get_dset_length()<<"), i.e. some of the target slots are already used! This is a bug, please report it."; 
-                 printer_error().raise(LOCAL_INFO, errmsg.str());
+                 if(force)
+                 {
+                     if(required_size > get_dset_length())
+                     {
+                         // Some overlap into unused space, partial dataset extension required.
+                         extend_dset_to(required_size);
+                     }
+                     // Else whole target block is inside current dataset size. No extension required.
+                 }
+                 else
+                 {
+                     std::ostringstream errmsg;
+                     errmsg << "Error! Tried to write block to dataset (name="<<myname()<<"), but target index ("<<target_pos<<") is inside the current dataset extents (dset size="<<get_dset_length()<<"), i.e. some of the target slots are already used! This is a bug, please report it."; 
+                     printer_error().raise(LOCAL_INFO, errmsg.str());
+                 }
              }
-             // Number of slots to be skipped
-             std::size_t skip_length = target_pos - get_dset_length();
-
-             // Extend dataset to accommodate the new data to be added
-             extend_dset_by(skip_length + length);
+             else
+             {
+                 // Target block fully outside current dataset extents. Extend to fit.
+                 extend_dset_to(required_size);
+             }
 
              // Select output hyperslab
              // (this also determines what data will be read out of the buffer)
@@ -256,6 +272,8 @@ namespace Gambit
              // Release the hyperslab IDs
              H5Sclose(dspace_id);
              H5Sclose(memspace_id);
+
+             //std::cout<<"write_buffer finished; new dataset size is: "<<get_dset_length()<<std::endl;
          }
 
          /// Write data to disk at specified positions
@@ -278,7 +296,7 @@ namespace Gambit
                      coords[j] = it->first;
                  }
                  // Write buffer to disk
-                 write_RA_buffer(buffer,coords,j+1);
+                 write_RA_buffer(buffer,coords,j);
                  if(it==data.end()) all_data_written = true;
              }
              close_dataset();
@@ -304,13 +322,16 @@ namespace Gambit
 
              bool error_occurred = false; // simple error flag
 
+             // DEBUG: check coords array
+             //for(std::size_t i=0; i<npoints; i++) std::cout<<"coords["<<i<<"] = "<<coords[i]<<std::endl;
+
              // Check that no data is to be written outside the current dataset extents. This
              // function is only for writing back to points that already exist!  
              std::size_t max_coord = *std::max_element(coords,coords+npoints);
              if(max_coord > get_dset_length())
              {
                  std::ostringstream errmsg;
-                 errmsg<<"Attempted to perform RA write to a point outside the current dataset extents! The dataset should be resized prior to calling this function, so this is a bug, please report it.";
+                 errmsg<<"Attempted to perform RA write to a point outside the current dataset extents (max_coord="<<max_coord<<", dset_length="<<get_dset_length()<<")! The dataset should be resized prior to calling this function, so this is a bug, please report it.";
                  printer_error().raise(LOCAL_INFO, errmsg.str()); 
              }
 
@@ -388,7 +409,7 @@ namespace Gambit
              {
                  std::ostringstream errmsg;
                  errmsg << "Error retrieving chunk (offset="<<offset<<", length="<<length<<") from dataset (with name: \""<<myname()<<"\") in HDF5 file. H5Dread failed." << std::endl;
-                 errmsg << "  offset+length = "<< length << std::endl;
+                 errmsg << "  offset+length = "<< offset+length << std::endl;
                  errmsg << "  dset_length() = "<< get_dset_length() << std::endl;
                  printer_error().raise(LOCAL_INFO, errmsg.str());
              }
@@ -404,7 +425,9 @@ namespace Gambit
          /// it doesn't delete or resize the dataset
          void reset(hid_t loc_id)
          {
+             open_dataset(loc_id);
              std::size_t remaining_length = get_dset_length();
+             close_dataset();
              std::size_t target_pos = 0;
              while(remaining_length>0)
              {
@@ -424,13 +447,13 @@ namespace Gambit
              } 
          }
 
+         /// Create a new dataset at the specified location
+         void create_dataset(hid_t location_id);
+
       private:
 
          /// HDF5 identifier for the template type of this dataset
          static const hid_t hdftype_id;
-
-         /// Create a new dataset at the specified location
-         void create_dataset(hid_t location_id);
 
     };
 
@@ -438,7 +461,7 @@ namespace Gambit
     template<class T>
     const hid_t HDF5DataSet<T>::hdftype_id = get_hdf5_data_type<T>::type();
  
-    /// Create (and open) a (chunked) dataset
+    /// Create a (chunked) dataset
     template<class T>
     void HDF5DataSet<T>::create_dataset(hid_t location_id)
     {
@@ -488,7 +511,7 @@ namespace Gambit
         }
 
         // Create the dataset
-        dset_id = H5Dcreate2(location_id, myname().c_str(), hdftype_id, dspace_id, H5P_DEFAULT, cparms_id, H5P_DEFAULT);
+        hid_t dset_id = H5Dcreate2(location_id, myname().c_str(), hdftype_id, dspace_id, H5P_DEFAULT, cparms_id, H5P_DEFAULT);
         if(dset_id<0)
         {
             std::ostringstream errmsg;
@@ -499,6 +522,7 @@ namespace Gambit
         // Release the dataspace IDs
         H5Sclose(dspace_id);
         H5Pclose(cparms_id);
+        H5Dclose(dset_id);
     }
 
 
@@ -586,7 +610,7 @@ namespace Gambit
             if(order.size() != buffer.size())
             {
                 std::ostringstream errmsg;
-                errmsg << "Supplied buffer ordering vector is not the same size as the buffer! This is a bug, please report it.";
+                errmsg << "Supplied buffer ordering vector is not the same size as the buffer (buffer.size()="<<buffer.size()<<", order.size()="<<order.size()<<"). This is a bug, please report it.";
                 printer_error().raise(LOCAL_INFO, errmsg.str());
             }
 
@@ -595,6 +619,7 @@ namespace Gambit
 
             // Create a vector version of the buffer in the specified order
             std::vector<T> ordered_buffer;
+            std::vector<int> ordered_buffer_valid;
             for(auto ppid_it=order.begin(); ppid_it!=order.end(); ++ppid_it)
             {
                 if(done.count(*ppid_it)!=0)
@@ -603,7 +628,8 @@ namespace Gambit
                     errmsg << "Supplied buffer ordering vector contains a duplicate PPIDpair! This is a bug, please report it.";
                     printer_error().raise(LOCAL_INFO, errmsg.str());
                 }
-                ordered_buffer.push_back(buffer.at(*ppid_it));
+                ordered_buffer      .push_back(buffer      .at(*ppid_it));
+                ordered_buffer_valid.push_back(buffer_valid.at(*ppid_it));
                 done.insert(*ppid_it);
             }
 
@@ -618,17 +644,19 @@ namespace Gambit
             }
 
             // Perform dataset writes
-            std::size_t newsize   = my_dataset      .write_vector(loc_id,ordered_buffer,target_pos);
-
-            // Write the validity flags
-            std::vector<int> allvalid(ordered_buffer.size(),1);
-            std::size_t newsize_v = my_dataset_valid.write_vector(loc_id,allvalid,target_pos);
+            std::size_t newsize   = my_dataset      .write_vector(loc_id,ordered_buffer      ,target_pos);
+            std::size_t newsize_v = my_dataset_valid.write_vector(loc_id,ordered_buffer_valid,target_pos);
             if(newsize!=newsize_v)
             {
                 std::ostringstream errmsg;
                 errmsg<<"Inconsistent dataset sizes detected after buffer flush! (newsize="<<newsize<<", newsize_v="<<newsize_v<<")"; 
                 printer_error().raise(LOCAL_INFO, errmsg.str());
             }
+
+            // Clear buffer variables
+            buffer      .clear();
+            buffer_valid.clear();
+            buffer_set.clear();
         }
 
         /// Empty the buffer to disk as "random access" data at pre-existing positions matching the point IDs
@@ -638,6 +666,13 @@ namespace Gambit
         {
             std::map<std::size_t,T> pos_buffer;
             std::map<std::size_t,int> pos_buffer_valid;
+
+            // DEBUG inspect buffer
+            //for(auto it=buffer.begin(); it!=buffer.end(); ++it)
+            //{
+            //    std::cout<<"buffer["<<it->first<<"] = "<<it->second<<std::endl;
+            //}
+
             for(auto it=position_map.begin(); it!=position_map.end(); ++it)
             {
                 const PPIDpair& ppid = it->first;
@@ -654,7 +689,8 @@ namespace Gambit
                 pos_buffer_valid[position] = vit->second;
                 // Erase point from buffer
                 buffer      .erase(bit);
-                buffer_valid.erase(vit); 
+                buffer_valid.erase(vit);
+                buffer_set.erase(ppid); 
             }
             // Perform dataset writes          
             my_dataset      .write_random(loc_id, pos_buffer      );
@@ -672,6 +708,7 @@ namespace Gambit
                 // once they are marked as 'invalid'.
                 buffer      .clear();
                 buffer_valid.clear();
+                buffer_set.clear();
                 //my_dataset      .reset(loc_id);
                 my_dataset_valid.reset(loc_id);
             }
@@ -762,7 +799,7 @@ namespace Gambit
       public:
 
         /// Constructor  
-        HDF5MasterBuffer(const std::string& filename, const std::string& groupname, bool sync);
+        HDF5MasterBuffer(const std::string& filename, const std::string& groupname, const bool sync, const std::size_t buffer_length);
 
         /// Destructor
         ~HDF5MasterBuffer();
@@ -779,7 +816,26 @@ namespace Gambit
             if(it==buffered_points.end())
             {
                 update_all_buffers(mpirank,pointID);
+                // DEBUG
+                //std::cout<<"Adding point to buffer for dataset "<<label<<": "<<thispoint<<std::endl;
                 buffered_points.push_back(thispoint);
+            }
+
+            /// Flush buffers if they are full
+            if(buffered_points.size()>=get_buffer_length())
+            {
+                flush();
+
+                /// RA buffers may not have been able to fully flush, so check their length and report if it is getting big.
+                if(not is_synchronised())
+                {
+                    if(buffered_points.size() > MAX_BUFFER_SIZE and (buffered_points.size()%1000)==0)
+                    {
+                        std::stringstream msg;
+                        msg<<"The number of unflushable points in the non-synchronised print buffers is getting very large (current size is "<<buffered_points.size()<<"). This may indicate that some process has not been properly printing the synchronised points that it is computing. If nothing changes this process may run out of RAM for the printer buffers and crash.";
+                        printer_warning().raise(LOCAL_INFO,msg.str());  
+                    } 
+                }
             }
         }
 
@@ -801,9 +857,27 @@ namespace Gambit
         /// Report which group in the output file we are targeting
         std::string get_group();
 
-        /// Search the existing output and find the highest used pointIDs for each rank
-        std::map<ulong, ulonglong> get_highest_PPIDs(const int maxrank);
+        /// Report length of buffer for HDF5 output
+        std::size_t get_buffer_length();
  
+        /// Extend all datasets to the specified size;
+        void extend_all_datasets_to(const std::size_t length);
+
+        /// Search the existing output and find the highest used pointIDs for each rank
+        std::map<ulong, ulonglong> get_highest_PPIDs(const int mpisize);
+ 
+        /// Open (and lock) output HDF5 file and obtain HDF5 handles
+        void lock_and_open_file();
+
+        /// Close (and unlock) output HDF5 file and release HDF5 handles
+        void close_and_unlock_file();
+
+        /// Retrieve the location_id specifying where output should be created in the HDF5 file
+        hid_t get_location_id();
+ 
+        /// Get next available position in the synchronised output datasets
+        std::size_t get_next_free_position();
+
       private:
 
         /// Map containing pointers to all buffers managed by this object;
@@ -817,6 +891,9 @@ namespace Gambit
 
         /// Flag to specify what sort of buffer this manager is supposed to be managing
         bool synchronised;
+
+        /// Max allowed size of buffer
+        std::size_t buffer_length;
 
         /// Retrieve the buffer for a given output label (and type)
         template<class T>
@@ -832,9 +909,6 @@ namespace Gambit
       
         /// Obtain positions in output datasets for a buffer of points
         std::map<PPIDpair,std::size_t> get_position_map(const std::vector<PPIDpair>& buffer) const;
-
-        /// Get next available position in the synchronised output datasets
-        std::size_t get_next_free_position();
 
         /// Output file variales 
         std::string file;  // Output HDF5 file
@@ -859,13 +933,7 @@ namespace Gambit
 
         /// Ensure HDF5 file is open (and locked for us to use)
         void ensure_file_is_open() const; 
-
-        /// Open (and lock) output HDF5 file and obtain HDF5 handles
-        void lock_and_open_file();
-
-        /// Close (and unlock) output HDF5 file and release HDF5 handles
-        void close_and_unlock_file();
-
+       
         /// Buffer manager objects
         //  Need a map for every directly printable type, and a specialisation
         //  of 'get_buffer' to access it. 
@@ -906,6 +974,9 @@ namespace Gambit
         /// Report group in output HDF5 file of output datasets
         std::string get_groupname();
 
+        /// Report length of buffer for HDF5 output
+        std::size_t get_buffer_length();
+ 
         /// Base class virtual function overloads
         /// (the public virtual interface)
         ///@{
@@ -935,15 +1006,22 @@ namespace Gambit
 
         /// Add buffer to the primary printers records
         void add_aux_buffer(HDF5MasterBuffer& aux_buffermaster);
-           
+          
+        /// Get pointer to primary printer of this class type
+        /// (get_primary_printer returns a pointer-to-base)
+        HDF5Printer2* get_HDF5_primary_printer();
+            
       private:
+    
+        /// Convert pointer-to-base for primary printer into derived type  
+        HDF5Printer2* link_primary_printer(BasePrinter* const primary);
+  
+        /// Pointer to primary printer object
+        HDF5Printer2* primary_printer;
 
         /// Object interfacing to HDF5 file and all datasets
         HDF5MasterBuffer buffermaster;
        
-        /// Pointer to primary printer object
-        HDF5Printer2* primary_printer;
-
         /// Vector of pointers to master buffer objects for auxilliary printers
         /// Only the primary printer will have anything in this.
         std::vector<HDF5MasterBuffer*> aux_buffers;
@@ -960,6 +1038,9 @@ namespace Gambit
         /// Determine target group in output HDF5 file from options
         std::string get_groupname(const Options& options);
 
+        /// Get length of buffer from options (or primary printer)
+        std::size_t get_buffer_length(const Options& options);
+ 
         /// Search the existing output and find the highest used pointIDs for each rank
         std::map<ulong, ulonglong> get_highest_PPIDs_from_HDF5();
  
