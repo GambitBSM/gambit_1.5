@@ -69,7 +69,7 @@ START_MODULE
   START_CAPABILITY
 
     #define FUNCTION getPythia
-    START_FUNCTION(BaseCollider*)
+    START_FUNCTION(ColliderPythia_defaultversion)
     NEEDS_MANAGER_WITH_CAPABILITY(ColliderOperator)
     NEEDS_CLASSES_FROM(Pythia, default)
     DEPENDENCY(decay_rates, DecayTable)
@@ -77,13 +77,20 @@ START_MODULE
     #undef FUNCTION
 
     #define FUNCTION getPythiaFileReader
-    START_FUNCTION(BaseCollider*)
+    START_FUNCTION(ColliderPythia_defaultversion)
     NEEDS_MANAGER_WITH_CAPABILITY(ColliderOperator)
     NEEDS_CLASSES_FROM(Pythia, default)
     #undef FUNCTION
 
+    #define FUNCTION getPythiaAsBase
+    START_FUNCTION(const BaseCollider*)
+    NEEDS_MANAGER_WITH_CAPABILITY(ColliderOperator)
+    NEEDS_CLASSES_FROM(Pythia, default)
+    DEPENDENCY(HardScatteringSim, ColliderPythia_defaultversion)
+    #undef FUNCTION
+
     #define FUNCTION getPythia_EM
-    START_FUNCTION(BaseCollider*)
+    START_FUNCTION(ColliderPythia_EM_defaultversion)
     NEEDS_MANAGER_WITH_CAPABILITY(ColliderOperator)
     NEEDS_CLASSES_FROM(Pythia_EM, default)
     DEPENDENCY(decay_rates, DecayTable)
@@ -91,9 +98,16 @@ START_MODULE
     #undef FUNCTION
 
     #define FUNCTION getPythia_EMFileReader
-    START_FUNCTION(BaseCollider*)
+    START_FUNCTION(ColliderPythia_EM_defaultversion)
     NEEDS_MANAGER_WITH_CAPABILITY(ColliderOperator)
     NEEDS_CLASSES_FROM(Pythia_EM, default)
+    #undef FUNCTION
+
+    #define FUNCTION getPythia_EMAsBase
+    START_FUNCTION(const BaseCollider*)
+    NEEDS_MANAGER_WITH_CAPABILITY(ColliderOperator)
+    NEEDS_CLASSES_FROM(Pythia_EM, default)
+    DEPENDENCY(HardScatteringSim, ColliderPythia_EM_defaultversion)
     #undef FUNCTION
 
   #undef CAPABILITY
@@ -327,7 +341,7 @@ START_MODULE
     #define FUNCTION getATLASAnalysisContainer
     START_FUNCTION(HEPUtilsAnalysisContainer)
     NEEDS_MANAGER_WITH_CAPABILITY(ColliderOperator)
-    DEPENDENCY(HardScatteringSim, BaseCollider*)
+    DEPENDENCY(HardScatteringSim, const BaseCollider*)
     #undef FUNCTION
   #undef CAPABILITY
 
@@ -336,7 +350,7 @@ START_MODULE
     #define FUNCTION getATLASnoeffAnalysisContainer
     START_FUNCTION(HEPUtilsAnalysisContainer)
     NEEDS_MANAGER_WITH_CAPABILITY(ColliderOperator)
-    DEPENDENCY(HardScatteringSim, BaseCollider*)
+    DEPENDENCY(HardScatteringSim, const BaseCollider*)
     #undef FUNCTION
   #undef CAPABILITY
 
@@ -345,7 +359,7 @@ START_MODULE
     #define FUNCTION getCMSAnalysisContainer
     START_FUNCTION(HEPUtilsAnalysisContainer)
     NEEDS_MANAGER_WITH_CAPABILITY(ColliderOperator)
-    DEPENDENCY(HardScatteringSim, BaseCollider*)
+    DEPENDENCY(HardScatteringSim, const BaseCollider*)
     #undef FUNCTION
   #undef CAPABILITY
 
@@ -354,7 +368,7 @@ START_MODULE
     #define FUNCTION getCMSnoeffAnalysisContainer
     START_FUNCTION(HEPUtilsAnalysisContainer)
     NEEDS_MANAGER_WITH_CAPABILITY(ColliderOperator)
-    DEPENDENCY(HardScatteringSim, BaseCollider*)
+    DEPENDENCY(HardScatteringSim, const BaseCollider*)
     #undef FUNCTION
   #undef CAPABILITY
 
@@ -363,7 +377,7 @@ START_MODULE
     #define FUNCTION getIdentityAnalysisContainer
     START_FUNCTION(HEPUtilsAnalysisContainer)
     NEEDS_MANAGER_WITH_CAPABILITY(ColliderOperator)
-    DEPENDENCY(HardScatteringSim, BaseCollider*)
+    DEPENDENCY(HardScatteringSim, const BaseCollider*)
     #undef FUNCTION
   #undef CAPABILITY
 

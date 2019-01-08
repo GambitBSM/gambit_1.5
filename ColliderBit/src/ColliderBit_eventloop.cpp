@@ -327,12 +327,13 @@ namespace Gambit
 
     /// Retrieve a Pythia hard-scattering Monte Carlo simulation
     template<typename PythiaT, typename EventT>
-    BaseCollider* getColliderPythia(const Spectrum& MSSM_spectrum,
-                                    const DecayTable& decay_rates,
-                                    const int iteration,
-                                    void(*wrapup)(),
-                                    const Options& runOptions,
-                                    bool(*ModelInUse)(str))
+    void getColliderPythia(ColliderPythia<PythiaT, EventT>& result,
+                           const Spectrum& MSSM_spectrum,
+                           const DecayTable& decay_rates,
+                           const int iteration,
+                           void(*wrapup)(),
+                           const Options& runOptions,
+                           bool(*ModelInUse)(str))
     {
       static str pythia_doc_path;
       static str default_doc_path;
@@ -341,10 +342,6 @@ namespace Gambit
       static SLHAstruct slha;
       static SLHAstruct spectrum;
       static std::vector<double> xsec_vetos;
-
-      // Undercover Pythia
-      static ColliderPythia<PythiaT,EventT> MCs[omp_get_num_threads()];
-      int mine = omp_get_thread_num();
 
       if (iteration == BASE_INIT)
       {
@@ -356,7 +353,7 @@ namespace Gambit
             "/share/Pythia8/xmldoc/";
           pythia_doc_path = runOptions.getValueOrDef<str>(default_doc_path, "Pythia_doc_path");
           // Print the Pythia banner once.
-          MCs[mine].banner(pythia_doc_path);
+          result.banner(pythia_doc_path);
           pythia_doc_path_needs_setting = false;
         }
 
@@ -423,7 +420,7 @@ namespace Gambit
         // Thus, the actual Pythia initialization is
         // *after* COLLIDER_INIT, within omp parallel.
 
-        MCs[mine].clear();
+        result.clear();
 
         // Get the Pythia options that are common across all OMP threads ('pythiaCommonOptions')
         // and then add the thread-specific seed
@@ -434,11 +431,11 @@ namespace Gambit
           cout << debug_prefix() << "getColliderPythia: My Pythia seed is: " << std::to_string(seedBase + omp_get_thread_num()) << endl;
         #endif
 
-        MCs[mine].resetSpecialization(*iterPythiaNames);
+        result.resetSpecialization(*iterPythiaNames);
 
         try
         {
-          MCs[mine].init(pythia_doc_path, pythiaOptions, &slha, processLevelOutput);
+          result.init(pythia_doc_path, pythiaOptions, &slha, processLevelOutput);
         }
         catch (typename ColliderPythia<PythiaT,EventT>::InitializationError& e)
         {
@@ -447,7 +444,7 @@ namespace Gambit
           pythiaOptions.push_back("Random:seed = " + std::to_string(newSeedBase));
           try
           {
-            MCs[mine].init(pythia_doc_path, pythiaOptions, &slha, processLevelOutput);
+            result.init(pythia_doc_path, pythiaOptions, &slha, processLevelOutput);
           }
           catch (typename ColliderPythia<PythiaT,EventT>::InitializationError& e)
           {
@@ -456,7 +453,7 @@ namespace Gambit
             #endif
             piped_invalid_point.request("Bad point: Pythia can't initialize");
             wrapup();
-            return &MCs[mine];
+            return;
           }
         }
 
@@ -496,7 +493,7 @@ namespace Gambit
           #endif
           piped_invalid_point.request("Got NaN cross-section estimate from Pythia.");
           wrapup();
-          return &MCs[mine];
+          return;
         }
 
         // - Wrap up loop if veto applies
@@ -508,16 +505,16 @@ namespace Gambit
           wrapup();
         }
       }
-      return &MCs[mine];
     }
 
 
     /// Retrieve a Pythia hard-scattering Monte Carlo simulation constructed from SLHA files
     template<typename PythiaT, typename EventT>
-    BaseCollider* getColliderPythiaFileReader(const str& model_suffix,
-                                              int iteration,
-                                              void(*wrapup)(),
-                                              const Options& runOptions)
+    void getColliderPythiaFileReader(ColliderPythia<PythiaT, EventT>& result,
+                                     const str& model_suffix,
+                                     int iteration,
+                                     void(*wrapup)(),
+                                     const Options& runOptions)
     {
       static std::vector<str> filenames;
       static str default_doc_path;
@@ -526,10 +523,6 @@ namespace Gambit
       static bool pythia_doc_path_needs_setting = true;
       static unsigned int fileCounter = 0;
       static std::vector<double> xsec_vetos;
-
-      // Undercover Pythia
-      static ColliderPythia<PythiaT,EventT> MCs[omp_get_num_threads()];
-      int mine = omp_get_thread_num();
 
       if (iteration == BASE_INIT)
       {
@@ -541,7 +534,7 @@ namespace Gambit
             "/share/Pythia8/xmldoc/";
           pythia_doc_path = runOptions.getValueOrDef<str>(default_doc_path, "Pythia_doc_path");
           // Print the Pythia banner once.
-          MCs[mine].banner(pythia_doc_path);
+          result.banner(pythia_doc_path);
           pythia_doc_path_needs_setting = false;
         }
 
@@ -598,7 +591,7 @@ namespace Gambit
         // Thus, the actual Pythia initialization is
         // *after* COLLIDER_INIT, within omp parallel.
 
-        MCs[mine].clear();
+        result.clear();
 
         if (omp_get_thread_num() == 0) logger() << "Reading SLHA file: " << filenames.at(fileCounter) << EOM;
 
@@ -611,11 +604,11 @@ namespace Gambit
         cout << debug_prefix() << "getPythia"+model_suffix+"FileReader: My Pythia seed is: " << std::to_string(seedBase + omp_get_thread_num()) << endl;
         #endif
 
-        MCs[mine].resetSpecialization(*iterPythiaNames);
+        result.resetSpecialization(*iterPythiaNames);
 
         try
         {
-          MCs[mine].init(pythia_doc_path, pythiaOptions, processLevelOutput);
+          result.init(pythia_doc_path, pythiaOptions, processLevelOutput);
         }
         catch (typename ColliderPythia<PythiaT,EventT>::InitializationError& e)
         {
@@ -624,13 +617,13 @@ namespace Gambit
           pythiaOptions.push_back("Random:seed = " + std::to_string(newSeedBase));
           try
           {
-            MCs[mine].init(pythia_doc_path, pythiaOptions, processLevelOutput);
+            result.init(pythia_doc_path, pythiaOptions, processLevelOutput);
           }
           catch (typename ColliderPythia<PythiaT,EventT>::InitializationError& e)
           {
             piped_invalid_point.request("Bad point: Pythia can't initialize");
             wrapup();
-            return &MCs[mine];
+            return;
           }
         }
 
@@ -674,8 +667,6 @@ namespace Gambit
       }
 
       if (iteration == BASE_FINALIZE) fileCounter++;
-
-      return &MCs[mine];
 
     }
 
@@ -1890,18 +1881,20 @@ namespace Gambit
     // *** Hard Scattering Collider Simulators ***
 
     /// Retrieve a specific Pythia hard-scattering Monte Carlo simulation
-    #define GET_PYTHIA_AS_BASE_COLLIDER(NAME, PYTHIA_NS)                           \
-    void NAME(BaseCollider* &result)                                               \
-    {                                                                              \
-      using namespace Pipes::NAME;                                                 \
-      result = getColliderPythia<PYTHIA_NS::Pythia8::Pythia,                       \
-       PYTHIA_NS::Pythia8::Event>(*Dep::MSSM_spectrum, *Dep::decay_rates,          \
-       *Loop::iteration, Loop::wrapup, *runOptions, ModelInUse);                   \
+    #define GET_SPECIFIC_PYTHIA(NAME, PYTHIA_NS)                           \
+    void NAME(ColliderPythia<PYTHIA_NS::Pythia8::Pythia,                   \
+                             PYTHIA_NS::Pythia8::Event &result)            \
+    {                                                                      \
+      using namespace Pipes::NAME;                                         \
+      result = getColliderPythia<PYTHIA_NS::Pythia8::Pythia,               \
+       PYTHIA_NS::Pythia8::Event>(*Dep::MSSM_spectrum, *Dep::decay_rates,  \
+       *Loop::iteration, Loop::wrapup, *runOptions, ModelInUse);           \
     }
 
     /// Retrieve a specific Pythia hard-scattering Monte Carlo simulation, initialised from an SLHA file
-    #define GET_PYTHIA_AS_BASE_COLLIDER_FROM_SLHA(NAME, PYTHIA_NS, MODEL_EXTENSION)\
-    void NAME(BaseCollider* &result)                                               \
+    #define GET_SPECIFIC_PYTHIA_FROM_SLHA(NAME, PYTHIA_NS, MODEL_EXTENSION)        \
+    void NAME(ColliderPythia<PYTHIA_NS::Pythia8::Pythia,                           \
+                             PYTHIA_NS::Pythia8::Event &result)                    \
     {                                                                              \
       using namespace Pipes::NAME;                                                 \
       result = getColliderPythiaFileReader<PYTHIA_NS::Pythia8::Pythia,             \
@@ -1909,11 +1902,20 @@ namespace Gambit
        *runOptions);                                                               \
     }
 
-    GET_PYTHIA_AS_BASE_COLLIDER(getPythia, Pythia_default)
-    GET_PYTHIA_AS_BASE_COLLIDER_FROM_SLHA(getPythiaFileReader, Pythia_default, )
+    /// Get a specific Pythia hard-scattering sim as a generator-independent pointer-to-BaseCollider
+    #define GET_PYTHIA_AS_BASE_COLLIDER(NAME)           \
+    void NAME(const BaseCollider*)                      \
+    {                                                   \
+      result = &(*Pipes::NAME::Dep::HardScatteringSim;  \
+    }                                                   \
 
-    GET_PYTHIA_AS_BASE_COLLIDER(getPythia_EM, Pythia_EM_default)
-    GET_PYTHIA_AS_BASE_COLLIDER_FROM_SLHA(getPythia_EMFileReader, Pythia_EM_default, _EM)
+    GET_SPECIFIC_PYTHIA(getPythia, Pythia_default)
+    GET_SPECIFIC_PYTHIA_FROM_SLHA(getPythiaFileReader, Pythia_default, )
+    GET_PYTHIA_AS_BASE_COLLIDER(getPythiaAsBase)
+
+    GET_SPECIFIC_PYTHIA(getPythia_EM, Pythia_EM_default)
+    GET_SPECIFIC_PYTHIA_FROM_SLHA(getPythia_EMFileReader, Pythia_EM_default, )
+    GET_PYTHIA_AS_BASE_COLLIDER(getPythia_EMAsBase)
 
 
     // *** Hard Scattering Event Generators ***
