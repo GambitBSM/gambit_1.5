@@ -385,12 +385,19 @@ namespace Gambit
 
         // Determine next available output slot (i.e. current nominal dataset length)
         std::size_t target_pos = get_next_free_position();
-        //std::cout<<"Preparing to flush buffers to target position "<<target_pos<<std::endl;
 
         // Behaviour is different depending on whether this buffer manager
         // manages synchronised or RA buffers
         if(is_synchronised())
         {
+            // DEBUG
+            //std::cout<<"Preparing to flush "<<buffered_points.size()<<" points to target position "<<target_pos<<std::endl;
+            //std::size_t i=0;
+            //for(auto it=buffered_points.begin(); it!=buffered_points.end(); ++it, ++i)
+            //{
+            //    std::cout<<"   buffered_point "<<i<<": "<<(*it)<<std::endl;
+            //}
+
             for(auto it=all_buffers.begin(); it!=all_buffers.end(); ++it)
             {
                 // Extend the output datasets to the next free position (in case some have been left behind)
@@ -404,8 +411,9 @@ namespace Gambit
             buffered_points.clear();
         } 
         else
-        {
-         
+        {     
+            //std::cout<<"Preparing to flush "<<buffered_points.size()<<" random-access points to datasets with length "<<target_pos<<std::endl;
+
             // DEBUG inspect buffered points
             //std::size_t i=0;
             //for(auto it=buffered_points.begin(); it!=buffered_points.end(); ++it, ++i)
@@ -448,7 +456,7 @@ namespace Gambit
                 // Tell all buffers to write their points to disk according to the position map
                 for(auto jt = all_buffers.begin(); jt!=all_buffers.end(); ++jt)
                 {
-                    // Extend datasets to current nominal size
+                    // Extend datasets to current nominal size and flush RA data
                     jt->second->ensure_dataset_exists(location_id, target_pos);
                     jt->second->random_flush(location_id, position_map);
                 }
@@ -653,6 +661,8 @@ namespace Gambit
         // DEBUG check that copy was correct
         //for(auto it=buffer_set.begin(); it!=buffer_set.end(); ++it) std::cout<<" buffer_set item: "<<(*it)<<std::endl; 
 
+        //std::cout<<"Obtaining position map for random access write"<<std::endl;
+
         // Open all datasets that we need
         mpiranks      .open_dataset(location_id);
         mpiranks_valid.open_dataset(location_id);
@@ -682,12 +692,15 @@ namespace Gambit
             auto pt =p_chunk .begin();
             auto pvt=pv_chunk.begin();
             for(; // Variables declared above due to different types
-                (rt!=r_chunk.end()) 
+                (rt !=r_chunk.end() ) 
              && (rvt!=rv_chunk.end())
-             && (pt!=p_chunk.end())
+             && (pt !=p_chunk.end() )
              && (pvt!=pv_chunk.end());
                 ++rt,++rvt,++pt,++pvt,++position)
             {
+                //DEBUG Dump everything as we read it
+                //std::cout<<"position: "<<position<<", point: ("<<(*rt)<<", "<<(*pt)<<"), valid: ("<<(*rvt)<<", "<<(*pvt)<<")"<<std::endl;
+
                 // Check if point is valid
                 if((*rvt) and (*pvt))
                 {
@@ -695,6 +708,7 @@ namespace Gambit
                     PPIDpair candidate(*rt,*pt);
                     if(buffer_set.count(candidate)>0)
                     {
+                        //std::cout<<"   Point "<<candidate<<" is a match at position "<<position<<std::endl;
                         position_map_out[candidate] = position;
                     }
                 } 
@@ -718,6 +732,12 @@ namespace Gambit
         mpiranks_valid.close_dataset();
         pointids      .close_dataset();
         pointids_valid.close_dataset();
+
+        // DEBUG check result
+        //for(auto it=position_map_out.begin(); it!=position_map_out.end(); ++it)
+        //{
+        //    std::cout<<"Point "<<it->first<<" found at index "<<it->second<<std::endl;
+        //}
 
         return position_map_out; 
     }

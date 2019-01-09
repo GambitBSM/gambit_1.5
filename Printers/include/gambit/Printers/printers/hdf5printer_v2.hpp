@@ -179,6 +179,8 @@ namespace Gambit
                      (j<MAX_BUFFER_SIZE) && (i<data.size());
                      ++j, ++i)
                  {
+                     // DEBUG inspect buffer
+                     //std::cout<< "   buffer["<<j<<"] = data.at("<<i<<") = "<<data.at(i)<<std::endl;
                      buffer[j] = data.at(i);
                  }
                  //std::cout<<"    i="<<i<<", j="<<j<<", data.size()="<<data.size()<<", MAX_BUFFER_SIZE="<<MAX_BUFFER_SIZE<<std::endl;
@@ -215,6 +217,12 @@ namespace Gambit
                  errmsg << "Error! Received buffer of length zero! This will cause an error when trying to select element for writing, and there is no point calling this function with no points to write anyway. Please review the input to this function (error occurred while tring to perform block write for dataset (name="<<myname()<<"))"; 
                  printer_error().raise(LOCAL_INFO, errmsg.str());
              }
+
+             // DEBUG dump whole buffer up to length to check it
+             //for(std::size_t i=0;i<length;++i)
+             //{
+             //    std::cout<<"    buffer["<<i<<"] = "<<buffer[i]<<std::endl;
+             //}
 
              ensure_dataset_is_open();
 
@@ -643,6 +651,13 @@ namespace Gambit
                 printer_error().raise(LOCAL_INFO, errmsg.str());
             }
 
+            if(ordered_buffer.size() != buffer.size())
+            {
+                std::ostringstream errmsg;
+                errmsg << "The ordered buffer we just constructed is not the same size as the original buffer! This is a bug, please report it.";
+                printer_error().raise(LOCAL_INFO, errmsg.str());
+            }
+
             // Perform dataset writes
             std::size_t newsize   = my_dataset      .write_vector(loc_id,ordered_buffer      ,target_pos);
             std::size_t newsize_v = my_dataset_valid.write_vector(loc_id,ordered_buffer_valid,target_pos);
@@ -808,35 +823,44 @@ namespace Gambit
         template<class T>
         void schedule_print(T const& value, const std::string& label, const unsigned int mpirank, const unsigned long pointID)
         {
-            get_buffer<T>(label).append(value,mpirank,pointID);
-
             /// Check if the point is known to be in the buffers already
             PPIDpair thispoint(mpirank,pointID);
             auto it = std::find(buffered_points.begin(),buffered_points.end(),thispoint);
             if(it==buffered_points.end())
             {
+                /// This is a new point! See if buffers are full and need to be flushed
+                if(is_synchronised() and buffered_points.size()>get_buffer_length())
+                {
+                    /// Sync buffers exceeded the allowed size somehow
+                    std::stringstream msg;
+                    msg<<"The allowed sync buffer size has somehow been exceeded! Buffers should have been flushed when they were full. This is a bug, please report it.";
+                    printer_error().raise(LOCAL_INFO,msg.str());  
+                }
+                else if(buffered_points.size()>=get_buffer_length())
+                {
+                    flush();
+
+                    /// RA buffers may not have been able to fully flush, so check their length and report if it is getting big.
+                    if(not is_synchronised())
+                    {
+                        if(buffered_points.size() > MAX_BUFFER_SIZE and (buffered_points.size()%1000)==0)
+                        {
+                            std::stringstream msg;
+                            msg<<"The number of unflushable points in the non-synchronised print buffers is getting very large (current size is "<<buffered_points.size()<<"). This may indicate that some process has not been properly printing the synchronised points that it is computing. If nothing changes this process may run out of RAM for the printer buffers and crash.";
+                            printer_warning().raise(LOCAL_INFO,msg.str());  
+                        } 
+                    }
+                }
+            
+                // Inform all buffers of this new point
                 update_all_buffers(mpirank,pointID);
                 // DEBUG
                 //std::cout<<"Adding point to buffer for dataset "<<label<<": "<<thispoint<<std::endl;
                 buffered_points.push_back(thispoint);
             }
 
-            /// Flush buffers if they are full
-            if(buffered_points.size()>=get_buffer_length())
-            {
-                flush();
-
-                /// RA buffers may not have been able to fully flush, so check their length and report if it is getting big.
-                if(not is_synchronised())
-                {
-                    if(buffered_points.size() > MAX_BUFFER_SIZE and (buffered_points.size()%1000)==0)
-                    {
-                        std::stringstream msg;
-                        msg<<"The number of unflushable points in the non-synchronised print buffers is getting very large (current size is "<<buffered_points.size()<<"). This may indicate that some process has not been properly printing the synchronised points that it is computing. If nothing changes this process may run out of RAM for the printer buffers and crash.";
-                        printer_warning().raise(LOCAL_INFO,msg.str());  
-                    } 
-                }
-            }
+            // Add the new data to the buffer
+            get_buffer<T>(label).append(value,mpirank,pointID);
         }
 
         /// Empty all buffers to disk
