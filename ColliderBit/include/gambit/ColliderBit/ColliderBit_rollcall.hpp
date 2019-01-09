@@ -162,7 +162,6 @@ START_MODULE
 
 
   #define CAPABILITY ATLASDetectorSim
-  START_CAPABILITY
     #define FUNCTION getBuckFastATLASPythia_EM
     START_FUNCTION(ColliderBit::BaseDetector<Pythia_EM_default::Pythia8::Event>*)
     NEEDS_MANAGER_WITH_CAPABILITY(ColliderOperator)
@@ -171,7 +170,6 @@ START_MODULE
   #undef CAPABILITY
 
   #define CAPABILITY ATLASnoeffDetectorSim
-  START_CAPABILITY
     #define FUNCTION getBuckFastATLASnoeffPythia_EM
     START_FUNCTION(ColliderBit::BaseDetector<Pythia_EM_default::Pythia8::Event>*)
     NEEDS_MANAGER_WITH_CAPABILITY(ColliderOperator)
@@ -180,7 +178,6 @@ START_MODULE
   #undef CAPABILITY
 
   #define CAPABILITY CMSDetectorSim
-  START_CAPABILITY
     #define FUNCTION getBuckFastCMSPythia_EM
     START_FUNCTION(ColliderBit::BaseDetector<Pythia_EM_default::Pythia8::Event>*)
     NEEDS_MANAGER_WITH_CAPABILITY(ColliderOperator)
@@ -189,7 +186,6 @@ START_MODULE
   #undef CAPABILITY
 
   #define CAPABILITY CMSnoeffDetectorSim
-  START_CAPABILITY
     #define FUNCTION getBuckFastCMSnoeffPythia_EM
     START_FUNCTION(ColliderBit::BaseDetector<Pythia_EM_default::Pythia8::Event>*)
     NEEDS_MANAGER_WITH_CAPABILITY(ColliderOperator)
@@ -198,7 +194,6 @@ START_MODULE
   #undef CAPABILITY
 
   #define CAPABILITY IdentityDetectorSim
-  START_CAPABILITY
     #define FUNCTION getBuckFastIdentityPythia_EM
     START_FUNCTION(ColliderBit::BaseDetector<Pythia_EM_default::Pythia8::Event>*)
     NEEDS_MANAGER_WITH_CAPABILITY(ColliderOperator)
