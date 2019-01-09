@@ -274,11 +274,11 @@ namespace Gambit
     bool typeComp(str s1, str s2, const Utils::type_equivalency & eq, bool with_regex)
     {
       bool match1, match2;
-      // Loop over all the default versions of BOSSed backends and strip off any corresponding leading namespace.
+      // Loop over all the default versions of BOSSed backends and replace any corresponding *_default leading namespace with the explicit version.
       for (auto it = Backends::backendInfo().default_safe_versions.begin(); it != Backends::backendInfo().default_safe_versions.end(); ++it)
       {
-        s1 = Utils::strip_leading_namespace(s1, it->first+"_"+it->second);
-        s2 = Utils::strip_leading_namespace(s2, it->first+"_"+it->second);
+        s1 = Utils::replace_leading_namespace(s1, it->first+"_default", it->first+"_"+it->second);
+        s2 = Utils::replace_leading_namespace(s2, it->first+"_default", it->first+"_"+it->second);
       }
       // Does it just match?
       if (stringComp(s1, s2, with_regex)) return true;
