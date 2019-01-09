@@ -57,25 +57,30 @@ namespace Gambit
         return dset_id;
     }
 
-    /// Ensure that the dataset exists with the specified length
-    void HDF5DataSetBase::ensure_dataset_exists(const hid_t loc_id, const std::size_t length)
+    /// Check if our dataset exists on disk with the required name at the given location
+    bool HDF5DataSetBase::dataset_exists(const hid_t loc_id)
     {
+        bool exists(false);
         htri_t r = H5Lexists(loc_id, myname().c_str(), H5P_DEFAULT);
-        if(r>0)
-        {
-            // Dataset exists, continue
-        }
-        else if(r==0)
-        {
-            // Dataset doesn't exist; create it
-            create_dataset(loc_id);
-        }
+        if(r>0) exists=true;
+        else if(r==0) exists=false;
         else
         {
             // Something else went wrong; error
             std::ostringstream errmsg;
             errmsg<<"HDF5 error encountered while checking if dataset named '"<<myname()<<"' exists!";
             printer_error().raise(LOCAL_INFO, errmsg.str());     
+        }
+        return exists;
+    }
+
+    /// Ensure that the dataset exists with the specified length
+    void HDF5DataSetBase::ensure_dataset_exists(const hid_t loc_id, const std::size_t length)
+    {
+        if(not dataset_exists(loc_id))
+        {
+            // Dataset doesn't exist; create it
+            create_dataset(loc_id);
         }
 
         // Make sure length is correct (add fill values as needed);

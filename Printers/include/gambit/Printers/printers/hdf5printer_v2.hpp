@@ -100,6 +100,9 @@ namespace Gambit
          /// Retrieve the current size of the dataset on disk
          std::size_t get_dset_length() const;
 
+         /// Check if our dataset exists on disk with the required name at the given location
+         bool dataset_exists(const hid_t loc_id);
+
          /// Ensure that a correctly named dataset exists at the target location with the specified length
          void ensure_dataset_exists(const hid_t loc_id, const std::size_t length);
 
@@ -433,26 +436,31 @@ namespace Gambit
          /// it doesn't delete or resize the dataset
          void reset(hid_t loc_id)
          {
-             open_dataset(loc_id);
-             std::size_t remaining_length = get_dset_length();
-             close_dataset();
-             std::size_t target_pos = 0;
-             while(remaining_length>0)
+             if(dataset_exists(loc_id))
              {
-                 std::vector<T> zero_buffer;
-                 if(remaining_length>=MAX_BUFFER_SIZE)
+                 open_dataset(loc_id);
+                 std::size_t remaining_length = get_dset_length();
+                 close_dataset();
+                 std::size_t target_pos = 0;
+                 while(remaining_length>0)
                  {
-                     zero_buffer = std::vector<T>(MAX_BUFFER_SIZE);
-                     remaining_length -= MAX_BUFFER_SIZE;
+                     std::vector<T> zero_buffer;
+                     if(remaining_length>=MAX_BUFFER_SIZE)
+                     {
+                         zero_buffer = std::vector<T>(MAX_BUFFER_SIZE);
+                         remaining_length -= MAX_BUFFER_SIZE;
+                     }
+                     else
+                     {
+                         zero_buffer = std::vector<T>(remaining_length);
+                         remaining_length = 0;
+                     }
+                     write_vector(loc_id, zero_buffer, target_pos, true);
+                     target_pos += MAX_BUFFER_SIZE;
                  }
-                 else
-                 {
-                     zero_buffer = std::vector<T>(remaining_length);
-                     remaining_length = 0;
-                 }
-                 write_vector(loc_id, zero_buffer, target_pos, true);
-                 target_pos += MAX_BUFFER_SIZE;
-             } 
+             }
+             // else the dataset doesn't even exist yet (no buffer flushes have occurred yet),
+             // so don't need to reset anything. 
          }
 
          /// Create a new dataset at the specified location
