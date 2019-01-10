@@ -421,10 +421,26 @@ HardScatteringEvent: |
    Uses the given HardScatteringSim to generate the next event
    of the collider simulation chain.
 
-SimpleSmearingSim: |
-   Provides a set of BuckFast functions within a container
-   which is ready to apply ATLAS smearing and reconstruction
-   efficiencies to an event.
+ATLASDetectorSim: |
+   Provides a set functions within a container ready to apply ATLAS
+   smearing and reconstruction efficiencies to an event.
+
+ATLASnoeffDetectorSim: |
+   Provides a set functions within a container ready to apply ATLAS
+   smearing to an event.  Effiencies must be applied on a per-analysis
+   basis.
+
+CMSDetectorSim: |
+   Provides a set functions within a container ready to apply CMS
+   smearing and reconstruction efficiencies to an event.
+
+CMSnoeffDetectorSim: |
+   Provides a set functions within a container ready to apply CMS
+   smearing to an event.  Effiencies must be applied on a per-analysis
+   basis.
+
+IdentityDetectorSim: |
+   Provides a fake detector sim, which simply returns truth-level events.
 
 ATLASSmearedEvent: |
    Uses the given SimpleSmearingSim to apply smearing and
@@ -1057,8 +1073,8 @@ LEP208_xsec_staurstaurbar: |
    The LEP pair production cross-section for sfermion
    eigenstates 'staur' and 'staurbar' at centre of mass energy 208 GeV.
 
-Pythia_8_212_EM_init: |
-   Initializes Pythia 8.212 EM.
+Pythia__EM_8_212_init: |
+   Initializes Pythia_EM 8.212.
 
 Pythia_8_212_init: |
    Initializes Pythia 8.212.

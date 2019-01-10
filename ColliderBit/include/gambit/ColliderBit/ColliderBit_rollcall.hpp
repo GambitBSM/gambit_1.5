@@ -231,7 +231,7 @@ START_MODULE
     NEEDS_MANAGER_WITH_CAPABILITY(ColliderOperator)
     NEEDS_CLASSES_FROM(Pythia, default)
     DEPENDENCY(HardScatteringEvent, Pythia_default::Pythia8::Event)
-    DEPENDENCY(ATLASDetectorSim, BaseDetector<Pythia_default::Pythia8::Event>*)
+    DEPENDENCY(ATLASDetectorSim, ColliderBit::BaseDetector<Pythia_default::Pythia8::Event>*)
     #undef FUNCTION
 
     #define FUNCTION smearEventATLAS_EM
@@ -239,7 +239,7 @@ START_MODULE
     NEEDS_MANAGER_WITH_CAPABILITY(ColliderOperator)
     NEEDS_CLASSES_FROM(Pythia_EM, default)
     DEPENDENCY(HardScatteringEvent, Pythia_EM_default::Pythia8::Event)
-    DEPENDENCY(ATLASDetectorSim, BaseDetector<Pythia_EM_default::Pythia8::Event>*)
+    DEPENDENCY(ATLASDetectorSim, ColliderBit::BaseDetector<Pythia_EM_default::Pythia8::Event>*)
     #undef FUNCTION
 
   #undef CAPABILITY
@@ -252,7 +252,7 @@ START_MODULE
     NEEDS_MANAGER_WITH_CAPABILITY(ColliderOperator)
     NEEDS_CLASSES_FROM(Pythia, default)
     DEPENDENCY(HardScatteringEvent, Pythia_default::Pythia8::Event)
-    DEPENDENCY(ATLASnoeffDetectorSim, BaseDetector<Pythia_default::Pythia8::Event>*)
+    DEPENDENCY(ATLASnoeffDetectorSim, ColliderBit::BaseDetector<Pythia_default::Pythia8::Event>*)
     #undef FUNCTION
 
     #define FUNCTION smearEventATLASnoeff_EM
@@ -260,7 +260,7 @@ START_MODULE
     NEEDS_MANAGER_WITH_CAPABILITY(ColliderOperator)
     NEEDS_CLASSES_FROM(Pythia_EM, default)
     DEPENDENCY(HardScatteringEvent, Pythia_EM_default::Pythia8::Event)
-    DEPENDENCY(ATLASnoeffDetectorSim, BaseDetector<Pythia_EM_default::Pythia8::Event>*)
+    DEPENDENCY(ATLASnoeffDetectorSim, ColliderBit::BaseDetector<Pythia_EM_default::Pythia8::Event>*)
     #undef FUNCTION
 
   #undef CAPABILITY
@@ -273,7 +273,7 @@ START_MODULE
     NEEDS_MANAGER_WITH_CAPABILITY(ColliderOperator)
     NEEDS_CLASSES_FROM(Pythia, default)
     DEPENDENCY(HardScatteringEvent, Pythia_default::Pythia8::Event)
-    DEPENDENCY(CMSDetectorSim, BaseDetector<Pythia_default::Pythia8::Event>*)
+    DEPENDENCY(CMSDetectorSim, ColliderBit::BaseDetector<Pythia_default::Pythia8::Event>*)
     #undef FUNCTION
 
     #define FUNCTION smearEventCMS_EM
@@ -281,7 +281,7 @@ START_MODULE
     NEEDS_MANAGER_WITH_CAPABILITY(ColliderOperator)
     NEEDS_CLASSES_FROM(Pythia_EM, default)
     DEPENDENCY(HardScatteringEvent, Pythia_EM_default::Pythia8::Event)
-    DEPENDENCY(CMSDetectorSim, BaseDetector<Pythia_EM_default::Pythia8::Event>*)
+    DEPENDENCY(CMSDetectorSim, ColliderBit::BaseDetector<Pythia_EM_default::Pythia8::Event>*)
     #undef FUNCTION
 
   #undef CAPABILITY
@@ -294,7 +294,7 @@ START_MODULE
     NEEDS_MANAGER_WITH_CAPABILITY(ColliderOperator)
     NEEDS_CLASSES_FROM(Pythia, default)
     DEPENDENCY(HardScatteringEvent, Pythia_default::Pythia8::Event)
-    DEPENDENCY(CMSnoeffDetectorSim, BaseDetector<Pythia_default::Pythia8::Event>*)
+    DEPENDENCY(CMSnoeffDetectorSim, ColliderBit::BaseDetector<Pythia_default::Pythia8::Event>*)
     #undef FUNCTION
 
     #define FUNCTION smearEventCMSnoeff_EM
@@ -302,7 +302,7 @@ START_MODULE
     NEEDS_MANAGER_WITH_CAPABILITY(ColliderOperator)
     NEEDS_CLASSES_FROM(Pythia_EM, default)
     DEPENDENCY(HardScatteringEvent, Pythia_EM_default::Pythia8::Event)
-    DEPENDENCY(CMSnoeffDetectorSim, BaseDetector<Pythia_EM_default::Pythia8::Event>*)
+    DEPENDENCY(CMSnoeffDetectorSim, ColliderBit::BaseDetector<Pythia_EM_default::Pythia8::Event>*)
     #undef FUNCTION
 
   #undef CAPABILITY
@@ -315,7 +315,7 @@ START_MODULE
     NEEDS_MANAGER_WITH_CAPABILITY(ColliderOperator)
     NEEDS_CLASSES_FROM(Pythia, default)
     DEPENDENCY(HardScatteringEvent, Pythia_default::Pythia8::Event)
-    DEPENDENCY(IdentityDetectorSim, BaseDetector<Pythia_default::Pythia8::Event>*)
+    DEPENDENCY(IdentityDetectorSim, ColliderBit::BaseDetector<Pythia_default::Pythia8::Event>*)
     #undef FUNCTION
 
     #define FUNCTION copyEvent_EM
@@ -323,7 +323,7 @@ START_MODULE
     NEEDS_MANAGER_WITH_CAPABILITY(ColliderOperator)
     NEEDS_CLASSES_FROM(Pythia_EM, default)
     DEPENDENCY(HardScatteringEvent, Pythia_EM_default::Pythia8::Event)
-    DEPENDENCY(IdentityDetectorSim, BaseDetector<Pythia_EM_default::Pythia8::Event>*)
+    DEPENDENCY(IdentityDetectorSim, ColliderBit::BaseDetector<Pythia_EM_default::Pythia8::Event>*)
     #undef FUNCTION
 
   #undef CAPABILITY
