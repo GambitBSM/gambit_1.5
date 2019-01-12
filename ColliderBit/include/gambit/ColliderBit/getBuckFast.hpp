@@ -39,6 +39,7 @@
 #include "gambit/ColliderBit/ColliderBit_eventloop.hpp"
 #include "gambit/ColliderBit/ATLASEfficiencies.hpp"
 #include "gambit/ColliderBit/CMSEfficiencies.hpp"
+#include "gambit/ColliderBit/detectors/BuckFast_definitions.hpp"
 
 #include "HEPUtils/FastJet.h"
 

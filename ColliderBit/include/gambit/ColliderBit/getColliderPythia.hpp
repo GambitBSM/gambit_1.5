@@ -52,6 +52,11 @@ namespace Gambit
                            const MCLoopInfo& RunMC,
                            const Spectrum& MSSM_spectrum,
                            const DecayTable& decay_rates,
+                           #ifdef COLLIDERBIT_DEBUG
+                             str model_suffix,
+                           #else
+                             str,
+                           #endif
                            const int iteration,
                            void(*wrapup)(),
                            const Options& runOptions,
@@ -144,12 +149,14 @@ namespace Gambit
 
         result.clear();
 
-        // Get the Pythia options that are common across all OMP threads ('pythiaCommonOptions') and then add the thread-specific seed
+        // Get the Pythia options that are common across all OMP threads ('pythiaCommonOptions')
+        // and then add the thread-specific seed
         std::vector<str> pythiaOptions = pythiaCommonOptions;
         pythiaOptions.push_back("Random:seed = " + std::to_string(RunMC.current_seed_base() + omp_get_thread_num()));
 
         #ifdef COLLIDERBIT_DEBUG
-          cout << debug_prefix() << "getColliderPythia: My Pythia seed is: " << std::to_string(RunMC.current_seed_base() + omp_get_thread_num()) << endl;
+          str extra = model_suffix == "" ? "" : "_" + model_suffix;
+          cout << debug_prefix() << "getPythia"+extra+": My Pythia seed is: " << std::to_string(RunMC.current_seed_base() + omp_get_thread_num()) << endl;
         #endif
 
         result.resetSpecialization(RunMC.current_collider);
@@ -206,7 +213,7 @@ namespace Gambit
         cout << debug_prefix() << "totalxsec [fb] = " << totalxsec * 1e12 << ", veto limit [fb] = " << totalxsec_fb_veto << endl;
         #endif
 
-        // - Check for NaN xsed
+        // - Check for NaN xsec
         if (Utils::isnan(totalxsec))
         {
           #ifdef COLLIDERBIT_DEBUG
@@ -277,7 +284,7 @@ namespace Gambit
         CHECK_EQUAL_VECTOR_LENGTH(xsec_vetos, RunMC.collider_names)
       }
 
-      if (iteration == COLLIDER_INIT)
+      else if (iteration == COLLIDER_INIT)
       {
         // Collect Pythia options that are common across all OMP threads
         pythiaCommonOptions.clear();
@@ -300,9 +307,9 @@ namespace Gambit
         pythiaCommonOptions.push_back("SLHA:file = " + filenames.at(fileCounter));
       }
 
-      if (iteration == START_SUBPROCESS)
+      else if (iteration == START_SUBPROCESS)
       {
-        // variables for xsec veto
+        // Variables needed for the xsec veto
         std::stringstream processLevelOutput;
         str _junk, readline;
         int code, nxsec;
@@ -389,19 +396,19 @@ namespace Gambit
 
       }
 
-      if (iteration == BASE_FINALIZE) fileCounter++;
+      else if (iteration == BASE_FINALIZE) fileCounter++;
 
     }
 
     /// Retrieve a specific Pythia hard-scattering Monte Carlo simulation
-    #define GET_SPECIFIC_PYTHIA(NAME, PYTHIA_NS)                         \
+    #define GET_SPECIFIC_PYTHIA(NAME, PYTHIA_NS, MODEL_EXTENSION)        \
     void NAME(ColliderPythia<PYTHIA_NS::Pythia8::Pythia,                 \
                              PYTHIA_NS::Pythia8::Event> &result)         \
     {                                                                    \
       using namespace Pipes::NAME;                                       \
       getColliderPythia(result, *Dep::RunMC, *Dep::MSSM_spectrum,        \
-       *Dep::decay_rates, *Loop::iteration, Loop::wrapup, *runOptions,   \
-       ModelInUse);                                                      \
+       *Dep::decay_rates, #MODEL_EXTENSION, *Loop::iteration,            \
+       Loop::wrapup, *runOptions, ModelInUse);                           \
     }
 
     /// Retrieve a specific Pythia hard-scattering Monte Carlo simulation, initialised from an SLHA file

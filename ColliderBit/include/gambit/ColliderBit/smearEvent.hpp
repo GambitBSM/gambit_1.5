@@ -55,7 +55,7 @@ namespace Gambit
                     const str& ID,
                     void(*wrapup)())
     {
-      bool useDetector = true; /// @todo this needs to instead be determined by polling a new global option collider_analyses containing *all* analyses.
+      bool useDetector = true; /// @todo this needs to instead be determined by polling a new option collider_analyses containing *all* analyses.
                                /// If collider_analyses[RunMC.current_collider_index] is empty of analyses that use detector Smearer [as determined by
                                /// a new function to be added to the analysis class, e.g. uses_detector(str& detname) and which tests against
                                /// new analysis metadata indicating which detector the analysis is for], then useDetector should be set false.
