@@ -124,9 +124,9 @@ START_MODULE
     #undef FUNCTION
   #undef CAPABILITY
 
-  #define CAPABILITY ATLASnoeffDetectorSim
+  #define CAPABILITY ATLASmultieffDetectorSim
   START_CAPABILITY
-    #define FUNCTION getBuckFastATLASnoeffPythia
+    #define FUNCTION getBuckFastATLASmultieffPythia
     START_FUNCTION(ColliderBit::BaseDetector<Pythia_default::Pythia8::Event>*)
     NEEDS_MANAGER(RunMC, MCLoopInfo)
     NEEDS_CLASSES_FROM(Pythia, default)
@@ -142,9 +142,9 @@ START_MODULE
     #undef FUNCTION
   #undef CAPABILITY
 
-  #define CAPABILITY CMSnoeffDetectorSim
+  #define CAPABILITY CMSmultieffDetectorSim
   START_CAPABILITY
-    #define FUNCTION getBuckFastCMSnoeffPythia
+    #define FUNCTION getBuckFastCMSmultieffPythia
     START_FUNCTION(ColliderBit::BaseDetector<Pythia_default::Pythia8::Event>*)
     NEEDS_MANAGER(RunMC, MCLoopInfo)
     NEEDS_CLASSES_FROM(Pythia, default)
@@ -169,8 +169,8 @@ START_MODULE
     #undef FUNCTION
   #undef CAPABILITY
 
-  #define CAPABILITY ATLASnoeffDetectorSim
-    #define FUNCTION getBuckFastATLASnoeffPythia_EM
+  #define CAPABILITY ATLASmultieffDetectorSim
+    #define FUNCTION getBuckFastATLASmultieffPythia_EM
     START_FUNCTION(ColliderBit::BaseDetector<Pythia_EM_default::Pythia8::Event>*)
     NEEDS_MANAGER(RunMC, MCLoopInfo)
     NEEDS_CLASSES_FROM(Pythia_EM, default)
@@ -185,8 +185,8 @@ START_MODULE
     #undef FUNCTION
   #undef CAPABILITY
 
-  #define CAPABILITY CMSnoeffDetectorSim
-    #define FUNCTION getBuckFastCMSnoeffPythia_EM
+  #define CAPABILITY CMSmultieffDetectorSim
+    #define FUNCTION getBuckFastCMSmultieffPythia_EM
     START_FUNCTION(ColliderBit::BaseDetector<Pythia_EM_default::Pythia8::Event>*)
     NEEDS_MANAGER(RunMC, MCLoopInfo)
     NEEDS_CLASSES_FROM(Pythia_EM, default)
@@ -244,23 +244,23 @@ START_MODULE
 
   #undef CAPABILITY
 
-  #define CAPABILITY ATLASnoeffSmearedEvent
+  #define CAPABILITY ATLASmultieffSmearedEvent
   START_CAPABILITY
 
-    #define FUNCTION smearEventATLASnoeff
+    #define FUNCTION smearEventATLASmultieff
     START_FUNCTION(HEPUtils::Event)
     NEEDS_MANAGER(RunMC, MCLoopInfo)
     NEEDS_CLASSES_FROM(Pythia, default)
     DEPENDENCY(HardScatteringEvent, Pythia_default::Pythia8::Event)
-    DEPENDENCY(ATLASnoeffDetectorSim, ColliderBit::BaseDetector<Pythia_default::Pythia8::Event>*)
+    DEPENDENCY(ATLASmultieffDetectorSim, ColliderBit::BaseDetector<Pythia_default::Pythia8::Event>*)
     #undef FUNCTION
 
-    #define FUNCTION smearEventATLASnoeff_EM
+    #define FUNCTION smearEventATLASmultieff_EM
     START_FUNCTION(HEPUtils::Event)
     NEEDS_MANAGER(RunMC, MCLoopInfo)
     NEEDS_CLASSES_FROM(Pythia_EM, default)
     DEPENDENCY(HardScatteringEvent, Pythia_EM_default::Pythia8::Event)
-    DEPENDENCY(ATLASnoeffDetectorSim, ColliderBit::BaseDetector<Pythia_EM_default::Pythia8::Event>*)
+    DEPENDENCY(ATLASmultieffDetectorSim, ColliderBit::BaseDetector<Pythia_EM_default::Pythia8::Event>*)
     #undef FUNCTION
 
   #undef CAPABILITY
@@ -286,23 +286,23 @@ START_MODULE
 
   #undef CAPABILITY
 
-  #define CAPABILITY CMSnoeffSmearedEvent
+  #define CAPABILITY CMSmultieffSmearedEvent
   START_CAPABILITY
 
-    #define FUNCTION smearEventCMSnoeff
+    #define FUNCTION smearEventCMSmultieff
     START_FUNCTION(HEPUtils::Event)
     NEEDS_MANAGER(RunMC, MCLoopInfo)
     NEEDS_CLASSES_FROM(Pythia, default)
     DEPENDENCY(HardScatteringEvent, Pythia_default::Pythia8::Event)
-    DEPENDENCY(CMSnoeffDetectorSim, ColliderBit::BaseDetector<Pythia_default::Pythia8::Event>*)
+    DEPENDENCY(CMSmultieffDetectorSim, ColliderBit::BaseDetector<Pythia_default::Pythia8::Event>*)
     #undef FUNCTION
 
-    #define FUNCTION smearEventCMSnoeff_EM
+    #define FUNCTION smearEventCMSmultieff_EM
     START_FUNCTION(HEPUtils::Event)
     NEEDS_MANAGER(RunMC, MCLoopInfo)
     NEEDS_CLASSES_FROM(Pythia_EM, default)
     DEPENDENCY(HardScatteringEvent, Pythia_EM_default::Pythia8::Event)
-    DEPENDENCY(CMSnoeffDetectorSim, ColliderBit::BaseDetector<Pythia_EM_default::Pythia8::Event>*)
+    DEPENDENCY(CMSmultieffDetectorSim, ColliderBit::BaseDetector<Pythia_EM_default::Pythia8::Event>*)
     #undef FUNCTION
 
   #undef CAPABILITY
@@ -340,9 +340,9 @@ START_MODULE
     #undef FUNCTION
   #undef CAPABILITY
 
-  #define CAPABILITY ATLASnoeffAnalysisContainer
+  #define CAPABILITY ATLASmultieffAnalysisContainer
   START_CAPABILITY
-    #define FUNCTION getATLASnoeffAnalysisContainer
+    #define FUNCTION getATLASmultieffAnalysisContainer
     START_FUNCTION(HEPUtilsAnalysisContainer)
     NEEDS_MANAGER(RunMC, MCLoopInfo)
     DEPENDENCY(HardScatteringSim, const ColliderBit::BaseCollider*)
@@ -358,9 +358,9 @@ START_MODULE
     #undef FUNCTION
   #undef CAPABILITY
 
-  #define CAPABILITY CMSnoeffAnalysisContainer
+  #define CAPABILITY CMSmultieffAnalysisContainer
   START_CAPABILITY
-    #define FUNCTION getCMSnoeffAnalysisContainer
+    #define FUNCTION getCMSmultieffAnalysisContainer
     START_FUNCTION(HEPUtilsAnalysisContainer)
     NEEDS_MANAGER(RunMC, MCLoopInfo)
     DEPENDENCY(HardScatteringSim, const ColliderBit::BaseCollider*)
@@ -390,14 +390,14 @@ START_MODULE
     #undef FUNCTION
   #undef CAPABILITY
 
-  #define CAPABILITY ATLASnoeffAnalysisNumbers
+  #define CAPABILITY ATLASmultieffAnalysisNumbers
   START_CAPABILITY
-    #define FUNCTION runATLASnoeffAnalyses
+    #define FUNCTION runATLASmultieffAnalyses
     START_FUNCTION(AnalysisDataPointers)
     NEEDS_MANAGER(RunMC, MCLoopInfo)
     DEPENDENCY(MC_ConvergenceSettings, convergence_settings)
-    DEPENDENCY(ATLASnoeffSmearedEvent, HEPUtils::Event)
-    DEPENDENCY(ATLASnoeffAnalysisContainer, HEPUtilsAnalysisContainer)
+    DEPENDENCY(ATLASmultieffSmearedEvent, HEPUtils::Event)
+    DEPENDENCY(ATLASmultieffAnalysisContainer, HEPUtilsAnalysisContainer)
     #undef FUNCTION
   #undef CAPABILITY
 
@@ -412,14 +412,14 @@ START_MODULE
     #undef FUNCTION
   #undef CAPABILITY
 
-  #define CAPABILITY CMSnoeffAnalysisNumbers
+  #define CAPABILITY CMSmultieffAnalysisNumbers
   START_CAPABILITY
-    #define FUNCTION runCMSnoeffAnalyses
+    #define FUNCTION runCMSmultieffAnalyses
     START_FUNCTION(AnalysisDataPointers)
     NEEDS_MANAGER(RunMC, MCLoopInfo)
     DEPENDENCY(MC_ConvergenceSettings, convergence_settings)
-    DEPENDENCY(CMSnoeffSmearedEvent, HEPUtils::Event)
-    DEPENDENCY(CMSnoeffAnalysisContainer, HEPUtilsAnalysisContainer)
+    DEPENDENCY(CMSmultieffSmearedEvent, HEPUtils::Event)
+    DEPENDENCY(CMSmultieffAnalysisContainer, HEPUtilsAnalysisContainer)
     #undef FUNCTION
   #undef CAPABILITY
 
@@ -440,9 +440,9 @@ START_MODULE
     #define FUNCTION CollectAnalyses
     START_FUNCTION(AnalysisDataPointers)
     DEPENDENCY(ATLASAnalysisNumbers, AnalysisDataPointers)
-    DEPENDENCY(ATLASnoeffAnalysisNumbers, AnalysisDataPointers)
+    DEPENDENCY(ATLASmultieffAnalysisNumbers, AnalysisDataPointers)
     DEPENDENCY(CMSAnalysisNumbers, AnalysisDataPointers)
-    DEPENDENCY(CMSnoeffAnalysisNumbers, AnalysisDataPointers)
+    DEPENDENCY(CMSmultieffAnalysisNumbers, AnalysisDataPointers)
     DEPENDENCY(IdentityAnalysisNumbers, AnalysisDataPointers)
     #undef FUNCTION
   #undef CAPABILITY

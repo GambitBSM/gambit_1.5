@@ -15,6 +15,7 @@
 ///  \author Anders Kvellestad
 ///          (anders.kvellestad@fys.uio.no)
 ///  \date 2018 May
+///
 ///  *********************************************
 
 #include <omp.h>
@@ -181,7 +182,7 @@ namespace Gambit
           if (_settings->all_SR_must_converge) analysis_converged = all_SR_converged;
 
           #ifdef COLLIDERBIT_DEBUG
-            cerr << endl; 
+            cerr << endl;
             cerr << "DEBUG: Done looping over SRs for analysis " << analysis_pointer_pair.first << endl;
             cerr << "DEBUG: analysis_converged =  " << analysis_converged << endl;
           #endif
@@ -189,7 +190,7 @@ namespace Gambit
           if (not analysis_converged) all_analyses_converged = false;
 
           // Shortcut
-          if (analysis_converged and not _settings->all_analyses_must_converge) 
+          if (analysis_converged and not _settings->all_analyses_must_converge)
           {
             converged = true;
             convergence_map[this] = true;
@@ -203,7 +204,7 @@ namespace Gambit
         } // End loop over analyses
 
         #ifdef COLLIDERBIT_DEBUG
-          cerr << endl; 
+          cerr << endl;
           cerr << "DEBUG: Done looping over analyses in this container" << endl;
           cerr << "DEBUG: Current variable values:" << endl;
           cerr << "DEBUG: analysis_converged = " << analysis_converged << endl;
@@ -218,7 +219,7 @@ namespace Gambit
       // Now check if all instances of this class have also set their entry in the convergence map to true,
       // implying that all analyses in all containers have reached convergence.
       if (_settings->all_analyses_must_converge)
-      {        
+      {
         for (auto& it : convergence_map)
         {
           if (not it.second) return false;
