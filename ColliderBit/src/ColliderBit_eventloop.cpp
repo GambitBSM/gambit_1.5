@@ -64,11 +64,6 @@ namespace Gambit
   namespace ColliderBit
   {
 
-    /// Module-wide variables
-    /// @{
-
-    /// @TODO: Get rid of some of these variables by restructuring the code a bit
-
     /// Special iteration labels for the loop controlled by operateLHCLoop
     enum specialIterations { BASE_INIT = -1,
                              COLLIDER_INIT = -2,
@@ -78,17 +73,6 @@ namespace Gambit
                              END_SUBPROCESS = -6,
                              COLLIDER_FINALIZE = -7,
                              BASE_FINALIZE = -8};
-
-    /// Pythia stuff
-    std::vector<str> pythiaNames;
-    std::vector<str>::const_iterator iterPythiaNames;
-    std::map< str,std::map<str,int> > colliderInfo;
-    unsigned int indexPythiaNames;
-    bool eventsGenerated;
-    int nFailedEvents;
-    int maxFailedEvents;
-    int seedBase;
-
     /// @}
 
 
@@ -108,6 +92,7 @@ namespace Gambit
     /// Retrieve an analysis container for a specific detector
     void getAnalysisContainer(HEPUtilsAnalysisContainer& result,
                               const str& detname,
+                              const MCLoopInfo& RunMC,
                               const BaseCollider& HardScatteringSim,
                               int iteration,
                               const Options& runOptions)
@@ -149,14 +134,14 @@ namespace Gambit
         result.register_thread(detname+"AnalysisContainer");
 
         // Set current collider
-        result.set_current_collider(*iterPythiaNames);
+        result.set_current_collider(RunMC.current_collider);
 
         // Initialize analysis container or reset all the contained analyses
         if (!result.has_analyses())
         {
           try
           {
-            result.init(analyses[indexPythiaNames]);
+            result.init(analyses[RunMC.current_collider_index]);
           }
           catch (std::runtime_error& e)
           {
@@ -166,18 +151,21 @@ namespace Gambit
         else result.reset();
       }
 
-      else if (iteration == END_SUBPROCESS && eventsGenerated && nFailedEvents <= maxFailedEvents)
+      if (iteration == END_SUBPROCESS && RunMC.event_generation_began)
       {
-        const double xs_fb = HardScatteringSim.xsec_pb() * 1000.;
-        const double xserr_fb = HardScatteringSim.xsecErr_pb() * 1000.;
-        result.add_xsec(xs_fb, xserr_fb);
+        if (not RunMC.exceeded_maxFailedEvents)
+        {
+          const double xs_fb = HardScatteringSim.xsec_pb() * 1000.;
+          const double xserr_fb = HardScatteringSim.xsecErr_pb() * 1000.;
+          result.add_xsec(xs_fb, xserr_fb);
 
-        #ifdef COLLIDERBIT_DEBUG
-        cout << debug_prefix() << "xs_fb = " << xs_fb << " +/- " << xserr_fb << endl;
-        #endif
+          #ifdef COLLIDERBIT_DEBUG
+          cout << debug_prefix() << "xs_fb = " << xs_fb << " +/- " << xserr_fb << endl;
+          #endif
+        }
       }
 
-      else if (iteration == COLLIDER_FINALIZE)
+      if (iteration == COLLIDER_FINALIZE)
       {
         result.collect_and_add_signal();
         result.collect_and_improve_xsec();
@@ -193,6 +181,7 @@ namespace Gambit
                      #else
                        const str&,
                      #endif
+                     const MCLoopInfo& RunMC,
                      const HEPUtilsAnalysisContainer& AnalysisContainer,
                      const HEPUtils::Event& SmearedEvent,
                      const convergence_settings& MC_ConvergenceSettings,
@@ -210,7 +199,7 @@ namespace Gambit
       static MC_convergence_checker convergence;
       if (iteration == COLLIDER_INIT)
       {
-        convergence.init(indexPythiaNames, MC_ConvergenceSettings);
+        convergence.init(RunMC.current_collider_index, MC_ConvergenceSettings);
         return;
       }
 
@@ -252,7 +241,7 @@ namespace Gambit
 
           str warning;
           result.push_back(analysis_pointer_pair.second->get_results_ptr(warning));
-          if (eventsGenerated && nFailedEvents <= maxFailedEvents && !warning.empty())
+          if (RunMC.event_generation_began && not RunMC.exceeded_maxFailedEvents && not warning.empty())
           {
             ColliderBit_error().raise(LOCAL_INFO, warning);
           }
@@ -287,6 +276,7 @@ namespace Gambit
     /// Retrieve a Pythia hard-scattering Monte Carlo simulation
     template<typename PythiaT, typename EventT>
     void getColliderPythia(ColliderPythia<PythiaT, EventT>& result,
+                           const MCLoopInfo& RunMC,
                            const Spectrum& MSSM_spectrum,
                            const DecayTable& decay_rates,
                            const int iteration,
@@ -338,9 +328,9 @@ namespace Gambit
         }
 
         // Read xsec veto values and store in static variable 'xsec_vetos'
-        std::vector<double> default_xsec_vetos(pythiaNames.size(), 0.0);
+        std::vector<double> default_xsec_vetos(RunMC.collider_names.size(), 0.0);
         xsec_vetos = runOptions.getValueOrDef<std::vector<double> >(default_xsec_vetos, "xsec_vetos");
-        CHECK_EQUAL_VECTOR_LENGTH(xsec_vetos, pythiaNames)
+        CHECK_EQUAL_VECTOR_LENGTH(xsec_vetos, RunMC.collider_names)
       }
 
       else if (iteration == COLLIDER_INIT)
@@ -353,9 +343,9 @@ namespace Gambit
         pythiaCommonOptions.push_back("SLHA:verbose = 0");
 
         // Get options from yaml file. If the ColliderPythia specialization is hard-coded, okay with no options.
-        if (runOptions.hasKey(*iterPythiaNames))
+        if (runOptions.hasKey(RunMC.current_collider))
         {
-          std::vector<str> addPythiaOptions = runOptions.getValue<std::vector<str>>(*iterPythiaNames);
+          std::vector<str> addPythiaOptions = runOptions.getValue<std::vector<str>>(RunMC.current_collider);
           pythiaCommonOptions.insert(pythiaCommonOptions.end(), addPythiaOptions.begin(), addPythiaOptions.end());
         }
 
@@ -381,16 +371,15 @@ namespace Gambit
 
         result.clear();
 
-        // Get the Pythia options that are common across all OMP threads ('pythiaCommonOptions')
-        // and then add the thread-specific seed
+        // Get the Pythia options that are common across all OMP threads ('pythiaCommonOptions') and then add the thread-specific seed
         std::vector<str> pythiaOptions = pythiaCommonOptions;
-        pythiaOptions.push_back("Random:seed = " + std::to_string(seedBase + omp_get_thread_num()));
+        pythiaOptions.push_back("Random:seed = " + std::to_string(RunMC.current_seed_base() + omp_get_thread_num()));
 
         #ifdef COLLIDERBIT_DEBUG
-          cout << debug_prefix() << "getColliderPythia: My Pythia seed is: " << std::to_string(seedBase + omp_get_thread_num()) << endl;
+          cout << debug_prefix() << "getColliderPythia: My Pythia seed is: " << std::to_string(RunMC.current_seed_base() + omp_get_thread_num()) << endl;
         #endif
 
-        result.resetSpecialization(*iterPythiaNames);
+        result.resetSpecialization(RunMC.current_collider);
 
         try
         {
@@ -419,7 +408,7 @@ namespace Gambit
         // Should we apply the xsec veto and skip event generation?
 
         // - Get the xsec veto value for the current collider
-        double totalxsec_fb_veto = xsec_vetos[indexPythiaNames];
+        double totalxsec_fb_veto = xsec_vetos[RunMC.current_collider_index];
 
         // - Get the upper limt xsec as estimated by Pythia
         code = -1;
@@ -470,6 +459,7 @@ namespace Gambit
     /// Retrieve a Pythia hard-scattering Monte Carlo simulation constructed from SLHA files
     template<typename PythiaT, typename EventT>
     void getColliderPythiaFileReader(ColliderPythia<PythiaT, EventT>& result,
+                                     const MCLoopInfo& RunMC,
                                      const str& model_suffix,
                                      int iteration,
                                      void(*wrapup)(),
@@ -509,9 +499,9 @@ namespace Gambit
         if (filenames.size() <= fileCounter) invalid_point().raise("No more SLHA files. My work is done.");
 
         // Read xsec veto values and store in static variable 'xsec_vetos'
-        std::vector<double> default_xsec_vetos(pythiaNames.size(), 0.0);
+        std::vector<double> default_xsec_vetos(RunMC.collider_names.size(), 0.0);
         xsec_vetos = runOptions.getValueOrDef<std::vector<double> >(default_xsec_vetos, "xsec_vetos");
-        CHECK_EQUAL_VECTOR_LENGTH(xsec_vetos, pythiaNames)
+        CHECK_EQUAL_VECTOR_LENGTH(xsec_vetos, RunMC.collider_names)
       }
 
       if (iteration == COLLIDER_INIT)
@@ -524,9 +514,9 @@ namespace Gambit
         pythiaCommonOptions.push_back("SLHA:verbose = 0");
 
         // Get options from yaml file. If the ColliderPythia specialization is hard-coded, okay with no options.
-        if (runOptions.hasKey(*iterPythiaNames))
+        if (runOptions.hasKey(RunMC.current_collider))
         {
-          std::vector<str> addPythiaOptions = runOptions.getValue<std::vector<str>>(*iterPythiaNames);
+          std::vector<str> addPythiaOptions = runOptions.getValue<std::vector<str>>(RunMC.current_collider);
           pythiaCommonOptions.insert(pythiaCommonOptions.end(), addPythiaOptions.begin(), addPythiaOptions.end());
         }
 
@@ -557,13 +547,13 @@ namespace Gambit
         // Get the Pythia options that are common across all OMP threads ('pythiaCommonOptions')
         // and then add the thread-specific seed
         std::vector<str> pythiaOptions = pythiaCommonOptions;
-        pythiaOptions.push_back("Random:seed = " + std::to_string(seedBase + omp_get_thread_num()));
+        pythiaOptions.push_back("Random:seed = " + std::to_string(RunMC.current_seed_base() + omp_get_thread_num()));
 
         #ifdef COLLIDERBIT_DEBUG
-        cout << debug_prefix() << "getPythia"+model_suffix+"FileReader: My Pythia seed is: " << std::to_string(seedBase + omp_get_thread_num()) << endl;
+        cout << debug_prefix() << "getPythia"+model_suffix+"FileReader: My Pythia seed is: " << std::to_string(RunMC.current_seed_base() + omp_get_thread_num()) << endl;
         #endif
 
-        result.resetSpecialization(*iterPythiaNames);
+        result.resetSpecialization(RunMC.current_collider);
 
         try
         {
@@ -589,7 +579,7 @@ namespace Gambit
         // Should we apply the xsec veto and skip event generation?
 
         // - Get the xsec veto value for the current collider
-        double totalxsec_fb_veto = xsec_vetos[indexPythiaNames];
+        double totalxsec_fb_veto = xsec_vetos[RunMC.current_collider_index];
 
         // - Get the upper limt xsec as estimated by Pythia
         code = -1;
@@ -633,14 +623,32 @@ namespace Gambit
     /// Generate a hard scattering event with Pythia
     template<typename PythiaT, typename EventT>
     void generateEventColliderPythia(EventT& result,
+                                     const MCLoopInfo& RunMC,
                                      const ColliderPythia<PythiaT,EventT>& HardScatteringSim,
                                      const int iteration,
                                      void(*wrapup)())
     {
-      if (iteration <= BASE_INIT) return;
+      static unsigned int nFailedEvents;
+
+      // If the event loop has not been entered yet, reset the counter for the number of failed events
+      if (iteration == BASE_INIT)
+      {
+        // Although BASE_INIT should never be called in parallel, we do this in omp_critical just in case.
+        #pragma omp critical (pythia_event_failure)
+        {
+          nFailedEvents = 0;
+        }
+        return;
+      }
+
+      // If in any other special iteration, do nothing
+      if (iteration < BASE_INIT) return;
+
+      // Reset the event
       result.clear();
 
-      while(nFailedEvents <= maxFailedEvents)
+      // Attempt (possibly repeatedly) to generate an event
+      while(nFailedEvents <= RunMC.maxFailedEvents)
       {
         try
         {
@@ -664,8 +672,9 @@ namespace Gambit
         }
       }
       // Wrap up event loop if too many events fail.
-      if(nFailedEvents > maxFailedEvents)
+      if(nFailedEvents > RunMC.maxFailedEvents)
       {
+        piped_warnings.request(LOCAL_INFO,"exceeded maxFailedEvents");
         wrapup();
         return;
       }
@@ -675,6 +684,7 @@ namespace Gambit
     /// Get a BuckFast detector simulation
     template<typename EventT>
     BaseDetector<EventT>* getBuckFast(const str& detname,
+                                      const MCLoopInfo& RunMC,
                                       bool use_effs,
                                       int iteration,
                                       const Options& runOptions)
@@ -689,20 +699,19 @@ namespace Gambit
 
       if (iteration == BASE_INIT)
       {
-        // Read options
-        std::vector<bool> default_partonOnly(pythiaNames.size(), false);
+        std::vector<bool> default_partonOnly(RunMC.collider_names.size(), false);
         partonOnly = runOptions.getValueOrDef<std::vector<bool> >(default_partonOnly, "partonOnly");
-        CHECK_EQUAL_VECTOR_LENGTH(partonOnly,pythiaNames)
+        CHECK_EQUAL_VECTOR_LENGTH(partonOnly,RunMC.collider_names)
 
-        std::vector<double> default_antiktR(pythiaNames.size(), 0.4);
+        std::vector<double> default_antiktR(RunMC.collider_names.size(), 0.4);
         antiktR = runOptions.getValueOrDef<std::vector<double> >(default_antiktR, "antiktR");
-        CHECK_EQUAL_VECTOR_LENGTH(antiktR,pythiaNames)
+        CHECK_EQUAL_VECTOR_LENGTH(antiktR,RunMC.collider_names)
       }
 
       if (iteration == START_SUBPROCESS)
       {
         // Each thread gets its own copy of the detector sim, so it is initialised *after* COLLIDER_INIT, within omp parallel.
-        bucky[mine].init(partonOnly[indexPythiaNames], antiktR[indexPythiaNames]);
+        bucky[mine].init(partonOnly[RunMC.current_collider_index], antiktR[RunMC.current_collider_index]);
         // Assign detector functions
         if (detname == "ATLAS")
         {
@@ -751,7 +760,7 @@ namespace Gambit
                     void(*wrapup)())
     {
       bool useDetector = true; /// @todo this needs to instead be determined by polling a new global option collider_analyses containing *all* analyses.
-                               /// If collider_analyses[indexPythiaNames] is empty of analyses that use detector Smearer [as determined by
+                               /// If collider_analyses[RunMC.current_collider_index] is empty of analyses that use detector Smearer [as determined by
                                /// a new function to be added to the analysis class, e.g. uses_detector(str& detname) and which tests against
                                /// new analysis metadata indicating which detector the analysis is for], then useDetector should be set false.
 
@@ -829,7 +838,7 @@ namespace Gambit
     }
 
     /// LHC Loop Manager
-    void operateLHCLoop()
+    void operateLHCLoop(MCLoopInfo &result)
     {
       using namespace Pipes::operateLHCLoop;
       static std::streambuf *coutbuf = std::cout.rdbuf(); // save cout buffer for running the loop quietly
@@ -839,33 +848,21 @@ namespace Gambit
       cout << debug_prefix() << "~~~~ New point! ~~~~" << endl;
       #endif
 
-      //
-      // Clear global containers and variables
-      //
-      pythiaNames.clear();
-      iterPythiaNames = pythiaNames.cbegin();
-      indexPythiaNames = 0;
-      colliderInfo.clear();
-
-      // - Pythia random number seed base will be set in the loop over colliders below.
-      seedBase = 0;
-      // - Set eventsGenerated to true once event generation is underway.
-      eventsGenerated = false;
-      // - Keep track of the number of failed events
-      nFailedEvents = 0;
+      result.clear();
 
       // Retrieve run options from the YAML file (or standalone code)
-      pythiaNames = runOptions->getValue<std::vector<str> >("pythiaNames");
-      maxFailedEvents = runOptions->getValueOrDef<int>(1, "maxFailedEvents");
-      // Allow the user to specify the Pythia seed base (for debugging). If the default value -1
-      // is used, a new seed is generated for every new Pythia configuration and parameter point.
-      int yaml_seedBase = runOptions->getValueOrDef<int>(-1, "pythiaSeedBase");
+      result.collider_names = runOptions->getValue<std::vector<str> >("colliders");
+      result.maxFailedEvents = runOptions->getValueOrDef<int>(1, "maxFailedEvents");
 
-      // Check that length of pythiaNames and nEvents agree!
-      if (pythiaNames.size() != Dep::MC_ConvergenceSettings->min_nEvents.size())
+      // Allow the user to specify the Monte Carlo seed base (for debugging). If the default value -1
+      // is used, a new seed is generated for every new collider (Monte Carlo sim) and parameter point.
+      int seedBase = runOptions->getValueOrDef<int>(-1, "colliderSeedBase");
+
+      // Check that length of collider_names and nEvents agree!
+      if (result.collider_names.size() != Dep::MC_ConvergenceSettings->min_nEvents.size())
       {
         str errmsg;
-        errmsg  = "The option 'pythiaNames' for the function 'operateLHCLoop' must have\n";
+        errmsg  = "The option 'colliders' for the function 'operateLHCLoop' must have\n";
         errmsg += "the same number of entries as those in the MC_ConvergenceSettings dependency.\nCorrect your settings and try again.";
         ColliderBit_error().raise(LOCAL_INFO, errmsg);
       }
@@ -878,28 +875,26 @@ namespace Gambit
       Loop::executeIteration(BASE_INIT);
 
       // For every collider requested in the yaml file:
-      for (iterPythiaNames = pythiaNames.cbegin(); iterPythiaNames != pythiaNames.cend(); ++iterPythiaNames)
+      for (auto& collider : result.collider_names)
       {
 
-        // Update the global index indexPythiaNames
-        indexPythiaNames = iterPythiaNames - pythiaNames.cbegin();
+        // Update the collider index and the current collider
+        result.current_collider_index = &collider - &result.collider_names[0];
+        result.current_collider = collider;
 
-        // Update the global Pythia seedBase.
-        // The Pythia random number seed will be this, plus the thread number.
-        if (yaml_seedBase == -1) { seedBase = int(Random::draw() * 899990000); }
-        else { seedBase = yaml_seedBase; }
+        // Save the random number seed to be used for this collider; actual seed will be this plus the thread number.
+        result.seed_base[collider] = (seedBase != -1 ? seedBase : int(Random::draw() * 899990000));
 
-        // Store some collider info
-        colliderInfo[*iterPythiaNames]["seed_base"] = seedBase;
-        colliderInfo[*iterPythiaNames]["final_event_count"] = 0;  // Will be updated later
+        // Initialise the count of the number of generated events.
+        result.event_count[collider] = 0;
 
         // Get the minimum and maximum number of events to run for this collider, and the convergence step
-        int min_nEvents = Dep::MC_ConvergenceSettings->min_nEvents[indexPythiaNames];
-        int max_nEvents = Dep::MC_ConvergenceSettings->max_nEvents[indexPythiaNames];
-        int stoppingres = Dep::MC_ConvergenceSettings->stoppingres[indexPythiaNames];
+        int min_nEvents = Dep::MC_ConvergenceSettings->min_nEvents[result.current_collider_index];
+        int max_nEvents = Dep::MC_ConvergenceSettings->max_nEvents[result.current_collider_index];
+        int stoppingres = Dep::MC_ConvergenceSettings->stoppingres[result.current_collider_index];
 
         #ifdef COLLIDERBIT_DEBUG
-        cout << debug_prefix() << "operateLHCLoop: Current collider is " << *iterPythiaNames << " with index " << indexPythiaNames << endl;
+        cout << debug_prefix() << "operateLHCLoop: Current collider is " << collider << " with index " << result.current_collider_index << endl;
         #endif
 
         piped_invalid_point.check();
@@ -943,10 +938,12 @@ namespace Gambit
             while(eventCountBetweenConvergenceChecks < stoppingres and
                   currentEvent < max_nEvents and
                   not *Loop::done and
-                  not piped_errors.inquire() and
-                  nFailedEvents <= maxFailedEvents)
+                  not result.exceeded_maxFailedEvents and
+                  not piped_warnings.inquire("exceeded maxFailedEvents") and
+                  not piped_errors.inquire()
+                  )
             {
-              if (!eventsGenerated) eventsGenerated = true;
+              result.event_generation_began = true;
               try
               {
                 Loop::executeIteration(currentEvent);
@@ -959,6 +956,9 @@ namespace Gambit
               }
             }
           }
+          // Update the flag indicating if there have been warnings raised about exceeding the maximum allowed number of failed events
+          result.exceeded_maxFailedEvents = result.exceeded_maxFailedEvents or piped_warnings.inquire("exceeded maxFailedEvents");
+
           // Any problems during the main event loop?
           piped_warnings.check(ColliderBit_warning());
           piped_errors.check(ColliderBit_error());
@@ -968,7 +968,7 @@ namespace Gambit
           #endif
 
           // Break convergence loop if too many events fail
-          if(nFailedEvents > maxFailedEvents) break;
+          if(result.exceeded_maxFailedEvents) break;
 
           // Don't bother with convergence stuff if we haven't passed the minimum number of events yet
           if (currentEvent >= min_nEvents)
@@ -989,10 +989,10 @@ namespace Gambit
         }
 
         // Store the number of generated events
-        colliderInfo[*iterPythiaNames]["final_event_count"] = currentEvent;  // Will be updated later
+        result.event_count[collider] = currentEvent;
 
         // Break collider loop if too many events have failed
-        if(nFailedEvents > maxFailedEvents)
+        if(result.exceeded_maxFailedEvents)
         {
           logger() << LogTags::debug << "Too many failed events during event generation." << EOM;
           break;
@@ -1145,7 +1145,7 @@ namespace Gambit
         /// each analysis.
         /// @todo This must be made more sophisticated once we add analyses that
         ///       don't rely on event generation.
-        if (!eventsGenerated || nFailedEvents > maxFailedEvents)
+        if (not Dep::RunMC->event_generation_began || Dep::RunMC->exceeded_maxFailedEvents)
         {
           // If this is an anlysis with covariance info, only add a single 0-entry in the map
           if (use_covar && adata.srcov.rows() > 0)
@@ -1731,7 +1731,7 @@ namespace Gambit
       static const std::vector<str> skip_analyses = runOptions->getValueOrDef<std::vector<str> >(default_skip_analyses, "skip_analyses");
 
       // If too many events have failed, do the conservative thing and return delta log-likelihood = 0
-      if (nFailedEvents > maxFailedEvents)
+      if (Dep::RunMC->exceeded_maxFailedEvents)
       {
         #ifdef COLLIDERBIT_DEBUG
           cout << debug_prefix() << "calc_combined_LHC_LogLike: Too many failed events. Will be conservative and return a delta log-likelihood of 0." << endl;
@@ -1793,14 +1793,15 @@ namespace Gambit
       // Clear the result map
       result.clear();
 
-      result["did_event_generation"] = double(eventsGenerated);
-      result["too_many_failed_events"] = double(nFailedEvents > maxFailedEvents);
+      result["did_event_generation"] = double(Dep::RunMC->event_generation_began);
+      result["too_many_failed_events"] = double(Dep::RunMC->exceeded_maxFailedEvents);
 
-      assert(pythiaNames.size() == colliderInfo.size());
-      for (auto& name : pythiaNames)
+      // TODO check this earlier
+      assert(Dep::RunMC->collider_names.size() == Dep::RunMC->seed_base.size());
+      for (auto& name : Dep::RunMC->collider_names)
       {
-        result["seed_base_" + name] = colliderInfo[name]["seed_base"];
-        result["final_event_count_" + name] = colliderInfo[name]["final_event_count"];
+        result["seed_base_" + name] = Dep::RunMC->seed_base.at(name);
+        result["event_count_" + name] = Dep::RunMC->event_count.at(name);
       }
 
     }
@@ -1814,8 +1815,9 @@ namespace Gambit
                              PYTHIA_NS::Pythia8::Event> &result)         \
     {                                                                    \
       using namespace Pipes::NAME;                                       \
-      getColliderPythia(result, *Dep::MSSM_spectrum, *Dep::decay_rates,  \
-       *Loop::iteration, Loop::wrapup, *runOptions, ModelInUse);         \
+      getColliderPythia(result, *Dep::RunMC, *Dep::MSSM_spectrum,        \
+       *Dep::decay_rates, *Loop::iteration, Loop::wrapup, *runOptions,   \
+       ModelInUse);                                                      \
     }
 
     /// Retrieve a specific Pythia hard-scattering Monte Carlo simulation, initialised from an SLHA file
@@ -1824,7 +1826,7 @@ namespace Gambit
                              PYTHIA_NS::Pythia8::Event> &result)           \
     {                                                                      \
       using namespace Pipes::NAME;                                         \
-      getColliderPythiaFileReader(result, #MODEL_EXTENSION,                \
+      getColliderPythiaFileReader(result, *Dep::RunMC, #MODEL_EXTENSION,   \
        *Loop::iteration, Loop::wrapup, *runOptions);                       \
     }
 
@@ -1847,11 +1849,12 @@ namespace Gambit
     // *** Hard Scattering Event Generators ***
 
     /// Generate a hard scattering event with a specific Pythia
-    #define GET_PYTHIA_EVENT(NAME, EVENT_TYPE)                                                      \
-    void NAME(EVENT_TYPE& result)                                                                   \
-    {                                                                                               \
-      using namespace Pipes::NAME;                                                                  \
-      generateEventColliderPythia(result, *Dep::HardScatteringSim, *Loop::iteration, Loop::wrapup); \
+    #define GET_PYTHIA_EVENT(NAME, EVENT_TYPE)                   \
+    void NAME(EVENT_TYPE& result)                                \
+    {                                                            \
+      using namespace Pipes::NAME;                               \
+      generateEventColliderPythia(result, *Dep::RunMC,           \
+       *Dep::HardScatteringSim, *Loop::iteration, Loop::wrapup); \
     }
 
     GET_PYTHIA_EVENT(generateEventPythia, Pythia_default::Pythia8::Event)
@@ -1865,8 +1868,8 @@ namespace Gambit
     void NAME(BaseDetector<EVENT>* &result)                                     \
     {                                                                           \
       using namespace Pipes::NAME;                                              \
-      result = getBuckFast<EVENT>(#EXPERIMENT, IF_ELSE_EMPTY(SUFFIX,true,false),\
-       *Loop::iteration, *runOptions);                                          \
+      result = getBuckFast<EVENT>(#EXPERIMENT, *Dep::RunMC,                     \
+       IF_ELSE_EMPTY(SUFFIX,true,false), *Loop::iteration, *runOptions);        \
     }
 
     GET_BUCKFAST_AS_BASE_DETECTOR(getBuckFastATLASPythia, Pythia_default::Pythia8::Event, ATLAS, )
@@ -1909,12 +1912,12 @@ namespace Gambit
     // *** Initialization for analyses ***
 
     /// Retrieve a container for analyses with EXPERIMENT
-    #define GET_ANALYSIS_CONTAINER(NAME, EXPERIMENT)                          \
-    void NAME(HEPUtilsAnalysisContainer& result)                              \
-    {                                                                         \
-      using namespace Pipes::NAME;                                            \
-      getAnalysisContainer(result, #EXPERIMENT, *(*Dep::HardScatteringSim),   \
-       *Loop::iteration, *runOptions);                                        \
+    #define GET_ANALYSIS_CONTAINER(NAME, EXPERIMENT)               \
+    void NAME(HEPUtilsAnalysisContainer& result)                   \
+    {                                                              \
+      using namespace Pipes::NAME;                                 \
+      getAnalysisContainer(result, #EXPERIMENT, *Dep::RunMC,       \
+       *(*Dep::HardScatteringSim), *Loop::iteration, *runOptions); \
     }
 
     GET_ANALYSIS_CONTAINER(getATLASAnalysisContainer, ATLAS)
@@ -1931,9 +1934,9 @@ namespace Gambit
     void NAME(AnalysisDataPointers& result)                                   \
     {                                                                         \
       using namespace Pipes::NAME;                                            \
-      runAnalyses(result, #NAME, *Dep::CAT(EXPERIMENT,AnalysisContainer),     \
-       *Dep::SMEARED_EVENT_DEP, *Dep::MC_ConvergenceSettings,                 \
-       *Loop::iteration, Loop::wrapup);                                       \
+      runAnalyses(result, #NAME, *Dep::RunMC,                                 \
+       *Dep::CAT(EXPERIMENT,AnalysisContainer), *Dep::SMEARED_EVENT_DEP,      \
+       *Dep::MC_ConvergenceSettings, *Loop::iteration, Loop::wrapup);         \
     }
 
     RUN_ANALYSES(runATLASAnalyses, ATLAS, ATLASSmearedEvent)

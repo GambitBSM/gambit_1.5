@@ -55,10 +55,10 @@ START_MODULE
   #undef CAPABILITY
 
   /// Controls looping of Collider simulations
-  #define CAPABILITY ColliderOperator
+  #define CAPABILITY RunMC
   START_CAPABILITY
     #define FUNCTION operateLHCLoop
-    START_FUNCTION(void, CAN_MANAGE_LOOPS)
+    START_FUNCTION(MCLoopInfo, CAN_MANAGE_LOOPS)
     DEPENDENCY(MC_ConvergenceSettings, convergence_settings)
     #undef FUNCTION
   #undef CAPABILITY
@@ -70,7 +70,7 @@ START_MODULE
 
     #define FUNCTION getPythia
     START_FUNCTION(ColliderPythia_defaultversion)
-    NEEDS_MANAGER_WITH_CAPABILITY(ColliderOperator)
+    NEEDS_MANAGER(RunMC, MCLoopInfo)
     NEEDS_CLASSES_FROM(Pythia, default)
     DEPENDENCY(decay_rates, DecayTable)
     MODEL_CONDITIONAL_DEPENDENCY(MSSM_spectrum, Spectrum, MSSM63atQ, MSSM63atMGUT)
@@ -78,20 +78,20 @@ START_MODULE
 
     #define FUNCTION getPythiaFileReader
     START_FUNCTION(ColliderPythia_defaultversion)
-    NEEDS_MANAGER_WITH_CAPABILITY(ColliderOperator)
+    NEEDS_MANAGER(RunMC, MCLoopInfo)
     NEEDS_CLASSES_FROM(Pythia, default)
     #undef FUNCTION
 
     #define FUNCTION getPythiaAsBase
     START_FUNCTION(const ColliderBit::BaseCollider*)
-    NEEDS_MANAGER_WITH_CAPABILITY(ColliderOperator)
+    NEEDS_MANAGER(RunMC, MCLoopInfo)
     NEEDS_CLASSES_FROM(Pythia, default)
     DEPENDENCY(HardScatteringSim, ColliderPythia_defaultversion)
     #undef FUNCTION
 
     #define FUNCTION getPythia_EM
     START_FUNCTION(ColliderPythia_EM_defaultversion)
-    NEEDS_MANAGER_WITH_CAPABILITY(ColliderOperator)
+    NEEDS_MANAGER(RunMC, MCLoopInfo)
     NEEDS_CLASSES_FROM(Pythia_EM, default)
     DEPENDENCY(decay_rates, DecayTable)
     MODEL_CONDITIONAL_DEPENDENCY(MSSM_spectrum, Spectrum, MSSM63atQ, MSSM63atMGUT)
@@ -99,13 +99,13 @@ START_MODULE
 
     #define FUNCTION getPythia_EMFileReader
     START_FUNCTION(ColliderPythia_EM_defaultversion)
-    NEEDS_MANAGER_WITH_CAPABILITY(ColliderOperator)
+    NEEDS_MANAGER(RunMC, MCLoopInfo)
     NEEDS_CLASSES_FROM(Pythia_EM, default)
     #undef FUNCTION
 
     #define FUNCTION getPythia_EMAsBase
     START_FUNCTION(const ColliderBit::BaseCollider*)
-    NEEDS_MANAGER_WITH_CAPABILITY(ColliderOperator)
+    NEEDS_MANAGER(RunMC, MCLoopInfo)
     NEEDS_CLASSES_FROM(Pythia_EM, default)
     DEPENDENCY(HardScatteringSim, ColliderPythia_EM_defaultversion)
     #undef FUNCTION
@@ -119,7 +119,7 @@ START_MODULE
   START_CAPABILITY
     #define FUNCTION getBuckFastATLASPythia
     START_FUNCTION(ColliderBit::BaseDetector<Pythia_default::Pythia8::Event>*)
-    NEEDS_MANAGER_WITH_CAPABILITY(ColliderOperator)
+    NEEDS_MANAGER(RunMC, MCLoopInfo)
     NEEDS_CLASSES_FROM(Pythia, default)
     #undef FUNCTION
   #undef CAPABILITY
@@ -128,7 +128,7 @@ START_MODULE
   START_CAPABILITY
     #define FUNCTION getBuckFastATLASnoeffPythia
     START_FUNCTION(ColliderBit::BaseDetector<Pythia_default::Pythia8::Event>*)
-    NEEDS_MANAGER_WITH_CAPABILITY(ColliderOperator)
+    NEEDS_MANAGER(RunMC, MCLoopInfo)
     NEEDS_CLASSES_FROM(Pythia, default)
     #undef FUNCTION
   #undef CAPABILITY
@@ -137,7 +137,7 @@ START_MODULE
   START_CAPABILITY
     #define FUNCTION getBuckFastCMSPythia
     START_FUNCTION(ColliderBit::BaseDetector<Pythia_default::Pythia8::Event>*)
-    NEEDS_MANAGER_WITH_CAPABILITY(ColliderOperator)
+    NEEDS_MANAGER(RunMC, MCLoopInfo)
     NEEDS_CLASSES_FROM(Pythia, default)
     #undef FUNCTION
   #undef CAPABILITY
@@ -146,7 +146,7 @@ START_MODULE
   START_CAPABILITY
     #define FUNCTION getBuckFastCMSnoeffPythia
     START_FUNCTION(ColliderBit::BaseDetector<Pythia_default::Pythia8::Event>*)
-    NEEDS_MANAGER_WITH_CAPABILITY(ColliderOperator)
+    NEEDS_MANAGER(RunMC, MCLoopInfo)
     NEEDS_CLASSES_FROM(Pythia, default)
     #undef FUNCTION
   #undef CAPABILITY
@@ -155,7 +155,7 @@ START_MODULE
   START_CAPABILITY
     #define FUNCTION getBuckFastIdentityPythia
     START_FUNCTION(ColliderBit::BaseDetector<Pythia_default::Pythia8::Event>*)
-    NEEDS_MANAGER_WITH_CAPABILITY(ColliderOperator)
+    NEEDS_MANAGER(RunMC, MCLoopInfo)
     NEEDS_CLASSES_FROM(Pythia, default)
     #undef FUNCTION
   #undef CAPABILITY
@@ -164,7 +164,7 @@ START_MODULE
   #define CAPABILITY ATLASDetectorSim
     #define FUNCTION getBuckFastATLASPythia_EM
     START_FUNCTION(ColliderBit::BaseDetector<Pythia_EM_default::Pythia8::Event>*)
-    NEEDS_MANAGER_WITH_CAPABILITY(ColliderOperator)
+    NEEDS_MANAGER(RunMC, MCLoopInfo)
     NEEDS_CLASSES_FROM(Pythia_EM, default)
     #undef FUNCTION
   #undef CAPABILITY
@@ -172,7 +172,7 @@ START_MODULE
   #define CAPABILITY ATLASnoeffDetectorSim
     #define FUNCTION getBuckFastATLASnoeffPythia_EM
     START_FUNCTION(ColliderBit::BaseDetector<Pythia_EM_default::Pythia8::Event>*)
-    NEEDS_MANAGER_WITH_CAPABILITY(ColliderOperator)
+    NEEDS_MANAGER(RunMC, MCLoopInfo)
     NEEDS_CLASSES_FROM(Pythia_EM, default)
     #undef FUNCTION
   #undef CAPABILITY
@@ -180,7 +180,7 @@ START_MODULE
   #define CAPABILITY CMSDetectorSim
     #define FUNCTION getBuckFastCMSPythia_EM
     START_FUNCTION(ColliderBit::BaseDetector<Pythia_EM_default::Pythia8::Event>*)
-    NEEDS_MANAGER_WITH_CAPABILITY(ColliderOperator)
+    NEEDS_MANAGER(RunMC, MCLoopInfo)
     NEEDS_CLASSES_FROM(Pythia_EM, default)
     #undef FUNCTION
   #undef CAPABILITY
@@ -188,7 +188,7 @@ START_MODULE
   #define CAPABILITY CMSnoeffDetectorSim
     #define FUNCTION getBuckFastCMSnoeffPythia_EM
     START_FUNCTION(ColliderBit::BaseDetector<Pythia_EM_default::Pythia8::Event>*)
-    NEEDS_MANAGER_WITH_CAPABILITY(ColliderOperator)
+    NEEDS_MANAGER(RunMC, MCLoopInfo)
     NEEDS_CLASSES_FROM(Pythia_EM, default)
     #undef FUNCTION
   #undef CAPABILITY
@@ -196,7 +196,7 @@ START_MODULE
   #define CAPABILITY IdentityDetectorSim
     #define FUNCTION getBuckFastIdentityPythia_EM
     START_FUNCTION(ColliderBit::BaseDetector<Pythia_EM_default::Pythia8::Event>*)
-    NEEDS_MANAGER_WITH_CAPABILITY(ColliderOperator)
+    NEEDS_MANAGER(RunMC, MCLoopInfo)
     NEEDS_CLASSES_FROM(Pythia_EM, default)
     #undef FUNCTION
   #undef CAPABILITY
@@ -208,14 +208,14 @@ START_MODULE
 
     #define FUNCTION generateEventPythia
     START_FUNCTION(Pythia_default::Pythia8::Event)
-    NEEDS_MANAGER_WITH_CAPABILITY(ColliderOperator)
+    NEEDS_MANAGER(RunMC, MCLoopInfo)
     NEEDS_CLASSES_FROM(Pythia, default)
     DEPENDENCY(HardScatteringSim, ColliderPythia_defaultversion)
     #undef FUNCTION
 
     #define FUNCTION generateEventPythia_EM
     START_FUNCTION(Pythia_EM_default::Pythia8::Event)
-    NEEDS_MANAGER_WITH_CAPABILITY(ColliderOperator)
+    NEEDS_MANAGER(RunMC, MCLoopInfo)
     NEEDS_CLASSES_FROM(Pythia_EM, default)
     DEPENDENCY(HardScatteringSim, ColliderPythia_EM_defaultversion)
     #undef FUNCTION
@@ -228,7 +228,7 @@ START_MODULE
 
     #define FUNCTION smearEventATLAS
     START_FUNCTION(HEPUtils::Event)
-    NEEDS_MANAGER_WITH_CAPABILITY(ColliderOperator)
+    NEEDS_MANAGER(RunMC, MCLoopInfo)
     NEEDS_CLASSES_FROM(Pythia, default)
     DEPENDENCY(HardScatteringEvent, Pythia_default::Pythia8::Event)
     DEPENDENCY(ATLASDetectorSim, ColliderBit::BaseDetector<Pythia_default::Pythia8::Event>*)
@@ -236,7 +236,7 @@ START_MODULE
 
     #define FUNCTION smearEventATLAS_EM
     START_FUNCTION(HEPUtils::Event)
-    NEEDS_MANAGER_WITH_CAPABILITY(ColliderOperator)
+    NEEDS_MANAGER(RunMC, MCLoopInfo)
     NEEDS_CLASSES_FROM(Pythia_EM, default)
     DEPENDENCY(HardScatteringEvent, Pythia_EM_default::Pythia8::Event)
     DEPENDENCY(ATLASDetectorSim, ColliderBit::BaseDetector<Pythia_EM_default::Pythia8::Event>*)
@@ -249,7 +249,7 @@ START_MODULE
 
     #define FUNCTION smearEventATLASnoeff
     START_FUNCTION(HEPUtils::Event)
-    NEEDS_MANAGER_WITH_CAPABILITY(ColliderOperator)
+    NEEDS_MANAGER(RunMC, MCLoopInfo)
     NEEDS_CLASSES_FROM(Pythia, default)
     DEPENDENCY(HardScatteringEvent, Pythia_default::Pythia8::Event)
     DEPENDENCY(ATLASnoeffDetectorSim, ColliderBit::BaseDetector<Pythia_default::Pythia8::Event>*)
@@ -257,7 +257,7 @@ START_MODULE
 
     #define FUNCTION smearEventATLASnoeff_EM
     START_FUNCTION(HEPUtils::Event)
-    NEEDS_MANAGER_WITH_CAPABILITY(ColliderOperator)
+    NEEDS_MANAGER(RunMC, MCLoopInfo)
     NEEDS_CLASSES_FROM(Pythia_EM, default)
     DEPENDENCY(HardScatteringEvent, Pythia_EM_default::Pythia8::Event)
     DEPENDENCY(ATLASnoeffDetectorSim, ColliderBit::BaseDetector<Pythia_EM_default::Pythia8::Event>*)
@@ -270,7 +270,7 @@ START_MODULE
 
     #define FUNCTION smearEventCMS
     START_FUNCTION(HEPUtils::Event)
-    NEEDS_MANAGER_WITH_CAPABILITY(ColliderOperator)
+    NEEDS_MANAGER(RunMC, MCLoopInfo)
     NEEDS_CLASSES_FROM(Pythia, default)
     DEPENDENCY(HardScatteringEvent, Pythia_default::Pythia8::Event)
     DEPENDENCY(CMSDetectorSim, ColliderBit::BaseDetector<Pythia_default::Pythia8::Event>*)
@@ -278,7 +278,7 @@ START_MODULE
 
     #define FUNCTION smearEventCMS_EM
     START_FUNCTION(HEPUtils::Event)
-    NEEDS_MANAGER_WITH_CAPABILITY(ColliderOperator)
+    NEEDS_MANAGER(RunMC, MCLoopInfo)
     NEEDS_CLASSES_FROM(Pythia_EM, default)
     DEPENDENCY(HardScatteringEvent, Pythia_EM_default::Pythia8::Event)
     DEPENDENCY(CMSDetectorSim, ColliderBit::BaseDetector<Pythia_EM_default::Pythia8::Event>*)
@@ -291,7 +291,7 @@ START_MODULE
 
     #define FUNCTION smearEventCMSnoeff
     START_FUNCTION(HEPUtils::Event)
-    NEEDS_MANAGER_WITH_CAPABILITY(ColliderOperator)
+    NEEDS_MANAGER(RunMC, MCLoopInfo)
     NEEDS_CLASSES_FROM(Pythia, default)
     DEPENDENCY(HardScatteringEvent, Pythia_default::Pythia8::Event)
     DEPENDENCY(CMSnoeffDetectorSim, ColliderBit::BaseDetector<Pythia_default::Pythia8::Event>*)
@@ -299,7 +299,7 @@ START_MODULE
 
     #define FUNCTION smearEventCMSnoeff_EM
     START_FUNCTION(HEPUtils::Event)
-    NEEDS_MANAGER_WITH_CAPABILITY(ColliderOperator)
+    NEEDS_MANAGER(RunMC, MCLoopInfo)
     NEEDS_CLASSES_FROM(Pythia_EM, default)
     DEPENDENCY(HardScatteringEvent, Pythia_EM_default::Pythia8::Event)
     DEPENDENCY(CMSnoeffDetectorSim, ColliderBit::BaseDetector<Pythia_EM_default::Pythia8::Event>*)
@@ -312,7 +312,7 @@ START_MODULE
 
     #define FUNCTION copyEvent
     START_FUNCTION(HEPUtils::Event)
-    NEEDS_MANAGER_WITH_CAPABILITY(ColliderOperator)
+    NEEDS_MANAGER(RunMC, MCLoopInfo)
     NEEDS_CLASSES_FROM(Pythia, default)
     DEPENDENCY(HardScatteringEvent, Pythia_default::Pythia8::Event)
     DEPENDENCY(IdentityDetectorSim, ColliderBit::BaseDetector<Pythia_default::Pythia8::Event>*)
@@ -320,7 +320,7 @@ START_MODULE
 
     #define FUNCTION copyEvent_EM
     START_FUNCTION(HEPUtils::Event)
-    NEEDS_MANAGER_WITH_CAPABILITY(ColliderOperator)
+    NEEDS_MANAGER(RunMC, MCLoopInfo)
     NEEDS_CLASSES_FROM(Pythia_EM, default)
     DEPENDENCY(HardScatteringEvent, Pythia_EM_default::Pythia8::Event)
     DEPENDENCY(IdentityDetectorSim, ColliderBit::BaseDetector<Pythia_EM_default::Pythia8::Event>*)
@@ -335,7 +335,7 @@ START_MODULE
   START_CAPABILITY
     #define FUNCTION getATLASAnalysisContainer
     START_FUNCTION(HEPUtilsAnalysisContainer)
-    NEEDS_MANAGER_WITH_CAPABILITY(ColliderOperator)
+    NEEDS_MANAGER(RunMC, MCLoopInfo)
     DEPENDENCY(HardScatteringSim, const ColliderBit::BaseCollider*)
     #undef FUNCTION
   #undef CAPABILITY
@@ -344,7 +344,7 @@ START_MODULE
   START_CAPABILITY
     #define FUNCTION getATLASnoeffAnalysisContainer
     START_FUNCTION(HEPUtilsAnalysisContainer)
-    NEEDS_MANAGER_WITH_CAPABILITY(ColliderOperator)
+    NEEDS_MANAGER(RunMC, MCLoopInfo)
     DEPENDENCY(HardScatteringSim, const ColliderBit::BaseCollider*)
     #undef FUNCTION
   #undef CAPABILITY
@@ -353,7 +353,7 @@ START_MODULE
   START_CAPABILITY
     #define FUNCTION getCMSAnalysisContainer
     START_FUNCTION(HEPUtilsAnalysisContainer)
-    NEEDS_MANAGER_WITH_CAPABILITY(ColliderOperator)
+    NEEDS_MANAGER(RunMC, MCLoopInfo)
     DEPENDENCY(HardScatteringSim, const ColliderBit::BaseCollider*)
     #undef FUNCTION
   #undef CAPABILITY
@@ -362,7 +362,7 @@ START_MODULE
   START_CAPABILITY
     #define FUNCTION getCMSnoeffAnalysisContainer
     START_FUNCTION(HEPUtilsAnalysisContainer)
-    NEEDS_MANAGER_WITH_CAPABILITY(ColliderOperator)
+    NEEDS_MANAGER(RunMC, MCLoopInfo)
     DEPENDENCY(HardScatteringSim, const ColliderBit::BaseCollider*)
     #undef FUNCTION
   #undef CAPABILITY
@@ -371,7 +371,7 @@ START_MODULE
   START_CAPABILITY
     #define FUNCTION getIdentityAnalysisContainer
     START_FUNCTION(HEPUtilsAnalysisContainer)
-    NEEDS_MANAGER_WITH_CAPABILITY(ColliderOperator)
+    NEEDS_MANAGER(RunMC, MCLoopInfo)
     DEPENDENCY(HardScatteringSim, const ColliderBit::BaseCollider*)
     #undef FUNCTION
   #undef CAPABILITY
@@ -383,7 +383,7 @@ START_MODULE
   START_CAPABILITY
     #define FUNCTION runATLASAnalyses
     START_FUNCTION(AnalysisDataPointers)
-    NEEDS_MANAGER_WITH_CAPABILITY(ColliderOperator)
+    NEEDS_MANAGER(RunMC, MCLoopInfo)
     DEPENDENCY(MC_ConvergenceSettings, convergence_settings)
     DEPENDENCY(ATLASSmearedEvent, HEPUtils::Event)
     DEPENDENCY(ATLASAnalysisContainer, HEPUtilsAnalysisContainer)
@@ -394,7 +394,7 @@ START_MODULE
   START_CAPABILITY
     #define FUNCTION runATLASnoeffAnalyses
     START_FUNCTION(AnalysisDataPointers)
-    NEEDS_MANAGER_WITH_CAPABILITY(ColliderOperator)
+    NEEDS_MANAGER(RunMC, MCLoopInfo)
     DEPENDENCY(MC_ConvergenceSettings, convergence_settings)
     DEPENDENCY(ATLASnoeffSmearedEvent, HEPUtils::Event)
     DEPENDENCY(ATLASnoeffAnalysisContainer, HEPUtilsAnalysisContainer)
@@ -405,7 +405,7 @@ START_MODULE
   START_CAPABILITY
     #define FUNCTION runCMSAnalyses
     START_FUNCTION(AnalysisDataPointers)
-    NEEDS_MANAGER_WITH_CAPABILITY(ColliderOperator)
+    NEEDS_MANAGER(RunMC, MCLoopInfo)
     DEPENDENCY(MC_ConvergenceSettings, convergence_settings)
     DEPENDENCY(CMSSmearedEvent, HEPUtils::Event)
     DEPENDENCY(CMSAnalysisContainer, HEPUtilsAnalysisContainer)
@@ -416,7 +416,7 @@ START_MODULE
   START_CAPABILITY
     #define FUNCTION runCMSnoeffAnalyses
     START_FUNCTION(AnalysisDataPointers)
-    NEEDS_MANAGER_WITH_CAPABILITY(ColliderOperator)
+    NEEDS_MANAGER(RunMC, MCLoopInfo)
     DEPENDENCY(MC_ConvergenceSettings, convergence_settings)
     DEPENDENCY(CMSnoeffSmearedEvent, HEPUtils::Event)
     DEPENDENCY(CMSnoeffAnalysisContainer, HEPUtilsAnalysisContainer)
@@ -427,7 +427,7 @@ START_MODULE
   START_CAPABILITY
     #define FUNCTION runIdentityAnalyses
     START_FUNCTION(AnalysisDataPointers)
-    NEEDS_MANAGER_WITH_CAPABILITY(ColliderOperator)
+    NEEDS_MANAGER(RunMC, MCLoopInfo)
     DEPENDENCY(MC_ConvergenceSettings, convergence_settings)
     DEPENDENCY(CopiedEvent, HEPUtils::Event)
     DEPENDENCY(IdentityAnalysisContainer, HEPUtilsAnalysisContainer)
@@ -462,6 +462,7 @@ START_MODULE
     #define FUNCTION calc_LHC_LogLikes
     START_FUNCTION(map_str_AnalysisLogLikes)
     DEPENDENCY(AllAnalysisNumbers, AnalysisDataPointers)
+    DEPENDENCY(RunMC, MCLoopInfo)
     BACKEND_REQ_FROM_GROUP(lnlike_marg_poisson, lnlike_marg_poisson_lognormal_error, (), double, (const int&, const double&, const double&, const double&) )
     BACKEND_REQ_FROM_GROUP(lnlike_marg_poisson, lnlike_marg_poisson_gaussian_error, (), double, (const int&, const double&, const double&, const double&) )
     BACKEND_GROUP(lnlike_marg_poisson)
@@ -510,6 +511,7 @@ START_MODULE
     #define FUNCTION calc_combined_LHC_LogLike
     START_FUNCTION(double)
     DEPENDENCY(LHC_LogLike_per_analysis, map_str_dbl)
+    DEPENDENCY(RunMC, MCLoopInfo)
     #undef FUNCTION
   #undef CAPABILITY
 
@@ -518,7 +520,7 @@ START_MODULE
   START_CAPABILITY
     #define FUNCTION getLHCEventLoopInfo
     START_FUNCTION(map_str_dbl)
-    DEPENDENCY(AllAnalysisNumbers, AnalysisDataPointers) // This is just to ensure that the loop is done
+    DEPENDENCY(RunMC, MCLoopInfo)
     #undef FUNCTION
   #undef CAPABILITY
 

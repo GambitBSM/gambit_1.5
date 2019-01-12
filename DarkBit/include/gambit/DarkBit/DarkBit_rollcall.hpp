@@ -319,7 +319,7 @@ START_MODULE
     #define FUNCTION cascadeMC_InitialState
       START_FUNCTION(std::string)
       DEPENDENCY(GA_missingFinalStates, std::vector<std::string>)
-      NEEDS_MANAGER_WITH_CAPABILITY(cascadeMC_LoopManagement)
+      NEEDS_MANAGER(cascadeMC_LoopManagement)
     #undef FUNCTION
   #undef CAPABILITY
 
@@ -329,7 +329,7 @@ START_MODULE
     #define FUNCTION cascadeMC_EventCount
       START_FUNCTION(DarkBit::stringIntMap)
       DEPENDENCY(cascadeMC_InitialState, std::string)
-      NEEDS_MANAGER_WITH_CAPABILITY(cascadeMC_LoopManagement)
+      NEEDS_MANAGER(cascadeMC_LoopManagement)
     #undef FUNCTION
   #undef CAPABILITY
 
@@ -340,7 +340,7 @@ START_MODULE
       START_FUNCTION(DarkBit::DecayChain::ChainContainer)
       DEPENDENCY(cascadeMC_InitialState, std::string)
       DEPENDENCY(cascadeMC_DecayTable, DarkBit::DecayChain::DecayTable)
-      NEEDS_MANAGER_WITH_CAPABILITY(cascadeMC_LoopManagement)
+      NEEDS_MANAGER(cascadeMC_LoopManagement)
     #undef FUNCTION
   #undef CAPABILITY
 
@@ -354,7 +354,7 @@ START_MODULE
       DEPENDENCY(TH_ProcessCatalog, DarkBit::TH_ProcessCatalog)
       DEPENDENCY(SimYieldTable, DarkBit::SimYieldTable)
       DEPENDENCY(cascadeMC_FinalStates,std::vector<std::string>)
-      NEEDS_MANAGER_WITH_CAPABILITY(cascadeMC_LoopManagement)
+      NEEDS_MANAGER(cascadeMC_LoopManagement)
     #undef FUNCTION
   #undef CAPABILITY
 

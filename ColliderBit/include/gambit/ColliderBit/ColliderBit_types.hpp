@@ -39,6 +39,7 @@
 #include <vector>
 #include <chrono>
 
+#include "gambit/ColliderBit/MCLoopInfo.hpp"
 #include "gambit/ColliderBit/MC_convergence.hpp"
 #include "gambit/ColliderBit/colliders/ColliderPythia.hpp"
 #include "gambit/ColliderBit/detectors/BuckFast.hpp"
@@ -65,8 +66,6 @@ namespace Gambit
     /// @{
     typedef ColliderPythia<Pythia_default::Pythia8::Pythia, Pythia_default::Pythia8::Event>       ColliderPythia_defaultversion;
     typedef ColliderPythia<Pythia_EM_default::Pythia8::Pythia, Pythia_EM_default::Pythia8::Event> ColliderPythia_EM_defaultversion;
-    /// @{
-
     /// @}
 
     /// @brief Container for data from multiple analyses and SRs
