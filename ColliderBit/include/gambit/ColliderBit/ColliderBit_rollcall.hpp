@@ -83,7 +83,7 @@ START_MODULE
     #undef FUNCTION
 
     #define FUNCTION getPythiaAsBase
-    START_FUNCTION(const ColliderBit::BaseCollider*)
+    START_FUNCTION(const BaseCollider*)
     NEEDS_MANAGER(RunMC, MCLoopInfo)
     NEEDS_CLASSES_FROM(Pythia, default)
     DEPENDENCY(HardScatteringSim, ColliderPythia_defaultversion)
@@ -104,7 +104,7 @@ START_MODULE
     #undef FUNCTION
 
     #define FUNCTION getPythia_EMAsBase
-    START_FUNCTION(const ColliderBit::BaseCollider*)
+    START_FUNCTION(const BaseCollider*)
     NEEDS_MANAGER(RunMC, MCLoopInfo)
     NEEDS_CLASSES_FROM(Pythia_EM, default)
     DEPENDENCY(HardScatteringSim, ColliderPythia_EM_defaultversion)
@@ -118,7 +118,7 @@ START_MODULE
   #define CAPABILITY ATLASDetectorSim
   START_CAPABILITY
     #define FUNCTION getBuckFastATLASPythia
-    START_FUNCTION(ColliderBit::BaseDetector<Pythia_default::Pythia8::Event>*)
+    START_FUNCTION(BaseDetector<Pythia_default::Pythia8::Event>*)
     NEEDS_MANAGER(RunMC, MCLoopInfo)
     NEEDS_CLASSES_FROM(Pythia, default)
     #undef FUNCTION
@@ -127,7 +127,7 @@ START_MODULE
   #define CAPABILITY ATLASmultieffDetectorSim
   START_CAPABILITY
     #define FUNCTION getBuckFastATLASmultieffPythia
-    START_FUNCTION(ColliderBit::BaseDetector<Pythia_default::Pythia8::Event>*)
+    START_FUNCTION(BaseDetector<Pythia_default::Pythia8::Event>*)
     NEEDS_MANAGER(RunMC, MCLoopInfo)
     NEEDS_CLASSES_FROM(Pythia, default)
     #undef FUNCTION
@@ -136,7 +136,7 @@ START_MODULE
   #define CAPABILITY CMSDetectorSim
   START_CAPABILITY
     #define FUNCTION getBuckFastCMSPythia
-    START_FUNCTION(ColliderBit::BaseDetector<Pythia_default::Pythia8::Event>*)
+    START_FUNCTION(BaseDetector<Pythia_default::Pythia8::Event>*)
     NEEDS_MANAGER(RunMC, MCLoopInfo)
     NEEDS_CLASSES_FROM(Pythia, default)
     #undef FUNCTION
@@ -145,7 +145,7 @@ START_MODULE
   #define CAPABILITY CMSmultieffDetectorSim
   START_CAPABILITY
     #define FUNCTION getBuckFastCMSmultieffPythia
-    START_FUNCTION(ColliderBit::BaseDetector<Pythia_default::Pythia8::Event>*)
+    START_FUNCTION(BaseDetector<Pythia_default::Pythia8::Event>*)
     NEEDS_MANAGER(RunMC, MCLoopInfo)
     NEEDS_CLASSES_FROM(Pythia, default)
     #undef FUNCTION
@@ -154,7 +154,7 @@ START_MODULE
   #define CAPABILITY IdentityDetectorSim
   START_CAPABILITY
     #define FUNCTION getBuckFastIdentityPythia
-    START_FUNCTION(ColliderBit::BaseDetector<Pythia_default::Pythia8::Event>*)
+    START_FUNCTION(BaseDetector<Pythia_default::Pythia8::Event>*)
     NEEDS_MANAGER(RunMC, MCLoopInfo)
     NEEDS_CLASSES_FROM(Pythia, default)
     #undef FUNCTION
@@ -163,7 +163,7 @@ START_MODULE
 
   #define CAPABILITY ATLASDetectorSim
     #define FUNCTION getBuckFastATLASPythia_EM
-    START_FUNCTION(ColliderBit::BaseDetector<Pythia_EM_default::Pythia8::Event>*)
+    START_FUNCTION(BaseDetector<Pythia_EM_default::Pythia8::Event>*)
     NEEDS_MANAGER(RunMC, MCLoopInfo)
     NEEDS_CLASSES_FROM(Pythia_EM, default)
     #undef FUNCTION
@@ -171,7 +171,7 @@ START_MODULE
 
   #define CAPABILITY ATLASmultieffDetectorSim
     #define FUNCTION getBuckFastATLASmultieffPythia_EM
-    START_FUNCTION(ColliderBit::BaseDetector<Pythia_EM_default::Pythia8::Event>*)
+    START_FUNCTION(BaseDetector<Pythia_EM_default::Pythia8::Event>*)
     NEEDS_MANAGER(RunMC, MCLoopInfo)
     NEEDS_CLASSES_FROM(Pythia_EM, default)
     #undef FUNCTION
@@ -179,7 +179,7 @@ START_MODULE
 
   #define CAPABILITY CMSDetectorSim
     #define FUNCTION getBuckFastCMSPythia_EM
-    START_FUNCTION(ColliderBit::BaseDetector<Pythia_EM_default::Pythia8::Event>*)
+    START_FUNCTION(BaseDetector<Pythia_EM_default::Pythia8::Event>*)
     NEEDS_MANAGER(RunMC, MCLoopInfo)
     NEEDS_CLASSES_FROM(Pythia_EM, default)
     #undef FUNCTION
@@ -187,7 +187,7 @@ START_MODULE
 
   #define CAPABILITY CMSmultieffDetectorSim
     #define FUNCTION getBuckFastCMSmultieffPythia_EM
-    START_FUNCTION(ColliderBit::BaseDetector<Pythia_EM_default::Pythia8::Event>*)
+    START_FUNCTION(BaseDetector<Pythia_EM_default::Pythia8::Event>*)
     NEEDS_MANAGER(RunMC, MCLoopInfo)
     NEEDS_CLASSES_FROM(Pythia_EM, default)
     #undef FUNCTION
@@ -195,7 +195,7 @@ START_MODULE
 
   #define CAPABILITY IdentityDetectorSim
     #define FUNCTION getBuckFastIdentityPythia_EM
-    START_FUNCTION(ColliderBit::BaseDetector<Pythia_EM_default::Pythia8::Event>*)
+    START_FUNCTION(BaseDetector<Pythia_EM_default::Pythia8::Event>*)
     NEEDS_MANAGER(RunMC, MCLoopInfo)
     NEEDS_CLASSES_FROM(Pythia_EM, default)
     #undef FUNCTION
@@ -231,7 +231,7 @@ START_MODULE
     NEEDS_MANAGER(RunMC, MCLoopInfo)
     NEEDS_CLASSES_FROM(Pythia, default)
     DEPENDENCY(HardScatteringEvent, Pythia_default::Pythia8::Event)
-    DEPENDENCY(ATLASDetectorSim, ColliderBit::BaseDetector<Pythia_default::Pythia8::Event>*)
+    DEPENDENCY(ATLASDetectorSim, BaseDetector<Pythia_default::Pythia8::Event>*)
     #undef FUNCTION
 
     #define FUNCTION smearEventATLAS_EM
@@ -239,7 +239,7 @@ START_MODULE
     NEEDS_MANAGER(RunMC, MCLoopInfo)
     NEEDS_CLASSES_FROM(Pythia_EM, default)
     DEPENDENCY(HardScatteringEvent, Pythia_EM_default::Pythia8::Event)
-    DEPENDENCY(ATLASDetectorSim, ColliderBit::BaseDetector<Pythia_EM_default::Pythia8::Event>*)
+    DEPENDENCY(ATLASDetectorSim, BaseDetector<Pythia_EM_default::Pythia8::Event>*)
     #undef FUNCTION
 
   #undef CAPABILITY
@@ -252,7 +252,7 @@ START_MODULE
     NEEDS_MANAGER(RunMC, MCLoopInfo)
     NEEDS_CLASSES_FROM(Pythia, default)
     DEPENDENCY(HardScatteringEvent, Pythia_default::Pythia8::Event)
-    DEPENDENCY(ATLASmultieffDetectorSim, ColliderBit::BaseDetector<Pythia_default::Pythia8::Event>*)
+    DEPENDENCY(ATLASmultieffDetectorSim, BaseDetector<Pythia_default::Pythia8::Event>*)
     #undef FUNCTION
 
     #define FUNCTION smearEventATLASmultieff_EM
@@ -260,7 +260,7 @@ START_MODULE
     NEEDS_MANAGER(RunMC, MCLoopInfo)
     NEEDS_CLASSES_FROM(Pythia_EM, default)
     DEPENDENCY(HardScatteringEvent, Pythia_EM_default::Pythia8::Event)
-    DEPENDENCY(ATLASmultieffDetectorSim, ColliderBit::BaseDetector<Pythia_EM_default::Pythia8::Event>*)
+    DEPENDENCY(ATLASmultieffDetectorSim, BaseDetector<Pythia_EM_default::Pythia8::Event>*)
     #undef FUNCTION
 
   #undef CAPABILITY
@@ -273,7 +273,7 @@ START_MODULE
     NEEDS_MANAGER(RunMC, MCLoopInfo)
     NEEDS_CLASSES_FROM(Pythia, default)
     DEPENDENCY(HardScatteringEvent, Pythia_default::Pythia8::Event)
-    DEPENDENCY(CMSDetectorSim, ColliderBit::BaseDetector<Pythia_default::Pythia8::Event>*)
+    DEPENDENCY(CMSDetectorSim, BaseDetector<Pythia_default::Pythia8::Event>*)
     #undef FUNCTION
 
     #define FUNCTION smearEventCMS_EM
@@ -281,7 +281,7 @@ START_MODULE
     NEEDS_MANAGER(RunMC, MCLoopInfo)
     NEEDS_CLASSES_FROM(Pythia_EM, default)
     DEPENDENCY(HardScatteringEvent, Pythia_EM_default::Pythia8::Event)
-    DEPENDENCY(CMSDetectorSim, ColliderBit::BaseDetector<Pythia_EM_default::Pythia8::Event>*)
+    DEPENDENCY(CMSDetectorSim, BaseDetector<Pythia_EM_default::Pythia8::Event>*)
     #undef FUNCTION
 
   #undef CAPABILITY
@@ -294,7 +294,7 @@ START_MODULE
     NEEDS_MANAGER(RunMC, MCLoopInfo)
     NEEDS_CLASSES_FROM(Pythia, default)
     DEPENDENCY(HardScatteringEvent, Pythia_default::Pythia8::Event)
-    DEPENDENCY(CMSmultieffDetectorSim, ColliderBit::BaseDetector<Pythia_default::Pythia8::Event>*)
+    DEPENDENCY(CMSmultieffDetectorSim, BaseDetector<Pythia_default::Pythia8::Event>*)
     #undef FUNCTION
 
     #define FUNCTION smearEventCMSmultieff_EM
@@ -302,7 +302,7 @@ START_MODULE
     NEEDS_MANAGER(RunMC, MCLoopInfo)
     NEEDS_CLASSES_FROM(Pythia_EM, default)
     DEPENDENCY(HardScatteringEvent, Pythia_EM_default::Pythia8::Event)
-    DEPENDENCY(CMSmultieffDetectorSim, ColliderBit::BaseDetector<Pythia_EM_default::Pythia8::Event>*)
+    DEPENDENCY(CMSmultieffDetectorSim, BaseDetector<Pythia_EM_default::Pythia8::Event>*)
     #undef FUNCTION
 
   #undef CAPABILITY
@@ -315,7 +315,7 @@ START_MODULE
     NEEDS_MANAGER(RunMC, MCLoopInfo)
     NEEDS_CLASSES_FROM(Pythia, default)
     DEPENDENCY(HardScatteringEvent, Pythia_default::Pythia8::Event)
-    DEPENDENCY(IdentityDetectorSim, ColliderBit::BaseDetector<Pythia_default::Pythia8::Event>*)
+    DEPENDENCY(IdentityDetectorSim, BaseDetector<Pythia_default::Pythia8::Event>*)
     #undef FUNCTION
 
     #define FUNCTION copyEvent_EM
@@ -323,7 +323,7 @@ START_MODULE
     NEEDS_MANAGER(RunMC, MCLoopInfo)
     NEEDS_CLASSES_FROM(Pythia_EM, default)
     DEPENDENCY(HardScatteringEvent, Pythia_EM_default::Pythia8::Event)
-    DEPENDENCY(IdentityDetectorSim, ColliderBit::BaseDetector<Pythia_EM_default::Pythia8::Event>*)
+    DEPENDENCY(IdentityDetectorSim, BaseDetector<Pythia_EM_default::Pythia8::Event>*)
     #undef FUNCTION
 
   #undef CAPABILITY
@@ -336,7 +336,7 @@ START_MODULE
     #define FUNCTION getATLASAnalysisContainer
     START_FUNCTION(HEPUtilsAnalysisContainer)
     NEEDS_MANAGER(RunMC, MCLoopInfo)
-    DEPENDENCY(HardScatteringSim, const ColliderBit::BaseCollider*)
+    DEPENDENCY(HardScatteringSim, const BaseCollider*)
     #undef FUNCTION
   #undef CAPABILITY
 
@@ -345,7 +345,7 @@ START_MODULE
     #define FUNCTION getATLASmultieffAnalysisContainer
     START_FUNCTION(HEPUtilsAnalysisContainer)
     NEEDS_MANAGER(RunMC, MCLoopInfo)
-    DEPENDENCY(HardScatteringSim, const ColliderBit::BaseCollider*)
+    DEPENDENCY(HardScatteringSim, const BaseCollider*)
     #undef FUNCTION
   #undef CAPABILITY
 
@@ -354,7 +354,7 @@ START_MODULE
     #define FUNCTION getCMSAnalysisContainer
     START_FUNCTION(HEPUtilsAnalysisContainer)
     NEEDS_MANAGER(RunMC, MCLoopInfo)
-    DEPENDENCY(HardScatteringSim, const ColliderBit::BaseCollider*)
+    DEPENDENCY(HardScatteringSim, const BaseCollider*)
     #undef FUNCTION
   #undef CAPABILITY
 
@@ -363,7 +363,7 @@ START_MODULE
     #define FUNCTION getCMSmultieffAnalysisContainer
     START_FUNCTION(HEPUtilsAnalysisContainer)
     NEEDS_MANAGER(RunMC, MCLoopInfo)
-    DEPENDENCY(HardScatteringSim, const ColliderBit::BaseCollider*)
+    DEPENDENCY(HardScatteringSim, const BaseCollider*)
     #undef FUNCTION
   #undef CAPABILITY
 
@@ -372,7 +372,7 @@ START_MODULE
     #define FUNCTION getIdentityAnalysisContainer
     START_FUNCTION(HEPUtilsAnalysisContainer)
     NEEDS_MANAGER(RunMC, MCLoopInfo)
-    DEPENDENCY(HardScatteringSim, const ColliderBit::BaseCollider*)
+    DEPENDENCY(HardScatteringSim, const BaseCollider*)
     #undef FUNCTION
   #undef CAPABILITY
 
