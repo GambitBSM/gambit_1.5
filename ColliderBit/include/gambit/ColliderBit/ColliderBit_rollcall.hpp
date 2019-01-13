@@ -21,6 +21,7 @@
 ///          (p.scott@imperial.ac.uk)
 ///  \date 2015 Jul
 ///  \date 2018 Jan
+///  \date 2019 Jan
 ///
 ///  \author Andy Buckley
 ///          (andy.buckley@cern.ch)
@@ -39,14 +40,14 @@
 #include "gambit/ColliderBit/ColliderBit_macros.hpp"
 
 
-
 #define MODULE ColliderBit
 START_MODULE
 
   #include "ColliderBit_Higgs_rollcall.hpp"
   #include "ColliderBit_LEP_rollcall.hpp"
 
-  /// Sets the options for establishing convergence of Monte Carlo simulations
+
+  /// Set the options for establishing convergence of Monte Carlo simulations.
   #define CAPABILITY MC_ConvergenceSettings
   START_CAPABILITY
     #define FUNCTION MC_ConvergenceSettings_from_YAML
@@ -54,7 +55,7 @@ START_MODULE
     #undef FUNCTION
   #undef CAPABILITY
 
-  /// Controls looping of Collider simulations
+  /// Execute the main Monte Carlo event loop.
   #define CAPABILITY RunMC
   START_CAPABILITY
     #define FUNCTION operateLHCLoop
@@ -63,274 +64,8 @@ START_MODULE
     #undef FUNCTION
   #undef CAPABILITY
 
-
-  /// Collider sim capabilities
-  #define CAPABILITY HardScatteringSim
-  START_CAPABILITY
-
-    #define FUNCTION getPythia
-    START_FUNCTION(ColliderPythia_defaultversion)
-    NEEDS_MANAGER(RunMC, MCLoopInfo)
-    NEEDS_CLASSES_FROM(Pythia, default)
-    DEPENDENCY(decay_rates, DecayTable)
-    MODEL_CONDITIONAL_DEPENDENCY(MSSM_spectrum, Spectrum, MSSM63atQ, MSSM63atMGUT)
-    #undef FUNCTION
-
-    #define FUNCTION getPythiaFileReader
-    START_FUNCTION(ColliderPythia_defaultversion)
-    NEEDS_MANAGER(RunMC, MCLoopInfo)
-    NEEDS_CLASSES_FROM(Pythia, default)
-    #undef FUNCTION
-
-    #define FUNCTION getPythiaAsBase
-    START_FUNCTION(const BaseCollider*)
-    NEEDS_MANAGER(RunMC, MCLoopInfo)
-    NEEDS_CLASSES_FROM(Pythia, default)
-    DEPENDENCY(HardScatteringSim, ColliderPythia_defaultversion)
-    #undef FUNCTION
-
-    #define FUNCTION getPythia_EM
-    START_FUNCTION(ColliderPythia_EM_defaultversion)
-    NEEDS_MANAGER(RunMC, MCLoopInfo)
-    NEEDS_CLASSES_FROM(Pythia_EM, default)
-    DEPENDENCY(decay_rates, DecayTable)
-    MODEL_CONDITIONAL_DEPENDENCY(MSSM_spectrum, Spectrum, MSSM63atQ, MSSM63atMGUT)
-    #undef FUNCTION
-
-    #define FUNCTION getPythia_EMFileReader
-    START_FUNCTION(ColliderPythia_EM_defaultversion)
-    NEEDS_MANAGER(RunMC, MCLoopInfo)
-    NEEDS_CLASSES_FROM(Pythia_EM, default)
-    #undef FUNCTION
-
-    #define FUNCTION getPythia_EMAsBase
-    START_FUNCTION(const BaseCollider*)
-    NEEDS_MANAGER(RunMC, MCLoopInfo)
-    NEEDS_CLASSES_FROM(Pythia_EM, default)
-    DEPENDENCY(HardScatteringSim, ColliderPythia_EM_defaultversion)
-    #undef FUNCTION
-
-  #undef CAPABILITY
-
-
-  /// Detector sim capabilities
-
-  #define CAPABILITY ATLASDetectorSim
-  START_CAPABILITY
-    #define FUNCTION getBuckFastATLASPythia
-    START_FUNCTION(BaseDetector<Pythia_default::Pythia8::Event>*)
-    NEEDS_MANAGER(RunMC, MCLoopInfo)
-    NEEDS_CLASSES_FROM(Pythia, default)
-    #undef FUNCTION
-  #undef CAPABILITY
-
-  #define CAPABILITY ATLASmultieffDetectorSim
-  START_CAPABILITY
-    #define FUNCTION getBuckFastATLASmultieffPythia
-    START_FUNCTION(BaseDetector<Pythia_default::Pythia8::Event>*)
-    NEEDS_MANAGER(RunMC, MCLoopInfo)
-    NEEDS_CLASSES_FROM(Pythia, default)
-    #undef FUNCTION
-  #undef CAPABILITY
-
-  #define CAPABILITY CMSDetectorSim
-  START_CAPABILITY
-    #define FUNCTION getBuckFastCMSPythia
-    START_FUNCTION(BaseDetector<Pythia_default::Pythia8::Event>*)
-    NEEDS_MANAGER(RunMC, MCLoopInfo)
-    NEEDS_CLASSES_FROM(Pythia, default)
-    #undef FUNCTION
-  #undef CAPABILITY
-
-  #define CAPABILITY CMSmultieffDetectorSim
-  START_CAPABILITY
-    #define FUNCTION getBuckFastCMSmultieffPythia
-    START_FUNCTION(BaseDetector<Pythia_default::Pythia8::Event>*)
-    NEEDS_MANAGER(RunMC, MCLoopInfo)
-    NEEDS_CLASSES_FROM(Pythia, default)
-    #undef FUNCTION
-  #undef CAPABILITY
-
-  #define CAPABILITY IdentityDetectorSim
-  START_CAPABILITY
-    #define FUNCTION getBuckFastIdentityPythia
-    START_FUNCTION(BaseDetector<Pythia_default::Pythia8::Event>*)
-    NEEDS_MANAGER(RunMC, MCLoopInfo)
-    NEEDS_CLASSES_FROM(Pythia, default)
-    #undef FUNCTION
-  #undef CAPABILITY
-
-
-  #define CAPABILITY ATLASDetectorSim
-    #define FUNCTION getBuckFastATLASPythia_EM
-    START_FUNCTION(BaseDetector<Pythia_EM_default::Pythia8::Event>*)
-    NEEDS_MANAGER(RunMC, MCLoopInfo)
-    NEEDS_CLASSES_FROM(Pythia_EM, default)
-    #undef FUNCTION
-  #undef CAPABILITY
-
-  #define CAPABILITY ATLASmultieffDetectorSim
-    #define FUNCTION getBuckFastATLASmultieffPythia_EM
-    START_FUNCTION(BaseDetector<Pythia_EM_default::Pythia8::Event>*)
-    NEEDS_MANAGER(RunMC, MCLoopInfo)
-    NEEDS_CLASSES_FROM(Pythia_EM, default)
-    #undef FUNCTION
-  #undef CAPABILITY
-
-  #define CAPABILITY CMSDetectorSim
-    #define FUNCTION getBuckFastCMSPythia_EM
-    START_FUNCTION(BaseDetector<Pythia_EM_default::Pythia8::Event>*)
-    NEEDS_MANAGER(RunMC, MCLoopInfo)
-    NEEDS_CLASSES_FROM(Pythia_EM, default)
-    #undef FUNCTION
-  #undef CAPABILITY
-
-  #define CAPABILITY CMSmultieffDetectorSim
-    #define FUNCTION getBuckFastCMSmultieffPythia_EM
-    START_FUNCTION(BaseDetector<Pythia_EM_default::Pythia8::Event>*)
-    NEEDS_MANAGER(RunMC, MCLoopInfo)
-    NEEDS_CLASSES_FROM(Pythia_EM, default)
-    #undef FUNCTION
-  #undef CAPABILITY
-
-  #define CAPABILITY IdentityDetectorSim
-    #define FUNCTION getBuckFastIdentityPythia_EM
-    START_FUNCTION(BaseDetector<Pythia_EM_default::Pythia8::Event>*)
-    NEEDS_MANAGER(RunMC, MCLoopInfo)
-    NEEDS_CLASSES_FROM(Pythia_EM, default)
-    #undef FUNCTION
-  #undef CAPABILITY
-
-
-  /// Event capabilities
-  #define CAPABILITY HardScatteringEvent
-  START_CAPABILITY
-
-    #define FUNCTION generateEventPythia
-    START_FUNCTION(Pythia_default::Pythia8::Event)
-    NEEDS_MANAGER(RunMC, MCLoopInfo)
-    NEEDS_CLASSES_FROM(Pythia, default)
-    DEPENDENCY(HardScatteringSim, ColliderPythia_defaultversion)
-    #undef FUNCTION
-
-    #define FUNCTION generateEventPythia_EM
-    START_FUNCTION(Pythia_EM_default::Pythia8::Event)
-    NEEDS_MANAGER(RunMC, MCLoopInfo)
-    NEEDS_CLASSES_FROM(Pythia_EM, default)
-    DEPENDENCY(HardScatteringSim, ColliderPythia_EM_defaultversion)
-    #undef FUNCTION
-
-  #undef CAPABILITY
-
-  /// Detector simulators that directly produce the standard event format
-  #define CAPABILITY ATLASSmearedEvent
-  START_CAPABILITY
-
-    #define FUNCTION smearEventATLAS
-    START_FUNCTION(HEPUtils::Event)
-    NEEDS_MANAGER(RunMC, MCLoopInfo)
-    NEEDS_CLASSES_FROM(Pythia, default)
-    DEPENDENCY(HardScatteringEvent, Pythia_default::Pythia8::Event)
-    DEPENDENCY(ATLASDetectorSim, BaseDetector<Pythia_default::Pythia8::Event>*)
-    #undef FUNCTION
-
-    #define FUNCTION smearEventATLAS_EM
-    START_FUNCTION(HEPUtils::Event)
-    NEEDS_MANAGER(RunMC, MCLoopInfo)
-    NEEDS_CLASSES_FROM(Pythia_EM, default)
-    DEPENDENCY(HardScatteringEvent, Pythia_EM_default::Pythia8::Event)
-    DEPENDENCY(ATLASDetectorSim, BaseDetector<Pythia_EM_default::Pythia8::Event>*)
-    #undef FUNCTION
-
-  #undef CAPABILITY
-
-  #define CAPABILITY ATLASmultieffSmearedEvent
-  START_CAPABILITY
-
-    #define FUNCTION smearEventATLASmultieff
-    START_FUNCTION(HEPUtils::Event)
-    NEEDS_MANAGER(RunMC, MCLoopInfo)
-    NEEDS_CLASSES_FROM(Pythia, default)
-    DEPENDENCY(HardScatteringEvent, Pythia_default::Pythia8::Event)
-    DEPENDENCY(ATLASmultieffDetectorSim, BaseDetector<Pythia_default::Pythia8::Event>*)
-    #undef FUNCTION
-
-    #define FUNCTION smearEventATLASmultieff_EM
-    START_FUNCTION(HEPUtils::Event)
-    NEEDS_MANAGER(RunMC, MCLoopInfo)
-    NEEDS_CLASSES_FROM(Pythia_EM, default)
-    DEPENDENCY(HardScatteringEvent, Pythia_EM_default::Pythia8::Event)
-    DEPENDENCY(ATLASmultieffDetectorSim, BaseDetector<Pythia_EM_default::Pythia8::Event>*)
-    #undef FUNCTION
-
-  #undef CAPABILITY
-
-  #define CAPABILITY CMSSmearedEvent
-  START_CAPABILITY
-
-    #define FUNCTION smearEventCMS
-    START_FUNCTION(HEPUtils::Event)
-    NEEDS_MANAGER(RunMC, MCLoopInfo)
-    NEEDS_CLASSES_FROM(Pythia, default)
-    DEPENDENCY(HardScatteringEvent, Pythia_default::Pythia8::Event)
-    DEPENDENCY(CMSDetectorSim, BaseDetector<Pythia_default::Pythia8::Event>*)
-    #undef FUNCTION
-
-    #define FUNCTION smearEventCMS_EM
-    START_FUNCTION(HEPUtils::Event)
-    NEEDS_MANAGER(RunMC, MCLoopInfo)
-    NEEDS_CLASSES_FROM(Pythia_EM, default)
-    DEPENDENCY(HardScatteringEvent, Pythia_EM_default::Pythia8::Event)
-    DEPENDENCY(CMSDetectorSim, BaseDetector<Pythia_EM_default::Pythia8::Event>*)
-    #undef FUNCTION
-
-  #undef CAPABILITY
-
-  #define CAPABILITY CMSmultieffSmearedEvent
-  START_CAPABILITY
-
-    #define FUNCTION smearEventCMSmultieff
-    START_FUNCTION(HEPUtils::Event)
-    NEEDS_MANAGER(RunMC, MCLoopInfo)
-    NEEDS_CLASSES_FROM(Pythia, default)
-    DEPENDENCY(HardScatteringEvent, Pythia_default::Pythia8::Event)
-    DEPENDENCY(CMSmultieffDetectorSim, BaseDetector<Pythia_default::Pythia8::Event>*)
-    #undef FUNCTION
-
-    #define FUNCTION smearEventCMSmultieff_EM
-    START_FUNCTION(HEPUtils::Event)
-    NEEDS_MANAGER(RunMC, MCLoopInfo)
-    NEEDS_CLASSES_FROM(Pythia_EM, default)
-    DEPENDENCY(HardScatteringEvent, Pythia_EM_default::Pythia8::Event)
-    DEPENDENCY(CMSmultieffDetectorSim, BaseDetector<Pythia_EM_default::Pythia8::Event>*)
-    #undef FUNCTION
-
-  #undef CAPABILITY
-
-  #define CAPABILITY CopiedEvent
-  START_CAPABILITY
-
-    #define FUNCTION copyEvent
-    START_FUNCTION(HEPUtils::Event)
-    NEEDS_MANAGER(RunMC, MCLoopInfo)
-    NEEDS_CLASSES_FROM(Pythia, default)
-    DEPENDENCY(HardScatteringEvent, Pythia_default::Pythia8::Event)
-    DEPENDENCY(IdentityDetectorSim, BaseDetector<Pythia_default::Pythia8::Event>*)
-    #undef FUNCTION
-
-    #define FUNCTION copyEvent_EM
-    START_FUNCTION(HEPUtils::Event)
-    NEEDS_MANAGER(RunMC, MCLoopInfo)
-    NEEDS_CLASSES_FROM(Pythia_EM, default)
-    DEPENDENCY(HardScatteringEvent, Pythia_EM_default::Pythia8::Event)
-    DEPENDENCY(IdentityDetectorSim, BaseDetector<Pythia_EM_default::Pythia8::Event>*)
-    #undef FUNCTION
-
-  #undef CAPABILITY
-
-
-  /// Capability that holds list of analyses to run
-  /// Eventually needs to be configurable from yaml file
+  /// Lists of analyses to run
+  /// @{
   #define CAPABILITY ATLASAnalysisContainer
   START_CAPABILITY
     #define FUNCTION getATLASAnalysisContainer
@@ -375,10 +110,10 @@ START_MODULE
     DEPENDENCY(HardScatteringSim, const BaseCollider*)
     #undef FUNCTION
   #undef CAPABILITY
+  /// @}
 
-  // A capability that calculates the log likelihood
-  // Runs all analyses and fills vector of analysis results
-
+  /// Run all analyses and fill vector of analysis results.
+  /// @{
   #define CAPABILITY ATLASAnalysisNumbers
   START_CAPABILITY
     #define FUNCTION runATLASAnalyses
@@ -433,8 +168,9 @@ START_MODULE
     DEPENDENCY(IdentityAnalysisContainer, HEPUtilsAnalysisContainer)
     #undef FUNCTION
   #undef CAPABILITY
+  /// @}
 
-  // Collect all the analysis numbers in one place
+  /// Collect all the analysis numbers in one place
   #define CAPABILITY AllAnalysisNumbers
   START_CAPABILITY
     #define FUNCTION CollectAnalyses
@@ -447,7 +183,7 @@ START_MODULE
     #undef FUNCTION
   #undef CAPABILITY
 
-  // Extract the signal predictions and uncertainties for all analyses
+  /// Extract the signal predictions and uncertainties for all analyses
   #define CAPABILITY LHC_signals
   START_CAPABILITY
     #define FUNCTION calc_LHC_signals
@@ -456,7 +192,7 @@ START_MODULE
     #undef FUNCTION
   #undef CAPABILITY
 
-  // Calculate the log likelihood for each SR in each analysis using the analysis numbers
+  /// Calculate the log likelihood for each SR in each analysis using the analysis numbers
   #define CAPABILITY LHC_LogLikes
   START_CAPABILITY
     #define FUNCTION calc_LHC_LogLikes
@@ -469,7 +205,7 @@ START_MODULE
     #undef FUNCTION
   #undef CAPABILITY
 
-  // Extract the log likelihood for each SR to a simple map_str_dbl
+  /// Extract the log likelihood for each SR to a simple map_str_dbl
   #define CAPABILITY LHC_LogLike_per_SR
   START_CAPABILITY
     #define FUNCTION get_LHC_LogLike_per_SR
@@ -478,7 +214,7 @@ START_MODULE
     #undef FUNCTION
   #undef CAPABILITY
 
-  // Extract the combined log likelihood for each analysis to a simple map_str_dbl
+  /// Extract the combined log likelihood for each analysis to a simple map_str_dbl
   #define CAPABILITY LHC_LogLike_per_analysis
   START_CAPABILITY
     #define FUNCTION get_LHC_LogLike_per_analysis
@@ -487,7 +223,7 @@ START_MODULE
     #undef FUNCTION
   #undef CAPABILITY
 
-  // Extract the labels for the SRs used in the analysis loglikes
+  /// Extract the labels for the SRs used in the analysis loglikes
   #define CAPABILITY LHC_LogLike_SR_labels
   START_CAPABILITY
     #define FUNCTION get_LHC_LogLike_SR_labels
@@ -496,7 +232,7 @@ START_MODULE
     #undef FUNCTION
   #undef CAPABILITY
 
-  // Extract the indices for the SRs used in the analysis loglikes (alphabetical SR ordering)
+  /// Extract the indices for the SRs used in the analysis loglikes (alphabetical SR ordering)
   #define CAPABILITY LHC_LogLike_SR_indices
   START_CAPABILITY
     #define FUNCTION get_LHC_LogLike_SR_indices
@@ -505,7 +241,7 @@ START_MODULE
     #undef FUNCTION
   #undef CAPABILITY
 
-  // Calculate the total LHC log likelihood
+  /// Calculate the total LHC log likelihood
   #define CAPABILITY LHC_Combined_LogLike
   START_CAPABILITY
     #define FUNCTION calc_combined_LHC_LogLike
@@ -515,7 +251,7 @@ START_MODULE
     #undef FUNCTION
   #undef CAPABILITY
 
-  // Output some info about the event loop
+  /// Output some info about the event loop
   #define CAPABILITY LHCEventLoopInfo
   START_CAPABILITY
     #define FUNCTION getLHCEventLoopInfo
@@ -524,11 +260,10 @@ START_MODULE
     #undef FUNCTION
   #undef CAPABILITY
 
-
-  // Dummy observable that creates a dependency on TestModel1D, which is used to satisfy the normal
-  // GAMBIT model requrements in a minimal way. This is useful in the case where we just want to test
-  // ColliderBit on a single point with Pythia's SLHA interface, but not use the ColliderBit standalone
-  // interface.
+  /// Dummy observable that creates a dependency on TestModel1D, which is used to satisfy the normal
+  /// GAMBIT model requrements in a minimal way. This is useful in the case where we just want to test
+  /// ColliderBit on a single point with Pythia's SLHA interface, but not use the ColliderBit standalone
+  /// interface.
   #define CAPABILITY DummyColliderObservable
   START_CAPABILITY
     #define FUNCTION getDummyColliderObservable
@@ -537,6 +272,58 @@ START_MODULE
     #undef FUNCTION
   #undef CAPABILITY
 
+  // All other functions are declared in additional headers in the ColliderBit/models directory.
+  // The following capabilities need to be provided for each new model:
+
+  /// Collider sim capability.
+  #define CAPABILITY HardScatteringSim
+  START_CAPABILITY
+  #undef CAPABILITY
+
+  /// Collider sim event capability.
+  #define CAPABILITY HardScatteringEvent
+  START_CAPABILITY
+  #undef CAPABILITY
+
+  /// Detector sim capabilities.
+  /// @{
+  #define CAPABILITY ATLASDetectorSim
+  START_CAPABILITY
+  #undef CAPABILITY
+  #define CAPABILITY ATLASmultieffDetectorSim
+  START_CAPABILITY
+  #undef CAPABILITY
+  #define CAPABILITY CMSDetectorSim
+  START_CAPABILITY
+  #undef CAPABILITY
+  #define CAPABILITY CMSmultieffDetectorSim
+  START_CAPABILITY
+  #undef CAPABILITY
+  #define CAPABILITY IdentityDetectorSim
+  START_CAPABILITY
+  #undef CAPABILITY
+  /// @}
+
+  /// Run detector simulators and produce the standard event format.
+  /// @{
+  #define CAPABILITY ATLASSmearedEvent
+  START_CAPABILITY
+  #undef CAPABILITY
+  #define CAPABILITY ATLASmultieffSmearedEvent
+  START_CAPABILITY
+  #undef CAPABILITY
+  #define CAPABILITY CMSSmearedEvent
+  START_CAPABILITY
+  #undef CAPABILITY
+  #define CAPABILITY CMSmultieffSmearedEvent
+  START_CAPABILITY
+  #undef CAPABILITY
+  #define CAPABILITY CopiedEvent
+  START_CAPABILITY
+  #undef CAPABILITY
+  /// @}
+
+  #include "gambit/ColliderBit/models/ColliderBit_models.hpp"
 
 #undef MODULE
 

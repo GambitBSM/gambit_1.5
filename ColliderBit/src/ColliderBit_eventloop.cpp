@@ -281,7 +281,6 @@ namespace Gambit
         result["seed_base_" + name] = Dep::RunMC->seed_base.at(name);
         result["event_count_" + name] = Dep::RunMC->event_count.at(name);
       }
-
     }
 
 
