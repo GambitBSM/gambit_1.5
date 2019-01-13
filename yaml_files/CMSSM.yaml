@@ -541,10 +541,10 @@ Rules:
                    "CMS_13TeV_MONOJET_36invfb" ] ]
 
   # Choose Monte Carlo event simulator.
-  - capability:  ColliderOperator
+  - capability: RunMC
     function: operateLHCLoop
     options:
-      pythiaNames: ["Pythia_SUSY_LHC_13TeV"]
+      colliders: ["Pythia_SUSY_LHC_13TeV"]
       silenceLoop: true
 
   # Choose statistical settings for Monte Carlo event generator
