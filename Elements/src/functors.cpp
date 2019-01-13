@@ -1336,7 +1336,7 @@ namespace Gambit
       // Do type checking only if the need for a manger was declared with a specific type
       if (myLoopManagerType != "any")
       {
-        if (dep_functor->capability() != myLoopManagerType)
+        if (dep_functor->type() != myLoopManagerType)
         {
           utils_error().raise(LOCAL_INFO, "Cannot set loop manager for nested functor:\n"
            "Function " + myName + " in " + myOrigin + " requires a manager with\n"

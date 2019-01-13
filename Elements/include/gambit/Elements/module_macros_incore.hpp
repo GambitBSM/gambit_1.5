@@ -639,7 +639,7 @@
 
 /// Redirection of NEEDS_MANAGER(LOOPMAN) when invoked from within the Core.
 #define CORE_NEEDS_MANAGER_1(LOOPMAN)                                          \
-  CORE_NEEDS_MANAGER_MAIN(LOOPMAN,"any")
+  CORE_NEEDS_MANAGER_MAIN(LOOPMAN, any)
 
 /// Redirection of NEEDS_MANAGER(LOOPMAN,TYPE) when invoked from within the Core.
 #define CORE_NEEDS_MANAGER_2(LOOPMAN,TYPE)                                     \
