@@ -863,7 +863,7 @@ namespace Gambit
     /// Getter for revealing the required capability of the wrapped function's loop manager
     str module_functor_common::loopManagerCapability() { return myLoopManagerCapability; }
     /// Getter for revealing the required type of the wrapped function's loop manager
-    str module_functor_common::loopManagerType() { return myLoopManagerCapability; }
+    str module_functor_common::loopManagerType() { return myLoopManagerType; }
     /// Getter for revealing the name of the wrapped function's assigned loop manager
     str module_functor_common::loopManagerName() { return (myLoopManager == NULL ? "none" : myLoopManager->name()); }
     /// Getter for revealing the module of the wrapped function's assigned loop manager

@@ -1633,7 +1633,7 @@ namespace Gambit
 
       // Digest capability of loop manager (if defined)
       str lmcap = (*masterGraph[vertex]).loopManagerCapability();
-      str lmtype = (*masterGraph[vertex]).loopManagerCapability();
+      str lmtype = (*masterGraph[vertex]).loopManagerType();
       if (lmcap != "none")
       {
         logger() << "Adding module function loop manager to resolution queue:" << endl;
