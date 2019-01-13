@@ -36,6 +36,8 @@
 ///
 ///  *********************************************
 
+#include <memory>
+
 #include "gambit/ColliderBit/ColliderBit_eventloop.hpp"
 #include "gambit/ColliderBit/ATLASEfficiencies.hpp"
 #include "gambit/ColliderBit/CMSEfficiencies.hpp"
@@ -63,8 +65,7 @@ namespace Gambit
       static std::vector<double> antiktR;
 
       // Where the real action is
-      /// @todo this memory leaks when GAMBIT shuts down.  Delete the buckies somehow.
-      static BuckFast<EventT>* bucky = new BuckFast<EventT>[omp_get_max_threads()];
+      static std::unique_ptr<BuckFast<EventT>[]> bucky(new BuckFast<EventT>[omp_get_max_threads()]);
       int mine = omp_get_thread_num();
 
       if (iteration == BASE_INIT)
