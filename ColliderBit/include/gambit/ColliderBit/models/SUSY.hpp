@@ -31,6 +31,8 @@
 
 #pragma once
 
+#define MODULE ColliderBit
+
   // Get Monte Carlo event generator
   #define CAPABILITY HardScatteringSim
 
@@ -164,3 +166,4 @@
     #undef FUNCTION
   #undef CAPABILITY
 
+#undef MODULE
