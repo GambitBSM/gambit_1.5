@@ -33,20 +33,11 @@
 
 #define MODULE ColliderBit
 
-  /// Set the options for establishing convergence of Monte Carlo simulations.
-  #define CAPABILITY MC_ConvergenceSettings
-  START_CAPABILITY
-    #define FUNCTION MC_ConvergenceSettings_from_YAML
-    START_FUNCTION(convergence_settings)
-    #undef FUNCTION
-  #undef CAPABILITY
-
   /// Execute the main Monte Carlo event loop.
   #define CAPABILITY RunMC
   START_CAPABILITY
     #define FUNCTION operateLHCLoop
     START_FUNCTION(MCLoopInfo, CAN_MANAGE_LOOPS)
-    DEPENDENCY(MC_ConvergenceSettings, convergence_settings)
     #undef FUNCTION
   #undef CAPABILITY
 
@@ -105,7 +96,6 @@
     #define FUNCTION runATLASAnalyses
     START_FUNCTION(AnalysisDataPointers)
     NEEDS_MANAGER(RunMC, MCLoopInfo)
-    DEPENDENCY(MC_ConvergenceSettings, convergence_settings)
     DEPENDENCY(ATLASSmearedEvent, HEPUtils::Event)
     DEPENDENCY(ATLASAnalysisContainer, HEPUtilsAnalysisContainer)
     #undef FUNCTION
@@ -116,7 +106,6 @@
     #define FUNCTION runATLASmultieffAnalyses
     START_FUNCTION(AnalysisDataPointers)
     NEEDS_MANAGER(RunMC, MCLoopInfo)
-    DEPENDENCY(MC_ConvergenceSettings, convergence_settings)
     DEPENDENCY(ATLASmultieffSmearedEvent, HEPUtils::Event)
     DEPENDENCY(ATLASmultieffAnalysisContainer, HEPUtilsAnalysisContainer)
     #undef FUNCTION
@@ -127,7 +116,6 @@
     #define FUNCTION runCMSAnalyses
     START_FUNCTION(AnalysisDataPointers)
     NEEDS_MANAGER(RunMC, MCLoopInfo)
-    DEPENDENCY(MC_ConvergenceSettings, convergence_settings)
     DEPENDENCY(CMSSmearedEvent, HEPUtils::Event)
     DEPENDENCY(CMSAnalysisContainer, HEPUtilsAnalysisContainer)
     #undef FUNCTION
@@ -138,7 +126,6 @@
     #define FUNCTION runCMSmultieffAnalyses
     START_FUNCTION(AnalysisDataPointers)
     NEEDS_MANAGER(RunMC, MCLoopInfo)
-    DEPENDENCY(MC_ConvergenceSettings, convergence_settings)
     DEPENDENCY(CMSmultieffSmearedEvent, HEPUtils::Event)
     DEPENDENCY(CMSmultieffAnalysisContainer, HEPUtilsAnalysisContainer)
     #undef FUNCTION
@@ -149,7 +136,6 @@
     #define FUNCTION runIdentityAnalyses
     START_FUNCTION(AnalysisDataPointers)
     NEEDS_MANAGER(RunMC, MCLoopInfo)
-    DEPENDENCY(MC_ConvergenceSettings, convergence_settings)
     DEPENDENCY(CopiedEvent, HEPUtils::Event)
     DEPENDENCY(IdentityAnalysisContainer, HEPUtilsAnalysisContainer)
     #undef FUNCTION

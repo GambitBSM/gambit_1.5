@@ -11,6 +11,7 @@
 ///  \author Pat Scott
 ///          (p.scott@imperial.ac.uk)
 ///  \date 2018 Jan
+///  \date 2019 Jan
 ///
 ///  \author Anders Kvellestad
 ///          (anders.kvellestad@fys.uio.no)
@@ -48,10 +49,9 @@ namespace Gambit
     }
 
     /// Initialise (or re-initialise) the object
-    void MC_convergence_checker::init(int collider, const convergence_settings& settings)
+    void MC_convergence_checker::init(const convergence_settings& settings)
     {
       clear();
-      set_collider(collider);
       set_settings(settings);
     }
 
@@ -60,13 +60,6 @@ namespace Gambit
     {
       if (omp_get_thread_num() > 0) utils_error().raise(LOCAL_INFO, "Cannot call this function from inside an OpenMP block.");
       _settings = &settings;
-    }
-
-    /// Indicate precisely which of the convergence settings to actually use
-    void MC_convergence_checker::set_collider(int collider)
-    {
-      if (omp_get_thread_num() > 0) utils_error().raise(LOCAL_INFO, "Cannot call this function from inside an OpenMP block.");
-      _collider = collider;
     }
 
     /// Clear all convergence data (for all threads)
@@ -140,7 +133,7 @@ namespace Gambit
             double fractional_stat_uncert = (total_counts == 0 ? 1.0 : 1.0/sqrt(total_counts));
             double absolute_stat_uncert = total_counts * fractional_stat_uncert;
             SR_converged = (_settings->stop_at_sys and total_counts > 0 and absolute_stat_uncert <= sr.signal_sys) or
-                   (fractional_stat_uncert <= _settings->target_stat[_collider]);
+                   (fractional_stat_uncert <= _settings->target_stat);
 
             if (not SR_converged) all_SR_converged = false;
 
@@ -149,7 +142,7 @@ namespace Gambit
               cerr << "DEBUG: SIGNAL REGION " << SR_index << " of " << n_signals[0].size() << endl;
               cerr << "DEBUG: SR label: " << sr.sr_label << " in analysis " << analysis_pointer_pair.first << endl;
               cerr << "DEBUG: absolute_stat_uncert vs sys: " << absolute_stat_uncert << " vs " << sr.signal_sys << endl;
-              cerr << "DEBUG: fractional_stat_uncert vs target: " << fractional_stat_uncert << " vs " << _settings->target_stat[_collider] << endl;
+              cerr << "DEBUG: fractional_stat_uncert vs target: " << fractional_stat_uncert << " vs " << _settings->target_stat << endl;
               cerr << "DEBUG: Is this SR done? " << SR_converged << endl;
             #endif
 

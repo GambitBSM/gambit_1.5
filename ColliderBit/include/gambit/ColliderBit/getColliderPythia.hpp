@@ -52,36 +52,29 @@ namespace Gambit
                            const MCLoopInfo& RunMC,
                            const Spectrum& MSSM_spectrum,
                            const DecayTable& decay_rates,
-                           #ifdef COLLIDERBIT_DEBUG
-                             str model_suffix,
-                           #else
-                             str,
-                           #endif
+                           const str model_suffix,
                            const int iteration,
                            void(*wrapup)(),
                            const Options& runOptions,
                            bool(*ModelInUse)(str))
     {
+      static bool first = true;
       static str pythia_doc_path;
-      static str default_doc_path;
-      static bool pythia_doc_path_needs_setting = true;
       static std::vector<str> pythiaCommonOptions;
       static SLHAstruct slha;
       static SLHAstruct spectrum;
-      static std::vector<double> xsec_vetos;
+      static double xsec_veto_fb;
 
       if (iteration == BASE_INIT)
       {
-        // Setup the Pythia documentation path
-        if (pythia_doc_path_needs_setting)
+        // Setup the Pythia documentation path and print the banner once
+        if (first)
         {
-          default_doc_path = GAMBIT_DIR "/Backends/installed/Pythia/" +
-            Backends::backendInfo().default_version("Pythia") +
-            "/share/Pythia8/xmldoc/";
-          pythia_doc_path = runOptions.getValueOrDef<str>(default_doc_path, "Pythia_doc_path");
-          // Print the Pythia banner once.
+          const str be = "Pythia" + model_suffix;
+          const str ver = Backends::backendInfo().default_version(be);
+          pythia_doc_path = Backends::backendInfo().corrected_path(be, ver) + "/share/Pythia8/xmldoc/";
           result.banner(pythia_doc_path);
-          pythia_doc_path_needs_setting = false;
+          first = false;
         }
 
         // SLHAea object constructed from dependencies on the spectrum and decays.
@@ -104,11 +97,6 @@ namespace Gambit
         {
           ColliderBit_error().raise(LOCAL_INFO, "No spectrum object available for this model.");
         }
-
-        // Read xsec veto values and store in static variable 'xsec_vetos'
-        std::vector<double> default_xsec_vetos(RunMC.collider_names.size(), 0.0);
-        xsec_vetos = runOptions.getValueOrDef<std::vector<double> >(default_xsec_vetos, "xsec_vetos");
-        CHECK_EQUAL_VECTOR_LENGTH(xsec_vetos, RunMC.collider_names)
       }
 
       else if (iteration == COLLIDER_INIT)
@@ -120,12 +108,20 @@ namespace Gambit
         pythiaCommonOptions.push_back("Print:quiet = on");
         pythiaCommonOptions.push_back("SLHA:verbose = 0");
 
-        // Get options from yaml file. If the ColliderPythia specialization is hard-coded, okay with no options.
-        if (runOptions.hasKey(RunMC.current_collider))
+        // Get options from yaml file. If the ColliderPythia specialization is a known one we're OK with no options.
+        double xsec_veto_default = 0.0;
+        if (runOptions.hasKey(RunMC.current_collider()))
         {
-          std::vector<str> addPythiaOptions = runOptions.getValue<std::vector<str>>(RunMC.current_collider);
-          pythiaCommonOptions.insert(pythiaCommonOptions.end(), addPythiaOptions.begin(), addPythiaOptions.end());
+          YAML::Node colNode = runOptions.getValue<YAML::Node>(RunMC.current_collider());
+          Options colOptions(colNode);
+          xsec_veto_fb = colOptions.getValueOrDef<double>(xsec_veto_default, "xsec_veto");
+          if (colOptions.hasKey("pythia_settings"))
+          {
+            std::vector<str> addPythiaOptions = colNode["pythia_settings"].as<std::vector<str> >();
+            pythiaCommonOptions.insert(pythiaCommonOptions.end(), addPythiaOptions.begin(), addPythiaOptions.end());
+          }
         }
+        else xsec_veto_fb = xsec_veto_default;
 
         // We need showProcesses for the xsec veto.
         pythiaCommonOptions.push_back("Init:showProcesses = on");
@@ -155,11 +151,10 @@ namespace Gambit
         pythiaOptions.push_back("Random:seed = " + std::to_string(RunMC.current_seed_base() + omp_get_thread_num()));
 
         #ifdef COLLIDERBIT_DEBUG
-          str extra = model_suffix == "" ? "" : "_" + model_suffix;
-          cout << debug_prefix() << "getPythia"+extra+": My Pythia seed is: " << std::to_string(RunMC.current_seed_base() + omp_get_thread_num()) << endl;
+          cout << debug_prefix() << "getPythia"+model_suffix+": My Pythia seed is: " << std::to_string(RunMC.current_seed_base() + omp_get_thread_num()) << endl;
         #endif
 
-        result.resetSpecialization(RunMC.current_collider);
+        result.resetSpecialization(RunMC.current_collider());
 
         try
         {
@@ -187,9 +182,6 @@ namespace Gambit
 
         // Should we apply the xsec veto and skip event generation?
 
-        // - Get the xsec veto value for the current collider
-        double totalxsec_fb_veto = xsec_vetos[RunMC.current_collider_index];
-
         // - Get the upper limt xsec as estimated by Pythia
         code = -1;
         nxsec = 0;
@@ -210,7 +202,7 @@ namespace Gambit
         }
 
         #ifdef COLLIDERBIT_DEBUG
-        cout << debug_prefix() << "totalxsec [fb] = " << totalxsec * 1e12 << ", veto limit [fb] = " << totalxsec_fb_veto << endl;
+        cout << debug_prefix() << "totalxsec [fb] = " << totalxsec * 1e12 << ", veto limit [fb] = " << xsec_veto_fb << endl;
         #endif
 
         // - Check for NaN xsec
@@ -225,7 +217,7 @@ namespace Gambit
         }
 
         // - Wrap up loop if veto applies
-        if (totalxsec * 1e12 < totalxsec_fb_veto)
+        if (totalxsec * 1e12 < xsec_veto_fb)
         {
           #ifdef COLLIDERBIT_DEBUG
           cout << debug_prefix() << "Cross-section veto applies. Will now call Loop::wrapup() to skip event generation for this collider." << endl;
@@ -239,49 +231,38 @@ namespace Gambit
     template<typename PythiaT, typename EventT>
     void getColliderPythiaFileReader(ColliderPythia<PythiaT, EventT>& result,
                                      const MCLoopInfo& RunMC,
-                                     str model_suffix,
+                                     const str model_suffix,
                                      int iteration,
                                      void(*wrapup)(),
                                      const Options& runOptions)
     {
+      static bool first = true;
       static std::vector<str> filenames;
-      static str default_doc_path;
       static str pythia_doc_path;
       static std::vector<str> pythiaCommonOptions;
-      static bool pythia_doc_path_needs_setting = true;
       static unsigned int fileCounter = 0;
-      static std::vector<double> xsec_vetos;
+      static double xsec_veto_fb;
 
       if (iteration == BASE_INIT)
       {
-        // Setup the Pythia documentation path
-        if (pythia_doc_path_needs_setting)
+        // Setup the Pythia documentation path and print the banner once
+        if (first)
         {
-          default_doc_path = GAMBIT_DIR "/Backends/installed/Pythia/" +
-            Backends::backendInfo().default_version("Pythia") +
-            "/share/Pythia8/xmldoc/";
-          pythia_doc_path = runOptions.getValueOrDef<str>(default_doc_path, "Pythia_doc_path");
-          // Print the Pythia banner once.
+          const str be = "Pythia" + model_suffix;
+          const str ver = Backends::backendInfo().default_version(be);
+          pythia_doc_path = Backends::backendInfo().corrected_path(be, ver) + "/share/Pythia8/xmldoc/";
           result.banner(pythia_doc_path);
-          pythia_doc_path_needs_setting = false;
-        }
-
-        // Get SLHA file(s)
-        filenames = runOptions.getValue<std::vector<str> >("SLHA_filenames");
-        if (filenames.empty())
-        {
-          str extra = model_suffix == "" ? "" : "_" + model_suffix;
-          str errmsg = "No SLHA files are listed for ColliderBit function getPythia"+extra+"FileReader.\n";
-          errmsg    += "Please correct the option 'SLHA_filenames' or use getPythia"+extra+" instead.";
-          ColliderBit_error().raise(LOCAL_INFO, errmsg);
+          filenames = runOptions.getValue<std::vector<str> >("SLHA_filenames");
+          if (filenames.empty())
+          {
+            str errmsg = "No SLHA files are listed for ColliderBit function getPythia"+model_suffix+"FileReader.\n";
+            errmsg    += "Please correct the option 'SLHA_filenames' or use getPythia"+model_suffix+" instead.";
+            ColliderBit_error().raise(LOCAL_INFO, errmsg);
+          }
+          first = false;
         }
 
         if (filenames.size() <= fileCounter) invalid_point().raise("No more SLHA files. My work is done.");
-
-        // Read xsec veto values and store in static variable 'xsec_vetos'
-        std::vector<double> default_xsec_vetos(RunMC.collider_names.size(), 0.0);
-        xsec_vetos = runOptions.getValueOrDef<std::vector<double> >(default_xsec_vetos, "xsec_vetos");
-        CHECK_EQUAL_VECTOR_LENGTH(xsec_vetos, RunMC.collider_names)
       }
 
       else if (iteration == COLLIDER_INIT)
@@ -293,12 +274,20 @@ namespace Gambit
         pythiaCommonOptions.push_back("Print:quiet = on");
         pythiaCommonOptions.push_back("SLHA:verbose = 0");
 
-        // Get options from yaml file. If the ColliderPythia specialization is hard-coded, okay with no options.
-        if (runOptions.hasKey(RunMC.current_collider))
+        // Get options from yaml file. If the ColliderPythia specialization is a known one we're OK with no options.
+        double xsec_veto_default = 0.0;
+        if (runOptions.hasKey(RunMC.current_collider()))
         {
-          std::vector<str> addPythiaOptions = runOptions.getValue<std::vector<str>>(RunMC.current_collider);
-          pythiaCommonOptions.insert(pythiaCommonOptions.end(), addPythiaOptions.begin(), addPythiaOptions.end());
+          YAML::Node colNode = runOptions.getValue<YAML::Node>(RunMC.current_collider());
+          Options colOptions(colNode);
+          xsec_veto_fb = colOptions.getValueOrDef<double>(xsec_veto_default, "xsec_veto");
+          if (colOptions.hasKey("pythia_settings"))
+          {
+            std::vector<str> addPythiaOptions = colNode["pythia_settings"].as<std::vector<str> >();
+            pythiaCommonOptions.insert(pythiaCommonOptions.end(), addPythiaOptions.begin(), addPythiaOptions.end());
+          }
         }
+        else xsec_veto_fb = xsec_veto_default;
 
         // We need showProcesses for the xsec veto.
         pythiaCommonOptions.push_back("Init:showProcesses = on");
@@ -330,11 +319,10 @@ namespace Gambit
         pythiaOptions.push_back("Random:seed = " + std::to_string(RunMC.current_seed_base() + omp_get_thread_num()));
 
         #ifdef COLLIDERBIT_DEBUG
-        str extra = model_suffix == "" ? "" : "_" + model_suffix;
-        cout << debug_prefix() << "getPythia"+extra+"FileReader: My Pythia seed is: " << std::to_string(RunMC.current_seed_base() + omp_get_thread_num()) << endl;
+        cout << debug_prefix() << "getPythia"+model_suffix+"FileReader: My Pythia seed is: " << std::to_string(RunMC.current_seed_base() + omp_get_thread_num()) << endl;
         #endif
 
-        result.resetSpecialization(RunMC.current_collider);
+        result.resetSpecialization(RunMC.current_collider());
 
         try
         {
@@ -357,11 +345,6 @@ namespace Gambit
           }
         }
 
-        // Should we apply the xsec veto and skip event generation?
-
-        // - Get the xsec veto value for the current collider
-        double totalxsec_fb_veto = xsec_vetos[RunMC.current_collider_index];
-
         // - Get the upper limt xsec as estimated by Pythia
         code = -1;
         nxsec = 0;
@@ -382,11 +365,11 @@ namespace Gambit
         }
 
         #ifdef COLLIDERBIT_DEBUG
-        cout << debug_prefix() << "totalxsec [fb] = " << totalxsec * 1e12 << ", veto limit [fb] = " << totalxsec_fb_veto << endl;
+        cout << debug_prefix() << "totalxsec [fb] = " << totalxsec * 1e12 << ", veto limit [fb] = " << xsec_veto_fb << endl;
         #endif
 
         // - Wrap up loop if veto applies
-        if (totalxsec * 1e12 < totalxsec_fb_veto)
+        if (totalxsec * 1e12 < xsec_veto_fb)
         {
           #ifdef COLLIDERBIT_DEBUG
           cout << debug_prefix() << "Cross-section veto applies. Will now call Loop::wrapup() to skip event generation for this collider." << endl;

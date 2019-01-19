@@ -74,7 +74,7 @@ namespace Gambit
       result.clear();
 
       // Attempt (possibly repeatedly) to generate an event
-      while(nFailedEvents <= RunMC.maxFailedEvents)
+      while(nFailedEvents <= RunMC.current_maxFailedEvents())
       {
         try
         {
@@ -98,7 +98,7 @@ namespace Gambit
         }
       }
       // Wrap up event loop if too many events fail.
-      if(nFailedEvents > RunMC.maxFailedEvents)
+      if(nFailedEvents > RunMC.current_maxFailedEvents())
       {
         piped_warnings.request(LOCAL_INFO,"exceeded maxFailedEvents");
         wrapup();

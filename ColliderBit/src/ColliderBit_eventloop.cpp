@@ -45,38 +45,6 @@ namespace Gambit
   {
 
 
-    ///Convergence setting retriever
-    void MC_ConvergenceSettings_from_YAML(convergence_settings& result)
-    {
-      using namespace Pipes::MC_ConvergenceSettings_from_YAML;
-
-      static bool first = true;
-      if (first)
-      {
-        result.min_nEvents = runOptions->getValue<std::vector<int> >("min_nEvents");
-        result.max_nEvents = runOptions->getValue<std::vector<int> >("max_nEvents");
-        result.target_stat = runOptions->getValue<std::vector<double> >("target_fractional_uncert");
-        result.stop_at_sys = runOptions->getValueOrDef<bool>(true, "halt_when_systematic_dominated");
-        result.all_analyses_must_converge = runOptions->getValueOrDef<bool>(false, "all_analyses_must_converge");
-        result.all_SR_must_converge = runOptions->getValueOrDef<bool>(false, "all_SR_must_converge");
-        result.stoppingres = runOptions->getValueOrDef<std::vector<int> >(std::vector<int>(result.target_stat.size(), 200), "events_between_convergence_checks");
-        if (result.min_nEvents.size() != result.max_nEvents.size() or result.min_nEvents.size() != result.target_stat.size())
-        {
-          str errmsg;
-          errmsg  = "The options 'min_nEvents', 'max_nEvents' and 'target_fractional_uncert' for the function 'MC_ConvergenceSettings_from_YAML' must have\n";
-          errmsg += "the same number of entries. Correct your settings and try again.";
-          ColliderBit_error().raise(LOCAL_INFO, errmsg);
-        }
-        for (unsigned int i = 0; i != result.min_nEvents.size(); ++i)
-        {
-          if (result.min_nEvents[i] > result.max_nEvents[i])
-           ColliderBit_error().raise(LOCAL_INFO,"One or more min_nEvents is greater than corresponding max_nEvents. Please correct yur YAML file.");
-        }
-        first = false;
-      }
-    }
-
-
     /// LHC Loop Manager
     void operateLHCLoop(MCLoopInfo& result)
     {
@@ -91,24 +59,47 @@ namespace Gambit
       result.clear();
 
       // Retrieve run options from the YAML file (or standalone code)
-      result.collider_names = runOptions->getValue<std::vector<str> >("colliders");
-      result.maxFailedEvents = runOptions->getValueOrDef<int>(1, "maxFailedEvents");
-
-      // Allow the user to specify the Monte Carlo seed base (for debugging). If the default value -1
-      // is used, a new seed is generated for every new collider (Monte Carlo sim) and parameter point.
-      int seedBase = runOptions->getValueOrDef<int>(-1, "colliderSeedBase");
-
-      // Check that length of collider_names and nEvents agree!
-      if (result.collider_names.size() != Dep::MC_ConvergenceSettings->min_nEvents.size())
+      static bool first = true;
+      static int seedBase;
+      static bool silenceLoop;
+      static std::map<str,int> min_nEvents;
+      static std::map<str,int> max_nEvents;
+      static std::map<str,int> stoppingres;
+      if (first)
       {
-        str errmsg;
-        errmsg  = "The option 'colliders' for the function 'operateLHCLoop' must have\n";
-        errmsg += "the same number of entries as those in the MC_ConvergenceSettings dependency.\nCorrect your settings and try again.";
-        ColliderBit_error().raise(LOCAL_INFO, errmsg);
+        // Allow the user to specify the Monte Carlo seed base (for debugging). If the default value -1
+        // is used, a new seed is generated for every new collider (Monte Carlo sim) and parameter point.
+        seedBase = runOptions->getValueOrDef<int>(-1, "colliderSeedBase");
+
+        // Should we silence stdout during the loop?
+        silenceLoop = runOptions->getValueOrDef<bool>(true, "silenceLoop");
+
+        // Retrieve all the names of all colliders to be used in this run.
+        std::vector<str> vec = runOptions->getNames();
+        vec.erase(std::remove(vec.begin(), vec.end(), "colliderSeedBase"), vec.end());
+        vec.erase(std::remove(vec.begin(), vec.end(), "silenceLoop"), vec.end());
+        result.collider_names = vec;
+
+        // Retrieve the options for each collider.
+        for (auto& collider : result.collider_names)
+        {
+          Options colOptions(runOptions->getValue<YAML::Node>(collider));
+          min_nEvents[collider]                                           = colOptions.getValue<int>("min_nEvents");
+          max_nEvents[collider]                                           = colOptions.getValue<int>("max_nEvents");
+          result.convergence_options[collider].target_stat                = colOptions.getValue<double>("target_fractional_uncert");
+          result.convergence_options[collider].stop_at_sys                = colOptions.getValueOrDef<bool>(true, "halt_when_systematic_dominated");
+          result.convergence_options[collider].all_analyses_must_converge = colOptions.getValueOrDef<bool>(false, "all_analyses_must_converge");
+          result.convergence_options[collider].all_SR_must_converge       = colOptions.getValueOrDef<bool>(false, "all_SR_must_converge");
+          result.maxFailedEvents[collider]                                = colOptions.getValueOrDef<int>(1, "maxFailedEvents");
+          stoppingres[collider]                                           = colOptions.getValueOrDef<int>(200, "events_between_convergence_checks");
+          if (min_nEvents.at(collider) > max_nEvents.at(collider))
+           ColliderBit_error().raise(LOCAL_INFO,"Option min_nEvents is greater than corresponding max_nEvents for collider "
+                                                +collider+". Please correct your YAML file.");
+        }
+        first = false;
       }
 
-      // Should we silence stdout during the loop?
-      bool silenceLoop = runOptions->getValueOrDef<bool>(true, "silenceLoop");
+      // Mute stdout during the loop if requested
       if (silenceLoop) std::cout.rdbuf(0);
 
       // Do the base-level initialisation
@@ -118,23 +109,17 @@ namespace Gambit
       for (auto& collider : result.collider_names)
       {
 
-        // Update the collider index and the current collider
-        result.current_collider_index = &collider - &result.collider_names[0];
-        result.current_collider = collider;
+        // Update the collider
+        result.set_current_collider(collider);
 
         // Save the random number seed to be used for this collider; actual seed will be this plus the thread number.
-        result.seed_base[collider] = (seedBase != -1 ? seedBase : int(Random::draw() * 899990000));
+        result.current_seed_base() = (seedBase != -1 ? seedBase : int(Random::draw() * 899990000));
 
         // Initialise the count of the number of generated events.
-        result.event_count[collider] = 0;
-
-        // Get the minimum and maximum number of events to run for this collider, and the convergence step
-        int min_nEvents = Dep::MC_ConvergenceSettings->min_nEvents[result.current_collider_index];
-        int max_nEvents = Dep::MC_ConvergenceSettings->max_nEvents[result.current_collider_index];
-        int stoppingres = Dep::MC_ConvergenceSettings->stoppingres[result.current_collider_index];
+        result.current_event_count() = 0;
 
         #ifdef COLLIDERBIT_DEBUG
-        cout << debug_prefix() << "operateLHCLoop: Current collider is " << collider << " with index " << result.current_collider_index << endl;
+        cout << debug_prefix() << "operateLHCLoop: Current collider is " << collider << ".";
         #endif
 
         piped_invalid_point.check();
@@ -164,19 +149,19 @@ namespace Gambit
         piped_errors.check(ColliderBit_error());
 
         // Convergence loop
-        while(currentEvent < max_nEvents and not *Loop::done)
+        while(currentEvent < max_nEvents.at(collider) and not *Loop::done)
         {
           int eventCountBetweenConvergenceChecks = 0;
 
           #ifdef COLLIDERBIT_DEBUG
-          cout << debug_prefix() << "Starting main event loop.  Will do " << stoppingres << " events before testing convergence." << endl;
+          cout << debug_prefix() << "Starting main event loop.  Will do " << stoppingres.at(collider) << " events before testing convergence." << endl;
           #endif
 
           // Main event loop
           #pragma omp parallel
           {
-            while(eventCountBetweenConvergenceChecks < stoppingres and
-                  currentEvent < max_nEvents and
+            while(eventCountBetweenConvergenceChecks < stoppingres.at(collider) and
+                  currentEvent < max_nEvents.at(collider) and
                   not *Loop::done and
                   not result.exceeded_maxFailedEvents and
                   not piped_warnings.inquire("exceeded maxFailedEvents") and
@@ -211,7 +196,7 @@ namespace Gambit
           if(result.exceeded_maxFailedEvents) break;
 
           // Don't bother with convergence stuff if we haven't passed the minimum number of events yet
-          if (currentEvent >= min_nEvents)
+          if (currentEvent >= min_nEvents.at(collider))
           {
             #pragma omp parallel
             {
@@ -229,7 +214,7 @@ namespace Gambit
         }
 
         // Store the number of generated events
-        result.event_count[collider] = currentEvent;
+        result.current_event_count() = currentEvent;
 
         // Break collider loop if too many events have failed
         if(result.exceeded_maxFailedEvents)
@@ -267,15 +252,9 @@ namespace Gambit
     void getLHCEventLoopInfo(map_str_dbl& result)
     {
       using namespace Pipes::getLHCEventLoopInfo;
-
-      // Clear the result map
       result.clear();
-
       result["did_event_generation"] = double(Dep::RunMC->event_generation_began);
       result["too_many_failed_events"] = double(Dep::RunMC->exceeded_maxFailedEvents);
-
-      // TODO check this earlier
-      assert(Dep::RunMC->collider_names.size() == Dep::RunMC->seed_base.size());
       for (auto& name : Dep::RunMC->collider_names)
       {
         result["seed_base_" + name] = Dep::RunMC->seed_base.at(name);

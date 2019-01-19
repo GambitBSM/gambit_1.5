@@ -61,28 +61,36 @@ namespace Gambit
                                       int iteration,
                                       const Options& runOptions)
     {
-      static std::vector<bool> partonOnly;
-      static std::vector<double> antiktR;
+      static bool partonOnly;
+      static double antiktR;
 
       // Where the real action is
       static std::unique_ptr<BuckFast<EventT>[]> bucky(new BuckFast<EventT>[omp_get_max_threads()]);
       int mine = omp_get_thread_num();
 
-      if (iteration == BASE_INIT)
+      if (iteration == COLLIDER_INIT)
       {
-        std::vector<bool> default_partonOnly(RunMC.collider_names.size(), false);
-        partonOnly = runOptions.getValueOrDef<std::vector<bool> >(default_partonOnly, "partonOnly");
-        CHECK_EQUAL_VECTOR_LENGTH(partonOnly,RunMC.collider_names)
-
-        std::vector<double> default_antiktR(RunMC.collider_names.size(), 0.4);
-        antiktR = runOptions.getValueOrDef<std::vector<double> >(default_antiktR, "antiktR");
-        CHECK_EQUAL_VECTOR_LENGTH(antiktR,RunMC.collider_names)
+        // The default values for partonOnly and antiktR
+        bool default_partonOnly = false;
+        double default_antiktR = 0.4;
+        // Retrieve any yaml options specifying partonOnly and antikt R for this collider
+        if (runOptions.hasKey(RunMC.current_collider()))
+        {
+          Options colOptions(runOptions.getValue<YAML::Node>(RunMC.current_collider()));
+          partonOnly = colOptions.getValueOrDef<bool>(default_partonOnly, "partonOnly");
+          antiktR = colOptions.getValueOrDef<double>(default_antiktR, "antiktR");
+        }
+        else
+        {
+          partonOnly = default_partonOnly;
+          antiktR = default_antiktR;
+        }
       }
 
       if (iteration == START_SUBPROCESS)
       {
         // Each thread gets its own copy of the detector sim, so it is initialised *after* COLLIDER_INIT, within omp parallel.
-        bucky[mine].init(partonOnly[RunMC.current_collider_index], antiktR[RunMC.current_collider_index]);
+        bucky[mine].init(partonOnly, antiktR);
         // Assign detector functions
         if (detname == "ATLAS")
         {

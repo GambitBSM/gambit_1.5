@@ -15,11 +15,11 @@
 ///  *********************************************
 
 
-#ifndef __MCLoopInfo_hpp__
-#define __MCLoopInfo_hpp__
+#pragma once
 
 #include <vector>
 #include "gambit/Utils/util_types.hpp"
+#include "gambit/ColliderBit/MC_convergence.hpp"
 
 namespace Gambit
 {
@@ -33,40 +33,58 @@ namespace Gambit
       /// Event generation has started
       bool event_generation_began;
 
-      /// Maximum allowable number of failed events before MC loop is terminated
-      int maxFailedEvents;
-
       /// Maximum allowed number of failed events has been reached and MC loop terminated
       bool exceeded_maxFailedEvents;
-
-      /// The index of the current collider
-      unsigned int current_collider_index;
-
-      /// The name of the current collider
-      str current_collider;
 
       /// The names of all colliders
       std::vector<str> collider_names;
 
-      /// The random seed bases of all colliders
+      /// Maximum allowable number of failed events before MC loop is terminated for each collider
+      std::map<str,int> maxFailedEvents;
+
+      /// The random seed base of each collider
       std::map<str,int> seed_base;
 
-      /// Number of events generated for all colliders
+      /// Number of events generated for each collider
       std::map<str,int> event_count;
 
-      /// The random seed base of the current collider
-      int current_seed_base() const;
+      /// Convergence options for each collider
+      std::map<str,convergence_settings> convergence_options;
 
-      /// Number of events generated for the current collider
-      int current_event_count() const;
+      /// Set the current collider
+      void set_current_collider(str&);
+
+      /// Get the current collider
+      const str& current_collider() const;
+
+      /// Get/set maximum allowable number of failed events before MC loop is terminated for the current collider
+      int& current_maxFailedEvents() const;
+
+      /// Get/set the random seed base of the current collider
+      int& current_seed_base() const;
+
+      /// Get/set the number of events generated for the current collider
+      int& current_event_count() const;
 
       /// Reinitialise
       void clear();
+
+      private:
+
+        /// The name of the current collider
+        str _current_collider;
+
+        /// Iterator to the current maxFailedEvents
+        std::map<str,int>::iterator _current_maxFailedEvents_it;
+
+        /// Iterator to the current seed base
+        std::map<str,int>::iterator _current_seed_base_it;
+
+        /// Iterator to the current event count
+        std::map<str,int>::iterator _current_event_count_it;
+
     };
 
   }
 }
 
-
-
-#endif /* defined __MCLoopInfo_hpp__ */

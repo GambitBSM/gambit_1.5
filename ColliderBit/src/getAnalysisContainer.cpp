@@ -53,7 +53,7 @@ namespace Gambit
                               int iteration,
                               const Options& runOptions)
     {
-      static std::vector<std::vector<str> > analyses;
+      static std::map<str, std::vector<str> > analyses;
       static bool first = true;
 
       if (iteration == BASE_INIT)
@@ -61,14 +61,19 @@ namespace Gambit
         // Only run this once
         if (first)
         {
-          // Read analysis names from the yaml file
-          std::vector<std::vector<str> > default_analyses;  // The default is empty lists of analyses
-          analyses = runOptions.getValueOrDef<std::vector<std::vector<str> > >(default_analyses, "analyses");
-
-          // Check that the analysis names listed in the yaml file all correspond to actual ColliderBit analyses
-          for (std::vector<str> collider_specific_analyses : analyses)
+          // Loop over colliders
+          for (auto& collider : RunMC.collider_names)
           {
-            for (str& analysis_name : collider_specific_analyses)
+            // Read analysis names from the yaml file
+            if (runOptions.hasKey(collider))
+            {
+              YAML::Node colNode = runOptions.getValue<YAML::Node>(collider);
+              analyses[collider] = colNode[collider].as<std::vector<str>>();
+            }
+            else analyses[collider] = std::vector<str>();
+
+            // Check that the analysis names listed in the yaml file all correspond to actual ColliderBit analyses
+            for (str& analysis_name : analyses[collider])
             {
               if (!checkAnalysis(analysis_name))
               {
@@ -77,7 +82,6 @@ namespace Gambit
               }
             }
           }
-
           first = false;
         }
       }
@@ -90,14 +94,14 @@ namespace Gambit
         result.register_thread(detname+"AnalysisContainer");
 
         // Set current collider
-        result.set_current_collider(RunMC.current_collider);
+        result.set_current_collider(RunMC.current_collider());
 
         // Initialize analysis container or reset all the contained analyses
         if (!result.has_analyses())
         {
           try
           {
-            result.init(analyses[RunMC.current_collider_index]);
+            result.init(analyses.at(RunMC.current_collider()));
           }
           catch (std::runtime_error& e)
           {
