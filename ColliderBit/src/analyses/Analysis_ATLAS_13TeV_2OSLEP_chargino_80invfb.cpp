@@ -30,7 +30,10 @@ namespace Gambit
 {
   namespace ColliderBit 
   {
-
+    // This analysis class is a base class for two SR-specific analysis classes
+    // defined further down:
+    // - ATLAS_13TeV_2OSLEP_chargino_binned_80invfb
+    // - ATLAS_13TeV_2OSLEP_chargino_inclusive_80invfb
     class Analysis_ATLAS_13TeV_2OSLEP_chargino_80invfb : public HEPUtilsAnalysis 
     {
 
@@ -55,6 +58,43 @@ namespace Gambit
         {"SR-SF-1J-100-120", 0},
         {"SR-SF-1J-120-160", 0}
       }; 
+      
+      std::map<string,double> _numSR_bin = {
+        {"SR-DF-0J-100-105", 0},
+        {"SR-DF-0J-105-110", 0},
+        {"SR-DF-0J-110-120", 0},
+        {"SR-DF-0J-120-140", 0},
+        {"SR-DF-0J-140-160", 0},
+        {"SR-DF-0J-160-180", 0},
+        {"SR-DF-0J-180-220", 0},
+        {"SR-DF-0J-220", 0},
+        {"SR-DF-1J-100-105", 0},
+        {"SR-DF-1J-105-110", 0},
+        {"SR-DF-1J-110-120", 0},
+        {"SR-DF-1J-120-140", 0},
+        {"SR-DF-1J-140-160", 0},
+        {"SR-DF-1J-160-180", 0},
+        {"SR-DF-1J-180-220", 0},
+        {"SR-DF-1J-220", 0},
+        {"SR-SF-0J-100-105", 0},
+        {"SR-SF-0J-105-110", 0},
+        {"SR-SF-0J-110-120", 0},
+        {"SR-SF-0J-120-140", 0},
+        {"SR-SF-0J-140-160", 0},
+        {"SR-SF-0J-160-180", 0},
+        {"SR-SF-0J-180-220", 0},
+        {"SR-SF-0J-220", 0},
+        {"SR-SF-1J-100-105", 0},
+        {"SR-SF-1J-105-110", 0},
+        {"SR-SF-1J-110-120", 0},
+        {"SR-SF-1J-120-140", 0},
+        {"SR-SF-1J-140-160", 0},
+        {"SR-SF-1J-160-180", 0},
+        {"SR-SF-1J-180-220", 0},
+        {"SR-SF-1J-220", 0}
+      }; 
+      
+      
       Cutflow _cutflow;
 
     public:
@@ -255,11 +295,29 @@ namespace Gambit
                 if (mT2>160)             _numSR["SR-SF-0J-160"]++;
                 if (mT2>100 and mT2<120) _numSR["SR-SF-0J-100-120"]++;
                 if (mT2>120 and mT2<160) _numSR["SR-SF-0J-120-160"]++;
+                // binned SRs
+                if (mT2>100 and mT2<105) _numSR_bin["SR-SF-0J-100-105"]++;
+                if (mT2>105 and mT2<110) _numSR_bin["SR-SF-0J-105-110"]++;
+                if (mT2>110 and mT2<120) _numSR_bin["SR-SF-0J-110-120"]++;
+                if (mT2>120 and mT2<140) _numSR_bin["SR-SF-0J-120-140"]++;
+                if (mT2>140 and mT2<160) _numSR_bin["SR-SF-0J-140-160"]++;
+                if (mT2>160 and mT2<180) _numSR_bin["SR-SF-0J-160-180"]++;
+                if (mT2>180 and mT2<220) _numSR_bin["SR-SF-0J-180-220"]++;
+                if (mT2>220            ) _numSR_bin["SR-SF-0J-220"]++;                
             } else {
                 if (mT2>100)             _numSR["SR-SF-1J-100"]++;
                 if (mT2>160)             _numSR["SR-SF-1J-160"]++;
                 if (mT2>100 and mT2<120) _numSR["SR-SF-1J-100-120"]++;
                 if (mT2>120 and mT2<160) _numSR["SR-SF-1J-120-160"]++;
+                // binned SRs
+                if (mT2>100 and mT2<105) _numSR_bin["SR-SF-1J-100-105"]++;
+                if (mT2>105 and mT2<110) _numSR_bin["SR-SF-1J-105-110"]++;
+                if (mT2>110 and mT2<120) _numSR_bin["SR-SF-1J-110-120"]++;
+                if (mT2>120 and mT2<140) _numSR_bin["SR-SF-1J-120-140"]++;
+                if (mT2>140 and mT2<160) _numSR_bin["SR-SF-1J-140-160"]++;
+                if (mT2>160 and mT2<180) _numSR_bin["SR-SF-1J-160-180"]++;
+                if (mT2>180 and mT2<220) _numSR_bin["SR-SF-1J-180-220"]++;
+                if (mT2>220            ) _numSR_bin["SR-SF-1J-220"]++;   
             }
         } else {
             if (nonbJets.size()==0){
@@ -267,11 +325,29 @@ namespace Gambit
                 if (mT2>160)             _numSR["SR-DF-0J-160"]++;
                 if (mT2>100 and mT2<120) _numSR["SR-DF-0J-100-120"]++;
                 if (mT2>120 and mT2<160) _numSR["SR-DF-0J-120-160"]++;
+                // binned SRs
+                if (mT2>100 and mT2<105) _numSR_bin["SR-DF-0J-100-105"]++;
+                if (mT2>105 and mT2<110) _numSR_bin["SR-DF-0J-105-110"]++;
+                if (mT2>110 and mT2<120) _numSR_bin["SR-DF-0J-110-120"]++;
+                if (mT2>120 and mT2<140) _numSR_bin["SR-DF-0J-120-140"]++;
+                if (mT2>140 and mT2<160) _numSR_bin["SR-DF-0J-140-160"]++;
+                if (mT2>160 and mT2<180) _numSR_bin["SR-DF-0J-160-180"]++;
+                if (mT2>180 and mT2<220) _numSR_bin["SR-DF-0J-180-220"]++;
+                if (mT2>220            ) _numSR_bin["SR-DF-0J-220"]++;   
             } else {
                 if (mT2>100)             _numSR["SR-DF-1J-100"]++;
                 if (mT2>160)             _numSR["SR-DF-1J-160"]++;
                 if (mT2>100 and mT2<120) _numSR["SR-DF-1J-100-120"]++;
                 if (mT2>120 and mT2<160) _numSR["SR-DF-1J-120-160"]++;
+                // binned SRs
+                if (mT2>100 and mT2<105) _numSR_bin["SR-DF-1J-100-105"]++;
+                if (mT2>105 and mT2<110) _numSR_bin["SR-DF-1J-105-110"]++;
+                if (mT2>110 and mT2<120) _numSR_bin["SR-DF-1J-110-120"]++;
+                if (mT2>120 and mT2<140) _numSR_bin["SR-DF-1J-120-140"]++;
+                if (mT2>140 and mT2<160) _numSR_bin["SR-DF-1J-140-160"]++;
+                if (mT2>160 and mT2<180) _numSR_bin["SR-DF-1J-160-180"]++;
+                if (mT2>180 and mT2<220) _numSR_bin["SR-DF-1J-180-220"]++;
+                if (mT2>220            ) _numSR_bin["SR-DF-1J-220"]++;
             }
         
         }
@@ -290,6 +366,10 @@ namespace Gambit
         for (auto& el : _numSR) { 
           el.second += specificOther->_numSR[el.first];
         }
+        
+        for (auto& el : _numSR_bin) { 
+          el.second += specificOther->_numSR_bin[el.first];
+        }
 
       }
 
@@ -300,6 +380,9 @@ namespace Gambit
         cout << _cutflow << endl;
         for (auto& el : _numSR) { 
             cout << el.first << "\t" << _numSR[el.first] << endl;
+        }
+        for (auto& el : _numSR_bin) { 
+            cout << el.first << "\t" << _numSR_bin[el.first] << endl;
         }
         #endif
 
@@ -329,12 +412,104 @@ namespace Gambit
     protected:
       void clear() {
         for (auto& el : _numSR) { el.second = 0.;}
+        for (auto& el : _numSR_bin) { el.second = 0.;}
       }
 
     };
 
     // Factory fn
     DEFINE_ANALYSIS_FACTORY(ATLAS_13TeV_2OSLEP_chargino_80invfb)
+
+
+    // 
+    // Derived analysis class for the 2Lep0Jets SRs
+    // 
+    class Analysis_ATLAS_13TeV_2OSLEP_chargino_inclusive_80invfb : public Analysis_ATLAS_13TeV_2OSLEP_chargino_80invfb {
+
+    public:
+      Analysis_ATLAS_13TeV_2OSLEP_chargino_inclusive_80invfb() {
+        set_analysis_name("ATLAS_13TeV_2OSLEP_chargino_inclusive_80invfb");
+      }
+
+      virtual void collect_results() {
+        // add_result(SignalRegionData("SR label", n_obs, {s, s_sys}, {b, b_sys}));
+        add_result(SignalRegionData("SR-SF-0J-100"    , 131., {_numSR["SR-SF-0J-100"],     0.}, {119.67, 9.0}));
+        add_result(SignalRegionData("SR-SF-0J-160"    ,  31., {_numSR["SR-SF-0J-160"],     0.}, {27.1  , 2.7}));
+        add_result(SignalRegionData("SR-SF-0J-100-120",  65., {_numSR["SR-SF-0J-100-120"], 0.}, {50.9  , 5.7}));
+        add_result(SignalRegionData("SR-SF-0J-120-160",  35., {_numSR["SR-SF-0J-120-160"], 0.}, {42.3  , 3.4}));
+        
+        add_result(SignalRegionData("SR-SF-1J-100"    , 114., {_numSR["SR-SF-1J-100"],     0.}, {114.  , 13.}));
+        add_result(SignalRegionData("SR-SF-1J-160"    ,  23., {_numSR["SR-SF-1J-160"],     0.}, {29.   , 5. }));
+        add_result(SignalRegionData("SR-SF-1J-100-120",  56., {_numSR["SR-SF-1J-100-120"], 0.}, {51.7  , 10.}));
+        add_result(SignalRegionData("SR-SF-1J-120-160",  35., {_numSR["SR-SF-1J-120-160"], 0.}, {33.   , 4. }));
+        
+        add_result(SignalRegionData("SR-DF-0J-100"    ,  84., {_numSR["SR-DF-0J-100"],     0.}, {100.8, 11.9}));
+        add_result(SignalRegionData("SR-DF-0J-160"    ,  15., {_numSR["SR-DF-0J-160"],     0.}, {16.1 , 2.0 }));
+        add_result(SignalRegionData("SR-DF-0J-100-120",  49., {_numSR["SR-DF-0J-100-120"], 0.}, {53.4 , 9.}));
+        add_result(SignalRegionData("SR-DF-0J-120-160",  20., {_numSR["SR-DF-0J-120-160"], 0.}, {31.5 , 3.5}));
+        
+        add_result(SignalRegionData("SR-DF-1J-100"    ,  73., {_numSR["SR-DF-1J-100"],     0.}, {83.5 , 14.6}));
+        add_result(SignalRegionData("SR-DF-1J-160"    ,   9., {_numSR["SR-DF-1J-160"],     0.}, {12.2 , 2.5 }));
+        add_result(SignalRegionData("SR-DF-1J-100-120",  39., {_numSR["SR-DF-1J-100-120"], 0.}, {50.6 , 10.7}));
+        add_result(SignalRegionData("SR-DF-1J-120-160",  25., {_numSR["SR-DF-1J-120-160"], 0.}, {21.2 , 4.0 }));
+      }
+
+    };
+
+    // Factory fn
+    DEFINE_ANALYSIS_FACTORY(ATLAS_13TeV_2OSLEP_chargino_inclusive_80invfb)
+
+    // 
+    // Derived analysis class for the 3Lep SRs
+    // 
+    class Analysis_ATLAS_13TeV_2OSLEP_chargino_binned_80invfb : public Analysis_ATLAS_13TeV_2OSLEP_chargino_80invfb {
+
+    public:
+      Analysis_ATLAS_13TeV_2OSLEP_chargino_binned_80invfb() {
+        set_analysis_name("ATLAS_13TeV_2OSLEP_chargino_binned_80invfb");
+      }
+
+      virtual void collect_results() {
+        // add_result(SignalRegionData("SR label", n_obs, {s, s_sys}, {b, b_sys}));
+        add_result(SignalRegionData("SR-DF-0J-100-105",	13	,	{_numSR_bin["SR-DF-0J-100-105"],	0.},	{	17.051834	,	3.918484	}));
+		add_result(SignalRegionData("SR-DF-0J-105-110",	16	,	{_numSR_bin["SR-DF-0J-105-110"],	0.},	{	16.017853	,	3.304676	}));
+		add_result(SignalRegionData("SR-DF-0J-110-120",	20	,	{_numSR_bin["SR-DF-0J-110-120"],	0.},	{	20.199902	,	3.164856	}));
+		add_result(SignalRegionData("SR-DF-0J-120-140",	12	,	{_numSR_bin["SR-DF-0J-120-140"],	0.},	{	21.925301	,	2.729999	}));
+		add_result(SignalRegionData("SR-DF-0J-140-160",	8	,	{_numSR_bin["SR-DF-0J-140-160"],	0.},	{	9.249123	,	1.258392	}));
+		add_result(SignalRegionData("SR-DF-0J-160-180",	7	,	{_numSR_bin["SR-DF-0J-160-180"],	0.},	{	5.797642	,	0.837528	}));
+		add_result(SignalRegionData("SR-DF-0J-180-220",	5	,	{_numSR_bin["SR-DF-0J-180-220"],	0.},	{	5.394958	,	0.882271	}));
+		add_result(SignalRegionData("SR-DF-0J-220",	    3	,	{_numSR_bin["SR-DF-0J-220"],	    0.},	{	4.923061	,	0.615914	}));
+		add_result(SignalRegionData("SR-DF-1J-100-105",	16	,	{_numSR_bin["SR-DF-1J-100-105"],	0.},	{	22.418163	,	5.116753	}));
+		add_result(SignalRegionData("SR-DF-1J-105-110",	11	,	{_numSR_bin["SR-DF-1J-105-110"],	0.},	{	12.466408	,	3.139675	}));
+		add_result(SignalRegionData("SR-DF-1J-110-120",	12	,	{_numSR_bin["SR-DF-1J-110-120"],	0.},	{	15.303375	,	4.375695	}));
+		add_result(SignalRegionData("SR-DF-1J-120-140",	20	,	{_numSR_bin["SR-DF-1J-120-140"],	0.},	{	14.805614	,	3.148068	}));
+		add_result(SignalRegionData("SR-DF-1J-140-160",	5	,	{_numSR_bin["SR-DF-1J-140-160"],	0.},	{	6.249268	,	1.218536	}));
+		add_result(SignalRegionData("SR-DF-1J-160-180",	5	,	{_numSR_bin["SR-DF-1J-160-180"],	0.},	{	3.536739	,	1.02978	}));
+		add_result(SignalRegionData("SR-DF-1J-180-220",	2	,	{_numSR_bin["SR-DF-1J-180-220"],	0.},	{	4.82729	,	0.920711	}));
+		add_result(SignalRegionData("SR-DF-1J-220",	    2	,	{_numSR_bin["SR-DF-1J-220"],	    0.},	{	3.910061	,	0.905338	}));
+		add_result(SignalRegionData("SR-SF-0J-100-105",	12	,	{_numSR_bin["SR-SF-0J-100-105"],	0.},	{	15.497025	,	2.616752	}));
+		add_result(SignalRegionData("SR-SF-0J-105-110",	19	,	{_numSR_bin["SR-SF-0J-105-110"],	0.},	{	13.017998	,	2.942539	}));
+		add_result(SignalRegionData("SR-SF-0J-110-120",	34	,	{_numSR_bin["SR-SF-0J-110-120"],	0.},	{	23.588459	,	2.989388	}));
+		add_result(SignalRegionData("SR-SF-0J-120-140",	24	,	{_numSR_bin["SR-SF-0J-120-140"],	0.},	{	26.485558	,	2.523765	}));
+		add_result(SignalRegionData("SR-SF-0J-140-160",	11	,	{_numSR_bin["SR-SF-0J-140-160"],	0.},	{	15.316658	,	1.483498	}));
+		add_result(SignalRegionData("SR-SF-0J-160-180",	12	,	{_numSR_bin["SR-SF-0J-160-180"],	0.},	{	8.523453	,	1.050754	}));
+		add_result(SignalRegionData("SR-SF-0J-180-220",	6	,	{_numSR_bin["SR-SF-0J-180-220"],	0.},	{	10.497726	,	1.696732	}));
+		add_result(SignalRegionData("SR-SF-0J-220",	    13	,	{_numSR_bin["SR-SF-0J-220"],	    0.},	{	8.087914	,	1.003913	}));
+		add_result(SignalRegionData("SR-SF-1J-100-105",	16	,	{_numSR_bin["SR-SF-1J-100-105"],	0.},	{	21.87426	,	5.927711	}));
+		add_result(SignalRegionData("SR-SF-1J-105-110",	14	,	{_numSR_bin["SR-SF-1J-105-110"],	0.},	{	14.086235	,	3.386467	}));
+		add_result(SignalRegionData("SR-SF-1J-110-120",	26	,	{_numSR_bin["SR-SF-1J-110-120"],	0.},	{	15.789253	,	3.269711	}));
+		add_result(SignalRegionData("SR-SF-1J-120-140",	16	,	{_numSR_bin["SR-SF-1J-120-140"],	0.},	{	18.984154	,	2.601387	}));
+		add_result(SignalRegionData("SR-SF-1J-140-160",	19	,	{_numSR_bin["SR-SF-1J-140-160"],	0.},	{	14.026108	,	2.25811	}));
+		add_result(SignalRegionData("SR-SF-1J-160-180",	6	,	{_numSR_bin["SR-SF-1J-160-180"],	0.},	{	6.74284	,	2.173508	}));
+		add_result(SignalRegionData("SR-SF-1J-180-220",	7	,	{_numSR_bin["SR-SF-1J-180-220"],	0.},	{	8.888386	,	2.181206	}));
+		add_result(SignalRegionData("SR-SF-1J-220",	    10	,	{_numSR_bin["SR-SF-1J-220"],	    0.},	{	13.481506	,	2.867035	}));
+
+      }
+
+    };
+
+    // Factory fn
+    DEFINE_ANALYSIS_FACTORY(ATLAS_13TeV_2OSLEP_chargino_binned_80invfb)
 
 
   }
