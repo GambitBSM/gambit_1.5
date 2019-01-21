@@ -18,6 +18,9 @@ namespace Gambit {
     class Analysis_CMS_13TeV_0LEP_13invfb : public HEPUtilsAnalysis {
     public:
 
+      // Required detector sim
+      static constexpr const char* detector = "CMS";
+
       // Numbers passing cuts
       static const size_t NUMSR = 12; //160;
       double _srnums[NUMSR];

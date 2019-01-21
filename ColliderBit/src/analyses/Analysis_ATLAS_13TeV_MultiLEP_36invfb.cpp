@@ -55,7 +55,7 @@ namespace Gambit {
         {"SR3_WZ_1Ja", 0},
         {"SR3_WZ_1Jb", 0},
         {"SR3_WZ_1Jc", 0}
-      }; 
+      };
 
     private:
 
@@ -63,40 +63,43 @@ namespace Gambit {
       vector<string> cutFlowVector1_str;
       size_t NCUTS1;
       // vector<double> cutFlowVector1ATLAS_200_100;
-      // double xsec1ATLAS_200_100; 
+      // double xsec1ATLAS_200_100;
 
       vector<int> cutFlowVector2;
       vector<string> cutFlowVector2_str;
       size_t NCUTS2;
       // vector<double> cutFlowVector2ATLAS_400_200;
-      // double xsec2ATLAS_400_200; 
+      // double xsec2ATLAS_400_200;
       // vector<double> cutFlowVector2ATLAS_500_100;
-      // double xsec2ATLAS_500_100; 
+      // double xsec2ATLAS_500_100;
 
       vector<int> cutFlowVector3;
       vector<string> cutFlowVector3_str;
       size_t NCUTS3;
       // vector<double> cutFlowVector3ATLAS_200_100;
-      // double xsec3ATLAS_200_100; 
+      // double xsec3ATLAS_200_100;
 
       vector<int> cutFlowVector4;
       vector<string> cutFlowVector4_str;
       size_t NCUTS4;
       // vector<double> cutFlowVector4ATLAS_800_600;
-      // double xsec4ATLAS_800_600; 
+      // double xsec4ATLAS_800_600;
 
       vector<int> cutFlowVector5;
       vector<string> cutFlowVector5_str;
       size_t NCUTS5;
       // vector<double> cutFlowVector5ATLAS_401_1;
-      // double xsec5ATLAS_401_1; 
+      // double xsec5ATLAS_401_1;
       // vector<double> cutFlowVector5ATLAS_300_150;
-      // double xsec5ATLAS_300_150; 
+      // double xsec5ATLAS_300_150;
 
       // ofstream cutflowFile;
 
 
     public:
+
+      // Required detector sim
+      static constexpr const char* detector = "ATLAS";
 
       Analysis_ATLAS_13TeV_MultiLEP_36invfb() {
 
@@ -154,7 +157,7 @@ namespace Gambit {
       struct ptComparison {
         bool operator() (HEPUtils::Particle* i,HEPUtils::Particle* j) {return (i->pT()>j->pT());}
       } comparePt;
-      
+
       struct ptJetComparison {
         bool operator() (HEPUtils::Jet* i,HEPUtils::Jet* j) {return (i->pT()>j->pT());}
       } compareJetPt;
@@ -180,7 +183,7 @@ namespace Gambit {
           if (jet->pT()>20. && jet->abseta()<4.5)baselineJets.push_back(jet);
         }
 
-        //Overlap Removal + Signal Objects      
+        //Overlap Removal + Signal Objects
         vector<HEPUtils::Particle*> signalElectrons;
         vector<HEPUtils::Particle*> signalMuons;
         vector<HEPUtils::Particle*> signalLeptons;
@@ -241,7 +244,7 @@ namespace Gambit {
 
         signalLeptons=signalElectrons;
         signalLeptons.insert(signalLeptons.end(),signalMuons.begin(),signalMuons.end());
-        sort(signalJets.begin(),signalJets.end(),compareJetPt); 
+        sort(signalJets.begin(),signalJets.end(),compareJetPt);
         sort(signalLeptons.begin(),signalLeptons.end(),comparePt);
         size_t nBaselineLeptons=baselineElectrons.size()+baselineMuons.size();
         size_t nSignalLeptons=signalLeptons.size();
@@ -289,7 +292,7 @@ namespace Gambit {
 
         if (nSignalLeptons>0)pT_l0=signalLeptons.at(0)->pT();
         if (nSignalLeptons>1) {
-          pT_l1=signalLeptons.at(1)->pT();        
+          pT_l1=signalLeptons.at(1)->pT();
           mll=(signalLeptons.at(0)->mom()+signalLeptons.at(1)->mom()).m();
           deltaR_ll=signalLeptons.at(0)->mom().deltaR_eta(signalLeptons.at(1)->mom());
 
@@ -347,7 +350,7 @@ namespace Gambit {
         }
         if (nSignalJets>2)pT_j2=signalJets.at(2)->pT();
 
-        bool preselection=false; 
+        bool preselection=false;
         if ((nSignalLeptons==2 || nSignalLeptons==3) && nBaselineLeptons==nSignalLeptons && pT_l0>25 && pT_l1>20)preselection=true;
 
 
@@ -366,7 +369,7 @@ namespace Gambit {
             if (mT2>300 && mll>111) _numSR["SR2_DF_300"]++;
           }
         }
-        
+
         //2lep+jets
         if (preselection && nSignalLeptons==2 && SFOSpairs.size()==1 && bjet_veto && nSignalJets>1 && pT_j0>30 && pT_j1>30 && pT_l1>25) {
           //SR2_int + SR2_high
@@ -379,7 +382,7 @@ namespace Gambit {
           //SR2_low_3J
           if (nSignalJets>2 && nSignalJets<6 && mll>86 && mll<96 && mjj>70. && mjj<90. && met>100 && Z.pT()>40 && deltaR_jj<2.2 && deltaPhi_met_W<2.2 && deltaPhi_met_ISR>2.4 && deltaPhi_met_jet0>2.6 && (met/W_ISR.at(1).pT())>0.4 && (met/W_ISR.at(1).pT())<0.8 && Z.abseta()<1.6 && pT_j2>30.) _numSR["SR2_low"]++;
         }
-        
+
         //3lep
         if (preselection && nSignalLeptons==3 && bjet_veto && SFOSpairs.size()) {
           if (mSFOS<81.2 && met>130. && mTmin>110.) {
@@ -455,47 +458,47 @@ namespace Gambit {
    //          if(
    //            (j==0) ||
 
-          //     (j==1 && nSignalLeptons>=2 && SFOSpairs.size()>0) ||   
+          //     (j==1 && nSignalLeptons>=2 && SFOSpairs.size()>0) ||
 
-          //     (j==2 && nSignalLeptons>=2 && SFOSpairs.size()>0 && nSignalLeptons==3 && nBaselineLeptons==3) ||   
+          //     (j==2 && nSignalLeptons>=2 && SFOSpairs.size()>0 && nSignalLeptons==3 && nBaselineLeptons==3) ||
 
-          //     (j==3 && nSignalLeptons>=2 && SFOSpairs.size()>0 && nSignalLeptons==3 && nBaselineLeptons==3 && bjet_veto) ||   
+          //     (j==3 && nSignalLeptons>=2 && SFOSpairs.size()>0 && nSignalLeptons==3 && nBaselineLeptons==3 && bjet_veto) ||
 
-          //     (j==4 && nSignalLeptons>=2 && SFOSpairs.size()>0 && nSignalLeptons==3 && nBaselineLeptons==3 && bjet_veto && pT_l0>25.) ||   
+          //     (j==4 && nSignalLeptons>=2 && SFOSpairs.size()>0 && nSignalLeptons==3 && nBaselineLeptons==3 && bjet_veto && pT_l0>25.) ||
 
-          //     (j==5 && nSignalLeptons>=2 && SFOSpairs.size()>0 && nSignalLeptons==3 && nBaselineLeptons==3 && bjet_veto && pT_l0>25. && pT_l2>20.) ||   
+          //     (j==5 && nSignalLeptons>=2 && SFOSpairs.size()>0 && nSignalLeptons==3 && nBaselineLeptons==3 && bjet_veto && pT_l0>25. && pT_l2>20.) ||
 
-          //     (j==6 && nSignalLeptons>=2 && SFOSpairs.size()>0 && nSignalLeptons==3 && nBaselineLeptons==3 && bjet_veto && pT_l0>25. && pT_l2>20. && mlll>20.) ||   
+          //     (j==6 && nSignalLeptons>=2 && SFOSpairs.size()>0 && nSignalLeptons==3 && nBaselineLeptons==3 && bjet_veto && pT_l0>25. && pT_l2>20. && mlll>20.) ||
 
-          //     (j==7 && nSignalLeptons>=2 && SFOSpairs.size()>0 && nSignalLeptons==3 && nBaselineLeptons==3 && bjet_veto && pT_l0>25. && pT_l2>20. && mlll>20. && fabs(mSFOS-91.2)<10.) ||   
+          //     (j==7 && nSignalLeptons>=2 && SFOSpairs.size()>0 && nSignalLeptons==3 && nBaselineLeptons==3 && bjet_veto && pT_l0>25. && pT_l2>20. && mlll>20. && fabs(mSFOS-91.2)<10.) ||
 
-          //     (j==8 && nSignalLeptons>=2 && SFOSpairs.size()>0 && nSignalLeptons==3 && nBaselineLeptons==3 && bjet_veto && pT_l0>25. && pT_l2>20. && mlll>20. && fabs(mSFOS-91.2)<10. && nSignalJets==0) ||   
+          //     (j==8 && nSignalLeptons>=2 && SFOSpairs.size()>0 && nSignalLeptons==3 && nBaselineLeptons==3 && bjet_veto && pT_l0>25. && pT_l2>20. && mlll>20. && fabs(mSFOS-91.2)<10. && nSignalJets==0) ||
 
-          //     (j==9 && nSignalLeptons>=2 && SFOSpairs.size()>0 && nSignalLeptons==3 && nBaselineLeptons==3 && bjet_veto && pT_l0>25. && pT_l2>20. && mlll>20. && fabs(mSFOS-91.2)<10. && met>60. && met<120. && nSignalJets==0) ||   
+          //     (j==9 && nSignalLeptons>=2 && SFOSpairs.size()>0 && nSignalLeptons==3 && nBaselineLeptons==3 && bjet_veto && pT_l0>25. && pT_l2>20. && mlll>20. && fabs(mSFOS-91.2)<10. && met>60. && met<120. && nSignalJets==0) ||
 
-          //     (j==10 && nSignalLeptons>=2 && SFOSpairs.size()>0 && nSignalLeptons==3 && nBaselineLeptons==3 && bjet_veto && pT_l0>25. && pT_l2>20. && mlll>20. && fabs(mSFOS-91.2)<10. && met>60. && met<120.&& nSignalJets==0 && mTmin>110.) ||   
- 
-          //     (j==11 && nSignalLeptons>=2 && SFOSpairs.size()>0 && nSignalLeptons==3 && nBaselineLeptons==3 && bjet_veto && pT_l0>25. && pT_l2>20. && mlll>20. && fabs(mSFOS-91.2)<10. && nSignalJets==0 && met>120. && met<170.) ||   
+          //     (j==10 && nSignalLeptons>=2 && SFOSpairs.size()>0 && nSignalLeptons==3 && nBaselineLeptons==3 && bjet_veto && pT_l0>25. && pT_l2>20. && mlll>20. && fabs(mSFOS-91.2)<10. && met>60. && met<120.&& nSignalJets==0 && mTmin>110.) ||
 
-          //     (j==12 && nSignalLeptons>=2 && SFOSpairs.size()>0 && nSignalLeptons==3 && nBaselineLeptons==3 && bjet_veto && pT_l0>25. && pT_l2>20. && mlll>20. && fabs(mSFOS-91.2)<10. && nSignalJets==0 && met>120. && met<170. && mTmin>110.) ||   
+          //     (j==11 && nSignalLeptons>=2 && SFOSpairs.size()>0 && nSignalLeptons==3 && nBaselineLeptons==3 && bjet_veto && pT_l0>25. && pT_l2>20. && mlll>20. && fabs(mSFOS-91.2)<10. && nSignalJets==0 && met>120. && met<170.) ||
 
-          //     (j==13 && nSignalLeptons>=2 && SFOSpairs.size()>0 && nSignalLeptons==3 && nBaselineLeptons==3 && bjet_veto && pT_l0>25. && pT_l2>20. && mlll>20. && fabs(mSFOS-91.2)<10. && nSignalJets==0 && met>170.) ||   
+          //     (j==12 && nSignalLeptons>=2 && SFOSpairs.size()>0 && nSignalLeptons==3 && nBaselineLeptons==3 && bjet_veto && pT_l0>25. && pT_l2>20. && mlll>20. && fabs(mSFOS-91.2)<10. && nSignalJets==0 && met>120. && met<170. && mTmin>110.) ||
 
-          //     (j==14 && nSignalLeptons>=2 && SFOSpairs.size()>0 && nSignalLeptons==3 && nBaselineLeptons==3 && bjet_veto && pT_l0>25. && pT_l2>20. && mlll>20. && fabs(mSFOS-91.2)<10. && nSignalJets==0 && met>170. && mTmin>110.) ||   
+          //     (j==13 && nSignalLeptons>=2 && SFOSpairs.size()>0 && nSignalLeptons==3 && nBaselineLeptons==3 && bjet_veto && pT_l0>25. && pT_l2>20. && mlll>20. && fabs(mSFOS-91.2)<10. && nSignalJets==0 && met>170.) ||
 
-          //     (j==15 && nSignalLeptons>=2 && SFOSpairs.size()>0 && nSignalLeptons==3 && nBaselineLeptons==3 && bjet_veto && pT_l0>25. && pT_l2>20. && mlll>20. && fabs(mSFOS-91.2)<10. && nSignalJets>0) ||   
+          //     (j==14 && nSignalLeptons>=2 && SFOSpairs.size()>0 && nSignalLeptons==3 && nBaselineLeptons==3 && bjet_veto && pT_l0>25. && pT_l2>20. && mlll>20. && fabs(mSFOS-91.2)<10. && nSignalJets==0 && met>170. && mTmin>110.) ||
 
-          //     (j==16 && nSignalLeptons>=2 && SFOSpairs.size()>0 && nSignalLeptons==3 && nBaselineLeptons==3 && bjet_veto && pT_l0>25. && pT_l2>20. && mlll>20. && fabs(mSFOS-91.2)<10. && nSignalJets>0 && met>120. && met<200.) ||   
+          //     (j==15 && nSignalLeptons>=2 && SFOSpairs.size()>0 && nSignalLeptons==3 && nBaselineLeptons==3 && bjet_veto && pT_l0>25. && pT_l2>20. && mlll>20. && fabs(mSFOS-91.2)<10. && nSignalJets>0) ||
 
-          //     (j==17 && nSignalLeptons>=2 && SFOSpairs.size()>0 && nSignalLeptons==3 && nBaselineLeptons==3 && bjet_veto && pT_l0>25. && pT_l2>20. && mlll>20. && fabs(mSFOS-91.2)<10. && nSignalJets>0 && met>120. && met<200. && mTmin>110.) ||   
+          //     (j==16 && nSignalLeptons>=2 && SFOSpairs.size()>0 && nSignalLeptons==3 && nBaselineLeptons==3 && bjet_veto && pT_l0>25. && pT_l2>20. && mlll>20. && fabs(mSFOS-91.2)<10. && nSignalJets>0 && met>120. && met<200.) ||
 
-          //     (j==18 && nSignalLeptons>=2 && SFOSpairs.size()>0 && nSignalLeptons==3 && nBaselineLeptons==3 && bjet_veto && pT_l0>25. && pT_l2>20. && mlll>20. && fabs(mSFOS-91.2)<10. && nSignalJets>0 && met>120. && met<200. && mTmin>110. && pTlll<120.) ||   
+          //     (j==17 && nSignalLeptons>=2 && SFOSpairs.size()>0 && nSignalLeptons==3 && nBaselineLeptons==3 && bjet_veto && pT_l0>25. && pT_l2>20. && mlll>20. && fabs(mSFOS-91.2)<10. && nSignalJets>0 && met>120. && met<200. && mTmin>110.) ||
 
-          //     (j==19 && nSignalLeptons>=2 && SFOSpairs.size()>0 && nSignalLeptons==3 && nBaselineLeptons==3 && bjet_veto && pT_l0>25. && pT_l2>20. && mlll>20. && fabs(mSFOS-91.2)<10. && nSignalJets>0 && met>120. && met<200. && mTmin>110. && pTlll<120. && pT_j0>70.) ||   
+          //     (j==18 && nSignalLeptons>=2 && SFOSpairs.size()>0 && nSignalLeptons==3 && nBaselineLeptons==3 && bjet_veto && pT_l0>25. && pT_l2>20. && mlll>20. && fabs(mSFOS-91.2)<10. && nSignalJets>0 && met>120. && met<200. && mTmin>110. && pTlll<120.) ||
 
-          //     (j==20 && nSignalLeptons>=2 && SFOSpairs.size()>0 && nSignalLeptons==3 && nBaselineLeptons==3 && bjet_veto && pT_l0>25. && pT_l2>20. && mlll>20. && fabs(mSFOS-91.2)<10. && nSignalJets>0 && met>200.) ||   
+          //     (j==19 && nSignalLeptons>=2 && SFOSpairs.size()>0 && nSignalLeptons==3 && nBaselineLeptons==3 && bjet_veto && pT_l0>25. && pT_l2>20. && mlll>20. && fabs(mSFOS-91.2)<10. && nSignalJets>0 && met>120. && met<200. && mTmin>110. && pTlll<120. && pT_j0>70.) ||
 
-          //     (j==21 && nSignalLeptons>=2 && SFOSpairs.size()>0 && nSignalLeptons==3 && nBaselineLeptons==3 && bjet_veto && pT_l0>25. && pT_l2>20. && mlll>20. && fabs(mSFOS-91.2)<10. && nSignalJets>0 && met>200. && mTmin>110. && mTmin<160.) )   
+          //     (j==20 && nSignalLeptons>=2 && SFOSpairs.size()>0 && nSignalLeptons==3 && nBaselineLeptons==3 && bjet_veto && pT_l0>25. && pT_l2>20. && mlll>20. && fabs(mSFOS-91.2)<10. && nSignalJets>0 && met>200.) ||
+
+          //     (j==21 && nSignalLeptons>=2 && SFOSpairs.size()>0 && nSignalLeptons==3 && nBaselineLeptons==3 && bjet_veto && pT_l0>25. && pT_l2>20. && mlll>20. && fabs(mSFOS-91.2)<10. && nSignalJets>0 && met>200. && mTmin>110. && mTmin<160.) )
 
           //     cutFlowVector1[j]++;
           // }
@@ -554,51 +557,51 @@ namespace Gambit {
  //            if(
  //              (j==0) ||
 
-        //       (j==1 && preselection && pT_l1>25. && nSignalLeptons==2 && SFOSpairs.size()>0) || 
+        //       (j==1 && preselection && pT_l1>25. && nSignalLeptons==2 && SFOSpairs.size()>0) ||
 
-        //       (j==2 && preselection && pT_l1>25. && nSignalLeptons==2 && SFOSpairs.size()>0 && bjet_veto) || 
+        //       (j==2 && preselection && pT_l1>25. && nSignalLeptons==2 && SFOSpairs.size()>0 && bjet_veto) ||
 
-        //       (j==3 && preselection && pT_l1>25. && nSignalLeptons==2 && SFOSpairs.size()>0 && bjet_veto && met>100.) || 
+        //       (j==3 && preselection && pT_l1>25. && nSignalLeptons==2 && SFOSpairs.size()>0 && bjet_veto && met>100.) ||
 
-        //       (j==4 && preselection && pT_l1>25. && nSignalLeptons==2 && SFOSpairs.size()>0 && bjet_veto && met>100. && nSignalJets==2) || 
+        //       (j==4 && preselection && pT_l1>25. && nSignalLeptons==2 && SFOSpairs.size()>0 && bjet_veto && met>100. && nSignalJets==2) ||
 
-        //       (j==5 && preselection && pT_l1>25. && nSignalLeptons==2 && SFOSpairs.size()>0 && bjet_veto && met>100. && nSignalJets==2 && pT_j0>30. && pT_j1>30.) || 
+        //       (j==5 && preselection && pT_l1>25. && nSignalLeptons==2 && SFOSpairs.size()>0 && bjet_veto && met>100. && nSignalJets==2 && pT_j0>30. && pT_j1>30.) ||
 
-        //       (j==6 && preselection && pT_l1>25. && nSignalLeptons==2 && SFOSpairs.size()>0 && bjet_veto && met>100. && nSignalJets==2 && pT_j0>30. && pT_j1>30. && mll>81. && mll<101.) || 
+        //       (j==6 && preselection && pT_l1>25. && nSignalLeptons==2 && SFOSpairs.size()>0 && bjet_veto && met>100. && nSignalJets==2 && pT_j0>30. && pT_j1>30. && mll>81. && mll<101.) ||
 
-        //       (j==7 && preselection && pT_l1>25. && nSignalLeptons==2 && SFOSpairs.size()>0 && bjet_veto && met>100. && nSignalJets==2 && pT_j0>30. && pT_j1>30. && mll>81. && mll<101. && mjj>70. && mjj<90.) || 
+        //       (j==7 && preselection && pT_l1>25. && nSignalLeptons==2 && SFOSpairs.size()>0 && bjet_veto && met>100. && nSignalJets==2 && pT_j0>30. && pT_j1>30. && mll>81. && mll<101. && mjj>70. && mjj<90.) ||
 
-        //       (j==8 && preselection && pT_l1>25. && nSignalLeptons==2 && SFOSpairs.size()>0 && bjet_veto && met>100. && nSignalJets==2 && pT_j0>30. && pT_j1>30. && mll>81. && mll<101. && mjj>70. && mjj<90. && Z.pT()>60.) || 
+        //       (j==8 && preselection && pT_l1>25. && nSignalLeptons==2 && SFOSpairs.size()>0 && bjet_veto && met>100. && nSignalJets==2 && pT_j0>30. && pT_j1>30. && mll>81. && mll<101. && mjj>70. && mjj<90. && Z.pT()>60.) ||
 
-        //       (j==9 && preselection && pT_l1>25. && nSignalLeptons==2 && SFOSpairs.size()>0 && bjet_veto && met>100. && nSignalJets==2 && pT_j0>30. && pT_j1>30. && mll>81. && mll<101. && mjj>70. && mjj<90. && Z.pT()>60. && deltaPhi_met_Z<0.8) || 
+        //       (j==9 && preselection && pT_l1>25. && nSignalLeptons==2 && SFOSpairs.size()>0 && bjet_veto && met>100. && nSignalJets==2 && pT_j0>30. && pT_j1>30. && mll>81. && mll<101. && mjj>70. && mjj<90. && Z.pT()>60. && deltaPhi_met_Z<0.8) ||
 
-        //       (j==10 && preselection && pT_l1>25. && nSignalLeptons==2 && SFOSpairs.size()>0 && bjet_veto && met>100. && nSignalJets==2 && pT_j0>30. && pT_j1>30. && mll>81. && mll<101. && mjj>70. && mjj<90. && Z.pT()>60. && deltaPhi_met_Z<0.8 && deltaPhi_met_W>1.5) || 
+        //       (j==10 && preselection && pT_l1>25. && nSignalLeptons==2 && SFOSpairs.size()>0 && bjet_veto && met>100. && nSignalJets==2 && pT_j0>30. && pT_j1>30. && mll>81. && mll<101. && mjj>70. && mjj<90. && Z.pT()>60. && deltaPhi_met_Z<0.8 && deltaPhi_met_W>1.5) ||
 
-        //       (j==11 && preselection && pT_l1>25. && nSignalLeptons==2 && SFOSpairs.size()>0 && bjet_veto && met>100. && nSignalJets==2 && pT_j0>30. && pT_j1>30. && mll>81. && mll<101. && mjj>70. && mjj<90. && Z.pT()>60. && deltaPhi_met_Z<0.8 && deltaPhi_met_W>1.5 && met/W.pT()<0.8) || 
+        //       (j==11 && preselection && pT_l1>25. && nSignalLeptons==2 && SFOSpairs.size()>0 && bjet_veto && met>100. && nSignalJets==2 && pT_j0>30. && pT_j1>30. && mll>81. && mll<101. && mjj>70. && mjj<90. && Z.pT()>60. && deltaPhi_met_Z<0.8 && deltaPhi_met_W>1.5 && met/W.pT()<0.8) ||
 
-        //       (j==12 && preselection && pT_l1>25. && nSignalLeptons==2 && SFOSpairs.size()>0 && bjet_veto && met>100. && nSignalJets==2 && pT_j0>30. && pT_j1>30. && mll>81. && mll<101. && mjj>70. && mjj<90. && Z.pT()>60. && deltaPhi_met_Z<0.8 && deltaPhi_met_W>1.5 && met/W.pT()<0.8 && met/Z.pT()>0.6 && met/Z.pT()<1.6) || 
+        //       (j==12 && preselection && pT_l1>25. && nSignalLeptons==2 && SFOSpairs.size()>0 && bjet_veto && met>100. && nSignalJets==2 && pT_j0>30. && pT_j1>30. && mll>81. && mll<101. && mjj>70. && mjj<90. && Z.pT()>60. && deltaPhi_met_Z<0.8 && deltaPhi_met_W>1.5 && met/W.pT()<0.8 && met/Z.pT()>0.6 && met/Z.pT()<1.6) ||
 
-        //       (j==13 && preselection && pT_l1>25. && nSignalLeptons==2 && SFOSpairs.size()>0 && bjet_veto && met>100. && nSignalJets>2 && nSignalJets<6) || 
+        //       (j==13 && preselection && pT_l1>25. && nSignalLeptons==2 && SFOSpairs.size()>0 && bjet_veto && met>100. && nSignalJets>2 && nSignalJets<6) ||
 
-        //       (j==14 && preselection && pT_l1>25. && nSignalLeptons==2 && SFOSpairs.size()>0 && bjet_veto && met>100. && nSignalJets>2 && nSignalJets<6 && pT_j0>30. && pT_j1>30. && pT_j2>30.) || 
+        //       (j==14 && preselection && pT_l1>25. && nSignalLeptons==2 && SFOSpairs.size()>0 && bjet_veto && met>100. && nSignalJets>2 && nSignalJets<6 && pT_j0>30. && pT_j1>30. && pT_j2>30.) ||
 
-        //       (j==15 && preselection && pT_l1>25. && nSignalLeptons==2 && SFOSpairs.size()>0 && bjet_veto && met>100. && nSignalJets>2 && nSignalJets<6 && pT_j0>30. && pT_j1>30. && pT_j2>30. && mll>81. && mll<101.) || 
+        //       (j==15 && preselection && pT_l1>25. && nSignalLeptons==2 && SFOSpairs.size()>0 && bjet_veto && met>100. && nSignalJets>2 && nSignalJets<6 && pT_j0>30. && pT_j1>30. && pT_j2>30. && mll>81. && mll<101.) ||
 
-        //       (j==16 && preselection && pT_l1>25. && nSignalLeptons==2 && SFOSpairs.size()>0 && bjet_veto && met>100. && nSignalJets>2 && nSignalJets<6 && pT_j0>30. && pT_j1>30. && pT_j2>30. && mll>81. && mll<101. && mjj>70. && mjj<90.) || 
+        //       (j==16 && preselection && pT_l1>25. && nSignalLeptons==2 && SFOSpairs.size()>0 && bjet_veto && met>100. && nSignalJets>2 && nSignalJets<6 && pT_j0>30. && pT_j1>30. && pT_j2>30. && mll>81. && mll<101. && mjj>70. && mjj<90.) ||
 
-        //       (j==17 && preselection && pT_l1>25. && nSignalLeptons==2 && SFOSpairs.size()>0 && bjet_veto && met>100. && nSignalJets>2 && nSignalJets<6 && pT_j0>30. && pT_j1>30. && pT_j2>30. && mll>81. && mll<101. && mjj>70. && mjj<90. && Z.abseta()<1.6) || 
+        //       (j==17 && preselection && pT_l1>25. && nSignalLeptons==2 && SFOSpairs.size()>0 && bjet_veto && met>100. && nSignalJets>2 && nSignalJets<6 && pT_j0>30. && pT_j1>30. && pT_j2>30. && mll>81. && mll<101. && mjj>70. && mjj<90. && Z.abseta()<1.6) ||
 
-        //       (j==18 && preselection && pT_l1>25. && nSignalLeptons==2 && SFOSpairs.size()>0 && bjet_veto && met>100. && nSignalJets>2 && nSignalJets<6 && pT_j0>30. && pT_j1>30. && pT_j2>30. && mll>81. && mll<101. && mjj>70. && mjj<90. && Z.abseta()<1.6 && Z.pT()>40.) || 
+        //       (j==18 && preselection && pT_l1>25. && nSignalLeptons==2 && SFOSpairs.size()>0 && bjet_veto && met>100. && nSignalJets>2 && nSignalJets<6 && pT_j0>30. && pT_j1>30. && pT_j2>30. && mll>81. && mll<101. && mjj>70. && mjj<90. && Z.abseta()<1.6 && Z.pT()>40.) ||
 
-        //       (j==19 && preselection && pT_l1>25. && nSignalLeptons==2 && SFOSpairs.size()>0 && bjet_veto && met>100. && nSignalJets>2 && nSignalJets<6 && pT_j0>30. && pT_j1>30. && pT_j2>30. && mll>81. && mll<101. && mjj>70. && mjj<90. && Z.abseta()<1.6 && Z.pT()>40. && deltaPhi_met_ISR>2.4) || 
+        //       (j==19 && preselection && pT_l1>25. && nSignalLeptons==2 && SFOSpairs.size()>0 && bjet_veto && met>100. && nSignalJets>2 && nSignalJets<6 && pT_j0>30. && pT_j1>30. && pT_j2>30. && mll>81. && mll<101. && mjj>70. && mjj<90. && Z.abseta()<1.6 && Z.pT()>40. && deltaPhi_met_ISR>2.4) ||
 
-        //       (j==20 && preselection && pT_l1>25. && nSignalLeptons==2 && SFOSpairs.size()>0 && bjet_veto && met>100. && nSignalJets>2 && nSignalJets<6 && pT_j0>30. && pT_j1>30. && pT_j2>30. && mll>81. && mll<101. && mjj>70. && mjj<90. && Z.abseta()<1.6 && Z.pT()>40. && deltaPhi_met_ISR>2.4 && deltaPhi_met_jet0>2.6) || 
+        //       (j==20 && preselection && pT_l1>25. && nSignalLeptons==2 && SFOSpairs.size()>0 && bjet_veto && met>100. && nSignalJets>2 && nSignalJets<6 && pT_j0>30. && pT_j1>30. && pT_j2>30. && mll>81. && mll<101. && mjj>70. && mjj<90. && Z.abseta()<1.6 && Z.pT()>40. && deltaPhi_met_ISR>2.4 && deltaPhi_met_jet0>2.6) ||
 
-        //       (j==21 && preselection && pT_l1>25. && nSignalLeptons==2 && SFOSpairs.size()>0 && bjet_veto && met>100. && nSignalJets>2 && nSignalJets<6 && pT_j0>30. && pT_j1>30. && pT_j2>30. && mll>81. && mll<101. && mjj>70. && mjj<90. && Z.abseta()<1.6 && Z.pT()>40. && deltaPhi_met_ISR>2.4 && deltaPhi_met_jet0>2.6 && deltaPhi_met_W<2.2) || 
+        //       (j==21 && preselection && pT_l1>25. && nSignalLeptons==2 && SFOSpairs.size()>0 && bjet_veto && met>100. && nSignalJets>2 && nSignalJets<6 && pT_j0>30. && pT_j1>30. && pT_j2>30. && mll>81. && mll<101. && mjj>70. && mjj<90. && Z.abseta()<1.6 && Z.pT()>40. && deltaPhi_met_ISR>2.4 && deltaPhi_met_jet0>2.6 && deltaPhi_met_W<2.2) ||
 
-        //       (j==22 && preselection && pT_l1>25. && nSignalLeptons==2 && SFOSpairs.size()>0 && bjet_veto && met>100. && nSignalJets>2 && nSignalJets<6 && pT_j0>30. && pT_j1>30. && pT_j2>30. && mll>81. && mll<101. && mjj>70. && mjj<90. && Z.abseta()<1.6 && Z.pT()>40. && deltaPhi_met_ISR>2.4 && deltaPhi_met_jet0>2.6 && deltaPhi_met_W<2.2 && met/W_ISR.at(1).pT()>0.4 && met/W_ISR.at(1).pT()<0.8) || 
+        //       (j==22 && preselection && pT_l1>25. && nSignalLeptons==2 && SFOSpairs.size()>0 && bjet_veto && met>100. && nSignalJets>2 && nSignalJets<6 && pT_j0>30. && pT_j1>30. && pT_j2>30. && mll>81. && mll<101. && mjj>70. && mjj<90. && Z.abseta()<1.6 && Z.pT()>40. && deltaPhi_met_ISR>2.4 && deltaPhi_met_jet0>2.6 && deltaPhi_met_W<2.2 && met/W_ISR.at(1).pT()>0.4 && met/W_ISR.at(1).pT()<0.8) ||
 
-        //       (j==23 && preselection && pT_l1>25. && nSignalLeptons==2 && SFOSpairs.size()>0 && bjet_veto && met>100. && nSignalJets>2 && nSignalJets<6 && pT_j0>30. && pT_j1>30. && pT_j2>30. && mll>81. && mll<101. && mjj>70. && mjj<90. && Z.abseta()<1.6 && Z.pT()>40. && deltaPhi_met_ISR>2.4 && deltaPhi_met_jet0>2.6 && deltaPhi_met_W<2.2 && met/W_ISR.at(1).pT()>0.4 && met/W_ISR.at(1).pT()<0.8 && deltaR_jj<2.2) ) 
+        //       (j==23 && preselection && pT_l1>25. && nSignalLeptons==2 && SFOSpairs.size()>0 && bjet_veto && met>100. && nSignalJets>2 && nSignalJets<6 && pT_j0>30. && pT_j1>30. && pT_j2>30. && mll>81. && mll<101. && mjj>70. && mjj<90. && Z.abseta()<1.6 && Z.pT()>40. && deltaPhi_met_ISR>2.4 && deltaPhi_met_jet0>2.6 && deltaPhi_met_W<2.2 && met/W_ISR.at(1).pT()>0.4 && met/W_ISR.at(1).pT()<0.8 && deltaR_jj<2.2) )
 
         //       cutFlowVector3[j]++;
         //   }
@@ -656,31 +659,31 @@ namespace Gambit {
  //            if(
  //              (j==0) ||
 
-        //       (j==1 && preselection && nSignalLeptons==2 && SFOSpairs.size()>0) ||   
+        //       (j==1 && preselection && nSignalLeptons==2 && SFOSpairs.size()>0) ||
 
-        //       (j==2 && preselection && nSignalLeptons==2 && SFOSpairs.size()>0 && bjet_veto) ||   
+        //       (j==2 && preselection && nSignalLeptons==2 && SFOSpairs.size()>0 && bjet_veto) ||
 
-        //       (j==3 && preselection && nSignalLeptons==2 && SFOSpairs.size()>0 && bjet_veto && nSignalJets>=2) ||   
+        //       (j==3 && preselection && nSignalLeptons==2 && SFOSpairs.size()>0 && bjet_veto && nSignalJets>=2) ||
 
-        //       (j==4 && preselection && nSignalLeptons==2 && SFOSpairs.size()>0 && bjet_veto && nSignalJets>=2 && pT_j0>30. && pT_j1>30.) ||   
+        //       (j==4 && preselection && nSignalLeptons==2 && SFOSpairs.size()>0 && bjet_veto && nSignalJets>=2 && pT_j0>30. && pT_j1>30.) ||
 
-        //       (j==5 && preselection && nSignalLeptons==2 && SFOSpairs.size()>0 && bjet_veto && nSignalJets>=2 && pT_j0>30. && pT_j1>30. && met>150.) ||   
+        //       (j==5 && preselection && nSignalLeptons==2 && SFOSpairs.size()>0 && bjet_veto && nSignalJets>=2 && pT_j0>30. && pT_j1>30. && met>150.) ||
 
-        //       (j==6 && preselection && nSignalLeptons==2 && SFOSpairs.size()>0 && bjet_veto && nSignalJets>=2 && pT_j0>30. && pT_j1>30. && met>150. && Z.pT()>80.) ||   
+        //       (j==6 && preselection && nSignalLeptons==2 && SFOSpairs.size()>0 && bjet_veto && nSignalJets>=2 && pT_j0>30. && pT_j1>30. && met>150. && Z.pT()>80.) ||
 
-        //       (j==7 && preselection && nSignalLeptons==2 && SFOSpairs.size()>0 && bjet_veto && nSignalJets>=2 && pT_j0>30. && pT_j1>30. && met>150. && Z.pT()>80. && W.pT()>100.) ||   
+        //       (j==7 && preselection && nSignalLeptons==2 && SFOSpairs.size()>0 && bjet_veto && nSignalJets>=2 && pT_j0>30. && pT_j1>30. && met>150. && Z.pT()>80. && W.pT()>100.) ||
 
-        //       (j==8 && preselection && nSignalLeptons==2 && SFOSpairs.size()>0 && bjet_veto && nSignalJets>=2 && pT_j0>30. && pT_j1>30. && met>150. && Z.pT()>80. && W.pT()>100. && mll>81. && mll<101.) ||   
+        //       (j==8 && preselection && nSignalLeptons==2 && SFOSpairs.size()>0 && bjet_veto && nSignalJets>=2 && pT_j0>30. && pT_j1>30. && met>150. && Z.pT()>80. && W.pT()>100. && mll>81. && mll<101.) ||
 
-        //       (j==9 && preselection && nSignalLeptons==2 && SFOSpairs.size()>0 && bjet_veto && nSignalJets>=2 && pT_j0>30. && pT_j1>30. && met>150. && Z.pT()>80. && W.pT()>100. && mll>81. && mll<101. && mjj>70. && mjj<100.) ||   
+        //       (j==9 && preselection && nSignalLeptons==2 && SFOSpairs.size()>0 && bjet_veto && nSignalJets>=2 && pT_j0>30. && pT_j1>30. && met>150. && Z.pT()>80. && W.pT()>100. && mll>81. && mll<101. && mjj>70. && mjj<100.) ||
 
-        //       (j==10 && preselection && nSignalLeptons==2 && SFOSpairs.size()>0 && bjet_veto && nSignalJets>=2 && pT_j0>30. && pT_j1>30. && met>150. && Z.pT()>80. && W.pT()>100. && mll>81. && mll<101. && mjj>70. && mjj<100. && mT2>100.) ||   
+        //       (j==10 && preselection && nSignalLeptons==2 && SFOSpairs.size()>0 && bjet_veto && nSignalJets>=2 && pT_j0>30. && pT_j1>30. && met>150. && Z.pT()>80. && W.pT()>100. && mll>81. && mll<101. && mjj>70. && mjj<100. && mT2>100.) ||
 
-        //       (j==11 && preselection && nSignalLeptons==2 && SFOSpairs.size()>0 && bjet_veto && nSignalJets>=2 && pT_j0>30. && pT_j1>30. && met>150. && Z.pT()>80. && W.pT()>100. && mll>81. && mll<101. && mjj>70. && mjj<100. && mT2>100. && deltaPhi_met_W>0.5 && deltaPhi_met_W<3.0) ||   
+        //       (j==11 && preselection && nSignalLeptons==2 && SFOSpairs.size()>0 && bjet_veto && nSignalJets>=2 && pT_j0>30. && pT_j1>30. && met>150. && Z.pT()>80. && W.pT()>100. && mll>81. && mll<101. && mjj>70. && mjj<100. && mT2>100. && deltaPhi_met_W>0.5 && deltaPhi_met_W<3.0) ||
 
-        //       (j==12 && preselection && nSignalLeptons==2 && SFOSpairs.size()>0 && bjet_veto && nSignalJets>=2 && pT_j0>30. && pT_j1>30. && met>150. && Z.pT()>80. && W.pT()>100. && mll>81. && mll<101. && mjj>70. && mjj<100. && mT2>100. && deltaPhi_met_W>0.5 && deltaPhi_met_W<3.0 && deltaR_jj<1.5) ||   
+        //       (j==12 && preselection && nSignalLeptons==2 && SFOSpairs.size()>0 && bjet_veto && nSignalJets>=2 && pT_j0>30. && pT_j1>30. && met>150. && Z.pT()>80. && W.pT()>100. && mll>81. && mll<101. && mjj>70. && mjj<100. && mT2>100. && deltaPhi_met_W>0.5 && deltaPhi_met_W<3.0 && deltaR_jj<1.5) ||
 
-        //       (j==13 && preselection && nSignalLeptons==2 && SFOSpairs.size()>0 && bjet_veto && nSignalJets>=2 && pT_j0>30. && pT_j1>30. && met>150. && Z.pT()>80. && W.pT()>100. && mll>81. && mll<101. && mjj>70. && mjj<100. && mT2>100. && deltaPhi_met_W>0.5 && deltaPhi_met_W<3.0 && deltaR_jj<1.5 && deltaR_ll<1.8) )   
+        //       (j==13 && preselection && nSignalLeptons==2 && SFOSpairs.size()>0 && bjet_veto && nSignalJets>=2 && pT_j0>30. && pT_j1>30. && met>150. && Z.pT()>80. && W.pT()>100. && mll>81. && mll<101. && mjj>70. && mjj<100. && mT2>100. && deltaPhi_met_W>0.5 && deltaPhi_met_W<3.0 && deltaR_jj<1.5 && deltaR_ll<1.8) )
 
         //       cutFlowVector2[j]++;
         //   }
@@ -718,27 +721,27 @@ namespace Gambit {
  //            if(
  //              (j==0) ||
 
-        //       (j==1 && nSignalLeptons==3 && SFOSpairs.size()>0) ||   
+        //       (j==1 && nSignalLeptons==3 && SFOSpairs.size()>0) ||
 
-        //       (j==2 && nSignalLeptons==3 && SFOSpairs.size()>0 && preselection && bjet_veto) ||   
+        //       (j==2 && nSignalLeptons==3 && SFOSpairs.size()>0 && preselection && bjet_veto) ||
 
-        //       (j==3 && nSignalLeptons==3 && SFOSpairs.size()>0 && preselection && bjet_veto && mTmin>110.) ||   
+        //       (j==3 && nSignalLeptons==3 && SFOSpairs.size()>0 && preselection && bjet_veto && mTmin>110.) ||
 
-        //       (j==4 && nSignalLeptons==3 && SFOSpairs.size()>0 && preselection && bjet_veto && mTmin>110. && met>130.) ||   
+        //       (j==4 && nSignalLeptons==3 && SFOSpairs.size()>0 && preselection && bjet_veto && mTmin>110. && met>130.) ||
 
-        //       (j==5 && nSignalLeptons==3 && SFOSpairs.size()>0 && preselection && bjet_veto && mTmin>110. && met>130. && mSFOS<81.2) ||   
+        //       (j==5 && nSignalLeptons==3 && SFOSpairs.size()>0 && preselection && bjet_veto && mTmin>110. && met>130. && mSFOS<81.2) ||
 
-        //       (j==6 && nSignalLeptons==3 && SFOSpairs.size()>0 && preselection && bjet_veto && mTmin>110. && met>130. && mSFOS<81.2 && pT_l2>20. && pT_l2<30.) ||   
+        //       (j==6 && nSignalLeptons==3 && SFOSpairs.size()>0 && preselection && bjet_veto && mTmin>110. && met>130. && mSFOS<81.2 && pT_l2>20. && pT_l2<30.) ||
 
-        //       (j==7 && nSignalLeptons==3 && SFOSpairs.size()>0 && preselection && bjet_veto && mTmin>110. && met>130. && mSFOS<81.2 && pT_l2>30.) ||   
+        //       (j==7 && nSignalLeptons==3 && SFOSpairs.size()>0 && preselection && bjet_veto && mTmin>110. && met>130. && mSFOS<81.2 && pT_l2>30.) ||
 
-        //       (j==8 && nSignalLeptons==3 && SFOSpairs.size()>0 && preselection && bjet_veto && mTmin>110. && met>130. && mSFOS>101.2) ||   
+        //       (j==8 && nSignalLeptons==3 && SFOSpairs.size()>0 && preselection && bjet_veto && mTmin>110. && met>130. && mSFOS>101.2) ||
 
-        //       (j==9 && nSignalLeptons==3 && SFOSpairs.size()>0 && preselection && bjet_veto && mTmin>110. && met>130. && mSFOS>101.2 && pT_l2>20. && pT_l2<50.) ||   
+        //       (j==9 && nSignalLeptons==3 && SFOSpairs.size()>0 && preselection && bjet_veto && mTmin>110. && met>130. && mSFOS>101.2 && pT_l2>20. && pT_l2<50.) ||
 
-        //       (j==10 && nSignalLeptons==3 && SFOSpairs.size()>0 && preselection && bjet_veto && mTmin>110. && met>130. && mSFOS>101.2 && pT_l2>50. && pT_l2<80.) ||   
+        //       (j==10 && nSignalLeptons==3 && SFOSpairs.size()>0 && preselection && bjet_veto && mTmin>110. && met>130. && mSFOS>101.2 && pT_l2>50. && pT_l2<80.) ||
 
-        //       (j==11 && nSignalLeptons==3 && SFOSpairs.size()>0 && preselection && bjet_veto && mTmin>110. && met>130. && mSFOS>101.2 && pT_l2>80.) ) 
+        //       (j==11 && nSignalLeptons==3 && SFOSpairs.size()>0 && preselection && bjet_veto && mTmin>110. && met>130. && mSFOS>101.2 && pT_l2>80.) )
 
         //       cutFlowVector4[j]++;
         //   }
@@ -783,25 +786,25 @@ namespace Gambit {
  //            if(
  //              (j==0) ||
 
-        //       (j==1 && nBaselineLeptons==nSignalLeptons && nSignalLeptons==2 && OSpairs.size()>0) ||   
+        //       (j==1 && nBaselineLeptons==nSignalLeptons && nSignalLeptons==2 && OSpairs.size()>0) ||
 
-        //       (j==2 && nBaselineLeptons==nSignalLeptons && nSignalLeptons==2 && OSpairs.size()>0 && pT_l0>25.) ||   
+        //       (j==2 && nBaselineLeptons==nSignalLeptons && nSignalLeptons==2 && OSpairs.size()>0 && pT_l0>25.) ||
 
-        //       (j==3 && nBaselineLeptons==nSignalLeptons && nSignalLeptons==2 && OSpairs.size()>0 && pT_l0>25. && central_jet_veto) ||   
+        //       (j==3 && nBaselineLeptons==nSignalLeptons && nSignalLeptons==2 && OSpairs.size()>0 && pT_l0>25. && central_jet_veto) ||
 
-        //       (j==4 && nBaselineLeptons==nSignalLeptons && nSignalLeptons==2 && OSpairs.size()>0 && pT_l0>25. && central_jet_veto && mll>40.) ||   
+        //       (j==4 && nBaselineLeptons==nSignalLeptons && nSignalLeptons==2 && OSpairs.size()>0 && pT_l0>25. && central_jet_veto && mll>40.) ||
 
-        //       (j==5 && nBaselineLeptons==nSignalLeptons && nSignalLeptons==2 && OSpairs.size()>0 && pT_l0>25. && central_jet_veto && mll>40. && SFOSpairs.size()>0) ||   
+        //       (j==5 && nBaselineLeptons==nSignalLeptons && nSignalLeptons==2 && OSpairs.size()>0 && pT_l0>25. && central_jet_veto && mll>40. && SFOSpairs.size()>0) ||
 
-        //       (j==6 && nBaselineLeptons==nSignalLeptons && nSignalLeptons==2 && OSpairs.size()>0 && pT_l0>25. && central_jet_veto && mll>40. && SFOSpairs.size()>0 && mll>111.) ||   
+        //       (j==6 && nBaselineLeptons==nSignalLeptons && nSignalLeptons==2 && OSpairs.size()>0 && pT_l0>25. && central_jet_veto && mll>40. && SFOSpairs.size()>0 && mll>111.) ||
 
-        //       (j==7 && nBaselineLeptons==nSignalLeptons && nSignalLeptons==2 && OSpairs.size()>0 && pT_l0>25. && central_jet_veto && mll>40. && SFOSpairs.size()>0 && mll>111. && mT2>100.) ||   
+        //       (j==7 && nBaselineLeptons==nSignalLeptons && nSignalLeptons==2 && OSpairs.size()>0 && pT_l0>25. && central_jet_veto && mll>40. && SFOSpairs.size()>0 && mll>111. && mT2>100.) ||
 
-        //       (j==8 && nBaselineLeptons==nSignalLeptons && nSignalLeptons==2 && OSpairs.size()>0 && pT_l0>25. && central_jet_veto && mll>40. && SFOSpairs.size()==0) ||   
+        //       (j==8 && nBaselineLeptons==nSignalLeptons && nSignalLeptons==2 && OSpairs.size()>0 && pT_l0>25. && central_jet_veto && mll>40. && SFOSpairs.size()==0) ||
 
-        //       (j==9 && nBaselineLeptons==nSignalLeptons && nSignalLeptons==2 && OSpairs.size()>0 && pT_l0>25. && central_jet_veto && mll>40. && SFOSpairs.size()==0 && mll>111.) ||   
+        //       (j==9 && nBaselineLeptons==nSignalLeptons && nSignalLeptons==2 && OSpairs.size()>0 && pT_l0>25. && central_jet_veto && mll>40. && SFOSpairs.size()==0 && mll>111.) ||
 
-        //       (j==10 && nBaselineLeptons==nSignalLeptons && nSignalLeptons==2 && OSpairs.size()>0 && pT_l0>25. && central_jet_veto && mll>40. && SFOSpairs.size()==0 && mll>111. && mT2>100.) )   
+        //       (j==10 && nBaselineLeptons==nSignalLeptons && nSignalLeptons==2 && OSpairs.size()>0 && pT_l0>25. && central_jet_veto && mll>40. && SFOSpairs.size()==0 && mll>111. && mT2>100.) )
 
         //       cutFlowVector5[j]++;
         //   }
@@ -812,7 +815,7 @@ namespace Gambit {
 
       void add(BaseAnalysis* other) {
         // The base class add function handles the signal region vector and total # events.
-        
+
         HEPUtilsAnalysis::add(other);
 
         Analysis_ATLAS_13TeV_MultiLEP_36invfb* specificOther
@@ -830,7 +833,7 @@ namespace Gambit {
           cutFlowVector2_str[j] = specificOther->cutFlowVector2_str[j];
         }
 
-        for (auto& el : _numSR) { 
+        for (auto& el : _numSR) {
           el.second += specificOther->_numSR[el.first];
         }
 
@@ -895,13 +898,13 @@ namespace Gambit {
         W_ISR.push_back(j1);
         return W_ISR;
       }
-                 
+
 
     protected:
       void clear() {
 
         for (auto& el : _numSR) { el.second = 0.;}
-        
+
         std::fill(cutFlowVector1.begin(), cutFlowVector1.end(), 0);
         std::fill(cutFlowVector2.begin(), cutFlowVector2.end(), 0);
         std::fill(cutFlowVector3.begin(), cutFlowVector3.end(), 0);
@@ -916,9 +919,9 @@ namespace Gambit {
 
 
 
-    // 
+    //
     // Derived analysis class for the 2Lep0Jets SRs
-    // 
+    //
     class Analysis_ATLAS_13TeV_MultiLEP_2Lep0Jets_36invfb : public Analysis_ATLAS_13TeV_MultiLEP_36invfb {
 
     public:

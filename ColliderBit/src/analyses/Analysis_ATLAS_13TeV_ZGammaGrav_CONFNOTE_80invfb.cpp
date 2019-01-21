@@ -20,6 +20,9 @@ namespace Gambit {
     class Analysis_ATLAS_13TeV_ZGammaGrav_CONFNOTE_80invfb : public HEPUtilsAnalysis {
     public:
 
+      // Required detector sim
+      static constexpr const char* detector = "ATLAS";
+
       Analysis_ATLAS_13TeV_ZGammaGrav_CONFNOTE_80invfb() {
         set_analysis_name("ATLAS_13TeV_ZGammaGrav_CONFNOTE_80invfb");
         set_luminosity(79.8);

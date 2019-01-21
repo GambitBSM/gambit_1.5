@@ -22,7 +22,7 @@
 
 // Based on arxiv:1709.05406 and arxiv:1801.03957 (which is a rebinning of the 3-lepton analysis in arxiv:1709.05406)
 
-// @todo Add covariance matrix for the rebinned analysis 
+// @todo Add covariance matrix for the rebinned analysis
 // @todo Validation!
 
 using namespace std;
@@ -190,6 +190,9 @@ namespace Gambit {
 
     public:
 
+      // Required detector sim
+      static constexpr const char* detector = "CMSmultieff";
+
       struct ptComparison {
         bool operator() (HEPUtils::Particle* i,HEPUtils::Particle* j) {return (i->pT()>j->pT());}
       } comparePt;
@@ -198,7 +201,7 @@ namespace Gambit {
 
         set_analysis_name("CMS_13TeV_MultiLEP_Full_36invfb");
         set_luminosity(35.9);
-        
+
         NCUTS1=10;
         NCUTS2=7;
         NCUTS3=7;
@@ -247,7 +250,7 @@ namespace Gambit {
 
         // Baseline objects
 
-        // Note that CMS provides two different efficiency maps, one for the multi-lepton SR and one for the 2SS signal region: 
+        // Note that CMS provides two different efficiency maps, one for the multi-lepton SR and one for the 2SS signal region:
         //   https://twiki.cern.ch/twiki/bin/view/CMSPublic/SUSMoriond2017ObjectsEfficiency
         // Here we have only implemented the multi-lepton efficiency map.
 
@@ -255,13 +258,13 @@ namespace Gambit {
         //@note The efficiency map has been extended to cover the low-pT region, using the efficiencies from BuckFast (CMSEfficiencies.hpp)
         const vector<double> aEl={0., 0.8, 1.442, 1.556, 2., 2.5, DBL_MAX};   // Bin edges in eta
         const vector<double> bEl={0., 10., 15., 20., 25., 30., 40., 50., DBL_MAX}; // Bin edges in pT. Assume flat efficiency above 200, where the CMS map stops.
-        const vector<double> cEl={                 
-                          // pT: (0,10),  (10,15),  (15,20),  (20,25),  (25,30),  (30,40),  (40,50),  (50,inf)     
+        const vector<double> cEl={
+                          // pT: (0,10),  (10,15),  (15,20),  (20,25),  (25,30),  (30,40),  (40,50),  (50,inf)
                                    0.0,    0.95,    0.507,    0.619,    0.682,    0.742,    0.798,    0.863,  // eta: (0, 0.8)
                                    0.0,    0.95,    0.429,    0.546,    0.619,    0.710,    0.734,    0.833,  // eta: (0.8, 1.4429
                                    0.0,    0.95,    0.256,    0.221,    0.315,    0.351,    0.373,    0.437,  // eta: (1.442, 1.556)
                                    0.0,    0.85,    0.249,    0.404,    0.423,    0.561,    0.642,    0.749,  // eta: (1.556, 2)
-                                   0.0,    0.85,    0.195,    0.245,    0.380,    0.441,    0.533,    0.644,  // eta: (2, 2.5) 
+                                   0.0,    0.85,    0.195,    0.245,    0.380,    0.441,    0.533,    0.644,  // eta: (2, 2.5)
                                    0.0,    0.0,     0.0,      0.0,      0.0,      0.0,      0.0,      0.0,    // eta > 2.5
                                   };
         // const vector<double> aEl={0,0.8,1.442,1.556,2.,2.5};
@@ -279,7 +282,7 @@ namespace Gambit {
         const vector<double> aMu={0., 0.9, 1.2, 2.1, 2.4, DBL_MAX};   // Bin edges in eta
         const vector<double> bMu={0., 10., 15., 20., 25., 30., 40., 50., DBL_MAX};  // Bin edges in pT. Assume flat efficiency above 200, where the CMS map stops.
         const vector<double> cMu={
-                           // pT:   (0,10),  (10,15),  (15,20),  (20,25),  (25,30),  (30,40),  (40,50),  (50,inf)     
+                           // pT:   (0,10),  (10,15),  (15,20),  (20,25),  (25,30),  (30,40),  (40,50),  (50,inf)
                                      0.0,     0.704,    0.797,    0.855,    0.880,    0.906,    0.927,    0.931,  // eta: (0, 0.9)
                                      0.0,     0.639,    0.776,    0.836,    0.875,    0.898,    0.940,    0.930,  // eta: (0.9, 1.2)
                                      0.0,     0.596,    0.715,    0.840,    0.862,    0.891,    0.906,    0.925,  // eta: (1.2, 2.1)
@@ -324,11 +327,11 @@ namespace Gambit {
         sort(signalLightLeptons.begin(),signalLightLeptons.end(),comparePt);
         sort(signalLeptons.begin(),signalLeptons.end(),comparePt);
 
-        vector<HEPUtils::Jet*> signalJets;   
-        vector<HEPUtils::Jet*> signalBJets;   
+        vector<HEPUtils::Jet*> signalJets;
+        vector<HEPUtils::Jet*> signalBJets;
         int num_ISRjets=0;
         for (size_t iJet=0;iJet<baselineJets.size();iJet++) {
-          bool overlap=false;            
+          bool overlap=false;
           for (size_t iLe=0;iLe<signalLeptons.size();iLe++) {
             if (fabs(signalLeptons.at(iLe)->mom().deltaR_eta(baselineJets.at(iJet)->mom()))<0.4)overlap=true;
           }
@@ -342,13 +345,13 @@ namespace Gambit {
 
         // int nSignalElectrons=signalElectrons.size();
         int nSignalMuons=signalMuons.size();
-        int nSignalTaus=signalTaus.size(); 
+        int nSignalTaus=signalTaus.size();
         int nSignalLightLeptons = signalLightLeptons.size();
         int nSignalLeptons=signalLeptons.size();
         // int nSignalJets=signalJets.size();
-        
+
         //Variables
-        bool preselection=false; 
+        bool preselection=false;
         bool bjet_veto=(signalBJets.size()==0);
         bool low_mass_veto=true;
         bool conversion_veto=true;
@@ -365,7 +368,7 @@ namespace Gambit {
         // Calculate HT
         for (size_t iJet=0; iJet<signalJets.size(); iJet++){
           double jetpT = signalJets.at(iJet)->pT();
-          if (jetpT > 30.) HT += jetpT;           
+          if (jetpT > 30.) HT += jetpT;
         }
 
         // // Calculate mT2
@@ -383,7 +386,7 @@ namespace Gambit {
         // }
 
         // Calculate mll and mT
-        if (nSignalLeptons==2 || (SFOSpair_cont.size()==0 && OSpair_cont.size()==0)) mT=get_mTmin(signalLeptons, event->missingmom());   
+        if (nSignalLeptons==2 || (SFOSpair_cont.size()==0 && OSpair_cont.size()==0)) mT=get_mTmin(signalLeptons, event->missingmom());
         if (SFOSpair_cont.size()>0) {
           vector<double> mll_mT= get_mll_mT(SFOSpair_cont,signalLeptons,event->missingmom(),0);
           mll=mll_mT.at(0);
@@ -403,7 +406,7 @@ namespace Gambit {
           if (nSignalLeptons>2) {
             double m_lll=(signalLeptons.at(0)->mom()+signalLeptons.at(1)->mom()+signalLeptons.at(2)->mom()).m();
             if (SFOSpair_cont.at(iPa).at(0)->abspid()!=15 && abs(m_lll-91.2)<15)conversion_veto=false;
-          }     
+          }
         }
         if (bjet_veto && low_mass_veto)preselection=true;
 
@@ -417,7 +420,7 @@ namespace Gambit {
               bool mm = false;
               if(signalLeptons.at(0)->pid() > 0)pp = true;
               if(signalLeptons.at(0)->pid() < 0)mm = true;
-              
+
               if (num_ISRjets==0) {
 
                 // The 0 jet regions
@@ -440,7 +443,7 @@ namespace Gambit {
               }
 
               if (num_ISRjets==1){
-                
+
                 // The 1 jet regions
                 if(mT < 100 && pT_ll < 50 && met < 100) _numSR["SS16"]++;
                 if(mT < 100 && pT_ll < 50 && met >= 100 && met < 150 && pp) _numSR["SS17"]++;
@@ -459,20 +462,20 @@ namespace Gambit {
                 if(mT > 100 && met > 200) _numSR["SS30"]++;
 
               }
-              
-            }   
+
+            }
           }
         }
-        
+
         // Increment signal region counters: 3 leptons (binning from arxiv:1709.05406)
         if (preselection && met>50 && conversion_veto && nSignalLeptons>2) {
-          
+
           if (nSignalTaus<2) {
             if ((signalLightLeptons.at(0)->abspid()==11 && signalLightLeptons.at(0)->pT()>25) || (signalLightLeptons.at(0)->abspid()==13 && signalLightLeptons.at(0)->pT()>20 && nSignalMuons>1) || (signalLightLeptons.at(0)->abspid()==13 && signalLightLeptons.at(0)->pT()>25 && nSignalMuons==1)) {
               if (nSignalLightLeptons==3 && nSignalTaus==0) {
-                
+
                 // The three light lepton signal regions
-                
+
                 if(mT < 100 && met >=50 && met < 100 && mll < 75) _numSR["A01"]++;
                 if(mT < 100 && met >=100 && met < 150 && mll < 75) _numSR["A02"]++;
                 if(mT < 100 && met >=150 && met < 200 && mll < 75) _numSR["A03"]++;
@@ -496,12 +499,12 @@ namespace Gambit {
                 if(mT < 100 && met >=200 && met < 250 && mll >= 75 && mll < 105) _numSR["A18"]++;
                 if(mT < 100 && met >=250 && met < 400 && mll >= 75 && mll < 105) _numSR["A19"]++;
                 if(mT < 100 && met >=400 && met < 550 && mll >= 75 && mll < 105) _numSR["A20"]++;
-                if(mT < 100 && met >=550 && mll >= 75 && mll < 105) _numSR["A21"]++;            
+                if(mT < 100 && met >=550 && mll >= 75 && mll < 105) _numSR["A21"]++;
                 if(mT >= 100 && mT < 160 && met >=50 && met < 100 && mll >= 75 && mll < 105) _numSR["A22"]++;
                 if(mT >= 100 && mT < 160 && met >=100 && met < 150 && mll >= 75 && mll < 105) _numSR["A23"]++;
                 if(mT >= 100 && mT < 160 && met >=150 && met < 200 && mll >= 75 && mll < 105) _numSR["A24"]++;
                 if(mT >= 100 && mT < 160 && met >=200 && mll >= 75 && mll < 105) _numSR["A25"]++;
-                
+
                 if(mT >= 160 && met >=50 && met < 100 && mll >= 75 && mll < 105) _numSR["A26"]++;
                 if(mT >= 160 && met >=100 && met < 150 && mll >= 75 && mll < 105) _numSR["A27"]++;
                 if(mT >= 160 && met >=150 && met < 200 && mll >= 75 && mll < 105) _numSR["A28"]++;
@@ -514,7 +517,7 @@ namespace Gambit {
                 if(mT < 100 && met >=150 && met < 200 && mll >= 105) _numSR["A34"]++;
                 if(mT < 100 && met >=200 && met < 250 && mll >= 105) _numSR["A35"]++;
                 if(mT < 100 && met >=250 && mll >= 105) _numSR["A36"]++;
-                
+
                 if(mT >= 100 && mT < 160 && met >=50 && met < 100 && mll >= 105) _numSR["A37"]++;
                 if(mT >= 100 && mT < 160 && met >=100 && met < 150 && mll >= 105) _numSR["A38"]++;
                 if(mT >= 100 && mT < 160 && met >=150 && met < 200 && mll >= 105) _numSR["A39"]++;
@@ -523,20 +526,20 @@ namespace Gambit {
                 if(mT >= 160 && met >=100 && met < 150 && mll >= 105) _numSR["A42"]++;
                 if(mT >= 160 && met >=150 && met < 200 && mll >= 105) _numSR["A43"]++;
                 if(mT >= 160 && met >=200 && mll >= 105) _numSR["A44"]++;
-                
+
               }
             }
           }
-          
+
         }
 
         // Increment signal region counters: 3 leptons (rebinning from arxiv:1801.03957)
         if (preselection && met>50 && conversion_veto && nSignalLeptons>2) {
-          
+
           if (nSignalTaus<2) {
             if ((signalLightLeptons.at(0)->abspid()==11 && signalLightLeptons.at(0)->pT()>25) || (signalLightLeptons.at(0)->abspid()==13 && signalLightLeptons.at(0)->pT()>20 && nSignalMuons>1) || (signalLightLeptons.at(0)->abspid()==13 && signalLightLeptons.at(0)->pT()>25 && nSignalMuons==1)) {
               if (nSignalLightLeptons==3 && nSignalTaus==0) {
-                
+
                 // The three light lepton signal regions
                 if(mll < 75 && mT < 100 && HT < 200 && met > 50 && met < 100) _numSR["SR01"]++;
                 if(mll < 75 && mT < 100 && HT < 200 && met > 100 && met < 150) _numSR["SR02"]++;
@@ -618,10 +621,10 @@ namespace Gambit {
 
       }
 
-      
+
       void add(BaseAnalysis* other) {
         // The base class add function handles the signal region vector and total # events.
-        
+
         HEPUtilsAnalysis::add(other);
 
         Analysis_CMS_13TeV_MultiLEP_Full_36invfb* specificOther
@@ -649,7 +652,7 @@ namespace Gambit {
           cutFlowVector_str4[j] = specificOther->cutFlowVector_str4[j];
         }
 
-        for (auto& el : _numSR) { 
+        for (auto& el : _numSR) {
           el.second += specificOther->_numSR[el.first];
         }
       }
@@ -691,7 +694,7 @@ namespace Gambit {
         add_result(SignalRegionData("SS28", 13., {_numSR["SS28"], 0.}, {10.7, 1.9}));
         add_result(SignalRegionData("SS29", 9., {_numSR["SS29"], 0.}, {6.7, 1.1}));
         add_result(SignalRegionData("SS30", 7., {_numSR["SS30"], 0.}, {3.9, 0.8}));
-        
+
         add_result(SignalRegionData("A01", 186., {_numSR["A01"], 0.}, {185., 22.}));
         add_result(SignalRegionData("A02", 34., {_numSR["A02"], 0.}, {35., 6.}));
         add_result(SignalRegionData("A03", 11., {_numSR["A03"], 0.}, {9.3, 2.2}));
@@ -796,12 +799,12 @@ namespace Gambit {
         add_result(SignalRegionData("SR56", 170., {_numSR["SR56"], 0.}, {173., 21.}));
         add_result(SignalRegionData("SR57", 28., {_numSR["SR57"], 0.}, {44., 7.}));
         add_result(SignalRegionData("SR58", 12., {_numSR["SR58"], 0.}, {23., 6.}));
-                        
+
       }
-      
+
 
       // Helper function to calculate mll and mT
-      vector<double> get_mll_mT(vector<vector<HEPUtils::Particle*>> pair_cont, vector<HEPUtils::Particle*> leptons, HEPUtils::P4 met, int type) { 
+      vector<double> get_mll_mT(vector<vector<HEPUtils::Particle*>> pair_cont, vector<HEPUtils::Particle*> leptons, HEPUtils::P4 met, int type) {
         vector<double> mll_mT;
         vector<vector<double>> mll_mT_container;
         for (size_t iPa=0;iPa<pair_cont.size();iPa++) {
@@ -821,7 +824,7 @@ namespace Gambit {
           temp.push_back(mT_temp);
           temp.push_back(fabs(m_ll_temp-mass));
           mll_mT_container.push_back(temp);
-        }         
+        }
 
         struct mllComparison {
           bool operator() (vector<double> i,vector<double> j) {return (i.at(2)<j.at(2));}
@@ -835,12 +838,12 @@ namespace Gambit {
         return mll_mT;
       }
 
-      // Helper function to get min mT 
-      double get_mTmin(vector<HEPUtils::Particle*> leptons, HEPUtils::P4 met) { 
+      // Helper function to get min mT
+      double get_mTmin(vector<HEPUtils::Particle*> leptons, HEPUtils::P4 met) {
         vector<double> mT_container;
         for (size_t iLe=0;iLe<leptons.size();iLe++) {
           mT_container.push_back(sqrt(2*met.pT()*leptons.at(iLe)->pT()*(1-cos(leptons.at(iLe)->phi()-met.phi()))));
-        }         
+        }
         sort(mT_container.begin(),mT_container.end());
         if (mT_container.size()>0) return mT_container.at(0);
         else return -1;
@@ -866,9 +869,9 @@ namespace Gambit {
 
 
 
-    // 
+    //
     // Derived analysis class for the 2Lep0Jets SRs
-    // 
+    //
     class Analysis_CMS_13TeV_MultiLEP_Full_2SSLep_36invfb : public Analysis_CMS_13TeV_MultiLEP_Full_36invfb {
 
     public:
@@ -918,9 +921,9 @@ namespace Gambit {
 
 
 
-    // 
+    //
     // Derived analysis class for the 3Lep SRs
-    // 
+    //
     class Analysis_CMS_13TeV_MultiLEP_Full_3Lep_36invfb : public Analysis_CMS_13TeV_MultiLEP_Full_36invfb {
 
     public:
@@ -975,7 +978,7 @@ namespace Gambit {
         add_result(SignalRegionData("A42", 3., {_numSR["A42"], 0.}, {6.6, 2.1}));
         add_result(SignalRegionData("A43", 0., {_numSR["A43"], 0.}, {3.1, 1.0}));
         add_result(SignalRegionData("A44", 1., {_numSR["A44"], 0.}, {2.5, 0.8}));
-        
+
         // Covariance matrix
         // Note that this is a 43x43 matrix, since the row & column corresponding to SR A15 has been removed
         static const vector< vector<double> > BKGCOV = {
@@ -1022,7 +1025,7 @@ namespace Gambit {
           { 6.4227e-01,  1.9110e+00,  6.2689e-01,  3.6017e-01,  2.0265e-01,  2.1964e+00,  1.0167e+00,  1.9574e-01,  4.2794e-02,  2.7869e-01,  9.5679e-01,  3.8611e-01,  1.5928e-01,  8.1280e-02,  4.9388e+00,  1.2059e+01,  4.1315e+00,  3.4521e+00,  5.4940e-01,  1.8917e-01, -2.3941e+00,  5.9930e+00,  1.9527e+00,  5.0485e-01,  3.3296e+00,  3.8227e+00,  1.3220e+00,  4.1744e-01,  6.0826e-01,  1.6800e-01,  1.4205e+00,  7.6012e-01,  2.3508e-01,  1.1908e-01,  4.3283e-01,  1.5555e+00,  9.1164e-01,  1.8334e-01,  1.0757e-01,  8.2278e-01,  4.4100e+00,  2.1876e-01,  3.1102e-01},
           { 2.0901e+00,  5.4878e-01,  1.5209e-01,  1.5356e-01,  5.6981e-02,  4.0173e-01,  4.2596e-01,  5.8532e-02,  3.5611e-02,  9.5460e-02,  2.3112e-01,  4.8733e-02,  9.7632e-02,  6.1360e-02,  4.1682e+00,  2.9030e+00,  1.4786e+00,  1.7182e+00,  1.8263e-01,  1.5285e-01, -3.2760e-02,  6.5041e-01,  2.8530e-01,  1.5110e-01,  7.3987e-01,  1.0138e+00,  4.0675e-01,  1.5886e-01,  1.9550e-01,  8.5745e-02,  6.8772e-01,  4.0086e-01,  1.2512e-01,  2.4450e-02,  1.0046e-01, -3.4796e-03,  2.2538e-01,  5.9240e-02,  4.2996e-02,  2.3154e-01,  2.1876e-01,  1.0000e+00,  1.7952e-01},
           { 1.0565e+00,  5.8637e-01,  2.6641e-01,  1.8912e-01,  8.2416e-02,  2.8149e-01,  3.4883e-01,  1.0308e-01,  5.0666e-02,  2.4918e-01,  3.5318e-01,  8.6654e-02,  1.1649e-01,  8.3149e-02,  3.6467e+00,  4.6579e+00,  1.9230e+00,  1.6585e+00,  2.9390e-01,  1.5232e-01, -3.6326e-02,  1.9458e+00,  7.0448e-01,  2.6016e-01,  1.0464e+00,  1.1777e+00,  5.4409e-01,  1.6229e-01,  2.5619e-01,  1.1555e-01,  7.8590e-01,  4.2860e-01,  9.3558e-02,  9.6698e-02,  1.5118e-01,  2.1590e-01,  3.3873e-01,  9.4332e-02,  7.2787e-02,  3.9348e-01,  3.1102e-01,  1.7952e-01,  6.4000e-01},
-        };        
+        };
 
         set_covariance(BKGCOV);
 
@@ -1035,9 +1038,9 @@ namespace Gambit {
 
 
 
-    // 
+    //
     // Derived analysis class for the 3Lep SRs (rebinned version)
-    // 
+    //
     class Analysis_CMS_13TeV_MultiLEP_Full_3Lep_rebinned_36invfb : public Analysis_CMS_13TeV_MultiLEP_Full_36invfb {
 
     public:
@@ -1166,7 +1169,7 @@ namespace Gambit {
           { 1.1833e+02,  2.1285e+01,  3.6964e+00,  2.1077e+00,  5.0472e+01,  1.6375e+01,  4.2150e-01,  4.9808e+00,  1.9787e+01,  3.9476e+00,  1.8399e+00,  3.6278e+01,  1.3548e+01,  1.1621e+01,  5.5155e+01,  4.6705e+01,  2.6746e+01,  2.0079e+01,  6.4483e-02,  4.1004e+01,  5.7544e+00,  1.9107e+00,  1.9604e+01,  3.8533e+01,  9.0707e+00,  9.2194e+00,  6.8049e+01,  1.0930e+01,  2.1958e+01,  1.0214e+01,  2.0708e+00,  8.3892e+00,  7.9997e+00,  4.5543e+00,  1.0905e+00,  1.1251e+01,  1.4687e+00,  9.4777e-01,  1.3624e+00,  6.5881e+01,  6.3538e+01,  2.8116e+01,  5.1535e+00, -1.1808e+01,  1.2416e+01,  9.7175e+00,  2.1084e+00,  2.4132e+00,  1.5728e+00,  9.6434e+00,  5.7691e+00,  1.8481e+00,  2.3183e+00,  1.0447e+00,  1.8907e+00,  4.4100e+02,  4.1720e+01,  2.8208e+01},
           { 4.8905e+00,  5.4594e+00,  7.0119e-01,  4.8013e-01,  1.1472e+01,  1.6862e+00,  3.5258e-01,  1.8092e+00,  3.7174e+00,  1.6136e+00,  8.9187e-02,  6.9917e+00,  5.2002e+00,  1.3906e+00, -9.6980e+00,  1.7218e+01,  2.3659e+00,  1.1654e+00, -1.9495e+01,  1.7531e+01,  4.3268e+00,  9.0790e-02,  8.5764e+00,  8.9562e+00,  2.5175e+00,  2.3758e+00, -3.9013e+01,  2.6212e+00,  2.8238e+00,  1.6527e+00,  6.8463e-01,  7.4502e+00,  2.1334e+00,  6.4310e-01,  1.2001e-01,  6.7728e-01,  2.4176e+00,  1.4269e-01,  2.5994e-01, -1.5056e+01,  1.6604e+01,  4.4079e+00,  3.8126e-01, -1.9100e+00,  1.6312e+00,  1.2664e+00,  8.1357e-01,  2.1412e-01,  1.6601e-01,  2.9077e+00,  6.0747e-01,  8.1477e-01,  5.1553e-01,  6.2922e-02,  1.1872e-01,  4.1720e+01,  4.9000e+01,  8.9468e+00},
           {-5.9351e+00,  1.8844e+00,  1.8055e-01,  5.2531e-01, -2.5530e-01,  1.2828e+00,  3.9758e-01,  4.2982e-01,  1.0299e+00,  7.9169e-01,  4.3476e-01,  3.6857e+00,  1.4053e+00,  1.7168e+00, -3.3763e+01,  9.0619e+00,  4.2402e+00,  4.3716e+00, -2.5121e+01,  1.8704e+01,  2.3870e+00,  3.1365e-01,  5.7456e+00,  8.8350e+00,  2.5858e+00,  3.0283e+00, -8.6263e+00, -2.7373e-01,  1.0042e+01,  1.8856e+00,  6.7836e-01, -3.9815e-01,  3.8851e+00,  1.3437e+00,  2.0365e-01,  3.1638e+00,  9.3943e-01,  4.5048e-01,  2.6030e-01,  3.7666e+01,  3.2475e+01,  1.2473e+01,  4.2208e+00,  2.1701e+00,  5.4428e+00,  3.8938e+00,  9.4853e-01,  3.2982e-01,  6.3033e-01,  5.0168e+00,  2.6524e+00,  9.9061e-01,  5.4125e-01,  2.8876e-01,  6.5517e-01,  2.8208e+01,  8.9468e+00,  3.6000e+01},
-        };        
+        };
 
         set_covariance(BKGCOV);
 

@@ -101,7 +101,6 @@ namespace Gambit
     /// Check if convergence has been achieved across threads, and across all instances of this class
     bool MC_convergence_checker::achieved(const HEPUtilsAnalysisContainer& ac)
     {
-
       if (not converged)
       {
 

@@ -15,6 +15,9 @@ namespace Gambit {
 
     public:
 
+      // Required detector sim
+      static constexpr const char* detector = "ATLAS";
+
       Analysis_Minimum() {
 
         // Set the analysis name

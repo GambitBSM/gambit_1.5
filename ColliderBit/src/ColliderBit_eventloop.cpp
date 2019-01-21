@@ -56,8 +56,6 @@ namespace Gambit
       cout << debug_prefix() << "~~~~ New point! ~~~~" << endl;
       #endif
 
-      result.clear();
-
       // Retrieve run options from the YAML file (or standalone code)
       static bool first = true;
       static int seedBase;
@@ -74,11 +72,14 @@ namespace Gambit
         // Should we silence stdout during the loop?
         silenceLoop = runOptions->getValueOrDef<bool>(true, "silenceLoop");
 
-        // Retrieve all the names of all colliders to be used in this run.
+        // Retrieve all the names of all entries in the yaml options node.
         std::vector<str> vec = runOptions->getNames();
-        vec.erase(std::remove(vec.begin(), vec.end(), "colliderSeedBase"), vec.end());
-        vec.erase(std::remove(vec.begin(), vec.end(), "silenceLoop"), vec.end());
-        result.collider_names = vec;
+        // Step though the names, and accept only those with a "min_nEvents" sub-entry as colliders.
+        for (str& name : vec)
+        {
+          YAML::Node node = runOptions->getNode(name);
+          if (not node.IsScalar() and node["min_nEvents"]) result.collider_names.push_back(name);
+        }
 
         // Retrieve the options for each collider.
         for (auto& collider : result.collider_names)
@@ -92,28 +93,40 @@ namespace Gambit
           result.convergence_options[collider].all_SR_must_converge       = colOptions.getValueOrDef<bool>(false, "all_SR_must_converge");
           result.maxFailedEvents[collider]                                = colOptions.getValueOrDef<int>(1, "maxFailedEvents");
           stoppingres[collider]                                           = colOptions.getValueOrDef<int>(200, "events_between_convergence_checks");
+          result.analyses[collider]                                       = colOptions.getValueOrDef<std::vector<str>>(std::vector<str>(), "analyses");
+          result.seed_base[collider]                                      = seedBase;
+          result.event_count[collider]                                    = 0;
+          // Check that the nEvents options given make sense.
           if (min_nEvents.at(collider) > max_nEvents.at(collider))
            ColliderBit_error().raise(LOCAL_INFO,"Option min_nEvents is greater than corresponding max_nEvents for collider "
                                                 +collider+". Please correct your YAML file.");
+          // Check that the analyses all correspond to actual ColliderBit analyses, and sort them into separate maps for each detector.
+          for (str& analysis : result.analyses.at(collider))
+          {
+            result.detector_analyses[collider][getDetector(analysis)].push_back(analysis);
+          }
         }
         first = false;
       }
 
-      // Mute stdout during the loop if requested
-      if (silenceLoop) std::cout.rdbuf(0);
-
       // Do the base-level initialisation
       Loop::executeIteration(BASE_INIT);
+
+      // Mute stdout during the loop if requested
+      if (silenceLoop) std::cout.rdbuf(0);
 
       // For every collider requested in the yaml file:
       for (auto& collider : result.collider_names)
       {
 
+        // Reset the event_generation_began and exceeded_maxFailedEvents flags
+        result.reset_flags();
+
         // Update the collider
         result.set_current_collider(collider);
 
         // Save the random number seed to be used for this collider; actual seed will be this plus the thread number.
-        result.current_seed_base() = (seedBase != -1 ? seedBase : int(Random::draw() * 899990000));
+        if (seedBase == -1) result.current_seed_base() = int(Random::draw() * 899990000);
 
         // Initialise the count of the number of generated events.
         result.current_event_count() = 0;

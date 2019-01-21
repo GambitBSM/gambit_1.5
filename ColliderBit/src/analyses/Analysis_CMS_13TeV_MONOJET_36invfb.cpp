@@ -20,6 +20,9 @@ namespace Gambit {
     class Analysis_CMS_13TeV_MONOJET_36invfb : public HEPUtilsAnalysis {
     public:
 
+      // Required detector sim
+      static constexpr const char* detector = "CMS";
+
       static const size_t NUMSR = 22;
       double _srnums[NUMSR];
       Cutflow _cutflow;
@@ -115,7 +118,7 @@ namespace Gambit {
         }
 
         // Commented out covariance matrix for now, as it currently is a bit
-        // too time consuming to calculate an accurate 'simplified likelihood' 
+        // too time consuming to calculate an accurate 'simplified likelihood'
         // for this analysis.
 
         // // Covariance

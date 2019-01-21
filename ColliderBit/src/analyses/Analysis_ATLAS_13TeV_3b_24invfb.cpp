@@ -25,7 +25,7 @@ using namespace std;
 namespace Gambit {
   namespace ColliderBit {
 
-    
+
     class Analysis_ATLAS_13TeV_3b_24invfb : public HEPUtilsAnalysis {
 
     protected:
@@ -80,7 +80,7 @@ namespace Gambit {
         {"low-SR-MET0meff440", 0.},       // Discovery regions
         {"low-SR-MET150meff440", 0.}
       };
-      
+
     private:
 
       #ifdef CHECK_CUTFLOW
@@ -93,11 +93,14 @@ namespace Gambit {
 
     public:
 
+      // Required detector sim
+      static constexpr const char* detector = "ATLAS";
+
       Analysis_ATLAS_13TeV_3b_24invfb() {
 
         set_analysis_name("ATLAS_13TeV_3b_24invfb");
         set_luminosity(24.3);
-        
+
         #ifdef CHECK_CUTFLOW
           NCUTS=9;
           for(size_t i=0;i<NCUTS;i++){
@@ -193,7 +196,7 @@ namespace Gambit {
         LeptonJetOverlapRemoval(electrons,candJets);
         JetLeptonOverlapRemoval(candJets,muons,0.2);
         LeptonJetOverlapRemoval(muons,candJets);
-        
+
    	    // Jets
         vector<HEPUtils::Jet*> bJets;
         vector<HEPUtils::Jet*> nonbJets;
@@ -211,7 +214,7 @@ namespace Gambit {
           else nonbJets.push_back(jet);
         }
 
-        
+
         // Find veto leptons with pT > 20 GeV
         vector<HEPUtils::Particle*> vetoElectrons;
         for (HEPUtils::Particle* electron : electrons) {
@@ -247,7 +250,7 @@ namespace Gambit {
         for(int i = 0; i < min(4,(int)nbJets); i++){
           meff += bJets_survivors.at(i)->pT();
         }
-        
+
         // Find top candidates
         bool notop = true;
         // Outer loop over b-jets candidates for top
@@ -273,7 +276,7 @@ namespace Gambit {
            }
           }
         }
-        
+
         // Find best Higgs (if any) candidates and calculate value of Xhh used in cuts
         bool higgs = false;
         double Dhhmin = 1000;
@@ -323,7 +326,7 @@ namespace Gambit {
             }
           }
         }
-        
+
         #ifdef CHECK_CUTFLOW
 
           // Increment cutFlowVector elements
@@ -449,7 +452,7 @@ namespace Gambit {
         // First exclusion regions
         if(nbJets > 3 && nLeptons == 0 && notop && higgs && Xhh < 1.6 && meff > 160. && meff < 200. && met < 20.) _numSR["meff160_ETmiss0"]++;
         if(nbJets > 3 && nLeptons == 0 && notop && higgs && Xhh < 1.6 && meff > 160. && meff < 200. && met > 20. && met < 45.) _numSR["meff160_ETmiss20"]++;
-        
+
         if(nbJets > 3 && nLeptons == 0 && notop && higgs && Xhh < 1.6 && meff > 200. && meff < 260. && met < 20.) _numSR["meff200_ETmiss0"]++;
         if(nbJets > 3 && nLeptons == 0 && notop && higgs && Xhh < 1.6 && meff > 200. && meff < 260. && met > 20. && met < 45.) _numSR["meff200_ETmiss20"]++;
         if(nbJets > 3 && nLeptons == 0 && notop && higgs && Xhh < 1.6 && meff > 200. && meff < 260. && met > 45. && met < 70.) _numSR["meff200_ETmiss45"]++;
@@ -500,13 +503,13 @@ namespace Gambit {
         if(nbJets > 3 && nLeptons == 0 && notop && higgs && Xhh < 1.6 && meff > 860. && met > 100. && met < 150.) _numSR["meff860_ETmiss100"]++;
         if(nbJets > 3 && nLeptons == 0 && notop && higgs && Xhh < 1.6 && meff > 860. && met > 150. && met < 200.) _numSR["meff860_ETmiss150"]++;
         if(nbJets > 3 && nLeptons == 0 && notop && higgs && Xhh < 1.6 && meff > 860. && met > 200.) _numSR["meff860_ETmiss200"]++;
-        
+
         // Discovery regions
         if(nbJets > 3 && nLeptons == 0 && notop && higgs && Xhh < 1.6 && meff > 440.) _numSR["low-SR-MET0meff440"]++;
         if(nbJets > 3 && nLeptons == 0 && notop && higgs && Xhh < 1.6 && meff > 440. && met > 150.) _numSR["low-SR-MET150meff440"]++;
 
         return;
-        
+
       } // End of analyze
 
 
@@ -525,11 +528,11 @@ namespace Gambit {
             cutFlowVector_str[j] = specificOther->cutFlowVector_str[j];
           }
         #endif
-        
+
         for (auto& el : _numSR) {
           el.second += specificOther->_numSR[el.first];
         }
- 
+
       }
 
 
@@ -545,7 +548,7 @@ namespace Gambit {
           // double xsec =   88.73; // 400 GeV
           // double xsec = 14.67; // 600 GeV
           // double xsec = 3.461; // 800 GeV
-          
+
           cout << "DEBUG:" << endl;
           for (size_t i=0; i<NCUTS; i++)
           {
@@ -562,7 +565,7 @@ namespace Gambit {
           cout << "DEBUG:" << endl;
         #endif
 
-        
+
         // Now fill a results object with the results for each SR
         // Only exclusion regions here
         // add_result(SignalRegionData("SR label", n_obs, {s, s_sys}, {b, b_sys}));
@@ -611,7 +614,7 @@ namespace Gambit {
         add_result(SignalRegionData("meff700_ETmiss100",   6., {_numSR["meff700_ETmiss100"], 0.},{  5.549,  0.873}));
         add_result(SignalRegionData("meff700_ETmiss150",   2., {_numSR["meff700_ETmiss150"], 0.},{  1.728,  0.879}));
         add_result(SignalRegionData("meff700_ETmiss200",   2., {_numSR["meff700_ETmiss200"], 0.},{  0.8551, 0.1211}));
-        
+
         add_result(SignalRegionData("meff860_ETmiss0",     2., {_numSR["meff860_ETmiss0"], 0.},  {  2.816,   0.246}));
         add_result(SignalRegionData("meff860_ETmiss20",    7., {_numSR["meff860_ETmiss20"], 0.}, {  7.766,   2.114}));
         add_result(SignalRegionData("meff860_ETmiss45",   10., {_numSR["meff860_ETmiss45"], 0.}, {  8.968,   2.332}));
@@ -619,7 +622,7 @@ namespace Gambit {
         add_result(SignalRegionData("meff860_ETmiss100",   2., {_numSR["meff860_ETmiss100"], 0.},{  2.785,   0.29}));
         add_result(SignalRegionData("meff860_ETmiss150",   4., {_numSR["meff860_ETmiss150"], 0.},{  0.9345,  0.2345}));
         add_result(SignalRegionData("meff860_ETmiss200",   1., {_numSR["meff860_ETmiss200"], 0.},{  0.4297,  0.0719}));
-        
+
         return;
       }
 
@@ -638,29 +641,29 @@ namespace Gambit {
     };
 
     DEFINE_ANALYSIS_FACTORY(ATLAS_13TeV_3b_24invfb)
-    
-    
+
+
     //
     // Class for collecting results for discovery regions as a derived class
     //
-    
+
     class Analysis_ATLAS_13TeV_3b_discoverySR_24invfb : public Analysis_ATLAS_13TeV_3b_24invfb {
-      
+
     public:
       Analysis_ATLAS_13TeV_3b_discoverySR_24invfb() {
         set_analysis_name("ATLAS_13TeV_3b_discoverySR_24invfb");
       }
-      
+
       virtual void collect_results() {
         // add_result(SignalRegionData("SR label", n_obs, {s, s_sys}, {b, b_sys}));
         add_result(SignalRegionData("low-SR-MET0meff440", 1063., {_numSR["low-SR-MET0meff440"], 0.}, {1100., 25.}));
         add_result(SignalRegionData("low-SR-MET150meff440", 17., {_numSR["low-SR-MET150meff440"], 0.}, {12., 8.}));
       }
-      
+
     };
-    
+
     // Factory fn
     DEFINE_ANALYSIS_FACTORY(ATLAS_13TeV_3b_discoverySR_24invfb)
-    
+
   }
 }

@@ -47,6 +47,9 @@ namespace Gambit {
 
     public:
 
+      // Required detector sim
+      static constexpr const char* detector = "ATLAS";
+
       Analysis_ATLAS_8TeV_3LEPEW_20invfb() {
 
         set_analysis_name("ATLAS_8TeV_3LEPEW_20invfb");
@@ -1066,7 +1069,7 @@ namespace Gambit {
         _num_SR1tau=0;
         _num_SR2tau_a=0;
         _num_SR2tau_b=0;
-        
+
         std::fill(cutFlowVector.begin(), cutFlowVector.end(), 0);
       }
 

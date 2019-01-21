@@ -38,7 +38,7 @@
 
 #include "gambit/ColliderBit/ColliderBit_eventloop.hpp"
 
-// #define COLLIDERBIT_DEBUG
+ #define COLLIDERBIT_DEBUG
 
 namespace Gambit
 {

@@ -146,6 +146,23 @@ namespace Gambit
     {
       using namespace Pipes::lnL_gaussian;
 
+      cout << "checking for LHC" << endl;
+      if (runOptions->hasKey("LHC"))
+      {
+        cout << "found LHC" << endl;
+        YAML::Node colNode = runOptions->getValue<YAML::Node>("LHC");
+        cout << "extracted LHC" << endl;
+        Options colOptions(colNode);
+        double xsec_veto_fb = colOptions.getValueOrDef<double>(2.0, "xsec_veto");
+        cout << "extracted xsec_veto: " << xsec_veto_fb << endl;
+        if (colOptions.hasKey("analyses"))
+        {
+          std::vector<str> analyses = colNode["analyses"].as<std::vector<str> >();
+          cout << analyses << endl;
+        }
+      }
+
+
       // Say we have a sample of 20 drawn from a normal distribution with
       // parameters muTrue and sigmaTrue. Let the sample mean and standard
       // deviation be as follows (this is our data):

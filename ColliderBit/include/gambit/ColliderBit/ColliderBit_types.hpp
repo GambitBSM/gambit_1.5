@@ -95,7 +95,6 @@ namespace Gambit
     /// @brief Container for multiple analysis containers
     typedef std::vector<HEPUtilsAnalysisContainer> HEPUtilsAnalysisContainers;
 
-    // typedefs specifically for timing (see ColliderBit_macros.hpp)
     typedef std::chrono::milliseconds ms;
     typedef std::chrono::steady_clock steady_clock;
     typedef std::chrono::steady_clock::time_point tp;

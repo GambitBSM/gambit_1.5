@@ -38,7 +38,7 @@
 
 #include "gambit/ColliderBit/ColliderBit_eventloop.hpp"
 
-// #define COLLIDERBIT_DEBUG
+ #define COLLIDERBIT_DEBUG
 
 namespace Gambit
 {
@@ -72,7 +72,7 @@ namespace Gambit
         {
           const str be = "Pythia" + model_suffix;
           const str ver = Backends::backendInfo().default_version(be);
-          pythia_doc_path = Backends::backendInfo().corrected_path(be, ver) + "/share/Pythia8/xmldoc/";
+          pythia_doc_path = Backends::backendInfo().path_dir(be, ver) + "/../share/Pythia8/xmldoc/";
           result.banner(pythia_doc_path);
           first = false;
         }
@@ -115,6 +115,7 @@ namespace Gambit
           YAML::Node colNode = runOptions.getValue<YAML::Node>(RunMC.current_collider());
           Options colOptions(colNode);
           xsec_veto_fb = colOptions.getValueOrDef<double>(xsec_veto_default, "xsec_veto");
+
           if (colOptions.hasKey("pythia_settings"))
           {
             std::vector<str> addPythiaOptions = colNode["pythia_settings"].as<std::vector<str> >();

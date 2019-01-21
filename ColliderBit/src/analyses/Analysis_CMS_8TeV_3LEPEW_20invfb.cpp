@@ -37,6 +37,9 @@ namespace Gambit {
 
     public:
 
+      // Required detector sim
+      static constexpr const char* detector = "CMS";
+
       Analysis_CMS_8TeV_3LEPEW_20invfb() {
 
         set_analysis_name("CMS_8TeV_3LEPEW_20invfb");

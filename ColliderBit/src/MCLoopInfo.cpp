@@ -25,16 +25,11 @@ namespace Gambit
   namespace ColliderBit
   {
 
-    /// Reinitialise
-    void MCLoopInfo::clear()
+    /// Reset flags
+    void MCLoopInfo::reset_flags()
     {
       event_generation_began = false;
       exceeded_maxFailedEvents = false;
-      collider_names.clear();
-      _current_collider = "";
-      maxFailedEvents.clear();
-      seed_base.clear();
-      event_count.clear();
     }
 
     /// Set the current collider
@@ -43,7 +38,7 @@ namespace Gambit
       // Save the current collider
       _current_collider = col;
 
-      // Save the current maxFailedEvents
+      // Save an iterator to the current maxFailedEvents
       auto it = maxFailedEvents.find(_current_collider);
       if (it == maxFailedEvents.end())
       {
@@ -52,7 +47,7 @@ namespace Gambit
       }
       _current_maxFailedEvents_it = it;
 
-      // Save the current seed base
+      // Save an iterator to the current seed base
       it = seed_base.find(_current_collider);
       if (it == seed_base.end())
       {
@@ -61,24 +56,78 @@ namespace Gambit
       }
       _current_seed_base_it = it;
 
-      // Save the number of events generated for the current collider
+      // Save an iterator to the number of events generated for the current collider
       it = event_count.find(_current_collider);
       if (it == event_count.end())
       {
-        str msg = "Current collider \"" + _current_collider + "\" not found in MCLoopInfo::current_event_count map.";
+        str msg = "Current collider \"" + _current_collider + "\" not found in MCLoopInfo::event_count map.";
         utils_error().raise(LOCAL_INFO, msg);
       }
       _current_event_count_it = it;
 
+      // Save an iterator to the the list of analyses for the current collider
+      auto jt = convergence_options.find(_current_collider);
+      if (jt == convergence_options.end())
+      {
+        str msg = "Current collider \"" + _current_collider + "\" not found in MCLoopInfo::convergence_options map.";
+        utils_error().raise(LOCAL_INFO, msg);
+      }
+      _current_convergence_options_it = jt;
+
+      // Save an iterator to the the list of analyses for the current collider
+      auto kt = analyses.find(_current_collider);
+      if (kt == analyses.end())
+      {
+        str msg = "Current collider \"" + _current_collider + "\" not found in MCLoopInfo::analyses map.";
+        utils_error().raise(LOCAL_INFO, msg);
+      }
+      _current_analyses_it = kt;
+
+      // Save an iterator to the the list of analyses for the current collider, sorted by detector
+      auto lt = detector_analyses.find(_current_collider);
+      if (lt == detector_analyses.end())
+      {
+        str msg = "Current collider \"" + _current_collider + "\" not found in MCLoopInfo::detector_analyses map.";
+        utils_error().raise(LOCAL_INFO, msg);
+      }
+      _current_detector_analyses_it = lt;
+
+    }
+
+    bool MCLoopInfo::current_analyses_exist_for(const str& detname) const
+    {
+      auto current_analyses_by_detector = _current_detector_analyses_it->second;
+      auto it = current_analyses_by_detector.find(detname);
+      return not (it == current_analyses_by_detector.end());
     }
 
     const str& MCLoopInfo::current_collider() const { return _current_collider; }
 
-    int& MCLoopInfo::current_maxFailedEvents() const { return _current_maxFailedEvents_it->second; }
+    const int& MCLoopInfo::current_maxFailedEvents() const { return _current_maxFailedEvents_it->second; }
+    int& MCLoopInfo::current_maxFailedEvents() { return _current_maxFailedEvents_it->second; }
 
-    int& MCLoopInfo::current_seed_base() const { return _current_seed_base_it->second; }
+    const int& MCLoopInfo::current_seed_base() const { return _current_seed_base_it->second; }
+    int& MCLoopInfo::current_seed_base() { return _current_seed_base_it->second; }
 
-    int& MCLoopInfo::current_event_count() const { return _current_event_count_it->second; }
+    const int& MCLoopInfo::current_event_count() const { return _current_event_count_it->second; }
+    int& MCLoopInfo::current_event_count() { return _current_event_count_it->second; }
+
+    const convergence_settings& MCLoopInfo::current_convergence_options() const { return _current_convergence_options_it->second; }
+    convergence_settings& MCLoopInfo::current_convergence_options() { return _current_convergence_options_it->second; }
+
+    const std::vector<str>& MCLoopInfo::current_analyses() const { return _current_analyses_it->second; }
+    std::vector<str>& MCLoopInfo::current_analyses() { return _current_analyses_it->second; }
+
+    const std::vector<str>& MCLoopInfo::current_analyses_for(const str& detname) const
+    {
+      if (not current_analyses_exist_for(detname)) utils_error().raise(LOCAL_INFO, "Detector "+detname);
+      return _current_detector_analyses_it->second.at(detname);
+    }
+    std::vector<str>& MCLoopInfo::current_analyses_for(const str& detname)
+    {
+      if (not current_analyses_exist_for(detname)) utils_error().raise(LOCAL_INFO, "Detector "+detname);
+      return _current_detector_analyses_it->second.at(detname);
+    }
 
   }
 

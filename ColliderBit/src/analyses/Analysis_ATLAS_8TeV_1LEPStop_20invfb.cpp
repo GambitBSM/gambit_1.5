@@ -56,6 +56,9 @@ namespace Gambit {
 
     public:
 
+      // Required detector sim
+      static constexpr const char* detector = "ATLAS";
+
       Analysis_ATLAS_8TeV_1LEPStop_20invfb() {
         set_analysis_name("ATLAS_8TeV_1LEPStop_20invfb");
         set_luminosity(20.7);

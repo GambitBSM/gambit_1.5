@@ -51,16 +51,14 @@ namespace Gambit
     void smearEvent(HEPUtils::Event& result,
                     const EventT& HardScatteringEvent,
                     const BaseDetector<EventT>& Smearer,
+                    const MCLoopInfo& RunMC,
                     const int iteration,
                     const str& ID,
+                    const str& detname,
                     void(*wrapup)())
     {
-      bool useDetector = true; /// @todo this needs to instead be determined by polling a new option collider_analyses containing *all* analyses.
-                               /// If collider_analyses[RunMC.current_collider_index] is empty of analyses that use detector Smearer [as determined by
-                               /// a new function to be added to the analysis class, e.g. uses_detector(str& detname) and which tests against
-                               /// new analysis metadata indicating which detector the analysis is for], then useDetector should be set false.
 
-      if (iteration <= BASE_INIT or !useDetector) return;
+      if (iteration <= BASE_INIT or not RunMC.current_analyses_exist_for(detname)) return;
       result.clear();
 
       // Attempt to get the next event from Pythia8, convert to HEPUtils::Event, and smear it
@@ -99,7 +97,7 @@ namespace Gambit
     {                                                                                    \
       using namespace Pipes::NAME;                                                       \
       smearEvent(result, *Dep::HardScatteringEvent, *(*Dep::CAT(EXPERIMENT,DetectorSim)),\
-       *Loop::iteration, #NAME, Loop::wrapup);                                           \
+       *Dep::RunMC, *Loop::iteration, #NAME, #EXPERIMENT, Loop::wrapup);                 \
     }
 
   }

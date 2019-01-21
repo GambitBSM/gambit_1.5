@@ -22,7 +22,6 @@
 #include <stdexcept>
 #include "gambit/Elements/shared_types.hpp"
 #include "gambit/ColliderBit/colliders/BaseCollider.hpp"
-#include "gambit/ColliderBit/ColliderBit_macros.hpp"
 #include "gambit/ColliderBit/colliders/collider_rollcall.hpp"
 #include "SLHAea/slhaea.h"
 

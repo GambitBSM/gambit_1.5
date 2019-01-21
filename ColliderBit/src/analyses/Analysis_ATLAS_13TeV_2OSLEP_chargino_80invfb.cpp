@@ -28,10 +28,10 @@ using namespace std;
 
 namespace Gambit
 {
-  namespace ColliderBit 
+  namespace ColliderBit
   {
 
-    class Analysis_ATLAS_13TeV_2OSLEP_chargino_80invfb : public HEPUtilsAnalysis 
+    class Analysis_ATLAS_13TeV_2OSLEP_chargino_80invfb : public HEPUtilsAnalysis
     {
 
     protected:
@@ -54,13 +54,16 @@ namespace Gambit
         {"SR-SF-1J-160",     0},
         {"SR-SF-1J-100-120", 0},
         {"SR-SF-1J-120-160", 0}
-      }; 
+      };
       Cutflow _cutflow;
 
     public:
 
+      // Required detector sim
+      static constexpr const char* detector = "ATLAS";
+
       Analysis_ATLAS_13TeV_2OSLEP_chargino_80invfb():
-      _cutflow("ATLAS 2-lep chargino-W 13 TeV", {"Two_OS_leptons", "mll_25", "b_jet_veto", "MET_100", "MET_significance_10", "n_j<=1", "m_ll_m_Z"}) 
+      _cutflow("ATLAS 2-lep chargino-W 13 TeV", {"Two_OS_leptons", "mll_25", "b_jet_veto", "MET_100", "MET_significance_10", "n_j<=1", "m_ll_m_Z"})
       {
 
         set_analysis_name("ATLAS_13TeV_2OSLEP_chargino_80invfb");
@@ -123,15 +126,15 @@ namespace Gambit
       struct ptComparison {
         bool operator() (HEPUtils::Particle* i,HEPUtils::Particle* j) {return (i->pT()>j->pT());}
       } comparePt;
-      
 
-      void analyze(const HEPUtils::Event* event) 
+
+      void analyze(const HEPUtils::Event* event)
       {
         _cutflow.fillinit();
         // Baseline objects
         HEPUtilsAnalysis::analyze(event);
         double met = event->met();
-        
+
         // electrons
         vector<HEPUtils::Particle*> electrons;
         for (HEPUtils::Particle* electron : event->electrons()) {
@@ -139,7 +142,7 @@ namespace Gambit
               && fabs(electron->eta()) < 2.47)
             electrons.push_back(electron);
         }
-        
+
         // muons
         vector<HEPUtils::Particle*> muons;
         for (HEPUtils::Particle* muon : event->muons()) {
@@ -170,7 +173,7 @@ namespace Gambit
    	    // Jets
         vector<HEPUtils::Jet*> bJets;
         vector<HEPUtils::Jet*> nonbJets;
-        
+
         // Find b-jets
         // Copied from ATLAS_13TeV_3b_24invfb
         double btag = 0.85; double cmisstag = 1/12.; double misstag = 1./381.;
@@ -236,10 +239,10 @@ namespace Gambit
         // Same flavour
         bool flag_SF = signalLeptons[0]->pid() + signalLeptons[1]->pid() == 0;
         if (flag_SF) {
-            if (fabs(mll-91.2)<30) return ; 
+            if (fabs(mll-91.2)<30) return ;
         }
         _cutflow.fill(7);
-        
+
         // Mt2
         double pLep1[3] = {signalLeptons[0]->mass(), signalLeptons[0]->mom().px(), signalLeptons[0]->mom().py()};
         double pLep2[3] = {signalLeptons[1]->mass(), signalLeptons[1]->mom().px(), signalLeptons[1]->mom().py()};
@@ -273,21 +276,21 @@ namespace Gambit
                 if (mT2>100 and mT2<120) _numSR["SR-DF-1J-100-120"]++;
                 if (mT2>120 and mT2<160) _numSR["SR-DF-1J-120-160"]++;
             }
-        
+
         }
-        
+
       }
 
 
       void add(BaseAnalysis* other) {
         // The base class add function handles the signal region vector and total # events.
-        
+
         HEPUtilsAnalysis::add(other);
 
         Analysis_ATLAS_13TeV_2OSLEP_chargino_80invfb* specificOther
                 = dynamic_cast<Analysis_ATLAS_13TeV_2OSLEP_chargino_80invfb*>(other);
 
-        for (auto& el : _numSR) { 
+        for (auto& el : _numSR) {
           el.second += specificOther->_numSR[el.first];
         }
 
@@ -298,7 +301,7 @@ namespace Gambit
 
         #ifdef CHECK_CUTFLOW
         cout << _cutflow << endl;
-        for (auto& el : _numSR) { 
+        for (auto& el : _numSR) {
             cout << el.first << "\t" << _numSR[el.first] << endl;
         }
         #endif
@@ -308,17 +311,17 @@ namespace Gambit
         add_result(SignalRegionData("SR-SF-0J-160"    ,  31., {_numSR["SR-SF-0J-160"],     0.}, {27.1  , 2.7}));
         add_result(SignalRegionData("SR-SF-0J-100-120",  65., {_numSR["SR-SF-0J-100-120"], 0.}, {50.9  , 5.7}));
         add_result(SignalRegionData("SR-SF-0J-120-160",  35., {_numSR["SR-SF-0J-120-160"], 0.}, {42.3  , 3.4}));
-        
+
         add_result(SignalRegionData("SR-SF-1J-100"    , 114., {_numSR["SR-SF-1J-100"],     0.}, {114.  , 13.}));
         add_result(SignalRegionData("SR-SF-1J-160"    ,  23., {_numSR["SR-SF-1J-160"],     0.}, {29.   , 5. }));
         add_result(SignalRegionData("SR-SF-1J-100-120",  56., {_numSR["SR-SF-1J-100-120"], 0.}, {51.7  , 10.}));
         add_result(SignalRegionData("SR-SF-1J-120-160",  35., {_numSR["SR-SF-1J-120-160"], 0.}, {33.   , 4. }));
-        
+
         add_result(SignalRegionData("SR-DF-0J-100"    ,  84., {_numSR["SR-DF-0J-100"],     0.}, {100.8, 11.9}));
         add_result(SignalRegionData("SR-DF-0J-160"    ,  15., {_numSR["SR-DF-0J-160"],     0.}, {16.1 , 2.0 }));
         add_result(SignalRegionData("SR-DF-0J-100-120",  49., {_numSR["SR-DF-0J-100-120"], 0.}, {53.4 , 9.}));
         add_result(SignalRegionData("SR-DF-0J-120-160",  20., {_numSR["SR-DF-0J-120-160"], 0.}, {31.5 , 3.5}));
-        
+
         add_result(SignalRegionData("SR-DF-1J-100"    ,  73., {_numSR["SR-DF-1J-100"],     0.}, {83.5 , 14.6}));
         add_result(SignalRegionData("SR-DF-1J-160"    ,   9., {_numSR["SR-DF-1J-160"],     0.}, {12.2 , 2.5 }));
         add_result(SignalRegionData("SR-DF-1J-100-120",  39., {_numSR["SR-DF-1J-100-120"], 0.}, {50.6 , 10.7}));

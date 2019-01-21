@@ -69,6 +69,9 @@ namespace Gambit {
 
     public:
 
+      // Required detector sim
+      static constexpr const char* detector = "ATLAS";
+
       ~Analysis_Perf() {
         #ifndef EXCLUDE_ROOT
         if(_hasTFile)

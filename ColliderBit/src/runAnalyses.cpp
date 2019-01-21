@@ -65,14 +65,14 @@ namespace Gambit
         return;
       }
 
-      if (not AnalysisContainer.has_analyses()) return;
-
       static MC_convergence_checker convergence;
       if (iteration == COLLIDER_INIT)
       {
-        convergence.init(RunMC.convergence_options.at(RunMC.current_collider()));
+        convergence.init(RunMC.current_convergence_options());
         return;
       }
+
+      if (not AnalysisContainer.has_analyses()) return;
 
       if (iteration == COLLECT_CONVERGENCE_DATA)
       {

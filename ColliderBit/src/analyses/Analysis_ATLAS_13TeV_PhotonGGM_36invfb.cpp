@@ -16,11 +16,11 @@ using namespace std;
 ///
 /// @author Martin White
 ///
-/// Known issues: 
+/// Known issues:
 ///
 /// 1) Photon isolation requirement is missing
-/// 2) They use a bizarre HT definition where they don't apply overlap removal 
-///    between photons and jets. This might not work for us, since jets won't be 
+/// 2) They use a bizarre HT definition where they don't apply overlap removal
+///    between photons and jets. This might not work for us, since jets won't be
 ///    made by photons in our events.
 ///
 /// @warning Not yet validated!
@@ -29,33 +29,33 @@ using namespace std;
 
 namespace Gambit {
   namespace ColliderBit {
-    
+
     bool sortByPT_jet(HEPUtils::Jet* jet1, HEPUtils::Jet* jet2) { return (jet1->pT() > jet2->pT()); }
     bool sortByPT_lep(HEPUtils::Particle* lep1, HEPUtils::Particle* lep2) { return (lep1->pT() > lep2->pT()); }
-    
-    
+
+
     class Analysis_ATLAS_13TeV_PhotonGGM_36invfb : public HEPUtilsAnalysis {
     private:
-      
+
       // Numbers passing cuts
       int num_SRaa_SL, num_SRaa_SH, num_SRaa_WL, num_SRaa_WH, num_SRaj_L, num_SRaj_L200, num_SRaj_H;
-      
+
       // Cut Flow
       vector<int> cutFlowVector;
       vector<string> cutFlowVector_str;
       int NCUTS;
-            
+
       // // debug
       // ofstream Savelep1;
       // ofstream Savelep2;
-      
+
       // Jet overlap removal
       void JetLeptonOverlapRemoval(vector<HEPUtils::Jet*> &jetvec, vector<HEPUtils::Particle*> &lepvec, double DeltaRMax) {
 	//Routine to do jet-lepton check
 	//Discards jets if they are within DeltaRMax of a lepton
-	
+
 	vector<HEPUtils::Jet*> Survivors;
-	
+
 	for(unsigned int itjet = 0; itjet < jetvec.size(); itjet++) {
 	  bool overlap = false;
                 HEPUtils::P4 jetmom=jetvec.at(itjet)->mom();
@@ -64,17 +64,17 @@ namespace Gambit {
                     double dR;
 
                     dR=jetmom.deltaR_eta(lepmom);
-		    
+
                     if(fabs(dR) <= DeltaRMax) overlap=true;
                 }
                 if(overlap) continue;
                 Survivors.push_back(jetvec.at(itjet));
             }
 	jetvec=Survivors;
-	
+
 	return;
       }
-        
+
         // Lepton overlap removal
         void LeptonJetOverlapRemoval(vector<HEPUtils::Particle*> &lepvec, vector<HEPUtils::Jet*> &jetvec, double DeltaRMax) {
             //Routine to do lepton-jet check
@@ -100,10 +100,13 @@ namespace Gambit {
 
             return;
         }
-    
+
 
     public:
-      
+
+      // Required detector sim
+      static constexpr const char* detector = "ATLAS";
+
       Analysis_ATLAS_13TeV_PhotonGGM_36invfb() {
 
             set_analysis_name("ATLAS_13TeV_PhotonGGM_36invfb");
@@ -116,8 +119,8 @@ namespace Gambit {
 	    num_SRaj_L=0;
 	    num_SRaj_L200=0;
 	    num_SRaj_H=0;
-              
-            NCUTS= 66;  
+
+            NCUTS= 66;
 
             // //debug
             // Savelep1.open("lep1.txt");
@@ -129,7 +132,7 @@ namespace Gambit {
             }
 
         }
-    
+
         void analyze(const HEPUtils::Event* event) {
             HEPUtilsAnalysis::analyze(event);
 
@@ -138,14 +141,14 @@ namespace Gambit {
             HEPUtils::P4 ptot = event->missingmom();
 
             // Baseline lepton objects
-            vector<HEPUtils::Particle*> blElectrons, blMuons;              // Used for SR-2body and SR-3body 
+            vector<HEPUtils::Particle*> blElectrons, blMuons;              // Used for SR-2body and SR-3body
             vector<HEPUtils::Particle*> baselineElectrons, baselineMuons;  // Used for SR-4body
             for (HEPUtils::Particle* electron : event->electrons()) {
 	      bool crack = (electron->abseta() > 1.37) && (electron->abseta() < 1.52);
 	      if (electron->pT() > 25. && electron->abseta() < 2.47 && !crack) baselineElectrons.push_back(electron);
             }
             ATLAS::applyTightIDElectronSelection(baselineElectrons);
-            
+
             //const std::vector<double>  a = {0,10.};
             //const std::vector<double>  b = {0,10000.};
             //const vector<double> cMu={0.89};
@@ -154,7 +157,7 @@ namespace Gambit {
 	      //bool hasTrig=has_tag(_eff2dMu, muon->eta(), muon->pT());
 	      if (muon->pT() > 25. && muon->abseta() < 2.7) baselineMuons.push_back(muon);
             }
-	    
+
 	    // Photons
 	    vector<HEPUtils::Particle*> baselinePhotons;
 	    for (HEPUtils::Particle* photon : event->photons()) {
@@ -162,18 +165,18 @@ namespace Gambit {
 	      bool crack = (photon->abseta() > 1.37) && (photon->abseta() < 1.52);
 	      if (photon->pT() > 25. && photon->abseta() < 2.37 && !crack) baselinePhotons.push_back(photon);
             }
-	    	    
+
             // Jets
-            vector<HEPUtils::Jet*> jets28;     
-	    vector<HEPUtils::Jet*> jets28_nophooverlap; 
-            vector<HEPUtils::Jet*> jets25;    
+            vector<HEPUtils::Jet*> jets28;
+	    vector<HEPUtils::Jet*> jets28_nophooverlap;
+            vector<HEPUtils::Jet*> jets25;
             for (HEPUtils::Jet* jet : event->jets()) {
 	      if (jet->pT() > 30. && fabs(jet->eta()) < 2.8) {
 		jets28.push_back(jet);
 		jets28_nophooverlap.push_back(jet);
 	      }
 	    }
-	    
+
             // Overlap removal
 	    JetLeptonOverlapRemoval(jets28,baselineElectrons,0.2);
 	    JetLeptonOverlapRemoval(jets28_nophooverlap,baselineElectrons,0.2);
@@ -183,17 +186,17 @@ namespace Gambit {
 	    LeptonJetOverlapRemoval(baselinePhotons,jets28,0.4); // LeptonJet still works for photons
             LeptonJetOverlapRemoval(baselineMuons,jets28,0.4);
 	    LeptonJetOverlapRemoval(baselineMuons,jets28_nophooverlap,0.4);
-	    
+
 	    // Make |eta| < 2.5 jets
 	    for (HEPUtils::Jet* jet : jets28){
 	      if (fabs(jet->eta()) < 2.5) jets25.push_back(jet);
 	    }
-	
+
 	    //Put signal jets／leptons in pT order
             std::sort(jets28.begin(), jets28.end(), sortByPT_jet);
 	    std::sort(jets25.begin(), jets25.end(), sortByPT_jet);
             std::sort(baselineElectrons.begin(), baselineElectrons.end(), sortByPT_lep);
-           
+
             // Function used to get b jets
             vector<HEPUtils::Jet*> bJets25;
 	    vector<HEPUtils::Jet*> bJets28;
@@ -211,7 +214,7 @@ namespace Gambit {
 	      bool hasTag=has_tag(_eff2d, jet->eta(), jet->pT());
 	      if(jet->btag() && hasTag) bJets28.push_back(jet);
 	    }
-	    
+
 	    // Pre-selection
 	    bool preSelection2a=false;
 	    if(baselinePhotons.size()==2 && baselinePhotons[0]->pT() > 75. && baselinePhotons[1]->pT() > 75.)preSelection2a=true;
@@ -251,7 +254,7 @@ namespace Gambit {
 	      meff += muon->pT();
 	    }
 
-	    // Note that meff is only used for aj signal regions -> |jet eta| < 2.5 
+	    // Note that meff is only used for aj signal regions -> |jet eta| < 2.5
 	    for(HEPUtils::Jet* jet : jets25) {
 	      meff += jet->pT();
 	    }
@@ -292,7 +295,7 @@ namespace Gambit {
 	    int nLep = baselineElectrons.size() + baselineMuons.size();
 	    int nJets25 = jets25.size();
 	    int nPhotons = baselinePhotons.size();
-	    
+
 	    // All variables are now done
 	    // Increment signal region variables
 	    // 2a regions
@@ -305,8 +308,8 @@ namespace Gambit {
 	    if(preSelectionSRLaj && nJets25 >=5 && nLep == 0 && met > 300. && meff > 2000. && RT4 < 0.90 && dphimin_j25met > 0.5 && dphimin_amet > 0.5)num_SRaj_L++;
 	    if(preSelectionSRLaj && nJets25 >=5 && nLep == 0 && met > 200. && meff > 2000. && RT4 < 0.90 && dphimin_j25met > 0.5 && dphimin_amet > 0.5)num_SRaj_L200++;
 	    if(preSelectionSRHaj && nJets25 >=3 && nLep == 0 && met > 400. && meff > 2400. && dphimin_j25met > 0.5 && dphimin_amet > 0.5)num_SRaj_H++;
-	    
-	    
+
+
             /*                                                       */
             /*********************************************************/
             cutFlowVector_str[0] = "Total ";
@@ -348,7 +351,7 @@ namespace Gambit {
 	    cutFlowVector_str[31] = "SRL: dphimin(gamma,met)";
 	    cutFlowVector_str[32] = "SRL: meff";
 	    cutFlowVector_str[33] = "SRL: RT4";
-		      
+
 	    cutFlowVector_str[34] = "SRH: trigger && 1 photon";
 	    cutFlowVector_str[35] = "SRH: lepton veto";
 	    cutFlowVector_str[36] = "SRH: pT_gamma";
@@ -357,7 +360,7 @@ namespace Gambit {
 	    cutFlowVector_str[39] = "SRH: dphimin(jet,met)";
 	    cutFlowVector_str[40] = "SRH: dphimin(gamma,met)";
 	    cutFlowVector_str[41] = "SRH: meff";
-	    
+
 	    for(int j=0;j<NCUTS;j++){
 	      if(
 		 (j==0) ||
@@ -368,7 +371,7 @@ namespace Gambit {
 		   cutFlowVector_str[4] = "SBL: HT";
 		   cutFlowVector_str[5] = "SBL: dPhiMin(jet,met)";
 		   cutFlowVector_str[6] = "SBL: dPhiMin(gamma,met)";*/
-		 
+
 		 (j==1 && nPhotons==2) ||
 
 		 (j==2 && nPhotons==2 && baselinePhotons[0]->pT() > 75. && baselinePhotons[1]->pT() > 75.) ||
@@ -387,7 +390,7 @@ namespace Gambit {
 		 cutFlowVector_str[10] = "SBH: HT";
 		 cutFlowVector_str[11] = "SBH: dPhiMin(jet,met)";
 		 cutFlowVector_str[12] = "SBH: dPhiMin(gamma,met)";*/
-		 
+
 		 (j==7 && nPhotons==2) ||
 
 		 (j==8 && nPhotons==2 && baselinePhotons[0]->pT() > 75. && baselinePhotons[1]->pT() > 75.) ||
@@ -398,7 +401,7 @@ namespace Gambit {
 
 		 (j==11 && nPhotons==2 && baselinePhotons[0]->pT() > 75. && baselinePhotons[1]->pT() > 75. && met > 250. && HT > 2000. && dphimin_j28met > 0.5) ||
 
-		 (j==12 && nPhotons==2 && baselinePhotons[0]->pT() > 75. && baselinePhotons[1]->pT() > 75. && met > 250. && HT > 2000. && dphimin_j28met > 0.5 && dphimin_amet > 0.5) || 
+		 (j==12 && nPhotons==2 && baselinePhotons[0]->pT() > 75. && baselinePhotons[1]->pT() > 75. && met > 250. && HT > 2000. && dphimin_j28met > 0.5 && dphimin_amet > 0.5) ||
 
 		 /* cutFlowVector_str[13] = "WBL: trigger && 2 photons";
 		 cutFlowVector_str[14] = "WBL: PhotonsPt";
@@ -427,9 +430,9 @@ namespace Gambit {
 		    cutFlowVector_str[24] = "WBH: dPhiMin(gamma,met)";*/
 
 		 (j==19 && nPhotons==2) ||
-		 
+
 		 (j==20 && nPhotons==2 && baselinePhotons[0]->pT() > 75. && baselinePhotons[1]->pT() > 75.) ||
-		 
+
 		 (j==21 && nPhotons==2 && baselinePhotons[0]->pT() > 75. && baselinePhotons[1]->pT() > 75. && met > 250.) ||
 
 		 (j==22 && nPhotons==2 && baselinePhotons[0]->pT() > 75. && baselinePhotons[1]->pT() > 75. && met > 250. && HT > 1000.) ||
@@ -437,7 +440,7 @@ namespace Gambit {
 		 (j==23 && nPhotons==2 && baselinePhotons[0]->pT() > 75. && baselinePhotons[1]->pT() > 75. && met > 250. && HT > 1000. && dphimin_j28met > 0.5) ||
 
 		 (j==24 && nPhotons==2 && baselinePhotons[0]->pT() > 75. && baselinePhotons[1]->pT() > 75. && met > 250. && HT > 1000. && dphimin_j28met > 0.5 && dphimin_amet > 0.5) || // no additional cut in this case
-	    
+
 		 /* cutFlowVector_str[25] = "SRL: trigger && 1 photon";
 		    cutFlowVector_str[26] = "SRL: lepton veto";
 		    cutFlowVector_str[27] = "SRL: pT_gamma";
@@ -476,11 +479,11 @@ namespace Gambit {
 		    cutFlowVector_str[41] = "SRH: meff";*/
 
 		 (j==34 && nPhotons==1) ||
-		 
+
 		 (j==35 && nPhotons==1 && nLep==0 ) ||
 
 		 (j==36 && nPhotons==1 && nLep==0 && baselinePhotons[0]->pT() > 400.) ||
-		 
+
 		 (j==37 && nPhotons==1 && nLep==0 && baselinePhotons[0]->pT() > 400. && met > 400.) ||
 
 		 (j==38 && nPhotons==1 && nLep==0 && baselinePhotons[0]->pT() > 400. && met > 400. && nJets25 >= 3) ||
@@ -490,9 +493,9 @@ namespace Gambit {
 		 (j==40 && nPhotons==1 && nLep==0 && baselinePhotons[0]->pT() > 400. && met > 400. && nJets25 >= 3 && dphimin_j25met > 0.4 && dphimin_amet > 0.4) ||
 
 		 (j==41 && nPhotons==1 && nLep==0 && baselinePhotons[0]->pT() > 400. && met > 400. && nJets25 >= 3 && dphimin_j25met > 0.4 && dphimin_amet > 0.4 && meff > 2400.)
-		 
+
 		 )cutFlowVector[j]++;
-	      
+
 	    }
 
         return;
@@ -513,7 +516,7 @@ namespace Gambit {
                 cutFlowVector[j] += specificOther->cutFlowVector[j];
                 cutFlowVector_str[j] = specificOther->cutFlowVector_str[j];
             }
-	    
+
 	    //num_SRaj_L, num_SRaj_L200, num_SRaj_H;
 
 	    num_SRaa_SL += specificOther->num_SRaa_SL;
@@ -523,7 +526,7 @@ namespace Gambit {
 	    num_SRaj_L += specificOther->num_SRaj_L;
 	    num_SRaj_L200 += specificOther->num_SRaj_L200;
 	    num_SRaj_H += specificOther->num_SRaj_H;
-	    
+
         }
 
 
@@ -543,8 +546,8 @@ namespace Gambit {
             // }
             // cout << "------------------------------------------------------------------------------------------------------------------------------ "<<endl;
 
-	  
-     	  
+
+
 	  SignalRegionData results_SRaa_SL;
 	  results_SRaa_SL.sr_label = "SRaa_SL";
 	  results_SRaa_SL.n_observed = 0.;
@@ -607,10 +610,10 @@ namespace Gambit {
 	  results_SRaj_H.signal_sys = 0.;
 	  results_SRaj_H.n_signal = num_SRaj_H;
 	  add_result(results_SRaj_H);
-	  
+
 	  return;
         }
-      
+
     protected:
       void clear() {
 	num_SRaa_SL=0;
@@ -620,15 +623,15 @@ namespace Gambit {
 	num_SRaj_L=0;
 	num_SRaj_L200=0;
 	num_SRaj_H=0;
-	
+
 	std::fill(cutFlowVector.begin(), cutFlowVector.end(), 0);
       }
 
-	
-      
+
+
 	};
 
-    
+
 
     DEFINE_ANALYSIS_FACTORY(ATLAS_13TeV_PhotonGGM_36invfb)
 

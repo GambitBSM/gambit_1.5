@@ -41,6 +41,9 @@ namespace Gambit {
 
     public:
 
+      // Required detector sim
+      static constexpr const char* detector = "CMS";
+
       Analysis_CMS_8TeV_1LEPDMTOP_20invfb()
         : _numSR(0),
           NCUTS(6)

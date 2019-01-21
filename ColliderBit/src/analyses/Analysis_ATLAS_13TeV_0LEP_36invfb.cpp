@@ -19,10 +19,13 @@ namespace Gambit {
     /// Recursive jigsaw reconstruction signal regions are currently not included
     /// Boosted signal regions not currently used.
     ///
-    /// Note: cutflows have not been updated yet (sincec 13 invfb analysis). 
+    /// Note: cutflows have not been updated yet (sincec 13 invfb analysis).
     ///
     class Analysis_ATLAS_13TeV_0LEP_36invfb : public HEPUtilsAnalysis {
     public:
+
+      // Required detector sim
+      static constexpr const char* detector = "ATLAS";
 
       // Numbers passing cuts
       static const size_t NUMSR = 13;
@@ -50,7 +53,7 @@ namespace Gambit {
       int num_6j_1800;
       int num_6j_2200;
       int num_6j_2600;
-      
+
       Cutflows _flows;
 
       Analysis_ATLAS_13TeV_0LEP_36invfb() {
@@ -104,7 +107,7 @@ namespace Gambit {
         num_6j_1800=0;
         num_6j_2200=0;
         num_6j_2600=0;
-        
+
       }
 
       void analyze(const Event* event) {
@@ -116,7 +119,7 @@ namespace Gambit {
         // Missing energy
         const P4 pmiss = event->missingmom();
         const double met = event->met();
-        
+
         // Get baseline jets
         /// @todo Drop b-tag if pT < 50 GeV or |eta| > 2.5?
         vector<const Jet*> baselineJets;
@@ -247,7 +250,7 @@ namespace Gambit {
 
         ////////////////////////////////
         // Fill signal regions
-      
+
         const bool leptonCut = (nElectrons == 0 && nMuons == 0);
         const bool metCut = (met > 250.);
         if (nJets50 >= 2 && leptonCut && metCut) {
@@ -270,7 +273,7 @@ namespace Gambit {
               if (met_sqrtHT > 18 && meff_incl > 3600) num_2j_3600 += 1;
             }
           }
-          
+
           if (dphimin_123 > 0.4 && dphimin_more > 0.2) {
             if(signalJets[0]->pT() > 600 && signalJets[1]->pT() > 50){
               if (met_sqrtHT > 26 && meff_incl > 2100) num_2j_2100 += 1;
@@ -296,12 +299,12 @@ namespace Gambit {
 
           // 5 jet regions (note implicit pT[1,2,3] cuts)
           if (nJets50 >= 5){
-            
+
             if(signalJets[0]->pT() > 700. && signalJets[4]->pT() > 50. && dphimin_123 > 0.4 && dphimin_more > 0.2 && met_meff_5 > 0.3 &&  meff_incl > 1700) num_5j_1700 += 1;
             if(signalJets[0]->pT() > 200. && signalJets[4]->pT() > 50. && dphimin_123 > 0.4 && dphimin_more > 0.2 && met_meff_5 > 0.15 &&  aplanarity > 0.08 && meff_incl > 1600) num_5j_1600 += 1;
             if(signalJets[0]->pT() > 200. && signalJets[4]->pT() > 50. && dphimin_123 > 0.4 && dphimin_more > 0.4 && met_sqrtHT > 15 && meff_incl > 2000) num_5j_2000 += 1;
             if(signalJets[0]->pT() > 200. && signalJets[4]->pT() > 50. && dphimin_123 > 0.8 && dphimin_more > 0.4 && met_sqrtHT > 18 && meff_incl > 2600) num_5j_2600 += 1;
-            
+
           }
 
           // 6 jet regions (note implicit pT[1,2,3,4] cuts)
@@ -332,7 +335,7 @@ namespace Gambit {
           if (nJets >= 4) _flows["4j-2200"].filltail({meff_incl > 800 && signalJets[0]->pT() > 200. , nJets>=4, dphimin_123 > 0.4, dphimin_more > 0.4, signalJets[3]->pT() > 100, etamax_4 < 2.0, aplanarity > 0.04, met_meff_4 > 0.25, meff_incl > 2200});
           if (nJets >= 4) _flows["4j-2600"].filltail({meff_incl > 800 && signalJets[0]->pT() > 200. , nJets>=4, dphimin_123 > 0.4, dphimin_more > 0.4, signalJets[3]->pT() > 150, etamax_4 < 2.0, aplanarity > 0.04, met_meff_4 > 0.2, meff_incl > 2600});
           if (nJets >= 4) _flows["4j-3000"].filltail({meff_incl > 800 && signalJets[0]->pT() > 200. , nJets>=4, dphimin_123 > 0.4, dphimin_more > 0.4, signalJets[3]->pT() > 150, etamax_4 < 2.0, aplanarity > 0.04, met_meff_4 > 0.2, meff_incl > 3000});
-          
+
           if (nJets >= 5) _flows["5j-1600"].filltail({meff_incl > 800 && signalJets[0]->pT() > 200., nJets>=5, dphimin_123 > 0.4, dphimin_more > 0.2, true, true, aplanarity > 0.08, met_meff_5 > 0.15, meff_incl > 1600});
           if (nJets >= 5) _flows["5j-1700"].filltail({meff_incl > 800 && signalJets[0]->pT() > 200., nJets>=5, dphimin_123 > 0.4, dphimin_more > 0.2, signalJets[0]->pT() > 700., true, true, met_meff_5 > 0.3, meff_incl > 1700});
           if (nJets >= 6) _flows["6j-1200"].filltail({meff_incl > 800 && signalJets[0]->pT() > 200., nJets>=6, dphimin_123 > 0.4, dphimin_more > 0.2, true, etamax_6 < 2.0, true, met_meff_6 > 0.25, meff_incl > 1200});
@@ -340,7 +343,7 @@ namespace Gambit {
           if (nJets >= 6) _flows["6j-2200"].filltail({meff_incl > 800 && signalJets[0]->pT() > 200., nJets>=6, dphimin_123 > 0.4, dphimin_more > 0.2, signalJets[5]->pT() > 100, true, aplanarity > 0.08, met_meff_6 > 0.2, meff_incl > 2200});
           if (nJets >= 6) _flows["6j-2600"].filltail({meff_incl > 800 && signalJets[0]->pT() > 200., nJets>=6, dphimin_123 > 0.4, dphimin_more > 0.2, signalJets[5]->pT() > 100, true, aplanarity > 0.08, met_meff_6 > 0.15, meff_incl > 2600});
 
-         
+
         }
       }
 
@@ -401,7 +404,7 @@ namespace Gambit {
         add_result(SignalRegionData("meff-6j-1800",  9, {num_6j_1800,  0.}, { 5.1,  1.8}));
         add_result(SignalRegionData("meff-6j-2200",  3, {num_6j_2200,  0.}, { 3.1,  1.3}));
         add_result(SignalRegionData("meff-6j-2600",  1, {num_6j_2600,  0.}, { 2.2,  1.4}));
-        
+
         // const double sf = 13.3*crossSection()/femtobarn/sumOfWeights();
         // _flows.scale(sf);
         // cout << "CUTFLOWS:\n\n" << _flows << endl;
@@ -435,7 +438,7 @@ namespace Gambit {
       }
 
 
-      
+
     };
 
 

@@ -96,6 +96,9 @@ namespace Gambit {
 
     public:
 
+        // Required detector sim
+        static constexpr const char* detector = "CMSmultieff";
+
         Analysis_CMS_13TeV_2LEPStop_36invfb() {
 
             set_analysis_name("CMS_13TeV_2LEPStop_36invfb");
@@ -342,7 +345,7 @@ namespace Gambit {
                    )cutFlowVector[j]++;
             }
             bool pre_cut= cut_2OSLep && cut_mllGt20 && cut_mllMZ && cut_Njet && cut_Nbjet && cut_PTmis && cut_SGt5 && cut_csj1 && cut_csj2 ;
-            // signal region          
+            // signal region
             for(size_t j=0;j<_SR_size;j++){
                 // same flavour
                 if(
@@ -495,7 +498,7 @@ namespace Gambit {
                 32., 1.1, 17., 1.0, 0.2, 0.5, 0.2, 0.2, 0.2, 0.3, 0.1, 0.3, 0.2
             };
 
-            for (size_t ibin = 0; ibin < _SR_size; ++ibin) 
+            for (size_t ibin = 0; ibin < _SR_size; ++ibin)
             {
                 stringstream ss_SF; ss_SF << "SF-SR-" << ibin;
                 stringstream ss_DF; ss_DF << "DF-SR-" << ibin;

@@ -1,5 +1,5 @@
 #pragma once
-#include "gambit/Utils/util_types.hpp"
+
 #include <string>
 #include <stdexcept>
 #include <vector>
@@ -30,8 +30,8 @@ namespace Gambit
     /// @todo Move to a separate file
     HEPUtilsAnalysis* mkAnalysis(const str& name);
 
-    /// Check that an analysis exists for a given analysis name
-    bool checkAnalysis(const str& name);
+    /// Return the detector to be used for a given analysis name, checking that the analysis exists.
+    str getDetector(const str& name);
 
 
     /// A class for managing collections of HEPUtilsAnalysis instances.

@@ -1,10 +1,9 @@
 #include "gambit/cmake/cmake_variables.hpp"
-#include "gambit/ColliderBit/ColliderBit_macros.hpp"
 #include "gambit/ColliderBit/analyses/HEPUtilsAnalysisContainer.hpp"
 #include "gambit/ColliderBit/analyses/BaseAnalysis.hpp"
+#include "gambit/Utils/standalone_error_handlers.hpp"
 #include <stdexcept>
 #include <omp.h>
-using namespace std;
 
 // #define ANALYSISCONTAINER_DEBUG
 
@@ -24,8 +23,8 @@ namespace Gambit
 
     #define MAP_ANALYSES_WITH_ROOT(F)                \
       F(ATLAS_13TeV_1LEPStop_36invfb)                \
-    
-    #define MAP_ANALYSES(F)             \
+
+    #define MAP_ANALYSES(F)                          \
       F(Minimum)                                     \
       F(Covariance)                                  \
       F(Perf)                                        \
@@ -81,9 +80,12 @@ namespace Gambit
       F(CMS_8TeV_3LEPEW_20invfb)                     \
       F(CMS_8TeV_MONOJET_20invfb)                    \
 
+    /// For analysis factory function declaration
+    #define DECLARE_ANALYSIS_FACTORY(ANAME)                                    \
+      HEPUtilsAnalysis* create_Analysis_ ## ANAME();                           \
+      std::string getDetector_ ## ANAME();
 
-
-    /// Forward declarations using #DECLARE_ANALYSIS_FACTORY(ANAME)
+    /// Forward declarations using DECLARE_ANALYSIS_FACTORY(ANAME)
     #ifndef EXCLUDE_ROOT
       #ifndef EXCLUDE_RESTFRAMES
         MAP_ANALYSES_WITH_ROOT_RESTFRAMES(DECLARE_ANALYSIS_FACTORY)
@@ -92,8 +94,12 @@ namespace Gambit
     #endif
     MAP_ANALYSES(DECLARE_ANALYSIS_FACTORY)
 
-    // Factory definition
-    HEPUtilsAnalysis* mkAnalysis(const std::string& name)
+    /// For the string-based factory function mkAnalysis()
+    #define IF_X_RTN_CREATE_ANA_X(A)                                           \
+      if (name == #A) return create_Analysis_ ## A();
+
+    /// Factory definition
+    HEPUtilsAnalysis* mkAnalysis(const str& name)
     {
       #ifndef EXCLUDE_ROOT
         #ifndef EXCLUDE_RESTFRAMES
@@ -103,28 +109,33 @@ namespace Gambit
       #endif
       MAP_ANALYSES(IF_X_RTN_CREATE_ANA_X)
 
-      throw std::runtime_error("The analysis " + name + " is not a known ColliderBit analysis.");
+      // If we end up here the analysis has not been found
+      utils_error().raise(LOCAL_INFO, "The analysis " + name + " is not a known ColliderBit analysis.");
       return nullptr;
     }
 
-    /// Check that an analysis exists for a given analysis name
-    bool checkAnalysis(const string& name)
+    /// For the string-based analysis checker and detector retriever getDetector
+    #define IF_X_RTN_DETECTOR(A)                                               \
+      if (name == #A) return getDetector_ ## A();
+
+    /// Return the detector to be used for a given analysis name (and check that the analysis exists).
+    str getDetector(const str& name)
     {
       #ifndef EXCLUDE_ROOT
         #ifndef EXCLUDE_RESTFRAMES
-          MAP_ANALYSES_WITH_ROOT_RESTFRAMES(IF_X_RTN_TRUE)
+          MAP_ANALYSES_WITH_ROOT_RESTFRAMES(IF_X_RTN_DETECTOR)
         #endif
-        MAP_ANALYSES_WITH_ROOT(IF_X_RTN_TRUE)
+        MAP_ANALYSES_WITH_ROOT(IF_X_RTN_DETECTOR)
       #endif
-      MAP_ANALYSES(IF_X_RTN_TRUE)
+      MAP_ANALYSES(IF_X_RTN_DETECTOR)
 
       // If we end up here the analysis has not been found
-      return false;
+      utils_error().raise(LOCAL_INFO, "The analysis " + name + " is not a known ColliderBit analysis.");
+      return "";
     }
 
-
     /// A map with pointers to all instances of this class. The key is the thread number.
-    std::map<string,std::map<int,HEPUtilsAnalysisContainer*> > HEPUtilsAnalysisContainer::instances_map;
+    std::map<str,std::map<int,HEPUtilsAnalysisContainer*> > HEPUtilsAnalysisContainer::instances_map;
 
     /// Constructor
     HEPUtilsAnalysisContainer::HEPUtilsAnalysisContainer() :
@@ -148,7 +159,7 @@ namespace Gambit
 
 
     /// Add container to instances map
-    void HEPUtilsAnalysisContainer::register_thread(string base_key_in)
+    void HEPUtilsAnalysisContainer::register_thread(str base_key_in)
     {
       base_key = base_key_in;
 
@@ -202,21 +213,21 @@ namespace Gambit
 
 
     /// Set name of the current collider
-    void HEPUtilsAnalysisContainer::set_current_collider(string collider_name)
+    void HEPUtilsAnalysisContainer::set_current_collider(str collider_name)
     {
       current_collider = collider_name;
     }
 
 
     /// Get the name of the current collider
-    string HEPUtilsAnalysisContainer::get_current_collider() const
+    str HEPUtilsAnalysisContainer::get_current_collider() const
     {
       return current_collider;
     }
 
 
     /// Does this instance contain analyses for the given collider
-    bool HEPUtilsAnalysisContainer::has_analyses(string collider_name) const
+    bool HEPUtilsAnalysisContainer::has_analyses(str collider_name) const
     {
       bool result = false;
 
@@ -239,7 +250,7 @@ namespace Gambit
 
 
     /// Initialize analyses (by names) for a specified collider
-    void HEPUtilsAnalysisContainer::init(const std::vector<std::string>& analysis_names, string collider_name)
+    void HEPUtilsAnalysisContainer::init(const std::vector<str>& analysis_names, str collider_name)
     {
       // If a map of analyses already exist for this collider, clear it
       if (analyses_map.count(collider_name) > 0)
@@ -258,20 +269,20 @@ namespace Gambit
     }
 
     /// Initialize analyses (by names) for the current collider
-    void HEPUtilsAnalysisContainer::init(const std::vector<std::string>& analysis_names)
+    void HEPUtilsAnalysisContainer::init(const std::vector<str>& analysis_names)
     {
       init(analysis_names, current_collider);
     }
 
 
     /// Reset specific analysis
-    void HEPUtilsAnalysisContainer::reset(string collider_name, string analysis_name)
+    void HEPUtilsAnalysisContainer::reset(str collider_name, str analysis_name)
     {
       analyses_map[collider_name][analysis_name]->reset();
     }
 
     /// Reset all analyses for given collider
-    void HEPUtilsAnalysisContainer::reset(string collider_name)
+    void HEPUtilsAnalysisContainer::reset(str collider_name)
     {
       for (auto& analysis_pointer_pair : analyses_map[collider_name])
       {
@@ -296,38 +307,38 @@ namespace Gambit
 
 
     /// Get pointer to specific analysis
-    const HEPUtilsAnalysis* HEPUtilsAnalysisContainer::get_analysis_pointer(string collider_name, string analysis_name) const
+    const HEPUtilsAnalysis* HEPUtilsAnalysisContainer::get_analysis_pointer(str collider_name, str analysis_name) const
     {
       return analyses_map.at(collider_name).at(analysis_name);
     }
 
     /// Get analyses map for a specific collider
-    const std::map<string,HEPUtilsAnalysis*>& HEPUtilsAnalysisContainer::get_collider_analyses_map(string collider_name) const
+    const std::map<str,HEPUtilsAnalysis*>& HEPUtilsAnalysisContainer::get_collider_analyses_map(str collider_name) const
     {
       return analyses_map.at(collider_name);
     }
 
     /// Get analyses map for the current collider
-    const std::map<string,HEPUtilsAnalysis*>& HEPUtilsAnalysisContainer::get_current_analyses_map() const
+    const std::map<str,HEPUtilsAnalysis*>& HEPUtilsAnalysisContainer::get_current_analyses_map() const
     {
       return analyses_map.at(current_collider);
     }
 
     /// Get the full analyses map
-    const std::map<string,std::map<string,HEPUtilsAnalysis*> >& HEPUtilsAnalysisContainer::get_full_analyses_map() const
+    const std::map<str,std::map<str,HEPUtilsAnalysis*> >& HEPUtilsAnalysisContainer::get_full_analyses_map() const
     {
       return analyses_map;
     }
 
 
     /// Pass event through specific analysis
-    void HEPUtilsAnalysisContainer::analyze(const HEPUtils::Event& event, string collider_name, string analysis_name) const
+    void HEPUtilsAnalysisContainer::analyze(const HEPUtils::Event& event, str collider_name, str analysis_name) const
     {
       analyses_map.at(collider_name).at(analysis_name)->do_analysis(event);
     }
 
     /// Pass event through all analysis for a specific collider
-    void HEPUtilsAnalysisContainer::analyze(const HEPUtils::Event& event, string collider_name) const
+    void HEPUtilsAnalysisContainer::analyze(const HEPUtils::Event& event, str collider_name) const
     {
       for (auto& analysis_pointer_pair : analyses_map.at(collider_name))
       {
@@ -344,14 +355,14 @@ namespace Gambit
 
     /// Add cross-sections and errors for two different processes,
     /// for specific analysis
-    void HEPUtilsAnalysisContainer::add_xsec(double xs, double xserr, string collider_name, string analysis_name)
+    void HEPUtilsAnalysisContainer::add_xsec(double xs, double xserr, str collider_name, str analysis_name)
     {
       analyses_map[collider_name][analysis_name]->add_xsec(xs, xserr);
     }
 
     /// Add cross-sections and errors for two different processes,
     /// for all analyses for a given collider
-    void HEPUtilsAnalysisContainer::add_xsec(double xs, double xserr, string collider_name)
+    void HEPUtilsAnalysisContainer::add_xsec(double xs, double xserr, str collider_name)
     {
       for (auto& analysis_pointer_pair : analyses_map[collider_name])
       {
@@ -369,14 +380,14 @@ namespace Gambit
 
     /// Weighted combination of cross-sections and errors for the same process,
     /// for a specific analysis
-    void HEPUtilsAnalysisContainer::improve_xsec(double xs, double xserr, string collider_name, string analysis_name)
+    void HEPUtilsAnalysisContainer::improve_xsec(double xs, double xserr, str collider_name, str analysis_name)
     {
       analyses_map[collider_name][analysis_name]->improve_xsec(xs, xserr);
     }
 
     /// Weighted combination of cross-sections and errors for the same process,
     /// for all analyses for a given collider
-    void HEPUtilsAnalysisContainer::improve_xsec(double xs, double xserr, string collider_name)
+    void HEPUtilsAnalysisContainer::improve_xsec(double xs, double xserr, str collider_name)
     {
       for (auto& analysis_pointer_pair : analyses_map[collider_name])
       {
@@ -398,7 +409,7 @@ namespace Gambit
 
     /// Collect signal predictions from other threads and add to this one,
     /// for specific analysis
-    void HEPUtilsAnalysisContainer::collect_and_add_signal(string collider_name, string analysis_name)
+    void HEPUtilsAnalysisContainer::collect_and_add_signal(str collider_name, str analysis_name)
     {
       for (auto& thread_container_pair : instances_map.at(base_key))
       {
@@ -414,11 +425,11 @@ namespace Gambit
 
     /// Collect signal predictions from other threads and add to this one,
     /// for all analyses for given collider
-    void HEPUtilsAnalysisContainer::collect_and_add_signal(string collider_name)
+    void HEPUtilsAnalysisContainer::collect_and_add_signal(str collider_name)
     {
       for (auto& analysis_pointer_pair : analyses_map[collider_name])
       {
-        string analysis_name = analysis_pointer_pair.first;
+        str analysis_name = analysis_pointer_pair.first;
         collect_and_add_signal(collider_name, analysis_name);
       }
     }
@@ -433,7 +444,7 @@ namespace Gambit
 
     /// Collect xsec predictions from other threads and do a weighted combination,
     /// for specific analysis
-    void HEPUtilsAnalysisContainer::collect_and_improve_xsec(string collider_name, string analysis_name)
+    void HEPUtilsAnalysisContainer::collect_and_improve_xsec(str collider_name, str analysis_name)
     {
       for (auto& thread_container_pair : instances_map.at(base_key))
       {
@@ -451,11 +462,11 @@ namespace Gambit
 
     /// Collect xsec predictions from other threads and do a weighted combination,
     /// for all analyses for given collider
-    void HEPUtilsAnalysisContainer::collect_and_improve_xsec(string collider_name)
+    void HEPUtilsAnalysisContainer::collect_and_improve_xsec(str collider_name)
     {
       for (auto& analysis_pointer_pair : analyses_map[collider_name])
       {
-        string analysis_name = analysis_pointer_pair.first;
+        str analysis_name = analysis_pointer_pair.first;
         collect_and_improve_xsec(collider_name, analysis_name);
       }
     }
@@ -469,17 +480,17 @@ namespace Gambit
 
 
     /// Scale results for specific analysis
-    void HEPUtilsAnalysisContainer::scale(string collider_name, string analysis_name, double factor)
+    void HEPUtilsAnalysisContainer::scale(str collider_name, str analysis_name, double factor)
     {
       analyses_map[collider_name][analysis_name]->scale(factor);
     }
 
     /// Scale results for all analyses for given collider
-    void HEPUtilsAnalysisContainer::scale(string collider_name, double factor)
+    void HEPUtilsAnalysisContainer::scale(str collider_name, double factor)
     {
       for (auto& analysis_pointer_pair : analyses_map[collider_name])
       {
-        string analysis_name = analysis_pointer_pair.first;
+        str analysis_name = analysis_pointer_pair.first;
         scale(collider_name, analysis_name, factor);
       }
     }
@@ -495,7 +506,7 @@ namespace Gambit
     {
       for (auto& collider_map_pair : analyses_map)
       {
-        string collider_name = collider_map_pair.first;
+        str collider_name = collider_map_pair.first;
         scale(collider_name, factor);
       }
     }

@@ -7,7 +7,6 @@
 ///
 /// @todo Move some inlines into .cpp files to minimise rebuilding?
 
-#include "gambit/ColliderBit/ColliderBit_macros.hpp"
 #include "gambit/ColliderBit/analyses/AnalysisData.hpp"
 
 #include "gambit/ColliderBit/Utils.hpp"
@@ -53,11 +52,11 @@ namespace Gambit {
       virtual ~BaseAnalysis() { }
 
       /// @brief Public method to reset this instance for reuse, avoiding the need for "new" or "delete".
-      /// @note This method calls _clear() to reset the base class variables, and then the overridden 
+      /// @note This method calls _clear() to reset the base class variables, and then the overridden
       /// clear() to reset analysis-specific variables.
       /// @todo For v2.0: Simplify this reset scheme.
-      void reset() { 
-        clear(); 
+      void reset() {
+        clear();
         _clear();
       }
 
@@ -72,8 +71,8 @@ namespace Gambit {
     private:
       /// @brief Reset the private base class variables.
       /// @todo For v2.0: Avoid this 'duplication' of reset/clear methods.
-      void _clear() 
-      { 
+      void _clear()
+      {
         _ntot = 0; _xsec = 0; _xsecerr = 0;
         _xsec_is_set = false; _is_scaled = false;
         _needs_collection = true;
@@ -106,7 +105,7 @@ namespace Gambit {
       /// Set the cross-section and its error (in pb).
       void set_luminosity(double lumi) { _luminosity_is_set = true; _luminosity = lumi; }
       /// Set the analysis name
-      void set_analysis_name(std::string aname) 
+      void set_analysis_name(std::string aname)
       {
         _analysis_name = aname;
         _results.analysis_name = _analysis_name;
@@ -248,6 +247,18 @@ namespace Gambit {
 
     /// A BaseAnalysis template specialization for the standard event type.
     using HEPUtilsAnalysis = BaseAnalysis<HEPUtils::Event>;
+
+    /// For analysis factory function definition
+    #define DEFINE_ANALYSIS_FACTORY(ANAME)                                     \
+      HEPUtilsAnalysis* create_Analysis_ ## ANAME()                            \
+      {                                                                        \
+        return new Analysis_ ## ANAME();                                       \
+      }                                                                        \
+      std::string getDetector_ ## ANAME()                                      \
+      {                                                                        \
+        return std::string(Analysis_ ## ANAME::detector);                      \
+      }
+
 
   }
 }
