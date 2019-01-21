@@ -271,6 +271,9 @@ namespace Gambit {
     /// Utility function for returning a collection of oppsosite-sign particle pairs
     std::vector<std::vector<HEPUtils::Particle*>> getOSpairs(std::vector<HEPUtils::Particle*> particles);
 
+    /// Utility function for returning a collection of same-sign particle pairs
+    std::vector<std::vector<HEPUtils::Particle*>> getSSpairs(std::vector<HEPUtils::Particle*> particles);
+
 
     /// @name Sorting
     //@{

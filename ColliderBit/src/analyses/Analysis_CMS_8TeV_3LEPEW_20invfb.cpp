@@ -4,15 +4,27 @@
 #include <iomanip>
 #include <sstream>
 
+// For debugging
+#include <cassert>
+
+
 #include "gambit/ColliderBit/analyses/BaseAnalysis.hpp"
 #include "gambit/ColliderBit/CMSEfficiencies.hpp"
 
-/* A simulation of CMS paper PAS SUS-13-006
 
-   Code by Martin White & Daniel Murnane
+/* A simulation of CMS paper PAS SUS-13-006, http://cds.cern.ch/record/1563142/files/SUS-13-006-pas.pdf
 
-   Known features:
-   a) Must run with a dedicated detector card due to odd b tagging and isolation
+  Original code by Martin White, Daniel Murnane, 
+  Revised version by Anders Kvellestad.
+
+  Known features:
+    a) Must run with a dedicated detector card due to odd b tagging and isolation
+    
+    Anders: Not sure if this comment is correct?
+
+  Missing:
+    Implement SRs for the 4lep and 2lep2jet final states
+    
 
 */
 
@@ -22,335 +34,593 @@ namespace Gambit {
     using namespace std;
 
     class Analysis_CMS_8TeV_3LEPEW_20invfb : public HEPUtilsAnalysis {
+
+    protected:
+
+      // Counters for the number of accepted events for each signal region
+      std::map<string,double> _numSR = {
+        // SRs in Table 1
+        {"SR3l_OSSF_mT<120_ETmiss50-100_mll<75", 0},
+        {"SR3l_OSSF_mT<120_ETmiss50-100_mll75-105", 0},
+        {"SR3l_OSSF_mT<120_ETmiss50-100_mll>105", 0},
+        {"SR3l_OSSF_mT<120_ETmiss100-150_mll<75", 0},
+        {"SR3l_OSSF_mT<120_ETmiss100-150_mll75-105", 0},
+        {"SR3l_OSSF_mT<120_ETmiss100-150_mll>105", 0},
+        {"SR3l_OSSF_mT<120_ETmiss150-200_mll<75", 0},
+        {"SR3l_OSSF_mT<120_ETmiss150-200_mll75-105", 0},
+        {"SR3l_OSSF_mT<120_ETmiss150-200_mll>105", 0},
+        {"SR3l_OSSF_mT<120_ETmiss200-250_mll<75", 0},
+        {"SR3l_OSSF_mT<120_ETmiss200-250_mll75-105", 0},
+        {"SR3l_OSSF_mT<120_ETmiss200-250_mll>105", 0},
+
+        {"SR3l_OSSF_mT120-160_ETmiss50-100_mll<75", 0},
+        {"SR3l_OSSF_mT120-160_ETmiss50-100_mll75-105", 0},
+        {"SR3l_OSSF_mT120-160_ETmiss50-100_mll>105", 0},
+        {"SR3l_OSSF_mT120-160_ETmiss100-150_mll<75", 0},
+        {"SR3l_OSSF_mT120-160_ETmiss100-150_mll75-105", 0},
+        {"SR3l_OSSF_mT120-160_ETmiss100-150_mll>105", 0},
+        {"SR3l_OSSF_mT120-160_ETmiss150-200_mll<75", 0},
+        {"SR3l_OSSF_mT120-160_ETmiss150-200_mll75-105", 0},
+        {"SR3l_OSSF_mT120-160_ETmiss150-200_mll>105", 0},
+        {"SR3l_OSSF_mT120-160_ETmiss200-250_mll<75", 0},
+        {"SR3l_OSSF_mT120-160_ETmiss200-250_mll75-105", 0},
+        {"SR3l_OSSF_mT120-160_ETmiss200-250_mll>105", 0},
+
+        {"SR3l_OSSF_mT>160_ETmiss50-100_mll<75", 0},
+        {"SR3l_OSSF_mT>160_ETmiss50-100_mll75-105", 0},
+        {"SR3l_OSSF_mT>160_ETmiss50-100_mll>105", 0},
+        {"SR3l_OSSF_mT>160_ETmiss100-150_mll<75", 0},
+        {"SR3l_OSSF_mT>160_ETmiss100-150_mll75-105", 0},
+        {"SR3l_OSSF_mT>160_ETmiss100-150_mll>105", 0},
+        {"SR3l_OSSF_mT>160_ETmiss150-200_mll<75", 0},
+        {"SR3l_OSSF_mT>160_ETmiss150-200_mll75-105", 0},
+        {"SR3l_OSSF_mT>160_ETmiss150-200_mll>105", 0},
+        {"SR3l_OSSF_mT>160_ETmiss200-250_mll<75", 0},
+        {"SR3l_OSSF_mT>160_ETmiss200-250_mll75-105", 0},
+        {"SR3l_OSSF_mT>160_ETmiss200-250_mll>105", 0},
+
+        // SRs in Table 2
+        {"SR3l_noOSSF_mT<120_ETmiss50-100_mll<100", 0},
+        {"SR3l_noOSSF_mT<120_ETmiss50-100_mll>100", 0},
+        {"SR3l_noOSSF_mT<120_ETmiss100-150_mll<100", 0},
+        {"SR3l_noOSSF_mT<120_ETmiss100-150_mll>100", 0},
+        {"SR3l_noOSSF_mT<120_ETmiss150-200_mll<100", 0},
+        {"SR3l_noOSSF_mT<120_ETmiss150-200_mll>100", 0},
+        {"SR3l_noOSSF_mT<120_ETmiss200-250_mll<100", 0},
+        {"SR3l_noOSSF_mT<120_ETmiss200-250_mll>100", 0},
+
+        {"SR3l_noOSSF_mT120-160_ETmiss50-100_mll<100", 0},
+        {"SR3l_noOSSF_mT120-160_ETmiss50-100_mll>100", 0},
+        {"SR3l_noOSSF_mT120-160_ETmiss100-150_mll<100", 0},
+        {"SR3l_noOSSF_mT120-160_ETmiss100-150_mll>100", 0},
+        {"SR3l_noOSSF_mT120-160_ETmiss150-200_mll<100", 0},
+        {"SR3l_noOSSF_mT120-160_ETmiss150-200_mll>100", 0},
+        {"SR3l_noOSSF_mT120-160_ETmiss200-250_mll<100", 0},
+        {"SR3l_noOSSF_mT120-160_ETmiss200-250_mll>100", 0},
+
+        {"SR3l_noOSSF_mT>160_ETmiss50-100_mll<100", 0},
+        {"SR3l_noOSSF_mT>160_ETmiss50-100_mll>100", 0},
+        {"SR3l_noOSSF_mT>160_ETmiss100-150_mll<100", 0},
+        {"SR3l_noOSSF_mT>160_ETmiss100-150_mll>100", 0},
+        {"SR3l_noOSSF_mT>160_ETmiss150-200_mll<100", 0},
+        {"SR3l_noOSSF_mT>160_ETmiss150-200_mll>100", 0},
+        {"SR3l_noOSSF_mT>160_ETmiss200-250_mll<100", 0},
+        {"SR3l_noOSSF_mT>160_ETmiss200-250_mll>100", 0},
+
+        // SRs in Table 3
+        {"SR3l_SS1tau_mT<120_ETmiss50-100_mll<100", 0},
+        {"SR3l_SS1tau_mT<120_ETmiss50-100_mll>100", 0},
+        {"SR3l_SS1tau_mT<120_ETmiss100-150_mll<100", 0},
+        {"SR3l_SS1tau_mT<120_ETmiss100-150_mll>100", 0},
+        {"SR3l_SS1tau_mT<120_ETmiss150-200_mll<100", 0},
+        {"SR3l_SS1tau_mT<120_ETmiss150-200_mll>100", 0},
+        {"SR3l_SS1tau_mT<120_ETmiss200-250_mll<100", 0},
+        {"SR3l_SS1tau_mT<120_ETmiss200-250_mll>100", 0},
+
+        {"SR3l_SS1tau_mT120-160_ETmiss50-100_mll<100", 0},
+        {"SR3l_SS1tau_mT120-160_ETmiss50-100_mll>100", 0},
+        {"SR3l_SS1tau_mT120-160_ETmiss100-150_mll<100", 0},
+        {"SR3l_SS1tau_mT120-160_ETmiss100-150_mll>100", 0},
+        {"SR3l_SS1tau_mT120-160_ETmiss150-200_mll<100", 0},
+        {"SR3l_SS1tau_mT120-160_ETmiss150-200_mll>100", 0},
+        {"SR3l_SS1tau_mT120-160_ETmiss200-250_mll<100", 0},
+        {"SR3l_SS1tau_mT120-160_ETmiss200-250_mll>100", 0},
+
+        {"SR3l_SS1tau_mT>160_ETmiss50-100_mll<100", 0},
+        {"SR3l_SS1tau_mT>160_ETmiss50-100_mll>100", 0},
+        {"SR3l_SS1tau_mT>160_ETmiss100-150_mll<100", 0},
+        {"SR3l_SS1tau_mT>160_ETmiss100-150_mll>100", 0},
+        {"SR3l_SS1tau_mT>160_ETmiss150-200_mll<100", 0},
+        {"SR3l_SS1tau_mT>160_ETmiss150-200_mll>100", 0},
+        {"SR3l_SS1tau_mT>160_ETmiss200-250_mll<100", 0},
+        {"SR3l_SS1tau_mT>160_ETmiss200-250_mll>100", 0},
+
+        // SRs in Table 4
+        {"SR3l_OS1tau_mT<120_ETmiss50-100_mll<100", 0},
+        {"SR3l_OS1tau_mT<120_ETmiss50-100_mll>100", 0},
+        {"SR3l_OS1tau_mT<120_ETmiss100-150_mll<100", 0},
+        {"SR3l_OS1tau_mT<120_ETmiss100-150_mll>100", 0},
+        {"SR3l_OS1tau_mT<120_ETmiss150-200_mll<100", 0},
+        {"SR3l_OS1tau_mT<120_ETmiss150-200_mll>100", 0},
+        {"SR3l_OS1tau_mT<120_ETmiss200-250_mll<100", 0},
+        {"SR3l_OS1tau_mT<120_ETmiss200-250_mll>100", 0},
+
+        {"SR3l_OS1tau_mT120-160_ETmiss50-100_mll<100", 0},
+        {"SR3l_OS1tau_mT120-160_ETmiss50-100_mll>100", 0},
+        {"SR3l_OS1tau_mT120-160_ETmiss100-150_mll<100", 0},
+        {"SR3l_OS1tau_mT120-160_ETmiss100-150_mll>100", 0},
+        {"SR3l_OS1tau_mT120-160_ETmiss150-200_mll<100", 0},
+        {"SR3l_OS1tau_mT120-160_ETmiss150-200_mll>100", 0},
+        {"SR3l_OS1tau_mT120-160_ETmiss200-250_mll<100", 0},
+        {"SR3l_OS1tau_mT120-160_ETmiss200-250_mll>100", 0},
+
+        {"SR3l_OS1tau_mT>160_ETmiss50-100_mll<100", 0},
+        {"SR3l_OS1tau_mT>160_ETmiss50-100_mll>100", 0},
+        {"SR3l_OS1tau_mT>160_ETmiss100-150_mll<100", 0},
+        {"SR3l_OS1tau_mT>160_ETmiss100-150_mll>100", 0},
+        {"SR3l_OS1tau_mT>160_ETmiss150-200_mll<100", 0},
+        {"SR3l_OS1tau_mT>160_ETmiss150-200_mll>100", 0},
+        {"SR3l_OS1tau_mT>160_ETmiss200-250_mll<100", 0},
+        {"SR3l_OS1tau_mT>160_ETmiss200-250_mll>100", 0},
+
+        // // SRs in Table 5
+        // {"SR4l_1OSSF0tau_ETmiss<30", 0},
+        // {"SR4l_1OSSF0tau_ETmiss30-50", 0},
+        // {"SR4l_1OSSF0tau_ETmiss50-100", 0},
+        // {"SR4l_1OSSF0tau_ETmiss>100", 0},
+        // {"SR4l_1OSSF1tau_ETmiss<30", 0},
+        // {"SR4l_1OSSF1tau_ETmiss30-50", 0},
+        // {"SR4l_1OSSF1tau_ETmiss50-100", 0},
+        // {"SR4l_1OSSF1tau_ETmiss>100", 0},
+        // {"SR4l_2OSSF0tau_ETmiss<30", 0},
+        // {"SR4l_2OSSF0tau_ETmiss30-50", 0},
+        // {"SR4l_2OSSF0tau_ETmiss50-100", 0},
+        // {"SR4l_2OSSF0tau_ETmiss>100", 0},
+      };
+
+
     private:
 
-      // Array of signal regions, set to zero
-      static const size_t NUMSR = 180;
-      int SR [NUMSR];
-      //int Region45=0;
-      //int Region46=0;
-      vector<double> boundsMll = {0.,75.,105.,9999.};
-      vector<double> boundsMt = {0.,120.,160.,9999.};
-      vector<double> boundsmet ={0.,50.,100.,150.,200.,9999.};
-      vector<double> boundsMll2 = {0.,100.,9999.};
-      // Debug histos
+      struct ptComparison 
+      {
+        bool operator() (HEPUtils::Particle* i,HEPUtils::Particle* j) {return (i->pT()>j->pT());}
+      } comparePt;
+      
+      struct ptJetComparison 
+      {
+        bool operator() (HEPUtils::Jet* i,HEPUtils::Jet* j) {return (i->pT()>j->pT());}
+      } compareJetPt;
+
+
+      // Jet lepton overlap removal
+      // Discards jets if they are within DeltaRMax of a lepton
+      void JetLeptonOverlapRemoval(vector<HEPUtils::Jet*>& jets, vector<HEPUtils::Particle*>& leptons, double DeltaRMax) 
+      {
+        vector<HEPUtils::Jet*> survivors;
+        for(HEPUtils::Jet* jet : jets)
+        {
+          bool overlap = false;
+          for(HEPUtils::Particle* lepton : leptons) 
+          {
+            double dR = jet->mom().deltaR_eta(lepton->mom());
+            if(fabs(dR) <= DeltaRMax) overlap = true;
+          }
+          if(!overlap) survivors.push_back(jet);
+        }
+        jets = survivors;
+        return;
+      }
+
+
+      // Identify the particle pair with invariant mass closest to a given value
+      vector<HEPUtils::Particle*> getClosestMllPair(vector<vector<HEPUtils::Particle*>> pairs, double mll_compare) {
+        
+        assert(pairs.size()>0);
+
+        vector<HEPUtils::Particle*> pair = pairs.at(0);
+        double mll = (pair.at(0)->mom() + pair.at(1)->mom()).m();
+
+        if (pairs.size() > 1) {
+          for (vector<HEPUtils::Particle*> pair_tmp : pairs)
+          {
+            double mll_tmp = (pair_tmp.at(0)->mom() + pair_tmp.at(1)->mom()).m();
+            if (fabs(mll_compare - mll_tmp) < fabs(mll_compare - mll)) {
+              pair = pair_tmp;
+              mll = mll_tmp;
+            }
+          }
+        }
+        return pair;
+      }
+
+
+      // Identify the lepton that is *not* part of the pair
+      HEPUtils::Particle* getLeptonNotInPair(vector<HEPUtils::Particle*> leptons, vector<HEPUtils::Particle*> pair) {
+
+        // Check that there is only one more element in 'leptons' than in 'pair'
+        assert(leptons.size() == pair.size()+1);
+
+        HEPUtils::Particle* lepton = NULL;
+        
+        for (HEPUtils::Particle* l : leptons) {
+          // If l is not in pair, we're done
+          if (find(pair.begin(), pair.end(), l) == pair.end()) {
+            lepton = l;
+            break;
+          }
+        }
+        // The lepton pointer should never be NULL at this point...
+        assert(lepton);
+        return lepton;
+      }
+
+
+      // Calculate transverse mass
+      double transverseMass(double ETmiss, double pTmissPhi, double lepPt, double lepPhi) {
+        return sqrt(2. * ETmiss * lepPt * (1. - cos(lepPhi - pTmissPhi)));
+      }
+
 
     public:
 
       Analysis_CMS_8TeV_3LEPEW_20invfb() {
-
         set_analysis_name("CMS_8TeV_3LEPEW_20invfb");
         set_luminosity(19.5);
-
-        for(size_t i=0;i<NUMSR;i++){
-          SR[i]=0;
-        }
-
       }
 
-      void JetLeptonOverlapRemoval(vector<HEPUtils::Jet*> &jetvec, vector<HEPUtils::Particle*> &lepvec, double DeltaRMax) {
-        //Routine to do jet-lepton check
-        //Discards jets if they are within DeltaRMax of a lepton
-
-        vector<HEPUtils::Jet*> Survivors;
-
-        for(unsigned int itjet = 0; itjet < jetvec.size(); itjet++) {
-          bool overlap = false;
-          HEPUtils::P4 jetmom=jetvec.at(itjet)->mom();
-          for(unsigned int itlep = 0; itlep < lepvec.size(); itlep++) {
-            HEPUtils::P4 lepmom=lepvec.at(itlep)->mom();
-            float dR;
-
-            dR=jetmom.deltaR_eta(lepmom);
-
-            if(dR <= DeltaRMax) overlap=true;
-          }
-          if(overlap) continue;
-          Survivors.push_back(jetvec.at(itjet));
-        }
-        jetvec=Survivors;
-
-        return;
-      }
-
-      void LeptonJetOverlapRemoval(vector<HEPUtils::Particle*> &lepvec, vector<HEPUtils::Jet*> &jetvec, double DeltaRMax) {
-        //Routine to do lepton-jet check
-        //Discards leptons if they are within DeltaRMax of a jet
-
-        vector<HEPUtils::Particle*> Survivors;
-
-        for(unsigned int itlep = 0; itlep < lepvec.size(); itlep++) {
-          bool overlap = false;
-          HEPUtils::P4 lepmom=lepvec.at(itlep)->mom();
-          for(unsigned int itjet= 0; itjet < jetvec.size(); itjet++) {
-            HEPUtils::P4 jetmom=jetvec.at(itjet)->mom();
-            float dR;
-
-            dR=jetmom.deltaR_eta(lepmom);
-
-            if(dR <= DeltaRMax) overlap=true;
-          }
-          if(overlap) continue;
-          Survivors.push_back(lepvec.at(itlep));
-        }
-        lepvec=Survivors;
-
-        return;
-      }
-
-      double TransMass(double eMissing, double ePhi, HEPUtils::Particle* thirdLepton ) {
-        //Calculate transverse mass
-
-        double mT = sqrt(2*eMissing*(thirdLepton->pT())*(1. - cos(thirdLepton->phi() - ePhi)));
-        return mT;
-      }
 
       void analyze(const HEPUtils::Event* event) {
         HEPUtilsAnalysis::analyze(event);
 
         // Missing energy
-        HEPUtils::P4 ptot = event->missingmom();
         double met = event->met();
-        double missingPhi = ptot.phi();
+        double pTmissPhi = event->missingmom().phi();
+        // vector<HEPUtils::Particle*> baselineElectrons;
+        // vector<HEPUtils::Particle*> baselineMuons;
+        // vector<HEPUtils::Particle*> baselineTaus;
+        // vector<HEPUtils::Jet*> baselineJets;
 
-        // Now define vectors of baseline objects
+        // Create vectors of physics objects:
+
+        // - electrons
         vector<HEPUtils::Particle*> signalElectrons;
         for (HEPUtils::Particle* electron : event->electrons()) {
           if (electron->pT() > 10. && fabs(electron->eta()) < 2.4) signalElectrons.push_back(electron);
         }
+
+        // - muons 
         vector<HEPUtils::Particle*> signalMuons;
         for (HEPUtils::Particle* muon : event->muons()) {
           if (muon->pT() > 10. && fabs(muon->eta()) < 2.4) signalMuons.push_back(muon);
         }
+
+        // - taus
         vector<HEPUtils::Particle*> signalTaus;
         for (HEPUtils::Particle* tau : event->taus()) {
           if (tau->pT() > 20. && fabs(tau->eta()) < 2.4) signalTaus.push_back(tau);
         }
         CMS::applyTauEfficiency(signalTaus);
 
+        // - jets
         vector<HEPUtils::Jet*> signalJets;
-        vector<HEPUtils::Jet*> bJets;
-
+        vector<HEPUtils::Jet*> signalBjets;
         for (HEPUtils::Jet* jet : event->jets()) {
           if (jet->pT() > 30. && fabs(jet->eta()) < 2.5) signalJets.push_back(jet);
-          if(jet->btag() && fabs(jet->eta()) < 2.5 && jet->pT() > 30.) bJets.push_back(jet);
+          if(jet->btag() && fabs(jet->eta()) < 2.5 && jet->pT() > 30.) signalBjets.push_back(jet);
         }
 
-        //Overlap Removal
 
-        //Note that ATLAS use |eta|<10 for removing jets close to electrons
-        //Then 2.8 is used for the rest of the overlap process
-        //Then the signal cut is applied for signal jets
 
+        // Missing: pT-dependent isolation check for leptons
+
+
+        // Jet overlap removal
         JetLeptonOverlapRemoval(signalJets,signalElectrons,0.4);
         JetLeptonOverlapRemoval(signalJets,signalMuons,0.4);
 
-        // int numElectrons = signalElectrons.size();
-        // int numMuons = signalMuons.size();
-        int numTaus = signalTaus.size();
+        // Create combined vectors with signal leptons and taus
+        vector<HEPUtils::Particle*> signalLeptons = signalElectrons;
+        signalLeptons.insert(signalLeptons.end(), signalMuons.begin(), signalMuons.end());
 
-        vector<HEPUtils::Particle*> signalLeptons;
+        vector<HEPUtils::Particle*> signalLeptonsTaus = signalLeptons;
+        signalLeptonsTaus.insert(signalLeptonsTaus.end(), signalTaus.begin(), signalTaus.end());
 
-        for (HEPUtils::Particle* ele : signalElectrons) {
-          signalLeptons.push_back(ele);
+        // Sort by pT
+        sort(signalJets.begin(), signalJets.end(), compareJetPt); 
+        sort(signalLeptons.begin(), signalLeptons.end(), comparePt);
+        sort(signalLeptonsTaus.begin(), signalLeptonsTaus.end(), comparePt);
+
+        // Count signal leptons, taus and jets
+        int nSignalElectrons = signalElectrons.size();
+        int nSignalMuons = signalMuons.size();
+        int nSignalLeptons = signalLeptons.size();
+        int nSignalTaus = signalTaus.size();
+        // int nSignalJets = signalJets.size();
+        int nSignalBjets = signalBjets.size();
+
+        // Has the highest-pT lepton pT > 20 GeV?
+        bool hasPt20Lepton = false;
+        if (nSignalLeptons > 0) {
+          if (signalLeptons.at(0)->pT() > 20) hasPt20Lepton = true;          
         }
 
-        for (HEPUtils::Particle* muo : signalMuons) {
-          signalLeptons.push_back(muo);
+        // Get OS and SFOS pairs
+        vector<vector<HEPUtils::Particle*>> SFOSpairs = getSFOSpairs(signalLeptons);
+        vector<vector<HEPUtils::Particle*>> SFOSpairsWithTaus = getSFOSpairs(signalLeptonsTaus);
+        vector<vector<HEPUtils::Particle*>> OSpairs = getOSpairs(signalLeptons);
+        vector<vector<HEPUtils::Particle*>> OSpairsWithTaus = getOSpairs(signalLeptonsTaus);
+        vector<vector<HEPUtils::Particle*>> SSpairs = getSSpairs(signalLeptons);
+        vector<vector<HEPUtils::Particle*>> SSpairsWithTaus = getSSpairs(signalLeptonsTaus);
+        int nSFOSpairs = SFOSpairs.size();
+        // int nSFOSpairsWithTaus = SFOSpairsWithTaus.size();
+        int nOSpairs = OSpairs.size();
+        int nOSpairsWithTaus = OSpairsWithTaus.size();
+        int nSSpairs = SSpairs.size();
+        // int nSSpairsWithTaus = SSpairsWithTaus.size();
+
+        // Is there an SFOS ee/mumu pair with invraiant mass below 12 GeV?
+        bool hasLowmassSFOSpair = false;
+        for (vector<HEPUtils::Particle*> pair : SFOSpairs) {
+          double mll_pair = (pair.at(0)->mom() + pair.at(1)->mom()).m();
+          if (mll_pair < 12.) {
+            hasLowmassSFOSpair = true;
+            break;
+          }
         }
 
-        int numLeptons = signalLeptons.size(); //Only electrons and muons
 
-        //Find transverse mass and invariant mass depending on presence of tau, OSSF/OSOF/SS
-
-        double mLL = 0;
+        // Determine which group of SRs the event belongs to 
+        // and calculate the transverse mass and invariant mass 
+        // accordingly, 
+        int SRgroup = 0; // Use numbering corresponding to the results tables in the paper
+        double mll = 0;
         double mT = 0;
-        vector<bool> flavourSign = {false,false,false,false};
+        static const double mZ = 91.2;
 
-        //No taus present
-        if(numLeptons==3){
-          double smallestDiff1=9999;
-          double smallestDiff2=9999;
+        //
+        // Events from Table 1: ee/mumu SFOS pair + one more e or mu
+        //
+        if (nSignalLeptons==3 and nSignalTaus==0 and nSFOSpairs>0) {
 
-          //cout << "Lep 1: " << signalLeptons.at(0)->pid() << ", Lep 2: " << signalLeptons.at(1)->pid() << ", Lep 3: " << signalLeptons.at(2)->pid() << endl;
+          // Set SR group
+          SRgroup = 1;
 
-          for(int lep1=0;lep1<numLeptons;lep1++){
-            for(int lep2=0;lep2<numLeptons;lep2++){
-              //Search for the OSSF pair closest to Z, and use the remaining lepton for transverse mass
-              if(signalLeptons.at(lep1)->pid()==-1*signalLeptons.at(lep2)->pid()){
-                flavourSign.at(0) = true;
-                flavourSign.at(1) = false;
-                HEPUtils::P4 lepVec1=signalLeptons.at(lep1)->mom();
-                HEPUtils::P4 lepVec2=signalLeptons.at(lep2)->mom();
-                double invMass1=(lepVec1+lepVec2).m();
-                if(fabs(invMass1-91.2)<smallestDiff1){
-                  smallestDiff1=fabs(invMass1-91.2);
-                  mLL=invMass1;
-                  mT=TransMass(met,missingPhi,signalLeptons.at(3-lep1-lep2));
-                }
-              }
-              //Search for the OSOF pair closest to Z->tau tau dilepton, use remaining lepton for transverse mass
-              else if((signalLeptons.at(lep1)->pid() * signalLeptons.at(lep2)->pid()) < 0 && !flavourSign.at(0)){
-                flavourSign.at(1) = true;
-                HEPUtils::P4 lepVec1=signalLeptons.at(lep1)->mom();
-                HEPUtils::P4 lepVec2=signalLeptons.at(lep2)->mom();
-                double invMass2=(lepVec1+lepVec2).m();
-                if(fabs(invMass2-50)<smallestDiff2){
-                  smallestDiff2=fabs(invMass2-50);
-                  mLL=invMass2;
-                  mT=TransMass(met,missingPhi,signalLeptons.at(3-lep1-lep2));
-                }
-              }
-            }
-          }
-        }
+          // Choose SFOS pair with mll closest to mZ
+          vector<HEPUtils::Particle*> pair = getClosestMllPair(SFOSpairs, mZ);
+          mll = (pair.at(0)->mom() + pair.at(1)->mom()).m();
 
-        //One tau present
-        else if(numTaus==1 && numLeptons==2){
-          //With SS pair
-          if(signalLeptons.at(0)->pid() * signalLeptons.at(1)->pid() > 0){
-            flavourSign.at(2) = true;
-            HEPUtils::P4 lepVec1=signalLeptons.at(0)->mom();
-            HEPUtils::P4 lepVec2=signalLeptons.at(1)->mom();
-            HEPUtils::P4 tauVec =signalTaus.at(0)->mom();
-            double invMass1 = (lepVec1+tauVec).m();
-            double invMass2 = (lepVec2+tauVec).m();
-            if(fabs(invMass1 - 60)<fabs(invMass2 - 60)){
-              mLL=invMass1;
-              mT=TransMass(met,missingPhi,signalLeptons.at(1));
-            }
-            else {
-              mLL=invMass2;
-              mT=TransMass(met,missingPhi,signalLeptons.at(0));
-            }
-          }
-          //With OSOF pair
-          else if(signalLeptons.at(0)->pid()!= -1*signalLeptons.at(1)->pid()){
-            flavourSign.at(3) = true;
-            if(signalLeptons.at(0)->pid() * signalTaus.at(0)->pid() < 0){
-              HEPUtils::P4 lepVec=signalLeptons.at(0)->mom();
-              HEPUtils::P4 tauVec=signalTaus.at(0)->mom();
-              mLL=(lepVec+tauVec).m();
-              mT=TransMass(met,missingPhi,signalLeptons.at(1));
-            }
-            else {
-              HEPUtils::P4 lepVec=signalLeptons.at(1)->mom();
-              HEPUtils::P4 tauVec=signalTaus.at(0)->mom();
-              mLL=(lepVec+tauVec).m();
-              mT=TransMass(met,missingPhi,signalLeptons.at(0));
-            }
-          }
-        }
+          // Identify the 'third lepton', i.e. the signal lepton 
+          // that is not part of the SFOS pair
+          HEPUtils::Particle* third_lepton = getLeptonNotInPair(signalLeptons, pair);
 
-        //Cuts to lepton energy
-
-        bool signalAccepted=false;
-
-        for(HEPUtils::Particle * lepton : signalLeptons){
-          if(lepton->pT()>20)signalAccepted=true;
-        }
-
-        for(int i=0;i<numLeptons;i++){
-          for(int j=0;j<numLeptons;j++){
-            HEPUtils::P4 lepVec1=signalLeptons.at(i)->mom();
-            HEPUtils::P4 lepVec2=signalLeptons.at(j)->mom();
-            double invMass = (lepVec1+lepVec2).m();
-            if(invMass<12 && (signalLeptons.at(i)->pid()*signalLeptons.at(j)->pid() < 0)){
-              signalAccepted=false;
-            }
-          }
-        }
-        if(bJets.size() > 0){
-          signalAccepted=false;
+          // Calculate mT with the third lepton
+          mT = transverseMass(met, pTmissPhi, third_lepton->pT(), third_lepton->phi());
         }
         //
-        //Fill signal vector
-        if(signalAccepted){
+        // Events from Table 2: eemu/emumu events *without* SFOS pair
+        //
+        else if (nSignalLeptons==3 and nSignalElectrons<3 and nSignalMuons<3 and
+                 nSignalTaus==0 and nSFOSpairs==0 and nOSpairs>0) {
 
-          int m=0;
-          int i=0;
-          for(unsigned int j=0;j<(boundsMll.size()-1);j++){
-            for(unsigned int k=0;k<(boundsMt.size()-1);k++){
-              for(unsigned int l=0;l<(boundsmet.size()-1);l++){
-                //cout << "FLAVSIGN " << flavourSign.at(i) << endl;
-                if(flavourSign.at(i) && mLL>=boundsMll.at(j) && mLL<boundsMll.at(j+1) && mT>=boundsMt.at(k) && mT<boundsMt.at(k+1) && met>=boundsmet.at(l) && met<boundsmet.at(l+1)){
-                  SR[m]++;
-                }
-                //cout << m << " ";
-                //std::cout << "REGION " << m << " Mll bounds " << boundsMll[j]<< " to " << boundsMll[j+1] << " MT bound " << boundsMt[k] << " to " << boundsMt[k+1] << " MET bound " << boundsmet[l] << " to " << boundsmet[l+1] << std::endl;
-                m++;
-              }
-            }
+          // Set SR group
+          SRgroup = 2;
+
+          // Choose OS pair with mll closest to 50 GeV. 
+          // (Since nSFOSpairs==0, this pair must be an e-mu pair.)
+          vector<HEPUtils::Particle*> pair = getClosestMllPair(OSpairs, 50.);
+          mll = (pair.at(0)->mom() + pair.at(1)->mom()).m();
+
+          // Identify the 'third lepton', i.e. the signal lepton 
+          // that is not part of the SFOS pair
+          HEPUtils::Particle* third_lepton = getLeptonNotInPair(signalLeptons, pair);
+
+          // Calculate mT with the third lepton
+          mT = transverseMass(met, pTmissPhi, third_lepton->pT(), third_lepton->phi());
+        }
+        // 
+        // Events from Table 3: same-sign ee/mumu/emu pair + one tau
+        // 
+        else if (nSignalLeptons==2 and nSignalTaus==1 and nSSpairs==1 and nOSpairsWithTaus>0) {
+
+          // Set SR group
+          SRgroup = 3;
+
+          // Choose OS (e-tau or mu-tau) pair with mll closest to 60 GeV
+          vector<HEPUtils::Particle*> pair = getClosestMllPair(OSpairsWithTaus, 60.);
+          mll = (pair.at(0)->mom() + pair.at(1)->mom()).m();
+
+          // Identify the 'third lepton', i.e. the signal lepton 
+          // that is not part of the OS pair
+          HEPUtils::Particle* third_lepton = getLeptonNotInPair(signalLeptons, pair);
+
+          // Calculate mT with the third lepton
+          mT = transverseMass(met, pTmissPhi, third_lepton->pT(), third_lepton->phi());        
+        }
+        // 
+        // Events from Table 4: opposite-sign emu pair + one tau
+        // 
+        else if (nSignalElectrons==1 and nSignalMuons==1 and nSignalTaus==1 and nOSpairs==1) {
+
+          // Set SR group
+          SRgroup = 4;
+
+          // mll for emu OS pair
+          vector<HEPUtils::Particle*> pair_emu = OSpairs.at(0);
+          double mll_emu = (pair_emu.at(0)->mom() + pair_emu.at(1)->mom()).m();
+
+          // mll for etau or mutau OS pair
+          HEPUtils::Particle* tau = signalTaus.at(0);
+          vector<HEPUtils::Particle*> pair_withtau;
+          pair_withtau.push_back(tau);
+          // - Pick the particle from the OS emu pair that has the opposite sign to the tau
+          if (pair_emu.at(0)->pid() * tau->pid() < 0) {
+            pair_withtau.push_back(pair_emu.at(0));
           }
+          else {
+            pair_withtau.push_back(pair_emu.at(1)); 
+          }
+          double mll_withtau = (pair_withtau.at(0)->mom() + pair_withtau.at(1)->mom()).m();
 
-          for(unsigned int i=1;i<(flavourSign.size());i++){
-            for(unsigned int j=0;j<(boundsMll2.size()-1);j++){
-              for(unsigned int k=0;k<(boundsMt.size()-1);k++){
-                for(unsigned int l=0;l<(boundsmet.size()-1);l++){
-                  if(flavourSign.at(i) && mLL>=boundsMll2.at(j) && mLL<boundsMll2.at(j+1) && mT>=boundsMt.at(k) && mT<boundsMt.at(k+1) && met>=boundsmet.at(l) && met<boundsmet.at(l+1)){
-                    SR[m]++;
-                  }
+          // Use the invariant mass that is closest to the the expected mass resulting from
+          // Z -> tautau events (50 GeV for emu pair, 60 GeV for etau/mutau pair).
+          // Then calculate mT using the remaining e/mu/tau.
+          if (fabs(mll_emu - 50.) < fabs(mll_withtau - 60.)) {
+            // The emu pair is the OS pair, the tau is the "third lepton"
+            mll = mll_emu;
+            mT = transverseMass(met, pTmissPhi, tau->pT(), tau->phi());
+          }
+          else {
+            // The etau/mutau pair is the OS pair, the leftover e/mu is the "third lepton"
+            mll = mll_withtau;
+            HEPUtils::Particle* third_lepton = getLeptonNotInPair(signalLeptons, pair_withtau);
+            mT = transverseMass(met, pTmissPhi, third_lepton->pT(), third_lepton->phi());        
+          }         
+        }
 
-                  //std::cout << "REGION " << m << " Mll bounds " << boundsMll2[j]<< " to " << boundsMll2[j+1] << " MT bound " << boundsMt[k] << " to " << boundsMt[k+1] << " MET bound " << boundsmet[l] << " to " << boundsmet[l+1] << std::endl;
-                  m++;
-                }
-              }
-              if(j==0){
-                m=m+15;
-              }
-            }
+
+        // Preselection cuts
+        bool preselection = (hasPt20Lepton and !hasLowmassSFOSpair and nSignalBjets==0);
+
+        // Increment SR counter:
+        if (preselection and SRgroup > 0) {
+          // 
+          // SR group 1
+          // 
+          if (SRgroup==1) {
+            if (mT<120 && met>50 && met<100 && mll<75)             _numSR["SR3l_OSSF_mT<120_ETmiss50-100_mll<75"]++;
+            if (mT<120 && met>50 && met<100 && mll>75 && mll<105)  _numSR["SR3l_OSSF_mT<120_ETmiss50-100_mll75-105"]++;
+            if (mT<120 && met>50 && met<100 && mll>105)            _numSR["SR3l_OSSF_mT<120_ETmiss50-100_mll>105"]++;
+            if (mT<120 && met>100 && met<150 && mll<75)            _numSR["SR3l_OSSF_mT<120_ETmiss100-150_mll<75"]++;
+            if (mT<120 && met>100 && met<150 && mll>75 && mll<105) _numSR["SR3l_OSSF_mT<120_ETmiss100-150_mll75-105"]++;
+            if (mT<120 && met>100 && met<150 && mll>105)           _numSR["SR3l_OSSF_mT<120_ETmiss100-150_mll>105"]++;
+            if (mT<120 && met>150 && met<200 && mll<75)            _numSR["SR3l_OSSF_mT<120_ETmiss150-200_mll<75"]++;
+            if (mT<120 && met>150 && met<200 && mll>75 && mll<105) _numSR["SR3l_OSSF_mT<120_ETmiss150-200_mll75-105"]++;
+            if (mT<120 && met>150 && met<200 && mll>105)           _numSR["SR3l_OSSF_mT<120_ETmiss150-200_mll>105"]++;
+            if (mT<120 && met>200 && met<250 && mll<75)            _numSR["SR3l_OSSF_mT<120_ETmiss200-250_mll<75"]++;
+            if (mT<120 && met>200 && met<250 && mll>75 && mll<105) _numSR["SR3l_OSSF_mT<120_ETmiss200-250_mll75-105"]++;
+            if (mT<120 && met>200 && met<250 && mll>105)           _numSR["SR3l_OSSF_mT<120_ETmiss200-250_mll>105"]++;
+
+            if (mT>120 && mT<160 && met>50 && met<100 && mll<75)             _numSR["SR3l_OSSF_mT120-160_ETmiss50-100_mll<75"]++;
+            if (mT>120 && mT<160 && met>50 && met<100 && mll>75 && mll<105)  _numSR["SR3l_OSSF_mT120-160_ETmiss50-100_mll75-105"]++;
+            if (mT>120 && mT<160 && met>50 && met<100 && mll>105)            _numSR["SR3l_OSSF_mT120-160_ETmiss50-100_mll>105"]++;
+            if (mT>120 && mT<160 && met>100 && met<150 && mll<75)            _numSR["SR3l_OSSF_mT120-160_ETmiss100-150_mll<75"]++;
+            if (mT>120 && mT<160 && met>100 && met<150 && mll>75 && mll<105) _numSR["SR3l_OSSF_mT120-160_ETmiss100-150_mll75-105"]++;
+            if (mT>120 && mT<160 && met>100 && met<150 && mll>105)           _numSR["SR3l_OSSF_mT120-160_ETmiss100-150_mll>105"]++;
+            if (mT>120 && mT<160 && met>150 && met<200 && mll<75)            _numSR["SR3l_OSSF_mT120-160_ETmiss150-200_mll<75"]++;
+            if (mT>120 && mT<160 && met>150 && met<200 && mll>75 && mll<105) _numSR["SR3l_OSSF_mT120-160_ETmiss150-200_mll75-105"]++;
+            if (mT>120 && mT<160 && met>150 && met<200 && mll>105)           _numSR["SR3l_OSSF_mT120-160_ETmiss150-200_mll>105"]++;
+            if (mT>120 && mT<160 && met>200 && met<250 && mll<75)            _numSR["SR3l_OSSF_mT120-160_ETmiss200-250_mll<75"]++;
+            if (mT>120 && mT<160 && met>200 && met<250 && mll>75 && mll<105) _numSR["SR3l_OSSF_mT120-160_ETmiss200-250_mll75-105"]++;
+            if (mT>120 && mT<160 && met>200 && met<250 && mll>105)           _numSR["SR3l_OSSF_mT120-160_ETmiss200-250_mll>105"]++;
+
+            if (mT>160 && met>50 && met<100 && mll<75)             _numSR["SR3l_OSSF_mT>160_ETmiss50-100_mll<75"]++;
+            if (mT>160 && met>50 && met<100 && mll>75 && mll<105)  _numSR["SR3l_OSSF_mT>160_ETmiss50-100_mll75-105"]++;
+            if (mT>160 && met>50 && met<100 && mll>105)            _numSR["SR3l_OSSF_mT>160_ETmiss50-100_mll>105"]++;
+            if (mT>160 && met>100 && met<150 && mll<75)            _numSR["SR3l_OSSF_mT>160_ETmiss100-150_mll<75"]++;
+            if (mT>160 && met>100 && met<150 && mll>75 && mll<105) _numSR["SR3l_OSSF_mT>160_ETmiss100-150_mll75-105"]++;
+            if (mT>160 && met>100 && met<150 && mll>105)           _numSR["SR3l_OSSF_mT>160_ETmiss100-150_mll>105"]++;
+            if (mT>160 && met>150 && met<200 && mll<75)            _numSR["SR3l_OSSF_mT>160_ETmiss150-200_mll<75"]++;
+            if (mT>160 && met>150 && met<200 && mll>75 && mll<105) _numSR["SR3l_OSSF_mT>160_ETmiss150-200_mll75-105"]++;
+            if (mT>160 && met>150 && met<200 && mll>105)           _numSR["SR3l_OSSF_mT>160_ETmiss150-200_mll>105"]++;
+            if (mT>160 && met>200 && met<250 && mll<75)            _numSR["SR3l_OSSF_mT>160_ETmiss200-250_mll<75"]++;
+            if (mT>160 && met>200 && met<250 && mll>75 && mll<105) _numSR["SR3l_OSSF_mT>160_ETmiss200-250_mll75-105"]++;
+            if (mT>160 && met>200 && met<250 && mll>105)           _numSR["SR3l_OSSF_mT>160_ETmiss200-250_mll>105"]++;
+          }
+          // 
+          // SR group 2
+          // 
+          else if (SRgroup==2) {
+            if (mT<120 && met>50 && met<100 && mll<100)  _numSR["SR3l_noOSSF_mT<120_ETmiss50-100_mll<100"]++;
+            if (mT<120 && met>50 && met<100 && mll>100)  _numSR["SR3l_noOSSF_mT<120_ETmiss50-100_mll>100"]++;
+            if (mT<120 && met>100 && met<150 && mll<100) _numSR["SR3l_noOSSF_mT<120_ETmiss100-150_mll<100"]++;
+            if (mT<120 && met>100 && met<150 && mll>100) _numSR["SR3l_noOSSF_mT<120_ETmiss100-150_mll>100"]++;
+            if (mT<120 && met>150 && met<200 && mll<100) _numSR["SR3l_noOSSF_mT<120_ETmiss150-200_mll<100"]++;
+            if (mT<120 && met>150 && met<200 && mll>100) _numSR["SR3l_noOSSF_mT<120_ETmiss150-200_mll>100"]++;
+            if (mT<120 && met>200 && met<250 && mll<100) _numSR["SR3l_noOSSF_mT<120_ETmiss200-250_mll<100"]++;
+            if (mT<120 && met>200 && met<250 && mll>100) _numSR["SR3l_noOSSF_mT<120_ETmiss200-250_mll>100"]++;
+
+            if (mT>120 && mT<160 && met>50 && met<100 && mll<100)  _numSR["SR3l_noOSSF_mT120-160_ETmiss50-100_mll<100"]++;
+            if (mT>120 && mT<160 && met>50 && met<100 && mll>100)  _numSR["SR3l_noOSSF_mT120-160_ETmiss50-100_mll>100"]++;
+            if (mT>120 && mT<160 && met>100 && met<150 && mll<100) _numSR["SR3l_noOSSF_mT120-160_ETmiss100-150_mll<100"]++;
+            if (mT>120 && mT<160 && met>100 && met<150 && mll>100) _numSR["SR3l_noOSSF_mT120-160_ETmiss100-150_mll>100"]++;
+            if (mT>120 && mT<160 && met>150 && met<200 && mll<100) _numSR["SR3l_noOSSF_mT120-160_ETmiss150-200_mll<100"]++;
+            if (mT>120 && mT<160 && met>150 && met<200 && mll>100) _numSR["SR3l_noOSSF_mT120-160_ETmiss150-200_mll>100"]++;
+            if (mT>120 && mT<160 && met>200 && met<250 && mll<100) _numSR["SR3l_noOSSF_mT120-160_ETmiss200-250_mll<100"]++;
+            if (mT>120 && mT<160 && met>200 && met<250 && mll>100) _numSR["SR3l_noOSSF_mT120-160_ETmiss200-250_mll>100"]++;
+
+            if (mT>160 && met>50 && met<100 && mll<100)  _numSR["SR3l_noOSSF_mT>160_ETmiss50-100_mll<100"]++;
+            if (mT>160 && met>50 && met<100 && mll>100)  _numSR["SR3l_noOSSF_mT>160_ETmiss50-100_mll>100"]++;
+            if (mT>160 && met>100 && met<150 && mll<100) _numSR["SR3l_noOSSF_mT>160_ETmiss100-150_mll<100"]++;
+            if (mT>160 && met>100 && met<150 && mll>100) _numSR["SR3l_noOSSF_mT>160_ETmiss100-150_mll>100"]++;
+            if (mT>160 && met>150 && met<200 && mll<100) _numSR["SR3l_noOSSF_mT>160_ETmiss150-200_mll<100"]++;
+            if (mT>160 && met>150 && met<200 && mll>100) _numSR["SR3l_noOSSF_mT>160_ETmiss150-200_mll>100"]++;
+            if (mT>160 && met>200 && met<250 && mll<100) _numSR["SR3l_noOSSF_mT>160_ETmiss200-250_mll<100"]++;
+            if (mT>160 && met>200 && met<250 && mll>100) _numSR["SR3l_noOSSF_mT>160_ETmiss200-250_mll>100"]++;
+          }
+          // 
+          // SR group 3
+          // 
+          else if (SRgroup==3) {
+            if (mT<120 && met>50 && met<100 && mll<100)  _numSR["SR3l_SS1tau_mT<120_ETmiss50-100_mll<100"]++;
+            if (mT<120 && met>50 && met<100 && mll>100)  _numSR["SR3l_SS1tau_mT<120_ETmiss50-100_mll>100"]++;
+            if (mT<120 && met>100 && met<150 && mll<100) _numSR["SR3l_SS1tau_mT<120_ETmiss100-150_mll<100"]++;
+            if (mT<120 && met>100 && met<150 && mll>100) _numSR["SR3l_SS1tau_mT<120_ETmiss100-150_mll>100"]++;
+            if (mT<120 && met>150 && met<200 && mll<100) _numSR["SR3l_SS1tau_mT<120_ETmiss150-200_mll<100"]++;
+            if (mT<120 && met>150 && met<200 && mll>100) _numSR["SR3l_SS1tau_mT<120_ETmiss150-200_mll>100"]++;
+            if (mT<120 && met>200 && met<250 && mll<100) _numSR["SR3l_SS1tau_mT<120_ETmiss200-250_mll<100"]++;
+            if (mT<120 && met>200 && met<250 && mll>100) _numSR["SR3l_SS1tau_mT<120_ETmiss200-250_mll>100"]++;
+
+            if (mT>120 && mT<160 && met>50 && met<100 && mll<100)  _numSR["SR3l_SS1tau_mT120-160_ETmiss50-100_mll<100"]++;
+            if (mT>120 && mT<160 && met>50 && met<100 && mll>100)  _numSR["SR3l_SS1tau_mT120-160_ETmiss50-100_mll>100"]++;
+            if (mT>120 && mT<160 && met>100 && met<150 && mll<100) _numSR["SR3l_SS1tau_mT120-160_ETmiss100-150_mll<100"]++;
+            if (mT>120 && mT<160 && met>100 && met<150 && mll>100) _numSR["SR3l_SS1tau_mT120-160_ETmiss100-150_mll>100"]++;
+            if (mT>120 && mT<160 && met>150 && met<200 && mll<100) _numSR["SR3l_SS1tau_mT120-160_ETmiss150-200_mll<100"]++;
+            if (mT>120 && mT<160 && met>150 && met<200 && mll>100) _numSR["SR3l_SS1tau_mT120-160_ETmiss150-200_mll>100"]++;
+            if (mT>120 && mT<160 && met>200 && met<250 && mll<100) _numSR["SR3l_SS1tau_mT120-160_ETmiss200-250_mll<100"]++;
+            if (mT>120 && mT<160 && met>200 && met<250 && mll>100) _numSR["SR3l_SS1tau_mT120-160_ETmiss200-250_mll>100"]++;
+
+            if (mT>160 && met>50 && met<100 && mll<100)  _numSR["SR3l_SS1tau_mT>160_ETmiss50-100_mll<100"]++;
+            if (mT>160 && met>50 && met<100 && mll>100)  _numSR["SR3l_SS1tau_mT>160_ETmiss50-100_mll>100"]++;
+            if (mT>160 && met>100 && met<150 && mll<100) _numSR["SR3l_SS1tau_mT>160_ETmiss100-150_mll<100"]++;
+            if (mT>160 && met>100 && met<150 && mll>100) _numSR["SR3l_SS1tau_mT>160_ETmiss100-150_mll>100"]++;
+            if (mT>160 && met>150 && met<200 && mll<100) _numSR["SR3l_SS1tau_mT>160_ETmiss150-200_mll<100"]++;
+            if (mT>160 && met>150 && met<200 && mll>100) _numSR["SR3l_SS1tau_mT>160_ETmiss150-200_mll>100"]++;
+            if (mT>160 && met>200 && met<250 && mll<100) _numSR["SR3l_SS1tau_mT>160_ETmiss200-250_mll<100"]++;
+            if (mT>160 && met>200 && met<250 && mll>100) _numSR["SR3l_SS1tau_mT>160_ETmiss200-250_mll>100"]++;
+          }
+          // 
+          // SR group 4
+          // 
+          else if (SRgroup==4) {
+            if (mT<120 && met>50 && met<100 && mll<100)  _numSR["SR3l_OS1tau_mT<120_ETmiss50-100_mll<100"]++;
+            if (mT<120 && met>50 && met<100 && mll>100)  _numSR["SR3l_OS1tau_mT<120_ETmiss50-100_mll>100"]++;
+            if (mT<120 && met>100 && met<150 && mll<100) _numSR["SR3l_OS1tau_mT<120_ETmiss100-150_mll<100"]++;
+            if (mT<120 && met>100 && met<150 && mll>100) _numSR["SR3l_OS1tau_mT<120_ETmiss100-150_mll>100"]++;
+            if (mT<120 && met>150 && met<200 && mll<100) _numSR["SR3l_OS1tau_mT<120_ETmiss150-200_mll<100"]++;
+            if (mT<120 && met>150 && met<200 && mll>100) _numSR["SR3l_OS1tau_mT<120_ETmiss150-200_mll>100"]++;
+            if (mT<120 && met>200 && met<250 && mll<100) _numSR["SR3l_OS1tau_mT<120_ETmiss200-250_mll<100"]++;
+            if (mT<120 && met>200 && met<250 && mll>100) _numSR["SR3l_OS1tau_mT<120_ETmiss200-250_mll>100"]++;
+
+            if (mT>120 && mT<160 && met>50 && met<100 && mll<100)  _numSR["SR3l_OS1tau_mT120-160_ETmiss50-100_mll<100"]++;
+            if (mT>120 && mT<160 && met>50 && met<100 && mll>100)  _numSR["SR3l_OS1tau_mT120-160_ETmiss50-100_mll>100"]++;
+            if (mT>120 && mT<160 && met>100 && met<150 && mll<100) _numSR["SR3l_OS1tau_mT120-160_ETmiss100-150_mll<100"]++;
+            if (mT>120 && mT<160 && met>100 && met<150 && mll>100) _numSR["SR3l_OS1tau_mT120-160_ETmiss100-150_mll>100"]++;
+            if (mT>120 && mT<160 && met>150 && met<200 && mll<100) _numSR["SR3l_OS1tau_mT120-160_ETmiss150-200_mll<100"]++;
+            if (mT>120 && mT<160 && met>150 && met<200 && mll>100) _numSR["SR3l_OS1tau_mT120-160_ETmiss150-200_mll>100"]++;
+            if (mT>120 && mT<160 && met>200 && met<250 && mll<100) _numSR["SR3l_OS1tau_mT120-160_ETmiss200-250_mll<100"]++;
+            if (mT>120 && mT<160 && met>200 && met<250 && mll>100) _numSR["SR3l_OS1tau_mT120-160_ETmiss200-250_mll>100"]++;
+
+            if (mT>160 && met>50 && met<100 && mll<100)  _numSR["SR3l_OS1tau_mT>160_ETmiss50-100_mll<100"]++;
+            if (mT>160 && met>50 && met<100 && mll>100)  _numSR["SR3l_OS1tau_mT>160_ETmiss50-100_mll>100"]++;
+            if (mT>160 && met>100 && met<150 && mll<100) _numSR["SR3l_OS1tau_mT>160_ETmiss100-150_mll<100"]++;
+            if (mT>160 && met>100 && met<150 && mll>100) _numSR["SR3l_OS1tau_mT>160_ETmiss100-150_mll>100"]++;
+            if (mT>160 && met>150 && met<200 && mll<100) _numSR["SR3l_OS1tau_mT>160_ETmiss150-200_mll<100"]++;
+            if (mT>160 && met>150 && met<200 && mll>100) _numSR["SR3l_OS1tau_mT>160_ETmiss150-200_mll>100"]++;
+            if (mT>160 && met>200 && met<250 && mll<100) _numSR["SR3l_OS1tau_mT>160_ETmiss200-250_mll<100"]++;
+            if (mT>160 && met>200 && met<250 && mll>100) _numSR["SR3l_OS1tau_mT>160_ETmiss200-250_mll>100"]++;
           }
         }
 
-        /*Region 45 test
-          double testMLL=9999;
-          double testMT=9999;
-          bool reg45 = false;
-          if(numLeptons==3){
-          double smallestDiff=9999;
-          double testmass=0;
-          if((signalLeptons.at(0)->pid()>0 && signalLeptons.at(1)->pid()<0 || signalLeptons.at(0)->pid()<0 && signalLeptons.at(1)->pid()>0) && signalLeptons.at(0)->pid()!=-1*signalLeptons.at(1)->pid()){
-          HEPUtils::P4 testlep1=signalLeptons.at(0)->mom();
-          HEPUtils::P4 testlep2=signalLeptons.at(1)->mom();
-          testMLL = (testlep1+testlep2).m();
-          smallestDiff = fabs(testMLL-50);
-          testMT=TransMass(met,missingPhi,signalLeptons.at(2));
-          reg45=true;
-          }
-
-          if((signalLeptons.at(0)->pid()>0 && signalLeptons.at(2)->pid()<0 || signalLeptons.at(0)->pid()<0 && signalLeptons.at(2)->pid()>0) && signalLeptons.at(0)->pid()!=-1*signalLeptons.at(2)->pid()){
-          HEPUtils::P4 testlep1=signalLeptons.at(0)->mom();
-          HEPUtils::P4 testlep2=signalLeptons.at(2)->mom();
-          testmass = (testlep1+testlep2).m();
-          if(fabs(testmass-50)<smallestDiff){
-          testMLL=testmass;
-          testMT=TransMass(met,missingPhi,signalLeptons.at(1));
-          smallestDiff=testmass-50;
-          reg45=true;
-          }
-          }
-
-          if((signalLeptons.at(1)->pid()>0 && signalLeptons.at(2)->pid()<0 || signalLeptons.at(1)->pid()<0 && signalLeptons.at(2)->pid()>0) && signalLeptons.at(1)->pid()!=-1*signalLeptons.at(2)->pid()){
-          HEPUtils::P4 testlep1=signalLeptons.at(1)->mom();
-          HEPUtils::P4 testlep2=signalLeptons.at(2)->mom();
-          testmass = (testlep1+testlep2).m();
-          if(fabs(testmass-50)<smallestDiff){
-          testMLL=testmass;
-          testMT=TransMass(met,missingPhi,signalLeptons.at(0));
-          reg45=true;
-          }
-          }
-          if(signalLeptons.at(1)->pid()==-1*signalLeptons.at(2)->pid())reg45=false;
-          if(signalLeptons.at(0)->pid()==-1*signalLeptons.at(1)->pid())reg45=false;
-          if(signalLeptons.at(0)->pid()==-1*signalLeptons.at(2)->pid())reg45=false;
-
-          if(reg45 && testMLL<75 && testMT<120 && met<50){
-          Region45++;
-          }
-          }
-        */
-
-        return;
       }
 
       void add(BaseAnalysis* other) {
@@ -362,413 +632,172 @@ namespace Gambit {
           = dynamic_cast<Analysis_CMS_8TeV_3LEPEW_20invfb*>(other);
 
         // Here we will add the subclass member variables:
-        for(size_t i=0;i<NUMSR;i++) {
-          SR[i] += specificOther->SR[i];
+
+        #ifdef CHECK_CUTFLOW
+          // if (NCUTS != specificOther->NCUTS) NCUTS = specificOther->NCUTS;
+          for (size_t j = 0; j < NCUTS; j++) {
+            cutFlowVector[j] += specificOther->cutFlowVector[j];
+            cutFlowVector_str[j] = specificOther->cutFlowVector_str[j];
+          }
+        #endif
+
+        for (auto& el : _numSR) { 
+          el.second += specificOther->_numSR[el.first];
         }
       }
 
 
       void collect_results() {
 
-        std::ostringstream *convert;
-        // TODO: Need to add all of the signal region results here
+        // Format:
+        // add_result(SignalRegionData("SR label", n_obs, {s, s_sys}, {b, b_sys}));
 
-        //First do the 3l with OSSF pair results (no tau)
-        //Table 1 in the paper
+        // 
+        // SR group 1
+        // 
+        add_result(SignalRegionData("SR3l_OSSF_mT<120_ETmiss50-100_mll<75", 138., {_numSR["SR3l_OSSF_mT<120_ETmiss50-100_mll<75"], 0}, {132., 19.}));
+        add_result(SignalRegionData("SR3l_OSSF_mT<120_ETmiss50-100_mll75-105", 821., {_numSR["SR3l_OSSF_mT<120_ETmiss50-100_mll75-105"], 0}, {776., 125.}));
+        add_result(SignalRegionData("SR3l_OSSF_mT<120_ETmiss50-100_mll>105", 49., {_numSR["SR3l_OSSF_mT<120_ETmiss50-100_mll>105"], 0}, {45., 7.}));
+        add_result(SignalRegionData("SR3l_OSSF_mT<120_ETmiss100-150_mll<75", 16., {_numSR["SR3l_OSSF_mT<120_ETmiss100-150_mll<75"], 0}, {20., 4.}));
+        add_result(SignalRegionData("SR3l_OSSF_mT<120_ETmiss100-150_mll75-105", 123., {_numSR["SR3l_OSSF_mT<120_ETmiss100-150_mll75-105"], 0}, {131., 30.}));
+        add_result(SignalRegionData("SR3l_OSSF_mT<120_ETmiss100-150_mll>105", 10., {_numSR["SR3l_OSSF_mT<120_ETmiss100-150_mll>105"], 0}, {10.0, 1.9}));
+        add_result(SignalRegionData("SR3l_OSSF_mT<120_ETmiss150-200_mll<75", 5., {_numSR["SR3l_OSSF_mT<120_ETmiss150-200_mll<75"], 0}, {4.0, 0.8}));
+        add_result(SignalRegionData("SR3l_OSSF_mT<120_ETmiss150-200_mll75-105", 34., {_numSR["SR3l_OSSF_mT<120_ETmiss150-200_mll75-105"], 0}, {34., 8.}));
+        add_result(SignalRegionData("SR3l_OSSF_mT<120_ETmiss150-200_mll>105", 4., {_numSR["SR3l_OSSF_mT<120_ETmiss150-200_mll>105"], 0}, {2.5, 0.5}));
+        add_result(SignalRegionData("SR3l_OSSF_mT<120_ETmiss200-250_mll<75", 2., {_numSR["SR3l_OSSF_mT<120_ETmiss200-250_mll<75"], 0}, {1.9, 0.4}));
+        add_result(SignalRegionData("SR3l_OSSF_mT<120_ETmiss200-250_mll75-105", 14., {_numSR["SR3l_OSSF_mT<120_ETmiss200-250_mll75-105"], 0}, {21., 7.}));
+        add_result(SignalRegionData("SR3l_OSSF_mT<120_ETmiss200-250_mll>105", 4., {_numSR["SR3l_OSSF_mT<120_ETmiss200-250_mll>105"], 0}, {1.2, 0.3}));
 
-        //MT > 160
-        //REGION 11 Mll bounds 0.000e+00 to 7.500e+01 MT bound 1.600e+02 to 9.999e+03 MET bound 5.000e+01 to 1.000e+02
-        //REGION 12 Mll bounds 0.000e+00 to 7.500e+01 MT bound 1.600e+02 to 9.999e+03 MET bound 1.000e+02 to 1.500e+02
-        //REGION 13 Mll bounds 0.000e+00 to 7.500e+01 MT bound 1.600e+02 to 9.999e+03 MET bound 1.500e+02 to 2.000e+02
-        //REGION 14 Mll bounds 0.000e+00 to 7.500e+01 MT bound 1.600e+02 to 9.999e+03 MET bound 2.000e+02 to 9.999e+03
-        //REGION 26 Mll bounds 7.500e+01 to 1.050e+02 MT bound 1.600e+02 to 9.999e+03 MET bound 5.000e+01 to 1.000e+02
-        //REGION 27 Mll bounds 7.500e+01 to 1.050e+02 MT bound 1.600e+02 to 9.999e+03 MET bound 1.000e+02 to 1.500e+02
-        //REGION 28 Mll bounds 7.500e+01 to 1.050e+02 MT bound 1.600e+02 to 9.999e+03 MET bound 1.500e+02 to 2.000e+02
-        //REGION 29 Mll bounds 7.500e+01 to 1.050e+02 MT bound 1.600e+02 to 9.999e+03 MET bound 2.000e+02 to 9.999e+03
-        //REGION 41 Mll bounds 1.050e+02 to 9.999e+03 MT bound 1.600e+02 to 9.999e+03 MET bound 5.000e+01 to 1.000e+02
-        //REGION 42 Mll bounds 1.050e+02 to 9.999e+03 MT bound 1.600e+02 to 9.999e+03 MET bound 1.000e+02 to 1.500e+02
-        //REGION 43 Mll bounds 1.050e+02 to 9.999e+03 MT bound 1.600e+02 to 9.999e+03 MET bound 1.500e+02 to 2.000e+02
-        //REGION 44 Mll bounds 1.050e+02 to 9.999e+03 MT bound 1.600e+02 to 9.999e+03 MET bound 2.000e+02 to 9.999e+03
+        add_result(SignalRegionData("SR3l_OSSF_mT120-160_ETmiss50-100_mll<75", 8., {_numSR["SR3l_OSSF_mT120-160_ETmiss50-100_mll<75"], 0}, {9.6, 1.7}));
+        add_result(SignalRegionData("SR3l_OSSF_mT120-160_ETmiss50-100_mll75-105", 29., {_numSR["SR3l_OSSF_mT120-160_ETmiss50-100_mll75-105"], 0}, {23., 5.}));
+        add_result(SignalRegionData("SR3l_OSSF_mT120-160_ETmiss50-100_mll>105", 4., {_numSR["SR3l_OSSF_mT120-160_ETmiss50-100_mll>105"], 0}, {2.7, 0.5}));
+        add_result(SignalRegionData("SR3l_OSSF_mT120-160_ETmiss100-150_mll<75", 2., {_numSR["SR3l_OSSF_mT120-160_ETmiss100-150_mll<75"], 0}, {3.3, 0.8}));
+        add_result(SignalRegionData("SR3l_OSSF_mT120-160_ETmiss100-150_mll75-105", 4., {_numSR["SR3l_OSSF_mT120-160_ETmiss100-150_mll75-105"], 0}, {3.4, 0.7}));
+        add_result(SignalRegionData("SR3l_OSSF_mT120-160_ETmiss100-150_mll>105", 2., {_numSR["SR3l_OSSF_mT120-160_ETmiss100-150_mll>105"], 0}, {0.71, 0.22}));
+        add_result(SignalRegionData("SR3l_OSSF_mT120-160_ETmiss150-200_mll<75", 0., {_numSR["SR3l_OSSF_mT120-160_ETmiss150-200_mll<75"], 0}, {0.26, 0.10}));
+        add_result(SignalRegionData("SR3l_OSSF_mT120-160_ETmiss150-200_mll75-105", 1., {_numSR["SR3l_OSSF_mT120-160_ETmiss150-200_mll75-105"], 0}, {0.72, 0.19}));
+        add_result(SignalRegionData("SR3l_OSSF_mT120-160_ETmiss150-200_mll>105", 0., {_numSR["SR3l_OSSF_mT120-160_ETmiss150-200_mll>105"], 0}, {0.38, 0.14}));
+        add_result(SignalRegionData("SR3l_OSSF_mT120-160_ETmiss200-250_mll<75", 0., {_numSR["SR3l_OSSF_mT120-160_ETmiss200-250_mll<75"], 0}, {0.29, 0.11}));
+        add_result(SignalRegionData("SR3l_OSSF_mT120-160_ETmiss200-250_mll75-105", 1., {_numSR["SR3l_OSSF_mT120-160_ETmiss200-250_mll75-105"], 0}, {0.36, 0.12}));
+        add_result(SignalRegionData("SR3l_OSSF_mT120-160_ETmiss200-250_mll>105", 0., {_numSR["SR3l_OSSF_mT120-160_ETmiss200-250_mll>105"], 0}, {0.24, 0.20}));
 
-        int regions_highmt [12] = {11,12,13,14,26,27,28,29,41,42,43,44};
-        float observed_highmt [12] = {12,3,2,0,13,8,3,2,1,3,0,0};
-        float background_highmt [12] = {5.8, 4.5, 1.5, 0.81, 7.5, 4.0, 1.5, 1.1, 2.6, 1.8, 0.7, 0.4};
-        float err_highmt [12] = {1.1, 1.1, 0.4, 0.21, 1.4, 1.0, 0.5, 0.4, 1.2, 0.9, 0.4, 0.24};
+        add_result(SignalRegionData("SR3l_OSSF_mT>160_ETmiss50-100_mll<75", 12., {_numSR["SR3l_OSSF_mT>160_ETmiss50-100_mll<75"], 0}, {5.8, 1.1}));
+        add_result(SignalRegionData("SR3l_OSSF_mT>160_ETmiss50-100_mll75-105", 13., {_numSR["SR3l_OSSF_mT>160_ETmiss50-100_mll75-105"], 0}, {7.5, 1.4}));
+        add_result(SignalRegionData("SR3l_OSSF_mT>160_ETmiss50-100_mll>105", 1., {_numSR["SR3l_OSSF_mT>160_ETmiss50-100_mll>105"], 0}, {2.6, 1.2}));
+        add_result(SignalRegionData("SR3l_OSSF_mT>160_ETmiss100-150_mll<75", 3., {_numSR["SR3l_OSSF_mT>160_ETmiss100-150_mll<75"], 0}, {4.5, 1.1}));
+        add_result(SignalRegionData("SR3l_OSSF_mT>160_ETmiss100-150_mll75-105", 8., {_numSR["SR3l_OSSF_mT>160_ETmiss100-150_mll75-105"], 0}, {4.0, 1.0}));
+        add_result(SignalRegionData("SR3l_OSSF_mT>160_ETmiss100-150_mll>105", 3., {_numSR["SR3l_OSSF_mT>160_ETmiss100-150_mll>105"], 0}, {1.8, 0.9}));
+        add_result(SignalRegionData("SR3l_OSSF_mT>160_ETmiss150-200_mll<75", 2., {_numSR["SR3l_OSSF_mT>160_ETmiss150-200_mll<75"], 0}, {1.5, 0.4}));
+        add_result(SignalRegionData("SR3l_OSSF_mT>160_ETmiss150-200_mll75-105", 3., {_numSR["SR3l_OSSF_mT>160_ETmiss150-200_mll75-105"], 0}, {1.5, 0.5}));
+        add_result(SignalRegionData("SR3l_OSSF_mT>160_ETmiss150-200_mll>105", 0., {_numSR["SR3l_OSSF_mT>160_ETmiss150-200_mll>105"], 0}, {0.7, 0.4}));
+        add_result(SignalRegionData("SR3l_OSSF_mT>160_ETmiss200-250_mll<75", 0., {_numSR["SR3l_OSSF_mT>160_ETmiss200-250_mll<75"], 0}, {0.81, 0.21}));
+        add_result(SignalRegionData("SR3l_OSSF_mT>160_ETmiss200-250_mll75-105", 2., {_numSR["SR3l_OSSF_mT>160_ETmiss200-250_mll75-105"], 0}, {1.1, 0.4}));
+        add_result(SignalRegionData("SR3l_OSSF_mT>160_ETmiss200-250_mll>105", 0., {_numSR["SR3l_OSSF_mT>160_ETmiss200-250_mll>105"], 0}, {0.40, 0.24}));
 
-        for(int region=0; region<12;region++){
-          SignalRegionData results_tmp;
-          convert = new std::ostringstream();
+        // 
+        // SR group 2
+        // 
+        add_result(SignalRegionData("SR3l_noOSSF_mT<120_ETmiss50-100_mll<100", 29., {_numSR["SR3l_noOSSF_mT<120_ETmiss50-100_mll<100"], 0}, { 32., 7.}));
+        add_result(SignalRegionData("SR3l_noOSSF_mT<120_ETmiss50-100_mll>100", 1., {_numSR["SR3l_noOSSF_mT<120_ETmiss50-100_mll>100"], 0}, {1.7, 0.4}));
+        add_result(SignalRegionData("SR3l_noOSSF_mT<120_ETmiss100-150_mll<100", 5., {_numSR["SR3l_noOSSF_mT<120_ETmiss100-150_mll<100"], 0}, {7.3, 1.7}));
+        add_result(SignalRegionData("SR3l_noOSSF_mT<120_ETmiss100-150_mll>100", 0., {_numSR["SR3l_noOSSF_mT<120_ETmiss100-150_mll>100"], 0}, {0.30, 0.11}));
+        add_result(SignalRegionData("SR3l_noOSSF_mT<120_ETmiss150-200_mll<100", 1., {_numSR["SR3l_noOSSF_mT<120_ETmiss150-200_mll<100"], 0}, {1.0, 0.3}));
+        add_result(SignalRegionData("SR3l_noOSSF_mT<120_ETmiss150-200_mll>100", 0., {_numSR["SR3l_noOSSF_mT<120_ETmiss150-200_mll>100"], 0}, {0.14, 0.09}));
+        add_result(SignalRegionData("SR3l_noOSSF_mT<120_ETmiss200-250_mll<100", 0., {_numSR["SR3l_noOSSF_mT<120_ETmiss200-250_mll<100"], 0}, {0.53, 0.24}));
+        add_result(SignalRegionData("SR3l_noOSSF_mT<120_ETmiss200-250_mll>100", 0., {_numSR["SR3l_noOSSF_mT<120_ETmiss200-250_mll>100"], 0}, {0.03, 0.03}));
 
-          (*convert) << regions_highmt[region];
-          results_tmp.sr_label = convert->str();
-          delete convert;
-          results_tmp.n_observed = observed_highmt[region];
-          results_tmp.n_background = background_highmt[region];
-          results_tmp.background_sys = err_highmt[region];
-          results_tmp.signal_sys = 0.;
-          results_tmp.n_signal = SR[regions_highmt[region]];
-          add_result(results_tmp);
+        add_result(SignalRegionData("SR3l_noOSSF_mT120-160_ETmiss50-100_mll<100", 3., {_numSR["SR3l_noOSSF_mT120-160_ETmiss50-100_mll<100"], 0}, {5.5, 1.2}));
+        add_result(SignalRegionData("SR3l_noOSSF_mT120-160_ETmiss50-100_mll>100", 1., {_numSR["SR3l_noOSSF_mT120-160_ETmiss50-100_mll>100"], 0}, {0.25, 0.07}));
+        add_result(SignalRegionData("SR3l_noOSSF_mT120-160_ETmiss100-150_mll<100", 1., {_numSR["SR3l_noOSSF_mT120-160_ETmiss100-150_mll<100"], 0}, {1.9, 0.5}));
+        add_result(SignalRegionData("SR3l_noOSSF_mT120-160_ETmiss100-150_mll>100", 0., {_numSR["SR3l_noOSSF_mT120-160_ETmiss100-150_mll>100"], 0}, {0.19, 0.10}));
+        add_result(SignalRegionData("SR3l_noOSSF_mT120-160_ETmiss150-200_mll<100", 1., {_numSR["SR3l_noOSSF_mT120-160_ETmiss150-200_mll<100"], 0}, {0.46, 0.18}));
+        add_result(SignalRegionData("SR3l_noOSSF_mT120-160_ETmiss150-200_mll>100", 0., {_numSR["SR3l_noOSSF_mT120-160_ETmiss150-200_mll>100"], 0}, {0.03, 0.03}));
+        add_result(SignalRegionData("SR3l_noOSSF_mT120-160_ETmiss200-250_mll<100", 0., {_numSR["SR3l_noOSSF_mT120-160_ETmiss200-250_mll<100"], 0}, {0.10, 0.05}));
+        add_result(SignalRegionData("SR3l_noOSSF_mT120-160_ETmiss200-250_mll>100", 0., {_numSR["SR3l_noOSSF_mT120-160_ETmiss200-250_mll>100"], 0}, {0.008, 0.010}));
 
-        }
+        add_result(SignalRegionData("SR3l_noOSSF_mT>160_ETmiss50-100_mll<100", 2., {_numSR["SR3l_noOSSF_mT>160_ETmiss50-100_mll<100"], 0}, {3.2, 0.8}));
+        add_result(SignalRegionData("SR3l_noOSSF_mT>160_ETmiss50-100_mll>100", 0., {_numSR["SR3l_noOSSF_mT>160_ETmiss50-100_mll>100"], 0}, {0.44, 0.33}));
+        add_result(SignalRegionData("SR3l_noOSSF_mT>160_ETmiss100-150_mll<100", 3., {_numSR["SR3l_noOSSF_mT>160_ETmiss100-150_mll<100"], 0}, {2.1, 0.7}));
+        add_result(SignalRegionData("SR3l_noOSSF_mT>160_ETmiss100-150_mll>100", 0., {_numSR["SR3l_noOSSF_mT>160_ETmiss100-150_mll>100"], 0}, {0.42, 0.19}));
+        add_result(SignalRegionData("SR3l_noOSSF_mT>160_ETmiss150-200_mll<100", 0., {_numSR["SR3l_noOSSF_mT>160_ETmiss150-200_mll<100"], 0}, {0.59, 0.18}));
+        add_result(SignalRegionData("SR3l_noOSSF_mT>160_ETmiss150-200_mll>100", 0., {_numSR["SR3l_noOSSF_mT>160_ETmiss150-200_mll>100"], 0}, {0.10, 0.06}));
+        add_result(SignalRegionData("SR3l_noOSSF_mT>160_ETmiss200-250_mll<100", 1., {_numSR["SR3l_noOSSF_mT>160_ETmiss200-250_mll<100"], 0}, {0.37, 0.13}));
+        add_result(SignalRegionData("SR3l_noOSSF_mT>160_ETmiss200-250_mll>100", 0., {_numSR["SR3l_noOSSF_mT>160_ETmiss200-250_mll>100"], 0}, {0.16, 0.14}));
 
-        //MT 120 - 160
-        //REGION 6 Mll bounds 0.000e+00 to 7.500e+01 MT bound 1.200e+02 to 1.600e+02 MET bound 5.000e+01 to 1.000e+02
-        //REGION 7 Mll bounds 0.000e+00 to 7.500e+01 MT bound 1.200e+02 to 1.600e+02 MET bound 1.000e+02 to 1.500e+02
-        //REGION 8 Mll bounds 0.000e+00 to 7.500e+01 MT bound 1.200e+02 to 1.600e+02 MET bound 1.500e+02 to 2.000e+02
-        //REGION 9 Mll bounds 0.000e+00 to 7.500e+01 MT bound 1.200e+02 to 1.600e+02 MET bound 2.000e+02 to 9.999e+03
-        //REGION 21 Mll bounds 7.500e+01 to 1.050e+02 MT bound 1.200e+02 to 1.600e+02 MET bound 5.000e+01 to 1.000e+02
-        //REGION 22 Mll bounds 7.500e+01 to 1.050e+02 MT bound 1.200e+02 to 1.600e+02 MET bound 1.000e+02 to 1.500e+02
-        //REGION 23 Mll bounds 7.500e+01 to 1.050e+02 MT bound 1.200e+02 to 1.600e+02 MET bound 1.500e+02 to 2.000e+02
-        //REGION 24 Mll bounds 7.500e+01 to 1.050e+02 MT bound 1.200e+02 to 1.600e+02 MET bound 2.000e+02 to 9.999e+03
-        //REGION 36 Mll bounds 1.050e+02 to 9.999e+03 MT bound 1.200e+02 to 1.600e+02 MET bound 5.000e+01 to 1.000e+02
-        //REGION 37 Mll bounds 1.050e+02 to 9.999e+03 MT bound 1.200e+02 to 1.600e+02 MET bound 1.000e+02 to 1.500e+02
-        //REGION 38 Mll bounds 1.050e+02 to 9.999e+03 MT bound 1.200e+02 to 1.600e+02 MET bound 1.500e+02 to 2.000e+02
-        //REGION 39 Mll bounds 1.050e+02 to 9.999e+03 MT bound 1.200e+02 to 1.600e+02 MET bound 2.000e+02 to 9.999e+03
+        // 
+        // SR group 3
+        // 
+        add_result(SignalRegionData("SR3l_SS1tau_mT<120_ETmiss50-100_mll<100", 46., {_numSR["SR3l_SS1tau_mT<120_ETmiss50-100_mll<100"], 0}, {51., 8.}));
+        add_result(SignalRegionData("SR3l_SS1tau_mT<120_ETmiss50-100_mll>100", 3., {_numSR["SR3l_SS1tau_mT<120_ETmiss50-100_mll>100"], 0}, {2.8, 0.6}));
+        add_result(SignalRegionData("SR3l_SS1tau_mT<120_ETmiss100-150_mll<100", 1., {_numSR["SR3l_SS1tau_mT<120_ETmiss100-150_mll<100"], 0}, {6.0, 1.3}));
+        add_result(SignalRegionData("SR3l_SS1tau_mT<120_ETmiss100-150_mll>100", 0., {_numSR["SR3l_SS1tau_mT<120_ETmiss100-150_mll>100"], 0}, {0.50, 0.14}));
+        add_result(SignalRegionData("SR3l_SS1tau_mT<120_ETmiss150-200_mll<100", 0., {_numSR["SR3l_SS1tau_mT<120_ETmiss150-200_mll<100"], 0}, {2.0, 0.4}));
+        add_result(SignalRegionData("SR3l_SS1tau_mT<120_ETmiss150-200_mll>100", 0., {_numSR["SR3l_SS1tau_mT<120_ETmiss150-200_mll>100"], 0}, {0.11, 0.07}));
+        add_result(SignalRegionData("SR3l_SS1tau_mT<120_ETmiss200-250_mll<100", 0., {_numSR["SR3l_SS1tau_mT<120_ETmiss200-250_mll<100"], 0}, {0.90, 0.24}));
+        add_result(SignalRegionData("SR3l_SS1tau_mT<120_ETmiss200-250_mll>100", 0., {_numSR["SR3l_SS1tau_mT<120_ETmiss200-250_mll>100"], 0}, {0.042, 0.021}));
 
-        int regions_medmt [12] = {6,7,8,9,21,22,23,24,36,37,38,39};
-        float observed_medmt [12] = {8,2,0,0,29,4,1,1,4,2,0,0};
-        float background_medmt [12] = {9.6, 3.3, 0.26, 0.29, 23, 3.4, 0.72, 0.36, 2.7, 0.71, 0.38, 0.24};
-        float err_medmt [12] = {1.7, 0.8, 0.10, 0.11, 5, 0.7, 0.19, 0.12, 0.5, 0.22, 0.14, 0.20};
+        add_result(SignalRegionData("SR3l_SS1tau_mT120-160_ETmiss50-100_mll<100", 6., {_numSR["SR3l_SS1tau_mT120-160_ETmiss50-100_mll<100"], 0}, {5.5, 1.0}));
+        add_result(SignalRegionData("SR3l_SS1tau_mT120-160_ETmiss50-100_mll>100", 1., {_numSR["SR3l_SS1tau_mT120-160_ETmiss50-100_mll>100"], 0}, {0.35, 0.13}));
+        add_result(SignalRegionData("SR3l_SS1tau_mT120-160_ETmiss100-150_mll<100", 2., {_numSR["SR3l_SS1tau_mT120-160_ETmiss100-150_mll<100"], 0}, {0.91, 0.26}));
+        add_result(SignalRegionData("SR3l_SS1tau_mT120-160_ETmiss100-150_mll>100", 0., {_numSR["SR3l_SS1tau_mT120-160_ETmiss100-150_mll>100"], 0}, {0.06, 0.05}));
+        add_result(SignalRegionData("SR3l_SS1tau_mT120-160_ETmiss150-200_mll<100", 0., {_numSR["SR3l_SS1tau_mT120-160_ETmiss150-200_mll<100"], 0}, {0.15, 0.10}));
+        add_result(SignalRegionData("SR3l_SS1tau_mT120-160_ETmiss150-200_mll>100", 0., {_numSR["SR3l_SS1tau_mT120-160_ETmiss150-200_mll>100"], 0}, {0., 0.008}));
+        add_result(SignalRegionData("SR3l_SS1tau_mT120-160_ETmiss200-250_mll<100", 0., {_numSR["SR3l_SS1tau_mT120-160_ETmiss200-250_mll<100"], 0}, {0.06, 0.08}));
+        add_result(SignalRegionData("SR3l_SS1tau_mT120-160_ETmiss200-250_mll>100", 0., {_numSR["SR3l_SS1tau_mT120-160_ETmiss200-250_mll>100"], 0}, {0.011, 0.012}));
 
-        for(int region=0; region<12;region++){
-          SignalRegionData results_tmp;
-          convert = new std::ostringstream();
+        add_result(SignalRegionData("SR3l_SS1tau_mT>160_ETmiss50-100_mll<100", 2., {_numSR["SR3l_SS1tau_mT>160_ETmiss50-100_mll<100"], 0}, {3.1, 0.6}));
+        add_result(SignalRegionData("SR3l_SS1tau_mT>160_ETmiss50-100_mll>100", 1., {_numSR["SR3l_SS1tau_mT>160_ETmiss50-100_mll>100"], 0}, {0.50, 0.21}));
+        add_result(SignalRegionData("SR3l_SS1tau_mT>160_ETmiss100-150_mll<100", 1., {_numSR["SR3l_SS1tau_mT>160_ETmiss100-150_mll<100"], 0}, {2.3, 0.5}));
+        add_result(SignalRegionData("SR3l_SS1tau_mT>160_ETmiss100-150_mll>100", 1., {_numSR["SR3l_SS1tau_mT>160_ETmiss100-150_mll>100"], 0}, {0.40, 0.17}));
+        add_result(SignalRegionData("SR3l_SS1tau_mT>160_ETmiss150-200_mll<100", 0., {_numSR["SR3l_SS1tau_mT>160_ETmiss150-200_mll<100"], 0}, {0.52, 0.16}));
+        add_result(SignalRegionData("SR3l_SS1tau_mT>160_ETmiss150-200_mll>100", 0., {_numSR["SR3l_SS1tau_mT>160_ETmiss150-200_mll>100"], 0}, {0.21, 0.11}));
+        add_result(SignalRegionData("SR3l_SS1tau_mT>160_ETmiss200-250_mll<100", 2., {_numSR["SR3l_SS1tau_mT>160_ETmiss200-250_mll<100"], 0}, {0.41, 0.12}));
+        add_result(SignalRegionData("SR3l_SS1tau_mT>160_ETmiss200-250_mll>100", 0., {_numSR["SR3l_SS1tau_mT>160_ETmiss200-250_mll>100"], 0}, {0.06, 0.05}));
 
-          (*convert) << regions_medmt[region];
-          results_tmp.sr_label = convert->str();
-          delete convert;
-          results_tmp.n_observed = observed_medmt[region];
-          results_tmp.n_background = background_medmt[region];
-          results_tmp.background_sys = err_medmt[region];
-          results_tmp.signal_sys = 0.;
-          results_tmp.n_signal = SR[regions_medmt[region]];
-          add_result(results_tmp);
-        }
+        // 
+        // SR group 4
+        // 
+        add_result(SignalRegionData("SR3l_OS1tau_mT<120_ETmiss50-100_mll<100", 290., {_numSR["SR3l_OS1tau_mT<120_ETmiss50-100_mll<100"], 0}, {259., 93.}));
+        add_result(SignalRegionData("SR3l_OS1tau_mT<120_ETmiss50-100_mll>100", 27., {_numSR["SR3l_OS1tau_mT<120_ETmiss50-100_mll>100"], 0}, {30., 13.}));
+        add_result(SignalRegionData("SR3l_OS1tau_mT<120_ETmiss100-150_mll<100", 62., {_numSR["SR3l_OS1tau_mT<120_ETmiss100-150_mll<100"], 0}, {60., 25.}));
+        add_result(SignalRegionData("SR3l_OS1tau_mT<120_ETmiss100-150_mll>100", 8., {_numSR["SR3l_OS1tau_mT<120_ETmiss100-150_mll>100"], 0}, {5.9, 2.6}));
+        add_result(SignalRegionData("SR3l_OS1tau_mT<120_ETmiss150-200_mll<100", 10., {_numSR["SR3l_OS1tau_mT<120_ETmiss150-200_mll<100"], 0}, {11., 5.}));
+        add_result(SignalRegionData("SR3l_OS1tau_mT<120_ETmiss150-200_mll>100", 0., {_numSR["SR3l_OS1tau_mT<120_ETmiss150-200_mll>100"], 0}, {2.3, 1.4}));
+        add_result(SignalRegionData("SR3l_OS1tau_mT<120_ETmiss200-250_mll<100", 2., {_numSR["SR3l_OS1tau_mT<120_ETmiss200-250_mll<100"], 0}, {2.9, 1.4}));
+        add_result(SignalRegionData("SR3l_OS1tau_mT<120_ETmiss200-250_mll>100", 0., {_numSR["SR3l_OS1tau_mT<120_ETmiss200-250_mll>100"], 0}, {1.1, 0.6}));
 
-        //MT < 120
-        //REGION 1 Mll bounds 0.000e+00 to 7.500e+01 MT bound 0.000e+00 to 1.200e+02 MET bound 5.000e+01 to 1.000e+02
-        //REGION 2 Mll bounds 0.000e+00 to 7.500e+01 MT bound 0.000e+00 to 1.200e+02 MET bound 1.000e+02 to 1.500e+02
-        //REGION 3 Mll bounds 0.000e+00 to 7.500e+01 MT bound 0.000e+00 to 1.200e+02 MET bound 1.500e+02 to 2.000e+02
-        //REGION 4 Mll bounds 0.000e+00 to 7.500e+01 MT bound 0.000e+00 to 1.200e+02 MET bound 2.000e+02 to 9.999e+03
-        //REGION 16 Mll bounds 7.500e+01 to 1.050e+02 MT bound 0.000e+00 to 1.200e+02 MET bound 5.000e+01 to 1.000e+02
-        //REGION 17 Mll bounds 7.500e+01 to 1.050e+02 MT bound 0.000e+00 to 1.200e+02 MET bound 1.000e+02 to 1.500e+02
-        //REGION 18 Mll bounds 7.500e+01 to 1.050e+02 MT bound 0.000e+00 to 1.200e+02 MET bound 1.500e+02 to 2.000e+02
-        //REGION 19 Mll bounds 7.500e+01 to 1.050e+02 MT bound 0.000e+00 to 1.200e+02 MET bound 2.000e+02 to 9.999e+03
-        //REGION 31 Mll bounds 1.050e+02 to 9.999e+03 MT bound 0.000e+00 to 1.200e+02 MET bound 5.000e+01 to 1.000e+02
-        //REGION 32 Mll bounds 1.050e+02 to 9.999e+03 MT bound 0.000e+00 to 1.200e+02 MET bound 1.000e+02 to 1.500e+02
-        //REGION 33 Mll bounds 1.050e+02 to 9.999e+03 MT bound 0.000e+00 to 1.200e+02 MET bound 1.500e+02 to 2.000e+02
-        //REGION 34 Mll bounds 1.050e+02 to 9.999e+03 MT bound 0.000e+00 to 1.200e+02 MET bound 2.000e+02 to 9.999e+03
+        add_result(SignalRegionData("SR3l_OS1tau_mT120-160_ETmiss50-100_mll<100", 41., {_numSR["SR3l_OS1tau_mT120-160_ETmiss50-100_mll<100"], 0}, {42., 16.}));
+        add_result(SignalRegionData("SR3l_OS1tau_mT120-160_ETmiss50-100_mll>100", 7., {_numSR["SR3l_OS1tau_mT120-160_ETmiss50-100_mll>100"], 0}, {8.3, 2.9}));
+        add_result(SignalRegionData("SR3l_OS1tau_mT120-160_ETmiss100-150_mll<100", 18., {_numSR["SR3l_OS1tau_mT120-160_ETmiss100-150_mll<100"], 0}, {17., 9.}));
+        add_result(SignalRegionData("SR3l_OS1tau_mT120-160_ETmiss100-150_mll>100", 4., {_numSR["SR3l_OS1tau_mT120-160_ETmiss100-150_mll>100"], 0}, {2.3, 1.3}));
+        add_result(SignalRegionData("SR3l_OS1tau_mT120-160_ETmiss150-200_mll<100", 2., {_numSR["SR3l_OS1tau_mT120-160_ETmiss150-200_mll<100"], 0}, {2.0, 1.2}));
+        add_result(SignalRegionData("SR3l_OS1tau_mT120-160_ETmiss150-200_mll>100", 0., {_numSR["SR3l_OS1tau_mT120-160_ETmiss150-200_mll>100"], 0}, {0.27, 0.32}));
+        add_result(SignalRegionData("SR3l_OS1tau_mT120-160_ETmiss200-250_mll<100", 1., {_numSR["SR3l_OS1tau_mT120-160_ETmiss200-250_mll<100"], 0}, {0.8, 0.5}));
+        add_result(SignalRegionData("SR3l_OS1tau_mT120-160_ETmiss200-250_mll>100", 0., {_numSR["SR3l_OS1tau_mT120-160_ETmiss200-250_mll>100"], 0}, {0.5, 0.4}));
 
-        int regions_lowmt [12] = {1,2,3,4,16,17,18,19,31,32,33,34};
-        float observed_lowmt [12] = {138,16,5,2,821,123,34,14,49,10,4,4};
-        float background_lowmt [12] = {132, 20, 4.0, 1.9, 776, 131, 34, 21, 45, 10.0, 2.5, 1.2};
-        float err_lowmt [12] = {19, 4, 0.8, 0.4, 125, 30, 8, 7, 7, 1.9, 0.5, 0.3};
-
-        for(int region=0; region<12;region++){
-          SignalRegionData results_tmp;
-          convert = new std::ostringstream();
-
-          (*convert) << regions_lowmt[region];
-          results_tmp.sr_label = convert->str();
-          delete convert;
-          results_tmp.n_observed = observed_lowmt[region];
-          results_tmp.n_background = background_lowmt[region];
-          results_tmp.background_sys = err_lowmt[region];
-          results_tmp.signal_sys = 0.;
-          results_tmp.n_signal = SR[regions_lowmt[region]];
-          add_result(results_tmp);
-        }
-
-
-        //Now do OSOF (no tau) results
-        //OSOF (no tau) MT > 160
-        //REGION 56 Mll bounds 0.000e+00 to 1.000e+02 MT bound 1.600e+02 to 9.999e+03 MET bound 5.000e+01 to 1.000e+02
-        //REGION 57 Mll bounds 0.000e+00 to 1.000e+02 MT bound 1.600e+02 to 9.999e+03 MET bound 1.000e+02 to 1.500e+02
-        //REGION 58 Mll bounds 0.000e+00 to 1.000e+02 MT bound 1.600e+02 to 9.999e+03 MET bound 1.500e+02 to 2.000e+02
-        //REGION 59 Mll bounds 0.000e+00 to 1.000e+02 MT bound 1.600e+02 to 9.999e+03 MET bound 2.000e+02 to 9.999e+03
-        //REGION 86 Mll bounds 1.000e+02 to 9.999e+03 MT bound 1.600e+02 to 9.999e+03 MET bound 5.000e+01 to 1.000e+02
-        //REGION 87 Mll bounds 1.000e+02 to 9.999e+03 MT bound 1.600e+02 to 9.999e+03 MET bound 1.000e+02 to 1.500e+02
-        //REGION 88 Mll bounds 1.000e+02 to 9.999e+03 MT bound 1.600e+02 to 9.999e+03 MET bound 1.500e+02 to 2.000e+02
-        //REGION 89 Mll bounds 1.000e+02 to 9.999e+03 MT bound 1.600e+02 to 9.999e+03 MET bound 2.000e+02 to 9.999e+03
-
-        int regions_highmt_osof [8] = {56,57,58,59,86,87,88,89};
-        float observed_highmt_osof [8] = {2,3,0,1,0,0,0,0};
-        float background_highmt_osof [8] = {3.2, 2.1, 0.59, 0.37, 0.44, 0.42, 0.10, 0.16};
-        float err_highmt_osof [8] = {0.8, 0.7, 0.18, 0.13, 0.33, 0.19, 0.06, 0.14};
-
-        for(int region=0; region<8;region++){
-          SignalRegionData results_tmp;
-          convert = new std::ostringstream();
-
-          (*convert) << regions_highmt_osof[region];
-          results_tmp.sr_label = convert->str();
-          delete convert;
-          results_tmp.n_observed = observed_highmt_osof[region];
-          results_tmp.n_background = background_highmt_osof[region];
-          results_tmp.background_sys = err_highmt_osof[region];
-          results_tmp.signal_sys = 0.;
-          results_tmp.n_signal = SR[regions_highmt_osof[region]];
-          add_result(results_tmp);
-        }
-
-        //OSOF (no tau) MT 120 - 160
-        //REGION 51 Mll bounds 0.000e+00 to 1.000e+02 MT bound 1.200e+02 to 1.600e+02 MET bound 5.000e+01 to 1.000e+02
-        //REGION 52 Mll bounds 0.000e+00 to 1.000e+02 MT bound 1.200e+02 to 1.600e+02 MET bound 1.000e+02 to 1.500e+02
-        //REGION 53 Mll bounds 0.000e+00 to 1.000e+02 MT bound 1.200e+02 to 1.600e+02 MET bound 1.500e+02 to 2.000e+02
-        //REGION 54 Mll bounds 0.000e+00 to 1.000e+02 MT bound 1.200e+02 to 1.600e+02 MET bound 2.000e+02 to 9.999e+03
-        //REGION 81 Mll bounds 1.000e+02 to 9.999e+03 MT bound 1.200e+02 to 1.600e+02 MET bound 5.000e+01 to 1.000e+02
-        //REGION 82 Mll bounds 1.000e+02 to 9.999e+03 MT bound 1.200e+02 to 1.600e+02 MET bound 1.000e+02 to 1.500e+02
-        //REGION 83 Mll bounds 1.000e+02 to 9.999e+03 MT bound 1.200e+02 to 1.600e+02 MET bound 1.500e+02 to 2.000e+02
-        //REGION 84 Mll bounds 1.000e+02 to 9.999e+03 MT bound 1.200e+02 to 1.600e+02 MET bound 2.000e+02 to 9.999e+03
-
-        int regions_medmt_osof [8] = {51,52,53,54,81,82,83,84};
-        float observed_medmt_osof [8] = {3,1,1,0,1,0,0,0};
-        float background_medmt_osof [8] = {5.5, 1.9, 0.46, 0.10, 0.25, 0.19, 0.03, 0.008};
-        float err_medmt_osof [8] = {1.2, 0.5, 0.18, 0.05, 0.07, 0.10, 0.03, 0.01};
-
-        for(int region=0; region<8;region++){
-          SignalRegionData results_tmp;
-          convert = new std::ostringstream();
-
-          (*convert) << regions_medmt_osof[region];
-          results_tmp.sr_label = convert->str();
-          delete convert;
-          results_tmp.n_observed = observed_medmt_osof[region];
-          results_tmp.n_background = background_medmt_osof[region];
-          results_tmp.background_sys = err_medmt_osof[region];
-          results_tmp.signal_sys = 0.;
-          results_tmp.n_signal = SR[regions_medmt_osof[region]];
-          add_result(results_tmp);
-        }
-
-        //OSOF (no tau) MT < 120
-        //REGION 46 Mll bounds 0.000e+00 to 1.000e+02 MT bound 0.000e+00 to 1.200e+02 MET bound 5.000e+01 to 1.000e+02
-        //REGION 47 Mll bounds 0.000e+00 to 1.000e+02 MT bound 0.000e+00 to 1.200e+02 MET bound 1.000e+02 to 1.500e+02
-        //REGION 48 Mll bounds 0.000e+00 to 1.000e+02 MT bound 0.000e+00 to 1.200e+02 MET bound 1.500e+02 to 2.000e+02
-        //REGION 49 Mll bounds 0.000e+00 to 1.000e+02 MT bound 0.000e+00 to 1.200e+02 MET bound 2.000e+02 to 9.999e+03
-        //REGION 76 Mll bounds 1.000e+02 to 9.999e+03 MT bound 0.000e+00 to 1.200e+02 MET bound 5.000e+01 to 1.000e+02
-        //REGION 77 Mll bounds 1.000e+02 to 9.999e+03 MT bound 0.000e+00 to 1.200e+02 MET bound 1.000e+02 to 1.500e+02
-        //REGION 78 Mll bounds 1.000e+02 to 9.999e+03 MT bound 0.000e+00 to 1.200e+02 MET bound 1.500e+02 to 2.000e+02
-        //REGION 79 Mll bounds 1.000e+02 to 9.999e+03 MT bound 0.000e+00 to 1.200e+02 MET bound 2.000e+02 to 9.999e+03
-
-        int regions_lowmt_osof [8] = {46,47,48,49,76,77,78,79};
-        float observed_lowmt_osof [8] = {29, 5, 1, 0, 1, 0, 0, 0};
-        float background_lowmt_osof [8] = {32, 7.3, 1.0, 0.53, 1.7, 0.30, 0.14, 0.03};
-        float err_lowmt_osof [8] = {7, 1.7, 0.3, 0.24, 0.4, 0.11, 0.09, 0.03};
-
-        for(int region=0; region<8;region++){
-          SignalRegionData results_tmp;
-          convert = new std::ostringstream();
-
-          (*convert) << regions_lowmt_osof[region];
-          results_tmp.sr_label = convert->str();
-          delete convert;
-          results_tmp.n_observed = observed_lowmt_osof[region];
-          results_tmp.n_background = background_lowmt_osof[region];
-          results_tmp.background_sys = err_lowmt_osof[region];
-          results_tmp.signal_sys = 0.;
-          results_tmp.n_signal = SR[regions_lowmt_osof[region]];
-          add_result(results_tmp);
-        }
-
-        //Now do the SS + 1 tau results
-        // SS 1 tau MT > 160
-        //REGION 101 Mll bounds 0.000e+00 to 1.000e+02 MT bound 1.600e+02 to 9.999e+03 MET bound 5.000e+01 to 1.000e+02
-        //REGION 102 Mll bounds 0.000e+00 to 1.000e+02 MT bound 1.600e+02 to 9.999e+03 MET bound 1.000e+02 to 1.500e+02
-        //REGION 103 Mll bounds 0.000e+00 to 1.000e+02 MT bound 1.600e+02 to 9.999e+03 MET bound 1.500e+02 to 2.000e+02
-        //REGION 104 Mll bounds 0.000e+00 to 1.000e+02 MT bound 1.600e+02 to 9.999e+03 MET bound 2.000e+02 to 9.999e+03
-        //REGION 131 Mll bounds 1.000e+02 to 9.999e+03 MT bound 1.600e+02 to 9.999e+03 MET bound 5.000e+01 to 1.000e+02
-        //REGION 132 Mll bounds 1.000e+02 to 9.999e+03 MT bound 1.600e+02 to 9.999e+03 MET bound 1.000e+02 to 1.500e+02
-        //REGION 133 Mll bounds 1.000e+02 to 9.999e+03 MT bound 1.600e+02 to 9.999e+03 MET bound 1.500e+02 to 2.000e+02
-        //REGION 134 Mll bounds 1.000e+02 to 9.999e+03 MT bound 1.600e+02 to 9.999e+03 MET bound 2.000e+02 to 9.999e+03
-
-        int regions_highmt_ss1tau [8] = {101,102,103,104,131,132,133,134};
-        float observed_highmt_ss1tau [8] = {2,1,0,2,1,1,0,0};
-        float background_highmt_ss1tau [8] = {3.1, 2.3, 0.5, 0.4, 0.5, 0.4, 0.2, 0.06};
-        float err_highmt_ss1tau [8] = {0.6, 0.5, 0.2, 0.1, 0.2, 0.2, 0.1, 0.05};
-
-        for(int region=0; region<8;region++){
-          SignalRegionData results_tmp;
-          convert = new std::ostringstream();
-
-          (*convert) << regions_highmt_ss1tau[region];
-          results_tmp.sr_label = convert->str();
-          delete convert;
-          results_tmp.n_observed = observed_highmt_ss1tau[region];
-          results_tmp.n_background = background_highmt_ss1tau[region];
-          results_tmp.background_sys = err_highmt_ss1tau[region];
-          results_tmp.signal_sys = 0.;
-          results_tmp.n_signal = SR[regions_highmt_ss1tau[region]];
-          add_result(results_tmp);
-        }
-
-        // SS 1 tau MT 120 - 160
-        //REGION 96 Mll bounds 0.000e+00 to 1.000e+02 MT bound 1.200e+02 to 1.600e+02 MET bound 5.000e+01 to 1.000e+02
-        //REGION 97 Mll bounds 0.000e+00 to 1.000e+02 MT bound 1.200e+02 to 1.600e+02 MET bound 1.000e+02 to 1.500e+02
-        //REGION 98 Mll bounds 0.000e+00 to 1.000e+02 MT bound 1.200e+02 to 1.600e+02 MET bound 1.500e+02 to 2.000e+02
-        //REGION 99 Mll bounds 0.000e+00 to 1.000e+02 MT bound 1.200e+02 to 1.600e+02 MET bound 2.000e+02 to 9.999e+03
-        //REGION 126 Mll bounds 1.000e+02 to 9.999e+03 MT bound 1.200e+02 to 1.600e+02 MET bound 5.000e+01 to 1.000e+02
-        //REGION 127 Mll bounds 1.000e+02 to 9.999e+03 MT bound 1.200e+02 to 1.600e+02 MET bound 1.000e+02 to 1.500e+02
-        //REGION 128 Mll bounds 1.000e+02 to 9.999e+03 MT bound 1.200e+02 to 1.600e+02 MET bound 1.500e+02 to 2.000e+02
-        //REGION 129 Mll bounds 1.000e+02 to 9.999e+03 MT bound 1.200e+02 to 1.600e+02 MET bound 2.000e+02 to 9.999e+03
-
-        int regions_medmt_ss1tau [8] = {96,97,98,99,126,127,128,129};
-        float observed_medmt_ss1tau [8] = {6,2,0,0,1,0,0,0};
-        float background_medmt_ss1tau [8] = {6, 0.9, 0.3, 0.06, 0.4, 0.06, 0.0, 0.01};
-        float err_medmt_ss1tau [8] = {1, 0.3, 0.1, 0.08, 0.1, 0.05, 0.01, 0.01};
-
-        for(int region=0; region<8;region++){
-          SignalRegionData results_tmp;
-          convert = new std::ostringstream();
-
-          (*convert) << regions_medmt_ss1tau[region];
-          results_tmp.sr_label = convert->str();
-          delete convert;
-          results_tmp.n_observed = observed_medmt_ss1tau[region];
-          results_tmp.n_background = background_medmt_ss1tau[region];
-          results_tmp.background_sys = err_medmt_ss1tau[region];
-          results_tmp.signal_sys = 0.;
-          results_tmp.n_signal = SR[regions_medmt_ss1tau[region]];
-          add_result(results_tmp);
-        }
-
-
-        // SS 1 tau MT < 120
-        //REGION 91 Mll bounds 0.000e+00 to 1.000e+02 MT bound 0.000e+00 to 1.200e+02 MET bound 5.000e+01 to 1.000e+02
-        //REGION 92 Mll bounds 0.000e+00 to 1.000e+02 MT bound 0.000e+00 to 1.200e+02 MET bound 1.000e+02 to 1.500e+02
-        //REGION 93 Mll bounds 0.000e+00 to 1.000e+02 MT bound 0.000e+00 to 1.200e+02 MET bound 1.500e+02 to 2.000e+02
-        //REGION 94 Mll bounds 0.000e+00 to 1.000e+02 MT bound 0.000e+00 to 1.200e+02 MET bound 2.000e+02 to 9.999e+03
-        //REGION 121 Mll bounds 1.000e+02 to 9.999e+03 MT bound 0.000e+00 to 1.200e+02 MET bound 5.000e+01 to 1.000e+02
-        //REGION 122 Mll bounds 1.000e+02 to 9.999e+03 MT bound 0.000e+00 to 1.200e+02 MET bound 1.000e+02 to 1.500e+02
-        //REGION 123 Mll bounds 1.000e+02 to 9.999e+03 MT bound 0.000e+00 to 1.200e+02 MET bound 1.500e+02 to 2.000e+02
-        //REGION 124 Mll bounds 1.000e+02 to 9.999e+03 MT bound 0.000e+00 to 1.200e+02 MET bound 2.000e+02 to 9.999e+03
-
-        int regions_lowmt_ss1tau [8] = {91,92,93,94,121,122,123,124};
-        float observed_lowmt_ss1tau [8] = {46,1,0,0,3,0,0,0};
-        float background_lowmt_ss1tau [8] = {51, 6, 2.0, 0.9, 2.8, 0.5, 0.11, 0.04};
-        float err_lowmt_ss1tau [8] = {8, 1, 0.4, 0.2, 0.6, 0.1, 0.07, 0.02};
-
-        for(int region=0; region<8;region++){
-          SignalRegionData results_tmp;
-          convert = new std::ostringstream();
-
-          (*convert) << regions_lowmt_ss1tau[region];
-          results_tmp.sr_label = convert->str();
-          delete convert;
-          results_tmp.n_observed = observed_lowmt_ss1tau[region];
-          results_tmp.n_background = background_lowmt_ss1tau[region];
-          results_tmp.background_sys = err_lowmt_ss1tau[region];
-          results_tmp.signal_sys = 0.;
-          results_tmp.n_signal = SR[regions_lowmt_ss1tau[region]];
-          add_result(results_tmp);
-        }
-
-
-        //Now do 1 tau, OSOF pair
-        //1 tau OSOF pair, MT > 160
-        //REGION 146 Mll bounds 0.000e+00 to 1.000e+02 MT bound 1.600e+02 to 9.999e+03 MET bound 5.000e+01 to 1.000e+02
-        //REGION 147 Mll bounds 0.000e+00 to 1.000e+02 MT bound 1.600e+02 to 9.999e+03 MET bound 1.000e+02 to 1.500e+02
-        //REGION 148 Mll bounds 0.000e+00 to 1.000e+02 MT bound 1.600e+02 to 9.999e+03 MET bound 1.500e+02 to 2.000e+02
-        //REGION 149 Mll bounds 0.000e+00 to 1.000e+02 MT bound 1.600e+02 to 9.999e+03 MET bound 2.000e+02 to 9.999e+03
-        //REGION 176 Mll bounds 1.000e+02 to 9.999e+03 MT bound 1.600e+02 to 9.999e+03 MET bound 5.000e+01 to 1.000e+02
-        //REGION 177 Mll bounds 1.000e+02 to 9.999e+03 MT bound 1.600e+02 to 9.999e+03 MET bound 1.000e+02 to 1.500e+02
-        //REGION 178 Mll bounds 1.000e+02 to 9.999e+03 MT bound 1.600e+02 to 9.999e+03 MET bound 1.500e+02 to 2.000e+02
-        //REGION 179 Mll bounds 1.000e+02 to 9.999e+03 MT bound 1.600e+02 to 9.999e+03 MET bound 2.000e+02 to 9.999e+03
-
-        int regions_highmt_osof1tau [8] = {146,147,148,149,176,177,178,179};
-        float observed_highmt_osof1tau [8] = {19,14,1,2,2,3,3,1};
-        float background_highmt_osof1tau [8] = {15, 14, 3.7, 1.5, 5.7, 4.0, 1.3, 0.7};
-        float err_highmt_osof1tau [8] = {8, 9, 2.1, 1.0, 2.3, 2.2, 1.0, 0.4};
-
-        for(int region=0; region<8;region++){
-          SignalRegionData results_tmp;
-          convert = new std::ostringstream();
-
-          (*convert) << regions_highmt_osof1tau[region];
-          results_tmp.sr_label = convert->str();
-          delete convert;
-          results_tmp.n_observed = observed_highmt_osof1tau[region];
-          results_tmp.n_background = background_highmt_osof1tau[region];
-          results_tmp.background_sys = err_highmt_osof1tau[region];
-          results_tmp.signal_sys = 0.;
-          results_tmp.n_signal = SR[regions_highmt_osof1tau[region]];
-          add_result(results_tmp);
-        }
-
-        //1 tau OSOF pair, MT > 120 - 160
-        //REGION 141 Mll bounds 0.000e+00 to 1.000e+02 MT bound 1.200e+02 to 1.600e+02 MET bound 5.000e+01 to 1.000e+02
-        //REGION 142 Mll bounds 0.000e+00 to 1.000e+02 MT bound 1.200e+02 to 1.600e+02 MET bound 1.000e+02 to 1.500e+02
-        //REGION 143 Mll bounds 0.000e+00 to 1.000e+02 MT bound 1.200e+02 to 1.600e+02 MET bound 1.500e+02 to 2.000e+02
-        //REGION 144 Mll bounds 0.000e+00 to 1.000e+02 MT bound 1.200e+02 to 1.600e+02 MET bound 2.000e+02 to 9.999e+03
-        //REGION 171 Mll bounds 1.000e+02 to 9.999e+03 MT bound 1.200e+02 to 1.600e+02 MET bound 5.000e+01 to 1.000e+02
-        //REGION 172 Mll bounds 1.000e+02 to 9.999e+03 MT bound 1.200e+02 to 1.600e+02 MET bound 1.000e+02 to 1.500e+02
-        //REGION 173 Mll bounds 1.000e+02 to 9.999e+03 MT bound 1.200e+02 to 1.600e+02 MET bound 1.500e+02 to 2.000e+02
-        //REGION 174 Mll bounds 1.000e+02 to 9.999e+03 MT bound 1.200e+02 to 1.600e+02 MET bound 2.000e+02 to 9.999e+03
-
-        int regions_medmt_osof1tau [8] = {141,142,143,144,171,172,173,174};
-        float observed_medmt_osof1tau [8] = {41,18,2,1,7,4,0,0};
-        float background_medmt_osof1tau [8] = {42, 17, 2.0, 0.8, 8.3, 2.3, 0.27, 0.5};
-        float err_medmt_osof1tau [8] = {16, 9, 1.2, 0.5, 2.9, 1.3, 0.32, 0.4};
-
-        for(int region=0; region<8;region++){
-          SignalRegionData results_tmp;
-          convert = new std::ostringstream();
-
-          (*convert) << regions_medmt_osof1tau[region];
-          results_tmp.sr_label = convert->str();
-          delete convert;
-          results_tmp.n_observed = observed_medmt_osof1tau[region];
-          results_tmp.n_background = background_medmt_osof1tau[region];
-          results_tmp.background_sys = err_medmt_osof1tau[region];
-          results_tmp.signal_sys = 0.;
-          results_tmp.n_signal = SR[regions_medmt_osof1tau[region]];
-          add_result(results_tmp);
-        }
-
-
-        //1 tau OSOF pair, MT < 120
-        //REGION 136 Mll bounds 0.000e+00 to 1.000e+02 MT bound 0.000e+00 to 1.200e+02 MET bound 5.000e+01 to 1.000e+02
-        //REGION 137 Mll bounds 0.000e+00 to 1.000e+02 MT bound 0.000e+00 to 1.200e+02 MET bound 1.000e+02 to 1.500e+02
-        //REGION 138 Mll bounds 0.000e+00 to 1.000e+02 MT bound 0.000e+00 to 1.200e+02 MET bound 1.500e+02 to 2.000e+02
-        //REGION 139 Mll bounds 0.000e+00 to 1.000e+02 MT bound 0.000e+00 to 1.200e+02 MET bound 2.000e+02 to 9.999e+03
-        //REGION 166 Mll bounds 1.000e+02 to 9.999e+03 MT bound 0.000e+00 to 1.200e+02 MET bound 5.000e+01 to 1.000e+02
-        //REGION 167 Mll bounds 1.000e+02 to 9.999e+03 MT bound 0.000e+00 to 1.200e+02 MET bound 1.000e+02 to 1.500e+02
-        //REGION 168 Mll bounds 1.000e+02 to 9.999e+03 MT bound 0.000e+00 to 1.200e+02 MET bound 1.500e+02 to 2.000e+02
-        //REGION 169 Mll bounds 1.000e+02 to 9.999e+03 MT bound 0.000e+00 to 1.200e+02 MET bound 2.000e+02 to 9.999e+03
-
-        int regions_lowmt_osof1tau [8] = {136,137,138,139,166,167,168,169};
-        float observed_lowmt_osof1tau [8] = {290,62,10,2,27,8,0,0};
-        float background_lowmt_osof1tau [8] = {259,60,11,2.9, 30, 5.9, 2.3, 1.1};
-        float err_lowmt_osof1tau [8] = {93, 25, 5, 1.4, 13, 2.6, 1.4, 0.6};
-
-        for(int region=0; region<8;region++){
-          SignalRegionData results_tmp;
-          convert = new std::ostringstream();
-
-          (*convert) << regions_lowmt_osof1tau[region];
-          results_tmp.sr_label = convert->str();
-          delete convert;
-          results_tmp.n_observed = observed_lowmt_osof1tau[region];
-          results_tmp.n_background = background_lowmt_osof1tau[region];
-          results_tmp.background_sys = err_lowmt_osof1tau[region];
-          results_tmp.signal_sys = 0.;
-          results_tmp.n_signal = SR[regions_lowmt_osof1tau[region]];
-          add_result(results_tmp);
-        }
+        add_result(SignalRegionData("SR3l_OS1tau_mT>160_ETmiss50-100_mll<100", 19., {_numSR["SR3l_OS1tau_mT>160_ETmiss50-100_mll<100"], 0}, {15., 8.}));
+        add_result(SignalRegionData("SR3l_OS1tau_mT>160_ETmiss50-100_mll>100", 2., {_numSR["SR3l_OS1tau_mT>160_ETmiss50-100_mll>100"], 0}, {5.7, 2.3}));
+        add_result(SignalRegionData("SR3l_OS1tau_mT>160_ETmiss100-150_mll<100", 14., {_numSR["SR3l_OS1tau_mT>160_ETmiss100-150_mll<100"], 0}, {14., 9.}));
+        add_result(SignalRegionData("SR3l_OS1tau_mT>160_ETmiss100-150_mll>100", 3., {_numSR["SR3l_OS1tau_mT>160_ETmiss100-150_mll>100"], 0}, {4.0, 2.2}));
+        add_result(SignalRegionData("SR3l_OS1tau_mT>160_ETmiss150-200_mll<100", 1., {_numSR["SR3l_OS1tau_mT>160_ETmiss150-200_mll<100"], 0}, {3.7, 2.1}));
+        add_result(SignalRegionData("SR3l_OS1tau_mT>160_ETmiss150-200_mll>100", 3., {_numSR["SR3l_OS1tau_mT>160_ETmiss150-200_mll>100"], 0}, {1.3, 1.0}));
+        add_result(SignalRegionData("SR3l_OS1tau_mT>160_ETmiss200-250_mll<100", 2., {_numSR["SR3l_OS1tau_mT>160_ETmiss200-250_mll<100"], 0}, {1.5, 1.0}));
+        add_result(SignalRegionData("SR3l_OS1tau_mT>160_ETmiss200-250_mll>100", 1., {_numSR["SR3l_OS1tau_mT>160_ETmiss200-250_mll>100"], 0}, {0.7, 0.4}));
 
       }
 
 
     protected:
       void clear() {
-        for(size_t i=0;i<NUMSR;i++) { SR[i]=0; }
+        for (auto& el : _numSR) { el.second = 0.;}
+        #ifdef CHECK_CUTFLOW
+          std::fill(cutFlowVector.begin(), cutFlowVector.end(), 0);
+        #endif
       }
 
     };
 
-
     DEFINE_ANALYSIS_FACTORY(CMS_8TeV_3LEPEW_20invfb)
-
 
   }
 }
