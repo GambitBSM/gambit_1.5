@@ -102,7 +102,7 @@ namespace Gambit {
     public:
 
         // Required detector sim
-        static constexpr const char* detector = "ATLASmultieff";
+        static constexpr const char* detector = "ATLAS";
 
         Analysis_ATLAS_13TeV_2LEPStop_36invfb() {
 
