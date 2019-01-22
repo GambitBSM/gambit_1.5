@@ -3,8 +3,6 @@
 #include <memory>
 #include <iomanip>
 #include <sstream>
-
-// For debugging
 #include <cassert>
 
 
@@ -20,7 +18,7 @@
   Known features:
     a) Must run with a dedicated detector card due to odd b tagging and isolation
     
-    Anders: Not sure if this comment is correct?
+    Anders: Not sure if this comment still applies?
 
   Missing:
     Implement SRs for the 4lep and 2lep2jet final states
@@ -275,13 +273,9 @@ namespace Gambit {
         // Missing energy
         double met = event->met();
         double pTmissPhi = event->missingmom().phi();
-        // vector<HEPUtils::Particle*> baselineElectrons;
-        // vector<HEPUtils::Particle*> baselineMuons;
-        // vector<HEPUtils::Particle*> baselineTaus;
-        // vector<HEPUtils::Jet*> baselineJets;
+
 
         // Create vectors of physics objects:
-
         // - electrons
         vector<HEPUtils::Particle*> signalElectrons;
         for (HEPUtils::Particle* electron : event->electrons()) {
