@@ -40,6 +40,7 @@ namespace Gambit {
 
       // Required detector sim
       static constexpr const char* detector = "CMS";
+      // FIXME Apply standard electron and muon efficiencies
 
       Analysis_CMS_8TeV_MONOJET_20invfb()
         : _num250(0),_num300(0),_num350(0),_num400(0),_num450(0),_num500(0),_num550(0),

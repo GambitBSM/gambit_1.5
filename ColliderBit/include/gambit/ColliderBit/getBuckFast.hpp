@@ -57,7 +57,6 @@ namespace Gambit
     template<typename EventT>
     BaseDetector<EventT>* getBuckFast(const str& detname,
                                       const MCLoopInfo& RunMC,
-                                      bool use_effs,
                                       int iteration,
                                       const Options& runOptions)
     {
@@ -95,14 +94,9 @@ namespace Gambit
         if (detname == "ATLAS")
         {
           bucky[mine].smearElectronEnergy = &ATLAS::smearElectronEnergy;
-          bucky[mine].smearMuonMomentum   = &ATLAS::smearMuonMomentum;
+          bucky[mine].smearMuonMomentum   = &ATLAS::smearMuonMomentum ;
           bucky[mine].smearTaus           = &ATLAS::smearTaus;
           bucky[mine].smearJets           = &ATLAS::smearJets;
-          if (use_effs)
-          {
-            bucky[mine].applyElectronEff  = &ATLAS::applyElectronEff;
-            bucky[mine].applyMuonEff      = &ATLAS::applyMuonEff;
-          }
         }
         else if (detname == "CMS")
         {
@@ -110,11 +104,6 @@ namespace Gambit
           bucky[mine].smearMuonMomentum   = &CMS::smearMuonMomentum;
           bucky[mine].smearTaus           = &CMS::smearTaus;
           bucky[mine].smearJets           = &CMS::smearJets;
-          if (use_effs)
-          {
-            bucky[mine].applyElectronEff  = &CMS::applyElectronEff;
-            bucky[mine].applyMuonEff      = &CMS::applyMuonEff;
-          }
         }
         else if (detname == "Identity") { /* relax */ }
         else
@@ -128,13 +117,13 @@ namespace Gambit
 
     }
 
-    /// Retrieve a BuckFast sim of CAT(EXPERIMENT,SUFFIX), that accepts type EVENT
-    #define GET_BUCKFAST_AS_BASE_DETECTOR(NAME, EVENT, EXPERIMENT, SUFFIX)      \
+    /// Retrieve a BuckFast sim of EXPERIMENT that accepts type EVENT
+    #define GET_BUCKFAST_AS_BASE_DETECTOR(NAME, EVENT, EXPERIMENT)              \
     void NAME(BaseDetector<EVENT>* &result)                                     \
     {                                                                           \
       using namespace Pipes::NAME;                                              \
-      result = getBuckFast<EVENT>(#EXPERIMENT, *Dep::RunMC,                     \
-       IF_ELSE_EMPTY(SUFFIX,true,false), *Loop::iteration, *runOptions);        \
+      result = getBuckFast<EVENT>(#EXPERIMENT, *Dep::RunMC, *Loop::iteration,   \
+      *runOptions);                                                             \
     }
 
   }

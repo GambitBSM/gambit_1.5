@@ -42,7 +42,7 @@ namespace Gambit {
     public:
 
       // Required detector sim
-      static constexpr const char* detector = "CMSmultieff";
+      static constexpr const char* detector = "CMS";
 
       Analysis_CMS_13TeV_2OSLEP_chargino_stop_36invfb():
       _cutflow("CMS 2-lep stop 13 TeV", {"Two_OC_leptons", "Third_lepton_veto", "mll_20", "mll_mZ_15", "PTmiss_140"})

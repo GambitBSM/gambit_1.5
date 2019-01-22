@@ -81,24 +81,8 @@
     #undef FUNCTION
   #undef CAPABILITY
 
-  #define CAPABILITY ATLASmultieffDetectorSim
-    #define FUNCTION getBuckFastATLASmultieffPythia
-    START_FUNCTION(BaseDetector<Pythia_default::Pythia8::Event>*)
-    NEEDS_MANAGER(RunMC, MCLoopInfo)
-    NEEDS_CLASSES_FROM(Pythia, default)
-    #undef FUNCTION
-  #undef CAPABILITY
-
   #define CAPABILITY CMSDetectorSim
     #define FUNCTION getBuckFastCMSPythia
-    START_FUNCTION(BaseDetector<Pythia_default::Pythia8::Event>*)
-    NEEDS_MANAGER(RunMC, MCLoopInfo)
-    NEEDS_CLASSES_FROM(Pythia, default)
-    #undef FUNCTION
-  #undef CAPABILITY
-
-  #define CAPABILITY CMSmultieffDetectorSim
-    #define FUNCTION getBuckFastCMSmultieffPythia
     START_FUNCTION(BaseDetector<Pythia_default::Pythia8::Event>*)
     NEEDS_MANAGER(RunMC, MCLoopInfo)
     NEEDS_CLASSES_FROM(Pythia, default)
@@ -126,16 +110,6 @@
     #undef FUNCTION
   #undef CAPABILITY
 
-  #define CAPABILITY ATLASmultieffSmearedEvent
-    #define FUNCTION smearEventATLASmultieff
-    START_FUNCTION(HEPUtils::Event)
-    NEEDS_MANAGER(RunMC, MCLoopInfo)
-    NEEDS_CLASSES_FROM(Pythia, default)
-    DEPENDENCY(HardScatteringEvent, Pythia_default::Pythia8::Event)
-    DEPENDENCY(ATLASmultieffDetectorSim, BaseDetector<Pythia_default::Pythia8::Event>*)
-    #undef FUNCTION
-  #undef CAPABILITY
-
   #define CAPABILITY CMSSmearedEvent
     #define FUNCTION smearEventCMS
     START_FUNCTION(HEPUtils::Event)
@@ -143,16 +117,6 @@
     NEEDS_CLASSES_FROM(Pythia, default)
     DEPENDENCY(HardScatteringEvent, Pythia_default::Pythia8::Event)
     DEPENDENCY(CMSDetectorSim, BaseDetector<Pythia_default::Pythia8::Event>*)
-    #undef FUNCTION
-  #undef CAPABILITY
-
-  #define CAPABILITY CMSmultieffSmearedEvent
-    #define FUNCTION smearEventCMSmultieff
-    START_FUNCTION(HEPUtils::Event)
-    NEEDS_MANAGER(RunMC, MCLoopInfo)
-    NEEDS_CLASSES_FROM(Pythia, default)
-    DEPENDENCY(HardScatteringEvent, Pythia_default::Pythia8::Event)
-    DEPENDENCY(CMSmultieffDetectorSim, BaseDetector<Pythia_default::Pythia8::Event>*)
     #undef FUNCTION
   #undef CAPABILITY
 

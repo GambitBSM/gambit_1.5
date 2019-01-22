@@ -108,7 +108,7 @@ namespace Gambit
         pythiaCommonOptions.push_back("Print:quiet = on");
         pythiaCommonOptions.push_back("SLHA:verbose = 0");
 
-        // Get options from yaml file. If the ColliderPythia specialization is a known one we're OK with no options.
+        // Get options from yaml file.
         double xsec_veto_default = 0.0;
         if (runOptions.hasKey(RunMC.current_collider()))
         {
@@ -154,8 +154,6 @@ namespace Gambit
         #ifdef COLLIDERBIT_DEBUG
           cout << debug_prefix() << "getPythia"+model_suffix+": My Pythia seed is: " << std::to_string(RunMC.current_seed_base() + omp_get_thread_num()) << endl;
         #endif
-
-        result.resetSpecialization(RunMC.current_collider());
 
         try
         {
@@ -275,7 +273,7 @@ namespace Gambit
         pythiaCommonOptions.push_back("Print:quiet = on");
         pythiaCommonOptions.push_back("SLHA:verbose = 0");
 
-        // Get options from yaml file. If the ColliderPythia specialization is a known one we're OK with no options.
+        // Get options from yaml file.
         double xsec_veto_default = 0.0;
         if (runOptions.hasKey(RunMC.current_collider()))
         {
@@ -322,8 +320,6 @@ namespace Gambit
         #ifdef COLLIDERBIT_DEBUG
         cout << debug_prefix() << "getPythia"+model_suffix+"FileReader: My Pythia seed is: " << std::to_string(RunMC.current_seed_base() + omp_get_thread_num()) << endl;
         #endif
-
-        result.resetSpecialization(RunMC.current_collider());
 
         try
         {

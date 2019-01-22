@@ -81,24 +81,8 @@
     #undef FUNCTION
   #undef CAPABILITY
 
-  #define CAPABILITY ATLASmultieffDetectorSim
-    #define FUNCTION getBuckFastATLASmultieffPythia_EM
-    START_FUNCTION(BaseDetector<Pythia_EM_default::Pythia8::Event>*)
-    NEEDS_MANAGER(RunMC, MCLoopInfo)
-    NEEDS_CLASSES_FROM(Pythia_EM, default)
-    #undef FUNCTION
-  #undef CAPABILITY
-
   #define CAPABILITY CMSDetectorSim
     #define FUNCTION getBuckFastCMSPythia_EM
-    START_FUNCTION(BaseDetector<Pythia_EM_default::Pythia8::Event>*)
-    NEEDS_MANAGER(RunMC, MCLoopInfo)
-    NEEDS_CLASSES_FROM(Pythia_EM, default)
-    #undef FUNCTION
-  #undef CAPABILITY
-
-  #define CAPABILITY CMSmultieffDetectorSim
-    #define FUNCTION getBuckFastCMSmultieffPythia_EM
     START_FUNCTION(BaseDetector<Pythia_EM_default::Pythia8::Event>*)
     NEEDS_MANAGER(RunMC, MCLoopInfo)
     NEEDS_CLASSES_FROM(Pythia_EM, default)
@@ -126,16 +110,6 @@
     #undef FUNCTION
   #undef CAPABILITY
 
-  #define CAPABILITY ATLASmultieffSmearedEvent
-    #define FUNCTION smearEventATLASmultieff_EM
-    START_FUNCTION(HEPUtils::Event)
-    NEEDS_MANAGER(RunMC, MCLoopInfo)
-    NEEDS_CLASSES_FROM(Pythia_EM, default)
-    DEPENDENCY(HardScatteringEvent, Pythia_EM_default::Pythia8::Event)
-    DEPENDENCY(ATLASmultieffDetectorSim, BaseDetector<Pythia_EM_default::Pythia8::Event>*)
-    #undef FUNCTION
-  #undef CAPABILITY
-
   #define CAPABILITY CMSSmearedEvent
     #define FUNCTION smearEventCMS_EM
     START_FUNCTION(HEPUtils::Event)
@@ -143,16 +117,6 @@
     NEEDS_CLASSES_FROM(Pythia_EM, default)
     DEPENDENCY(HardScatteringEvent, Pythia_EM_default::Pythia8::Event)
     DEPENDENCY(CMSDetectorSim, BaseDetector<Pythia_EM_default::Pythia8::Event>*)
-    #undef FUNCTION
-  #undef CAPABILITY
-
-  #define CAPABILITY CMSmultieffSmearedEvent
-    #define FUNCTION smearEventCMSmultieff_EM
-    START_FUNCTION(HEPUtils::Event)
-    NEEDS_MANAGER(RunMC, MCLoopInfo)
-    NEEDS_CLASSES_FROM(Pythia_EM, default)
-    DEPENDENCY(HardScatteringEvent, Pythia_EM_default::Pythia8::Event)
-    DEPENDENCY(CMSmultieffDetectorSim, BaseDetector<Pythia_EM_default::Pythia8::Event>*)
     #undef FUNCTION
   #undef CAPABILITY
 

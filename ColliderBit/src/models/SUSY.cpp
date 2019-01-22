@@ -34,17 +34,13 @@ namespace Gambit
     GET_PYTHIA_EVENT(generateEventPythia, Pythia_default::Pythia8::Event)
 
     // Get detector simulations
-    GET_BUCKFAST_AS_BASE_DETECTOR(getBuckFastATLASPythia, Pythia_default::Pythia8::Event, ATLAS, )
-    GET_BUCKFAST_AS_BASE_DETECTOR(getBuckFastATLASmultieffPythia, Pythia_default::Pythia8::Event, ATLAS, multieff)
-    GET_BUCKFAST_AS_BASE_DETECTOR(getBuckFastCMSPythia, Pythia_default::Pythia8::Event, CMS, )
-    GET_BUCKFAST_AS_BASE_DETECTOR(getBuckFastCMSmultieffPythia, Pythia_default::Pythia8::Event, CMS, multieff)
-    GET_BUCKFAST_AS_BASE_DETECTOR(getBuckFastIdentityPythia, Pythia_default::Pythia8::Event, Identity, )
+    GET_BUCKFAST_AS_BASE_DETECTOR(getBuckFastATLASPythia, Pythia_default::Pythia8::Event, ATLAS)
+    GET_BUCKFAST_AS_BASE_DETECTOR(getBuckFastCMSPythia, Pythia_default::Pythia8::Event, CMS)
+    GET_BUCKFAST_AS_BASE_DETECTOR(getBuckFastIdentityPythia, Pythia_default::Pythia8::Event, Identity)
 
     // Run detector simulations
     SMEAR_EVENT(smearEventATLAS, ATLAS)
-    SMEAR_EVENT(smearEventATLASmultieff, ATLASmultieff)
     SMEAR_EVENT(smearEventCMS, CMS)
-    SMEAR_EVENT(smearEventCMSmultieff, CMSmultieff)
     SMEAR_EVENT(copyEvent, Identity)
 
   }

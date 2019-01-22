@@ -26,6 +26,7 @@ namespace Gambit {
 
       // Required detector sim
       static constexpr const char* detector = "ATLAS";
+      // FIXME Apply standard electron and muon efficiencies
 
       // Numbers passing cuts
       static const size_t NUMSR = 13;

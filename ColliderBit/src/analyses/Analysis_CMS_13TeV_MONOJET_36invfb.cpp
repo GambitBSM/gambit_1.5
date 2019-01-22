@@ -22,6 +22,7 @@ namespace Gambit {
 
       // Required detector sim
       static constexpr const char* detector = "CMS";
+      // FIXME Apply standard electron and muon efficiencies
 
       static const size_t NUMSR = 22;
       double _srnums[NUMSR];

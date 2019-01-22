@@ -66,6 +66,7 @@ namespace Gambit {
 
         // Required detector sim
         static constexpr const char* detector = "CMS";
+        // FIXME Apply standard electron and muon efficiencies
 
         Analysis_CMS_13TeV_1LEPStop_36invfb():
             _cutflow("CMS 0-lep stop 13 TeV", {

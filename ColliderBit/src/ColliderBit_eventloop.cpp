@@ -287,17 +287,13 @@ namespace Gambit
 
       #ifdef COLLIDERBIT_DEBUG
         cout << debug_prefix() << "CollectAnalyses: Dep::ATLASAnalysisNumbers->size()    = " << Dep::ATLASAnalysisNumbers->size() << endl;
-        cout << debug_prefix() << "CollectAnalyses: Dep::ATLASmultieffAnalysisNumbers->size()    = " << Dep::ATLASmultieffAnalysisNumbers->size() << endl;
         cout << debug_prefix() << "CollectAnalyses: Dep::CMSAnalysisNumbers->size()      = " << Dep::CMSAnalysisNumbers->size() << endl;
-        cout << debug_prefix() << "CollectAnalyses: Dep::CMSmultieffAnalysisNumbers->size() = " << Dep::CMSmultieffAnalysisNumbers->size() << endl;
         cout << debug_prefix() << "CollectAnalyses: Dep::IdentityAnalysisNumbers->size() = " << Dep::IdentityAnalysisNumbers->size() << endl;
       #endif
 
       // Add results
       if (Dep::ATLASAnalysisNumbers->size() != 0) result.insert(result.end(), Dep::ATLASAnalysisNumbers->begin(), Dep::ATLASAnalysisNumbers->end());
-      if (Dep::ATLASmultieffAnalysisNumbers->size() != 0) result.insert(result.end(), Dep::ATLASmultieffAnalysisNumbers->begin(), Dep::ATLASmultieffAnalysisNumbers->end());
       if (Dep::CMSAnalysisNumbers->size() != 0) result.insert(result.end(), Dep::CMSAnalysisNumbers->begin(), Dep::CMSAnalysisNumbers->end());
-      if (Dep::CMSmultieffAnalysisNumbers->size() != 0) result.insert(result.end(), Dep::CMSmultieffAnalysisNumbers->begin(), Dep::CMSmultieffAnalysisNumbers->end());
       if (Dep::IdentityAnalysisNumbers->size() != 0) result.insert(result.end(), Dep::IdentityAnalysisNumbers->begin(), Dep::IdentityAnalysisNumbers->end());
 
       // When first called, check that all analyses contain at least one signal region.

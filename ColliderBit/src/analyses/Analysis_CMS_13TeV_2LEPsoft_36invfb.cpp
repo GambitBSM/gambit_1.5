@@ -65,7 +65,7 @@ namespace Gambit {
     public:
 
       // Required detector sim
-      static constexpr const char* detector = "CMSmultieff";
+      static constexpr const char* detector = "CMS";
 
       struct ptComparison {
         bool operator() (HEPUtils::Particle* i,HEPUtils::Particle* j) {return (i->pT()>j->pT());}

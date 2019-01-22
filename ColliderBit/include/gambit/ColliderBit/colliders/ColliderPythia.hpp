@@ -22,7 +22,6 @@
 #include <stdexcept>
 #include "gambit/Elements/shared_types.hpp"
 #include "gambit/ColliderBit/colliders/BaseCollider.hpp"
-#include "gambit/ColliderBit/colliders/collider_rollcall.hpp"
 #include "SLHAea/slhaea.h"
 
 namespace Gambit
@@ -41,7 +40,6 @@ namespace Gambit
         PythiaT* _pythiaInstance;
         PythiaT* _pythiaBase;
         std::vector<std::string> _pythiaSettings;
-        void (*_specialInit)(ColliderPythia<PythiaT, EventT>*);
 
 
       public:
@@ -128,9 +126,6 @@ namespace Gambit
           // Settings acquired externally (ex from a gambit yaml file)
           for(const auto command : externalSettings) _pythiaSettings.push_back(command);
 
-          // Specialized settings:
-          _specialInit(this);
-
           if (!_pythiaBase)
           {
             _pythiaBase = new PythiaT(pythiaDocPath, false);
@@ -165,9 +160,6 @@ namespace Gambit
           // Settings acquired externally (for example, from a gambit yaml file)
           for(const auto command : externalSettings) _pythiaSettings.push_back(command);
 
-          // Specialized settings:
-          _specialInit(this);
-
           if (!_pythiaBase)
           {
             _pythiaBase = new PythiaT(pythiaDocPath, false);
@@ -198,24 +190,6 @@ namespace Gambit
                              const std::vector<std::string>& externalSettings, std::ostream& os)
         {
           init_user_model(pythiaDocPath, externalSettings, nullptr, os);
-        }
-
-        /// Specialize this Pythia interface to Gambit with a specialization function.
-        void resetSpecialization(const std::string& specName)
-        {
-          clear();
-          /// @todo move this out to a yaml file, find some way to enforce that specialisation must match the template parameter
-          #define IF_X_SPECIALIZEX(X) if (specName == #X) { _specialInit = CAT(X,_init); return; }
-          IF_X_SPECIALIZEX(Pythia_external)
-          IF_X_SPECIALIZEX(Pythia_SUSY_LHC_8TeV)
-          IF_X_SPECIALIZEX(Pythia_glusq_LHC_8TeV)
-          IF_X_SPECIALIZEX(Pythia_SUSY_LHC_13TeV)
-          // default to a Pythia instance configured entirely by external (yaml) settings:
-          _specialInit = Pythia_external_init;
-          std::cout<<"\n\n\n"
-                   <<"COLLIDERBIT WARNING: Pythia named "<<specName<<" is not coded in ColliderPythia."
-                   <<"                     Now trying to configure Pythia entirely by yaml input..."
-                   <<"\n\n\n";
         }
 
         ///@}

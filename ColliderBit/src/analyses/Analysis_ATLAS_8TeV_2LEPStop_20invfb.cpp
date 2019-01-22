@@ -51,6 +51,7 @@ namespace Gambit {
 
       // Required detector sim
       static constexpr const char* detector = "ATLAS";
+      // FIXME Apply standard electron and muon efficiencies
 
       Analysis_ATLAS_8TeV_2LEPStop_20invfb()
         : _numSRM90SF(0), _numSRM100SF(0), _numSRM110SF(0), _numSRM120SF(0),
