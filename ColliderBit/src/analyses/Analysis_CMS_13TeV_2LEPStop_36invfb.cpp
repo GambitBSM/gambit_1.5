@@ -15,9 +15,8 @@ using namespace std;
    Yang Zhang
 
    Known errors:
-
-   Known features:
-
+        Using ATLASEfficiencies instead of CMSEfficiencies because "applyLooseIDElectronSelectionR2" and "applyMediumIDElectronSelectionR2" functions are important for this analysis.
+        
 */
 
 namespace Gambit {
