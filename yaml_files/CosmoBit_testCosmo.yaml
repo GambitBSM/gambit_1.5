@@ -78,6 +78,11 @@ ObsLikes:
     type:         double
 
   - purpose:      LogLike
+    capability:   Pantheon_LogLike
+    module:       CosmoBit
+    type:         double
+
+  - purpose:      LogLike
     capability:   compute_Planck_high_TT_loglike
     module:       CosmoBit
     type:         double

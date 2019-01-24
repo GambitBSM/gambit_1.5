@@ -231,9 +231,27 @@ BE_NAMESPACE
     background_at_tau(&cosmo.ba,tau,cosmo.ba.long_info,cosmo.ba.inter_normal, &index, pvecback);
 
     //double H_z=pvecback[cosmo.ba.index_bg_H];
-    double D_ang=pvecback[cosmo.ba.index_bg_ang_distance];
+    double Da=pvecback[cosmo.ba.index_bg_ang_distance];
 
-    return D_ang;
+    return Da;
+  }
+
+  double class_get_Dl(double z)
+  {
+        double tau=0;
+        int index;
+        double *pvecback;
+
+        background_tau_of_z(&cosmo.ba,z,&tau);
+
+        pvecback=(double *)malloc(cosmo.ba.bg_size*sizeof(double));
+
+        //call to fill pvecback
+        background_at_tau(&cosmo.ba,tau,cosmo.ba.long_info,cosmo.ba.inter_normal, &index, pvecback);
+
+        double Dl = pvecback[cosmo.ba.index_bg_lum_distance];
+        free(pvecback);
+        return Dl;
   }
 
   double class_get_Hz(double z)

@@ -2661,6 +2661,75 @@ namespace Gambit
 /// -----------
 /// Background Likelihoods (H0 + BAO)
 /// -----------
+
+    void compute_Pantheon_LogLike(double &result)
+    {
+        using namespace Pipes::compute_Pantheon_LogLike;
+
+        const str path_to_file = GAMBIT_DIR "/CosmoBit/data/SNeIa/Pantheon/lcparam_full_long.dat";
+        const str path_to_covmat = GAMBIT_DIR "/CosmoBit/data/SNeIa/Pantheon/sys_full_long.dat";
+        static ASCIItableReader data(path_to_file);
+        static ASCIItableReader covmat_data(path_to_covmat); 
+        static int nobs = covmat_data[0][0]; 
+        static bool read_data = false;
+
+        static gsl_matrix *invcov = gsl_matrix_alloc(nobs, nobs);
+
+        int s,ie,je;
+        double M = -19.3; // TODO: make proper nuissance param!!
+        double dl, moduli_pred[nobs], chi2;
+
+        if(read_data == false)
+        {
+          read_data = true;
+          logger() << "Pantheon data read from file '"<<path_to_file<<"'." << EOM;
+          std::vector<std::string> colnames = initVector<std::string>("zcmb", "zhel", "dz", "mb", "dmb", "x1", "dx1", "color", "dcolor", "3rdvar", "d3rdvar", "cov_m_s", "cov_m_c", "cov_s_c", "set", "ra", "dec");
+          data.setcolnames(colnames);
+          
+          int covmat_line = 1; // 0-th entry stores dimension of covmat, start with 1
+          gsl_matrix *cov = gsl_matrix_alloc(nobs, nobs);
+          gsl_permutation *p = gsl_permutation_alloc(nobs);
+
+          for(ie=0;ie<nobs;ie++)
+          {
+            for(je=0;je<nobs;je++)
+            {
+              if (ie == je)   // add statistical error of mb to diagonal elements
+              {  
+                gsl_matrix_set(cov, ie, je, covmat_data[0][covmat_line]+data["dmb"][ie]*data["dmb"][ie]); 
+                covmat_line+=1;
+              }
+              else
+              {
+                gsl_matrix_set(cov, ie, je, covmat_data[0][covmat_line]); 
+                covmat_line+=1;
+              }
+            }
+          }
+          
+          // compute inverse of covmat 
+          gsl_linalg_LU_decomp(cov,p,&s);
+          gsl_linalg_LU_invert(cov,p,invcov);
+
+          // only need inverse covmat to compute chi2, can free others
+          gsl_matrix_free(cov);
+          gsl_permutation_free(p);
+          // free or delete read covmat ASCIItableReader covmat_data here?
+        }
+
+
+        for(ie=0;ie<nobs;ie++)
+        {   
+            dl = BEreq::class_get_Dl(byVal(data["zcmb"][ie]));
+            moduli_pred[ie] = 5 * log10(dl) + 25 + M;  // calculate theory prediction for mb
+        } 
+        
+        for(ie=0;ie<nobs;ie++) for(je=0;je<nobs;je++) chi2+=(data["mb"][ie]-moduli_pred[ie])*gsl_matrix_get(invcov,ie,je)*(data["mb"][ie]-moduli_pred[ie]);
+        result = -0.5*chi2;
+
+        // do not free invcov since it is needed for all points
+    }
+
     void compute_H0_LogLike(double &result)
     {
         using namespace Pipes::compute_H0_LogLike;

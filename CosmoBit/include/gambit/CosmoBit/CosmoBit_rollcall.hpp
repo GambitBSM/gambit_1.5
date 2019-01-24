@@ -371,6 +371,17 @@ START_MODULE
     #undef FUNCTION
   #undef CAPABILITY
 
+  #define CAPABILITY Pantheon_LogLike
+   START_CAPABILITY
+   #define FUNCTION compute_Pantheon_LogLike
+    START_FUNCTION(double)
+    DEPENDENCY(class_get_spectra,CosmoBit::Class_container)
+    ALLOW_MODELS(LCDM, LCDM_dNeff_Smu,LCDM_dNeff_Smu_etaBBN,LCDMtensor)
+    BACKEND_REQ(class_get_Dl,(class_tag),double,(double))
+   #undef FUNCTION
+  #undef CAPABILITY
+
+
   #define CAPABILITY BAO_LogLike
    START_CAPABILITY
    #define FUNCTION compute_BAO_LogLike

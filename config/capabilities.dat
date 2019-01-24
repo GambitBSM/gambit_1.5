@@ -4135,6 +4135,9 @@ class_background_tau_of_z: |
 class_get_Da: |
     Returns angular diameter distance at given z.
 
+class_get_Dl: |
+    Returns luminosity distance at given z.
+
 class_get_Hz: |
     Returns Hubble parameter at given z.
 
@@ -4210,6 +4213,9 @@ T_cmb: |
 
 eta:  |
   Calculate baryon to photon ratio eta from Omega_b and T_cmb. 
+
+Sigma8:  |
+  Returns sigma8. 
 
 TestDecayingDM_parameters: |
    mass, mass of the dark matter candidate [in GeV]
@@ -4375,6 +4381,9 @@ H0_LogLike: |
 
 sigma8_LogLike: |
     Compute likelihood for Simga8 measurements from specified data file.
+
+Pantheon_LogLike:  |
+    Compute SNe Ia likelihood with Pantheon SNe. 
 
 #-------------------------------------
 #  Capgen capabilities
