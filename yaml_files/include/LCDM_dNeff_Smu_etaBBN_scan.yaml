@@ -26,7 +26,7 @@ tau_reio:
   range: [0.004,0.20]
 dNeff:
   prior_type: flat
-  range: [0.0,2.]
+  range: [-2.,2.]
 Smu:
   prior_type: flat
   range: [0.06,2]
@@ -35,4 +35,4 @@ eta_BBN:
   range: [5.0e-10,7.0e-10]
 dNeff_BBN:
   prior_type: flat
-  range: [0.0,2.]
+  range: [-2.,2.]
