@@ -78,7 +78,9 @@ namespace Gambit
       F(CMS_13TeV_MONOJET_36invfb)                   \
       F(CMS_8TeV_1LEPDMTOP_20invfb)                  \
       F(CMS_8TeV_2LEPDMTOP_20invfb)                  \
-      F(CMS_8TeV_3LEPEW_20invfb)                     \
+      F(CMS_8TeV_MultiLEP_20invfb)                   \
+      F(CMS_8TeV_MultiLEP_3Lep_20invfb)              \
+      F(CMS_8TeV_MultiLEP_4Lep_20invfb)              \
       F(CMS_8TeV_MONOJET_20invfb)                    \
 
 
