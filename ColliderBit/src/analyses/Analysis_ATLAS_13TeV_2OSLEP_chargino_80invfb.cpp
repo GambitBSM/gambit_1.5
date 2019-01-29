@@ -58,9 +58,6 @@ namespace Gambit
         {"SR-SF-1J-160",     0},
         {"SR-SF-1J-100-120", 0},
         {"SR-SF-1J-120-160", 0}
-<<<<<<< HEAD
-      };
-=======
       };
 
       std::map<string,double> _numSR_bin = {
@@ -98,8 +95,6 @@ namespace Gambit
         {"SR-SF-1J-220", 0}
       };
 
-
->>>>>>> ColliderBit_development
       Cutflow _cutflow;
 
     public:
