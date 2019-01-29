@@ -42,6 +42,7 @@
 #include "gambit/ColliderBit/MCLoopInfo.hpp"
 #include "gambit/ColliderBit/MC_convergence.hpp"
 #include "gambit/ColliderBit/colliders/ColliderPythia.hpp"
+#include "gambit/ColliderBit/colliders/ColliderPythia_typedefs.hpp"
 #include "gambit/ColliderBit/detectors/BuckFast.hpp"
 #include "gambit/ColliderBit/analyses/HEPUtilsAnalysisContainer.hpp"
 #include "gambit/ColliderBit/analyses/AnalysisData.hpp"
@@ -61,12 +62,6 @@ namespace Gambit
 
   namespace ColliderBit
   {
-
-    /// Typedefs for each Pythia collider
-    /// @{
-    typedef ColliderPythia<Pythia_default::Pythia8::Pythia, Pythia_default::Pythia8::Event>       ColliderPythia_defaultversion;
-    typedef ColliderPythia<Pythia_EM_default::Pythia8::Pythia, Pythia_EM_default::Pythia8::Event> ColliderPythia_EM_defaultversion;
-    /// @}
 
     /// @brief Container for data from multiple analyses and SRs
     typedef std::vector<AnalysisData> AnalysisNumbers;
