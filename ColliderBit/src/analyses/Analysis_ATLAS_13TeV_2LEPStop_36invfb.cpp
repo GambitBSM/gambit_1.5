@@ -16,8 +16,8 @@ using namespace std;
 
    Known errors:
         1. Jet overlap removal with muon is not done becasue miss trac imformation
-   Known features:
-
+        2. Applied specific efficiencies on muon for validation
+    
 */
 
 namespace Gambit {
