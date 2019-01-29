@@ -497,6 +497,7 @@ else()
 endif()
 if(EXISTS "${PROJECT_SOURCE_DIR}/ColliderBit/" AND ";${GAMBIT_BITS};" MATCHES ";ColliderBit;")
   add_gambit_custom(collider_harvest colliders_harvested COLLIDER_HARVESTER COLLIDER_HARVESTER_FILES)
+  add_dependencies(module_harvest collider_harvest)
 endif()
 
 # Generate the CMakeLists.txt files for GAMBIT modules, Backends, Models and Printers)
