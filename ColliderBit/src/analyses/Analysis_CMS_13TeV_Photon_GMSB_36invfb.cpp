@@ -106,7 +106,7 @@ namespace Gambit {
 	        }
 	    }
         if (not high_pT_photon) return;
-//        if (delta_R_g_j) return;
+        if (delta_R_g_j) return;
         for (HEPUtils::Jet* jet : Jets){
             if (jet->pT()>100. && jet->mom().deltaPhi(ptot) < 0.3 ) delta_phi_j_MET=true;
         }
