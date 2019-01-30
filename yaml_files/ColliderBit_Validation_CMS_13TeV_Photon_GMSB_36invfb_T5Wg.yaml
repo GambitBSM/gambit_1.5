@@ -278,8 +278,8 @@ Rules:
   # Choose statistical settings for Monte Carlo event generator
   - capability: MC_ConvergenceSettings
     options:
-      min_nEvents: [10000]
-      max_nEvents: [10000]
+      min_nEvents: [100000]
+      max_nEvents: [100000]
       events_between_convergence_checks: [20000]
       target_fractional_uncert: [0.3]
       halt_when_systematic_dominated: true
@@ -299,13 +299,13 @@ Rules:
                                      "PartonLevel:FSR = on",
                                      "HadronLevel:all = on",
                                      "SUSY:all = on",
-                                     "SUSY:idA = 1000022",
-                                     "SUSY:idB = 1000024"]
+                                     "SUSY:idA = 1000021",
+                                     "SUSY:idB = 1000021"]
 
 
       xsec_vetos: [0.028]  # 0.028 fb corresponds to ~1 expected event at L = 36 fb^-1.
 # Option needed if you want to use the getPythiaFileReader
-      SLHA_filenames: ["ColliderBit/data/CMS_13TeV_Photon_GMSB_36invfb_TChiWg.slha"]
+      SLHA_filenames: ["ColliderBit/data/CMS_13TeV_Photon_GMSB_36invfb_T5Wg.slha"]
 
 
   # Rules and options for BuckFast ATLAS simulation
