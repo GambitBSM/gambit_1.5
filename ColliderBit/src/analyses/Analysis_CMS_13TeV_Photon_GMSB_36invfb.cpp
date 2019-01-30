@@ -35,7 +35,6 @@ namespace Gambit {
     public:
 
       static constexpr const char* detector = "CMS";
-      // FIXME Apply standard electron and muon efficiencies
 
       // Counters for the number of accepted events for each signal region
       std::map<string,double> _numSR = {
