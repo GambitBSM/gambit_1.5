@@ -4174,37 +4174,6 @@ DA_reset: |
    BE function to release the 'alreadyCalculated'-flag of the module.
 
 #----------------------------
-#  PyArrayTest
-#----------------------------
-
-PyArrayTest_1_0_init: |
-   Initializes the PyArrayTest-backend. (v1.0)
-
-PyArrayTest_Py_to_cpp: |
-   (Convenience function) Example of how to map a python array (list) onto std::vector.
-
-PyArrayTest_cpp_to_Py: |
-   (Convenience function) Example of how to map std::vector onto a python array (list).
-
-PyArrayTest_initialize: |
-   (BE function) Prepares global variables of the backend.
-
-PyArrayTest_multiply: |
-   (BE function) Multiplies the backend internal array with 'someFactor'
-
-readPythonArray: |
-   (BE function) Reads an array or list and returns the sum of its components
-
-returnPythonArray: |
-   (BE function) Returns the backend internal array to be used in GAMBIT.
-
-SomeFactor: |
-   (BE variable) Number which will multiplied to the backend internal array.
-
-arrayLen: |
-   (BE variable) Length of the backend internal array.
-
-#----------------------------
 #  CosmoBit
 #----------------------------
 
@@ -4326,16 +4295,6 @@ injection_spectrum: |
     given by the branching ratio (BR).
 
     --> DUMMY for the use with TestDecayingDM <--
-
-PyTest_cap_1: |
-    First test of the mapping of std::vector onto python lists
-    and vice versa.
-    Receives an std::vector from the PyArrayTest and computes
-    the sum of its entries.
-
-PyTest_cap_2: |
-    As 'PyTest_cap_2', but the sum will be performed by the
-    PyArrayTest backend and the result is taken.
 
 AlterBBN_2_0_init: |
     Initialise AlterBBN.

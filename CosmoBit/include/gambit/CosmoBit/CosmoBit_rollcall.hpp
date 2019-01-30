@@ -73,22 +73,6 @@ START_MODULE
     #undef FUNCTION
   #undef CAPABILITY
 
-  #define CAPABILITY PyTest_cap_1
-  START_CAPABILITY
-    #define FUNCTION PyTest_func_1
-    START_FUNCTION(double)
-    BACKEND_REQ(PyArrayTest_Py_to_cpp, (PyArrayTest_tag), std::vector<double>, ())
-    #undef FUNCTION
-  #undef CAPABILITY
-
-  #define CAPABILITY PyTest_cap_2
-  START_CAPABILITY
-    #define FUNCTION PyTest_func_2
-    START_FUNCTION(double)
-    BACKEND_REQ(PyArrayTest_cpp_to_Py, (PyArrayTest_tag), double, (int))
-    #undef FUNCTION
-  #undef CAPABILITY
-
   #define CAPABILITY lnL_A_planck
   START_CAPABILITY
     #define FUNCTION lnL_A_planck_gaussian

@@ -13,9 +13,6 @@
 AlterBBN:
   2.0:       ./Backends/installed/alterbbn/2.0/libbbn.so
 
-PyArrayTest:
-  1.0:         ./Backends/examples/PyArrayTest/1.0/PyArrayTest.py
-
 DarkAges:
   1.0.0:       ./Backends/installed/DarkAges/1.0.0/DarkAges_for_GAMBIT.py
 

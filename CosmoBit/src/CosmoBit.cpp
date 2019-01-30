@@ -224,27 +224,6 @@ namespace Gambit
       }
     }
 
-    void PyTest_func_1(double& result)
-    {
-      using namespace Pipes::PyTest_func_1;
-
-      std::vector<double> vec = BEreq::PyArrayTest_Py_to_cpp();
-      double sum = 0.0;
-      for (std::vector<double>::iterator it = vec.begin(); it != vec.end(); ++it)
-      {
-        sum += *it;
-      }
-      result = sum;
-    }
-
-    void PyTest_func_2(double& result)
-    {
-      using namespace Pipes::PyTest_func_2;
-
-      int len = runOptions->getValueOrDef<int>(10,"array_len");
-      result = BEreq::PyArrayTest_cpp_to_Py(byVal(len));
-    }
-
     void lnL_A_planck_gaussian(double& result)
     {
       using namespace Pipes::lnL_A_planck_gaussian;
