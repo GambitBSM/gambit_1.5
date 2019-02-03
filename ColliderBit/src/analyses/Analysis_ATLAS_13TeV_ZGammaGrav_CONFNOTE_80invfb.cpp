@@ -23,13 +23,7 @@ namespace Gambit {
       Analysis_ATLAS_13TeV_ZGammaGrav_CONFNOTE_80invfb() {
         set_analysis_name("ATLAS_13TeV_ZGammaGrav_CONFNOTE_80invfb");
         set_luminosity(79.8);
-        nsig = 0;
-
-        // NCUTS= 66;
-        // for (int i=0;i<NCUTS;i++){
-        //   cutFlowVector.push_back(0);
-        //   cutFlowVector_str.push_back("");
-        // }
+        clear();
       }
 
 
@@ -66,6 +60,12 @@ namespace Gambit {
           if (j->pT() > 20. && j->absrap() < 4.4)
             jets.push_back(j);
 
+        // cout <<  "#J = " << jets.size()
+        //      << " #Y = " << photons.size()
+        //      << " #E = " << electrons.size()
+        //      << " #M = " << muons.size()
+        //      << endl;
+
         // Overlap removal
         removeOverlap(jets, electrons, 0.2);
         removeOverlap(electrons, jets, 0.4);
@@ -87,31 +87,40 @@ namespace Gambit {
 
         /////////////////
 
-
-        // There must be a prompt photon
-        if (photons.empty()) return;
+        size_t ncut = 0;
 
         // Find the Z system
         if (electrons.size() + muons.size() != 2) return; //< must be exactly two leptons
         if (!electrons.empty() && !muons.empty()) return; //< the two leptons must be same-flavour
         const ParticlePtrs& leps = electrons.empty() ? muons : electrons;
 
-        // Check lepton pTs and require small delta_phi
-        if (leps[0]->pT() < 25 || leps[1]->pT() < 20) return;
-        if (deltaPhi(leps[0]->mom(), leps[1]->mom()) > 1.4) return;
         // The dilepton mass must be within 10 GeV of the Z mass
         const P4 pZ = leps[0]->mom() + leps[1]->mom();
         if (fabs(pZ.m() - 91.2) > 10.) return;
+        cutflow[ncut++] += 1;
+
+        // There must be a prompt photon with pT > 25 GeV
+        if (photons.empty()) return;
+        if (photons[0]->pT() < 25) return;
+        cutflow[ncut++] += 1;
 
         // MET and jet requirements
         if (met < 95) return;
         if (!jets.empty() && jets[0]->pT() > 30) return;
+        cutflow[ncut++] += 1;
 
         // Require separation of the Z and the MET+photon(s) systems
         const P4 pYMET = pmiss + photons[0]->mom() +
           (photons.size() > 1 ? photons[1]->mom() : P4());
-        if (deltaPhi(pZ, pYMET) < 2.8) return;
         if (fabs(pZ.pT()-pYMET.pT())/pYMET.pT() > 0.2) return;
+        cutflow[ncut++] += 1;
+        if (deltaPhi(pZ, pYMET) < 2.8) return;
+        cutflow[ncut++] += 1;
+
+        // Check lepton pTs and require small delta_phi
+        if (leps[0]->pT() < 25 || leps[1]->pT() < 20) return;
+        if (deltaPhi(leps[0]->mom(), leps[1]->mom()) > 1.4) return;
+        cutflow[ncut++] += 1;
 
         // Signal count
         nsig += 1;
@@ -126,12 +135,7 @@ namespace Gambit {
         Analysis_ATLAS_13TeV_ZGammaGrav_CONFNOTE_80invfb* specificOther
           = dynamic_cast<Analysis_ATLAS_13TeV_ZGammaGrav_CONFNOTE_80invfb*>(other);
 
-        // // Here we will add the subclass member variables:
-        // if (NCUTS != specificOther->NCUTS) NCUTS = specificOther->NCUTS;
-        // for (int j=0; j<NCUTS; j++) {
-        //   cutFlowVector[j] += specificOther->cutFlowVector[j];
-        //   cutFlowVector_str[j] = specificOther->cutFlowVector_str[j];
-        // }
+        for (size_t j = 0; j < NCUTS; ++j) cutflow[j] += specificOther->cutflow[j];
 
         nsig += specificOther->nsig;
       }
@@ -148,12 +152,17 @@ namespace Gambit {
         results.n_signal = nsig;
         add_result(results);
 
+        cout << "\nCUTFLOW" << endl;
+        const string cutnames[NCUTS] = {"mll near mZ", "y1 > 25 GeV", "MET > 95 GeV", "ZH pT balance", "ZH dphi", "ll dphi"};
+        const double sf_cutflow = 85.92 / cutflow[0];
+        for (size_t i = 0; i < NCUTS; ++i) cout << i+1 << ". " << cutflow[i] * sf_cutflow << " (" << cutnames[i] << ")" << endl;
+
       }
 
 
       void clear() {
         nsig = 0;
-        // std::fill(cutFlowVector.begin(), cutFlowVector.end(), 0);
+        for (size_t i = 0; i < NCUTS; ++i) cutflow[i] = 0;
       }
 
 
@@ -162,10 +171,10 @@ namespace Gambit {
       // Numbers passing cuts
       int nsig = 0;
 
-      // // Cut flow
-      // vector<int> cutFlowVector;
+      // Cut flow
+      const static int NCUTS = 6;
+      double cutflow[NCUTS];
       // vector<string> cutFlowVector_str;
-      // int NCUTS;
 
     };
 
