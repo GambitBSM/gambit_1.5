@@ -35,7 +35,7 @@
 #include <gsl/gsl_spline.h>
 #include <gsl/gsl_matrix_double.h>
 #include <gsl/gsl_linalg.h>
-
+#include <gsl/gsl_blas.h>
 
 #include <stdlib.h>     /* malloc, free, rand */
 #include "gambit/Utils/yaml_options.hpp"
@@ -222,27 +222,6 @@ namespace Gambit
         std::cout << "f_eff (sum of all channels at z = "<< z_eff << ") = " << result << std::endl;
         std::cout << "################\n" << std::endl;
       }
-    }
-
-    void PyTest_func_1(double& result)
-    {
-      using namespace Pipes::PyTest_func_1;
-
-      std::vector<double> vec = BEreq::PyArrayTest_Py_to_cpp();
-      double sum = 0.0;
-      for (std::vector<double>::iterator it = vec.begin(); it != vec.end(); ++it)
-      {
-        sum += *it;
-      }
-      result = sum;
-    }
-
-    void PyTest_func_2(double& result)
-    {
-      using namespace Pipes::PyTest_func_2;
-
-      int len = runOptions->getValueOrDef<int>(10,"array_len");
-      result = BEreq::PyArrayTest_cpp_to_Py(byVal(len));
     }
 
     void lnL_A_planck_gaussian(double& result)
@@ -2683,7 +2662,6 @@ namespace Gambit
 
         if(read_data == false)
         {
-          const clock_t begin_time1 = clock();
           read_data = true;
           logger() << "Pantheon data read from file '"<<path_to_file<<"'." << EOM;
           std::vector<std::string> colnames = initVector<std::string>("zcmb", "zhel", "dz", "mb", "dmb", "x1", "dx1", "color", "dcolor", "3rdvar", "d3rdvar", "cov_m_s", "cov_m_c", "cov_s_c", "set", "ra", "dec");
