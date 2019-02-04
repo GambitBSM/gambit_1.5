@@ -30,6 +30,9 @@ Parameters:
 
  # nuisance parameters in Planck likelihood
  Planck_lite: !import include/Planck_lite_scan.yaml
+ 
+ # nuisance paramters for other cosmological likelihoods
+ cosmo_nuisance_params: !import include/cosmo_nuisance_params.yaml
 
 #======== Prior setup ========
 Priors:
