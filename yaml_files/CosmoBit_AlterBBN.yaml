@@ -16,9 +16,9 @@
 #======== Input parameter declarations =======
 Parameters:
 
- LCDM_dNeff_Smu: !import include/LCDM_dNeff_Smu_scan.yaml
- #LCDM_dNeff_Smu_etaBBN: !import include/LCDM_dNeff_Smu_etaBBN_scan.yaml
  #LCDM: !import include/LCDM_scan.yaml
+ #LCDM_Smu_dNeffCMB: !import include/LCDM_Smu_dNeffCMB_scan.yaml
+ LCDM_Smu_dNeffCMB: !import include/LCDM_Smu_dNeffCMB_scan.yaml
 
  #eta:
  #  prior_type: flat

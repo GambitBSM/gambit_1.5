@@ -23,21 +23,47 @@
 #ifndef __CosmoModels_hpp__
 #define __CosmoModels_hpp__
 
+#define MODEL LCDM_Smu_dNeffCMB_dNeffBBN_etaBBN
+  START_MODEL
+  DEFINEPARS(omega_b,omega_cdm,H0,ln10A_s,n_s,tau_reio,Smu,dNeff,dNeff_BBN,eta_BBN)
+#undef MODEL
+
+#define MODEL LCDM_Smu_dNeffCMB_dNeffBBN
+ #define PARENT LCDM_Smu_dNeffCMB_dNeffBBN_etaBBN
+  START_MODEL
+  DEFINEPARS(omega_b,omega_cdm,H0,ln10A_s,n_s,tau_reio,Smu,dNeff,dNeff_BBN)
+  INTERPRET_AS_PARENT_FUNCTION(LCDM_Smu_dNeffCMB_dNeffBBN_to_LCDM_Smu_dNeffCMB_dNeffBBN_etaBBN)
+  INTERPRET_AS_PARENT_DEPENDENCY(T_cmb, double)
+#undef PARENT
+#undef MODEL
+
+#define MODEL LCDM_Smu_dNeffCMB
+ #define PARENT LCDM_Smu_dNeffCMB_dNeffBBN
+  START_MODEL
+  DEFINEPARS(omega_b,omega_cdm,H0,ln10A_s,n_s,tau_reio,Smu,dNeff)
+  INTERPRET_AS_PARENT_FUNCTION(LCDM_Smu_dNeffCMB_to_LCDM_Smu_dNeffCMB_dNeffBBN)
+  //INTERPRET_AS_PARENT_DEPENDENCY(T_cmb, double)
+#undef PARENT
+#undef MODEL
+
+#define MODEL LCDM_Smu
+ #define PARENT LCDM_Smu_dNeffCMB
+  START_MODEL
+  DEFINEPARS(omega_b,omega_cdm,H0,ln10A_s,n_s,tau_reio,Smu)
+  INTERPRET_AS_PARENT_FUNCTION(LCDM_Smu_to_LCDM_Smu_dNeffCMB)
+  //INTERPRET_AS_PARENT_DEPENDENCY(T_cmb, double)
+#undef PARENT
+#undef MODEL
+
+
+
+
 
 #define MODEL LCDM
   START_MODEL
   DEFINEPARS(omega_b,omega_cdm,H0,ln10A_s,n_s,tau_reio)
 #undef MODEL
 
-#define MODEL LCDM_dNeff_Smu
-  START_MODEL
-  DEFINEPARS(omega_b,omega_cdm,H0,ln10A_s,n_s,tau_reio,dNeff,Smu)
-#undef MODEL
-
-#define MODEL LCDM_dNeff_Smu_etaBBN
-  START_MODEL
-  DEFINEPARS(omega_b,omega_cdm,H0,ln10A_s,n_s,tau_reio,dNeff,Smu,eta_BBN,dNeff_BBN)
-#undef MODEL
 
 /*
 #define MODEL rLCDM

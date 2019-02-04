@@ -279,10 +279,10 @@ namespace Gambit
       }
     }
 
-    void class_set_parameter_LCDM_dNeff_Smu(Class_container& cosmo)
+    void class_set_parameter_LCDM_Smu_dNeffCMB_dNeffBBN_etaBBN(Class_container& cosmo)
     {
-      using namespace Pipes::class_set_parameter_LCDM_dNeff_Smu;
-      // on the level of class the model LCDM_dNeff_Smu and LCDM_dNeff_Smu_etaBBN are identical
+      using namespace Pipes::class_set_parameter_LCDM_Smu_dNeffCMB_dNeffBBN_etaBBN;
+      // on the level of class the model LCDM_Smu_dNeff and LCDM_Smu_dNeff_dNeffBBN are identical
 
       int l_max=cosmo.lmax;
 
@@ -2288,27 +2288,11 @@ namespace Gambit
       result.err = runOptions->getValueOrDef<int>(3,"err");
     }
 
-    void AlterBBN_fill_dNeff(relicparam &result)
+    
+    void AlterBBN_fill_LCDM_Smu_dNeffCMB_dNeffBBN_etaBBN(relicparam &result)
     {
-      // fill AlterBBN structure for LCDM_dNeff_Smu
-      using namespace Pipes::AlterBBN_fill_dNeff;
-
-      BEreq::Init_cosmomodel(&result);
-
-      result.eta0=*Dep::eta; // eta0 = eta_BBN = eta_CMB
-      result.Nnu=3.046;            // 3 massive neutrinos
-      result.dNnu=*Param["dNeff"]; // no extra rel. d.o.f. in  base LCDM
-      //result.failsafe = 3;  // set precision parameters for AlterBBN
-      //result.err = 3;
-      result.failsafe = runOptions->getValueOrDef<int>(3,"failsafe");
-      result.err = runOptions->getValueOrDef<int>(3,"err");
-    }
-
-
-    void AlterBBN_fill_etaBBN(relicparam &result)
-    {
-      // fill AlterBBN structure for LCDM__dNeff_Smu_etaBBN
-      using namespace Pipes::AlterBBN_fill_etaBBN;
+      // fill AlterBBN structure for LCDM_Smu_dNeffCMB_dNeffBBN_etaBBN
+      using namespace Pipes::AlterBBN_fill_LCDM_Smu_dNeffCMB_dNeffBBN_etaBBN;
 
       BEreq::Init_cosmomodel(&result);
       

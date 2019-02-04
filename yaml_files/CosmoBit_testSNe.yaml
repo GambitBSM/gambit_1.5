@@ -61,7 +61,7 @@ Scanner:
 
     random:
       plugin: random
-      point_number: 2
+      point_number: 1
       like:  LogLike
 
 #======== Observables of interest ========
@@ -122,7 +122,7 @@ Rules:
   - capability: class_set_parameter
     options:
       class_dict: 
-        output: "tCl pCl lCl mPk" # need to add matter power spectrum for sigma8 computation
+        output: "tCl pCl lCl" # need to add matter power spectrum for sigma8 computation
         k_pivot: 0.05
 
   - capability: AlterBBN_modelinfo
@@ -137,7 +137,7 @@ Rules:
       elements: [Yp,D]
 
 #======== Logging setup ========
-Lxogger:
+Logger:
   redirection:
     [Debug]      : "debug.log"
     [Default]      : "default.log"

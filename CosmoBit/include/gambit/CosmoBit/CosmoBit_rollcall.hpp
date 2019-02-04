@@ -90,11 +90,11 @@ START_MODULE
     ALLOW_MODELS(LCDM)
     #undef FUNCTION
 
-    #define FUNCTION class_set_parameter_LCDM_dNeff_Smu
+    #define FUNCTION class_set_parameter_LCDM_Smu_dNeffCMB_dNeffBBN_etaBBN
     START_FUNCTION(CosmoBit::Class_container)
     DEPENDENCY(Helium_abundance,std::vector<double>)
     DEPENDENCY(T_cmb, double)
-    ALLOW_MODELS(LCDM_dNeff_Smu,LCDM_dNeff_Smu_etaBBN)
+    ALLOW_MODELS(LCDM_Smu_dNeffCMB_dNeffBBN_etaBBN)
     #undef FUNCTION
 
     #define FUNCTION class_set_parameter_LCDM_SingletDM
@@ -246,7 +246,8 @@ START_MODULE
     #define FUNCTION calculate_eta
       START_FUNCTION(double)
       DEPENDENCY(T_cmb, double)
-      ALLOW_MODELS(LCDM, LCDM_dNeff_Smu,LCDM_dNeff_Smu_etaBBN,LCDMtensor)
+      ALLOW_MODELS(LCDM)  
+      // TODO: atm calculation of eta implemented twice: once in CosmoModels, once here. put default LCDM into model tree
     #undef FUNCTION
   #undef CAPABILITY
   
@@ -254,7 +255,6 @@ START_MODULE
     START_CAPABILITY
     #define FUNCTION set_T_cmb
       START_FUNCTION(double)
-      ALLOW_MODELS(LCDM, LCDM_dNeff_Smu,LCDM_dNeff_Smu_etaBBN,LCDMtensor)
     #undef FUNCTION
   #undef CAPABILITY
 
@@ -268,17 +268,9 @@ START_MODULE
       BACKEND_REQ(Init_cosmomodel, (libbbn), void, (relicparam*))
     #undef FUNCTION
 
-    #define FUNCTION AlterBBN_fill_dNeff
+    #define FUNCTION AlterBBN_fill_LCDM_Smu_dNeffCMB_dNeffBBN_etaBBN
      START_FUNCTION(relicparam)
-     ALLOW_MODELS(LCDM_dNeff_Smu)
-     BACKEND_OPTION( (AlterBBN, 2.0), (libbbn) )
-     DEPENDENCY(eta, double)
-     BACKEND_REQ(Init_cosmomodel, (libbbn), void, (relicparam*))
-    #undef FUNCTION
-
-    #define FUNCTION AlterBBN_fill_etaBBN
-     START_FUNCTION(relicparam)
-     ALLOW_MODELS(LCDM_dNeff_Smu_etaBBN)
+     ALLOW_MODELS(LCDM_Smu_dNeffCMB_dNeffBBN_etaBBN)
      BACKEND_OPTION( (AlterBBN, 2.0), (libbbn) )
      BACKEND_REQ(Init_cosmomodel, (libbbn), void, (relicparam*))
     #undef FUNCTION
@@ -343,7 +335,7 @@ START_MODULE
    BACKEND_OPTION( (AlterBBN, 2.0), (libbbn) )
    DEPENDENCY(AlterBBN_modelinfo, relicparam)
    //BACKEND_REQ(bbn_excluded_chi2, (libbbn), int, (const relicparam*))
-   ALLOW_MODELS(LCDM,LCDM_dNeff_Smu,LCDM_dNeff_Smu_etaBBN)
+   ALLOW_MODELS(LCDM,LCDM_Smu_dNeffCMB_dNeffBBN_etaBBN)
   #undef FUNCTION
   #undef CAPABILITY
 
@@ -351,7 +343,7 @@ START_MODULE
    START_CAPABILITY
     #define FUNCTION compute_H0_LogLike
     START_FUNCTION(double)
-    ALLOW_MODELS(LCDM, LCDM_dNeff_Smu,LCDM_dNeff_Smu_etaBBN,LCDMtensor)
+    ALLOW_MODELS(LCDM, LCDM_Smu_dNeffCMB_dNeffBBN_etaBBN)
     #undef FUNCTION
   #undef CAPABILITY
 
@@ -361,7 +353,7 @@ START_MODULE
     START_FUNCTION(double)
     DEPENDENCY(class_get_spectra,CosmoBit::Class_container)
     ALLOW_MODEL_DEPENDENCE(LCDM,cosmo_nuisance_params)
-    MODEL_GROUP(cosmology, (LCDM, LCDM_dNeff_Smu,LCDM_dNeff_Smu_etaBBN,LCDMtensor))
+    MODEL_GROUP(cosmology, (LCDM, LCDM_Smu_dNeffCMB_dNeffBBN_etaBBN))
     MODEL_GROUP(nuisance, (cosmo_nuisance_params))
     ALLOW_MODEL_COMBINATION(cosmology,nuisance)
     BACKEND_REQ(class_get_Dl,(class_tag),double,(double))
@@ -374,7 +366,7 @@ START_MODULE
    #define FUNCTION compute_BAO_LogLike
     START_FUNCTION(double)
     DEPENDENCY(class_get_spectra,CosmoBit::Class_container)
-    ALLOW_MODELS(LCDM, LCDM_dNeff_Smu,LCDM_dNeff_Smu_etaBBN,LCDMtensor)
+    ALLOW_MODELS(LCDM, LCDM_Smu_dNeffCMB_dNeffBBN_etaBBN)
     BACKEND_REQ(class_get_Da,(class_tag),double,(double))
     BACKEND_REQ(class_get_Hz,(class_tag),double,(double))
    #undef FUNCTION
@@ -385,7 +377,7 @@ START_MODULE
      #define FUNCTION compute_sigma8_LogLike
       START_FUNCTION(double)
       DEPENDENCY(class_get_spectra,CosmoBit::Class_container)
-      ALLOW_MODELS(LCDM, LCDM_dNeff_Smu,LCDM_dNeff_Smu_etaBBN,LCDMtensor)
+      ALLOW_MODELS(LCDM, LCDM_Smu_dNeffCMB_dNeffBBN_etaBBN)
       BACKEND_REQ(class_get_sigma8,(class_tag),double,(double))
      #undef FUNCTION
   #undef CAPABILITY
@@ -395,7 +387,7 @@ START_MODULE
      #define FUNCTION compute_Sigma8
       START_FUNCTION(double)
       DEPENDENCY(class_get_spectra,CosmoBit::Class_container)
-      ALLOW_MODELS(LCDM, LCDM_dNeff_Smu,LCDM_dNeff_Smu_etaBBN,LCDMtensor)
+      ALLOW_MODELS(LCDM, LCDM_Smu_dNeffCMB_dNeffBBN_etaBBN)
       BACKEND_REQ(class_get_sigma8,(class_tag),double,(double))
      #undef FUNCTION
   #undef CAPABILITY
