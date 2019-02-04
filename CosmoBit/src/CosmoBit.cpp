@@ -2703,6 +2703,8 @@ namespace Gambit
         
         result = -0.5* chi2;
         // do not free invcov since it is needed for all points
+        gsl_vector_free(residuals);
+        gsl_vector_free(product);
     }
 
     void compute_H0_LogLike(double &result)
