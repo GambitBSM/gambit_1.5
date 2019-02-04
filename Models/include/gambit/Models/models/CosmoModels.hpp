@@ -13,6 +13,10 @@
 ///  \date 2016 Oct
 ///  \date 2017 Jan
 ///
+///
+///  \author Janina Renk
+///          (janina.renk@fysik.su.se)
+///  \date 2018 Oct
 ///  *********************************************
 
 
@@ -196,6 +200,12 @@ DEFINEPARS(lambda,mu,N_pivot,omega_b,omega_cdm,H0,tau_reio)
     DEFINEPARS(A_planck)
   #undef PARENT
 #undef MODEL
+
+#define MODEL cosmo_nuisance_params 
+  START_MODEL
+  DEFINEPARS(M_AbsMag_SNe)
+#undef MODEL
+
 
 //#define MODEL inflation
 //START_MODEL

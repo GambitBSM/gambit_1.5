@@ -16,6 +16,10 @@
 ///
 ///  \author Selim Hotinli
 ///	 \date 2018 Jan
+///
+///  \author Janina Renk
+///          (janina.renk@fysik.su.se)
+///  \date 2018 Oct
 ///  *********************************************
 
 #include <string>

@@ -232,7 +232,7 @@ BE_NAMESPACE
 
     //double H_z=pvecback[cosmo.ba.index_bg_H];
     double Da=pvecback[cosmo.ba.index_bg_ang_distance];
-
+    free(pvecback);
     return Da;
   }
 
@@ -269,6 +269,7 @@ BE_NAMESPACE
     background_at_tau(&cosmo.ba,tau,cosmo.ba.long_info,cosmo.ba.inter_normal, &index, pvecback);
     
     double H_z=pvecback[cosmo.ba.index_bg_H];
+    free(pvecback);
     return(H_z);
   }
 
@@ -289,7 +290,7 @@ BE_NAMESPACE
     background_at_tau(&cosmo.ba,tau,cosmo.ba.long_info,cosmo.ba.inter_normal, &index, pvecback);
     //background_at_tau(pba,tau,pba->long_info,pba->inter_normal,&last_index,pvecback);
     success=spectra_sigma(&cosmo.ba,&cosmo.pm,&cosmo.sp,8./cosmo.ba.h,z,&sigma8);
-
+    free(pvecback);
     return sigma8;
 
   }

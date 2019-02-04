@@ -2679,7 +2679,7 @@ namespace Gambit
 
         int ie,je;
         double dl,chi2;
-        double M = -19.3; // TODO: make proper nuissance param!!        
+        double M = *Param["M_AbsMag_SNe"]; // TODO: make proper nuissance param!!        
 
         if(read_data == false)
         {

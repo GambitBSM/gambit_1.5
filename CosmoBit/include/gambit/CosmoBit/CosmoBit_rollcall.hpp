@@ -376,7 +376,10 @@ START_MODULE
    #define FUNCTION compute_Pantheon_LogLike
     START_FUNCTION(double)
     DEPENDENCY(class_get_spectra,CosmoBit::Class_container)
-    ALLOW_MODELS(LCDM, LCDM_dNeff_Smu,LCDM_dNeff_Smu_etaBBN,LCDMtensor)
+    ALLOW_MODEL_DEPENDENCE(LCDM,cosmo_nuisance_params)
+    MODEL_GROUP(cosmology, (LCDM, LCDM_dNeff_Smu,LCDM_dNeff_Smu_etaBBN,LCDMtensor))
+    MODEL_GROUP(nuisance, (cosmo_nuisance_params))
+    ALLOW_MODEL_COMBINATION(cosmology,nuisance)
     BACKEND_REQ(class_get_Dl,(class_tag),double,(double))
    #undef FUNCTION
   #undef CAPABILITY

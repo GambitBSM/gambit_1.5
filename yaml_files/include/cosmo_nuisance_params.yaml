@@ -1,0 +1,12 @@
+##########################################################################
+## Nuissance parameter of Cosmological likelihoods (excluding the Planck CMB fits)
+##
+## Janina Renk
+## janina.renk@fysik.su.se
+## 2019, Feb
+##########################################################################
+
+M_AbsMag_SNe:
+  prior_type: flat
+  range: [-19.024,-19.016]
+
