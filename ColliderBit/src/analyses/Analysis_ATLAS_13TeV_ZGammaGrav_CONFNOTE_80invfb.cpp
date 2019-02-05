@@ -52,7 +52,6 @@ namespace Gambit {
           if (y->pT() > 20.)
             photons.push_back(y);
         ATLAS::applyPhotonEfficiencyR2(photons);
-        /// @todo Need to do some explicit isolation? Unlike leptons, there will be significant hadronic photons
 
         // Jets
         JetPtrs jets;
@@ -81,8 +80,11 @@ namespace Gambit {
         sortByPt(photons);
 
         // Missing energy
-        const double met = event->met();
-        const P4 pmiss = event->missingmom();
+        double ht = 0;
+        for (const Particle* p : event->visible_particles()) ht += p->pT();
+        P4 pmiss = event->missingmom();
+        ATLAS::smearMET(pmiss, ht);
+        const double met = pmiss.pT();
 
 
         /////////////////

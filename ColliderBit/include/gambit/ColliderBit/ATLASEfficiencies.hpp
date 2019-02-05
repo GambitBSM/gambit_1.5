@@ -243,6 +243,25 @@ namespace Gambit {
         }
 
 
+        /// Randomly smear the MET vector by parameterised resolutions
+        inline void smearMET(HEPUtils::P4& pmiss, double set) {
+          // Smearing function from ATLAS Run 1 performance paper, converted from Rivet
+          // cf. https://arxiv.org/pdf/1108.5602v2.pdf, Figs 14 and 15
+
+          // Linearity offset (Fig 14)
+          if (pmiss.pT() < 25) pmiss *= 1.05;
+          else if (pmiss.pT() < 40) pmiss *= (1.05 - (0.04/15)*(pmiss.pT() - 25)); //< linear decrease
+          else pmiss *= 1.01;
+
+          // Smear by a Gaussian with width given by the resolution(sumEt) ~ 0.45 sqrt(sumEt) GeV
+          const double resolution = 0.45 * sqrt(set);
+          std::normal_distribution<> d(pmiss.pT(), resolution);
+          const double smearedmet = std::max(d(Random::rng()), 0.);
+
+          pmiss *= smearedmet / pmiss.pT();
+        }
+
+
         /// Randomly smear the supplied taus' momenta by parameterised resolutions
         inline void smearTaus(std::vector<HEPUtils::Particle*>& taus) {
           // We need to smear pT, then recalculate E, then reset the 4-vector.
