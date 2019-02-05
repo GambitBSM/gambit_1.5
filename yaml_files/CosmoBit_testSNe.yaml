@@ -24,10 +24,11 @@
 Parameters:
  
  # --- import model parameters for models to scan over ---
- #LCDM: !import include/LCDM_scan.yaml        # base LCDM
- #LCDM_dNeff_Smu: !import include/LCDM_dNeff_Smu_scan.yaml
- LCDM_dNeff_Smu: !import include/LCDM_dNeff_Smu_testBAO.yaml
- #LCDM_dNeff_Smu_etaBBN: !import include/LCDM_dNeff_Smu_etaBBN_scan.yaml
+ LCDM: !import include/LCDM_scan.yaml        # base LCDM
+ #LCDM_Smu: !import include/LCDM_Smu_scan.yaml
+ #LCDM_Smu_dNeffCMB: !import include/LCDM_Smu_dNeffCMB_scan.yaml
+ #LCDM_Smu_dNeffCMB_dNeffBBN: !import include/LCDM_Smu_dNeffCMB_dNeffBBN_scan.yaml
+ #LCDM_Smu_dNeffCMB_dNeffBBN_etaBBN: !import include/LCDM_Smu_dNeffCMB_dNeffBBN_etaBBN_scan.yaml
 
  # nuisance parameters in Planck likelihood
  #Planck_lite: !import include/Planck_lite_scan.yaml
