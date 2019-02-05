@@ -15,7 +15,9 @@ namespace Gambit {
     ///
     /// @author Andy Buckley
     ///
-    /// @warning NOT YET VALIDATED!!!
+    /// @note Conservative underestimate of yield in benchmark point cutflow 5.2 vs 8.7
+    /// passing all cuts: underestimation of MET and satisfaction of angular/balance cuts.
+    /// Adding MET smearing doesn't appear to have helped.
     ///
     class Analysis_ATLAS_13TeV_ZGammaGrav_CONFNOTE_80invfb : public HEPUtilsAnalysis {
     public:
