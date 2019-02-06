@@ -42,16 +42,25 @@
   START_MODEL
   DEFINEPARS(omega_b,omega_cdm,H0,ln10A_s,n_s,tau_reio,Smu,dNeff)
   INTERPRET_AS_PARENT_FUNCTION(LCDM_Smu_dNeffCMB_to_LCDM_Smu_dNeffCMB_dNeffBBN)
-  //INTERPRET_AS_PARENT_DEPENDENCY(T_cmb, double)
 #undef PARENT
 #undef MODEL
+
+// get dNeff from external calculation (e.g. for ALPs)
+#define MODEL LCDM_Smu_dNeffExt
+ #define PARENT LCDM_Smu_dNeffCMB_dNeffBBN
+  START_MODEL
+  DEFINEPARS(omega_b,omega_cdm,H0,ln10A_s,n_s,tau_reio,Smu)
+  INTERPRET_AS_PARENT_FUNCTION(LCDM_Smu_dNeffExt_to_LCDM_Smu_dNeffCMB_dNeffBBN)
+  INTERPRET_AS_PARENT_DEPENDENCY(dNeffExt, double)
+#undef PARENT
+#undef MODEL
+
 
 #define MODEL LCDM_Smu
  #define PARENT LCDM_Smu_dNeffCMB
   START_MODEL
   DEFINEPARS(omega_b,omega_cdm,H0,ln10A_s,n_s,tau_reio,Smu)
   INTERPRET_AS_PARENT_FUNCTION(LCDM_Smu_to_LCDM_Smu_dNeffCMB)
-  //INTERPRET_AS_PARENT_DEPENDENCY(T_cmb, double)
 #undef PARENT
 #undef MODEL
 

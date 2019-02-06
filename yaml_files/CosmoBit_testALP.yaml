@@ -1,0 +1,154 @@
+##########################################################################
+## Test CosmoBit Likelihoods
+##   - Using random sampler
+##   - Using the Planck-lite likelihood for high-l
+##     (Either TT or TTTEEE -> Specified in 'Rules')
+##   - Using BBN Likelihood
+##   - Using BAO Likelihood
+##   - Using Sigma8 Likelihood
+##   - Computing local H0 Likelihood as observable
+##
+##  To test this you need to make the backends 'class', 'alterbbn' and 'plc'.
+##  You also need to download the Planck data and set the path to it in the
+##  rules for 
+##  - capability: plc_2_0_init
+##    options:
+##      planck_path: path/to/your/planck/data
+##
+## Janina Renk <janina.renk@fysik.su.se>
+## 2018 Nov
+##########################################################################
+
+
+#======== Input parameter declarations =======
+Parameters:
+ 
+ # --- import model parameters for models to scan over ---
+ LCDM_Smu_dNeffExt: !import include/LCDM_Smu_dNeffExt_scan.yaml       
+
+ # nuisance parameters in Planck likelihood
+ #Planck_lite: !import include/Planck_lite_scan.yaml
+
+ # Cosmological nuisance parameters (except for Planck CMB Likelihoods) 
+ cosmo_nuisance_params: !import include/cosmo_nuisance_params.yaml
+
+#======== Prior setup ========
+Priors:
+
+#======== Output setup ========
+Printer:
+  printer: ascii
+  options:
+    output_file: "gambit_output.data"
+    buffer_length: 100
+
+#======== Scanner setup ========
+Scanner:
+  use_scanner: random
+
+  scanners:
+    multinest:
+      plugin: multinest
+      like:  LogLike
+      nlive: 1000
+      tol: 0.01
+      aux_printer_txt_options:
+      aux_printer_stats_options:
+      aux_printer_live_options:
+
+    random:
+      plugin: random
+      point_number: 1
+      like:  LogLike
+
+#======== Observables of interest ========
+ObsLikes:
+ 
+  - purpose:      LogLike
+    capability:   Pantheon_LogLike
+    module:       CosmoBit
+    type:         double
+
+
+
+#======== Rule entries ========
+Rules:
+
+#####
+##  Since the "Planck_lite" model fits to be used by 
+##  the marginalized (lite) versions of both, the TT
+##  and the TTTEEE, likelihoods, we need to resolve
+##  this ambiguity manually.
+#####
+
+  - capability: compute_Planck_high_TT_loglike
+    function: function_Planck_high_TT_lite_loglike
+    module: CosmoBit
+
+#####
+##
+##  Specify data files for BAO, BBN, H0 and sigma8 Likelihoods
+##
+####
+  
+  - capability: T_cmb
+    options:
+      T_cmb: 2.7255
+
+  - capability: BAO_LogLike
+    options:
+      DataFile:  BAO_2014.dat
+
+  - capability: BBN_LogLike
+    options:
+      DataFile: PDG_2017.dat # Use both, the Yp and D/H measurement as given in PDG 2017
+      #DataFile: PDG_2017_updated.dat # Use the Yp measurement from PDG 2017 and the updated D/H measurement of 1801.08023
+  
+  - capability: H0_LogLike
+    options:
+      DataFile:  SH0ES.dat
+
+  - capability: plc_2_0_init
+    options:
+      planck_path: /home/janina/code/PlanckLike/plc_2.0 # set by hand: path/to/your/planck/data
+      
+  - capability: sigma8_LogLike
+    options:
+        DataFile: Planck_SZ.dat
+
+  - capability: class_set_parameter
+    options:
+      class_dict: 
+        output: "tCl pCl lCl" # need to add matter power spectrum for sigma8 computation
+        k_pivot: 0.05
+
+  - capability: AlterBBN_modelinfo
+    options:
+      failsafe: 1
+      err: 0
+
+  - capability: BBN_abundances
+    options:
+      correlation_matrix: [[1.0,0.2],[0.2,1.0]]
+      relative_errors: [1e-3,1e-2]
+      elements: [Yp,D]
+
+#======== Logging setup ========
+Logger:
+  redirection:
+    [Debug]      : "debug.log"
+    [Default]      : "default.log"
+    [CosmoBit]  : "CosmoBit.log"
+    [Scanner]      : "Scanner.log"
+
+#======== Generic Name/Value Section ========
+KeyValues:
+
+  debug: true
+
+  default_output_path: "runs/CosmoBit_testScan"
+
+  rng: ranlux48
+
+  likelihood:
+    model_invalid_for_lnlike_below: -1e6
