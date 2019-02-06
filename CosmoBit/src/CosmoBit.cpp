@@ -2720,7 +2720,7 @@ namespace Gambit
       static int nrow;
 
       sigma8 = BEreq::class_get_sigma8(0.);
-      Omega_m = BEreq::class_get_Omega_m();
+      Omega_m = *Dep::Omega_m;
 
       if(read_data == false)
 	{
@@ -2744,9 +2744,16 @@ namespace Gambit
       using namespace Pipes::compute_Sigma8;
 
       double sigma8 = BEreq::class_get_sigma8(0.);
-      double Omega_m = BEreq::class_get_Omega_m();
+      double Omega_m = *Dep::Omega_m;
 
       result = sigma8*pow(Omega_m/0.3, 0.5);
+    }
+
+    void compute_Omega_m(double &result)
+    {
+      using namespace Pipes::compute_Omega_m;
+
+      result = BEreq::class_get_Omega_m();
     }
   }
 }

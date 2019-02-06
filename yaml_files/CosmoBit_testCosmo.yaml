@@ -127,6 +127,11 @@ ObsLikes:
     module:       CosmoBit
     type:         double
 
+  - purpose:      Observable
+    capability:   Omega_m
+    module:       CosmoBit
+    type:         double
+
 #======== Rule entries ========
 Rules:
 
