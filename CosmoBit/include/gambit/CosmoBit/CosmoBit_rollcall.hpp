@@ -81,20 +81,28 @@ START_MODULE
     #undef FUNCTION
   #undef CAPABILITY
 
-  #define CAPABILITY class_set_parameter
+  #define CAPABILITY class_set_Smu
   START_CAPABILITY
-    #define FUNCTION class_set_parameter_LCDM
+    #define FUNCTION class_set_Smu_LCDM
     START_FUNCTION(CosmoBit::Class_container)
-    DEPENDENCY(Helium_abundance,std::vector<double>)
-    DEPENDENCY(T_cmb, double)
     ALLOW_MODELS(LCDM)
     #undef FUNCTION
 
-    #define FUNCTION class_set_parameter_LCDM_Smu_dNeffCMB_dNeffBBN_etaBBN
+    #define FUNCTION class_set_Smu_LCDM_Smu_dNeffCMB_dNeffBBN_etaBBN
+    START_FUNCTION(CosmoBit::Class_container)
+    ALLOW_MODELS(LCDM_Smu_dNeffCMB_dNeffBBN_etaBBN)
+    #undef FUNCTION
+  #undef CAPABILITY
+
+  #define CAPABILITY class_set_parameter
+  START_CAPABILITY
+
+    #define FUNCTION class_set_parameter_LCDM_family
     START_FUNCTION(CosmoBit::Class_container)
     DEPENDENCY(Helium_abundance,std::vector<double>)
     DEPENDENCY(T_cmb, double)
-    ALLOW_MODELS(LCDM_Smu_dNeffCMB_dNeffBBN_etaBBN)
+    DEPENDENCY(class_set_Smu, CosmoBit::Class_container)
+    ALLOW_MODELS(LCDM,LCDM_Smu_dNeffCMB_dNeffBBN_etaBBN)
     #undef FUNCTION
 
     #define FUNCTION class_set_parameter_LCDM_SingletDM
@@ -240,16 +248,9 @@ START_MODULE
   #undef CAPABILITY
 
 
-// BBN related functions & capabilities
-  #define CAPABILITY eta
-    START_CAPABILITY
-    #define FUNCTION calculate_eta
-      START_FUNCTION(double)
-      DEPENDENCY(T_cmb, double)
-      ALLOW_MODELS(LCDM)
-      // TODO: atm calculation of eta implemented twice: once in CosmoModels, once here. put default LCDM into model tree
-    #undef FUNCTION
-  #undef CAPABILITY
+
+// ------------------------
+
 
   #define CAPABILITY T_cmb
     START_CAPABILITY
@@ -258,9 +259,39 @@ START_MODULE
     #undef FUNCTION
   #undef CAPABILITY
 
+  #define CAPABILITY eta
+    START_CAPABILITY
+    #define FUNCTION calculate_eta
+      START_FUNCTION(double)
+      DEPENDENCY(T_cmb, double)
+      ALLOW_MODELS(LCDM)
+      // TODO: atm calculation of eta implemented twice: once in CosmoModels, once here. put default LCDM into model tree, hand nu masses!
+    #undef FUNCTION
+  #undef CAPABILITY
+
+  #define CAPABILITY dNeffExt
+    START_CAPABILITY
+    #define FUNCTION compute_dNeffExt_ALP
+      START_FUNCTION(double)
+      //ALLOW_MODELS(ALP) # TODO: refer to correct model name
+    #undef FUNCTION
+  #undef CAPABILITY
+
+  #define CAPABILITY etaBBN_ALP
+    START_CAPABILITY
+    #define FUNCTION compute_etaBBN_ALP
+      START_FUNCTION(double)
+      // TODO: refer to correct model name
+      //MODEL_GROUP(cosmology, (LCDM, LCDM_Smu_dNeffCMB_dNeffBBN_etaBBN))
+      //MODEL_GROUP(particle, (ALP))
+      //ALLOW_MODEL_COMBINATION(cosmology,particle)
+    #undef FUNCTION
+  #undef CAPABILITY
+
+// AlterBBN related functions & capabilities
   #define CAPABILITY AlterBBN_modelinfo
     START_CAPABILITY
-    #define FUNCTION AlterBBN_fill
+    #define FUNCTION AlterBBN_fill_LCDM
       START_FUNCTION(relicparam)
       ALLOW_MODELS(LCDM)
       DEPENDENCY(eta, double)
@@ -358,7 +389,6 @@ START_MODULE
     BACKEND_REQ(class_get_Dl,(class_tag),double,(double))
    #undef FUNCTION
   #undef CAPABILITY
-
 
   #define CAPABILITY BAO_LogLike
    START_CAPABILITY

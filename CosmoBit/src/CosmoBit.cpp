@@ -236,52 +236,30 @@ namespace Gambit
       result = Stats::gaussian_loglikelihood(pred_mean, obs_mean, pred_err, obs_err, false);
     }
 
-    void class_set_parameter_LCDM(Class_container& cosmo)
+    void class_set_Smu_LCDM(Class_container& cosmo)
     {
-      using namespace Pipes::class_set_parameter_LCDM;
+      using namespace Pipes::class_set_Smu_LCDM;
 
-      int l_max=cosmo.lmax;
-
-      cosmo.input.clear();
-
-      cosmo.input.addEntry("output","tCl pCl lCl");
-      cosmo.input.addEntry("l_max_scalars",l_max);
-      cosmo.input.addEntry("lensing","yes");
-
-      cosmo.input.addEntry("T_cmb",*Dep::T_cmb);
-      cosmo.input.addEntry("omega_b",*Param["omega_b"]);
-      cosmo.input.addEntry("omega_cdm",*Param["omega_cdm"]);
-      cosmo.input.addEntry("H0",*Param["H0"]);
-      cosmo.input.addEntry("ln10^{10}A_s",*Param["ln10A_s"]);
-      cosmo.input.addEntry("n_s",*Param["n_s"]);
-      cosmo.input.addEntry("tau_reio",*Param["tau_reio"]);
-
-      std::vector<double> Helium_abund = *Dep::Helium_abundance; // .at(0): mean, .at(1): uncertainty
-      cosmo.input.addEntry("YHe",Helium_abund.at(0));
-
-      // JR: heads-up! Neutrinos + dNeff also need to be set. accordingly for base model we want to scan
-      // Planck baseline should be
       cosmo.input.addEntry("N_ur",2.0328);  //1 massive neutrinos
       cosmo.input.addEntry("N_ncdm",1);
       cosmo.input.addEntry("m_ncdm","0.06");
-
-
-      YAML::Node class_dict;
-      if (runOptions->hasKey("class_dict"))
-      {
-	class_dict = runOptions->getValue<YAML::Node>("class_dict");
-	for (auto it=class_dict.begin(); it != class_dict.end(); it++)
-	{
-	  std::string name = it->first.as<std::string>();
-	  std::string value = it->second.as<std::string>();
-	  cosmo.input.addEntry(name,value);
-	}
-      }
     }
 
-    void class_set_parameter_LCDM_Smu_dNeffCMB_dNeffBBN_etaBBN(Class_container& cosmo)
+    void class_set_Smu_LCDM_Smu_dNeffCMB_dNeffBBN_etaBBN(Class_container& cosmo)
     {
-      using namespace Pipes::class_set_parameter_LCDM_Smu_dNeffCMB_dNeffBBN_etaBBN;
+      using namespace Pipes::class_set_Smu_LCDM_Smu_dNeffCMB_dNeffBBN_etaBBN;
+
+      cosmo.input.addEntry("N_ur",*Param["dNeff"]+0.00641);  // dNeff= 0.00641 for 3 massive neutrinos at CMB release
+      cosmo.input.addEntry("N_ncdm",3);
+      std::stringstream sstream;
+      double numass = *Param["Smu"]/3.;
+      sstream << numass << ", " << numass << ", " << numass;
+      cosmo.input.addEntry("m_ncdm",sstream.str());
+    }
+
+    void class_set_parameter_LCDM_family(Class_container& cosmo)
+    {
+      using namespace Pipes::class_set_parameter_LCDM_family;
       // on the level of class the model LCDM_Smu_dNeff and LCDM_Smu_dNeff_dNeffBBN are identical
 
       int l_max=cosmo.lmax;
@@ -300,12 +278,7 @@ namespace Gambit
       cosmo.input.addEntry("n_s",*Param["n_s"]);
       cosmo.input.addEntry("tau_reio",*Param["tau_reio"]);
 
-      cosmo.input.addEntry("N_ur",*Param["dNeff"]+0.00641);  // dNeff= 0.00641 for 3 massive neutrinos at CMB release
-      cosmo.input.addEntry("N_ncdm",3);
-      std::stringstream sstream;
-      double numass = *Param["Smu"]/3.;
-      sstream << numass << ", " << numass << ", " << numass;
-      cosmo.input.addEntry("m_ncdm",sstream.str());
+      cosmo = *Dep::class_set_Smu;
 
       std::vector<double> Helium_abund = *Dep::Helium_abundance; // .at(0): mean, .at(1): uncertainty
       cosmo.input.addEntry("YHe",Helium_abund.at(0));
@@ -2224,22 +2197,38 @@ namespace Gambit
       logger() << "Baryon to photon ratio (eta) computed to be " << result << EOM;
     }
 
-    void AlterBBN_fill(relicparam &result)
+    void compute_dNeffExt_ALP(double &result)
+    {
+      using namespace Pipes::compute_dNeffExt_ALP;
+
+      // TODO: call parameters from ALP model and calculate dNeff from them
+      result = 0.1;
+
+    }
+
+    void compute_etaBBN_ALP(double &result)
+    {
+      using namespace Pipes::compute_dNeffExt_ALP;
+
+      // TODO: call parameters from ALP model and calculate etaBBN from them
+      result = 1e-10;
+
+    }
+
+
+    void AlterBBN_fill_LCDM(relicparam &result)
     {
       // fill AlterBBN structure for LCDM
-      using namespace Pipes::AlterBBN_fill;
+      using namespace Pipes::AlterBBN_fill_LCDM;
 
       BEreq::Init_cosmomodel(&result);
 
       result.eta0=*Dep::eta; // eta0 = eta_BBN = eta_CMB
       result.Nnu=3.046;     // 3 massive neutrinos
       result.dNnu=0;        // no extra rel. d.o.f. in  base LCDM
-      //result.failsafe = 3;  // set precision parameters for AlterBBN
-      //result.err = 3;
       result.failsafe = runOptions->getValueOrDef<int>(3,"failsafe");
       result.err = runOptions->getValueOrDef<int>(3,"err");
     }
-
 
     void AlterBBN_fill_LCDM_Smu_dNeffCMB_dNeffBBN_etaBBN(relicparam &result)
     {
@@ -2251,12 +2240,9 @@ namespace Gambit
       result.eta0 = *Param["eta_BBN"];  // eta AFTER BBN (variable during)
       result.Nnu=3.046;                 // 3 massive neutrinos
       result.dNnu=*Param["dNeff_BBN"];
-      //result.failsafe = 3;  // set precision parameters for AlterBBN
-      //result.err = 3;
       result.failsafe = runOptions->getValueOrDef<int>(3,"failsafe");
       result.err = runOptions->getValueOrDef<int>(3,"err");
     }
-
 
     void compute_BBN_abundances(CosmoBit::BBN_container &result)
     {
