@@ -235,10 +235,10 @@ namespace Gambit {
 
     /// Overlap removal -- discard from first list if within deltaRMax of any from the second list
     template<typename MOMPTRS1, typename MOMPTRS2>
-    void removeOverlap(MOMPTRS1& momstofilter, const MOMPTRS2& momstocmp, double deltaRMax) {
+    void removeOverlap(MOMPTRS1& momstofilter, const MOMPTRS2& momstocmp, double deltaRMax, bool use_rapidity=false) {
       ifilter_reject(momstofilter, [&](const typename MOMPTRS1::value_type& mom1) {
           for (const typename MOMPTRS2::value_type& mom2 : momstocmp) {
-            const double dR = deltaR_eta(mom1->mom(), mom2->mom());
+            const double dR = (use_rapidity) ? deltaR_rap(mom1->mom(), mom2->mom()) : deltaR_eta(mom1->mom(), mom2->mom());
             if (dR < deltaRMax) return true;
           }
           return false;
