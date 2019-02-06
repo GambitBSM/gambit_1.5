@@ -171,7 +171,7 @@ START_MODULE
     #define FUNCTION class_get_spectra_func
     START_FUNCTION(CosmoBit::Class_container)
     BACKEND_REQ(get_ptr_to_class,(class_tag),CosmoBit::Class_container,())
-    BACKEND_REQ(class_output_total_cl_at_l,(class_tag),int, (Class::spectra*, Class::lensing* , Class::output*, int, double* ))
+    BACKEND_REQ(class_get_cl,(class_tag),std::vector< double >, (str))
     FORCE_SAME_BACKEND(class_tag)
     #undef FUNCTION
   #undef CAPABILITY
@@ -246,11 +246,11 @@ START_MODULE
     #define FUNCTION calculate_eta
       START_FUNCTION(double)
       DEPENDENCY(T_cmb, double)
-      ALLOW_MODELS(LCDM)  
+      ALLOW_MODELS(LCDM)
       // TODO: atm calculation of eta implemented twice: once in CosmoModels, once here. put default LCDM into model tree
     #undef FUNCTION
   #undef CAPABILITY
-  
+
   #define CAPABILITY T_cmb
     START_CAPABILITY
     #define FUNCTION set_T_cmb
@@ -275,7 +275,7 @@ START_MODULE
      BACKEND_REQ(Init_cosmomodel, (libbbn), void, (relicparam*))
     #undef FUNCTION
   #undef CAPABILITY
-     
+
 
   #define CAPABILITY Helium_abundance
    START_CAPABILITY
@@ -308,7 +308,7 @@ START_MODULE
       DEPENDENCY(BBN_abundances, CosmoBit::BBN_container)
     #undef FUNCTION
   #undef CAPABILITY
-  
+
   #define CAPABILITY Beryllium7_abundance
    START_CAPABILITY
     #define FUNCTION get_Beryllium7_abundance
@@ -326,7 +326,7 @@ START_MODULE
       BACKEND_REQ(get_NNUC, (libbbn), int, ())
     #undef FUNCTION
   #undef CAPABILITY
-    
+
  #define CAPABILITY BBN_LogLike
    START_CAPABILITY
    #define FUNCTION compute_BBN_LogLike
@@ -351,7 +351,6 @@ START_MODULE
    START_CAPABILITY
    #define FUNCTION compute_Pantheon_LogLike
     START_FUNCTION(double)
-    DEPENDENCY(class_get_spectra,CosmoBit::Class_container)
     ALLOW_MODEL_DEPENDENCE(LCDM,cosmo_nuisance_params)
     MODEL_GROUP(cosmology, (LCDM, LCDM_Smu_dNeffCMB_dNeffBBN_etaBBN))
     MODEL_GROUP(nuisance, (cosmo_nuisance_params))
@@ -365,10 +364,10 @@ START_MODULE
    START_CAPABILITY
    #define FUNCTION compute_BAO_LogLike
     START_FUNCTION(double)
-    DEPENDENCY(class_get_spectra,CosmoBit::Class_container)
     ALLOW_MODELS(LCDM, LCDM_Smu_dNeffCMB_dNeffBBN_etaBBN)
     BACKEND_REQ(class_get_Da,(class_tag),double,(double))
     BACKEND_REQ(class_get_Hz,(class_tag),double,(double))
+    BACKEND_REQ(class_get_rs,(class_tag),double,())
    #undef FUNCTION
   #undef CAPABILITY
 
@@ -376,9 +375,9 @@ START_MODULE
      START_CAPABILITY
      #define FUNCTION compute_sigma8_LogLike
       START_FUNCTION(double)
-      DEPENDENCY(class_get_spectra,CosmoBit::Class_container)
       ALLOW_MODELS(LCDM, LCDM_Smu_dNeffCMB_dNeffBBN_etaBBN)
       BACKEND_REQ(class_get_sigma8,(class_tag),double,(double))
+      BACKEND_REQ(class_get_Omega_m,(class_tag),double,())
      #undef FUNCTION
   #undef CAPABILITY
 
@@ -386,9 +385,9 @@ START_MODULE
      START_CAPABILITY
      #define FUNCTION compute_Sigma8
       START_FUNCTION(double)
-      DEPENDENCY(class_get_spectra,CosmoBit::Class_container)
       ALLOW_MODELS(LCDM, LCDM_Smu_dNeffCMB_dNeffBBN_etaBBN)
       BACKEND_REQ(class_get_sigma8,(class_tag),double,(double))
+      BACKEND_REQ(class_get_Omega_m,(class_tag),double,())
      #undef FUNCTION
   #undef CAPABILITY
 

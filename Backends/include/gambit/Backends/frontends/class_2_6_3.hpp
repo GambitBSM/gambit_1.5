@@ -59,15 +59,18 @@ BE_FUNCTION(background_tau_of_z, int, (Class::background*,double,double*), "back
 BE_FUNCTION(background_at_tau, int, (Class::background*,double,short,short,int*,double*), "background_at_tau", "class_background_at_tau")
 BE_FUNCTION(spectra_sigma, int, (Class::background*,Class::primordial*,Class::spectra*,double,double,double*), "spectra_sigma", "class_spectra_sigma")
 
+BE_CONV_FUNCTION(class_get_cl, std::vector<double>, (str), "class_get_cl")
 BE_CONV_FUNCTION(class_get_Da, double, (double), "class_get_Da")
 BE_CONV_FUNCTION(class_get_Dl, double, (double), "class_get_Dl")
 BE_CONV_FUNCTION(class_get_Hz, double, (double), "class_get_Hz")
+BE_CONV_FUNCTION(class_get_rs, double, (), "class_get_rs")
+BE_CONV_FUNCTION(class_get_Omega_m, double, (), "class_get_Omega_m")
 BE_CONV_FUNCTION(class_get_sigma8, double, (double), "class_get_sigma8")
 
-BE_CONV_FUNCTION(class_2_6_3_run, void, (), "class_run_internal")
-BE_CONV_FUNCTION(class_2_6_3_free, void, (), "class_free_internal")
+//BE_CONV_FUNCTION(class_2_6_3_run, void, (), "class_run_internal")
+//BE_CONV_FUNCTION(class_2_6_3_free, void, (), "class_free_internal")
 BE_CONV_FUNCTION(get_class_2_6_3, CosmoBit::Class_container, (), "get_ptr_to_class")
-BE_CONV_FUNCTION(class_2_6_3_set_parameter, void, (CosmoBit::ClassInput), "class_set_parameter_internal")
+//BE_CONV_FUNCTION(class_2_6_3_set_parameter, void, (CosmoBit::ClassInput), "class_set_parameter_internal")
 
 BE_INI_DEPENDENCY(class_set_parameter,CosmoBit::Class_container)
 

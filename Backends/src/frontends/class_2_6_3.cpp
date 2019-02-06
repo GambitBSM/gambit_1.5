@@ -23,23 +23,39 @@
 #include "gambit/Backends/frontend_macros.hpp"
 #include "gambit/Backends/frontends/class_2_6_3.hpp"
 
+
 // Convenience functions (definitions)
 BE_NAMESPACE
 {
   CosmoBit::Class_container cosmo;
-  static int last_success=0;
+
+  Class::file_content fc;
+  Class::precision pr;
+  Class::background ba;
+  Class::thermo th;
+  Class::perturbs pt;
+  Class::transfers tr;
+  Class::primordial pm;
+  Class::spectra sp;
+  Class::nonlinear nl;
+  Class::lensing le;
+  Class::output op;
+  Class::ErrorMsg errmsg;
+
+  static int last_success = 0;
   static bool check_for_unused = true;
+  static str maxlevel;
 
   void class_2_6_3_free()
   {
-    if (last_success > 8) class_lensing_free(&cosmo.le);
-    if (last_success > 7) class_spectra_free(&cosmo.sp);
-    if (last_success > 6) class_transfer_free(&cosmo.tr);
-    if (last_success > 5) class_nonlinear_free(&cosmo.nl);
-    if (last_success > 4) class_primordial_free(&cosmo.pm);
-    if (last_success > 3) class_perturb_free(&cosmo.pt);
-    if (last_success > 2) class_thermodynamics_free(&cosmo.th);
-    if (last_success > 1) class_background_free(&cosmo.ba);
+    if (last_success > 8) class_lensing_free(&le);
+    if (last_success > 7) class_spectra_free(&sp);
+    if (last_success > 6) class_transfer_free(&tr);
+    if (last_success > 5) class_nonlinear_free(&nl);
+    if (last_success > 4) class_primordial_free(&pm);
+    if (last_success > 3) class_perturb_free(&pt);
+    if (last_success > 2) class_thermodynamics_free(&th);
+    if (last_success > 1) class_background_free(&ba);
     last_success = 0;
   }
 
@@ -49,72 +65,75 @@ BE_NAMESPACE
 
     char error_printout[1024];
 
-    if (class_input_initialize(&cosmo.fc,&cosmo.pr,&cosmo.ba,&cosmo.th,&cosmo.pt,&cosmo.tr,&cosmo.pm,&cosmo.sp,&cosmo.nl,&cosmo.le,&cosmo.op,cosmo.class_errmsg) == _FAILURE_)
+    if (class_input_initialize(&fc,&pr,&ba,&th,&pt,&tr,&pm,&sp,&nl,&le,&op,errmsg) == _FAILURE_)
     {
-      sprintf(error_printout,"Error in class_input_initialize\n=>%s\n",cosmo.class_errmsg);
+      sprintf(error_printout,"Error in class_input_initialize\n=>%s\n",errmsg);
       invalid_point().raise(error_printout);
     }
     last_success++;
     /** - Check for unused parameters */
 
     /* (If this function is run for the first time, we check if all parameters were read.
-       This is done by a loop through all entries of cosmo.fc. When the input
-       was successfully recognized, cosmo.fc.read[i] is set to be true.
+       This is done by a loop through all entries of fc. When the input
+       was successfully recognized, fc.read[i] is set to be true.
        If at least one parameter is not used, we throw an error, to prevent the user from
        calculating from things.) */
+
     if (check_for_unused)
     {
       std::vector< std::string > unused;
-      for (int i=0; i<cosmo.fc.size; i++)
+      for (int i=0; i<fc.size; i++)
       {
-        if (cosmo.fc.read[i] != _TRUE_)
-        {
-          unused.push_back(std::string(cosmo.fc.name[i]));
-        }
+	if (fc.read[i] != _TRUE_)
+	{
+	  unused.push_back(std::string(fc.name[i]));
+	}
       }
       if (!(unused.empty()))
       {
-        std::string error_out;
-        error_out = "Some of your parameters are not read by class.\n\nThese are:\n\n";
-        for (auto par = unused.begin(); par != unused.end(); par++)
-        {
-          error_out +=  "--> ";
-          error_out +=  *par;
-          error_out +=  " <--\n";
-        }
-        error_out += "\nPlease fix this. Most probably these unknown parameters are given in the Rules section.";
-        backend_error().raise(LOCAL_INFO,error_out);
+	std::string error_out;
+	error_out = "Some of your parameters are not read by class.\n\nThese are:\n\n";
+	for (auto par = unused.begin(); par != unused.end(); par++)
+	{
+	  error_out +=  "--> ";
+	  error_out +=  *par;
+	  error_out +=  " <--\n";
+	}
+	error_out += "\nPlease fix this. Most probably these unknown parameters are given in the Rules section.";
+	backend_error().raise(LOCAL_INFO,error_out);
       }
       check_for_unused = false;
     }
 
     /** - Run CLASS (Go through all class_xxx_initialize) */
 
-    if (class_background_initialize(&cosmo.pr,&cosmo.ba) == _FAILURE_)
+    if (class_background_initialize(&pr,&ba) == _FAILURE_)
     {
-      sprintf(error_printout,"Error in class_background_initialize\n=>%s\n",cosmo.ba.error_message);
+      sprintf(error_printout,"Error in class_background_initialize\n=>%s\n",ba.error_message);
       invalid_point().raise(error_printout);
     }
     last_success++;
-    if (class_thermodynamics_initialize(&cosmo.pr,&cosmo.ba,&cosmo.th) == _FAILURE_)
+    if (maxlevel.compare("background") == 0) return;
+    if (class_thermodynamics_initialize(&pr,&ba,&th) == _FAILURE_)
     {
-      sprintf(error_printout,"Error in class_thermodynamics_initialize\n=>%s\n",cosmo.th.error_message);
+      sprintf(error_printout,"Error in class_thermodynamics_initialize\n=>%s\n",th.error_message);
       invalid_point().raise(error_printout);
     }
     last_success++;
-    if (class_perturb_initialize(&cosmo.pr,&cosmo.ba,&cosmo.th,&cosmo.pt) == _FAILURE_)
+    if (maxlevel.compare("thermodynamics") == 0) return;
+    if (class_perturb_initialize(&pr,&ba,&th,&pt) == _FAILURE_)
     {
-      sprintf(error_printout,"Error in class_perturb_initialize\n=>%s\n",cosmo.pt.error_message);
+      sprintf(error_printout,"Error in class_perturb_initialize\n=>%s\n",pt.error_message);
       invalid_point().raise(error_printout);
     }
     last_success++;
-		
+    if (maxlevel.compare("perturb") == 0) return;
     /* If full pk is asked on the set parameter function; this sets ppm->primordial_spec_type
        to be equal to 'gambit_Pk'. Using this flag, we externally fill in the primordial power spectrum.
        (note alterative -without patching class at all- is to use text files and 'cat' command which we
        want to aviod. The existing CLASS on the branch is already patched to have necessary flags and
        functions to allow for hacking and external setting the primordial power spectrum. */
-    if(cosmo.pm.primordial_spec_type == 6) // is 6 when Gambit_pk is asked for.
+    if(pm.primordial_spec_type == 6) // is 6 when Gambit_pk is asked for.
     {
       /* The bin number of the primordial power spectrum.
        This is not to be set here (and also should be given by the user).
@@ -124,75 +143,78 @@ BE_NAMESPACE
        cosmo.k_ar, cosmo.Pk_S, and cosmo.Pk_T are to be filled
        in the early step of setting the parameters. */
 
-			cosmo.pm.lnk_size = 30;
-	  	cosmo.pm.md_size = cosmo.pt.md_size;
+      pm.lnk_size = 30;
+      pm.md_size = pt.md_size;
 
       /** - Make room */
-      cosmo.pm.lnk = (double *)malloc(cosmo.pm.lnk_size*sizeof(double));
+      pm.lnk = (double *)malloc(pm.lnk_size*sizeof(double));
       // std::cout << "DEBUG: we pass pm.lnk \n" << std::endl;
 
-      cosmo.pm.lnpk = (double **)malloc(cosmo.pt.md_size*sizeof(double));
-      cosmo.pm.ddlnpk = (double **)malloc(cosmo.pt.md_size*sizeof(double));
-      cosmo.pm.ic_size = (int *)malloc(cosmo.pt.md_size*sizeof(int));
-      cosmo.pm.ic_ic_size = (int *)malloc(cosmo.pt.md_size*sizeof(int));
-      cosmo.pm.is_non_zero = (short **)malloc(cosmo.pt.md_size*sizeof(short));
+      pm.lnpk = (double **)malloc(pt.md_size*sizeof(double));
+      pm.ddlnpk = (double **)malloc(pt.md_size*sizeof(double));
+      pm.ic_size = (int *)malloc(pt.md_size*sizeof(int));
+      pm.ic_ic_size = (int *)malloc(pt.md_size*sizeof(int));
+      pm.is_non_zero = (short **)malloc(pt.md_size*sizeof(short));
 
       int index_md;
-      for (index_md = 0; index_md < cosmo.pt.md_size; index_md++)
+      for (index_md = 0; index_md < pt.md_size; index_md++)
       {
-        cosmo.pm.ic_size[index_md] = cosmo.pt.ic_size[index_md];
-        cosmo.pm.ic_ic_size[index_md] = (cosmo.pm.ic_size[index_md]*(cosmo.pm.ic_size[index_md]+1))/2;
+	pm.ic_size[index_md] = pt.ic_size[index_md];
+	pm.ic_ic_size[index_md] = (pm.ic_size[index_md]*(pm.ic_size[index_md]+1))/2;
 
-        cosmo.pm.lnpk[index_md] = (double *)malloc(cosmo.pm.lnk_size*cosmo.pm.ic_ic_size[index_md]*sizeof(double));
-        cosmo.pm.ddlnpk[index_md] = (double *)malloc(cosmo.pm.lnk_size*cosmo.pm.ic_ic_size[index_md]*sizeof(double));
-        cosmo.pm.is_non_zero[index_md] = (short *)malloc(cosmo.pm.lnk_size*cosmo.pm.ic_ic_size[index_md]*sizeof(short));
+	pm.lnpk[index_md] = (double *)malloc(pm.lnk_size*pm.ic_ic_size[index_md]*sizeof(double));
+	pm.ddlnpk[index_md] = (double *)malloc(pm.lnk_size*pm.ic_ic_size[index_md]*sizeof(double));
+	pm.is_non_zero[index_md] = (short *)malloc(pm.lnk_size*pm.ic_ic_size[index_md]*sizeof(short));
       }
 
       /** - Store values */
-      for (int index_k=0; index_k<cosmo.pm.lnk_size; index_k++)
+      for (int index_k=0; index_k<pm.lnk_size; index_k++)
       {
-				 std::cout <<  cosmo.k_ar.at(index_k) << "," << cosmo.Pk_S.at(index_k)<<std::endl;
+	std::cout <<  cosmo.k_ar.at(index_k) << "," << cosmo.Pk_S.at(index_k)<<std::endl;
 
-         cosmo.pm.lnk[index_k] = std::log( cosmo.k_ar.at(index_k) );
-         cosmo.pm.lnpk[cosmo.pt.index_md_scalars][index_k] = std::log( cosmo.Pk_S.at(index_k) );
-         if (cosmo.pt.has_tensors == _TRUE_)
-           cosmo.pm.lnpk[cosmo.pt.index_md_tensors][index_k] = std::log( cosmo.Pk_T.at(index_k) );
+	 pm.lnk[index_k] = std::log( cosmo.k_ar.at(index_k) );
+	 pm.lnpk[pt.index_md_scalars][index_k] = std::log( cosmo.Pk_S.at(index_k) );
+	 if (pt.has_tensors == _TRUE_)
+	   pm.lnpk[pt.index_md_tensors][index_k] = std::log( cosmo.Pk_T.at(index_k) );
       }
 
       /** - Tell CLASS that there are scalar (and tensor) modes */
-      cosmo.pm.is_non_zero[cosmo.pt.index_md_scalars][cosmo.pt.index_ic_ad] = _TRUE_;
-      if (cosmo.pt.has_tensors == _TRUE_)
-        cosmo.pm.is_non_zero[cosmo.pt.index_md_tensors][cosmo.pt.index_ic_ten] = _TRUE_;
+      pm.is_non_zero[pt.index_md_scalars][pt.index_ic_ad] = _TRUE_;
+      if (pt.has_tensors == _TRUE_)
+	pm.is_non_zero[pt.index_md_tensors][pt.index_ic_ten] = _TRUE_;
     }
 
-    if (class_primordial_initialize(&cosmo.pr,&cosmo.pt,&cosmo.pm) == _FAILURE_)
+    if (class_primordial_initialize(&pr,&pt,&pm) == _FAILURE_)
     {
-      sprintf(error_printout,"Error in class_primordial_initialize\n=>%s\n",cosmo.pm.error_message);
-      invalid_point().raise(error_printout);
-    }
-		
-    last_success++;
-    if (class_nonlinear_initialize(&cosmo.pr,&cosmo.ba,&cosmo.th,&cosmo.pt,&cosmo.pm,&cosmo.nl) == _FAILURE_)
-    {
-      sprintf(error_printout,"Error in class_nonlinear_initialize\n=>%s\n",cosmo.nl.error_message);
+      sprintf(error_printout,"Error in class_primordial_initialize\n=>%s\n",pm.error_message);
       invalid_point().raise(error_printout);
     }
     last_success++;
-    if (class_transfer_initialize(&cosmo.pr,&cosmo.ba,&cosmo.th,&cosmo.pt,&cosmo.nl,&cosmo.tr) == _FAILURE_)
+    if (maxlevel.compare("primordial") == 0) return;
+    if (class_nonlinear_initialize(&pr,&ba,&th,&pt,&pm,&nl) == _FAILURE_)
     {
-      sprintf(error_printout,"Error in class_transfer_initialize\n=>%s\n",cosmo.tr.error_message);
+      sprintf(error_printout,"Error in class_nonlinear_initialize\n=>%s\n",nl.error_message);
       invalid_point().raise(error_printout);
     }
     last_success++;
-    if (class_spectra_initialize(&cosmo.pr,&cosmo.ba,&cosmo.pt,&cosmo.pm,&cosmo.nl,&cosmo.tr,&cosmo.sp) == _FAILURE_)
+    if (maxlevel.compare("nonlinear") == 0) return;
+    if (class_transfer_initialize(&pr,&ba,&th,&pt,&nl,&tr) == _FAILURE_)
     {
-      sprintf(error_printout,"Error in class_spectra_initialize\n=>%s\n",cosmo.sp.error_message);
+      sprintf(error_printout,"Error in class_transfer_initialize\n=>%s\n",tr.error_message);
       invalid_point().raise(error_printout);
     }
     last_success++;
-    if (class_lensing_initialize(&cosmo.pr,&cosmo.pt,&cosmo.sp,&cosmo.nl,&cosmo.le) == _FAILURE_)
+    if (maxlevel.compare("transfer") == 0) return;
+    if (class_spectra_initialize(&pr,&ba,&pt,&pm,&nl,&tr,&sp) == _FAILURE_)
     {
-      sprintf(error_printout,"Error in class_lensing_initialize\n=>%s\n",cosmo.le.error_message);
+      sprintf(error_printout,"Error in class_spectra_initialize\n=>%s\n",sp.error_message);
+      invalid_point().raise(error_printout);
+    }
+    last_success++;
+    if (maxlevel.compare("spectra") == 0) return;
+    if (class_lensing_initialize(&pr,&pt,&sp,&nl,&le) == _FAILURE_)
+    {
+      sprintf(error_printout,"Error in class_lensing_initialize\n=>%s\n",le.error_message);
       invalid_point().raise(error_printout);
     }
     last_success++;
@@ -207,12 +229,12 @@ BE_NAMESPACE
   {
     std::map<std::string,std::string> in_map = in_dict.get_map();
     int len_of_input = in_map.size();
-    class_parser_initialize(&cosmo.fc,byVal(len_of_input),(char *)"",cosmo.class_errmsg);
+    class_parser_initialize(&fc,byVal(len_of_input),(char *)"",errmsg);
     for(auto iter=in_map.begin(); iter != in_map.end(); iter++)
     {
       auto pos = std::distance(in_map.begin(), iter );
-      std::strncpy(cosmo.fc.name[pos], iter->first.c_str(), sizeof(Class::FileArg));
-      std::strncpy(cosmo.fc.value[pos], iter->second.c_str(), sizeof(Class::FileArg));
+      std::strncpy(fc.name[pos], iter->first.c_str(), sizeof(Class::FileArg));
+      std::strncpy(fc.value[pos], iter->second.c_str(), sizeof(Class::FileArg));
     }
   }
 
@@ -222,36 +244,36 @@ BE_NAMESPACE
     int index;
     double *pvecback;
     //transform redshift in conformal time
-    background_tau_of_z(&cosmo.ba,z,&tau);
+    background_tau_of_z(&ba,z,&tau);
 
-    //pvecback must be allocated 
-    pvecback=(double *)malloc(cosmo.ba.bg_size*sizeof(double));
+    //pvecback must be allocated
+    pvecback=(double *)malloc(ba.bg_size*sizeof(double));
 
     //call to fill pvecback
-    background_at_tau(&cosmo.ba,tau,cosmo.ba.long_info,cosmo.ba.inter_normal, &index, pvecback);
+    background_at_tau(&ba,tau,ba.long_info,ba.inter_normal, &index, pvecback);
 
-    //double H_z=pvecback[cosmo.ba.index_bg_H];
-    double Da=pvecback[cosmo.ba.index_bg_ang_distance];
+    //double H_z=pvecback[ba.index_bg_H];
+    double Da=pvecback[ba.index_bg_ang_distance];
     free(pvecback);
     return Da;
   }
 
   double class_get_Dl(double z)
   {
-        double tau=0;
-        int index;
-        double *pvecback;
+    double tau=0;
+    int index;
+    double *pvecback;
 
-        background_tau_of_z(&cosmo.ba,z,&tau);
+    background_tau_of_z(&ba,z,&tau);
 
-        pvecback=(double *)malloc(cosmo.ba.bg_size*sizeof(double));
+    pvecback=(double *)malloc(ba.bg_size*sizeof(double));
 
-        //call to fill pvecback
-        background_at_tau(&cosmo.ba,tau,cosmo.ba.long_info,cosmo.ba.inter_normal, &index, pvecback);
+    //call to fill pvecback
+    background_at_tau(&ba,tau,ba.long_info,ba.inter_normal, &index, pvecback);
 
-        double Dl = pvecback[cosmo.ba.index_bg_lum_distance];
-        free(pvecback);
-        return Dl;
+    double Dl = pvecback[ba.index_bg_lum_distance];
+    free(pvecback);
+    return Dl;
   }
 
   double class_get_Hz(double z)
@@ -260,17 +282,27 @@ BE_NAMESPACE
     int index;
     double *pvecback;
     //transform redshift in conformal time
-    background_tau_of_z(&cosmo.ba,z,&tau);
+    background_tau_of_z(&ba,z,&tau);
 
-    //pvecback must be allocated 
-    pvecback=(double *)malloc(cosmo.ba.bg_size*sizeof(double));
+    //pvecback must be allocated
+    pvecback=(double *)malloc(ba.bg_size*sizeof(double));
 
     //call to fill pvecback
-    background_at_tau(&cosmo.ba,tau,cosmo.ba.long_info,cosmo.ba.inter_normal, &index, pvecback);
-    
-    double H_z=pvecback[cosmo.ba.index_bg_H];
+    background_at_tau(&ba,tau,ba.long_info,ba.inter_normal, &index, pvecback);
+
+    double H_z=pvecback[ba.index_bg_H];
     free(pvecback);
     return(H_z);
+  }
+
+  double class_get_Omega_m()
+  {
+    return ba.Omega0_cdm + ba.Omega0_dcdmdr + ba.Omega0_b + ba.Omega0_ncdm_tot;
+  }
+
+  double class_get_rs()
+  {
+    return th.rs_d;
   }
 
   double class_get_sigma8(double z)
@@ -281,19 +313,81 @@ BE_NAMESPACE
     double sigma8 = 0.;
     int success;
     //transform redshift in conformal time
-    background_tau_of_z(&cosmo.ba,z,&tau);
+    background_tau_of_z(&ba,z,&tau);
 
-    //pvecback must be allocated 
-    pvecback=(double *)malloc(cosmo.ba.bg_size*sizeof(double));
+    //pvecback must be allocated
+    pvecback=(double *)malloc(ba.bg_size*sizeof(double));
 
     //call to fill pvecback
-    background_at_tau(&cosmo.ba,tau,cosmo.ba.long_info,cosmo.ba.inter_normal, &index, pvecback);
+    background_at_tau(&ba,tau,ba.long_info,ba.inter_normal, &index, pvecback);
     //background_at_tau(pba,tau,pba->long_info,pba->inter_normal,&last_index,pvecback);
-    success=spectra_sigma(&cosmo.ba,&cosmo.pm,&cosmo.sp,8./cosmo.ba.h,z,&sigma8);
+    success=spectra_sigma(&ba,&pm,&sp,8./ba.h,z,&sigma8);
     free(pvecback);
     return sigma8;
 
   }
+
+  std::vector<double> class_get_cl(std::string spectype)
+  {
+    // Maximal value of l.
+    int l_max = cosmo.lmax;
+
+    std::vector<double> cl(l_max+1,0.);
+
+    // Number of Cl-spectra (columns of the Cl-table).
+    // The order of the spectra is [TT, EE, TE, BB, PhiPhi, TPhi, EPhi]
+    int num_ct_max=7;
+
+    // Define an array which takes the values of Cl of the different
+    // spectra at a given value of l
+    double* cltemp = new double[num_ct_max];
+
+    // Loop through all l from 0 to l_max (including) and ask for the cl-spectra.
+    for (int l=0; l <= l_max; l++)
+    {
+      if (l < 2)
+      {
+	// The entries for l=0 and l=1 are zero per defintion
+	cl.at(l) = 0.;
+      }
+      else
+      {
+	// For l >= 2 ask for the cl-spectra.
+	if (class_output_total_cl_at_l(&sp,&le,&op,byVal(l),byVal(cltemp)) == _SUCCESS_)
+	{
+	  if (spectype.compare("tt") == 0)
+	    cl.at(l) = cltemp[sp.index_ct_tt]*pow(ba.T_cmb*1.e6,2);
+	  else if (spectype.compare("te") == 0)
+	    cl.at(l) = cltemp[sp.index_ct_te]*pow(ba.T_cmb*1.e6,2);
+	  else if (spectype.compare("ee") == 0)
+	    cl.at(l) = cltemp[sp.index_ct_ee]*pow(ba.T_cmb*1.e6,2);
+	  else if (spectype.compare("bb") == 0)
+	    cl.at(l) = cltemp[sp.index_ct_bb]*pow(ba.T_cmb*1.e6,2);
+	  else if (spectype.compare("pp") == 0)
+	    cl.at(l) = cltemp[sp.index_ct_pp];
+	  else
+	  {
+	    std::string error_out;
+	    error_out = "The \'spectype\' -> ";
+	    error_out +=  spectype;
+	    error_out += " <- is not recongnized and cannot be calculated by this Backend.";
+	    backend_error().raise(LOCAL_INFO,error_out);
+	  }
+	}
+	else
+	{
+	  // Failsafe for unexpected behaviour of "class_outpout_at_cl"
+	  cl.at(l) = 0.;
+	}
+      }
+    }
+
+    // We do not need "cl" anymore
+    delete cltemp;
+
+    return cl;
+  }
+
 
 
 }
@@ -307,8 +401,17 @@ BE_INI_FUNCTION
   {
     class_2_6_3_free();
   }
+  else
+  {
+    if (*InUse::class_get_Da) maxlevel = "background" ;
+    if (*InUse::class_get_Dl) maxlevel = "background" ;
+    if (*InUse::class_get_Hz) maxlevel= "background";
+    if (*InUse::class_get_Omega_m) maxlevel = "background" ;
+    if (*InUse::class_get_rs) maxlevel = "thermodynamics";
+    if (*InUse::class_get_sigma8) maxlevel = "lensing";
+    if (*InUse::class_get_cl) maxlevel = "lensing";
+  }
   scan_level = false;
-
   cosmo = *Dep::class_set_parameter;
   CosmoBit::ClassInput in_dict = cosmo.input;
   class_2_6_3_set_parameter(in_dict);
