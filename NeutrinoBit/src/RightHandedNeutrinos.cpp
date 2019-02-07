@@ -1455,8 +1455,8 @@ namespace Gambit
       static bool read_table = true;
       static tk::spline s;
       // Mass range of experiment
-      static double low_lim = 0.0606;  // GeV
-      static double upp_lim = 0.1293;  // GeV
+      static double low_lim = 0.06060759493670887;  // GeV
+      static double upp_lim = 0.12926582278481014;  // GeV
       std::vector<double> M(3), U(3), mixing_sq(3);
 
       mixing_sq[0] = *Dep::Ue1;
@@ -1497,8 +1497,8 @@ namespace Gambit
       static bool read_table = true;
       static tk::spline s;
       // Mass range of experiment
-      static double low_lim = 0.0118;  // GeV
-      static double upp_lim = 0.4492;  // GeV
+      static double low_lim = 0.011810586;  // GeV
+      static double upp_lim = 0.4491907842;  // GeV
       std::vector<double> M(3), U(3), mixing_sq(3);
       double c_e = 0.5711;
       double c_mu = 0.1265;
@@ -1540,8 +1540,8 @@ namespace Gambit
       static bool read_table = true;
       static tk::spline s;
       // Mass range of experiment
-      static double low_lim = 0.0103;  // GeV
-      static double upp_lim = 0.3611;  // GeV
+      static double low_lim = 0.0103348894;  // GeV
+      static double upp_lim = 0.3610401587;  // GeV
       std::vector<double> M(3), U(3), mixing_sq(3);
       double c_e = 0.5711;
       double c_mu = 0.1265;
@@ -1583,8 +1583,8 @@ namespace Gambit
       static bool read_table = true;
       static tk::spline s;
       // Mass range of experiment
-      static double low_lim = 0.1595;  // GeV
-      static double upp_lim = 2.0815;  // GeV
+      static double low_lim = 0.1595725833606568;  // GeV
+      static double upp_lim = 2.0814785578102417;  // GeV
       std::vector<double> M(3), U(3), mixing_sq(3);
       double c_e = 0.5711;
       double c_mu = 0.1265;
@@ -1626,8 +1626,8 @@ namespace Gambit
       static bool read_table = true;
       static tk::spline s;
       // Mass range of experiment
-      static double low_lim = 0.4483;  // GeV
-      static double upp_lim = 1.9232;  // GeV
+      static double low_lim = 0.4483153374997989;  // GeV
+      static double upp_lim = 1.9231171483448785;  // GeV
       std::vector<double> M(3), U(3), mixing_sq(3);
       double c_e = 0.5711;
       double c_mu = 0.1265;
@@ -1669,8 +1669,8 @@ namespace Gambit
       static bool read_table = true;
       static tk::spline s;
       // Mass range of experiment
-      static double low_lim = 1.8102;  // GeV
-      static double upp_lim = 80.0;  // GeV
+      static double low_lim = 1.8102188251700203;  // GeV
+      static double upp_lim = 80.00000000000006;  // GeV
       std::vector<double> M(3), U(3), mixing_sq(9);
 
       mixing_sq[0] = *Dep::Ue1;  // This is |U_{e1}|^2 etc
@@ -1718,8 +1718,8 @@ namespace Gambit
       static bool read_table = true;
       static tk::spline s;
       // Mass range of experiment
-      static double low_lim = 0.4383;  // GeV
-      static double upp_lim = 4.1955;  // GeV
+      static double low_lim = 0.4383563;  // GeV
+      static double upp_lim = 4.1954595;  // GeV
       std::vector<double> M(3), U(3), mixing_sq(9);
 
       mixing_sq[0] = *Dep::Ue1;  // This is |U_{e1}|^2 etc
@@ -1767,8 +1767,8 @@ namespace Gambit
       static bool read_table = true;
       static tk::spline s;
       // Mass range of experiment
-      static double low_lim = 100.1041;  // GeV
-      static double upp_lim = 476.1459;  // GeV
+      static double low_lim = 100.1041668;  // GeV
+      static double upp_lim = 476.1458333;  // GeV
       std::vector<double> M(3), U(3), mixing_sq(3);
 
       mixing_sq[0] = *Dep::Ue1;
@@ -1809,8 +1809,8 @@ namespace Gambit
       static bool read_table = true;
       static tk::spline s;
       // Mass range of experiment
-      static double low_lim = 101.8909;  // GeV
-      static double upp_lim = 500.7691;  // GeV
+      static double low_lim = 101.89094090419824;  // GeV
+      static double upp_lim = 500.76903192219294;  // GeV
       std::vector<double> M(3), U(3), mixing_sq(3);
 
       mixing_sq[0] = *Dep::Um1;
@@ -1851,8 +1851,8 @@ namespace Gambit
       static bool read_table = true;
       static tk::spline s;
       // Mass range of experiment
-      static double low_lim = 0.1794;  // GeV
-      static double upp_lim = 0.2996;  // GeV
+      static double low_lim = 0.1794613032227713;  // GeV
+      static double upp_lim = 0.2995365796283227;  // GeV
       std::vector<double> M(3), U(3), mixing_sq(3);
 
       mixing_sq[0] = *Dep::Um1;
@@ -1893,8 +1893,8 @@ namespace Gambit
       static bool read_table = true;
       static tk::spline s;
       // Mass range of experiment
-      static double low_lim = 0.2116;  // GeV
-      static double upp_lim = 2.0162;  // GeV
+      static double low_lim = 0.2116390354;  // GeV
+      static double upp_lim = 2.0161957132;  // GeV
       std::vector<double> M(3), U(3), mixing_sq(3);
 
       mixing_sq[0] = *Dep::Um1;
@@ -1933,8 +1933,8 @@ namespace Gambit
       static bool read_table = true;
       static tk::spline s;
       // Mass range of experiment
-      static double low_lim = 0.0106;  // GeV
-      static double upp_lim = 0.2888;  // GeV
+      static double low_lim = 0.010685579196217497;  // GeV
+      static double upp_lim = 0.288745725563687;  // GeV
       std::vector<double> M(3), U(3), mixing_sq(3);
 
       mixing_sq[0] = *Dep::Ut1;
@@ -1957,7 +1957,7 @@ namespace Gambit
         if ( (M[i] < low_lim) or (M[i] > upp_lim) )
         {
           result += -0.5*log(2*pi/1.28/1.28);
-          result += 0;
+          //result += 0;
         }
         else
         {
@@ -1975,7 +1975,7 @@ namespace Gambit
       static bool read_table = true;
       static tk::spline s;
       // Mass range of experiment
-      static double low_lim = 1.0293;  // GeV
+      static double low_lim = 1.0293246;  // GeV
       static double upp_lim = 1e3;  // GeV
       std::vector<double> M(3), U(3), mixing_sq(3);
 
@@ -2017,8 +2017,8 @@ namespace Gambit
       static bool read_table = true;
       static tk::spline s;
       // Mass range of experiment
-      static double low_lim = 1.0145;  // GeV
-      static double upp_lim = 9.857e2;  // GeV
+      static double low_lim = 1.0145564;  // GeV
+      static double upp_lim = 985.652549;  // GeV
       std::vector<double> M(3), U(3), mixing_sq(3);
 
       mixing_sq[0] = *Dep::Um1;
