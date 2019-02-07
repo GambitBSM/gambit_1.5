@@ -540,6 +540,6 @@ DFSZAxion_II: |
 
    DFSZ axion model with E/N = 8/3 and CAee = [1 - sin^2(beta)]/3.
 
-SimpleALP: |
+ConstantMassALP: |
 
    A convenient version of the GeneralALP model for studies of ALPs with not explicitly temperature-dependent axion mass, i.e. beta = 0 and Tcrit is irrelevant.

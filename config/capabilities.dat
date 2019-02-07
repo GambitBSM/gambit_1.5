@@ -3794,34 +3794,34 @@ calculate_uncertainty_amu_2loop: |
 #----------------------------
 
 GeneralALP_parameters: |
-   Parameters of the GeneralALP model (gagg, gaee, fa, ma0, Tcrit, beta, thetai).
+   Parameters of the GeneralALP model (gagg, gaee, fa, ma0, Tchi, beta, thetai).
    See also ./gambit GeneralALP
 
 QCDAxion_parameters: |
-   Parameters of the QCDAxion model (EoverN, CaggQCD, Caee, fa, LambdaQCD, Tcrit, beta, thetai).
+   Parameters of the QCDAxion model (EoverN, CaggQCD, Caee, fa, LambdaChi, Tchi, beta, thetai).
    See also ./gambit QCDAxion
 
 KSVZAxion_parameters: |
-   Parameters of the KSVZAxion model (EoverN, CaggQCD, fa, LambdaQCD, Tcrit, beta, thetai).
+   Parameters of the KSVZAxion model (EoverN, CaggQCD, fa, LambdaChi, Tchi, beta, thetai).
    See also ./gambit KSVZAxion
 
 DFSZAxion_I_parameters: |
-   Parameters of the DFSZAxion_I model (EoverN, CaggQCD, tanbeta, fa, LambdaQCD, Tcrit, beta, thetai).
+   Parameters of the DFSZAxion_I model (EoverN, CaggQCD, tanbeta, fa, LambdaChi, Tchi, beta, thetai).
    See also ./gambit DFSZAxion_I
 
 DFSZAxion_II_parameters: |
-   Parameters of the DFSZAxion_II model (EoverN, CaggQCD, tanbeta, fa, LambdaQCD, Tcrit, beta, thetai).
+   Parameters of the DFSZAxion_II model (EoverN, CaggQCD, tanbeta, fa, LambdaChi, Tchi, beta, thetai).
    See also ./gambit DFSZAxion_II
 
-SimpleALP_parameters: |
-   Parameters of the SimpleALP model (Cagg, Caee, fa, Lambda, thetai).
-   See also ./gambit SimpleALP
+ConstantMassALP_parameters: |
+   Parameters of the ConstantMassALP model (Cagg, Caee, fa, Lambda, thetai).
+   See also ./gambit ConstantMassALP
 
 QCDAxion_ZeroTemperatureMass: |
-   Nuisance likelihood for the QCD-related energy scale LambdaQCD, which defines the low-energy QCD axion mass.
+   Nuisance likelihood for the QCD-related energy scale LambdaChi, which defines the low-energy QCD axion mass.
 
 QCDAxion_TemperatureDependence: |
-   Nuisance likelihood for the parameters beta and Tcrit, which define the temperature dependence of the QCD axion mass for high temperatures.
+   Nuisance likelihood for the parameters beta and Tchi, which define the temperature dependence of the QCD axion mass for high temperatures.
 
 QCDAxion_AxionPhotonConstant: |
    Nuisance likelihood for the contribution of axion-pion interactions in the chiral Lagrangian to the axion-photon coupling.

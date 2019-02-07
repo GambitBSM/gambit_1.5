@@ -219,6 +219,12 @@ START_MODULE
       DEPENDENCY(RD_oh2_Xf, ddpair)
     #undef FUNCTION
 
+    // Routine for axion energy density today
+    #define FUNCTION RD_oh2_Axions
+      START_FUNCTION(double)
+        ALLOW_MODEL(GeneralALP)
+        DEPENDENCY(AxionOscillationTemperature, double)
+    #undef FUNCTION
   #undef CAPABILITY
 
 
@@ -269,13 +275,6 @@ START_MODULE
       DEPENDENCY(Xf, double)
       BACKEND_REQ(get_oneChannel, (gimmemicro) , double,  (double,double,char*,char*,char*,char*))
       BACKEND_OPTION((MicrOmegas_ScalarSingletDM_Z3),(gimmemicro))
-    #undef FUNCTION
-
-    // Routine for axion energy density today
-    #define FUNCTION RD_oh2_Axions
-      START_FUNCTION(double)
-        ALLOW_MODEL(GeneralALP)
-        DEPENDENCY(AxionOscillationTemperature, double)
     #undef FUNCTION
   #undef CAPABILITY
 
@@ -1422,7 +1421,7 @@ START_MODULE
   START_CAPABILITY
     #define FUNCTION calc_RParameter
     START_FUNCTION(double)
-    ALLOW_MODEL(GeneralALP)
+    DEPENDENCY(GeneralALP_parameters, ModelParameters)
     #undef FUNCTION
   #undef CAPABILITY
 

@@ -13,6 +13,7 @@
 ///  \date 2016 Oct
 ///  \date 2017 Jan, Feb, Jun, Jul, Sep - Dec
 ///  \date 2018 Jan, Mar - May, Sep
+///  \date 2019 Feb
 ///
 ///  *********************************************
 
@@ -55,8 +56,8 @@ namespace Gambit
     /*! \brief Supporting classes and functions for the axion module.
      */
 
-     #define AXION_DEBUG_MODE
-     #define AXION_OMP_DEBUG_MODE
+     //#define AXION_DEBUG_MODE
+     //#define AXION_OMP_DEBUG_MODE
 
      //#ifdef WITH_MPI
      //if(GMPI::Is_initialized() && !GMPI::Is_finalized())
@@ -436,7 +437,7 @@ namespace Gambit
     double SolarModel::omega_pl_squared(double r) { return gsl_spline_eval(linear_interp[2], r, accel[2]); }
 
     // Constant numbers for precision etc.
-    const double abs_prec = 1.0e-1, rel_prec = 1.0e-6;
+    const double abs_prec = 1.0E-1, rel_prec = 1.0E-6;
     const int method = 5;
     // Auxillary structure for passing the model parameters to the gsl solver.
     struct SolarModel_params1 {double erg; double rad; SolarModel* sol;};
@@ -902,7 +903,7 @@ namespace Gambit
     void QCDAxion_ZeroTemperatureMass_Nuisance_lnL(double &result)
     {
       using namespace Pipes::QCDAxion_ZeroTemperatureMass_Nuisance_lnL;
-      double LambdaQCD = *Param["LambdaQCD"];
+      double LambdaChi = *Param["LambdaChi"];
 
       // DEPRECATED: Results from the IILM (0910.1066).
       // const double L2mu = 78.19;
@@ -911,7 +912,7 @@ namespace Gambit
       const double Lmu = 75.5;
       const double Lsigma = 0.5;
 
-      result = gaussian_nuisance_lnL(Lmu, LambdaQCD, Lsigma);
+      result = gaussian_nuisance_lnL(Lmu, LambdaChi, Lsigma);
     }
 
     // Capability function to provide a simple Gaussian nuisance likelihood for
@@ -930,10 +931,10 @@ namespace Gambit
 
 
     // Auxillary function for QCD nuisance likelihood below.
-    double log_chi (double T, double beta, double Tcrit)
+    double log_chi (double T, double beta, double Tchi)
     {
       double result = 0.0;
-      if (T > Tcrit) { result = -beta*log10(T/Tcrit); };
+      if (T > Tchi) { result = -beta*log10(T/Tchi); };
 
       return result;
     }
@@ -942,7 +943,7 @@ namespace Gambit
      void QCDAxion_TemperatureDependence_Nuisance_lnL(double &result)
      {
        using namespace Pipes::QCDAxion_TemperatureDependence_Nuisance_lnL;
-       double Tcrit = *Param["Tcrit"];
+       double Tchi = *Param["Tchi"];
        double beta = *Param["beta"];
 
        // Results from lattice QCD (doi:10.1038/nature20115, Supplementary Material).
@@ -952,7 +953,7 @@ namespace Gambit
        const double log_chi_err_vals [20] = {0.014468, 0.0361846, 0.014468, 0.014468, 0.064104, 0.064104, 0.0510815, 0.0361846, 0.0510815, 0.064104, 0.0878027, 0.110042, 0.142159, 0.163124, 0.183873, 0.224965, 0.255557, 0.286023, 0.316401, 0.356804};
 
        double dummy = 0.0;
-       for (int i = 0; i < 20; i++) { dummy = dummy + gaussian_nuisance_lnL(log_chi_vals[i], log_chi(temp_vals[i],beta,Tcrit), log_chi_err_vals[i]); };
+       for (int i = 0; i < 20; i++) { dummy = dummy + gaussian_nuisance_lnL(log_chi_vals[i], log_chi(temp_vals[i],beta,Tchi), log_chi_err_vals[i]); };
 
        result = dummy;
      }
@@ -1005,7 +1006,7 @@ namespace Gambit
     {
       using namespace Pipes::calc_ALPS1_signal_vac;
       double m_ax = *Param["ma0"];
-      double gagg = std::fabs(*Param["gagg"]);
+      double gagg = 1.0E-9*std::fabs(*Param["gagg"]); // gagg needs to be in eV^-1.
 
       result = ALPS1_signal_general(1096.0, 0.0, m_ax, gagg);
     }
@@ -1015,7 +1016,7 @@ namespace Gambit
     {
       using namespace Pipes::calc_ALPS1_signal_gas;
       double m_ax = *Param["ma0"];
-      double gagg = std::fabs(*Param["gagg"]);
+      double gagg = 1.0E-9*std::fabs(*Param["gagg"]); // gagg needs to be in eV^-1.
 
       result = ALPS1_signal_general(1044.0, 5.0E-8, m_ax, gagg);
     }
@@ -1062,7 +1063,7 @@ namespace Gambit
     {
       using namespace Pipes::calc_CAST2007_signal_vac;
       double m_ax = *Param["ma0"];
-      double gagg = std::fabs(*Param["gagg"]);
+      double gagg = 1.0E-9*std::fabs(*Param["gagg"]); // gagg needs to be in eV^-1.
       double gaee = std::fabs(*Param["gaee"]);
 
       // Initialise the Solar model calculator and get the reference counts for a given mass.
@@ -1090,7 +1091,7 @@ namespace Gambit
     {
       using namespace Pipes::calc_CAST2017_signal_vac;
       double m_ax = *Param["ma0"];
-      double gagg = std::fabs(*Param["gagg"]);
+      double gagg = 1.0E-9*std::fabs(*Param["gagg"]); // gagg needs to be in eV^-1.
       double gaee = std::fabs(*Param["gaee"]);
       std::vector<std::vector<double>> res;
 
@@ -1240,7 +1241,7 @@ namespace Gambit
     {
       using namespace Pipes::calc_Haloscope_signal;
       //double m_ax = *Param["ma0"];
-      double gagg = std::fabs(*Param["gagg"]);
+      double gagg = 1.0E-9*std::fabs(*Param["gagg"]); // gagg needs to be in eV^-1.
       // Get the DM fraction in axions and the local DM density.
       double fraction = *Dep::RD_fraction;
       LocalMaxwellianHalo LocalHaloParameters = *Dep::LocalHalo;
@@ -1299,7 +1300,7 @@ namespace Gambit
     {
       using namespace Pipes::calc_lnL_Haloscope_ADMX2;
       // Rescale the axion mass to ueV.
-      double m_ax = 1.0e+6*(*Param["ma0"]);
+      double m_ax = 1.0E+6*(*Param["ma0"]);
       double l = 0.0;
 
       // ADMX 2018 90% C.L. exclusion limits; digitised from Fig. 4, 1804.05750.
@@ -1326,7 +1327,7 @@ namespace Gambit
     {
       using namespace Pipes::calc_lnL_Haloscope_UF;
       // Rescale the axion mass to ueV.
-      double m = 1.0e+6*(*Param["ma0"]);
+      double m = 1.0E+6*(*Param["ma0"]);
       double l = 0.0;
 
       // There are only limits between 5.4 and 5.9 ueV.
@@ -1351,7 +1352,7 @@ namespace Gambit
     {
       using namespace Pipes::calc_lnL_Haloscope_RBF;
       // Rescale the axion mass to ueV.
-      double m = 1.0e+6*(*Param["ma0"]);
+      double m = 1.0E+6*(*Param["ma0"]);
       double l = 0.0;
       // Results from Phys. Rev. D 40, 3153 (1989)
       // The bins and results are directly derived from Table I (which appears to be inconsitent with Figure 14).
@@ -1434,20 +1435,20 @@ namespace Gambit
     double hubble_rad_dom(double T)
     {
       // H(T)/eV, T/MeV, m_pl/10^12eV = m_pl/10^3 GeV
-      const double m_pl = m_planck_red*1.0e-3;
+      const double m_pl = m_planck_red*1.0E-3;
       return 0.331153*sqrt(gStar(T))*T*T/m_pl;
     }
 
     // General form of the temperature-dependent axion mass.
-    double axion_mass_temp(double T, double beta, double Tcrit)
+    double axion_mass_temp(double T, double beta, double Tchi)
     {
       double res = 1.0;
-      if (T > Tcrit) { res = pow(T/Tcrit,-0.5*beta); };
+      if (T > Tchi) { res = pow(T/Tchi,-0.5*beta); };
       return res;
     }
 
     // Auxillary structure for passing the model parameters to the gsl solver.
-    struct AxionEDT_params {double ma0; double beta; double Tcrit; double thetai; double Tosc;};
+    struct AxionEDT_params {double ma0; double beta; double Tchi; double thetai; double Tosc;};
 
     // Auxillary function with root Tosc, the temperature where the axion field oscillations start (defined by mA = 3H).
     // Note that this is only to set the temperature scale of the problem. The differential equation is solved numerically around
@@ -1455,13 +1456,13 @@ namespace Gambit
     double equation_Tosc(double T, void *params)
     {
       // T/MeV, ma0/eV, m_pl/10^12eV = m_pl/10^3 GeV
-      const double m_pl = m_planck_red*1.0e-3;
+      const double m_pl = m_planck_red*1.0E-3;
       struct AxionEDT_params * p1 = (struct AxionEDT_params *)params;
       double ma0 = (p1->ma0);
       double beta = (p1->beta);
-      double Tcrit = (p1->Tcrit);
+      double Tchi = (p1->Tchi);
 
-      double result = 1.0 - gStar(T)*gsl_pow_2(T*T*pi/(ma0*m_pl*axion_mass_temp(T, beta, Tcrit)))/10.0;
+      double result = 1.0 - gStar(T)*gsl_pow_2(T*T*pi/(ma0*m_pl*axion_mass_temp(T, beta, Tchi)))/10.0;
 
       return result;
     }
@@ -1473,12 +1474,12 @@ namespace Gambit
 
       double ma0 = *Param["ma0"];
       double beta = *Param["beta"];
-      double Tcrit = *Param["Tcrit"];
+      double Tchi = *Param["Tchi"];
       // m_pl/10^12 eV = m_pl/10^3 GeV
-      const double m_pl = m_planck_red*1.0e-3;
+      const double m_pl = m_planck_red*1.0E-3;
 
       // Initialising the parameter structure with known and dummy values.
-      AxionEDT_params params = {ma0, beta, Tcrit, 0.0, 0.0};
+      AxionEDT_params params = {ma0, beta, Tchi, 0.0, 0.0};
 
       // Use gsl implementation Brent's method to determine the oscillation temperature.
       gsl_function F;
@@ -1493,12 +1494,12 @@ namespace Gambit
       double r, r_up, r_lo;
 
       // Calculate first estimate for the root bracketing [r_lo, r_up].
-      // Calcucate best estimate for comparison. g(Tcrit)^-0.25 = 0.49, g(Tcrit)^-...=0.76
+      // Calcucate best estimate for comparison. g(Tchi)^-0.25 = 0.49, g(Tchi)^-...=0.76
       r = 0.49*pow((10.0/(pi*pi)) * gsl_pow_2(m_pl*ma0), 0.25);
-      // Compare to decide which branch of the equation is valid; T1 > Tcrit or T1 < Tcrit
-      if ( (r > Tcrit) && (beta > 1.0E-10) )
+      // Compare to decide which branch of the equation is valid; T1 > Tchi or T1 < Tchi
+      if ( (r > Tchi) && (beta > 1.0E-10) )
       {
-        r = 0.76*pow((10.0/(pi*pi)) * gsl_pow_2(m_pl*ma0) * pow(Tcrit, beta), 1.0/(4.0+beta));
+        r = 0.76*pow((10.0/(pi*pi)) * gsl_pow_2(m_pl*ma0) * pow(Tchi, beta), 1.0/(4.0+beta));
       };
       // Find appropriate values for r_lo and r_up
       r_up = r;
@@ -1533,15 +1534,15 @@ namespace Gambit
       struct AxionEDT_params * p = (struct AxionEDT_params *)params;
       double ma0 = (p->ma0);
       double beta = (p->beta);
-      double Tcrit= (p->Tcrit);
+      double Tchi= (p->Tchi);
       double Tosc = (p->Tosc);
       double thetai = (p->thetai);
       // f stores derivatives, y stores functions.
       f[0] = y[1];
       // As a function of (relative) temperature:
-      //f[1] = - gsl_pow_2(ma0*axion_mass_temp(-tau*Tosc,beta,Tcrit)/(hubble_rad_dom(-tau*Tosc)*(-tau)))*gsl_sf_sin(y[0]*thetai)/thetai;
-      f[1] = - gsl_pow_2(SpecialFun1(-tau*Tosc)*ma0*axion_mass_temp(-tau*Tosc,beta,Tcrit)/(hubble_rad_dom(-tau*Tosc)*(-tau)))*gsl_sf_sin(y[0]*thetai)/thetai;
-      //f[1] = - SpecialFun3(-tau*Tosc)*y[2]/(-tau) - 9.0*(gStar(Tosc)/gStar(-tau*Tosc))*gsl_pow_2(SpecialFun1(-tau*Tosc)*axion_mass_temp(-tau*Tosc,beta,Tcrit)/axion_mass_temp(Tosc,beta,Tcrit))*gsl_sf_sin(y[0]*thetai)/(gsl_pow_6(-tau)*thetai);
+      //f[1] = - gsl_pow_2(ma0*axion_mass_temp(-tau*Tosc,beta,Tchi)/(hubble_rad_dom(-tau*Tosc)*(-tau)))*gsl_sf_sin(y[0]*thetai)/thetai;
+      f[1] = - gsl_pow_2(SpecialFun1(-tau*Tosc)*ma0*axion_mass_temp(-tau*Tosc,beta,Tchi)/(hubble_rad_dom(-tau*Tosc)*(-tau)))*gsl_sf_sin(y[0]*thetai)/thetai;
+      //f[1] = - SpecialFun3(-tau*Tosc)*y[2]/(-tau) - 9.0*(gStar(Tosc)/gStar(-tau*Tosc))*gsl_pow_2(SpecialFun1(-tau*Tosc)*axion_mass_temp(-tau*Tosc,beta,Tchi)/axion_mass_temp(Tosc,beta,Tchi))*gsl_sf_sin(y[0]*thetai)/(gsl_pow_6(-tau)*thetai);
 
       return GSL_SUCCESS;
     }
@@ -1553,7 +1554,7 @@ namespace Gambit
       struct AxionEDT_params * p = (struct AxionEDT_params *)params;
       double ma0 = (p->ma0);
       double beta = (p->beta);
-      double Tcrit = (p->Tcrit);
+      double Tchi = (p->Tchi);
       double Tosc = (p->Tosc);
       double thetai = (p->thetai);
       gsl_matrix_view dfdy_mat  = gsl_matrix_view_array (dfdy, 2, 2);
@@ -1562,9 +1563,9 @@ namespace Gambit
       gsl_matrix_set (m, 0, 0, 0);
       gsl_matrix_set (m, 0, 1, 1);
       // As a function of (relative) temperature;
-      //gsl_matrix_set (m, 1, 0, - gsl_pow_2(ma0*axion_mass_temp(-tau*Tosc,beta,Tcrit)/(hubble_rad_dom(-tau*Tosc)*(-tau)))*gsl_sf_cos(y[0]*thetai));
-      gsl_matrix_set (m, 1, 0, - gsl_pow_2(SpecialFun1(-tau*Tosc)*ma0*axion_mass_temp(-tau*Tosc,beta,Tcrit)/(hubble_rad_dom(-tau*Tosc)*(-tau)))*gsl_sf_cos(y[0]*thetai));
-      //gsl_matrix_set (m, 1, 0, -9.0*(gStar(Tosc)/gStar(-tau*Tosc))*gsl_pow_2(SpecialFun1(-tau*Tosc)*axion_mass_temp(-tau*Tosc,beta,Tcrit)/axion_mass_temp(Tosc,beta,Tcrit))*gsl_sf_cos(y[0]*thetai)/gsl_pow_6(-tau));
+      //gsl_matrix_set (m, 1, 0, - gsl_pow_2(ma0*axion_mass_temp(-tau*Tosc,beta,Tchi)/(hubble_rad_dom(-tau*Tosc)*(-tau)))*gsl_sf_cos(y[0]*thetai));
+      gsl_matrix_set (m, 1, 0, - gsl_pow_2(SpecialFun1(-tau*Tosc)*ma0*axion_mass_temp(-tau*Tosc,beta,Tchi)/(hubble_rad_dom(-tau*Tosc)*(-tau)))*gsl_sf_cos(y[0]*thetai));
+      //gsl_matrix_set (m, 1, 0, -9.0*(gStar(Tosc)/gStar(-tau*Tosc))*gsl_pow_2(SpecialFun1(-tau*Tosc)*axion_mass_temp(-tau*Tosc,beta,Tchi)/axion_mass_temp(Tosc,beta,Tchi))*gsl_sf_cos(y[0]*thetai)/gsl_pow_6(-tau));
       //gsl_matrix_set (m, 1, 1, 0);
       gsl_matrix_set (m, 1, 1, -SpecialFun3(-tau*Tosc)/(-tau));
       dfdt[0] = 0.0;
@@ -1579,7 +1580,7 @@ namespace Gambit
       using namespace Pipes::RD_oh2_Axions;
       double ma0 = *Param["ma0"];
       double beta = *Param["beta"];
-      double Tcrit = *Param["Tcrit"];
+      double Tchi = *Param["Tchi"];
       double thetai = *Param["thetai"];
       double fa = *Param["fa"];
       double Tosc = *Dep::AxionOscillationTemperature;
@@ -1592,7 +1593,7 @@ namespace Gambit
       // Critical energy density today * h^2 (in eV^4).
       const double ede_crit_today = 3.0*2.69862E-11;
 
-      struct AxionEDT_params p = {ma0, beta, Tcrit, thetai, Tosc};
+      struct AxionEDT_params p = {ma0, beta, Tchi, thetai, Tosc};
 
       // Function, Jacobian, number of dimensions + pointer to params.
       gsl_odeiv2_system sys = {scal_field_eq, scal_field_eq_jac, 2, &p};
@@ -1622,8 +1623,8 @@ namespace Gambit
         new_step = -pow(10.0, 1.0 + (log10(-tau2)-1.0)*i/1000.0);
         int status = gsl_odeiv2_driver_apply (d, &tau1, new_step, y);
         if (status != GSL_SUCCESS) {std::cout << "Error, return value = " << d << std::endl;};
-        check1 = fabs(thetai)*sqrt(gsl_pow_2( fabs(y[0]) ) + gsl_pow_2( fabs((-new_step)*y[1]*hubble_rad_dom(-new_step*Tosc)/(ma0*axion_mass_temp(-new_step*Tosc,beta,Tcrit))) ));
-        check2 = 3.0*hubble_rad_dom(-new_step*Tosc)/(ma0*axion_mass_temp(-new_step*Tosc,beta,Tcrit));
+        check1 = fabs(thetai)*sqrt(gsl_pow_2( fabs(y[0]) ) + gsl_pow_2( fabs((-new_step)*y[1]*hubble_rad_dom(-new_step*Tosc)/(ma0*axion_mass_temp(-new_step*Tosc,beta,Tchi))) ));
+        check2 = 3.0*hubble_rad_dom(-new_step*Tosc)/(ma0*axion_mass_temp(-new_step*Tosc,beta,Tchi));
 
         #ifdef AXION_DEBUG_MODE
           std::cout << -new_step << " " << thetai*y[0] << " " << -tau2*thetai*y[1] << std::endl;
@@ -1635,14 +1636,14 @@ namespace Gambit
       if (i>=1E+3)
       {
         std::ostringstream buffer;
-        buffer << "T_end: " << -new_step << " | theta_hat_val: " << check1 << ", theta_der: "<< -tau2*y[1]*thetai << ", 3H/m_osc: " << 3.0*hubble_rad_dom(Tosc)/(ma0*axion_mass_temp(-new_step*Tosc,beta,Tcrit)) << ", 3H/m: " << check2 << " .\n";
+        buffer << "T_end: " << -new_step << " | theta_hat_val: " << check1 << ", theta_der: "<< -tau2*y[1]*thetai << ", 3H/m_osc: " << 3.0*hubble_rad_dom(Tosc)/(ma0*axion_mass_temp(-new_step*Tosc,beta,Tchi)) << ", 3H/m: " << check2 << " .\n";
         DarkBit_warning().raise(LOCAL_INFO, "Warning! Maximum number of integration steps reached for energy density calculator!\n         "+buffer.str());
       };
 
       // Calculate the axion energy density at the stopping point.
-      double ede = 1E+18*gsl_pow_2(fa)*(0.5*gsl_pow_2(y[1]*thetai*hubble_rad_dom(-new_step*Tosc)*(-new_step)) + gsl_pow_2(ma0*axion_mass_temp(-new_step*Tosc,beta,Tcrit))*(1.0 - gsl_sf_cos(y[0]*thetai)));
+      double ede = 1E+18*gsl_pow_2(fa)*(0.5*gsl_pow_2(y[1]*thetai*hubble_rad_dom(-new_step*Tosc)*(-new_step)) + gsl_pow_2(ma0*axion_mass_temp(-new_step*Tosc,beta,Tchi))*(1.0 - gsl_sf_cos(y[0]*thetai)));
       // Use conservation of entropy to scale the axion energy density to its present value (relative to the critical energy density).
-      double OmegaAh2 = ede*gsl_pow_3(TCMB/(-new_step*Tosc))*(gStar_S(TCMB)/gStar_S(-new_step*Tosc))*(1.0/axion_mass_temp(-new_step*Tosc,beta,Tcrit))/ede_crit_today;
+      double OmegaAh2 = ede*gsl_pow_3(TCMB/(-new_step*Tosc))*(gStar_S(TCMB)/gStar_S(-new_step*Tosc))*(1.0/axion_mass_temp(-new_step*Tosc,beta,Tchi))/ede_crit_today;
 
       gsl_odeiv2_driver_free (d);
 
@@ -1669,18 +1670,30 @@ namespace Gambit
      void calc_RParameter(double &result)
      {
        using namespace Pipes::calc_RParameter;
-       double gaee2 = gsl_pow_2(1.0E+13 * std::fabs(*Param["gaee"]));
-       double gagg = 1.0E+19 * std::fabs(*Param["gagg"]);
+       // DEPRECATED: RParameter has no longer ALLOW_MODELS()
+       //double gaee2 = gsl_pow_2(1.0E+13 * std::fabs(*Param["gaee"]));
+       //double gagg = 1.0E+10*std::fabs(*Param["gagg"]); // gagg needs to be in 10^-10 GeV^-1.
+       const ModelParameters& params = *Dep::GeneralALP_parameters;
+       double gaee2 = gsl_pow_2(1.0E+13 * std::fabs(params.at("gaee")));
+       double gagg = 1.0E+10*std::fabs(params.at("gagg")); // gagg needs to be in 10^-10 GeV^-1.
+       double lgma0 = log10(params.at("ma0"));
        // Value for He-abundance Y from 1408.6953: Y = 0.255(2).
        //const double Y = 0.255;
        // Value for He-abundance Y from 1503.08146: <Y> = 0.2515(17).
        const double Y = 0.2515;
-
+       // Use interpolation for the finite-mass correction.
+       static AxionInterpolator correction ("DarkBit/data/Axions_RParameterCorrection.dat", "linear");
+       // Initialise an effective axion-photon coupling, valid for low masses.
+       double geff = gagg;
+       // Apply correction for higher mass values...
+       if ((lgma0 > correction.lower()) && (lgma0 < correction.upper())) { geff *= pow(10, 0.5*correction.interpolate(lgma0)); };
+       // ... or set to zero if mass is too high.
+       if (lgma0 >= correction.upper()) { geff = 0.0; };
        // Expressions only valid for gaee2 < 35.18 but limits should become stronger for gaee2 > 35.18 (but perhaps not gaee2 >> 35.18).
        // Conservative approach: Constrain gaee2 > 35.18 at the level of gaee2 = 35.18.
        if (gaee2 > 35.18) { gaee2 = 35.18; };
 
-       result = -0.421824 - 0.0948659*(-4.675 + sqrt(21.8556 + 21.0824*gagg)) - 0.00533169*gaee2 - 0.0386834*(-1.23 - 0.137991*pow(gaee2,0.75) + sqrt(1.5129 + gaee2)) + 7.3306*Y;
+       result = -0.421824 - 0.0948659*(-4.675 + sqrt(21.8556 + 21.0824*geff)) - 0.00533169*gaee2 - 0.0386834*(-1.23 - 0.137991*pow(gaee2,0.75) + sqrt(1.5129 + gaee2)) + 7.3306*Y;
      }
 
      // Capability function to calculate the likelihood for the R-parameter.
@@ -1854,7 +1867,7 @@ namespace Gambit
     {
       using namespace Pipes::calc_lnL_SN1987A;
       double ma0  = (1.0E+10*(*Param["ma0"]))/5.433430;
-      double gagg = (1.0E+21*std::fabs(*Param["gagg"]))/5.339450;
+      double gagg = (1.0E+12*std::fabs(*Param["gagg"]))/5.339450;
 
       // Standard devation of the null observation.
       const double sigma = 0.2;
@@ -1874,7 +1887,7 @@ namespace Gambit
     {
       using namespace Pipes::calc_lnL_HESS_GCMF;
       double m_ax = *Param["ma0"];
-      double gagg = std::fabs(*Param["gagg"]);
+      double gagg = 1.0E-9*std::fabs(*Param["gagg"]); // gagg needs to be in eV^-1.
 
       // Compute the domensionless parameters Epsilon and Gamma from the axion mass and axion-photon coupling (see 1311.3148).
       const double c_epsilon = 0.071546787;
