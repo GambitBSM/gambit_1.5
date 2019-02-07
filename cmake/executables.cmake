@@ -29,8 +29,11 @@ if(EXISTS "${PROJECT_SOURCE_DIR}/Core/")
   if (NOT EXCLUDE_FLEXIBLESUSY)
     set(gambit_XTRA ${flexiblesusy_LDFLAGS})
   endif()
-  if (NOT EXCLUDE_DELPHES)
-    set(gambit_XTRA ${gambit_XTRA} ${DELPHES_LDFLAGS} ${ROOT_LIBRARIES} ${ROOT_LIBRARY_DIR}/libEG.so)
+  if (NOT EXCLUDE_ROOT)
+    set(gambit_XTRA ${gambit_XTRA} ${ROOT_LIBRARIES})
+    if (NOT EXCLUDE_RESTFRAMES)
+      set(gambit_XTRA ${gambit_XTRA} ${RESTFRAMES_LDFLAGS})
+    endif()
   endif()
   add_gambit_executable(${PROJECT_NAME} "${gambit_XTRA}"
                         SOURCES ${PROJECT_SOURCE_DIR}/Core/src/gambit.cpp
@@ -43,8 +46,8 @@ if(EXISTS "${PROJECT_SOURCE_DIR}/Core/")
   if (NOT EXCLUDE_FLEXIBLESUSY)
     add_dependencies(gambit flexiblesusy)
   endif()
-  if (NOT EXCLUDE_DELPHES)
-    add_dependencies(gambit delphes)
+  if (NOT EXCLUDE_RESTFRAMES)
+    add_dependencies(gambit restframes)
   endif()
   # If Mathematica is present and the system is OS X, absolutize paths to avoid dylib errors
   if (${HAVE_MATHEMATICA} AND ${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
@@ -58,9 +61,6 @@ if(EXISTS "${PROJECT_SOURCE_DIR}/ScannerBit/")
     if (NOT EXCLUDE_FLEXIBLESUSY)
       set(ScannerBit_XTRA ${flexiblesusy_LDFLAGS})
     endif()
-    if (NOT EXCLUDE_DELPHES)
-      set(ScannerBit_XTRA ${ScannerBit_XTRA} ${DELPHES_LDFLAGS} ${ROOT_LIBRARIES} ${ROOT_LIBRARY_DIR}/libEG.so)
-    endif()
   endif()
   add_gambit_executable(ScannerBit_standalone "${ScannerBit_XTRA}"
                         SOURCES ${PROJECT_SOURCE_DIR}/ScannerBit/examples/ScannerBit_standalone.cpp
@@ -72,9 +72,6 @@ if(EXISTS "${PROJECT_SOURCE_DIR}/ScannerBit/")
     if (NOT EXCLUDE_FLEXIBLESUSY)
       add_dependencies(ScannerBit_standalone flexiblesusy)
     endif()
-    if (NOT EXCLUDE_DELPHES)
-      add_dependencies(ScannerBit_standalone delphes)
-    endif()
   else()
     # Make sure the printers compile OK if the rest of GAMBIT is missing
     target_compile_definitions(Printers PRIVATE SCANNER_STANDALONE)
@@ -83,15 +80,18 @@ if(EXISTS "${PROJECT_SOURCE_DIR}/ScannerBit/")
 endif()
 
 # Add C++ hdf5 combine tool, if we have HDF5 libraries
-#if(HDF5_FOUND)
-#  if(EXISTS "${PROJECT_SOURCE_DIR}/Printers/")
-#    if(EXISTS "${PROJECT_SOURCE_DIR}/Elements/")
-#       add_gambit_executable(hdf5_combine ${HDF5_LIBRARIES}
-#                        SOURCES ${PROJECT_SOURCE_DIR}/Printers/examples/hdf5_combine_standalone.cpp
-#                                ${GAMBIT_BASIC_COMMON_OBJECTS}
-#       )
-#       set_target_properties(hdf5_combine PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${PROJECT_SOURCE_DIR}/Printers/scripts")
-#    endif()
-#  endif()
-#endif()
+# There are a lot of annoying peripheral dependencies on GAMBIT things here, would be good to try and decouple things better
+if(HDF5_FOUND)
+  if(EXISTS "${PROJECT_SOURCE_DIR}/Printers/")
+    if(EXISTS "${PROJECT_SOURCE_DIR}/Utils/")
+       add_gambit_executable(hdf5combine ${HDF5_LIBRARIES}
+                        SOURCES ${PROJECT_SOURCE_DIR}/Printers/standalone/manual_hdf5_combine.cpp
+                                $<TARGET_OBJECTS:Printers>
+                                ${GAMBIT_BASIC_COMMON_OBJECTS}
+                                )
+       set_target_properties(hdf5combine PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${PROJECT_SOURCE_DIR}/Printers/bin")
+    endif()
+  endif()
+endif()
+
 
