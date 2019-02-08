@@ -24,7 +24,6 @@ namespace Gambit {
 
       // Required detector sim
       static constexpr const char* detector = "ATLAS";
-      // FIXME Apply standard electron and muon efficiencies
 
       // Numbers passing cuts
       static const size_t NUMSR = 13;
@@ -75,16 +74,22 @@ namespace Gambit {
           }
 
         // Get baseline electrons
-        vector<const Particle*> baselineElectrons;
-        for (const Particle* electron : event->electrons())
+        vector<Particle*> baselineElectrons;
+        for (Particle* electron : event->electrons())
           if (electron->pT() > 10. && electron->abseta() < 2.47)
             baselineElectrons.push_back(electron);
 
+        // Apply electron efficiency
+        ATLAS::applyElectronEff(baselineElectrons);
+
         // Get baseline muons
-        vector<const Particle*> baselineMuons;
-        for (const Particle* muon : event->muons())
+        vector<Particle*> baselineMuons;
+        for (Particle* muon : event->muons())
           if (muon->pT() > 10. && muon->abseta() < 2.7)
             baselineMuons.push_back(muon);
+
+        // Apply muon efficiency
+        ATLAS::applyMuonEff(baselineMuons);
 
         // Full isolation details:
         //  - Remove electrons within dR = 0.2 of a b-tagged jet

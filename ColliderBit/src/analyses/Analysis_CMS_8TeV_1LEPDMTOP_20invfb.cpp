@@ -2,7 +2,7 @@
 
 #include "gambit/ColliderBit/analyses/BaseAnalysis.hpp"
 #include "gambit/ColliderBit/mt2w.h"
-// #include "gambit/ColliderBit/CMSEfficiencies.hpp"
+#include "gambit/ColliderBit/CMSEfficiencies.hpp"
 
 using namespace std;
 
@@ -43,7 +43,6 @@ namespace Gambit {
 
       // Required detector sim
       static constexpr const char* detector = "CMS";
-      // FIXME Apply standard electron and muon efficiencies
 
       Analysis_CMS_8TeV_1LEPDMTOP_20invfb()
         : _numSR(0),
@@ -82,6 +81,7 @@ namespace Gambit {
         // Now define vectors of baseline objects
         vector<HEPUtils::Particle*> baselineLeptons;
 
+        // Baseline electrons
         vector<HEPUtils::Particle*> baselineElectrons;
         for (HEPUtils::Particle* electron : event->electrons()) {
           if (electron->pT() > 30. && fabs(electron->eta()) < 2.5) {
@@ -89,6 +89,11 @@ namespace Gambit {
             baselineLeptons.push_back(electron);
           }
         }
+
+        // Apply electron efficiency
+        CMS::applyElectronEff(baselineElectrons);
+
+        // Baseline muons
         vector<HEPUtils::Particle*> baselineMuons;
         for (HEPUtils::Particle* muon : event->muons()) {
           if (muon->pT() > 30. && fabs(muon->eta()) < 2.1) {
@@ -96,6 +101,9 @@ namespace Gambit {
             baselineLeptons.push_back(muon);
           }
         }
+
+        // Apply muon efficiency
+        CMS::applyMuonEff(baselineMuons);
 
         vector<HEPUtils::Jet*> baselineJets;
         //vector<LorentzVector> jets;

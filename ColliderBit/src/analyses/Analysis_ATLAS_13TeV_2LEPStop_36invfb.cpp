@@ -17,7 +17,7 @@ using namespace std;
    Known errors:
         1. Jet overlap removal with muon is not done becasue miss trac imformation
         2. Applied specific efficiencies on muon for validation
-    
+
 */
 
 namespace Gambit {
@@ -103,7 +103,6 @@ namespace Gambit {
 
         // Required detector sim
         static constexpr const char* detector = "ATLAS";
-      // FIXME Apply standard electron and muon efficiencies
 
         Analysis_ATLAS_13TeV_2LEPStop_36invfb() {
 
@@ -145,6 +144,11 @@ namespace Gambit {
                 if (electron->pT() > 10. && electron->abseta() < 2.47) blElectrons.push_back(electron);
                 if (electron->pT() > 7. && electron->abseta() < 2.47) baselineElectrons.push_back(electron);
             }
+
+            // Apply electron efficiency
+            ATLAS::applyElectronEff(baselineElectrons);
+
+            // Apply loose electron selection
             ATLAS::applyLooseIDElectronSelectionR2(blElectrons);
             ATLAS::applyLooseIDElectronSelectionR2(baselineElectrons);
 
@@ -158,6 +162,9 @@ namespace Gambit {
                 if (muon->pT() > 10. && muon->abseta() < 2.5 && hasTrig) blMuons.push_back(muon);
                 if (muon->pT() > 7. && muon->abseta() < 2.5 && hasTrig) baselineMuons.push_back(muon);
             }
+
+            // Apply muon efficiency
+            ATLAS::applyMuonEff(baselineMuons);
 
             // Jets
             vector<HEPUtils::Jet*> blJets;          // Used for SR-2body and SR-3body

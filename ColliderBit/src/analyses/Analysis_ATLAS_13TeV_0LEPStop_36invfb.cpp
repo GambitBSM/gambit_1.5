@@ -174,7 +174,6 @@ namespace Gambit {
 
       // Required detector sim
       static constexpr const char* detector = "ATLAS";
-      // FIXME Apply standard electron and muon efficiencies
 
       Analysis_ATLAS_13TeV_0LEPStop_36invfb() {
 
@@ -257,6 +256,10 @@ namespace Gambit {
         for (HEPUtils::Particle* muon : event->muons()) {
           if (muon->pT() > 6. && muon->abseta() < 2.7) baselineMuons.push_back(muon);
         }
+
+        // Apply lepton efficiencies
+        ATLAS::applyElectronEff(baselineElectrons);
+        ATLAS::applyMuonEff(baselineMuons);
 
         // Photons
         vector<HEPUtils::Particle*> signalPhotons;

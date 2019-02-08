@@ -27,9 +27,7 @@ namespace Gambit
         /// Pointers to actual detector response functions
         /// @{
         void(*smearElectronEnergy)(std::vector<HEPUtils::Particle*>&);
-        void(*applyElectronEff)(std::vector<HEPUtils::Particle*>&);
         void(*smearMuonMomentum)(std::vector<HEPUtils::Particle*>&);
-        void(*applyMuonEff)(std::vector<HEPUtils::Particle*>&);
         void(*smearTaus)(std::vector<HEPUtils::Particle*>&);
         void(*smearJets)(std::vector<HEPUtils::Jet*>&);
         /// @}
@@ -51,9 +49,7 @@ namespace Gambit
         BuckFast() : partonOnly(false)
                    , antiktR(0.4)
                    , smearElectronEnergy(NULL)
-                   , applyElectronEff(NULL)
                    , smearMuonMomentum(NULL)
-                   , applyMuonEff(NULL)
                    , smearTaus(NULL)
                    , smearJets(NULL)
         {}

@@ -2,7 +2,6 @@
 #include "gambit/ColliderBit/analyses/BaseAnalysis.hpp"
 #include "gambit/ColliderBit/analyses/Cutflow.hpp"
 #include "gambit/ColliderBit/CMSEfficiencies.hpp"
-// #include "Eigen/Eigen"
 
 // Based on http://cms-results.web.cern.ch/cms-results/public-results/publications/EXO-16-048/index.html
 
@@ -22,7 +21,6 @@ namespace Gambit {
 
       // Required detector sim
       static constexpr const char* detector = "CMS";
-      // FIXME Apply standard electron and muon efficiencies
 
       static const size_t NUMSR = 22;
       double _srnums[NUMSR];
@@ -50,9 +48,21 @@ namespace Gambit {
         // Record a trigger weight; we can aggregate this rather than wastefully random-vetoing
         const double trigweight = (met < 350) ? 0.97 : 1.0;
 
+        // Electron objects
+        vector<HEPUtils::Particle*> baselineElectrons = event->electrons();
+
+        // Apply electron efficiency
+        CMS::applyElectronEff(baselineElectrons);
+
+        // Muon objects
+        vector<HEPUtils::Particle*> baselineMuons = event->muons();
+
+        // Apply muon efficiency
+        CMS::applyMuonEff(baselineMuons);
+
         // Veto on isolated leptons and photons
-        for (const Particle* e : event->electrons()) if (e->pT() > 10) return; //< VETO
-        for (const Particle* m : event->muons()) if (m->pT() > 10) return; //< VETO
+        for (const Particle* e : baselineElectrons) if (e->pT() > 10) return; //< VETO
+        for (const Particle* m : baselineMuons) if (m->pT() > 10) return; //< VETO
         for (const Particle* t : event->taus()) if (t->pT() > 18) return; //< VETO
         for (const Particle* y : event->photons()) if (y->pT() > 15 && y->abseta() < 2.5) return; //< VETO
 

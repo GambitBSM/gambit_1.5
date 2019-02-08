@@ -22,7 +22,6 @@ namespace Gambit {
 
       // Required detector sim
       static constexpr const char* detector = "ATLAS";
-      // FIXME Apply standard electron and muon efficiencies
 
       Analysis_ATLAS_13TeV_ZGammaGrav_CONFNOTE_80invfb() {
         set_analysis_name("ATLAS_13TeV_ZGammaGrav_CONFNOTE_80invfb");
@@ -47,6 +46,11 @@ namespace Gambit {
           if (e->pT() > 10. && e->abseta() < 2.47 && !crack)
             electrons.push_back(e);
         }
+
+        // Apply electron efficiency
+        ATLAS::applyElectronEff(electrons);
+
+        // Apply medium electron selection
         ATLAS::applyMediumIDElectronSelection(electrons);
 
         // Muons
@@ -55,6 +59,9 @@ namespace Gambit {
         for (Particle* m : event->muons())
           if (m->pT() > 10. && m->abseta() < 2.7 && random_bool(0.99))
             muons.push_back(m);
+
+        // Apply muon efficiency
+        ATLAS::applyMuonEff(muons);
 
         // Photons
         ParticlePtrs photons;

@@ -39,7 +39,6 @@ namespace Gambit {
 
       // Required detector sim
       static constexpr const char* detector = "CMS";
-      // FIXME Apply standard electron and muon efficiencies
 
       Analysis_CMS_8TeV_3LEPEW_20invfb() {
 
@@ -117,15 +116,25 @@ namespace Gambit {
         double met = event->met();
         double missingPhi = ptot.phi();
 
-        // Now define vectors of baseline objects
+        // Now define vectors of baseline electrons
         vector<HEPUtils::Particle*> signalElectrons;
         for (HEPUtils::Particle* electron : event->electrons()) {
           if (electron->pT() > 10. && fabs(electron->eta()) < 2.4) signalElectrons.push_back(electron);
         }
+
+        // Apply electron efficiency
+        CMS::applyElectronEff(signalElectrons);
+
+        // Now define vectors of baseline muons
         vector<HEPUtils::Particle*> signalMuons;
         for (HEPUtils::Particle* muon : event->muons()) {
           if (muon->pT() > 10. && fabs(muon->eta()) < 2.4) signalMuons.push_back(muon);
         }
+
+        // Apply muon efficiency
+        CMS::applyMuonEff(signalMuons);
+
+        // Now define vectors of baseline taus
         vector<HEPUtils::Particle*> signalTaus;
         for (HEPUtils::Particle* tau : event->taus()) {
           if (tau->pT() > 20. && fabs(tau->eta()) < 2.4) signalTaus.push_back(tau);

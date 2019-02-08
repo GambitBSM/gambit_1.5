@@ -149,7 +149,6 @@ namespace Gambit
 
       // Required detector sim
       static constexpr const char* detector = "ATLAS";
-      // FIXME Apply standard electron and muon efficiencies
 
       Analysis_ATLAS_13TeV_4LEP_36invfb()
       {
@@ -202,13 +201,22 @@ namespace Gambit
         {
           if (electron->pT()>7. && electron->abseta()<2.47) baselineElectrons.push_back(electron);
         }
+
+        // Apply electron efficiency
+        ATLAS::applyElectronEff(baselineElectrons);
+
+        // Apply loose electron selection
         ATLAS::applyLooseIDElectronSelectionR2(baselineElectrons);
 
         for (HEPUtils::Particle* muon : event->muons())
         {
           if (muon->pT()>5. && muon->abseta()<2.7) baselineMuons.push_back(muon);
         }
-        // Missing: Apply "medium" ID criteria
+
+        // Apply muon efficiency
+        ATLAS::applyMuonEff(baselineMuons);
+
+        // Missing: Apply "medium" muon ID criteria
 
         for (HEPUtils::Particle* tau : event->taus())
         {

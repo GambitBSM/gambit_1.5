@@ -1,5 +1,6 @@
 #include <fstream>
 #include "gambit/ColliderBit/topness.h"
+#include "gambit/ColliderBit/CMSEfficiencies.hpp"
 #include "gambit/ColliderBit/analyses/BaseAnalysis.hpp"
 #include "gambit/ColliderBit/analyses/Cutflow.hpp"
 
@@ -66,7 +67,6 @@ namespace Gambit {
 
         // Required detector sim
         static constexpr const char* detector = "CMS";
-        // FIXME Apply standard electron and muon efficiencies
 
         Analysis_CMS_13TeV_1LEPStop_36invfb():
             _cutflow("CMS 0-lep stop 13 TeV", {
@@ -99,13 +99,22 @@ namespace Gambit {
             // Online  trigger
             if (met<120) return;
 
-            // lepton objects
+            // Electron objects
             vector<HEPUtils::Particle*> baselineElectrons;
             for (HEPUtils::Particle* electron : event->electrons())
                 if (electron->pT() > 5. && electron->abseta() < 2.4 ) baselineElectrons.push_back(electron);
+
+            // Apply electron efficiency
+            CMS::applyElectronEff(baselineElectrons);
+
+            // Muon objects
             vector<HEPUtils::Particle*> baselineMuons;
             for (HEPUtils::Particle* muon : event->muons())
                 if (muon->pT() > 5. && muon->abseta() < 2.4 ) baselineMuons.push_back(muon);
+
+            // Apply muon efficiency
+            CMS::applyMuonEff(baselineMuons);
+
             // Jets
             vector<HEPUtils::Jet*> baselineJets;
             vector<HEPUtils::Jet*> fullJets;

@@ -20,6 +20,8 @@
 
 #pragma once
 
+#include <cfloat>
+
 #include "gambit/ColliderBit/Utils.hpp"
 #include "gambit/Utils/threadsafe_rng.hpp"
 

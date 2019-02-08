@@ -39,16 +39,13 @@ namespace Gambit
       // Electron smearing and efficiency
       /// @todo Run-dependence?
       if (smearElectronEnergy != NULL) smearElectronEnergy(eventOut.electrons());
-      if (applyElectronEff !=NULL) applyElectronEff(eventOut.electrons());
 
       // Muon smearing and efficiency
       /// @todo Run-dependence?
       if (smearMuonMomentum != NULL) smearMuonMomentum(eventOut.muons());
-      if (applyMuonEff != NULL) applyMuonEff(eventOut.muons());
 
       //Smear taus
       if (smearTaus != NULL) smearTaus(eventOut.taus());
-      // Note that we apply the hadronic tau reconstruction efficiency *in the analyses*, as it is specific to the LHC run and working point.
 
       // Smear jet momenta
       if (smearJets != NULL) smearJets(eventOut.jets());

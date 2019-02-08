@@ -51,7 +51,6 @@ namespace Gambit {
 
       // Required detector sim
       static constexpr const char* detector = "ATLAS";
-      // FIXME Apply standard electron and muon efficiencies
 
       static bool sortByPT(HEPUtils::Jet* jet1, HEPUtils::Jet* jet2) { return (jet1->pT() > jet2->pT()); }
 
@@ -138,18 +137,28 @@ namespace Gambit {
         // Now define vectors of baseline objects, including:
         // - retrieval of electron, muon and jets from the event
         // - application of basic pT and eta cuts
+
+        // Electrons
         vector<HEPUtils::Particle*> electrons;
         for (HEPUtils::Particle* electron : event->electrons()) {
           if (electron->pT() > 5.
               && fabs(electron->eta()) < 2.47)
             electrons.push_back(electron);
         }
+
+        // Apply electron efficiency
+        ATLAS::applyElectronEff(electrons);
+
+        // Muons
         vector<HEPUtils::Particle*> muons;
         for (HEPUtils::Particle* muon : event->muons()) {
           if (muon->pT() > 5.
               && fabs(muon->eta()) < 2.5)
             muons.push_back(muon);
         }
+
+        // Apply muon efficiency
+        ATLAS::applyMuonEff(muons);
 
         vector<HEPUtils::Jet*> candJets;
         for (HEPUtils::Jet* jet : event->jets()) {

@@ -101,7 +101,6 @@ namespace Gambit
 
       // Required detector sim
       static constexpr const char* detector = "ATLAS";
-      // FIXME Apply standard electron and muon efficiencies
 
       Analysis_ATLAS_13TeV_2OSLEP_chargino_80invfb():
       _cutflow("ATLAS 2-lep chargino-W 13 TeV", {"Two_OS_leptons", "mll_25", "b_jet_veto", "MET_100", "MET_significance_10", "n_j<=1", "m_ll_m_Z"})
@@ -172,11 +171,12 @@ namespace Gambit
       void analyze(const HEPUtils::Event* event)
       {
         _cutflow.fillinit();
+
         // Baseline objects
         HEPUtilsAnalysis::analyze(event);
         double met = event->met();
 
-        // electrons
+        // Electrons
         vector<HEPUtils::Particle*> electrons;
         for (HEPUtils::Particle* electron : event->electrons()) {
           if (electron->pT() > 10.
@@ -184,13 +184,19 @@ namespace Gambit
             electrons.push_back(electron);
         }
 
-        // muons
+        // Apply electron efficiency
+        ATLAS::applyElectronEff(electrons);
+
+        // Muons
         vector<HEPUtils::Particle*> muons;
         for (HEPUtils::Particle* muon : event->muons()) {
           if (muon->pT() > 10.
               && fabs(muon->eta()) < 2.5)
             muons.push_back(muon);
         }
+
+        // Apply muon efficiency
+        ATLAS::applyMuonEff(muons);
 
         // Jets
         vector<HEPUtils::Jet*> candJets;

@@ -18,7 +18,6 @@ namespace Gambit {
 
       // Required detector sim
       static constexpr const char* detector = "ATLAS";
-      // FIXME Apply standard electron and muon efficiencies
 
       Analysis_Covariance() {
         set_analysis_name("Covariance");
