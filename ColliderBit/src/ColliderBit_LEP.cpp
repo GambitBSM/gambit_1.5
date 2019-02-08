@@ -2635,5 +2635,5 @@ namespace Gambit
       result = limit_LLike(xsec.central, limit, xsec.upper - xsec.central);
     }
 
-  }
-}
+  }  // namespace ColliderBit
+}  // namespace Gambit
