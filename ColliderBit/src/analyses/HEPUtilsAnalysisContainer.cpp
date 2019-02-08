@@ -45,8 +45,8 @@ namespace Gambit
       F(ATLAS_13TeV_3b_discoverySR_24invfb)          \
       F(ATLAS_13TeV_3b_36invfb)                      \
       F(ATLAS_13TeV_3b_discoverySR_36invfb)          \
-      /* F(ATLAS_13TeV_PhotonGGM_36invfb) */         \
-      /* F(ATLAS_13TeV_ZGammaGrav_CONFNOTE_80invfb) */  \
+      F(ATLAS_13TeV_PhotonGGM_36invfb)               \
+      F(ATLAS_13TeV_ZGammaGrav_CONFNOTE_80invfb)     \
       F(ATLAS_8TeV_0LEP_20invfb)                     \
       F(ATLAS_8TeV_0LEPStop_20invfb)                 \
       F(ATLAS_8TeV_1LEPStop_20invfb)                 \

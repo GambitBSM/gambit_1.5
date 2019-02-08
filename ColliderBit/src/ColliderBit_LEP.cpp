@@ -36,6 +36,7 @@
 #include "gambit/ColliderBit/ColliderBit_rollcall.hpp"
 #include "gambit/Elements/mssm_slhahelp.hpp"
 #include "gambit/ColliderBit/lep_mssm_xsecs.hpp"
+#include "gambit/ColliderBit/limits/ImageLimit.hpp"
 
 //#define COLLIDERBIT_DEBUG
 
@@ -51,8 +52,14 @@ namespace Gambit
 
 
     /// LEP limit likelihood function
-    double limitLike(double x, double x95, double sigma)
-    {
+    double limit_LLike(double x, double x95, double sigma) {
+      /**
+         @brief Incorporate theoretical uncertainty in a 95% limit
+         @param x Predicted cross section
+         @param x95 Experimental 95% upper limit on cross section
+         @param sigma Theoretical uncertainty on predicted cross section
+         @returns Log-likelihood
+      */
       static double p95 = 1.;
       using std::erf;
       using std::sqrt;
@@ -78,7 +85,7 @@ namespace Gambit
         cout << "p95: " << p95 << endl;
         cout << "(x - x95) / sigma / sqrt(2.): " << (x - x95) / sigma / sqrt(2.) << endl;
         cout << "erf(p95 + (x - x95) / sigma / sqrt(2.)): " << erf(p95 + (x - x95) / sigma / sqrt(2.)) << endl;
-        ColliderBit_error().raise(LOCAL_INFO, "Suspicious results in limitLike!");
+        ColliderBit_error().raise(LOCAL_INFO, "Suspicious results in limit_LLike!");
       }
 
       return (result == 0.0 ? -1e10 : log(result));
@@ -1232,11 +1239,11 @@ namespace Gambit
 
       if (xsecWithError.central < xsecLimit)
       {
-        result += limitLike(xsecWithError.central, xsecLimit, xsecWithError.upper - xsecWithError.central);
+        result += limit_LLike(xsecWithError.central, xsecLimit, xsecWithError.upper - xsecWithError.central);
       }
       else
       {
-        result += limitLike(xsecWithError.central, xsecLimit, xsecWithError.central - xsecWithError.lower);
+        result += limit_LLike(xsecWithError.central, xsecLimit, xsecWithError.central - xsecWithError.lower);
       }
 
       // se_R, se_R
@@ -1249,11 +1256,11 @@ namespace Gambit
 
       if (xsecWithError.central < xsecLimit)
       {
-        result += limitLike(xsecWithError.central, xsecLimit, xsecWithError.upper - xsecWithError.central);
+        result += limit_LLike(xsecWithError.central, xsecLimit, xsecWithError.upper - xsecWithError.central);
       }
       else
       {
-        result += limitLike(xsecWithError.central, xsecLimit, xsecWithError.central - xsecWithError.lower);
+        result += limit_LLike(xsecWithError.central, xsecLimit, xsecWithError.central - xsecWithError.lower);
       }
 
     }
@@ -1300,11 +1307,11 @@ namespace Gambit
 
       if (xsecWithError.central < xsecLimit)
       {
-        result += limitLike(xsecWithError.central, xsecLimit, xsecWithError.upper - xsecWithError.central);
+        result += limit_LLike(xsecWithError.central, xsecLimit, xsecWithError.upper - xsecWithError.central);
       }
       else
       {
-        result += limitLike(xsecWithError.central, xsecLimit, xsecWithError.central - xsecWithError.lower);
+        result += limit_LLike(xsecWithError.central, xsecLimit, xsecWithError.central - xsecWithError.lower);
       }
 
       // smu_R, smu_R
@@ -1317,11 +1324,11 @@ namespace Gambit
 
       if (xsecWithError.central < xsecLimit)
       {
-        result += limitLike(xsecWithError.central, xsecLimit, xsecWithError.upper - xsecWithError.central);
+        result += limit_LLike(xsecWithError.central, xsecLimit, xsecWithError.upper - xsecWithError.central);
       }
       else
       {
-        result += limitLike(xsecWithError.central, xsecLimit, xsecWithError.central - xsecWithError.lower);
+        result += limit_LLike(xsecWithError.central, xsecLimit, xsecWithError.central - xsecWithError.lower);
       }
 
     }
@@ -1370,11 +1377,11 @@ namespace Gambit
 
       if (xsecWithError.central < xsecLimit)
       {
-        result += limitLike(xsecWithError.central, xsecLimit, xsecWithError.upper - xsecWithError.central);
+        result += limit_LLike(xsecWithError.central, xsecLimit, xsecWithError.upper - xsecWithError.central);
       }
       else
       {
-        result += limitLike(xsecWithError.central, xsecLimit, xsecWithError.central - xsecWithError.lower);
+        result += limit_LLike(xsecWithError.central, xsecLimit, xsecWithError.central - xsecWithError.lower);
       }
 
       // stau_2, stau_2
@@ -1387,11 +1394,11 @@ namespace Gambit
 
       if (xsecWithError.central < xsecLimit)
       {
-        result += limitLike(xsecWithError.central, xsecLimit, xsecWithError.upper - xsecWithError.central);
+        result += limit_LLike(xsecWithError.central, xsecLimit, xsecWithError.upper - xsecWithError.central);
       }
       else
       {
-        result += limitLike(xsecWithError.central, xsecLimit, xsecWithError.central - xsecWithError.lower);
+        result += limit_LLike(xsecWithError.central, xsecLimit, xsecWithError.central - xsecWithError.lower);
       }
 
     }
@@ -1439,11 +1446,11 @@ namespace Gambit
 
       if (xsecWithError.central < xsecLimit)
       {
-        result += limitLike(xsecWithError.central, xsecLimit, xsecWithError.upper - xsecWithError.central);
+        result += limit_LLike(xsecWithError.central, xsecLimit, xsecWithError.upper - xsecWithError.central);
       }
       else
       {
-        result += limitLike(xsecWithError.central, xsecLimit, xsecWithError.central - xsecWithError.lower);
+        result += limit_LLike(xsecWithError.central, xsecLimit, xsecWithError.central - xsecWithError.lower);
       }
 
       // se_R, se_R
@@ -1456,11 +1463,11 @@ namespace Gambit
 
       if (xsecWithError.central < xsecLimit)
       {
-        result += limitLike(xsecWithError.central, xsecLimit, xsecWithError.upper - xsecWithError.central);
+        result += limit_LLike(xsecWithError.central, xsecLimit, xsecWithError.upper - xsecWithError.central);
       }
       else
       {
-        result += limitLike(xsecWithError.central, xsecLimit, xsecWithError.central - xsecWithError.lower);
+        result += limit_LLike(xsecWithError.central, xsecLimit, xsecWithError.central - xsecWithError.lower);
       }
 
     }
@@ -1508,11 +1515,11 @@ namespace Gambit
 
       if (xsecWithError.central < xsecLimit)
       {
-        result += limitLike(xsecWithError.central, xsecLimit, xsecWithError.upper - xsecWithError.central);
+        result += limit_LLike(xsecWithError.central, xsecLimit, xsecWithError.upper - xsecWithError.central);
       }
       else
       {
-        result += limitLike(xsecWithError.central, xsecLimit, xsecWithError.central - xsecWithError.lower);
+        result += limit_LLike(xsecWithError.central, xsecLimit, xsecWithError.central - xsecWithError.lower);
       }
 
       // smu_R, smu_R
@@ -1525,11 +1532,11 @@ namespace Gambit
 
       if (xsecWithError.central < xsecLimit)
       {
-        result += limitLike(xsecWithError.central, xsecLimit, xsecWithError.upper - xsecWithError.central);
+        result += limit_LLike(xsecWithError.central, xsecLimit, xsecWithError.upper - xsecWithError.central);
       }
       else
       {
-        result += limitLike(xsecWithError.central, xsecLimit, xsecWithError.central - xsecWithError.lower);
+        result += limit_LLike(xsecWithError.central, xsecLimit, xsecWithError.central - xsecWithError.lower);
       }
 
     }
@@ -1578,11 +1585,11 @@ namespace Gambit
 
       if (xsecWithError.central < xsecLimit)
       {
-        result += limitLike(xsecWithError.central, xsecLimit, xsecWithError.upper - xsecWithError.central);
+        result += limit_LLike(xsecWithError.central, xsecLimit, xsecWithError.upper - xsecWithError.central);
       }
       else
       {
-        result += limitLike(xsecWithError.central, xsecLimit, xsecWithError.central - xsecWithError.lower);
+        result += limit_LLike(xsecWithError.central, xsecLimit, xsecWithError.central - xsecWithError.lower);
       }
 
       // stau_2, stau_2
@@ -1595,11 +1602,11 @@ namespace Gambit
 
       if (xsecWithError.central < xsecLimit)
       {
-        result += limitLike(xsecWithError.central, xsecLimit, xsecWithError.upper - xsecWithError.central);
+        result += limit_LLike(xsecWithError.central, xsecLimit, xsecWithError.upper - xsecWithError.central);
       }
       else
       {
-        result += limitLike(xsecWithError.central, xsecLimit, xsecWithError.central - xsecWithError.lower);
+        result += limit_LLike(xsecWithError.central, xsecLimit, xsecWithError.central - xsecWithError.lower);
       }
 
     }
@@ -1662,11 +1669,11 @@ namespace Gambit
 
       if (xsecWithError.central < xsecLimit)
       {
-        result += limitLike(xsecWithError.central, xsecLimit, xsecWithError.upper - xsecWithError.central);
+        result += limit_LLike(xsecWithError.central, xsecLimit, xsecWithError.upper - xsecWithError.central);
       }
       else
       {
-        result += limitLike(xsecWithError.central, xsecLimit, xsecWithError.central - xsecWithError.lower);
+        result += limit_LLike(xsecWithError.central, xsecLimit, xsecWithError.central - xsecWithError.lower);
       }
 
       // neut3, neut1
@@ -1693,11 +1700,11 @@ namespace Gambit
 
       if (xsecWithError.central < xsecLimit)
       {
-        result += limitLike(xsecWithError.central, xsecLimit, xsecWithError.upper - xsecWithError.central);
+        result += limit_LLike(xsecWithError.central, xsecLimit, xsecWithError.upper - xsecWithError.central);
       }
       else
       {
-        result += limitLike(xsecWithError.central, xsecLimit, xsecWithError.central - xsecWithError.lower);
+        result += limit_LLike(xsecWithError.central, xsecLimit, xsecWithError.central - xsecWithError.lower);
       }
 
       // neut4, neut1
@@ -1724,11 +1731,11 @@ namespace Gambit
 
       if (xsecWithError.central < xsecLimit)
       {
-        result += limitLike(xsecWithError.central, xsecLimit, xsecWithError.upper - xsecWithError.central);
+        result += limit_LLike(xsecWithError.central, xsecLimit, xsecWithError.upper - xsecWithError.central);
       }
       else
       {
-        result += limitLike(xsecWithError.central, xsecLimit, xsecWithError.central - xsecWithError.lower);
+        result += limit_LLike(xsecWithError.central, xsecLimit, xsecWithError.central - xsecWithError.lower);
       }
 
     }
@@ -1785,11 +1792,11 @@ namespace Gambit
 
       if (xsecWithError.central < xsecLimit)
       {
-        result += limitLike(xsecWithError.central, xsecLimit, xsecWithError.upper - xsecWithError.central);
+        result += limit_LLike(xsecWithError.central, xsecLimit, xsecWithError.upper - xsecWithError.central);
       }
       else
       {
-        result += limitLike(xsecWithError.central, xsecLimit, xsecWithError.central - xsecWithError.lower);
+        result += limit_LLike(xsecWithError.central, xsecLimit, xsecWithError.central - xsecWithError.lower);
       }
 
       // neut3, neut1
@@ -1813,11 +1820,11 @@ namespace Gambit
 
       if (xsecWithError.central < xsecLimit)
       {
-        result += limitLike(xsecWithError.central, xsecLimit, xsecWithError.upper - xsecWithError.central);
+        result += limit_LLike(xsecWithError.central, xsecLimit, xsecWithError.upper - xsecWithError.central);
       }
       else
       {
-        result += limitLike(xsecWithError.central, xsecLimit, xsecWithError.central - xsecWithError.lower);
+        result += limit_LLike(xsecWithError.central, xsecLimit, xsecWithError.central - xsecWithError.lower);
       }
 
       // neut4, neut1
@@ -1841,11 +1848,11 @@ namespace Gambit
 
       if (xsecWithError.central < xsecLimit)
       {
-        result += limitLike(xsecWithError.central, xsecLimit, xsecWithError.upper - xsecWithError.central);
+        result += limit_LLike(xsecWithError.central, xsecLimit, xsecWithError.upper - xsecWithError.central);
       }
       else
       {
-        result += limitLike(xsecWithError.central, xsecLimit, xsecWithError.central - xsecWithError.lower);
+        result += limit_LLike(xsecWithError.central, xsecLimit, xsecWithError.central - xsecWithError.lower);
       }
 
     }
@@ -1898,11 +1905,11 @@ namespace Gambit
 
       if (xsecWithError.central < xsecLimit)
       {
-        result += limitLike(xsecWithError.central, xsecLimit, xsecWithError.upper - xsecWithError.central);
+        result += limit_LLike(xsecWithError.central, xsecLimit, xsecWithError.upper - xsecWithError.central);
       }
       else
       {
-        result += limitLike(xsecWithError.central, xsecLimit, xsecWithError.central - xsecWithError.lower);
+        result += limit_LLike(xsecWithError.central, xsecLimit, xsecWithError.central - xsecWithError.lower);
       }
 
       // char2, neut1
@@ -1923,11 +1930,11 @@ namespace Gambit
 
       if (xsecWithError.central < xsecLimit)
       {
-        result += limitLike(xsecWithError.central, xsecLimit, xsecWithError.upper - xsecWithError.central);
+        result += limit_LLike(xsecWithError.central, xsecLimit, xsecWithError.upper - xsecWithError.central);
       }
       else
       {
-        result += limitLike(xsecWithError.central, xsecLimit, xsecWithError.central - xsecWithError.lower);
+        result += limit_LLike(xsecWithError.central, xsecLimit, xsecWithError.central - xsecWithError.lower);
       }
 
     }
@@ -1983,11 +1990,11 @@ namespace Gambit
 
       if (xsecWithError.central < xsecLimit)
       {
-        result += limitLike(xsecWithError.central, xsecLimit, xsecWithError.upper - xsecWithError.central);
+        result += limit_LLike(xsecWithError.central, xsecLimit, xsecWithError.upper - xsecWithError.central);
       }
       else
       {
-        result += limitLike(xsecWithError.central, xsecLimit, xsecWithError.central - xsecWithError.lower);
+        result += limit_LLike(xsecWithError.central, xsecLimit, xsecWithError.central - xsecWithError.lower);
       }
 
       // char2, neut1
@@ -2011,11 +2018,11 @@ namespace Gambit
 
       if (xsecWithError.central < xsecLimit)
       {
-        result += limitLike(xsecWithError.central, xsecLimit, xsecWithError.upper - xsecWithError.central);
+        result += limit_LLike(xsecWithError.central, xsecLimit, xsecWithError.upper - xsecWithError.central);
       }
       else
       {
-        result += limitLike(xsecWithError.central, xsecLimit, xsecWithError.central - xsecWithError.lower);
+        result += limit_LLike(xsecWithError.central, xsecLimit, xsecWithError.central - xsecWithError.lower);
       }
 
     }
@@ -2067,11 +2074,11 @@ namespace Gambit
 
       if (xsecWithError.central < xsecLimit)
       {
-        result += limitLike(xsecWithError.central, xsecLimit, xsecWithError.upper - xsecWithError.central);
+        result += limit_LLike(xsecWithError.central, xsecLimit, xsecWithError.upper - xsecWithError.central);
       }
       else
       {
-        result += limitLike(xsecWithError.central, xsecLimit, xsecWithError.central - xsecWithError.lower);
+        result += limit_LLike(xsecWithError.central, xsecLimit, xsecWithError.central - xsecWithError.lower);
       }
 
       // char2, neut1
@@ -2091,11 +2098,11 @@ namespace Gambit
 
       if (xsecWithError.central < xsecLimit)
       {
-        result += limitLike(xsecWithError.central, xsecLimit, xsecWithError.upper - xsecWithError.central);
+        result += limit_LLike(xsecWithError.central, xsecLimit, xsecWithError.upper - xsecWithError.central);
       }
       else
       {
-        result += limitLike(xsecWithError.central, xsecLimit, xsecWithError.central - xsecWithError.lower);
+        result += limit_LLike(xsecWithError.central, xsecLimit, xsecWithError.central - xsecWithError.lower);
       }
 
     }
@@ -2174,11 +2181,11 @@ namespace Gambit
 
       if (xsecWithError.central < xsecLimit)
       {
-        result += limitLike(xsecWithError.central, xsecLimit, xsecWithError.upper - xsecWithError.central);
+        result += limit_LLike(xsecWithError.central, xsecLimit, xsecWithError.upper - xsecWithError.central);
       }
       else
       {
-        result += limitLike(xsecWithError.central, xsecLimit, xsecWithError.central - xsecWithError.lower);
+        result += limit_LLike(xsecWithError.central, xsecLimit, xsecWithError.central - xsecWithError.lower);
       }
 
       // char2, neut1
@@ -2219,11 +2226,11 @@ namespace Gambit
 
       if (xsecWithError.central < xsecLimit)
       {
-        result += limitLike(xsecWithError.central, xsecLimit, xsecWithError.upper - xsecWithError.central);
+        result += limit_LLike(xsecWithError.central, xsecLimit, xsecWithError.upper - xsecWithError.central);
       }
       else
       {
-        result += limitLike(xsecWithError.central, xsecLimit, xsecWithError.central - xsecWithError.lower);
+        result += limit_LLike(xsecWithError.central, xsecLimit, xsecWithError.central - xsecWithError.lower);
       }
 
     }
@@ -2292,11 +2299,11 @@ namespace Gambit
 
       if (xsecWithError.central < xsecLimit)
       {
-        result += limitLike(xsecWithError.central, xsecLimit, xsecWithError.upper - xsecWithError.central);
+        result += limit_LLike(xsecWithError.central, xsecLimit, xsecWithError.upper - xsecWithError.central);
       }
       else
       {
-        result += limitLike(xsecWithError.central, xsecLimit, xsecWithError.central - xsecWithError.lower);
+        result += limit_LLike(xsecWithError.central, xsecLimit, xsecWithError.central - xsecWithError.lower);
       }
 
       // char2, neut1
@@ -2326,11 +2333,11 @@ namespace Gambit
 
       if (xsecWithError.central < xsecLimit)
       {
-        result += limitLike(xsecWithError.central, xsecLimit, xsecWithError.upper - xsecWithError.central);
+        result += limit_LLike(xsecWithError.central, xsecLimit, xsecWithError.upper - xsecWithError.central);
       }
       else
       {
-        result += limitLike(xsecWithError.central, xsecLimit, xsecWithError.central - xsecWithError.lower);
+        result += limit_LLike(xsecWithError.central, xsecLimit, xsecWithError.central - xsecWithError.lower);
       }
 
     }
@@ -2368,11 +2375,11 @@ namespace Gambit
       
       if (xsecWithError.central < xsecLimit)
       {
-        result += limitLike(xsecWithError.central, xsecLimit, xsecWithError.upper - xsecWithError.central);
+        result += limit_LLike(xsecWithError.central, xsecLimit, xsecWithError.upper - xsecWithError.central);
       }
       else
       {
-        result += limitLike(xsecWithError.central, xsecLimit, xsecWithError.central - xsecWithError.lower);
+        result += limit_LLike(xsecWithError.central, xsecLimit, xsecWithError.central - xsecWithError.lower);
       }
       
     }
@@ -2436,11 +2443,11 @@ namespace Gambit
 
       if (xsecWithError.central < xsecLimit)
       {
-        result += limitLike(xsecWithError.central, xsecLimit, xsecWithError.upper - xsecWithError.central);
+        result += limit_LLike(xsecWithError.central, xsecLimit, xsecWithError.upper - xsecWithError.central);
       }
       else
       {
-        result += limitLike(xsecWithError.central, xsecLimit, xsecWithError.central - xsecWithError.lower);
+        result += limit_LLike(xsecWithError.central, xsecLimit, xsecWithError.central - xsecWithError.lower);
       }
 
       // char2, neut1
@@ -2467,11 +2474,11 @@ namespace Gambit
 
       if (xsecWithError.central < xsecLimit)
       {
-        result += limitLike(xsecWithError.central, xsecLimit, xsecWithError.upper - xsecWithError.central);
+        result += limit_LLike(xsecWithError.central, xsecLimit, xsecWithError.upper - xsecWithError.central);
       }
       else
       {
-        result += limitLike(xsecWithError.central, xsecLimit, xsecWithError.central - xsecWithError.lower);
+        result += limit_LLike(xsecWithError.central, xsecLimit, xsecWithError.central - xsecWithError.lower);
       }
 
     }
@@ -2525,11 +2532,11 @@ namespace Gambit
 
       if (xsecWithError.central < xsecLimit)
       {
-        result += limitLike(xsecWithError.central, xsecLimit, xsecWithError.upper - xsecWithError.central);
+        result += limit_LLike(xsecWithError.central, xsecLimit, xsecWithError.upper - xsecWithError.central);
       }
       else
       {
-        result += limitLike(xsecWithError.central, xsecLimit, xsecWithError.central - xsecWithError.lower);
+        result += limit_LLike(xsecWithError.central, xsecLimit, xsecWithError.central - xsecWithError.lower);
       }
 
       // neut3, neut1
@@ -2550,11 +2557,11 @@ namespace Gambit
 
       if (xsecWithError.central < xsecLimit)
       {
-        result += limitLike(xsecWithError.central, xsecLimit, xsecWithError.upper - xsecWithError.central);
+        result += limit_LLike(xsecWithError.central, xsecLimit, xsecWithError.upper - xsecWithError.central);
       }
       else
       {
-        result += limitLike(xsecWithError.central, xsecLimit, xsecWithError.central - xsecWithError.lower);
+        result += limit_LLike(xsecWithError.central, xsecLimit, xsecWithError.central - xsecWithError.lower);
       }
 
       // neut4, neut1
@@ -2575,16 +2582,58 @@ namespace Gambit
 
       if (xsecWithError.central < xsecLimit)
       {
-        result += limitLike(xsecWithError.central, xsecLimit, xsecWithError.upper - xsecWithError.central);
+        result += limit_LLike(xsecWithError.central, xsecLimit, xsecWithError.upper - xsecWithError.central);
       }
       else
       {
-        result += limitLike(xsecWithError.central, xsecLimit, xsecWithError.central - xsecWithError.lower);
+        result += limit_LLike(xsecWithError.central, xsecLimit, xsecWithError.central - xsecWithError.lower);
       }
 
     }
 
     /// @}
 
-  }
-}
+    void L3_Gravitino_LLike(double& result) {
+      /**
+         @brief L3 search for gravitinos at 207 GeV
+
+         We use a limit from Fig. 6c of
+         https://doi.org/10.1016/j.physletb.2004.01.010.
+
+         We use the 95% upper limit on
+        \f[
+        \sigma(ee \to \chi^0_1\chi^0_1) \textrm{BR}(\chi^0_1 \to \tilde{G}\gamma)^2
+        \f]
+      */
+
+      // Unpack neutralino & gravitino mass
+      using namespace Pipes::L3_Gravitino_LLike;
+      const Spectrum& spectrum = *Dep::MSSM_spectrum;
+      const double m_chi = spectrum.get(Par::Pole_Mass, 1000022, 0);
+      const double m_gravitino = spectrum.get(Par::Pole_Mass, 1000039, 0);
+
+      // Calculate relevant branching ratio
+      const DecayTable& decay_rates = *Dep::decay_rates;
+      const auto gamma = decay_rates.at("~chi0_1").BF("gamma", "~G");
+      const auto gamma_total = decay_rates.at("~chi0_1").width_in_GeV;
+      const double BR = gamma / gamma_total;
+
+      // Production cross section of two lightest neutralinos at 207 GeV
+      const auto production_xsec = *Dep::LEP207_xsec_chi00_11;
+
+      // Make product of cross section and branching ratio squared
+      triplet<double> xsec;
+      xsec.upper = production_xsec.upper * pow(BR, 2);
+      xsec.central = production_xsec.central * pow(BR, 2);
+      xsec.lower = production_xsec.lower * pow(BR, 2);
+
+      // Construct object for fetching limit (do this once only, hence static)
+      static auto L3Gravitino = ImageLimit("scraped_fig6c.dat", 0., 103., 0., 103.);
+      const double limit = L3Gravitino.get_limit(m_chi, m_gravitino);
+
+      // Resulting log-likelihood, taking into account theoretical uncertainty
+      result = limit_LLike(xsec.central, limit, xsec.upper - xsec.central);
+    }
+
+  }  // namespace ColliderBit
+}  // namespace Gambit
