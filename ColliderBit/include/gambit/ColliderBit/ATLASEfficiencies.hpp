@@ -104,8 +104,7 @@ namespace Gambit
         /// @note From Delphes 3.1.2
         /// @todo Use https://cds.cern.ch/record/1233743/files/ATL-PHYS-PUB-2010-001.pdf -- it is more accurate and has pT-dependence
         inline void applyTauEfficiencyR1(std::vector<HEPUtils::Particle*>& taus) {
-          // No delete, because this should only ever be applied to copies of the Event Particle* vectors in Analysis routines
-          filtereff(taus, 0.40, false);
+          filtereff(taus, 0.40);
         }
 
 
@@ -131,7 +130,7 @@ namespace Gambit
           //   add EfficiencyFormula {2} {0.60}
           //   add EfficiencyFormula {-1} {0.02}
           //   add EfficiencyFormula {-2} {0.01}
-          // filtereff(taus, 0.65, false);
+          // filtereff(taus, 0.65);
 
           // Distributions from ATL-PHYS-PUB-2015-045, Fig 10
           const static std::vector<double> binedges_pt    = { 0.,  20.,  40.,   60.,   120.,  160.,   220.,   280.,   380.,    500.,  DBL_MAX };
@@ -142,7 +141,7 @@ namespace Gambit
           // 85% 1-prong, 15% >=3-prong
           const static std::vector<double> bineffs_pt_avg = { 0.,  .52,  .53,   .54,    .56,   .55,    .54,    .52,     .48,     0. };
           const static HEPUtils::BinnedFn1D<double> _eff_pt_avg(binedges_pt, bineffs_pt_avg);
-          filtereff_pt(taus, _eff_pt_avg, false);
+          filtereff_pt(taus, _eff_pt_avg);
 
         }
 
@@ -159,7 +158,7 @@ namespace Gambit
                                                               0.00, 0.61, 0.74, 0.83, 0.88, 0.91, 0.94, 0.95, 0.96, 0.97, 0.98, 0.98, 0.98, 0.98, 0.98, 0.98, 0.98, //
                                                               0.00, 0.00, 0.00, 0.00, 0.00, 0.00, 0.00, 0.00, 0.00, 0.00, 0.00, 0.00, 0.00, 0.00, 0.00, 0.00, 0.00 };
           const static HEPUtils::BinnedFn2D<double> _eff_etapt(binedges_eta, binedges_pt, bineffs_etapt);
-          filtereff_etapt(photons, _eff_etapt, false);
+          filtereff_etapt(photons, _eff_etapt);
         }
 
 

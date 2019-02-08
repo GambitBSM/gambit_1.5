@@ -104,7 +104,7 @@ namespace Gambit
       /// @brief Randomly filter the supplied particle list by parameterised tau efficiency
       /// @note No delete, because this should only ever be applied to copies of the Event Particle* vectors in Analysis routines
       inline void applyTauEfficiency(std::vector<HEPUtils::Particle*>& taus) {
-        filtereff(taus, 0.6, false);
+        filtereff(taus, 0.6);
       }
 
 
