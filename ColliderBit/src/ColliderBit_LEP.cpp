@@ -52,8 +52,14 @@ namespace Gambit
 
 
     /// LEP limit likelihood function
-    double limitLike(double x, double x95, double sigma)
-    {
+    double limitLike(double x, double x95, double sigma) {
+      /**
+         @brief Incorporate theoretical uncertainty in a 95% limit
+         @param x Predicted cross section
+         @param x95 Experimental 95% upper limit on cross section
+         @param sigma Theoretical uncertainty on predicted cross section
+         @returns Log-likelihood
+      */
       static double p95 = 1.;
       using std::erf;
       using std::sqrt;
