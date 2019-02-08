@@ -204,5 +204,7 @@ QUICK_FUNCTION(ColliderBit, OPAL_Degenerate_Chargino_LLike, NEW_CAPABILITY, OPAL
   //QUICK_FUNCTION(ColliderBit, L3_Charged_Gaugino_Small_DeltaM_Any_Sneutrino_LLike, NEW_CAPABILITY, L3_Charged_Gaugino_Small_DeltaM_Any_Sneutrino_Conservative_LLike, double, (MSSM30atQ, MSSM30atMGUT, NUHM2), (MSSM_spectrum, Spectrum), (LEP188_xsec_chipm_11, triplet<double>), (charginoplus_1_decay_rates, DecayTable::Entry), (W_plus_decay_rates, DecayTable::Entry))
   //QUICK_FUNCTION(ColliderBit, L3_Charged_Higgsino_Small_DeltaM, NEW_CAPABILITY, L3_Charged_Higgsino_Small_DeltaM, double, (MSSM30atQ, MSSM30atMGUT, NUHM2), (MSSM_spectrum, Spectrum), (LEP188_xsec_chipm_11, triplet<double>), (charginoplus_1_decay_rates, DecayTable::Entry), (W_plus_decay_rates, DecayTable::Entry))
 
+  // L3 gravitino search
+  QUICK_FUNCTION(ColliderBit, L3_Gravitino_LLike, NEW_CAPABILITY, L3_Gravitino_LLike, double, (MSSM63atQ_lightgravitino, MSSM63atMGUT_lightgravitino), (MSSM_spectrum, Spectrum), (LEP207_xsec_chi00_11, triplet<double>), (decay_rates, DecayTable))
 
 #endif /* defined __ColliderBit_LEP_rollcall_hpp__ */
