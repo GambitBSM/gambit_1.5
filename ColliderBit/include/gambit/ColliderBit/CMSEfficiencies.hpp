@@ -94,7 +94,6 @@ namespace Gambit
                                                const double eff = 0.95 * (p->pT() <= 1.0e3 ? 1 : exp(0.5 - 5e-4*p->pT()));
                                                rm = (HEPUtils::rand01() > eff);
                                              }
-                                             if (rm) delete p;
                                              return rm;
                                            } );
         muons.erase(keptMuonsEnd, muons.end());
