@@ -13,9 +13,6 @@
 #include "gambit/ColliderBit/ATLASEfficiencies.hpp"
 #include "gambit/ColliderBit/mt2_bisect.h"
 
-
-
-
 #include "RestFrames/RestFrames.hh"
 #include "TLorentzVector.h"
 
@@ -53,20 +50,6 @@ namespace Gambit {
     bool SortJets(const TLorentzVector jv1, const TLorentzVector jv2)
     {
       return jv1.Pt() > jv2.Pt();
-    }
-
-    // Class to randomly select m elements from an n-d vector
-    template<class BidiIter >
-    BidiIter random_unique(BidiIter begin, BidiIter end, size_t num_random) {
-      size_t left = std::distance(begin, end);
-      while (num_random--) {
-        BidiIter r = begin;
-        std::advance(r, rand()%left);
-        std::swap(*begin, *r);
-        ++begin;
-        --left;
-      }
-      return begin;
     }
 
 

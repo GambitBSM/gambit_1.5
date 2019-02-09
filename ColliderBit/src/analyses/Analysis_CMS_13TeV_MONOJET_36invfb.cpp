@@ -75,7 +75,7 @@ namespace Gambit {
         for (const Jet* jet : jets4) {
           if (jet->abseta() > 2.4) continue;
           const double btag_rate = jet->btag() ? 0.8 : jet->ctag() ? 0.4 : 0.1;
-          if (rand01() < btag_rate) return; //< VETO
+          if (Random::draw() < btag_rate) return; //< VETO
         }
 
         // Get the 4 leading jets > 3 GeV, and veto if pTmiss is too close to them

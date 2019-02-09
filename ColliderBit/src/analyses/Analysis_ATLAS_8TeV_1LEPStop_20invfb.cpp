@@ -236,7 +236,7 @@ namespace Gambit {
         for (HEPUtils::Jet* jet : event->jets()) {
           if (jet->pT() > 20. && jet->abseta() < 10.0) baselineJets.push_back(jet);
           if (jet->abseta() < 2.5 && jet->pT() > 25.) {
-            if ((jet->btag() && HEPUtils::rand01() < 0.75) || (!jet->btag() && HEPUtils::rand01() < 0.02)) bJets.push_back(jet);
+            if ((jet->btag() && Random::draw() < 0.75) || (!jet->btag() && Random::draw() < 0.02)) bJets.push_back(jet);
           }
         }
 

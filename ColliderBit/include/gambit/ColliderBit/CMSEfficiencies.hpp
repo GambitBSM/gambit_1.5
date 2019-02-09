@@ -29,7 +29,6 @@
 #include "HEPUtils/BinnedFn.h"
 #include "HEPUtils/Event.h"
 #include <iomanip>
-#include <random>
 #include <algorithm>
 
 
@@ -92,7 +91,7 @@ namespace Gambit
                                              if (!rm)
                                              {
                                                const double eff = 0.95 * (p->pT() <= 1.0e3 ? 1 : exp(0.5 - 5e-4*p->pT()));
-                                               rm = (HEPUtils::rand01() > eff);
+                                               rm = !random_bool(eff);
                                              }
                                              return rm;
                                            } );

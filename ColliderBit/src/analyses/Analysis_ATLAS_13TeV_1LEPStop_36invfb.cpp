@@ -5,7 +5,6 @@
 #include <cmath>
 #include <memory>
 #include <iomanip>
-#include <random>
 
 #include "gambit/Utils/threadsafe_rng.hpp"
 #include "gambit/ColliderBit/analyses/BaseAnalysis.hpp"
