@@ -78,15 +78,11 @@ namespace Gambit {
         HEPUtils::P4 ptot = event->missingmom();
         double met = event->met();
 
-        // Now define vectors of baseline objects
-        vector<HEPUtils::Particle*> baselineLeptons;
-
         // Baseline electrons
         vector<HEPUtils::Particle*> baselineElectrons;
         for (HEPUtils::Particle* electron : event->electrons()) {
           if (electron->pT() > 30. && fabs(electron->eta()) < 2.5) {
             baselineElectrons.push_back(electron);
-            baselineLeptons.push_back(electron);
           }
         }
 
@@ -98,12 +94,15 @@ namespace Gambit {
         for (HEPUtils::Particle* muon : event->muons()) {
           if (muon->pT() > 30. && fabs(muon->eta()) < 2.1) {
             baselineMuons.push_back(muon);
-            baselineLeptons.push_back(muon);
           }
         }
 
         // Apply muon efficiency
         CMS::applyMuonEff(baselineMuons);
+
+        // All baseline leptons
+        vector<HEPUtils::Particle*> baselineLeptons = baselineElectrons;
+        baselineLeptons.insert(baselineLeptons.end(), baselineMuons.begin(), baselineMuons.end() );
 
         vector<HEPUtils::Jet*> baselineJets;
         //vector<LorentzVector> jets;

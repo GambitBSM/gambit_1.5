@@ -154,7 +154,7 @@ namespace Gambit {
         HEPUtilsAnalysis::analyze(event);
         double met = event->met();
 
-        // Baseline objects
+        // Baseline electrons
         vector<HEPUtils::Particle*> baselineElectrons;
         for (HEPUtils::Particle* electron : event->electrons()) {
           if (electron->pT()>10. && electron->abseta()<2.47)baselineElectrons.push_back(electron);
@@ -166,6 +166,7 @@ namespace Gambit {
         // Apply loose electron selection
         ATLAS::applyLooseIDElectronSelectionR2(baselineElectrons);
 
+        // Baseline muons
         vector<HEPUtils::Particle*> baselineMuons;
         for (HEPUtils::Particle* muon : event->muons()) {
           if (muon->pT()>10. && muon->abseta()<2.4)baselineMuons.push_back(muon);

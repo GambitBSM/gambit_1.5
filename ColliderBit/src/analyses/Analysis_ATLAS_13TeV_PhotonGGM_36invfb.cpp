@@ -136,8 +136,7 @@ namespace Gambit {
         const double met = pmiss.pT();
 
         // Baseline lepton objects
-        vector<HEPUtils::Particle*> blElectrons, blMuons;              // Used for SR-2body and SR-3body
-        vector<HEPUtils::Particle*> baselineElectrons, baselineMuons;  // Used for SR-4body
+        vector<HEPUtils::Particle*> baselineElectrons, baselineMuons;
 
         // Baseline electrons
         for (HEPUtils::Particle* electron : event->electrons()) {

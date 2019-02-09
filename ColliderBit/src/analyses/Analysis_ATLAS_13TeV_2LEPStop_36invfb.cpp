@@ -146,6 +146,7 @@ namespace Gambit {
             }
 
             // Apply electron efficiency
+            ATLAS::applyElectronEff(blElectrons);
             ATLAS::applyElectronEff(baselineElectrons);
 
             // Apply loose electron selection
@@ -164,6 +165,7 @@ namespace Gambit {
             }
 
             // Apply muon efficiency
+            ATLAS::applyMuonEff(blMuons);
             ATLAS::applyMuonEff(baselineMuons);
 
             // Jets

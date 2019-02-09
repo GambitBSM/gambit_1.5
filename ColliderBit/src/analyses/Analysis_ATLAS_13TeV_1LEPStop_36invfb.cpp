@@ -399,32 +399,38 @@ namespace Gambit {
         HEPUtils::P4 metVec = event->missingmom();
         double Met = event->met();
 
-
-        // Baseline lepton objects
-        vector<HEPUtils::Particle*> baselineElectrons, baselineMuons, baselineTaus, baselineLeptons;
-
+        // Construct baseline electron objects
+        vector<HEPUtils::Particle*> baselineElectrons;
         for (HEPUtils::Particle* electron : event->electrons())
         {
           if (electron->pT() > 5. && electron->abseta() < 2.47)
           {
             baselineElectrons.push_back(electron);
-            baselineLeptons.push_back(electron);
           }
         }
+
         // Apply electron efficiency
         ATLAS::applyElectronEff(baselineElectrons);
 
+        // Construct baseline muon objects
+        vector<HEPUtils::Particle*> baselineMuons;
         for (HEPUtils::Particle* muon : event->muons())
         {
           if (muon->pT() > 4. && muon->abseta() < 2.7)
           {
             baselineMuons.push_back(muon);
-            baselineLeptons.push_back(muon);
           }
         }
+
         // Apply muon efficiency
         ATLAS::applyMuonEff(baselineMuons);
 
+        // Construct set of all light baseline leptons
+        vector<HEPUtils::Particle*> baselineLeptons = baselineElectrons;
+        baselineLeptons.insert(baselineLeptons.end(), baselineMuons.begin(), baselineMuons.end() );
+
+        // Construct baseline tau objects
+        vector<HEPUtils::Particle*> baselineTaus;
         for (HEPUtils::Particle* tau : event->taus())
         {
           if (tau->pT() > 20. && fabs(tau->eta()) < 2.5) baselineTaus.push_back(tau);
