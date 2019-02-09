@@ -129,8 +129,11 @@ int main(int argc, char* argv[])
         use_mpi_abort = iniFile.getValueOrDef<bool>(true, "use_mpi_abort");
       #endif
 
-      // Initialise the random number generator, letting the RNG class choose its own default.
-      Random::create_rng_engine(iniFile.getValueOrDef<str>("default", "rng"));
+      // Initialise the random number generator, letting the RNG class choose its own defaults.
+      Options rng(iniFile.getValueOrDef<YAML::Node>(YAML::Node(), "rng"));
+      str generator = rng.getValueOrDef<str>("default", "generator");
+      int seed = rng.getValueOrDef<int>(-1, "seed");
+      Random::create_rng_engine(generator, seed);
 
       // Determine selected model(s)
       std::set<str> selectedmodels = iniFile.getModelNames();
