@@ -37,6 +37,10 @@
 
   ///////////// LEP limits ////////////////////////
 
+  // CoM energy 207GeV
+  // LEP production cross sections and uncertainties: neutralinos
+  QUICK_FUNCTION(ColliderBit, LEP207_xsec_chi00_11, NEW_CAPABILITY, LEP207_SLHA1_convention_xsec_chi00_11, triplet<double>, (MSSM30atQ, MSSM30atMGUT, NUHM2), (MSSM_spectrum, Spectrum), (Z_decay_rates, DecayTable::Entry))
+
   // CoM energy 208GeV
   // LEP production cross sections and uncertainties: selectrons
   QUICK_FUNCTION(ColliderBit, LEP208_xsec_selselbar, NEW_CAPABILITY, LEP208_SLHA1_convention_xsec_selselbar, triplet<double>, (MSSM30atQ, MSSM30atMGUT, NUHM2), (MSSM_spectrum, Spectrum), (Z_decay_rates, DecayTable::Entry))

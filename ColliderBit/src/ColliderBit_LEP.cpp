@@ -339,6 +339,16 @@ namespace Gambit
     }
     /// @}
 
+    // @brief \f[ee \to \chi_1\chi_1\f] pair production cross-section at 207 GeV
+    void LEP207_SLHA1_convention_xsec_chi00_11(triplet<double>& result) {
+      using namespace Pipes::LEP207_SLHA1_convention_xsec_chi00_11;
+      const static double tol = runOptions->getValueOrDef<double>(1e-2, "gauge_mixing_tolerance");
+      const static bool pt_error = runOptions->getValueOrDef<bool>(true, "gauge_mixing_tolerance_invalidates_point_only");
+      get_sigma_ee_chi00(result, 207.0, 1, 1, tol, pt_error, *Dep::MSSM_spectrum, Dep::Z_decay_rates->width_in_GeV);
+      if (!is_xsec_sane(result)) {
+        ColliderBit_error().raise(LOCAL_INFO, "Non-physical LEP cross section!");
+      }
+    }
 
     /// ee --> neutralino pair production cross-sections at 208 GeV
     /// @{
