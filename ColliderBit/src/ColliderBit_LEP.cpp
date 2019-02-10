@@ -2614,18 +2614,16 @@ namespace Gambit
 
       // Calculate relevant branching ratio
       const DecayTable& decay_rates = *Dep::decay_rates;
-      const auto gamma = decay_rates.at("~chi0_1").BF("gamma", "~G");
-      const auto gamma_total = decay_rates.at("~chi0_1").width_in_GeV;
-      const double BR = gamma / gamma_total;
+      const auto BF = decay_rates.at("~chi0_1").BF("gamma", "~G");
 
       // Production cross section of two lightest neutralinos at 207 GeV
       const auto production_xsec = *Dep::LEP207_xsec_chi00_11;
 
       // Make product of cross section and branching ratio squared
       triplet<double> xsec;
-      xsec.upper = production_xsec.upper * pow(BR, 2);
-      xsec.central = production_xsec.central * pow(BR, 2);
-      xsec.lower = production_xsec.lower * pow(BR, 2);
+      xsec.upper = production_xsec.upper * pow(BF, 2);
+      xsec.central = production_xsec.central * pow(BF, 2);
+      xsec.lower = production_xsec.lower * pow(BF, 2);
 
       // Construct object for fetching limit (do this once only, hence static)
       static auto L3Gravitino = ImageLimit("scraped_fig6c.dat", 0., 103., 0., 103.);
