@@ -24,6 +24,7 @@
 #include <fstream>
 #include <cmath>
 #include <limits>
+#include <stdexcept>
 
 
 namespace Gambit {

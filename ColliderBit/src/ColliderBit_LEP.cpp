@@ -339,6 +339,16 @@ namespace Gambit
     }
     /// @}
 
+    // @brief \f[ee \to \chi_1\chi_1\f] pair production cross-section at 207 GeV
+    void LEP207_SLHA1_convention_xsec_chi00_11(triplet<double>& result) {
+      using namespace Pipes::LEP207_SLHA1_convention_xsec_chi00_11;
+      const static double tol = runOptions->getValueOrDef<double>(1e-2, "gauge_mixing_tolerance");
+      const static bool pt_error = runOptions->getValueOrDef<bool>(true, "gauge_mixing_tolerance_invalidates_point_only");
+      get_sigma_ee_chi00(result, 207.0, 1, 1, tol, pt_error, *Dep::MSSM_spectrum, Dep::Z_decay_rates->width_in_GeV);
+      if (!is_xsec_sane(result)) {
+        ColliderBit_error().raise(LOCAL_INFO, "Non-physical LEP cross section!");
+      }
+    }
 
     /// ee --> neutralino pair production cross-sections at 208 GeV
     /// @{
@@ -2601,9 +2611,9 @@ namespace Gambit
          https://doi.org/10.1016/j.physletb.2004.01.010.
 
          We use the 95% upper limit on
-        \f[
-        \sigma(ee \to \chi^0_1\chi^0_1) \textrm{BR}(\chi^0_1 \to \tilde{G}\gamma)^2
-        \f]
+         \f[
+         \sigma(ee \to \chi^0_1\chi^0_1) \textrm{BR}(\chi^0_1 \to \tilde{G}\gamma)^2
+         \f]
       */
 
       // Unpack neutralino & gravitino mass
@@ -2614,21 +2624,20 @@ namespace Gambit
 
       // Calculate relevant branching ratio
       const DecayTable& decay_rates = *Dep::decay_rates;
-      const auto gamma = decay_rates.at("~chi0_1").BF("gamma", "~G");
-      const auto gamma_total = decay_rates.at("~chi0_1").width_in_GeV;
-      const double BR = gamma / gamma_total;
+      const auto BF = decay_rates.at("~chi0_1").BF("gamma", "~G");
 
       // Production cross section of two lightest neutralinos at 207 GeV
       const auto production_xsec = *Dep::LEP207_xsec_chi00_11;
 
       // Make product of cross section and branching ratio squared
       triplet<double> xsec;
-      xsec.upper = production_xsec.upper * pow(BR, 2);
-      xsec.central = production_xsec.central * pow(BR, 2);
-      xsec.lower = production_xsec.lower * pow(BR, 2);
+      xsec.upper = production_xsec.upper * pow(BF, 2);
+      xsec.central = production_xsec.central * pow(BF, 2);
+      xsec.lower = production_xsec.lower * pow(BF, 2);
 
       // Construct object for fetching limit (do this once only, hence static)
-      static auto L3Gravitino = ImageLimit("scraped_fig6c.dat", 0., 103., 0., 103.);
+      const std::string fig6c = GAMBIT_DIR "/ColliderBit/data/scraped_fig6c.dat";
+      static auto L3Gravitino = ImageLimit(fig6c, 0., 103., 0., 103.);
       const double limit = L3Gravitino.get_limit(m_chi, m_gravitino);
 
       // Resulting log-likelihood, taking into account theoretical uncertainty

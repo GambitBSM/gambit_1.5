@@ -53,11 +53,11 @@ namespace Gambit {
 
       // Retrive limit from data
 
-      //try {
+      try {
         return image_data.at(index_y).at(index_x);
-      //} catch (const std::out_of_range& e) {
-      //  return limit_outside_grid;
-      //}
+      } catch (const std::out_of_range& e) {
+        return limit_outside_grid;
+      }
     }
 
     ImageLimit::ImageLimit(std::string name,
