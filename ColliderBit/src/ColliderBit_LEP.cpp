@@ -2601,9 +2601,9 @@ namespace Gambit
          https://doi.org/10.1016/j.physletb.2004.01.010.
 
          We use the 95% upper limit on
-        \f[
-        \sigma(ee \to \chi^0_1\chi^0_1) \textrm{BR}(\chi^0_1 \to \tilde{G}\gamma)^2
-        \f]
+         \f[
+         \sigma(ee \to \chi^0_1\chi^0_1) \textrm{BR}(\chi^0_1 \to \tilde{G}\gamma)^2
+         \f]
       */
 
       // Unpack neutralino & gravitino mass
