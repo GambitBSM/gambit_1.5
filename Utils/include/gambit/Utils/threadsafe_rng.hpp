@@ -51,7 +51,6 @@
 #define __threadsafe_rng_hpp__
 
 #include <random>
-#include <chrono>
 
 #include "gambit/Utils/util_macros.hpp"
 #include "gambit/Utils/util_types.hpp"
@@ -97,14 +96,14 @@ namespace Gambit
         typedef unsigned long long result_type;
 
         /// Create RNG engines, one for each thread.
-        specialised_threadsafe_rng()
+        specialised_threadsafe_rng(int& seed)
         {
           const int max_threads = omp_get_max_threads();
           rngs = new Engine[max_threads];
+          if (seed == -1) seed = std::random_device()();
           for(int index = 0; index < max_threads; ++index)
           {
-            /// @todo Would it be better to hardware-seed via std::random_device?
-            rngs[index] = Engine(index+std::chrono::system_clock::now().time_since_epoch().count());
+            rngs[index] = Engine(index + seed);
           }
         }
 
@@ -138,7 +137,7 @@ namespace Gambit
     public:
 
       /// Choose the engine to use for random number generation, based on the contents of the ini file.
-      static void create_rng_engine(str);
+      static void create_rng_engine(str, int);
 
       /// Draw a single uniform random deviate from the interval (0,1) using the chosen RNG engine
       static double draw();
