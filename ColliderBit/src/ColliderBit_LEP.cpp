@@ -2626,7 +2626,8 @@ namespace Gambit
       xsec.lower = production_xsec.lower * pow(BF, 2);
 
       // Construct object for fetching limit (do this once only, hence static)
-      static auto L3Gravitino = ImageLimit("scraped_fig6c.dat", 0., 103., 0., 103.);
+      const std::string fig6c = GAMBIT_DIR "/ColliderBit/data/scraped_fig6c.dat";
+      static auto L3Gravitino = ImageLimit(fig6c, 0., 103., 0., 103.);
       const double limit = L3Gravitino.get_limit(m_chi, m_gravitino);
 
       // Resulting log-likelihood, taking into account theoretical uncertainty
