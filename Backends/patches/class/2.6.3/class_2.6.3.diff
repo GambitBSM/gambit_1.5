@@ -66,7 +66,7 @@ index 44289f6..c40ea47 100755
  
    //@{
 diff --git a/source/input.c b/source/input.c
-index 43a2fdd..7163edd 100755
+index 43a2fdd..f3e2115 100755
 --- a/source/input.c
 +++ b/source/input.c
 @@ -1531,9 +1531,15 @@ int input_read_parameters(
@@ -86,6 +86,53 @@ index 43a2fdd..7163edd 100755
    }
  
    class_read_double("k_pivot",ppm->k_pivot);
+@@ -1910,6 +1916,36 @@ int input_read_parameters(
+           class_read_double("V_3",ppm->V3);
+           class_read_double("V_4",ppm->V4);
+ 
++          if (strcmp(string1,"smash_inflation") == 0) {
++            ppm->potential = smash_inflation;
++          }
++
++          class_call(parser_read_string(pfc,"ln_aH_ratio",&string1,&flag1,errmsg),
++                     errmsg,
++                     errmsg);
++
++          class_call(parser_read_string(pfc,"N_star",&string2,&flag2,errmsg),
++                     errmsg,
++                     errmsg);
++
++          class_test((flag1 == _TRUE_) && (flag2 == _TRUE_),
++                     errmsg,
++                     "In input file, you can only enter one of ln_aH_ratio or N_star, the two are not compatible");
++
++          if (flag1 == _TRUE_) {
++            if ((strstr(string1,"auto") != NULL) || (strstr(string1,"AUTO") != NULL)) {
++              ppm->phi_pivot_method = ln_aH_ratio_auto;
++            }
++            else {
++              ppm->phi_pivot_method = ln_aH_ratio;
++              class_read_double("ln_aH_ratio",ppm->phi_pivot_target);
++            }
++          }
++
++          if (flag2 == _TRUE_) {
++            ppm->phi_pivot_method = N_star;
++            class_read_double("N_star",ppm->phi_pivot_target);
++          }
+         }
+       }
+     }
+@@ -1970,6 +2006,9 @@ int input_read_parameters(
+       else if (strcmp(string1,"higgs_inflation") == 0) {
+         ppm->potential = higgs_inflation;
+       }
++      else if (strcmp(string1,"smash_inflation") == 0) {
++        ppm->potential = smash_inflation;
++      }
+       else {
+         class_stop(errmsg,"did not recognize input parameter 'potential': should be one of 'polynomial' or 'higgs_inflation'");
+       }
 diff --git a/source/primordial.c b/source/primordial.c
 index 4161313..481fa36 100755
 --- a/source/primordial.c
