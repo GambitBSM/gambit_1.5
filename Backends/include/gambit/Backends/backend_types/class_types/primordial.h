@@ -13,7 +13,8 @@ enum primordial_spectrum_type {
   inflation_V,
   inflation_H,
   inflation_V_end,
-  external_Pk
+  external_Pk,
+  gambit_Pk // ADDED BY S.C.H. FOR GAMBIT 01-2018
 };
 
 /** enum defining whether the spectrum routine works with linear or logarithmic input/output */
@@ -28,7 +29,8 @@ enum linear_or_logarithmic {
 enum potential_shape {
   polynomial,
   natural,
-  higgs_inflation
+  higgs_inflation,
+  smash_inflation
 };
 
 /** enum defining which quantity plays the role of a target for evolving inflationary equations */
@@ -83,6 +85,11 @@ struct primordial {
       and the content of the 'precision' and 'perturbs' structures) */
 
   //@{
+
+//  double *k_gambit   // scalar perturbation power spectrum // ADDED BY S.C.H. FOR GAMBIT 01-2018
+//  double *pks_gambit // scalar perturbation power spectrum // ADDED BY S.C.H. FOR GAMBIT 01-2018
+//  double *pkt_gambit // tensor perturbation power spectrum // ADDED BY S.C.H. FOR GAMBIT 01-2018
+//  int ksteps_gambit  // bin number of  the  power spectrum // ADDED BY S.C.H. FOR GAMBIT 01-2018
 
   double k_pivot; /**< pivot scale in \f$ Mpc^{-1} \f$ */
 
@@ -285,6 +292,28 @@ struct primordial {
   double phi_min;        /**< in inflationary module, value of phi when \f$ k_{min}=aH \f$*/
   double phi_max;        /**< in inflationary module, value of phi when \f$ k_{max}=aH \f$*/
   double phi_stop;       /**< in inflationary module, value of phi at the end of inflation */
+
+  //@}
+
+  /** @name - added smash parameters */
+
+  //@{
+
+  int max_pot_smash; // need to set it properly
+
+  double phi_init0; // need to set it properly
+
+  double * rho_array;
+  double * chi_array;
+  double * d0V_array;
+  double * d1V_array;
+  double * d2V_array;
+  double * d3V_array;
+
+  double * ddd0V_array;
+  double * ddd1V_array;
+  double * ddd2V_array;
+  double * ddd3V_array;
 
   //@}
 
