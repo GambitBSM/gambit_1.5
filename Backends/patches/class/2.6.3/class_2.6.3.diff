@@ -1,0 +1,369 @@
+diff --git a/include/primordial.h b/include/primordial.h
+index 44289f6..c40ea47 100755
+--- a/include/primordial.h
++++ b/include/primordial.h
+@@ -13,7 +13,8 @@ enum primordial_spectrum_type {
+   inflation_V,
+   inflation_H,
+   inflation_V_end,
+-  external_Pk
++  external_Pk,
++  gambit_Pk // ADDED BY S.C.H. FOR GAMBIT 01-2018
+ };
+ 
+ /** enum defining whether the spectrum routine works with linear or logarithmic input/output */
+@@ -28,7 +29,8 @@ enum linear_or_logarithmic {
+ enum potential_shape {
+   polynomial,
+   natural,
+-  higgs_inflation
++  higgs_inflation,
++  smash_inflation
+ };
+ 
+ /** enum defining which quantity plays the role of a target for evolving inflationary equations */
+@@ -84,6 +86,11 @@ struct primordial {
+ 
+   //@{
+ 
++//  double *k_gambit   // scalar perturbation power spectrum // ADDED BY S.C.H. FOR GAMBIT 01-2018
++//  double *pks_gambit // scalar perturbation power spectrum // ADDED BY S.C.H. FOR GAMBIT 01-2018
++//  double *pkt_gambit // tensor perturbation power spectrum // ADDED BY S.C.H. FOR GAMBIT 01-2018
++//  int ksteps_gambit  // bin number of  the  power spectrum // ADDED BY S.C.H. FOR GAMBIT 01-2018
++
+   double k_pivot; /**< pivot scale in \f$ Mpc^{-1} \f$ */
+ 
+   enum primordial_spectrum_type primordial_spec_type; /**< type of primordial spectrum (simple analytic from, integration of inflationary perturbations, etc.) */
+@@ -288,6 +295,30 @@ struct primordial {
+ 
+   //@}
+ 
++  /** @name - added smash parameters */
++
++  //@{
++
++  int max_pot_smash; // need to set it properly
++  //int last_index;
++
++  double phi_init0; // need to set it properly
++
++  double * rho_array;
++  double * chi_array;
++  double * d0V_array;
++  double * d1V_array;
++  double * d2V_array;
++  double * d3V_array;
++
++  double * ddd0V_array;
++  double * ddd1V_array;
++  double * ddd2V_array;
++  double * ddd3V_array;
++
++	//@}
++
++
+   /** @name - technical parameters */
+ 
+   //@{
+diff --git a/source/input.c b/source/input.c
+index 43a2fdd..7163edd 100755
+--- a/source/input.c
++++ b/source/input.c
+@@ -1531,9 +1531,15 @@ int input_read_parameters(
+       ppm->primordial_spec_type = external_Pk;
+       flag2=_TRUE_;
+     }
++    /* ------------------- SH -------------------- */
++    if (strcmp(string1,"gambit_Pk") == 0) {
++      ppm->primordial_spec_type = gambit_Pk;
++      flag2=_TRUE_;
++    }
++    /* ------------------------------------------- */
+     class_test(flag2==_FALSE_,
+                errmsg,
+-               "could not identify primordial spectrum type, check that it is one of 'analytic_pk', 'two_scales', 'inflation_V', 'inflation_H', 'external_Pk'...");
++               "could not identify primordial spectrum type, check that it is one of 'analytic_pk', 'two_scales', 'inflation_V', 'inflation_H', 'external_Pk', 'gambit_Pk'...");
+   }
+ 
+   class_read_double("k_pivot",ppm->k_pivot);
+diff --git a/source/primordial.c b/source/primordial.c
+index 4161313..481fa36 100755
+--- a/source/primordial.c
++++ b/source/primordial.c
+@@ -197,6 +197,8 @@ int primordial_init(
+   int index_md,index_ic1,index_ic2,index_ic1_ic2,index_k;
+   double pk,pk1,pk2;
+   double dlnk,lnpk_pivot,lnpk_minus,lnpk_plus,lnpk_minusminus,lnpk_plusplus;
++  int pot_index; // SCH: related to smash inflation
++  double dchidrho; // SCH: related to smash inflation
+   /* uncomment if you use optional test below
+      (for correlated isocurvature modes) */
+   //double cos_delta_k;
+@@ -241,24 +243,28 @@ int primordial_init(
+              ppr->k_per_decade_primordial);
+ 
+   /** - allocate and fill values of \f$ \ln{k}\f$'s */
++  // SH: skip if the power spectrum is filled by GAMBIT
++  if ( ppm->primordial_spec_type != gambit_Pk) {
+ 
+-  class_call(primordial_get_lnk_list(ppm,
+-                                     k_min,
+-                                     k_max,
+-                                     ppr->k_per_decade_primordial
+-                                     ),
+-             ppm->error_message,
+-             ppm->error_message);
+-
++    class_call(primordial_get_lnk_list(ppm,
++                                       k_min,
++                                       k_max,
++                                       ppr->k_per_decade_primordial),
++               ppm->error_message,
++               ppm->error_message);
++  }
+   /** - define indices and allocate tables in primordial structure */
++  // SH: skip if the power spectrum is filled by GAMBIT
++  if ( ppm->primordial_spec_type != gambit_Pk) {
+ 
+-  class_call(primordial_indices(ppt,
+-                                ppm),
+-             ppm->error_message,
+-             ppm->error_message);
++    class_call(primordial_indices(ppt,
++                                  ppm),
++               ppm->error_message,
++               ppm->error_message);
+ 
+-  /** - deal with case of analytic primordial spectra (with amplitudes, tilts, runnings, etc.) */
++  }
+ 
++  /** - deal with case of analytic primordial spectra (with amplitudes, tilts, runnings, etc.) */
+   if (ppm->primordial_spec_type == analytic_Pk) {
+ 
+     if (ppm->primordial_verbose > 0)
+@@ -361,7 +367,110 @@ int primordial_init(
+ 
+     if (ppm->primordial_verbose > 0)
+       printf(" (simulating inflation)\n");
++    
++    if ( ppm->potential == smash_inflation ){
++      
++      printf("creating smash inflation arrays\n");
++      
++      // silly at the moment - fix soon.
++      ppm->max_pot_smash = 10000;
++      
++      class_alloc(ppm->rho_array,ppm->max_pot_smash*sizeof(double),ppm->error_message);
++      class_alloc(ppm->chi_array,ppm->max_pot_smash*sizeof(double),ppm->error_message);
++      class_alloc(ppm->d0V_array,ppm->max_pot_smash*sizeof(double),ppm->error_message);
++      class_alloc(ppm->d1V_array,ppm->max_pot_smash*sizeof(double),ppm->error_message);
++      class_alloc(ppm->d2V_array,ppm->max_pot_smash*sizeof(double),ppm->error_message);
++      class_alloc(ppm->d3V_array,ppm->max_pot_smash*sizeof(double),ppm->error_message);
++ 
++      class_alloc(ppm->ddd0V_array,ppm->max_pot_smash*sizeof(double),ppm->error_message);
++      class_alloc(ppm->ddd1V_array,ppm->max_pot_smash*sizeof(double),ppm->error_message);
++      class_alloc(ppm->ddd2V_array,ppm->max_pot_smash*sizeof(double),ppm->error_message);
++      class_alloc(ppm->ddd3V_array,ppm->max_pot_smash*sizeof(double),ppm->error_message);
++ 			
++      ppm->V0 = pow(10.,ppm->V0);
++      ppm->V1 = pow(10.,ppm->V1);
++      ppm->V3 = pow(10.,ppm->V3);
++      
++      //printf("ppm->V0=%e, and ppm->V1=%e, and ppm->V3=%e\n",ppm->V0,ppm->V1,ppm->V3);
++      
++      for (pot_index = 0; pot_index<ppm->max_pot_smash; pot_index++){
++	ppm->rho_array[pot_index] = 5.*ppm->V2 - (double)pot_index*(1e-3)*ppm->V2;
++	// \xi 		= ppm->V0
++	// \beta 	= ppm->V1
++	// \phi_0 = ppm->V2
++	// \lambda= ppm->V3
++	ppm->chi_array[pot_index] = ((sqrt(1.+6.*ppm->V0/ppm->V1)*
++				      asinh(sqrt(1.+6.*ppm->V0/ppm->V1)*
++					    sqrt(ppm->V0)*ppm->rho_array[pot_index]) -
++				      sqrt(6.*ppm->V0/ppm->V1) *
++				      asinh(sqrt(6.*ppm->V0/ppm->V1) *
++					    sqrt(ppm->V0)*ppm->rho_array[pot_index]/
++					    sqrt(1.+pow(sqrt(ppm->V0)*ppm->rho_array[pot_index],2)))) /
++				     sqrt(ppm->V0/ppm->V1));
++	
++	ppm->d0V_array[pot_index] = (ppm->V3/4.*pow(ppm->rho_array[pot_index],4)
++				     /pow(1.+ppm->V0*pow(ppm->rho_array[pot_index],2),2));
++	
++	
++	dchidrho = (sqrt(ppm->V1*(1.+ppm->V0*pow(ppm->rho_array[pot_index],2)) +
++			 6.*pow(ppm->V0,2)*pow(ppm->rho_array[pot_index],2)) /
++		    (1.+ppm->V0*pow(ppm->rho_array[pot_index],2)));
++	
++	ppm->d1V_array[pot_index] = ((ppm->V3*pow(ppm->rho_array[pot_index],3)/dchidrho)
++				     /pow(1.+ppm->V0*pow(ppm->rho_array[pot_index],2),2)*
++				     (1.-pow(ppm->rho_array[pot_index],2)*ppm->V0
++				      /(1.+ppm->V0*pow(ppm->rho_array[pot_index],2))));
++	
++	//printf("%e, %e\n",ppm->chi_array[pot_index],ppm->d0V_array[pot_index]);
++
++	if(pot_index>0){
++	  ppm->d2V_array[pot_index-1] = ((ppm->d1V_array[pot_index]-ppm->d1V_array[pot_index-1])
++					 /(ppm->chi_array[pot_index]-ppm->chi_array[pot_index-1]));
++	  /* it was suggestive from my MultiModeCode application that there was some issue with setting d3V like this
++	     (although I might have fixed that by simply changing indices here.*/
++	  if(pot_index>1)
++	    ppm->d3V_array[pot_index-1] = ((ppm->d2V_array[pot_index]-ppm->d2V_array[pot_index-1])
++					   /(ppm->chi_array[pot_index]-ppm->chi_array[pot_index-1]));
++	}
++      }
++      
++      if (ppm->primordial_verbose > 0)
++	printf(" (creating spline tables for potential)\n");
++      
++      
++      class_call(array_spline_table_lines(ppm->chi_array,
++					  ppm->max_pot_smash,
++					  ppm->d0V_array,
++					  1,
++					  ppm->ddd0V_array,
++					  _SPLINE_EST_DERIV_,
++					  ppm->error_message),
++		 ppm->error_message,
++		 ppm->error_message);
++      
++      class_call(array_spline_table_lines(ppm->chi_array,
++					  ppm->max_pot_smash,
++					  ppm->d1V_array,
++					  1,
++					  ppm->ddd1V_array,
++					  _SPLINE_EST_DERIV_,
++					  ppm->error_message),
++		 ppm->error_message,
++		 ppm->error_message);
++      
++      class_call(array_spline_table_lines(ppm->chi_array,
++					  ppm->max_pot_smash,
++					  ppm->d2V_array,
++					  1,
++					  ppm->ddd2V_array,
++					  _SPLINE_EST_DERIV_,
++					  ppm->error_message),
++		 ppm->error_message,
++		 ppm->error_message);  
+ 
++    }
++    
++    
+     class_call_except(primordial_inflation_solve_inflation(ppt,ppm,ppr),
+                       ppm->error_message,
+                       ppm->error_message,
+@@ -393,7 +502,18 @@ int primordial_init(
+                       ppm->error_message,
+                       primordial_free(ppm));
+   }
++  /* ----------------   SH ---------------- */
++  else if (ppm->primordial_spec_type == gambit_Pk) {
+ 
++    class_test(ppt->has_scalars == _FALSE_,
++               ppm->error_message,
++               "external Pk module cannot work if you do not ask for scalar modes");
++
++    class_test(ppt->has_vectors == _TRUE_,
++               ppm->error_message,
++               "external Pk module cannot work if you ask for vector modes");
++    /* ------------------------------------- */
++  }
+   else {
+ 
+     class_test(0==0,
+@@ -969,6 +1089,9 @@ int primordial_inflation_potential(
+                                    ) {
+ 
+   double e,de,dde,mu,dmu,ddmu,l,dl,ddl,p,dp,ddp;
++  int last_index;
++
++  double xi,beta,lambda;
+ 
+   switch (ppm->potential) {
+ 
+@@ -1023,13 +1146,70 @@ int primordial_inflation_potential(
+ 
+     break;
+ 
++    
++    /* Higgs-scalar (i.e. smash) inflation*/
++  case smash_inflation:
++    
++    /*********************************************************************/
++    /* Interpolate inflationary potential V at phi := chi.		 */
++    /*********************************************************************/
++    
++    class_call(array_interpolate_spline(ppm->chi_array,
++					ppm->max_pot_smash,
++					ppm->d0V_array,
++					ppm->ddd0V_array,
++					1,
++					phi,
++					&last_index,
++					V,
++					1,
++					ppm->error_message),
++	       ppm->error_message,
++	       ppm->error_message);
++    
++    /*********************************************************************/
++    /* Interpolate inflationary potential first derv. dV at phi := chi.	 */
++    /*********************************************************************/
++    
++    class_call(array_interpolate_spline(ppm->chi_array,
++					ppm->max_pot_smash,
++					ppm->d1V_array,
++					ppm->ddd1V_array,
++					1,
++					phi,
++					&last_index,
++					dV,
++					1,
++					ppm->error_message),
++	       ppm->error_message,
++	       ppm->error_message);
++    
++    /*********************************************************************/
++    /* Interpolate inflationary potential scnd derv. dV at phi := chi.	 */
++    /*********************************************************************/
++    
++    class_call(array_interpolate_spline(ppm->chi_array,
++					ppm->max_pot_smash,
++					ppm->d2V_array,
++					ppm->ddd2V_array,
++					1,
++					phi,
++					&last_index,
++					ddV,
++					1,
++					ppm->error_message),
++	       ppm->error_message,
++	       ppm->error_message);
++    
++    break;
++    
+     /* code here other shapes */
+-
++    
+   default:
+     class_stop(ppm->error_message,"ppm->potential=%d different from all known cases",ppm->potential);
+     break;
+   }
+-
++  
+   return _SUCCESS_;
+ }
+ 
+@@ -1750,9 +1930,9 @@ int primordial_inflation_one_wavenumber(
+ 
+   /* uncomment if you want to print here the spectra for testing */
+   /* fprintf(stderr,"%e %e %e\n", */
+-  /* 	    ppm->lnk[index_k], */
+-  /* 	    ppm->lnpk[ppt->index_md_scalars][index_k], */
+-  /* 	    ppm->lnpk[ppt->index_md_tensors][index_k]); */
++  /*        ppm->lnk[index_k], */
++  /*        ppm->lnpk[ppt->index_md_scalars][index_k], */
++  /*        ppm->lnpk[ppt->index_md_tensors][index_k]); */
+ 
+   return _SUCCESS_;
+ }

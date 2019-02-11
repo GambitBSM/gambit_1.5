@@ -1001,15 +1001,17 @@ endif()
 set(name "class")
 set(ver "2.6.3")
 set(lib "libclass")
-#set(patch "${PROJECT_SOURCE_DIR}/Backends/patches/${name}/${ver}")
+set(patch "${PROJECT_SOURCE_DIR}/Backends/patches/${name}/${ver}")
 set(dl "https://github.com/lesgourg/class_public/archive/v${ver}.tar.gz")
 set(md5 "e6eb0fd721bb1098e642f5d1970501ce")
 set(dir "${PROJECT_SOURCE_DIR}/Backends/installed/${name}/${ver}")
+check_ditch_status(${name} ${ver})
 if(NOT ditched_${name}_${ver})
   ExternalProject_Add(${name}_${ver}
     DOWNLOAD_COMMAND ${DL_BACKEND} ${dl} ${md5} ${dir}
     SOURCE_DIR ${dir}
     BUILD_IN_SOURCE 1
+    PATCH_COMMAND patch -p1 < ${patch}/${name}_${ver}.diff
     ## PATCH_COMMAND patch -p0 < ${patch}/primordial_header.dif
     ## COMMAND patch -p0 < ${patch}/primordial_source.dif
     ## COMMAND patch -p0 < ${patch}/input_source.dif
