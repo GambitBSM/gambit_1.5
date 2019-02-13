@@ -58,17 +58,12 @@ namespace Gambit
 
       // Retrieve run options from the YAML file (or standalone code)
       static bool first = true;
-      static int seedBase;
       static bool silenceLoop;
       static std::map<str,int> min_nEvents;
       static std::map<str,int> max_nEvents;
       static std::map<str,int> stoppingres;
       if (first)
       {
-        // Allow the user to specify the Monte Carlo seed base (for debugging). If the default value -1
-        // is used, a new seed is generated for every new collider (Monte Carlo sim) and parameter point.
-        seedBase = runOptions->getValueOrDef<int>(-1, "colliderSeedBase");
-
         // Should we silence stdout during the loop?
         silenceLoop = runOptions->getValueOrDef<bool>(true, "silenceLoop");
 
@@ -94,7 +89,6 @@ namespace Gambit
           result.maxFailedEvents[collider]                                = colOptions.getValueOrDef<int>(1, "maxFailedEvents");
           stoppingres[collider]                                           = colOptions.getValueOrDef<int>(200, "events_between_convergence_checks");
           result.analyses[collider]                                       = colOptions.getValueOrDef<std::vector<str>>(std::vector<str>(), "analyses");
-          result.seed_base[collider]                                      = seedBase;
           result.event_count[collider]                                    = 0;
           // Check that the nEvents options given make sense.
           if (min_nEvents.at(collider) > max_nEvents.at(collider))
@@ -124,9 +118,6 @@ namespace Gambit
 
         // Update the collider
         result.set_current_collider(collider);
-
-        // Save the random number seed to be used for this collider; actual seed will be this plus the thread number.
-        if (seedBase == -1) result.current_seed_base() = int(Random::draw() * 899990000);
 
         // Initialise the count of the number of generated events.
         result.current_event_count() = 0;
@@ -270,7 +261,6 @@ namespace Gambit
       result["too_many_failed_events"] = double(Dep::RunMC->exceeded_maxFailedEvents);
       for (auto& name : Dep::RunMC->collider_names)
       {
-        result["seed_base_" + name] = Dep::RunMC->seed_base.at(name);
         result["event_count_" + name] = Dep::RunMC->event_count.at(name);
       }
     }

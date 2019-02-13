@@ -47,15 +47,6 @@ namespace Gambit
       }
       _current_maxFailedEvents_it = it;
 
-      // Save an iterator to the current seed base
-      it = seed_base.find(_current_collider);
-      if (it == seed_base.end())
-      {
-        str msg = "Current collider \"" + _current_collider + "\" not found in MCLoopInfo::seed_base map.";
-        utils_error().raise(LOCAL_INFO, msg);
-      }
-      _current_seed_base_it = it;
-
       // Save an iterator to the number of events generated for the current collider
       it = event_count.find(_current_collider);
       if (it == event_count.end())
@@ -105,9 +96,6 @@ namespace Gambit
 
     const int& MCLoopInfo::current_maxFailedEvents() const { return _current_maxFailedEvents_it->second; }
     int& MCLoopInfo::current_maxFailedEvents() { return _current_maxFailedEvents_it->second; }
-
-    const int& MCLoopInfo::current_seed_base() const { return _current_seed_base_it->second; }
-    int& MCLoopInfo::current_seed_base() { return _current_seed_base_it->second; }
 
     const int& MCLoopInfo::current_event_count() const { return _current_event_count_it->second; }
     int& MCLoopInfo::current_event_count() { return _current_event_count_it->second; }

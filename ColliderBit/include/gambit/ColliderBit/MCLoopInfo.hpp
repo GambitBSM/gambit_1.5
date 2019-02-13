@@ -42,9 +42,6 @@ namespace Gambit
       /// Maximum allowable number of failed events before MC loop is terminated for each collider
       std::map<str,int> maxFailedEvents;
 
-      /// The random seed base of each collider
-      std::map<str,int> seed_base;
-
       /// Number of events generated for each collider
       std::map<str,int> event_count;
 
@@ -67,11 +64,6 @@ namespace Gambit
       const int& current_maxFailedEvents() const;
       /// Get/set maximum allowable number of failed events before MC loop is terminated for the current collider
       int& current_maxFailedEvents();
-
-      /// Get the random seed base of the current collider
-      const int& current_seed_base() const;
-      /// Get/set the random seed base of the current collider
-      int& current_seed_base();
 
       /// Get the number of events generated for the current collider
       const int& current_event_count() const;
@@ -106,9 +98,6 @@ namespace Gambit
 
         /// Iterator to the current maxFailedEvents
         std::map<str,int>::iterator _current_maxFailedEvents_it;
-
-        /// Iterator to the current seed base
-        std::map<str,int>::iterator _current_seed_base_it;
 
         /// Iterator to the current event count
         std::map<str,int>::iterator _current_event_count_it;

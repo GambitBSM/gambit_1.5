@@ -149,10 +149,11 @@ namespace Gambit
         // Get the Pythia options that are common across all OMP threads ('pythiaCommonOptions')
         // and then add the thread-specific seed
         std::vector<str> pythiaOptions = pythiaCommonOptions;
-        pythiaOptions.push_back("Random:seed = " + std::to_string(RunMC.current_seed_base() + omp_get_thread_num()));
+        str seed = std::to_string(int(Random::draw() * 899990000.));
+        pythiaOptions.push_back("Random:seed = " + seed);
 
         #ifdef COLLIDERBIT_DEBUG
-          cout << debug_prefix() << "getPythia"+model_suffix+": My Pythia seed is: " << std::to_string(RunMC.current_seed_base() + omp_get_thread_num()) << endl;
+          cout << debug_prefix() << "getPythia"+model_suffix+": My Pythia seed is: " << seed << endl;
         #endif
 
         try
@@ -315,10 +316,11 @@ namespace Gambit
         // Get the Pythia options that are common across all OMP threads ('pythiaCommonOptions')
         // and then add the thread-specific seed
         std::vector<str> pythiaOptions = pythiaCommonOptions;
-        pythiaOptions.push_back("Random:seed = " + std::to_string(RunMC.current_seed_base() + omp_get_thread_num()));
+        str seed = std::to_string(int(Random::draw() * 899990000.));
+        pythiaOptions.push_back("Random:seed = " + seed);
 
         #ifdef COLLIDERBIT_DEBUG
-        cout << debug_prefix() << "getPythia"+model_suffix+"FileReader: My Pythia seed is: " << std::to_string(RunMC.current_seed_base() + omp_get_thread_num()) << endl;
+          cout << debug_prefix() << "getPythia"+model_suffix+"FileReader: My Pythia seed is: " << seed << endl;
         #endif
 
         try
