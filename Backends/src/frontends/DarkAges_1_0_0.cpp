@@ -84,8 +84,7 @@ BE_INI_FUNCTION
   }
   scan_level = false;
   // Reset the 'alreadyCalculated' flag
-  //*already_calculated = false;
-  release_flag();
+  *already_calculated = false;
   DarkAges::injectionSpectrum spec = *Dep::injection_spectrum;
   pybind11::array_t<double> Energies = cast_std_to_np(spec.E);
   pybind11::array_t<double> dNdE_e = cast_std_to_np(spec.spec_el);

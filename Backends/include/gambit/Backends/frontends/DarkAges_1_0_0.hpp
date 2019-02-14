@@ -28,7 +28,6 @@ LOAD_LIBRARY
 /* Include an extra header of pybind11.
  * Needed for casting of python list into std::vector and vice versa
  */
-#include <pybind11/stl.h>
 #include <pybind11/numpy.h>
 
 /* Syntax for BE_FUNCTION (same as for any other backend):
@@ -36,7 +35,6 @@ LOAD_LIBRARY
  */
 
 BE_FUNCTION(initialize, void, (), "initialize", "DA_initialize")
-BE_FUNCTION(release_flag, void, (), "release_flag", "DA_reset")
 BE_FUNCTION(calc_f_decay, void, (pybind11::array_t<double>, pybind11::array_t<double>, pybind11::array_t<double>, double, double), "calculate_f_for_decay", "DA_calc_f")
 BE_FUNCTION(get_result, pybind11::array_t<double>, (str), "get_result","DA_get_result")
 
@@ -44,7 +42,7 @@ BE_FUNCTION(get_result, pybind11::array_t<double>, (str), "get_result","DA_get_r
  * BE_VARIABLE([name], [type], "[exact symbol name]", "[choose capability name]")
  * */
 
-//BE_VARIABLE(already_calculated, bool, "alreadyCalculated", "DA_alreadyCalculated")
+BE_VARIABLE(already_calculated, bool, "alreadyCalculated", "DA_alreadyCalculated")
 
 /* We use BE_INI_DEPENDENCY, since DarkAges needs the spectra of injected electrons, positrons and photons
  * to calculate f(z)

@@ -4170,8 +4170,8 @@ DA_calc_f: |
 DA_get_result: |
    BE function returning an array containing f(z) for a given channel.
 
-DA_reset: |
-   BE function to release the 'alreadyCalculated'-flag of the module.
+DA_alreadyCalculated: |
+   Flag if calculations were already performed for this parameter point.
 
 #----------------------------
 #  CosmoBit
