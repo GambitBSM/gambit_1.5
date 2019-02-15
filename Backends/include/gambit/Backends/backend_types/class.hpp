@@ -12,6 +12,11 @@
 ///          selim.hotinli14@imperial.ac.uk
 ///  \date 2017 Jul
 ///  \date 2017 Oct
+///
+///  \author Patrick Stoecker
+///          stoecker@physik.rwth-aachen.de
+///  \date 2019 Feb
+///
 ///  *************************
 
 #include "gambit/Utils/util_types.hpp"
@@ -21,9 +26,9 @@
 
 namespace Gambit
 {
-	namespace Class
-	{
-		#include "class_types/class.h"
-	}
+  namespace Class
+  {
+    #include "class_types/class.h"
+  }
 }
 #endif // defined __class_hpp__

@@ -11,6 +11,7 @@
 ///  \author Patrick Stoecker
 ///          (stoecker@physik.rwth-aachen.de)
 ///  \date 2018 Apr, May
+///  \date 2019 Feb
 ///
 ///  \author Selim Hotinli
 ///  \date 2018 May-June
@@ -63,12 +64,13 @@ BE_NAMESPACE
   {
     //std::cout << "Last seen alive in: class_2_6_3_run" << std::endl;
 
-    char error_printout[1024];
+    std::string error_printout;
 
     if (class_input_initialize(&fc,&pr,&ba,&th,&pt,&tr,&pm,&sp,&nl,&le,&op,errmsg) == _FAILURE_)
     {
-      sprintf(error_printout,"Error in class_input_initialize\n=>%s\n",errmsg);
-      invalid_point().raise(error_printout);
+      error_printout = "Error in class_input_initialize:\n\n ";
+      error_printout += errmsg;
+      invalid_point().raise(error_printout.c_str());
     }
     last_success++;
     /** - Check for unused parameters */
@@ -91,16 +93,15 @@ BE_NAMESPACE
       }
       if (!(unused.empty()))
       {
-	std::string error_out;
-	error_out = "Some of your parameters are not read by class.\n\nThese are:\n\n";
+	error_printout = "Some of your parameters are not read by class.\n\nThese are:\n\n";
 	for (auto par = unused.begin(); par != unused.end(); par++)
 	{
-	  error_out +=  "--> ";
-	  error_out +=  *par;
-	  error_out +=  " <--\n";
+	  error_printout +=  "--> ";
+	  error_printout +=  *par;
+	  error_printout +=  " <--\n";
 	}
-	error_out += "\nPlease fix this. Most probably these unknown parameters are given in the Rules section.";
-	backend_error().raise(LOCAL_INFO,error_out);
+	error_printout += "\nPlease fix this. Most probably these unknown parameters are given in the Rules section.";
+	backend_error().raise(LOCAL_INFO,error_printout.c_str());
       }
       check_for_unused = false;
     }
@@ -109,22 +110,25 @@ BE_NAMESPACE
 
     if (class_background_initialize(&pr,&ba) == _FAILURE_)
     {
-      sprintf(error_printout,"Error in class_background_initialize\n=>%s\n",ba.error_message);
-      invalid_point().raise(error_printout);
+      error_printout = "Error in class_background_initialize:\n\n ";
+      error_printout += ba.error_message;
+      invalid_point().raise(error_printout.c_str());
     }
     last_success++;
     if (maxlevel.compare("background") == 0) return;
     if (class_thermodynamics_initialize(&pr,&ba,&th) == _FAILURE_)
     {
-      sprintf(error_printout,"Error in class_thermodynamics_initialize\n=>%s\n",th.error_message);
-      invalid_point().raise(error_printout);
+      error_printout = "Error in class_thermodynamics_initialize:\n\n ";
+      error_printout += th.error_message;
+      invalid_point().raise(error_printout.c_str());
     }
     last_success++;
     if (maxlevel.compare("thermodynamics") == 0) return;
     if (class_perturb_initialize(&pr,&ba,&th,&pt) == _FAILURE_)
     {
-      sprintf(error_printout,"Error in class_perturb_initialize\n=>%s\n",pt.error_message);
-      invalid_point().raise(error_printout);
+      error_printout = "Error in class_perturb_initialize:\n\n ";
+      error_printout += pt.error_message;
+      invalid_point().raise(error_printout.c_str());
     }
     last_success++;
     if (maxlevel.compare("perturb") == 0) return;
@@ -186,36 +190,41 @@ BE_NAMESPACE
 
     if (class_primordial_initialize(&pr,&pt,&pm) == _FAILURE_)
     {
-      sprintf(error_printout,"Error in class_primordial_initialize\n=>%s\n",pm.error_message);
-      invalid_point().raise(error_printout);
+      error_printout = "Error in class_primordial_initialize:\n\n ";
+      error_printout += pm.error_message;
+      invalid_point().raise(error_printout.c_str());
     }
     last_success++;
     if (maxlevel.compare("primordial") == 0) return;
     if (class_nonlinear_initialize(&pr,&ba,&th,&pt,&pm,&nl) == _FAILURE_)
     {
-      sprintf(error_printout,"Error in class_nonlinear_initialize\n=>%s\n",nl.error_message);
-      invalid_point().raise(error_printout);
+      error_printout = "Error in class_nonlinear_initialize:\n\n ";
+      error_printout += nl.error_message;
+      invalid_point().raise(error_printout.c_str());
     }
     last_success++;
     if (maxlevel.compare("nonlinear") == 0) return;
     if (class_transfer_initialize(&pr,&ba,&th,&pt,&nl,&tr) == _FAILURE_)
     {
-      sprintf(error_printout,"Error in class_transfer_initialize\n=>%s\n",tr.error_message);
-      invalid_point().raise(error_printout);
+      error_printout = "Error in class_transfer_initialize:\n\n ";
+      error_printout += tr.error_message;
+      invalid_point().raise(error_printout.c_str());
     }
     last_success++;
     if (maxlevel.compare("transfer") == 0) return;
     if (class_spectra_initialize(&pr,&ba,&pt,&pm,&nl,&tr,&sp) == _FAILURE_)
     {
-      sprintf(error_printout,"Error in class_spectra_initialize\n=>%s\n",sp.error_message);
-      invalid_point().raise(error_printout);
+      error_printout = "Error in class_spectra_initialize:\n\n ";
+      error_printout += sp.error_message;
+      invalid_point().raise(error_printout.c_str());
     }
     last_success++;
     if (maxlevel.compare("spectra") == 0) return;
     if (class_lensing_initialize(&pr,&pt,&sp,&nl,&le) == _FAILURE_)
     {
-      sprintf(error_printout,"Error in class_lensing_initialize\n=>%s\n",le.error_message);
-      invalid_point().raise(error_printout);
+      error_printout = "Error in class_lensing_initialize:\n\n ";
+      error_printout += le.error_message;
+      invalid_point().raise(error_printout.c_str());
     }
     last_success++;
   }
@@ -311,7 +320,6 @@ BE_NAMESPACE
     int index;
     double *pvecback;
     double sigma8 = 0.;
-    int success;
     //transform redshift in conformal time
     background_tau_of_z(&ba,z,&tau);
 
@@ -320,8 +328,7 @@ BE_NAMESPACE
 
     //call to fill pvecback
     background_at_tau(&ba,tau,ba.long_info,ba.inter_normal, &index, pvecback);
-    //background_at_tau(pba,tau,pba->long_info,pba->inter_normal,&last_index,pvecback);
-    success=spectra_sigma(&ba,&pm,&sp,8./ba.h,z,&sigma8);
+    spectra_sigma(&ba,&pm,&sp,8./ba.h,z,&sigma8);
     free(pvecback);
     return sigma8;
 
