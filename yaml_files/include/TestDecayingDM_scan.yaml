@@ -1,0 +1,17 @@
+##########################################################################
+## TestDecayingDM parameter
+##
+## Patrick Stoecker <stoecker@physik.rwth-aachen.de>
+## 2019, Feb
+##########################################################################
+
+mass: # mass in eV
+  range: [0.01, 100]
+  prior_type: log
+BR:
+  range: [0.0, 1.0]
+lifetime:
+  range: [1e16, 1e18]
+  prior_type: log
+fraction:
+  range: [0.0, 1.0]

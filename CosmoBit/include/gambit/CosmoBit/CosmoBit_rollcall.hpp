@@ -64,12 +64,21 @@ START_MODULE
     #undef FUNCTION
   #undef CAPABILITY
 
+  #define CAPABILITY energy_injection_efficiency
+  START_CAPABILITY
+    #define FUNCTION energy_injection_efficiency_func
+    START_FUNCTION(DarkAges::fz_table)
+    ALLOW_MODELS(TestDecayingDM)
+    BACKEND_REQ(DA_efficiency_function, (DarkAges_tag) ,DarkAges::fz_table,())
+    #undef FUNCTION
+  #undef CAPABILITY
+
   #define CAPABILITY f_effective
   START_CAPABILITY
     #define FUNCTION f_effective_func
     START_FUNCTION(double)
     ALLOW_MODELS(TestDecayingDM)
-    BACKEND_REQ(DA_efficiency_function, (DarkAges_tag),DarkAges::fz_table,())
+    DEPENDENCY(energy_injection_efficiency,DarkAges::fz_table)
     #undef FUNCTION
   #undef CAPABILITY
 
@@ -102,7 +111,9 @@ START_MODULE
     DEPENDENCY(Helium_abundance,std::vector<double>)
     DEPENDENCY(T_cmb, double)
     DEPENDENCY(class_set_Smu, CosmoBit::Class_container)
-    ALLOW_MODELS(LCDM,LCDM_Smu_dNeffCMB_dNeffBBN_etaBBN)
+    ALLOW_MODELS(LCDM,LCDM_Smu_dNeffCMB_dNeffBBN_etaBBN,TestDecayingDM)
+    MODEL_CONDITIONAL_DEPENDENCY(lifetime,double,TestDecayingDM)
+    MODEL_CONDITIONAL_DEPENDENCY(DM_fraction,double,TestDecayingDM)
     #undef FUNCTION
 
     #define FUNCTION class_set_parameter_LCDM_SingletDM
