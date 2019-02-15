@@ -240,6 +240,8 @@ namespace Gambit
     {
       using namespace Pipes::class_set_Smu_LCDM;
 
+      cosmo.input.clear();
+
       cosmo.input.addEntry("N_ur",2.0328);  //1 massive neutrinos
       cosmo.input.addEntry("N_ncdm",1);
       cosmo.input.addEntry("m_ncdm","0.06");
@@ -248,6 +250,8 @@ namespace Gambit
     void class_set_Smu_LCDM_Smu_dNeffCMB_dNeffBBN_etaBBN(Class_container& cosmo)
     {
       using namespace Pipes::class_set_Smu_LCDM_Smu_dNeffCMB_dNeffBBN_etaBBN;
+
+      cosmo.input.clear();
 
       cosmo.input.addEntry("N_ur",*Param["dNeff"]+0.00641);  // dNeff= 0.00641 for 3 massive neutrinos at CMB release
       cosmo.input.addEntry("N_ncdm",3);
@@ -266,6 +270,8 @@ namespace Gambit
 
       cosmo.input.clear();
 
+      cosmo = *Dep::class_set_Smu;
+
       cosmo.input.addEntry("output","tCl pCl lCl");
       cosmo.input.addEntry("l_max_scalars",l_max);
       cosmo.input.addEntry("lensing","yes");
@@ -277,8 +283,6 @@ namespace Gambit
       cosmo.input.addEntry("ln10^{10}A_s",*Param["ln10A_s"]);
       cosmo.input.addEntry("n_s",*Param["n_s"]);
       cosmo.input.addEntry("tau_reio",*Param["tau_reio"]);
-
-      cosmo = *Dep::class_set_Smu;
 
       std::vector<double> Helium_abund = *Dep::Helium_abundance; // .at(0): mean, .at(1): uncertainty
       cosmo.input.addEntry("YHe",Helium_abund.at(0));
