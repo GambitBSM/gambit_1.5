@@ -1,7 +1,9 @@
 ##########################################################################
 ## GAMBIT configuration for an ultra-minimal MultiNest scan of a toy model.
 ##
-## Only needs ExampleBit_A and a scanner (Diver, MultiNest, GreAT or TWalk).
+## Only needs ExampleBit_A and a scanner (either one of the built-ins like
+## the random sampler or TWalk, or an external like Diver, MultiNest,
+## GreAT or Polychord).
 ##########################################################################
 
 
@@ -37,9 +39,14 @@ Printer:
 
 Scanner:
 
-  use_scanner: twalk
+  use_scanner: multinest
 
   scanners:
+
+    random:
+      plugin: random
+      like: LogLike
+      point_number: 10
 
     de:
       plugin: diver
@@ -60,6 +67,7 @@ Scanner:
 
     twalk:
       plugin: twalk
+      like: LogLike
 
     polychord:
       plugin: polychord
