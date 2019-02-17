@@ -56,6 +56,9 @@ namespace Gambit {
 
     public:
 
+      // Required detector sim
+      static constexpr const char* detector = "ATLAS";
+
       Analysis_ATLAS_8TeV_1LEPStop_20invfb() {
         set_analysis_name("ATLAS_8TeV_1LEPStop_20invfb");
         set_luminosity(20.7);
@@ -208,24 +211,32 @@ namespace Gambit {
         HEPUtils::P4 ptot = event->missingmom();
         double met = event->met();
 
-        // Now define vectors of baseline objects
+        // Now define vector of baseline electrons
         vector<HEPUtils::Particle*> baselineElectrons;
         for (HEPUtils::Particle* electron : event->electrons()) {
           if (electron->pT() > 10. && electron->abseta() < 2.47 &&
               !object_in_cone(*event, *electron, 0.1*electron->pT(), 0.2)) baselineElectrons.push_back(electron);
         }
+
+        // Apply electron efficiency
+        ATLAS::applyElectronEff(baselineElectrons);
+
+        // Now define vector of baseline muons
         vector<HEPUtils::Particle*> baselineMuons;
         for (HEPUtils::Particle* muon : event->muons()) {
           if (muon->pT() > 10. && muon->abseta() < 2.4 &&
               !object_in_cone(*event, *muon, 1.8, 0.2)) baselineMuons.push_back(muon);
         }
 
+        // Apply muon efficiency
+        ATLAS::applyMuonEff(baselineMuons);
+
         // Get b jets with efficiency and mistag (fake) rates
         vector<HEPUtils::Jet*> baselineJets, bJets; // trueBJets; //for debugging
         for (HEPUtils::Jet* jet : event->jets()) {
           if (jet->pT() > 20. && jet->abseta() < 10.0) baselineJets.push_back(jet);
           if (jet->abseta() < 2.5 && jet->pT() > 25.) {
-            if ((jet->btag() && HEPUtils::rand01() < 0.75) || (!jet->btag() && HEPUtils::rand01() < 0.02)) bJets.push_back(jet);
+            if ((jet->btag() && Random::draw() < 0.75) || (!jet->btag() && Random::draw() < 0.02)) bJets.push_back(jet);
           }
         }
 

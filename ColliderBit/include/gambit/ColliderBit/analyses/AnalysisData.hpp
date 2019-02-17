@@ -5,9 +5,6 @@
 ///
 ///  The SignalRegionData and AnalysisData structs.
 
-#include "gambit/ColliderBit/ColliderBit_macros.hpp"
-//#include "gambit/ColliderBit/Utils.hpp" //< avoid passing this to the _types/_rollcall
-
 #include "Eigen/Core"
 
 #include <string>

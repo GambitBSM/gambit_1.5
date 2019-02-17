@@ -24,6 +24,7 @@
 ///  \author Pat Scott
 ///          (p.scott@imperial.ac.uk)
 ///  \date 2018 Jan
+///  \date 2019 Jan
 ///
 ///  \author Tomas Gonzalo
 ///          (t.e.gonzalo@fys.uio.no)
@@ -38,9 +39,11 @@
 #include <vector>
 #include <chrono>
 
+#include "gambit/ColliderBit/MCLoopInfo.hpp"
 #include "gambit/ColliderBit/MC_convergence.hpp"
-#include "gambit/ColliderBit/colliders/SpecializablePythia.hpp"
-#include "gambit/ColliderBit/detectors/BuckFastSmear.hpp"
+#include "gambit/ColliderBit/colliders/ColliderPythia.hpp"
+#include "gambit/ColliderBit/colliders/ColliderPythia_typedefs.hpp"
+#include "gambit/ColliderBit/detectors/BuckFast.hpp"
 #include "gambit/ColliderBit/analyses/HEPUtilsAnalysisContainer.hpp"
 #include "gambit/ColliderBit/analyses/AnalysisData.hpp"
 
@@ -87,7 +90,6 @@ namespace Gambit
     /// @brief Container for multiple analysis containers
     typedef std::vector<HEPUtilsAnalysisContainer> HEPUtilsAnalysisContainers;
 
-    // typedefs specifically for timing (see ColliderBit_macros.hpp)
     typedef std::chrono::milliseconds ms;
     typedef std::chrono::steady_clock steady_clock;
     typedef std::chrono::steady_clock::time_point tp;

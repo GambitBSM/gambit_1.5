@@ -18,6 +18,9 @@ namespace Gambit {
     class Analysis_CMS_13TeV_0LEP_13invfb : public HEPUtilsAnalysis {
     public:
 
+      // Required detector sim
+      static constexpr const char* detector = "CMS";
+
       // Numbers passing cuts
       static const size_t NUMSR = 12; //160;
       double _srnums[NUMSR];
@@ -67,16 +70,22 @@ namespace Gambit {
 
 
         // Get baseline electrons
-        vector<const Particle*> baseelecs;
-        for (const Particle* electron : event->electrons())
+        vector<Particle*> baseelecs;
+        for (Particle* electron : event->electrons())
           if (electron->pT() > 10. && electron->abseta() < 2.5)
             baseelecs.push_back(electron);
 
+        // Apply electron efficiency
+        CMS::applyElectronEff(baseelecs);
+
         // Get baseline muons
-        vector<const Particle*> basemuons;
-        for (const Particle* muon : event->muons())
+        vector<Particle*> basemuons;
+        for (Particle* muon : event->muons())
           if (muon->pT() > 10. && muon->abseta() < 2.4)
             basemuons.push_back(muon);
+
+        // Apply electron efficiency
+        CMS::applyMuonEff(basemuons);
 
         // Electron isolation
         /// @todo Sum should actually be over all non-e/mu calo particles
@@ -156,7 +165,7 @@ namespace Gambit {
         // for (const Jet* j : jets24) {
         //   if (j->pT() < 50 && j->abseta() > 2.5) continue;
         //   // b-tag effs: b: 0.55, c: 0.12, l: 0.016
-        //   const bool btagged = rand01() < (j->btag() ? 0.55 : j->ctag() ? 0.12 : 0.016);
+        //   const bool btagged = Random::draw() < (j->btag() ? 0.55 : j->ctag() ? 0.12 : 0.016);
         //   if (btagged) nbj += 1;
         // }
         // const size_t inbj = binIndex(nbj, njbedges, true);
@@ -186,7 +195,7 @@ namespace Gambit {
         for (const Jet* j : jets24) {
           if (j->pT() < 50 && j->abseta() > 2.5) continue;
           // b-tag effs: b: 0.55, c: 0.12, l: 0.016
-          const bool btagged = rand01() < (j->btag() ? 0.55 : j->ctag() ? 0.12 : 0.016);
+          const bool btagged = Random::draw() < (j->btag() ? 0.55 : j->ctag() ? 0.12 : 0.016);
           if (btagged) nbj += 1;
         }
         if (nj >= 3 && nbj == 0 && ht >  500 && htmiss > 500) _srnums[ 0] += 1;

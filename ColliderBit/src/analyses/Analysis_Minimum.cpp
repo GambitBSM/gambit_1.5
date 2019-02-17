@@ -15,6 +15,9 @@ namespace Gambit {
 
     public:
 
+      // Required detector sim
+      static constexpr const char* detector = "ATLAS";
+
       Analysis_Minimum() {
 
         // Set the analysis name
@@ -39,14 +42,20 @@ namespace Gambit {
         // Now define vectors of baseline objects,  including:
         // - retrieval of electron, muon and jets from the event)
         // - application of basic pT and eta cuts
+
+        // Baseline electrons
         vector<HEPUtils::Particle*> baselineElectrons;
         for (HEPUtils::Particle* electron : event->electrons()) {
           if (electron->pT() > 10. && fabs(electron->eta()) < 2.47) baselineElectrons.push_back(electron);
         }
+
+        // Baseline muons
         vector<HEPUtils::Particle*> baselineMuons;
         for (HEPUtils::Particle* muon : event->muons()) {
           if (muon->pT() > 10. && fabs(muon->eta()) < 2.4) baselineMuons.push_back(muon);
         }
+
+        // Baseline jets
         vector<HEPUtils::Jet*> baselineJets;
         for (HEPUtils::Jet* jet : event->jets()) {
           if (jet->pT() > 20. && fabs(jet->eta()) < 4.5) baselineJets.push_back(jet);

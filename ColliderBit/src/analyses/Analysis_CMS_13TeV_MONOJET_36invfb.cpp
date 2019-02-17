@@ -2,7 +2,6 @@
 #include "gambit/ColliderBit/analyses/BaseAnalysis.hpp"
 #include "gambit/ColliderBit/analyses/Cutflow.hpp"
 #include "gambit/ColliderBit/CMSEfficiencies.hpp"
-// #include "Eigen/Eigen"
 
 // Based on http://cms-results.web.cern.ch/cms-results/public-results/publications/EXO-16-048/index.html
 
@@ -19,6 +18,9 @@ namespace Gambit {
     ///
     class Analysis_CMS_13TeV_MONOJET_36invfb : public HEPUtilsAnalysis {
     public:
+
+      // Required detector sim
+      static constexpr const char* detector = "CMS";
 
       static const size_t NUMSR = 22;
       double _srnums[NUMSR];
@@ -46,9 +48,21 @@ namespace Gambit {
         // Record a trigger weight; we can aggregate this rather than wastefully random-vetoing
         const double trigweight = (met < 350) ? 0.97 : 1.0;
 
+        // Electron objects
+        vector<HEPUtils::Particle*> baselineElectrons = event->electrons();
+
+        // Apply electron efficiency
+        CMS::applyElectronEff(baselineElectrons);
+
+        // Muon objects
+        vector<HEPUtils::Particle*> baselineMuons = event->muons();
+
+        // Apply muon efficiency
+        CMS::applyMuonEff(baselineMuons);
+
         // Veto on isolated leptons and photons
-        for (const Particle* e : event->electrons()) if (e->pT() > 10) return; //< VETO
-        for (const Particle* m : event->muons()) if (m->pT() > 10) return; //< VETO
+        for (const Particle* e : baselineElectrons) if (e->pT() > 10) return; //< VETO
+        for (const Particle* m : baselineMuons) if (m->pT() > 10) return; //< VETO
         for (const Particle* t : event->taus()) if (t->pT() > 18) return; //< VETO
         for (const Particle* y : event->photons()) if (y->pT() > 15 && y->abseta() < 2.5) return; //< VETO
 
@@ -61,7 +75,7 @@ namespace Gambit {
         for (const Jet* jet : jets4) {
           if (jet->abseta() > 2.4) continue;
           const double btag_rate = jet->btag() ? 0.8 : jet->ctag() ? 0.4 : 0.1;
-          if (rand01() < btag_rate) return; //< VETO
+          if (Random::draw() < btag_rate) return; //< VETO
         }
 
         // Get the 4 leading jets > 3 GeV, and veto if pTmiss is too close to them
@@ -115,7 +129,7 @@ namespace Gambit {
         }
 
         // Commented out covariance matrix for now, as it currently is a bit
-        // too time consuming to calculate an accurate 'simplified likelihood' 
+        // too time consuming to calculate an accurate 'simplified likelihood'
         // for this analysis.
 
         // // Covariance

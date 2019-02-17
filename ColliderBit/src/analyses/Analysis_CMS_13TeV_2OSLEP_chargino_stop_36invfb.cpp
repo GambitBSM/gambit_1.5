@@ -28,18 +28,22 @@ namespace Gambit {
     // - Analysis_CMS_13TeV_2OSLEP_chargino_36invfb
     // - Analysis_CMS_13TeV_2OSLEP_stop_36invfb
     class Analysis_CMS_13TeV_2OSLEP_chargino_stop_36invfb : public HEPUtilsAnalysis {
-    
-    
+
+
     protected:
       // Counters for the number of accepted events for each signal region
-      static const size_t NUMSR_stop = 84; 
+      static const size_t NUMSR_stop = 84;
       double _srnums_stop[NUMSR_stop];
-      static const size_t NUMSR_chargino = 70; 
+      static const size_t NUMSR_chargino = 70;
       double _srnums_chargino[NUMSR_chargino];
-      
+
       Cutflow _cutflow;
-    
+
     public:
+
+      // Required detector sim
+      static constexpr const char* detector = "CMS";
+
       Analysis_CMS_13TeV_2OSLEP_chargino_stop_36invfb():
       _cutflow("CMS 2-lep stop 13 TeV", {"Two_OC_leptons", "Third_lepton_veto", "mll_20", "mll_mZ_15", "PTmiss_140"})
       {
@@ -52,32 +56,32 @@ namespace Gambit {
       struct ptComparison {
         bool operator() (HEPUtils::Particle* i,HEPUtils::Particle* j) {return (i->pT()>j->pT());}
       } comparePt;
-      
-      void analyze(const HEPUtils::Event* event) 
+
+      void analyze(const HEPUtils::Event* event)
       {
         // Baseline objects
         HEPUtilsAnalysis::analyze(event);
         HEPUtils::P4 ptot = event->missingmom();
         double met = event->met();
         _cutflow.fillinit();
-        
+
         // Apply electron efficiency and collect baseline electrons
         //@note Numbers digitized from https://twiki.cern.ch/twiki/pub/CMSPublic/SUSMoriond2017ObjectsEfficiency/2d_full_pteta_el_17010_ttbar.pdf
         //@note The efficiency map has been extended to cover the low-pT region, using the efficiencies from BuckFast (CMSEfficiencies.hpp)
         const vector<double> aEl={0., 0.8, 1.442, 1.556, 2., 2.4, DBL_MAX};   // Bin edges in eta
         const vector<double> bEl={0., 10., 20., 25., 30., 40., 50., DBL_MAX}; // Bin edges in pT. Assume flat efficiency above 200, where the CMS map stops.
-        const vector<double> cEl={                 
-                          // pT: (0,10),  (10,20),  (20,25),  (25,30),  (30,40),  (40,50),  (50,inf)     
+        const vector<double> cEl={
+                          // pT: (0,10),  (10,20),  (20,25),  (25,30),  (30,40),  (40,50),  (50,inf)
                                     0.0,    0.95,    0.463,     0.537,    0.597,   0.648,    0.701,  // eta: (0, 0.8)
                                     0.0,    0.95,    0.424,     0.520,    0.603,   0.635,    0.700, // eta: (0.8, 1.4429
                                     0.0,    0.95,    0.041,     0.044,    0.053,   0.049,    0.053, // eta: (1.442, 1.556)
                                     0.0,    0.85,    0.271,     0.343,    0.439,   0.508,    0.557, // eta: (1.556, 2)
-                                    0.0,    0.85,    0.262,     0.336,    0.411,   0.463,    0.513, // eta: (2, 2.5) 
+                                    0.0,    0.85,    0.262,     0.336,    0.411,   0.463,    0.513, // eta: (2, 2.5)
                                     0.0,    0.0,     0.0,       0.0,      0.0,     0.0,      0.0,   // eta > 2.5
                                   };
         HEPUtils::BinnedFn2D<double> _eff2dEl(aEl,bEl,cEl);
         vector<HEPUtils::Particle*> baselineElectrons;
-        for (HEPUtils::Particle* electron : event->electrons()) 
+        for (HEPUtils::Particle* electron : event->electrons())
         {
           bool isEl=has_tag(_eff2dEl, electron->eta(), electron->pT());
           if (isEl && electron->pT()>15. && fabs(electron->eta())<2.4) baselineElectrons.push_back(electron);
@@ -90,7 +94,7 @@ namespace Gambit {
         const vector<double> aMu={0., 0.9, 1.2, 2.1, 2.4, DBL_MAX};   // Bin edges in eta
         const vector<double> bMu={0., 10., 20., 25., 30., 40., 50., DBL_MAX};  // Bin edges in pT. Assume flat efficiency above 200, where the CMS map stops.
         const vector<double> cMu={
-                           // pT:   (0,10),  (10,20),  (20,25),  (25,30),  (30,40),  (40,50),  (50,inf)     
+                           // pT:   (0,10),  (10,20),  (20,25),  (25,30),  (30,40),  (40,50),  (50,inf)
                                      0.0,    0.950,    0.692,    0.759,    0.813,    0.852,    0.896,  // eta: (0, 0.9)
                                      0.0,    0.950,    0.679,    0.752,    0.803,    0.856,    0.897,  // eta: (0.9, 1.2)
                                      0.0,    0.950,    0.706,    0.757,    0.801,    0.836,    0.886,  // eta: (1.2, 2.1)
@@ -99,7 +103,7 @@ namespace Gambit {
                                  };
         HEPUtils::BinnedFn2D<double> _eff2dMu(aMu,bMu,cMu);
         vector<HEPUtils::Particle*> baselineMuons;
-        for (HEPUtils::Particle* muon : event->muons()) 
+        for (HEPUtils::Particle* muon : event->muons())
         {
           bool isMu=has_tag(_eff2dMu, muon->eta(), muon->pT());
           if (isMu && muon->pT()>15. && fabs(muon->eta())<2.4) baselineMuons.push_back(muon);
@@ -107,18 +111,18 @@ namespace Gambit {
 
         // Baseline jets
         vector<HEPUtils::Jet*> baselineJets;
-        for (HEPUtils::Jet* jet : event->jets()) 
+        for (HEPUtils::Jet* jet : event->jets())
         {
           if (jet->pT()>20. &&fabs(jet->eta())<2.4) baselineJets.push_back(jet);
         }
 
-        
+
         // Signal leptons = electrons + muons
         vector<HEPUtils::Particle*> signalLeptons;
         signalLeptons=baselineElectrons;
         signalLeptons.insert(signalLeptons.end(),baselineMuons.begin(),baselineMuons.end());
         sort(signalLeptons.begin(),signalLeptons.end(),comparePt);
-        
+
         // Signal jets
         const vector<double> aBJet={0,10.};
         const vector<double> bBJet={0,30., 40., 50., 70., 80., 90., 100.,150., 200., 10000.};
@@ -142,32 +146,32 @@ namespace Gambit {
         }
         int nj  = signalJets.size();
         int nbj = signalBJets.size();
-        
-        
+
+
         // Tow OC lepton
         if (signalLeptons.size()<2) return;
         if (signalLeptons[0]->pid()*signalLeptons[1]->pid()>0) return;
         if (signalLeptons[0]->pT()<25. or signalLeptons[1]->pT()<20.) return;
         _cutflow.fill(1);
-        
+
         // Third lepton veto
         if (signalLeptons.size()>2) return;
         _cutflow.fill(2);
-        
+
         // m_{ll} > 20 GeV
         double mll=(signalLeptons[0]->mom()+signalLeptons[1]->mom()).m();
         if (mll<20) return;
         _cutflow.fill(3);
-        
+
         // |m_{ll}-m_Z| >15 GeV for ee and mumu events
-        bool same_flavor = signalLeptons[0]->abspid() == signalLeptons[1]->abspid();        
+        bool same_flavor = signalLeptons[0]->abspid() == signalLeptons[1]->abspid();
         if (same_flavor and fabs(mll-91.2)<15 ) return;
         _cutflow.fill(4);
 
         // MET>140 GeV
         if (met<140) return;
         _cutflow.fill(5);
-        
+
         // Mt2
         double pLep1[3] = {signalLeptons[0]->mass(), signalLeptons[0]->mom().px(), signalLeptons[0]->mom().py()};
         double pLep2[3] = {signalLeptons[1]->mass(), signalLeptons[1]->mom().px(), signalLeptons[1]->mom().py()};
@@ -176,15 +180,15 @@ namespace Gambit {
         mt2_calc.set_momenta(pLep1,pLep2,pMiss);
         mt2_calc.set_mn(0.0);
         double mT2 = mt2_calc.get_mt2();
-        
+
         // ISR jet
         int nISR=0;
         if (nj>1){
             if ( signalJets.at(0)->pT()>150. and ptot.deltaPhi(signalJets.at(0)->mom())>2.5 and (not ISR_btag)){
                 nISR = 1;
             }
-        }   
-        
+        }
+
         // For chargino SRs
         // In the order of x axis
         // http://cms-results.web.cern.ch/cms-results/public-results/publications/SUS-17-010/CMS-SUS-17-010_Figure-aux_001.png
@@ -206,7 +210,7 @@ namespace Gambit {
                     else if (mT2< 80) ++_srnums_chargino[17];
                     else if (mT2<100) ++_srnums_chargino[18];
                     else if (mT2<120) ++_srnums_chargino[19];
-                    else              ++_srnums_chargino[20];      
+                    else              ++_srnums_chargino[20];
                 }
             } else if (met<300){
                 if (nbj==0 and nj ==0) { //SR2_{0tag}^{0jet}
@@ -225,7 +229,7 @@ namespace Gambit {
                     else if (mT2< 80) ++_srnums_chargino[45];
                     else if (mT2<100) ++_srnums_chargino[46];
                     else if (mT2<120) ++_srnums_chargino[47];
-                    else              ++_srnums_chargino[48];      
+                    else              ++_srnums_chargino[48];
                 }
             } else {
                 if (nbj==0 and nj >=0) { //SR3_{0tag}
@@ -235,7 +239,7 @@ namespace Gambit {
                     else if (mT2< 80) ++_srnums_chargino[59];
                     else if (mT2<100) ++_srnums_chargino[60];
                     else if (mT2<120) ++_srnums_chargino[61];
-                    else              ++_srnums_chargino[62];        
+                    else              ++_srnums_chargino[62];
                 }
             }
         } else {
@@ -256,8 +260,8 @@ namespace Gambit {
                     else if (mT2< 80) ++_srnums_chargino[24];
                     else if (mT2<100) ++_srnums_chargino[25];
                     else if (mT2<120) ++_srnums_chargino[26];
-                    else              ++_srnums_chargino[27]; 
-                         
+                    else              ++_srnums_chargino[27];
+
                 }
             } else if (met<300){
                 if (nbj==0 and nj ==0) { //SR2_{0tag}^{0jet}
@@ -290,7 +294,7 @@ namespace Gambit {
                 }
             }
         }
-        
+
         // For stop SRs
         // In the order of x axis in
         // http://cms-results.web.cern.ch/cms-results/public-results/publications/SUS-17-010/CMS-SUS-17-010_Figure-aux_003.png
@@ -303,7 +307,7 @@ namespace Gambit {
                     else if (mT2< 80) ++_srnums_stop[45];
                     else if (mT2<100) ++_srnums_stop[46];
                     else if (mT2<120) ++_srnums_stop[47];
-                    else              ++_srnums_stop[48]; 
+                    else              ++_srnums_stop[48];
                 }
                 if (nbj>=1 and nj >=1) {            //SR1_{tags}
                     if      (mT2< 20) ++_srnums_stop[ 0];
@@ -312,7 +316,7 @@ namespace Gambit {
                     else if (mT2< 80) ++_srnums_stop[ 3];
                     else if (mT2<100) ++_srnums_stop[ 4];
                     else if (mT2<120) ++_srnums_stop[ 5];
-                    else              ++_srnums_stop[ 6];      
+                    else              ++_srnums_stop[ 6];
                 }
             } else if (met<300){
                 if (nbj==0) {                       //SR2_{0tag}
@@ -322,7 +326,7 @@ namespace Gambit {
                     else if (mT2< 80) ++_srnums_stop[59];
                     else if (mT2<100) ++_srnums_stop[60];
                     else if (mT2<120) ++_srnums_stop[61];
-                    else              ++_srnums_stop[62];     
+                    else              ++_srnums_stop[62];
                 }
                 if (nbj>=1 and nj >=1) {            //SR2_{tags}
                     if      (mT2< 20) ++_srnums_stop[14];
@@ -331,7 +335,7 @@ namespace Gambit {
                     else if (mT2< 80) ++_srnums_stop[17];
                     else if (mT2<100) ++_srnums_stop[18];
                     else if (mT2<120) ++_srnums_stop[19];
-                    else              ++_srnums_stop[20];      
+                    else              ++_srnums_stop[20];
                 }
             } else {
                 if (nbj==0 and nj >=1 and nISR>0) { //SR3_{0tag}
@@ -371,7 +375,7 @@ namespace Gambit {
                     else if (mT2< 80) ++_srnums_stop[10];
                     else if (mT2<100) ++_srnums_stop[11];
                     else if (mT2<120) ++_srnums_stop[12];
-                    else              ++_srnums_stop[13]; 
+                    else              ++_srnums_stop[13];
                 }
             } else if (met<300){
                 if (nbj==0) {                       //SR2_{0tag}
@@ -390,7 +394,7 @@ namespace Gambit {
                     else if (mT2< 80) ++_srnums_stop[24];
                     else if (mT2<100) ++_srnums_stop[25];
                     else if (mT2<120) ++_srnums_stop[26];
-                    else              ++_srnums_stop[27]; 
+                    else              ++_srnums_stop[27];
                 }
             } else {
                 if (nbj==0 and nj >=1 and nISR>0) { //SR3_{0tag}
@@ -411,21 +415,21 @@ namespace Gambit {
                     else if (mT2<120) ++_srnums_stop[40];
                     else              ++_srnums_stop[41];
                 }
-                
+
             }
         }
-        
-        
-        
-        
+
+
+
+
 
       }
-      
-      
-      void add(BaseAnalysis* other) 
+
+
+      void add(BaseAnalysis* other)
       {
         // The base class add function handles the signal region vector and total # events.
-        
+
         HEPUtilsAnalysis::add(other);
 
         Analysis_CMS_13TeV_2OSLEP_chargino_stop_36invfb* specificOther
@@ -439,7 +443,7 @@ namespace Gambit {
       }
 
 
-      virtual void collect_results() 
+      virtual void collect_results()
       {
         cout << _cutflow << endl;
         cout << "------------- chargino ----------" << endl;
@@ -454,7 +458,7 @@ namespace Gambit {
         }
 
         static const size_t SR_size_cov_chargino = 70;
-        
+
         // Observed event counts
         static const double OBSNUM_chargino[SR_size_cov_chargino] = {\
             39, 24, 33, 44, 13, 6, 9, \
@@ -476,7 +480,7 @@ namespace Gambit {
             1310, 499, 623, 634, 271.7, 51.6, 48.6, \
             10.3, 7, 6.5, 6.9, 2.19, 1.59, 7.8, \
             10.9, 7.8, 7.3, 7.9, 1.9, 1.28, 7.1, \
-            534, 158.6, 167.9, 157.9, 42.4, 5.9, 9, 
+            534, 158.6, 167.9, 157.9, 42.4, 5.9, 9,
             474, 134.8, 155.1, 128.5, 37.1, 7.29, 23.9, \
             127.9, 28.3, 30.2, 23.1, 4.96, 1.12, 4.5, \
             112.8, 27.9, 24.2, 22.5, 5.2, 1.36, 10.6 \
@@ -494,7 +498,7 @@ namespace Gambit {
             7.2, 2, 2.4, 2, 0.73, 0.38, 1.2, \
             6.3, 2.2, 1.8, 1.8, 1, 0.36, 1.2 \
         };
-        
+
         for (size_t ibin = 0; ibin < SR_size_cov_chargino; ++ibin) {
           stringstream ss; ss << "sr-chargino-" << ibin;
           add_result(SignalRegionData(ss.str(), OBSNUM_chargino[ibin], {_srnums_chargino[ibin],  0.}, {BKGNUM_chargino[ibin], BKGERR_chargino[ibin]}));
@@ -502,7 +506,7 @@ namespace Gambit {
 
 
         static const size_t SR_size_cov_stop = 84;
-        
+
         // Observed event counts
         static const double OBSNUM_stop[SR_size_cov_stop] = {\
             3534, 1494, 1938, 2068, 879, 111, 15, \
@@ -553,7 +557,7 @@ namespace Gambit {
           stringstream ss; ss << "sr-stop-" << ibin;
           add_result(SignalRegionData(ss.str(), OBSNUM_stop[ibin], {_srnums_stop[ibin],  0.}, {BKGNUM_stop[ibin], BKGERR_stop[ibin]}));
         }
-        
+
       }
 
     protected:
@@ -570,9 +574,9 @@ namespace Gambit {
 
 
 
-    // 
+    //
     // Derived analysis class for the chargino SRs
-    // 
+    //
     class Analysis_CMS_13TeV_2OSLEP_for_chargino_36invfb : public Analysis_CMS_13TeV_2OSLEP_chargino_stop_36invfb {
 
     public:
@@ -582,7 +586,7 @@ namespace Gambit {
 
       virtual void collect_results() {
         static const size_t SR_size_cov = 70;
-        
+
         // Observed event counts
         static const double OBSNUM[SR_size_cov] = {\
             39, 24, 33, 44, 13, 6, 9, \
@@ -604,7 +608,7 @@ namespace Gambit {
             1310, 499, 623, 634, 271.7, 51.6, 48.6, \
             10.3, 7, 6.5, 6.9, 2.19, 1.59, 7.8, \
             10.9, 7.8, 7.3, 7.9, 1.9, 1.28, 7.1, \
-            534, 158.6, 167.9, 157.9, 42.4, 5.9, 9, 
+            534, 158.6, 167.9, 157.9, 42.4, 5.9, 9,
             474, 134.8, 155.1, 128.5, 37.1, 7.29, 23.9, \
             127.9, 28.3, 30.2, 23.1, 4.96, 1.12, 4.5, \
             112.8, 27.9, 24.2, 22.5, 5.2, 1.36, 10.6 \
@@ -622,12 +626,12 @@ namespace Gambit {
             7.2, 2, 2.4, 2, 0.73, 0.38, 1.2, \
             6.3, 2.2, 1.8, 1.8, 1, 0.36, 1.2 \
         };
-        
+
         for (size_t ibin = 0; ibin < SR_size_cov; ++ibin) {
           stringstream ss; ss << "sr-" << ibin;
           add_result(SignalRegionData(ss.str(), OBSNUM[ibin], {_srnums_chargino[ibin],  0.}, {BKGNUM[ibin], BKGERR[ibin]}));
         }
-        
+
         // Covariance matrix
         static const vector< vector<double> > BKGCOV = {
           {25.598, 13.424, 16.352, 21.763, 10.454, 3.1358, 5.0395, 20.224, 11.944, 15.636, 15.766, 9.1389, 3.6114, 4.94, 2.6272, 3.154, 7.2268, 0.1247, -2.9303, 2.6016, 5.1647, 8.0038, 6.9048, 4.96, 4.2144, -4.5489, 0.15967, -3.3981, -0.50065, -1.0013, -1.2021, -0.74028, -0.55454, -0.37688, 0.81781, 0.23105, -0.76926, -0.8439, 0.87561, -0.27353, -0.1891, 0.53007, 3.1935, 4.2566, 4.7622, 4.4467, 1.1547, 0.86073, 1.1328, 3.145, 4.6289, 3.0738, 3.9791, -0.35038, 0.08308, -0.59277, 2.9314, 0.85789, 0.95815, 0.80839, -0.22872, -0.20368, 0.37534, 0.036379, 0.91204, -0.12344, 1.1105, -0.43384, -0.059015, 0.021492},
@@ -700,10 +704,10 @@ namespace Gambit {
           {-0.43384, -0.27408, 0.059269, -0.25827, 0.43587, -0.098948, -0.42694, -0.7539, -0.4085, -0.32261, -0.050324, -0.28412, -0.12766, 0.041538, 2.4642, -0.031495, -0.25654, -0.83062, 2.2139, 0.087234, -0.26628, 1.5019, -0.43977, -0.9473, 0.81216, 2.0864, 0.26358, 1.4358, 0.23436, 0.13685, 0.20323, 0.086796, 0.12307, 0.054273, -0.048397, 0.33582, -0.14572, 0.12187, -0.18797, 0.049773, 0.039596, 0.12737, -1.9218, -0.65201, -0.5057, -0.38948, 0.11273, 0.0099994, -0.074524, -1.4864, -0.54666, -0.57629, -0.72792, 0.10542, -0.0741, 0.34107, 1.6314, 0.35576, 0.13082, 0.2484, 0.047618, 0.072969, 0.14952, 0.94405, -0.1243, 0.28197, -0.016799, 1.0901, -0.055188, 0.27448},
           {-0.059015, 0.13183, 0.13656, 0.043533, -0.14995, -0.0056201, -0.028331, -0.17753, -0.035382, 0.010085, 0.017878, 0.09792, -0.028528, -0.13146, -2.3018, -0.29887, -1.4514, -0.9444, -0.39336, -0.068867, 0.08914, -1.4817, -0.24713, -0.42988, -1.197, -0.35178, -0.027649, 0.22148, 0.032775, 0.15121, -0.017683, 0.062101, 0.012381, 0.053309, -0.016816, -0.098258, 0.146, 0.033368, 0.028573, -0.01184, 0.029079, -0.010258, -0.11177, -0.042541, 0.10977, -0.18632, -0.0045016, 0.050335, -0.032798, -0.22098, 0.07932, -0.065006, -0.17787, -0.11954, 0.021696, -0.015032, 0.26709, 0.060371, 0.060905, -0.086651, 0.019479, 0.013289, 0.068621, 0.44023, 0.087073, 0.041063, 0.04443, -0.055188, 0.13273, 0.091095},
           {0.021492, 0.016357, -0.12428, -0.013689, -0.32898, 0.048339, -0.2513, -1.2384, -0.531, -0.05502, -0.2399, 0.04186, -0.0045298, -0.22882, -2.8429, -0.5134, -2.635, -3.256, -1.0781, 0.35117, 0.19393, -1.8005, 0.49724, -1.1595, -2.9374, -1.3931, 0.54486, 0.77249, 0.10114, 0.22571, 0.10174, 0.017415, 0.053724, 0.059132, 0.11669, -0.062539, -0.021509, 0.08295, -0.019312, -0.013878, 0.058839, -0.047376, -3.0123, -1.3777, -0.85864, -0.41618, -0.050603, 0.20474, -0.12537, -1.7842, -0.56279, -0.38601, -0.12975, -0.3819, -0.017877, 0.52797, 2.5077, 0.58519, 0.65843, 0.0076185, 0.068346, 0.077849, 0.71377, 2.0087, 0.11164, 0.31349, 0.22082, 0.27448, 0.091095, 1.5519},
-        };        
+        };
 
         set_covariance(BKGCOV);
-        
+
       }
 
     };
@@ -713,9 +717,9 @@ namespace Gambit {
 
 
 
-    // 
+    //
     // Derived analysis class for the stop SRs
-    // 
+    //
     class Analysis_CMS_13TeV_2OSLEP_for_stop_36invfb : public Analysis_CMS_13TeV_2OSLEP_chargino_stop_36invfb {
 
     public:
@@ -725,7 +729,7 @@ namespace Gambit {
 
       virtual void collect_results() {
         static const size_t SR_size_cov = 84;
-        
+
         // Observed event counts
         static const double OBSNUM[SR_size_cov] = {\
             3534, 1494, 1938, 2068, 879, 111, 15, \
@@ -776,7 +780,7 @@ namespace Gambit {
           stringstream ss; ss << "sr-" << ibin;
           add_result(SignalRegionData(ss.str(), OBSNUM[ibin], {_srnums_stop[ibin],  0.}, {BKGNUM[ibin], BKGERR[ibin]}));
         }
-        
+
         // Covariance matrix
         static const vector< vector<double> > BKGCOV = {
           {6875.0, 2377.1, 3179.8, 2837.9, 733.27, -26.073, 16.145, 5545.5, 2171.9, 2506.6, 2068.9, 589.85, -34.232, 16.026, 2674.2, 845.18, 921.25, 822.71, 223.5, 22.604, -1.8677, 2128.7, 739.49, 824.29, 751.1, 124.89, 12.545, -1.8774, 519.98, 116.99, 102.17, 63.98, 4.8098, -10.741, -4.3299, 453.91, 79.243, 69.709, 46.518, 0.49875, -16.329, -10.927, 1687.3, 611.98, 821.71, 672.55, 94.67, -36.091, 13.612, 1427.4, 398.08, 735.36, 590.4, 71.951, 11.927, -14.458, 620.87, 360.06, 290.08, 250.94, 61.003, 10.469, 37.189, 599.35, 229.85, 199.88, 243.85, 41.32, 10.523, 17.981, 143.19, 6.2269, 35.119, 42.799, 5.2863, -4.6229, -9.6257, 133.28, 37.996, 18.791, 26.163, -0.34789, -11.301, -13.304},
@@ -863,10 +867,10 @@ namespace Gambit {
           {-0.34789, 0.94846, -0.72862, 1.0705, -1.0232, 0.092468, 0.020948, 0.92148, 0.83693, 0.76508, 0.054607, -1.2139, 0.079588, 0.072075, -0.20407, 0.1471, -0.0082883, -0.27416, -0.24882, 0.023148, 0.025695, 0.32259, 0.2332, -0.26327, -0.40095, 0.06678, 0.026903, 0.079766, 0.91432, 0.19963, 0.20045, 0.14507, 0.11866, 0.015424, 0.026334, 0.46214, 0.16128, 0.072466, 0.13831, 0.07997, 0.019651, 0.03192, -0.48938, 0.89481, 0.51655, 0.46894, -0.044634, -0.19341, -0.15972, -1.369, 0.35091, 0.40136, 0.81026, -0.38955, -0.15552, -0.08563, 0.30223, 0.055727, 0.23721, 0.07824, -0.027541, 0.078881, -0.17066, 0.17532, 0.26528, 0.3979, 0.26943, 0.10559, 0.065944, -0.15256, 0.51682, 0.24358, 0.18702, -0.0052886, 0.06155, 0.019773, 0.037033, 0.45193, 0.16761, 0.11576, 0.086583, 0.34198, 0.0085079, 0.019087},
           {-11.301, -3.0998, -5.4621, -5.4772, -0.73059, 0.4824, -0.022716, -8.5398, -3.5092, -4.1136, -3.9984, -0.027504, 0.46166, 0.071571, -4.6486, -2.008, -1.9768, -1.8913, -0.64683, -0.066968, 0.036326, -3.2991, -1.9164, -2.1225, -1.3856, -0.17324, -0.049482, 0.069385, -0.85104, -0.1217, -0.13667, -0.097954, -0.00014591, 0.05539, 0.020798, -0.86248, -0.028142, -0.04014, 0.021645, 0.0081853, 0.065295, 0.045952, -2.6417, -0.52371, -1.3533, -1.3375, 0.15851, 0.094988, -0.14897, -1.9509, -0.23474, -1.3279, -1.3908, -0.11533, -0.04268, -0.018175, -0.77354, -0.99052, -0.61787, -0.50273, -0.1632, -0.017753, -0.0072469, -0.93267, -0.66599, -0.23175, -0.74392, -0.065625, 0.01091, 0.080084, 0.011871, 0.10835, -0.1321, -0.1292, -0.005629, 0.016562, 0.034865, 0.014449, -0.054958, 0.0047336, -0.076052, 0.0085079, 0.12947, 0.075923},
           {-13.304, -5.0949, -7.5422, -7.5714, -0.34327, 0.2535, 0.069002, -10.899, -4.8197, -6.2523, -5.4826, -0.13759, 0.26377, 0.13305, -5.8726, -2.3817, -2.6177, -2.1, -0.86039, 0.013475, 0.019166, -4.3915, -2.2435, -2.4595, -1.7459, -0.57386, 0.054287, 0.07118, -1.3607, -0.28456, -0.18827, -0.13296, 0.012177, 0.058261, 0.033145, -1.2939, -0.17745, -0.074818, -0.038672, 0.016543, 0.071045, 0.049264, -3.4771, -1.2635, -2.2055, -1.6517, 0.063831, 0.043339, -0.19482, -2.1972, -0.56486, -1.7542, -1.5625, 0.10739, 0.11457, 0.3217, -1.1679, -1.0352, -0.85829, -0.68692, -0.37299, 0.011246, -0.070075, -1.878, -0.69908, -0.50058, -0.80477, -0.23741, 0.047225, 0.20464, -0.09616, 0.082853, -0.062524, -0.062383, -0.0015397, 0.017873, 0.058048, 0.040086, 0.018141, -0.034916, -0.030465, 0.019087, 0.075923, 0.17748},
-        };        
+        };
 
         set_covariance(BKGCOV);
-        
+
       }
 
     };
