@@ -432,6 +432,9 @@ namespace Gambit {
 
     public:
 
+      // Required detector sim
+      static constexpr const char* detector = "CMS";
+
       Analysis_CMS_8TeV_MultiLEP_20invfb() {
         set_analysis_name("CMS_8TeV_MultiLEP_20invfb");
         set_luminosity(19.5);
@@ -453,11 +456,17 @@ namespace Gambit {
           if (electron->pT() > 10. && fabs(electron->eta()) < 2.4) signalElectrons.push_back(electron);
         }
 
+        // Apply electron efficiency
+        CMS::applyElectronEff(signalElectrons);
+
         // - muons 
         vector<HEPUtils::Particle*> signalMuons;
         for (HEPUtils::Particle* muon : event->muons()) {
           if (muon->pT() > 10. && fabs(muon->eta()) < 2.4) signalMuons.push_back(muon);
         }
+
+        // Apply muon efficiency
+        CMS::applyMuonEff(signalMuons);
 
         // - taus
         vector<HEPUtils::Particle*> signalTaus;
