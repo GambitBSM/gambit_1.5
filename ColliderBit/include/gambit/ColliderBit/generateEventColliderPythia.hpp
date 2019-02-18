@@ -54,7 +54,7 @@ namespace Gambit
                                      const int iteration,
                                      void(*wrapup)())
     {
-      static unsigned int nFailedEvents;
+      static int nFailedEvents;
 
       // If the event loop has not been entered yet, reset the counter for the number of failed events
       if (iteration == BASE_INIT)
