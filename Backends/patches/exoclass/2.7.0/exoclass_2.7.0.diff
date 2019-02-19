@@ -64,7 +64,7 @@ index ddc40b2e..7d527e74 100755
    }
    /* END */
 -
-+}
++ } else {num_lines = pth->annihil_coef_num_lines;}
    /* spline in one dimension */
    class_call(array_spline_table_lines(pth->annihil_coef_xe,
                                        num_lines,
