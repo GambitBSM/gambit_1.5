@@ -18,6 +18,7 @@
 ///          (stoecker@physik.rwth-aachen.de)
 ///  \date 2017 Nov
 ///  \date 2018 Jan - May
+///  \date 2019 Jan - Feb
 ///
 ///  *********************************************
 #include <string>
@@ -69,6 +70,35 @@ namespace Gambit
 
       return exp(4.0/3.0*(d-0.125*(pow(10.0,b)+6.0*pow(10.0,a))*(-c*c+x*x)))
       -(1.0+pow(10.0,a)*c*c)/(1.0+pow(10.0,a)*x*x);
+    }
+
+    // Utility function to set the number of massive neutrino species and prepare the input for class
+    std::vector<double> set_nu_masses(double mNu1, double mNu2, double mNu3, int& N_ncdm)
+    {
+      // !! masses mNu1, mNu2, mNu3 in eV unlike the definition in StandardMOdel_SLHA2 !!
+
+      // Reset N_ncdm
+      N_ncdm = 0;
+      std::vector<double> neutrino_masses;
+
+      // check for every mass if it is positive. If so add it to the vector and increase N_ncdm
+      if (mNu1 > 0.)
+      {
+        N_ncdm++;
+        neutrino_masses.push_back(mNu1);
+      }
+      if (mNu2 > 0.)
+      {
+        N_ncdm++;
+        neutrino_masses.push_back(mNu2);
+      }
+      if (mNu3 > 0.)
+      {
+        N_ncdm++;
+        neutrino_masses.push_back(mNu3);
+      }
+
+      return neutrino_masses;
     }
 
     // Returns SMASH potential value given parameters and field amplitude
@@ -242,41 +272,63 @@ namespace Gambit
       result = Stats::gaussian_loglikelihood(pred_mean, obs_mean, pred_err, obs_err, false);
     }
 
-    void class_set_Smu_LCDM(Class_container& cosmo)
-    {
-      using namespace Pipes::class_set_Smu_LCDM;
-
-      cosmo.input.clear();
-
-      cosmo.input.addEntry("N_ur",2.0328);  //1 massive neutrinos
-      cosmo.input.addEntry("N_ncdm",1);
-      cosmo.input.addEntry("m_ncdm","0.06");
-    }
-
-    void class_set_Smu_LCDM_Smu_dNeffCMB_dNeffBBN_etaBBN(Class_container& cosmo)
-    {
-      using namespace Pipes::class_set_Smu_LCDM_Smu_dNeffCMB_dNeffBBN_etaBBN;
-
-      cosmo.input.clear();
-
-      cosmo.input.addEntry("N_ur",*Param["dNeff"]+0.00641);  // dNeff= 0.00641 for 3 massive neutrinos at CMB release
-      cosmo.input.addEntry("N_ncdm",3);
-      std::stringstream sstream;
-      double numass = *Param["Smu"]/3.;
-      sstream << numass << ", " << numass << ", " << numass;
-      cosmo.input.addEntry("m_ncdm",sstream.str());
-    }
-
     void class_set_parameter_LCDM_family(Class_container& cosmo)
     {
       using namespace Pipes::class_set_parameter_LCDM_family;
-      // on the level of class the model LCDM_Smu_dNeff and LCDM_Smu_dNeff_dNeffBBN are identical
 
       int l_max=cosmo.lmax;
 
       cosmo.input.clear();
 
-      cosmo = *Dep::class_set_Smu;
+      double mNu1, mNu2, mNu3;
+      if (ModelInUse("StandardModel_SLHA2"))
+      {
+        // (PS) Heads up! The units in StandardModel_SLHA2 are GeV
+        // Here we are using eV
+        mNu1 = 1e9*(*Param["mNu1"]);
+        mNu2 = 1e9*(*Param["mNu2"]);
+        mNu3 = 1e9*(*Param["mNu3"]);
+      }
+      else
+      {
+        mNu1 = 0.06;
+        mNu2 = 0.;
+        mNu3 = 0.;
+      }
+
+      int N_ncdm = 0;
+      std::vector<double> numasses = set_nu_masses(mNu1, mNu2, mNu3, N_ncdm);
+      switch (N_ncdm)
+      {
+        case 1:
+          cosmo.input.addEntry("N_ur",*Param["dNeff"]+2.0328);  // dNeff= 2.0328 for 1 massive neutrino at CMB release
+          break;
+        case 2:
+          cosmo.input.addEntry("N_ur",*Param["dNeff"]+1.0196);  // dNeff= 1.0196 for 2 massive neutrinos at CMB release
+          break;
+        case 3:
+          cosmo.input.addEntry("N_ur",*Param["dNeff"]+0.00641);  // dNeff= 0.00641 for 3 massive neutrinos at CMB release
+          break;
+        case 0:
+          {
+            std::ostringstream err;
+            err << "Warning: All your neutrino masses are zero. The Planck baseline LCDM model assumes at least one massive neutrino.";
+            CosmoBit_warning().raise(LOCAL_INFO, err.str());
+          }
+          break;
+        default:
+          {
+            std::ostringstream err;
+            err << "You are asking for more than three massive neutrino species.\n";
+            err << "Such a case is not implemented here in CosmoBit. But if you know what you are doing just add the respective case in \'class_set_parameter_LCDM_family\' and you are done.";
+            CosmoBit_error().raise(LOCAL_INFO, err.str());
+          }
+      }
+      if (N_ncdm > 0.)
+      {
+        cosmo.input.addEntry("N_ncdm",N_ncdm);
+        cosmo.input.addEntry("m_ncdm",numasses);
+      }
 
       cosmo.input.addEntry("output","tCl pCl lCl");
       cosmo.input.addEntry("l_max_scalars",l_max);
@@ -2201,7 +2253,7 @@ namespace Gambit
       result = runOptions->getValueOrDef<double>(2.7255,"T_cmb");
 
     }
-
+/*
     void calculate_eta(double &result)
     {
       using namespace Pipes::calculate_eta;
@@ -2213,7 +2265,7 @@ namespace Gambit
       result =  nb/ngamma;
       logger() << "Baryon to photon ratio (eta) computed to be " << result << EOM;
     }
-
+*/
     void compute_dNeffExt_ALP(double &result)
     {
       using namespace Pipes::compute_dNeffExt_ALP;
@@ -2232,24 +2284,10 @@ namespace Gambit
 
     }
 
-    void AlterBBN_fill_LCDM(relicparam &result)
-    {
-      // fill AlterBBN structure for LCDM
-      using namespace Pipes::AlterBBN_fill_LCDM;
-
-      BEreq::Init_cosmomodel(&result);
-
-      result.eta0=*Dep::eta; // eta0 = eta_BBN = eta_CMB
-      result.Nnu=3.046;     // 3 massive neutrinos
-      result.dNnu=0;        // no extra rel. d.o.f. in  base LCDM
-      result.failsafe = runOptions->getValueOrDef<int>(3,"failsafe");
-      result.err = runOptions->getValueOrDef<int>(3,"err");
-    }
-
-    void AlterBBN_fill_LCDM_Smu_dNeffCMB_dNeffBBN_etaBBN(relicparam &result)
+    void AlterBBN_fill_LCDM_dNeffCMB_dNeffBBN_etaBBN(relicparam &result)
     {
       // fill AlterBBN structure for LCDM_Smu_dNeffCMB_dNeffBBN_etaBBN
-      using namespace Pipes::AlterBBN_fill_LCDM_Smu_dNeffCMB_dNeffBBN_etaBBN;
+      using namespace Pipes::AlterBBN_fill_LCDM_dNeffCMB_dNeffBBN_etaBBN;
 
       BEreq::Init_cosmomodel(&result);
 

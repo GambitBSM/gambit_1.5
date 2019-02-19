@@ -28,8 +28,6 @@
 #ifndef __CosmoBit_types_hpp__
 #define __CosmoBit_types_hpp__
 
-
-
 #include "gambit/Backends/backend_types/class.hpp"
 
 namespace Gambit
@@ -40,18 +38,18 @@ namespace Gambit
     class BBN_container
     {
       public:
-	BBN_container();
+        BBN_container();
 
-	std::vector<double> BBN_abund;
-	std::vector< std::vector<double> > BBN_covmat;
-	std::map<std::string, int> abund_map;
+        std::vector<double> BBN_abund;
+        std::vector< std::vector<double> > BBN_covmat;
+        std::map<std::string, int> abund_map;
 
-	void init_arr(int nnuc);
-	int get_NNUC(){return NNUC;};
-	std::map<std::string,int> get_map(){return abund_map;};
+        void init_arr(int nnuc);
+        int get_NNUC(){return NNUC;};
+        std::map<std::string,int> get_map(){return abund_map;};
 
       private:
-	int NNUC;
+        int NNUC;
     };
 
     // Forward declaration of warnings and errors
@@ -62,13 +60,16 @@ namespace Gambit
     class ClassInput
     {
       public:
-	//classInput();
-	//~classInput();
-	void addEntry(std::string key,std::string val);
-	void addEntry(std::string key,double val);
-	void addEntry(std::string key,int val);
-	void clear();
-	std::map<std::string,std::string> get_map();
+        //classInput();
+        //~classInput();
+        void addEntry(std::string key,std::string val);
+        void addEntry(std::string key,double val);
+        void addEntry(std::string key,int val);
+        void addEntry(std::string key, std::vector<double> val);
+        void addEntry(std::string key, std::vector<int> val);
+
+        void clear();
+        std::map<std::string,std::string> get_map();
 
       private:
 	std::map<std::string,std::string> input_list;
@@ -78,21 +79,21 @@ namespace Gambit
     class Class_container
     {
       public:
-	Class_container();
-	//~Class_container();
+        Class_container();
+        //~Class_container();
 
-	ClassInput input;
+        ClassInput input;
 
-	int lmax;
-	std::vector<double> Cl_TT;
-	std::vector<double> Cl_TE;
-	std::vector<double> Cl_EE;
-	std::vector<double> Cl_BB;
-	std::vector<double> Cl_PhiPhi;
+        int lmax;
+        std::vector<double> Cl_TT;
+        std::vector<double> Cl_TE;
+        std::vector<double> Cl_EE;
+        std::vector<double> Cl_BB;
+        std::vector<double> Cl_PhiPhi;
 
-	std::vector<double> Pk_S; // Primordial Scalar Power Spectrum
-	std::vector<double> Pk_T; // Primordial Tensor Power Spectrum
-	std::vector<double> k_ar; // Corresponding wavenumbers.
+        std::vector<double> Pk_S; // Primordial Scalar Power Spectrum
+        std::vector<double> Pk_T; // Primordial Tensor Power Spectrum
+        std::vector<double> k_ar; // Corresponding wavenumbers.
 
     };
   }

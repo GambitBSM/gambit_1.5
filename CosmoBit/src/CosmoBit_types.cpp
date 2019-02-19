@@ -94,6 +94,34 @@ namespace Gambit
       addEntry(key,stringified_val.str());
     }
 
+    void ClassInput::addEntry(std::string key, std::vector<double> val)
+    {
+      std::ostringstream stringified_val;
+      bool first = true;
+      for (auto it = val.begin(); it != val.end(); it++)
+      {
+	if (not first)
+	  stringified_val << ", ";
+	stringified_val << *it;
+	first = false;
+      }
+      addEntry(key,stringified_val.str());
+    }
+
+    void ClassInput::addEntry(std::string key, std::vector<int> val)
+    {
+      std::ostringstream stringified_val;
+      bool first = true;
+      for (auto it = val.begin(); it != val.end(); it++)
+      {
+	if (not first)
+	  stringified_val << ", ";
+	stringified_val << *it;
+	first = false;
+      }
+      addEntry(key,stringified_val.str());
+    }
+
     void ClassInput::clear()
     {
       input_list.clear();
@@ -103,7 +131,6 @@ namespace Gambit
     {
       return input_list;
     }
-
 
   }
 }

@@ -25,10 +25,13 @@ Parameters:
  
  # --- import model parameters for models to scan over ---
  LCDM: !import include/LCDM_scan.yaml        # base LCDM
- #LCDM_Smu: !import include/LCDM_Smu_scan.yaml
- #LCDM_Smu_dNeffCMB: !import include/LCDM_Smu_dNeffCMB_scan.yaml
- #LCDM_Smu_dNeffCMB_dNeffBBN: !import include/LCDM_Smu_dNeffCMB_dNeffBBN_scan.yaml
- #LCDM_Smu_dNeffCMB_dNeffBBN_etaBBN: !import include/LCDM_Smu_dNeffCMB_dNeffBBN_etaBBN_scan.yaml
+ #LCDM_dNeffCMB: !import include/LCDM_dNeffCMB_scan.yaml
+ #LCDM_dNeffCMB_dNeffBBN: !import include/LCDM_dNeffCMB_dNeffBBN_scan.yaml
+ #LCDM_dNeffCMB_dNeffBBN_etaBBN: !import include/LCDM_dNeffCMB_dNeffBBN_etaBBN_scan.yaml
+
+ # neutrino masses
+ StandardModel_numass_single: !import include/StandardModel_numass_single_scan.yaml
+ #StandardModel_numass_degenerate: !import include/StandardModel_numass_degenerate_scan.yaml
 
  # Cosmological nuisance parameters (except for Planck CMB Likelihoods) 
  cosmo_nuisance_params: !import include/cosmo_nuisance_params.yaml

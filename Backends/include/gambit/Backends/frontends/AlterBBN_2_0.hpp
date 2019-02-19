@@ -22,7 +22,7 @@
 
 LOAD_LIBRARY
 
-BE_ALLOW_MODELS(LCDM, LCDM_Smu_dNeffCMB_dNeffBBN_etaBBN)
+BE_ALLOW_MODELS(LCDM_dNeffCMB_dNeffBBN_etaBBN)
 // add SMASH
 BE_FUNCTION(Init_cosmomodel, void, (relicparam*), "Init_cosmomodel", "Init_cosmomodel")
 BE_FUNCTION(nucl_err, int, (const relicparam*, double* , double* ), "nucl_err", "nucl_err")

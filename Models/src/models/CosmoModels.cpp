@@ -30,22 +30,17 @@
 #include "gambit/Utils/numerical_constants.hpp"
 
 #include "gambit/Models/models/CosmoModels.hpp"
-// Activate debug output
-//#define SingletDM_DBUG
-
-//using namespace Gambit::Utils;
-
 
 /////////////// translation functions for Cosmology models ///////////////////////////
 
-#define MODEL  LCDM_Smu_dNeffCMB_dNeffBBN
-#define PARENT LCDM_Smu_dNeffCMB_dNeffBBN_etaBBN
+#define MODEL  LCDM_dNeffCMB_dNeffBBN
+#define PARENT LCDM_dNeffCMB_dNeffBBN_etaBBN
 
 // Translation function definition
-void MODEL_NAMESPACE::LCDM_Smu_dNeffCMB_dNeffBBN_to_LCDM_Smu_dNeffCMB_dNeffBBN_etaBBN (const ModelParameters &myP, ModelParameters &targetP)
+void MODEL_NAMESPACE::LCDM_dNeffCMB_dNeffBBN_to_LCDM_dNeffCMB_dNeffBBN_etaBBN (const ModelParameters &myP, ModelParameters &targetP)
 {
   USE_MODEL_PIPE(PARENT) // get pipe for "interpret as PARENT" function
-  logger()<<"Running interpret_as_parent calculations for LCDM_Smu_dNeffCMB_dNeffBBN --> LCDM_Smu_dNeffCMB_dNeffBBN_etaBBN..."<<LogTags::info<<EOM;
+  logger()<<"Running interpret_as_parent calculations for LCDM_dNeffCMB_dNeffBBN --> LCDM_dNeffCMB_dNeffBBN_etaBBN..."<<LogTags::info<<EOM;
 
   targetP.setValue("omega_b", myP.getValue("omega_b"));
   targetP.setValue("omega_cdm",myP.getValue("omega_cdm"));
@@ -53,7 +48,6 @@ void MODEL_NAMESPACE::LCDM_Smu_dNeffCMB_dNeffBBN_to_LCDM_Smu_dNeffCMB_dNeffBBN_e
   targetP.setValue("ln10A_s", myP.getValue("ln10A_s") );
   targetP.setValue("n_s", myP.getValue("n_s") );
   targetP.setValue("tau_reio", myP.getValue("tau_reio") );
-  targetP.setValue("Smu", myP.getValue("Smu") );
   targetP.setValue("dNeff", myP.getValue("dNeff") );
   targetP.setValue("dNeff_BBN", myP.getValue("dNeff_BBN") );
 
@@ -64,21 +58,19 @@ void MODEL_NAMESPACE::LCDM_Smu_dNeffCMB_dNeffBBN_to_LCDM_Smu_dNeffCMB_dNeffBBN_e
   eta_CMB =  nb/ngamma;
 
   targetP.setValue("eta_BBN", eta_CMB );
-
 }
 
 #undef PARENT
 #undef MODEL
 
-
-#define MODEL  LCDM_Smu_dNeffCMB
-#define PARENT LCDM_Smu_dNeffCMB_dNeffBBN
+#define MODEL  LCDM_dNeffCMB
+#define PARENT LCDM_dNeffCMB_dNeffBBN
 
 // Translation function definition
-void MODEL_NAMESPACE::LCDM_Smu_dNeffCMB_to_LCDM_Smu_dNeffCMB_dNeffBBN (const ModelParameters &myP, ModelParameters &targetP)
+void MODEL_NAMESPACE::LCDM_dNeffCMB_to_LCDM_dNeffCMB_dNeffBBN (const ModelParameters &myP, ModelParameters &targetP)
 {
   USE_MODEL_PIPE(PARENT) // get pipe for "interpret as PARENT" function
-  logger()<<"Running interpret_as_parent calculations for LCDM_Smu_dNeffCMB --> LCDM_Smu_dNeffCMB_dNeffBBN..."<<LogTags::info<<EOM;
+  logger()<<"Running interpret_as_parent calculations for LCDM_dNeffCMB --> LCDM_dNeffCMB_dNeffBBN..."<<LogTags::info<<EOM;
 
   targetP.setValue("omega_b", myP.getValue("omega_b"));
   targetP.setValue("omega_cdm",myP.getValue("omega_cdm"));
@@ -86,26 +78,21 @@ void MODEL_NAMESPACE::LCDM_Smu_dNeffCMB_to_LCDM_Smu_dNeffCMB_dNeffBBN (const Mod
   targetP.setValue("ln10A_s", myP.getValue("ln10A_s") );
   targetP.setValue("n_s", myP.getValue("n_s") );
   targetP.setValue("tau_reio", myP.getValue("tau_reio") );
-  targetP.setValue("Smu", myP.getValue("Smu") );
   targetP.setValue("dNeff", myP.getValue("dNeff") );
   targetP.setValue("dNeff_BBN", myP.getValue("dNeff") );
-
-
 }
 
 #undef PARENT
 #undef MODEL
 
-
-
-#define MODEL  LCDM_Smu_dNeffExt
-#define PARENT LCDM_Smu_dNeffCMB_dNeffBBN
+#define MODEL  LCDM_dNeffExt
+#define PARENT LCDM_dNeffCMB_dNeffBBN
 
 // Translation function definition
-void MODEL_NAMESPACE::LCDM_Smu_dNeffExt_to_LCDM_Smu_dNeffCMB_dNeffBBN (const ModelParameters &myP, ModelParameters &targetP)
+void MODEL_NAMESPACE::LCDM_dNeffExt_to_LCDM_dNeffCMB_dNeffBBN (const ModelParameters &myP, ModelParameters &targetP)
 {
   USE_MODEL_PIPE(PARENT) // get pipe for "interpret as PARENT" function
-  logger()<<"Running interpret_as_parent calculations for LCDM_Smu_dNeffExt --> LCDM_Smu_dNeffCMB_dNeffBBN..."<<LogTags::info<<EOM;
+  logger()<<"Running interpret_as_parent calculations for LCDM_dNeffExt --> LCDM_dNeffCMB_dNeffBBN..."<<LogTags::info<<EOM;
 
   targetP.setValue("omega_b", myP.getValue("omega_b"));
   targetP.setValue("omega_cdm",myP.getValue("omega_cdm"));
@@ -113,7 +100,10 @@ void MODEL_NAMESPACE::LCDM_Smu_dNeffExt_to_LCDM_Smu_dNeffCMB_dNeffBBN (const Mod
   targetP.setValue("ln10A_s", myP.getValue("ln10A_s") );
   targetP.setValue("n_s", myP.getValue("n_s") );
   targetP.setValue("tau_reio", myP.getValue("tau_reio") );
-  targetP.setValue("Smu", myP.getValue("Smu") );
+
+  // (PS) Needs fix. In the most genral case dNeffCMB and dNeffBBN are different.
+  // The dependency should be either on std::vector<double> or on two distinct
+  // capabilities.
   targetP.setValue("dNeff_BBN", *Dep::dNeffExt );
   targetP.setValue("dNeff", *Dep::dNeffExt );
 }
@@ -121,14 +111,14 @@ void MODEL_NAMESPACE::LCDM_Smu_dNeffExt_to_LCDM_Smu_dNeffCMB_dNeffBBN (const Mod
 #undef PARENT
 #undef MODEL
 
-#define MODEL  LCDM_Smu
-#define PARENT LCDM_Smu_dNeffCMB
+#define MODEL  LCDM
+#define PARENT LCDM_dNeffCMB
 
 // Translation function definition
-void MODEL_NAMESPACE::LCDM_Smu_to_LCDM_Smu_dNeffCMB (const ModelParameters &myP, ModelParameters &targetP)
+void MODEL_NAMESPACE::LCDM_to_LCDM_dNeffCMB (const ModelParameters &myP, ModelParameters &targetP)
 {
   USE_MODEL_PIPE(PARENT) // get pipe for "interpret as PARENT" function
-  logger()<<"Running interpret_as_parent calculations for LCDM_Smu --> LCDM_Smu_dNeffCMB..."<<LogTags::info<<EOM;
+  logger()<<"Running interpret_as_parent calculations for LCDM --> LCDM_dNeffCMB..."<<LogTags::info<<EOM;
 
   targetP.setValue("omega_b", myP.getValue("omega_b"));
   targetP.setValue("omega_cdm",myP.getValue("omega_cdm"));
@@ -136,9 +126,7 @@ void MODEL_NAMESPACE::LCDM_Smu_to_LCDM_Smu_dNeffCMB (const ModelParameters &myP,
   targetP.setValue("ln10A_s", myP.getValue("ln10A_s") );
   targetP.setValue("n_s", myP.getValue("n_s") );
   targetP.setValue("tau_reio", myP.getValue("tau_reio") );
-  targetP.setValue("Smu", myP.getValue("Smu") );
   targetP.setValue("dNeff", 0. );
-
 }
 
 #undef PARENT

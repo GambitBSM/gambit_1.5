@@ -1,4 +1,4 @@
-###########################################################################
+##########################################################################
 ## LCDM parameter
 ##
 ## Patrick Stoecker <stoecker@physik.rwth-aachen.de>
@@ -25,11 +25,5 @@ tau_reio:
   #range: [0.04,0.20]
   range: [0.004,0.20]
 dNeff:
-  prior_type: flat
-  range: [-2.,2.]
-Smu:
-  prior_type: flat
-  range: [0.06,2]
-dNeff_BBN:
   prior_type: flat
   range: [-2.,2.]
