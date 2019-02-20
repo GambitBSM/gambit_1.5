@@ -24,8 +24,6 @@
 #include <iostream>
 #include <sstream>
 
-//#include <mpi.h>
-//#include <omp.h>
 #include <gsl/gsl_math.h>
 #include <gsl/gsl_sf.h>
 #include <gsl/gsl_sf_trig.h>
@@ -37,11 +35,14 @@
 #include <gsl/gsl_odeiv2.h>
 
 #include "gambit/Elements/gambit_module_headers.hpp"
-//#include "gambit/Utils/util_functions.hpp"
+#include "gambit/Utils/util_functions.hpp"
 #include "gambit/Utils/ascii_table_reader.hpp"
 #include "gambit/Utils/numerical_constants.hpp"
 #include "gambit/DarkBit/DarkBit_rollcall.hpp"
 #include "gambit/DarkBit/DarkBit_utils.hpp"
+
+//#define AXION_DEBUG_MODE
+//#define AXION_OMP_DEBUG_MODE
 
 namespace Gambit
 {
@@ -56,38 +57,9 @@ namespace Gambit
     /*! \brief Supporting classes and functions for the axion module.
      */
 
-     //#define AXION_DEBUG_MODE
-     //#define AXION_OMP_DEBUG_MODE
-
-     //#ifdef WITH_MPI
-     //if(GMPI::Is_initialized() && !GMPI::Is_finalized())
-     //{
-       //GMPI::Comm COMM_WORLD;
-       //MPIrank = COMM_WORLD.Get_rank();
-       //if (MPIrank == 0)
-       //{
-         //#define AXION_DEBUG_MODE
-       //};
-       //#define AXION_OMP_DEBUG_MODE
-     //}
-     //#endif
-
     /////////////////////////////////////////////////////////////////
     //      Auxillary functions and classes for interpolation      //
     /////////////////////////////////////////////////////////////////
-
-    /* Function to check whether a file exists or not.
-    */
-
-    /* Utils/util_functions.hpp already provides this function. */
-    // Inspired by https://stackoverflow.com/questions/12774207/fastest-way-to-check-if-a-file-exist-using-standard-c-c11-c.
-    // Could be easier with C++14; strictly speaking only checks if file is accesible (equivalent for our purposes).
-    bool file_exists(const std::string& path)
-    {
-      bool res = false;
-      if (FILE *file = fopen(path.c_str(), "r")) { fclose(file); res = true; }
-      return res;
-    }
 
     /*! \brief Generic one-dimensional integration container for linear interpolation and cubic splines.
      */
@@ -121,7 +93,7 @@ namespace Gambit
     void AxionInterpolator::init(std::string file, std::string type)
     {
       // Check if file exists.
-      if (not(file_exists(file)))
+      if (not(Utils::file_exists(file)))
       {
         DarkBit_error().raise(LOCAL_INFO, "ERROR! File '"+file+"' not found!");
       } else {
@@ -166,7 +138,7 @@ namespace Gambit
     double AxionInterpolator::upper() { return up; };
 
 
-     /* \brief H.E.S.S.-likelihood-related interpolation routines.
+     /*! \brief H.E.S.S.-likelihood-related interpolation routines.
      */
 
     // Auxillary function for a parabola (needed for H.E.S.S. likelihood approximation).
@@ -426,10 +398,7 @@ namespace Gambit
     // Routine to return the screening paramter kappa^2 in units of keV^2 (kappa^-1 = Debye-Hueckel radius).
     double SolarModel::kappa_squared(double r)
     {
-      // DEPRECATED: Approximation from Raffelt, Ch. 5.2.1 (error ~ 15%)
-      // const double kappa_squared_tilde = 12.0;
-      // return gsl_pow_2(2.0*temperature_in_keV(r))*kappa_squared_tilde;
-      // CURRENT   : Interpolated value, directly from the Solar model.
+      // Interpolated value, directly from the Solar model.
       return gsl_spline_eval(linear_interp[1], r, accel[1]);
     }
 
@@ -464,7 +433,6 @@ namespace Gambit
       cylinder = rho/sqrt(cylinder);
       double energy_factor = erg*sqrt(erg*erg - w_pl_sq)/gsl_expm1(erg/T_in_keV);
       double rate = (ks_sq*T_in_keV)*((1.0 + 1.0/x)*gsl_log1p(x) - 1.0);
-      //std::cout << rho << " T = " << temp_in_keV << " " << rate << " " << cylinder << std::endl;
 
       return cylinder*energy_factor*rate;
     }
@@ -518,7 +486,6 @@ namespace Gambit
 
       // Max. and min. integration radius
       double rmin = sol->r_lo, rmax = std::min(rs, sol->r_hi);
-      //std::cout << "rs = " << rs << ", rmin = " << rmin << ", rmax = " << rmax << std::endl;
 
       gsl_integration_qag (&F, rmin, rmax, 1e-1*abs_prec, 1e-1*rel_prec, 1E6, method, w, &result, &error);
       gsl_integration_workspace_free (w);
@@ -537,8 +504,6 @@ namespace Gambit
       double temp = gsl_pow_2(gsl_sf_sinc(argument/pi));
       double exposure = p4->eff_exp->interpolate(erg);
       double gaee_flux = p4->gaee_flux->interpolate(erg);
-
-      //std::cout << "Erg | Exposure | Flux : " << erg << " | " << exposure << " | " << gaee_flux << std::endl;
 
       return temp*exposure*gaee_flux;
     }
@@ -572,8 +537,8 @@ namespace Gambit
       logger() << LogTags::info << "Using solar models '"+solar_model_gagg+"' (axion-photon int.) and '"+solar_model_gaee+"' (axion-electron int.) for experiment '"+data_set+"'." << EOM;
 
       // Check if a pre-computed a file for a given model exists.
-      user_gagg_file_missing = not(file_exists(darkbitdata_path+"CAST/"+data_set+"_ReferenceCounts_"+solar_model_gagg+"_gagg.dat"));
-      user_gaee_file_missing = not(file_exists(darkbitdata_path+"CAST/"+data_set+"_ReferenceCounts_"+solar_model_gaee+"_gaee.dat"));
+      user_gagg_file_missing = not(Utils::file_exists(darkbitdata_path+"CAST/"+data_set+"_ReferenceCounts_"+solar_model_gagg+"_gagg.dat"));
+      user_gaee_file_missing = not(Utils::file_exists(darkbitdata_path+"CAST/"+data_set+"_ReferenceCounts_"+solar_model_gaee+"_gaee.dat"));
       if (not(user_gagg_file_missing)) { logger() << LogTags::info << "Found pre-calculated axion-photon counts file for experiment '"+data_set+"' and solar model '"+solar_model_gagg+"'. Skipping calculation step..." << EOM; };
       if (not(user_gaee_file_missing)) { logger() << LogTags::info << "Found pre-calculated axion-electron counts file for experiment '"+data_set+"' and solar model '"+solar_model_gaee+"'. Skipping calculation step..." << EOM; };
 
@@ -590,7 +555,6 @@ namespace Gambit
                                                  -1.0375, -1.03, -1.0225, -1.015, -1.0075, -1., -0.9925, -0.985, -0.9775, -0.97, -0.9625, -0.955, -0.9475, -0.94, -0.9325, -0.925, -0.9175, -0.91, -0.9025, -0.895, -0.8875, -0.88, -0.8725, -0.865,
                                                  -0.8575, -0.85, -0.8425, -0.835, -0.8275, -0.82, -0.8125, -0.805, -0.7975, -0.79, -0.7825, -0.775, -0.7675, -0.76, -0.7525, -0.745, -0.7375, -0.73, -0.7225, -0.715, -0.7075, -0.7, -0.65, -0.6,
                                                  -0.55, -0.5, -0.4, -0.2, 0., 0.2, 0.4, 0.6, 0.8, 1., 1.2, 1.4, 1.6, 1.8, 2.};
-        //const double* masses = &log_masses[0];
 
         // Define quantities specific to CAST and the data set.
         // prefactor_gagg = (keV/eV)^6 * (1 cm^2/eVcm^2) * (1 day/eVs) * (10^10 cm/eVcm) * (10^-19 eV^-1)^4 * ((9.26 m/eVm) * (9.0 T/(T/eV^2) ))^2 / (128 pi^3)
@@ -616,7 +580,7 @@ namespace Gambit
         SolarModel model_gagg;
         if (user_gagg_file_missing)
         {
-          if (file_exists(darkbitdata_path+"SolarModel_"+solar_model_gagg+".dat"))
+          if (Utils::file_exists(darkbitdata_path+"SolarModel_"+solar_model_gagg+".dat"))
           {
             model_gagg = SolarModel(darkbitdata_path+"SolarModel_"+solar_model_gagg+".dat");
           } else {
@@ -630,7 +594,7 @@ namespace Gambit
         AxionInterpolator gaee_spectrum;
         if (user_gaee_file_missing)
         {
-          if (file_exists(darkbitdata_path+"CAST/"+"Axion_Spectrum_"+solar_model_gaee+"_gaee.dat"))
+          if (Utils::file_exists(darkbitdata_path+"CAST/"+"Axion_Spectrum_"+solar_model_gaee+"_gaee.dat"))
           {
             gaee_spectrum = AxionInterpolator(darkbitdata_path+"CAST/"+"Axion_Spectrum_"+solar_model_gaee+"_gaee.dat");
           } else {
@@ -658,8 +622,6 @@ namespace Gambit
         #endif
         for(int bin = 0; bin < n_bins; bin++)
         {
-          // //#pragma omp parallel
-          // //{
           erg_lo = erg_hi;
           erg_hi += bin_delta;
           gsl_integration_workspace * v = gsl_integration_workspace_alloc (1E6);
@@ -674,7 +636,6 @@ namespace Gambit
           };
           relevant_peaks.push_back(erg_hi);
 
-          // //#pragma omp for
           for (int i = 0; i < n_mass_bins; i++)
           {
             double gagg_result, gagg_error, gaee_result, gaee_error;
@@ -710,7 +671,6 @@ namespace Gambit
           };
           gsl_integration_workspace_free (v);
           gsl_integration_workspace_free (w);
-          // //}
         };
 
 
@@ -850,10 +810,6 @@ namespace Gambit
     // Function to provide the effective relativistic degrees of freedom (for the Standard Model).
     double gStar(double T)
     {
-      // DEPRECATED: Previous, alternative version: Parametric result from 0910.1066; needs T in GeV.
-      // double TGeV = T*1E-3;
-      // return gsl_sf_exp( (1.21 + 0.572*(1. + tanh((gsl_sf_log(TGeV) + 8.77)/0.682)) +  0.33*(1. + tanh((gsl_sf_log(TGeV) + 2.95)/1.01)) +  0.579*(1. + tanh((gsl_sf_log(TGeV) + 1.8)/0.165)) + 0.138*(1. + tanh((gsl_sf_log(TGeV) + 0.162)/0.934)) + 0.108*(1. + tanh((gsl_sf_log(TGeV) - 3.76)/0.869))));
-
       // Needs log10(T/GeV) for interpolation.
       double lgT = log10(T) - 3.0;
       // Interpolated effective relatvistic d.o.f. based on 0910.1066, deviations < 0.5%
@@ -874,10 +830,6 @@ namespace Gambit
     // Function to provide the effective relativistic entropic degrees of freedom (for the Standard Model).
     double gStar_S(double T)
     {
-      // DEPRECATED: Previous, alternative version: Parametric result from 0910.1066; needs T in GeV.
-      // double TGeV = T*1E-3;
-      //return gsl_sf_exp ( (1.36 + 0.498*(1 + tanh((gsl_sf_log(TGeV) + 8.77)/0.693)) + 0.327*(1 + tanh((gsl_sf_log(TGeV) + 2.89)/1.01)) + 0.579*(1 + tanh((gsl_sf_log(TGeV) + 1.79)/0.155)) + 0.140*(1 + tanh((gsl_sf_log(TGeV) + 0.102)/0.963)) + 0.109*(1 + tanh((gsl_sf_log(TGeV) - 3.82)/0.907))) );
-
       // Need log10(T/GeV) for interpolation.
       double lgT = log10(T) - 3.0;
       // Interpolated effective relatvistic d.o.f. based on 0910.1066, deviations < 0.5%
@@ -905,9 +857,6 @@ namespace Gambit
       using namespace Pipes::QCDAxion_ZeroTemperatureMass_Nuisance_lnL;
       double LambdaChi = *Param["LambdaChi"];
 
-      // DEPRECATED: Results from the IILM (0910.1066).
-      // const double L2mu = 78.19;
-      // const double L2sigma = n/a;
       // Results from NLO calculations (1511.02867).
       const double Lmu = 75.5;
       const double Lsigma = 0.5;
@@ -1160,7 +1109,6 @@ namespace Gambit
       const std::vector<int> dat_vac {1, 3, 1, 1, 1, 2, 1, 2, 0, 2, 0, 1, 0, 2, 2, 0, 2, 1, 2, 2};
       const std::vector<double> bkg_vac {2.286801272, 1.559182673, 2.390746817, 1.559182673, 2.598637835, 1.039455092, 0.727618599, 1.559182673, 1.247346181, 1.455237199, 1.871019235, 0.831564073, 1.663128217, 1.247346181, 1.143400636, 1.663128217,
                                          1.247346181, 1.247346181, 2.286801272, 1.247346181};
-      //const double diff = 26.0 - 30.871817388;
 
       // Only calculate norm once.
       static double norm = 0.0;
@@ -1210,10 +1158,6 @@ namespace Gambit
                                                            {0.0150685, 0.0568493, 0.060274, 0.0150685, 0.0150685, 0.00753425, 0.0267123, 0.0150685, 0.0267123, 0.0116438},
                                                            {0.0409574, 0.226904, 0.243287, 0.0532447, 0.0188404, 0.0344043, 0.0417766, 0.0409574, 0.0409574, 0.0286702} };
 
-      //const int dat_vac [n_bins] = {22, 34, 27, 21, 17, 12, 20, 27, 28, 18};
-      //const double bkg_vac [n_bins] = {20.3969, 31.9437, 29.9568, 22.0278, 20.2608, 19.5587, 24.4385, 27.0346, 25.5171, 25.5024};
-      //const double diff = 226.0 - 246.6373;
-
       // Only calculate norm once.
       static double norm = 0.0;
       static bool norm_not_calculated = true;
@@ -1240,7 +1184,6 @@ namespace Gambit
     void calc_Haloscope_signal(double &result)
     {
       using namespace Pipes::calc_Haloscope_signal;
-      //double m_ax = *Param["ma0"];
       double gagg = 1.0E-9*std::fabs(*Param["gagg"]); // gagg needs to be in eV^-1.
       // Get the DM fraction in axions and the local DM density.
       double fraction = *Dep::RD_fraction;
@@ -1253,7 +1196,7 @@ namespace Gambit
       result = s;
     }
 
-    /* Approximated likelihood for the AxionDarkMatterEXperiment (ADMX).
+    /*! Approximated likelihood for the AxionDarkMatterEXperiment (ADMX).
     */
 
     // ADMX approximated likelihood function for data from publications from 1998 to 2009.
@@ -1530,7 +1473,6 @@ namespace Gambit
     // Define the system of differential equations.
     int scal_field_eq(double tau, const double y[], double f[], void *params)
     {
-      //(void)(t); // avoid unused parameter warning.
       struct AxionEDT_params * p = (struct AxionEDT_params *)params;
       double ma0 = (p->ma0);
       double beta = (p->beta);
@@ -1540,10 +1482,7 @@ namespace Gambit
       // f stores derivatives, y stores functions.
       f[0] = y[1];
       // As a function of (relative) temperature:
-      //f[1] = - gsl_pow_2(ma0*axion_mass_temp(-tau*Tosc,beta,Tchi)/(hubble_rad_dom(-tau*Tosc)*(-tau)))*gsl_sf_sin(y[0]*thetai)/thetai;
       f[1] = - gsl_pow_2(SpecialFun1(-tau*Tosc)*ma0*axion_mass_temp(-tau*Tosc,beta,Tchi)/(hubble_rad_dom(-tau*Tosc)*(-tau)))*gsl_sf_sin(y[0]*thetai)/thetai;
-      //f[1] = - SpecialFun3(-tau*Tosc)*y[2]/(-tau) - 9.0*(gStar(Tosc)/gStar(-tau*Tosc))*gsl_pow_2(SpecialFun1(-tau*Tosc)*axion_mass_temp(-tau*Tosc,beta,Tchi)/axion_mass_temp(Tosc,beta,Tchi))*gsl_sf_sin(y[0]*thetai)/(gsl_pow_6(-tau)*thetai);
-
       return GSL_SUCCESS;
     }
 
@@ -1563,10 +1502,7 @@ namespace Gambit
       gsl_matrix_set (m, 0, 0, 0);
       gsl_matrix_set (m, 0, 1, 1);
       // As a function of (relative) temperature;
-      //gsl_matrix_set (m, 1, 0, - gsl_pow_2(ma0*axion_mass_temp(-tau*Tosc,beta,Tchi)/(hubble_rad_dom(-tau*Tosc)*(-tau)))*gsl_sf_cos(y[0]*thetai));
       gsl_matrix_set (m, 1, 0, - gsl_pow_2(SpecialFun1(-tau*Tosc)*ma0*axion_mass_temp(-tau*Tosc,beta,Tchi)/(hubble_rad_dom(-tau*Tosc)*(-tau)))*gsl_sf_cos(y[0]*thetai));
-      //gsl_matrix_set (m, 1, 0, -9.0*(gStar(Tosc)/gStar(-tau*Tosc))*gsl_pow_2(SpecialFun1(-tau*Tosc)*axion_mass_temp(-tau*Tosc,beta,Tchi)/axion_mass_temp(Tosc,beta,Tchi))*gsl_sf_cos(y[0]*thetai)/gsl_pow_6(-tau));
-      //gsl_matrix_set (m, 1, 1, 0);
       gsl_matrix_set (m, 1, 1, -SpecialFun3(-tau*Tosc)/(-tau));
       dfdt[0] = 0.0;
       dfdt[1] = 0.0;
@@ -1670,15 +1606,10 @@ namespace Gambit
      void calc_RParameter(double &result)
      {
        using namespace Pipes::calc_RParameter;
-       // DEPRECATED: RParameter has no longer ALLOW_MODELS()
-       //double gaee2 = gsl_pow_2(1.0E+13 * std::fabs(*Param["gaee"]));
-       //double gagg = 1.0E+10*std::fabs(*Param["gagg"]); // gagg needs to be in 10^-10 GeV^-1.
        const ModelParameters& params = *Dep::GeneralALP_parameters;
        double gaee2 = gsl_pow_2(1.0E+13 * std::fabs(params.at("gaee")));
        double gagg = 1.0E+10*std::fabs(params.at("gagg")); // gagg needs to be in 10^-10 GeV^-1.
        double lgma0 = log10(params.at("ma0"));
-       // Value for He-abundance Y from 1408.6953: Y = 0.255(2).
-       //const double Y = 0.255;
        // Value for He-abundance Y from 1503.08146: <Y> = 0.2515(17).
        const double Y = 0.2515;
        // Use interpolation for the finite-mass correction.
@@ -1705,8 +1636,6 @@ namespace Gambit
        // Observed R values from astro-ph/0403600.
        const double Robs = 1.39;
        const double RobsErr = 0.03;
-       // Value for He-abundance Y from 1408.6953: Y = 0.255(2).
-       // const double YobsErrContrib = 7.3306*0.002;
        // Value for He-abundance Y from 1503.08146: <Y> = 0.2515(17).
        const double YobsErrContrib = 7.3306*0.0017;
 
