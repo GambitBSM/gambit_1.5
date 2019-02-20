@@ -21,24 +21,26 @@
 ///  \date 2019 Jan - Feb
 ///
 ///  *********************************************
-#include <string>
-#include <iostream>
 #include <cmath>
 #include <functional>
-
+#include <iostream>
 #include <omp.h>
+#include <stdlib.h>     /* malloc, free, rand */
+#include <string>
+#include <valarray>
+
+#include <gsl/gsl_blas.h>
+#include <gsl/gsl_errno.h>
 #include <gsl/gsl_integration.h>
+#include <gsl/gsl_linalg.h>
+#include <gsl/gsl_math.h>
+#include <gsl/gsl_matrix_double.h>
+#include <gsl/gsl_min.h>
+#include <gsl/gsl_odeiv2.h>
 #include <gsl/gsl_poly.h>
 #include <gsl/gsl_sf_log.h>
-#include <gsl/gsl_errno.h>
-#include <gsl/gsl_math.h>
-#include <gsl/gsl_min.h>
 #include <gsl/gsl_spline.h>
-#include <gsl/gsl_matrix_double.h>
-#include <gsl/gsl_linalg.h>
-#include <gsl/gsl_blas.h>
 
-#include <stdlib.h>     /* malloc, free, rand */
 #include "gambit/Utils/yaml_options.hpp"
 #include "gambit/Utils/statistics.hpp"
 #include "gambit/Utils/ascii_table_reader.hpp"
@@ -47,6 +49,7 @@
 #include "gambit/Elements/gambit_module_headers.hpp"
 #include "gambit/CosmoBit/CosmoBit_rollcall.hpp"
 #include "gambit/CosmoBit/CosmoBit_types.hpp"
+
 
 
 namespace Gambit
@@ -2241,9 +2244,101 @@ namespace Gambit
 //      std::cout << "Log likelihood (of lowp_TT) is : " << result << std::endl;
     }
 
+
+
 /// -----------
-/// BBN related functions
+/// SM Quantities // TODO: make capabilities?
 /// -----------
+
+// These functions are valid only at t >~ 10^3 s, where electrons and positrons are 
+// already completely annihilated // TODO: implement check that t is >~ 10^3 s
+class SM_properties {
+  public:
+    // SM photon temperature (keV) as a function of time (seconds)  
+    double T (double t)
+    {return 1147.40/sqrt(t);}
+    
+    // SM neutrino temperature (keV) as a function of time (seconds)
+    // Defined in this way, one gets Neff = 3.046, using Nnu = 3 SM neutrinos
+    double Tnu (double t)
+    {return 822.0965/sqrt(t);}
+    
+    // SM Hubble rate (1/s) as a function of time (seconds)
+    double H_t (double t)
+    {return 1/(2.0*t);} 
+    
+    // SM Hubble rate (1/s) as a function of temperature (keV)
+    double H_T(double T)
+    {return 3.7978719e-7*pow(T,2);}
+} SM;
+// ***************************************************************************************************************
+
+class fast_interpolation {
+    private:
+        int grid_size;
+        double Delta_logx;
+        std::valarray<double> x_grid;
+        std::valarray<double> y_grid;
+    public: 
+        fast_interpolation(std::valarray<double>& x_grid0, std::valarray<double>& y_grid0)
+        {
+            x_grid = x_grid0;
+            y_grid = y_grid0;
+            grid_size = x_grid.size();
+            Delta_logx = (log(x_grid[grid_size-1]) - log(x_grid[0]))/(grid_size-1);        
+        }
+        double interp(double x)
+        {    
+            if (x <= x_grid[0])
+            {return y_grid[0];}
+            if (x >= x_grid[grid_size-1])
+            {return y_grid[grid_size-1];}
+
+            double intpart_d;
+            double fracpart = std::modf((log(x) - log(x_grid[0]))/Delta_logx, &intpart_d);
+            int intpart = lround(intpart_d);
+           
+            return y_grid[intpart] * (1 - fracpart) + y_grid[intpart+1]*fracpart;            
+        }
+};
+
+// This calculates int(y(x') dx', {x', x0, x}) for each x in x_grid (with x0 = x_grid[0]),
+//    using a simple trapezoidal integration.
+//    This function explicitly assumes that the logarithms of the values in x_grid are equally spaced.
+std::valarray<double> fast_cumulative_integration(const std::valarray<double>& x_grid, const std::valarray<double>& y_grid) {
+    int grid_size = x_grid.size();
+    std::valarray<double> result(grid_size);
+    std::valarray<double> g_grid(grid_size);
+    
+    double Delta_z = (log(x_grid[grid_size-1]) - log(x_grid[0]))/(grid_size - 1);
+    g_grid = x_grid*y_grid;
+    
+    result[0] = 0.0;
+    result[1] = 0.5*Delta_z*(g_grid[0] + g_grid[1]);
+    
+    double cumsum = g_grid[1];
+    for (int i = 2; i<grid_size; ++i) {
+        result[i] = 0.5*Delta_z*(g_grid[0] + g_grid[i] + 2.0*cumsum);
+        cumsum = cumsum + g_grid[i];
+    }
+    return result;
+}
+// ***************************************************************************************************************
+
+// right hand side of differential equation for dT/dt
+int diff_eq_rhs (double t, const double T[], double f[], void *params)
+{
+  fast_interpolation injection_inter = *(static_cast<fast_interpolation*>(params)); 
+        // class for interpolating function of m_a*n_a(t)/tau_a
+  f[0] = (15.0/(4.0*pi*pi)) * injection_inter.interp(t)/pow(T[0], 3) - SM.H_T(T[0])*T[0]; 
+  return GSL_SUCCESS;
+}
+
+
+/// -----------
+/// Capabilities for general cosmological quantities
+/// -----------
+
 
     void set_T_cmb(double &result)
     {
@@ -2266,24 +2361,142 @@ namespace Gambit
       logger() << "Baryon to photon ratio (eta) computed to be " << result << EOM;
     }
 */
-    void compute_dNeffExt_ALP(double &result)
-    {
-      using namespace Pipes::compute_dNeffExt_ALP;
 
-      // TODO: call parameters from ALP model and calculate dNeff from them
-      result = 0.1;
+    //void compute_dNeff_etaBBN_ALP(std::map<std::string, double>  &result)
+    void compute_dNeff_etaBBN_ALP(std::vector<double> &result)
+
+    {
+      using namespace Pipes::compute_dNeff_etaBBN_ALP;
+
+      double dNeff, eta_ratio;
+      double temp_eta_ratio = 1; // temporary values to check convergence of iteration
+      double temp_dNeff = 1;
+      int jj;
+
+      // --- model parameters ----
+      // TODO: call from CosmoALPs model when implemented
+      double na_t0 = 2.0;     // initial number density of a at t=t0, in units keV^3.
+      double m_a = 30.0;      // mass of a in keV
+      double tau_a = 1.0e7;   // lifetime of a in seconds
+
+
+      // --- precision parameters -- 
+      double hstart = runOptions->getValueOrDef<double>(1e-6,"hstart"); // initial step size for GSL ODE solver
+      double epsrel = runOptions->getValueOrDef<double>(1e-6,"epsrel"); // desired relative accuracy for GSL ODE solver
+      double N_t = runOptions->getValueOrDef<int>(3000,"N_t"); // number of (logarithmic) grid points in t
+      double max_iter = runOptions->getValueOrDef<int>(10,"max_iter"); // maximum number of iterations before error message is thrown if result not converged
+      //double eps = runOptions->getValueOrDef<double>(1e-4,"eps"); // relative deviation as convergence criteria 
+
+      double t0 = runOptions->getValueOrDef<double>(1e4,"t0"); // initial time in seconds
+      double tf = runOptions->getValueOrDef<double>(1e12,"tf"); // final time in seconds
+     
+      std::valarray<double> t_grid(N_t), T_grid(N_t), Tnu_grid(N_t), H_grid(N_t), H_cumsum(N_t), na_grid(N_t), injection_grid(N_t); // arrays containing time dependence of variables
+
+      // initialize logarithmic grid in t, and set quantities for iteration step i=0
+      double Delta_logt = (log(tf) - log(t0))/(N_t-1);
+      for (jj = 0; jj<N_t; ++jj) 
+      {
+           t_grid[jj] = exp(log(t0) + jj*Delta_logt);
+           T_grid[jj] = SM.T(t_grid[jj]);    // initial T(t)
+           H_grid[jj] = SM.H_t(t_grid[jj]);  // initial H(t)           
+      }
+      
+      
+      int ii=0;
+      // loop over iterations until convergence or max_iter is reached
+      while( (( fabs(temp_eta_ratio-eta_ratio) > epsrel ) || fabs(temp_dNeff - dNeff) > epsrel) && ( ii <= max_iter ) ) 
+      {
+          
+          temp_eta_ratio = eta_ratio;
+          temp_dNeff = dNeff;
+
+          H_cumsum = fast_cumulative_integration(t_grid, H_grid);     // compute integral of Hubble rate from t0 to t
+          na_grid = na_t0*exp(-3.0*H_cumsum)*exp(-t_grid/tau_a);      // na(t) in units keV^3
+          Tnu_grid = SM.Tnu(t0)*exp(-1.0*H_cumsum);                   // T_nu(t) in units keV
+          injection_grid = (m_a/tau_a)*na_grid;                       // m_a*na(t)/tau_a in units keV^4/s
+          fast_interpolation injection_inter(t_grid, injection_grid); // interpolating function
+         
+          // now solve the differential equation for T(t), and store it in T_grid
+          gsl_odeiv2_system sys = {diff_eq_rhs, NULL, 1, &injection_inter};    
+          gsl_odeiv2_driver * d = gsl_odeiv2_driver_alloc_y_new (&sys, gsl_odeiv2_step_rkf45, hstart, 0.0, epsrel);
+          double T[1] = { SM.T(t0) };  // initial condition: T(t0) = T_SM(t0)
+          double t=t0;
+          for (jj = 0; jj < N_t; jj++)
+          {
+              double t_j = t_grid[jj];
+              int status = gsl_odeiv2_driver_apply (d, &t, t_j, T);
+              if (status != GSL_SUCCESS)
+              {printf ("error, return value=%d\n", status);break;}
+              T_grid[jj] = T[0];             
+          }
+          gsl_odeiv2_driver_free (d);
+          
+          
+          // update Hubble rate for next iteration
+          for (jj = 0; jj<N_t; ++jj) {
+               H_grid[jj] = SM.H_T(T_grid[jj]);
+          }
+          
+          // Calculate eta_0/eta_f
+          eta_ratio = pow(T_grid[N_t-1]/T_grid[0], 3) * exp(3.0*H_cumsum[N_t-1]);
+         
+          // Calculate Neff at recombination 
+          dNeff = 3*pow(Tnu_grid[N_t-1]/T_grid[N_t-1], 4) * 3.85280407965; // (11/4)^(4/3) = 3.85280407965
+          
+          // Print results
+          std::cout << "Results at iteration step " << ii << ":" << std::endl;
+          std::cout << "eta_initial / eta_final = " << eta_ratio << std::endl;
+          std::cout << "Neff at recombination = " << dNeff << std::endl;
+          std::cout << std::endl;
+          ii ++;
+
+      }
+
+      eta_ratio = pow(T_grid[N_t-1]/T_grid[0], 3)* exp(3.*H_cumsum[N_t-1]);
+      dNeff = 3.*pow(Tnu_grid[N_t-1]/T_grid[N_t-1], 4) * 3.85280407965; // (11/4)^(4/3) = 3.85280407965
+
+      result.clear();
+      result.push_back(dNeff);  
+      result.push_back(eta_ratio);
+      /* TODO: this should ideally be a std::map<std::string, double> s.t. there is not danger of confusing the two, however, I did not 
+        not manage to make that work, kept getting compiling error 
+        error: macro "DEPENDENCY" passed 3 arguments, but takes just 2
+         DEPENDENCY(external_dNeff_etaBBN, std::map<std::string,double>)
+        It seems like the std::map time is not recognised, even though it should?
+      */
+      
 
     }
 
-    void compute_etaBBN_ALP(double &result)
-    {
-      using namespace Pipes::compute_dNeffExt_ALP;
 
-      // TODO: call parameters from ALP model and calculate etaBBN from them
-      result = 1e-10;
+    void calculate_etaBBN_ALP(double &result)
+    {
+      
+      using namespace Pipes::calculate_etaBBN_ALP;
+      // TODO: put into etaBBN capability plus dependency on etaCMB to convert ratio in actual result  
+
+       std::vector<double> dNeff_etaBBN = *Dep::external_dNeff_etaBBN;
+       result = dNeff_etaBBN.at(1);
+       logger() << "etaBBN for ALP calculated to be " << result << EOM;
+    }
+    
+    void calculate_ExtdNeff_ALP(double &result)
+    {
+      
+      using namespace Pipes::calculate_ExtdNeff_ALP;
+
+
+      std::vector<double> dNeff_etaBBN = *Dep::external_dNeff_etaBBN;
+      result = dNeff_etaBBN.at(0);
+      logger() << "dNeff for ALP calculated to be " << result << EOM;
 
     }
 
+/// -----------
+/// BBN related functions
+/// -----------
+
+    
     void AlterBBN_fill_LCDM_dNeffCMB_dNeffBBN_etaBBN(relicparam &result)
     {
       // fill AlterBBN structure for LCDM_Smu_dNeffCMB_dNeffBBN_etaBBN
@@ -2294,6 +2507,7 @@ namespace Gambit
       result.eta0 = *Param["eta_BBN"];  // eta AFTER BBN (variable during)
       result.Nnu=3.046;                 // 3 massive neutrinos
       result.dNnu=*Param["dNeff_BBN"];
+      std::cout<< " eta_BBN " << *Param["eta_BBN"] << " dNeff_BBN " << *Param["dNeff_BBN"] << " dNeff " << *Param["dNeff"] <<std::endl;
       result.failsafe = runOptions->getValueOrDef<int>(3,"failsafe");
       result.err = runOptions->getValueOrDef<int>(3,"err");
     }
@@ -2376,7 +2590,7 @@ namespace Gambit
             if (std::abs(tmp_corr.at(ie).at(je) - tmp_corr.at(je).at(ie)) > 1e-6)
             {
               std::ostringstream err;
-              err << "The correlation matirx is not symmetric";
+              err << "The correlation matrix is not symmetric";
               CosmoBit_error().raise(LOCAL_INFO, err.str());
             }
             // Check if the off-diagonal elements are between -1 and 1.
@@ -2613,7 +2827,7 @@ namespace Gambit
     }
 
 /// -----------
-/// Background Likelihoods (H0 + BAO)
+/// Background Likelihoods (SNe + H0 + BAO + Sigma8)
 /// -----------
 
     void compute_Pantheon_LogLike(double &result)

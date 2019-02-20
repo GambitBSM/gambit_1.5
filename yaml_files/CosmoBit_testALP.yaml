@@ -24,13 +24,13 @@
 Parameters:
  
  # --- import model parameters for models to scan over ---
- LCDM_Smu_dNeffExt: !import include/LCDM_Smu_dNeffExt_scan.yaml       
+ LCDM_dNeffExt: !import include/LCDM_dNeffExt_scan.yaml       
 
  # nuisance parameters in Planck likelihood
  #Planck_lite: !import include/Planck_lite_scan.yaml
 
  # Cosmological nuisance parameters (except for Planck CMB Likelihoods) 
- cosmo_nuisance_params: !import include/cosmo_nuisance_params.yaml
+ #cosmo_nuisance_params: !import include/cosmo_nuisance_params.yaml
 
 #======== Prior setup ========
 Priors:
@@ -65,10 +65,14 @@ Scanner:
 ObsLikes:
  
   - purpose:      LogLike
-    capability:   Pantheon_LogLike
+    capability:   ExtdNeff
     module:       CosmoBit
     type:         double
 
+  - purpose:      LogLike
+    capability:   etaBBN
+    module:       CosmoBit
+    type:         double
 
 
 #======== Rule entries ========

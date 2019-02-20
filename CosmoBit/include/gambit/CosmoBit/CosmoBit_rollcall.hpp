@@ -29,6 +29,7 @@
 
 #include "gambit/CosmoBit/CosmoBit_types.hpp"
 
+
 #define MODULE CosmoBit
 START_MODULE
 
@@ -266,24 +267,47 @@ START_MODULE
 //    #undef FUNCTION
 //  #undef CAPABILITY
 
-  #define CAPABILITY dNeffExt
-    START_CAPABILITY
-    #define FUNCTION compute_dNeffExt_ALP
-      START_FUNCTION(double)
-      //ALLOW_MODELS(ALP) # TODO: refer to correct model name
-    #undef FUNCTION
-  #undef CAPABILITY
-
-  #define CAPABILITY etaBBN_ALP
-    START_CAPABILITY
-    #define FUNCTION compute_etaBBN_ALP
-      START_FUNCTION(double)
-      // TODO: refer to correct model name
+  #define CAPABILITY etaBBN
+   START_CAPABILITY
+   #define FUNCTION calculate_etaBBN_ALP
+     START_FUNCTION(double)
+        DEPENDENCY(T_cmb, double)
+        DEPENDENCY(external_dNeff_etaBBN, std::vector<double>)
+      //ALLOW_MODEL_COMBINATION(cosmology,particle)// TODO: refer to correct model name
       //MODEL_GROUP(cosmology, (LCDM_dNeffCMB_dNeffBBN_etaBBN))
       //MODEL_GROUP(particle, (ALP))
       //ALLOW_MODEL_COMBINATION(cosmology,particle)
+     // TODO: atm calculation of eta implemented twice: once in CosmoModels, once here. put default LCDM into model tree, hand nu masses!
+   #undef FUNCTION
+  #undef CAPABILITY
+
+  #define CAPABILITY external_dNeff_etaBBN
+    START_CAPABILITY
+    #define FUNCTION compute_dNeff_etaBBN_ALP
+      START_FUNCTION(std::vector<double>)
+      //DEPENDENCY(eta, double)
+      DEPENDENCY(T_cmb, double)
+      ALLOW_MODELS(LCDM_dNeffExt)
+      // TODO: refer to correct model name
+      //MODEL_GROUP(cosmology, (LCDM_dNeffCMB_dNeffBBN_etaBBN))
+      //MODEL_GROUP(particle, (ALP))
     #undef FUNCTION
   #undef CAPABILITY
+
+
+  #define CAPABILITY ExtdNeff
+   START_CAPABILITY
+   #define FUNCTION calculate_ExtdNeff_ALP
+     START_FUNCTION(double)
+     DEPENDENCY(external_dNeff_etaBBN, std::vector<double>)
+      //ALLOW_MODEL_COMBINATION(cosmology,particle)// TODO: refer to correct model name
+      //MODEL_GROUP(cosmology, (LCDM_dNeffCMB_dNeffBBN_etaBBN))
+      //MODEL_GROUP(particle, (ALP))
+      //ALLOW_MODEL_COMBINATION(cosmology,particle)
+     // TODO: atm calculation of eta implemented twice: once in CosmoModels, once here. put default LCDM into model tree, hand nu masses!
+   #undef FUNCTION
+  #undef CAPABILITY
+
 
 // AlterBBN related functions & capabilities
   #define CAPABILITY AlterBBN_modelinfo

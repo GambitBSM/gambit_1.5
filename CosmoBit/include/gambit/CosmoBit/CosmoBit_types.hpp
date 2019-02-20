@@ -45,7 +45,7 @@ namespace Gambit
         std::map<std::string, int> abund_map;
 
         void init_arr(int nnuc);
-        int get_NNUC(){return NNUC;};
+        int get_NNUC(){return NNUC;}; // global parameter in AlterBBN, holds number of computed element abundances
         std::map<std::string,int> get_map(){return abund_map;};
 
       private:
