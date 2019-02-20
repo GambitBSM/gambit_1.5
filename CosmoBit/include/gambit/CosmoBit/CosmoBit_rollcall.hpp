@@ -261,7 +261,8 @@ START_MODULE
     #define FUNCTION calculate_etaCMB
       START_FUNCTION(double)
       DEPENDENCY(T_cmb, double)
-      ALLOW_MODELS(LCDM_dNeffCMB_dNeffBBN)
+      ALLOW_MODELS(LCDM_dNeffCMB_dNeffBBN_etaBBN) // To get etaCMB for LCDM_dNeffCMB_dNeffBBN_etaBBN
+      ALLOW_MODELS(LCDM_dNeffCMB_dNeffBBN) // Allow for all direct childs of LCDM_dNeffCMB_dNeffBBN_etaBBN. Needed for the translation into LCDM_dNeffCMB_dNeffBBN_etaBBN
     #undef FUNCTION
   #undef CAPABILITY
 
