@@ -256,15 +256,14 @@ START_MODULE
     #undef FUNCTION
   #undef CAPABILITY
 
-//  #define CAPABILITY eta
-//    START_CAPABILITY
-//    #define FUNCTION calculate_eta
-//      START_FUNCTION(double)
-//      DEPENDENCY(T_cmb, double)
-//      ALLOW_MODELS(LCDM)
-//      // TODO: atm calculation of eta implemented twice: once in CosmoModels, once here. put default LCDM into model tree, hand nu masses!
-//    #undef FUNCTION
-//  #undef CAPABILITY
+  #define CAPABILITY etaCMB
+    START_CAPABILITY
+    #define FUNCTION calculate_etaCMB
+      START_FUNCTION(double)
+      DEPENDENCY(T_cmb, double)
+      ALLOW_MODELS(LCDM_dNeffCMB_dNeffBBN)
+    #undef FUNCTION
+  #undef CAPABILITY
 
   #define CAPABILITY dNeffExt
     START_CAPABILITY

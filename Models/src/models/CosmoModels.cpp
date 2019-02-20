@@ -51,12 +51,7 @@ void MODEL_NAMESPACE::LCDM_dNeffCMB_dNeffBBN_to_LCDM_dNeffCMB_dNeffBBN_etaBBN (c
   targetP.setValue("dNeff", myP.getValue("dNeff") );
   targetP.setValue("dNeff_BBN", myP.getValue("dNeff_BBN") );
 
-  // eta_BBN = eta_CMB, computed from omega_b
-  double ngamma, nb,eta_CMB;
-  ngamma = 16*pi*zeta3*pow(*Dep::T_cmb*kb/hc,3); // photon number density today
-  nb = myP.getValue("omega_b")*3*100*1e3*100*1e3/Mpc/Mpc/(8*pi*Gn*m_proton_g); // baryon number density today
-  eta_CMB =  nb/ngamma;
-
+  double eta_CMB = *Dep::etaCMB;
   targetP.setValue("eta_BBN", eta_CMB );
 }
 

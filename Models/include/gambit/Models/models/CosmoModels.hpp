@@ -32,7 +32,7 @@
   START_MODEL
   DEFINEPARS(omega_b,omega_cdm,H0,ln10A_s,n_s,tau_reio,dNeff,dNeff_BBN)
   INTERPRET_AS_PARENT_FUNCTION(LCDM_dNeffCMB_dNeffBBN_to_LCDM_dNeffCMB_dNeffBBN_etaBBN)
-  INTERPRET_AS_PARENT_DEPENDENCY(T_cmb, double)
+  INTERPRET_AS_PARENT_DEPENDENCY(etaCMB, double)
  #undef PARENT
 #undef MODEL
 
