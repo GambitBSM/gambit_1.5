@@ -996,26 +996,20 @@ set(ver "2.0")
 set(lib "libclik")
 set(dl "https://pla.esac.esa.int/pla-sl/data-action?COSMOLOGY.COSMOLOGY_OID=1904")
 set(md5 "1d732465a5cc8833cec72a414676c655")
-set(patch "${PROJECT_SOURCE_DIR}/Backends/patches/${name}/${ver}")
 set(dir "${PROJECT_SOURCE_DIR}/Backends/installed/${name}/${ver}")
-set(CFITSIOPATH "${PROJECT_SOURCE_DIR}/Backends/installed/cfitsio/3.390")
-set(PLC_SO "so")
+set(cfitsio_name "cfitsio")
+set(cfitsio_ver "3.390")
+set(cfitsio_dir "${PROJECT_SOURCE_DIR}/Backends/installed/${cfitsio_name}/${cfitsio_ver}")
 check_ditch_status(${name} ${ver})
 if(NOT ditched_${name}_${ver})
   ExternalProject_Add(${name}_${ver}
+    DEPENDS ${cfitsio_name}_${cfitsio_ver} 
     DOWNLOAD_COMMAND ${DL_BACKEND} ${dl} ${md5} ${dir}
     SOURCE_DIR ${dir}
-    #PATCH_COMMAND patch -p1 < ${patch}/plc_test.diff
     BUILD_IN_SOURCE 1
-    CONFIGURE_COMMAND python ${dir}/waf configure --install_all_deps
+    CONFIGURE_COMMAND python ${dir}/waf configure --cfitsio_include=${cfitsio_dir}/include --cfitsio_lib=${cfitsio_dir}/lib64
     BUILD_COMMAND ""
     INSTALL_COMMAND python ${dir}/waf install
-    #CONFIGURE_COMMAND ""
-    #BUILD_COMMAND ${CMAKE_MAKE_PROGRAM} FC=${CMAKE_Fortran_COMPILER} CC=${CMAKE_C_COMPILER} CFITSIOPATH=${CFITSIO_DIR} GFORTRANLIBPATH=${FORTRAN_LIBRARIES} LAPACKLIBPATH=${LAPACK_DIR} SO=${PLC_SO}
-    #INSTALL_COMMAND ${CMAKE_MAKE_PROGRAM} FC=${CMAKE_Fortran_COMPILER} CC=${CMAKE_C_COMPILER} install CFITSIOPATH=${CFITSIO_DIR} GFORTRANLIBPATH=${FORTRAN_LIBRARIES} LAPACKLIBPATH=${LAPACK_DIR} SO=${PLC_SO}
-    #COMMAND ${CMAKE_COMMAND} -E echo "source ${dir}/bin/clik_profile.sh" > msource.sh
-    #COMMAND chmod u+x msource.sh
-    #COMMAND ./msource.sh
   )
   add_extra_targets("backend" ${name} ${ver} ${dir} ${dl} clean)
   set_as_default_version("backend" ${name} ${ver})
