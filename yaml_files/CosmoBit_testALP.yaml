@@ -24,7 +24,8 @@
 Parameters:
  
  # --- import model parameters for models to scan over ---
- LCDM_dNeffExt: !import include/LCDM_dNeffExt_scan.yaml       
+ LCDM_ExtdNeffCMB: !import include/LCDM_ExtdNeffCMB_scan.yaml       
+ #LCDM_dNeffCMB_dNeffBBN: !import include/LCDM_dNeffCMB_dNeffBBN_scan.yaml       
 
  # nuisance parameters in Planck likelihood
  #Planck_lite: !import include/Planck_lite_scan.yaml
@@ -65,7 +66,7 @@ Scanner:
 ObsLikes:
  
   - purpose:      LogLike
-    capability:   ExtdNeff
+    capability:   ExtdNeffCMB
     module:       CosmoBit
     type:         double
 
@@ -73,6 +74,16 @@ ObsLikes:
     capability:   etaBBN
     module:       CosmoBit
     type:         double
+
+  - purpose:      LogLike
+    capability:   BAO_LogLike
+    module:       CosmoBit
+    type:         double
+  
+  - purpose:      Observable
+    capability:   Helium3_abundance
+    module:       CosmoBit
+    type:         std::vector<double>
 
 
 #======== Rule entries ========

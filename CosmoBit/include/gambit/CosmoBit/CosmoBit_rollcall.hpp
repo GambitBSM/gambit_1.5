@@ -257,27 +257,48 @@ START_MODULE
     #undef FUNCTION
   #undef CAPABILITY
 
-//  #define CAPABILITY eta
-//    START_CAPABILITY
-//    #define FUNCTION calculate_eta
-//      START_FUNCTION(double)
-//      DEPENDENCY(T_cmb, double)
-//      ALLOW_MODELS(LCDM)
-//      // TODO: atm calculation of eta implemented twice: once in CosmoModels, once here. put default LCDM into model tree, hand nu masses!
-//    #undef FUNCTION
-//  #undef CAPABILITY
+  #define CAPABILITY eta0
+    START_CAPABILITY
+    #define FUNCTION calculate_eta0
+      START_FUNCTION(double)
+      DEPENDENCY(T_cmb, double)
+      ALLOW_MODELS(LCDM_dNeffCMB_dNeffBBN_etaBBN) // To get etaCMB for LCDM_dNeffCMB_dNeffBBN_etaBBN
+      ALLOW_MODELS(LCDM_dNeffCMB_dNeffBBN) // Allow for all direct childs of LCDM_dNeffCMB_dNeffBBN_etaBBN. Needed for the translation into LCDM_dNeffCMB_dNeffBBN_etaBBN
+      ALLOW_MODELS(LCDM_ExtdNeffCMB)
+    #undef FUNCTION
+  #undef CAPABILITY
+
+#define CAPABILITY etaCMB
+    START_CAPABILITY
+    #define FUNCTION calculate_etaCMB_SM // eta0 = etaCMB
+      START_FUNCTION(double)
+      DEPENDENCY(eta0, double)
+      ALLOW_MODELS(LCDM_dNeffCMB_dNeffBBN_etaBBN) // To get etaCMB for LCDM_dNeffCMB_dNeffBBN_etaBBN
+      ALLOW_MODELS(LCDM_dNeffCMB_dNeffBBN) // Allow for all direct childs of LCDM_dNeffCMB_dNeffBBN_etaBBN. Needed for the translation into LCDM_dNeffCMB_dNeffBBN_etaBBN
+      ALLOW_MODELS(LCDM_ExtdNeffCMB)
+    #undef FUNCTION
+  #undef CAPABILITY
 
   #define CAPABILITY etaBBN
    START_CAPABILITY
+   #define FUNCTION set_etaBBN // etaBBN is model parameter
+      START_FUNCTION(double)
+      ALLOW_MODELS(LCDM_dNeffCMB_dNeffBBN_etaBBN) // To get etaCMB for LCDM_dNeffCMB_dNeffBBN_etaBBN
+    #undef FUNCTION
+   #define FUNCTION calculate_etaBBN_SM // etaBBN = etaCMB
+      START_FUNCTION(double)
+      DEPENDENCY(etaCMB, double)
+      ALLOW_MODELS(LCDM_dNeffCMB_dNeffBBN) // Allow for all direct childs of LCDM_dNeffCMB_dNeffBBN_etaBBN. Needed for the translation into LCDM_dNeffCMB_dNeffBBN_etaBBN
+    #undef FUNCTION
    #define FUNCTION calculate_etaBBN_ALP
      START_FUNCTION(double)
-        DEPENDENCY(T_cmb, double)
+        DEPENDENCY(etaCMB, double)
         DEPENDENCY(external_dNeff_etaBBN, std::vector<double>)
+        ALLOW_MODELS(LCDM_ExtdNeffCMB) // TODO: make the model combinaiton explicit here
       //ALLOW_MODEL_COMBINATION(cosmology,particle)// TODO: refer to correct model name
       //MODEL_GROUP(cosmology, (LCDM_dNeffCMB_dNeffBBN_etaBBN))
       //MODEL_GROUP(particle, (ALP))
       //ALLOW_MODEL_COMBINATION(cosmology,particle)
-     // TODO: atm calculation of eta implemented twice: once in CosmoModels, once here. put default LCDM into model tree, hand nu masses!
    #undef FUNCTION
   #undef CAPABILITY
 
@@ -285,9 +306,6 @@ START_MODULE
     START_CAPABILITY
     #define FUNCTION compute_dNeff_etaBBN_ALP
       START_FUNCTION(std::vector<double>)
-      //DEPENDENCY(eta, double)
-      DEPENDENCY(T_cmb, double)
-      ALLOW_MODELS(LCDM_dNeffExt)
       // TODO: refer to correct model name
       //MODEL_GROUP(cosmology, (LCDM_dNeffCMB_dNeffBBN_etaBBN))
       //MODEL_GROUP(particle, (ALP))
@@ -295,10 +313,11 @@ START_MODULE
   #undef CAPABILITY
 
 
-  #define CAPABILITY ExtdNeff
+#define CAPABILITY ExtdNeffCMB
    START_CAPABILITY
-   #define FUNCTION calculate_ExtdNeff_ALP
+   #define FUNCTION calculate_dNeff_ALP
      START_FUNCTION(double)
+     ALLOW_MODELS(LCDM_ExtdNeffCMB)
      DEPENDENCY(external_dNeff_etaBBN, std::vector<double>)
       //ALLOW_MODEL_COMBINATION(cosmology,particle)// TODO: refer to correct model name
       //MODEL_GROUP(cosmology, (LCDM_dNeffCMB_dNeffBBN_etaBBN))
@@ -378,8 +397,6 @@ START_MODULE
    DEPENDENCY(BBN_abundances, CosmoBit::BBN_container)
    BACKEND_OPTION( (AlterBBN, 2.0), (libbbn) )
    DEPENDENCY(AlterBBN_modelinfo, relicparam)
-   //BACKEND_REQ(bbn_excluded_chi2, (libbbn), int, (const relicparam*))
-   ALLOW_MODELS(LCDM_dNeffCMB_dNeffBBN_etaBBN)
   #undef FUNCTION
   #undef CAPABILITY
 
@@ -407,7 +424,6 @@ START_MODULE
    START_CAPABILITY
    #define FUNCTION compute_BAO_LogLike
     START_FUNCTION(double)
-    ALLOW_MODELS(LCDM_dNeffCMB_dNeffBBN_etaBBN)
     BACKEND_REQ(class_get_Da,(class_tag),double,(double))
     BACKEND_REQ(class_get_Hz,(class_tag),double,(double))
     BACKEND_REQ(class_get_rs,(class_tag),double,())
@@ -429,7 +445,6 @@ START_MODULE
      #define FUNCTION compute_Sigma8
       START_FUNCTION(double)
       DEPENDENCY(Omega_m, double)
-      ALLOW_MODELS(LCDM_dNeffCMB_dNeffBBN_etaBBN)
       BACKEND_REQ(class_get_sigma8,(class_tag),double,(double))
      #undef FUNCTION
   #undef CAPABILITY

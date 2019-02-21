@@ -51,13 +51,7 @@ void MODEL_NAMESPACE::LCDM_dNeffCMB_dNeffBBN_to_LCDM_dNeffCMB_dNeffBBN_etaBBN (c
   targetP.setValue("dNeff", myP.getValue("dNeff") );
   targetP.setValue("dNeff_BBN", myP.getValue("dNeff_BBN") );
 
-  // eta_BBN = eta_CMB, computed from omega_b
-  double ngamma, nb,eta_CMB;
-  ngamma = 16*pi*zeta3*pow(*Dep::T_cmb*kb/hc,3); // photon number density today
-  nb = myP.getValue("omega_b")*3*100*1e3*100*1e3/Mpc/Mpc/(8*pi*Gn*m_proton_g); // baryon number density today
-  eta_CMB =  nb/ngamma;
-
-  targetP.setValue("eta_BBN", eta_CMB );
+  targetP.setValue("eta_BBN", *Dep::etaBBN );
 }
 
 #undef PARENT
@@ -85,14 +79,14 @@ void MODEL_NAMESPACE::LCDM_dNeffCMB_to_LCDM_dNeffCMB_dNeffBBN (const ModelParame
 #undef PARENT
 #undef MODEL
 
-#define MODEL  LCDM_dNeffExt
+#define MODEL  LCDM_ExtdNeffCMB
 #define PARENT LCDM_dNeffCMB_dNeffBBN_etaBBN
 
 // Translation function definition
-void MODEL_NAMESPACE::LCDM_dNeffExt_to_LCDM_dNeffCMB_dNeffBBN_etaBBN (const ModelParameters &myP, ModelParameters &targetP)
+void MODEL_NAMESPACE::LCDM_ExtdNeffCMB_to_LCDM_dNeffCMB_dNeffBBN_etaBBN (const ModelParameters &myP, ModelParameters &targetP)
 {
   USE_MODEL_PIPE(PARENT) // get pipe for "interpret as PARENT" function
-  logger()<<"Running interpret_as_parent calculations for LCDM_dNeffExt --> LCDM_dNeffCMB_dNeffBBN_etaBBN..."<<LogTags::info<<EOM;
+  logger()<<"Running interpret_as_parent calculations for LCDM_ExtdNeffCMB --> LCDM_dNeffCMB_dNeffBBN_etaBBN..."<<LogTags::info<<EOM;
 
   targetP.setValue("omega_b", myP.getValue("omega_b"));
   targetP.setValue("omega_cdm",myP.getValue("omega_cdm"));
@@ -101,20 +95,9 @@ void MODEL_NAMESPACE::LCDM_dNeffExt_to_LCDM_dNeffCMB_dNeffBBN_etaBBN (const Mode
   targetP.setValue("n_s", myP.getValue("n_s") );
   targetP.setValue("tau_reio", myP.getValue("tau_reio") );
 
-  // (PS) Needs fix. In the most genral case dNeffCMB and dNeffBBN are different.
-  // The dependency should be either on std::vector<double> or on two distinct
-  // capabilities.
-  double ngamma, nb,eta_CMB;
-  ngamma = 16*pi*zeta3*pow(*Dep::T_cmb*kb/hc,3); // photon number density today
-  nb = myP.getValue("omega_b")*3*100*1e3*100*1e3/Mpc/Mpc/(8*pi*Gn*m_proton_g); // baryon number density today
-  eta_CMB =  nb/ngamma;
-  std::cout<< "Expected eta_CMB " << eta_CMB << std::endl;
-  std::cout<< "Result Ext calc " << *Dep::external_dNeff_etaBBN << std::endl;
-  //std::cout<< "Gotten eta_CMB "<< myP.getValue("eta_BBN")<<endl;
-  double ratio = 1; 
-  targetP.setValue("eta_BBN", eta_CMB*ratio );
+  targetP.setValue("eta_BBN", *Dep::etaBBN);
   targetP.setValue("dNeff_BBN", 0. );
-  targetP.setValue("dNeff", *Dep::external_dNeff_etaBBN );
+  targetP.setValue("dNeff", *Dep::ExtdNeffCMB );
 }
 
 #undef PARENT

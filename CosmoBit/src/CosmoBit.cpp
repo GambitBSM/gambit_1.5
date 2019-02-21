@@ -301,7 +301,7 @@ namespace Gambit
 
       int N_ncdm = 0;
       std::vector<double> numasses = set_nu_masses(mNu1, mNu2, mNu3, N_ncdm);
-      switch (N_ncdm)
+      switch (N_ncdm) 
       {
         case 1:
           cosmo.input.addEntry("N_ur",*Param["dNeff"]+2.0328);  // dNeff= 2.0328 for 1 massive neutrino at CMB release
@@ -2348,23 +2348,69 @@ int diff_eq_rhs (double t, const double T[], double f[], void *params)
       result = runOptions->getValueOrDef<double>(2.7255,"T_cmb");
 
     }
-/*
-    void calculate_eta(double &result)
+
+    void calculate_eta0(double &result)
     {
-      using namespace Pipes::calculate_eta;
+      using namespace Pipes::calculate_eta0;
 
       double ngamma, nb;
       ngamma = 16*pi*zeta3*pow(*Dep::T_cmb*kb/hc,3); // photon number density today
       nb = *Param["omega_b"]*3*100*1e3*100*1e3/Mpc/Mpc/(8*pi*Gn*m_proton_g); // baryon number density today
 
       result =  nb/ngamma;
-      logger() << "Baryon to photon ratio (eta) computed to be " << result << EOM;
+      logger() << "Baryon to photon ratio (eta) today computed to be " << result << EOM;
     }
-*/
+    
+    void calculate_etaCMB_SM(double &result)
+    {
+      using namespace Pipes::calculate_etaCMB_SM;
 
-    //void compute_dNeff_etaBBN_ALP(std::map<std::string, double>  &result)
+      result =  *Dep::eta0; // in SM the baryon to photon ratio does not change between today an CMB release
+      logger() << "Baryon to photon ratio (eta) @CMB computed to be " << result << EOM;
+    }
+
+    void set_etaBBN(double &result)
+    {
+      using namespace Pipes::set_etaBBN;
+
+      result =  *Param["eta_BBN"]; // in SM the baryon to photon ratio does not change between today an CMB release
+      logger() << "Baryon to photon ratio (eta) @BBN set to be " << result << EOM;
+    }
+
+    void calculate_etaBBN_SM(double &result)
+    {
+      using namespace Pipes::calculate_etaCMB_SM;
+
+      result =  *Dep::eta0; // in SM the baryon to photon ratio does not change between today an CMB release
+      logger() << "Baryon to photon ratio (eta) @BBN computed to be " << result << EOM;
+    }
+
+    void calculate_etaBBN_ALP(double &result)
+    {
+      
+      using namespace Pipes::calculate_etaBBN_ALP;
+
+       std::vector<double> dNeff_etaBBN = *Dep::external_dNeff_etaBBN;
+       result = *Dep::etaCMB * dNeff_etaBBN.at(1);
+       logger() << "Baryon to photon ratio (eta) @BBN computed to be " << result << EOM;
+       std::cout << "etaBBN for ALP calculated to be " << result << std::endl;
+    }
+
+    
+    void calculate_dNeff_ALP(double &result)
+    {
+      
+      using namespace Pipes::calculate_dNeff_ALP;
+
+      std::vector<double> dNeff_etaBBN = *Dep::external_dNeff_etaBBN;
+      result = dNeff_etaBBN.at(0);
+      logger() << "dNeff for ALP calculated to be " << result << EOM;
+      std::cout << "dNeff for ALP calculated to be " << result << std::endl;
+
+    }
+
+
     void compute_dNeff_etaBBN_ALP(std::vector<double> &result)
-
     {
       using namespace Pipes::compute_dNeff_etaBBN_ALP;
 
@@ -2469,29 +2515,6 @@ int diff_eq_rhs (double t, const double T[], double f[], void *params)
     }
 
 
-    void calculate_etaBBN_ALP(double &result)
-    {
-      
-      using namespace Pipes::calculate_etaBBN_ALP;
-      // TODO: put into etaBBN capability plus dependency on etaCMB to convert ratio in actual result  
-
-       std::vector<double> dNeff_etaBBN = *Dep::external_dNeff_etaBBN;
-       result = dNeff_etaBBN.at(1);
-       logger() << "etaBBN for ALP calculated to be " << result << EOM;
-    }
-    
-    void calculate_ExtdNeff_ALP(double &result)
-    {
-      
-      using namespace Pipes::calculate_ExtdNeff_ALP;
-
-
-      std::vector<double> dNeff_etaBBN = *Dep::external_dNeff_etaBBN;
-      result = dNeff_etaBBN.at(0);
-      logger() << "dNeff for ALP calculated to be " << result << EOM;
-
-    }
-
 /// -----------
 /// BBN related functions
 /// -----------
@@ -2505,7 +2528,7 @@ int diff_eq_rhs (double t, const double T[], double f[], void *params)
       BEreq::Init_cosmomodel(&result);
 
       result.eta0 = *Param["eta_BBN"];  // eta AFTER BBN (variable during)
-      result.Nnu=3.046;                 // 3 massive neutrinos
+      result.Nnu=3.046;                 // 3 massive neutrinos TODO: not consistent with the neutrino treatment for class! -> update here as well
       result.dNnu=*Param["dNeff_BBN"];
       std::cout<< " eta_BBN " << *Param["eta_BBN"] << " dNeff_BBN " << *Param["dNeff_BBN"] << " dNeff " << *Param["dNeff"] <<std::endl;
       result.failsafe = runOptions->getValueOrDef<int>(3,"failsafe");
