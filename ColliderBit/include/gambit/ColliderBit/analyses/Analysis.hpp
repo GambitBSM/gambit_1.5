@@ -63,7 +63,7 @@ namespace Gambit
 
         Analysis() : _ntot(0), _xsec(0), _xsecerr(0), _luminosity(0),
                          _xsec_is_set(false), _luminosity_is_set(false),
-                         _is_scaled(false), _needs_collection(true) {  }
+                         _is_scaled(false), _needs_collection(true) { }
 
         virtual ~Analysis() { }
 

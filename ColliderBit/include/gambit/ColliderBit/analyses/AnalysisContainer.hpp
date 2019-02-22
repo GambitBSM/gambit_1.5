@@ -1,3 +1,29 @@
+//   GAMBIT: Global and Modular BSM Inference Tool
+//   *********************************************
+///  \file
+///
+///  Class for holding ColliderBit analyses.
+///
+///  *********************************************
+///
+///  Authors (add name and date if you modify):
+///
+///  \author Abram Krislock
+///          (a.m.b.krislock@fys.uio.no)
+///
+///  \author Andy Buckley
+///          (mostlikelytobefound@facebook.com)
+///
+///  \author Anders Kvellestad
+///          (anders.kvellestad@fys.uio.no)
+///  \date often
+///
+///  \author Pat Scott
+///          (p.scott@imperial.ac.uk)
+///  \date 2019 Feb
+///
+///  *********************************************
+
 #pragma once
 
 #include <string>
@@ -40,9 +66,6 @@ namespace Gambit
 
         /// String identifying the currently active collider
         str current_collider;
-
-        /// Has this class instance been initialized?
-        bool ready; //< @todo Currently not used for anything. Do we need it?
 
         /// Has this instance been registered in the instances_map?
         bool is_registered;
