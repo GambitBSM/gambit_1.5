@@ -21,7 +21,7 @@
 
 #include <omp.h>
 #include "gambit/ColliderBit/MC_convergence.hpp"
-#include "gambit/ColliderBit/analyses/AnalysisData.hpp"
+#include "gambit/ColliderBit/analyses/AnalysisContainer.hpp"
 #include "gambit/ColliderBit/analyses/Analysis.hpp"
 #include "gambit/Utils/standalone_error_handlers.hpp"
 

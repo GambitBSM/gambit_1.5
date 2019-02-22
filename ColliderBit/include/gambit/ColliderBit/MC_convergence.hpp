@@ -23,12 +23,14 @@
 #define __MC_convergence_hpp__
 
 #include "gambit/Utils/util_types.hpp"
-#include "gambit/ColliderBit/analyses/AnalysisContainer.hpp"
 
 namespace Gambit
 {
   namespace ColliderBit
   {
+
+    /// Forward declaration
+    class AnalysisContainer;
 
     /// Type for holding Monte Carlo convergence settings
     struct convergence_settings

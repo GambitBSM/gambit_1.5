@@ -1,9 +1,37 @@
+//   GAMBIT: Global and Modular BSM Inference Tool
+//   *********************************************
+///  \file
+///
+///  Class for holding ColliderBit analyses.
+///
+///  *********************************************
+///
+///  Authors (add name and date if you modify):
+///
+///  \author Abram Krislock
+///          (a.m.b.krislock@fys.uio.no)
+///
+///  \author Andy Buckley
+///          (mostlikelytobefound@facebook.com)
+///
+///  \author Anders Kvellestad
+///          (anders.kvellestad@fys.uio.no)
+///  \date often
+///
+///  \author Pat Scott
+///          (p.scott@imperial.ac.uk)
+///  \date 2019 Feb
+///
+///  *********************************************
+
+#include <stdexcept>
+
+#include <omp.h>
+
 #include "gambit/cmake/cmake_variables.hpp"
 #include "gambit/ColliderBit/analyses/AnalysisContainer.hpp"
 #include "gambit/ColliderBit/analyses/Analysis.hpp"
 #include "gambit/Utils/standalone_error_handlers.hpp"
-#include <stdexcept>
-#include <omp.h>
 
 // #define ANALYSISCONTAINER_DEBUG
 
@@ -142,12 +170,10 @@ namespace Gambit
     std::map<str,std::map<int,AnalysisContainer*> > AnalysisContainer::instances_map;
 
     /// Constructor
-    AnalysisContainer::AnalysisContainer() :
-      current_collider(""),
-      ready(false),
-      is_registered(false),
-      n_threads(omp_get_max_threads()),
-      base_key("")
+    AnalysisContainer::AnalysisContainer() : current_collider(""),
+                                             is_registered(false),
+                                             n_threads(omp_get_max_threads()),
+                                             base_key("")
     {
       #ifdef ANALYSISCONTAINER_DEBUG
         std::cout << "DEBUG: thread " << omp_get_thread_num() << ": AnalysisContainer::ctor: created at " << this << std::endl;
@@ -212,7 +238,6 @@ namespace Gambit
 
       // Clear the double map
       analyses_map.clear();
-      ready = false;
     }
 
 
@@ -267,9 +292,6 @@ namespace Gambit
       {
         analyses_map[collider_name][aname] = mkAnalysis(aname);
       }
-
-      // This instance is now ready
-      ready = true;
     }
 
     /// Initialize analyses (by names) for the current collider

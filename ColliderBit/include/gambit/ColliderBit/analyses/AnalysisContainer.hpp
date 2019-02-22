@@ -31,19 +31,17 @@
 #include <vector>
 #include <map>
 
-// Forward declarations, to avoid header-chaining into CB_types.hpp
-namespace HEPUtils { class Event; }
+#include "HEPUtils/Event.h"
+
 namespace Gambit
 {
+
   typedef std::string str;
-}
-
-
-namespace Gambit
-{
 
   namespace ColliderBit
   {
+
+    class Analysis;
 
     /// Create a new analysis based on a name string
     /// @note The caller is responsible for deleting the returned analysis object.
