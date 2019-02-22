@@ -557,7 +557,7 @@ namespace Gambit {
       }
 
     protected:
-      void clear() {
+      void analysis_specific_reset() {
 
         for(size_t i=0;i<NUMSR_stop;i++) { _srnums_stop[i]=0; }
         for(size_t i=0;i<NUMSR_chargino;i++) { _srnums_chargino[i]=0; }

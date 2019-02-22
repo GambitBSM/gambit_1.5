@@ -429,7 +429,7 @@ namespace Gambit {
 
 
     protected:
-      void clear() {
+      void analysis_specific_reset() {
         _numSRM90SF=0; _numSRM100SF=0; _numSRM110SF=0; _numSRM120SF=0;
         _numSRM90DF=0; _numSRM100DF=0; _numSRM110DF=0; _numSRM120DF=0;
 

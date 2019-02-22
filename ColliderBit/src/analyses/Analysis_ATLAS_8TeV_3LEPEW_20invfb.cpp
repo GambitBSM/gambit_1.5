@@ -1052,7 +1052,7 @@ namespace Gambit {
 
 
     protected:
-      void clear() {
+      void analysis_specific_reset() {
         _num_SR0tau_a_bin_1=0;
         _num_SR0tau_a_bin_2=0;
         _num_SR0tau_a_bin_3=0;

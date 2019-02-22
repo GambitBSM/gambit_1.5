@@ -420,7 +420,7 @@ namespace Gambit
 
 
     protected:
-      void clear() {
+      void analysis_specific_reset() {
         for (auto& el : _numSR) { el.second = 0.;}
         for (auto& el : _numSR_bin) { el.second = 0.;}
       }

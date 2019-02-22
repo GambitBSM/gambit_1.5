@@ -243,7 +243,7 @@ namespace Gambit {
 
 
     protected:
-      void clear() {
+      void analysis_specific_reset() {
         _numSR = 0;
         std::fill(cutFlowVector.begin(), cutFlowVector.end(), 0);
       }

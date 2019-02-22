@@ -28,7 +28,7 @@ namespace Gambit {
       Analysis_ATLAS_13TeV_ZGammaGrav_CONFNOTE_80invfb() {
         set_analysis_name("ATLAS_13TeV_ZGammaGrav_CONFNOTE_80invfb");
         set_luminosity(79.8);
-        clear();
+        analysis_specific_reset();
       }
 
 
@@ -175,7 +175,7 @@ namespace Gambit {
       }
 
 
-      void clear() {
+      void analysis_specific_reset() {
         nsig = 0;
         for (size_t i = 0; i < NCUTS; ++i) cutflow[i] = 0;
       }

@@ -1209,7 +1209,7 @@ namespace Gambit {
 
 
     protected:
-      void clear() {
+      void analysis_specific_reset() {
         _numSR2_SF_loose=0;
         _numSR2_SF_tight=0;
         _numSR2_DF_100=0;

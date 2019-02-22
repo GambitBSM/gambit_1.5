@@ -822,7 +822,7 @@ namespace Gambit {
 
 
     protected:
-      void clear() {
+      void analysis_specific_reset() {
         _numTN1Shape_bin1 = 0; _numTN1Shape_bin2 = 0; _numTN1Shape_bin3 = 0;
         _numTN2 = 0; _numTN3 = 0; _numBC1 = 0;
         _numBC2 = 0; _numBC3 = 0;

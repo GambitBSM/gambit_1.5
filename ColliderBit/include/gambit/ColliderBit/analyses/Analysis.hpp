@@ -49,10 +49,7 @@ namespace Gambit
         Analysis();
         virtual ~Analysis() { }
 
-        /// @brief Public method to reset this instance for reuse, avoiding the need for "new" or "delete".
-        /// @note This method calls _clear() to reset the base class variables, and then the overridden
-        /// clear() to reset analysis-specific variables.
-        /// @todo For v2.0: Simplify this reset scheme.
+        /// Public method to reset this instance for reuse, avoiding the need for "new" or "delete".
         void reset();
 
         /// @name Event analysis, event number, and cross section functions:
@@ -97,7 +94,7 @@ namespace Gambit
         ///@{
         /// General init for any analysis of this type.
         virtual void init(const std::vector<std::string>&) {}
-        /// General init for any collider of this type - no settings version.
+        /// General init for any analysis of this type - no settings version.
         virtual void init() {}
         /// Scale by number of input events and xsec.
         virtual void scale(double factor=-1);
@@ -115,12 +112,8 @@ namespace Gambit
 
       protected:
 
-        /// @brief Overloadable method to reset the analysis-specific variables.
-        //
-        /// @note Internally, reset() is called clear() -- we avoid this
-        /// externally because of confusion with std::vector::clear(), esp. on
-        /// AnalysisContainer.
-        virtual void clear() = 0;
+        /// Overloadable method to reset the analysis-specific variables.
+        virtual void analysis_specific_reset() = 0;
 
         /// @name Collection functions
         ///@{
@@ -143,11 +136,6 @@ namespace Gambit
         bool _xsec_is_set, _luminosity_is_set, _is_scaled, _needs_collection;
         AnalysisData _results;
         std::string _analysis_name;
-
-        /// @brief Reset the private base class variables.
-        /// @todo For v2.0: Avoid this 'duplication' of reset/clear methods.
-        void _clear();
-        ///@}
 
     };
 

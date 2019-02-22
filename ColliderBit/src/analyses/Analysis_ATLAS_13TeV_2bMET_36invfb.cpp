@@ -976,7 +976,7 @@ namespace Gambit {
         return;
       }
 
-      void clear() {
+      void analysis_specific_reset() {
 
 	_numb0L_SRA350=0; _numb0L_SRA450=0; _numb0L_SRA550=0;
         _numb0L_SRB=0; _numb0L_SRC=0;

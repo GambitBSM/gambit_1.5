@@ -419,7 +419,7 @@ namespace Gambit {
         }
 
     protected:
-        void clear() {
+        void analysis_specific_reset() {
             for(size_t i=0;i<NUM_aggregateSR;i++) { _aggregateSR[i]=0; }
         }
 

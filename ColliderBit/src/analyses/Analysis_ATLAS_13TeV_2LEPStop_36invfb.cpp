@@ -757,7 +757,7 @@ namespace Gambit {
         }
 
     protected:
-      void clear() {
+      void analysis_specific_reset() {
 	_SRASF120=0; _SRADF120=0; _SRASF140=0; _SRADF140=0;
 	_SRASF160=0; _SRADF160=0; _SRASF180=0; _SRADF180=0;
 	_SRBSF120=0; _SRBDF120=0; _SRBSF140=0; _SRBDF140=0;

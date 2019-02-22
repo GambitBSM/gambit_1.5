@@ -178,7 +178,7 @@ namespace Gambit {
 
 
     protected:
-      void clear() {
+      void analysis_specific_reset() {
        for (auto& el : _numSR) { el.second = 0.;}
       }
 

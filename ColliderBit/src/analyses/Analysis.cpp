@@ -49,17 +49,14 @@ namespace Gambit
     /// Public method to reset this instance for reuse, avoiding the need for "new" or "delete".
     void Analysis::reset()
     {
-      clear();
-      _clear();
-    }
-
-    /// Reset the private base class variables.
-    void Analysis::_clear()
-    {
-      _ntot = 0; _xsec = 0; _xsecerr = 0;
-      _xsec_is_set = false; _is_scaled = false;
+      _ntot = 0;
+      _xsec = 0;
+      _xsecerr = 0;
+      _xsec_is_set = false;
+      _is_scaled = false;
       _needs_collection = true;
       _results.clear();
+      analysis_specific_reset();
     }
 
     /// Analyze the event (accessed by reference).

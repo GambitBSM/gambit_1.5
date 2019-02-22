@@ -520,7 +520,7 @@ namespace Gambit
 
 
     protected:
-      void clear() {
+      void analysis_specific_reset() {
         for (auto& el : _numSR) { el.second = 0.;}
         #ifdef CHECK_CUTFLOW
           std::fill(cutFlowVector.begin(), cutFlowVector.end(), 0);

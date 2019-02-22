@@ -2158,7 +2158,7 @@ namespace Gambit {
 
 
     protected:
-      void clear() {
+      void analysis_specific_reset() {
         _num2L2JHIGH=0;
         _num2L2JINT=0;
         _num2L2JLOW=0;

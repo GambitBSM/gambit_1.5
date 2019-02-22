@@ -636,7 +636,7 @@ namespace Gambit {
         return;
       }
 
-      void clear() {
+      void analysis_specific_reset() {
         // Clear signal regions
         for (auto& el : _numSR) { el.second = 0.;}
 

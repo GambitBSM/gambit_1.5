@@ -1535,7 +1535,7 @@ namespace Gambit {
 
 
     protected:
-      void clear()
+      void analysis_specific_reset()
       {
         num_tN_med=0;
         num_tN_high=0;

@@ -754,7 +754,7 @@ namespace Gambit {
 
 
     protected:
-      void clear() {
+      void analysis_specific_reset() {
         _numSRA1 = 0 ; _numSRA2 = 0; _numSRA3 = 0; _numSRA4 = 0;
         _numSRC1 = 0 ; _numSRC2 = 0; _numSRC3 = 0;
 

@@ -985,7 +985,7 @@ namespace Gambit {
 
 
     protected:
-      void clear() {
+      void analysis_specific_reset() {
         _num_MT2_90_SF=0;
         _num_MT2_90_DF=0;
         _num_MT2_120_SF=0;

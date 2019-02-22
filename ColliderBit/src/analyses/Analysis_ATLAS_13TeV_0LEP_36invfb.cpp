@@ -418,7 +418,7 @@ namespace Gambit {
 
 
     protected:
-      void clear() {
+      void analysis_specific_reset() {
         num_2j_1200=0;
         num_2j_1600=0;
         num_2j_2000=0;

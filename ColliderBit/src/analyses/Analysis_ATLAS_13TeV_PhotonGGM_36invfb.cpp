@@ -666,7 +666,7 @@ namespace Gambit {
 
 
     protected:
-      void clear() {
+      void analysis_specific_reset() {
         num_SRaa_SL=0;
         num_SRaa_SH=0;
         num_SRaa_WL=0;

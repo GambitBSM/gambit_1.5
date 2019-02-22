@@ -925,7 +925,7 @@ namespace Gambit {
             add_result(results_SRA2);*/
 
     protected:
-      void clear() {
+      void analysis_specific_reset() {
 
         std::fill(_SRSF.begin(), _SRSF.end(), 0);
         std::fill(_SRDF.begin(), _SRDF.end(), 0);

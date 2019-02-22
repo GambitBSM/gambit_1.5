@@ -30,7 +30,7 @@ namespace Gambit {
       // : _cutflow("CMS monojet 13 TeV", {"Njet >= 3", "HT > 300", "HTmiss > 300", "Nmuon = 0", "Nelectron = 0", "Nhadron = 0 (no-op)", "Dphi_htmiss_j1", "Dphi_htmiss_j2", "Dphi_htmiss_j3", "Dphi_htmiss_j4"})
       {
         //for (double& n : _srnums) n = 0;
-        clear();
+        analysis_specific_reset();
         set_analysis_name("CMS_13TeV_MONOJET_36invfb");
         set_luminosity(35.9);
       }
@@ -162,7 +162,7 @@ namespace Gambit {
       }
 
     protected:
-      void clear() {
+      void analysis_specific_reset() {
         for (double& n : _srnums) n = 0;
         /// @todo Need to also clear/reset cutflow, but it currently has no method for that
       }
