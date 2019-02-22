@@ -1,5 +1,5 @@
 // -*- C++ -*-
-#include "gambit/ColliderBit/analyses/BaseAnalysis.hpp"
+#include "gambit/ColliderBit/analyses/Analysis.hpp"
 #include "gambit/ColliderBit/analyses/Cutflow.hpp"
 #include "gambit/ColliderBit/ATLASEfficiencies.hpp"
 #include "Eigen/Eigen"
@@ -21,7 +21,7 @@ namespace Gambit {
     ///
     /// Note: cutflows have not been updated yet (sincec 13 invfb analysis).
     ///
-    class Analysis_ATLAS_13TeV_0LEP_36invfb : public HEPUtilsAnalysis {
+    class Analysis_ATLAS_13TeV_0LEP_36invfb : public Analysis {
     public:
 
       // Required detector sim
@@ -112,7 +112,7 @@ namespace Gambit {
 
       void analyze(const Event* event) {
 
-        HEPUtilsAnalysis::analyze(event);
+        Analysis::analyze(event);
 
         _flows.fillinit();
 
@@ -354,9 +354,9 @@ namespace Gambit {
       }
 
 
-      void add(BaseAnalysis* other) {
+      void add(Analysis* other) {
         // The base class add function handles the signal region vector and total # events.
-        HEPUtilsAnalysis::add(other);
+        Analysis::add(other);
 
         Analysis_ATLAS_13TeV_0LEP_36invfb* specificOther = dynamic_cast<Analysis_ATLAS_13TeV_0LEP_36invfb*>(other);
 

@@ -1,4 +1,4 @@
-#include "gambit/ColliderBit/analyses/BaseAnalysis.hpp"
+#include "gambit/ColliderBit/analyses/Analysis.hpp"
 #include "gambit/ColliderBit/ATLASEfficiencies.hpp"
 #include "gambit/ColliderBit/mt2_bisect.h"
 using namespace std;
@@ -19,7 +19,7 @@ namespace Gambit {
     /// passing all cuts: underestimation of MET and satisfaction of angular/balance cuts.
     /// Adding MET smearing doesn't appear to have helped.
     ///
-    class Analysis_ATLAS_13TeV_ZGammaGrav_CONFNOTE_80invfb : public HEPUtilsAnalysis {
+    class Analysis_ATLAS_13TeV_ZGammaGrav_CONFNOTE_80invfb : public Analysis {
     public:
 
       // Required detector sim
@@ -33,7 +33,7 @@ namespace Gambit {
 
 
       void analyze(const Event* event) {
-        HEPUtilsAnalysis::analyze(event);
+        Analysis::analyze(event);
 
         // Electrons
         ParticlePtrs electrons;
@@ -143,9 +143,9 @@ namespace Gambit {
       }
 
 
-      void add(BaseAnalysis* other) {
+      void add(Analysis* other) {
         // The base class add function handles the signal region vector and total # events.
-        HEPUtilsAnalysis::add(other);
+        Analysis::add(other);
 
         Analysis_ATLAS_13TeV_ZGammaGrav_CONFNOTE_80invfb* specificOther
           = dynamic_cast<Analysis_ATLAS_13TeV_ZGammaGrav_CONFNOTE_80invfb*>(other);

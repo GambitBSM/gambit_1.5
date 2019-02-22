@@ -3,7 +3,7 @@
 #include <memory>
 #include <iomanip>
 
-#include "gambit/ColliderBit/analyses/BaseAnalysis.hpp"
+#include "gambit/ColliderBit/analyses/Analysis.hpp"
 #include "gambit/ColliderBit/ATLASEfficiencies.hpp"
 #include "gambit/ColliderBit/mt2_bisect.h"
 
@@ -16,13 +16,13 @@ using namespace std;
 
    Known errors:
         Using ATLASEfficiencies instead of CMSEfficiencies because "applyLooseIDElectronSelectionR2" and "applyMediumIDElectronSelectionR2" functions are important for this analysis.
-        
+
 */
 
 namespace Gambit {
   namespace ColliderBit {
 
-    class Analysis_CMS_13TeV_2LEPStop_36invfb : public HEPUtilsAnalysis {
+    class Analysis_CMS_13TeV_2LEPStop_36invfb : public Analysis {
     private:
 
         // Numbers passing cuts
@@ -121,7 +121,7 @@ namespace Gambit {
         }
 
         void analyze(const HEPUtils::Event* event) {
-            HEPUtilsAnalysis::analyze(event);
+            Analysis::analyze(event);
 
             // Missing energy
             double met = event->met();
@@ -407,9 +407,9 @@ namespace Gambit {
         }
 
 
-        void add(BaseAnalysis* other) {
+        void add(Analysis* other) {
             // The base class add function handles the signal region vector and total # events.
-            HEPUtilsAnalysis::add(other);
+            Analysis::add(other);
 
             Analysis_CMS_13TeV_2LEPStop_36invfb* specificOther
                 = dynamic_cast<Analysis_CMS_13TeV_2LEPStop_36invfb*>(other);

@@ -3,7 +3,7 @@
 #include <memory>
 #include <iomanip>
 
-#include "gambit/ColliderBit/analyses/BaseAnalysis.hpp"
+#include "gambit/ColliderBit/analyses/Analysis.hpp"
 #include "gambit/ColliderBit/ATLASEfficiencies.hpp"
 #include "gambit/ColliderBit/mt2_bisect.h"
 
@@ -27,7 +27,7 @@ namespace Gambit {
     bool sortByPT_j(HEPUtils::Jet* jet1, HEPUtils::Jet* jet2) { return (jet1->pT() > jet2->pT()); }
     bool sortByPT_l(HEPUtils::Particle* lep1, HEPUtils::Particle* lep2) { return (lep1->pT() > lep2->pT()); }
 
-    class Analysis_ATLAS_13TeV_2LEPStop_36invfb : public HEPUtilsAnalysis {
+    class Analysis_ATLAS_13TeV_2LEPStop_36invfb : public Analysis {
     private:
 
         // Numbers passing cuts
@@ -130,7 +130,7 @@ namespace Gambit {
         }
 
         void analyze(const HEPUtils::Event* event) {
-            HEPUtilsAnalysis::analyze(event);
+            Analysis::analyze(event);
 
             // Missing energy
             double met = event->met();
@@ -567,9 +567,9 @@ namespace Gambit {
         }
 
 
-        void add(BaseAnalysis* other) {
+        void add(Analysis* other) {
             // The base class add function handles the signal region vector and total # events.
-            HEPUtilsAnalysis::add(other);
+            Analysis::add(other);
 
             Analysis_ATLAS_13TeV_2LEPStop_36invfb* specificOther
                 = dynamic_cast<Analysis_ATLAS_13TeV_2LEPStop_36invfb*>(other);

@@ -18,7 +18,7 @@
 #include <iomanip>
 #include <fstream>
 
-#include "gambit/ColliderBit/analyses/BaseAnalysis.hpp"
+#include "gambit/ColliderBit/analyses/Analysis.hpp"
 #include "gambit/ColliderBit/CMSEfficiencies.hpp"
 #include "gambit/ColliderBit/mt2_bisect.h"
 
@@ -31,7 +31,7 @@ namespace Gambit {
     // Analysis_CMS_13TeV_2LEPsoft_36invfb_nocovar defined further down.
     // This is the same analysis, but it does not make use of the
     // SR covariance information.
-    class Analysis_CMS_13TeV_2LEPsoft_36invfb : public HEPUtilsAnalysis {
+    class Analysis_CMS_13TeV_2LEPsoft_36invfb : public Analysis {
 
     protected:
 
@@ -89,7 +89,7 @@ namespace Gambit {
 
 
       void analyze(const HEPUtils::Event* event) {
-        HEPUtilsAnalysis::analyze(event);
+        Analysis::analyze(event);
         double met = event->met();
 
         // Signal objects
@@ -301,10 +301,10 @@ namespace Gambit {
       }
 
 
-      void add(BaseAnalysis* other) {
+      void add(Analysis* other) {
         // The base class add function handles the signal region vector and total # events.
 
-        HEPUtilsAnalysis::add(other);
+        Analysis::add(other);
 
         Analysis_CMS_13TeV_2LEPsoft_36invfb* specificOther
                 = dynamic_cast<Analysis_CMS_13TeV_2LEPsoft_36invfb*>(other);

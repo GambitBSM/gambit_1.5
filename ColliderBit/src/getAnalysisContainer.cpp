@@ -25,7 +25,7 @@
 ///          (p.scott@imperial.ac.uk)
 ///  \date 2015 Jul
 ///  \date 2018 Jan
-///  \date 2019 Jan
+///  \date 2019 Jan, Feb
 ///
 ///  \author Anders Kvellestad
 ///          (anders.kvellestad@fys.uio.no)
@@ -46,7 +46,7 @@ namespace Gambit
   {
 
     /// Retrieve an analysis container for a specific detector
-    void getAnalysisContainer(HEPUtilsAnalysisContainer& result,
+    void getAnalysisContainer(AnalysisContainer& result,
                               const str& detname,
                               const MCLoopInfo& RunMC,
                               const BaseCollider& HardScatteringSim,
@@ -103,7 +103,7 @@ namespace Gambit
 
     /// Retrieve a container for analyses with EXPERIMENT
     #define GET_ANALYSIS_CONTAINER(NAME, EXPERIMENT)               \
-    void NAME(HEPUtilsAnalysisContainer& result)                   \
+    void NAME(AnalysisContainer& result)                           \
     {                                                              \
       using namespace Pipes::NAME;                                 \
       getAnalysisContainer(result, #EXPERIMENT, *Dep::RunMC,       \

@@ -1,5 +1,5 @@
 // -*- C++ -*-
-#include "gambit/ColliderBit/analyses/BaseAnalysis.hpp"
+#include "gambit/ColliderBit/analyses/Analysis.hpp"
 #include "gambit/ColliderBit/analyses/Cutflow.hpp"
 #include "gambit/ColliderBit/CMSEfficiencies.hpp"
 #include "Eigen/Eigen"
@@ -15,7 +15,7 @@ namespace Gambit {
     ///
     /// Based on:
     ///
-    class Analysis_CMS_13TeV_0LEP_13invfb : public HEPUtilsAnalysis {
+    class Analysis_CMS_13TeV_0LEP_13invfb : public Analysis {
     public:
 
       // Required detector sim
@@ -38,7 +38,7 @@ namespace Gambit {
 
       void analyze(const Event* event) {
 
-        HEPUtilsAnalysis::analyze(event);
+        Analysis::analyze(event);
         _cutflow.fillinit();
 
         // FinalState isofs(Cuts::abseta < 3.0 && Cuts::abspid != PID::ELECTRON && Cuts::abspid != PID::MUON);
@@ -214,9 +214,9 @@ namespace Gambit {
       }
 
 
-      void add(BaseAnalysis* other) {
+      void add(Analysis* other) {
         // The base class add function handles the signal region vector and total # events.
-        HEPUtilsAnalysis::add(other);
+        Analysis::add(other);
 
         Analysis_CMS_13TeV_0LEP_13invfb* specificOther = dynamic_cast<Analysis_CMS_13TeV_0LEP_13invfb*>(other);
 

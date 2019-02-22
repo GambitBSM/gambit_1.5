@@ -46,7 +46,7 @@
   #define CAPABILITY ATLASAnalysisContainer
   START_CAPABILITY
     #define FUNCTION getATLASAnalysisContainer
-    START_FUNCTION(HEPUtilsAnalysisContainer)
+    START_FUNCTION(AnalysisContainer)
     NEEDS_MANAGER(RunMC, MCLoopInfo)
     DEPENDENCY(HardScatteringSim, const BaseCollider*)
     #undef FUNCTION
@@ -55,7 +55,7 @@
   #define CAPABILITY CMSAnalysisContainer
   START_CAPABILITY
     #define FUNCTION getCMSAnalysisContainer
-    START_FUNCTION(HEPUtilsAnalysisContainer)
+    START_FUNCTION(AnalysisContainer)
     NEEDS_MANAGER(RunMC, MCLoopInfo)
     DEPENDENCY(HardScatteringSim, const BaseCollider*)
     #undef FUNCTION
@@ -64,7 +64,7 @@
   #define CAPABILITY IdentityAnalysisContainer
   START_CAPABILITY
     #define FUNCTION getIdentityAnalysisContainer
-    START_FUNCTION(HEPUtilsAnalysisContainer)
+    START_FUNCTION(AnalysisContainer)
     NEEDS_MANAGER(RunMC, MCLoopInfo)
     DEPENDENCY(HardScatteringSim, const BaseCollider*)
     #undef FUNCTION
@@ -79,7 +79,7 @@
     START_FUNCTION(AnalysisDataPointers)
     NEEDS_MANAGER(RunMC, MCLoopInfo)
     DEPENDENCY(ATLASSmearedEvent, HEPUtils::Event)
-    DEPENDENCY(ATLASAnalysisContainer, HEPUtilsAnalysisContainer)
+    DEPENDENCY(ATLASAnalysisContainer, AnalysisContainer)
     #undef FUNCTION
   #undef CAPABILITY
 
@@ -89,7 +89,7 @@
     START_FUNCTION(AnalysisDataPointers)
     NEEDS_MANAGER(RunMC, MCLoopInfo)
     DEPENDENCY(CMSSmearedEvent, HEPUtils::Event)
-    DEPENDENCY(CMSAnalysisContainer, HEPUtilsAnalysisContainer)
+    DEPENDENCY(CMSAnalysisContainer, AnalysisContainer)
     #undef FUNCTION
   #undef CAPABILITY
 
@@ -99,7 +99,7 @@
     START_FUNCTION(AnalysisDataPointers)
     NEEDS_MANAGER(RunMC, MCLoopInfo)
     DEPENDENCY(CopiedEvent, HEPUtils::Event)
-    DEPENDENCY(IdentityAnalysisContainer, HEPUtilsAnalysisContainer)
+    DEPENDENCY(IdentityAnalysisContainer, AnalysisContainer)
     #undef FUNCTION
   #undef CAPABILITY
   /// @}

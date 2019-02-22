@@ -44,7 +44,7 @@
 #include "gambit/ColliderBit/colliders/ColliderPythia.hpp"
 #include "gambit/ColliderBit/colliders/ColliderPythia_typedefs.hpp"
 #include "gambit/ColliderBit/detectors/BuckFast.hpp"
-#include "gambit/ColliderBit/analyses/HEPUtilsAnalysisContainer.hpp"
+#include "gambit/ColliderBit/analyses/AnalysisContainer.hpp"
 #include "gambit/ColliderBit/analyses/AnalysisData.hpp"
 
 #include "gambit/ColliderBit/limits/ALEPHSleptonLimits.hpp"
@@ -88,7 +88,7 @@ namespace Gambit
     typedef std::map<std::string,AnalysisLogLikes> map_str_AnalysisLogLikes;
 
     /// @brief Container for multiple analysis containers
-    typedef std::vector<HEPUtilsAnalysisContainer> HEPUtilsAnalysisContainers;
+    typedef std::vector<AnalysisContainer> AnalysisContainers;
 
     typedef std::chrono::milliseconds ms;
     typedef std::chrono::steady_clock steady_clock;

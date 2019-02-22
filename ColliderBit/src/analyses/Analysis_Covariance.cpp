@@ -1,4 +1,4 @@
-#include "gambit/ColliderBit/analyses/BaseAnalysis.hpp"
+#include "gambit/ColliderBit/analyses/Analysis.hpp"
 #include "gambit/ColliderBit/ATLASEfficiencies.hpp"
 
 namespace Gambit {
@@ -7,7 +7,7 @@ namespace Gambit {
 
 
     /// Dummy analysis code with a hard-coded return including a SR covariance matrix
-    class Analysis_Covariance : public HEPUtilsAnalysis {
+    class Analysis_Covariance : public Analysis {
     private:
 
       // Variables that holds the number of events passing
@@ -26,7 +26,7 @@ namespace Gambit {
 
 
       void analyze(const HEPUtils::Event* event) {
-        HEPUtilsAnalysis::analyze(event);
+        Analysis::analyze(event);
         // if ((int)num_events() % 100 == 0) cout << num_events() << endl;
       }
 

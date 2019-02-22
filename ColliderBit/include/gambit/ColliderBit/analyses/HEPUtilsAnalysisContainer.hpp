@@ -10,12 +10,6 @@ namespace HEPUtils { class Event; }
 namespace Gambit
 {
   typedef std::string str;
-  namespace ColliderBit
-  {
-    template <typename EventT>
-    class BaseAnalysis;
-    using HEPUtilsAnalysis = BaseAnalysis<HEPUtils::Event>;
-  }
 }
 
 
@@ -28,21 +22,21 @@ namespace Gambit
     /// Create a new analysis based on a name string
     /// @note The caller is responsible for deleting the returned analysis object.
     /// @todo Move to a separate file
-    HEPUtilsAnalysis* mkAnalysis(const str& name);
+    Analysis* mkAnalysis(const str& name);
 
     /// Return the detector to be used for a given analysis name, checking that the analysis exists.
     str getDetector(const str& name);
 
 
-    /// A class for managing collections of HEPUtilsAnalysis instances.
-    class HEPUtilsAnalysisContainer
+    /// A class for managing collections of Analysis instances.
+    class AnalysisContainer
     {
 
       private:
 
-        /// A map of maps of pointer-to-HEPUtilsAnalysis.
+        /// A map of maps of pointer-to-Analysis.
         /// First key is the collider name, second key is the analysis name.
-        std::map<str,std::map<str,HEPUtilsAnalysis*> > analyses_map;
+        std::map<str,std::map<str,Analysis*> > analyses_map;
 
         /// String identifying the currently active collider
         str current_collider;
@@ -61,16 +55,16 @@ namespace Gambit
 
         /// A vector with pointers to all instances of this class. The key is the OMP thread number.
         /// (There should only be one instance of this class per OMP thread.)
-        static std::map<str,std::map<int,HEPUtilsAnalysisContainer*> > instances_map;
+        static std::map<str,std::map<int,AnalysisContainer*> > instances_map;
 
 
       public:
 
         /// Constructor
-        HEPUtilsAnalysisContainer();
+        AnalysisContainer();
 
         /// Destructor
-        ~HEPUtilsAnalysisContainer();
+        ~AnalysisContainer();
 
         /// Add container to instances map
         void register_thread(str);
@@ -104,13 +98,13 @@ namespace Gambit
         void reset_all();
 
         /// Get pointer to specific analysis
-        const HEPUtilsAnalysis* get_analysis_pointer(str, str) const;
+        const Analysis* get_analysis_pointer(str, str) const;
         /// Get analyses map for a specific collider
-        const std::map<str,HEPUtilsAnalysis*>& get_collider_analyses_map(str) const;
+        const std::map<str,Analysis*>& get_collider_analyses_map(str) const;
         /// Get analyses map for the current collider
-        const std::map<str,HEPUtilsAnalysis*>& get_current_analyses_map() const;
+        const std::map<str,Analysis*>& get_current_analyses_map() const;
         /// Get the full analyses map
-        const std::map<str,std::map<str,HEPUtilsAnalysis*> >& get_full_analyses_map() const;
+        const std::map<str,std::map<str,Analysis*> >& get_full_analyses_map() const;
 
         /// Pass event through specific analysis
         void analyze(const HEPUtils::Event&, str, str) const;

@@ -1,5 +1,5 @@
 // -*- C++ -*-
-#include "gambit/ColliderBit/analyses/BaseAnalysis.hpp"
+#include "gambit/ColliderBit/analyses/Analysis.hpp"
 #include "gambit/ColliderBit/analyses/Cutflow.hpp"
 #include "gambit/ColliderBit/CMSEfficiencies.hpp"
 
@@ -16,7 +16,7 @@ namespace Gambit {
     ///
     /// @todo Add W/Z region with AKT8 jets and 2/1 n-subjettiness ratio cut
     ///
-    class Analysis_CMS_13TeV_MONOJET_36invfb : public HEPUtilsAnalysis {
+    class Analysis_CMS_13TeV_MONOJET_36invfb : public Analysis {
     public:
 
       // Required detector sim
@@ -37,7 +37,7 @@ namespace Gambit {
 
       void analyze(const Event* event) {
 
-        HEPUtilsAnalysis::analyze(event);
+        Analysis::analyze(event);
         // _cutflow.fillinit();
 
         // Require large MET
@@ -98,9 +98,9 @@ namespace Gambit {
       }
 
 
-      void add(BaseAnalysis* other) {
+      void add(Analysis* other) {
         // The base class add function handles the signal region vector and total # events.
-        HEPUtilsAnalysis::add(other);
+        Analysis::add(other);
         Analysis_CMS_13TeV_MONOJET_36invfb* specificOther = dynamic_cast<Analysis_CMS_13TeV_MONOJET_36invfb*>(other);
         for (size_t i = 0; i < NUMSR; ++i)
           _srnums[i] += specificOther->_srnums[i];

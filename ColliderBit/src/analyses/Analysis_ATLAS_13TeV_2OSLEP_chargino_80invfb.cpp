@@ -17,7 +17,7 @@
 #include <algorithm>
 #include <fstream>
 
-#include "gambit/ColliderBit/analyses/BaseAnalysis.hpp"
+#include "gambit/ColliderBit/analyses/Analysis.hpp"
 #include "gambit/ColliderBit/ATLASEfficiencies.hpp"
 #include "gambit/ColliderBit/mt2_bisect.h"
 #include "gambit/ColliderBit/analyses/Cutflow.hpp"
@@ -35,7 +35,7 @@ namespace Gambit
     // defined further down:
     // - ATLAS_13TeV_2OSLEP_chargino_binned_80invfb
     // - ATLAS_13TeV_2OSLEP_chargino_inclusive_80invfb
-    class Analysis_ATLAS_13TeV_2OSLEP_chargino_80invfb : public HEPUtilsAnalysis
+    class Analysis_ATLAS_13TeV_2OSLEP_chargino_80invfb : public Analysis
     {
 
     protected:
@@ -173,7 +173,7 @@ namespace Gambit
         _cutflow.fillinit();
 
         // Baseline objects
-        HEPUtilsAnalysis::analyze(event);
+        Analysis::analyze(event);
         double met = event->met();
 
         // Electrons
@@ -365,10 +365,10 @@ namespace Gambit
       }
 
 
-      void add(BaseAnalysis* other) {
+      void add(Analysis* other) {
         // The base class add function handles the signal region vector and total # events.
 
-        HEPUtilsAnalysis::add(other);
+        Analysis::add(other);
 
         Analysis_ATLAS_13TeV_2OSLEP_chargino_80invfb* specificOther
                 = dynamic_cast<Analysis_ATLAS_13TeV_2OSLEP_chargino_80invfb*>(other);

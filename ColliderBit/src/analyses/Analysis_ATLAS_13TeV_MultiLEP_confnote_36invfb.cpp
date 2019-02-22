@@ -13,7 +13,7 @@
 #include <algorithm>
 #include <fstream>
 
-#include "gambit/ColliderBit/analyses/BaseAnalysis.hpp"
+#include "gambit/ColliderBit/analyses/Analysis.hpp"
 #include "gambit/ColliderBit/ATLASEfficiencies.hpp"
 #include "gambit/ColliderBit/mt2_bisect.h"
 
@@ -22,7 +22,7 @@ using namespace std;
 namespace Gambit {
   namespace ColliderBit {
 
-    class Analysis_ATLAS_13TeV_MultiLEP_confnote_36invfb : public HEPUtilsAnalysis {
+    class Analysis_ATLAS_13TeV_MultiLEP_confnote_36invfb : public Analysis {
     private:
 
       // Numbers passing cuts
@@ -151,7 +151,7 @@ namespace Gambit {
       } compareJetPt;
 
       void analyze(const HEPUtils::Event* event) {
-        HEPUtilsAnalysis::analyze(event);
+        Analysis::analyze(event);
         double met = event->met();
 
         // Baseline electrons
@@ -808,10 +808,10 @@ namespace Gambit {
       }
 
 
-      void add(BaseAnalysis* other) {
+      void add(Analysis* other) {
         // The base class add function handles the signal region vector and total # events.
 
-        HEPUtilsAnalysis::add(other);
+        Analysis::add(other);
 
         Analysis_ATLAS_13TeV_MultiLEP_confnote_36invfb* specificOther
                 = dynamic_cast<Analysis_ATLAS_13TeV_MultiLEP_confnote_36invfb*>(other);

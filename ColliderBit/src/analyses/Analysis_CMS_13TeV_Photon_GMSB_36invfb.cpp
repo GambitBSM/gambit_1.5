@@ -18,7 +18,7 @@
 #include <iomanip>
 #include <fstream>
 
-#include "gambit/ColliderBit/analyses/BaseAnalysis.hpp"
+#include "gambit/ColliderBit/analyses/Analysis.hpp"
 #include "gambit/ColliderBit/CMSEfficiencies.hpp"
 #include "gambit/ColliderBit/mt2_bisect.h"
 #include "gambit/ColliderBit/analyses/Cutflow.hpp"
@@ -31,7 +31,7 @@ namespace Gambit {
   namespace ColliderBit {
 
 
-    class Analysis_CMS_13TeV_Photon_GMSB_36invfb : public HEPUtilsAnalysis {
+    class Analysis_CMS_13TeV_Photon_GMSB_36invfb : public Analysis {
     public:
 
       static constexpr const char* detector = "CMS";
@@ -58,7 +58,7 @@ namespace Gambit {
       void analyze(const HEPUtils::Event* event)
       {
         // Baseline objects
-        HEPUtilsAnalysis::analyze(event);
+        Analysis::analyze(event);
         HEPUtils::P4 ptot = event->missingmom();
         double met = event->met();
         _cutflow.fillinit();
@@ -142,11 +142,11 @@ namespace Gambit {
       }
 
 
-      void add(BaseAnalysis* other)
+      void add(Analysis* other)
       {
         // The base class add function handles the signal region vector and total # events.
 
-        HEPUtilsAnalysis::add(other);
+        Analysis::add(other);
 
         Analysis_CMS_13TeV_Photon_GMSB_36invfb* specificOther
                 = dynamic_cast<Analysis_CMS_13TeV_Photon_GMSB_36invfb*>(other);

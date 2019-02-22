@@ -11,7 +11,7 @@
 #include <fstream>
 #include <ctime>
 
-#include "gambit/ColliderBit/analyses/BaseAnalysis.hpp"
+#include "gambit/ColliderBit/analyses/Analysis.hpp"
 #include "gambit/ColliderBit/ATLASEfficiencies.hpp"
 //#include "gambit/ColliderBit/analyses/Perf_Plot.hpp"
 
@@ -20,7 +20,7 @@ using namespace std;
 namespace Gambit {
   namespace ColliderBit {
 
-    class Analysis_ATLAS_8TeV_1LEPbb_20invfb : public HEPUtilsAnalysis {
+    class Analysis_ATLAS_8TeV_1LEPbb_20invfb : public Analysis {
     private:
 
       // Numbers passing cuts
@@ -85,7 +85,7 @@ namespace Gambit {
 
 
       void analyze(const HEPUtils::Event* event) {
-        HEPUtilsAnalysis::analyze(event);
+        Analysis::analyze(event);
         double met = event->met();
 
         // Baseline objects
@@ -313,9 +313,9 @@ namespace Gambit {
       }
 
 
-      void add(BaseAnalysis* other) {
+      void add(Analysis* other) {
         // The base class add function handles the signal region vector and total # events.
-        HEPUtilsAnalysis::add(other);
+        Analysis::add(other);
 
         Analysis_ATLAS_8TeV_1LEPbb_20invfb* specificOther
                 = dynamic_cast<Analysis_ATLAS_8TeV_1LEPbb_20invfb*>(other);

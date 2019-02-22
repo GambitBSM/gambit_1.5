@@ -1,4 +1,4 @@
-#include "gambit/ColliderBit/analyses/BaseAnalysis.hpp"
+#include "gambit/ColliderBit/analyses/Analysis.hpp"
 #include "gambit/ColliderBit/ATLASEfficiencies.hpp"
 
 namespace Gambit {
@@ -7,7 +7,7 @@ namespace Gambit {
 
 
     /// Basic analysis code for copying
-    class Analysis_Minimum : public HEPUtilsAnalysis {
+    class Analysis_Minimum : public Analysis {
     private:
 
       // Variables to hold the number of events passing signal region cuts
@@ -34,7 +34,7 @@ namespace Gambit {
 
 
       void analyze(const HEPUtils::Event* event) {
-        HEPUtilsAnalysis::analyze(event);
+        Analysis::analyze(event);
 
         // Get the missing energy in the event
         double met = event->met();
@@ -81,12 +81,12 @@ namespace Gambit {
       }
 
 
-      void add(BaseAnalysis* other) {
+      void add(Analysis* other)
+      {
         // The base class add function handles the signal region number and total # events combination across threads
-        HEPUtilsAnalysis::add(other);
+        Analysis::add(other);
 
         Analysis_Minimum* specificOther = dynamic_cast<Analysis_Minimum*>(other);
-
         // Here we will add the subclass member variables:
         _numSR += specificOther->_numSR;
       }

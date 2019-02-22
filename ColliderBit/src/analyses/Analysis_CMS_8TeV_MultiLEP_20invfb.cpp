@@ -5,35 +5,35 @@
 #include <sstream>
 #include <cassert>
 
-#include "gambit/ColliderBit/analyses/BaseAnalysis.hpp"
+#include "gambit/ColliderBit/analyses/Analysis.hpp"
 #include "gambit/ColliderBit/CMSEfficiencies.hpp"
 
-/* 
+/*
   A simulation of CMS paper PAS SUS-13-006, http://cds.cern.ch/record/1563142/files/SUS-13-006-pas.pdf
 
-  Original code by Martin White, Daniel Murnane, 
+  Original code by Martin White, Daniel Murnane,
   Revised version by Anders Kvellestad.
 
   Known features:
     a) Must run with a dedicated detector card due to odd b tagging and isolation
-    
+
     Anders: Not sure if this comment still applies?
 
   Missing:
     Implement SRs for the 2lep2jet final states
-    
-  
-  NOTE: 
-  To protect against copy/paste mistakes and other inconsistencies when 
-  the results are used both in the base and the derived analysis classes below, 
-  we first define some macros that will be used in the collect_results() 
+
+
+  NOTE:
+  To protect against copy/paste mistakes and other inconsistencies when
+  the results are used both in the base and the derived analysis classes below,
+  we first define some macros that will be used in the collect_results()
   functions in the classes below.
 */
 
 
-// 
+//
 // SR group 1
-// 
+//
 #define ADD_RESULTS_SRGROUP_1 \
   add_result(SignalRegionData("SR3l_OSSF_mT<120_ETmiss50-100_mll<75", 138., {_numSR["SR3l_OSSF_mT<120_ETmiss50-100_mll<75"], 0}, {132., 19.}));          \
   add_result(SignalRegionData("SR3l_OSSF_mT<120_ETmiss50-100_mll75-105", 821., {_numSR["SR3l_OSSF_mT<120_ETmiss50-100_mll75-105"], 0}, {776., 125.}));   \
@@ -75,9 +75,9 @@
   add_result(SignalRegionData("SR3l_OSSF_mT>160_ETmiss200-250_mll>105", 0., {_numSR["SR3l_OSSF_mT>160_ETmiss200-250_mll>105"], 0}, {0.40, 0.24}));    \
 
 
-// 
+//
 // SR group 2
-// 
+//
 #define ADD_RESULTS_SRGROUP_2 \
   add_result(SignalRegionData("SR3l_noOSSF_mT<120_ETmiss50-100_mll<100", 29., {_numSR["SR3l_noOSSF_mT<120_ETmiss50-100_mll<100"], 0}, { 32., 7.}));      \
   add_result(SignalRegionData("SR3l_noOSSF_mT<120_ETmiss50-100_mll>100", 1., {_numSR["SR3l_noOSSF_mT<120_ETmiss50-100_mll>100"], 0}, {1.7, 0.4}));       \
@@ -107,9 +107,9 @@
   add_result(SignalRegionData("SR3l_noOSSF_mT>160_ETmiss200-250_mll>100", 0., {_numSR["SR3l_noOSSF_mT>160_ETmiss200-250_mll>100"], 0}, {0.16, 0.14}));   \
 
 
-// 
+//
 // SR group 3
-// 
+//
 #define ADD_RESULTS_SRGROUP_3 \
   add_result(SignalRegionData("SR3l_SS1tau_mT<120_ETmiss50-100_mll<100", 46., {_numSR["SR3l_SS1tau_mT<120_ETmiss50-100_mll<100"], 0}, {51., 8.}));       \
   add_result(SignalRegionData("SR3l_SS1tau_mT<120_ETmiss50-100_mll>100", 3., {_numSR["SR3l_SS1tau_mT<120_ETmiss50-100_mll>100"], 0}, {2.8, 0.6}));       \
@@ -139,9 +139,9 @@
   add_result(SignalRegionData("SR3l_SS1tau_mT>160_ETmiss200-250_mll>100", 0., {_numSR["SR3l_SS1tau_mT>160_ETmiss200-250_mll>100"], 0}, {0.06, 0.05}));   \
 
 
-// 
+//
 // SR group 4
-// 
+//
 #define ADD_RESULTS_SRGROUP_4 \
   add_result(SignalRegionData("SR3l_OS1tau_mT<120_ETmiss50-100_mll<100", 290., {_numSR["SR3l_OS1tau_mT<120_ETmiss50-100_mll<100"], 0}, {259., 93.}));  \
   add_result(SignalRegionData("SR3l_OS1tau_mT<120_ETmiss50-100_mll>100", 27., {_numSR["SR3l_OS1tau_mT<120_ETmiss50-100_mll>100"], 0}, {30., 13.}));    \
@@ -171,9 +171,9 @@
   add_result(SignalRegionData("SR3l_OS1tau_mT>160_ETmiss200-250_mll>100", 1., {_numSR["SR3l_OS1tau_mT>160_ETmiss200-250_mll>100"], 0}, {0.7, 0.4}));   \
 
 
-// 
+//
 // SR group 5
-// 
+//
 #define ADD_RESULTS_SRGROUP_5 \
   add_result(SignalRegionData("SR4l_1OSSF0tau_ETmiss<30", 1., {_numSR["SR4l_1OSSF0tau_ETmiss<30"], 0}, {2.3, 0.6}));       \
   add_result(SignalRegionData("SR4l_1OSSF0tau_ETmiss30-50", 3., {_numSR["SR4l_1OSSF0tau_ETmiss30-50"], 0}, {1.2, 0.3}));   \
@@ -198,11 +198,11 @@ namespace Gambit {
 
     using namespace std;
 
-    // This analysis class is a base class for the following SR-specific 
+    // This analysis class is a base class for the following SR-specific
     // analysis classes defined further down:
     // - Analysis_CMS_8TeV_MultiLEP_3Lep_20invfb
     // - Analysis_CMS_8TeV_MultiLEP_4Lep_20invfb
-    class Analysis_CMS_8TeV_MultiLEP_20invfb : public HEPUtilsAnalysis {
+    class Analysis_CMS_8TeV_MultiLEP_20invfb : public Analysis {
 
     protected:
 
@@ -350,12 +350,12 @@ namespace Gambit {
 
     private:
 
-      struct ptComparison 
+      struct ptComparison
       {
         bool operator() (HEPUtils::Particle* i,HEPUtils::Particle* j) {return (i->pT()>j->pT());}
       } comparePt;
-      
-      struct ptJetComparison 
+
+      struct ptJetComparison
       {
         bool operator() (HEPUtils::Jet* i,HEPUtils::Jet* j) {return (i->pT()>j->pT());}
       } compareJetPt;
@@ -363,13 +363,13 @@ namespace Gambit {
 
       // Jet lepton overlap removal
       // Discards jets if they are within DeltaRMax of a lepton
-      void JetLeptonOverlapRemoval(vector<HEPUtils::Jet*>& jets, vector<HEPUtils::Particle*>& leptons, double DeltaRMax) 
+      void JetLeptonOverlapRemoval(vector<HEPUtils::Jet*>& jets, vector<HEPUtils::Particle*>& leptons, double DeltaRMax)
       {
         vector<HEPUtils::Jet*> survivors;
         for(HEPUtils::Jet* jet : jets)
         {
           bool overlap = false;
-          for(HEPUtils::Particle* lepton : leptons) 
+          for(HEPUtils::Particle* lepton : leptons)
           {
             double dR = jet->mom().deltaR_eta(lepton->mom());
             if(fabs(dR) <= DeltaRMax) overlap = true;
@@ -383,7 +383,7 @@ namespace Gambit {
 
       // Identify the particle pair with invariant mass closest to a given value
       vector<HEPUtils::Particle*> getClosestMllPair(vector<vector<HEPUtils::Particle*>> pairs, double mll_compare) {
-        
+
         assert(pairs.size()>0);
 
         vector<HEPUtils::Particle*> pair = pairs.at(0);
@@ -410,7 +410,7 @@ namespace Gambit {
         assert(leptons.size() == pair.size()+1);
 
         HEPUtils::Particle* lepton = NULL;
-        
+
         for (HEPUtils::Particle* l : leptons) {
           // If l is not in pair, we're done
           if (find(pair.begin(), pair.end(), l) == pair.end()) {
@@ -442,7 +442,7 @@ namespace Gambit {
 
 
       void analyze(const HEPUtils::Event* event) {
-        HEPUtilsAnalysis::analyze(event);
+        Analysis::analyze(event);
 
         // Missing energy
         double met = event->met();
@@ -459,7 +459,7 @@ namespace Gambit {
         // Apply electron efficiency
         CMS::applyElectronEff(signalElectrons);
 
-        // - muons 
+        // - muons
         vector<HEPUtils::Particle*> signalMuons;
         for (HEPUtils::Particle* muon : event->muons()) {
           if (muon->pT() > 10. && fabs(muon->eta()) < 2.4) signalMuons.push_back(muon);
@@ -500,7 +500,7 @@ namespace Gambit {
         signalLeptonsTaus.insert(signalLeptonsTaus.end(), signalTaus.begin(), signalTaus.end());
 
         // Sort by pT
-        sort(signalJets.begin(), signalJets.end(), compareJetPt); 
+        sort(signalJets.begin(), signalJets.end(), compareJetPt);
         sort(signalLeptons.begin(), signalLeptons.end(), comparePt);
         sort(signalLeptonsTaus.begin(), signalLeptonsTaus.end(), comparePt);
 
@@ -515,7 +515,7 @@ namespace Gambit {
         // Has the highest-pT lepton pT > 20 GeV?
         bool hasPt20Lepton = false;
         if (nSignalLeptons > 0) {
-          if (signalLeptons.at(0)->pT() > 20) hasPt20Lepton = true;          
+          if (signalLeptons.at(0)->pT() > 20) hasPt20Lepton = true;
         }
 
         // Get OS and OSSF pairs
@@ -563,7 +563,7 @@ namespace Gambit {
           vector<HEPUtils::Particle*> pair = getClosestMllPair(OSSFpairs, mZ);
           mll = (pair.at(0)->mom() + pair.at(1)->mom()).m();
 
-          // Identify the 'third lepton', i.e. the signal lepton 
+          // Identify the 'third lepton', i.e. the signal lepton
           // that is not part of the OSSF pair
           HEPUtils::Particle* third_lepton = getLeptonNotInPair(signalLeptons, pair);
 
@@ -579,21 +579,21 @@ namespace Gambit {
           // Set SR group
           SRgroup = 2;
 
-          // Choose OS pair with mll closest to 50 GeV. 
+          // Choose OS pair with mll closest to 50 GeV.
           // (Since nOSSFpairs==0, this pair must be an e-mu pair.)
           vector<HEPUtils::Particle*> pair = getClosestMllPair(OSpairs, 50.);
           mll = (pair.at(0)->mom() + pair.at(1)->mom()).m();
 
-          // Identify the 'third lepton', i.e. the signal lepton 
+          // Identify the 'third lepton', i.e. the signal lepton
           // that is not part of the OSSF pair
           HEPUtils::Particle* third_lepton = getLeptonNotInPair(signalLeptons, pair);
 
           // Calculate mT with the third lepton
           mT = transverseMass(met, pTmissPhi, third_lepton->pT(), third_lepton->phi());
         }
-        // 
+        //
         // Events from Table 3: same-sign ee/mumu/emu pair + one tau
-        // 
+        //
         else if (nSignalLeptons==2 && nSignalTaus==1 && nSSpairs==1 && nOSpairsWithTaus>0) {
 
           // Set SR group
@@ -603,16 +603,16 @@ namespace Gambit {
           vector<HEPUtils::Particle*> pair = getClosestMllPair(OSpairsWithTaus, 60.);
           mll = (pair.at(0)->mom() + pair.at(1)->mom()).m();
 
-          // Identify the 'third lepton', i.e. the signal lepton 
+          // Identify the 'third lepton', i.e. the signal lepton
           // that is not part of the OS pair
           HEPUtils::Particle* third_lepton = getLeptonNotInPair(signalLeptons, pair);
 
           // Calculate mT with the third lepton
-          mT = transverseMass(met, pTmissPhi, third_lepton->pT(), third_lepton->phi());        
+          mT = transverseMass(met, pTmissPhi, third_lepton->pT(), third_lepton->phi());
         }
-        // 
+        //
         // Events from Table 4: opposite-sign emu pair + one tau
-        // 
+        //
         else if (nSignalElectrons==1 && nSignalMuons==1 && nSignalTaus==1 && nOSpairs==1) {
 
           // Set SR group
@@ -631,7 +631,7 @@ namespace Gambit {
             pair_withtau.push_back(pair_emu.at(0));
           }
           else {
-            pair_withtau.push_back(pair_emu.at(1)); 
+            pair_withtau.push_back(pair_emu.at(1));
           }
           double mll_withtau = (pair_withtau.at(0)->mom() + pair_withtau.at(1)->mom()).m();
 
@@ -647,13 +647,13 @@ namespace Gambit {
             // The etau/mutau pair is the OS pair, the leftover e/mu is the "third lepton"
             mll = mll_withtau;
             HEPUtils::Particle* third_lepton = getLeptonNotInPair(signalLeptons, pair_withtau);
-            mT = transverseMass(met, pTmissPhi, third_lepton->pT(), third_lepton->phi());        
-          }         
+            mT = transverseMass(met, pTmissPhi, third_lepton->pT(), third_lepton->phi());
+          }
         }
-        // 
-        // Events from Table 5: 4-leptons (including at most one tau), and one OSSF pair consistent with a Z   
-        // 
-        else if ((nSignalLeptons + nSignalTaus)==4 && nSignalTaus<=1 && nOSSFpairs>=1) { 
+        //
+        // Events from Table 5: 4-leptons (including at most one tau), and one OSSF pair consistent with a Z
+        //
+        else if ((nSignalLeptons + nSignalTaus)==4 && nSignalTaus<=1 && nOSSFpairs>=1) {
 
           // Set SR group
           SRgroup = 5;
@@ -671,9 +671,9 @@ namespace Gambit {
 
         // Increment SR counter:
         if (preselection && SRgroup > 0) {
-          // 
+          //
           // SR group 1
-          // 
+          //
           if (SRgroup==1) {
             if (mT<120 && met>50 && met<100 && mll<75)             _numSR["SR3l_OSSF_mT<120_ETmiss50-100_mll<75"]++;
             if (mT<120 && met>50 && met<100 && mll>75 && mll<105)  _numSR["SR3l_OSSF_mT<120_ETmiss50-100_mll75-105"]++;
@@ -714,9 +714,9 @@ namespace Gambit {
             if (mT>160 && met>200 && met<250 && mll>75 && mll<105) _numSR["SR3l_OSSF_mT>160_ETmiss200-250_mll75-105"]++;
             if (mT>160 && met>200 && met<250 && mll>105)           _numSR["SR3l_OSSF_mT>160_ETmiss200-250_mll>105"]++;
           }
-          // 
+          //
           // SR group 2
-          // 
+          //
           else if (SRgroup==2) {
             if (mT<120 && met>50 && met<100 && mll<100)  _numSR["SR3l_noOSSF_mT<120_ETmiss50-100_mll<100"]++;
             if (mT<120 && met>50 && met<100 && mll>100)  _numSR["SR3l_noOSSF_mT<120_ETmiss50-100_mll>100"]++;
@@ -745,9 +745,9 @@ namespace Gambit {
             if (mT>160 && met>200 && met<250 && mll<100) _numSR["SR3l_noOSSF_mT>160_ETmiss200-250_mll<100"]++;
             if (mT>160 && met>200 && met<250 && mll>100) _numSR["SR3l_noOSSF_mT>160_ETmiss200-250_mll>100"]++;
           }
-          // 
+          //
           // SR group 3
-          // 
+          //
           else if (SRgroup==3) {
             if (mT<120 && met>50 && met<100 && mll<100)  _numSR["SR3l_SS1tau_mT<120_ETmiss50-100_mll<100"]++;
             if (mT<120 && met>50 && met<100 && mll>100)  _numSR["SR3l_SS1tau_mT<120_ETmiss50-100_mll>100"]++;
@@ -776,9 +776,9 @@ namespace Gambit {
             if (mT>160 && met>200 && met<250 && mll<100) _numSR["SR3l_SS1tau_mT>160_ETmiss200-250_mll<100"]++;
             if (mT>160 && met>200 && met<250 && mll>100) _numSR["SR3l_SS1tau_mT>160_ETmiss200-250_mll>100"]++;
           }
-          // 
+          //
           // SR group 4
-          // 
+          //
           else if (SRgroup==4) {
             if (mT<120 && met>50 && met<100 && mll<100)  _numSR["SR3l_OS1tau_mT<120_ETmiss50-100_mll<100"]++;
             if (mT<120 && met>50 && met<100 && mll>100)  _numSR["SR3l_OS1tau_mT<120_ETmiss50-100_mll>100"]++;
@@ -807,9 +807,9 @@ namespace Gambit {
             if (mT>160 && met>200 && met<250 && mll<100) _numSR["SR3l_OS1tau_mT>160_ETmiss200-250_mll<100"]++;
             if (mT>160 && met>200 && met<250 && mll>100) _numSR["SR3l_OS1tau_mT>160_ETmiss200-250_mll>100"]++;
           }
-          // 
+          //
           // SR group 5
-          // 
+          //
           else if (SRgroup==5) {
             if (nOSSFpairs==1 && nSignalTaus==0 && mll>75 && mll<105 && met<30)            _numSR["SR4l_1OSSF0tau_ETmiss<30"]++;
             if (nOSSFpairs==1 && nSignalTaus==0 && mll>75 && mll<105 && met>30 && met<50)  _numSR["SR4l_1OSSF0tau_ETmiss30-50"]++;
@@ -831,10 +831,10 @@ namespace Gambit {
       }
 
 
-      void add(BaseAnalysis* other) {
+      void add(Analysis* other) {
         // TODO: Need to combine the signal region results here
         // The base class add function handles the signal region vector and total # events.
-        HEPUtilsAnalysis::add(other);
+        Analysis::add(other);
 
         Analysis_CMS_8TeV_MultiLEP_20invfb* specificOther
           = dynamic_cast<Analysis_CMS_8TeV_MultiLEP_20invfb*>(other);
@@ -849,7 +849,7 @@ namespace Gambit {
           }
         #endif
 
-        for (auto& el : _numSR) { 
+        for (auto& el : _numSR) {
           el.second += specificOther->_numSR[el.first];
         }
       }
@@ -884,15 +884,15 @@ namespace Gambit {
 
 
 
-    // 
+    //
     //  Derived analysis class for the 3-lepton SRs
-    // 
+    //
     class Analysis_CMS_8TeV_MultiLEP_3Lep_20invfb : public Analysis_CMS_8TeV_MultiLEP_20invfb {
 
-    public: 
+    public:
       Analysis_CMS_8TeV_MultiLEP_3Lep_20invfb() {
         set_analysis_name("CMS_8TeV_MultiLEP_3Lep_20invfb");
-      }      
+      }
 
       virtual void collect_results() {
         // Adding results from the SR groups 1-4 (the 3-lepton SR groups)
@@ -908,15 +908,15 @@ namespace Gambit {
     DEFINE_ANALYSIS_FACTORY(CMS_8TeV_MultiLEP_3Lep_20invfb)
 
 
-    // 
+    //
     //  Derived analysis class for the 4-lepton SRs
-    // 
+    //
     class Analysis_CMS_8TeV_MultiLEP_4Lep_20invfb : public Analysis_CMS_8TeV_MultiLEP_20invfb {
 
-    public: 
+    public:
       Analysis_CMS_8TeV_MultiLEP_4Lep_20invfb() {
         set_analysis_name("CMS_8TeV_MultiLEP_4Lep_20invfb");
-      }      
+      }
 
       virtual void collect_results() {
         // Adding results from the SR group 5 (the 4-lepton SR group)

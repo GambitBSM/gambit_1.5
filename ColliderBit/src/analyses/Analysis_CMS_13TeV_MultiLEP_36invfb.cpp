@@ -13,7 +13,7 @@
 #include <iomanip>
 #include <fstream>
 
-#include "gambit/ColliderBit/analyses/BaseAnalysis.hpp"
+#include "gambit/ColliderBit/analyses/Analysis.hpp"
 #include "gambit/ColliderBit/CMSEfficiencies.hpp"
 #include "gambit/ColliderBit/mt2_bisect.h"
 
@@ -28,7 +28,7 @@ namespace Gambit {
     // defined further down:
     // - Analysis_CMS_13TeV_MultiLEP_2SSLep_36invfb
     // - Analysis_CMS_13TeV_MultiLEP_3Lep_36invfb
-    class Analysis_CMS_13TeV_MultiLEP_36invfb : public HEPUtilsAnalysis {
+    class Analysis_CMS_13TeV_MultiLEP_36invfb : public Analysis {
 
     protected:
       // Counters for the number of accepted events for each signal region
@@ -110,7 +110,7 @@ namespace Gambit {
 
 
       void analyze(const HEPUtils::Event* event) {
-        HEPUtilsAnalysis::analyze(event);
+        Analysis::analyze(event);
         double met = event->met();
 
         // Baseline objects
@@ -490,10 +490,10 @@ namespace Gambit {
       }
 
 
-      void add(BaseAnalysis* other) {
+      void add(Analysis* other) {
         // The base class add function handles the signal region vector and total # events.
 
-        HEPUtilsAnalysis::add(other);
+        Analysis::add(other);
 
         Analysis_CMS_13TeV_MultiLEP_36invfb* specificOther
                 = dynamic_cast<Analysis_CMS_13TeV_MultiLEP_36invfb*>(other);

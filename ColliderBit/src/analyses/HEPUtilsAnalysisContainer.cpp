@@ -1,6 +1,6 @@
 #include "gambit/cmake/cmake_variables.hpp"
-#include "gambit/ColliderBit/analyses/HEPUtilsAnalysisContainer.hpp"
-#include "gambit/ColliderBit/analyses/BaseAnalysis.hpp"
+#include "gambit/ColliderBit/analyses/AnalysisContainer.hpp"
+#include "gambit/ColliderBit/analyses/Analysis.hpp"
 #include "gambit/Utils/standalone_error_handlers.hpp"
 #include <stdexcept>
 #include <omp.h>
@@ -85,8 +85,8 @@ namespace Gambit
       F(CMS_8TeV_MONOJET_20invfb)                    \
 
     /// For analysis factory function declaration
-    #define DECLARE_ANALYSIS_FACTORY(ANAME)                                    \
-      HEPUtilsAnalysis* create_Analysis_ ## ANAME();                           \
+    #define DECLARE_ANALYSIS_FACTORY(ANAME)          \
+      Analysis* create_Analysis_ ## ANAME();         \
       std::string getDetector_ ## ANAME();
 
     /// Forward declarations using DECLARE_ANALYSIS_FACTORY(ANAME)
@@ -103,7 +103,7 @@ namespace Gambit
       if (name == #A) return create_Analysis_ ## A();
 
     /// Factory definition
-    HEPUtilsAnalysis* mkAnalysis(const str& name)
+    Analysis* mkAnalysis(const str& name)
     {
       #ifndef EXCLUDE_ROOT
         #ifndef EXCLUDE_RESTFRAMES
@@ -139,10 +139,10 @@ namespace Gambit
     }
 
     /// A map with pointers to all instances of this class. The key is the thread number.
-    std::map<str,std::map<int,HEPUtilsAnalysisContainer*> > HEPUtilsAnalysisContainer::instances_map;
+    std::map<str,std::map<int,AnalysisContainer*> > AnalysisContainer::instances_map;
 
     /// Constructor
-    HEPUtilsAnalysisContainer::HEPUtilsAnalysisContainer() :
+    AnalysisContainer::AnalysisContainer() :
       current_collider(""),
       ready(false),
       is_registered(false),
@@ -150,20 +150,20 @@ namespace Gambit
       base_key("")
     {
       #ifdef ANALYSISCONTAINER_DEBUG
-        std::cout << "DEBUG: thread " << omp_get_thread_num() << ": HEPUtilsAnalysisContainer::ctor: created at " << this << std::endl;
+        std::cout << "DEBUG: thread " << omp_get_thread_num() << ": AnalysisContainer::ctor: created at " << this << std::endl;
       #endif
     }
 
 
     /// Destructor
-    HEPUtilsAnalysisContainer::~HEPUtilsAnalysisContainer()
+    AnalysisContainer::~AnalysisContainer()
     {
       clear();
     }
 
 
     /// Add container to instances map
-    void HEPUtilsAnalysisContainer::register_thread(str base_key_in)
+    void AnalysisContainer::register_thread(str base_key_in)
     {
       base_key = base_key_in;
 
@@ -176,7 +176,7 @@ namespace Gambit
           is_registered = true;
 
           #ifdef ANALYSISCONTAINER_DEBUG
-            std::cout << "DEBUG: thread " << omp_get_thread_num() << ": HEPUtilsAnalysisContainer::register_thread: added " << this << " to instances_map with key " << base_key << "-" << omp_get_thread_num() << std::endl;
+            std::cout << "DEBUG: thread " << omp_get_thread_num() << ": AnalysisContainer::register_thread: added " << this << " to instances_map with key " << base_key << "-" << omp_get_thread_num() << std::endl;
           #endif
         }
         else
@@ -188,7 +188,7 @@ namespace Gambit
           else
           {
             #ifdef ANALYSISCONTAINER_DEBUG
-              std::cout << "DEBUG: thread " << omp_get_thread_num() << ": HEPUtilsAnalysisContainer::register_thread: this instance is already in instances_map" << std::endl;
+              std::cout << "DEBUG: thread " << omp_get_thread_num() << ": AnalysisContainer::register_thread: this instance is already in instances_map" << std::endl;
             #endif
           }
         }
@@ -197,7 +197,7 @@ namespace Gambit
 
 
     /// Delete and clear the analyses contained within this instance.
-    void HEPUtilsAnalysisContainer::clear()
+    void AnalysisContainer::clear()
     {
       /// @todo Storing smart ptrs to Analysis would make this way easier
       // Loop through double map and delete the analysis pointers
@@ -217,21 +217,21 @@ namespace Gambit
 
 
     /// Set name of the current collider
-    void HEPUtilsAnalysisContainer::set_current_collider(str collider_name)
+    void AnalysisContainer::set_current_collider(str collider_name)
     {
       current_collider = collider_name;
     }
 
 
     /// Get the name of the current collider
-    str HEPUtilsAnalysisContainer::get_current_collider() const
+    str AnalysisContainer::get_current_collider() const
     {
       return current_collider;
     }
 
 
     /// Does this instance contain analyses for the given collider
-    bool HEPUtilsAnalysisContainer::has_analyses(str collider_name) const
+    bool AnalysisContainer::has_analyses(str collider_name) const
     {
       bool result = false;
 
@@ -247,14 +247,14 @@ namespace Gambit
     }
 
     /// Does this instance contain analyses for the current collider
-    bool HEPUtilsAnalysisContainer::has_analyses() const
+    bool AnalysisContainer::has_analyses() const
     {
       return has_analyses(current_collider);
     }
 
 
     /// Initialize analyses (by names) for a specified collider
-    void HEPUtilsAnalysisContainer::init(const std::vector<str>& analysis_names, str collider_name)
+    void AnalysisContainer::init(const std::vector<str>& analysis_names, str collider_name)
     {
       // If a map of analyses already exist for this collider, clear it
       if (analyses_map.count(collider_name) > 0)
@@ -273,20 +273,20 @@ namespace Gambit
     }
 
     /// Initialize analyses (by names) for the current collider
-    void HEPUtilsAnalysisContainer::init(const std::vector<str>& analysis_names)
+    void AnalysisContainer::init(const std::vector<str>& analysis_names)
     {
       init(analysis_names, current_collider);
     }
 
 
     /// Reset specific analysis
-    void HEPUtilsAnalysisContainer::reset(str collider_name, str analysis_name)
+    void AnalysisContainer::reset(str collider_name, str analysis_name)
     {
       analyses_map[collider_name][analysis_name]->reset();
     }
 
     /// Reset all analyses for given collider
-    void HEPUtilsAnalysisContainer::reset(str collider_name)
+    void AnalysisContainer::reset(str collider_name)
     {
       for (auto& analysis_pointer_pair : analyses_map[collider_name])
       {
@@ -295,13 +295,13 @@ namespace Gambit
     }
 
     /// Reset all analyses for the current collider
-    void HEPUtilsAnalysisContainer::reset()
+    void AnalysisContainer::reset()
     {
       reset(current_collider);
     }
 
     /// Reset all analyses for all colliders
-    void HEPUtilsAnalysisContainer::reset_all()
+    void AnalysisContainer::reset_all()
     {
       for(auto& collider_map_pair : analyses_map)
       {
@@ -311,38 +311,38 @@ namespace Gambit
 
 
     /// Get pointer to specific analysis
-    const HEPUtilsAnalysis* HEPUtilsAnalysisContainer::get_analysis_pointer(str collider_name, str analysis_name) const
+    const Analysis* AnalysisContainer::get_analysis_pointer(str collider_name, str analysis_name) const
     {
       return analyses_map.at(collider_name).at(analysis_name);
     }
 
     /// Get analyses map for a specific collider
-    const std::map<str,HEPUtilsAnalysis*>& HEPUtilsAnalysisContainer::get_collider_analyses_map(str collider_name) const
+    const std::map<str,Analysis*>& AnalysisContainer::get_collider_analyses_map(str collider_name) const
     {
       return analyses_map.at(collider_name);
     }
 
     /// Get analyses map for the current collider
-    const std::map<str,HEPUtilsAnalysis*>& HEPUtilsAnalysisContainer::get_current_analyses_map() const
+    const std::map<str,Analysis*>& AnalysisContainer::get_current_analyses_map() const
     {
       return analyses_map.at(current_collider);
     }
 
     /// Get the full analyses map
-    const std::map<str,std::map<str,HEPUtilsAnalysis*> >& HEPUtilsAnalysisContainer::get_full_analyses_map() const
+    const std::map<str,std::map<str,Analysis*> >& AnalysisContainer::get_full_analyses_map() const
     {
       return analyses_map;
     }
 
 
     /// Pass event through specific analysis
-    void HEPUtilsAnalysisContainer::analyze(const HEPUtils::Event& event, str collider_name, str analysis_name) const
+    void AnalysisContainer::analyze(const HEPUtils::Event& event, str collider_name, str analysis_name) const
     {
       analyses_map.at(collider_name).at(analysis_name)->do_analysis(event);
     }
 
     /// Pass event through all analysis for a specific collider
-    void HEPUtilsAnalysisContainer::analyze(const HEPUtils::Event& event, str collider_name) const
+    void AnalysisContainer::analyze(const HEPUtils::Event& event, str collider_name) const
     {
       for (auto& analysis_pointer_pair : analyses_map.at(collider_name))
       {
@@ -351,7 +351,7 @@ namespace Gambit
     }
 
     /// Pass event through all analysis for the current collider
-    void HEPUtilsAnalysisContainer::analyze(const HEPUtils::Event& event) const
+    void AnalysisContainer::analyze(const HEPUtils::Event& event) const
     {
       analyze(event, current_collider);
     }
@@ -359,14 +359,14 @@ namespace Gambit
 
     /// Add cross-sections and errors for two different processes,
     /// for specific analysis
-    void HEPUtilsAnalysisContainer::add_xsec(double xs, double xserr, str collider_name, str analysis_name)
+    void AnalysisContainer::add_xsec(double xs, double xserr, str collider_name, str analysis_name)
     {
       analyses_map[collider_name][analysis_name]->add_xsec(xs, xserr);
     }
 
     /// Add cross-sections and errors for two different processes,
     /// for all analyses for a given collider
-    void HEPUtilsAnalysisContainer::add_xsec(double xs, double xserr, str collider_name)
+    void AnalysisContainer::add_xsec(double xs, double xserr, str collider_name)
     {
       for (auto& analysis_pointer_pair : analyses_map[collider_name])
       {
@@ -376,7 +376,7 @@ namespace Gambit
 
     /// Add cross-sections and errors for two different processes,
     /// for all analyses for the current collider
-    void HEPUtilsAnalysisContainer::add_xsec(double xs, double xserr)
+    void AnalysisContainer::add_xsec(double xs, double xserr)
     {
       add_xsec(xs, xserr, current_collider);
     }
@@ -384,14 +384,14 @@ namespace Gambit
 
     /// Weighted combination of cross-sections and errors for the same process,
     /// for a specific analysis
-    void HEPUtilsAnalysisContainer::improve_xsec(double xs, double xserr, str collider_name, str analysis_name)
+    void AnalysisContainer::improve_xsec(double xs, double xserr, str collider_name, str analysis_name)
     {
       analyses_map[collider_name][analysis_name]->improve_xsec(xs, xserr);
     }
 
     /// Weighted combination of cross-sections and errors for the same process,
     /// for all analyses for a given collider
-    void HEPUtilsAnalysisContainer::improve_xsec(double xs, double xserr, str collider_name)
+    void AnalysisContainer::improve_xsec(double xs, double xserr, str collider_name)
     {
       for (auto& analysis_pointer_pair : analyses_map[collider_name])
       {
@@ -401,7 +401,7 @@ namespace Gambit
 
     /// Weighted combination of cross-sections and errors for the same process,
     /// for all analyses for the current collider
-    void HEPUtilsAnalysisContainer::improve_xsec(double xs, double xserr)
+    void AnalysisContainer::improve_xsec(double xs, double xserr)
     {
       improve_xsec(xs, xserr, current_collider);
     }
@@ -413,15 +413,15 @@ namespace Gambit
 
     /// Collect signal predictions from other threads and add to this one,
     /// for specific analysis
-    void HEPUtilsAnalysisContainer::collect_and_add_signal(str collider_name, str analysis_name)
+    void AnalysisContainer::collect_and_add_signal(str collider_name, str analysis_name)
     {
       for (auto& thread_container_pair : instances_map.at(base_key))
       {
         if (thread_container_pair.first == omp_get_thread_num()) continue;
 
-        HEPUtilsAnalysisContainer* other_container = thread_container_pair.second;
-        // HEPUtilsAnalysis* other_analysis = other_container->get_analysis_pointer(collider_name, analysis_name);
-        HEPUtilsAnalysis* other_analysis = other_container->analyses_map[collider_name][analysis_name];
+        AnalysisContainer* other_container = thread_container_pair.second;
+        // Analysis* other_analysis = other_container->get_analysis_pointer(collider_name, analysis_name);
+        Analysis* other_analysis = other_container->analyses_map[collider_name][analysis_name];
 
         analyses_map[collider_name][analysis_name]->add(other_analysis);
       }
@@ -429,7 +429,7 @@ namespace Gambit
 
     /// Collect signal predictions from other threads and add to this one,
     /// for all analyses for given collider
-    void HEPUtilsAnalysisContainer::collect_and_add_signal(str collider_name)
+    void AnalysisContainer::collect_and_add_signal(str collider_name)
     {
       for (auto& analysis_pointer_pair : analyses_map[collider_name])
       {
@@ -440,7 +440,7 @@ namespace Gambit
 
     /// Collect signal predictions from other threads and add to this one,
     /// for all analyses for the current collider
-    void HEPUtilsAnalysisContainer::collect_and_add_signal()
+    void AnalysisContainer::collect_and_add_signal()
     {
       collect_and_add_signal(current_collider);
     }
@@ -448,14 +448,14 @@ namespace Gambit
 
     /// Collect xsec predictions from other threads and do a weighted combination,
     /// for specific analysis
-    void HEPUtilsAnalysisContainer::collect_and_improve_xsec(str collider_name, str analysis_name)
+    void AnalysisContainer::collect_and_improve_xsec(str collider_name, str analysis_name)
     {
       for (auto& thread_container_pair : instances_map.at(base_key))
       {
         if (thread_container_pair.first == omp_get_thread_num()) continue;
 
-        HEPUtilsAnalysisContainer* other_container = thread_container_pair.second;
-        const HEPUtilsAnalysis* other_analysis = other_container->get_analysis_pointer(collider_name, analysis_name);
+        AnalysisContainer* other_container = thread_container_pair.second;
+        const Analysis* other_analysis = other_container->get_analysis_pointer(collider_name, analysis_name);
 
         double other_xsec = other_analysis->xsec();
         double other_xsec_err = other_analysis->xsec_err();
@@ -466,7 +466,7 @@ namespace Gambit
 
     /// Collect xsec predictions from other threads and do a weighted combination,
     /// for all analyses for given collider
-    void HEPUtilsAnalysisContainer::collect_and_improve_xsec(str collider_name)
+    void AnalysisContainer::collect_and_improve_xsec(str collider_name)
     {
       for (auto& analysis_pointer_pair : analyses_map[collider_name])
       {
@@ -477,20 +477,20 @@ namespace Gambit
 
     /// Collect xsec predictions from other threads and do a weighted combination,
     /// for all analyses for the current collider
-    void HEPUtilsAnalysisContainer::collect_and_improve_xsec()
+    void AnalysisContainer::collect_and_improve_xsec()
     {
       collect_and_improve_xsec(current_collider);
     }
 
 
     /// Scale results for specific analysis
-    void HEPUtilsAnalysisContainer::scale(str collider_name, str analysis_name, double factor)
+    void AnalysisContainer::scale(str collider_name, str analysis_name, double factor)
     {
       analyses_map[collider_name][analysis_name]->scale(factor);
     }
 
     /// Scale results for all analyses for given collider
-    void HEPUtilsAnalysisContainer::scale(str collider_name, double factor)
+    void AnalysisContainer::scale(str collider_name, double factor)
     {
       for (auto& analysis_pointer_pair : analyses_map[collider_name])
       {
@@ -500,13 +500,13 @@ namespace Gambit
     }
 
     /// Scale results for all analyses for the current collider
-    void HEPUtilsAnalysisContainer::scale(double factor)
+    void AnalysisContainer::scale(double factor)
     {
       scale(current_collider, factor);
     }
 
     /// Scale results for all analyses across all colliders
-    void HEPUtilsAnalysisContainer::scale_all(double factor)
+    void AnalysisContainer::scale_all(double factor)
     {
       for (auto& collider_map_pair : analyses_map)
       {

@@ -3,7 +3,7 @@
 #include <memory>
 #include <iomanip>
 
-#include "gambit/ColliderBit/analyses/BaseAnalysis.hpp"
+#include "gambit/ColliderBit/analyses/Analysis.hpp"
 #include "gambit/ColliderBit/ATLASEfficiencies.hpp"
 #include "gambit/ColliderBit/mt2_bisect.h"
 #include "gambit/ColliderBit/lester_mt2_bisect.h"
@@ -34,7 +34,7 @@ namespace Gambit {
       double aMT2_BM;
     };
 
-    class Analysis_ATLAS_13TeV_2bMET_36invfb : public HEPUtilsAnalysis {
+    class Analysis_ATLAS_13TeV_2bMET_36invfb : public Analysis {
     private:
 
       // Variables that hold the number of events passing signal region cuts
@@ -278,7 +278,7 @@ namespace Gambit {
 
 
       void analyze(const HEPUtils::Event* event) {
-        HEPUtilsAnalysis::analyze(event);
+        Analysis::analyze(event);
 
         // Get the missing energy and momentum in the event
         HEPUtils::P4 metVec = event->missingmom();
@@ -846,9 +846,9 @@ namespace Gambit {
       }
 
 
-      void add(BaseAnalysis* other) {
+      void add(Analysis* other) {
         // The base class add function handles the signal region number and total # events combination across threads
-        HEPUtilsAnalysis::add(other);
+        Analysis::add(other);
 
         Analysis_ATLAS_13TeV_2bMET_36invfb* specificOther
           = dynamic_cast<Analysis_ATLAS_13TeV_2bMET_36invfb*>(other);
