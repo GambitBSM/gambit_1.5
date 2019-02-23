@@ -15,9 +15,10 @@
 ///  *********************************************
 
 #include <omp.h>
-#include "HEPUtils/MathUtils.h"
 #include "gambit/ColliderBit/xsec.hpp"
 #include "gambit/Utils/standalone_error_handlers.hpp"
+
+#include "HEPUtils/MathUtils.h"
 
 namespace Gambit
 {
@@ -65,8 +66,8 @@ namespace Gambit
     /// Set the cross-section and its error (in pb).
     void xsec::set_xsec(double xs, double xserr) { _xsec = xs; _xsecerr = xserr; }
 
-    /// Add cross-sections and errors (in quadrature) from multiple runs.
-    void xsec::add_xsec(double other_xsec, double other_xsecerr, other_ntot)
+    /// Average cross-sections and combine errors.
+    void xsec::average_xsec(double other_xsec, double other_xsecerr, int other_ntot)
     {
       if (other_xsec > 0)
       {
@@ -76,9 +77,19 @@ namespace Gambit
         }
         else
         {
-          _xsec += other_xsec;
-          _xsecerr = HEPUtils::add_quad(_xsecerr, other_xsecerr);
           _ntot += other_ntot;
+          /// @todo Probably shouldn't be combined with equal weight?!?
+          _xsec = _xsec/2.0 + other_xsec/2.0;
+          _xsecerr = HEPUtils::add_quad(_xsecerr, other_xsecerr) / 2.0;
+
+          //cout << "old: " << _xsec << " " << _xsecerr << endl;
+
+          //double w = 1./(_xsecerr*_xsecerr);
+          //double other_w = 1./(other_xsecerr*other_xsecerr);
+          //_xsec = (w * _xsec + other_w * other_xsec) / (w + other_w);
+          //_xsecerr = 1./sqrt(w + other_w);
+
+          //cout << "new: " << _xsec << " " << _xsecerr << endl;
         }
       }
     }
@@ -91,7 +102,7 @@ namespace Gambit
       {
         if (thread_xsec_pair.first == this_thread) continue;
         const xsec& other_xsec = (*thread_xsec_pair.second);
-        add_xsec(other_xsec(), other_xsec.xsec_err(), other_xsec.num_events());
+        average_xsec(other_xsec(), other_xsec.xsec_err(), other_xsec.num_events());
       }
     }
 

@@ -145,13 +145,13 @@ namespace Gambit
         void collect_and_add_signal();
 
         /// Scale results for specific analysis
-        void scale(str, str, double factor=-1);
+        void scale(str, str, double);
         /// Scale results for all analyses for given collider
-        void scale(str, double factor=-1);
+        void scale(str, double);
         /// Scale results for all analyses for the current collider
-        void scale(double factor=-1);
+        void scale(double);
         /// Scale results for all analyses across all colliders
-        void scale_all(double factor=-1);
+        void scale_all(double);
 
     };
 

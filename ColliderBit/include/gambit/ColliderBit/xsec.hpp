@@ -57,8 +57,8 @@ namespace Gambit
         /// Set the cross-section and its error (in pb).
         void set_xsec(double, double);
 
-        /// Add cross-sections and errors (in quadrature) from multiple runs.
-        void add_xsec(double, double, int);
+        /// Average cross-sections and combine errors.
+        void average_xsec(double, double, int);
 
         /// Collect xsec predictions from other threads and do a weighted combination.
         void gather_xsecs();
