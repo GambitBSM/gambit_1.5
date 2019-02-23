@@ -7,7 +7,7 @@ namespace Gambit {
 
 
     /// Dummy analysis code with a hard-coded return including a SR covariance matrix
-    class Analysis_Covariance : public Analysis {
+    class Analysis_Covariance : public Analysis{
     private:
 
       // Variables that holds the number of events passing
@@ -26,10 +26,7 @@ namespace Gambit {
       }
 
 
-      void run(const HEPUtils::Event*)
-      {
-        // if ((int)num_events() % 100 == 0) cout << num_events() << endl;
-      }
+      void run(const HEPUtils::Event*) {}
 
       /// Combine the variables of another copy of this analysis (typically on another thread) into this one.
       void combine(const Analysis*) {}

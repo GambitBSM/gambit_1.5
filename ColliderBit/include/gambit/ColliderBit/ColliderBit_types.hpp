@@ -41,6 +41,7 @@
 
 #include "gambit/ColliderBit/MCLoopInfo.hpp"
 #include "gambit/ColliderBit/MC_convergence.hpp"
+#include "gambit/ColliderBit/xsec.hpp"
 #include "gambit/ColliderBit/colliders/ColliderPythia.hpp"
 #include "gambit/ColliderBit/colliders/ColliderPythia_typedefs.hpp"
 #include "gambit/ColliderBit/detectors/BuckFast.hpp"

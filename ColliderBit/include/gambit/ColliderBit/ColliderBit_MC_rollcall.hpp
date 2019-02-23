@@ -48,7 +48,7 @@
     #define FUNCTION getATLASAnalysisContainer
     START_FUNCTION(AnalysisContainer)
     NEEDS_MANAGER(RunMC, MCLoopInfo)
-    DEPENDENCY(HardScatteringSim, const BaseCollider*)
+    DEPENDENCY(CrossSection, xsec)
     #undef FUNCTION
   #undef CAPABILITY
 
@@ -57,7 +57,7 @@
     #define FUNCTION getCMSAnalysisContainer
     START_FUNCTION(AnalysisContainer)
     NEEDS_MANAGER(RunMC, MCLoopInfo)
-    DEPENDENCY(HardScatteringSim, const BaseCollider*)
+    DEPENDENCY(CrossSection, xsec)
     #undef FUNCTION
   #undef CAPABILITY
 
@@ -66,8 +66,27 @@
     #define FUNCTION getIdentityAnalysisContainer
     START_FUNCTION(AnalysisContainer)
     NEEDS_MANAGER(RunMC, MCLoopInfo)
+    DEPENDENCY(CrossSection, xsec)
+    #undef FUNCTION
+  #undef CAPABILITY
+  /// @}
+
+  /// Cross-section calculators
+  /// @{
+  #define CAPABILITY CrossSection
+  START_CAPABILITY
+
+    #define FUNCTION getMCxsec
+    START_FUNCTION(xsec)
+    NEEDS_MANAGER(RunMC, MCLoopInfo)
     DEPENDENCY(HardScatteringSim, const BaseCollider*)
     #undef FUNCTION
+
+    #define FUNCTION getNLLFastxsec
+    START_FUNCTION(xsec)
+    NEEDS_MANAGER(RunMC, MCLoopInfo)
+    #undef FUNCTION
+
   #undef CAPABILITY
   /// @}
 

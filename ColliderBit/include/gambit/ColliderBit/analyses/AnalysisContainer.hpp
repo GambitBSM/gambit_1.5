@@ -74,7 +74,7 @@ namespace Gambit
         /// Key for the instances_map
         str base_key;
 
-        /// A vector with pointers to all instances of this class. The key is the OMP thread number.
+        /// A map with pointers to all instances of this class. The key is the OMP thread number.
         /// (There should only be one instance of this class per OMP thread.)
         static std::map<str,std::map<int,AnalysisContainer*> > instances_map;
 
@@ -134,26 +134,6 @@ namespace Gambit
         /// Pass event through all analysis for the current collider
         void analyze(const HEPUtils::Event&) const;
 
-        /// Add cross-sections and errors for two different processes,
-        /// for a specific analysis
-        void add_xsec(double, double, str, str);
-        /// Add cross-sections and errors for two different processes,
-        /// for all analyses for a given collider
-        void add_xsec(double, double, str);
-        /// Add cross-sections and errors for two different processes,
-        /// for all analyses for the current collider
-        void add_xsec(double, double);
-
-        /// Weighted combination of xsecs and errors for the same process,
-        /// for a specific analysis
-        void improve_xsec(double, double, str, str);
-        /// Weighted combination of xsecs and errors for the same process,
-        /// for all analyses for a given collider
-        void improve_xsec(double, double, str);
-        /// Weighted combination of xsecs and errors for the same process,
-        /// for all analyses for the current collider
-        void improve_xsec(double, double);
-
         /// Collect signal predictions from other threads and add to this one,
         /// for specific analysis
         void collect_and_add_signal(str, str);
@@ -163,16 +143,6 @@ namespace Gambit
         /// Collect signal predictions from other threads and add to this one,
         /// for all analyses for the current collider
         void collect_and_add_signal();
-
-        /// Collect xsec predictions from other threads and do a weighted combination,
-        /// for specific analysis
-        void collect_and_improve_xsec(str, str);
-        /// Collect xsec predictions from other threads and do a weighted combination,
-        /// for all analyses for given collider
-        void collect_and_improve_xsec(str);
-        /// Collect xsec predictions from other threads and do a weighted combination,
-        /// for all analyses for the current collider
-        void collect_and_improve_xsec();
 
         /// Scale results for specific analysis
         void scale(str, str, double factor=-1);

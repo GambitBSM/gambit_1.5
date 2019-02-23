@@ -356,7 +356,6 @@ namespace Gambit
       return analyses_map;
     }
 
-
     /// Pass event through specific analysis
     void AnalysisContainer::analyze(const HEPUtils::Event& event, str collider_name, str analysis_name) const
     {
@@ -376,56 +375,6 @@ namespace Gambit
     void AnalysisContainer::analyze(const HEPUtils::Event& event) const
     {
       analyze(event, current_collider);
-    }
-
-
-    /// Add cross-sections and errors for two different processes,
-    /// for specific analysis
-    void AnalysisContainer::add_xsec(double xs, double xserr, str collider_name, str analysis_name)
-    {
-      analyses_map[collider_name][analysis_name]->add_xsec(xs, xserr);
-    }
-
-    /// Add cross-sections and errors for two different processes,
-    /// for all analyses for a given collider
-    void AnalysisContainer::add_xsec(double xs, double xserr, str collider_name)
-    {
-      for (auto& analysis_pointer_pair : analyses_map[collider_name])
-      {
-        analysis_pointer_pair.second->add_xsec(xs, xserr);
-      }
-    }
-
-    /// Add cross-sections and errors for two different processes,
-    /// for all analyses for the current collider
-    void AnalysisContainer::add_xsec(double xs, double xserr)
-    {
-      add_xsec(xs, xserr, current_collider);
-    }
-
-
-    /// Weighted combination of cross-sections and errors for the same process,
-    /// for a specific analysis
-    void AnalysisContainer::improve_xsec(double xs, double xserr, str collider_name, str analysis_name)
-    {
-      analyses_map[collider_name][analysis_name]->improve_xsec(xs, xserr);
-    }
-
-    /// Weighted combination of cross-sections and errors for the same process,
-    /// for all analyses for a given collider
-    void AnalysisContainer::improve_xsec(double xs, double xserr, str collider_name)
-    {
-      for (auto& analysis_pointer_pair : analyses_map[collider_name])
-      {
-        analysis_pointer_pair.second->improve_xsec(xs, xserr);
-      }
-    }
-
-    /// Weighted combination of cross-sections and errors for the same process,
-    /// for all analyses for the current collider
-    void AnalysisContainer::improve_xsec(double xs, double xserr)
-    {
-      improve_xsec(xs, xserr, current_collider);
     }
 
     /// Collect signal predictions from other threads and add to this one,
@@ -458,44 +407,6 @@ namespace Gambit
     {
       collect_and_add_signal(current_collider);
     }
-
-
-    /// Collect xsec predictions from other threads and do a weighted combination,
-    /// for specific analysis
-    void AnalysisContainer::collect_and_improve_xsec(str collider_name, str analysis_name)
-    {
-      for (auto& thread_container_pair : instances_map.at(base_key))
-      {
-        if (thread_container_pair.first == omp_get_thread_num()) continue;
-
-        AnalysisContainer* other_container = thread_container_pair.second;
-        const Analysis* other_analysis = other_container->get_analysis_pointer(collider_name, analysis_name);
-
-        double other_xsec = other_analysis->xsec();
-        double other_xsec_err = other_analysis->xsec_err();
-
-        improve_xsec(other_xsec, other_xsec_err, collider_name, analysis_name);
-      }
-    }
-
-    /// Collect xsec predictions from other threads and do a weighted combination,
-    /// for all analyses for given collider
-    void AnalysisContainer::collect_and_improve_xsec(str collider_name)
-    {
-      for (auto& analysis_pointer_pair : analyses_map[collider_name])
-      {
-        str analysis_name = analysis_pointer_pair.first;
-        collect_and_improve_xsec(collider_name, analysis_name);
-      }
-    }
-
-    /// Collect xsec predictions from other threads and do a weighted combination,
-    /// for all analyses for the current collider
-    void AnalysisContainer::collect_and_improve_xsec()
-    {
-      collect_and_improve_xsec(current_collider);
-    }
-
 
     /// Scale results for specific analysis
     void AnalysisContainer::scale(str collider_name, str analysis_name, double factor)
