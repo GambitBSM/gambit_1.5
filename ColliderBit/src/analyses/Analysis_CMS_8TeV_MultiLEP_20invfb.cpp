@@ -441,8 +441,7 @@ namespace Gambit {
       }
 
 
-      void analyze(const HEPUtils::Event* event) {
-        Analysis::analyze(event);
+      void run(const HEPUtils::Event* event) {
 
         // Missing energy
         double met = event->met();
@@ -830,27 +829,25 @@ namespace Gambit {
 
       }
 
-
-      void add(Analysis* other) {
+      /// Combine the variables of another copy of this analysis (typically on another thread) into this one.
+      void combine(const Analysis* other)
+      {
         // TODO: Need to combine the signal region results here
-        // The base class add function handles the signal region vector and total # events.
-        Analysis::add(other);
 
-        Analysis_CMS_8TeV_MultiLEP_20invfb* specificOther
-          = dynamic_cast<Analysis_CMS_8TeV_MultiLEP_20invfb*>(other);
-
-        // Here we will add the subclass member variables:
+        const Analysis_CMS_8TeV_MultiLEP_20invfb* specificOther
+          = dynamic_cast<const Analysis_CMS_8TeV_MultiLEP_20invfb*>(other);
 
         #ifdef CHECK_CUTFLOW
           // if (NCUTS != specificOther->NCUTS) NCUTS = specificOther->NCUTS;
           for (size_t j = 0; j < NCUTS; j++) {
-            cutFlowVector[j] += specificOther->cutFlowVector[j];
-            cutFlowVector_str[j] = specificOther->cutFlowVector_str[j];
+            cutFlowVector[j] += specificOther->cutFlowVector.at(j);
+            cutFlowVector_str[j] = specificOther->cutFlowVector_str.at(j);
           }
         #endif
 
-        for (auto& el : _numSR) {
-          el.second += specificOther->_numSR[el.first];
+        for (auto& el : _numSR)
+        {
+          el.second += specificOther->_numSR.at(el.first);
         }
       }
 

@@ -360,15 +360,15 @@ namespace Gambit
     /// Pass event through specific analysis
     void AnalysisContainer::analyze(const HEPUtils::Event& event, str collider_name, str analysis_name) const
     {
-      analyses_map.at(collider_name).at(analysis_name)->do_analysis(event);
+      analyses_map.at(collider_name).at(analysis_name)->analyze(event);
     }
 
-    /// Pass event through all analysis for a specific collider
+    /// Pass event through all analyses for a specific collider
     void AnalysisContainer::analyze(const HEPUtils::Event& event, str collider_name) const
     {
       for (auto& analysis_pointer_pair : analyses_map.at(collider_name))
       {
-        analysis_pointer_pair.second->do_analysis(event);
+        analysis_pointer_pair.second->analyze(event);
       }
     }
 
@@ -428,11 +428,6 @@ namespace Gambit
       improve_xsec(xs, xserr, current_collider);
     }
 
-
-    //
-    // @todo Add the 'collect_and_add_signal' functions
-    //
-
     /// Collect signal predictions from other threads and add to this one,
     /// for specific analysis
     void AnalysisContainer::collect_and_add_signal(str collider_name, str analysis_name)
@@ -440,12 +435,9 @@ namespace Gambit
       for (auto& thread_container_pair : instances_map.at(base_key))
       {
         if (thread_container_pair.first == omp_get_thread_num()) continue;
-
         AnalysisContainer* other_container = thread_container_pair.second;
-        // Analysis* other_analysis = other_container->get_analysis_pointer(collider_name, analysis_name);
-        Analysis* other_analysis = other_container->analyses_map[collider_name][analysis_name];
-
-        analyses_map[collider_name][analysis_name]->add(other_analysis);
+        Analysis* other_analysis = other_container->analyses_map.at(collider_name).at(analysis_name);
+        analyses_map.at(collider_name).at(analysis_name)->add(other_analysis);
       }
     }
 

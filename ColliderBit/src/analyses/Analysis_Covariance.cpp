@@ -19,21 +19,23 @@ namespace Gambit {
       // Required detector sim
       static constexpr const char* detector = "ATLAS";
 
-      Analysis_Covariance() {
+      Analysis_Covariance()
+      {
         set_analysis_name("Covariance");
         set_luminosity(30.); // fb
       }
 
 
-      void analyze(const HEPUtils::Event* event) {
-        Analysis::analyze(event);
+      void run(const HEPUtils::Event*)
+      {
         // if ((int)num_events() % 100 == 0) cout << num_events() << endl;
       }
 
+      /// Combine the variables of another copy of this analysis (typically on another thread) into this one.
+      void combine(const Analysis*) {}
 
-      void collect_results() {
-        // cout << "$$$ " << num_events() << endl;
-
+      void collect_results()
+      {
         // Now fill a results object with the result for two signal regions
         SignalRegionData results_SR1;
         results_SR1.sr_label = "SR1"; // label must be unique for each signal region

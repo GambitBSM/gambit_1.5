@@ -55,9 +55,9 @@ namespace Gambit
         /// @name Event analysis, event number, and cross section functions:
         ///@{
         /// Analyze the event (accessed by reference).
-        void do_analysis(const HEPUtils::Event&);
+        void analyze(const HEPUtils::Event&);
         /// Analyze the event (accessed by pointer).
-        void do_analysis(const HEPUtils::Event*);
+        void analyze(const HEPUtils::Event*);
 
         /// Return the total number of events seen so far.
         double num_events() const;
@@ -69,11 +69,11 @@ namespace Gambit
         double xsec_relerr() const;
         /// Return the cross-section per event seen (in pb).
         double xsec_per_event() const;
-        /// Return the integrated luminosity (in inverse pb).
-        void set_xsec(double, double);
-        /// Set the integrated luminosity (in inverse pb).
-        double luminosity() const;
         /// Set the cross-section and its error (in pb).
+        void set_xsec(double, double);
+        /// Return the integrated luminosity (in inverse pb).
+        double luminosity() const;
+        /// Set the integrated luminosity (in inverse pb).
         void set_luminosity(double);
         /// Set the analysis name
         void set_analysis_name(str);
@@ -97,13 +97,15 @@ namespace Gambit
         /// General init for any analysis of this type - no settings version.
         virtual void init() {}
         /// Scale by number of input events and xsec.
-        virtual void scale(double factor=-1);
+        void scale(double factor=-1);
         ///@}
 
         /// @name Analysis combination operations
         ///@{
-        /// An operator to do xsec-weighted combination of analysis runs.
-        virtual void add(Analysis* other);
+        /// Add the results of another analysis to this one. Argument is not const, because the other needs to be able to gather its results if necessary.
+        void add(Analysis* other);
+        /// Add the analysis-specific variables of another analysis to this one.
+        virtual void combine(const Analysis* other) = 0;
         /// Add cross-sections and errors for two different process types.
         void add_xsec(double xs, double xserr);
         /// Combine cross-sections and errors for the same process type, assuming uncorrelated errors.
@@ -112,14 +114,13 @@ namespace Gambit
 
       protected:
 
-        /// Overloadable method to reset the analysis-specific variables.
+        /// Reset the analysis-specific variables.
         virtual void analysis_specific_reset() = 0;
 
         /// @name Collection functions
         ///@{
-        /// Analyze the event (accessed by pointer).
-        /// @note Needs to be called from Derived::analyze().
-        virtual void analyze(const HEPUtils::Event*);
+        /// Run the analysis.
+        virtual void run(const HEPUtils::Event*) = 0;
         /// Add the given result to the internal results list.
         void add_result(const SignalRegionData& sr);
         /// Set the covariance matrix, expressing SR correlations
@@ -132,8 +133,14 @@ namespace Gambit
 
       private:
 
-        double _ntot, _xsec, _xsecerr, _luminosity;
-        bool _xsec_is_set, _luminosity_is_set, _is_scaled, _needs_collection;
+        double _ntot;
+        double _xsec;
+        double _xsecerr;
+        double _luminosity;
+        bool _xsec_is_set;
+        bool _luminosity_is_set;
+        bool _is_scaled;
+        bool _needs_collection;
         AnalysisData _results;
         std::string _analysis_name;
 

@@ -168,12 +168,11 @@ namespace Gambit
       } comparePt;
 
 
-      void analyze(const HEPUtils::Event* event)
+      void run(const HEPUtils::Event* event)
       {
         _cutflow.fillinit();
 
         // Baseline objects
-        Analysis::analyze(event);
         double met = event->met();
 
         // Electrons
@@ -364,21 +363,20 @@ namespace Gambit
 
       }
 
+      /// Combine the variables of another copy of this analysis (typically on another thread) into this one.
+      void combine(const Analysis* other)
+      {
+        const Analysis_ATLAS_13TeV_2OSLEP_chargino_80invfb* specificOther
+                = dynamic_cast<const Analysis_ATLAS_13TeV_2OSLEP_chargino_80invfb*>(other);
 
-      void add(Analysis* other) {
-        // The base class add function handles the signal region vector and total # events.
-
-        Analysis::add(other);
-
-        Analysis_ATLAS_13TeV_2OSLEP_chargino_80invfb* specificOther
-                = dynamic_cast<Analysis_ATLAS_13TeV_2OSLEP_chargino_80invfb*>(other);
-
-        for (auto& el : _numSR) {
-          el.second += specificOther->_numSR[el.first];
+        for (auto& el : _numSR)
+        {
+          el.second += specificOther->_numSR.at(el.first);
         }
 
-        for (auto& el : _numSR_bin) {
-          el.second += specificOther->_numSR_bin[el.first];
+        for (auto& el : _numSR_bin)
+        {
+          el.second += specificOther->_numSR_bin.at(el.first);
         }
 
       }

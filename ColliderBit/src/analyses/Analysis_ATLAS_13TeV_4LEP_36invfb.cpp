@@ -168,9 +168,8 @@ namespace Gambit
 
       }
 
-      void analyze(const HEPUtils::Event* event)
+      void run(const HEPUtils::Event* event)
       {
-        Analysis::analyze(event);
 
         // Baseline objects
         vector<HEPUtils::Particle*> baselineElectrons;
@@ -463,16 +462,11 @@ namespace Gambit
         #endif
       }
 
-
-      void add(Analysis* other) {
-        // The base class add function handles the signal region vector and total # events.
-
-        Analysis::add(other);
-
-        Analysis_ATLAS_13TeV_4LEP_36invfb* specificOther
-                = dynamic_cast<Analysis_ATLAS_13TeV_4LEP_36invfb*>(other);
-
-        // Here we will add the subclass member variables:
+      /// Combine the variables of another copy of this analysis (typically on another thread) into this one.
+      void combine(const Analysis* other)
+      {
+        const Analysis_ATLAS_13TeV_4LEP_36invfb* specificOther
+                = dynamic_cast<const Analysis_ATLAS_13TeV_4LEP_36invfb*>(other);
 
         #ifdef CHECK_CUTFLOW
           // if (NCUTS != specificOther->NCUTS) NCUTS = specificOther->NCUTS;
@@ -482,8 +476,9 @@ namespace Gambit
           }
         #endif
 
-        for (auto& el : _numSR) {
-          el.second += specificOther->_numSR[el.first];
+        for (auto& el : _numSR)
+        {
+          el.second += specificOther->_numSR.at(el.first);
         }
 
       }

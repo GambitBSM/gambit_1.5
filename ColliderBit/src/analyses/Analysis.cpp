@@ -60,10 +60,15 @@ namespace Gambit
     }
 
     /// Analyze the event (accessed by reference).
-    void Analysis::do_analysis(const HEPUtils::Event& e) { do_analysis(&e); }
+    void Analysis::analyze(const HEPUtils::Event& e) { analyze(&e); }
 
     /// Analyze the event (accessed by pointer).
-    void Analysis::do_analysis(const HEPUtils::Event* e) { _needs_collection = true; analyze(e); }
+    void Analysis::analyze(const HEPUtils::Event* e)
+    {
+      _needs_collection = true;
+      _ntot += 1;
+      run(e);
+    }
 
     /// Return the total number of events seen so far.
     double Analysis::num_events() const { return _ntot; }
@@ -119,7 +124,7 @@ namespace Gambit
       if (not _luminosity_is_set)
         warning += "Luminosity has not been set for analysis " + _analysis_name + ".";
       if (not _is_scaled)
-        warning += "Results have not been scaled for analsyis " + _analysis_name + ".";
+        warning += "Results have not been scaled for analysis " + _analysis_name + ".";
       if (_ntot < 1)
         warning += "No events have been analyzed for analysis " + _analysis_name + ".";
 
@@ -141,10 +146,6 @@ namespace Gambit
     {
       return &get_results(warning);
     }
-
-    /// Analyze the event (accessed by pointer).
-    /// @note Needs to be called from Derived::analyze().
-    void Analysis::analyze(const HEPUtils::Event*) { _ntot += 1; }
 
     /// Add the given result to the internal results list.
     void Analysis::add_result(const SignalRegionData& sr) { _results.add(sr); }
@@ -181,11 +182,11 @@ namespace Gambit
       _is_scaled = true;
     }
 
-    /// An operator to do xsec-weighted combination of analysis runs.
+    /// Add the results of another analysis to this one. Argument is not const, because the other needs to be able to gather its results if necessary.
     void Analysis::add(Analysis* other)
     {
       if (_results.empty()) collect_results();
-      AnalysisData otherResults = other->get_results();
+      const AnalysisData otherResults = other->get_results();
       /// @todo Access by name, including merging disjoint region sets?
       assert(otherResults.size() == _results.size());
       for (size_t i = 0; i < _results.size(); ++i)
@@ -193,6 +194,7 @@ namespace Gambit
         _results[i].n_signal += otherResults[i].n_signal;
       }
       _ntot += other->num_events();
+      combine(other);
     }
 
     /// Add cross-sections and errors for two different process types.

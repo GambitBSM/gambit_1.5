@@ -162,8 +162,8 @@ namespace Gambit {
         bool operator() (HEPUtils::Jet* i,HEPUtils::Jet* j) {return (i->pT()>j->pT());}
       } compareJetPt;
 
-      void analyze(const HEPUtils::Event* event) {
-        Analysis::analyze(event);
+      void run(const HEPUtils::Event* event) {
+
         double met = event->met();
 
         // Baseline objects
@@ -820,16 +820,12 @@ namespace Gambit {
 
       }
 
+      /// Combine the variables of another copy of this analysis (typically on another thread) into this one.
+      void combine(const Analysis* other)
+      {
+        const Analysis_ATLAS_13TeV_MultiLEP_36invfb* specificOther
+                = dynamic_cast<const Analysis_ATLAS_13TeV_MultiLEP_36invfb*>(other);
 
-      void add(Analysis* other) {
-        // The base class add function handles the signal region vector and total # events.
-
-        Analysis::add(other);
-
-        Analysis_ATLAS_13TeV_MultiLEP_36invfb* specificOther
-                = dynamic_cast<Analysis_ATLAS_13TeV_MultiLEP_36invfb*>(other);
-
-        // Here we will add the subclass member variables:
         if (NCUTS1 != specificOther->NCUTS1) NCUTS1 = specificOther->NCUTS1;
         for (size_t j = 0; j < NCUTS1; j++) {
           cutFlowVector1[j] += specificOther->cutFlowVector1[j];
@@ -842,7 +838,7 @@ namespace Gambit {
         }
 
         for (auto& el : _numSR) {
-          el.second += specificOther->_numSR[el.first];
+          el.second += specificOther->_numSR.at(el.first);
         }
 
       }

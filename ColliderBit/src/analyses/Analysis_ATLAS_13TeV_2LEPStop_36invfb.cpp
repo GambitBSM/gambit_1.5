@@ -129,8 +129,7 @@ namespace Gambit {
 
         }
 
-        void analyze(const HEPUtils::Event* event) {
-            Analysis::analyze(event);
+        void run(const HEPUtils::Event* event) {
 
             // Missing energy
             double met = event->met();
@@ -566,35 +565,33 @@ namespace Gambit {
 
         }
 
+        /// Combine the variables of another copy of this analysis (typically on another thread) into this one.
+        void combine(const Analysis* other)
+        {
+            const Analysis_ATLAS_13TeV_2LEPStop_36invfb* specificOther
+                = dynamic_cast<const Analysis_ATLAS_13TeV_2LEPStop_36invfb*>(other);
 
-        void add(Analysis* other) {
-            // The base class add function handles the signal region vector and total # events.
-            Analysis::add(other);
-
-            Analysis_ATLAS_13TeV_2LEPStop_36invfb* specificOther
-                = dynamic_cast<Analysis_ATLAS_13TeV_2LEPStop_36invfb*>(other);
-
-            // Here we will add the subclass member variables:
             if (NCUTS != specificOther->NCUTS) NCUTS = specificOther->NCUTS;
-            for (int j=0; j<NCUTS; j++) {
+            for (int j=0; j<NCUTS; j++)
+            {
                 cutFlowVector[j] += specificOther->cutFlowVector[j];
                 cutFlowVector_str[j] = specificOther->cutFlowVector_str[j];
             }
 
-	    _SRASF120 += specificOther->_SRASF120;
-	    _SRASF140 += specificOther->_SRASF140;
-	    _SRADF140 += specificOther->_SRADF140;
-	    _SRASF160 += specificOther->_SRASF160;
-	    _SRADF160 += specificOther->_SRADF160;
-	    _SRASF180 += specificOther->_SRASF180;
-	    _SRADF180 += specificOther->_SRADF180;
-	    _SRBSF120 += specificOther->_SRBSF120;
-	    _SRBDF120 += specificOther->_SRBDF120;
-	    _SRBSF140 += specificOther->_SRBSF140;
-	    _SRBDF140 += specificOther->_SRBDF140;
-	    _SRCSF110 += specificOther->_SRCSF110;
-	    _SRCDF110 += specificOther->_SRCDF110;
-	    _SR4b += specificOther->_SR4b;
+            _SRASF120 += specificOther->_SRASF120;
+            _SRASF140 += specificOther->_SRASF140;
+            _SRADF140 += specificOther->_SRADF140;
+            _SRASF160 += specificOther->_SRASF160;
+            _SRADF160 += specificOther->_SRADF160;
+            _SRASF180 += specificOther->_SRASF180;
+            _SRADF180 += specificOther->_SRADF180;
+            _SRBSF120 += specificOther->_SRBSF120;
+            _SRBDF120 += specificOther->_SRBDF120;
+            _SRBSF140 += specificOther->_SRBSF140;
+            _SRBDF140 += specificOther->_SRBDF140;
+            _SRCSF110 += specificOther->_SRCSF110;
+            _SRCDF110 += specificOther->_SRCDF110;
+            _SR4b += specificOther->_SR4b;
         }
 
 

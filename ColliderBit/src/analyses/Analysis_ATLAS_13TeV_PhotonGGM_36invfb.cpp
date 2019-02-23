@@ -124,9 +124,7 @@ namespace Gambit {
 
       }
 
-      void analyze(const HEPUtils::Event* event) {
-
-        Analysis::analyze(event);
+      void run(const HEPUtils::Event* event) {
 
         // Missing energy w/ smearing
         double ht = 0;
@@ -554,13 +552,11 @@ namespace Gambit {
 
       }
 
-
-      void add(Analysis* other) {
-        // The base class add function handles the signal region vector and total # events.
-        Analysis::add(other);
-
-        Analysis_ATLAS_13TeV_PhotonGGM_36invfb* specificOther
-          = dynamic_cast<Analysis_ATLAS_13TeV_PhotonGGM_36invfb*>(other);
+      /// Combine the variables of another copy of this analysis (typically on another thread) into this one.
+      void combine(const Analysis* other)
+      {
+        const Analysis_ATLAS_13TeV_PhotonGGM_36invfb* specificOther
+          = dynamic_cast<const Analysis_ATLAS_13TeV_PhotonGGM_36invfb*>(other);
 
         #ifdef CHECK_CUTFLOW
           if (NCUTS != specificOther->NCUTS) NCUTS = specificOther->NCUTS;

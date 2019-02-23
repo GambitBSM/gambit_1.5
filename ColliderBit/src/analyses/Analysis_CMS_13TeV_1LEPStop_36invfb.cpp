@@ -88,8 +88,8 @@ namespace Gambit {
             for (size_t i = 0; i < NUM_aggregateSR; ++i) _aggregateSR[i] = 0;
         }
 
-        void analyze(const HEPUtils::Event* event) {
-            Analysis::analyze(event);
+        void run(const HEPUtils::Event* event) {
+
             _cutflow.fillinit();
 
             // Missing energy
@@ -366,12 +366,11 @@ namespace Gambit {
 
         }
 
-
-        void add(Analysis* other) {
-            // The base class add function handles the signal region vector and total # events.
-            Analysis::add(other);
-            Analysis_CMS_13TeV_1LEPStop_36invfb* specificOther
-                = dynamic_cast<Analysis_CMS_13TeV_1LEPStop_36invfb*>(other);
+        /// Combine the variables of another copy of this analysis (typically on another thread) into this one.
+        void combine(const Analysis* other)
+        {
+            const Analysis_CMS_13TeV_1LEPStop_36invfb* specificOther
+                = dynamic_cast<const Analysis_CMS_13TeV_1LEPStop_36invfb*>(other);
 
 //            for (size_t i = 0; i < NUM_SR; ++i)
 //                _SR[i] += specificOther->_SR[i];

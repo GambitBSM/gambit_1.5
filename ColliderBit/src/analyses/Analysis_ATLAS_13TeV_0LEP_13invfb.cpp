@@ -54,9 +54,7 @@ namespace Gambit {
       }
 
 
-      void analyze(const Event* event) {
-
-        Analysis::analyze(event);
+      void run(const Event* event) {
 
         _flows.fillinit();
 
@@ -265,15 +263,11 @@ namespace Gambit {
         }
       }
 
-
-      void add(Analysis* other) {
-        // The base class add function handles the signal region vector and total # events.
-        Analysis::add(other);
-
-        Analysis_ATLAS_13TeV_0LEP_13invfb* specificOther = dynamic_cast<Analysis_ATLAS_13TeV_0LEP_13invfb*>(other);
-
-        for (size_t i = 0; i < NUMSR; ++i)
-          _srnums[i] += specificOther->_srnums[i];
+      /// Combine the variables of another copy of this analysis (typically on another thread) into this one.
+      void combine(const Analysis* other)
+      {
+        const Analysis_ATLAS_13TeV_0LEP_13invfb* specificOther = dynamic_cast<const Analysis_ATLAS_13TeV_0LEP_13invfb*>(other);
+        for (size_t i = 0; i < NUMSR; ++i) _srnums[i] += specificOther->_srnums[i];
       }
 
 

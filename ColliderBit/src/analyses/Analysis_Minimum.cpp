@@ -33,8 +33,7 @@ namespace Gambit {
       }
 
 
-      void analyze(const HEPUtils::Event* event) {
-        Analysis::analyze(event);
+      void run(const HEPUtils::Event* event){
 
         // Get the missing energy in the event
         double met = event->met();
@@ -81,13 +80,10 @@ namespace Gambit {
       }
 
 
-      void add(Analysis* other)
+      /// Combine the variables of another copy of this analysis (typically on another thread) into this one.
+      void combine(const Analysis* other)
       {
-        // The base class add function handles the signal region number and total # events combination across threads
-        Analysis::add(other);
-
-        Analysis_Minimum* specificOther = dynamic_cast<Analysis_Minimum*>(other);
-        // Here we will add the subclass member variables:
+        const Analysis_Minimum* specificOther = dynamic_cast<const Analysis_Minimum*>(other);
         _numSR += specificOther->_numSR;
       }
 

@@ -69,8 +69,7 @@ namespace Gambit {
 
       }
 
-      void analyze(const HEPUtils::Event* event) {
-        Analysis::analyze(event);
+      void run(const HEPUtils::Event* event) {
 
         // Missing energy
         // HEPUtils::P4 ptot = event->missingmom();
@@ -205,14 +204,11 @@ namespace Gambit {
       }
 
 
-      void add(Analysis* other) {
-        // The base class add function handles the signal region vector and total # events.
-        Analysis::add(other);
-
-        Analysis_CMS_8TeV_2LEPDMTOP_20invfb* specificOther
-                = dynamic_cast<Analysis_CMS_8TeV_2LEPDMTOP_20invfb*>(other);
-
-        // Here we will add the subclass member variables:
+      /// Combine the variables of another copy of this analysis (typically on another thread) into this one.
+      void combine(const Analysis* other)
+      {
+        const Analysis_CMS_8TeV_2LEPDMTOP_20invfb* specificOther
+                = dynamic_cast<const Analysis_CMS_8TeV_2LEPDMTOP_20invfb*>(other);
         if (NCUTS != specificOther->NCUTS) NCUTS = specificOther->NCUTS;
         for (int j=0; j<NCUTS; j++) {
           cutFlowVector[j] += specificOther->cutFlowVector[j];

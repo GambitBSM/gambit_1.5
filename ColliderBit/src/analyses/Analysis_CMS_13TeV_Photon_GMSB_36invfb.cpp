@@ -55,10 +55,9 @@ namespace Gambit {
       }
 
 
-      void analyze(const HEPUtils::Event* event)
+      void run(const HEPUtils::Event* event)
       {
         // Baseline objects
-        Analysis::analyze(event);
         HEPUtils::P4 ptot = event->missingmom();
         double met = event->met();
         _cutflow.fillinit();
@@ -141,20 +140,14 @@ namespace Gambit {
 
       }
 
-
-      void add(Analysis* other)
+      /// Combine the variables of another copy of this analysis (typically on another thread) into this one.
+      void combine(const Analysis* other)
       {
-        // The base class add function handles the signal region vector and total # events.
-
-        Analysis::add(other);
-
-        Analysis_CMS_13TeV_Photon_GMSB_36invfb* specificOther
-                = dynamic_cast<Analysis_CMS_13TeV_Photon_GMSB_36invfb*>(other);
-
+        const Analysis_CMS_13TeV_Photon_GMSB_36invfb* specificOther
+                = dynamic_cast<const Analysis_CMS_13TeV_Photon_GMSB_36invfb*>(other);
         for (auto& el : _numSR) {
-          el.second += specificOther->_numSR[el.first];
+          el.second += specificOther->_numSR.at(el.first);
         }
-
       }
 
 

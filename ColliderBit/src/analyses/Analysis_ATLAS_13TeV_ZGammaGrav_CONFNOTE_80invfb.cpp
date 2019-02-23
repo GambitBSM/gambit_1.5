@@ -32,8 +32,7 @@ namespace Gambit {
       }
 
 
-      void analyze(const Event* event) {
-        Analysis::analyze(event);
+      void run(const Event* event) {
 
         // Electrons
         ParticlePtrs electrons;
@@ -142,16 +141,12 @@ namespace Gambit {
 
       }
 
-
-      void add(Analysis* other) {
-        // The base class add function handles the signal region vector and total # events.
-        Analysis::add(other);
-
-        Analysis_ATLAS_13TeV_ZGammaGrav_CONFNOTE_80invfb* specificOther
-          = dynamic_cast<Analysis_ATLAS_13TeV_ZGammaGrav_CONFNOTE_80invfb*>(other);
-
+      /// Combine the variables of another copy of this analysis (typically on another thread) into this one.
+      void combine(const Analysis* other)
+      {
+        const Analysis_ATLAS_13TeV_ZGammaGrav_CONFNOTE_80invfb* specificOther
+          = dynamic_cast<const Analysis_ATLAS_13TeV_ZGammaGrav_CONFNOTE_80invfb*>(other);
         for (size_t j = 0; j < NCUTS; ++j) cutflow[j] += specificOther->cutflow[j];
-
         nsig += specificOther->nsig;
       }
 
