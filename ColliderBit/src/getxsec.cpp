@@ -62,6 +62,8 @@ namespace Gambit
       if (*Loop::iteration == COLLIDER_FINALIZE)
       {
         result.gather_xsecs();
+
+        cout << "xsec, err, ntot: " << result() << " " << result.xsec_err() << " " << result.num_events() << endl;
       }
 
     }

@@ -18,8 +18,6 @@
 #include "gambit/ColliderBit/xsec.hpp"
 #include "gambit/Utils/standalone_error_handlers.hpp"
 
-#include "HEPUtils/MathUtils.h"
-
 namespace Gambit
 {
   namespace ColliderBit
@@ -29,13 +27,7 @@ namespace Gambit
     xsec::xsec() : _ntot(0)
                  , _xsec(0)
                  , _xsecerr(0)
-    {
-      #pragma omp critical
-      {
-        // Add this instance to the instances map
-        instances_map[omp_get_thread_num()] = this;
-      }
-    }
+    {}
 
     /// Public method to reset this instance for reuse, avoiding the need for "new" or "delete".
     void xsec::reset()
@@ -43,6 +35,16 @@ namespace Gambit
       _ntot = 0;
       _xsec = 0;
       _xsecerr = 0;
+
+      // Add this instance to the instances map if it's not there already.
+      int thread = omp_get_thread_num();
+      if (instances_map.count(thread) == 0)
+      {
+        #pragma omp critical
+        {
+          instances_map[thread] = this;
+        }
+      }
     }
 
     /// Increment the number of events seen so far
