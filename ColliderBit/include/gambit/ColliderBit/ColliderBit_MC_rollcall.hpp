@@ -21,7 +21,7 @@
 ///          (p.scott@imperial.ac.uk)
 ///  \date 2015 Jul
 ///  \date 2018 Jan
-///  \date 2019 Jan
+///  \date 2019 Jan, Feb
 ///
 ///  \author Andy Buckley
 ///          (andy.buckley@cern.ch)
@@ -40,6 +40,25 @@
     START_FUNCTION(MCLoopInfo, CAN_MANAGE_LOOPS)
     #undef FUNCTION
   #undef CAPABILITY
+
+  /// Cross-section calculators
+  /// @{
+  #define CAPABILITY CrossSection
+  START_CAPABILITY
+
+    #define FUNCTION getMCxsec
+    START_FUNCTION(xsec)
+    NEEDS_MANAGER(RunMC, MCLoopInfo)
+    DEPENDENCY(HardScatteringSim, const BaseCollider*)
+    #undef FUNCTION
+
+    #define FUNCTION getNLLFastxsec
+    START_FUNCTION(xsec)
+    NEEDS_MANAGER(RunMC, MCLoopInfo)
+    #undef FUNCTION
+
+  #undef CAPABILITY
+  /// @}
 
   /// Lists of analyses to run
   /// @{
@@ -68,25 +87,6 @@
     NEEDS_MANAGER(RunMC, MCLoopInfo)
     DEPENDENCY(CrossSection, xsec)
     #undef FUNCTION
-  #undef CAPABILITY
-  /// @}
-
-  /// Cross-section calculators
-  /// @{
-  #define CAPABILITY CrossSection
-  START_CAPABILITY
-
-    #define FUNCTION getMCxsec
-    START_FUNCTION(xsec)
-    NEEDS_MANAGER(RunMC, MCLoopInfo)
-    DEPENDENCY(HardScatteringSim, const BaseCollider*)
-    #undef FUNCTION
-
-    #define FUNCTION getNLLFastxsec
-    START_FUNCTION(xsec)
-    NEEDS_MANAGER(RunMC, MCLoopInfo)
-    #undef FUNCTION
-
   #undef CAPABILITY
   /// @}
 

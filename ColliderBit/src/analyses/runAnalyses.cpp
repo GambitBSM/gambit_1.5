@@ -107,7 +107,7 @@ namespace Gambit
         for (auto& analysis_pointer_pair : Container.get_current_analyses_map())
         {
           #ifdef COLLIDERBIT_DEBUG
-          cout << debug_prefix() << "run"+detname+"Analyses: Collecting result from " << analysis_pointer_pair.first << endl;
+            cout << debug_prefix() << "run"+detname+"Analyses: Collecting result from " << analysis_pointer_pair.first << endl;
           #endif
 
           str warning;
@@ -124,7 +124,7 @@ namespace Gambit
       {
         // Final iteration. Just return.
         #ifdef COLLIDERBIT_DEBUG
-        cout << debug_prefix() << "run"+detname+"Analyses: 'result' contains " << result.size() << " results." << endl;
+          cout << debug_prefix() << "run"+detname+"Analyses: 'result' contains " << result.size() << " results." << endl;
         #endif
         return;
       }
@@ -141,7 +141,7 @@ namespace Gambit
     void NAME(AnalysisDataPointers& result)                                   \
     {                                                                         \
       using namespace Pipes::NAME;                                            \
-      runAnalyses(result, #NAME, *Dep::RunMC,                                 \
+      runAnalyses(result, #EXPERIMENT, *Dep::RunMC,                           \
        *Dep::CAT(EXPERIMENT,AnalysisContainer), *Dep::SMEARED_EVENT_DEP,      \
        *Loop::iteration, Loop::wrapup);                                       \
     }

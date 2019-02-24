@@ -14,6 +14,7 @@
 ///
 ///  *********************************************
 
+#include <cmath>
 #include <omp.h>
 #include "gambit/ColliderBit/xsec.hpp"
 #include "gambit/Utils/standalone_error_handlers.hpp"
@@ -80,18 +81,10 @@ namespace Gambit
         else
         {
           _ntot += other_ntot;
-          /// @todo Probably shouldn't be combined with equal weight?!?
-          _xsec = _xsec/2.0 + other_xsec/2.0;
-          _xsecerr = HEPUtils::add_quad(_xsecerr, other_xsecerr) / 2.0;
-
-          //cout << "old: " << _xsec << " " << _xsecerr << endl;
-
-          //double w = 1./(_xsecerr*_xsecerr);
-          //double other_w = 1./(other_xsecerr*other_xsecerr);
-          //_xsec = (w * _xsec + other_w * other_xsec) / (w + other_w);
-          //_xsecerr = 1./sqrt(w + other_w);
-
-          //cout << "new: " << _xsec << " " << _xsecerr << endl;
+          double w = 1./(_xsecerr*_xsecerr);
+          double other_w = 1./(other_xsecerr*other_xsecerr);
+          _xsec = (w * _xsec + other_w * other_xsec) / (w + other_w);
+          _xsecerr = 1./sqrt(w + other_w);
         }
       }
     }
