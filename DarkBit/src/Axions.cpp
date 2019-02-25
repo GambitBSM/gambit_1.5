@@ -37,6 +37,7 @@
 #include "gambit/Elements/gambit_module_headers.hpp"
 #include "gambit/Utils/util_functions.hpp"
 #include "gambit/Utils/ascii_table_reader.hpp"
+#include "gambit/Utils/statistics.hpp"
 #include "gambit/Utils/numerical_constants.hpp"
 #include "gambit/DarkBit/DarkBit_rollcall.hpp"
 #include "gambit/DarkBit/DarkBit_utils.hpp"
@@ -779,18 +780,8 @@ namespace Gambit
       return result;
     }
 
-    // TODO: To be replaced by global GAMBIT nuisance lnL?!
-    double gaussian_nuisance_lnL(double theo, double val, double theosigma)
-    {
-
-      if (theosigma < 0) DarkBit_error().raise(LOCAL_INFO, "Theory uncertainty cannot be negative.");
-
-      double errsq = theosigma*theosigma;
-      double chi2 = -0.5*gsl_pow_2(theo-val)/errsq;
-      double norm = log(2.0*pi*errsq);
-
-      return chi2 - norm;
-    }
+    // Use simplified version of Gaussian likelihood from GAMBIT Utils.
+    double gaussian_nuisance_lnL(double theo, double obs, double sigma) { return Stats::gaussian_loglikelihood(theo, obs, 0, sigma, false); };
 
     ////////////////////////////////////////////////////////
     //                                                    //
