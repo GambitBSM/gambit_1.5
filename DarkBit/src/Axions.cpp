@@ -302,7 +302,7 @@ namespace Gambit
       if (data.getncol() != 35)
       {
         DarkBit_error().raise(LOCAL_INFO, "ERROR! Solar model file '"+file+"' not compatible with GAMBIT!\n"
-                                          "       See documentation or example file in 'DarkBit/data/' for the correct format.");
+                                          "       See [arXiv:1810.07192] or example file in 'DarkBit/data/' for the correct format.");
       };
       data.setcolnames("mass", "radius", "temperature", "rho", "Pressure", "Luminosity", "X_H1", "X_He4", "X_He3", "X_C12", "X_C13", "X_N14", "X_N15", "X_O16", "X_O17", "X_O18", "X_Ne", "X_Na", "X_Mg", "X_Al", "X_Si", "X_P", "X_S", "X_Cl", "X_Ar",
                        "X_K", "X_Ca", "X_Sc", "X_Ti", "X_V", "X_Cr", "X_Mn", "X_Fe", "X_Co", "X_Ni");
@@ -989,7 +989,7 @@ namespace Gambit
       const double exp_sig_mu_v1 = -4.01, exp_sig_std_v1 = 3.01;
       // ALPS Collaboration results, vacuum, 6 frames.
       const double exp_sig_mu_v2 = -2.35, exp_sig_std_v2 = 3.44;
-      // ALPS Collaboration results, vacuum combined, 11 frames.
+      // ALPS Collaboration results, vacuum combined(!), 11 frames (we keep them seperated).
       //const double exp_sig_mu_vc = -3.29, exp_sig_std_vc = 2.27;
       // ALPS Collaboration results, gas, 8 frames (P = 0.18 mbar).
       const double exp_sig_mu_g = 3.98, exp_sig_std_g = 2.45;
@@ -997,10 +997,8 @@ namespace Gambit
       double l1 = ALPS1_lnL_general(s1, exp_sig_mu_v1, exp_sig_std_v1);
       double l2 = ALPS1_lnL_general(s1, exp_sig_mu_v2, exp_sig_std_v2);
       double l3 = ALPS1_lnL_general(s2, exp_sig_mu_g, exp_sig_std_g);
-      //double l4 = ALPS1_lnL_general(s1, exp_sig_mu_vc, exp_sig_std_vc);
 
       result = l1 + l2 + l3;
-      //result = l3 + l4;
     }
 
     //////////////////////////////////////////////////
@@ -1276,11 +1274,10 @@ namespace Gambit
       // There are only limits between 5.4 and 5.9 ueV.
       if ((m > 5.4) && (m < 5.9)) {
         // Likelihood parameters based on information from Phys. Rev. D 42, 1297(R) (1990); correspond to power in 10^-22 W.
-        // const double PowerDFSZ = 6.92;
-        // const double sigma = 7.0/1.95996; // Rescaled to 95% C.L.
         const double sigma = 2.859772;
         // The "signal" needs to be rescaled to 0.2804 GeV/cm^3 (their reference value)
         // and also to the reference DFSZ coupling strength gDFSZ^2 = 0.6188 x 10^-30 GeV^-2
+        // const double PowerDFSZ = 6.92;
         //double s = (0.45/0.2804)*(PowerDFSZ/0.6188)*(*Dep::Haloscope_signal);
         //double s = 0.035083106*(0.45/0.2804)*(*Dep::Haloscope_signal);
         double s = 0.0273012*(*Dep::Haloscope_signal);
@@ -1298,7 +1295,7 @@ namespace Gambit
       double m = 1.0E+6*(*Param["ma0"]);
       double l = 0.0;
       // Results from Phys. Rev. D 40, 3153 (1989)
-      // The bins and results are directly derived from Table I (which appears to be inconsitent with Figure 14).
+      // The bins and results below (from Table I) appear to be inconsitent with Figure 14.
       //const std::vector<double> bins = {4.507875, 5.037241, 5.459079, 5.851967, 5.996715, 6.257262, 6.617065, 6.976868, 7.113345, 7.295314, 7.857765, 8.631134, 8.684898, 9.259755, 9.760171, 10.173737,
       //                                  11.298638, 11.583999, 12.845377, 13.234130, 15.301962, 16.2655809};
       // N_sigma values as defined in the paper.
@@ -1306,7 +1303,6 @@ namespace Gambit
       // Proportionality factors ("sigma") inferred from Table I in in units of GeV^-1/cm^3.
       //const double eff_sigma [21] = {8.3030524510E+01, 3.5789241789E+02, 5.3457189090E+02, 8.3673921774E+02, 7.3205267295E+02, 7.1850356207E+02, 7.0099211538E+02, 9.3243407987E+02, 1.3132694610E+03, 1.9447760075E+03, 2.4028734743E+03,
       //                               3.5992849457E+03, 5.8433323192E+03, 1.2415907565E+03, 1.1487509033E+03, 1.0000000000E+99, 2.6768234439E+03, 9.1546564260E+04, 1.7208310692E+04, 4.2462784870E+04, 2.8794160844E+04};
-
       // The results below are derived from Fig. 14 (assuming N_sigma = 4 for all values).
       const std::vector<double> bins = {4.400841, 4.960600, 5.209095, 5.668611, 6.934590, 7.445686, 8.041207, 8.898392, 9.570607, 10.067396, 11.213613, 11.626834, 12.773085, 13.450179, 14.704884, 16.170394};
       const double N_sigma = 4.0;
@@ -1350,7 +1346,7 @@ namespace Gambit
     /* Some auxillary functions for solving the  necessary differential equations
      */
 
-    // Provides function F1 for the change in variables time -> temperature (see documentation).
+    // Provides function F1 for the change in variables time -> temperature (see 1810.07192).
     double SpecialFun1(double T)
     {
       // log10(T/GeV) required for interpolation.
@@ -1362,7 +1358,7 @@ namespace Gambit
       return res;
     }
 
-    // Provides function F3 for the change in variables time -> temperature (see documentation).
+    // Provides function F3 for the change in variables time -> temperature (see 1810.07192).
     double SpecialFun3(double T)
     {
       // log10(T/GeV) required for interpolation.
@@ -1437,7 +1433,7 @@ namespace Gambit
       double r, r_up, r_lo;
 
       // Calculate first estimate for the root bracketing [r_lo, r_up].
-      // Calcucate best estimate for comparison. g(Tchi)^-0.25 = 0.49, g(Tchi)^-...=0.76
+      // Calculate best estimate for comparison. g(Tchi)^-0.25 = 0.49, g(Tchi)^-...=0.76
       r = 0.49*pow((10.0/(pi*pi)) * gsl_pow_2(m_pl*ma0), 0.25);
       // Compare to decide which branch of the equation is valid; T1 > Tchi or T1 < Tchi
       if ( (r > Tchi) && (beta > 1.0E-10) )
@@ -1470,7 +1466,7 @@ namespace Gambit
     /* Differential equation solver to calculate the axion energy density today */
 
     // Initialise the quantities needed for the ODE solver from the gsl library.
-    // Define the system of differential equations.
+    // Define the system of differential equations as a function of relative temperature.
     int scal_field_eq(double tau, const double y[], double f[], void *params)
     {
       struct AxionEDT_params * p = (struct AxionEDT_params *)params;
@@ -1481,8 +1477,8 @@ namespace Gambit
       double thetai = (p->thetai);
       // f stores derivatives, y stores functions.
       f[0] = y[1];
-      // As a function of (relative) temperature:
-      f[1] = - gsl_pow_2(SpecialFun1(-tau*Tosc)*ma0*axion_mass_temp(-tau*Tosc,beta,Tchi)/(hubble_rad_dom(-tau*Tosc)*(-tau)))*gsl_sf_sin(y[0]*thetai)/thetai;
+      f[1] = -gsl_pow_2(SpecialFun1(-tau*Tosc) * ma0*axion_mass_temp(-tau*Tosc,beta,Tchi) / (hubble_rad_dom(-tau*Tosc) * (-tau))) * gsl_sf_sin(y[0]*thetai)/thetai;
+
       return GSL_SUCCESS;
     }
 
@@ -1501,9 +1497,8 @@ namespace Gambit
       // (i, j) entries for matrix m; last entry = df[i]/df[j].
       gsl_matrix_set (m, 0, 0, 0);
       gsl_matrix_set (m, 0, 1, 1);
-      // As a function of (relative) temperature;
-      gsl_matrix_set (m, 1, 0, - gsl_pow_2(SpecialFun1(-tau*Tosc)*ma0*axion_mass_temp(-tau*Tosc,beta,Tchi)/(hubble_rad_dom(-tau*Tosc)*(-tau)))*gsl_sf_cos(y[0]*thetai));
-      gsl_matrix_set (m, 1, 1, -SpecialFun3(-tau*Tosc)/(-tau));
+      gsl_matrix_set (m, 1, 0, -gsl_pow_2(SpecialFun1(-tau*Tosc) * ma0*axion_mass_temp(-tau*Tosc,beta,Tchi) / (hubble_rad_dom(-tau*Tosc) * (-tau))) * gsl_sf_cos(y[0]*thetai));
+      gsl_matrix_set (m, 1, 1, -SpecialFun3(-tau*Tosc) / (-tau));
       dfdt[0] = 0.0;
       dfdt[1] = 0.0;
 
@@ -1539,7 +1534,7 @@ namespace Gambit
       double y[2] = {1.0, 0.0};
       // Settings for the driver: pointer to the ODE system sys, the gsl method, initial step size,
       // absolute accuracy in y[0] and y[1], relative accuracy in y[0] and y[1].
-      // TODO: CLASSIC gsl_odeiv2_step_rk4, STANDARD gsl_odeiv2_step_rk8pd, gsl_odeiv2_step_rkf45, BEST? gsl_odeiv2_step_bsimp
+      // Other possible choices: gsl_odeiv2_step_rk4 (classic), gsl_odeiv2_step_rk8pd, gsl_odeiv2_step_rkf45 (standard choices).
       gsl_odeiv2_driver * d = gsl_odeiv2_driver_alloc_y_new (&sys, gsl_odeiv2_step_bsimp, -0.1*tau1, 1E-8, 1E-8);
 
       // Numerically solve ODE by continuing the integration well into the harmonic and adiabatic regime (stopping conditions
@@ -1549,8 +1544,8 @@ namespace Gambit
       int i = 0;
 
       #ifdef AXION_DEBUG_MODE
-        std::cout << "DEBUGGING INFO for solar relic denisity calculation:\n"
-                     "'temperature' theta dtheta/dtau" << std::endl;
+        std::cout << "DEBUGGING INFO for relic density calculation:\n"
+                     "#'temperature' theta dtheta/dtau" << std::endl;
       #endif
 
       do
@@ -1573,7 +1568,7 @@ namespace Gambit
       {
         std::ostringstream buffer;
         buffer << "T_end: " << -new_step << " | theta_hat_val: " << check1 << ", theta_der: "<< -tau2*y[1]*thetai << ", 3H/m_osc: " << 3.0*hubble_rad_dom(Tosc)/(ma0*axion_mass_temp(-new_step*Tosc,beta,Tchi)) << ", 3H/m: " << check2 << " .\n";
-        DarkBit_warning().raise(LOCAL_INFO, "Warning! Maximum number of integration steps reached for energy density calculator!\n         "+buffer.str());
+        DarkBit_warning().raise(LOCAL_INFO, "WARNING! Maximum number of integration steps reached for energy density calculator!\n         "+buffer.str());
       };
 
       // Calculate the axion energy density at the stopping point.
@@ -1592,7 +1587,7 @@ namespace Gambit
     //                                          //
     //////////////////////////////////////////////
 
-    /*! \brief Capabilities realting to astrophysical observations (R-parameter, H.E.S.S. telescope search, cooling hints).
+    /*! \brief Capabilities relating to astrophysical observations (R-parameter, H.E.S.S. telescope search, cooling hints).
      *
      * Supported models: GeneralALP
      */
@@ -1669,7 +1664,7 @@ namespace Gambit
       };
 
       // We only have predictions up to x = 30. Limits should get stronger for x > 30, so
-      // it is conservative to use the prodiction for x = 30 for x > 30.
+      // it is conservative to use the prediction for x = 30 for x > 30.
       double pred;
       if (x > 30.0)
       {
@@ -1790,7 +1785,7 @@ namespace Gambit
     //      SN 1987A limits (from axion-photon conversion in the B-field of the Milky Way)      //
     //////////////////////////////////////////////////////////////////////////////////////////////
 
-    // Capability function to calculate the likelihood for SN 1987A (based on model predction from 1410.3747
+    // Capability function to calculate the likelihood for SN 1987A (based on model prediction from 1410.3747
     // and data from 25 to 100 MeV photons interpreted by Chupp et al., Phys. Rev. Lett. 62, 505 (1989)).
     void calc_lnL_SN1987A (double &result)
     {
