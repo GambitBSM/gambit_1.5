@@ -19,12 +19,35 @@
 #ifndef __GeneralALP_hpp__
 #define __GeneralALP_hpp__
 
+// General axion model with parametric temperature-dependent mass and cosmological applications.
+#define MODEL GeneralCosmoALP
+  START_MODEL
+  // Physical units: gagg [GeV^-1], gaee [dimensionless], fa [GeV], ma0 [eV]
+  //                 Tchi [MeV], beta [dimensionless], thetai [dimensionless], xi [dimensionless]
+  DEFINEPARS(gagg,gaee,fa,ma0,Tchi,beta,thetai)
+  DEFINEPARS(xi)
+#undef MODEL
+
+// Simplified general axion model with parametric temperature-independent mass and cosmological applications.
+#define MODEL CosmoALP
+#define PARENT GeneralCosmoALP
+  START_MODEL
+  // Units for these parameters are the same as for the GeneralALP.
+  DEFINEPARS(gagg,fa,ma0,thetai)
+  DEFINEPARS(xi)
+  // Translation to parent, all defined in Axions.cpp:
+  INTERPRET_AS_PARENT_FUNCTION(CosmoALP_to_GeneralCosmoALP)
+#undef MODEL
+
 // General axion model with parametric temperature-dependent mass.
 #define MODEL GeneralALP
+#define PARENT GeneralCosmoALP
   START_MODEL
   // Physical units: gagg [GeV^-1], gaee [dimensionless], fa [GeV], ma0 [eV]
   //                 Tchi [MeV], beta [dimensionless], thetai [dimensionless]
   DEFINEPARS(gagg,gaee,fa,ma0,Tchi,beta,thetai)
+  // Translation to parent, all defined in Axions.cpp:
+  INTERPRET_AS_PARENT_FUNCTION(GeneralALP_to_GeneralCosmoALP)
 #undef MODEL
 
 // QCD axion model

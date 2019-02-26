@@ -23,6 +23,38 @@
 
 #include "gambit/Models/models/Axions.hpp"
 
+#define MODEL CosmoALP
+void MODEL_NAMESPACE::CosmoALP_to_GeneralCosmoALP (const ModelParameters &myparams, ModelParameters &parentparams)
+{
+    logger()<<"Running interpret_as_parent calculations for CosmoALP -> GeneralCosmoALP ..."<<EOM;
+
+    parentparams.setValue("gagg", myparams["gagg"]);
+    parentparams.setValue("gaee", 0);
+    parentparams.setValue("fa", myparams["fa"]);
+    parentparams.setValue("ma0", myparams["ma0"]);
+    parentparams.setValue("Tchi", 1E99);
+    parentparams.setValue("beta", 0);
+    parentparams.setValue("thetai", myparams["thetai"]);
+    parentparams.setValue("xi", myparams["xi"]);
+}
+#undef MODEL
+
+#define MODEL GeneralALP
+void MODEL_NAMESPACE::GeneralALP_to_GeneralCosmoALP (const ModelParameters &myparams, ModelParameters &parentparams)
+{
+    logger()<<"Running interpret_as_parent calculations for GeneralALP -> GeneralCosmoALP ..."<<EOM;
+
+    parentparams.setValue("gagg", myparams["gagg"]);
+    parentparams.setValue("gaee", myparams["gaee"]);
+    parentparams.setValue("fa", myparams["fa"]);
+    parentparams.setValue("ma0", myparams["ma0"]);
+    parentparams.setValue("Tchi", myparams["Tchi"]);
+    parentparams.setValue("beta", myparams["beta"]);
+    parentparams.setValue("thetai", myparams["thetai"]);
+    // Set xi = 0 to avoid unnecessary relic density calculation...
+    parentparams.setValue("xi", 0);
+}
+#undef MODEL
 
 #define MODEL QCDAxion
 void MODEL_NAMESPACE::QCDAxion_to_GeneralALP (const ModelParameters &myparams, ModelParameters &parentparams)

@@ -1592,7 +1592,7 @@ namespace Gambit
      void calc_RParameter(double &result)
      {
        using namespace Pipes::calc_RParameter;
-       const ModelParameters& params = *Dep::GeneralALP_parameters;
+       const ModelParameters& params = *Dep::GeneralCosmoALP_parameters;
        double gaee2 = gsl_pow_2(1.0E+13 * std::fabs(params.at("gaee")));
        double gagg = 1.0E+10*std::fabs(params.at("gagg")); // gagg needs to be in 10^-10 GeV^-1.
        double lgma0 = log10(params.at("ma0"));

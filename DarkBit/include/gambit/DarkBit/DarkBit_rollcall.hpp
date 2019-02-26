@@ -1421,7 +1421,7 @@ START_MODULE
   START_CAPABILITY
     #define FUNCTION calc_RParameter
     START_FUNCTION(double)
-    DEPENDENCY(GeneralALP_parameters, ModelParameters)
+    DEPENDENCY(GeneralCosmoALP_parameters, ModelParameters)
     #undef FUNCTION
   #undef CAPABILITY
 
@@ -1429,7 +1429,7 @@ START_MODULE
   START_CAPABILITY
     #define FUNCTION calc_lnL_RParameter
     START_FUNCTION(double)
-    ALLOW_MODEL(GeneralALP)
+    ALLOW_MODEL(GeneralCosmoALP)
     DEPENDENCY(RParameter, double)
     #undef FUNCTION
   #undef CAPABILITY
