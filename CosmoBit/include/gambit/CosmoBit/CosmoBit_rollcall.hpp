@@ -29,6 +29,7 @@
 
 #include "gambit/CosmoBit/CosmoBit_types.hpp"
 
+#include <valarray>
 
 #define MODULE CosmoBit
 START_MODULE
@@ -246,10 +247,6 @@ START_MODULE
   #undef CAPABILITY
 
 
-
-// ------------------------
-
-
   #define CAPABILITY T_cmb
     START_CAPABILITY
     #define FUNCTION set_T_cmb
@@ -264,7 +261,7 @@ START_MODULE
       DEPENDENCY(T_cmb, double)
       ALLOW_MODELS(LCDM_dNeffCMB_dNeffBBN_etaBBN) // To get etaCMB for LCDM_dNeffCMB_dNeffBBN_etaBBN
       ALLOW_MODELS(LCDM_dNeffCMB_dNeffBBN) // Allow for all direct childs of LCDM_dNeffCMB_dNeffBBN_etaBBN. Needed for the translation into LCDM_dNeffCMB_dNeffBBN_etaBBN
-      ALLOW_MODELS(LCDM_ExtdNeffCMB)
+      ALLOW_MODELS(LCDM_ExtdNeffCMB_ExtetaBBN)
     #undef FUNCTION
   #undef CAPABILITY
 
@@ -275,7 +272,7 @@ START_MODULE
       DEPENDENCY(eta0, double)
       ALLOW_MODELS(LCDM_dNeffCMB_dNeffBBN_etaBBN) // To get etaCMB for LCDM_dNeffCMB_dNeffBBN_etaBBN
       ALLOW_MODELS(LCDM_dNeffCMB_dNeffBBN) // Allow for all direct childs of LCDM_dNeffCMB_dNeffBBN_etaBBN. Needed for the translation into LCDM_dNeffCMB_dNeffBBN_etaBBN
-      ALLOW_MODELS(LCDM_ExtdNeffCMB)
+      ALLOW_MODELS(LCDM_ExtdNeffCMB_ExtetaBBN)
     #undef FUNCTION
   #undef CAPABILITY
 
@@ -293,8 +290,8 @@ START_MODULE
    #define FUNCTION calculate_etaBBN_ALP
      START_FUNCTION(double)
         DEPENDENCY(etaCMB, double)
-        DEPENDENCY(external_dNeff_etaBBN, std::vector<double>)
-        ALLOW_MODELS(LCDM_ExtdNeffCMB) // TODO: make the model combinaiton explicit here
+        DEPENDENCY(external_dNeff_etaBBN, map_str_dbl)
+        ALLOW_MODELS(LCDM_ExtdNeffCMB_ExtetaBBN) // TODO: make the model combinaiton explicit here
       //ALLOW_MODEL_COMBINATION(cosmology,particle)// TODO: refer to correct model name
       //MODEL_GROUP(cosmology, (LCDM_dNeffCMB_dNeffBBN_etaBBN))
       //MODEL_GROUP(particle, (ALP))
@@ -302,10 +299,11 @@ START_MODULE
    #undef FUNCTION
   #undef CAPABILITY
 
+  // compute dNeff AND etaBBN for non-standard models
   #define CAPABILITY external_dNeff_etaBBN
     START_CAPABILITY
     #define FUNCTION compute_dNeff_etaBBN_ALP
-      START_FUNCTION(std::vector<double>)
+      START_FUNCTION(map_str_dbl)
       // TODO: refer to correct model name
       //MODEL_GROUP(cosmology, (LCDM_dNeffCMB_dNeffBBN_etaBBN))
       //MODEL_GROUP(particle, (ALP))
@@ -317,8 +315,8 @@ START_MODULE
    START_CAPABILITY
    #define FUNCTION calculate_dNeff_ALP
      START_FUNCTION(double)
-     ALLOW_MODELS(LCDM_ExtdNeffCMB)
-     DEPENDENCY(external_dNeff_etaBBN, std::vector<double>)
+     ALLOW_MODELS(LCDM_ExtdNeffCMB_ExtetaBBN)
+     DEPENDENCY(external_dNeff_etaBBN, map_str_dbl)
       //ALLOW_MODEL_COMBINATION(cosmology,particle)// TODO: refer to correct model name
       //MODEL_GROUP(cosmology, (LCDM_dNeffCMB_dNeffBBN_etaBBN))
       //MODEL_GROUP(particle, (ALP))

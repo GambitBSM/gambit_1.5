@@ -24,7 +24,7 @@
 Parameters:
  
  # --- import model parameters for models to scan over ---
- LCDM_ExtdNeffCMB: !import include/LCDM_ExtdNeffCMB_scan.yaml       
+ LCDM_ExtdNeffCMB_ExtetaBBN: !import include/LCDM_ExtdNeffCMB_ExtetaBBN_scan.yaml       
  #LCDM_dNeffCMB_dNeffBBN: !import include/LCDM_dNeffCMB_dNeffBBN_scan.yaml       
 
  # nuisance parameters in Planck likelihood
@@ -59,29 +59,15 @@ Scanner:
 
     random:
       plugin: random
-      point_number: 1
+      point_number: 3
       like:  LogLike
 
 #======== Observables of interest ========
 ObsLikes:
  
+   
   - purpose:      LogLike
-    capability:   ExtdNeffCMB
-    module:       CosmoBit
-    type:         double
-
-  - purpose:      LogLike
-    capability:   etaBBN
-    module:       CosmoBit
-    type:         double
-
-  - purpose:      LogLike
-    capability:   BAO_LogLike
-    module:       CosmoBit
-    type:         double
-  
-  - purpose:      Observable
-    capability:   Helium3_abundance
+    capability:   Helium_abundance
     module:       CosmoBit
     type:         std::vector<double>
 
@@ -89,64 +75,24 @@ ObsLikes:
 #======== Rule entries ========
 Rules:
 
-#####
-##  Since the "Planck_lite" model fits to be used by 
-##  the marginalized (lite) versions of both, the TT
-##  and the TTTEEE, likelihoods, we need to resolve
-##  this ambiguity manually.
-#####
 
-  - capability: compute_Planck_high_TT_loglike
-    function: function_Planck_high_TT_lite_loglike
-    module: CosmoBit
-
-#####
-##
-##  Specify data files for BAO, BBN, H0 and sigma8 Likelihoods
-##
-####
   
-  - capability: T_cmb
-    options:
-      T_cmb: 2.7255
-
-  - capability: BAO_LogLike
-    options:
-      DataFile:  BAO_2014.dat
-
   - capability: BBN_LogLike
     options:
       DataFile: PDG_2017.dat # Use both, the Yp and D/H measurement as given in PDG 2017
       #DataFile: PDG_2017_updated.dat # Use the Yp measurement from PDG 2017 and the updated D/H measurement of 1801.08023
   
-  - capability: H0_LogLike
-    options:
-      DataFile:  SH0ES.dat
-
-  - capability: plc_2_0_init
-    options:
-      planck_path: /home/janina/code/PlanckLike/plc_2.0 # set by hand: path/to/your/planck/data
-      
-  - capability: sigma8_LogLike
-    options:
-        DataFile: Planck_SZ.dat
-
-  - capability: class_set_parameter
-    options:
-      class_dict: 
-        output: "tCl pCl lCl" # need to add matter power spectrum for sigma8 computation
-        k_pivot: 0.05
-
   - capability: AlterBBN_modelinfo
     options:
       failsafe: 1
       err: 0
 
-  - capability: BBN_abundances
+  - capability: external_dNeff_etaBBN
     options:
-      correlation_matrix: [[1.0,0.2],[0.2,1.0]]
-      relative_errors: [1e-3,1e-2]
-      elements: [Yp,D]
+      grid_size: 3000
+      max_iter: 7
+
+
 
 #======== Logging setup ========
 Logger:

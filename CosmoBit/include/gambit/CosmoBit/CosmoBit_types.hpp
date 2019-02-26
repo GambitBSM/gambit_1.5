@@ -29,12 +29,15 @@
 #define __CosmoBit_types_hpp__
 
 #include "gambit/Backends/backend_types/class.hpp"
+#include <valarray>
 
 namespace Gambit
 {
 
   namespace CosmoBit
   {
+    typedef std::map< std::string,std::valarray < double > > map_str_valarray_dbl;
+    
     class BBN_container
     {
       public:
@@ -51,6 +54,47 @@ namespace Gambit
       private:
         int NNUC;
     };
+
+    class SM_time_evo 
+    {
+     /* Use these routines for times t before that but t >~ 10^3 s, where electrons and positrons are 
+        already completely annihilated 
+        For times after CMB release you can get these values from the class background structure.
+     */
+      public:
+        SM_time_evo(double t0, double tf, double grid_size);
+       
+        // SM photon temperature (keV) as a function of time (seconds)  
+        void set_T_evo() {T_evo = 1147.40/sqrt((get_t_grid()));}
+
+        // SM neutrino temperature (keV) as a function of time (seconds)
+        // Defined in this way, one gets Neff = 3.046, using Nnu = 3 SM neutrinos
+        void set_Tnu_evo() {Tnu_evo = 822.0965/sqrt(t_grid);}
+        
+        // SM Hubble rate (1/s) as a function of time (seconds)
+        void set_Ht_evo() {H_evo= 1/(2.0*t_grid);} 
+        
+        // SM Hubble rate (1/s) as a function of temperature (keV)
+        void set_HT_evo(std::valarray<double> T) {H_evo = 3.7978719e-7*T*T;}
+
+        // fast integration of Hubble rate using trapezoidal integration
+        void calc_H_int();
+
+        std::valarray<double> get_t_grid() const {return t_grid;}
+        std::valarray<double> get_T_evo() const {return T_evo;}
+        std::valarray<double> get_Tnu_evo() const {return Tnu_evo;}
+        std::valarray<double> get_H_evo() const {return H_evo;}
+        std::valarray<double> get_H_int() const {return H_int;}
+
+    private:
+        int grid_size;
+        std::valarray<double> t_grid;
+        std::valarray<double> T_evo;
+        std::valarray<double> Tnu_evo;
+        std::valarray<double> H_evo;
+        std::valarray<double> H_int;
+    };
+
 
     // Forward declaration of warnings and errors
     error& CosmoBit_error();

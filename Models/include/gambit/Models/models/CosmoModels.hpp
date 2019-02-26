@@ -45,11 +45,11 @@
 #undef MODEL
 
 // get dNeff from external calculation (e.g. for ALPs)
-#define MODEL LCDM_ExtdNeffCMB
+#define MODEL LCDM_ExtdNeffCMB_ExtetaBBN
  #define PARENT LCDM_dNeffCMB_dNeffBBN_etaBBN
   START_MODEL
   DEFINEPARS(omega_b,omega_cdm,H0,ln10A_s,n_s,tau_reio)
-  INTERPRET_AS_PARENT_FUNCTION(LCDM_ExtdNeffCMB_to_LCDM_dNeffCMB_dNeffBBN_etaBBN)
+  INTERPRET_AS_PARENT_FUNCTION(LCDM_ExtdNeffCMB_ExtetaBBN_to_LCDM_dNeffCMB_dNeffBBN_etaBBN)
   INTERPRET_AS_PARENT_DEPENDENCY(etaBBN, double)
   INTERPRET_AS_PARENT_DEPENDENCY(ExtdNeffCMB, double)
  #undef PARENT

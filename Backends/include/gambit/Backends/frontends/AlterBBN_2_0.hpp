@@ -23,7 +23,7 @@
 LOAD_LIBRARY
 
 BE_ALLOW_MODELS(LCDM_dNeffCMB_dNeffBBN_etaBBN)
-// add SMASH
+// TODO: add SMASH
 BE_FUNCTION(Init_cosmomodel, void, (relicparam*), "Init_cosmomodel", "Init_cosmomodel")
 BE_FUNCTION(nucl_err, int, (const relicparam*, double* , double* ), "nucl_err", "nucl_err")
 
@@ -32,9 +32,6 @@ BE_FUNCTION(nucl_err, int, (const relicparam*, double* , double* ), "nucl_err", 
 //BE_FUNCTION(sgStar, double, (double, relicparam*), "sgStar", "sgStar")
 
 BE_CONV_FUNCTION(get_NNUC, int, (), "get_NNUC")
-
-// to test if gambit & alterBBN get same results with same data (in AlterBBN.dat file)
-//BE_FUNCTION(bbn_excluded_chi2, int, (const relicparam*), "bbn_excluded_chi2", "bbn_excluded_chi2")
 
 // Undefine macros to avoid conflict with other backends
 #include "gambit/Backends/backend_undefs.hpp"

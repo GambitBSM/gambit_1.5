@@ -25,6 +25,7 @@
 #include <string>
 #include <iostream>
 #include <stdlib.h>     /* malloc, free, rand */
+#include <valarray>
 
 #include "gambit/CosmoBit/CosmoBit_types.hpp"
 
@@ -54,6 +55,54 @@ namespace Gambit
       BBN_covmat.resize(NNUC+1, std::vector<double>(NNUC+1,0.));
     }
     
+    SM_time_evo::SM_time_evo(double t0, double tf, double N_t) : grid_size(N_t), t_grid(N_t), T_evo(N_t), Tnu_evo(N_t), H_evo(N_t), H_int(N_t)
+    {
+      
+      // check if implemented routines are valid for given initial time
+      if(t0 < 1e3) 
+      {
+        std::ostringstream err;
+        err << "Requested initial time for evolution of Temperature & Hubble rate for SM for Temperatures t_initial was "<< t0<<". Implemented routines are only valid after e+/- annihilation (t > 10^3). Aborting now.";
+        CosmoBit_error().raise(LOCAL_INFO, err.str());
+      }
+
+      // initialize time grid in log space
+      double Delta_logt = (log(tf) - log(t0))/(grid_size-1);      
+      for (int jj = 0; jj<grid_size; ++jj) 
+      {
+           t_grid[jj] = exp(log(t0) + jj*Delta_logt);
+      }
+
+      set_T_evo();
+      set_Tnu_evo();
+      set_Ht_evo();
+    }
+
+
+    void SM_time_evo::calc_H_int()
+    {
+      /*
+      This calculates int(y(x') dx', {x', x0, x}) for each x in x_grid (with x0 = x_grid[0]), using a simple trapezoidal integration.
+      This function explicitly assumes that the logarithms of the values in x_grid are equally spaced.
+      This is very simplified and designed to work fast in case of the Hubble rate. Can go wrong with other functions, so it should
+      really only be used in this context (or if you exactly know what you are doing..).
+      */
+      std::valarray<double> g_grid(grid_size);
+      double Delta_z = (log(t_grid[grid_size-1]) - log(t_grid[0]))/(grid_size - 1);
+      
+      g_grid = t_grid*H_evo;
+      
+      H_int[0] = 0.0;
+      H_int[1] = 0.5*Delta_z*(g_grid[0] + g_grid[1]);
+      
+      double cumsum = g_grid[1];
+      for (int i = 2; i<grid_size; ++i) 
+      {
+          H_int[i] = 0.5*Delta_z*(g_grid[0] + g_grid[i] + 2.0*cumsum);
+          cumsum = cumsum + g_grid[i];
+      }
+    }
+
 
     Class_container::Class_container() : lmax(2508)
     {

@@ -79,14 +79,14 @@ void MODEL_NAMESPACE::LCDM_dNeffCMB_to_LCDM_dNeffCMB_dNeffBBN (const ModelParame
 #undef PARENT
 #undef MODEL
 
-#define MODEL  LCDM_ExtdNeffCMB
+#define MODEL  LCDM_ExtdNeffCMB_ExtetaBBN
 #define PARENT LCDM_dNeffCMB_dNeffBBN_etaBBN
 
 // Translation function definition
-void MODEL_NAMESPACE::LCDM_ExtdNeffCMB_to_LCDM_dNeffCMB_dNeffBBN_etaBBN (const ModelParameters &myP, ModelParameters &targetP)
+void MODEL_NAMESPACE::LCDM_ExtdNeffCMB_ExtetaBBN_to_LCDM_dNeffCMB_dNeffBBN_etaBBN (const ModelParameters &myP, ModelParameters &targetP)
 {
   USE_MODEL_PIPE(PARENT) // get pipe for "interpret as PARENT" function
-  logger()<<"Running interpret_as_parent calculations for LCDM_ExtdNeffCMB --> LCDM_dNeffCMB_dNeffBBN_etaBBN..."<<LogTags::info<<EOM;
+  logger()<<"Running interpret_as_parent calculations for LCDM_ExtdNeffCMB_ExtetaBBN --> LCDM_dNeffCMB_dNeffBBN_etaBBN..."<<LogTags::info<<EOM;
 
   targetP.setValue("omega_b", myP.getValue("omega_b"));
   targetP.setValue("omega_cdm",myP.getValue("omega_cdm"));
