@@ -173,5 +173,6 @@ KeyValues:
   likelihood:
     model_invalid_for_lnlike_below: -1.0E6
     lnlike_offset: -1.0E3
+  debug: true
 
 # End of file
