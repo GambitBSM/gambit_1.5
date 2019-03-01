@@ -533,7 +533,7 @@ namespace Gambit
     // Needs path to pre-claculated data for the "default" option.
     CAST_SolarModel_Interpolator::CAST_SolarModel_Interpolator(std::string solar_model_gagg, std::string solar_model_gaee, std::string data_set)
     {
-      const std::string darkbitdata_path = "DarkBit/data/";
+      const std::string darkbitdata_path = GAMBIT_DIR "/DarkBit/data/";
       bool user_gagg_file_missing = true, user_gaee_file_missing = true;
       logger() << LogTags::info << "Using solar models '"+solar_model_gagg+"' (axion-photon int.) and '"+solar_model_gaee+"' (axion-electron int.) for experiment '"+data_set+"'." << EOM;
 
@@ -805,7 +805,7 @@ namespace Gambit
       double lgT = log10(T) - 3.0;
       // Interpolated effective relatvistic d.o.f. based on 0910.1066, deviations < 0.5%
       // Tabulated data: x = log10(T/GeV), y = gStar
-      static AxionInterpolator gR ("DarkBit/data/gR_WantzShellard.dat", "cspline");
+      static AxionInterpolator gR (GAMBIT_DIR "/DarkBit/data/gR_WantzShellard.dat", "cspline");
       double res;
       if (lgT > 3.0) {
         res = gR.interpolate (2.99);
@@ -825,7 +825,7 @@ namespace Gambit
       double lgT = log10(T) - 3.0;
       // Interpolated effective relatvistic d.o.f. based on 0910.1066, deviations < 0.5%
       // Tabulated data: x = log10(T/GeV), y = gStar
-      static AxionInterpolator gS ("DarkBit/data/gS_WantzShellard.dat", "cspline");
+      static AxionInterpolator gS (GAMBIT_DIR "/DarkBit/data/gS_WantzShellard.dat", "cspline");
       double res;
       if (lgT > 3.0) {
         res = gS.interpolate (2.99);
@@ -1203,7 +1203,7 @@ namespace Gambit
       // Unless initialised already, read in digitised limits from 0910.5914.
       if (not(init_flag))
       {
-        FILE * f = fopen("DarkBit/data/ADMXLimitsHistogram.dat", "r");
+        FILE * f = fopen(GAMBIT_DIR "/DarkBit/data/ADMXLimitsHistogram.dat", "r");
         gsl_histogram_fscanf (f, h);
         fclose(f);
         init_flag = true;
@@ -1236,7 +1236,7 @@ namespace Gambit
       double l = 0.0;
 
       // ADMX 2018 90% C.L. exclusion limits; digitised from Fig. 4, 1804.05750.
-      static AxionInterpolator g_limits ("DarkBit/data/ADMX2018Limits.dat");
+      static AxionInterpolator g_limits (GAMBIT_DIR "/DarkBit/data/ADMX2018Limits.dat");
 
       // If we are within the avialable data range, calculate the limit.
       if ( (m_ax > g_limits.lower()) && (m_ax < g_limits.upper()) )
@@ -1343,7 +1343,7 @@ namespace Gambit
       // log10(T/GeV) required for interpolation.
       double lgT = log10(T) - 3.0;
       // Tabulated data: x = log10(T/GeV), y = F1(T); gR and gS from 0910.1066 .
-      static AxionInterpolator F1 ("DarkBit/data/Axion_DiffEqnFun1.dat", "linear");
+      static AxionInterpolator F1 (GAMBIT_DIR "/DarkBit/data/Axion_DiffEqnFun1.dat", "linear");
       double res = -1.0;
       if ((lgT > 3.0) && (lgT < -5.0)) { res = F1.interpolate (lgT); };
       return res;
@@ -1355,7 +1355,7 @@ namespace Gambit
       // log10(T/GeV) required for interpolation.
       double lgT = log10(T) - 3.0;
       // Tabulated data: x = log10(T/GeV), y = F3(T); gR and gS from 0910.1066 .
-      static AxionInterpolator F3 ("DarkBit/data/Axion_DiffEqnFun3.dat", "linear");
+      static AxionInterpolator F3 (GAMBIT_DIR "/DarkBit/data/Axion_DiffEqnFun3.dat", "linear");
       double res = 0.0;
       if ((lgT > 3.0) && (lgT < -5.0)) { res = F3.interpolate (lgT); };
       return res;
@@ -1599,7 +1599,7 @@ namespace Gambit
        // Value for He-abundance Y from 1503.08146: <Y> = 0.2515(17).
        const double Y = 0.2515;
        // Use interpolation for the finite-mass correction.
-       static AxionInterpolator correction ("DarkBit/data/Axions_RParameterCorrection.dat", "linear");
+       static AxionInterpolator correction (GAMBIT_DIR "/DarkBit/data/Axions_RParameterCorrection.dat", "linear");
        // Initialise an effective axion-photon coupling, valid for low masses.
        double geff = gagg;
        // Apply correction for higher mass values...
@@ -1811,7 +1811,7 @@ namespace Gambit
       double gamma = log10(gagg*c_gamma) + 20.0;
 
       // Initialise the interpolation and extrapolation routies for the H.E.S.S. results.
-      static HESS_Interpolator interp ("DarkBit/data/HESS_GCMF_Table.dat");
+      static HESS_Interpolator interp (GAMBIT_DIR "/DarkBit/data/HESS_GCMF_Table.dat");
 
       result = interp.lnL(epsilon, gamma);
     }
