@@ -47,7 +47,6 @@
 ///  \author Sebastian Wild
 ///          (sebastian.wild@ph.tum.de)
 ///  \date 2016 Aug
-///
 ///  *********************************************
 
 
@@ -83,6 +82,12 @@ namespace Gambit
       double valB;
     };
 
+    //generalized capture cross section
+    // struct genCapXsec
+    // {
+    //   std::map< std::pair < int, int >, double> sigma;
+    //   // std::map<const char*,int> sigma;
+    // };
 
     struct RD_coannihilating_particle
     {
@@ -166,6 +171,7 @@ namespace Gambit
             std::vector<SimYieldChannel> channel_list;
             int findChannel(std::string p1, std::string p2, std::string finalState) const;
     };
+
   }
 }
 
