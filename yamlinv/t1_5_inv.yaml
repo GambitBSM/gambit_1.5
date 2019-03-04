@@ -37,7 +37,7 @@ Parameters:
       range: [6e-5, 9e-5]
       prior_type: flat
     dmNu3l:
-      range: [2e-3, 3e-3]
+      range: [-3e-3, -2e-3]
       prior_type: flat
 
     alpha1:
@@ -121,7 +121,7 @@ Scanner:
       version: 1.0.4
       like: LogLike
       NP: 19200
-      convthresh: 1e-8
+      convthresh: 1e-10
       lambdajDE: true
 
     multinest:
@@ -361,6 +361,10 @@ Rules:
       slope: 0.5
       mslope: 0.5
 
+  - function: lnL_lepuniv
+    options:
+      include_R_W: true
+
   - capability: RKstar_0045_11
     function: RHN_RKstar_0045_11
 
@@ -370,17 +374,17 @@ Rules:
   - capability: RK
     function: RHN_RK
 
-#  - function: Ut1
-#    options:
-#      upper_limit: 1e-3
+  - function: Ut1
+    options:
+      upper_limit: 1e-4
 
-#  - function: Ut2
-#    options:
-#      upper_limit: 1e-3
+  - function: Ut2
+    options:
+      upper_limit: 1e-4
 
-#  - function: Ut3
-#    options:
-#      upper_limit: 1e-3
+  - function: Ut3
+    options:
+      upper_limit: 1e-4
 
 KeyValues:
 

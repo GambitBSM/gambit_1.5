@@ -36,7 +36,7 @@ Parameters:
       range: [6e-5, 9e-5]
       prior_type: flat
     dmNu3l:
-      range: [2e-3, 3e-3]
+      range: [-3e-3, -2e-3]
       prior_type: flat
 
     alpha1:
@@ -112,7 +112,7 @@ Scanner:
       version: 1.0.4
       like: LogLike
       NP: 19200
-      convthresh: 1e-8
+      convthresh: 1e-10
       lambdajDE: true
 
     multinest:
