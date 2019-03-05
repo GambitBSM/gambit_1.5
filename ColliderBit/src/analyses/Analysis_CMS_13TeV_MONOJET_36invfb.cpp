@@ -1,5 +1,5 @@
 // -*- C++ -*-
-#include "gambit/ColliderBit/analyses/BaseAnalysis.hpp"
+#include "gambit/ColliderBit/analyses/Analysis.hpp"
 #include "gambit/ColliderBit/analyses/Cutflow.hpp"
 #include "gambit/ColliderBit/CMSEfficiencies.hpp"
 
@@ -16,7 +16,7 @@ namespace Gambit {
     ///
     /// @todo Add W/Z region with AKT8 jets and 2/1 n-subjettiness ratio cut
     ///
-    class Analysis_CMS_13TeV_MONOJET_36invfb : public HEPUtilsAnalysis {
+    class Analysis_CMS_13TeV_MONOJET_36invfb : public Analysis {
     public:
 
       // Required detector sim
@@ -30,14 +30,13 @@ namespace Gambit {
       // : _cutflow("CMS monojet 13 TeV", {"Njet >= 3", "HT > 300", "HTmiss > 300", "Nmuon = 0", "Nelectron = 0", "Nhadron = 0 (no-op)", "Dphi_htmiss_j1", "Dphi_htmiss_j2", "Dphi_htmiss_j3", "Dphi_htmiss_j4"})
       {
         //for (double& n : _srnums) n = 0;
-        clear();
+        analysis_specific_reset();
         set_analysis_name("CMS_13TeV_MONOJET_36invfb");
         set_luminosity(35.9);
       }
 
-      void analyze(const Event* event) {
+      void run(const Event* event) {
 
-        HEPUtilsAnalysis::analyze(event);
         // _cutflow.fillinit();
 
         // Require large MET
@@ -97,11 +96,10 @@ namespace Gambit {
 
       }
 
-
-      void add(BaseAnalysis* other) {
-        // The base class add function handles the signal region vector and total # events.
-        HEPUtilsAnalysis::add(other);
-        Analysis_CMS_13TeV_MONOJET_36invfb* specificOther = dynamic_cast<Analysis_CMS_13TeV_MONOJET_36invfb*>(other);
+      /// Combine the variables of another copy of this analysis (typically on another thread) into this one.
+      void combine(const Analysis* other)
+      {
+        const Analysis_CMS_13TeV_MONOJET_36invfb* specificOther = dynamic_cast<const Analysis_CMS_13TeV_MONOJET_36invfb*>(other);
         for (size_t i = 0; i < NUMSR; ++i)
           _srnums[i] += specificOther->_srnums[i];
       }
@@ -162,7 +160,7 @@ namespace Gambit {
       }
 
     protected:
-      void clear() {
+      void analysis_specific_reset() {
         for (double& n : _srnums) n = 0;
         /// @todo Need to also clear/reset cutflow, but it currently has no method for that
       }

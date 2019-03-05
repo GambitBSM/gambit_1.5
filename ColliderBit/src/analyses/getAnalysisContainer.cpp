@@ -25,7 +25,7 @@
 ///          (p.scott@imperial.ac.uk)
 ///  \date 2015 Jul
 ///  \date 2018 Jan
-///  \date 2019 Jan
+///  \date 2019 Jan, Feb
 ///
 ///  \author Anders Kvellestad
 ///          (anders.kvellestad@fys.uio.no)
@@ -46,10 +46,10 @@ namespace Gambit
   {
 
     /// Retrieve an analysis container for a specific detector
-    void getAnalysisContainer(HEPUtilsAnalysisContainer& result,
+    void getAnalysisContainer(AnalysisContainer& result,
                               const str& detname,
                               const MCLoopInfo& RunMC,
-                              const BaseCollider& HardScatteringSim,
+                              const xsec& CrossSection,
                               int iteration)
     {
       if (RunMC.analyses.empty() or iteration == BASE_INIT) return;
@@ -78,36 +78,21 @@ namespace Gambit
         else result.reset();
       }
 
-      if (iteration == END_SUBPROCESS && RunMC.event_generation_began)
-      {
-        if (not RunMC.exceeded_maxFailedEvents)
-        {
-          const double xs_fb = HardScatteringSim.xsec_pb() * 1000.;
-          const double xserr_fb = HardScatteringSim.xsecErr_pb() * 1000.;
-          result.add_xsec(xs_fb, xserr_fb);
-
-          #ifdef COLLIDERBIT_DEBUG
-          cout << debug_prefix() << "xs_fb = " << xs_fb << " +/- " << xserr_fb << endl;
-          #endif
-        }
-      }
-
       if (iteration == COLLIDER_FINALIZE)
       {
         result.collect_and_add_signal();
-        result.collect_and_improve_xsec();
-        result.scale();
+        result.scale(CrossSection.xsec_per_event());
       }
 
     }
 
     /// Retrieve a container for analyses with EXPERIMENT
     #define GET_ANALYSIS_CONTAINER(NAME, EXPERIMENT)               \
-    void NAME(HEPUtilsAnalysisContainer& result)                   \
+    void NAME(AnalysisContainer& result)                           \
     {                                                              \
       using namespace Pipes::NAME;                                 \
       getAnalysisContainer(result, #EXPERIMENT, *Dep::RunMC,       \
-       *(*Dep::HardScatteringSim), *Loop::iteration);              \
+       *Dep::CrossSection, *Loop::iteration);                      \
     }
 
     GET_ANALYSIS_CONTAINER(getATLASAnalysisContainer, ATLAS)

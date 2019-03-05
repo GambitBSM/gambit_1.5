@@ -1,5 +1,5 @@
 // -*- C++ -*-
-#include "gambit/ColliderBit/analyses/BaseAnalysis.hpp"
+#include "gambit/ColliderBit/analyses/Analysis.hpp"
 #include "gambit/ColliderBit/analyses/Cutflow.hpp"
 #include "gambit/ColliderBit/ATLASEfficiencies.hpp"
 #include "Eigen/Eigen"
@@ -19,7 +19,7 @@ namespace Gambit {
     ///
     /// Recursive jigsaw reconstruction signal regions are currently not included
     ///
-    class Analysis_ATLAS_13TeV_0LEP_13invfb : public HEPUtilsAnalysis {
+    class Analysis_ATLAS_13TeV_0LEP_13invfb : public Analysis {
     public:
 
       // Required detector sim
@@ -54,9 +54,7 @@ namespace Gambit {
       }
 
 
-      void analyze(const Event* event) {
-
-        HEPUtilsAnalysis::analyze(event);
+      void run(const Event* event) {
 
         _flows.fillinit();
 
@@ -265,15 +263,11 @@ namespace Gambit {
         }
       }
 
-
-      void add(BaseAnalysis* other) {
-        // The base class add function handles the signal region vector and total # events.
-        HEPUtilsAnalysis::add(other);
-
-        Analysis_ATLAS_13TeV_0LEP_13invfb* specificOther = dynamic_cast<Analysis_ATLAS_13TeV_0LEP_13invfb*>(other);
-
-        for (size_t i = 0; i < NUMSR; ++i)
-          _srnums[i] += specificOther->_srnums[i];
+      /// Combine the variables of another copy of this analysis (typically on another thread) into this one.
+      void combine(const Analysis* other)
+      {
+        const Analysis_ATLAS_13TeV_0LEP_13invfb* specificOther = dynamic_cast<const Analysis_ATLAS_13TeV_0LEP_13invfb*>(other);
+        for (size_t i = 0; i < NUMSR; ++i) _srnums[i] += specificOther->_srnums[i];
       }
 
 
@@ -300,7 +294,7 @@ namespace Gambit {
 
 
     protected:
-      void clear() {
+      void analysis_specific_reset() {
         for(size_t i=0;i<NUMSR;i++) { _srnums[i]=0; }
       }
 

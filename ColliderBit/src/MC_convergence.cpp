@@ -21,8 +21,8 @@
 
 #include <omp.h>
 #include "gambit/ColliderBit/MC_convergence.hpp"
-#include "gambit/ColliderBit/analyses/AnalysisData.hpp"
-#include "gambit/ColliderBit/analyses/BaseAnalysis.hpp"
+#include "gambit/ColliderBit/analyses/AnalysisContainer.hpp"
+#include "gambit/ColliderBit/analyses/Analysis.hpp"
 #include "gambit/Utils/standalone_error_handlers.hpp"
 
 // #define COLLIDERBIT_DEBUG
@@ -76,7 +76,7 @@ namespace Gambit
 
 
     /// Update the convergence data.  This is the only routine meant to be called in parallel.
-    void MC_convergence_checker::update(const HEPUtilsAnalysisContainer& ac)
+    void MC_convergence_checker::update(const AnalysisContainer& ac)
     {
       // Abort if the analysis container tracked by this object is already fully converged
       if (converged) return;
@@ -99,7 +99,7 @@ namespace Gambit
 
 
     /// Check if convergence has been achieved across threads, and across all instances of this class
-    bool MC_convergence_checker::achieved(const HEPUtilsAnalysisContainer& ac)
+    bool MC_convergence_checker::achieved(const AnalysisContainer& ac)
     {
       if (not converged)
       {

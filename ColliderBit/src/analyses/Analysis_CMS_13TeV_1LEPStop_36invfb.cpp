@@ -1,7 +1,7 @@
 #include <fstream>
 #include "gambit/ColliderBit/topness.h"
 #include "gambit/ColliderBit/CMSEfficiencies.hpp"
-#include "gambit/ColliderBit/analyses/BaseAnalysis.hpp"
+#include "gambit/ColliderBit/analyses/Analysis.hpp"
 #include "gambit/ColliderBit/analyses/Cutflow.hpp"
 
 using namespace std;
@@ -24,7 +24,7 @@ using namespace std;
 namespace Gambit {
   namespace ColliderBit {
 
-    class Analysis_CMS_13TeV_1LEPStop_36invfb : public HEPUtilsAnalysis {
+    class Analysis_CMS_13TeV_1LEPStop_36invfb : public Analysis {
     private:
 
         // Numbers passing cuts
@@ -88,8 +88,8 @@ namespace Gambit {
             for (size_t i = 0; i < NUM_aggregateSR; ++i) _aggregateSR[i] = 0;
         }
 
-        void analyze(const HEPUtils::Event* event) {
-            HEPUtilsAnalysis::analyze(event);
+        void run(const HEPUtils::Event* event) {
+
             _cutflow.fillinit();
 
             // Missing energy
@@ -366,12 +366,11 @@ namespace Gambit {
 
         }
 
-
-        void add(BaseAnalysis* other) {
-            // The base class add function handles the signal region vector and total # events.
-            HEPUtilsAnalysis::add(other);
-            Analysis_CMS_13TeV_1LEPStop_36invfb* specificOther
-                = dynamic_cast<Analysis_CMS_13TeV_1LEPStop_36invfb*>(other);
+        /// Combine the variables of another copy of this analysis (typically on another thread) into this one.
+        void combine(const Analysis* other)
+        {
+            const Analysis_CMS_13TeV_1LEPStop_36invfb* specificOther
+                = dynamic_cast<const Analysis_CMS_13TeV_1LEPStop_36invfb*>(other);
 
 //            for (size_t i = 0; i < NUM_SR; ++i)
 //                _SR[i] += specificOther->_SR[i];
@@ -419,7 +418,7 @@ namespace Gambit {
         }
 
     protected:
-        void clear() {
+        void analysis_specific_reset() {
             for(size_t i=0;i<NUM_aggregateSR;i++) { _aggregateSR[i]=0; }
         }
 

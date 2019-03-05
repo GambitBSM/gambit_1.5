@@ -3,7 +3,7 @@
 #include <memory>
 #include <iomanip>
 
-#include "gambit/ColliderBit/analyses/BaseAnalysis.hpp"
+#include "gambit/ColliderBit/analyses/Analysis.hpp"
 #include "gambit/ColliderBit/ATLASEfficiencies.hpp"
 #include "gambit/ColliderBit/mt2_bisect.h"
 #include "gambit/ColliderBit/lester_mt2_bisect.h"
@@ -34,7 +34,7 @@ namespace Gambit {
       double aMT2_BM;
     };
 
-    class Analysis_ATLAS_13TeV_2bMET_36invfb : public HEPUtilsAnalysis {
+    class Analysis_ATLAS_13TeV_2bMET_36invfb : public Analysis {
     private:
 
       // Variables that hold the number of events passing signal region cuts
@@ -277,8 +277,7 @@ namespace Gambit {
       }
 
 
-      void analyze(const HEPUtils::Event* event) {
-        HEPUtilsAnalysis::analyze(event);
+      void run(const HEPUtils::Event* event) {
 
         // Get the missing energy and momentum in the event
         HEPUtils::P4 metVec = event->missingmom();
@@ -845,20 +844,19 @@ namespace Gambit {
 
       }
 
+      /// Combine the variables of another copy of this analysis (typically on another thread) into this one.
+      void combine(const Analysis* other)
+      {
+        const Analysis_ATLAS_13TeV_2bMET_36invfb* specificOther
+          = dynamic_cast<const Analysis_ATLAS_13TeV_2bMET_36invfb*>(other);
 
-      void add(BaseAnalysis* other) {
-        // The base class add function handles the signal region number and total # events combination across threads
-        HEPUtilsAnalysis::add(other);
-
-        Analysis_ATLAS_13TeV_2bMET_36invfb* specificOther
-          = dynamic_cast<Analysis_ATLAS_13TeV_2bMET_36invfb*>(other);
-
-        // Here we will add the subclass member variables:
         if (NCUTS != specificOther->NCUTS) NCUTS = specificOther->NCUTS;
-        for (int j=0; j<NCUTS; j++) {
+        for (int j=0; j<NCUTS; j++)
+        {
           cutFlowVector[j] += specificOther->cutFlowVector[j];
           cutFlowVector_str[j] = specificOther->cutFlowVector_str[j];
         }
+
         _numb0L_SRA350    += specificOther->_numb0L_SRA350;
         _numb0L_SRA450    += specificOther->_numb0L_SRA450;
         _numb0L_SRA550    += specificOther->_numb0L_SRA550;
@@ -976,7 +974,7 @@ namespace Gambit {
         return;
       }
 
-      void clear() {
+      void analysis_specific_reset() {
 
 	_numb0L_SRA350=0; _numb0L_SRA450=0; _numb0L_SRA550=0;
         _numb0L_SRB=0; _numb0L_SRC=0;

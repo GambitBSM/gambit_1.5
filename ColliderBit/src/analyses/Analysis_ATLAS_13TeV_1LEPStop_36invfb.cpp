@@ -7,7 +7,7 @@
 #include <iomanip>
 
 #include "gambit/Utils/threadsafe_rng.hpp"
-#include "gambit/ColliderBit/analyses/BaseAnalysis.hpp"
+#include "gambit/ColliderBit/analyses/Analysis.hpp"
 #include "gambit/ColliderBit/ATLASEfficiencies.hpp"
 #include "gambit/ColliderBit/mt2_bisect.h"
 #include "TLorentzVector.h"
@@ -54,7 +54,7 @@ namespace Gambit {
     }
 
 
-    class Analysis_ATLAS_13TeV_1LEPStop_36invfb : public HEPUtilsAnalysis
+    class Analysis_ATLAS_13TeV_1LEPStop_36invfb : public Analysis
     {
     private:
 
@@ -240,7 +240,7 @@ namespace Gambit {
       ClusteringHistory& GetHistory(const FJNS::PseudoJet& jet)
       {
         auto shared_ptr = jet.user_info_shared_ptr();
-        return *dynamic_cast<ClusteringHistory*>(shared_ptr.get());
+        return *dynamic_cast<const ClusteringHistory*>(shared_ptr.get());
       }
 
       static std::vector<FJNS::PseudoJet> SortedByNConstit(std::vector<FJNS::PseudoJet> jets)
@@ -390,9 +390,8 @@ namespace Gambit {
       }
 
 
-      void analyze(const HEPUtils::Event* event)
+      void run(const HEPUtils::Event* event)
       {
-        HEPUtilsAnalysis::analyze(event);
 
         // Missing energy
         HEPUtils::P4 metVec = event->missingmom();
@@ -1360,18 +1359,14 @@ namespace Gambit {
 
         return;
 
-      } // END analyze
+      }
 
-
-      void add(BaseAnalysis* other)
+      /// Combine the variables of another copy of this analysis (typically on another thread) into this one.
+      void combine(const Analysis* other)
       {
-        // The base class add function handles the signal region vector and total # events.
-        HEPUtilsAnalysis::add(other);
+        const Analysis_ATLAS_13TeV_1LEPStop_36invfb* specificOther
+                = dynamic_cast<const Analysis_ATLAS_13TeV_1LEPStop_36invfb*>(other);
 
-        Analysis_ATLAS_13TeV_1LEPStop_36invfb* specificOther
-                = dynamic_cast<Analysis_ATLAS_13TeV_1LEPStop_36invfb*>(other);
-
-        // Here we will add the subclass member variables:
         if (NCUTS != specificOther->NCUTS) NCUTS = specificOther->NCUTS;
         for (int j=0; j<NCUTS; j++)
         {
@@ -1388,7 +1383,6 @@ namespace Gambit {
         num_DM_low_loose += specificOther->num_DM_low_loose;
         num_DM_low += specificOther->num_DM_low;
         num_DM_high += specificOther->num_DM_high;
-
       }
 
 
@@ -1535,7 +1529,7 @@ namespace Gambit {
 
 
     protected:
-      void clear()
+      void analysis_specific_reset()
       {
         num_tN_med=0;
         num_tN_high=0;

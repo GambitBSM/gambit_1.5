@@ -1,5 +1,5 @@
 // -*- C++ -*-
-#include "gambit/ColliderBit/analyses/BaseAnalysis.hpp"
+#include "gambit/ColliderBit/analyses/Analysis.hpp"
 #include "gambit/ColliderBit/analyses/Cutflow.hpp"
 #include "gambit/ColliderBit/CMSEfficiencies.hpp"
 #include "Eigen/Eigen"
@@ -15,7 +15,7 @@ namespace Gambit {
     ///
     /// Based on: https://arxiv.org/pdf/1704.07781.pdf
     ///
-    class Analysis_CMS_13TeV_0LEP_36invfb : public HEPUtilsAnalysis {
+    class Analysis_CMS_13TeV_0LEP_36invfb : public Analysis {
     public:
 
       // Required detector sim
@@ -36,9 +36,8 @@ namespace Gambit {
       }
 
 
-      void analyze(const Event* event) {
+      void run(const Event* event) {
 
-        HEPUtilsAnalysis::analyze(event);
         _cutflow.fillinit();
 
         // FinalState isofs(Cuts::abseta < 3.0 && Cuts::abspid != PID::ELECTRON && Cuts::abspid != PID::MUON);
@@ -214,15 +213,11 @@ namespace Gambit {
 
       }
 
-
-      void add(BaseAnalysis* other) {
-        // The base class add function handles the signal region vector and total # events.
-        HEPUtilsAnalysis::add(other);
-
-        Analysis_CMS_13TeV_0LEP_36invfb* specificOther = dynamic_cast<Analysis_CMS_13TeV_0LEP_36invfb*>(other);
-
-        for (size_t i = 0; i < NUMSR; ++i)
-          _srnums[i] += specificOther->_srnums[i];
+      /// Combine the variables of another copy of this analysis (typically on another thread) into this one.
+      void combine(const Analysis* other)
+      {
+        const Analysis_CMS_13TeV_0LEP_36invfb* specificOther = dynamic_cast<const Analysis_CMS_13TeV_0LEP_36invfb*>(other);
+        for (size_t i = 0; i < NUMSR; ++i) _srnums[i] += specificOther->_srnums[i];
       }
 
 
@@ -247,7 +242,7 @@ namespace Gambit {
 
 
     protected:
-      void clear() {
+      void analysis_specific_reset() {
         for(size_t i=0;i<NUMSR;i++) { _srnums[i]=0; }
       }
 

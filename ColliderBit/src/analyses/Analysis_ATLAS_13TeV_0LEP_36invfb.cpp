@@ -1,5 +1,5 @@
 // -*- C++ -*-
-#include "gambit/ColliderBit/analyses/BaseAnalysis.hpp"
+#include "gambit/ColliderBit/analyses/Analysis.hpp"
 #include "gambit/ColliderBit/analyses/Cutflow.hpp"
 #include "gambit/ColliderBit/ATLASEfficiencies.hpp"
 #include "Eigen/Eigen"
@@ -21,7 +21,7 @@ namespace Gambit {
     ///
     /// Note: cutflows have not been updated yet (sincec 13 invfb analysis).
     ///
-    class Analysis_ATLAS_13TeV_0LEP_36invfb : public HEPUtilsAnalysis {
+    class Analysis_ATLAS_13TeV_0LEP_36invfb : public Analysis {
     public:
 
       // Required detector sim
@@ -110,9 +110,7 @@ namespace Gambit {
 
       }
 
-      void analyze(const Event* event) {
-
-        HEPUtilsAnalysis::analyze(event);
+      void run(const Event* event) {
 
         _flows.fillinit();
 
@@ -353,13 +351,10 @@ namespace Gambit {
         }
       }
 
-
-      void add(BaseAnalysis* other) {
-        // The base class add function handles the signal region vector and total # events.
-        HEPUtilsAnalysis::add(other);
-
-        Analysis_ATLAS_13TeV_0LEP_36invfb* specificOther = dynamic_cast<Analysis_ATLAS_13TeV_0LEP_36invfb*>(other);
-
+      /// Combine the variables of another copy of this analysis (typically on another thread) into this one.
+      void combine(const Analysis* other)
+      {
+        const Analysis_ATLAS_13TeV_0LEP_36invfb* specificOther = dynamic_cast<const Analysis_ATLAS_13TeV_0LEP_36invfb*>(other);
         num_2j_1200 += specificOther->num_2j_1200;
         num_2j_1600 += specificOther->num_2j_1600;
         num_2j_2000 += specificOther->num_2j_2000;
@@ -373,7 +368,7 @@ namespace Gambit {
         num_4j_1800 += specificOther->num_4j_1800;
         num_4j_2200 += specificOther->num_4j_2200;
         num_4j_2600 += specificOther->num_4j_2600;
-        num_4j_3000 += specificOther-> num_4j_3000;
+        num_4j_3000 += specificOther->num_4j_3000;
         num_5j_1700 += specificOther->num_5j_1700;
         num_5j_1600 += specificOther->num_5j_1600;
         num_5j_2000 += specificOther->num_5j_2000;
@@ -382,7 +377,6 @@ namespace Gambit {
         num_6j_1800 += specificOther->num_6j_1800;
         num_6j_2200 += specificOther->num_6j_2200;
         num_6j_2600 += specificOther->num_6j_2600;
-
       }
 
 
@@ -418,7 +412,7 @@ namespace Gambit {
 
 
     protected:
-      void clear() {
+      void analysis_specific_reset() {
         num_2j_1200=0;
         num_2j_1600=0;
         num_2j_2000=0;

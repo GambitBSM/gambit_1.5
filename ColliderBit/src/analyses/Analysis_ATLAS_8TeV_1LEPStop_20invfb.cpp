@@ -3,7 +3,7 @@
 #include <memory>
 #include <iomanip>
 
-#include "gambit/ColliderBit/analyses/BaseAnalysis.hpp"
+#include "gambit/ColliderBit/analyses/Analysis.hpp"
 #include "gambit/ColliderBit/ATLASEfficiencies.hpp"
 #include "gambit/ColliderBit/mt2_bisect.h"
 
@@ -42,7 +42,7 @@ namespace Gambit {
     };
 
 
-    class Analysis_ATLAS_8TeV_1LEPStop_20invfb : public HEPUtilsAnalysis {
+    class Analysis_ATLAS_8TeV_1LEPStop_20invfb : public Analysis {
     private:
 
       // Numbers passing cuts
@@ -204,8 +204,7 @@ namespace Gambit {
 
 
 
-      void analyze(const HEPUtils::Event* event) {
-        HEPUtilsAnalysis::analyze(event);
+      void run(const HEPUtils::Event* event) {
 
         // Missing energy
         HEPUtils::P4 ptot = event->missingmom();
@@ -741,20 +740,18 @@ namespace Gambit {
         return;
       }
 
+      /// Combine the variables of another copy of this analysis (typically on another thread) into this one.
+      void combine(const Analysis* other)
+      {
+        const Analysis_ATLAS_8TeV_1LEPStop_20invfb* specificOther
+                = dynamic_cast<const Analysis_ATLAS_8TeV_1LEPStop_20invfb*>(other);
 
-      void add(BaseAnalysis* other) {
-        // The base class add function handles the signal region vector and total # events.
-        HEPUtilsAnalysis::add(other);
-
-        Analysis_ATLAS_8TeV_1LEPStop_20invfb* specificOther
-                = dynamic_cast<Analysis_ATLAS_8TeV_1LEPStop_20invfb*>(other);
-
-        // Here we will add the subclass member variables:
         if (NCUTS != specificOther->NCUTS) NCUTS = specificOther->NCUTS;
-        for (int j=0; j<NCUTS; j++) {
-          cutFlowVector[j] += specificOther->cutFlowVector[j];
-          cutFlowVector_str[j] = specificOther->cutFlowVector_str[j];
-          cutFlowVector_alt[j] += specificOther->cutFlowVector_alt[j];
+        for (int j=0; j<NCUTS; j++)
+        {
+          cutFlowVector[j] += specificOther->cutFlowVector.at(j);
+          cutFlowVector_str[j] = specificOther->cutFlowVector_str.at(j);
+          cutFlowVector_alt[j] += specificOther->cutFlowVector_alt.at(j);
         }
         _numTN1Shape_bin1 += specificOther->_numTN1Shape_bin1;
         _numTN1Shape_bin2 += specificOther->_numTN1Shape_bin2;
@@ -822,7 +819,7 @@ namespace Gambit {
 
 
     protected:
-      void clear() {
+      void analysis_specific_reset() {
         _numTN1Shape_bin1 = 0; _numTN1Shape_bin2 = 0; _numTN1Shape_bin3 = 0;
         _numTN2 = 0; _numTN3 = 0; _numBC1 = 0;
         _numBC2 = 0; _numBC3 = 0;

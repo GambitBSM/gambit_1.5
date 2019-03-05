@@ -3,7 +3,7 @@
 #include <memory>
 #include <iomanip>
 
-#include "gambit/ColliderBit/analyses/BaseAnalysis.hpp"
+#include "gambit/ColliderBit/analyses/Analysis.hpp"
 #include "gambit/ColliderBit/CMSEfficiencies.hpp"
 
 /// @todo Remove the ROOT classes...
@@ -25,7 +25,7 @@ namespace Gambit {
   namespace ColliderBit {
 
 
-    class Analysis_CMS_8TeV_2LEPDMTOP_20invfb : public HEPUtilsAnalysis {
+    class Analysis_CMS_8TeV_2LEPDMTOP_20invfb : public Analysis {
     private:
 
       // Numbers passing cuts
@@ -69,8 +69,7 @@ namespace Gambit {
 
       }
 
-      void analyze(const HEPUtils::Event* event) {
-        HEPUtilsAnalysis::analyze(event);
+      void run(const HEPUtils::Event* event) {
 
         // Missing energy
         // HEPUtils::P4 ptot = event->missingmom();
@@ -205,14 +204,11 @@ namespace Gambit {
       }
 
 
-      void add(BaseAnalysis* other) {
-        // The base class add function handles the signal region vector and total # events.
-        HEPUtilsAnalysis::add(other);
-
-        Analysis_CMS_8TeV_2LEPDMTOP_20invfb* specificOther
-                = dynamic_cast<Analysis_CMS_8TeV_2LEPDMTOP_20invfb*>(other);
-
-        // Here we will add the subclass member variables:
+      /// Combine the variables of another copy of this analysis (typically on another thread) into this one.
+      void combine(const Analysis* other)
+      {
+        const Analysis_CMS_8TeV_2LEPDMTOP_20invfb* specificOther
+                = dynamic_cast<const Analysis_CMS_8TeV_2LEPDMTOP_20invfb*>(other);
         if (NCUTS != specificOther->NCUTS) NCUTS = specificOther->NCUTS;
         for (int j=0; j<NCUTS; j++) {
           cutFlowVector[j] += specificOther->cutFlowVector[j];
@@ -243,7 +239,7 @@ namespace Gambit {
 
 
     protected:
-      void clear() {
+      void analysis_specific_reset() {
         _numSR = 0;
         std::fill(cutFlowVector.begin(), cutFlowVector.end(), 0);
       }

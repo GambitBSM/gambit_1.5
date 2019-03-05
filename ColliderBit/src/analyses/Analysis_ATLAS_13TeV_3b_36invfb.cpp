@@ -13,7 +13,7 @@
 #include <memory>
 #include <iomanip>
 
-#include "gambit/ColliderBit/analyses/BaseAnalysis.hpp"
+#include "gambit/ColliderBit/analyses/Analysis.hpp"
 #include "gambit/ColliderBit/ATLASEfficiencies.hpp"
 
 using namespace std;
@@ -24,7 +24,7 @@ namespace Gambit {
   namespace ColliderBit {
 
 
-    class Analysis_ATLAS_13TeV_3b_36invfb : public HEPUtilsAnalysis {
+    class Analysis_ATLAS_13TeV_3b_36invfb : public Analysis {
 
     protected:
       // Signal region map
@@ -127,8 +127,7 @@ namespace Gambit {
         return mT;
       }
 
-      void analyze(const HEPUtils::Event* event) {
-        HEPUtilsAnalysis::analyze(event);
+      void run(const HEPUtils::Event* event) {
 
         // Get the missing energy in the event
         double met = event->met();
@@ -406,15 +405,12 @@ namespace Gambit {
 
       } // End of analyze
 
+      /// Combine the variables of another copy of this analysis (typically on another thread) into this one.
+      void combine(const Analysis* other)
+      {
+        const Analysis_ATLAS_13TeV_3b_36invfb* specificOther
+          = dynamic_cast<const Analysis_ATLAS_13TeV_3b_36invfb*>(other);
 
-      void add(BaseAnalysis* other) {
-        // The base class add function handles the signal region number and total # events combination across threads
-        HEPUtilsAnalysis::add(other);
-
-        Analysis_ATLAS_13TeV_3b_36invfb* specificOther
-          = dynamic_cast<Analysis_ATLAS_13TeV_3b_36invfb*>(other);
-
-        // Here we will add the subclass member variables:
         if (NCUTS != specificOther->NCUTS) NCUTS = specificOther->NCUTS;
         for (size_t j=0; j<NCUTS; j++) {
           cutFlowVector[j] += specificOther->cutFlowVector[j];
@@ -422,7 +418,7 @@ namespace Gambit {
         }
 
         for (auto& el : _numSR) {
-          el.second += specificOther->_numSR[el.first];
+          el.second += specificOther->_numSR.at(el.first);
         }
 
       }
@@ -463,7 +459,7 @@ namespace Gambit {
         return;
       }
 
-      void clear() {
+      void analysis_specific_reset() {
         // Clear signal regions
         for (auto& el : _numSR) { el.second = 0.;}
 

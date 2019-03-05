@@ -18,7 +18,7 @@
 #include <iomanip>
 #include <fstream>
 
-#include "gambit/ColliderBit/analyses/BaseAnalysis.hpp"
+#include "gambit/ColliderBit/analyses/Analysis.hpp"
 #include "gambit/ColliderBit/CMSEfficiencies.hpp"
 #include "gambit/ColliderBit/mt2_bisect.h"
 #include "gambit/ColliderBit/analyses/Cutflow.hpp"
@@ -31,7 +31,7 @@ namespace Gambit {
   namespace ColliderBit {
 
 
-    class Analysis_CMS_13TeV_Photon_GMSB_36invfb : public HEPUtilsAnalysis {
+    class Analysis_CMS_13TeV_Photon_GMSB_36invfb : public Analysis {
     public:
 
       static constexpr const char* detector = "CMS";
@@ -55,10 +55,9 @@ namespace Gambit {
       }
 
 
-      void analyze(const HEPUtils::Event* event)
+      void run(const HEPUtils::Event* event)
       {
         // Baseline objects
-        HEPUtilsAnalysis::analyze(event);
         HEPUtils::P4 ptot = event->missingmom();
         double met = event->met();
         _cutflow.fillinit();
@@ -141,20 +140,14 @@ namespace Gambit {
 
       }
 
-
-      void add(BaseAnalysis* other)
+      /// Combine the variables of another copy of this analysis (typically on another thread) into this one.
+      void combine(const Analysis* other)
       {
-        // The base class add function handles the signal region vector and total # events.
-
-        HEPUtilsAnalysis::add(other);
-
-        Analysis_CMS_13TeV_Photon_GMSB_36invfb* specificOther
-                = dynamic_cast<Analysis_CMS_13TeV_Photon_GMSB_36invfb*>(other);
-
+        const Analysis_CMS_13TeV_Photon_GMSB_36invfb* specificOther
+                = dynamic_cast<const Analysis_CMS_13TeV_Photon_GMSB_36invfb*>(other);
         for (auto& el : _numSR) {
-          el.second += specificOther->_numSR[el.first];
+          el.second += specificOther->_numSR.at(el.first);
         }
-
       }
 
 
@@ -178,7 +171,7 @@ namespace Gambit {
 
 
     protected:
-      void clear() {
+      void analysis_specific_reset() {
        for (auto& el : _numSR) { el.second = 0.;}
       }
 

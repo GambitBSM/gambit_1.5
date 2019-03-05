@@ -13,7 +13,7 @@
 #include <iomanip>
 #include <fstream>
 
-#include "gambit/ColliderBit/analyses/BaseAnalysis.hpp"
+#include "gambit/ColliderBit/analyses/Analysis.hpp"
 #include "gambit/ColliderBit/CMSEfficiencies.hpp"
 #include "gambit/ColliderBit/mt2_bisect.h"
 
@@ -28,7 +28,7 @@ namespace Gambit {
     // defined further down:
     // - Analysis_CMS_13TeV_MultiLEP_2SSLep_36invfb
     // - Analysis_CMS_13TeV_MultiLEP_3Lep_36invfb
-    class Analysis_CMS_13TeV_MultiLEP_36invfb : public HEPUtilsAnalysis {
+    class Analysis_CMS_13TeV_MultiLEP_36invfb : public Analysis {
 
     protected:
       // Counters for the number of accepted events for each signal region
@@ -109,8 +109,8 @@ namespace Gambit {
       }
 
 
-      void analyze(const HEPUtils::Event* event) {
-        HEPUtilsAnalysis::analyze(event);
+      void run(const HEPUtils::Event* event) {
+
         double met = event->met();
 
         // Baseline objects
@@ -489,16 +489,12 @@ namespace Gambit {
         // }
       }
 
+      /// Combine the variables of another copy of this analysis (typically on another thread) into this one.
+      void combine(const Analysis* other)
+      {
+        const Analysis_CMS_13TeV_MultiLEP_36invfb* specificOther
+                = dynamic_cast<const Analysis_CMS_13TeV_MultiLEP_36invfb*>(other);
 
-      void add(BaseAnalysis* other) {
-        // The base class add function handles the signal region vector and total # events.
-
-        HEPUtilsAnalysis::add(other);
-
-        Analysis_CMS_13TeV_MultiLEP_36invfb* specificOther
-                = dynamic_cast<Analysis_CMS_13TeV_MultiLEP_36invfb*>(other);
-
-        // Here we will add the subclass member variables:
         if (NCUTS1 != specificOther->NCUTS1) NCUTS1 = specificOther->NCUTS1;
         if (NCUTS2 != specificOther->NCUTS2) NCUTS2 = specificOther->NCUTS2;
         if (NCUTS3 != specificOther->NCUTS3) NCUTS3 = specificOther->NCUTS3;
@@ -521,7 +517,7 @@ namespace Gambit {
         }
 
         for (auto& el : _numSR) {
-          el.second += specificOther->_numSR[el.first];
+          el.second += specificOther->_numSR.at(el.first);
         }
       }
 
@@ -687,7 +683,7 @@ namespace Gambit {
 
 
     protected:
-      void clear() {
+      void analysis_specific_reset() {
 
         for (auto& el : _numSR) { el.second = 0.;}
 

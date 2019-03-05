@@ -3,7 +3,7 @@
 #include <memory>
 #include <iomanip>
 
-#include "gambit/ColliderBit/analyses/BaseAnalysis.hpp"
+#include "gambit/ColliderBit/analyses/Analysis.hpp"
 #include "gambit/ColliderBit/ATLASEfficiencies.hpp"
 
 using namespace std;
@@ -15,7 +15,7 @@ using namespace std;
 namespace Gambit {
   namespace ColliderBit {
 
-    class Analysis_ATLAS_8TeV_0LEP_20invfb : public HEPUtilsAnalysis {
+    class Analysis_ATLAS_8TeV_0LEP_20invfb : public Analysis {
     private:
 
       // Numbers passing cuts
@@ -53,8 +53,7 @@ namespace Gambit {
       }
 
 
-      void analyze(const HEPUtils::Event* event) {
-        HEPUtilsAnalysis::analyze(event);
+      void run(const HEPUtils::Event* event) {
 
         // Missing energy
         HEPUtils::P4 ptot = event->missingmom();
@@ -325,20 +324,20 @@ namespace Gambit {
 
       }
 
+      /// Combine the variables of another copy of this analysis (typically on another thread) into this one.
+      void combine(const Analysis* other)
+      {
+        const Analysis_ATLAS_8TeV_0LEP_20invfb* specificOther
+                = dynamic_cast<const Analysis_ATLAS_8TeV_0LEP_20invfb*>(other);
 
-      void add(BaseAnalysis* other) {
-        // The base class add function handles the signal region vector and total # events.
-        HEPUtilsAnalysis::add(other);
-
-        Analysis_ATLAS_8TeV_0LEP_20invfb* specificOther
-                = dynamic_cast<Analysis_ATLAS_8TeV_0LEP_20invfb*>(other);
-
-        // Here we will add the subclass member variables:
         if (NCUTS != specificOther->NCUTS) NCUTS = specificOther->NCUTS;
-        for (size_t j = 0; j < NCUTS; j++) {
+
+        for (size_t j = 0; j < NCUTS; j++)
+        {
           cutFlowVector[j] += specificOther->cutFlowVector[j];
           cutFlowVector_str[j] = specificOther->cutFlowVector_str[j];
         }
+
         _num2jl += specificOther->_num2jl;
         _num2jm += specificOther->_num2jm;
         _num2jt += specificOther->_num2jt;
@@ -519,7 +518,7 @@ namespace Gambit {
 
 
     protected:
-      void clear() {
+      void analysis_specific_reset() {
         _num2jl=0; _num2jm=0; _num2jt=0; _num3j=0;
         _num4jlm=0; _num4jl=0; _num4jm=0; _num4jt=0; _num5j=0; _num6jl=0;
         _num6jm=0; _num6jt=0; _num6jtp=0;

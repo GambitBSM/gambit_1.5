@@ -13,7 +13,7 @@
 #include <algorithm>
 #include <fstream>
 
-#include "gambit/ColliderBit/analyses/BaseAnalysis.hpp"
+#include "gambit/ColliderBit/analyses/Analysis.hpp"
 #include "gambit/ColliderBit/ATLASEfficiencies.hpp"
 #include "gambit/ColliderBit/mt2_bisect.h"
 
@@ -22,7 +22,7 @@ using namespace std;
 namespace Gambit {
   namespace ColliderBit {
 
-    class Analysis_ATLAS_13TeV_MultiLEP_confnote_36invfb : public HEPUtilsAnalysis {
+    class Analysis_ATLAS_13TeV_MultiLEP_confnote_36invfb : public Analysis {
     private:
 
       // Numbers passing cuts
@@ -150,8 +150,8 @@ namespace Gambit {
         bool operator() (HEPUtils::Jet* i,HEPUtils::Jet* j) {return (i->pT()>j->pT());}
       } compareJetPt;
 
-      void analyze(const HEPUtils::Event* event) {
-        HEPUtilsAnalysis::analyze(event);
+      void run(const HEPUtils::Event* event) {
+
         double met = event->met();
 
         // Baseline electrons
@@ -807,23 +807,22 @@ namespace Gambit {
 
       }
 
+      /// Combine the variables of another copy of this analysis (typically on another thread) into this one.
+      void combine(const Analysis* other)
+      {
+        const Analysis_ATLAS_13TeV_MultiLEP_confnote_36invfb* specificOther
+                = dynamic_cast<const Analysis_ATLAS_13TeV_MultiLEP_confnote_36invfb*>(other);
 
-      void add(BaseAnalysis* other) {
-        // The base class add function handles the signal region vector and total # events.
-
-        HEPUtilsAnalysis::add(other);
-
-        Analysis_ATLAS_13TeV_MultiLEP_confnote_36invfb* specificOther
-                = dynamic_cast<Analysis_ATLAS_13TeV_MultiLEP_confnote_36invfb*>(other);
-
-        // Here we will add the subclass member variables:
         if (NCUTS1 != specificOther->NCUTS1) NCUTS1 = specificOther->NCUTS1;
-        for (size_t j = 0; j < NCUTS1; j++) {
+        for (size_t j = 0; j < NCUTS1; j++)
+        {
           cutFlowVector1[j] += specificOther->cutFlowVector1[j];
           cutFlowVector1_str[j] = specificOther->cutFlowVector1_str[j];
         }
+
         if (NCUTS2 != specificOther->NCUTS2) NCUTS2 = specificOther->NCUTS2;
-        for (size_t j = 0; j < NCUTS2; j++) {
+        for (size_t j = 0; j < NCUTS2; j++)
+        {
           cutFlowVector2[j] += specificOther->cutFlowVector2[j];
           cutFlowVector2_str[j] = specificOther->cutFlowVector2_str[j];
         }
@@ -1209,7 +1208,7 @@ namespace Gambit {
 
 
     protected:
-      void clear() {
+      void analysis_specific_reset() {
         _numSR2_SF_loose=0;
         _numSR2_SF_tight=0;
         _numSR2_DF_100=0;

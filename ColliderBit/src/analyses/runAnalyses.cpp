@@ -25,7 +25,7 @@
 ///          (p.scott@imperial.ac.uk)
 ///  \date 2015 Jul
 ///  \date 2018 Jan
-///  \date 2019 Jan
+///  \date 2019 Jan, Feb
 ///
 ///  \author Anders Kvellestad
 ///          (anders.kvellestad@fys.uio.no)
@@ -36,7 +36,7 @@
 ///  *********************************************
 
 #include "gambit/ColliderBit/ColliderBit_eventloop.hpp"
-#include "gambit/ColliderBit/analyses/BaseAnalysis.hpp"
+#include "gambit/ColliderBit/analyses/Analysis.hpp"
 
 // #define COLLIDERBIT_DEBUG
 
@@ -54,7 +54,7 @@ namespace Gambit
                        const str&,
                      #endif
                      const MCLoopInfo& RunMC,
-                     const HEPUtilsAnalysisContainer& AnalysisContainer,
+                     const AnalysisContainer& Container,
                      const HEPUtils::Event& SmearedEvent,
                      int iteration,
                      void(*wrapup)())
@@ -72,26 +72,26 @@ namespace Gambit
         return;
       }
 
-      if (not AnalysisContainer.has_analyses()) return;
+      if (not Container.has_analyses()) return;
 
       if (iteration == COLLECT_CONVERGENCE_DATA)
       {
         // Update the convergence tracker with the new results
-        convergence.update(AnalysisContainer);
+        convergence.update(Container);
         return;
       }
 
       if (iteration == CHECK_CONVERGENCE)
       {
         // Call quits on the event loop if every analysis in every analysis container has sufficient statistics
-        if (convergence.achieved(AnalysisContainer)) wrapup();
+        if (convergence.achieved(Container)) wrapup();
         return;
       }
 
       // #ifdef COLLIDERBIT_DEBUG
       // if (iteration == END_SUBPROCESS)
       // {
-      //   for (auto& analysis_pointer_pair : AnalysisContainer.get_current_analyses_map())
+      //   for (auto& analysis_pointer_pair : Container.get_current_analyses_map())
       //   {
       //     for (auto& sr : analysis_pointer_pair.second->get_results().srdata)
       //     {
@@ -104,10 +104,10 @@ namespace Gambit
       if (iteration == COLLIDER_FINALIZE)
       {
         // The final iteration for this collider: collect results
-        for (auto& analysis_pointer_pair : AnalysisContainer.get_current_analyses_map())
+        for (auto& analysis_pointer_pair : Container.get_current_analyses_map())
         {
           #ifdef COLLIDERBIT_DEBUG
-          cout << debug_prefix() << "run"+detname+"Analyses: Collecting result from " << analysis_pointer_pair.first << endl;
+            cout << debug_prefix() << "run"+detname+"Analyses: Collecting result from " << analysis_pointer_pair.first << endl;
           #endif
 
           str warning;
@@ -124,15 +124,15 @@ namespace Gambit
       {
         // Final iteration. Just return.
         #ifdef COLLIDERBIT_DEBUG
-        cout << debug_prefix() << "run"+detname+"Analyses: 'result' contains " << result.size() << " results." << endl;
+          cout << debug_prefix() << "run"+detname+"Analyses: 'result' contains " << result.size() << " results." << endl;
         #endif
         return;
       }
 
       if (iteration <= BASE_INIT) return;
 
-      // Loop over analyses and run them... Managed by HEPUtilsAnalysisContainer
-      AnalysisContainer.analyze(SmearedEvent);
+      // Loop over contained analyses and run them.
+      Container.analyze(SmearedEvent);
 
     }
 
@@ -141,7 +141,7 @@ namespace Gambit
     void NAME(AnalysisDataPointers& result)                                   \
     {                                                                         \
       using namespace Pipes::NAME;                                            \
-      runAnalyses(result, #NAME, *Dep::RunMC,                                 \
+      runAnalyses(result, #EXPERIMENT, *Dep::RunMC,                           \
        *Dep::CAT(EXPERIMENT,AnalysisContainer), *Dep::SMEARED_EVENT_DEP,      \
        *Loop::iteration, Loop::wrapup);                                       \
     }

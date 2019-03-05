@@ -3,7 +3,7 @@
 #include <memory>
 #include <iomanip>
 
-#include "gambit/ColliderBit/analyses/BaseAnalysis.hpp"
+#include "gambit/ColliderBit/analyses/Analysis.hpp"
 #include "gambit/ColliderBit/ATLASEfficiencies.hpp"
 #include "gambit/ColliderBit/mt2_bisect.h"
 
@@ -35,7 +35,7 @@ namespace Gambit {
     bool sortByPT_lep(HEPUtils::Particle* lep1, HEPUtils::Particle* lep2) { return (lep1->pT() > lep2->pT()); }
 
 
-    class Analysis_ATLAS_13TeV_PhotonGGM_36invfb : public HEPUtilsAnalysis {
+    class Analysis_ATLAS_13TeV_PhotonGGM_36invfb : public Analysis {
     private:
 
       // Numbers passing cuts
@@ -124,9 +124,7 @@ namespace Gambit {
 
       }
 
-      void analyze(const HEPUtils::Event* event) {
-
-        HEPUtilsAnalysis::analyze(event);
+      void run(const HEPUtils::Event* event) {
 
         // Missing energy w/ smearing
         double ht = 0;
@@ -554,13 +552,11 @@ namespace Gambit {
 
       }
 
-
-      void add(BaseAnalysis* other) {
-        // The base class add function handles the signal region vector and total # events.
-        HEPUtilsAnalysis::add(other);
-
-        Analysis_ATLAS_13TeV_PhotonGGM_36invfb* specificOther
-          = dynamic_cast<Analysis_ATLAS_13TeV_PhotonGGM_36invfb*>(other);
+      /// Combine the variables of another copy of this analysis (typically on another thread) into this one.
+      void combine(const Analysis* other)
+      {
+        const Analysis_ATLAS_13TeV_PhotonGGM_36invfb* specificOther
+          = dynamic_cast<const Analysis_ATLAS_13TeV_PhotonGGM_36invfb*>(other);
 
         #ifdef CHECK_CUTFLOW
           if (NCUTS != specificOther->NCUTS) NCUTS = specificOther->NCUTS;
@@ -666,7 +662,7 @@ namespace Gambit {
 
 
     protected:
-      void clear() {
+      void analysis_specific_reset() {
         num_SRaa_SL=0;
         num_SRaa_SH=0;
         num_SRaa_WL=0;

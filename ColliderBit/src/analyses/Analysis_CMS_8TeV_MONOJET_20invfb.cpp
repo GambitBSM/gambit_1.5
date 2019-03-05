@@ -3,7 +3,7 @@
 #include <memory>
 #include <iomanip>
 
-#include "gambit/ColliderBit/analyses/BaseAnalysis.hpp"
+#include "gambit/ColliderBit/analyses/Analysis.hpp"
 #include "gambit/ColliderBit/CMSEfficiencies.hpp"
 //#include "gambit/ColliderBit/mt2w.h"
 
@@ -24,7 +24,7 @@ using namespace std;
 namespace Gambit {
   namespace ColliderBit {
 
-    class Analysis_CMS_8TeV_MONOJET_20invfb : public HEPUtilsAnalysis {
+    class Analysis_CMS_8TeV_MONOJET_20invfb : public Analysis {
     private:
 
       // Numbers passing cuts
@@ -68,8 +68,7 @@ namespace Gambit {
 
       }
 
-      void analyze(const HEPUtils::Event* event) {
-        HEPUtilsAnalysis::analyze(event);
+      void run(const HEPUtils::Event* event) {
 
         // Missing energy
         //HEPUtils::P4 ptot = event->missingmom();
@@ -198,17 +197,14 @@ namespace Gambit {
 
       }
 
-
-      void add(BaseAnalysis* other) {
-        // The base class add function handles the signal region vector and total # events.
-        HEPUtilsAnalysis::add(other);
-
-        Analysis_CMS_8TeV_MONOJET_20invfb* specificOther
-                = dynamic_cast<Analysis_CMS_8TeV_MONOJET_20invfb*>(other);
-
-        // Here we will add the subclass member variables:
+      /// Combine the variables of another copy of this analysis (typically on another thread) into this one.
+      void combine(const Analysis* other)
+      {
+        const Analysis_CMS_8TeV_MONOJET_20invfb* specificOther
+                = dynamic_cast<const Analysis_CMS_8TeV_MONOJET_20invfb*>(other);
         if (NCUTS != specificOther->NCUTS) NCUTS = specificOther->NCUTS;
-        for (int j=0; j<NCUTS; j++) {
+        for (int j=0; j<NCUTS; j++)
+        {
           cutFlowVector[j] += specificOther->cutFlowVector[j];
           cutFlowVector_str[j] = specificOther->cutFlowVector_str[j];
         }
@@ -221,13 +217,8 @@ namespace Gambit {
         _num550 += specificOther->_num550;
       }
 
-
-      double loglikelihood() {
-        /// @todo Implement!
-        return 0;
-      }
-
-      void collect_results() {
+      void collect_results()
+      {
         SignalRegionData results_250;
         results_250.sr_label = "250";
         results_250.n_observed = 52200.;
@@ -297,7 +288,7 @@ namespace Gambit {
 
 
     protected:
-      void clear() {
+      void analysis_specific_reset() {
         _num250=0; _num300=0; _num350=0; _num400=0; _num450=0; _num500=0; _num550=0;
 
         std::fill(cutFlowVector.begin(), cutFlowVector.end(), 0);

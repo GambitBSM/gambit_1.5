@@ -3,7 +3,7 @@
 #include <memory>
 #include <iomanip>
 
-#include "gambit/ColliderBit/analyses/BaseAnalysis.hpp"
+#include "gambit/ColliderBit/analyses/Analysis.hpp"
 #include "gambit/ColliderBit/ATLASEfficiencies.hpp"
 #include "gambit/ColliderBit/mt2_bisect.h"
 
@@ -16,13 +16,13 @@ using namespace std;
 
    Known errors:
         Using ATLASEfficiencies instead of CMSEfficiencies because "applyLooseIDElectronSelectionR2" and "applyMediumIDElectronSelectionR2" functions are important for this analysis.
-        
+
 */
 
 namespace Gambit {
   namespace ColliderBit {
 
-    class Analysis_CMS_13TeV_2LEPStop_36invfb : public HEPUtilsAnalysis {
+    class Analysis_CMS_13TeV_2LEPStop_36invfb : public Analysis {
     private:
 
         // Numbers passing cuts
@@ -120,8 +120,7 @@ namespace Gambit {
 
         }
 
-        void analyze(const HEPUtils::Event* event) {
-            HEPUtilsAnalysis::analyze(event);
+        void run(const HEPUtils::Event* event) {
 
             // Missing energy
             double met = event->met();
@@ -406,28 +405,31 @@ namespace Gambit {
 
         }
 
+        /// Combine the variables of another copy of this analysis (typically on another thread) into this one.
+        void combine(const Analysis* other)
+        {
+            const Analysis_CMS_13TeV_2LEPStop_36invfb* specificOther
+                = dynamic_cast<const Analysis_CMS_13TeV_2LEPStop_36invfb*>(other);
 
-        void add(BaseAnalysis* other) {
-            // The base class add function handles the signal region vector and total # events.
-            HEPUtilsAnalysis::add(other);
-
-            Analysis_CMS_13TeV_2LEPStop_36invfb* specificOther
-                = dynamic_cast<Analysis_CMS_13TeV_2LEPStop_36invfb*>(other);
-            // Here we will add the subclass member variables:
             if (NCUTS != specificOther->NCUTS) NCUTS = specificOther->NCUTS;
-            for (int j=0; j<NCUTS; j++) {
+
+            for (int j=0; j<NCUTS; j++)
+            {
                 cutFlowVector[j] += specificOther->cutFlowVector[j];
                 cutFlowVector_str[j] = specificOther->cutFlowVector_str[j];
             }
-            for (size_t j=0; j<_SR_size; j++) {
+
+            for (size_t j=0; j<_SR_size; j++)
+            {
                 _SRSF[j] += specificOther->_SRSF[j];
                 _SRDF[j] += specificOther->_SRDF[j];
                 _SRALL[j] += specificOther->_SRALL[j];
             }
-            for (size_t j=0; j<_SRA_size; j++) {
+
+            for (size_t j=0; j<_SRA_size; j++)
+            {
                 _SRA[j] += specificOther->_SRA[j];
             }
-
         }
 
 
@@ -925,7 +927,7 @@ namespace Gambit {
             add_result(results_SRA2);*/
 
     protected:
-      void clear() {
+      void analysis_specific_reset() {
 
         std::fill(_SRSF.begin(), _SRSF.end(), 0);
         std::fill(_SRDF.begin(), _SRDF.end(), 0);

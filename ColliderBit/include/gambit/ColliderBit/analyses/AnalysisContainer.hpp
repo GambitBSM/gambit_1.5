@@ -1,3 +1,29 @@
+//   GAMBIT: Global and Modular BSM Inference Tool
+//   *********************************************
+///  \file
+///
+///  Class for holding ColliderBit analyses.
+///
+///  *********************************************
+///
+///  Authors (add name and date if you modify):
+///
+///  \author Abram Krislock
+///          (a.m.b.krislock@fys.uio.no)
+///
+///  \author Andy Buckley
+///          (mostlikelytobefound@facebook.com)
+///
+///  \author Anders Kvellestad
+///          (anders.kvellestad@fys.uio.no)
+///  \date often
+///
+///  \author Pat Scott
+///          (p.scott@imperial.ac.uk)
+///  \date 2019 Feb
+///
+///  *********************************************
+
 #pragma once
 
 #include <string>
@@ -5,50 +31,39 @@
 #include <vector>
 #include <map>
 
-// Forward declarations, to avoid header-chaining into CB_types.hpp
-namespace HEPUtils { class Event; }
+#include "HEPUtils/Event.h"
+
 namespace Gambit
 {
+
   typedef std::string str;
-  namespace ColliderBit
-  {
-    template <typename EventT>
-    class BaseAnalysis;
-    using HEPUtilsAnalysis = BaseAnalysis<HEPUtils::Event>;
-  }
-}
-
-
-namespace Gambit
-{
 
   namespace ColliderBit
   {
+
+    class Analysis;
 
     /// Create a new analysis based on a name string
     /// @note The caller is responsible for deleting the returned analysis object.
     /// @todo Move to a separate file
-    HEPUtilsAnalysis* mkAnalysis(const str& name);
+    Analysis* mkAnalysis(const str& name);
 
     /// Return the detector to be used for a given analysis name, checking that the analysis exists.
     str getDetector(const str& name);
 
 
-    /// A class for managing collections of HEPUtilsAnalysis instances.
-    class HEPUtilsAnalysisContainer
+    /// A class for managing collections of Analysis instances.
+    class AnalysisContainer
     {
 
       private:
 
-        /// A map of maps of pointer-to-HEPUtilsAnalysis.
+        /// A map of maps of pointer-to-Analysis.
         /// First key is the collider name, second key is the analysis name.
-        std::map<str,std::map<str,HEPUtilsAnalysis*> > analyses_map;
+        std::map<str,std::map<str,Analysis*> > analyses_map;
 
         /// String identifying the currently active collider
         str current_collider;
-
-        /// Has this class instance been initialized?
-        bool ready; //< @todo Currently not used for anything. Do we need it?
 
         /// Has this instance been registered in the instances_map?
         bool is_registered;
@@ -59,18 +74,18 @@ namespace Gambit
         /// Key for the instances_map
         str base_key;
 
-        /// A vector with pointers to all instances of this class. The key is the OMP thread number.
+        /// A map with pointers to all instances of this class. The key is the OMP thread number.
         /// (There should only be one instance of this class per OMP thread.)
-        static std::map<str,std::map<int,HEPUtilsAnalysisContainer*> > instances_map;
+        static std::map<str,std::map<int,AnalysisContainer*> > instances_map;
 
 
       public:
 
         /// Constructor
-        HEPUtilsAnalysisContainer();
+        AnalysisContainer();
 
         /// Destructor
-        ~HEPUtilsAnalysisContainer();
+        ~AnalysisContainer();
 
         /// Add container to instances map
         void register_thread(str);
@@ -104,13 +119,13 @@ namespace Gambit
         void reset_all();
 
         /// Get pointer to specific analysis
-        const HEPUtilsAnalysis* get_analysis_pointer(str, str) const;
+        const Analysis* get_analysis_pointer(str, str) const;
         /// Get analyses map for a specific collider
-        const std::map<str,HEPUtilsAnalysis*>& get_collider_analyses_map(str) const;
+        const std::map<str,Analysis*>& get_collider_analyses_map(str) const;
         /// Get analyses map for the current collider
-        const std::map<str,HEPUtilsAnalysis*>& get_current_analyses_map() const;
+        const std::map<str,Analysis*>& get_current_analyses_map() const;
         /// Get the full analyses map
-        const std::map<str,std::map<str,HEPUtilsAnalysis*> >& get_full_analyses_map() const;
+        const std::map<str,std::map<str,Analysis*> >& get_full_analyses_map() const;
 
         /// Pass event through specific analysis
         void analyze(const HEPUtils::Event&, str, str) const;
@@ -118,26 +133,6 @@ namespace Gambit
         void analyze(const HEPUtils::Event&, str) const;
         /// Pass event through all analysis for the current collider
         void analyze(const HEPUtils::Event&) const;
-
-        /// Add cross-sections and errors for two different processes,
-        /// for a specific analysis
-        void add_xsec(double, double, str, str);
-        /// Add cross-sections and errors for two different processes,
-        /// for all analyses for a given collider
-        void add_xsec(double, double, str);
-        /// Add cross-sections and errors for two different processes,
-        /// for all analyses for the current collider
-        void add_xsec(double, double);
-
-        /// Weighted combination of xsecs and errors for the same process,
-        /// for a specific analysis
-        void improve_xsec(double, double, str, str);
-        /// Weighted combination of xsecs and errors for the same process,
-        /// for all analyses for a given collider
-        void improve_xsec(double, double, str);
-        /// Weighted combination of xsecs and errors for the same process,
-        /// for all analyses for the current collider
-        void improve_xsec(double, double);
 
         /// Collect signal predictions from other threads and add to this one,
         /// for specific analysis
@@ -149,24 +144,14 @@ namespace Gambit
         /// for all analyses for the current collider
         void collect_and_add_signal();
 
-        /// Collect xsec predictions from other threads and do a weighted combination,
-        /// for specific analysis
-        void collect_and_improve_xsec(str, str);
-        /// Collect xsec predictions from other threads and do a weighted combination,
-        /// for all analyses for given collider
-        void collect_and_improve_xsec(str);
-        /// Collect xsec predictions from other threads and do a weighted combination,
-        /// for all analyses for the current collider
-        void collect_and_improve_xsec();
-
         /// Scale results for specific analysis
-        void scale(str, str, double factor=-1);
+        void scale(str, str, double);
         /// Scale results for all analyses for given collider
-        void scale(str, double factor=-1);
+        void scale(str, double);
         /// Scale results for all analyses for the current collider
-        void scale(double factor=-1);
+        void scale(double);
         /// Scale results for all analyses across all colliders
-        void scale_all(double factor=-1);
+        void scale_all(double);
 
     };
 

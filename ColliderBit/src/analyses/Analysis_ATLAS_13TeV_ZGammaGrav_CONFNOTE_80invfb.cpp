@@ -1,4 +1,4 @@
-#include "gambit/ColliderBit/analyses/BaseAnalysis.hpp"
+#include "gambit/ColliderBit/analyses/Analysis.hpp"
 #include "gambit/ColliderBit/ATLASEfficiencies.hpp"
 #include "gambit/ColliderBit/mt2_bisect.h"
 using namespace std;
@@ -19,7 +19,7 @@ namespace Gambit {
     /// passing all cuts: underestimation of MET and satisfaction of angular/balance cuts.
     /// Adding MET smearing doesn't appear to have helped.
     ///
-    class Analysis_ATLAS_13TeV_ZGammaGrav_CONFNOTE_80invfb : public HEPUtilsAnalysis {
+    class Analysis_ATLAS_13TeV_ZGammaGrav_CONFNOTE_80invfb : public Analysis {
     public:
 
       // Required detector sim
@@ -28,12 +28,11 @@ namespace Gambit {
       Analysis_ATLAS_13TeV_ZGammaGrav_CONFNOTE_80invfb() {
         set_analysis_name("ATLAS_13TeV_ZGammaGrav_CONFNOTE_80invfb");
         set_luminosity(79.8);
-        clear();
+        analysis_specific_reset();
       }
 
 
-      void analyze(const Event* event) {
-        HEPUtilsAnalysis::analyze(event);
+      void run(const Event* event) {
 
         // Electrons
         ParticlePtrs electrons;
@@ -142,16 +141,12 @@ namespace Gambit {
 
       }
 
-
-      void add(BaseAnalysis* other) {
-        // The base class add function handles the signal region vector and total # events.
-        HEPUtilsAnalysis::add(other);
-
-        Analysis_ATLAS_13TeV_ZGammaGrav_CONFNOTE_80invfb* specificOther
-          = dynamic_cast<Analysis_ATLAS_13TeV_ZGammaGrav_CONFNOTE_80invfb*>(other);
-
+      /// Combine the variables of another copy of this analysis (typically on another thread) into this one.
+      void combine(const Analysis* other)
+      {
+        const Analysis_ATLAS_13TeV_ZGammaGrav_CONFNOTE_80invfb* specificOther
+          = dynamic_cast<const Analysis_ATLAS_13TeV_ZGammaGrav_CONFNOTE_80invfb*>(other);
         for (size_t j = 0; j < NCUTS; ++j) cutflow[j] += specificOther->cutflow[j];
-
         nsig += specificOther->nsig;
       }
 
@@ -175,7 +170,7 @@ namespace Gambit {
       }
 
 
-      void clear() {
+      void analysis_specific_reset() {
         nsig = 0;
         for (size_t i = 0; i < NCUTS; ++i) cutflow[i] = 0;
       }
