@@ -56,7 +56,6 @@ namespace Gambit
                            const int iteration,
                            void(*wrapup)(),
                            const Options& runOptions,
-                           bool(*ModelInUse)(str),
                            bool is_SUSY)
     {
       static bool first = true;
@@ -389,7 +388,7 @@ namespace Gambit
       using namespace Pipes::NAME;                                                    \
       getColliderPythia(result, *Dep::RunMC, *Dep::SPECTRUM,                          \
        *Dep::decay_rates, #MODEL_EXTENSION, *Loop::iteration,                         \
-       Loop::wrapup, *runOptions, ModelInUse, SUSY_FLAG);                             \
+       Loop::wrapup, *runOptions, SUSY_FLAG);                             \
     }
 
     /// Retrieve a specific Pythia hard-scattering Monte Carlo simulation, initialised from an SLHA file
