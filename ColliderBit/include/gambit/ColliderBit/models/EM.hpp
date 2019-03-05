@@ -41,7 +41,7 @@
     NEEDS_MANAGER(RunMC, MCLoopInfo)
     NEEDS_CLASSES_FROM(Pythia_EM, default)
     DEPENDENCY(decay_rates, DecayTable)
-    MODEL_CONDITIONAL_DEPENDENCY(MSSM_spectrum, Spectrum, MSSM63atQ, MSSM63atMGUT)
+    DEPENDENCY(EM_spectrum, Spectrum)
     #undef FUNCTION
 
     #define FUNCTION getPythia_EMFileReader

@@ -25,7 +25,7 @@
 ///          (p.scott@imperial.ac.uk)
 ///  \date 2015 Jul
 ///  \date 2018 Jan
-///  \date 2019 Jan
+///  \date 2019 Jan, Feb
 ///
 ///  \author Anders Kvellestad
 ///          (anders.kvellestad@fys.uio.no)
@@ -50,13 +50,14 @@ namespace Gambit
     template<typename PythiaT, typename EventT>
     void getColliderPythia(ColliderPythia<PythiaT, EventT>& result,
                            const MCLoopInfo& RunMC,
-                           const Spectrum& MSSM_spectrum,
+                           const Spectrum& spectrum,
                            const DecayTable& decay_rates,
                            const str model_suffix,
                            const int iteration,
                            void(*wrapup)(),
                            const Options& runOptions,
-                           bool(*ModelInUse)(str))
+                           bool(*ModelInUse)(str),
+                           bool is_SUSY)
     {
       static bool first = true;
       static str pythia_doc_path;
@@ -81,21 +82,17 @@ namespace Gambit
         slha.clear();
         spectrum.clear();
         slha = decay_rates.getSLHAea(2);
-        if (ModelInUse("MSSM63atQ") or ModelInUse("MSSM63atMGUT"))
+        // SLHAea in SLHA2 format, please.
+        spectrum = spectrum.getSLHAea(2);
+        slha.insert(slha.begin(), spectrum.begin(), spectrum.end());
+        if (is_SUSY)
         {
-          // MSSM-specific.  SLHAea in SLHA2 format, please.
-          spectrum = MSSM_spectrum.getSLHAea(2);
           SLHAea::Block block("MODSEL");
           block.push_back("BLOCK MODSEL              # Model selection");
           SLHAea::Line line;
-          line << 1 << 0 << "# General MSSM";
+          line << 1 << 0 << "# Tell Pythia that this is a SUSY model.";
           block.push_back(line);
-          slha.insert(slha.begin(), spectrum.begin(), spectrum.end());
           slha.push_front(block);
-        }
-        else
-        {
-          ColliderBit_error().raise(LOCAL_INFO, "No spectrum object available for this model.");
         }
       }
 
@@ -383,14 +380,16 @@ namespace Gambit
     }
 
     /// Retrieve a specific Pythia hard-scattering Monte Carlo simulation
-    #define GET_SPECIFIC_PYTHIA(NAME, PYTHIA_NS, MODEL_EXTENSION)        \
-    void NAME(ColliderPythia<PYTHIA_NS::Pythia8::Pythia,                 \
-                             PYTHIA_NS::Pythia8::Event> &result)         \
-    {                                                                    \
-      using namespace Pipes::NAME;                                       \
-      getColliderPythia(result, *Dep::RunMC, *Dep::MSSM_spectrum,        \
-       *Dep::decay_rates, #MODEL_EXTENSION, *Loop::iteration,            \
-       Loop::wrapup, *runOptions, ModelInUse);                           \
+    #define IS_SUSY true
+    #define NOT_SUSY false
+    #define GET_SPECIFIC_PYTHIA(NAME, PYTHIA_NS, SPECTRUM, MODEL_EXTENSION, SUSY_FLAG)\
+    void NAME(ColliderPythia<PYTHIA_NS::Pythia8::Pythia,                              \
+                             PYTHIA_NS::Pythia8::Event> &result)                      \
+    {                                                                                 \
+      using namespace Pipes::NAME;                                                    \
+      getColliderPythia(result, *Dep::RunMC, *Dep::SPECTRUM,                          \
+       *Dep::decay_rates, #MODEL_EXTENSION, *Loop::iteration,                         \
+       Loop::wrapup, *runOptions, ModelInUse, SUSY_FLAG);                             \
     }
 
     /// Retrieve a specific Pythia hard-scattering Monte Carlo simulation, initialised from an SLHA file
