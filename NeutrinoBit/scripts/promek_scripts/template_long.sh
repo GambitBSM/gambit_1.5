@@ -2,7 +2,7 @@
 #
 #SBATCH --nodes 1                              # Number of nodes
 #SBATCH --ntasks-per-node 1                # Number of MPI processes per node.
-#SBATCH --mem 25G
+#SBATCH --mem 20G
 #SBATCH -t 0-23:00                         # Runtime in D-HH:MM
 #SBATCH -p plgrid                          # Partition to submit to
 #SBATCH -A hbtv1                           # Account to charge

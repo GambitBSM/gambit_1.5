@@ -25,7 +25,7 @@ do
     echo 'python /net/archive/groups/plgghbt/gambit/gambit_RHN/NeutrinoBit/scripts/cut_script_noslide.py '$f $fout >> lunch_inv/$name.sh
     echo 'python /net/archive/groups/plgghbt/gambit/gambit_RHN/NeutrinoBit/scripts/cut_script_4sigma.py '$fout $fout2 >> lunch_inv/$name.sh
     
-    sbatch lunch_inv/$name.sh
+    #sbatch lunch_inv/$name.sh
 
     
 
