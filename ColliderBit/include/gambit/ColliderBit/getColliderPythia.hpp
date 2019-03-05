@@ -63,7 +63,7 @@ namespace Gambit
       static str pythia_doc_path;
       static std::vector<str> pythiaCommonOptions;
       static SLHAstruct slha;
-      static SLHAstruct spectrum;
+      static SLHAstruct slha_spectrum;
       static double xsec_veto_fb;
 
       if (iteration == BASE_INIT)
@@ -80,11 +80,11 @@ namespace Gambit
 
         // SLHAea object constructed from dependencies on the spectrum and decays.
         slha.clear();
-        spectrum.clear();
+        slha_spectrum.clear();
         slha = decay_rates.getSLHAea(2);
         // SLHAea in SLHA2 format, please.
-        spectrum = spectrum.getSLHAea(2);
-        slha.insert(slha.begin(), spectrum.begin(), spectrum.end());
+        slha_spectrum = spectrum.getSLHAea(2);
+        slha.insert(slha.begin(), slha_spectrum.begin(), slha_spectrum.end());
         if (is_SUSY)
         {
           SLHAea::Block block("MODSEL");
