@@ -37,6 +37,7 @@
   DEFINEPARS(xi)
   // Translation to parent, all defined in Axions.cpp:
   INTERPRET_AS_PARENT_FUNCTION(CosmoALP_to_GeneralCosmoALP)
+#undef PARENT
 #undef MODEL
 
 // General axion model with parametric temperature-dependent mass.
@@ -48,6 +49,7 @@
   DEFINEPARS(gagg,gaee,fa,ma0,Tchi,beta,thetai)
   // Translation to parent, all defined in Axions.cpp:
   INTERPRET_AS_PARENT_FUNCTION(GeneralALP_to_GeneralCosmoALP)
+#undef PARENT
 #undef MODEL
 
 // QCD axion model
