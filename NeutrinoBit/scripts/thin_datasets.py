@@ -36,6 +36,7 @@ parser = OptionParser()
 parser.add_option("-v", "--verbose", help = "Print debug output", action='store_true', dest='verbose', default=False)
 parser.add_option("-a", "--all", help = "Use all the scan parameters for thinning", action='store_true', dest='all_params', default=False)
 parser.add_option("-l", "--logvars", help = "Set log scale for input variables", metavar='LOGVARS')
+parser.add_option("-f", "--force", help = "Force log scale even if there are negative values", action='store_true', dest='force', default=False)
 (options, args) = parser.parse_args()
 if len(args) < 4 or (not options.all_params and len(args) < 6):
   print 'Wrong number of arguments \n\
@@ -51,7 +52,8 @@ Options:\n\
        -h, --help                    Show this help message and exit\n\
        -v, --verbose                 Print debug output\n\
        -a, --all                     Use all the scan parameters for thinning\n\
-       -l LOGVARS, --logvars=LOGVARS Set log scale for input variables'
+       -l LOGVARS, --logvars=LOGVARS Set log scale for input variables\n\
+       -f, --force                   Force log scale even if there are negative values'
 
   exit()
 
@@ -82,7 +84,14 @@ else :
 if options.logvars is not None :
   logvars = options.logvars.split(',')
   for logvar in logvars:
-    params[int(logvar)] = np.log10(params[int(logvar)])
+    if np.any(params[int(logvar)] < 0) :
+      print "Warning! Trying to use log scale on a variable with negative values (", param_names[int(logvar)],")"
+      if options.force:
+        print "Selected force option, thinning will continue"
+      else:
+        print "Thinning will abort. To force log scale use the -f or --force option"
+        exit()
+    params[int(logvar)] = np.log10(np.abs(params[int(logvar)]))
 
 # Identify limits and binning
 mins = []
