@@ -1511,7 +1511,7 @@ namespace Gambit
       if ( (thetai>pi) && (thetai<3.0*pi) ) {thetai = thetai - 2.0*pi;};
 
       // TCMB in MeV.
-      const double TCMB = T_CMB*K2eV*1.0E-6;
+      const double TCMB = *Dep::T_cmb*K2eV*1.0E-6;
       // Critical energy density today * h^2 (in eV^4).
       const double ede_crit_today = 3.0*2.69862E-11;
 
