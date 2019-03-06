@@ -22,6 +22,11 @@
 ///  \date 2017 Nov
 ///  \date 2018 May
 ///
+///  \author Janina Renk
+///          (janina.renk@fysik.su.se)
+///  \date 2018 Oct
+///  \date 2019 Mar
+///
 ///  *********************************************
 
 
@@ -36,6 +41,7 @@ namespace Gambit
 
   namespace CosmoBit
   {
+
     typedef std::map< std::string,std::valarray < double > > map_str_valarray_dbl;
     
     class BBN_container
@@ -64,15 +70,22 @@ namespace Gambit
       public:
         SM_time_evo(double t0, double tf, double grid_size);
        
-        // SM photon temperature (keV) as a function of time (seconds)  
-        void set_T_evo() {T_evo = 1147.40/sqrt((get_t_grid()));}
+        // SM photon temperature (keV) as a function of time (seconds)
+        // T_g [keV] = T_cmb [keV] / sqrt(2*H0*(Omega_r0)^0.5   
+        //           = { [2 sqrt(8pi^3 G[_SI_] (kB [J/K])^4] / [45 c^2 (c hbar)^3 gstar] }^-0.5 
+        // with G: Newton's constant in kg m^3/s^2, kB: Boltzmann const in J/K, c: speed of light in m/s, 
+        // hbar x c: reduced Planck const in Jm 
+        // H0 and T_cmb cancel out, the factor that stays besides natural constants is 
+        // g_star = g_gamma + 7/8 * g_nu * Neff * (4/11)^(4/3) = 3.38354
+        void set_T_evo() {T_evo = 1147.40/sqrt(t_grid);}
 
         // SM neutrino temperature (keV) as a function of time (seconds)
-        // Defined in this way, one gets Neff = 3.046, using Nnu = 3 SM neutrinos
+        // Defined in this way, one gets Neff = 3.046, using Nnu = 3 SM neutrinos (Tnu = 0.716486 T(t0))
         void set_Tnu_evo() {Tnu_evo = 822.0965/sqrt(t_grid);}
         
         // SM Hubble rate (1/s) as a function of time (seconds)
-        void set_Ht_evo() {H_evo= 1/(2.0*t_grid);} 
+        // Solve Friedmann eq. for rad. dominated Universe da/dt = H0 sqrt(Omega_g0 a^-4)
+        void set_Ht_evo() {H_evo= 1./(2.0*t_grid);} 
         
         // SM Hubble rate (1/s) as a function of temperature (keV)
         void set_HT_evo(std::valarray<double> T) {H_evo = 3.7978719e-7*T*T;}
@@ -111,6 +124,7 @@ namespace Gambit
         void addEntry(std::string key,int val);
         void addEntry(std::string key, std::vector<double> val);
         void addEntry(std::string key, std::vector<int> val);
+        std::ostringstream print_entries_to_logger();
 
         void clear();
         std::map<std::string,std::string> get_map();

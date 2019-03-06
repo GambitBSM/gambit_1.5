@@ -25,13 +25,28 @@ Parameters:
  
  # --- import model parameters for models to scan over ---
  LCDM_ExtdNeffCMB_ExtetaBBN: !import include/LCDM_ExtdNeffCMB_ExtetaBBN_scan.yaml       
- #LCDM_dNeffCMB_dNeffBBN: !import include/LCDM_dNeffCMB_dNeffBBN_scan.yaml       
+ 
+ # neutrino masses
+ #StandardModel_numass_single: !import include/StandardModel_numass_single_scan.yaml
+ StandardModel_numass_degenerate: !import include/StandardModel_numass_degenerate_scan.yaml
 
  # nuisance parameters in Planck likelihood
  #Planck_lite: !import include/Planck_lite_scan.yaml
 
  # Cosmological nuisance parameters (except for Planck CMB Likelihoods) 
- #cosmo_nuisance_params: !import include/cosmo_nuisance_params.yaml
+ cosmo_nuisance_params: !import include/cosmo_nuisance_params.yaml
+ 
+ # Model Parameters of CosmoALP
+ CosmoALP:
+   fa: 1.0
+   ma0:
+     range: [1.0E+2, 1.0E+7]
+     prior_type: log
+   gagg:
+     range: [1.0E-13, 1.0]
+     prior_type: log
+   thetai: 0.0
+   xi: 0.0
 
 #======== Prior setup ========
 Priors:
@@ -64,24 +79,88 @@ Scanner:
 
 #======== Observables of interest ========
 ObsLikes:
- 
-   
+  
   - purpose:      LogLike
+    capability:   BAO_LogLike
+    module:       CosmoBit
+    type:         double
+
+  - purpose:      LogLike
+    capability:   BBN_LogLike
+    module:       CosmoBit
+    type:         double
+  
+  - purpose:      Observable
+    capability:   H0_LogLike
+    module:       CosmoBit
+    type:         double
+
+  - purpose:      LogLike
+    capability:   Pantheon_LogLike
+    module:       CosmoBit
+    type:         double
+
+ # - purpose:      LogLike  # commented to make this not depended on plc and the download of Planck data
+ #   capability:   compute_Planck_high_TT_loglike
+ #   module:       CosmoBit
+ #   type:         double
+  
+  - purpose:      Observable
     capability:   Helium_abundance
     module:       CosmoBit
     type:         std::vector<double>
+
+  - purpose:      Observable
+    capability:   Deuterium_abundance
+    module:       CosmoBit
+    type:         std::vector<double>
+
+  - purpose:      Observable
+    capability:   Helium3_abundance
+    module:       CosmoBit
+    type:         std::vector<double>
+
+  - purpose:      Observable
+    capability:   Lithium7_abundance
+    module:       CosmoBit
+    type:         std::vector<double>
+
+  - purpose:      Observable
+    capability:   Beryllium7_abundance
+    module:       CosmoBit
+    type:         std::vector<double>
+
+  - purpose:      Observable
+    capability:   n0_g
+    module:       CosmoBit
+    type:         double
+   
+  - purpose:      Observable
+    capability:   etaBBN
+    module:       CosmoBit
+    type:         double
+
 
 
 #======== Rule entries ========
 Rules:
 
-
-  
+ 
   - capability: BBN_LogLike
     options:
       DataFile: PDG_2017.dat # Use both, the Yp and D/H measurement as given in PDG 2017
       #DataFile: PDG_2017_updated.dat # Use the Yp measurement from PDG 2017 and the updated D/H measurement of 1801.08023
+
+  - capability: BAO_LogLike
+    options:
+      DataFile:  BAO_2014.dat
   
+  
+  - capability: H0_LogLike
+    options:
+      DataFile:  SH0ES.dat
+
+
   - capability: AlterBBN_modelinfo
     options:
       failsafe: 1
@@ -89,8 +168,8 @@ Rules:
 
   - capability: external_dNeff_etaBBN
     options:
-      grid_size: 3000
-      max_iter: 7
+      grid_size: 3000   # set grid size of time grid to solve differntial equation to compute dNeff and etaBBN for CosmoALP model (default: 3000)
+      max_iter: 8       # set max. number of iterations until convergence (of default 1e-6 accuracy) is reached. If not: point invalidated
 
 
 
@@ -107,7 +186,7 @@ KeyValues:
 
   debug: true
 
-  default_output_path: "runs/CosmoBit_testScan"
+  default_output_path: "runs/CosmoBit_testALP"
 
   rng: ranlux48
 

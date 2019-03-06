@@ -49,6 +49,7 @@
 #include "gambit/Elements/gambit_module_headers.hpp"
 #include "gambit/CosmoBit/CosmoBit_rollcall.hpp"
 #include "gambit/CosmoBit/CosmoBit_types.hpp"
+#include "gambit/CosmoBit/CosmoBit_utils.hpp"
 
 
 
@@ -366,6 +367,9 @@ namespace Gambit
           cosmo.input.addEntry(name,value);
         }
       }
+
+      std::ostringstream log_msg = cosmo.input.print_entries_to_logger(); // print all parameters and their values that are passed to class in debug.log
+      logger() << LogTags::debug << log_msg.str() << EOM;
     }
 
     void class_set_parameter_LCDM_SingletDM(Class_container& cosmo)
@@ -2246,35 +2250,6 @@ namespace Gambit
 
 
 
-class fast_interpolation {
-    private:
-        int grid_size;
-        double Delta_logx;
-        std::valarray<double> x_grid;
-        std::valarray<double> y_grid;
-    public: 
-        fast_interpolation(std::valarray<double>& x_grid0, std::valarray<double>& y_grid0)
-        {
-            x_grid = x_grid0;
-            y_grid = y_grid0;
-            grid_size = x_grid.size();
-            Delta_logx = (log(x_grid[grid_size-1]) - log(x_grid[0]))/(grid_size-1);        
-        }
-        double interp(double x)
-        {    
-            if (x <= x_grid[0])
-            {return y_grid[0];}
-            if (x >= x_grid[grid_size-1])
-            {return y_grid[grid_size-1];}
-
-            double intpart_d;
-            double fracpart = std::modf((log(x) - log(x_grid[0]))/Delta_logx, &intpart_d);
-            int intpart = lround(intpart_d);
-           
-            return y_grid[intpart] * (1 - fracpart) + y_grid[intpart+1]*fracpart;            
-        }
-};
-
 
 // ***************************************************************************************************************
 
@@ -2286,7 +2261,7 @@ class fast_interpolation {
         y[0]: stores SM T[t0]
       */
     
-      fast_interpolation injection_inter = *(static_cast<fast_interpolation*>(params)); // TODO: interpolation with daFunk instead of with class defined above
+      fast_interpolation injection_inter = *(static_cast<fast_interpolation*>(params)); 
       f[0] = (15.0/(4.0*pi*pi)) * injection_inter.interp(t)/pow(y[0], 3) - 3.7978719e-7*y[0]*y[0]*y[0];
       return GSL_SUCCESS;
     }
@@ -2305,11 +2280,12 @@ class fast_interpolation {
       double na_t0 = 2.0;     // initial number density of a at t=t0, in units keV^3.
       double m_a = 30.0;      // mass of a in keV
       double tau_a = 1.0e7;   // lifetime of a in seconds
+  
 
       // --- precision parameters -- 
       double hstart = runOptions->getValueOrDef<double>(1e-6,"hstart"); // initial step size for GSL ODE solver
       double epsrel = runOptions->getValueOrDef<double>(1e-6,"epsrel"); // desired relative accuracy for GSL ODE solver and dNeff & etaBBN
-      double max_iter = runOptions->getValueOrDef<int>(8,"max_iter"); // maximum number of iterations before error message is thrown if result not converged
+      double max_iter = runOptions->getValueOrDef<int>(10,"max_iter"); // maximum number of iterations before error message is thrown if result not converged
       double grid_size = runOptions->getValueOrDef<int>(3000,"grid_size"); // number of (logarithmic) grid points in t
 
       double t0 = runOptions->getValueOrDef<double>(1e4,"t_initial"); // initial time in seconds
@@ -2329,7 +2305,7 @@ class fast_interpolation {
 
           SM.calc_H_int();
           na_grid = na_t0*exp(-3.0*SM.get_H_int())*exp(-t_grid/tau_a);    // na(t) in units keV^3
-          injection_grid = (m_a/tau_a)*na_grid;                           // m_a*na(t)/tau_a in units keV^4/s
+          injection_grid = (m_a/tau_a)*na_grid;                 // m_a*na(t)/tau_a in units keV^4/s
           Tnu_grid = SM.get_Tnu_evo()[0]*exp(-1.0*SM.get_H_int());        // T_nu(t) in units keV
           fast_interpolation injection_inter(t_grid, injection_grid);     // interpolating function
 
@@ -2372,7 +2348,9 @@ class fast_interpolation {
       } 
 
       result["dNeff"] = dNeff;
-      result["eta_ratio"] = eta_ratio;      
+      result["eta_ratio"] = eta_ratio;    
+      logger() << "CosmoALP model: calculated dNeff @BBN to be " << result["dNeff"] <<", and etaBB(ALP)/etaBBN(SM) = " << result["eta_ratio"] << ". Calculation converged after "<< ii <<" iterations." << EOM;
+      
 
     }
 
@@ -2388,7 +2366,6 @@ class fast_interpolation {
 
       // use COBE/FIRAS (0911.1955) mes. if not specified otherwise
       result = runOptions->getValueOrDef<double>(2.7255,"T_cmb");
-
     }
 
     void calculate_eta0(double &result)
@@ -2396,13 +2373,99 @@ class fast_interpolation {
       using namespace Pipes::calculate_eta0;
 
       double ngamma, nb;
-      ngamma = 16*pi*zeta3*pow(*Dep::T_cmb*kb/hc,3); // photon number density today
-      nb = *Param["omega_b"]*3*100*1e3*100*1e3/Mpc/Mpc/(8*pi*Gn*m_proton_g); // baryon number density today
+      ngamma = 16*pi*zeta3*pow(*Dep::T_cmb*_kB_eV_over_K_/_hc_eVcm_,3); // photon number density today
+      nb = *Param["omega_b"]*3*100*1e3*100*1e3/_Mpc_SI_/_Mpc_SI_/(8*pi*_GN_cgs_*_m_proton_g_); // baryon number density today
 
       result =  nb/ngamma;
       logger() << "Baryon to photon ratio (eta) today computed to be " << result << EOM;
     }
     
+    void compute_Sigma8(double &result)
+    {
+      using namespace Pipes::compute_Sigma8;
+
+      double sigma8 = BEreq::class_get_sigma8(0.);
+      double Omega0_m = *Dep::Omega0_m;
+
+      result = sigma8*pow(Omega0_m/0.3, 0.5);
+    }
+
+    void compute_Omega0_m(double &result)
+    {
+      using namespace Pipes::compute_Omega0_m;
+
+      result =(*Dep::Omega0_b) + (*Dep::Omega0_cdm) + (*Dep::Omega0_ncdm); 
+    }
+    
+    void compute_Omega0_b(double &result)
+    {
+      using namespace Pipes::compute_Omega0_b;
+
+      double h = *Param["H0"]/100;
+      result =*Param["omega_b"]/h/h; 
+    }
+    
+    void compute_Omega0_cdm(double &result)
+    {
+      using namespace Pipes::compute_Omega0_cdm;
+
+      double h = *Param["H0"]/100;
+      result =*Param["omega_cdm"]/h/h; 
+    }
+
+    void compute_Omega0_g(double &result)
+    {
+      using namespace Pipes::compute_Omega0_g;
+
+      double h = *Param["H0"]/100.;
+      result = (4.*_sigmaB_SI_/_c_SI_*pow(*Dep::T_cmb,4.)) / (3.*_c_SI_*_c_SI_*1.e10*h*h/_Mpc_SI_/_Mpc_SI_/8./pi/_GN_SI_);
+    }
+
+    void compute_n0_g(double &result)
+    {
+      using namespace Pipes::compute_n0_g;
+
+      result = 2./pi/pi*zeta3 *pow(*Dep::T_cmb*_kB_eV_over_K_,3.)/pow(_hP_eVs_*_c_SI_/2./pi,3)/100/100/100; // result per cm^3  
+    }
+    
+    void compute_Omega0_ur(double &result)
+    {
+      using namespace Pipes::compute_Omega0_ur;
+
+      double Neff_nu = 2.0328; // TODO: only valid for 1 massive neutrinos -> need capability to set this
+      result = (*Param["dNeff"]+Neff_nu)*7./8.*pow(4./11.,4./3.)*(*Dep::Omega0_g); 
+    }
+    
+    void compute_Omega0_ncdm(double &result)
+    {
+      using namespace Pipes::compute_Omega0_ncdm;
+
+      double mNu_tot_eV; // sum of neutrino masses
+      if (ModelInUse("StandardModel_SLHA2"))
+      {
+        // (PS) Heads up! The units in StandardModel_SLHA2 are GeV
+        // Here we are using eV
+        mNu_tot_eV = 1e9*(*Param["mNu1"] + (*Param["mNu2"]) + (*Param["mNu3"]) );
+      }
+
+      else
+      {
+        mNu_tot_eV = 0.06; // default to standard Planck case of 1 massive neutrino with m = 0.06 eV
+      }
+
+      double h = *Param["H0"]/100;
+      result = mNu_tot_eV/(93.14*h*h);  // TODO: heads up: explicit assumption of T_ncdm = 0.71611 and T_cmb goes in here. Has to be generalised  
+    }
+
+    void compute_Omega0_r(double &result)
+    {
+      using namespace Pipes::compute_Omega0_r;
+
+      result = *Dep::Omega0_g + (*Dep::Omega0_ur); 
+      //std::cout << "omega0_g g " << *Dep::Omega0_g << " omega_ur " << *Dep::Omega0_ur <<  std::endl; 
+    }
+
+
     void calculate_etaCMB_SM(double &result)
     {
       using namespace Pipes::calculate_etaCMB_SM;
@@ -2421,26 +2484,24 @@ class fast_interpolation {
 
     void calculate_etaBBN_SM(double &result)
     {
-      using namespace Pipes::calculate_etaCMB_SM;
+      using namespace Pipes::calculate_etaBBN_SM;
 
-      result =  *Dep::eta0; // in SM the baryon to photon ratio does not change between today an CMB release
+      result =  *Dep::etaCMB; // in SM the baryon to photon ratio does not change between today an CMB release
       logger() << "Baryon to photon ratio (eta) @BBN computed to be " << result << EOM;
     }
 
     void calculate_etaBBN_ALP(double &result)
     {
-      
       using namespace Pipes::calculate_etaBBN_ALP;
 
        map_str_dbl dNeff_etaBBN = *Dep::external_dNeff_etaBBN;
-       result = *Dep::etaCMB * dNeff_etaBBN["eta_ratio"];
+       result = (*Dep::etaCMB) * dNeff_etaBBN["eta_ratio"];
        logger() << "Baryon to photon ratio (eta) @BBN computed to be " << result << EOM;
     }
 
     
     void calculate_dNeff_ALP(double &result)
     {
-      
       using namespace Pipes::calculate_dNeff_ALP;
 
       map_str_dbl dNeff_etaBBN = *Dep::external_dNeff_etaBBN;
@@ -2451,7 +2512,7 @@ class fast_interpolation {
 
    
 /// -----------
-/// BBN related functions
+/// BBN related functions (call AlterBBN, BBN abundances & Likelihood)
 /// -----------
 
     
@@ -2463,10 +2524,12 @@ class fast_interpolation {
       BEreq::Init_cosmomodel(&result);
 
       result.eta0 = *Param["eta_BBN"];  // eta AFTER BBN (variable during)
-      result.Nnu=3.046;                 
+      result.Nnu=3.046;                 // contribution from neutrinos
       result.dNnu=*Param["dNeff_BBN"];
       result.failsafe = runOptions->getValueOrDef<int>(3,"failsafe");
       result.err = runOptions->getValueOrDef<int>(3,"err");
+
+      logger() << "Called AlterBBN with parameters eta = " << result.eta0 << ", Nnu = " << result.Nnu << ", dNeffBBN = " << result.dNnu << EOM;
     }
 
     void compute_BBN_abundances(CosmoBit::BBN_container &result)
@@ -2933,7 +2996,7 @@ class fast_interpolation {
     {
       using namespace Pipes::compute_sigma8_LogLike;
 
-      double sigma8,Omega_m; // cosmo distances and sound horizon at drag,Hubble, theoretical prediction
+      double sigma8,Omega0_m; // cosmo distances and sound horizon at drag,Hubble, theoretical prediction
       double chi2 =0;
 
       const str filename = runOptions->getValue<std::string>("DataFile");
@@ -2943,7 +3006,7 @@ class fast_interpolation {
       static int nrow;
 
       sigma8 = BEreq::class_get_sigma8(0.);
-      Omega_m = *Dep::Omega_m;
+      Omega0_m = *Dep::Omega0_m;
 
       if(read_data == false)
       {
@@ -2957,26 +3020,11 @@ class fast_interpolation {
 
       for(int ie=0;ie<nrow;ie++)
       {
-        chi2 += pow(( sigma8*pow(Omega_m/data["Omega_m_ref"][ie], data["Omega_m_index"][ie]) - data["bestfit"][ie])/ data["sigma"][ie],2);
+        chi2 += pow(( sigma8*pow(Omega0_m/data["Omega_m_ref"][ie], data["Omega_m_index"][ie]) - data["bestfit"][ie])/ data["sigma"][ie],2);
       }
       result = -0.5*chi2;
     }
 
-    void compute_Sigma8(double &result)
-    {
-      using namespace Pipes::compute_Sigma8;
-
-      double sigma8 = BEreq::class_get_sigma8(0.);
-      double Omega_m = *Dep::Omega_m;
-
-      result = sigma8*pow(Omega_m/0.3, 0.5);
-    }
-
-    void compute_Omega_m(double &result)
-    {
-      using namespace Pipes::compute_Omega_m;
-
-      result = BEreq::class_get_Omega_m();
-    }
   }
 }
+

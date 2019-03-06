@@ -22,6 +22,11 @@
 ///  \date 2017 Nov
 ///  \date 2018 Jan,Feb, Mar
 ///
+///  \author Janina Renk
+///          (janina.renk@fysik.su.se)
+///  \date 2018 Jun
+///  \date 2019 Mar
+///
 ///  *********************************************
 
 #ifndef __CosmoBit_rollcall_hpp__
@@ -29,7 +34,7 @@
 
 #include "gambit/CosmoBit/CosmoBit_types.hpp"
 
-#include <valarray>
+//#include <valarray>
 
 #define MODULE CosmoBit
 START_MODULE
@@ -254,6 +259,79 @@ START_MODULE
     #undef FUNCTION
   #undef CAPABILITY
 
+  #define CAPABILITY n0_g
+       START_CAPABILITY
+       #define FUNCTION compute_n0_g
+        START_FUNCTION(double)
+        DEPENDENCY(T_cmb, double)
+        ALLOW_MODELS(LCDM_dNeffCMB_dNeffBBN_etaBBN)
+       #undef FUNCTION
+    #undef CAPABILITY
+  
+    #define CAPABILITY Omega0_m
+     START_CAPABILITY
+     #define FUNCTION compute_Omega0_m
+      START_FUNCTION(double)
+      DEPENDENCY(Omega0_b, double)
+      DEPENDENCY(Omega0_cdm, double)
+      DEPENDENCY(Omega0_ncdm, double)
+      ALLOW_MODELS(LCDM_dNeffCMB_dNeffBBN_etaBBN)
+     #undef FUNCTION
+  #undef CAPABILITY
+  
+  #define CAPABILITY Omega0_b
+     START_CAPABILITY
+     #define FUNCTION compute_Omega0_b
+      START_FUNCTION(double)
+      ALLOW_MODELS(LCDM_dNeffCMB_dNeffBBN_etaBBN)
+     #undef FUNCTION
+  #undef CAPABILITY
+  
+  #define CAPABILITY Omega0_cdm
+     START_CAPABILITY
+     #define FUNCTION compute_Omega0_cdm
+      START_FUNCTION(double)
+      ALLOW_MODELS(LCDM_dNeffCMB_dNeffBBN_etaBBN)
+     #undef FUNCTION
+  #undef CAPABILITY
+  
+  #define CAPABILITY Omega0_r
+       START_CAPABILITY
+       #define FUNCTION compute_Omega0_r
+        START_FUNCTION(double)
+        DEPENDENCY(Omega0_g, double)
+        DEPENDENCY(Omega0_ur, double)
+        ALLOW_MODELS(LCDM_dNeffCMB_dNeffBBN_etaBBN)
+       #undef FUNCTION
+    #undef CAPABILITY
+  
+  #define CAPABILITY Omega0_g
+       START_CAPABILITY
+       #define FUNCTION compute_Omega0_g
+        START_FUNCTION(double)
+        DEPENDENCY(T_cmb, double)
+        ALLOW_MODELS(LCDM_dNeffCMB_dNeffBBN_etaBBN)
+       #undef FUNCTION
+    #undef CAPABILITY
+  
+  #define CAPABILITY Omega0_ur
+       START_CAPABILITY
+       #define FUNCTION compute_Omega0_ur
+        START_FUNCTION(double)
+        DEPENDENCY(Omega0_g, double)
+        ALLOW_MODELS(LCDM_dNeffCMB_dNeffBBN_etaBBN)
+       #undef FUNCTION
+    #undef CAPABILITY
+  
+  #define CAPABILITY Omega0_ncdm
+       START_CAPABILITY
+       #define FUNCTION compute_Omega0_ncdm
+        START_FUNCTION(double)
+        DEPENDENCY(T_cmb, double)
+        ALLOW_MODELS(LCDM_dNeffCMB_dNeffBBN_etaBBN,StandardModel_SLHA2)
+       #undef FUNCTION
+    #undef CAPABILITY
+
   #define CAPABILITY eta0
     START_CAPABILITY
     #define FUNCTION calculate_eta0
@@ -267,7 +345,7 @@ START_MODULE
 
 #define CAPABILITY etaCMB
     START_CAPABILITY
-    #define FUNCTION calculate_etaCMB_SM // eta0 = etaCMB
+    #define FUNCTION calculate_etaCMB_SM // here: eta0 = etaCMB
       START_FUNCTION(double)
       DEPENDENCY(eta0, double)
       ALLOW_MODELS(LCDM_dNeffCMB_dNeffBBN_etaBBN) // To get etaCMB for LCDM_dNeffCMB_dNeffBBN_etaBBN
@@ -291,11 +369,7 @@ START_MODULE
      START_FUNCTION(double)
         DEPENDENCY(etaCMB, double)
         DEPENDENCY(external_dNeff_etaBBN, map_str_dbl)
-        ALLOW_MODELS(LCDM_ExtdNeffCMB_ExtetaBBN) // TODO: make the model combinaiton explicit here
-      //ALLOW_MODEL_COMBINATION(cosmology,particle)// TODO: refer to correct model name
-      //MODEL_GROUP(cosmology, (LCDM_dNeffCMB_dNeffBBN_etaBBN))
-      //MODEL_GROUP(particle, (ALP))
-      //ALLOW_MODEL_COMBINATION(cosmology,particle)
+        ALLOW_MODELS(LCDM_ExtdNeffCMB_ExtetaBBN) // To make sure this function is used to fulfill etaBBN capability in model translation function 
    #undef FUNCTION
   #undef CAPABILITY
 
@@ -303,28 +377,28 @@ START_MODULE
   #define CAPABILITY external_dNeff_etaBBN
     START_CAPABILITY
     #define FUNCTION compute_dNeff_etaBBN_ALP
-      START_FUNCTION(map_str_dbl)
-      // TODO: refer to correct model name
-      //MODEL_GROUP(cosmology, (LCDM_dNeffCMB_dNeffBBN_etaBBN))
-      //MODEL_GROUP(particle, (ALP))
+     START_FUNCTION(map_str_dbl)
+     ALLOW_MODELS(CosmoALP)
     #undef FUNCTION
   #undef CAPABILITY
 
 
-#define CAPABILITY ExtdNeffCMB
+  #define CAPABILITY ExtdNeffCMB
    START_CAPABILITY
    #define FUNCTION calculate_dNeff_ALP
      START_FUNCTION(double)
-     ALLOW_MODELS(LCDM_ExtdNeffCMB_ExtetaBBN)
      DEPENDENCY(external_dNeff_etaBBN, map_str_dbl)
-      //ALLOW_MODEL_COMBINATION(cosmology,particle)// TODO: refer to correct model name
-      //MODEL_GROUP(cosmology, (LCDM_dNeffCMB_dNeffBBN_etaBBN))
-      //MODEL_GROUP(particle, (ALP))
-      //ALLOW_MODEL_COMBINATION(cosmology,particle)
-     // TODO: atm calculation of eta implemented twice: once in CosmoModels, once here. put default LCDM into model tree, hand nu masses!
    #undef FUNCTION
   #undef CAPABILITY
 
+  #define CAPABILITY Sigma8
+     START_CAPABILITY
+     #define FUNCTION compute_Sigma8
+      START_FUNCTION(double)
+      DEPENDENCY(Omega0_m, double)
+      BACKEND_REQ(class_get_sigma8,(class_tag),double,(double))
+     #undef FUNCTION
+  #undef CAPABILITY
 
 // AlterBBN related functions & capabilities
   #define CAPABILITY AlterBBN_modelinfo
@@ -432,27 +506,9 @@ START_MODULE
      START_CAPABILITY
      #define FUNCTION compute_sigma8_LogLike
       START_FUNCTION(double)
-      DEPENDENCY(Omega_m, double)
+      DEPENDENCY(Omega0_m, double)
       ALLOW_MODELS(LCDM_dNeffCMB_dNeffBBN_etaBBN)
       BACKEND_REQ(class_get_sigma8,(class_tag),double,(double))
-     #undef FUNCTION
-  #undef CAPABILITY
-
-  #define CAPABILITY Sigma8
-     START_CAPABILITY
-     #define FUNCTION compute_Sigma8
-      START_FUNCTION(double)
-      DEPENDENCY(Omega_m, double)
-      BACKEND_REQ(class_get_sigma8,(class_tag),double,(double))
-     #undef FUNCTION
-  #undef CAPABILITY
-
-  #define CAPABILITY Omega_m
-     START_CAPABILITY
-     #define FUNCTION compute_Omega_m
-      START_FUNCTION(double)
-      ALLOW_MODELS(LCDM_dNeffCMB_dNeffBBN_etaBBN)
-      BACKEND_REQ(class_get_Omega_m,(class_tag),double,())
      #undef FUNCTION
   #undef CAPABILITY
 

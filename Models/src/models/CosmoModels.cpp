@@ -40,7 +40,7 @@
 void MODEL_NAMESPACE::LCDM_dNeffCMB_dNeffBBN_to_LCDM_dNeffCMB_dNeffBBN_etaBBN (const ModelParameters &myP, ModelParameters &targetP)
 {
   USE_MODEL_PIPE(PARENT) // get pipe for "interpret as PARENT" function
-  logger()<<"Running interpret_as_parent calculations for LCDM_dNeffCMB_dNeffBBN --> LCDM_dNeffCMB_dNeffBBN_etaBBN..."<<LogTags::info<<EOM;
+  logger()<<"Running interpret_as_parent calculations for LCDM_dNeffCMB_dNeffBBN --> LCDM_dNeffCMB_dNeffBBN_etaBBN ..."<<LogTags::info<<EOM;
 
   targetP.setValue("omega_b", myP.getValue("omega_b"));
   targetP.setValue("omega_cdm",myP.getValue("omega_cdm"));
@@ -64,7 +64,7 @@ void MODEL_NAMESPACE::LCDM_dNeffCMB_dNeffBBN_to_LCDM_dNeffCMB_dNeffBBN_etaBBN (c
 void MODEL_NAMESPACE::LCDM_dNeffCMB_to_LCDM_dNeffCMB_dNeffBBN (const ModelParameters &myP, ModelParameters &targetP)
 {
   USE_MODEL_PIPE(PARENT) // get pipe for "interpret as PARENT" function
-  logger()<<"Running interpret_as_parent calculations for LCDM_dNeffCMB --> LCDM_dNeffCMB_dNeffBBN..."<<LogTags::info<<EOM;
+  logger()<<"Running interpret_as_parent calculations for LCDM_dNeffCMB --> LCDM_dNeffCMB_dNeffBBN ..."<<LogTags::info<<EOM;
 
   targetP.setValue("omega_b", myP.getValue("omega_b"));
   targetP.setValue("omega_cdm",myP.getValue("omega_cdm"));
@@ -86,7 +86,7 @@ void MODEL_NAMESPACE::LCDM_dNeffCMB_to_LCDM_dNeffCMB_dNeffBBN (const ModelParame
 void MODEL_NAMESPACE::LCDM_ExtdNeffCMB_ExtetaBBN_to_LCDM_dNeffCMB_dNeffBBN_etaBBN (const ModelParameters &myP, ModelParameters &targetP)
 {
   USE_MODEL_PIPE(PARENT) // get pipe for "interpret as PARENT" function
-  logger()<<"Running interpret_as_parent calculations for LCDM_ExtdNeffCMB_ExtetaBBN --> LCDM_dNeffCMB_dNeffBBN_etaBBN..."<<LogTags::info<<EOM;
+  logger()<<"Running interpret_as_parent calculations for LCDM_ExtdNeffCMB_ExtetaBBN --> LCDM_dNeffCMB_dNeffBBN_etaBBN ..."<<LogTags::info<<EOM;
 
   targetP.setValue("omega_b", myP.getValue("omega_b"));
   targetP.setValue("omega_cdm",myP.getValue("omega_cdm"));
@@ -110,7 +110,7 @@ void MODEL_NAMESPACE::LCDM_ExtdNeffCMB_ExtetaBBN_to_LCDM_dNeffCMB_dNeffBBN_etaBB
 void MODEL_NAMESPACE::LCDM_to_LCDM_dNeffCMB (const ModelParameters &myP, ModelParameters &targetP)
 {
   USE_MODEL_PIPE(PARENT) // get pipe for "interpret as PARENT" function
-  logger()<<"Running interpret_as_parent calculations for LCDM --> LCDM_dNeffCMB..."<<LogTags::info<<EOM;
+  logger()<<"Running interpret_as_parent calculations for LCDM --> LCDM_dNeffCMB ..."<<LogTags::info<<EOM;
 
   targetP.setValue("omega_b", myP.getValue("omega_b"));
   targetP.setValue("omega_cdm",myP.getValue("omega_cdm"));

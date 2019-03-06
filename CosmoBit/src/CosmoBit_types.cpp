@@ -33,7 +33,7 @@ namespace Gambit
 {
   namespace CosmoBit
   {
-
+    
     BBN_container::BBN_container()
     { 
       abund_map["H2"] = 3;
@@ -169,6 +169,20 @@ namespace Gambit
 	first = false;
       }
       addEntry(key,stringified_val.str());
+    }
+
+    std::ostringstream ClassInput::print_entries_to_logger()
+    {
+      using namespace LogTags;
+      std::ostringstream log_msg;
+      log_msg << "Parameters passed to class: \n \n";
+      std::map<std::string,std::string> in_map = get_map();
+      int len_of_input = in_map.size();
+      for(auto iter=in_map.begin(); iter != in_map.end(); iter++)
+      {
+        log_msg << iter->first.c_str() << " = " << iter->second.c_str() << " \n"; // uncomment if you want class input to be printed in terminal before class call 
+      }
+      return log_msg;
     }
 
     void ClassInput::clear()
