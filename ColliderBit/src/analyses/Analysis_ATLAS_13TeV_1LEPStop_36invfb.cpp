@@ -240,7 +240,7 @@ namespace Gambit {
       ClusteringHistory& GetHistory(const FJNS::PseudoJet& jet)
       {
         auto shared_ptr = jet.user_info_shared_ptr();
-        return *dynamic_cast<const ClusteringHistory*>(shared_ptr.get());
+        return *dynamic_cast<ClusteringHistory*>(shared_ptr.get());
       }
 
       static std::vector<FJNS::PseudoJet> SortedByNConstit(std::vector<FJNS::PseudoJet> jets)
