@@ -17,6 +17,10 @@
 ///          (c.weniger@uva.nl)
 ///  \date   2015 Apr
 ///  \date   2016 Mar
+///
+///  \author Janina Renk
+///          (janina.renk@fysik.su.se)
+///  \date   2019 Mar
 //
 ///  *********************************************
 
@@ -27,7 +31,7 @@
 
 namespace Gambit
 {
-
+                    
   const double pi = 3.141592653589793238462643383279502884197;
   const double root2 = sqrt(2.0);
   const double zeta3 = 1.2020569031595942855;                   // Riemann zeta function of 3
@@ -41,20 +45,33 @@ namespace Gambit
   const double s2cm = 2.99792458e10;                            // cm per s
   const double m_planck = 1.220910e19;                          // Planck mass (GeV)
   const double m_planck_red = m_planck/sqrt(8.0*pi);            // reduced Planck mass (GeV)
-  const double atomic_mass_unit = 0.931494028;                    // atomic mass unit (GeV/c^2)
+  const double atomic_mass_unit = 0.931494028;                  // atomic mass unit (GeV/c^2)
   const double m_proton_amu = 1.00727646688;                    // proton mass (amu)
   const double m_neutron_amu = 1.0086649156;                    // neutron mass (amu)
   const double m_proton = m_proton_amu * atomic_mass_unit;      // proton mass (GeV/c^2)
   const double m_neutron = m_neutron_amu * atomic_mass_unit;    // neutron mass (GeV/c^2)
   const double m_electron = 0.5109989461e-3;                    // electron mass (GeV/c^2)
-  const double Gn = 6.67428e-8;                                 // newton's constant in cm^3.g^-1.s^-2
-  const double hc = 1.23984193*pow(10,-4);                      // Planck const. x speed of light in eV cm
-  const double kb = 8.617330350*pow(10,-5);                     // Boltzmann constant in eV/K
-  const double m_proton_g = 1.67262189821*pow(10,-24);          // proton mass in g
-  const double Mpc = 969394202136*pow(10,11)/pi;                // Mpc in m
-  const double K_to_GeV = 8.617330637338339*pow(10,-5);         // conversion factor T(10**9 K) * K_to_GeV = T(GeV) */
   const double alpha_EM = 7.2973525664e-3;                      // fine structure constant
-  const double T_CMB = 2.7255;                                  // present day CMB temperature (K)
+  
+  // values from Particle Data Group 2018 (http://pdg.lbl.gov/2018/reviews/rpp2018-rev-phys-constants.pdf)
+  const double _c_SI_ = s2cm/100;                               // speed of light in m/s
+  const double _eV_to_J_ = 1.6021766208e-19;                    // electron charge in C
+  const double _Mpc_SI_ = 969394202136*pow(10,11)/pi;           // Mpc in m
+  
+  const double _m_proton_SI_ = m_proton*1e9*_eV_to_J_/_c_SI_/_c_SI_; // proton mass in kg
+  const double _m_proton_g_ = _m_proton_SI_*1000;               // proton mass in g
+
+  const double _GN_cgs_ = 6.67408e-8;                           // Newton's constant in cm^3.g^-1.s^-2
+  const double _GN_SI_ = _GN_cgs_/1e3;                          // Newton's constant in m^3.kg^-1.s^-2
+  
+  const double _kB_SI_ = 1.38064852e-23;                        // Boltzmann constant in  Kg/K^4/s^3
+  const double _kB_eV_over_K_ = _kB_SI_/_eV_to_J_;              // Boltzmann constant in eV/K
+  
+  const double _hP_SI_ = 6.626070040e-34;                       // Planck const. in Js
+  const double _hP_eVs_ = _hP_SI_/_eV_to_J_;                    // Planck const. in eVs
+  const double _hc_eVcm_ =_hP_eVs_*s2cm;                        // Planck const. x speed of light in eV cm
+
+  const double _sigmaB_SI_ = 2*pow(pi,5)*pow(_kB_SI_,4)/(15*pow(_hP_SI_,3)*_c_SI_*_c_SI_); // Stefan-Boltzman constant in W/m^2/K^4 = Kg/K^4/s^3
 
   /**
      @brief Thomson limit of \f$\alpha_e\f$ in OS scheme from
