@@ -4168,8 +4168,14 @@ class_get_Dl: |
 class_get_Hz: |
     Returns Hubble parameter at given z.
 
+class_get_rs: |
+    Returns comoving sound horizon at baryon drag.
+
 class_get_sigma8: |
     Returns sigma8 computed by class.
+
+class_get_Omega_m: |
+    Returns Omega0_m (matter energy density today) computed by class. (Mainly for test purposes, you can use gambit internal capability Omega0_m, Omega0_g..).
 
 class_spectra_sigma: |
     Get spectra from class needed to calculate sigma8.
@@ -4207,8 +4213,38 @@ DA_alreadyCalculated: |
 T_cmb: |
   Sets CMB temperature (to 2.7255 if not specified in yaml file via runOption).
 
-eta:  |
-  Calculate baryon to photon ratio eta from Omega_b and T_cmb.
+n0_g: |
+  Compute the number density of photons today per cm^3 from CMB temperature.
+
+eta0:  |
+  Calculate baryon to photon ratio today eta from Omega_b and T_cmb.
+
+etaCMB:  |
+  Calculate baryon to photon ratio etaCMB at CMB release.
+
+etaBBN:  |
+  Calculate or set (depending on model) baryon to photon ratio etaBBN at BBN.
+
+Omega0_g: |
+  Energy density of photons today.
+
+Omega0_ur: |
+  Energy density of ultra-relativistic species today; includes contribution from ultra-relativistic species (Neutrinos + potential extra components).
+
+Omega0_r: |
+  Energy density of radiation today; sum of Omega0_g and Omega0_ur).
+
+Omega0_m: |
+  Energy density of matter today; sum of Omega0_b, Omega0_cdm and potential Omega0_ncdm.
+
+Omega0_cdm: |
+  Energy density of cold dark matter today.
+
+Omega0_ncdm: |
+  Energy density of non-CDM components today, e.g. contribution from non-relativistic massive neutrinos.
+
+Omega0_b: |
+  Energy density of baryons today.
 
 Sigma8:  |
   Returns sigma8.
@@ -4231,16 +4267,32 @@ LCDMtensor_parameters: |
    in addition to the above, r_tensor, amplitude of
    tensor power spectrum over scalar power spectrum.
 
-LCDM_dNeff_Smu_parameters: |
+LCDM_dNeffCMB_parameters: |
    in addition to LCDM_parameters:
-   neutrino mass sum (three massive neutrinos with degenerate masses)
-   dNeff, extra relativistic degrees of freedom (Neff=3.064+Neff)
+   dNeff, extra relativistic degrees of freedom (Neff=3.064+dNeff)
 
-LCDM_dNeff_Smu_etaBBN_parameters: |
+LCDM_dNeffCMB_dNeffBBN_parameters: |
    in addition to LCDM_parameters:
-   neutrino mass sum (three massive neutrinos with degenerate masses)
-   dNeff, extra relativistic degrees of freedom (Neff=3.064+Neff)
+   dNeff, extra relativistic degrees of freedom @CMB release (Neff=3.064+dNeff)
+   dNeffBBN, extra relativistic degrees of freedom @BBN (Neff=3.064+dNeffBBN)
+
+LCDM_dNeffCMB_dNeffBBN_etaBBN_parameters: |
+   in addition to LCDM_parameters:
+   dNeff, extra relativistic degrees of freedom @CMB release (Neff=3.064+dNeff)
+   dNeffBBN, extra relativistic degrees of freedom @BBN (Neff=3.064+dNeffBBN)
    etaBBN, baryon to photon ratio at BBN (eta at CMB set by omega_b)
+
+LCDM_ExtdNeffCMB_ExtetaBBN_parameters: |
+   as LCDM_parameters but with two additional 'externally' derived parameters. I.e. the parameters are not free in a cosmological sense but can rather be derived from other sources. E.g. the presence of an extra light particle, like an ALP. 
+   dNeff, extra relativistic degrees of freedom @CMB release (Neff=3.064+dNeff), can be called via capability ExtdNeffCMB, derived in external_dNeff_etaBBN for the according considered model. 
+   etaBBN, baryon to photon ratio at BBN (eta at CMB set by omega_b), can be called via capability etaBBN computed by a function for the according considered model; derived with dNeff in capability external_dNeff_etaBBN.
+
+ExtNeffCMB: |
+   Capability to set or compute non-standard values of dNeff at CMB release. E.g. needed for the CosmoALP model. 
+
+external_dNeff_etaBBN: |
+   Compute dNeff @CMB and etaBBN for non-standard models. E.g. needed for the CosmoALP model. 
+
 
 inf_SR1quad_LCDMt_parameters: |
    omega_b, baryon density parameter.
@@ -4277,6 +4329,9 @@ inf_1naturalInf_LCDMt_parameters: |
 
 class_set_parameter: |
    Gathers all input parameters to  run Class.
+
+cosmo_nuisance_params_parameters: |
+    Cosmological nuisance parameters (besides the ones entering the Planck likelihoods).
 
 compute_Planck_lowp_TT_loglike: |
    function computes the planck log-likelihood for a  given

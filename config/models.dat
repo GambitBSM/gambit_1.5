@@ -506,22 +506,10 @@ LCDMtensor: |
    tau_reio            - reionization optical depth
    r                   - ratio of tensor primordial power to curvature power
 
-LCDM_dNeff_Smu: |
 
-   The standard Lambda-CDM model with two additional free paramters: the number of effective relativistic degrees of freedom, Neff, and the sum of the neutrino masses. In this model three massive neutrino species with degenerate mass are assumed.
+LCDM_dNeffCMB_dNeffBBN_etaBBN: |
 
-   omega_b             - baryon density parameter
-   omega_cdm           - dark matter density parameter
-   H0                  - Hubble constant
-   ln10A_s             - primordial curvature fluctuation amplitude
-   n_s                 - parametrises the primordial scale dependence.
-   tau_reio            - reionization optical depth
-   dNeff               - additional relativistic degrees of freedom (Neff = 3.046+dNeff)
-   Smu                 - sum of neutrino masses 
-
-LCDM_dNeff_Smu_etaBBN: |
-
-   The standard Lambda-CDM model with three additional free paramters: the number of effective relativistic degrees of freedom, Neff, the sum of the neutrino masses and the baryon to photon ration at BBN. In this model three massive neutrino species with degenerate mass are assumed.
+   The standard Lambda-CDM model with three additional free parameters: the number of effective relativistic degrees of freedom today, dNeff, and in the early universe during the epoch of BBN, eta_BBN. as well as the baryon to photon ration at BBN, eta_BBN. Neutrino masses handling see below. 
 
    omega_b             - baryon density parameter
    omega_cdm           - dark matter density parameter
@@ -529,11 +517,40 @@ LCDM_dNeff_Smu_etaBBN: |
    ln10A_s             - primordial curvature fluctuation amplitude
    n_s                 - parametrises the primordial scale dependence.
    tau_reio            - reionization optical depth
-   dNeff               - additional relativistic degrees of freedom (Neff = 3.046+dNeff)
-   Smu                 - sum of neutrino masses 
+   dNeff               - additional relativistic degrees of freedom today (Neff = dNu+dNeff, i.e. sum of contribution from massive neutrinos and extra component).
+   dNeff_BBN           - additional relativistic degrees of freedom in the early universe (Neff = 3.046+dNeff)
    etaBBN              - baryon to photon ratio at BBN (eta at CMB set by omega_b)
 
+   Neutrino masses:
+   default: 1 massive neutrino with m_nu = 0.06eV (as in the Planck 2015/2018 'baseline' model)
+   if model 'StandardModel_numass_single' is scanned as well: one massive neutrino with m_nu = mNu.
+   if model 'StandardModel_numass_degenerate' is scanned as well: three massive neutrinos with m_nu = Smu/3. each. 
 
+LCDM_dNeffCMB_dNeffBBN: |
+   
+   Child model of LCDM_dNeffCMB_dNeffBBN_etaBBN model. Parameters are as in parent model but the model parameter etaBBN is derived. It is assumed to be equal to the baryon-to-photon ration at CMB with SM model assumptions, i.e. etaBBN = etaCMB = eta0.
+
+LCDM_dNeffCMB: |
+   
+   Child model of LCDM_dNeffCMB_dNeffBBN model. Parameters are as in parent model but the model parameter dNeff_BBN is derived. It is assumed to be equal to the value at CMB release, i.e. dNeffBBN = dNeff.
+
+LCDM_dNeffCMB: |
+   
+   Child model of LCDM_dNeffCMB model. Parameters are as in parent model but the model parameter dNeffCMB is set to 0 -> only the standard contribution of neutrinos to (Neff = 3.046) is considered. 
+
+LCDM_ExtdNeffCMB_ExtetaBBN: |
+   
+   Child model of LCDM_dNeffCMB_dNeffBBN_etaBBN model. Parameters are as in parent model but the model parameter etaBBN and dNeff_BBN and dNeff are derived (see below). Use case e.g. modification of dNeff @CMB release and eta_BBN through the presence of an ultra-relativistic species like an Axion Like Particle (ALP -> combination of this cosmology model and the CosmoALP model). 
+
+   dNeff_BBN = 0
+   eta_BBN set by capability etaBBN with function valid for this model
+   dNeff set by capability ExtdNeffCMB with function valid for this model
+
+cosmo_nuisance_params: |
+   Cosmological nuisance parameters (besides the ones entering the Planck likelihood, these are stored in Planck_XXX). Parameters:
+
+   M_AbsMag_SNe         - absolute magnitude of Type Ia Supernova
+  
 Planck_TTTEEE: |
    Planck likelihood for high-l TT,TE,EE-spectra with 34 nuissance parameter.
 
