@@ -44,12 +44,6 @@
     DEPENDENCY(EM_spectrum, Spectrum)
     #undef FUNCTION
 
-    #define FUNCTION getPythia_EMFileReader
-    START_FUNCTION(ColliderPythia_EM_defaultversion)
-    NEEDS_MANAGER(RunMC, MCLoopInfo)
-    NEEDS_CLASSES_FROM(Pythia_EM, default)
-    #undef FUNCTION
-
     #define FUNCTION getPythia_EMAsBase
     START_FUNCTION(const BaseCollider*)
     NEEDS_MANAGER(RunMC, MCLoopInfo)

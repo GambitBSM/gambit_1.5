@@ -27,7 +27,6 @@ namespace Gambit
 
     // Get Monte Carlo event generator
     GET_SPECIFIC_PYTHIA(getPythia_EM, Pythia_EM_default, EM_spectrum, _EM, NOT_SUSY)
-    GET_SPECIFIC_PYTHIA_FROM_SLHA(getPythia_EMFileReader, Pythia_EM_default, _EM)
     GET_PYTHIA_AS_BASE_COLLIDER(getPythia_EMAsBase)
 
     // Run event generator

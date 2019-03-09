@@ -44,12 +44,6 @@
     MODEL_CONDITIONAL_DEPENDENCY(MSSM_spectrum, Spectrum, MSSM63atQ, MSSM63atMGUT)
     #undef FUNCTION
 
-    #define FUNCTION getPythiaFileReader
-    START_FUNCTION(ColliderPythia_defaultversion)
-    NEEDS_MANAGER(RunMC, MCLoopInfo)
-    NEEDS_CLASSES_FROM(Pythia, default)
-    #undef FUNCTION
-
     #define FUNCTION getPythiaAsBase
     START_FUNCTION(const BaseCollider*)
     NEEDS_MANAGER(RunMC, MCLoopInfo)
