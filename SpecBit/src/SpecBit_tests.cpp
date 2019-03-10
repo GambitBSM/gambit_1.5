@@ -413,7 +413,6 @@ namespace Gambit
            {}
 
            private:
-             std::ostringstream& report;
              const Spectrum& fullspectrum;
              const SubSpectrum& spec;
              SLHAea::Coll slhaea;
