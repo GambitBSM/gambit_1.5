@@ -191,14 +191,12 @@ class my_Nelder_Mead {
   int d;
   int Ntry;      // N cycles of Nelder-Mead algorithm
   double eps;
-  double Deltastep; // step to take when restarting after finding a new minimum
-  int n;
 
  public:
   my_func *f;
   my_simplex simplex;
   bool convergeYes; // set to True when algorithm has converged
-  my_Nelder_Mead(int, double, double, double, int, double, double, int, my_func *);
+  my_Nelder_Mead(int, double, double, double, int, double, my_func *);
   bool one_cycle(my_simplex *);
   bool find_global_min(double xin[DMAX*(DMAX+1)]);
   double yfinal;
@@ -601,7 +599,7 @@ void my_simplex::print_all()
 }
 
 
-my_Nelder_Mead::my_Nelder_Mead(int dd, double alpha, double beta, double gamma, int NNtry, double eeps, double DDeltastep, int nn, my_func *ff): d(dd), Ntry(NNtry), eps(eeps), Deltastep(DDeltastep), n(nn), f(ff), simplex(dd, alpha, beta, gamma, f){}
+my_Nelder_Mead::my_Nelder_Mead(int dd, double alpha, double beta, double gamma, int NNtry, double eeps, my_func *ff): d(dd), Ntry(NNtry), eps(eeps), f(ff), simplex(dd, alpha, beta, gamma, f){}
 
 bool my_Nelder_Mead::one_cycle(my_simplex *s)
 {
@@ -703,7 +701,7 @@ minimum  */
       //std::cout << std::endl << std::endl << std::endl;
       // double yavg=simplex.get_yavg();
       //  double sigma=simplex.get_sigma();
-      if (abs(ynewmax -ynewmin)/(abs(ynewmax)+abs(ynewmin)+eps) < eps)
+      if (std::abs(ynewmax -ynewmin)/(std::abs(ynewmax)+std::abs(ynewmin)+eps) < eps)
       {
 	    convergeYes=true;
 
@@ -790,8 +788,8 @@ double topnesscompute(double pb1[4], double pl[4], double MET[4], double sigmat,
 //  my_func topstat2(pb2,pb1,pl,MET,sigmat,sigmaW,1.0); // other combination
 
   // initialize topness computation
-  my_Nelder_Mead my_check1(d,alpha,beta,gamma, Ntry, eps, Deltastep, n, &topstat1);
-//  my_Nelder_Mead my_check2(d,alpha,beta,gamma, Ntry, eps, Deltastep, n, &topstat2);
+  my_Nelder_Mead my_check1(d,alpha,beta,gamma, Ntry, eps, &topstat1);
+//  my_Nelder_Mead my_check2(d,alpha,beta,gamma, Ntry, eps, &topstat2);
   double yl;
   // begin loop over Nattempts
   for (k=0; k<Nattempts; k++)

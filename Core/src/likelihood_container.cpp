@@ -25,9 +25,9 @@
 ///  *********************************************
 
 #include "gambit/Core/likelihood_container.hpp"
-#include "gambit/Utils/mpiwrapper.hpp"
 #include "gambit/Utils/signal_helpers.hpp"
 #include "gambit/Utils/signal_handling.hpp"
+#include "gambit/Utils/mpiwrapper.hpp"
 
 //#define CORE_DEBUG
 
@@ -39,17 +39,10 @@ namespace Gambit
   /// Constructor
   Likelihood_Container::Likelihood_Container(const std::map<str, primary_model_functor *> &functorMap,
    DRes::DependencyResolver &dependencyResolver, IniParser::IniFile &iniFile,
-   const str &purpose, Printers::BaseBasePrinter& printer
-  #ifdef WITH_MPI
-    , GMPI::Comm& comm
-  #endif
-  )
+   const str &purpose, Printers::BaseBasePrinter& printer)
   : dependencyResolver (dependencyResolver),
     printer            (printer),
     functorMap         (functorMap),
-    #ifdef WITH_MPI
-      errorComm        (comm),
-    #endif
     min_valid_lnlike        (iniFile.getValue<double>("likelihood", "model_invalid_for_lnlike_below")),
     alt_min_valid_lnlike    (iniFile.getValueOrDef<double>(0.5*min_valid_lnlike, "likelihood", "model_invalid_for_lnlike_below_alt")),
     active_min_valid_lnlike (min_valid_lnlike), // can be switched to the alternate value by the scanner
@@ -321,8 +314,8 @@ namespace Gambit
       {
         int rank = printer.getRank();
         // Convert time counts to doubles (had weird problem with long long ints on some systems)
-        double d_runtime   = std::chrono::duration_cast<ms>(runtimeL).count(); 
-        double d_interloop = std::chrono::duration_cast<ms>(interloop_time).count();     
+        double d_runtime   = std::chrono::duration_cast<ms>(runtimeL).count();
+        double d_interloop = std::chrono::duration_cast<ms>(interloop_time).count();
         double d_total     = std::chrono::duration_cast<ms>(true_total_loop_time).count();
         printer.print(d_runtime,   intralooptime_label, intraloopID, rank, getPtID());
         printer.print(d_interloop, interlooptime_label, interloopID, rank, getPtID());

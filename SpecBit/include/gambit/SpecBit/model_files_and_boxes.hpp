@@ -94,29 +94,6 @@
             scales.LowScale  = spectrum_generator.get_low_scale();                     \
           }                                                                            \
                                                                                        \
-          /* Constructor 2 (mostly for testing; leave input with default values) */    \
-          CAT_3(MODELNAME,_,interface) (const Model& modelIN)                          \
-          : model(modelIN)                                                             \
-          , oneset()                                                                   \
-          , input()                                                                    \
-          , problems(CAT_3(MODELNAME,_,info)::particle_names)                          \
-          , scales()                                                                   \
-          {}                                                                           \
-                                                                                       \
-          /* Make sure the slhaio object is up to date in preparation for writing
-             output */                                                                 \
-          void fill_slhaio(SlhaIo& slhaio) const                                      \
-          {                                                                            \
-             slhaio.set_spinfo(problems);                                             \
-             slhaio.set_sminputs(oneset);                                             \
-             slhaio.set_minpar(input);                                                \
-             slhaio.set_extpar(input);                                                \
-             if (!problems.have_problem()) {                                           \
-                slhaio.set_spectrum(model);                                           \
-                slhaio.set_extra(model,scales);                                       \
-             }                                                                         \
-          }                                                                            \
-                                                                                       \
       };                                                                               \
       /* I think that there is a need to ensure that these templates actually get
          instantiated; was getting weird segfaults accessing the (virtual) getters
@@ -181,7 +158,7 @@
 #include "gambit/SpecBit/flexiblesusy_include_automater.hpp"// Automatically includes necessary MSSMatMGUTEFTHiggs model headers etc.
 #undef MODELNAME
 /// @}
-   
+
 #define MODELNAME MSSMatMGUTEFTHiggs_mAmu
 #include "gambit/SpecBit/flexiblesusy_include_automater.hpp"// Automatically includes necessary MSSMatMGUTEFTHiggs_mAmu model headers etc.
 #undef MODELNAME

@@ -64,14 +64,13 @@ endforeach()
 # Set the project name, enabling C, C++ and Fortran support
 project(gambit C CXX Fortran)
 
-# Disable clang support
-if (CMAKE_CXX_COMPILER_ID MATCHES "Clang")
-  message(FATAL_ERROR "\nYou seem to have selected the Clang compiler.  Beware that if you are using a mac, Clang may be your default compiler even though you might think it is gcc.  You can thank Apple for that, not GAMBIT/cmake.  \nGAMBIT does not support the Clang compiler. Please choose another compiler.")
-endif()
-
-# Make sure the user hasn't accidentally passed gcc instead of g++.
-if (CMAKE_CXX_COMPILER MATCHES "gcc$")
-  message(FATAL_ERROR "\nYou have set CMAKE_CXX_COMPILER to gcc.  I don't think that means what you think it means.  Do you really want to compile C++ with gcc rather than g++?")
+# Make sure the user hasn't accidentally set the C++ compiler to the C compiler.
+if (CMAKE_CXX_COMPILER MATCHES "gcc.*$")
+  message(FATAL_ERROR "\nYou have set CMAKE_CXX_COMPILER to gcc.  Did you mean g++?")
+elseif (CMAKE_CXX_COMPILER MATCHES "clang($|-.*)")
+  message(FATAL_ERROR "\nYou have set CMAKE_CXX_COMPILER to clang.  Did you mean clang++?")
+elseif (CMAKE_CXX_COMPILER MATCHES "icc.*$")
+  message(FATAL_ERROR "\nYou have set CMAKE_CXX_COMPILER to icc.  Did you mean icpc?")
 endif()
 
 # Use ccache to speed up re-compiling if it is available
@@ -264,6 +263,15 @@ if(Boost_FOUND)
   include_directories("${Boost_INCLUDE_DIR}")
 else()
   message(FATAL_ERROR "GAMBIT requires Boost v1.41 or greater.\nPlease install a suitable version of Boost and rerun cmake.")
+endif()
+
+# Fix Boost < 1.55 for Clang
+if("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
+  if(${CMAKE_VERSION} VERSION_LESS "3.12.0")
+    add_definitions(-DBOOST_PP_VARIADICS=1)
+  else()
+    add_compile_definitions(BOOST_PP_VARIADICS=1)
+  endif()
 endif()
 
 # Check for Eigen

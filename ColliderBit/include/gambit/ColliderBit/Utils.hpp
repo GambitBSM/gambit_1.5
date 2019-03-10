@@ -174,16 +174,6 @@ namespace Gambit {
         return false; // No tag if outside lookup range... be careful!
       }
     }
-    /// Alias
-    inline bool has_tag(double eta, double pt, const HEPUtils::BinnedFn2D<double>& effmap) {
-      return has_tag(eta, pt, effmap);
-    }
-
-    /// Randomly get a tag result (can be anything) from a 2D |eta|-pT efficiency map
-    inline bool has_tag_etapt(const HEPUtils::Jet* j, const HEPUtils::BinnedFn2D<double>& effmap) {
-      return has_tag(j->eta(), j->pT(), effmap);
-    }
-
 
     template <typename NUM1, typename NUM2>
     inline size_t binIndex(NUM1 val, const std::vector<NUM2>& binedges, bool allow_overflow=false) {
