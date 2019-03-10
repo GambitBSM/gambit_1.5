@@ -44,11 +44,6 @@ if(EIGEN3_FOUND AND EIGEN3_VERSION VERSION_LESS 3.3.0)
   set_compiler_warning("no-ignored-attributes" CMAKE_CXX_FLAGS)
 endif()
 
-CHECK_CXX_COMPILER_FLAG("-Wno-deprecated-register" CXX_SUPPORTS_WNO_SELF_ASSIGN)
-if (CXX_SUPPORTS_WNO_SELF_ASSIGN)
-  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-deprecated-register -Wno-deprecated-declarations")
-endif()
-
 # Suppress additional warnings when using clang and ccache
 if("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
 	if (CMAKE_CXX_COMPILER MATCHES "ccache")
