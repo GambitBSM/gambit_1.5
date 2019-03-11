@@ -407,7 +407,7 @@
                                                                                \
       /* Resolve backend requirement BE_REQ in function TAG */                 \
       template <typename BE_REQ, typename TAG>                                 \
-      void resolve_backendreq(functor* be_functor)                             \
+      void resolve_backendreq(functor*)                                        \
       {                                                                        \
         cout<<STRINGIFY(MODULE)<<" does not"<<endl;                            \
         cout<<"have this backend requirement for this function.";              \

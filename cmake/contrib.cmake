@@ -131,7 +131,7 @@ if(";${GAMBIT_BITS};" MATCHES ";SpecBit;")
   set (EXCLUDE_FLEXIBLESUSY FALSE)
 
   # Always use -O2 for flexiblesusy to ensure fast spectrum generation.
-  set(FS_CXX_FLAGS "${BACKEND_CXX_FLAGS} -Wno-missing-field-initializers")
+  set(FS_CXX_FLAGS "${BACKEND_CXX_FLAGS}")
   set(FS_Fortran_FLAGS "${BACKEND_Fortran_FLAGS}")
   if (CMAKE_BUILD_TYPE STREQUAL "Debug")
     set(FS_CXX_FLAGS "${FS_CXX_FLAGS} -O2")
@@ -148,12 +148,18 @@ if(";${GAMBIT_BITS};" MATCHES ";SpecBit;")
   endif()
   set(flexiblesusy_LDFLAGS ${flexiblesusy_LDFLAGS} ${flexiblesusy_compilerlibs})
 
-  # Silence the deprecated-declarations warnings comming from Eigen3
+  # Silence the deprecated-declarations warnings coming from Eigen3
   set_compiler_warning("no-deprecated-declarations" FS_CXX_FLAGS)
 
-  # Silence the unused parameter and variable warnings comming from FlexibleSUSY
+  # Silence the mass of compiler warnings coming from FlexibleSUSY
   set_compiler_warning("no-unused-parameter" FS_CXX_FLAGS)
   set_compiler_warning("no-unused-variable" FS_CXX_FLAGS)
+  set_compiler_warning("no-unused-private-field" FS_CXX_FLAGS)
+  set_compiler_warning("no-unused-lambda-capture" FS_CXX_FLAGS)
+  set_compiler_warning("no-missing-field-initializers" FS_CXX_FLAGS)
+  set_compiler_warning("no-sign-compare" FS_CXX_FLAGS)
+  set_compiler_warning("no-mismatched-tags" FS_CXX_FLAGS)
+  set_compiler_warning("no-unneeded-internal-declaration" FS_CXX_FLAGS)
 
   # Construct the command to create the shared library
   set(FS_SO_LINK_COMMAND "${CMAKE_CXX_COMPILER} ${CMAKE_SHARED_LINKER_FLAGS} -shared -o")

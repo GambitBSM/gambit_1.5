@@ -165,11 +165,7 @@ int main(int argc, char* argv[])
       if (not Core().show_runorder)
       {
         //Define the likelihood container object for the scanner
-        Likelihood_Container_Factory factory(Core(), dependencyResolver, iniFile, *(printerManager.printerptr)
-          #ifdef WITH_MPI
-            , errorComm
-          #endif
-        );
+        Likelihood_Container_Factory factory(Core(), dependencyResolver, iniFile, *(printerManager.printerptr));
 
         //Make scanner yaml node
         YAML::Node scanner_node;
