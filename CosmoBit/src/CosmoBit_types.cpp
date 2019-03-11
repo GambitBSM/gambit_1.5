@@ -171,7 +171,7 @@ namespace Gambit
       addEntry(key,stringified_val.str());
     }
 
-    std::ostringstream ClassInput::print_entries_to_logger()
+    std::string ClassInput::print_entries_to_logger()
     {
       using namespace LogTags;
       std::ostringstream log_msg;
@@ -182,7 +182,7 @@ namespace Gambit
       {
         log_msg << iter->first.c_str() << " = " << iter->second.c_str() << " \n"; // uncomment if you want class input to be printed in terminal before class call 
       }
-      return log_msg;
+      return log_msg.str();
     }
 
     void ClassInput::clear()

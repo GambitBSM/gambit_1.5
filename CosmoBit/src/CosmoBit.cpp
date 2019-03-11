@@ -368,8 +368,8 @@ namespace Gambit
         }
       }
 
-      std::ostringstream log_msg = cosmo.input.print_entries_to_logger(); // print all parameters and their values that are passed to class in debug.log
-      logger() << LogTags::debug << log_msg.str() << EOM;
+      std::string log_msg = cosmo.input.print_entries_to_logger(); // print all parameters and their values that are passed to class in debug.log
+      logger() << LogTags::debug << log_msg << EOM;
     }
 
     void class_set_parameter_LCDM_SingletDM(Class_container& cosmo)

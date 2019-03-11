@@ -124,13 +124,13 @@ namespace Gambit
         void addEntry(std::string key,int val);
         void addEntry(std::string key, std::vector<double> val);
         void addEntry(std::string key, std::vector<int> val);
-        std::ostringstream print_entries_to_logger();
+        std::string print_entries_to_logger();
 
         void clear();
         std::map<std::string,std::string> get_map();
 
       private:
-	std::map<std::string,std::string> input_list;
+        std::map<std::string,std::string> input_list;
     };
 
     // Container for the structs of Class
