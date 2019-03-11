@@ -29,8 +29,10 @@ using Gambit::type_index;
 #ifndef SCANNER_PLUGIN_MACROS_HPP
 #define SCANNER_PLUGIN_MACROS_HPP
 
-// Don't warn about usage of extern "C" even when the types involved are C++ (we just use it to avoid name-mangling)
-#pragma clang diagnostic ignored "-Wreturn-type-c-linkage"
+// Tell clang not to warn about usage of extern "C" even when the types involved are C++ (we just use it to avoid name-mangling)
+#ifdef __clang__
+  #pragma clang diagnostic ignored "-Wreturn-type-c-linkage"
+#endif
 
 /// \name gambit plugin macros
 /// The main macros to be used by the user.
