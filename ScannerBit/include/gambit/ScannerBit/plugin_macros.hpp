@@ -14,7 +14,7 @@
 ///  \date 2014 Feb
 ///
 ///  \author Pat Scott
-///          (p.scott@imperial.ac.uk)   
+///          (p.scott@imperial.ac.uk)
 ///  \date 2014 Dec
 ///
 ///  *********************************************
@@ -29,7 +29,7 @@ using Gambit::type_index;
 #ifndef SCANNER_PLUGIN_MACROS_HPP
 #define SCANNER_PLUGIN_MACROS_HPP
 
-/// \name gambit plugin macros 
+/// \name gambit plugin macros
 /// The main macros to be used by the user.
 /// @{
 /// Makes an abstract type of type "name" available to the plugin interface.
@@ -276,8 +276,8 @@ namespace __gambit_plugin_ ## plug_name ## __t__ ## plug_type ## __v__ ## plug_v
                     static interface <T> reg;                                                               \
             };                                                                                              \
         }                                                                                                   \
-                                                                                                            \
-        extern "C" const std::map<type_index, void *> &                                                     \
+        /* FIXME extern "C"? */                                                                             \
+        extern const std::map<type_index, void *> &                                                         \
             __gambit_plugin_pluginInit_ ## plug_name ## __t__ ## plug_type ## __v__ ## plug_version ## __   \
             (const std::string *tag, const YAML::Node *node, Gambit::Scanner::printer_interface &printer,   \
                                     Gambit::Scanner::prior_interface &prior, std::vector<void *> *input )   \
@@ -310,7 +310,8 @@ namespace __gambit_plugin_ ## plug_name ## __t__ ## plug_type ## __v__ ## plug_v
             return myData.plugin_mains;                                                                     \
         }                                                                                                   \
                                                                                                             \
-        extern "C" void *                                                                                   \
+        /* FIXME extern "C"? */                                                                             \
+        extern void *                                                                                       \
             __gambit_plugin_getMember_ ## plug_name ## __t__ ## plug_type ## __v__ ## plug_version ## __    \
                                                                                             (std::string in)\
         {                                                                                                   \
@@ -408,7 +409,7 @@ namespace __gambit_plugin_ ## plug_name ## __t__ ## plug_type ## __v__ ## plug_v
 
 #define GAMBIT_PLUGIN_1(plugin_name)                                                                        \
         _GAMBIT_PLUGIN_(plug_name,, __PLUGIN_no_version)                                                    \
-        
+
 #define GAMBIT_PLUGIN_2(plugin_name, plug_type)                                                             \
         _GAMBIT_PLUGIN_(plug_name, plug_type, __PLUGIN__no_version)                                         \
 
@@ -443,5 +444,5 @@ GAMBIT_PLUGIN(__VA_ARGS__)                                                      
     setup                                                                                                   \
 }                                                                                                           \
 __GAMBIT_PLUGIN_NAMESPACE__(__VA_ARGS__)                                                                    \
-        
+
 #endif
