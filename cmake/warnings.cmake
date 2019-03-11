@@ -43,6 +43,7 @@ set_compiler_warning("no-misleading-indentation" CMAKE_CXX_FLAGS)
 if(EIGEN3_FOUND AND EIGEN3_VERSION VERSION_LESS 3.3.0)
   set_compiler_warning("no-ignored-attributes" CMAKE_CXX_FLAGS)
   set_compiler_warning("no-deprecated-register" CMAKE_CXX_FLAGS)
+  set_compiler_warning("no-deprecated-declarations" CMAKE_CXX_FLAGS)
 endif()
 
 # Suppress additional warnings when using clang and ccache
