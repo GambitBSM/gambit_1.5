@@ -29,6 +29,9 @@ using Gambit::type_index;
 #ifndef SCANNER_PLUGIN_MACROS_HPP
 #define SCANNER_PLUGIN_MACROS_HPP
 
+// Don't warn about usage of extern "C" even when the types involved are C++ (we just use it to avoid name-mangling)
+#pragma clang diagnostic ignored "-Wreturn-type-c-linkage"
+
 /// \name gambit plugin macros
 /// The main macros to be used by the user.
 /// @{
@@ -276,8 +279,8 @@ namespace __gambit_plugin_ ## plug_name ## __t__ ## plug_type ## __v__ ## plug_v
                     static interface <T> reg;                                                               \
             };                                                                                              \
         }                                                                                                   \
-        /* FIXME extern "C"? */                                                                             \
-        extern const std::map<type_index, void *> &                                                         \
+                                                                                                            \
+        extern "C" const std::map<type_index, void *> &                                                     \
             __gambit_plugin_pluginInit_ ## plug_name ## __t__ ## plug_type ## __v__ ## plug_version ## __   \
             (const std::string *tag, const YAML::Node *node, Gambit::Scanner::printer_interface &printer,   \
                                     Gambit::Scanner::prior_interface &prior, std::vector<void *> *input )   \
@@ -310,8 +313,7 @@ namespace __gambit_plugin_ ## plug_name ## __t__ ## plug_type ## __v__ ## plug_v
             return myData.plugin_mains;                                                                     \
         }                                                                                                   \
                                                                                                             \
-        /* FIXME extern "C"? */                                                                             \
-        extern void *                                                                                       \
+        extern "C" void *                                                                                   \
             __gambit_plugin_getMember_ ## plug_name ## __t__ ## plug_type ## __v__ ## plug_version ## __    \
                                                                                             (std::string in)\
         {                                                                                                   \
