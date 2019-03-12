@@ -188,24 +188,6 @@ namespace Gambit
       spectrum.spec_ph.resize(1,BR_ph*2e9);
     }
 
-    void DM_mass_ToyModel(double& result)
-    {
-      using namespace Pipes::DM_mass_ToyModel;
-      result = *Param["mass"];
-    }
-
-    void lifetime_ToyModel(double& result)
-    {
-      using namespace Pipes::lifetime_ToyModel;
-      result = *Param["lifetime"];
-    }
-
-    void DM_fraction_ToyModel(double& result)
-    {
-      using namespace Pipes::DM_fraction_ToyModel;
-      result = *Param["fraction"];
-    }
-
     void energy_injection_efficiency_func(DarkAges::fz_table& result)
     {
       using namespace Pipes::energy_injection_efficiency_func;

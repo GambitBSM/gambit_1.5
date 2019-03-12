@@ -47,30 +47,6 @@ START_MODULE
     #undef FUNCTION
   #undef CAPABILITY
 
-  #define CAPABILITY DM_mass
-  START_CAPABILITY
-    #define FUNCTION DM_mass_ToyModel
-    START_FUNCTION(double)
-    ALLOW_MODELS(TestDecayingDM)
-    #undef FUNCTION
-  #undef CAPABILITY
-
-  #define CAPABILITY DM_fraction
-  START_CAPABILITY
-    #define FUNCTION DM_fraction_ToyModel
-    START_FUNCTION(double)
-    ALLOW_MODELS(TestDecayingDM)
-    #undef FUNCTION
-  #undef CAPABILITY
-
-  #define CAPABILITY lifetime
-  START_CAPABILITY
-    #define FUNCTION lifetime_ToyModel
-    START_FUNCTION(double)
-    ALLOW_MODELS(TestDecayingDM)
-    #undef FUNCTION
-  #undef CAPABILITY
-
   #define CAPABILITY energy_injection_efficiency
   START_CAPABILITY
     #define FUNCTION energy_injection_efficiency_func
