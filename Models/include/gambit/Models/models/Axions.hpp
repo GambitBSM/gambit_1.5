@@ -23,9 +23,9 @@
 #define MODEL GeneralCosmoALP
   START_MODEL
   // Physical units: gagg [GeV^-1], gaee [dimensionless], fa [GeV], ma0 [eV]
-  //                 Tchi [MeV], beta [dimensionless], thetai [dimensionless], xi [dimensionless]
+  //                 Tchi [MeV], beta [dimensionless], thetai [dimensionless], Ya0 [dimensionless]
   DEFINEPARS(gagg,gaee,fa,ma0,Tchi,beta,thetai)
-  DEFINEPARS(xi)
+  DEFINEPARS(Ya0)
 #undef MODEL
 
 // Simplified general axion model with parametric temperature-independent mass and cosmological applications.
@@ -34,7 +34,7 @@
   START_MODEL
   // Units for these parameters are the same as for the GeneralALP.
   DEFINEPARS(gagg,fa,ma0,thetai)
-  DEFINEPARS(xi)
+  DEFINEPARS(Ya0)
   // Translation to parent, all defined in Axions.cpp:
   INTERPRET_AS_PARENT_FUNCTION(CosmoALP_to_GeneralCosmoALP)
 #undef PARENT

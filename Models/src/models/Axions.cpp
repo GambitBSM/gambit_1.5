@@ -35,7 +35,7 @@ void MODEL_NAMESPACE::CosmoALP_to_GeneralCosmoALP (const ModelParameters &mypara
     parentparams.setValue("Tchi", 1E99);
     parentparams.setValue("beta", 0);
     parentparams.setValue("thetai", myparams["thetai"]);
-    parentparams.setValue("xi", myparams["xi"]);
+    parentparams.setValue("Ya0", myparams["Ya0"]);
 }
 #undef MODEL
 
@@ -51,8 +51,8 @@ void MODEL_NAMESPACE::GeneralALP_to_GeneralCosmoALP (const ModelParameters &mypa
     parentparams.setValue("Tchi", myparams["Tchi"]);
     parentparams.setValue("beta", myparams["beta"]);
     parentparams.setValue("thetai", myparams["thetai"]);
-    // Set xi = 0 to avoid unnecessary relic density calculation...
-    parentparams.setValue("xi", 0);
+    // Set Ya0 = 0 to avoid unnecessary relic density calculation...
+    parentparams.setValue("Ya0", 0);
 }
 #undef MODEL
 
