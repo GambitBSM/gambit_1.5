@@ -982,7 +982,7 @@ if(NOT ditched_${name}_${ver})
     DOWNLOAD_COMMAND ${DL_BACKEND} ${dl} ${md5} ${dir}
     SOURCE_DIR ${dir}
     BUILD_IN_SOURCE 1
-    CONFIGURE_COMMAND ./configure FC=${CMAKE_Fortran_COMPILER} FCFLAGS=${BACKEND_Fortran_FLAGS} FFLAGS=${BACKEND_Fortran_FLAGS} CC=${CMAKE_C_COMPILER} CFLAGS=${BACKEND_C_FLAGS} CXX=${CMAKE_CXX_COMPILER} CXXFLAGS=${BACKEND_CXX_FLAGS} SHLIB_SUFFIX=${CFITSIO_SO}
+    CONFIGURE_COMMAND ./configure --includedir=${dir}/include --libdir=${dir}/lib FC=${CMAKE_Fortran_COMPILER} FCFLAGS=${BACKEND_Fortran_FLAGS} FFLAGS=${BACKEND_Fortran_FLAGS} CC=${CMAKE_C_COMPILER} CFLAGS=${BACKEND_C_FLAGS} CXX=${CMAKE_CXX_COMPILER} CXXFLAGS=${BACKEND_CXX_FLAGS} SHLIB_SUFFIX=${CFITSIO_SO}
     BUILD_COMMAND ${CMAKE_MAKE_PROGRAM} shared SHLIB_SUFFIX=${CFITSIO_SO}
     INSTALL_COMMAND ${CMAKE_MAKE_PROGRAM} install SHLIB_SUFFIX=${CFITSIO_SO}
   )
@@ -1003,11 +1003,11 @@ set(cfitsio_dir "${PROJECT_SOURCE_DIR}/Backends/installed/${cfitsio_name}/${cfit
 check_ditch_status(${name} ${ver})
 if(NOT ditched_${name}_${ver})
   ExternalProject_Add(${name}_${ver}
-    DEPENDS ${cfitsio_name}_${cfitsio_ver} 
+    DEPENDS ${cfitsio_name}_${cfitsio_ver}
     DOWNLOAD_COMMAND ${DL_BACKEND} ${dl} ${md5} ${dir}
     SOURCE_DIR ${dir}
     BUILD_IN_SOURCE 1
-    CONFIGURE_COMMAND python ${dir}/waf configure --cfitsio_include=${cfitsio_dir}/include --cfitsio_lib=${cfitsio_dir}/lib64
+    CONFIGURE_COMMAND python ${dir}/waf configure --cfitsio_include=${cfitsio_dir}/include --cfitsio_lib=${cfitsio_dir}/lib
     BUILD_COMMAND ""
     INSTALL_COMMAND python ${dir}/waf install
   )
