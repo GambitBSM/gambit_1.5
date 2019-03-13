@@ -55,7 +55,7 @@ BE_NAMESPACE
   {
     DarkAges::fz_table result;
     pybind11::array_t<double> tmp;
-    logger().send("Message from 'gather_results' backend convenience function in DarkAges v1.0.0 wrapper",LogTags::info);
+    logger().send("Message from 'gather_results' backend convenience function in DarkAges v1.0.0 wrapper (Start)",LogTags::info);
     tmp =  get_result("redshift");
     result.redshift = cast_np_to_std(tmp);
     tmp =  get_result("Heat");
@@ -68,6 +68,7 @@ BE_NAMESPACE
     result.f_heion = cast_np_to_std(tmp);
     tmp =  get_result("LowE");
     result.f_lowe = cast_np_to_std(tmp);
+    logger().send("Message from 'gather_results' backend convenience function in DarkAges v1.0.0 wrapper (Done casting NumPy-arrays into std vectors)",LogTags::info);
 
     return result;
   }
@@ -85,6 +86,7 @@ BE_INI_FUNCTION
   scan_level = false;
   // Reset the 'alreadyCalculated' flag
   *already_calculated = false;
+  logger().send("Message from \'DarkAges_1.0.0_ini\'. Retrieving the injection spectrum",LogTags::info);
   DarkAges::injectionSpectrum spec = *Dep::injection_spectrum;
   pybind11::array_t<double> Energies = cast_std_to_np(spec.E);
   pybind11::array_t<double> dNdE_e = cast_std_to_np(spec.spec_el);
@@ -92,6 +94,8 @@ BE_INI_FUNCTION
   double mass = *Dep::DM_mass;
   double lifetime = *Dep::lifetime;
 
+  logger().send("Message from \'DarkAges_1.0.0_ini\'. Starting now to execute \'calc_f_decay\'.",LogTags::info);
   calc_f_decay(Energies,dNdE_e,dNdE_ph,mass,lifetime);
+  logger().send("Message from \'DarkAges_1.0.0_ini\'. Done executing \'calc_f_decay\'.",LogTags::info);
 }
 END_BE_INI_FUNCTION
