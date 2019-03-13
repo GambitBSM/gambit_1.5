@@ -264,8 +264,8 @@ namespace Gambit
     {
       using namespace Pipes::lnL_A_planck_gaussian;
 
-      double obs_mean = 1.0;
-      double obs_err = 0.0025;
+      double obs_mean = runOptions->getValueOrDef<double>(1.,"mean");
+      double obs_err = runOptions->getValueOrDef<double>(0.0025,"sigma") ;
       double pred_mean = *Param["A_planck"];
       double pred_err = 0.0;
 
