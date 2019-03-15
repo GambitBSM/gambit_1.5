@@ -3969,8 +3969,6 @@ lnL_SN1987A: |
 lnL_HESS_GCMF: |
    LogLikelihood for H.E.S.S. constraints on axions (Galactic Centre magnetic field result).
 
-
->>>>>>> master
 #------------------------------
 #  SUSYHD capabilities
 #------------------------------

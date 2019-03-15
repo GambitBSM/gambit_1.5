@@ -28,6 +28,7 @@ from optparse import OptionParser
 #        -v, --verbose                 Print debug output
 #        -a, --all                     Use all the scan parameters for thinning
 #        -l LOGVARS, --logvars=LOGVARS Set log scale for input variables
+#        -f, --force                   Force log scale even if there are negative values
 #
 #######################################################################################################
 
