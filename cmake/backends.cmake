@@ -1072,6 +1072,7 @@ if(NOT ditched_${name}_${ver})
     SOURCE_DIR ${dir}
     BUILD_IN_SOURCE 1
     PATCH_COMMAND patch -p1 < ${patch}/${name}_${ver}.diff
+    COMMAND patch -p1 < ${patch}/${name}_${ver}_decay_fix.diff
     CONFIGURE_COMMAND ""
     BUILD_COMMAND ${CMAKE_MAKE_PROGRAM} CC=${CMAKE_C_COMPILER} OMPFLAG= OPTFLAG= CCFLAG=${BACKEND_C_FLAGS} LDFLAG=${BACKEND_C_FLAGS} class
     COMMAND ${CMAKE_COMMAND} -E make_directory lib
