@@ -188,6 +188,94 @@ namespace Gambit
       spectrum.spec_ph.resize(1,BR_ph*2e9);
     }
 
+    void lifetime_CosmoALP(double& result)
+    {
+      // lifetime in s
+      using namespace Pipes::lifetime_CosmoALP;
+      double gagg = *Param["gagg"]; // in GeV^-1
+      double ma = *Param["ma0"]; // in eV
+
+      // Calculate the decay width (in GeV)
+      // (It's maybe worth being a seperate capability)
+      double Gamma = 1/64./pi * pow(gagg,2) * pow(ma,3) * 1e-27;
+
+      // For the lifetime take 1/Gamma and translate GeV^-1 into s by multiplication with "hbar"
+      result = 1./Gamma * hbar;
+
+      // Reject points which have a lifetime bigger than 1e17s (or whatever the user chooses)
+      // Gets only triggered if the user wishes to do so.
+      // !! This is not a real physical bound but it is more to deal with the lack of likelihoods so far. !!
+      static bool do_rejection = runOptions->getValueOrDef<bool>(false,"do_rejection");
+      static double tdec_max = runOptions->getValueOrDef<double>(1.0e17,"reject_tau_bigger_than");
+      if (do_rejection && result > tdec_max)
+      {
+        std::ostringstream err;
+        err << "ALP lifetime (" << result << " [s]) exceeds the threshold of " << tdec_max <<" [s].";
+        invalid_point().raise(err.str());
+      }
+    }
+
+    void minimum_abundance_CosmoALP(double& result)
+    {
+      using namespace Pipes::minimum_abundance_CosmoALP;
+
+      // Read T_R in MeV and convert it to GeV
+      static double T_R_in_GeV = 1e-3*(runOptions->getValueOrDef<double>(5.,"T_R")); // Read T_R in MeV and convert it to GeV
+
+      // check for stupid input (T_R < m_e)
+      // Throw an error if the user really pushed it that far.
+      if (m_electron >= T_R_in_GeV)
+	CosmoBit_error().raise(LOCAL_INFO,"The reheating temperature is below the electron mass.");
+
+      double gagg = *Param["gagg"]; // in GeV^-1
+      double Ya0_min = 1.56e-5 * pow(gagg,2) * m_planck * (T_R_in_GeV - m_electron);
+
+      result = Ya0_min;
+    }
+
+    void DM_fraction_CosmoALP(double& result)
+    {
+      using namespace Pipes::DM_fraction_CosmoALP;
+      double Ya0 = *Param["Ya0"]; // ALP abundance (after production)
+      double ma0 = *Param["ma0"]; // non-thermal ALP mass in eV
+      double T = *Dep::T_cmb; // CMB temperature in K
+      double ssm0 = (2.*pow(pi,2)/45.) * (43./11.) * pow((_kB_eV_over_K_*T),3); // SM entropy density today in eV^3 (cf. footnote 24 of PDG2018-Astrophysical parameters)
+      double rho0_a = Ya0 * ma0 * ssm0; // energy density of axions today in eV^4
+
+      double omega_cdm = *Param["omega_cdm"]; // omega_cdm = Omega_cdm * h^2
+      double rho0_crit_by_h2 = 3.*pow(m_planck_red*1e9,2) * pow((1e5*1e9*hbar/_Mpc_SI_),2); // rho0_crit/(h^2)
+      double rho0_cdm = omega_cdm * rho0_crit_by_h2; // rho0_cdm = Omega_cdm * rho0_crit;
+
+      double xi = rho0_a / rho0_cdm;
+
+      // invalidate if there are more ALPs than dark matter
+      if (xi > 1.)
+      {
+        std::ostringstream err;
+        err << "ALPs are overabundant (omega_a > omega_cdm)";
+        invalid_point().raise(err.str());
+      }
+
+      // TODO: Make the part which follows down below a proper likelihood
+
+      // Consistency check if value for xi (rho0_a / rh0_cdm) is in contradiction with
+      // T_R > 5 MeV (or user input). If so, invalidate the point.
+      // (Reason: T_R predicts a minimum abundance Ya0_min through Primakoff processes. Any additional production mechanism would only increase Ya0)
+      double Ya0_min = *Dep::minimum_abundance;
+      if (Ya0 < Ya0_min)
+      {
+        std::ostringstream err;
+        err << "The choice of Ya0 (";
+        err << Ya0;
+        err << ") is in contradiction with the minimum abundance Ya0_min (";
+        err << Ya0_min;
+        err << ") produced via Primakoff processes.";
+        invalid_point().raise(err.str());
+      }
+
+      result = xi;
+    }
+
     void energy_injection_efficiency_func(DarkAges::fz_table& result)
     {
       using namespace Pipes::energy_injection_efficiency_func;

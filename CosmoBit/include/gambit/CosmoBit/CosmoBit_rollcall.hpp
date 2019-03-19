@@ -47,6 +47,35 @@ START_MODULE
     #undef FUNCTION
   #undef CAPABILITY
 
+  #define CAPABILITY DM_fraction
+  START_CAPABILITY
+    #define FUNCTION DM_fraction_CosmoALP
+    START_FUNCTION(double)
+    DEPENDENCY(T_cmb, double)
+    DEPENDENCY(minimum_abundance,double)
+    ALLOW_MODEL_DEPENDENCE(CosmoALP,LCDM_dNeffCMB_dNeffBBN_etaBBN)
+    MODEL_GROUP(alp,(CosmoALP))
+    MODEL_GROUP(cosmo,(CosmoALP))
+    ALLOW_MODEL_COMBINATION(cosmo,alp)
+    #undef FUNCTION
+  #undef CAPABILITY
+
+  #define CAPABILITY lifetime
+  START_CAPABILITY
+    #define FUNCTION lifetime_CosmoALP
+    START_FUNCTION(double)
+    ALLOW_MODELS(CosmoALP)
+    #undef FUNCTION
+  #undef CAPABILITY
+
+  #define CAPABILITY minimum_abundance
+  START_CAPABILITY
+    #define FUNCTION minimum_abundance_CosmoALP
+    START_FUNCTION(double)
+    ALLOW_MODELS(CosmoALP)
+    #undef FUNCTION
+  #undef CAPABILITY
+
   #define CAPABILITY energy_injection_efficiency
   START_CAPABILITY
     #define FUNCTION energy_injection_efficiency_func

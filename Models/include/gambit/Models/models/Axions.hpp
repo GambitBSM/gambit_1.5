@@ -37,6 +37,12 @@
   DEFINEPARS(Ya0)
   // Translation to parent, all defined in Axions.cpp:
   INTERPRET_AS_PARENT_FUNCTION(CosmoALP_to_GeneralCosmoALP)
+
+  // Start friendship with "TestDayingDM" (Mapping is defined in Axions.cpp)
+  INTERPRET_AS_X_FUNCTION(TestDecayingDM,CosmoALP_to_TestDecayingDM)
+  // The mapping CosmoALP_to_TestDecayingDM depends on the lifetime and the fraction rho_a/rho_cdm (mapping of the mass is trivial).
+  INTERPRET_AS_X_DEPENDENCY(TestDecayingDM,lifetime,double)
+  INTERPRET_AS_X_DEPENDENCY(TestDecayingDM,DM_fraction,double)
 #undef PARENT
 #undef MODEL
 
