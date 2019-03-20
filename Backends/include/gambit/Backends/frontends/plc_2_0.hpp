@@ -26,7 +26,11 @@
 #define VERSION 2.0
 #define SAFE_VERSION 2_0
 
+#ifndef PLC_PATH
 #define PLC_PATH "EMPTY"
+#endif
+
+#include "gambit/Utils/util_functions.hpp"
 
 // Load it
 LOAD_LIBRARY
@@ -99,6 +103,13 @@ BE_NAMESPACE
     std::cout << "Loading the high-l TT likelihood" << std::endl;
     std::string full_path = plc_location;
     full_path += "hi_l/plik/plik_dx11dr2_HM_v18_TT.clik";
+    if (not Utils::file_exists(full_path))
+    {
+      std::string ErrMssg = "Error while loading likelihood in plc_2.0:\n\nThe file \'";
+      ErrMssg += full_path;
+      ErrMssg += "\' does not exist. Hence we will fail to load it.\n(Hint: Is PLC_PATH set properly?)";
+      backend_error().raise(LOCAL_INFO,ErrMssg.c_str());
+    }
     char* clik_path = (char*)full_path.c_str();
     _err = initError();
     clikid_plik_dx11dr2_HM_v18_TT = clik_init(clik_path,&_err);
@@ -109,6 +120,13 @@ BE_NAMESPACE
     std::cout << "Loading the high-l TTTEEE likelihood" << std::endl;
     std::string full_path = plc_location;
     full_path += "hi_l/plik/plik_dx11dr2_HM_v18_TTTEEE.clik";
+    if (not Utils::file_exists(full_path))
+    {
+      std::string ErrMssg = "Error while loading likelihood in plc_2.0:\n\nThe file \'";
+      ErrMssg += full_path;
+      ErrMssg += "\' does not exist. Hence we will fail to load it.\n(Hint: Is PLC_PATH set properly?)";
+      backend_error().raise(LOCAL_INFO,ErrMssg.c_str());
+    }
     char* clik_path = (char*)full_path.c_str();
     _err = initError();
     clikid_plik_dx11dr2_HM_v18_TTTEEE = clik_init(clik_path,&_err);
@@ -119,6 +137,13 @@ BE_NAMESPACE
     std::cout << "Loading the high-l TT-lite likelihood" << std::endl;
     std::string full_path = plc_location;
     full_path += "hi_l/plik_lite/plik_lite_v18_TT.clik";
+    if (not Utils::file_exists(full_path))
+    {
+      std::string ErrMssg = "Error while loading likelihood in plc_2.0:\n\nThe file \'";
+      ErrMssg += full_path;
+      ErrMssg += "\' does not exist. Hence we will fail to load it.\n(Hint: Is PLC_PATH set properly?)";
+      backend_error().raise(LOCAL_INFO,ErrMssg.c_str());
+    }
     char* clik_path = (char*)full_path.c_str();
     _err = initError();
     clikid_plik_lite_v18_TT = clik_init(clik_path,&_err);
@@ -129,6 +154,13 @@ BE_NAMESPACE
     std::cout << "Loading the high-l TTTEEE-lite likelihood" << std::endl;
     std::string full_path = plc_location;
     full_path += "hi_l/plik_lite/plik_lite_v18_TTTEEE.clik";
+    if (not Utils::file_exists(full_path))
+    {
+      std::string ErrMssg = "Error while loading likelihood in plc_2.0:\n\nThe file \'";
+      ErrMssg += full_path;
+      ErrMssg += "\' does not exist. Hence we will fail to load it.\n(Hint: Is PLC_PATH set properly?)";
+      backend_error().raise(LOCAL_INFO,ErrMssg.c_str());
+    }
     char* clik_path = (char*)full_path.c_str();
     _err = initError();
     clikid_plik_lite_v18_TTTEEE = clik_init(clik_path,&_err);
@@ -139,6 +171,13 @@ BE_NAMESPACE
     std::cout << "Loading the low-l likelihood (This may take some time)" << std::endl;
     std::string full_path = plc_location;
     full_path += "low_l/bflike/lowl_SMW_70_dx11d_2014_10_03_v5c_Ap.clik";
+    if (not Utils::file_exists(full_path))
+    {
+      std::string ErrMssg = "Error while loading likelihood in plc_2.0:\n\nThe file \'";
+      ErrMssg += full_path;
+      ErrMssg += "\' does not exist. Hence we will fail to load it.\n(Hint: Is PLC_PATH set properly?)";
+      backend_error().raise(LOCAL_INFO,ErrMssg.c_str());
+    }
     char* clik_path = (char*)full_path.c_str();
     _err = initError();
     clikid_lowl_SMW_70_dx11d_2014 = clik_init(clik_path,&_err);
@@ -149,6 +188,13 @@ BE_NAMESPACE
     std::cout << "Loading the lensing likelihood" << std::endl;
     std::string full_path = plc_location;
     full_path += "lensing/smica_g30_ftl_full_pp.clik_lensing";
+    if (not Utils::file_exists(full_path))
+    {
+      std::string ErrMssg = "Error while loading likelihood in plc_2.0:\n\nThe file \'";
+      ErrMssg += full_path;
+      ErrMssg += "\' does not exist. Hence we will fail to load it.\n(Hint: Is PLC_PATH set properly?)";
+      backend_error().raise(LOCAL_INFO,ErrMssg.c_str());
+    }
     char* clik_path = (char*)full_path.c_str();
     _err = initError();
     smica_g30_ftl_full_pp = clik_lensing_init(clik_path,&_err);
