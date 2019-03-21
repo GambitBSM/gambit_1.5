@@ -466,6 +466,8 @@ BE_INI_FUNCTION
   in_dict.clear();
   if (has_energy_injection)
     fzt = *Dep::energy_injection_efficiency;
+  logger() << LogTags::info << "Starting \'exoclass_2_7_0_run()\'" << EOM;
   exoclass_2_7_0_run(has_energy_injection);
+  logger() << LogTags::info << "Finished \'exoclass_2_7_0_run()\'" << EOM;
 }
 END_BE_INI_FUNCTION

@@ -7,7 +7,7 @@
 +  if (pth->decay_fraction > 0) {
 +    double lifetime = pba->tau_dcdm;
 +    double bound = 4.6e-13 * pow((lifetime/1e13),-6.0) * pow((1.0+lifetime/1e13),7.0);
-+    class_test(pth->decay_fraction > 1e4*bound,
++    class_test(pth->decay_fraction > 1e3*bound,
 +	       pth->error_message,
 +	       "The value of 'pth->decay_fraction' (=%e) is suspiciously high given the choice of 'pba->tau_dcdm'. The bound on the decay fraction for 'pba->tau_dcdm'=%e is given by %e, which is exceeded by several orders of magnitude. We stop here since the code doesn't handle well with too high energy injection. Please adjust the inputs accordingly.",
 +	       pth->decay_fraction, lifetime, bound);
