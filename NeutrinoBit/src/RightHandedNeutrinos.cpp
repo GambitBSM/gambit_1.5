@@ -85,9 +85,10 @@ namespace Gambit
       // Take from the model parameters (Wolfenstein) PDG value: 0.97434
       static double Vud = 1.0 - 0.5*pow(*Param["CKM_lambda"],2);
       std::vector<double> m_lep(3), gamma(3), M(3);
-      m_lep[0] = sminputs.mE;
-      m_lep[1] = sminputs.mMu;
-      m_lep[2] = sminputs.mTau;
+      // Since we scan the SLHA2 model, we take masses from it
+      m_lep[0] = *Param["mE"];
+      m_lep[1] = *Param["mMu"];
+      m_lep[2] = *Param["mTau"];
       M[0] = *Param["M_1"];
       M[1] = *Param["M_2"];
       M[2] = *Param["M_3"];
@@ -117,9 +118,10 @@ namespace Gambit
       // Take from the model parameters (Wolfenstein) PDG value: 0.22506
       static double Vus = *Param["CKM_lambda"];
       std::vector<double> m_lep(3), gamma(3), M(3);
-      m_lep[0] = sminputs.mE;
-      m_lep[1] = sminputs.mMu;
-      m_lep[2] = sminputs.mTau;
+       // Since we scan the SLHA2 model, we take masses from it
+      m_lep[0] = *Param["mE"];
+      m_lep[1] = *Param["mMu"];
+      m_lep[2] = *Param["mTau"];
       M[0] = *Param["M_1"];
       M[1] = *Param["M_2"];
       M[2] = *Param["M_3"];
@@ -149,9 +151,10 @@ namespace Gambit
       // Take from the model parameters (Wolfenstein) PDG value: 0.22492
       static double Vcd = -*Param["CKM_lambda"];
       std::vector<double> m_lep(3), gamma(3), M(3);
-      m_lep[0] = sminputs.mE;
-      m_lep[1] = sminputs.mMu;
-      m_lep[2] = sminputs.mTau;
+      // Since we scan the SLHA2 model, we take masses from it
+      m_lep[0] = *Param["mE"];
+      m_lep[1] = *Param["mMu"];
+      m_lep[2] = *Param["mTau"];
       M[0] = *Param["M_1"];
       M[1] = *Param["M_2"];
       M[2] = *Param["M_3"];
@@ -181,9 +184,10 @@ namespace Gambit
       // Take from the model parameters (Wolfenstein) PDG value: 0.97351
       static double Vcs = 1 - 0.5*pow(*Param["CKM_lambda"],2);
       std::vector<double> m_lep(3), gamma(3), M(3);
-      m_lep[0] = sminputs.mE;
-      m_lep[1] = sminputs.mMu;
-      m_lep[2] = sminputs.mTau;
+      // Since we scan the SLHA2 model, we take masses from it
+      m_lep[0] = *Param["mE"];
+      m_lep[1] = *Param["mMu"];
+      m_lep[2] = *Param["mTau"];
       M[0] = *Param["M_1"];
       M[1] = *Param["M_2"];
       M[2] = *Param["M_3"];
@@ -213,9 +217,10 @@ namespace Gambit
       // Take from the model parameters (Wolfenstein) PDG value: 0.00357 (absolute value)
       static double Vub = *Param["CKM_A"]*pow(*Param["CKM_lambda"],3)*sqrt(pow(*Param["CKM_rhobar"],2) + pow(*Param["CKM_etabar"],2));
       std::vector<double> m_lep(3), gamma(3), M(3);
-      m_lep[0] = sminputs.mE;
-      m_lep[1] = sminputs.mMu;
-      m_lep[2] = sminputs.mTau;
+      // Since we scan the SLHA2 model, we take masses from it
+      m_lep[0] = *Param["mE"];
+      m_lep[1] = *Param["mMu"];
+      m_lep[2] = *Param["mTau"];
       M[0] = *Param["M_1"];
       M[1] = *Param["M_2"];
       M[2] = *Param["M_3"];
@@ -245,9 +250,10 @@ namespace Gambit
       // Take from the model parameters (Wolfenstein) PDG value: 0.22506
       static double Vus = *Param["CKM_lambda"];
       std::vector<double> m_lep(3), gamma(3), M(3);
-      m_lep[0] = sminputs.mE;
-      m_lep[1] = sminputs.mMu;
-      m_lep[2] = sminputs.mTau;
+      // Since we scan the SLHA2 model, we take masses from it
+      m_lep[0] = *Param["mE"];
+      m_lep[1] = *Param["mMu"];
+      m_lep[2] = *Param["mTau"];
       M[0] = *Param["M_1"];
       M[1] = *Param["M_2"];
       M[2] = *Param["M_3"];
@@ -277,9 +283,10 @@ namespace Gambit
       // Take from the model parameters (Wolfenstein) PDG value: 0.0411
       static double Vcb = *Param["CKM_A"]*pow(*Param["CKM_lambda"],2);
       std::vector<double> m_lep(3), gamma(3), M(3);
-      m_lep[0] = sminputs.mE;
-      m_lep[1] = sminputs.mMu;
-      m_lep[2] = sminputs.mTau;
+      // Since we scan the SLHA2 model, we take masses from it
+      m_lep[0] = *Param["mE"];
+      m_lep[1] = *Param["mMu"];
+      m_lep[2] = *Param["mTau"];
       M[0] = *Param["M_1"];
       M[1] = *Param["M_2"];
       M[2] = *Param["M_3"];
@@ -363,9 +370,10 @@ namespace Gambit
       // Take from the model parameters (Wolfenstein) PDG value: 0.97434
       static double Vud = 1.0 - 0.5*pow(*Param["CKM_lambda"],2);
       std::vector<double> m_lep(3), gamma(3), M(3);
-      m_lep[0] = sminputs.mE;
-      m_lep[1] = sminputs.mMu;
-      m_lep[2] = sminputs.mTau;
+      // Since we scan the SLHA2 model, we take masses from it
+      m_lep[0] = *Param["mE"];
+      m_lep[1] = *Param["mMu"];
+      m_lep[2] = *Param["mTau"];
       M[0] = *Param["M_1"];
       M[1] = *Param["M_2"];
       M[2] = *Param["M_3"];
@@ -450,9 +458,10 @@ namespace Gambit
       static double G_F_sq = pow(sminputs.GF, 2);
       double x_a, x_b;
       std::vector<double> m_lep(3), gamma(3), M(3);
-      m_lep[0] = sminputs.mE;
-      m_lep[1] = sminputs.mMu;
-      m_lep[2] = sminputs.mTau;
+      // Since we scan the SLHA2 model, we take masses from it
+      m_lep[0] = *Param["mE"];
+      m_lep[1] = *Param["mMu"];
+      m_lep[2] = *Param["mTau"];
       M[0] = *Param["M_1"];
       M[1] = *Param["M_2"];
       M[2] = *Param["M_3"];
@@ -497,9 +506,10 @@ namespace Gambit
       static double C3 = 0.25*(1 + (4*s_W_sq) + (8*pow(s_W_sq,2)));
       static double C4 = 0.5*s_W_sq*((2*s_W_sq) + 1);
       std::vector<double> m_lep(3), gamma(3), M(3);
-      m_lep[0] = sminputs.mE;
-      m_lep[1] = sminputs.mMu;
-      m_lep[2] = sminputs.mTau;
+       // Since we scan the SLHA2 model, we take masses from it
+      m_lep[0] = *Param["mE"];
+      m_lep[1] = *Param["mMu"];
+      m_lep[2] = *Param["mTau"];
       M[0] = *Param["M_1"];
       M[1] = *Param["M_2"];
       M[2] = *Param["M_3"];
@@ -550,10 +560,10 @@ namespace Gambit
       static double C1 = s_W_sq*(3 - (4*s_W_sq));
       std::vector<double> m_uquark(3), gamma(3), M(3);
       double x_q;
-      // Taking the quark masses from PDG; available within GAMBIT?
-      m_uquark[0] = 0.0022;  // up; GeV
-      m_uquark[1] = 1.28;  // charm; GeV
-      m_uquark[2] = 173.1; // top; GeV
+      // Since we scan the SLHA2 model, we take masses from it
+      m_uquark[0] = *Param["mU"];
+      m_uquark[1] = *Param["mCmC"];
+      m_uquark[2] = *Param["mT"];
       M[0] = *Param["M_1"];
       M[1] = *Param["M_2"];
       M[2] = *Param["M_3"];
@@ -597,10 +607,10 @@ namespace Gambit
       static double C2 = s_W_sq*(3 - (2*s_W_sq));
       std::vector<double> m_dquark(3), gamma(3), M(3);
       double x_q;
-      // Taking the quark masses from PDG; available within GAMBIT?
-      m_dquark[0] = 0.0047;  // down; GeV
-      m_dquark[1] = 0.096;  // strange; GeV
-      m_dquark[2] = 4.18; // bottom; GeV
+      // Since we scan the SLHA2 model, we take masses from it
+      m_dquark[0] = *Param["mD"];
+      m_dquark[1] = *Param["mS"];
+      m_dquark[2] = *Param["mBmB"];
       M[0] = *Param["M_1"];
       M[1] = *Param["M_2"];
       M[2] = *Param["M_3"];
@@ -670,16 +680,16 @@ namespace Gambit
 
       double x, y;
       std::vector<double> m_lep(3), m_uquark(3), m_dquark(3), gamma(3), M(3), decay_prod(3), two_heaviest(2);
-      // Taking the quark masses from PDG; available within GAMBIT?
-      m_lep[0] = sminputs.mE;
-      m_lep[1] = sminputs.mMu;
-      m_lep[2] = sminputs.mTau;
-      m_uquark[0] = 0.0022;  // up; GeV
-      m_uquark[1] = 1.28;  // charm; GeV
-      m_uquark[2] = 173.1; // top; GeV
-      m_dquark[0] = 0.0047;  // down; GeV
-      m_dquark[1] = 0.096;  // strange; GeV
-      m_dquark[2] = 4.18; // bottom; GeV
+      // Since we scan the SLHA2 model, we take masses from it
+      m_lep[0] = *Param["mE"];
+      m_lep[1] = *Param["mMu"];
+      m_lep[2] = *Param["mTau"];
+      m_uquark[0] = *Param["mU"];
+      m_uquark[1] = *Param["mCmC"];
+      m_uquark[2] = *Param["mT"];
+      m_dquark[0] = *Param["mD"];
+      m_dquark[1] = *Param["mS"];
+      m_dquark[2] = *Param["mBmB"];
       M[0] = *Param["M_1"];
       M[1] = *Param["M_2"];
       M[2] = *Param["M_3"];
