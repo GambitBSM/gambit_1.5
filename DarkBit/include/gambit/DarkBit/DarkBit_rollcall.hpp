@@ -225,7 +225,6 @@ START_MODULE
         ALLOW_MODEL(GeneralALP)
         DEPENDENCY(AxionOscillationTemperature, double)
         DEPENDENCY(T_cmb, double)
-
     #undef FUNCTION
   #undef CAPABILITY
 
