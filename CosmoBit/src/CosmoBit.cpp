@@ -201,6 +201,7 @@ namespace Gambit
 
       // For the lifetime take 1/Gamma and translate GeV^-1 into s by multiplication with "hbar"
       result = 1./Gamma * hbar;
+      logger() << "[lifetime_CosmoALP] tau = " << result << " [s]" << EOM;
 
       // Reject points which have a lifetime bigger than 1e17s (or whatever the user chooses)
       // Gets only triggered if the user wishes to do so.
@@ -243,10 +244,11 @@ namespace Gambit
       double rho0_a = Ya0 * ma0 * ssm0; // energy density of axions today in eV^4
 
       double omega_cdm = *Param["omega_cdm"]; // omega_cdm = Omega_cdm * h^2
-      double rho0_crit_by_h2 = 3.*pow(m_planck_red*1e9,2) * pow((1e5*1e9*hbar/_Mpc_SI_),2); // rho0_crit/(h^2)
+      const double rho0_crit_by_h2 = 3.*pow(m_planck_red*1e9,2) * pow((1e5*1e9*hbar/_Mpc_SI_),2); // rho0_crit/(h^2)
       double rho0_cdm = omega_cdm * rho0_crit_by_h2; // rho0_cdm = Omega_cdm * rho0_crit;
 
       double xi = rho0_a / rho0_cdm;
+      logger() << "[DM_fraction_CosmoALP]  xi = " << xi << EOM;
 
       // invalidate if there are more ALPs than dark matter
       if (xi > 1.)
