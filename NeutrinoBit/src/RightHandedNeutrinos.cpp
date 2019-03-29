@@ -1330,12 +1330,7 @@ namespace Gambit
       
       result_Vus = est_Vus;
     }
-    void get_Vus(double& result_Vus)
-    {
-      using namespace Pipes::get_Vus; 
-      SMInputs sminputs = *Dep::SMINPUTS;   
-      result_Vus = *Param["CKM_lambda"];
-    }
+
     // CKM unitarity constraint: V_ud should lie within 3sigma of the world average [PDG 2016]
     void lnL_ckm_Vusmin(double& result_ckm)
     {
@@ -1388,7 +1383,7 @@ namespace Gambit
       SMInputs sminputs = *Dep::SMINPUTS;
       Matrix3cd Theta = *Dep::SeesawI_Theta;
       double G_mu = sminputs.GF;
-      double V_us = *Dep::get_Vus;
+      double V_us = *Param["CKM_lambda"];
       
 
       // Experimental values determined for K and tau decays. From table 1 in 1502.00477

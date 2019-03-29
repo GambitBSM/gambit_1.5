@@ -252,44 +252,28 @@ namespace Gambit
       //std::string order = runOptions->getValueOrDef<std::string>("321", "R_order");
       float Rorder = *Param["Rorder"];
 
-      //if (order == "321")
       if ((0. <= Rorder) && (Rorder < 1.))
         R = R_23 * R_13 * R_12;
-      //if (order == "213")
-      if ((1. <= Rorder) && (Rorder < 2.))
+      else if ((1. <= Rorder) && (Rorder < 2.))
         R = R_13 * R_12 * R_23;
-      //if (order == "132")
-      if ((2. <= Rorder) && (Rorder < 3.))
+      else if ((2. <= Rorder) && (Rorder < 3.))
         R = R_12 * R_23 * R_13;
-      //if (order == "231")
-      if ((3. <= Rorder) && (Rorder < 4.))
+      else if ((3. <= Rorder) && (Rorder < 4.))
         R = R_13 * R_23 * R_12;
-      //if (order == "312")
-      if ((4. <= Rorder) && (Rorder < 5.))
+      else if ((4. <= Rorder) && (Rorder < 5.))
         R = R_23 * R_12 * R_13;
-      //if (order == "123")
-      if ((5. <= Rorder) && (Rorder <= 6.))
+      else if ((5. <= Rorder) && (Rorder <= 6.))
         R = R_12 * R_13 * R_23;
+      else
+      {
+        std::ostringstream msg;
+        msg << "Invalid R order";
+        logger() << msg.str() << EOM;
+        invalid_point().raise(msg.str());
+      }
 
       if(mnu != Eigen::Matrix3cd::Zero() and M_twid != Eigen::Matrix3cd::Zero())
         Theta = I * *Dep::UPMNS * mnu.sqrt() * R * M_twid.inverse();
-
-      // std::cout << R(0, 0) << std::endl;
-      // std::cout << R(1, 2) << std::endl;
-      // std::cout << R_23(0, 0) << std::endl;
-      // std::cout << R_23(1, 2) << std::endl;
-      // std::cout << (*Dep::UPMNS)(0, 0) << std::endl;
-      // std::cout << (*Dep::UPMNS)(1, 2) << std::endl;
-      // std::cout << mnu(0, 0) << std::endl;
-      // std::cout << mnu(1, 2) << std::endl;
-      // std::cout << M_twid(0, 0) << std::endl;
-      // std::cout << M_twid(1, 2) << std::endl;
-      // std::cout << Theta(0, 0) << std::endl;
-      // std::cout << Theta(1, 2) << std::endl;
-      // std::cout << M_I(0, 0) << std::endl;
-      // std::cout << M_I(1, 1) << std::endl;
-      // std::cout << M_I(2, 2) << std::endl;
-      // std::cout << std::endl;
 
       // This parametrisation is not valid when |Theta|^2_ij > 1, so invalidate those points
       Eigen::Matrix3d ThetaNorm = (Theta.adjoint() * Theta).real();
