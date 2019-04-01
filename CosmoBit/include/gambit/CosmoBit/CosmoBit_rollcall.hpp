@@ -55,7 +55,7 @@ START_MODULE
     DEPENDENCY(minimum_abundance,double)
     ALLOW_MODEL_DEPENDENCE(CosmoALP,LCDM_dNeffCMB_dNeffBBN_etaBBN)
     MODEL_GROUP(alp,(CosmoALP))
-    MODEL_GROUP(cosmo,(CosmoALP))
+    MODEL_GROUP(cosmo,(LCDM_dNeffCMB_dNeffBBN_etaBBN))
     ALLOW_MODEL_COMBINATION(cosmo,alp)
     #undef FUNCTION
   #undef CAPABILITY
