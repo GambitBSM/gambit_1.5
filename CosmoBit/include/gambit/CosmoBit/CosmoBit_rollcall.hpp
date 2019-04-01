@@ -384,6 +384,7 @@ START_MODULE
     #define FUNCTION compute_dNeff_etaBBN_ALP
      START_FUNCTION(map_str_dbl)
      ALLOW_MODELS(CosmoALP)
+     DEPENDENCY(lifetime, double)
     #undef FUNCTION
   #undef CAPABILITY
 

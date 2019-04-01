@@ -2321,18 +2321,16 @@ namespace Gambit
     }
 
 
-
-
 // ***************************************************************************************************************
 
     int diff_eq_rhs (double t, const double y[], double f[], void *params) // @Pat: this is the function for the differential equation that has to be solved in 'compute_dNeff_etaBBN_ALP' routine
-    { 
-      /* RHS of differential equation 
+    {
+      /* RHS of differential equation
         dT/dt = 15/pi^2 (m_a n_a(t)/ tau_a) T^(-3) - H(T) T , where H(T) = 3.7978719e-7*T*T  // TODO: refer to Eq. number in paper when ready
         params: stores (m_a n_a(t)/ tau_a)
         y[0]: stores SM T[t0]
       */
-    
+
       fast_interpolation injection_inter = *(static_cast<fast_interpolation*>(params)); 
       f[0] = (15.0/(4.0*pi*pi)) * injection_inter.interp(t)/pow(y[0], 3) - 3.7978719e-7*y[0]*y[0]*y[0];
       return GSL_SUCCESS;
@@ -2347,14 +2345,7 @@ namespace Gambit
       double temp_dNeff = 1;
       int ii=0;
 
-      // --- model parameters ----
-      // TODO: call from CosmoALPs model when implemented
-      double na_t0 = 2.0;     // initial number density of a at t=t0, in units keV^3.
-      double m_a = 30.0;      // mass of a in keV
-      double tau_a = 1.0e7;   // lifetime of a in seconds
-  
-
-      // --- precision parameters -- 
+      // --- precision parameters --
       double hstart = runOptions->getValueOrDef<double>(1e-6,"hstart"); // initial step size for GSL ODE solver
       double epsrel = runOptions->getValueOrDef<double>(1e-6,"epsrel"); // desired relative accuracy for GSL ODE solver and dNeff & etaBBN
       double max_iter = runOptions->getValueOrDef<int>(10,"max_iter"); // maximum number of iterations before error message is thrown if result not converged
@@ -2362,53 +2353,62 @@ namespace Gambit
 
       double t0 = runOptions->getValueOrDef<double>(1e4,"t_initial"); // initial time in seconds
       double tf = runOptions->getValueOrDef<double>(1e12,"t_final"); // final time in seconds
-      
+
       std::valarray<double> t_grid(grid_size), T_evo(grid_size), Tnu_grid(grid_size), na_grid(grid_size), injection_grid(grid_size); // arrays containing time dependence of variables
-      
+
       SM_time_evo SM(t0,tf,grid_size);  // set time evolution of SM
       t_grid = SM.get_t_grid();         // has to be updated when solving the differential equation 
-      T_evo = SM.get_T_evo();           
+      T_evo = SM.get_T_evo();
+
+      // --- model parameters ----
+      // TODO: call from CosmoALPs model when implemented
+      double Ya0 = *Param["Ya0"];
+      double T0 = T_evo[0];
+      double ssm_at_T0 = (2.*pow(pi,2)/45.) * (43./11.) * pow((1e-3*_kB_eV_over_K_*T0),3);
+      double na_t0 = Ya0 * ssm_at_T0;     // initial number density of a at t=t0, in units keV^3.
+      double m_a = 1e-3*(*Param["ma0"]);  // mass of a in keV
+      double tau_a = *Dep::lifetime;      // lifetime of a in seconds
 
       // loop over iterations until convergence or max_iter is reached
       while( ((fabs(temp_eta_ratio-eta_ratio) > epsrel) || fabs(temp_dNeff - dNeff) > epsrel) && (ii <= max_iter) ) 
-      {   
-          temp_eta_ratio = eta_ratio;  // to check for convergence
-          temp_dNeff = dNeff;
+      {
+        temp_eta_ratio = eta_ratio;  // to check for convergence
+        temp_dNeff = dNeff;
 
-          SM.calc_H_int();
-          na_grid = na_t0*exp(-3.0*SM.get_H_int())*exp(-t_grid/tau_a);    // na(t) in units keV^3
-          injection_grid = (m_a/tau_a)*na_grid;                 // m_a*na(t)/tau_a in units keV^4/s
-          Tnu_grid = SM.get_Tnu_evo()[0]*exp(-1.0*SM.get_H_int());        // T_nu(t) in units keV
-          fast_interpolation injection_inter(t_grid, injection_grid);     // interpolating function
+        SM.calc_H_int();
+        na_grid = na_t0*exp(-3.0*SM.get_H_int())*exp(-t_grid/tau_a);    // na(t) in units keV^3
+        injection_grid = (m_a/tau_a)*na_grid;                 // m_a*na(t)/tau_a in units keV^4/s
+        Tnu_grid = SM.get_Tnu_evo()[0]*exp(-1.0*SM.get_H_int());        // T_nu(t) in units keV
+        fast_interpolation injection_inter(t_grid, injection_grid);     // interpolating function
 
-          gsl_odeiv2_system sys = {diff_eq_rhs, NULL, 1, &injection_inter};    
-          gsl_odeiv2_driver *d = gsl_odeiv2_driver_alloc_y_new (&sys, gsl_odeiv2_step_rkf45, hstart, 0.0, epsrel);
-          
-          double y[1] = {T_evo[0]}; // initial condition: T(t0) = T_SM(t0)
-          double t=t0;
+        gsl_odeiv2_system sys = {diff_eq_rhs, NULL, 1, &injection_inter};
+        gsl_odeiv2_driver *d = gsl_odeiv2_driver_alloc_y_new (&sys, gsl_odeiv2_step_rkf45, hstart, 0.0, epsrel);
 
-          for (int jj = 0; jj < grid_size; jj++)
+        double y[1] = {T_evo[0]}; // initial condition: T(t0) = T_SM(t0)
+        double t=t0;
+
+        for (int jj = 0; jj < grid_size; jj++)
+        {
+          double t_j = t_grid[jj];
+          int status = gsl_odeiv2_driver_apply (d, &t, t_j, y);
+          if (status != GSL_SUCCESS)
           {
-              double t_j = t_grid[jj];          
-              int status = gsl_odeiv2_driver_apply (d, &t, t_j, y);
-              if (status != GSL_SUCCESS)
-              {
-                std::ostringstream err;
-                err << "Failed to solve differential equation to compute dNeffCMB and etaBB for Cosmo_ALP model at iteration step "<< ii <<". Invalidating point";
-                invalid_point().raise(err.str());
-              }
-              T_evo[jj] = y[0];           
+            std::ostringstream err;
+            err << "Failed to solve differential equation to compute dNeffCMB and etaBB for Cosmo_ALP model at iteration step "<< ii <<". Invalidating point";
+            invalid_point().raise(err.str());
           }
-          
-          gsl_odeiv2_driver_free (d);
+          T_evo[jj] = y[0];
+        }
 
-          // update Hubble rate for next iteration
-          SM.set_HT_evo(T_evo);
-                    
-          eta_ratio = pow(T_evo[grid_size-1]/T_evo[0], 3) * exp(3.0*SM.get_H_int()[grid_size-1]);
-          dNeff = 3*pow(Tnu_grid[grid_size-1]/T_evo[grid_size-1], 4) * 3.85280407965; // (11/4)^(4/3) = 3.85280407965
-           
-          ii ++;
+        gsl_odeiv2_driver_free (d);
+
+        // update Hubble rate for next iteration
+        SM.set_HT_evo(T_evo);
+
+        eta_ratio = pow(T_evo[grid_size-1]/T_evo[0], 3) * exp(3.0*SM.get_H_int()[grid_size-1]);
+        dNeff = 3*pow(Tnu_grid[grid_size-1]/T_evo[grid_size-1], 4) * 3.85280407965; // (11/4)^(4/3) = 3.85280407965
+
+        ii ++;
       }
 
       // invalidate point if results not converged after 'max_iter' steps
@@ -2416,16 +2416,14 @@ namespace Gambit
       {
         std::ostringstream err;
         err << "Computation of dNeffCMB and etaBBN for Cosmo_ALP model did not converge after n = "<< ii <<" iterations. You can increase the maximum number of iterations with the run Option 'max_iter'. Invalidating point.";
-        invalid_point().raise(err.str()); 
-      } 
+        invalid_point().raise(err.str());
+      }
 
       result["dNeff"] = dNeff;
-      result["eta_ratio"] = eta_ratio;    
+      result["eta_ratio"] = eta_ratio;
       logger() << "CosmoALP model: calculated dNeff @BBN to be " << result["dNeff"] <<", and etaBB(ALP)/etaBBN(SM) = " << result["eta_ratio"] << ". Calculation converged after "<< ii <<" iterations." << EOM;
-      
 
     }
-
 
 /// -----------
 /// Capabilities for general cosmological quantities
@@ -2451,7 +2449,7 @@ namespace Gambit
       result =  nb/ngamma;
       logger() << "Baryon to photon ratio (eta) today computed to be " << result << EOM;
     }
-    
+
     void compute_Sigma8(double &result)
     {
       using namespace Pipes::compute_Sigma8;
@@ -2466,23 +2464,23 @@ namespace Gambit
     {
       using namespace Pipes::compute_Omega0_m;
 
-      result =(*Dep::Omega0_b) + (*Dep::Omega0_cdm) + (*Dep::Omega0_ncdm); 
+      result =(*Dep::Omega0_b) + (*Dep::Omega0_cdm) + (*Dep::Omega0_ncdm);
     }
-    
+
     void compute_Omega0_b(double &result)
     {
       using namespace Pipes::compute_Omega0_b;
 
       double h = *Param["H0"]/100;
-      result =*Param["omega_b"]/h/h; 
+      result =*Param["omega_b"]/h/h;
     }
-    
+
     void compute_Omega0_cdm(double &result)
     {
       using namespace Pipes::compute_Omega0_cdm;
 
       double h = *Param["H0"]/100;
-      result =*Param["omega_cdm"]/h/h; 
+      result =*Param["omega_cdm"]/h/h;
     }
 
     void compute_Omega0_g(double &result)
@@ -2499,7 +2497,7 @@ namespace Gambit
 
       result = 2./pi/pi*zeta3 *pow(*Dep::T_cmb*_kB_eV_over_K_,3.)/pow(_hP_eVs_*_c_SI_/2./pi,3)/100/100/100; // result per cm^3  
     }
-    
+
     void compute_Omega0_ur(double &result)
     {
       using namespace Pipes::compute_Omega0_ur;
@@ -2507,7 +2505,7 @@ namespace Gambit
       double Neff_nu = 2.0328; // TODO: only valid for 1 massive neutrinos -> need capability to set this
       result = (*Param["dNeff"]+Neff_nu)*7./8.*pow(4./11.,4./3.)*(*Dep::Omega0_g); 
     }
-    
+
     void compute_Omega0_ncdm(double &result)
     {
       using namespace Pipes::compute_Omega0_ncdm;
@@ -2533,7 +2531,7 @@ namespace Gambit
     {
       using namespace Pipes::compute_Omega0_r;
 
-      result = *Dep::Omega0_g + (*Dep::Omega0_ur); 
+      result = *Dep::Omega0_g + (*Dep::Omega0_ur);
       //std::cout << "omega0_g g " << *Dep::Omega0_g << " omega_ur " << *Dep::Omega0_ur <<  std::endl; 
     }
 
@@ -2571,7 +2569,6 @@ namespace Gambit
        logger() << "Baryon to photon ratio (eta) @BBN computed to be " << result << EOM;
     }
 
-    
     void calculate_dNeff_ALP(double &result)
     {
       using namespace Pipes::calculate_dNeff_ALP;
@@ -2582,12 +2579,10 @@ namespace Gambit
     }
 
 
-   
 /// -----------
 /// BBN related functions (call AlterBBN, BBN abundances & Likelihood)
 /// -----------
 
-    
     void AlterBBN_fill_LCDM_dNeffCMB_dNeffBBN_etaBBN(relicparam &result)
     {
       // fill AlterBBN structure for LCDM_Smu_dNeffCMB_dNeffBBN_etaBBN
