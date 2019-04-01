@@ -2364,7 +2364,8 @@ namespace Gambit
       // TODO: call from CosmoALPs model when implemented
       double Ya0 = *Param["Ya0"];
       double T0 = T_evo[0];
-      double ssm_at_T0 = (2.*pow(pi,2)/45.) * (43./11.) * pow((1e-3*_kB_eV_over_K_*T0),3);
+      //double ssm_at_T0 = (2.*pow(pi,2)/45.) * (43./11.) * pow((1e-3*_kB_eV_over_K_*T0),3);
+      double ssm_at_T0 = (2.*pow(pi,2)/45.) * (43./11.) * pow((T0),3); // !!! T0 is already in units of keV !!
       double na_t0 = Ya0 * ssm_at_T0;     // initial number density of a at t=t0, in units keV^3.
       double m_a = 1e-3*(*Param["ma0"]);  // mass of a in keV
       double tau_a = *Dep::lifetime;      // lifetime of a in seconds
