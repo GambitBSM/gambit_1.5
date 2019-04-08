@@ -453,51 +453,59 @@ if(EXISTS "${PROJECT_SOURCE_DIR}/Models/")
   message("${Yellow}-- Generated particle_database.cpp from particle_database.yaml.${ColourReset}")
 endif()
 
+# Add the main gambit sources and identify which modules are to be included.
+include(cmake/gambit.cmake)
+
 # Identify the different harvester scripts
-set(MODEL_HARVESTER ${PROJECT_SOURCE_DIR}/Models/scripts/model_harvester.py)
-set(BACKEND_HARVESTER ${PROJECT_SOURCE_DIR}/Backends/scripts/backend_harvester.py)
 set(MODULE_HARVESTER ${PROJECT_SOURCE_DIR}/Elements/scripts/module_harvester.py)
+set(BACKEND_HARVESTER ${PROJECT_SOURCE_DIR}/Backends/scripts/backend_harvester.py)
+set(MODEL_HARVESTER ${PROJECT_SOURCE_DIR}/Models/scripts/model_harvester.py)
 set(PRINTER_HARVESTER ${PROJECT_SOURCE_DIR}/Printers/scripts/printer_harvester.py)
+set(COLLIDER_HARVESTER ${PROJECT_SOURCE_DIR}/ColliderBit/scripts/collider_harvester.py)
 set(HARVEST_TOOLS ${PROJECT_SOURCE_DIR}/Utils/scripts/harvesting_tools.py)
 
 # Create module_rollcall.hpp, module_types_rollcall.hpp, module_functor_types.hpp, models_rollcall.hpp, model_types_rollcall.hpp,
-# backend_rollcall.hpp, backend_types_rollcall.hpp, backend_functor_types.hpp, printer_rollcall.hpp, particle_database.cpp.
-file(GLOB MODEL_HARVESTER_FILES    "${PROJECT_SOURCE_DIR}/Models/include/gambit/Models/models/*.hpp"
-                                   "${PROJECT_SOURCE_DIR}/Models/CMakeLists.txt")
-file(GLOB BACKEND_HARVESTER_FILES  "${PROJECT_SOURCE_DIR}/Backends/include/gambit/Backends/frontends/*.hpp"
-                                   "${PROJECT_SOURCE_DIR}/Backends/CMakeLists.txt")
-file(GLOB PRINTER_HARVESTER_FILES  "${PROJECT_SOURCE_DIR}/Printers/include/gambit/Printers/printers/*.hpp"
-                                   "${PROJECT_SOURCE_DIR}/Printers/CMakeLists.txt")
+# backend_rollcall.hpp, backend_types_rollcall.hpp, backend_functor_types.hpp, printer_rollcall.hpp, particle_database.cpp,
+# ColliderBit_model_rollcall.hpp, ColliderPythia_typedefs.hpp
 file(GLOB MODULE_HARVESTER_FILES   "${PROJECT_SOURCE_DIR}/*Bit*/include/gambit/*Bit*/*_rollcall.hpp"
                                    "${PROJECT_SOURCE_DIR}/*Bit*/include/gambit/*Bit*/*_types.hpp")
-string (REPLACE "//" "/" MODEL_HARVESTER_FILES    "${MODEL_HARVESTER_FILES}")   # (GLOB creates erroneous double slashes)
-string (REPLACE "//" "/" BACKEND_HARVESTER_FILES  "${BACKEND_HARVESTER_FILES}")
-string (REPLACE "//" "/" PRINTER_HARVESTER_FILES  "${PRINTER_HARVESTER_FILES}")
+file(GLOB BACKEND_HARVESTER_FILES  "${PROJECT_SOURCE_DIR}/Backends/include/gambit/Backends/frontends/*.hpp"
+                                   "${PROJECT_SOURCE_DIR}/Backends/CMakeLists.txt")
+file(GLOB MODEL_HARVESTER_FILES    "${PROJECT_SOURCE_DIR}/Models/include/gambit/Models/models/*.hpp"
+                                   "${PROJECT_SOURCE_DIR}/Models/CMakeLists.txt")
+file(GLOB PRINTER_HARVESTER_FILES  "${PROJECT_SOURCE_DIR}/Printers/include/gambit/Printers/printers/*.hpp"
+                                   "${PROJECT_SOURCE_DIR}/Printers/CMakeLists.txt")
+file(GLOB COLLIDER_HARVESTER_FILES "${PROJECT_SOURCE_DIR}/ColliderBit/include/gambit/ColliderBit/models/*.hpp"
+                                   "${PROJECT_SOURCE_DIR}/Models/CMakeLists.txt")
 string (REPLACE "//" "/" MODULE_HARVESTER_FILES   "${MODULE_HARVESTER_FILES}")
+string (REPLACE "//" "/" BACKEND_HARVESTER_FILES  "${BACKEND_HARVESTER_FILES}")
+string (REPLACE "//" "/" MODEL_HARVESTER_FILES    "${MODEL_HARVESTER_FILES}")   # (GLOB creates erroneous double slashes)
+string (REPLACE "//" "/" PRINTER_HARVESTER_FILES  "${PRINTER_HARVESTER_FILES}")
+string (REPLACE "//" "/" COLLIDER_HARVESTER_FILES "${COLLIDER_HARVESTER_FILES}")
 list(REMOVE_ITEM MODULE_HARVESTER_FILES "${PROJECT_SOURCE_DIR}/ScannerBit//include//gambit//ScannerBit//priors_rollcall.hpp"
                                         "${PROJECT_SOURCE_DIR}/ScannerBit//include//gambit//ScannerBit//test_function_rollcall.hpp")
 list(APPEND MODULE_HARVESTER_FILES "${PROJECT_SOURCE_DIR}/config/resolution_type_equivalency_classes.yaml")
 set(MODULE_HARVESTER_FILES ${MODULE_HARVESTER_FILES} ${BACKEND_HARVESTER_FILES})
-remove_build_files(models_harvested backends_harvested modules_harvested printers_harvested)
-if(EXISTS "${PROJECT_SOURCE_DIR}/Models/")
- add_gambit_custom(model_harvest models_harvested MODEL_HARVESTER MODEL_HARVESTER_FILES)
-endif()
-if(EXISTS "${PROJECT_SOURCE_DIR}/Backends/")
-  add_gambit_custom(backend_harvest backends_harvested BACKEND_HARVESTER BACKEND_HARVESTER_FILES)
-endif()
-if(EXISTS "${PROJECT_SOURCE_DIR}/Printers/")
-  add_gambit_custom(printer_harvest printers_harvested PRINTER_HARVESTER PRINTER_HARVESTER_FILES)
-else()
-  add_definitions(-DNO_PRINTERS)
-endif()
+remove_build_files(models_harvested backends_harvested modules_harvested printers_harvested colliders_harvested)
 if(EXISTS "${PROJECT_SOURCE_DIR}/Elements/")
   add_gambit_custom(module_harvest modules_harvested MODULE_HARVESTER  MODULE_HARVESTER_FILES)
 endif()
 if(EXISTS "${PROJECT_SOURCE_DIR}/Backends/")
+  add_gambit_custom(backend_harvest backends_harvested BACKEND_HARVESTER BACKEND_HARVESTER_FILES)
   add_dependencies(module_harvest backend_harvest)
 endif()
+if(EXISTS "${PROJECT_SOURCE_DIR}/Models/")
+ add_gambit_custom(model_harvest models_harvested MODEL_HARVESTER MODEL_HARVESTER_FILES)
+endif()
 if(EXISTS "${PROJECT_SOURCE_DIR}/Printers/")
+  add_gambit_custom(printer_harvest printers_harvested PRINTER_HARVESTER PRINTER_HARVESTER_FILES)
   add_dependencies(printer_harvest module_harvest)
+else()
+  add_definitions(-DNO_PRINTERS)
+endif()
+if(EXISTS "${PROJECT_SOURCE_DIR}/ColliderBit/" AND ";${GAMBIT_BITS};" MATCHES ";ColliderBit;")
+  add_gambit_custom(collider_harvest colliders_harvested COLLIDER_HARVESTER COLLIDER_HARVESTER_FILES)
+  add_dependencies(module_harvest collider_harvest)
 endif()
 
 # Generate the CMakeLists.txt files for GAMBIT modules, Backends, Models and Printers)
@@ -507,8 +515,7 @@ execute_process(RESULT_VARIABLE result COMMAND ${PYTHON_EXECUTABLE} ${update_cma
 check_result(${result} ${update_cmakelists})
 message("${Yellow}-- Updating GAMBIT module, backend, and printer CMake files - done.${ColourReset}")
 
-# Include other cmake scripts
-include(cmake/gambit.cmake)
+# Add backends and scanners
 include(cmake/externals.cmake)
 
 # Add GAMBIT subdirectories.
@@ -530,9 +537,13 @@ foreach(bit ${GAMBIT_BITS})
   set(GAMBIT_BIT_OBJECTS ${GAMBIT_BIT_OBJECTS} "$<TARGET_OBJECTS:${bit}>")
 endforeach()
 
-# If ColliderBit and RestFrames is used, make RestFrames a dependency of ColliderBit
-if(";${GAMBIT_BITS};" MATCHES ";ColliderBit;" AND NOT EXCLUDE_RESTFRAMES)
-  add_dependencies(ColliderBit restframes)
+# If ColliderBit is in use, make the collider_harvest step a dependency of ColliderBit
+if(";${GAMBIT_BITS};" MATCHES ";ColliderBit;")
+  add_dependencies(ColliderBit collider_harvest)
+  # If RestFrames is in use, make RestFrames a dependency of ColliderBit
+  if(NOT EXCLUDE_RESTFRAMES)
+    add_dependencies(ColliderBit restframes)
+  endif()
 endif()
 
 # Add the executables

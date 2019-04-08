@@ -15,7 +15,7 @@
 #include <iomanip>
 #include <fstream>
 
-#include "gambit/ColliderBit/analyses/BaseAnalysis.hpp"
+#include "gambit/ColliderBit/analyses/Analysis.hpp"
 #include "gambit/ColliderBit/CMSEfficiencies.hpp"
 #include "gambit/ColliderBit/mt2_bisect.h"
 
@@ -28,7 +28,7 @@ namespace Gambit {
     // Analysis_CMS_13TeV_2OSLEP_36invfb_nocovar defined further down.
     // This is the same analysis, but it does not make use of the
     // SR covariance information.
-    class Analysis_CMS_13TeV_2OSLEP_36invfb : public HEPUtilsAnalysis {
+    class Analysis_CMS_13TeV_2OSLEP_36invfb : public Analysis {
 
     protected:
 
@@ -54,6 +54,9 @@ namespace Gambit {
 
     public:
 
+      // Required detector sim
+      static constexpr const char* detector = "CMS";
+
       struct ptComparison {
         bool operator() (HEPUtils::Particle* i,HEPUtils::Particle* j) {return (i->pT()>j->pT());}
       } comparePt;
@@ -78,10 +81,9 @@ namespace Gambit {
       }
 
 
-      void analyze(const HEPUtils::Event* event)
+      void run(const HEPUtils::Event* event)
       {
         // Baseline objects
-        HEPUtilsAnalysis::analyze(event);
         double met = event->met();
 
         // Apply electron efficiency and collect baseline electrons
@@ -338,18 +340,12 @@ namespace Gambit {
 
       }
 
-
-
-      void add(BaseAnalysis* other)
+      /// Combine the variables of another copy of this analysis (typically on another thread) into this one.
+      void combine(const Analysis* other)
       {
-        // The base class add function handles the signal region vector and total # events.
+        const Analysis_CMS_13TeV_2OSLEP_36invfb* specificOther
+                = dynamic_cast<const Analysis_CMS_13TeV_2OSLEP_36invfb*>(other);
 
-        HEPUtilsAnalysis::add(other);
-
-        Analysis_CMS_13TeV_2OSLEP_36invfb* specificOther
-                = dynamic_cast<Analysis_CMS_13TeV_2OSLEP_36invfb*>(other);
-
-        // Here we will add the subclass member variables:
         if (NCUTS != specificOther->NCUTS) NCUTS = specificOther->NCUTS;
         for (size_t j = 0; j < NCUTS; j++)
         {
@@ -358,7 +354,7 @@ namespace Gambit {
         }
 
         for (auto& el : _numSR) {
-          el.second += specificOther->_numSR[el.first];
+          el.second += specificOther->_numSR.at(el.first);
         }
 
       }
@@ -443,7 +439,7 @@ namespace Gambit {
 
 
     protected:
-      void clear() {
+      void analysis_specific_reset() {
 
         for (auto& el : _numSR) { el.second = 0.;}
 
