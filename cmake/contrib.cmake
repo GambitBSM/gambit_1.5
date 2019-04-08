@@ -85,7 +85,6 @@ if(NOT EXCLUDE_RESTFRAMES)
   set(patch "${PROJECT_SOURCE_DIR}/contrib/patches/${name}/${ver}/patch_${name}_${ver}.dif")
   set(RESTFRAMES_LDFLAGS "-L${dir}/lib -lRestFrames")
   set(CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_RPATH};${dir}/lib")
-  add_install_name_tool_step(${name} ${dir}/lib libRestFrames.so)
   include_directories("${dir}" "${dir}/inc")
   ExternalProject_Add(restframes
     DOWNLOAD_COMMAND git clone https://github.com/crogan/RestFrames ${dir}
@@ -101,6 +100,8 @@ if(NOT EXCLUDE_RESTFRAMES)
     BUILD_COMMAND ${CMAKE_MAKE_PROGRAM}
     INSTALL_COMMAND ${CMAKE_MAKE_PROGRAM} install
     )
+  # Add install name tool step for OSX
+  add_install_name_tool_step(${name} ${dir}/lib libRestFrames.so)
   # Add clean-restframes and nuke-restframes
   set(rmstring "${CMAKE_BINARY_DIR}/restframes-prefix/src/restframes-stamp/restframes")
   add_custom_target(clean-restframes COMMAND ${CMAKE_COMMAND} -E remove -f ${rmstring}-configure ${rmstring}-build ${rmstring}-install ${rmstring}-done
