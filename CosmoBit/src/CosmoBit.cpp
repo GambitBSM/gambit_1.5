@@ -2340,7 +2340,7 @@ namespace Gambit
     {
       using namespace Pipes::compute_dNeff_etaBBN_ALP;
 
-      double dNeff, eta_ratio;
+      double dNeff, Neff_SM, Neff_ALP, eta_ratio;
       double temp_eta_ratio = 1; // temporary values to check convergence of iteration
       double temp_dNeff = 1;
       int ii=0;
@@ -2407,7 +2407,9 @@ namespace Gambit
         SM.set_HT_evo(T_evo);
 
         eta_ratio = pow(T_evo[grid_size-1]/T_evo[0], 3) * exp(3.0*SM.get_H_int()[grid_size-1]);
-        dNeff = 3*pow(Tnu_grid[grid_size-1]/T_evo[grid_size-1], 4) * 3.85280407965; // (11/4)^(4/3) = 3.85280407965
+        Neff_ALP = 3*pow(Tnu_grid[grid_size-1]/T_evo[grid_size-1], 4) * 3.85280407965; // (11/4)^(4/3) = 3.85280407965
+        Neff_SM = 3*pow(Tnu_grid[0]/T_evo[0], 4) * 3.85280407965; // (11/4)^(4/3) = 3.85280407965
+        dNeff = Neff_ALP - Neff_SM;
 
         ii ++;
       }
