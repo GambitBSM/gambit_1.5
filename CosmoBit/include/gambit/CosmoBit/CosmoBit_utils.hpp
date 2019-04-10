@@ -66,7 +66,9 @@ namespace Gambit
             }
     };
 
+    double entropy_density_SM(double T, bool T_in_eV=false);
     
+    std::vector<double> set_nu_masses(double mNu1, double mNu2, double mNu3, int& N_ncdm);
   }
 }
 

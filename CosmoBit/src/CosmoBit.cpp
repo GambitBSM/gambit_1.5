@@ -76,35 +76,7 @@ namespace Gambit
       -(1.0+pow(10.0,a)*c*c)/(1.0+pow(10.0,a)*x*x);
     }
 
-    // Utility function to set the number of massive neutrino species and prepare the input for class
-    std::vector<double> set_nu_masses(double mNu1, double mNu2, double mNu3, int& N_ncdm)
-    {
-      // !! masses mNu1, mNu2, mNu3 in eV unlike the definition in StandardMOdel_SLHA2 !!
-
-      // Reset N_ncdm
-      N_ncdm = 0;
-      std::vector<double> neutrino_masses;
-
-      // check for every mass if it is positive. If so add it to the vector and increase N_ncdm
-      if (mNu1 > 0.)
-      {
-        N_ncdm++;
-        neutrino_masses.push_back(mNu1);
-      }
-      if (mNu2 > 0.)
-      {
-        N_ncdm++;
-        neutrino_masses.push_back(mNu2);
-      }
-      if (mNu3 > 0.)
-      {
-        N_ncdm++;
-        neutrino_masses.push_back(mNu3);
-      }
-
-      return neutrino_masses;
-    }
-
+    
     // Returns SMASH potential value given parameters and field amplitude
     double pot_SMASH(double lambda, double phi, double xi)
     {
@@ -226,7 +198,7 @@ namespace Gambit
       // check for stupid input (T_R < m_e)
       // Throw an error if the user really pushed it that far.
       if (m_electron >= T_R_in_GeV)
-	CosmoBit_error().raise(LOCAL_INFO,"The reheating temperature is below the electron mass.");
+	    CosmoBit_error().raise(LOCAL_INFO,"The reheating temperature is below the electron mass.");
 
       double gagg = *Param["gagg"]; // in GeV^-1
       double Ya0_min = 1.56e-5 * pow(gagg,2) * m_planck * (T_R_in_GeV - m_electron);
@@ -240,7 +212,7 @@ namespace Gambit
       double Ya0 = *Param["Ya0"]; // ALP abundance (after production)
       double ma0 = *Param["ma0"]; // non-thermal ALP mass in eV
       double T = *Dep::T_cmb; // CMB temperature in K
-      double ssm0 = (2.*pow(pi,2)/45.) * (43./11.) * pow((_kB_eV_over_K_*T),3); // SM entropy density today in eV^3 (cf. footnote 24 of PDG2018-Astrophysical parameters)
+      double ssm0 = entropy_density_SM(T); // SM entropy density today in eV^3 (cf. footnote 24 of PDG2018-Astrophysical parameters)
       double rho0_a = Ya0 * ma0 * ssm0; // energy density of axions today in eV^4
 
       double omega_cdm = *Param["omega_cdm"]; // omega_cdm = Omega_cdm * h^2
@@ -254,7 +226,7 @@ namespace Gambit
       if (xi > 1.)
       {
         std::ostringstream err;
-        err << "ALPs are overabundant (omega_a > omega_cdm)";
+        err << "ALPs are over-abundant (omega_a > omega_cdm)";
         invalid_point().raise(err.str());
       }
 
@@ -305,8 +277,8 @@ namespace Gambit
       double red[npts];
       for (unsigned int i = 0; i < npts; i++)
       {
-	ftot[i] = fh.at(i)+fly.at(i)+fhi.at(i)+fhei.at(i)+flo.at(i);
-	red[i] = z.at(i);
+	       ftot[i] = fh.at(i)+fly.at(i)+fhi.at(i)+fhei.at(i)+flo.at(i);
+	       red[i] = z.at(i);
       }
 
       gsl_interp_accel *gsl_accel_ptr = gsl_interp_accel_alloc();
@@ -347,6 +319,7 @@ namespace Gambit
 
       result = Stats::gaussian_loglikelihood(pred_mean, obs_mean, pred_err, obs_err, false);
     }
+
 
     void class_set_parameter_LCDM_family(Class_container& cosmo)
     {
@@ -2361,11 +2334,10 @@ namespace Gambit
       T_evo = SM.get_T_evo();
 
       // --- model parameters ----
-      // TODO: call from CosmoALPs model when implemented
       double Ya0 = *Param["Ya0"];
       double T0 = T_evo[0];
-      //double ssm_at_T0 = (2.*pow(pi,2)/45.) * (43./11.) * pow((1e-3*_kB_eV_over_K_*T0),3);
-      double ssm_at_T0 = (2.*pow(pi,2)/45.) * (43./11.) * pow((T0),3); // !!! T0 is already in units of keV !!
+      double ssm_at_T0 = entropy_density_SM(T0, true);; // T0 in units of keV, set T_in_eV=True to interpret it correctly
+      
       double na_t0 = Ya0 * ssm_at_T0;     // initial number density of a at t=t0, in units keV^3.
       double m_a = 1e-3*(*Param["ma0"]);  // mass of a in keV
       double tau_a = *Dep::lifetime;      // lifetime of a in seconds
@@ -2378,7 +2350,7 @@ namespace Gambit
 
         SM.calc_H_int();
         na_grid = na_t0*exp(-3.0*SM.get_H_int())*exp(-t_grid/tau_a);    // na(t) in units keV^3
-        injection_grid = (m_a/tau_a)*na_grid;                 // m_a*na(t)/tau_a in units keV^4/s
+        injection_grid = (m_a/tau_a)*na_grid;                           // m_a*na(t)/tau_a in units keV^4/s
         Tnu_grid = SM.get_Tnu_evo()[0]*exp(-1.0*SM.get_H_int());        // T_nu(t) in units keV
         fast_interpolation injection_inter(t_grid, injection_grid);     // interpolating function
 
@@ -2423,8 +2395,9 @@ namespace Gambit
       }
 
       result["dNeff"] = dNeff;
+      result["Neff_ratio"] = Neff_ALP/Neff_SM;
       result["eta_ratio"] = eta_ratio;
-      logger() << "CosmoALP model: calculated dNeff @BBN to be " << result["dNeff"] <<", and etaBB(ALP)/etaBBN(SM) = " << result["eta_ratio"] << ". Calculation converged after "<< ii <<" iterations." << EOM;
+      logger() << "CosmoALP model: calculated Neff @BBN to be " << result["dNeff"] <<", and etaBB(ALP)/etaBBN(SM) = " << result["eta_ratio"] << ". Calculation converged after "<< ii <<" iterations." << EOM;
 
     }
 
@@ -2937,8 +2910,8 @@ namespace Gambit
 
       int ie,je;
       double dl,chi2;
-      double M = *Param["M_AbsMag_SNe"]; // TODO: make proper nuissance param!!
-
+      double M = *Param["M_AbsMag_SNe"]; 
+      
       if(read_data == false)
       {
         read_data = true;
