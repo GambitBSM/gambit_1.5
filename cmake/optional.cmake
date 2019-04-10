@@ -27,9 +27,9 @@
 #
 #************************************************
 
-# Check for MPI libraries; disable manually with "cmake -DMPI=OFF .."
-option(MPI "Compile with MPI enabled" ON)
-if(MPI)
+# Check for MPI libraries; enable manually with "cmake -DMPI=ON .."
+option(WITH_MPI "Compile with MPI enabled" OFF)
+if(WITH_MPI)
   find_package(MPI)
   # Do things for GAMBIT itself
   if(MPI_C_FOUND OR MPI_CXX_FOUND)
@@ -102,7 +102,7 @@ if(MPI)
     message("${BoldRed}   Missing C++ MPI installation.  C++ scanners will not be MPI-enabled.${ColourReset}")
   endif()
 else()
-  message("${BoldCyan} X MPI manually disabled. Executables will not be parallelised via MPI.${ColourReset}")
+  message("${BoldCyan} X MPI is disabled. Executables will not be parallelised with MPI. Please use -DWITH_MPI=ON to enable MPI.${ColourReset}")
 endif()
 
 # Check for LAPACK.  Cmake native findLAPACK isn't very thorough, so we need to do a bit more work here.
@@ -175,23 +175,27 @@ if(LAPACK_STATIC OR (NOT LAPACK_LINKLIBS AND NOT LAPACK_FOUND))
   message("${BoldRed}   LAPACK shared library not found. Excluding FlexibleSUSY and MultiNest from GAMBIT configuration. ${ColourReset}")
 endif()
 
-# Check for ROOT.  Always look, in case the wise user has uninstalled it since last cmaking.
-unset(ROOT_CONFIG_EXECUTABLE CACHE)
-find_package(ROOT)
-if (NOT ROOT_FOUND OR ROOT_VERSION VERSION_GREATER 6)
-  # Excluding GreAT and RestFrames from GAMBIT
-  if (NOT ROOT_FOUND)
-    message("${BoldRed}   No ROOT installation found. Excluding GreAT and RestFrames from GAMBIT configuration. ${ColourReset}")
-    set (EXCLUDE_ROOT TRUE)
-    set (itch "${itch}" "great" "RestFrames")
-  else()
-    set (ROOT_6_OR_LATER_FOUND 1)
-    include_directories(${ROOT_INCLUDE_DIR})
-    set (EXCLUDE_ROOT FALSE)
+# Check for ROOT.
+option(WITH_ROOT "Compile with ROOT enabled" OFF)
+if(WITH_ROOT)
+  find_package(ROOT)
+  if(NOT ROOT_FOUND)
+    message("${BoldRed}   ROOT not found.${ColourReset}")
   endif()
 else()
+  message("${BoldCyan} X ROOT support is deactivated. Set -DWITH_ROOT=ON to activate ROOT support in GAMBIT.${ColourReset}")
+endif()
+if (WITH_ROOT AND ROOT_FOUND)
+  if (ROOT_VERSION VERSION_GREATER 6)
+    set (ROOT_6_OR_LATER_FOUND 1)
+  endif()
   include_directories(${ROOT_INCLUDE_DIR})
   set (EXCLUDE_ROOT FALSE)
+else()
+  message("   Disabling GreAT and RestFrames support in GAMBIT configuration.")
+  set (WITH_RESTFRAMES OFF)
+  set (itch "${itch}" "great")
+  set (EXCLUDE_ROOT TRUE)
 endif()
 
 # Check for HDF5 libraries

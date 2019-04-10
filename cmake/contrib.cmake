@@ -49,22 +49,21 @@ include_directories("${yaml_INCLUDE_DIR}")
 add_definitions(-DYAML_CPP_DLL)
 add_subdirectory(${PROJECT_SOURCE_DIR}/contrib/yaml-cpp-0.6.2 EXCLUDE_FROM_ALL)
 
+#contrib/RestFrames; include only if ColliderBit is in use, ROOT is found and WITH_RESTFRAMES=ON.
+option(WITH_RESTFRAMES "Compile with RestFrames enabled" OFF)
+if(NOT WITH_RESTFRAMES)
+  message("${BoldCyan} X RestFrames is deactivated. Set -DWITH_RESTFRAMES=ON to activate RestFrames.${ColourReset}")
+elseif(NOT ";${GAMBIT_BITS};" MATCHES ";ColliderBit;")
+  message("${BoldCyan} X ColliderBit is not in use: excluding RestFrames from GAMBIT configuration.${ColourReset}")
+  set(WITH_RESTFRAMES OFF)
+elseif(NOT ROOT_FOUND)
+  message("${BoldCyan} X Not compiling with ROOT support: excluding RestFrames from GAMBIT configuration.${ColourReset}")
+  set(WITH_RESTFRAMES OFF)
+endif()
 
-#contrib/RestFrames; include only if ColliderBit is in use, ROOT is found and WITH_RESTFRAMES=True (default).
 set(restframes_VERSION "1.0.2")
 set(restframes_CONTRIB_DIR "${PROJECT_SOURCE_DIR}/contrib/RestFrames-${restframes_VERSION}")
-if(NOT ";${GAMBIT_BITS};" MATCHES ";ColliderBit;")
-  message("${BoldCyan} X Excluding RestFrames from GAMBIT configuration. (ColliderBit is not in use.)${ColourReset}")
-  set(EXCLUDE_RESTFRAMES TRUE)
-elseif(DEFINED WITH_RESTFRAMES AND NOT WITH_RESTFRAMES)
-  message("${BoldCyan} X Excluding RestFrames from GAMBIT configuration. (WITH_RESTFRAMES is set to False.)${ColourReset}")
-  message("   RestFrames-dependent analyses in ColliderBit will be deactivated.")
-  set(EXCLUDE_RESTFRAMES TRUE)
-elseif(NOT ROOT_FOUND)
-  message("${BoldCyan} X Excluding RestFrames from GAMBIT configuration. (ROOT was not found.)${ColourReset}")
-  message("   RestFrames-dependent analyses in ColliderBit will be deactivated.")
-  set(EXCLUDE_RESTFRAMES TRUE)
-else() # OK, let's include RestFrames then
+if(WITH_RESTFRAMES)
   message("-- RestFrames-dependent analyses in ColliderBit will be activated.")
   set(EXCLUDE_RESTFRAMES FALSE)
   # Check if the RestFrames library already exists and print info message
@@ -75,6 +74,9 @@ else() # OK, let's include RestFrames then
   else()
     message("   Found RestFrames library: ${RestFrames_LIBRARY}")
   endif()
+else()
+  message("   RestFrames-dependent analyses in ColliderBit will be deactivated.")
+  set(EXCLUDE_RESTFRAMES TRUE)
 endif()
 
 # Add RestFrames as an external project that GAMBIT can depend on
