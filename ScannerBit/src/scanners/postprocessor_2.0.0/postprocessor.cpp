@@ -64,8 +64,10 @@ scanner_plugin(postprocessor, version(2, 0, 0))
   int numtasks;
   int rank;
 
-  // Tags for messages
-  const int request_work_tag=10;
+  #ifdef WITH_MPI
+    /// Tag for messages
+    const int request_work_tag=10;
+  #endif
 
   /// The reader object in use for the scan
   Gambit::Printers::BaseBaseReader* reader;

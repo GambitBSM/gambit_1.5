@@ -403,8 +403,8 @@ namespace Gambit
               ana_like_b = lsum_b / (double)NSAMPLE;
               ana_like_sb = lsum_sb / (double)NSAMPLE;
               //
-              const double diff_abs_b = fabs(ana_like_b_prev - ana_like_b);
-              const double diff_abs_sb = fabs(ana_like_sb_prev - ana_like_sb);
+              const double diff_abs_b = std::abs(ana_like_b_prev - ana_like_b);
+              const double diff_abs_sb = std::abs(ana_like_sb_prev - ana_like_sb);
               const double diff_rel_b = diff_abs_b/ana_like_b;
               const double diff_rel_sb = diff_abs_sb/ana_like_sb;
               //
