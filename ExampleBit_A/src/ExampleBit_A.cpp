@@ -146,10 +146,10 @@ namespace Gambit
     {
       using namespace Pipes::lnL_gaussian;
 
-      cout << "checking for LHC" << endl;
+      cout << "Checking for LHC option... ";
       if (runOptions->hasKey("LHC"))
       {
-        cout << "found LHC" << endl;
+        cout << "found." << endl;
         YAML::Node colNode = runOptions->getValue<YAML::Node>("LHC");
         cout << "extracted LHC" << endl;
         Options colOptions(colNode);
@@ -161,6 +161,7 @@ namespace Gambit
           cout << analyses << endl;
         }
       }
+      else cout << "not found." << endl;
 
 
       // Say we have a sample of 20 drawn from a normal distribution with

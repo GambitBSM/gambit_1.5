@@ -66,7 +66,6 @@ namespace Gambit
      , havejumped(1) // set to zero after jump point set
      , cleanup_function_set(false)
      , rank(-1)
-     , MPIsize(1)
      , shutdownBegun(0)
      , emergency(0)
      , POSIX_signal_noticed(false)
@@ -79,11 +78,12 @@ namespace Gambit
      , inside_omp_block(false)
      , N_signals(0)
      #ifdef WITH_MPI
+     , MPIsize(1)
      , _comm_rdy(false)
      , shutdown_broadcast_done(false)
      , looptimes(1000)
      , timeout(500)
-    #endif
+     #endif
    {}
 
    /// Retrieve MPI rank as a string (for log messages etc.)

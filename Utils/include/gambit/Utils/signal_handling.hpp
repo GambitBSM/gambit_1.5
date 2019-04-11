@@ -144,7 +144,6 @@ namespace Gambit
 
      private:
        int rank;
-       int MPIsize;
 
        /// Flag to warn if early shutdown is already in process
        volatile sig_atomic_t shutdownBegun;
@@ -178,21 +177,22 @@ namespace Gambit
 
        /// Extra data needed in MPI mode
        #ifdef WITH_MPI
-       GMPI::Comm* signalComm;
-       bool _comm_rdy;
+         int MPIsize;
+         GMPI::Comm* signalComm;
+         bool _comm_rdy;
 
-       /// Shutdown codes receivable via MPI (not MPI tags)
-       //static const int ERROR = 0; // Not in use
-       static const int SOFT_SHUTDOWN = 1;
-       static const int EMERGENCY_SHUTDOWN = 2;
-       static std::string shutdown_name(int shutdown_code);
+         /// Shutdown codes receivable via MPI (not MPI tags)
+         //static const int ERROR = 0; // Not in use
+         static const int SOFT_SHUTDOWN = 1;
+         static const int EMERGENCY_SHUTDOWN = 2;
+         static std::string shutdown_name(int shutdown_code);
 
-       /// Flag to check if shutdown message has already been broadcast
-       bool shutdown_broadcast_done;
+         /// Flag to check if shutdown message has already been broadcast
+         bool shutdown_broadcast_done;
 
-       /// Variables needed to compute sensible shutdown timeout length
-       std::vector<double> looptimes;
-       double timeout; // Computed timeout value for shutdowns
+         /// Variables needed to compute sensible shutdown timeout length
+         std::vector<double> looptimes;
+         double timeout; // Computed timeout value for shutdowns
        #endif
 
    };

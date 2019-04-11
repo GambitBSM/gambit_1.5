@@ -39,7 +39,7 @@ Printer:
 
 Scanner:
 
-  use_scanner: multinest
+  use_scanner: random
 
   scanners:
 
