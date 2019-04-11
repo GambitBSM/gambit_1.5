@@ -266,8 +266,8 @@ else()
 endif()
 
 # Fix Boost < 1.55 for Clang
-if("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
-  if(${CMAKE_VERSION} VERSION_LESS "3.12.0")
+if("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang" OR "${CMAKE_CXX_COMPILER_ID}" STREQUAL "AppleClang")
+  if(${CMAKE_VERSION} VERSION_LESS 3.12.0)
     add_definitions(-DBOOST_PP_VARIADICS=1)
   else()
     add_compile_definitions(BOOST_PP_VARIADICS=1)
@@ -286,15 +286,31 @@ else()
 endif()
 
 # Check for OpenMP
-find_package(OpenMP REQUIRED)
+find_package(OpenMP)
 if (OPENMP_FOUND)
-    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${OpenMP_C_FLAGS}")
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}")
-    if (NOT DEFINED OpenMP_Fortran_FLAGS)
-      set(OpenMP_Fortran_FLAGS "-fopenmp")
+  set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${OpenMP_C_FLAGS}")
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}")
+  if (NOT DEFINED OpenMP_Fortran_FLAGS)
+    set(OpenMP_Fortran_FLAGS "-fopenmp")
+  endif()
+  set(CMAKE_Fortran_FLAGS "${CMAKE_Fortran_FLAGS} ${OpenMP_Fortran_FLAGS}")
+else()
+  if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "AppleClang")
+    set(err_msg "\nOpenMP libraries not found.  You are using the Apple Clang compiler.  Please see"
+                "\nhttps://iscinumpy.gitlab.io/post/omp-on-high-sierra/ for installation instructions.")
+    if(${CMAKE_VERSION} VERSION_LESS 3.12.0)
+      set(err_msg "${err_msg}/nNote that because your version of cmake is older than 3.12.0, you must use"
+                  "\nall the command-line cmake switches listed under the 'classic method' on that page.")
+    else()
+      set(err_msg "${err_msg}/nNote that because your version of cmake is 3.12.0 or later, you do not need"
+                  "\nto pass any of the command-line cmake switches listed under 'classic method' on that page.")
     endif()
-    set(CMAKE_Fortran_FLAGS "${CMAKE_Fortran_FLAGS} ${OpenMP_Fortran_FLAGS}")
+    message(FATAL_ERROR err_msg)
+  else()
+    message(FATAL_ERROR "\nOpenMP libraries not found.  Your compiler installation seems to be broken."
+  endif()
 endif()
+
 
 # Check for Gnu Scientific Library (GSL)
 include(cmake/FindGSL.cmake)

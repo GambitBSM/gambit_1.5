@@ -274,6 +274,10 @@ function(add_gambit_executable executablename LIBRARIES)
     endforeach()
   endif()
 
+  if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "AppleClang" AND NOT ${CMAKE_VERSION} VERSION_LESS 3.12.0)
+    target_link_libraries(${executablename} PRIVATE OpenMP::OpenMP_CXX)
+  endif()
+
   if(MPI_CXX_FOUND)
     set(LIBRARIES ${LIBRARIES} ${MPI_CXX_LIBRARIES})
     if(MPI_CXX_LINK_FLAGS)
