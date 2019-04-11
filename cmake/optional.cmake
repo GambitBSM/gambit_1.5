@@ -136,7 +136,7 @@ if(NOT LAPACK_LINKLIBS)
         # Make sure FindLAPACK.cmake doesn't clobber gcc's openmp
         string(FIND "${lib}" "iomp5" IS_IOMP5)
         string(FIND "${lib}" "mkl_intel_thread" IS_MKLINTELTHREAD)
-        if("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU" OR "${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
+        if("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU" OR "${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang" OR "${CMAKE_CXX_COMPILER_ID}" STREQUAL "AppleClang")
           if(NOT ${IS_IOMP5} EQUAL -1)
             set(lib "")
           endif()

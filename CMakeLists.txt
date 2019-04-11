@@ -307,7 +307,7 @@ else()
     endif()
     message(FATAL_ERROR err_msg)
   else()
-    message(FATAL_ERROR "\nOpenMP libraries not found.  Your compiler installation seems to be broken."
+    message(FATAL_ERROR "\nOpenMP libraries not found.  Your compiler installation seems to be broken.")
   endif()
 endif()
 
