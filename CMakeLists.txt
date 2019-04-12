@@ -305,7 +305,7 @@ else()
       set(err_msg "${err_msg}/nNote that because your version of cmake is 3.12.0 or later, you do not need"
                   "\nto pass any of the command-line cmake switches listed under 'classic method' on that page.")
     endif()
-    message(FATAL_ERROR err_msg)
+    message(FATAL_ERROR "${err_msg}")
   else()
     message(FATAL_ERROR "\nOpenMP libraries not found.  Your compiler installation seems to be broken.")
   endif()
