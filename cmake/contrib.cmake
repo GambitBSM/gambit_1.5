@@ -216,29 +216,10 @@ if(";${GAMBIT_BITS};" MATCHES ";SpecBit;")
     endif()
   endforeach()
 
-  # Explain how to build each of the flexiblesusy spectrum generators we need.  Configure now, serially, to prevent parallel build issues.
+  # Explain how to build each of the flexiblesusy spectrum generators we need.
   string (REPLACE ";" "," BUILD_FS_MODELS_COMMAS "${BUILD_FS_MODELS}")
   string (REPLACE ";" "," EXCLUDED_FS_MODELS_COMMAS "${EXCLUDED_FS_MODELS}")
-   set(config_command ./configure ${FS_OPTIONS} --with-models=${BUILD_FS_MODELS_COMMAS})
-  add_custom_target(configure-flexiblesusy COMMAND cd ${FS_DIR} && ${config_command})
-  message("${Yellow}-- Configuring FlexibleSUSY for models: ${BoldYellow}${BUILD_FS_MODELS_COMMAS}${ColourReset}")
-  if (NOT "${EXCLUDED_FS_MODELS_COMMAS}" STREQUAL "")
-    message("${Red}   Switching OFF FlexibleSUSY support for models: ${BoldRed}${EXCLUDED_FS_MODELS_COMMAS}${ColourReset}")
-  endif()
-  #message("${Yellow}-- Using configure command \n${config_command}${output}${ColourReset}" )
-  execute_process(COMMAND ${config_command}
-                  WORKING_DIRECTORY ${FS_DIR}
-                  RESULT_VARIABLE result
-                  OUTPUT_VARIABLE output
-                 )
-  if (NOT "${result}" STREQUAL "0")
-     message("${BoldRed}-- Configuring FlexibleSUSY failed.  Here's what I tried to do:\n${config_command}\n${output}${ColourReset}" )
-     message(FATAL_ERROR "Configuring FlexibleSUSY failed." )
-  endif()
-  set(rmstring "${CMAKE_BINARY_DIR}/flexiblesusy-prefix/src/flexiblesusy-stamp/flexiblesusy")
-  execute_process(COMMAND ${CMAKE_COMMAND} -E touch ${rmstring}-configure)
-
-  message("${Yellow}-- Configuring FlexibleSUSY - done.${ColourReset}")
+  set(config_command ./configure ${FS_OPTIONS} --with-models=${BUILD_FS_MODELS_COMMAS})
 
   # Add FlexibleSUSY as an external project
   ExternalProject_Add(flexiblesusy
@@ -272,6 +253,27 @@ if(";${GAMBIT_BITS};" MATCHES ";SpecBit;")
   foreach(_MODEL ${BUILD_FS_MODELS})
     include_directories("${FS_DIR}/models/${_MODEL}")
   endforeach()
+
+  # Configure now, serially, to prevent parallel build issues.
+  message("${Yellow}-- Configuring FlexibleSUSY for models: ${BoldYellow}${BUILD_FS_MODELS_COMMAS}${ColourReset}")
+  if (NOT "${EXCLUDED_FS_MODELS_COMMAS}" STREQUAL "")
+    message("${Red}   Switching OFF FlexibleSUSY support for models: ${BoldRed}${EXCLUDED_FS_MODELS_COMMAS}${ColourReset}")
+  endif()
+  #message("${Yellow}-- Using configure command \n${config_command}${output}${ColourReset}" )
+  execute_process(COMMAND ${config_command}
+                  WORKING_DIRECTORY ${FS_DIR}
+                  RESULT_VARIABLE result
+                  OUTPUT_VARIABLE output
+                 )
+  if (NOT "${result}" STREQUAL "0")
+     message("${BoldRed}-- Configuring FlexibleSUSY failed.  Here's what I tried to do:\n${config_command}\n${output}${ColourReset}" )
+     message(FATAL_ERROR "Configuring FlexibleSUSY failed." )
+  endif()
+  set(rmstring "${CMAKE_BINARY_DIR}/flexiblesusy-prefix/src/flexiblesusy-stamp/flexiblesusy")
+  execute_process(COMMAND ${CMAKE_COMMAND} -E touch ${rmstring}-configure)
+
+  message("${Yellow}-- Configuring FlexibleSUSY - done.${ColourReset}")
+
 
 else()
 
