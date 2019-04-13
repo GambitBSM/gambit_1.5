@@ -124,9 +124,10 @@ namespace Gambit
         // Calling DarkSUSY subroutine dsddgpgn(gps,gns,gpa,gna)
         // to set all four couplings.
 
-        int ierr = 0;
-        double* DDcouplings;
-        BEreq::get_DD_couplings(DDcouplings);
+//        double* DDcouplings;
+//        BEreq::get_DD_couplings(DDcouplings);
+// TB debug: whch syntax is correct ?
+        double* DDcouplings=BEreq::get_DD_couplings();
         ///This call is now replaced by the above call to a convenience function
         //BEreq::dsddgpgn(result.gps, result.gns, result.gpa, result.gna);
         double factor =

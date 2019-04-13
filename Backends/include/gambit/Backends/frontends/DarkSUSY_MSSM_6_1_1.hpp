@@ -55,7 +55,7 @@ BE_CONV_FUNCTION(DS_neutral_h_decay_channels, std::vector<std::vector<str>>, (),
 BE_CONV_FUNCTION(DS_charged_h_decay_channels, std::vector<std::vector<str>>, (), "get_DS_charged_h_decay_channels")
 BE_CONV_FUNCTION(neutrino_yield, double, (const double&, const int&, void*&), "nuyield")
 BE_CONV_FUNCTION(dsgenericwimp_nusetup, void, (const double(&)[29], const double(&)[29][3], const double(&)[15], const double(&)[3], const double&, const double&), "nuyield_setup")
-// BE_CONV_FUNCTION(init_diskless, int, (const SLHAstruct&, const DecayTable&), "initFromSLHAeaAndDecayTable")
+BE_CONV_FUNCTION(init_diskless, int, (const SLHAstruct&, const DecayTable&), "initFromSLHAeaAndDecayTable")
 // Functions used by convenience functions
 BE_FUNCTION(dsseyield_sim_ls, double, (const double&, const double&, const double&, const int&, const int&, const int&, const int&, const int&, const int&, const char&, const int&, const int&, const int&), "dsseyield_sim_ls_", "raw_nuyield_sim")
 BE_FUNCTION(dsseyield_ch, double, (const double&, const double&, const double&, const int&, const int&, const char&, const int&, const int&, const int&), "dsseyield_ch_", "raw_nuyield_casc")
@@ -146,6 +146,9 @@ BE_VARIABLE(mssmtype, DS_MSSMTYPE, "mssmtype_", "mssmtype")
 BE_VARIABLE(mssmpar, DS_MSSMPAR, "mssmpar_", "mssmpar")
 BE_VARIABLE(mssmwidths, DS_MSSMWIDTHS, "mssmwidths_", "mssmwidths")
 BE_VARIABLE(mssmmixing, DS_MSSMMIXING, "mssmmixing_", "mssmmixing")
+
+
+
 
 
 
