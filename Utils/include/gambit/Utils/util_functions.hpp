@@ -71,30 +71,55 @@ namespace Gambit
 
     /// Split a string into a vector of strings, using a delimiter,
     /// and removing any whitespace around the delimiter.
-    std::vector<str> delimiterSplit(str s, str delim);
+    EXPORT_SYMBOLS std::vector<str> delimiterSplit(str s, str delim);
 
     /// Strips namespace from the start of a string, or after "const".
-    str strip_leading_namespace(str s, str ns);
+    EXPORT_SYMBOLS str strip_leading_namespace(str s, str ns);
 
     /// Strip all whitespace except that following "const",
     /// in which case the whitespace is replaced by a single space.
-    void strip_whitespace_except_after_const(str&);
+    EXPORT_SYMBOLS void strip_whitespace_except_after_const(str&);
 
     /// Strips leading and/or trailing parentheses from a string.
-    void strip_parentheses(str&);
+    EXPORT_SYMBOLS void strip_parentheses(str&);
 
     /// Created a str of a specified length.
-    str str_fixed_len(str, int);
+    EXPORT_SYMBOLS str str_fixed_len(str, int);
 
     /// Copy a str to a character array, stripping the null termination character.
-    void strcpy2f(char*, int, str);
+    EXPORT_SYMBOLS void strcpy2f(char*, int, str);
 
     /// Checks whether `str' ends with `suffix'
-    bool endsWith(const std::string& str, const std::string& suffix);
+    EXPORT_SYMBOLS bool endsWith(const std::string& str, const std::string& suffix);
 
     /// Checks whether `str' begins with `prefix'
-    bool startsWith(const std::string& str, const std::string& prefix);
+    EXPORT_SYMBOLS bool startsWith(const std::string& str, const std::string& prefix, bool case_sensitive=true);
 
+    /// Perform a (possibly) case-insensitive string comparison
+    EXPORT_SYMBOLS bool iequals(const std::string& a, const std::string& b, bool case_sensitive=false);
+
+    /************************************************************************/
+    /* Comparator for case-insensitive comparison in STL assos. containers  */
+    /************************************************************************/
+    // From: https://stackoverflow.com/a/1801913/1447953
+    struct EXPORT_SYMBOLS ci_less : std::binary_function<std::string, std::string, bool>
+    {
+      // case-independent (ci) compare_less binary function
+      struct nocase_compare : public std::binary_function<unsigned char,unsigned char,bool>
+      {
+        bool operator() (const unsigned char& c1, const unsigned char& c2) const {
+            return tolower (c1) < tolower (c2);
+        }
+      };
+      bool operator() (const std::string & s1, const std::string & s2) const {
+        return std::lexicographical_compare
+          (s1.begin (), s1.end (),   // source range
+          s2.begin (), s2.end (),   // dest range
+          nocase_compare ());  // comparison
+      }
+    };
+
+    
     /// Get pointers to beginning and end of array.
     // Useful for initialising vectors with arrays, e.g.
     //   int vv[] = { 12,43 };
@@ -132,36 +157,36 @@ namespace Gambit
       return true;
     }
 
-     /// Ensure that a path exists (and then return the path, for chaining purposes)
-    const str& ensure_path_exists(const str&);
+    /// Ensure that a path exists (and then return the path, for chaining purposes)
+    EXPORT_SYMBOLS const str& ensure_path_exists(const str&);
 
     /// Check if a file exists
-    bool file_exists(const std::string& filename);
+    EXPORT_SYMBOLS bool file_exists(const std::string& filename);
 
     /// Return a vector of strings listing the contents of a directory (POSIX)
-    std::vector<str> ls_dir(const str& dir);
+    EXPORT_SYMBOLS std::vector<str> ls_dir(const str& dir);
 
     /// Get directory name from full path+filename (POSIX)
-    str dir_name(const str& path);
+    EXPORT_SYMBOLS str dir_name(const str& path);
 
     /// Get file name from full path+filename (POSIX)
-    str base_name(const str& path);
+    EXPORT_SYMBOLS str base_name(const str& path);
 
     /// Delete all files in a directory (does not act recursively)
-    int remove_all_files_in(const str& dirname, bool error_if_absent = true);
+    EXPORT_SYMBOLS int remove_all_files_in(const str& dirname, bool error_if_absent = true);
 
 
     typedef std::chrono::time_point<std::chrono::system_clock> time_point;
 
     /// Get clock time
-    time_point get_clock_now();
+    EXPORT_SYMBOLS time_point get_clock_now();
 
     /// Get date and time
-    str return_time_and_date(const time_point& in);
+    EXPORT_SYMBOLS str return_time_and_date(const time_point& in);
 
     /// Check if two strings are a "close" match
     /// Used for "did you mean?" type checking during command line argument processing
-    bool are_similar(const str& s1, const str& s2);
+    EXPORT_SYMBOLS bool are_similar(const str& s1, const str& s2);
 
     /// Sub-check for are_similar.
     /// true if s1 can be obtained by deleting one character from s2
@@ -172,7 +197,7 @@ namespace Gambit
     bool check2(const str& s1, const str& s2);
 
     /// returns square of double - saves tedious repetition
-    double sqr(double a);
+    EXPORT_SYMBOLS double sqr(double a);
 
     /// Local GAMBIT definition of isnan.  Could be redefined at a later point, depending on compiler support.
     using std::isnan;
@@ -182,7 +207,7 @@ namespace Gambit
 
     /// Check if a string represents an integer
     /// From: http://stackoverflow.com/a/2845275/1447953
-    bool isInteger(const std::string&);
+    EXPORT_SYMBOLS bool isInteger(const std::string&);
 
     // Dummy functions for variadic variables to avoid compiler warnings
     template<typename... T> void dummy_function() {}

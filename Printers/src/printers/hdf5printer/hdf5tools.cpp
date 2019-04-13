@@ -95,7 +95,7 @@ namespace Gambit {
       /// third argument "oldfile" is used to report whether an existing file was opened (true if yes)
       hid_t openFile(const std::string& fname, bool overwrite, bool& oldfile, const char access_type)
       {
-	  hid_t file_id;  // file handle
+	      hid_t file_id;  // file handle
 
           unsigned int atype;
           switch(access_type)
@@ -143,7 +143,7 @@ namespace Gambit {
                 {
                    /* Still no good; error */
                    std::ostringstream errmsg;
-                   errmsg << "Failed to open existing HDF5 file, then failed to create new one! ("<<fname<<")";
+                   errmsg << "Failed to open existing HDF5 file, then failed to create new one! ("<<fname<<"). The file may exist but be unreadable. You can check this by trying to inspect it with the 'h5ls' command line tool.";
                    printer_error().raise(LOCAL_INFO, errmsg.str());
                 }
                 else
@@ -175,9 +175,9 @@ namespace Gambit {
       {
           bool readable(false);
 
-          //errorsOff();
+          errorsOff();
           hid_t file_id = H5Fopen(fname.c_str(), H5F_ACC_RDONLY, H5P_GAMBIT);
-          //errorsOn();
+          errorsOn();
           if(file_id < 0)
           {
             readable=false;

@@ -69,6 +69,7 @@ namespace Gambit
       private:
         int rank;
         std::set<std::string> print_list; // List of names of data that may be printed (i.e. with printme=true)
+        bool resume; // Flag to query to determine if printer is appending points to existing output 
 
       public:
         BaseBasePrinter(): rank(0), printer_enabled(true) {}
@@ -79,6 +80,11 @@ namespace Gambit
         /// Signal printer to reset contents, i.e. delete old data in preperation for replacement
         virtual void reset(bool force=false) = 0;
 
+        /// Signal printer to flush data in buffers to disk
+        /// Printers should do this automatically as needed, but this is useful if a scanner is printing
+        /// a bunch of data as a batch, to make sure it is all on disk after the batch is done.
+        virtual void flush() = 0;
+
         /// Retrieve/Set MPI rank (setting is useful for e.g. the postprocessor to re-print points from other ranks)
         int  getRank() {return rank;}
         void setRank(int r) {rank = r;}
@@ -86,8 +92,15 @@ namespace Gambit
         /// Retrieve/Set print list for this printer
         /// Required by e.g. postprocessor.
         std::set<std::string> getPrintList() {return print_list;}
-        void                  setPrintList(std::set<std::string>& in) {print_list = in;}
-        void                  addToPrintList(std::string& in) {print_list.insert(in);}
+        void                  setPrintList(const std::set<std::string>& in) {print_list = in;}
+        void                  addToPrintList(const std::string& in) {print_list.insert(in);}
+
+        // Get options required to construct a reader object that can read
+        // the previous output of this printer.
+        virtual Options resume_reader_options() = 0;
+
+        bool get_resume() { return resume; }
+        void set_resume(bool rflag) { resume = rflag; }
 
         /// Signal printer that scan is finished, and final output needs to be performed
         virtual void finalise(bool abnormal=false) = 0;

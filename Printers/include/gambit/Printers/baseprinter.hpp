@@ -32,6 +32,10 @@
 #include "gambit/Utils/boost_fallbacks.hpp"
 #include "gambit/Utils/factory_registry.hpp"
 #include "gambit/Utils/model_parameters.hpp"
+#include "gambit/Utils/export_symbols.hpp"
+
+// Boost
+#include <boost/preprocessor/seq/for_each_i.hpp>
 
 // Printable types
 #ifndef SCANNER_STANDALONE
@@ -60,11 +64,17 @@ namespace Gambit
   {
 
     // Helper function for parsing ModelParameters label strings.
-    bool parse_label_for_ModelParameters(const std::string& fulllabel, const std::string& modelname, std::string& out, std::string& rest);
+    bool parse_label_for_ModelParameters(const std::string& fulllabel, const std::string& modelname, std::string& out, std::string& rest, bool case_sensitive=true);
 
     /// For debugging; print to stdout all the typeIDs for all types.
     void printAllTypeIDs(void);
 
+    /// Declare specialisations of type ID getters
+    #define DECLARE_GETTYPEID(r,data,i,elem) \
+      template<> \
+      EXPORT_SYMBOLS std::size_t getTypeID<elem>(void);
+    BOOST_PP_SEQ_FOR_EACH_I(DECLARE_GETTYPEID, _, PRINTABLE_TYPES)
+    #undef DECLARE_GETTYPEID
 
     //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     //% Printer class declarations                          %
@@ -94,6 +104,15 @@ namespace Gambit
         /// Initialisation function
         // Run by dependency resolver, which supplies the functors with a vector of VertexIDs whose requiresPrinting flags are set to true. (TODO: probably extend this to be a list of functors THIS printer is supposed to print, since we may want several printers handling different functors, for SLHA output or some such perhaps).
         virtual void initialise(const std::vector<int>&) = 0;
+
+        /// Signal printer to flush data in buffers to disk
+        /// Printers should do this automatically as needed, but this is useful if a scanner is printing
+        /// a bunch of data as a batch, to make sure it is all on disk after the batch is done.
+        virtual void flush() = 0;        
+
+        // Get options required to construct a reader object that can read
+        // the previous output of this printer.
+        virtual Options resume_reader_options() = 0;
 
         /// Set this as an auxilliary printer
         void set_as_aux() { is_aux = true; }
@@ -197,7 +216,7 @@ namespace Gambit
     // Note: Arguments to e.g printer_creators need to match constructor for printer object
     // e.g. printer_creators.at(tag)(args...)
     // (this is set up by the typedef)
-    registry
+    gambit_registry
     {
             typedef BasePrinter* create_printer_function(const Options&, BasePrinter* const&);
             reg_elem <create_printer_function> printer_creators;
