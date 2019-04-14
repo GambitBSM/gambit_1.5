@@ -69,6 +69,7 @@
 ///  \date 2016 Oct
 ///  \date 2017 Feb, Sep, Dec
 ///  \date 2018 Jan, Mar, Apr
+///  \date 2019 Mar, Apr
 ///
 ///  *********************************************
 
@@ -1472,6 +1473,14 @@ START_MODULE
     #define FUNCTION calc_lnL_SN1987A
     START_FUNCTION(double)
     ALLOW_MODEL(GeneralALP)
+    #undef FUNCTION
+  #undef CAPABILITY
+
+  #define CAPABILITY lnL_SN1987A_DecayApprox
+  START_CAPABILITY
+    #define FUNCTION calc_lnL_SN1987A_DecayApprox
+    START_FUNCTION(double)
+    DEPENDENCY(GeneralCosmoALP_parameters, ModelParameters)
     #undef FUNCTION
   #undef CAPABILITY
 

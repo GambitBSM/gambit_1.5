@@ -3884,7 +3884,10 @@ lnL_WDVar_L192: |
    Loglikelihood for the White Dwarf L19-2 (cooling hint).
 
 lnL_SN1987A: |
-   Loglikelihood for an axion signal from SN1987A.
+   Loglikelihood for an axion signal from SN1987A (conversion in the Galactic magnetic field).
+
+lnL_SN1987A_DecayApprox: |
+   Temporary loglikelihood for an axion signal from SN1987A (from ALP decays).
 
 lnL_HESS_GCMF: |
    LogLikelihood for H.E.S.S. constraints on axions (Galactic Centre magnetic field result).

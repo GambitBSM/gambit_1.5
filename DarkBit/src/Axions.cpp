@@ -1793,6 +1793,24 @@ namespace Gambit
       result = -0.5 * gsl_pow_2(obs/sigma);
     }
 
+    //////////////////////////////////////////////////////////////////////////////
+    //      Approximation for SN 1987A limits (from axion-to-photon decay)      //
+    //////////////////////////////////////////////////////////////////////////////
+
+    // Capability function to calculate the likelihood for axion decay SN 1987A
+    // Current approximation: Rule out axions inside the contours of Fig.  in .
+    void calc_lnL_SN1987A_DecayApprox (double &result)
+    {
+      using namespace Pipes::calc_lnL_SN1987A_DecayApprox;
+      const ModelParameters& params = *Dep::GeneralCosmoALP_parameters;
+      double lgg = log10(std::fabs(params.at("gagg")));
+      double lgm = log10(params.at("ma0"));
+      result = 0.0;
+
+      bool inside_exclusion_region = ( (lgm > 4.0) && (lgm < 8.100544) && (lgg > -11.498333) && (lgg > -9.754647-0.5*(lgm-4.0)) && (lgg < -9.990374-2.0*(lgm-8.100544)) );
+      if (inside_exclusion_region) { result = -0.5*9.00; };
+    }
+
     //////////////////////////////////////////////////////////////////
     //      Spectral distortions (H.E.S.S. telescope searches)      //
     //////////////////////////////////////////////////////////////////
