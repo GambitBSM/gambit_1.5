@@ -28,6 +28,7 @@
 #define __CosmoBit_utils_hpp__
 
 #include <valarray>
+#include <vector>
 
 namespace Gambit
 {
@@ -43,16 +44,16 @@ namespace Gambit
             double Delta_logx;
             std::valarray<double> x_grid;
             std::valarray<double> y_grid;
-        public: 
+        public:
             fast_interpolation(std::valarray<double>& x_grid0, std::valarray<double>& y_grid0)
             {
                 x_grid = x_grid0;
                 y_grid = y_grid0;
                 grid_size = x_grid.size();
-                Delta_logx = (log(x_grid[grid_size-1]) - log(x_grid[0]))/(grid_size-1);        
+                Delta_logx = (log(x_grid[grid_size-1]) - log(x_grid[0]))/(grid_size-1);
             }
             double interp(double x)
-            {    
+            {
                 if (x <= x_grid[0])
                 {return y_grid[0];}
                 if (x >= x_grid[grid_size-1])
@@ -61,13 +62,13 @@ namespace Gambit
                 double intpart_d;
                 double fracpart = std::modf((log(x) - log(x_grid[0]))/Delta_logx, &intpart_d);
                 int intpart = lround(intpart_d);
-               
-                return y_grid[intpart] * (1 - fracpart) + y_grid[intpart+1]*fracpart;            
+
+                return y_grid[intpart] * (1 - fracpart) + y_grid[intpart+1]*fracpart;
             }
     };
 
     double entropy_density_SM(double T, bool T_in_eV=false);
-    
+
     std::vector<double> set_nu_masses(double mNu1, double mNu2, double mNu3, int& N_ncdm);
   }
 }
