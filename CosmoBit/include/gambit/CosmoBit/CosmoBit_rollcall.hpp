@@ -101,6 +101,35 @@ START_MODULE
     ALLOW_MODELS(Planck_TTTEEE,Planck_TT,Planck_lite)
     #undef FUNCTION
   #undef CAPABILITY
+  
+  #define CAPABILITY NuMasses_SM
+  START_CAPABILITY
+    #define FUNCTION set_NuMasses_SM
+    START_FUNCTION(map_str_dbl)
+    ALLOW_MODELS(LCDM_dNeffCMB_dNeffBBN_etaBBN,TestDecayingDM,StandardModel_SLHA2)
+    #undef FUNCTION
+  #undef CAPABILITY
+
+  #define CAPABILITY class_Nur
+  START_CAPABILITY
+    #define FUNCTION set_class_Nur_LCDM_family
+    START_FUNCTION(double)
+    ALLOW_MODELS(LCDM_dNeffCMB_dNeffBBN_etaBBN,TestDecayingDM,StandardModel_SLHA2)
+    DEPENDENCY(NuMasses_SM, map_str_dbl)
+    #undef FUNCTION
+    #define FUNCTION set_class_Nur_CosmoALP
+    START_FUNCTION(double)
+    MODEL_GROUP(SM,(StandardModel_SLHA2))
+    MODEL_GROUP(cosmo,(LCDM))
+    MODEL_GROUP(dark,(CosmoALP))
+    ALLOW_MODEL_COMBINATION(cosmo,dark,SM)
+    //ALLOW_MODELS(CosmoALP)
+    //ALLOW_MODELS(LCDM_dNeffCMB_dNeffBBN_etaBBN,TestDecayingDM,StandardModel_SLHA2)
+    DEPENDENCY(external_dNeff_etaBBN, map_str_dbl)
+    DEPENDENCY(NuMasses_SM, map_str_dbl)
+    #undef FUNCTION
+  
+  #undef CAPABILITY
 
   #define CAPABILITY class_set_parameter
   START_CAPABILITY
@@ -109,10 +138,14 @@ START_MODULE
     START_FUNCTION(CosmoBit::Class_container)
     DEPENDENCY(Helium_abundance,std::vector<double>)
     DEPENDENCY(T_cmb, double)
+    DEPENDENCY(T_ncdm, double)
+    DEPENDENCY(class_Nur, double)
+    DEPENDENCY(NuMasses_SM, map_str_dbl )
     ALLOW_MODELS(LCDM_dNeffCMB_dNeffBBN_etaBBN,TestDecayingDM,StandardModel_SLHA2)
     MODEL_CONDITIONAL_DEPENDENCY(lifetime,double,TestDecayingDM)
     MODEL_CONDITIONAL_DEPENDENCY(DM_fraction,double,TestDecayingDM)
     #undef FUNCTION
+
 
     #define FUNCTION class_set_parameter_LCDM_SingletDM
     START_FUNCTION(CosmoBit::Class_container)
@@ -263,6 +296,18 @@ START_MODULE
       START_FUNCTION(double)
     #undef FUNCTION
   #undef CAPABILITY
+  
+  #define CAPABILITY T_ncdm
+    START_CAPABILITY
+    #define FUNCTION set_T_ncdm
+      START_FUNCTION(double)
+    #undef FUNCTION
+    #define FUNCTION set_T_ncdm_CosmoALP
+      START_FUNCTION(double)
+      ALLOW_MODELS(CosmoALP)
+      DEPENDENCY(external_dNeff_etaBBN, map_str_dbl)
+    #undef FUNCTION
+  #undef CAPABILITY
 
   #define CAPABILITY n0_g
        START_CAPABILITY
@@ -391,7 +436,7 @@ START_MODULE
 
   #define CAPABILITY ExtdNeffCMB
    START_CAPABILITY
-   #define FUNCTION calculate_dNeff_ALP
+   #define FUNCTION calculate_dNeffCMB_ALP
      START_FUNCTION(double)
      DEPENDENCY(external_dNeff_etaBBN, map_str_dbl)
    #undef FUNCTION

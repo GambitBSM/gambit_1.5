@@ -321,15 +321,12 @@ namespace Gambit
     }
 
 
-    void class_set_parameter_LCDM_family(Class_container& cosmo)
+    void set_NuMasses_SM(map_str_dbl &result)
     {
-      using namespace Pipes::class_set_parameter_LCDM_family;
-
-      int l_max=cosmo.lmax;
-
-      cosmo.input.clear();
-
+      using namespace Pipes::set_NuMasses_SM;
+      
       double mNu1, mNu2, mNu3;
+      int N_ncdm = 0;
       if (ModelInUse("StandardModel_SLHA2"))
       {
         // (PS) Heads up! The units in StandardModel_SLHA2 are GeV
@@ -345,23 +342,28 @@ namespace Gambit
         mNu3 = 0.;
       }
 
-      int N_ncdm = 0;
-      std::vector<double> numasses = set_nu_masses(mNu1, mNu2, mNu3, N_ncdm);
+      if(mNu1 > 0.){result["mNu1"]=mNu1;N_ncdm++;}
+      if(mNu1 > 0.){result["mNu2"]=mNu2;N_ncdm++;}
+      if(mNu1 > 0.){result["mNu3"]=mNu3;N_ncdm++;}
+
+      result["N_ncdm"] = N_ncdm;
+
       switch (N_ncdm) 
       {
         case 1:
-          cosmo.input.addEntry("N_ur",*Param["dNeff"]+2.0328);  // dNeff= 2.0328 for 1 massive neutrino at CMB release
+          result["N_ur_SMnu"]= 2.0328;  // dNeff= 2.0328 for 1 massive neutrino at CMB release
           break;
         case 2:
-          cosmo.input.addEntry("N_ur",*Param["dNeff"]+1.0196);  // dNeff= 1.0196 for 2 massive neutrinos at CMB release
+          result["N_ur_SMnu"]= 1.0196;  // dNeff= 2.0328 for 1 massive neutrino at CMB release
           break;
         case 3:
-          cosmo.input.addEntry("N_ur",*Param["dNeff"]+0.00641);  // dNeff= 0.00641 for 3 massive neutrinos at CMB release
+          result["N_ur_SMnu"]= 0.00641;  // dNeff= 0.00641 for 3 massive neutrinos at CMB release
           break;
         case 0:
           {
             std::ostringstream err;
-            err << "Warning: All your neutrino masses are zero. The Planck baseline LCDM model assumes at least one massive neutrino.";
+            err << "Warning: All your neutrino masses are zero. The Planck baseline LCDM model assumes at least one massive neutrino.\n";
+            err << "A cosmological without massive neutrinos is not implemented in CosmoBit. If you want to consider this you can add it to the function 'set_NuMasses_SM' of the capability 'NuMasses_SM' ";
             CosmoBit_warning().raise(LOCAL_INFO, err.str());
           }
           break;
@@ -373,11 +375,44 @@ namespace Gambit
             CosmoBit_error().raise(LOCAL_INFO, err.str());
           }
       }
-      if (N_ncdm > 0.)
-      {
-        cosmo.input.addEntry("N_ncdm",N_ncdm);
-        cosmo.input.addEntry("m_ncdm",numasses);
+    
+    
+    }
+
+
+    void class_set_parameter_LCDM_family(Class_container& cosmo)
+    {
+      using namespace Pipes::class_set_parameter_LCDM_family;
+
+      int l_max=cosmo.lmax,ii=1;
+
+      cosmo.input.clear();
+
+      map_str_dbl NuMasses_SM = *Dep::NuMasses_SM;
+
+      if (NuMasses_SM["N_ncdm"] > 0.)
+      { 
+        cosmo.input.addEntry("N_ncdm",NuMasses_SM["N_ncdm"]);
+        
+        std::ostringstream numasses;
+        numasses << NuMasses_SM["mNu1"] << ", " << NuMasses_SM["mNu2"] << ", " << NuMasses_SM["mNu3"];
+        cosmo.input.addEntry("m_ncdm",numasses.str());
+        
+        std::ostringstream T_ncdm_str;
+        T_ncdm_str << *Dep::T_ncdm; // N_ncdm > 0, so at least 1 Temperature component
+        while(ii<NuMasses_SM["N_ncdm"])
+        {
+          T_ncdm_str <<"," << *Dep::T_ncdm;
+          ii++;
+        }
+        cosmo.input.addEntry("T_ncdm", T_ncdm_str.str());
       }
+      else
+      {
+        cosmo.input.addEntry("T_ncdm", *Dep::T_ncdm); 
+      }
+
+      cosmo.input.addEntry("N_ur",*Dep::class_Nur);
 
       cosmo.input.addEntry("output","tCl pCl lCl");
       cosmo.input.addEntry("l_max_scalars",l_max);
@@ -391,8 +426,8 @@ namespace Gambit
       cosmo.input.addEntry("n_s",*Param["n_s"]);
       cosmo.input.addEntry("tau_reio",*Param["tau_reio"]);
 
-      if (ModelInUse("TestDecayingDM"))
-      {
+      if (ModelInUse("TestDecayingDM"))  // TODO: need to test if class or exo_class in use! does not work 
+      { 
         cosmo.input.addEntry("energy_deposition_function","GAMBIT");
         cosmo.input.addEntry("tau_dcdm",*Dep::lifetime);
         cosmo.input.addEntry("decay_fraction",*Dep::DM_fraction);
@@ -2382,7 +2417,6 @@ namespace Gambit
         Neff_ALP = 3*pow(Tnu_grid[grid_size-1]/T_evo[grid_size-1], 4) * 3.85280407965; // (11/4)^(4/3) = 3.85280407965
         Neff_SM = 3*pow(Tnu_grid[0]/T_evo[0], 4) * 3.85280407965; // (11/4)^(4/3) = 3.85280407965
         dNeff = Neff_ALP - Neff_SM;
-
         ii ++;
       }
 
@@ -2412,6 +2446,30 @@ namespace Gambit
 
       // use COBE/FIRAS (0911.1955) mes. if not specified otherwise
       result = runOptions->getValueOrDef<double>(2.7255,"T_cmb");
+    }
+
+    void set_T_ncdm(double &result)
+    {
+      using namespace Pipes::set_T_ncdm;
+
+      // set to 0.71611, above the instantaneous decoupling value (4/11)^(1/3)
+      // to recover Sum_i mNu_i/omega = 93.14 eV resulting from studies of active neutrino decoupling (hep-ph/0506164)
+      result = 0.71611;
+      // This standard values enters in many assumption entering class. Therefore changing this value in 
+      // the yaml file is disabled at the moment. If you still want to modify it uncomment the line below and 
+      // you can set is as a run option (as T_cmb).
+      // result = runOptions->getValueOrDef<double>(0.71611,"T_ncdm");
+    }
+
+    void set_T_ncdm_CosmoALP(double &result)
+    {
+      using namespace Pipes::set_T_ncdm_CosmoALP;
+
+      map_str_dbl dNeff_CosmoALP = *Dep::external_dNeff_etaBBN;
+      // SM value of 0.71611 (see set_T_ncdm) multiplied by (Neff_ALP/Neff_SM)^(1/4) = T_nu_ALP/T_nu_SM
+      // to account for modified Neutrino temperature today (ALPs heat gamma w.r.t. to photons -> Neutrino today are cooler)
+      result = 0.71611*pow(dNeff_CosmoALP["Neff_ratio"], 1./4.);
+
     }
 
     void calculate_eta0(double &result)
@@ -2545,13 +2603,38 @@ namespace Gambit
        logger() << "Baryon to photon ratio (eta) @BBN computed to be " << result << EOM;
     }
 
-    void calculate_dNeff_ALP(double &result)
+    void calculate_dNeffCMB_ALP(double &result)
     {
-      using namespace Pipes::calculate_dNeff_ALP;
-
+      using namespace Pipes::calculate_dNeffCMB_ALP;
+     
       map_str_dbl dNeff_etaBBN = *Dep::external_dNeff_etaBBN;
       result = dNeff_etaBBN["dNeff"];
       logger() << "dNeff for ALP calculated to be " << result << EOM;
+
+    }
+
+     void set_class_Nur_LCDM_family(double &result)
+    {
+      using namespace Pipes::set_class_Nur_LCDM_family;
+
+      map_str_dbl NuMasses_SM = *Dep::NuMasses_SM;
+      result = *Param["dNeff"] + NuMasses_SM["N_ur_SMnu"];
+      logger() << "N_ur for LCDM family calculated to be " << result << EOM;
+    }
+
+
+    void set_class_Nur_CosmoALP(double &result)
+    {
+      using namespace Pipes::set_class_Nur_CosmoALP;
+
+      map_str_dbl dNeff_etaBBN = *Dep::external_dNeff_etaBBN;
+      map_str_dbl NuMasses_SM = *Dep::NuMasses_SM;
+      // N_ur = (NeffCMB_CosmoALP/NeffCMB_SM) * Nur_SM , to rescale the value for N_ur from non-instantaneous 
+      // decoupling with the standard value of 3.046 to the according contribution for a modified Neutrino temperature
+      // (CosmoALP model heats CMB photons w.r.t. to neutrinos)
+      // TODO: refer to relevant section in paper!
+      result = dNeff_etaBBN["Neff_ratio"]*NuMasses_SM["N_ur_SMnu"];
+      logger() << "N_ur for ALP calculated to be " << result << EOM;
     }
 
 
@@ -2911,7 +2994,7 @@ namespace Gambit
       int ie,je;
       double dl,chi2;
       double M = *Param["M_AbsMag_SNe"]; 
-      
+
       if(read_data == false)
       {
         read_data = true;

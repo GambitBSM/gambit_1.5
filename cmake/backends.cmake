@@ -1099,7 +1099,7 @@ if(NOT ditched_${name}_${ver})
 endif()
 
 #DarkAges
-set(name "DarkAges")
+set(name "darkages")
 set(ver "1.0.0")
 set(dl "null")
 set(dir "${PROJECT_SOURCE_DIR}/Backends/installed/${name}/${ver}")

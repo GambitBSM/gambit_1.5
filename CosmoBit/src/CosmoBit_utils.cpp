@@ -35,36 +35,5 @@ namespace Gambit
     	return (2.*pow(pi,2)/45.) * (43./11.) * pow((_kB_eV_over_K_*T),3);
     }
 
-
-    // Utility function to set the number of massive neutrino species and prepare the input for class
-    std::vector<double> set_nu_masses(double mNu1, double mNu2, double mNu3, int& N_ncdm)
-    {
-      // !! masses mNu1, mNu2, mNu3 in eV unlike the definition in StandardMOdel_SLHA2 !!
-
-      // Reset N_ncdm
-      N_ncdm = 0;
-      std::vector<double> neutrino_masses;
-
-      // check for every mass if it is positive. If so add it to the vector and increase N_ncdm
-      if (mNu1 > 0.)
-      {
-        N_ncdm++;
-        neutrino_masses.push_back(mNu1);
-      }
-      if (mNu2 > 0.)
-      {
-        N_ncdm++;
-        neutrino_masses.push_back(mNu2);
-      }
-      if (mNu3 > 0.)
-      {
-        N_ncdm++;
-        neutrino_masses.push_back(mNu3);
-      }
-
-      return neutrino_masses;
-    }
-
-
   }
 }
