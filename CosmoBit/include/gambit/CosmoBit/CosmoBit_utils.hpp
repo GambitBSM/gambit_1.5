@@ -29,6 +29,9 @@
 
 #include <valarray>
 #include <vector>
+#include <map>
+#include <string>
+#include <sstream>
 
 namespace Gambit
 {
@@ -70,6 +73,7 @@ namespace Gambit
     double entropy_density_SM(double T, bool T_in_eV=false);
 
     std::vector<double> set_nu_masses(double mNu1, double mNu2, double mNu3, int& N_ncdm);
+    std::string m_ncdm_classInput(std::map<std::string,double> NuMasses_SM);
   }
 }
 

@@ -297,10 +297,18 @@ START_MODULE
     #undef FUNCTION
   #undef CAPABILITY
   
+#define CAPABILITY T_ncdm_SM // needed in additino to T_ncdm since T_ncdm of non-SM models assume a fiducial value to base calculation on 
+    START_CAPABILITY
+    #define FUNCTION set_T_ncdm_SM
+      START_FUNCTION(double)
+    #undef FUNCTION
+  #undef CAPABILITY
+  
   #define CAPABILITY T_ncdm
     START_CAPABILITY
     #define FUNCTION set_T_ncdm
       START_FUNCTION(double)
+      DEPENDENCY(T_ncdm_SM,double)
     #undef FUNCTION
     #define FUNCTION set_T_ncdm_CosmoALP
       START_FUNCTION(double)

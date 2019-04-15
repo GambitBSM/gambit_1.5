@@ -75,7 +75,7 @@ namespace Gambit
         //           = { [2 sqrt(8pi^3 G[_SI_] (kB [J/K])^4] / [45 c^2 (c hbar)^3 gstar] }^-0.5 
         // with G: Newton's constant in kg m^3/s^2, kB: Boltzmann const in J/K, c: speed of light in m/s, 
         // hbar x c: reduced Planck const in Jm 
-        // H0 and T_cmb cancel out, the factor that stays besides natural constants is 
+        // H0 and T_cmb cancel out in SM where Omega_r0 = [1 + Neff] Omega_r, the factor that stays besides natural constants is 
         // g_star = g_gamma + 7/8 * g_nu * Neff * (4/11)^(4/3) = 3.38354
         void set_T_evo() {T_evo = 1147.40/sqrt(t_grid);}
 
@@ -153,6 +153,7 @@ namespace Gambit
         std::vector<double> Pk_T; // Primordial Tensor Power Spectrum
         std::vector<double> k_ar; // Corresponding wavenumbers.
 
+        std::string backend_in_use;
     };
   }
 }

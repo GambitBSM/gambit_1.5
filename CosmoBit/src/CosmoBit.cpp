@@ -342,9 +342,23 @@ namespace Gambit
         mNu3 = 0.;
       }
 
-      if(mNu1 > 0.){result["mNu1"]=mNu1;N_ncdm++;}
-      if(mNu1 > 0.){result["mNu2"]=mNu2;N_ncdm++;}
-      if(mNu1 > 0.){result["mNu3"]=mNu3;N_ncdm++;}
+      if(mNu1 > 0.)
+      {
+        result["mNu1"]=mNu1;
+        N_ncdm++;
+        if(mNu2 > 0.)
+        {
+          result["mNu2"]=mNu2;
+          N_ncdm++;
+          if(mNu3 > 0.){result["mNu3"]=mNu3;N_ncdm++;}
+          else{result["mNu3"]=0.;}
+        }
+        else
+        {
+          result["mNu2"]=0.;
+          result["mNu3"]=0.;
+        }
+      }
 
       result["N_ncdm"] = N_ncdm;
 
@@ -376,7 +390,6 @@ namespace Gambit
           }
       }
     
-    
     }
 
 
@@ -393,13 +406,10 @@ namespace Gambit
       if (NuMasses_SM["N_ncdm"] > 0.)
       { 
         cosmo.input.addEntry("N_ncdm",NuMasses_SM["N_ncdm"]);
-        
-        std::ostringstream numasses;
-        numasses << NuMasses_SM["mNu1"] << ", " << NuMasses_SM["mNu2"] << ", " << NuMasses_SM["mNu3"];
-        cosmo.input.addEntry("m_ncdm",numasses.str());
-        
+        cosmo.input.addEntry("m_ncdm",m_ncdm_classInput(NuMasses_SM)); // convert neutrino masses to string compatible with CLASS input format
+
         std::ostringstream T_ncdm_str;
-        T_ncdm_str << *Dep::T_ncdm; // N_ncdm > 0, so at least 1 Temperature component
+        T_ncdm_str << *Dep::T_ncdm; // N_ncdm > 0, so at least 1 Temperature component, need to generalise if ncdm components have different temperatures
         while(ii<NuMasses_SM["N_ncdm"])
         {
           T_ncdm_str <<"," << *Dep::T_ncdm;
@@ -2448,9 +2458,9 @@ namespace Gambit
       result = runOptions->getValueOrDef<double>(2.7255,"T_cmb");
     }
 
-    void set_T_ncdm(double &result)
+    void set_T_ncdm_SM(double &result)
     {
-      using namespace Pipes::set_T_ncdm;
+      using namespace Pipes::set_T_ncdm_SM;
 
       // set to 0.71611, above the instantaneous decoupling value (4/11)^(1/3)
       // to recover Sum_i mNu_i/omega = 93.14 eV resulting from studies of active neutrino decoupling (hep-ph/0506164)
@@ -2459,6 +2469,13 @@ namespace Gambit
       // the yaml file is disabled at the moment. If you still want to modify it uncomment the line below and 
       // you can set is as a run option (as T_cmb).
       // result = runOptions->getValueOrDef<double>(0.71611,"T_ncdm");
+    }
+
+    void set_T_ncdm(double &result)
+    {
+      using namespace Pipes::set_T_ncdm;
+
+      result = *Dep::T_ncdm_SM;
     }
 
     void set_T_ncdm_CosmoALP(double &result)
