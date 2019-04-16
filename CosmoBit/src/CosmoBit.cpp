@@ -173,7 +173,6 @@ namespace Gambit
 
       // For the lifetime take 1/Gamma and translate GeV^-1 into s by multiplication with "hbar"
       result = 1./Gamma * hbar;
-      logger() << "[lifetime_CosmoALP] tau = " << result << " [s]" << EOM;
 
       // Reject points which have a lifetime bigger than 1e17s (or whatever the user chooses)
       // Gets only triggered if the user wishes to do so.
@@ -198,7 +197,7 @@ namespace Gambit
       // check for stupid input (T_R < m_e)
       // Throw an error if the user really pushed it that far.
       if (m_electron >= T_R_in_GeV)
-	    CosmoBit_error().raise(LOCAL_INFO,"The reheating temperature is below the electron mass.");
+        CosmoBit_error().raise(LOCAL_INFO,"The reheating temperature is below the electron mass.");
 
       double gagg = *Param["gagg"]; // in GeV^-1
       double Ya0_min = 1.56e-5 * pow(gagg,2) * m_planck * (T_R_in_GeV - m_electron);
@@ -219,14 +218,16 @@ namespace Gambit
       const double rho0_crit_by_h2 = 3.*pow(m_planck_red*1e9,2) * pow((1e5*1e9*hbar/_Mpc_SI_),2); // rho0_crit/(h^2)
       double rho0_cdm = omega_cdm * rho0_crit_by_h2; // rho0_cdm = Omega_cdm * rho0_crit;
 
-      double xi = rho0_a / rho0_cdm;
-      logger() << "[DM_fraction_CosmoALP]  xi = " << xi << EOM;
+      double xi_ini = rho0_a / rho0_cdm; // Initial fraction of decauying dark matter (rho_dcdm / rho_cdm) and the naive value if decay of the ALP would be neglected.
+      double tau_a = *Dep::lifetime;
+      const double t_rec = 1e12;
+      double xi_at_rec = xi_ini * exp(-t_rec/tau_a );
 
-      // invalidate if there are more ALPs than dark matter
-      if (xi > 1.)
+      // invalidate if there are more ALPs than dark matter at the time of recombination (t ~ 1e12s)
+      if (xi_at_rec  > 1.)
       {
         std::ostringstream err;
-        err << "ALPs are over-abundant (omega_a > omega_cdm)";
+        err << "ALPs are over-abundant (n_a > n_cdm) at t = 10^12 s. (n_a/n_cdm = "<< xi_at_rec <<")";
         invalid_point().raise(err.str());
       }
 
@@ -247,7 +248,7 @@ namespace Gambit
         invalid_point().raise(err.str());
       }
 
-      result = xi;
+      result = xi_ini;
     }
 
     void energy_injection_efficiency_func(DarkAges::fz_table& result)
@@ -2382,8 +2383,8 @@ namespace Gambit
       double Ya0 = *Param["Ya0"];
       double T0 = T_evo[0];
       double ssm_at_T0 = entropy_density_SM(T0, true);; // T0 in units of keV, set T_in_eV=True to interpret it correctly
-      
-      double na_t0 = Ya0 * ssm_at_T0;     // initial number density of a at t=t0, in units keV^3.
+
+      double na_t0 = Ya0 * ssm_at_T0;     // initial number density of a at t=t0, in units keV^3. (no decay taken into account)
       double m_a = 1e-3*(*Param["ma0"]);  // mass of a in keV
       double tau_a = *Dep::lifetime;      // lifetime of a in seconds
 
