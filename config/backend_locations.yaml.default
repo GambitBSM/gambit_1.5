@@ -20,7 +20,7 @@ class:
   2.6.3:       ./Backends/installed/class/2.6.3/lib/libclass.so
 
 DarkAges:
-  1.0.0:       ./Backends/installed/DarkAges/1.0.0/DarkAges_for_GAMBIT.py
+  1.0.0:       ./Backends/installed/darkages/1.0.0/DarkAges_for_GAMBIT.py
 
 exoclass:
   2.7.0:       ./Backends/installed/exoclass/2.7.0/lib/libclass.so
