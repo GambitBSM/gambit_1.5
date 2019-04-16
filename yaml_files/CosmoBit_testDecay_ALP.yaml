@@ -111,6 +111,11 @@ ObsLikes:
     module:       DarkBit
     type:         double
 
+  - purpose:      LogLike
+    capability:   lnL_SN1987A_DecayApprox
+    module:       DarkBit
+    type:         double
+
   - purpose:      Observable
     capability:   Helium_abundance
     module:       CosmoBit
@@ -140,6 +145,20 @@ ObsLikes:
     capability:   DM_fraction
     module:       CosmoBit
     type:         double
+
+  - purpose:      Observable
+    capability:   etaCMB
+    module:       CosmoBit
+    type:         double
+
+  - purpose:      Observable
+    capability:   external_dNeff_etaBBN
+    module:       CosmoBit
+    type:         map_str_dbl
+
+  - purpose:      Observable
+    capability:   LCDM_dNeffCMB_dNeffBBN_etaBBN_parameters
+    type:         ModelParameters
 
 #======== Rule entries ========
 Rules:
