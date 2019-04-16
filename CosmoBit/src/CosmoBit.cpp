@@ -325,7 +325,6 @@ namespace Gambit
     void set_NuMasses_SM(map_str_dbl &result)
     {
       using namespace Pipes::set_NuMasses_SM;
-      
       double mNu1, mNu2, mNu3;
       int N_ncdm = 0;
       if (ModelInUse("StandardModel_SLHA2"))
@@ -344,26 +343,19 @@ namespace Gambit
       }
 
       if(mNu1 > 0.)
-      {
-        result["mNu1"]=mNu1;
         N_ncdm++;
-        if(mNu2 > 0.)
-        {
-          result["mNu2"]=mNu2;
-          N_ncdm++;
-          if(mNu3 > 0.){result["mNu3"]=mNu3;N_ncdm++;}
-          else{result["mNu3"]=0.;}
-        }
-        else
-        {
-          result["mNu2"]=0.;
-          result["mNu3"]=0.;
-        }
-      }
+      if(mNu2 > 0.)
+        N_ncdm++;
+      if(mNu3 > 0.)
+        N_ncdm++;
+
+      result["mNu1"]=mNu1;
+      result["mNu2"]=mNu2;
+      result["mNu3"]=mNu3;
 
       result["N_ncdm"] = N_ncdm;
 
-      switch (N_ncdm) 
+      switch (N_ncdm)
       {
         case 1:
           result["N_ur_SMnu"]= 2.0328;  // dNeff= 2.0328 for 1 massive neutrino at CMB release
@@ -390,9 +382,7 @@ namespace Gambit
             CosmoBit_error().raise(LOCAL_INFO, err.str());
           }
       }
-    
     }
-
 
     void class_set_parameter_LCDM_family(Class_container& cosmo)
     {
@@ -403,20 +393,15 @@ namespace Gambit
       cosmo.input.clear();
 
       map_str_dbl NuMasses_SM = *Dep::NuMasses_SM;
+      int N_ncdm = (int)NuMasses_SM["N_ncdm"];
 
-      if (NuMasses_SM["N_ncdm"] > 0.)
+      if (N_ncdm > 0.)
       { 
-        cosmo.input.addEntry("N_ncdm",NuMasses_SM["N_ncdm"]);
-        cosmo.input.addEntry("m_ncdm",m_ncdm_classInput(NuMasses_SM)); // convert neutrino masses to string compatible with CLASS input format
+        cosmo.input.addEntry("N_ncdm",N_ncdm);
+        cosmo.input.addEntry("m_ncdm",m_ncdm_classInput(NuMasses_SM));
 
-        std::ostringstream T_ncdm_str;
-        T_ncdm_str << *Dep::T_ncdm; // N_ncdm > 0, so at least 1 Temperature component, need to generalise if ncdm components have different temperatures
-        while(ii<NuMasses_SM["N_ncdm"])
-        {
-          T_ncdm_str <<"," << *Dep::T_ncdm;
-          ii++;
-        }
-        cosmo.input.addEntry("T_ncdm", T_ncdm_str.str());
+        std::vector<double> T_ncdm(N_ncdm,*Dep::T_ncdm);
+        cosmo.input.addEntry("T_ncdm", T_ncdm);
       }
       else
       {
@@ -438,7 +423,7 @@ namespace Gambit
       cosmo.input.addEntry("tau_reio",*Param["tau_reio"]);
 
       if (ModelInUse("TestDecayingDM"))  // TODO: need to test if class or exo_class in use! does not work 
-      { 
+      {
         cosmo.input.addEntry("energy_deposition_function","GAMBIT");
         cosmo.input.addEntry("tau_dcdm",*Dep::lifetime);
         cosmo.input.addEntry("decay_fraction",*Dep::DM_fraction);
@@ -2624,7 +2609,7 @@ namespace Gambit
     void calculate_dNeffCMB_ALP(double &result)
     {
       using namespace Pipes::calculate_dNeffCMB_ALP;
-     
+
       map_str_dbl dNeff_etaBBN = *Dep::external_dNeff_etaBBN;
       result = dNeff_etaBBN["dNeff"];
       logger() << "dNeff for ALP calculated to be " << result << EOM;
