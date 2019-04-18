@@ -11,6 +11,11 @@
 ///  routines to force only one process at a time
 ///  to perform these routines.
 ///
+///  Can also be used to literally lock access to
+///  a particular file, e.g. HDF5Printer2 output
+///  uses these to serialise write access to the
+///  hdf5 output file. 
+///
 ///  Usage:
 ///
 ///   {
@@ -30,7 +35,7 @@
 ///   
 ///  \author Ben Farmer
 ///          (ben.farmer@gmail.com)
-///  \date 2016 Feb
+///  \date 2016 Feb, 2019 Apr
 ///
 ///  *********************************************
 
@@ -44,6 +49,7 @@
 #include "gambit/Utils/util_functions.hpp"
 #include "gambit/Utils/standalone_error_handlers.hpp"
 #include "gambit/Utils/local_info.hpp"
+#include "gambit/Logs/logger.hpp"
 #include "gambit/cmake/cmake_variables.hpp"
 
 //#define FILE_LOCK_DEBUG
@@ -126,6 +132,17 @@ namespace Gambit
           gettimeofday(&tv, &tz);      
           cout << "[" << tv.tv_sec << "." << tv.tv_usec << "] Got lock " << my_lock_fname << " in rank " << rank << endl;
         #endif
+
+        /// Ok it seems there are some errors that we should handle, and then just try again to obtain the lock. 
+        if(return_code==EINTR)
+        {
+          // This happens if the system call is interrupted by a signal. This 
+          // happens when we tell GAMBIT to stop via a signal! But it is no 
+          // big deal, we just need to attempt the lock again. We should log 
+          // that this happened, in case we need to debug some bizarre problem.
+          logger() << LogTags::utils << "Attempt to get lock "<< my_lock_fname <<" failed due to interruption by system call! But this was probably just the GAMBIT shutdown signal, so we will just try one more time to get the lock..." << EOM;
+          return_code = lockf(fd, F_LOCK, 0);
+        }
 
         if(return_code!=0)
         {
