@@ -148,7 +148,8 @@ namespace Gambit
         {
           // Uh oh, error occurred. Return error message
           std::ostringstream msg;
-          msg << "Error obtaining lock on \""<<my_lock_fname<<"\"! Error was: "<< std::strerror(errno);
+          msg << "Error obtaining lock on \""<<my_lock_fname<<"\"! Error was: "<< std::strerror(errno) << " (errno="<<errno<<")";
+          msg << " (DEBUG! EINTR="<<EINTR<<")";
           if(hard_errors) { std::cerr<<"Error! ("<<LOCAL_INFO<<"): "<<msg.str()<<hardmsg<<std::endl; std::cerr.flush(); abort(); }
           else { utils_error().raise(LOCAL_INFO,msg.str()); }
         }
