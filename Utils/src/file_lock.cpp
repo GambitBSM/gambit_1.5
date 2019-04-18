@@ -134,14 +134,17 @@ namespace Gambit
         #endif
 
         /// Ok it seems there are some errors that we should handle, and then just try again to obtain the lock. 
-        if(return_code==EINTR)
+        if(return_code!=0 && errno==EINTR)
         {
           // This happens if the system call is interrupted by a signal. This 
           // happens when we tell GAMBIT to stop via a signal! But it is no 
           // big deal, we just need to attempt the lock again. We should log 
           // that this happened, in case we need to debug some bizarre problem.
-          logger() << LogTags::utils << "Attempt to get lock "<< my_lock_fname <<" failed due to interruption by system call! But this was probably just the GAMBIT shutdown signal, so we will just try one more time to get the lock..." << EOM;
-          return_code = lockf(fd, F_LOCK, 0);
+          logger() << LogTags::utils << "Attempt to get lock "<< my_lock_fname <<" failed due to interruption by system call! But this was probably just the GAMBIT shutdown signal, so we will just keep trying to get the lock until the error changes or goes away..." << EOM;
+          while(return_code!=0 && errno==EINTR)
+          {
+            return_code = lockf(fd, F_LOCK, 0);
+          }
         }
 
         if(return_code!=0)
@@ -149,7 +152,7 @@ namespace Gambit
           // Uh oh, error occurred. Return error message
           std::ostringstream msg;
           msg << "Error obtaining lock on \""<<my_lock_fname<<"\"! Error was: "<< std::strerror(errno) << " (errno="<<errno<<")";
-          msg << " (DEBUG! EINTR="<<EINTR<<")";
+          //msg << " (DEBUG! EINTR="<<EINTR<<")";
           if(hard_errors) { std::cerr<<"Error! ("<<LOCAL_INFO<<"): "<<msg.str()<<hardmsg<<std::endl; std::cerr.flush(); abort(); }
           else { utils_error().raise(LOCAL_INFO,msg.str()); }
         }
