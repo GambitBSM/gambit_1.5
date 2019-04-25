@@ -173,6 +173,7 @@ namespace Gambit
 
       // For the lifetime take 1/Gamma and translate GeV^-1 into s by multiplication with "hbar"
       result = 1./Gamma * hbar;
+      logger() << "[lifetime_CosmoALP] tau = " << result << " [s]" << EOM;
 
       // Reject points which have a lifetime bigger than 1e17s (or whatever the user chooses)
       // Gets only triggered if the user wishes to do so.
@@ -197,7 +198,7 @@ namespace Gambit
       // check for stupid input (T_R < m_e)
       // Throw an error if the user really pushed it that far.
       if (m_electron >= T_R_in_GeV)
-        CosmoBit_error().raise(LOCAL_INFO,"The reheating temperature is below the electron mass.");
+	    CosmoBit_error().raise(LOCAL_INFO,"The reheating temperature is below the electron mass.");
 
       double gagg = *Param["gagg"]; // in GeV^-1
       double Ya0_min = 1.56e-5 * pow(gagg,2) * m_planck * (T_R_in_GeV - m_electron);
@@ -218,16 +219,14 @@ namespace Gambit
       const double rho0_crit_by_h2 = 3.*pow(m_planck_red*1e9,2) * pow((1e5*1e9*hbar/_Mpc_SI_),2); // rho0_crit/(h^2)
       double rho0_cdm = omega_cdm * rho0_crit_by_h2; // rho0_cdm = Omega_cdm * rho0_crit;
 
-      double xi_ini = rho0_a / rho0_cdm; // Initial fraction of decauying dark matter (rho_dcdm / rho_cdm) and the naive value if decay of the ALP would be neglected.
-      double tau_a = *Dep::lifetime;
-      const double t_rec = 1e12;
-      double xi_at_rec = xi_ini * exp(-t_rec/tau_a );
+      double xi = rho0_a / rho0_cdm;
+      logger() << "[DM_fraction_CosmoALP]  xi = " << xi << EOM;
 
-      // invalidate if there are more ALPs than dark matter at the time of recombination (t ~ 1e12s)
-      if (xi_at_rec  > 1.)
+      // invalidate if there are more ALPs than dark matter
+      if (xi > 1.)
       {
         std::ostringstream err;
-        err << "ALPs are over-abundant (n_a > n_cdm) at t = 10^12 s. (n_a/n_cdm = "<< xi_at_rec <<")";
+        err << "ALPs are over-abundant (omega_a > omega_cdm)";
         invalid_point().raise(err.str());
       }
 
@@ -248,7 +247,7 @@ namespace Gambit
         invalid_point().raise(err.str());
       }
 
-      result = xi_ini;
+      result = xi;
     }
 
     void energy_injection_efficiency_func(DarkAges::fz_table& result)
@@ -325,6 +324,7 @@ namespace Gambit
     void set_NuMasses_SM(map_str_dbl &result)
     {
       using namespace Pipes::set_NuMasses_SM;
+      
       double mNu1, mNu2, mNu3;
       int N_ncdm = 0;
       if (ModelInUse("StandardModel_SLHA2"))
@@ -343,19 +343,26 @@ namespace Gambit
       }
 
       if(mNu1 > 0.)
+      {
+        result["mNu1"]=mNu1;
         N_ncdm++;
-      if(mNu2 > 0.)
-        N_ncdm++;
-      if(mNu3 > 0.)
-        N_ncdm++;
-
-      result["mNu1"]=mNu1;
-      result["mNu2"]=mNu2;
-      result["mNu3"]=mNu3;
+        if(mNu2 > 0.)
+        {
+          result["mNu2"]=mNu2;
+          N_ncdm++;
+          if(mNu3 > 0.){result["mNu3"]=mNu3;N_ncdm++;}
+          else{result["mNu3"]=0.;}
+        }
+        else
+        {
+          result["mNu2"]=0.;
+          result["mNu3"]=0.;
+        }
+      }
 
       result["N_ncdm"] = N_ncdm;
 
-      switch (N_ncdm)
+      switch (N_ncdm) 
       {
         case 1:
           result["N_ur_SMnu"]= 2.0328;  // dNeff= 2.0328 for 1 massive neutrino at CMB release
@@ -382,7 +389,9 @@ namespace Gambit
             CosmoBit_error().raise(LOCAL_INFO, err.str());
           }
       }
+    
     }
+
 
     void class_set_parameter_LCDM_family(Class_container& cosmo)
     {
@@ -393,15 +402,20 @@ namespace Gambit
       cosmo.input.clear();
 
       map_str_dbl NuMasses_SM = *Dep::NuMasses_SM;
-      int N_ncdm = (int)NuMasses_SM["N_ncdm"];
 
-      if (N_ncdm > 0.)
+      if (NuMasses_SM["N_ncdm"] > 0.)
       { 
-        cosmo.input.addEntry("N_ncdm",N_ncdm);
-        cosmo.input.addEntry("m_ncdm",m_ncdm_classInput(NuMasses_SM));
+        cosmo.input.addEntry("N_ncdm",NuMasses_SM["N_ncdm"]);
+        cosmo.input.addEntry("m_ncdm",m_ncdm_classInput(NuMasses_SM)); // convert neutrino masses to string compatible with CLASS input format
 
-        std::vector<double> T_ncdm(N_ncdm,*Dep::T_ncdm);
-        cosmo.input.addEntry("T_ncdm", T_ncdm);
+        std::ostringstream T_ncdm_str;
+        T_ncdm_str << *Dep::T_ncdm; // N_ncdm > 0, so at least 1 Temperature component, need to generalise if ncdm components have different temperatures
+        while(ii<NuMasses_SM["N_ncdm"])
+        {
+          T_ncdm_str <<"," << *Dep::T_ncdm;
+          ii++;
+        }
+        cosmo.input.addEntry("T_ncdm", T_ncdm_str.str());
       }
       else
       {
@@ -423,7 +437,7 @@ namespace Gambit
       cosmo.input.addEntry("tau_reio",*Param["tau_reio"]);
 
       if (ModelInUse("TestDecayingDM"))  // TODO: need to test if class or exo_class in use! does not work 
-      {
+      { 
         cosmo.input.addEntry("energy_deposition_function","GAMBIT");
         cosmo.input.addEntry("tau_dcdm",*Dep::lifetime);
         cosmo.input.addEntry("decay_fraction",*Dep::DM_fraction);
@@ -2368,8 +2382,8 @@ namespace Gambit
       double Ya0 = *Param["Ya0"];
       double T0 = T_evo[0];
       double ssm_at_T0 = entropy_density_SM(T0, true);; // T0 in units of keV, set T_in_eV=True to interpret it correctly
-
-      double na_t0 = Ya0 * ssm_at_T0;     // initial number density of a at t=t0, in units keV^3. (no decay taken into account)
+      
+      double na_t0 = Ya0 * ssm_at_T0;     // initial number density of a at t=t0, in units keV^3.
       double m_a = 1e-3*(*Param["ma0"]);  // mass of a in keV
       double tau_a = *Dep::lifetime;      // lifetime of a in seconds
 
@@ -2448,7 +2462,7 @@ namespace Gambit
     {
       using namespace Pipes::set_T_ncdm_SM;
 
-      // set to 0.71611, above the instantaneous decoupling value (4/11)^(1/3)
+      // set to 0.71611 in units of photon temperature, above the instantaneous decoupling value (4/11)^(1/3)
       // to recover Sum_i mNu_i/omega = 93.14 eV resulting from studies of active neutrino decoupling (hep-ph/0506164)
       result = 0.71611;
       // This standard values enters in many assumption entering class. Therefore changing this value in 
@@ -2539,8 +2553,9 @@ namespace Gambit
     {
       using namespace Pipes::compute_Omega0_ur;
 
-      double Neff_nu = 2.0328; // TODO: only valid for 1 massive neutrinos -> need capability to set this
-      result = (*Param["dNeff"]+Neff_nu)*7./8.*pow(4./11.,4./3.)*(*Dep::Omega0_g); 
+      // Capability class_Nur takes care of setting N_ur right for considered number of 
+      // massive neutrinos & extra model dependent contributions
+      result = (*Dep::class_Nur)*7./8.*pow(4./11.,4./3.)*(*Dep::Omega0_g); 
     }
 
     void compute_Omega0_ncdm(double &result)
@@ -2609,7 +2624,7 @@ namespace Gambit
     void calculate_dNeffCMB_ALP(double &result)
     {
       using namespace Pipes::calculate_dNeffCMB_ALP;
-
+     
       map_str_dbl dNeff_etaBBN = *Dep::external_dNeff_etaBBN;
       result = dNeff_etaBBN["dNeff"];
       logger() << "dNeff for ALP calculated to be " << result << EOM;

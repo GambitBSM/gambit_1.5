@@ -28,6 +28,7 @@
 #include <valarray>
 
 #include "gambit/CosmoBit/CosmoBit_types.hpp"
+#include "gambit/Utils/numerical_constants.hpp"
 
 namespace Gambit
 {
@@ -36,6 +37,8 @@ namespace Gambit
     
     BBN_container::BBN_container()
     { 
+      // maps elements to their position in 'ratioH' array in AlterBBN holding 
+      // primordial element abundances relative to H abundance
       abund_map["H2"] = 3;
       abund_map["D"] = 3;
       abund_map["H3"] = 4;
@@ -72,6 +75,13 @@ namespace Gambit
       {
            t_grid[jj] = exp(log(t0) + jj*Delta_logt);
       }
+      double Neff_SM = 3.046;
+      double g_star_SM = 2.+2.*7./8.*Neff_SM*pow(4./11.,4./3.); // contribution from photons & neutrinos with Neff = 3.046
+      
+      // factor needed to calculate temperature evolution. For details see definition of functions set_T_evo(),.. in CosmoBit_types.hpp header
+      factor_T_evo = 1./sqrt(2.*sqrt(8.*pi*pi*pi*_GN_SI_ *pow(_kB_SI_,4.)*g_star_SM/90./_c_SI_/_c_SI_/pow(_hP_SI_/2./pi*_c_SI_,3.)))*_kB_eV_over_K_/1e3;
+      factor_Tnu_evo = pow(Neff_SM/3.,1./4.)* pow(4./11.,1./3.)*factor_T_evo; // = T_nu/T_gamma * factor_T_evo
+      factor_HT_evo = sqrt(8.*pi*_GN_SI_/3.*pi*pi/30.*g_star_SM/pow(_hP_SI_/2./pi*_c_SI_,3.))*(1e6*_eV_to_J_*_eV_to_J_)/_c_SI_;
 
       set_T_evo();
       set_Tnu_evo();

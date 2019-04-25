@@ -155,7 +155,7 @@ Rules:
 ##  Specify data files for BAO, BBN, H0 and sigma8 Likelihoods
 ##
 ####
-  
+
   - capability: T_cmb
     options:
       T_cmb: 2.7255
@@ -163,6 +163,12 @@ Rules:
   - capability: BAO_LogLike
     options:
       DataFile:  BAO_2014.dat
+    backends:
+      - {backend: class, version: 2.6.3}
+
+  - capability: Pantheon_LogLike
+    backends:
+      - {backend: class, version: 2.6.3}
 
   - capability: BBN_LogLike
     options:
@@ -180,6 +186,12 @@ Rules:
   - capability: sigma8_LogLike
     options:
         DataFile: Planck_SZ.dat
+    backends:
+      - {backend: exoclass, version: 2.7.0}
+
+  - capability: Sigma8
+    backends:
+      - {backend: class, version: 2.6.3}
 
   - capability: class_set_parameter
     options:
@@ -202,6 +214,11 @@ Rules:
     options:
       grid_size: 3000
       max_iter: 8
+
+  - capability: class_get_spectra
+    backends:
+      - {backend: exoclass, version: 2.7.0}
+
 
 
 #======== Logging setup ========
