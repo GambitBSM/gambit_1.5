@@ -36,7 +36,6 @@ namespace Gambit
         return (2.*pow(pi,2)/45.) * (43./11.) * pow((_kB_eV_over_K_*T),3);
     }
 
-    // convert neutrino masses into string compatible with CLASS input
     std::vector<double> m_ncdm_classInput(std::map<std::string,double> NuMasses_SM)
     {
       std::vector<double> numasses;

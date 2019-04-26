@@ -53,6 +53,7 @@ START_MODULE
     START_FUNCTION(double)
     DEPENDENCY(T_cmb, double)
     DEPENDENCY(minimum_abundance,double)
+    DEPENDENCY(lifetime,double)
     ALLOW_MODEL_DEPENDENCE(CosmoALP,LCDM_dNeffCMB_dNeffBBN_etaBBN)
     MODEL_GROUP(alp,(CosmoALP))
     MODEL_GROUP(cosmo,(LCDM_dNeffCMB_dNeffBBN_etaBBN))
@@ -549,7 +550,6 @@ START_MODULE
     MODEL_GROUP(nuisance, (cosmo_nuisance_params))
     ALLOW_MODEL_COMBINATION(cosmology,nuisance)
     BACKEND_REQ(class_get_Dl,(class_tag),double,(double))
-
    #undef FUNCTION
   #undef CAPABILITY
 
