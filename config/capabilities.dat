@@ -4198,7 +4198,7 @@ DA_efficiency_function: |
 
 DA_initialize: |
    BE function loading all the DarkAges python module and setting
-   the redshift array to its glaobal default.
+   the redshift array to its global default.
 
 DA_calc_f: |
    BE function performing the convolution to get f(z).
@@ -4215,6 +4215,12 @@ DA_alreadyCalculated: |
 
 T_cmb: |
   Sets CMB temperature (to 2.7255 if not specified in yaml file via runOption).
+
+T_ncdm_SM: |
+  Temperature of non-cold DM components in units of T_cmb in the SM, fixed to 0.71611. This is larger than the value obtained by assuming instantaneous neutrino decoupling to account for the effect of flavour oscillations (hep-ph/0506164). 
+
+T_ncdm: |
+  Sets temperature of non-cold DM components in units of T_cmb (fixed to 0.71611, uncomment line in function set_Tncdm to be able to  specify it in yaml file via runOption).
 
 n0_g: |
   Compute the number density of photons today per cm^3 from CMB temperature.

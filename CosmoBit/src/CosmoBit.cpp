@@ -325,6 +325,7 @@ namespace Gambit
     void set_NuMasses_SM(map_str_dbl &result)
     {
       using namespace Pipes::set_NuMasses_SM;
+      
       double mNu1, mNu2, mNu3;
       int N_ncdm = 0;
       if (ModelInUse("StandardModel_SLHA2"))
@@ -2368,8 +2369,8 @@ namespace Gambit
       double Ya0 = *Param["Ya0"];
       double T0 = T_evo[0];
       double ssm_at_T0 = entropy_density_SM(T0, true);; // T0 in units of keV, set T_in_eV=True to interpret it correctly
-
-      double na_t0 = Ya0 * ssm_at_T0;     // initial number density of a at t=t0, in units keV^3. (no decay taken into account)
+      
+      double na_t0 = Ya0 * ssm_at_T0;     // initial number density of a at t=t0, in units keV^3.
       double m_a = 1e-3*(*Param["ma0"]);  // mass of a in keV
       double tau_a = *Dep::lifetime;      // lifetime of a in seconds
 
@@ -2448,7 +2449,7 @@ namespace Gambit
     {
       using namespace Pipes::set_T_ncdm_SM;
 
-      // set to 0.71611, above the instantaneous decoupling value (4/11)^(1/3)
+      // set to 0.71611 in units of photon temperature, above the instantaneous decoupling value (4/11)^(1/3)
       // to recover Sum_i mNu_i/omega = 93.14 eV resulting from studies of active neutrino decoupling (hep-ph/0506164)
       result = 0.71611;
       // This standard values enters in many assumption entering class. Therefore changing this value in 
@@ -2539,8 +2540,9 @@ namespace Gambit
     {
       using namespace Pipes::compute_Omega0_ur;
 
-      double Neff_nu = 2.0328; // TODO: only valid for 1 massive neutrinos -> need capability to set this
-      result = (*Param["dNeff"]+Neff_nu)*7./8.*pow(4./11.,4./3.)*(*Dep::Omega0_g); 
+      // Capability class_Nur takes care of setting N_ur right for considered number of 
+      // massive neutrinos & extra model dependent contributions
+      result = (*Dep::class_Nur)*7./8.*pow(4./11.,4./3.)*(*Dep::Omega0_g); 
     }
 
     void compute_Omega0_ncdm(double &result)
@@ -2609,7 +2611,7 @@ namespace Gambit
     void calculate_dNeffCMB_ALP(double &result)
     {
       using namespace Pipes::calculate_dNeffCMB_ALP;
-
+     
       map_str_dbl dNeff_etaBBN = *Dep::external_dNeff_etaBBN;
       result = dNeff_etaBBN["dNeff"];
       logger() << "dNeff for ALP calculated to be " << result << EOM;

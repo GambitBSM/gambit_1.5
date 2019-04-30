@@ -378,7 +378,8 @@ START_MODULE
        #define FUNCTION compute_Omega0_ur
         START_FUNCTION(double)
         DEPENDENCY(Omega0_g, double)
-        ALLOW_MODELS(LCDM_dNeffCMB_dNeffBBN_etaBBN)
+        DEPENDENCY(class_Nur, double)
+        //ALLOW_MODELS(LCDM_dNeffCMB_dNeffBBN_etaBBN)
        #undef FUNCTION
     #undef CAPABILITY
   
@@ -559,6 +560,7 @@ START_MODULE
     BACKEND_REQ(class_get_Da,(class_tag),double,(double))
     BACKEND_REQ(class_get_Hz,(class_tag),double,(double))
     BACKEND_REQ(class_get_rs,(class_tag),double,())
+    FORCE_SAME_BACKEND(class_tag)
    #undef FUNCTION
   #undef CAPABILITY
 
