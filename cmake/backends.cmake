@@ -71,6 +71,37 @@
 #
 #************************************************
 
+
+# AlterBBN
+set(name "alterbbn")
+set(ver "2.1")
+set(lib "libbbn")
+set(dl "https://alterbbn.hepforge.org/downloads?f=alterbbn_v2.1.tgz")
+set(md5 "c8e024ddcb1011281cd18476d49918c7")
+set(dir "${PROJECT_SOURCE_DIR}/Backends/installed/${name}/${ver}")
+check_ditch_status(${name} ${ver})
+if(NOT ditched_${name}_${ver})
+  ExternalProject_Add(${name}_${ver}
+    DOWNLOAD_COMMAND ${DL_BACKEND} ${dl} ${md5} ${dir} ${name} ${ver}
+    SOURCE_DIR ${dir}
+    BUILD_IN_SOURCE 1
+    CONFIGURE_COMMAND ""
+    #BUILD_COMMAND sed ${dashi} -e "s#CC = gcc#CC = ${CMAKE_C_COMPILER}#g" Makefile
+    BUILD_COMMAND sed ${dashi} -e "s#CC = gcc#CC = ${CMAKE_C_COMPILER}#g" Makefile
+          COMMAND sed ${dashi} -e "s#rcsU#rcs#g" Makefile
+          COMMAND sed ${dashi} -e "s/CFLAGS= -O3 -pipe -fomit-frame-pointer/CFLAGS= ${BACKEND_C_FLAGS}/g" Makefile
+          COMMAND sed ${dashi} -e "s/CFLAGS_MP= -fopenmp/CFLAGS_MP= ${OpenMP_C_FLAGS}/g" Makefile
+          COMMAND ${CMAKE_MAKE_PROGRAM}
+          COMMAND ar x src/libbbn.a
+          COMMAND ${CMAKE_COMMAND} -E echo "${CMAKE_C_COMPILER} ${OpenMP_C_FLAGS} ${CMAKE_SHARED_LIBRARY_CREATE_C_FLAGS} -o ${lib}.so *.o" > make_so.sh
+          COMMAND chmod u+x make_so.sh
+          COMMAND ./make_so.sh
+    INSTALL_COMMAND ""
+  )
+  add_extra_targets("backend" ${name} ${ver} ${dir} ${dl} clean)
+  set_as_default_version("backend" ${name} ${ver})
+endif()
+
 # AlterBBN
 set(name "alterbbn")
 set(ver "2.0")
@@ -98,7 +129,6 @@ if(NOT ditched_${name}_${ver})
     INSTALL_COMMAND ""
   )
   add_extra_targets("backend" ${name} ${ver} ${dir} ${dl} clean)
-  set_as_default_version("backend" ${name} ${ver})
 endif()
 
 # CaptnGeneral

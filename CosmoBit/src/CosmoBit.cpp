@@ -2647,20 +2647,24 @@ namespace Gambit
 /// BBN related functions (call AlterBBN, BBN abundances & Likelihood)
 /// -----------
 
-    void AlterBBN_fill_LCDM_dNeffCMB_dNeffBBN_etaBBN(relicparam &result)
+    void AlterBBN_Input_LCDM_dNeffCMB_dNeffBBN_etaBBN(map_str_dbl &result)
     {
-      // fill AlterBBN structure for LCDM_Smu_dNeffCMB_dNeffBBN_etaBBN
-      using namespace Pipes::AlterBBN_fill_LCDM_dNeffCMB_dNeffBBN_etaBBN;
+      // add parameters of relicparam structure that should be set to non-default values
+      // to the AlterBBN_input map. 
+      // If you want to modify a parameter which has not been used in CosmoBit before simply
+      // add it to the function 'fill_cosmomodel' in 'AlterBBN_<version>.cpp' and to the 
+      // set of 'known' parameters 'known_relicparam_options'
+      using namespace Pipes::AlterBBN_Input_LCDM_dNeffCMB_dNeffBBN_etaBBN;
 
-      BEreq::Init_cosmomodel(&result);
+      result["eta0"] = *Param["eta_BBN"];  // eta AFTER BBN (variable during)
+      result["Nnu"]=3.046;                 // contribution from SM neutrinos
+      result["dNnu"]=*Param["dNeff_BBN"];  // dNnu: within AlterBBN scenarios in which the sum Nnu+dNnu is the same are identical
+      result["failsafe"] = runOptions->getValueOrDef<double>(3,"failsafe");
+      result["err"] = runOptions->getValueOrDef<double>(3,"err");
 
-      result.eta0 = *Param["eta_BBN"];  // eta AFTER BBN (variable during)
-      result.Nnu=3.046;                 // contribution from neutrinos
-      result.dNnu=*Param["dNeff_BBN"];
-      result.failsafe = runOptions->getValueOrDef<int>(3,"failsafe");
-      result.err = runOptions->getValueOrDef<int>(3,"err");
-
-      logger() << "Called AlterBBN with parameters eta = " << result.eta0 << ", Nnu = " << result.Nnu << ", dNeffBBN = " << result.dNnu << EOM;
+      std::cout << "Set AlterBBN with parameters eta = " << result["eta0"] << ", Nnu = " << result["Nnu"] << ", dNeffBBN = " << result["dNnu"] << std::endl;
+      logger() << "Set AlterBBN with parameters eta = " << result["eta0"] << ", Nnu = " << result["Nnu"] << ", dNeffBBN = " << result["dNnu"] << EOM;
+      logger() << "     and error params: failsafe = " << result["failsafe"] << ", err = " << result["err"] << EOM;
     }
 
     void compute_BBN_abundances(CosmoBit::BBN_container &result)
@@ -2784,9 +2788,10 @@ namespace Gambit
         first = false;
       }
 
-      relicparam const& paramrelic = *Dep::AlterBBN_modelinfo;
-      int nucl_err = BEreq::nucl_err(&paramrelic, byVal(ratioH), byVal(cov_ratioH[0]));
+      map_str_dbl AlterBBN_input = *Dep::AlterBBN_setInput; // fill AlterBBN_input map with the parameters for the model in consideration
+      int nucl_err = BEreq::call_nucl_err(AlterBBN_input, byVal(ratioH), byVal(cov_ratioH[0]));
 
+      // TODO: replace .at() by [] to speed up 
       std::vector<double> err_ratio(NNUC+1,0);
       if (use_fudged_correlations)
       {
@@ -2821,7 +2826,7 @@ namespace Gambit
       else
       {
         std::ostringstream err;
-        err << "AlterBBN calculation for primordial element abundances failed.";
+        err << "AlterBBN calculation for primordial element abundances failed. Invalidating Point.";
         invalid_point().raise(err.str());
       }
     }

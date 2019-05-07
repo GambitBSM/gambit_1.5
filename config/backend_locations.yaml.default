@@ -12,6 +12,7 @@
 
 AlterBBN:
   2.0:         ./Backends/installed/alterbbn/2.0/libbbn.so
+  2.1:         ./Backends/installed/alterbbn/2.1/libbbn.so
 
 CaptnGeneral:
   1.0:         ./Backends/installed/capgen/1.0/gencaplib.so

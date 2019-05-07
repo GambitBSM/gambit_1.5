@@ -462,13 +462,12 @@ START_MODULE
   #undef CAPABILITY
 
 // AlterBBN related functions & capabilities
-  #define CAPABILITY AlterBBN_modelinfo
+  #define CAPABILITY AlterBBN_setInput
     START_CAPABILITY
-    #define FUNCTION AlterBBN_fill_LCDM_dNeffCMB_dNeffBBN_etaBBN
-     START_FUNCTION(relicparam)
+    #define FUNCTION AlterBBN_Input_LCDM_dNeffCMB_dNeffBBN_etaBBN
+     START_FUNCTION(map_str_dbl)
      ALLOW_MODELS(LCDM_dNeffCMB_dNeffBBN_etaBBN)
-     BACKEND_OPTION( (AlterBBN, 2.0), (libbbn) )
-     BACKEND_REQ(Init_cosmomodel, (libbbn), void, (relicparam*))
+     BACKEND_OPTION( (AlterBBN), (libbbn) )
     #undef FUNCTION
   #undef CAPABILITY
 
@@ -517,8 +516,8 @@ START_MODULE
   START_CAPABILITY
     #define FUNCTION compute_BBN_abundances
       START_FUNCTION(CosmoBit::BBN_container)
-      DEPENDENCY(AlterBBN_modelinfo, relicparam)
-      BACKEND_REQ(nucl_err, (libbbn), int, (const relicparam*,double*,double*))
+      DEPENDENCY(AlterBBN_setInput, map_str_dbl)
+      BACKEND_REQ(call_nucl_err, (libbbn), int, (map_str_dbl &,double*,double*))
       BACKEND_REQ(get_NNUC, (libbbn), int, ())
     #undef FUNCTION
   #undef CAPABILITY
@@ -528,8 +527,7 @@ START_MODULE
    #define FUNCTION compute_BBN_LogLike
    START_FUNCTION(double)
    DEPENDENCY(BBN_abundances, CosmoBit::BBN_container)
-   BACKEND_OPTION( (AlterBBN, 2.0), (libbbn) )
-   DEPENDENCY(AlterBBN_modelinfo, relicparam)
+   DEPENDENCY(AlterBBN_setInput, map_str_dbl)
   #undef FUNCTION
   #undef CAPABILITY
 

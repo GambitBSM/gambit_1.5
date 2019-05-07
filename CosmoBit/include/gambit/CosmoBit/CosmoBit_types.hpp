@@ -132,8 +132,8 @@ namespace Gambit
         void addEntry(std::string key,std::string val);
         void addEntry(std::string key,double val);
         void addEntry(std::string key,int val);
-        void addEntry(std::string key, std::vector<double> val);
-        void addEntry(std::string key, std::vector<int> val);
+        void addEntry(std::string key,std::vector<double> val);
+        void addEntry(std::string key,std::vector<int> val);
         std::string print_entries_to_logger();
 
         void clear();
