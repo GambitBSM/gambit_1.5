@@ -63,7 +63,7 @@ BE_NAMESPACE
   	if (AlterBBN_input.count("Nnu")){input_relicparam->Nnu = AlterBBN_input["Nnu"];}
   	if (AlterBBN_input.count("dNnu")){input_relicparam->dNnu = AlterBBN_input["dNnu"];}
   	
-    if (AlterBBN_input.count("failsafe")){input_relicparam->dNnu = (int)AlterBBN_input["failsafe"];}
+    if (AlterBBN_input.count("failsafe")){input_relicparam->failsafe = (int)AlterBBN_input["failsafe"];}
   	if (AlterBBN_input.count("err")){input_relicparam->err = (int)AlterBBN_input["err"];}
   }
 
