@@ -124,7 +124,7 @@ set(dl "staff.fysik.su.se/~edsjo/darksusy/tars/${name}-${ver}.tar.gz")
 set(md5 "448f72e9bfafbb086bf4526a2094a189")
 set(dir "${PROJECT_SOURCE_DIR}/Backends/installed/${name}/${ver}")
 set(patch "${PROJECT_SOURCE_DIR}/Backends/patches/${name}/${ver}/patch_${name}_${ver}.dif")
-set(DS_Fortran_FLAGS "${GAMBIT_Fortran_FLAGS}")  # Workaround to avoid the debug flag (-g) being ignored.
+set(DS_Fortran_FLAGS "${BACKEND_Fortran_FLAGS}")  # Workaround to avoid the debug flag (-g) being ignored.
 check_ditch_status(${name} ${ver})
 if(NOT ditched_${name}_${ver})
   ExternalProject_Add(${name}_${ver}
