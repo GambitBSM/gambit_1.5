@@ -274,7 +274,7 @@ namespace Gambit {
       {
           static const std::size_t CHUNK(1000);
           std::vector<T> buffer(CHUNK);
-          bool fully_readable(false);
+          bool fully_readable(true);
           std::size_t largest_readable_index(0);
 
           // Get dataset length
@@ -285,7 +285,7 @@ namespace Gambit {
           }
           else
           {
-              size_t dset_length;
+              size_t dset_length(0);
               bool length_error(false);
               try
               {
@@ -306,6 +306,7 @@ namespace Gambit {
                   if(remainder!=0) Nchunks+=1;
                   std::size_t offset(0);
                   std::size_t length(0);
+                  errorsOff();
                   for(std::size_t i=0; i<Nchunks; i++)  
                   {
                       offset = i * CHUNK;
@@ -313,6 +314,7 @@ namespace Gambit {
                       if(remainder!=0 and (i+1)==Nchunks) length = remainder;
                       try
                       {
+                          errorsOff();
                           buffer = getChunk<T>(dset_id, offset, length);
                       }
                       catch(const Gambit::exception& e)
@@ -321,12 +323,16 @@ namespace Gambit {
                       }
                       if(not fully_readable) break;
                   }
+                  errorsOn();
+
                   if(not fully_readable)
                   {
                       // Try to find highest readable index in the dataset
                       // We know it is somewhere in the last chunk we were reading.
                       // Could do a more efficient search, but we will just look
                       // sequentially from the beginning of the chunk
+
+                      errorsOff();
                       for(std::size_t j=offset; j<offset+length; j++)
                       {
                           try
@@ -339,6 +345,7 @@ namespace Gambit {
                               break;
                           }
                       }
+                      errorsOn();
 
                       if(largest_readable_index==dset_length)
                       {
@@ -349,6 +356,11 @@ namespace Gambit {
                           err<<"Dataset "<<dset_name<<" was determined to be partially unreadable (corrupted), however we were unable to determine the largest readable index. You will have to investigate the HDF5 file manually.";
                           printer_error().raise(LOCAL_INFO,err.str());
                       }
+                  }
+                  else
+                  {
+                      // Everything seems fine with this dataset
+                      largest_readable_index = dset_length;
                   }
               }
           }
