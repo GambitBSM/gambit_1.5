@@ -1217,9 +1217,10 @@ namespace Gambit
              std::size_t highest_common_readable_index = 0;
 
              // We already measured the longest dataset length. So now we want to extend all datasets to this length
+             std::cerr<<std::endl;
              for(auto it = dset_names.begin(); it!=dset_names.end(); ++it)
              {
-                 std::cerr<<"Scanning dataset for problems: "<<*it<<"                             \r";
+                 std::cerr<<"\rScanning dataset for problems: "<<*it<<"                                                                    ";
                  HDF5DataSetBasic dset(*it);
                  dset.open_dataset(gid);
                  std::size_t this_dset_length = dset.get_dset_length();
@@ -1244,6 +1245,7 @@ namespace Gambit
                  }
                  dset.close_dataset();
              }
+             std::cerr<<"\rScan of datasets complete!                                                                                      "<<std::endl;
 
              if(unfixable_problem)
              {

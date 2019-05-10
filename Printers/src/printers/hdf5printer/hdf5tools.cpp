@@ -304,8 +304,8 @@ namespace Gambit {
                   std::size_t Nchunks   = dset_length / CHUNK;
                   std::size_t remainder = dset_length % CHUNK;
                   if(remainder!=0) Nchunks+=1;
-                  std::size_t offset;
-                  std::size_t length;
+                  std::size_t offset(0);
+                  std::size_t length(0);
                   for(std::size_t i=0; i<Nchunks; i++)  
                   {
                       offset = i * CHUNK;
@@ -327,7 +327,7 @@ namespace Gambit {
                       // We know it is somewhere in the last chunk we were reading.
                       // Could do a more efficient search, but we will just look
                       // sequentially from the beginning of the chunk
-                      for(std::size_t j=offset; j<length; j++)
+                      for(std::size_t j=offset; j<offset+length; j++)
                       {
                           try
                           {
