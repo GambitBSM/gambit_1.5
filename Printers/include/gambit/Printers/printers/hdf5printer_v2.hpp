@@ -911,6 +911,9 @@ namespace Gambit
         /// Report what sort of buffers we are managing
         bool is_synchronised();
 
+        /// Report status of non-empty buffers (as a string message)
+        std::string buffer_status();
+ 
         /// Report what output file we are targeting
         std::string get_file(); 
 

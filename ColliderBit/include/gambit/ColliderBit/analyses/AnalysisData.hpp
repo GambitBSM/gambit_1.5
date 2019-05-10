@@ -12,6 +12,7 @@
 
 #include <string>
 #include <map>
+#include <iostream>
 #include <sstream>
 #include <vector>
 #include <cmath>
@@ -60,6 +61,7 @@ namespace Gambit {
         /// @todo Add SR consistency checks
         return consistent;
       }
+
 
       /// @name Signal region specification
       //@{
@@ -168,8 +170,8 @@ namespace Gambit {
       /// Is there non-null correlation data?
       bool hasCorrs() const
       {
-        // check();
-        return srcov.rows() == 0;
+        // check(); // bjf> This was wrong! Needs to be !=, not ==
+        return srcov.rows() != 0;
       }
 
       /// @brief Add a SignalRegionData
@@ -207,6 +209,9 @@ namespace Gambit {
         return true;
       }
 
+      /// bjf> Experimental! But already useful for helping me convert the key
+      /// numbers from these analyses to Python for the p-value calculuations.
+      void pythonize_me() const;
 
       /// Analysis name
       std::string analysis_name;

@@ -857,6 +857,20 @@ namespace Gambit
         return all_empty;
     }
 
+    /// Report status of non-empty buffers
+    std::string HDF5MasterBuffer::buffer_status()
+    {
+        std::stringstream ss;
+        for(auto it=all_buffers.begin(); it!=all_buffers.end(); ++it)
+        {
+            if(it->second->N_items_in_buffer()!=0)
+            {
+                ss << "   Buffer "<<it->first<<" contains "<<it->second->N_items_in_buffer()<<" unwritten items (synchronised="<<it->second->is_synchronised()<<")"<<std::endl;
+            }
+        } 
+        return ss.str();
+    }
+
     /// Retrieve the location_id specifying where output should be created in the HDF5 file
     hid_t HDF5MasterBuffer::get_location_id()
     {
@@ -1186,6 +1200,8 @@ namespace Gambit
 
             if(myRank==0) std::cout<<"Final dataset size is "<<final_size<<std::endl;
 
+            std::ostringstream buffer_nonempty_report;
+            bool buffer_nonempty_warn(false);
             for(auto it=aux_buffers.begin(); it!=aux_buffers.end(); ++it)
             {
                 if(not (*it)->is_synchronised())
@@ -1194,13 +1210,22 @@ namespace Gambit
                     // Check if everything managed to flush!
                     if(not (*it)->all_buffers_empty())
                     {
-                        std::ostringstream errmsg;
-                        errmsg<<"Not all 'random access' buffers were successfully flushed on rank "<<myRank<<" process! This is a bug, please report it."; 
-                        printer_error().raise(LOCAL_INFO, errmsg.str());
+                        buffer_nonempty_report<<(*it)->buffer_status();
+                        buffer_nonempty_warn = true;
                     }
                     // Make sure final dataset size is correct for the unsynchronised buffers
                     (*it)->extend_all_datasets_to(final_size);
                 } 
+            }
+
+            if(buffer_nonempty_warn)
+            {
+                std::ostringstream errmsg;
+                errmsg<<"\nWarning! Not all 'random access' buffers were successfully flushed to disk on rank "<<myRank<<" process! This most often occurs when you resume scanning from a run that did not shut down cleanly (at some point in its history). Hard shutdowns can cause loss of samples, and cause subsequent attempts to write data to the missing points to fail, triggering this warning."<<std::endl;
+                errmsg<<"A report on the data that could not be written to disk is given below. Please consider the impact of this on the integrity of your results:"<<std::endl;
+                errmsg<<buffer_nonempty_report.str();
+                std::cout<<errmsg.str();
+                printer_warning().raise(LOCAL_INFO, errmsg.str());
             }
         }    
     }

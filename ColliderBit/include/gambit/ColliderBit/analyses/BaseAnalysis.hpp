@@ -122,6 +122,7 @@ namespace Gambit {
         {
           collect_results();
           _needs_collection = false;
+          _results.pythonize_me(); // bjf> hack to get signal region definitions 
         }
         return _results;
       }

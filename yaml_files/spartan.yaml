@@ -35,7 +35,7 @@ Printer:
     output_file: "results.hdf5"
     group: "/spartan"
     delete_file_on_restart: true
-    buffer_length: 100
+    buffer_length: 5
 
   #printer: ascii
   #options:
@@ -47,7 +47,7 @@ Printer:
 
 Scanner:
 
-  use_scanner: de
+  use_scanner: multinest
 
   scanners:
 
@@ -65,7 +65,7 @@ Scanner:
       plugin: multinest
       like:  LogLike
       nlive: 2000
-      tol: 0.1
+      tol: 0.0001
 
     mcmc:
       plugin: great
