@@ -1190,6 +1190,7 @@ namespace Gambit
                      check = true;
                  }
                  if(this_dset_length>max_dset_length) max_dset_length = this_dset_length;
+
                  dset_length = this_dset_length;
                  dset.close_dataset();
              }
@@ -1207,9 +1208,53 @@ namespace Gambit
              // in HDF5, so it is better to just leave a chunk of invalid data.
 
              std::ostringstream warn;
-             warn << "An inconsistency has been detected in the existing HDF5 output! Not all datasets are the same length. This can happen if your previous run was not shut down safely."<<std::endl;
+             warn << "An inconsistency has been detected in the existing HDF5 output! Not all datasets are the same length. This can happen if your previous run was not shut down safely. We will now check all datasets for corruption (this involves reading the whole HDF5 file so may take some time if it is a large file)"<<std::endl;
              std::cerr << warn.str();
              printer_warning().raise(LOCAL_INFO, warn.str());
+
+             bool unfixable_problem=false;
+             std::string unfixable_report;
+             std::size_t highest_common_readable_index = 0;
+
+             // We already measured the longest dataset length. So now we want to extend all datasets to this length
+             for(auto it = dset_names.begin(); it!=dset_names.end(); ++it)
+             {
+                 std::cerr<<"Scanning dataset for problems: "<<*it<<"                             \r";
+                 HDF5DataSetBasic dset(*it);
+                 dset.open_dataset(gid);
+                 std::size_t this_dset_length = dset.get_dset_length();
+
+                 // Check that the dataset is fully readable
+                 // Also finds highest readable index if dataset is partially readable
+                 std::pair<bool,std::size_t> readable_info = HDF5::checkDatasetReadable(gid, *it);
+                 if(not readable_info.first)
+                 {
+                     std::ostringstream msg;
+                     msg << "   Corrupted dataset detected! Highest readable index was "<<readable_info.second<<" (dataset name = "<<*it<<")"<<std::endl;
+                     unfixable_report += msg.str();
+                     if(not unfixable_problem)
+                     {
+                         highest_common_readable_index = readable_info.second;
+                         unfixable_problem = true;
+                     }
+                     else if(readable_info.second < highest_common_readable_index)
+                     {
+                         highest_common_readable_index = readable_info.second;
+                     }
+                 }
+                 dset.close_dataset();
+             }
+
+             if(unfixable_problem)
+             {
+                 // Dataset corruption detected! Need to abort, but we can tell the user some facts about the problem.
+                 std::ostringstream err;
+                 err<<"Corruption detected in existing datasets! You cannot resume writing to the existing HDF5 file. You may be able to recover from this by copying all readable data from these datasets into a new HDF5 file. We have checked the readability of all datasets and determined that the highest index readable in all datasets is:"<<std::endl;
+                 err<<"   "<<highest_common_readable_index<<std::endl;
+                 err<<" A full report on the readability of corrupted datasets is given below:"<<std::endl;
+                 err<<unfixable_report;
+                 printer_error().raise(LOCAL_INFO, err.str());
+             }
 
              if(attempt_repair)
              {
