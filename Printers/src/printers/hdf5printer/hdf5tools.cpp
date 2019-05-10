@@ -290,13 +290,13 @@ namespace Gambit {
               try
               {
                   dset_length = getSimpleExtentNpoints(dspace_id);
-                  closeSpace(dset_id);
               }
               catch(const Gambit::exception& e)
               {
                   fully_readable = false;
                   length_error = true;
               }
+              closeSpace(dspace_id);
 
               if(not length_error)
               {
@@ -391,6 +391,7 @@ namespace Gambit {
                   }
               }
           }
+          closeDataset(dataset_id);
           return readable_info;
       }
 
