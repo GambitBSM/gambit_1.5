@@ -118,40 +118,21 @@ namespace Gambit
       // option in the official DS5.1.3.  The version in GAMBIT is patched to implement this option though,
       // so we use it as the default here.
 
-
-      if (*Dep::DarkSUSY_PointInit)
-      {
-        // Calling DarkSUSY subroutine dsddgpgn(gps,gns,gpa,gna)
-        // to set all four couplings.
-
-//        double* DDcouplings;
-//        BEreq::get_DD_couplings(DDcouplings);
-// TB debug: whch syntax is correct ?
-        double* DDcouplings=BEreq::get_DD_couplings();
-        ///This call is now replaced by the above call to a convenience function
-        //BEreq::dsddgpgn(result.gps, result.gns, result.gpa, result.gna);
-        double factor =
-        /// Option rescale_couplings<double>: Rescaling factor for WIMP-nucleon couplings (default 1.)
-          runOptions->getValueOrDef<double>(1., "rescale_couplings");
-        result.gps = factor*DDcouplings[0];// *= factor;
-        result.gns = factor*DDcouplings[1];// *= factor;
-        result.gpa = factor*DDcouplings[2];// *= factor;
-        result.gna = factor*DDcouplings[3];// *= factor;
-        logger() << LogTags::debug << "DarkSUSY dsddgpgn gives:" << std::endl;
-        logger() << LogTags::debug << " gps = " << result.gps << std::endl;
-        logger() << LogTags::debug << " gns = " << result.gns << std::endl;
-        logger() << LogTags::debug << " gpa = " << result.gpa << std::endl;
-        logger() << LogTags::debug << " gna = " << result.gna << EOM;
-      }
-      else
-      {
-        // Set couplings to zero if DarkSUSY point initialization
-        // was not successful
-        result.gps = 0.0; result.gns = 0.0;
-        result.gpa = 0.0; result.gna = 0.0;
-        logger() << "DarkSUSY point initialization failed:" << std::endl;
-        logger() << " couplings set to zero." << EOM;
-      }
+      // Calling DarkSUSY subroutine dsddgpgn(gps,gns,gpa,gna)
+      // to set all four couplings.
+      double* DDcouplings=BEreq::get_DD_couplings();
+      double factor =
+      /// Option rescale_couplings<double>: Rescaling factor for WIMP-nucleon couplings (default 1.)
+      runOptions->getValueOrDef<double>(1., "rescale_couplings");
+      result.gps = factor*DDcouplings[0];// *= factor;
+      result.gns = factor*DDcouplings[1];// *= factor;
+      result.gpa = factor*DDcouplings[2];// *= factor;
+      result.gna = factor*DDcouplings[3];// *= factor;
+      logger() << LogTags::debug << "DarkSUSY dsddgpgn gives:" << std::endl;
+      logger() << LogTags::debug << " gps = " << result.gps << std::endl;
+      logger() << LogTags::debug << " gns = " << result.gns << std::endl;
+      logger() << LogTags::debug << " gpa = " << result.gpa << std::endl;
+      logger() << LogTags::debug << " gna = " << result.gna << EOM;
     }
 
     /*! \brief Get direct detection couplings from initialized MicrOmegas.

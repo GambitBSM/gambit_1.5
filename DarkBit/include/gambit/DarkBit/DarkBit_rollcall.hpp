@@ -23,6 +23,7 @@
 ///          (torsten.bringmann@fys.uio.no)
 ///  \date 2013 Jun
 ///  \date 2014 Mar
+///  \date 2019 May
 ///
 ///  \author Lars A. Dal
 ///          (l.a.dal@fys.uio.no)
@@ -80,32 +81,6 @@
 #define MODULE DarkBit
 START_MODULE
 
-  // Backend point initialization --------------------------
-
-  // Function to initialize DarkSUSY to a specific model point.
-  // The generic DarkSUSY initialization is done in the backend
-  // initialization; this is only necessary for other capabilities
-  // that make use of model-specific DarkSUSY routines.
-  #define CAPABILITY DarkSUSY_PointInit
-  START_CAPABILITY
-    // Function returns if point initialization is successful
-    // (probably always true)
-    #define FUNCTION DarkSUSY_PointInit_MSSM
-      START_FUNCTION(bool)
-      DEPENDENCY(MSSM_spectrum, Spectrum)
-      DEPENDENCY(decay_rates, DecayTable)
-      ALLOW_MODELS(MSSM63atQ,CMSSM)
-      // For debugging using DarkSUSY native interface to ISASUGRA
-      BACKEND_REQ(dsgive_model_isasugra, (), void, (double&,double&,double&,double&,double&))
-      BACKEND_REQ(dssusy_isasugra, (), void, (int&,int&))
-      // Initialize DarkSUSY with SLHA file
-      BACKEND_REQ(dsSLHAread, (), void, (const char*, int&, int))
-      BACKEND_REQ(dsprep, (), void, ())
-      // Initialize DarkSUSY with SLHA object (convenience function)
-      BACKEND_REQ(initFromSLHAeaAndDecayTable, (), int, (const SLHAstruct&, const DecayTable&))
-    #undef FUNCTION
-  #undef CAPABILITY
-
   // Function to initialize LocalHalo model in DarkSUSY
   #define CAPABILITY DarkSUSY_PointInit_LocalHalo
   START_CAPABILITY
@@ -126,7 +101,6 @@ START_MODULE
   START_CAPABILITY
     #define FUNCTION RD_spectrum_SUSY
       START_FUNCTION(DarkBit::RD_spectrum_type)
-      DEPENDENCY(DarkSUSY_PointInit, bool)
       BACKEND_REQ(mspctm, (), DS_MSPCTM)
       BACKEND_REQ(widths, (), DS_WIDTHS)
       BACKEND_REQ(intdof, (), DS_INTDOF)
@@ -207,7 +181,6 @@ START_MODULE
     #define FUNCTION RD_oh2_DarkSUSY
       START_FUNCTION(double)
       ALLOW_MODELS(MSSM63atQ)
-      DEPENDENCY(DarkSUSY_PointInit, bool)
       BACKEND_REQ(dsrdomega, (), double, (int&,int&,double&,int&,int&,int&))
       BACKEND_REQ(rderrors, (), DS_RDERRORS)
       BACKEND_REQ(rdtime, (), DS_RDTIME)
@@ -449,7 +422,6 @@ START_MODULE
     #define FUNCTION TH_ProcessCatalog_MSSM
       START_FUNCTION(DarkBit::TH_ProcessCatalog)
       //ALLOW_MODELS(MSSM63atQ)
-      DEPENDENCY(DarkSUSY_PointInit, bool)
       DEPENDENCY(MSSM_spectrum, Spectrum)
       DEPENDENCY(DarkMatter_ID, std::string)
       DEPENDENCY(decay_rates,DecayTable)
@@ -621,7 +593,6 @@ START_MODULE
 
     #define FUNCTION DD_couplings_DarkSUSY
       START_FUNCTION(DM_nucleon_couplings)
-      DEPENDENCY(DarkSUSY_PointInit, bool)
       BACKEND_REQ(get_DD_couplings, (needs_DS), double*, ())
       BACKEND_REQ(mspctm, (), DS_MSPCTM)
       BACKEND_REQ(ddcom, (DarkSUSY), DS_DDCOM)

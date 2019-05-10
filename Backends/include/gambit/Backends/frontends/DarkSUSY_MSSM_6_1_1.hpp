@@ -13,7 +13,7 @@
 ///
 ///  \author Torsten Bringmann
 ///          (torsten.bringmann@fys.uio.no)
-///  \date 2018 September
+///  \date 2018 September, 2019
 ///
 ///  \author Joakim Edsjo
 ///          (edsjo@fysik.su.se)
@@ -70,24 +70,25 @@ BE_FUNCTION(dsddgpgn, void, (DS_gg&, int&), "dsddgpgn_", "dsddgpgn")
 // BE_FUNCTION(dsrdwintp, double, (double&), "dsrdwintp_", "dsrdwintp")
 // BE_FUNCTION(dsanwx, double, (double&), "dsanwx_", "dsanwx")
 
-// the following should be made obsolete in DS:
+// the following should be made obsolete in DS6:
 // BE_FUNCTION(dsrdthlim, void, (), "dsrdthlim_", "dsrdthlim")
 // BE_FUNCTION(dsrdtab, void, (double(*)(double&),double&,int&), "dsrdtab_", "dsrdtab")
 // BE_FUNCTION(dsrdeqn, void, (double(*)(double&),double&,double&,double&,double&,int&), "dsrdeqn_", "dsrdeqn")
 
 
 // Functions used in MSSM.cpp
-// BE_FUNCTION(dssusy_isasugra, void, (int&,int&), "dssusy_isasugra_", "dssusy_isasugra")
-// BE_FUNCTION(dsgive_model_isasugra, void, (double&,double&,double&,double&,double&), "dsgive_model_isasugra_", "dsgive_model_isasugra")
-// BE_FUNCTION(dsSLHAread, void, (const char*, int&, int), "dsslharead_", "dsSLHAread")
+ BE_FUNCTION(dsmodelsetup, void, (int&,int&), "dsmodelsetup_", "dsmodelsetup")
+ BE_FUNCTION(dsgive_model_isasugra, void, (double&,double&,double&,double&,double&), "dsgive_model_isasugra_", "dsgive_model_isasugra")
+ BE_FUNCTION(dsgive_model_SLHA, void, (const char*, int&, int), "dsgive_model_SLHA_", "dsSLHAread")
+// -> dssigmav0, has changed signature!
 // BE_FUNCTION(dssigmav, double, (int&), "dssigmav_", "dssigmav")
-// BE_FUNCTION(dsIBffdxdy, double, (int&, double&, double&), "dsibffdxdy_", "dsIBffdxdy")
-// BE_FUNCTION(dsIBfsrdxdy, double, (int&, double&, double&), "dsibfsrdxdy_", "dsIBfsrdxdy")
-// BE_FUNCTION(dsIBhhdxdy, double, (int&, double&, double&), "dsibhhdxdy_", "dsIBhhdxdy")
-// BE_FUNCTION(dsIBwhdxdy, double, (int&, double&, double&), "dsibwhdxdy_", "dsIBwhdxdy")
-// BE_FUNCTION(dsIBwwdxdy, double, (int&, double&, double&), "dsibwwdxdy_", "dsIBwwdxdy")
-// BE_FUNCTION(dssusy, void, (int&,int&), "dssusy_", "dssusy")
+ BE_FUNCTION(dsIBffdxdy, double, (int&, double&, double&), "dsibffdxdy_", "dsIBffdxdy")
+ BE_FUNCTION(dsIBfsrdxdy, double, (int&, double&, double&), "dsibfsrdxdy_", "dsIBfsrdxdy")
+ BE_FUNCTION(dsIBhhdxdy, double, (int&, double&, double&), "dsibhhdxdy_", "dsIBhhdxdy")
+ BE_FUNCTION(dsIBwhdxdy, double, (int&, double&, double&), "dsibwhdxdy_", "dsIBwhdxdy")
+ BE_FUNCTION(dsIBwwdxdy, double, (int&, double&, double&), "dsibwwdxdy_", "dsIBwwdxdy")
 // also used in RelicDensity.cpp
+// -> dsmodelsetup (also in RD!?), has changed signature!
 // BE_FUNCTION(dsprep, void, (), "dsprep_", "dsprep")
 
 
@@ -99,8 +100,9 @@ BE_FUNCTION(dsddgpgn, void, (DS_gg&, int&), "dsddgpgn_", "dsddgpgn")
 // BE_FUNCTION(dsntcapsuntab, double, (const double&, const double&, const double&), "dsntcapsuntab_", "cap_Sun_v0q0_isoscalar")
 
 
-// TODO: organize the list below in "DS main" and module-depednent part
-// UPDATE common blocks as necessary when going through the functions above!
+// TODO: organize the list below in "DS main" and module-dependent part
+// UPDATE common blocks as necessary (i.e. check what has changed
+//        in DS5->DS6) when going through the functions above!
 
 
 // Used in RD_eff_annrate_SUSY_DSprep_func, RD_oh2_general and RD_thresholds_resonances_SingletDM
@@ -115,13 +117,8 @@ BE_FUNCTION(dsddgpgn, void, (DS_gg&, int&), "dsddgpgn_", "dsddgpgn")
 // BE_VARIABLE(rdpadd, DS_RDPADD,     "rdpadd_",    "rdpadd")    // gRD I/O
 // BE_VARIABLE(rdtime, DS_RDTIME,     "rdtime_",    "rdtime")    // gRD timeout
 // BE_VARIABLE(intdof, DS_INTDOF, "intdof_", "intdof")
-// IB stuff
-// BE_VARIABLE(IBintvars, DS_IBINTVARS,"ibintvars_", "IBintvars")
 // Direct detection
 // BE_VARIABLE(ddcom, DS_DDCOM, "ddcom_",    "ddcom")
-// Neutrino detection
-// BE_VARIABLE(wabranch, DS_NUCOM, "wabranch_", "nu_common_block")
-BE_VARIABLE(anbranch,DS6_NUCOM, "anbranch_", "nu_common_block")
 // Halo model common blocks
 // BE_VARIABLE(dshmcom, DS_HMCOM, "dshmcom_", "dshmcom")
 // BE_VARIABLE(dshmframevelcom, DS_HMFRAMEVELCOM, "dshmframevelcom_", "dshmframevelcom")
@@ -133,7 +130,7 @@ BE_VARIABLE(anbranch,DS6_NUCOM, "anbranch_", "nu_common_block")
 
 // Common blocks in the MSSM module library
 BE_VARIABLE(smquarkmasses, DS_SMQUARKMASSES, "smquarkmasses_", "smquarkmasses")
-BE_VARIABLE(sckm, DS_SCKM, "sckm_", "sckm")
+BE_VARIABLE(sckm, DS_SCKM, "sckm_", "sckm") 
 BE_VARIABLE(pmasses, DS_PMASSES, "pmasses_", "pmasses")
 BE_VARIABLE(pwidths, DS_PWIDTHS, "pwidths_", "pwidths")
 BE_VARIABLE(smcoupling, DS_SMCOUPLING, "smcoupling_", "smcoupling")
@@ -146,6 +143,8 @@ BE_VARIABLE(mssmtype, DS_MSSMTYPE, "mssmtype_", "mssmtype")
 BE_VARIABLE(mssmpar, DS_MSSMPAR, "mssmpar_", "mssmpar")
 BE_VARIABLE(mssmwidths, DS_MSSMWIDTHS, "mssmwidths_", "mssmwidths")
 BE_VARIABLE(mssmmixing, DS_MSSMMIXING, "mssmmixing_", "mssmmixing")
+BE_VARIABLE(IBintvars, DS_IBINTVARS,"ibintvars_", "IBintvars")
+BE_VARIABLE(anbranch,DS6_NUCOM, "anbranch_", "nu_common_block")
 
 
 
@@ -162,6 +161,8 @@ BE_VARIABLE(mssmmixing, DS_MSSMMIXING, "mssmmixing_", "mssmmixing")
 // BE_VARIABLE(mssmswitch, DS_MSSMSWITCH, "mssmswitch_", "mssmswitch")
 // BE_VARIABLE(sfermionmass, DS_SFERMIONMASS, "sfermionmass_", "sfermionmass")
 // BE_VARIABLE(vrtxs, DS_VRTXS, "vrtxs_", "vrtxs")
+// BE_FUNCTION(dssusy, void, (int&,int&), "dssusy_", "dssusy")
+// BE_FUNCTION(dssusy_isasugra, void, (int&,int&), "dssusy_isasugra_", "dssusy_isasugra")
 
 
 

@@ -304,7 +304,7 @@ Rules:
        oh2_obs: 0.1188
     #function: RD_fraction_one # Do not rescale the local DM density
 
-  - function: DarkSUSY_PointInit_MSSM
+  - function: DarkSUSY_5_1_3_init
     options:
        # Set the below to true to write SLHA file to disk and read it in using DarkSUSY
        # SLHA reader instead of using diskless initialisation (not recommended!)

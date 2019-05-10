@@ -11,7 +11,7 @@
 ///
 ///  \author Torsten Bringmann
 ///          (torsten.bringmann@fys.uio.no)
-///  \date 2018 September
+///  \date 2018 2019
 ///
 ///  \author Joakim Edsjo
 ///          (edsjo@fysik.su.se)
@@ -61,10 +61,10 @@ BE_INI_FUNCTION
     dsinit();
     mylock.release_lock();
 
-    // TB: should not be needed in DS6 anymore!
+    // TB: should not be needed in DS6 anymore -- check ! FIXME
     // dsrdinit();
 
-    // TB: also this should not be needed in DS6 anymore! CHECK
+    // TB: also this should not be needed in DS6 anymore -- check! FIXME
     //// Initialize yield tables for use in cascade decays (initialize more if needed)
     //dshainit(151); // Initialize positron tables
     //dshainit(152); // Initialize gamma ray tables

@@ -21,6 +21,8 @@
 ///  \author Jonathan Cornell
 ///  \date 2016-2017
 ///
+///  \author Torsten Bringmann
+///  \date 2019 May
 ///  *********************************************
 
 #include "gambit/Elements/standalone_module.hpp"
@@ -211,18 +213,12 @@ int main(int argc, char* argv[])
     MicrOmegas_MSSM_3_6_9_2_init.reset_and_calculate();
 
     // Initialize DarkSUSY backend
+    DarkSUSY_5_1_3_init.notifyOfModel("MSSM30atQ");
+    DarkSUSY_5_1_3_init.resolveDependency(&createSpectrum);
+    DarkSUSY_5_1_3_init.resolveDependency(&createDecays);
+    if (decays) DarkSUSY_5_1_3_init.setOption<bool>("use_dsSLHAread", false);
+    else DarkSUSY_5_1_3_init.setOption<bool>("use_dsSLHAread", true);
     DarkSUSY_5_1_3_init.reset_and_calculate();
-    DarkSUSY_PointInit_MSSM.notifyOfModel("MSSM30atQ");
-    DarkSUSY_PointInit_MSSM.resolveDependency(&createSpectrum);
-    DarkSUSY_PointInit_MSSM.resolveDependency(&createDecays);
-    DarkSUSY_PointInit_MSSM.resolveBackendReq(&Backends::DarkSUSY_5_1_3::Functown::init_diskless);
-    DarkSUSY_PointInit_MSSM.resolveBackendReq(&Backends::DarkSUSY_5_1_3::Functown::dsgive_model_isasugra);
-    DarkSUSY_PointInit_MSSM.resolveBackendReq(&Backends::DarkSUSY_5_1_3::Functown::dssusy_isasugra);
-    DarkSUSY_PointInit_MSSM.resolveBackendReq(&Backends::DarkSUSY_5_1_3::Functown::dsSLHAread);
-    DarkSUSY_PointInit_MSSM.resolveBackendReq(&Backends::DarkSUSY_5_1_3::Functown::dsprep);
-    if (decays) DarkSUSY_PointInit_MSSM.setOption<bool>("use_dsSLHAread", false);
-    else DarkSUSY_PointInit_MSSM.setOption<bool>("use_dsSLHAread", true);
-    DarkSUSY_PointInit_MSSM.reset_and_calculate();
 
     // Assume for direct and indirect detection likelihoods that dark matter
     // density is always the measured one (regardless of relic density results)
@@ -250,13 +246,12 @@ int main(int argc, char* argv[])
     RD_oh2_MicrOmegas.reset_and_calculate();
 
     // Calculate relic density using RD_oh2_DarkSUSY (for checks only)
-    //RD_oh2_DarkSUSY.resolveDependency(&DarkSUSY_PointInit_MSSM);
-    //RD_oh2_DarkSUSY.resolveBackendReq(&Backends::DarkSUSY_5_1_3::Functown::dsrdomega);
+    //RD_oh2_DarkSUSY.resolveDependency(&DarkSUSY_5_1_3_init);
     //RD_oh2_DarkSUSY.setOption<int>("fast", 1);  // 0: normal; 1: fast; 2: dirty
     //RD_oh2_DarkSUSY.reset_and_calculate();
 
     // Relic density calculation with GAMBIT routines:
-    RD_spectrum_SUSY.resolveDependency(&DarkSUSY_PointInit_MSSM);
+    RD_spectrum_SUSY.resolveDependency(&DarkSUSY_5_1_3_init);
     RD_spectrum_SUSY.resolveBackendReq(&Backends::DarkSUSY_5_1_3::Functown::mspctm);
     RD_spectrum_SUSY.resolveBackendReq(&Backends::DarkSUSY_5_1_3::Functown::widths);
     RD_spectrum_SUSY.resolveBackendReq(&Backends::DarkSUSY_5_1_3::Functown::intdof);
@@ -315,7 +310,7 @@ int main(int argc, char* argv[])
     DarkMatter_ID_MSSM.reset_and_calculate();
 
     // Set up process catalog based on DarkSUSY annihilation rates
-    TH_ProcessCatalog_MSSM.resolveDependency(&DarkSUSY_PointInit_MSSM);
+    TH_ProcessCatalog_MSSM.resolveDependency(&DarkSUSY_5_1_3_init);
     TH_ProcessCatalog_MSSM.resolveDependency(&createSpectrum);
     TH_ProcessCatalog_MSSM.resolveDependency(&createDecays);
     TH_ProcessCatalog_MSSM.resolveDependency(&DarkMatter_ID_MSSM);
@@ -354,7 +349,7 @@ int main(int argc, char* argv[])
     // Calculate DD couplings with DarkSUSY
     DD_couplings_DarkSUSY.notifyOfModel("nuclear_params_fnq");
     DD_couplings_DarkSUSY.resolveDependency(&Models::nuclear_params_fnq::Functown::primary_parameters);
-    DD_couplings_DarkSUSY.resolveDependency(&DarkSUSY_PointInit_MSSM);
+    DD_couplings_DarkSUSY.resolveDependency(&DarkSUSY_5_1_3_init);
     DD_couplings_DarkSUSY.resolveBackendReq(&Backends::DarkSUSY_5_1_3::Functown::dsddgpgn);
     DD_couplings_DarkSUSY.resolveBackendReq(&Backends::DarkSUSY_5_1_3::Functown::mspctm);
     DD_couplings_DarkSUSY.resolveBackendReq(&Backends::DarkSUSY_5_1_3::Functown::ddcom);
