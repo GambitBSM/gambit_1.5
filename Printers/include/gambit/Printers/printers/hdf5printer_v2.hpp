@@ -106,6 +106,9 @@ namespace Gambit
          /// Ensure that a correctly named dataset exists at the target location with the specified length
          void ensure_dataset_exists(const hid_t loc_id, const std::size_t length);
 
+         /// Extend dataset to the specified size, filling it with default values
+         void extend_dset_to(const std::size_t new_size);
+
       private:
 
          // Dataset and chunk dimension specification arrays
@@ -146,14 +149,19 @@ namespace Gambit
          /// Extend dataset by the specified amount
          void extend_dset_by(const std::size_t extend_by);
  
-         /// Extend dataset to the specified size, filling it with default values
-         void extend_dset_to(const std::size_t new_size);
-
          /// Obtain memory and dataspace identifiers for writing to a hyperslab in the dataset
          std::pair<hid_t,hid_t> select_hyperslab(std::size_t offset, std::size_t length) const;
  
     };
- 
+
+    /// Constructable class for doing basic operations on a HDF5 dataset
+    class HDF5DataSetBasic: public HDF5DataSetBase
+    {
+      public:
+          HDF5DataSetBasic(const std::string& name);
+          void create_dataset(hid_t location_id);
+    };
+
     /// Class for interfacing to a HDF5 dataset of fixed type
     template<class T>
     class HDF5DataSet: public HDF5DataSetBase
@@ -1111,6 +1119,10 @@ namespace Gambit
         /// Search the existing output and find the highest used pointIDs for each rank
         std::map<ulong, ulonglong> get_highest_PPIDs_from_HDF5();
  
+        /// Check all datasets in a group for length inconsistencies
+        /// and correct them if possible
+        void check_consistency(bool attempt_repair);
+
         /// Report whether this printer prints in synchronised or 'random' mode
         bool get_sync(const Options& options);
 

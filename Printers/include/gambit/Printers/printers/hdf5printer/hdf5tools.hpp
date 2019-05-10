@@ -162,7 +162,10 @@ namespace Gambit
 
          /// Select a simple hyperslab in a 1D dataset
          std::pair<hid_t,hid_t> selectChunk(const hid_t dset_id, std::size_t offset, std::size_t length);
-  
+ 
+         /// Check if an object in a group is a dataset
+         bool isDataSet(hid_t group_id, const std::string& name);
+
          /// @}
 
       }

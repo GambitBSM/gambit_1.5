@@ -16,6 +16,7 @@
 //
 #include "gambit/Printers/printers/hdf5printer/hdf5tools.hpp"
 #include "gambit/Printers/printers/hdf5printer_v2.hpp"
+#include "gambit/Utils/util_functions.hpp"
 
 namespace Gambit
 {
@@ -304,7 +305,22 @@ namespace Gambit
     }
 
     /// @}
+   
+    /// @{ HDF5DataSetBasic member functions
+ 
+    HDF5DataSetBasic::HDF5DataSetBasic(const std::string& name)
+     : HDF5DataSetBase(name)
+    {}
+
+    void HDF5DataSetBasic::create_dataset(hid_t /*location_id*/)
+    {
+        std::ostringstream errmsg;
+        errmsg<<"Tried to use create_dataset function in a HDF5DataSetBasic object! This is not allowed. This object is only able to perform basic operations on existing datasets, like resizings them. For full dataset access a HDF5DataSet<T> object is required, where the type T of the dataset must be known.";
+        printer_error().raise(LOCAL_INFO, errmsg.str());
+    }
     
+    /// @}
+
     /// @{ HDF5BufferBase member functions
     
     /// Constructor
@@ -963,6 +979,9 @@ namespace Gambit
             // Overwrite output file if one already exists with the same name?
             bool overwrite_file = options.getValueOrDef<bool>(false,"delete_file_on_restart");
 
+            // Attempt repairs on existing HDF5 output if inconsistencies detected
+            bool attempt_repair = !options.getValueOrDef<bool>(false,"disable_autorepair");
+
             std::vector<ulonglong> highests(mpiSize);
             
             std::string file  = get_filename();
@@ -1057,6 +1076,12 @@ namespace Gambit
                         // Cleanup
                         HDF5::closeFile(file_id);
 
+                        // Check output for signs of corruption, and fix them
+                        // For example if a previous hard shutdown occurred, but the file is not corrupted, 
+                        // we might nevertheless still be missing data in some datasets.
+                        // We need to look for this and at least make sure the datasets are all sized correctly.
+                        check_consistency(attempt_repair);
+
                         // Output seems to be readable. 
                         // Get previous highest pointID for our rank from the existing output file
                         // Might take a while, so time it.
@@ -1130,6 +1155,146 @@ namespace Gambit
 #endif
         }
     }
+
+    /// Check all datasets in a group for length inconsistencies
+    /// and correct them if possible
+    void HDF5Printer2::check_consistency(bool attempt_repair)
+    {
+         hid_t fid = HDF5::openFile(get_filename(), false, 'r');
+         hid_t gid = HDF5::openGroup(fid, get_groupname(), true);
+        
+         // Get all object names in the group 
+         std::vector<std::string> names = HDF5::lsGroup(gid);
+         std::vector<std::string> dset_names;
+
+         // Check if all datasets have the same length
+         bool check=false;
+         bool problem=false;
+         std::size_t dset_length = 0;
+         std::size_t max_dset_length = 0;
+         for(auto it = names.begin(); it!=names.end(); ++it)
+         {
+             // Check if object is a dataset (could be another group)
+             if(HDF5::isDataSet(gid, *it))
+             {
+                 dset_names.push_back(*it);
+                 HDF5DataSetBasic dset(*it);
+                 dset.open_dataset(gid);
+                 std::size_t this_dset_length = dset.get_dset_length();
+                 if(check and dset_length!=this_dset_length)
+                 {
+                     problem = true;
+                 }
+                 else
+                 {
+                     check = true;
+                 }
+                 if(this_dset_length>max_dset_length) max_dset_length = this_dset_length;
+                 dset_length = this_dset_length;
+                 dset.close_dataset();
+             }
+         }
+
+         if(problem)
+         {
+             // Length inconsistency detected. Need to try and fix it.
+             // First, need to know "nominal" length. This is the *shortest*
+             // of the mpiranks/pointids datasets. We will invalidate data
+             // in any datasets beyond this length.
+             // Then we need to know the longest actual length of any dataset.
+             // We will extend all datasets to this size, and set data as invalid
+             // beyond the nominal length. Shortening datasets doesn't work well
+             // in HDF5, so it is better to just leave a chunk of invalid data.
+
+             std::ostringstream warn;
+             warn << "An inconsistency has been detected in the existing HDF5 output! Not all datasets are the same length. This can happen if your previous run was not shut down safely."<<std::endl;
+             std::cerr << warn.str();
+             printer_warning().raise(LOCAL_INFO, warn.str());
+
+             if(attempt_repair)
+             {
+                 std::ostringstream warn;
+                 warn << "Attempting to automatically repair datasets. Lost data will not be recovered, but file will be restored to a condition such that further data can be added. A report on dataset modifications will be issued below. If you want to disable auto-repair (and get an error message instead) then please set disable_autorepair=true in the YAML options for this printer."<<std::endl; 
+                 std::cerr << warn.str();
+                 printer_warning().raise(LOCAL_INFO, warn.str());
+  
+                 std::ostringstream repair_report;
+      
+                 // Reopen file in write mode
+                 HDF5::closeGroup(gid);
+                 HDF5::closeFile(fid);
+                 fid = HDF5::openFile(get_filename(), false, 'w');
+                 gid = HDF5::openGroup(fid, get_groupname(), true);
+ 
+                 HDF5DataSet<int>       mpiranks      ("MPIrank");
+                 HDF5DataSet<int>       mpiranks_valid("MPIrank_isvalid");
+                 HDF5DataSet<ulonglong> pointids      ("pointID");
+                 HDF5DataSet<int>       pointids_valid("pointID_isvalid");
+
+                 mpiranks      .open_dataset(gid);     
+                 mpiranks_valid.open_dataset(gid);
+                 pointids      .open_dataset(gid);
+                 pointids_valid.open_dataset(gid);
+
+                 std::size_t nominal_dset_length = mpiranks.get_dset_length();
+                 if(mpiranks_valid.get_dset_length() < nominal_dset_length) nominal_dset_length = mpiranks_valid.get_dset_length();
+                 if(pointids      .get_dset_length() < nominal_dset_length) nominal_dset_length = pointids      .get_dset_length();
+                 if(pointids_valid.get_dset_length() < nominal_dset_length) nominal_dset_length = pointids_valid.get_dset_length();
+                
+                 mpiranks      .close_dataset();     
+                 mpiranks_valid.close_dataset();
+                 pointids      .close_dataset();
+                 pointids_valid.close_dataset();
+
+                 repair_report << "   Nominal dataset length identified as: "<<nominal_dset_length<<std::endl;
+                 repair_report << "   Maximum dataset length identified as: "<<max_dset_length<<std::endl;
+
+                 // We already measured the longest dataset length. So now we want to extend all datasets to this length
+                 for(auto it = dset_names.begin(); it!=dset_names.end(); ++it)
+                 {
+                     HDF5DataSetBasic dset(*it);
+                     dset.open_dataset(gid);
+                     std::size_t this_dset_length = dset.get_dset_length();
+                     if(max_dset_length > this_dset_length)
+                     {
+                         dset.extend_dset_to(max_dset_length);
+                         repair_report << "   Extended dataset from "<<this_dset_length<<" to "<<max_dset_length<<"   (name = "<<*it<<")"<<std::endl;
+                     }
+                     dset.close_dataset();
+                 }
+
+                 // Next we want to open all the 'isvalid' datasets, and set their entries as 'invalid' between nominal and max lengths.
+                 // Could be that the nominal length is the max length though; in which case no further action is required. That just
+                 // means some datasets were too short. They will automatically be set as invalid in the extended sections.
+                 if(max_dset_length > nominal_dset_length)
+                 {
+                     for(auto it = dset_names.begin(); it!=dset_names.end(); ++it)
+                     {
+                         if(Utils::endsWith(*it,"_isvalid"))
+                         {
+                             HDF5DataSet<int> dset(*it);
+                             std::vector<int> zeros(max_dset_length-nominal_dset_length,0);
+                             dset.write_vector(gid, zeros, nominal_dset_length, true);
+                             repair_report << "   Set data as 'invalid' from "<<nominal_dset_length<<" to "<<max_dset_length<<"   (name = "<<*it<<")"<<std::endl; 
+                         }
+                     }
+                 }
+                 repair_report << "   Repairs complete."<<std::endl;
+                 std::cerr << repair_report.str();
+                 printer_warning().raise(LOCAL_INFO, repair_report.str());
+             }
+             else
+             {
+                 std::ostringstream err;
+                 err << "Automatic dataset repair has been disabled, and a problem with your HDF5 file was detected, so this run must stop. Please manually repair your HDF5 file, or set disable_autorepair=false in the YAML options for this printer, and then try again."; 
+                 printer_error().raise(LOCAL_INFO, err.str());
+             }
+         }
+ 
+         HDF5::closeGroup(gid);
+         HDF5::closeFile(fid);
+    }
+
 
     /// Destructor
     HDF5Printer2::~HDF5Printer2()

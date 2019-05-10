@@ -36,6 +36,7 @@ Printer:
     group: "/spartan"
     delete_file_on_restart: true
     buffer_length: 5
+    #disable_autorepair: true
 
   #printer: ascii
   #options:

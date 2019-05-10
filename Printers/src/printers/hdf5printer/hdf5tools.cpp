@@ -374,6 +374,20 @@ namespace Gambit {
          return out;
       }
 
+      /// Check if an object in a file or group is a dataset
+      bool isDataSet(hid_t loc_id, const std::string& name)
+      {
+          H5O_info_t object_info;
+          herr_t err = H5Oget_info_by_name(loc_id, name.c_str(), &object_info, H5P_DEFAULT);
+          if(err<0)
+          {
+              std::ostringstream errmsg;
+              errmsg << "Attempt to check if object named '"<<name<<"' is a dataset failed! See HDF5 error for more details (stderr).";
+              printer_error().raise(LOCAL_INFO, errmsg.str()); 
+          }
+          return object_info.type == H5O_TYPE_DATASET;
+      }
+
       /// Get type of a dataset in a group
       /// NOTE: Make sure to call closeType when the ID is no longer needed! 
       hid_t getH5DatasetType(hid_t group_id, const std::string& dset_name)
@@ -522,10 +536,9 @@ namespace Gambit {
           return std::make_pair(memspace_id, dspace_id); // Be sure to close these identifiers after using them!
       }
 
-
-
-
       /// @}
+      
+
     }
  
     /// DEBUG: print to stdout all HDF5 type IDs
