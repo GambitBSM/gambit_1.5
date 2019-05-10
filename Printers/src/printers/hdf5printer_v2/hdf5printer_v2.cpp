@@ -1244,6 +1244,10 @@ namespace Gambit
                      }
                  }
                  dset.close_dataset();
+
+                 // Also need to shorten this highest_common_readable_index in case some non-corrupt datasets happen to be shorter
+                 if(this_dset_length < highest_common_readable_index) highest_common_readable_index = this_dset_length;
+
              }
              std::cerr<<"\rScan of datasets complete!                                                                                      "<<std::endl;
 
