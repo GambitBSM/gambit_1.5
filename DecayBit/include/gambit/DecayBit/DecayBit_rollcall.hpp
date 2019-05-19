@@ -25,9 +25,17 @@
 ///  \author Csaba Balazs
 ///  \date 2015 Jan-May
 ///
+///  \author Ankit Beniwal
+///          (ankit.beniwal@adelaide.edu.au)
+///  \date 2016 Aug
+///
 ///   \author Tomas Gonzalo
 ///           (t.e.gonzalo@fys.uio.no)
-///   \date 2018 Feb
+///  \date 2018 Feb
+///  \author Andrew Fowlie
+///  \date 2018 May
+///  \author Peter Athron
+///  \date 2018 May
 ///
 ///  *********************************************
 
@@ -121,11 +129,33 @@ START_MODULE
     DEPENDENCY(Reference_SM_Higgs_decay_rates, DecayTable::Entry)
     #undef FUNCTION
 
-    #define FUNCTION SingletDM_Higgs_decays
+    #define FUNCTION ScalarSingletDM_Higgs_decays
     START_FUNCTION(DecayTable::Entry)
     DEPENDENCY(Reference_SM_Higgs_decay_rates, DecayTable::Entry)
-    DEPENDENCY(SingletDM_spectrum, Spectrum)
-    ALLOW_MODELS(SingletDM, SingletDMZ3)
+    MODEL_CONDITIONAL_DEPENDENCY(ScalarSingletDM_Z2_spectrum, Spectrum, ScalarSingletDM_Z2, ScalarSingletDM_Z2_running)
+    MODEL_CONDITIONAL_DEPENDENCY(ScalarSingletDM_Z3_spectrum, Spectrum, ScalarSingletDM_Z3, ScalarSingletDM_Z3_running)
+    ALLOW_MODELS(ScalarSingletDM_Z2, ScalarSingletDM_Z2_running, ScalarSingletDM_Z3, ScalarSingletDM_Z3_running)
+    #undef FUNCTION
+
+    #define FUNCTION VectorSingletDM_Higgs_decays
+    START_FUNCTION(DecayTable::Entry)
+    DEPENDENCY(Reference_SM_Higgs_decay_rates, DecayTable::Entry)
+    DEPENDENCY(VectorSingletDM_Z2_spectrum, Spectrum)
+    ALLOW_MODELS(VectorSingletDM_Z2)
+    #undef FUNCTION
+
+    #define FUNCTION MajoranaSingletDM_Higgs_decays
+    START_FUNCTION(DecayTable::Entry)
+    DEPENDENCY(Reference_SM_Higgs_decay_rates, DecayTable::Entry)
+    DEPENDENCY(MajoranaSingletDM_Z2_spectrum, Spectrum)
+    ALLOW_MODELS(MajoranaSingletDM_Z2)
+    #undef FUNCTION
+
+    #define FUNCTION DiracSingletDM_Higgs_decays
+    START_FUNCTION(DecayTable::Entry)
+    DEPENDENCY(Reference_SM_Higgs_decay_rates, DecayTable::Entry)
+    DEPENDENCY(DiracSingletDM_Z2_spectrum, Spectrum)
+    ALLOW_MODELS(DiracSingletDM_Z2)
     #undef FUNCTION
 
     #define FUNCTION MSSM_h0_1_decays
@@ -562,7 +592,6 @@ START_MODULE
     #define FUNCTION chargino_plus_1_decays_SH
     START_FUNCTION(DecayTable::Entry)
     DEPENDENCY(SLHA_pseudonyms, mass_es_pseudonyms)
-    DEPENDENCY(MSSM_spectrum, Spectrum)
     BACKEND_REQ(cb_sd_charwidth, (sh_reqd), sd_charwidth_type)
     BACKEND_REQ(cb_sd_char2body, (sh_reqd), sd_char2body_type)
     BACKEND_REQ(cb_sd_char2bodygrav, (sh_reqd), sd_char2bodygrav_type)
@@ -673,31 +702,6 @@ START_MODULE
 
   #undef CAPABILITY
 
-  #define CAPABILITY Z_invisible_width
-  START_CAPABILITY
-
-    #define FUNCTION Z_invisible_width_MSSM
-    START_FUNCTION(DecayTable::Entry)
-    DEPENDENCY(Z_decay_rates, DecayTable::Entry)
-    DEPENDENCY(MSSM_spectrum, Spectrum)
-    ALLOW_MODELS(MSSM63atQ, MSSM63atMGUT)
-    #undef FUNCTION
-
-  #undef CAPABILITY
-
-  #define CAPABILITY lnL_Z_invisible_width
-  START_CAPABILITY
-
-    #define FUNCTION lnL_Z_invisible_width
-    START_FUNCTION(double)
-    DEPENDENCY(Z_decay_rates, DecayTable::Entry)
-    DEPENDENCY(Z_invisible_width, DecayTable::Entry)
-    ALLOW_MODELS(MSSM63atQ, MSSM63atMGUT)
-    #undef FUNCTION
-
-  #undef CAPABILITY
-
-
   #define CAPABILITY decay_rates
   START_CAPABILITY
 
@@ -805,9 +809,76 @@ START_MODULE
     #undef FUNCTION
   #undef CAPABILITY
 
+  #define CAPABILITY Z_gamma_nu
+  START_CAPABILITY
+    #define FUNCTION Z_gamma_nu_SM_2l
+    START_FUNCTION(triplet<double>)
+    DEPENDENCY(SM_spectrum, Spectrum)
+    #undef FUNCTION
+  #undef CAPABILITY
+
+  #define CAPABILITY Z_gamma_chi_0
+  START_CAPABILITY
+    #define FUNCTION Z_gamma_chi_0_MSSM_tree
+    START_FUNCTION(triplet<double>)
+    DEPENDENCY(MSSM_spectrum, Spectrum)
+    ALLOW_MODELS(MSSM63atQ, MSSM63atMGUT)
+    #undef FUNCTION
+  #undef CAPABILITY
+
+  #define CAPABILITY lnL_Z_inv
+  START_CAPABILITY
+    #define FUNCTION lnL_Z_inv_MSSMlike
+    START_FUNCTION(double)
+    DEPENDENCY(Z_gamma_nu, triplet<double>)
+    DEPENDENCY(Z_gamma_chi_0, triplet<double>)
+    #undef FUNCTION
+  #undef CAPABILITY
+
+  #define CAPABILITY lnL_Higgs_invWidth
+  START_CAPABILITY
+    #define FUNCTION lnL_Higgs_invWidth_SMlike
+    START_FUNCTION(double)
+    DEPENDENCY(inv_Higgs_BF, double)
+    #undef FUNCTION
+  #undef CAPABILITY
+
+  #define CAPABILITY inv_Higgs_BF
+  START_CAPABILITY
+
+    #define FUNCTION ScalarSingletDM_inv_Higgs_BF
+    START_FUNCTION(double)
+    DEPENDENCY(Higgs_decay_rates, DecayTable::Entry)
+    ALLOW_MODELS(ScalarSingletDM_Z2, ScalarSingletDM_Z2_running, ScalarSingletDM_Z3, ScalarSingletDM_Z3_running)
+    #undef FUNCTION
+
+    #define FUNCTION VectorSingletDM_inv_Higgs_BF
+    START_FUNCTION(double)
+    DEPENDENCY(Higgs_decay_rates, DecayTable::Entry)
+    ALLOW_MODELS(VectorSingletDM_Z2)
+    #undef FUNCTION
+
+    #define FUNCTION MajoranaSingletDM_inv_Higgs_BF
+    START_FUNCTION(double)
+    DEPENDENCY(Higgs_decay_rates, DecayTable::Entry)
+    ALLOW_MODELS(MajoranaSingletDM_Z2)
+    #undef FUNCTION
+
+    #define FUNCTION DiracSingletDM_inv_Higgs_BF
+    START_FUNCTION(double)
+    DEPENDENCY(Higgs_decay_rates, DecayTable::Entry)
+    ALLOW_MODELS(DiracSingletDM_Z2)
+    #undef FUNCTION
+
+    #define FUNCTION MSSM_inv_Higgs_BF
+    START_FUNCTION(double)
+    DEPENDENCY(MSSM_spectrum, Spectrum)
+    ALLOW_MODELS(MSSM63atQ, MSSM63atMGUT)
+    #undef FUNCTION
+
+  #undef CAPABILITY
 
 #undef MODULE
-
 
 // SM decay rate functions
 QUICK_FUNCTION(DecayBit, W_plus_decay_rates,    NEW_CAPABILITY, W_plus_decays,    DecayTable::Entry)
@@ -853,9 +924,6 @@ QUICK_FUNCTION(DecayBit, snubar_muonl_decay_rates,     NEW_CAPABILITY, snubar_mu
 QUICK_FUNCTION(DecayBit, snubar_taul_decay_rates,      NEW_CAPABILITY, snubar_taul_decays,      DecayTable::Entry, (MSSM63atQ, MSSM63atMGUT), (snu_taul_decay_rates,       DecayTable::Entry))
 QUICK_FUNCTION(DecayBit, chargino_minus_1_decay_rates, NEW_CAPABILITY, chargino_minus_1_decays, DecayTable::Entry, (MSSM63atQ, MSSM63atMGUT), (chargino_plus_1_decay_rates,DecayTable::Entry))
 QUICK_FUNCTION(DecayBit, chargino_minus_2_decay_rates, NEW_CAPABILITY, chargino_minus_2_decays, DecayTable::Entry, (MSSM63atQ, MSSM63atMGUT), (chargino_plus_2_decay_rates,DecayTable::Entry))
-
-// Likelihoods
-QUICK_FUNCTION(DecayBit, lnL_Higgs_invWidth, NEW_CAPABILITY, lnL_Higgs_invWidth_SMlike, double, (SingletDM, SingletDMZ3), (Higgs_decay_rates, DecayTable::Entry))
 
 #endif /* defined(__DecayBit_rollcall_hpp__) */
 
