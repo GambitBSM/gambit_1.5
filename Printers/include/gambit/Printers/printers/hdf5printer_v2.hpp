@@ -45,6 +45,7 @@
 #include "gambit/Utils/new_mpi_datatypes.hpp"
 #include "gambit/Utils/yaml_options.hpp"
 #include "gambit/Utils/cats.hpp"
+#include "gambit/Utils/mpiwrapper.hpp"
 #include "gambit/Printers/baseprinter.hpp"
 #include "gambit/Printers/printers/hdf5printer/hdf5tools.hpp"
 #include "gambit/Printers/printers/hdf5types.hpp"
@@ -70,6 +71,34 @@ namespace Gambit
  
     /// Largest allowed size of buffers. Size can be dynamically set from 1 to this number.
     static const std::size_t MAX_BUFFER_SIZE = 100000; 
+
+    /// MPI tags for HDF5 printer v2 
+    const int h5v2_bufname(10);
+    const int h5v2_bufdata_points(11);
+    const int h5v2_bufdata_ranks(12);
+    const int h5v2_bufdata_valid(13);
+    // Need a different tag for every datatype we want to send
+    const int h5v2_bufdata_values_int      (20);
+    const int h5v2_bufdata_values_uint     (21);
+    const int h5v2_bufdata_values_long     (22);
+    const int h5v2_bufdata_values_ulong    (23);
+    const int h5v2_bufdata_values_longlong (24);
+    const int h5v2_bufdata_values_ulonglong(25);
+    const int h5v2_bufdata_values_float    (26);
+    const int h5v2_bufdata_values_double   (27);
+    // Message block end tag
+    const int h5v2_END(30); 
+ 
+    // Template functions to match datatypes to tags
+    template <class T> int h5v2_bufdata_values();
+    template <> int h5v2_bufdata_values<int      >(); 
+    template <> int h5v2_bufdata_values<uint     >();
+    template <> int h5v2_bufdata_values<long     >();
+    template <> int h5v2_bufdata_values<ulong    >();
+    template <> int h5v2_bufdata_values<longlong >();
+    template <> int h5v2_bufdata_values<ulonglong>();
+    template <> int h5v2_bufdata_values<float    >();
+    template <> int h5v2_bufdata_values<double   >();
 
     template<class T>
     std::set<T> set_diff(const std::set<T>& set1, const std::set<T>& set2)
@@ -559,7 +588,7 @@ namespace Gambit
         HDF5BufferBase(const std::string& name, const bool sync);
           
         /// Report name of dataset for which we are the buffer
-        std::string dset_name();
+        std::string dset_name() const;
 
         /// Make sure buffer includes the input point (data will be set as 'invalid' unless given elsewhere)
         virtual void update(const PPIDpair& ppid) = 0;
@@ -570,6 +599,11 @@ namespace Gambit
         /// Empty buffer to disk as arbitrarily positioned data
         virtual void random_flush(const hid_t loc_id, const std::map<PPIDpair,std::size_t>& position_map) = 0;
 
+#ifdef WITH_MPI
+        /// Send buffer contents to another process
+        virtual void MPI_flush_to_rank(const unsigned int r) = 0;
+#endif 
+
         /// Make sure datasets exist on disk with the correct name and size
         virtual void ensure_dataset_exists(const hid_t loc_id, const std::size_t length) = 0;
 
@@ -577,10 +611,13 @@ namespace Gambit
         virtual void reset(hid_t loc_id) = 0;
 
         // Report whether this buffer is synchronised
-        bool is_synchronised();
+        bool is_synchronised() const;
 
         // Report the number of items currently in the buffer;
         virtual std::size_t N_items_in_buffer() = 0;
+
+        /// Report all the points in this buffer
+        std::set<PPIDpair> get_points_set() const; 
 
       private:
 
@@ -591,6 +628,10 @@ namespace Gambit
         /// to the output dataset, or look up and overwrite existing points.
         bool synchronised;
 
+      protected:
+
+        /// Set detailing what points are in the buffer
+        std::set<PPIDpair> buffer_set; 
     };
 
     /// Class to manage buffer for a single output label
@@ -600,10 +641,18 @@ namespace Gambit
       public:
 
         /// Constructor
-        HDF5Buffer(const std::string& name, const bool sync, const std::vector<PPIDpair>& buffered_points)
+        HDF5Buffer(const std::string& name, const bool sync, const std::vector<PPIDpair>& buffered_points
+#ifdef WITH_MPI
+          // Gambit MPI communicator context for use within the hdf5 printer system
+        , GMPI::Comm& comm
+#endif
+        )
           : HDF5BufferBase(name,sync)
           , my_dataset(name)
           , my_dataset_valid(name+"_isvalid")
+#ifdef WITH_MPI
+          , myComm(comm)
+#endif
         {
            // Add points known to other buffers (as 'invalid' data, for synchronisation purposes)
            for(auto it=buffered_points.begin(); it!=buffered_points.end(); ++it)
@@ -789,6 +838,75 @@ namespace Gambit
             return buffer.size();
         }
 
+#ifdef WITH_MPI
+        // Send buffer contents to a different process
+        void MPI_flush_to_rank(const unsigned int r)
+        {
+            if(buffer.size()>0)
+            {
+                // Get name of the dataset this buffer is associated with
+                std::string namebuf = dset_name();
+                // Copy point data and values into MPI send buffer
+                std::vector<unsigned long long int> pointIDs;
+                std::vector<unsigned int> ranks; // Will assume all PPIDpairs are valid. I think this is fine to do...
+                std::vector<int> valid; // We have to send the invalid points too, to maintain buffer synchronicity
+                std::vector<T> values;
+                for(auto it=buffer.begin(); it!=buffer.end(); ++it)
+                {
+                    pointIDs.push_back(it->first.pointID);
+                    ranks   .push_back(it->first.rank);
+                    valid   .push_back(buffer_valid.at(it->first));
+                    values  .push_back(it->second);
+                }
+                // Send the buffers
+                std::size_t Npoints = values.size();
+                myComm.Send(&namebuf[0] , namebuf.size(), MPI_CHAR, r, h5v2_bufname);
+                myComm.Send(&values[0]  , Npoints, r, h5v2_bufdata_values<T>());
+                myComm.Send(&pointIDs[0], Npoints, r, h5v2_bufdata_points);
+                myComm.Send(&ranks[0]   , Npoints, r, h5v2_bufdata_ranks);
+                myComm.Send(&valid[0]   , Npoints, r, h5v2_bufdata_valid);
+
+                // Clear buffer variables
+                buffer      .clear();
+                buffer_valid.clear();
+                buffer_set.clear();
+            }
+        }
+
+        // Receive buffer contents from a different process
+        // (MasterBuffer should have received the name, type, and size of the 
+        // buffer data, and used this to construct/retrieve this buffer. 
+        // We then collect the buffer data messages)
+        void MPI_recv_from_rank(unsigned int r, std::size_t Npoints)
+        {
+            /// MPI buffers
+            std::vector<unsigned long long int> pointIDs(Npoints);
+            std::vector<unsigned int> ranks(Npoints);
+            std::vector<int> valid(Npoints);
+            std::vector<T> values(Npoints);
+
+            // Receive buffer data 
+            myComm.Recv(&values[0]  , Npoints, r, h5v2_bufdata_values<T>());
+            myComm.Recv(&pointIDs[0], Npoints, r, h5v2_bufdata_points);
+            myComm.Recv(&ranks[0]   , Npoints, r, h5v2_bufdata_ranks);
+            myComm.Recv(&valid[0]   , Npoints, r, h5v2_bufdata_valid);
+
+            // Pack it into this buffer
+            for(std::size_t i=0; i<Npoints; ++i)
+            {
+                PPIDpair ppid(ranks.at(i), pointIDs.at(i));
+                if(valid.at(i))
+                {
+                    append(values[i], ppid);
+                }
+                else
+                {
+                    update(ppid);
+                }
+            }
+        }
+#endif   
+ 
       private:
 
         /// Object that provides an interface to the output HDF5 dataset matching this buffer
@@ -798,12 +916,13 @@ namespace Gambit
         /// Buffer containing points to be written to disk upon "flush"
         std::map<PPIDpair,T> buffer;
 
-        /// Set detailing what points are in the buffer
-        std::set<PPIDpair> buffer_set; 
-
         /// Buffer specifying whether the data in the primary buffer is "valid".
         std::map<PPIDpair,int> buffer_valid;
 
+#ifdef WITH_MPI
+        // Gambit MPI communicator context for use within the hdf5 printer system
+        GMPI::Comm& myComm;
+#endif
     };
 
     /// Class to manage a set of buffers for a single output type
@@ -813,8 +932,14 @@ namespace Gambit
       public:
  
         /// Constructor
-        HDF5MasterBufferT(bool sync)
-          : synchronised(sync)
+        HDF5MasterBufferT(bool sync
+#ifdef WITH_MPI
+          , GMPI::Comm& comm
+#endif
+          ) : synchronised(sync)
+#ifdef WITH_MPI
+            , myComm(comm)
+#endif
         {}
 
         /// Retrieve buffer of our type for a given label
@@ -825,7 +950,11 @@ namespace Gambit
             if(it==my_buffers.end())
             {
                 // No buffer with this name. Need to create one!
-                my_buffers.emplace(label,HDF5Buffer<T>(label,synchronised,buffered_points));
+                my_buffers.emplace(label,HDF5Buffer<T>(label,synchronised,buffered_points
+#ifdef WITH_MPI
+                 , myComm
+#endif
+                ));
                 it=my_buffers.find(label);
             }
             return it->second;
@@ -835,6 +964,10 @@ namespace Gambit
  
         std::map<std::string,HDF5Buffer<T>> my_buffers;
         bool synchronised;
+#ifdef WITH_MPI
+        // Gambit MPI communicator context for use within the hdf5 printer system
+        GMPI::Comm& myComm;
+#endif
     };
 
     /// Class to manage all buffers for a given printer object
@@ -845,7 +978,11 @@ namespace Gambit
       public:
 
         /// Constructor  
-        HDF5MasterBuffer(const std::string& filename, const std::string& groupname, const bool sync, const std::size_t buffer_length);
+        HDF5MasterBuffer(const std::string& filename, const std::string& groupname, const bool sync, const std::size_t buffer_length
+#ifdef WITH_MPI
+          , GMPI::Comm& comm
+#endif
+        );
 
         /// Destructor
         ~HDF5MasterBuffer();
@@ -909,9 +1046,39 @@ namespace Gambit
 
         /// Empty all buffers to disk
         void flush();
- 
+
+        #ifdef WITH_MPI
+        /// Gather all buffer data on a certain rank process
+        /// (only gathers data from buffers known to that process)
+        void MPI_flush_to_rank(const unsigned int rank);
+
+        /// Receive buffer data from a specified process until a STOP message is received
+        void MPI_recv_all_buffers(const unsigned int rank);
+  
+        /// Receive buffer data of a known type for a known dataset
+        /// Requires status message resulting from a probe for the message to be received
+        template<class T>
+        void MPI_recv_buffer(const unsigned int r, const std::string& dset_name, MPI_Status& status)      
+        {
+            int Npoints; 
+            int err = MPI_Get_count(&status, GMPI::get_mpi_data_type<T>::type(), &Npoints);
+            if(err<0)
+            {
+                std::stringstream msg;
+                msg<<"Error from MPI_Get_count while attempting to receive buffer data from rank "<<r<<" for dataset "<<dset_name<<"!";
+                printer_error().raise(LOCAL_INFO,msg.str());  
+            }
+            auto buffer = get_buffer<T>(dset_name, buffered_points);
+            buffer.MPI_recv_from_rank(r, Npoints);
+            logger()<< LogTags::printers << LogTags::info << "Received "<<Npoints<<" points from rank "<<r<<"'s buffers (for dataset: "<<dset_name<<")"<<EOM;
+        }
+        #endif
+
         /// Clear all data in buffers ***and on disk*** for this printer
         void reset();
+
+        /// Make sure all buffers know about all points in all buffers
+        void resynchronise();
 
         /// Report whether all the buffers are empty
         bool all_buffers_empty();
@@ -930,7 +1097,7 @@ namespace Gambit
 
         /// Report length of buffer for HDF5 output
         std::size_t get_buffer_length();
- 
+
         /// Extend all datasets to the specified size;
         void extend_all_datasets_to(const std::size_t length);
 
@@ -948,6 +1115,10 @@ namespace Gambit
  
         /// Get next available position in the synchronised output datasets
         std::size_t get_next_free_position();
+
+#ifdef WITH_MPI
+
+#endif
 
       private:
 
@@ -1020,6 +1191,11 @@ namespace Gambit
         HDF5MasterBufferT<ulonglong> hdf5_buffers_ulonglong;
         HDF5MasterBufferT<float    > hdf5_buffers_float;
         HDF5MasterBufferT<double   > hdf5_buffers_double;
+
+#ifdef WITH_MPI
+        // Gambit MPI communicator context for use within the hdf5 printer system
+        GMPI::Comm& myComm;
+#endif
 
     };
    
@@ -1094,6 +1270,14 @@ namespace Gambit
         /// Pointer to primary printer object
         HDF5Printer2* primary_printer;
 
+        std::size_t myRank;
+        std::size_t mpiSize;
+
+#ifdef WITH_MPI
+        // Gambit MPI communicator context for use within the hdf5 printer system
+        GMPI::Comm myComm; // initially attaches to MPI_COMM_WORLD
+#endif
+
         /// Object interfacing to HDF5 file and all datasets
         HDF5MasterBuffer buffermaster;
        
@@ -1101,12 +1285,6 @@ namespace Gambit
         /// Only the primary printer will have anything in this.
         std::vector<HDF5MasterBuffer*> aux_buffers;
 
-        std::size_t myRank;
-        std::size_t mpiSize;
-#ifdef WITH_MPI
-        // Gambit MPI communicator context for use within the hdf5 printer system
-        GMPI::Comm myComm; // initially attaches to MPI_COMM_WORLD
-#endif
         /// Determine filename from options 
         std::string get_filename(const Options& options);
                 

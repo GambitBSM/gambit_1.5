@@ -22,7 +22,16 @@ namespace Gambit
 {
   namespace Printers
   {
- 
+    // Template functions to match datatypes to MPI tags
+    template <> int h5v2_bufdata_values<int      >() {return h5v2_bufdata_values_int      ;}
+    template <> int h5v2_bufdata_values<uint     >() {return h5v2_bufdata_values_uint     ;}
+    template <> int h5v2_bufdata_values<long     >() {return h5v2_bufdata_values_long     ;}
+    template <> int h5v2_bufdata_values<ulong    >() {return h5v2_bufdata_values_ulong    ;}
+    template <> int h5v2_bufdata_values<longlong >() {return h5v2_bufdata_values_longlong ;}
+    template <> int h5v2_bufdata_values<ulonglong>() {return h5v2_bufdata_values_ulonglong;}
+    template <> int h5v2_bufdata_values<float    >() {return h5v2_bufdata_values_float    ;}
+    template <> int h5v2_bufdata_values<double   >() {return h5v2_bufdata_values_double   ;}
+
     /// @{ HDF5DataSetBase member functions
 
     /// Constructor
@@ -330,15 +339,21 @@ namespace Gambit
     {}
  
     /// Report name of dataset for which we are the buffer
-    std::string HDF5BufferBase::dset_name()
+    std::string HDF5BufferBase::dset_name() const
     {
         return _dset_name;
     }
 
     /// Report whether this buffer is synchronised
-    bool HDF5BufferBase::is_synchronised()
+    bool HDF5BufferBase::is_synchronised() const
     {
         return synchronised;
+    }
+
+    /// Report all the points in this buffer
+    std::set<PPIDpair> HDF5BufferBase::get_points_set() const
+    { 
+        return buffer_set; 
     }
 
     /// @}
@@ -346,7 +361,11 @@ namespace Gambit
 
     /// @{ Member functions of HDF5MasterBuffer
 
-    HDF5MasterBuffer::HDF5MasterBuffer(const std::string& filename, const std::string& groupname, const bool sync, const std::size_t buflen)
+    HDF5MasterBuffer::HDF5MasterBuffer(const std::string& filename, const std::string& groupname, const bool sync, const std::size_t buflen
+#ifdef WITH_MPI
+        , GMPI::Comm& comm
+#endif
+        )
         : synchronised(sync)
         , buffer_length(sync ? buflen : MAX_BUFFER_SIZE) // Use buflen for the bufferlength if this is a sync buffer, otherwise use MAX_BUFFER_SIZE
         , file(filename)
@@ -357,6 +376,17 @@ namespace Gambit
         , hdf5out(file,false)
         , file_open(false)
         , have_lock(false)
+#ifdef WITH_MPI
+        , hdf5_buffers_int(sync,comm)
+        , hdf5_buffers_uint(sync,comm)
+        , hdf5_buffers_long(sync,comm)
+        , hdf5_buffers_ulong(sync,comm)
+        , hdf5_buffers_longlong(sync,comm)
+        , hdf5_buffers_ulonglong(sync,comm)
+        , hdf5_buffers_float(sync,comm)
+        , hdf5_buffers_double(sync,comm)
+        , myComm(comm)
+#else
         , hdf5_buffers_int(sync)
         , hdf5_buffers_uint(sync)
         , hdf5_buffers_long(sync)
@@ -365,6 +395,7 @@ namespace Gambit
         , hdf5_buffers_ulonglong(sync)
         , hdf5_buffers_float(sync)
         , hdf5_buffers_double(sync)
+#endif
     {
         //std::cout<<"Constructed MasterBuffer to attach to file/group:"<<std::endl;
         //std::cout<<"file : "<<file<<std::endl;
@@ -514,7 +545,78 @@ namespace Gambit
         // Release lock on output file
         close_and_unlock_file();
     }
-    
+
+    #ifdef WITH_MPI
+    /// Send buffer data to a specified process  
+    void HDF5MasterBuffer::MPI_flush_to_rank(const unsigned int r)
+    {
+        for(auto it=all_buffers.begin(); it!=all_buffers.end(); ++it)
+        {
+            it->second->MPI_flush_to_rank(r);
+        }
+        buffered_points.clear();
+        buffered_points_set.clear();
+    }
+
+    /// Receive buffer data from a specified process until a STOP message is received
+    void HDF5MasterBuffer::MPI_recv_all_buffers(const unsigned int r)
+    {
+        int stop(0);
+        while(not stop)
+        {
+            MPI_Status status;
+            // Check for stop message  
+            myComm.Probe(r, MPI_ANY_TAG, &status);
+            if(status.MPI_TAG==h5v2_END)
+            {
+                stop = 1;
+                int nullbuf;
+                myComm.Recv(&nullbuf, 1, r, h5v2_END); // Release the sending process!
+            }
+            else if(status.MPI_TAG==h5v2_bufname)
+            {
+                // Retrieve the name of the dataset for the buffer data
+                int name_size;
+                int err = MPI_Get_count(&status, MPI_CHAR, &name_size);
+                if(err<0)
+                { 
+                    std::ostringstream errmsg;
+                    errmsg<<"MPI_Get_count failed while trying to get name of dataset to receive!";
+                    printer_error().raise(LOCAL_INFO, errmsg.str());       
+                }
+                std::string dset_name(name_size, 'x'); // Initialise string to correct size, but filled with x's
+                myComm.Recv(&dset_name[0], name_size, MPI_CHAR, r, h5v2_bufname);
+   
+                // Determine datatype of the buffer to be sent (can be inferred
+                // from the tag of the next message to come from this process)
+                myComm.Probe(r, MPI_ANY_TAG, &status);
+                switch(status.MPI_TAG) 
+                {
+                    case h5v2_bufdata_values_int      : MPI_recv_buffer<int      >(r, dset_name, status); break;      
+                    case h5v2_bufdata_values_uint     : MPI_recv_buffer<uint     >(r, dset_name, status); break;      
+                    case h5v2_bufdata_values_long     : MPI_recv_buffer<long     >(r, dset_name, status); break;      
+                    case h5v2_bufdata_values_ulong    : MPI_recv_buffer<ulong    >(r, dset_name, status); break;      
+                    case h5v2_bufdata_values_longlong : MPI_recv_buffer<longlong >(r, dset_name, status); break;      
+                    case h5v2_bufdata_values_ulonglong: MPI_recv_buffer<ulonglong>(r, dset_name, status); break;      
+                    case h5v2_bufdata_values_float    : MPI_recv_buffer<float    >(r, dset_name, status); break;      
+                    case h5v2_bufdata_values_double   : MPI_recv_buffer<double   >(r, dset_name, status); break;      
+                    default:
+                       std::ostringstream errmsg;
+                       errmsg<<"Unrecognised datatype tag (tag value = "<<status.MPI_TAG<<") returned for buffer data message from rank "<<r<<" for dataset "<<dset_name<<"!";
+                       printer_error().raise(LOCAL_INFO, errmsg.str());       
+                } 
+            }
+            else
+            {
+                std::ostringstream errmsg;
+                errmsg<<"Next message waiting to be received from rank "<<r<<" is neither a buffer name nor an END command! Something has therefore gone wrong with the message order! I think MPI should preserve these with the blocking calls we are using, so it is probably a bug in the HDF5Printer2 MPI logic.";
+                printer_error().raise(LOCAL_INFO, errmsg.str());       
+            }
+        }
+        logger()<< LogTags::printers << LogTags::info << "All buffer data successfully received from rank "<<r<<" process!"<<EOM;
+    }
+    #endif 
+
     /// Ensure HDF5 file is open (and locked for us to use)
     void HDF5MasterBuffer::ensure_file_is_open() const 
     {
@@ -905,6 +1007,31 @@ namespace Gambit
         close_and_unlock_file();
     }
 
+    /// Make sure all buffers know about all points in all buffers
+    /// Should not generally be necessary if points are added in the
+    /// "normal" way. Only needed in special circumstances (e.g. when
+    /// receiving points from another process).
+    void HDF5MasterBuffer::resynchronise()
+    {
+        // Determine all known points in all buffers
+        std::set<PPIDpair> all_points;
+        for(auto it=all_buffers.begin(); it!=all_buffers.end(); ++it)
+        {
+            std::set<PPIDpair> buffer_points = it->second->get_points_set();
+            all_points.insert(buffer_points.begin(), buffer_points.end());
+        }
+
+        // Update all buffers with these points
+        for(auto it=all_buffers.begin(); it!=all_buffers.end(); ++it)
+        {
+            for(auto jt=all_points.begin(); jt!=all_points.end(); ++jt)
+            {
+                it->second->update(*jt);
+            }
+        }    
+    }
+
+
     /// Specialisation declarations for 'get_buffer' function for each buffer type
     #define DEFINE_GET_BUFFER(TYPE)\
     template<>\
@@ -949,17 +1076,21 @@ namespace Gambit
     HDF5Printer2::HDF5Printer2(const Options& options, BasePrinter* const primary)
       : BasePrinter(primary,options.getValueOrDef<bool>(false,"auxilliary"))
       , primary_printer(link_primary_printer(primary))
-      , buffermaster(get_filename(options),get_groupname(options),get_sync(options),get_buffer_length(options))
       , myRank(0)
       , mpiSize(1)
 #ifdef WITH_MPI
       , myComm() // initially attaches to MPI_COMM_WORLD
+#endif
+      , buffermaster(get_filename(options),get_groupname(options),get_sync(options),get_buffer_length(options)
+#ifdef WITH_MPI
+        , myComm
+#endif  
+        )
     {
+#ifdef WITH_MPI
         myRank  = myComm.Get_rank();
         mpiSize = myComm.Get_size(); 
         this->setRank(myRank); // Tell BasePrinter what rank this process is (for error messages)
-#else
-    { //} This comment is here just to satisfy automatic parenthesis matching 
 #endif
         // Set resume flag to match primary printer, and give primary printer a pointer to our buffer master object.
         if(this->is_auxilliary_printer())
@@ -1168,10 +1299,11 @@ namespace Gambit
          std::vector<std::string> dset_names;
 
          // Check if all datasets have the same length
-         bool check=false;
+         bool first=true;
          bool problem=false;
          std::size_t dset_length = 0;
          std::size_t max_dset_length = 0;
+         std::size_t min_dset_length = 0;
          for(auto it = names.begin(); it!=names.end(); ++it)
          {
              // Check if object is a dataset (could be another group)
@@ -1181,16 +1313,17 @@ namespace Gambit
                  HDF5DataSetBasic dset(*it);
                  dset.open_dataset(gid);
                  std::size_t this_dset_length = dset.get_dset_length();
-                 if(check and dset_length!=this_dset_length)
+                 if(first)
+                 {
+                     min_dset_length = this_dset_length; 
+                     first = false;
+                 }
+                 else if(dset_length!=this_dset_length)
                  {
                      problem = true;
                  }
-                 else
-                 {
-                     check = true;
-                 }
                  if(this_dset_length>max_dset_length) max_dset_length = this_dset_length;
-
+                 if(this_dset_length<min_dset_length) min_dset_length = this_dset_length;
                  dset_length = this_dset_length;
                  dset.close_dataset();
              }
@@ -1209,6 +1342,8 @@ namespace Gambit
 
              std::ostringstream warn;
              warn << "An inconsistency has been detected in the existing HDF5 output! Not all datasets are the same length. This can happen if your previous run was not shut down safely. We will now check all datasets for corruption (this involves reading the whole HDF5 file so may take some time if it is a large file)"<<std::endl;
+             warn << "Note: longest  dataset: "<<max_dset_length<<std::endl;
+             warn << "      shortest dataset: "<<min_dset_length<<std::endl;
              std::cerr << warn.str();
              printer_warning().raise(LOCAL_INFO, warn.str());
 
@@ -1390,54 +1525,143 @@ namespace Gambit
         // The primary printer will take care of finalising all output.
         if(not is_auxilliary_printer())
         {
-            /// Need to finalise output of the sync buffers for
-            /// all printers before we do the RA buffers.
-            buffermaster.flush(); // Flush the primary printer
-            for(auto it=aux_buffers.begin(); it!=aux_buffers.end(); ++it)
+            // On HPC systems we are likely to be using hundreds or thousands of processes,
+            // over a networked filesystem. If each process tries to write to the
+            // output file all at once, it will create an enormous bottleneck and be very
+            // slow.
+            // We thus need to send ALL the buffer data to the master process via MPI,
+            // and have the master process write everything to disk. Fortunately all the
+            // processes can be synced here, so we can do some big collective
+            // operations to send everything.
+
+            /// First, empty the sync buffers for the rank 0 process
+            if(myRank==0)
             {
-                if((*it)->is_synchronised())
+                /// Need to finalise output of the sync buffers for
+                /// all printers before we do the RA buffers.
+                buffermaster.flush(); // Flush the primary printer
+                for(auto it=aux_buffers.begin(); it!=aux_buffers.end(); ++it)
                 {
-                    (*it)->flush();
-                } 
+                    if((*it)->is_synchronised())
+                    {
+                        (*it)->flush();
+                    } 
+                }
+            } 
+
+            #ifdef WITH_MPI
+            /// Next, every *other* process needs to send all its buffers to rank 0 for printing
+            /// Need to repeat this until other processes report that they have no more data
+            /// to send.
+            if(myRank==0)
+            {
+                // Attempt to gather sync buffer data from other processes and write it to disk
+                for(std::size_t r=1; r<mpiSize; r++)
+                {
+                    buffermaster.MPI_recv_all_buffers(r);
+                    buffermaster.resynchronise(); // Make sure all sync buffers know about all the newly received points
+                    buffermaster.flush(); // If needed we can collect buffers from several processes before flushing
+                }
             }
- 
+            else
+            {
+                // Each process needs to flush all its sync printers, one at a time. 
+                buffermaster.MPI_flush_to_rank(0);
+                for(auto it=aux_buffers.begin(); it!=aux_buffers.end(); ++it)
+                {
+                    if((*it)->is_synchronised())
+                    {
+                        (*it)->MPI_flush_to_rank(0);
+                    }
+                }
+                // When this is done, inform rank 0 printer that no more sync buffer data
+                // will come from this process
+                int finished(1);
+                // Blocking call. Do not progress until rank 0 printer confirms message
+                // received.
+                myComm.Send(&finished, 1, 0, h5v2_END);
+            }
+            #endif
+    
             /// Now we need to wait until all processes have done this, to make
             /// sure every single calculated point is on disk. This way the
             /// RA buffers should be able to fully empty themselves.
-            logger()<<"Synchronised buffers flushed for rank "<<myRank<<" printers. Waiting for all processes to flush their sync data before we try to write the RA data."<<EOM;
+            logger()<<LogTags::printers<<LogTags::info<<"Synchronised buffers flushed for rank "<<myRank<<" printers. Waiting for all processes to flush their sync data before we try to write the RA data."<<EOM;
 #ifdef WITH_MPI
             myComm.Barrier();
 #endif
 
-            /// Need to know final nominal dataset size to ensure unsynchronised datasets match synchronised ones.
-            buffermaster.lock_and_open_file();
-            std::size_t final_size = buffermaster.get_next_free_position();
-            buffermaster.close_and_unlock_file();
-
-            if(myRank==0) std::cout<<"Final dataset size is "<<final_size<<std::endl;
-
             std::ostringstream buffer_nonempty_report;
             bool buffer_nonempty_warn(false);
-            for(auto it=aux_buffers.begin(); it!=aux_buffers.end(); ++it)
+            std::size_t final_size;
+
+            if(myRank==0)
             {
-                if(not (*it)->is_synchronised())
+                /// Need to know final nominal dataset size to ensure unsynchronised datasets match synchronised ones.
+                buffermaster.lock_and_open_file();
+                final_size = buffermaster.get_next_free_position();
+                buffermaster.close_and_unlock_file();
+                std::cout<<"Final dataset size is "<<final_size<<std::endl;
+
+                for(auto it=aux_buffers.begin(); it!=aux_buffers.end(); ++it)
                 {
-                    (*it)->flush();
-                    // Check if everything managed to flush!
-                    if(not (*it)->all_buffers_empty())
+                    if(not (*it)->is_synchronised())
                     {
-                        buffer_nonempty_report<<(*it)->buffer_status();
+                        (*it)->flush();
+                        // Check if everything managed to flush!
+                        if(not (*it)->all_buffers_empty())
+                        {
+                            buffer_nonempty_report<<(*it)->buffer_status();
+                            buffer_nonempty_warn = true;
+                        }
+                        // Make sure final dataset size is correct for the unsynchronised buffers
+                        (*it)->extend_all_datasets_to(final_size);
+                    } 
+                }
+
+            }
+
+            #ifdef WITH_MPI
+            if(myRank==0)
+            {
+                // Create a dedicate unsynchronised 'aux' buffer handler to receive data from other processes
+                HDF5MasterBuffer RAbuffer(get_filename(),get_groupname(),false,get_buffer_length(),myComm);
+
+                // Attempt to gather RA buffer data from other processes and write it to disk
+                for(std::size_t r=1; r<mpiSize; r++)
+                {
+                    RAbuffer.MPI_recv_all_buffers(r);
+                    RAbuffer.flush();
+                    // Check if everything managed to flush!
+                    if(not RAbuffer.all_buffers_empty())
+                    {
+                        buffer_nonempty_report<<RAbuffer.buffer_status();
                         buffer_nonempty_warn = true;
                     }
                     // Make sure final dataset size is correct for the unsynchronised buffers
-                    (*it)->extend_all_datasets_to(final_size);
-                } 
+                    RAbuffer.extend_all_datasets_to(final_size);
+                }
             }
+            else
+            {
+                // All other processes send their RA buffer data to rank 0
+                for(auto it=aux_buffers.begin(); it!=aux_buffers.end(); ++it)
+                {
+                    if(not (*it)->is_synchronised())
+                    {
+                        (*it)->MPI_flush_to_rank(0);
+                    }
+                }
+                // End of RA buffer block
+                int finished(1);
+                myComm.Send(&finished, 1, 0, h5v2_END);
+            }
+            #endif
 
-            if(buffer_nonempty_warn)
+            if(myRank==0 and buffer_nonempty_warn)
             {
                 std::ostringstream errmsg;
-                errmsg<<"\nWarning! Not all 'random access' buffers were successfully flushed to disk on rank "<<myRank<<" process! This most often occurs when you resume scanning from a run that did not shut down cleanly (at some point in its history). Hard shutdowns can cause loss of samples, and cause subsequent attempts to write data to the missing points to fail, triggering this warning."<<std::endl;
+                errmsg<<"\nWarning! Not all 'random access' buffers were successfully flushed to disk! This most often occurs when you resume scanning from a run that did not shut down cleanly (at some point in its history). Hard shutdowns can cause loss of samples, and cause subsequent attempts to write data to the missing points to fail, triggering this warning."<<std::endl;
                 errmsg<<"A report on the data that could not be written to disk is given below. Please consider the impact of this on the integrity of your results:"<<std::endl;
                 errmsg<<buffer_nonempty_report.str();
                 std::cout<<errmsg.str();
