@@ -313,7 +313,7 @@ namespace Gambit
              if(status<0)
              {
                 std::ostringstream errmsg;
-                errmsg << "Error writing new chunk to dataset (with name: \""<<myname()<<"\") in HDF5 file. H5Dwrite failed." << std::endl;
+                errmsg << "Error writing new chunk to dataset (with name=\""<<myname()<<"\") in HDF5 file. H5Dwrite failed." << std::endl;
                 printer_error().raise(LOCAL_INFO, errmsg.str());
              }
              
@@ -456,7 +456,7 @@ namespace Gambit
              if(err_read<0)
              {
                  std::ostringstream errmsg;
-                 errmsg << "Error retrieving chunk (offset="<<offset<<", length="<<length<<") from dataset (with name: \""<<myname()<<"\") in HDF5 file. H5Dread failed." << std::endl;
+                 errmsg << "Error retrieving chunk (offset="<<offset<<", length="<<length<<") from dataset (with name=\""<<myname()<<"\") in HDF5 file. H5Dread failed." << std::endl;
                  errmsg << "  offset+length = "<< offset+length << std::endl;
                  errmsg << "  dset_length() = "<< get_dset_length() << std::endl;
                  printer_error().raise(LOCAL_INFO, errmsg.str());
@@ -534,7 +534,7 @@ namespace Gambit
         if(dspace_id<0)
         {
             std::ostringstream errmsg;
-            errmsg << "Error creating dataset (with name: \""<<myname()<<"\") in HDF5 file. H5Screate_simple failed.";
+            errmsg << "Error creating dataset (with name=\""<<myname()<<"\") in HDF5 file. H5Screate_simple failed.";
             printer_error().raise(LOCAL_INFO, errmsg.str());
         }
 
@@ -543,7 +543,7 @@ namespace Gambit
         if(cparms_id<0)
         {
             std::ostringstream errmsg;
-            errmsg << "Error creating dataset (with name: \""<<myname()<<"\") in HDF5 file. H5Pcreate failed.";
+            errmsg << "Error creating dataset (with name=\""<<myname()<<"\") in HDF5 file. H5Pcreate failed.";
             printer_error().raise(LOCAL_INFO, errmsg.str());
         }
 
@@ -551,7 +551,7 @@ namespace Gambit
         if(status<0)
         {
             std::ostringstream errmsg;
-            errmsg << "Error creating dataset (with name: \""<<myname()<<"\") in HDF5 file. H5Pset_chunk failed.";
+            errmsg << "Error creating dataset (with name=\""<<myname()<<"\") in HDF5 file. H5Pset_chunk failed.";
             printer_error().raise(LOCAL_INFO, errmsg.str());
         }
 
@@ -559,7 +559,7 @@ namespace Gambit
         if(location_id==-1)
         {
             std::ostringstream errmsg;
-            errmsg << "Error! Tried to create hdf5 dataset (with name: \""<<myname()<<"\") at undefined location (location_id was -1). Please check that calling code supplied a valid location handle. This is a bug, please report it.";
+            errmsg << "Error! Tried to create hdf5 dataset (with name=\""<<myname()<<"\") at undefined location (location_id was -1). Please check that calling code supplied a valid location handle. This is a bug, please report it.";
             printer_error().raise(LOCAL_INFO, errmsg.str());
         }
 
@@ -568,7 +568,7 @@ namespace Gambit
         if(dset_id<0)
         {
             std::ostringstream errmsg;
-            errmsg << "Error creating dataset (with name: \""<<myname()<<"\") in HDF5 file. Dataset with same name may already exist";
+            errmsg << "Error creating dataset (with name=\""<<myname()<<"\") in HDF5 file. Dataset with same name may already exist";
             printer_error().raise(LOCAL_INFO, errmsg.str());
         }
     
@@ -858,6 +858,13 @@ namespace Gambit
                     valid   .push_back(buffer_valid.at(it->first));
                     values  .push_back(it->second);
                 }
+            
+                // Debug info 
+                for(std::size_t i=0; i<buffer.size(); ++i)
+                {
+                    std::cout<<"Sending point ("<<ranks.at(i)<<", "<<pointIDs.at(i)<<")="<<values.at(i)<<" (valid="<<valid.at(i)<<")"<<std::endl;
+                }
+
                 // Send the buffers
                 std::size_t Npoints = values.size();
                 myComm.Send(&namebuf[0] , namebuf.size(), MPI_CHAR, r, h5v2_bufname);
@@ -869,7 +876,7 @@ namespace Gambit
                 // Clear buffer variables
                 buffer      .clear();
                 buffer_valid.clear();
-                buffer_set.clear();
+                buffer_set  .clear();
             }
         }
 
@@ -894,16 +901,20 @@ namespace Gambit
             // Pack it into this buffer
             for(std::size_t i=0; i<Npoints; ++i)
             {
-                PPIDpair ppid(ranks.at(i), pointIDs.at(i));
+                std::cout<<"Adding received point ("<<ranks.at(i)<<", "<<pointIDs.at(i)<<")="<<values.at(i)<<" (valid="<<valid.at(i)<<") to buffer "<<dset_name()<<std::endl;
+                PPIDpair ppid(pointIDs.at(i), ranks.at(i));
                 if(valid.at(i))
                 {
-                    append(values[i], ppid);
+                    append(values.at(i), ppid);
                 }
                 else
                 {
                     update(ppid);
                 }
             }
+
+            // Debug info:
+            std::cout<<"(rank "<<myComm.Get_rank()<<") Final buffer size: "<<N_items_in_buffer()<<" (Npoints was: "<<Npoints<<"), dset="<<dset_name()<<std::endl;
         }
 #endif   
  
@@ -992,7 +1003,7 @@ namespace Gambit
         void schedule_print(T const& value, const std::string& label, const unsigned int mpirank, const unsigned long pointID)
         {
             /// Check if the point is known to be in the buffers already
-            PPIDpair thispoint(mpirank,pointID);
+            PPIDpair thispoint(pointID,mpirank);
             auto it = buffered_points_set.find(thispoint);
             if(it==buffered_points_set.end())
             {
@@ -1068,9 +1079,10 @@ namespace Gambit
                 msg<<"Error from MPI_Get_count while attempting to receive buffer data from rank "<<r<<" for dataset "<<dset_name<<"!";
                 printer_error().raise(LOCAL_INFO,msg.str());  
             }
-            auto buffer = get_buffer<T>(dset_name, buffered_points);
+            HDF5Buffer<T>& buffer = get_buffer<T>(dset_name, buffered_points);
             buffer.MPI_recv_from_rank(r, Npoints);
             logger()<< LogTags::printers << LogTags::info << "Received "<<Npoints<<" points from rank "<<r<<"'s buffers (for dataset: "<<dset_name<<")"<<EOM;
+            std::cout<<"(rank "<<myComm.Get_rank()<<") Received "<<Npoints<<" from rank "<<r<<". New buffer size is "<<buffer.N_items_in_buffer()<<" (name="<<buffer.dset_name()<<")"<<std::endl;
         }
         #endif
 
@@ -1098,6 +1110,9 @@ namespace Gambit
         /// Report length of buffer for HDF5 output
         std::size_t get_buffer_length();
 
+        /// Report number of points currently in the buffer
+        std::size_t get_Npoints();
+
         /// Extend all datasets to the specified size;
         void extend_all_datasets_to(const std::size_t length);
 
@@ -1115,10 +1130,6 @@ namespace Gambit
  
         /// Get next available position in the synchronised output datasets
         std::size_t get_next_free_position();
-
-#ifdef WITH_MPI
-
-#endif
 
       private:
 
