@@ -324,6 +324,46 @@ BE_NAMESPACE
     return Dl;
   }
 
+  double class_get_scale_independent_growth_factor(double z)
+  {
+    double tau;
+    int index;
+    double *pvecback;
+    //transform redshift in conformal time
+    background_tau_of_z(&ba,z,&tau);
+
+    //pvecback must be allocated
+    pvecback=(double *)malloc(ba.bg_size*sizeof(double));
+
+    //call to fill pvecback
+    background_at_tau(&ba,tau,ba.long_info,ba.inter_normal, &index, pvecback);
+
+    //double H_z=pvecback[ba.index_bg_H];
+    double D =pvecback[ba.index_bg_D];
+    free(pvecback);
+    return D;
+  }
+
+  double class_get_scale_independent_growth_factor_f(double z)
+  {
+    double tau;
+    int index;
+    double *pvecback;
+    //transform redshift in conformal time
+    background_tau_of_z(&ba,z,&tau);
+
+    //pvecback must be allocated
+    pvecback=(double *)malloc(ba.bg_size*sizeof(double));
+
+    //call to fill pvecback
+    background_at_tau(&ba,tau,ba.long_info,ba.inter_normal, &index, pvecback);
+
+    //double H_z=pvecback[ba.index_bg_H];
+    double f =pvecback[ba.index_bg_f];
+    free(pvecback);
+    return f;
+  }
+
   double class_get_Hz(double z)
   {
     double tau;
@@ -352,6 +392,38 @@ BE_NAMESPACE
   {
     return th.rs_d;
   }
+
+  std::vector<std::vector<double>> class_get_z_of_r(std::vector<double> z_array)
+  {
+    double tau;
+    int index;
+    double *pvecback;
+    std::vector<double> r;
+    std::vector<double> dzdr;
+    std::vector<std::vector<double>> result;
+
+    //pvecback must be allocated
+    pvecback=(double *)malloc(ba.bg_size*sizeof(double));
+
+    for(int ii = 0; ii < z_array.size(); ii++)
+    {
+      //transform redshift in conformal time
+      background_tau_of_z(&ba,z_array[ii],&tau);
+
+      //call to fill pvecback
+      background_at_tau(&ba,tau,ba.long_info,ba.inter_normal, &index, pvecback);
+
+      r.push_back(pvecback[ba.index_bg_conf_distance]);
+      dzdr.push_back(pvecback[self.ba.index_bg_H]);
+    }
+
+    result.push_back(r);
+    result.push_back(dzdr);
+    free(pvecback);
+    
+    return result;
+  }
+
 
   double class_get_sigma8(double z)
   {

@@ -298,7 +298,7 @@ START_MODULE
     #undef FUNCTION
   #undef CAPABILITY
   
-#define CAPABILITY T_ncdm_SM // needed in additino to T_ncdm since T_ncdm of non-SM models assume a fiducial value to base calculation on 
+#define CAPABILITY T_ncdm_SM // needed in addition to T_ncdm since T_ncdm of non-SM models assume a fiducial value to base calculation on 
     START_CAPABILITY
     #define FUNCTION set_T_ncdm_SM
       START_FUNCTION(double)
@@ -467,7 +467,6 @@ START_MODULE
     #define FUNCTION AlterBBN_Input_LCDM_dNeffCMB_dNeffBBN_etaBBN
      START_FUNCTION(map_str_dbl)
      ALLOW_MODELS(LCDM_dNeffCMB_dNeffBBN_etaBBN)
-     BACKEND_OPTION( (AlterBBN), (libbbn) )
     #undef FUNCTION
   #undef CAPABILITY
 
@@ -517,8 +516,9 @@ START_MODULE
     #define FUNCTION compute_BBN_abundances
       START_FUNCTION(CosmoBit::BBN_container)
       DEPENDENCY(AlterBBN_setInput, map_str_dbl)
-      BACKEND_REQ(call_nucl_err, (libbbn), int, (map_str_dbl &,double*,double*))
+      BACKEND_REQ(call_nucl_err, (libbbn), int, (map_str_dbl&,double*,double*))
       BACKEND_REQ(get_NNUC, (libbbn), int, ())
+      BACKEND_OPTION( (AlterBBN), (libbbn) )
     #undef FUNCTION
   #undef CAPABILITY
 

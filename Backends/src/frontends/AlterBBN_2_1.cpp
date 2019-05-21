@@ -69,12 +69,13 @@ BE_NAMESPACE
 
   int call_nucl_err(map_str_dbl &AlterBBN_input, double* ratioH, double* cov_ratioH )
   {
-    struct AlterBBN::AlterBBN_2_1::relicparam input_relicparam;
+    AlterBBN::AlterBBN_2_1::relicparam input_relicparam;
     Init_cosmomodel(&input_relicparam); // initialise valuse of relicparam structure to their defaults 
     fill_cosmomodel(&input_relicparam, AlterBBN_input); // fill strucutre with values contained in AlerBBN_input map which is filled in CosmoBit.ccp for different models
 
     int nucl_err_res = nucl_err(&input_relicparam, ratioH, cov_ratioH);
-
+    //int bbn_exc = bbn_excluded_chi2(&input_relicparam); just for testing purposes to compare internal AlterBBN output to GAMBIT result
+    
     return nucl_err_res;
   }
 
