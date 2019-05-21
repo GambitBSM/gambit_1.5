@@ -411,9 +411,11 @@ namespace Gambit
 
       cosmo.input.addEntry("N_ur",*Dep::class_Nur);
 
-      cosmo.input.addEntry("output","tCl pCl lCl");
+      cosmo.input.addEntry("output","tCl pCl lCl mPk");
       cosmo.input.addEntry("l_max_scalars",l_max);
       cosmo.input.addEntry("lensing","yes");
+      cosmo.input.addEntry("non linear","halofit");
+      cosmo.input.addEntry("P_k_max_h/Mpc",1);
 
       cosmo.input.addEntry("T_cmb",*Dep::T_cmb);
       cosmo.input.addEntry("omega_b",*Param["omega_b"]);
