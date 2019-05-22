@@ -419,7 +419,8 @@ START_MODULE
 
   #define CAPABILITY TH_ProcessCatalog
   START_CAPABILITY
-    #define FUNCTION TH_ProcessCatalog_MSSM
+    // only for DarkSUSY5:
+    #define FUNCTION TH_ProcessCatalog_MSSM 
       START_FUNCTION(DarkBit::TH_ProcessCatalog)
       //ALLOW_MODELS(MSSM63atQ)
       DEPENDENCY(MSSM_spectrum, Spectrum)
@@ -427,6 +428,19 @@ START_MODULE
       DEPENDENCY(decay_rates,DecayTable)
       //BACKEND_REQ(mspctm, (), DS_MSPCTM)
       BACKEND_REQ(dssigmav, (), double, (int&))
+      BACKEND_REQ(dsIBffdxdy, (), double, (int&, double&, double&))
+      BACKEND_REQ(dsIBhhdxdy, (), double, (int&, double&, double&))
+      BACKEND_REQ(dsIBwhdxdy, (), double, (int&, double&, double&))
+      BACKEND_REQ(dsIBwwdxdy, (), double, (int&, double&, double&))
+      BACKEND_REQ(IBintvars, (), DS_IBINTVARS)
+    #undef FUNCTION
+    #define FUNCTION TH_ProcessCatalog_DS6_MSSM 
+      START_FUNCTION(DarkBit::TH_ProcessCatalog)
+      DEPENDENCY(MSSM_spectrum, Spectrum)
+      DEPENDENCY(DarkMatter_ID, std::string)
+      DEPENDENCY(decay_rates,DecayTable)
+      BACKEND_REQ(dssigmav0, (), double, (int&,int&))
+      BACKEND_REQ(dssigmav0tot, (), double, ())
       BACKEND_REQ(dsIBffdxdy, (), double, (int&, double&, double&))
       BACKEND_REQ(dsIBhhdxdy, (), double, (int&, double&, double&))
       BACKEND_REQ(dsIBwhdxdy, (), double, (int&, double&, double&))
