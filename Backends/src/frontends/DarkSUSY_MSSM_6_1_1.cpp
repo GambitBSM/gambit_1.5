@@ -486,7 +486,7 @@ BE_NAMESPACE
 
   /// Function DD_couplings returns direct detection couplings gps,gns,gpa,gna
   /// (proton/neutron scalar/axial four-couplinngs)
-  /// Provided here because the signature of the corresponding DarkSUSY 
+  /// Provided here because the signature of the corresponding DarkSUSY routine
   double* DD_couplings()
   {
     int ierr = 0;

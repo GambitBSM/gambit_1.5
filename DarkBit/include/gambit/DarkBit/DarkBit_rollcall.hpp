@@ -613,6 +613,14 @@ START_MODULE
       ALLOW_JOINT_MODEL(nuclear_params_fnq,MSSM63atQ)
     #undef FUNCTION
 
+    #define FUNCTION DD_couplings_MSSM_DS6
+      START_FUNCTION(DM_nucleon_couplings)
+      BACKEND_REQ(get_DD_couplings, (needs_DS), double*, ())
+      BACKEND_REQ(ddcomlegacy, (DarkSUSY), DS_DDCOMLEGACY)
+      BACKEND_REQ(ddmssmcom, (DarkSUSY), DS_DDMSSMCOM)
+      ALLOW_JOINT_MODEL(nuclear_params_fnq,MSSM63atQ)
+    #undef FUNCTION
+
     #define FUNCTION DD_couplings_MicrOmegas
       START_FUNCTION(DM_nucleon_couplings)
       BACKEND_REQ(nucleonAmplitudes, (gimmemicro), int, (double(*)(double,double,double,double), double*, double*, double*, double*))

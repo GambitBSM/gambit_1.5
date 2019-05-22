@@ -303,6 +303,7 @@ namespace Gambit
       Fdouble rdt_max,rdt_start,rdt_end;
   };
 
+// this one only exists in DS5
   struct DS_DDCOM
   {
       Farray<Fdouble, 7, 12> ftp;
@@ -314,6 +315,23 @@ namespace Gambit
       Finteger dddn;
       Fstring<10> ddfsi;
       Fstring<10> ddfsd;
+  };
+
+// this one only exists in DS6
+  struct DS_DDCOMLEGACY
+  {
+      Farray<Fdouble, 7, 12> ftp;
+      Farray<Fdouble, 7, 12> ftn;
+      Fdouble delu;
+      Fdouble deld;
+      Fdouble dels;
+  };
+
+// this one only exists in DS6
+  struct DS_DDMSSMCOM
+  {
+      Finteger ddpole;
+      Finteger dddn;
   };
 
   struct DS_NUCOM
