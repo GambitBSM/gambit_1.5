@@ -32,6 +32,8 @@ LOAD_LIBRARY
 
 // Functions used in DS frontend
 BE_FUNCTION(dsinit, void, (), "dsinit_", "dsinit")
+BE_FUNCTION(dsSLHAread, void, (const char*, int), "dsgive_model_SLHA_", "dsgive_model_SLHA")
+BE_FUNCTION(dsmodelsetup, void, (int&,int&), "dsmodelsetup_", "dsmodelsetup")
 BE_FUNCTION(dssuconst, void, (), "dssuconst_", "dssuconst")
 BE_FUNCTION(dsmssmzero, void, (), "dsmssmzero_", "dsmssmzero")
 BE_FUNCTION(dsvertx, void, (), "dsvertx_", "dsvertx")
@@ -46,6 +48,9 @@ BE_FUNCTION(dsgf2s2thw, double, (const double&, const double&, const double&, co
 // only needed in debug mode
 BE_FUNCTION(dswspectrum, void, (int&), "dswspectrum_", "dswspectrum")
 BE_FUNCTION(dswwidth, void, (int&), "dswwidth_", "dswwidth")
+// model-conditional dependencies of BE_INI 
+BE_INI_CONDITIONAL_DEPENDENCY(MSSM_spectrum, Spectrum, MSSM63atQ, CMSSM)
+BE_INI_CONDITIONAL_DEPENDENCY(decay_rates, DecayTable, MSSM63atQ, CMSSM)
 
 
 // Convenience functions (registration)
@@ -77,28 +82,21 @@ BE_FUNCTION(dsddgpgn, void, (DS_gg&, int&), "dsddgpgn_", "dsddgpgn")
 
 
 // Functions used in MSSM.cpp
- BE_FUNCTION(dsmodelsetup, void, (int&,int&), "dsmodelsetup_", "dsmodelsetup")
- BE_FUNCTION(dsgive_model_isasugra, void, (double&,double&,double&,double&,double&), "dsgive_model_isasugra_", "dsgive_model_isasugra")
- BE_FUNCTION(dsgive_model_SLHA, void, (const char*, int&, int), "dsgive_model_SLHA_", "dsSLHAread")
-// -> dssigmav0, has changed signature!
+  BE_FUNCTION(dsgive_model_isasugra, void, (double&,double&,double&,double&,double&), "dsgive_model_isasugra_", "dsgive_model_isasugra")
+// -> dssigmav0, has changed signature! Even worse: signature and name will be different for every model
+// -> create convenience function! 
 // BE_FUNCTION(dssigmav, double, (int&), "dssigmav_", "dssigmav")
  BE_FUNCTION(dsIBffdxdy, double, (int&, double&, double&), "dsibffdxdy_", "dsIBffdxdy")
  BE_FUNCTION(dsIBfsrdxdy, double, (int&, double&, double&), "dsibfsrdxdy_", "dsIBfsrdxdy")
  BE_FUNCTION(dsIBhhdxdy, double, (int&, double&, double&), "dsibhhdxdy_", "dsIBhhdxdy")
  BE_FUNCTION(dsIBwhdxdy, double, (int&, double&, double&), "dsibwhdxdy_", "dsIBwhdxdy")
  BE_FUNCTION(dsIBwwdxdy, double, (int&, double&, double&), "dsibwwdxdy_", "dsIBwwdxdy")
-// also used in RelicDensity.cpp
-// -> dsmodelsetup (also in RD!?), has changed signature!
-// BE_FUNCTION(dsprep, void, (), "dsprep_", "dsprep")
 
 
 // Functions used in GamYields.cpp
+// -> this one is structured in a completely different way in DS6 -> !?
 // BE_FUNCTION(dshayield, double, (double&,double&,int&,int&,int&), "dshayield_", "dshayield")
 BE_FUNCTION(dsanyield_sim, double, (double&,double&,int&,char&,int&,int&,int&), "dsanyield_sim_", "dsanyield_sim")
-
-
-// Functions used in SunNeutrinos.cpp
-// BE_FUNCTION(dsntcapsuntab, double, (const double&, const double&, const double&), "dsntcapsuntab_", "cap_Sun_v0q0_isoscalar")
 
 
 // TODO: organize the list below in "DS main" and module-dependent part
@@ -119,6 +117,7 @@ BE_FUNCTION(dsanyield_sim, double, (double&,double&,int&,char&,int&,int&,int&), 
 // BE_VARIABLE(rdtime, DS_RDTIME,     "rdtime_",    "rdtime")    // gRD timeout
 // BE_VARIABLE(intdof, DS_INTDOF, "intdof_", "intdof")
 // Direct detection
+// Structure has completely changed here -> ?
 // BE_VARIABLE(ddcom, DS_DDCOM, "ddcom_",    "ddcom")
 // Halo model common blocks
 // BE_VARIABLE(dshmcom, DS_HMCOM, "dshmcom_", "dshmcom")
@@ -164,6 +163,7 @@ BE_VARIABLE(anbranch,DS6_NUCOM, "anbranch_", "nu_common_block")
 // BE_VARIABLE(vrtxs, DS_VRTXS, "vrtxs_", "vrtxs")
 // BE_FUNCTION(dssusy, void, (int&,int&), "dssusy_", "dssusy")
 // BE_FUNCTION(dssusy_isasugra, void, (int&,int&), "dssusy_isasugra_", "dssusy_isasugra")
+// BE_FUNCTION(dsntcapsuntab, double, (const double&, const double&, const double&), "dsntcapsuntab_", "cap_Sun_v0q0_isoscalar")
 
 
 

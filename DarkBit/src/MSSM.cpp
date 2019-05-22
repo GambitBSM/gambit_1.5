@@ -418,7 +418,7 @@ namespace Gambit
       if(annFinalStates.count("A0") == 1)
         ImportDecays("A0", catalog, importedDecays, tbl, minBranching, excludeDecays);
 
-      // Add process to provess list
+      // Add process to process list
       catalog.processList.push_back(process);
 
       // Validate

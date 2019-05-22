@@ -210,7 +210,7 @@ BE_INI_FUNCTION
       const char * filename = fstr.c_str();
       logger() << LogTags::debug << "Initializing DarkSUSY via SLHA." << EOM;
       dsSLHAread(byVal(filename),flag,byVal(len));
-      //The following used to be a sparate capability dsprep up to DS5
+      //The following used to be a separate capability dsprep up to DS5
       //(as also specified in the manual)
       dsprep();
       result = true;
@@ -226,14 +226,12 @@ BE_INI_FUNCTION
           }
         }
       }
-
       if (!result) {
         backend_warning().raise(LOCAL_INFO,
             "DarkSUSY point initialization failed.");
         invalid_point().raise("DarkSUSY point initialization failed.");
       }
-  
-  
+    
 }
 END_BE_INI_FUNCTION
 
