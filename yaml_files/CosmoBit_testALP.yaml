@@ -166,7 +166,7 @@ Rules:
       DataFile:  SH0ES.dat
 
 
-  - capability: AlterBBN_modelinfo
+  - capability: AlterBBN_setInput
     options:
       failsafe: 1
       err: 0
