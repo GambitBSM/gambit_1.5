@@ -1197,7 +1197,11 @@ START_MODULE
 
   #define CAPABILITY SimYieldTable
   START_CAPABILITY
-    #define FUNCTION SimYieldTable_DarkSUSY
+    #define FUNCTION SimYieldTable_DarkSUSY6
+    START_FUNCTION(DarkBit::SimYieldTable)
+  BACKEND_REQ(dsanyield_sim, (), double, (double&,double&,int&,char&,int&,int&,int&)) // character*1 input correct? JE FIX
+    #undef FUNCTION
+    #define FUNCTION SimYieldTable_DarkSUSY // DS5 only
     START_FUNCTION(DarkBit::SimYieldTable)
     BACKEND_REQ(dshayield, (), double, (double&,double&,int&,int&,int&))
     #undef FUNCTION

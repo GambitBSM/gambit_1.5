@@ -65,6 +65,7 @@ BE_INI_FUNCTION
     // dsrdinit();
 
     // TB: also this should not be needed in DS6 anymore -- check! FIXME
+    // If needed, the parts below need to be updated with dsanyield_sim
     //// Initialize yield tables for use in cascade decays (initialize more if needed)
     //dshainit(151); // Initialize positron tables
     //dshainit(152); // Initialize gamma ray tables

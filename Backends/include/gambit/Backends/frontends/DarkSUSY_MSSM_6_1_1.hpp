@@ -94,6 +94,7 @@ BE_FUNCTION(dsddgpgn, void, (DS_gg&, int&), "dsddgpgn_", "dsddgpgn")
 
 // Functions used in GamYields.cpp
 // BE_FUNCTION(dshayield, double, (double&,double&,int&,int&,int&), "dshayield_", "dshayield")
+BE_FUNCTION(dsanyield_sim, double, (double&,double&,int&,char&,int&,int&,int&), "dsanyield_sim_", "dsanyield_sim")
 
 
 // Functions used in SunNeutrinos.cpp

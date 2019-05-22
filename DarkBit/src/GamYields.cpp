@@ -419,7 +419,7 @@ namespace Gambit {
     }
 
 
-    /// SimYieldTable based on DarkSUSY tabulated results.
+    /// SimYieldTable based on DarkSUSY5 tabulated results. (DS6 below)
     void SimYieldTable_DarkSUSY(SimYieldTable& result)
     {
       using namespace Pipes::SimYieldTable_DarkSUSY;
@@ -578,6 +578,174 @@ namespace Gambit {
           ADD_CHANNEL_MIXEDMASSES(22, 24, "s", "tbar", "gamma", 0.0, 175.0, 185.285, 2*mDM_max)
           ADD_CHANNEL_MIXEDMASSES(24, 25, "t", "bbar", "gamma", 175.0, 5.0, 185.214, 2*mDM_max)
           ADD_CHANNEL_MIXEDMASSES(25, 24, "b", "tbar", "gamma", 5.0, 175.0, 185.214, 2*mDM_max)
+      }
+
+#undef ADD_CHANNEL_MIXEDMASSES
+
+        initialized = true;
+      }
+    }
+
+    /// SimYieldTable based on DarkSUSY6 tabulated results.
+    void SimYieldTable_DarkSUSY6(SimYieldTable& result)
+    {
+      using namespace Pipes::SimYieldTable_DarkSUSY6;
+
+      static bool initialized = false;
+      if ( not initialized )
+      {
+        int flag = 0;      // some flag
+        int yieldpdg = 22;  // gamma ray yield (pdg code)
+	int diff=1;         // differential yields (=1)
+	char hel='0';       // helicity
+        daFunk::Funk dNdE;
+        daFunk::Funk dNdE_1;
+        daFunk::Funk dNdE_2;
+
+        using DarkBit_utils::str_flav_to_mass;
+
+        double mDM_min, mDM_max;
+        /// Option allow_yield_extrapolation<bool>: Spectra extrapolated for masses beyond Pythia results (default false)
+        bool allow_yield_extrapolation = runOptions->getValueOrDef(false, "allow_yield_extrapolation");
+  if ( allow_yield_extrapolation ) 
+        {
+          mDM_min = 0.0; // in this case, the minimally allowed dark matter mass will later be set to be the mass of the final state particle,
+                         // with an additional factor 0.99 for the case of Z, W or t final states (following DarkSUSY)
+          mDM_max = 1.0e6;
+        }
+        else 
+        {
+          mDM_min = 3.0; // minimal dark matter mass simulated in DarkSUSY6.
+          mDM_max = 20000.; // maximal dark matter mass simulated in DarkSUSY6.
+        }
+
+#define ADD_CHANNEL(pdg, P1, P2, FINAL, EcmMin, EcmMax)                \
+        dNdE = daFunk::func_fromThreadsafe(                           \
+            BEreq::dsanyield_sim.pointer(), daFunk::var("mwimp"),         \
+            daFunk::var("E"), pdg, hel,yieldpdg, diff, flag)->set("mwimp", \
+            daFunk::var("Ecm")/2);                                    \
+        result.addChannel(dNdE, str_flav_to_mass(P1), str_flav_to_mass(P2), FINAL, EcmMin, EcmMax);
+
+// the following routine adds an annhilation channel, for which the yields are extrapolated below Ecm_ToScale
+// using the approximation that x*dN/dx is a constant function of the dark matter mass.
+#define ADD_CHANNEL_WITH_SCALING(pdg, P1, P2, FINAL, EcmMin, EcmMax, Ecm_ToScale)                \
+        daFunk::Funk Ecm_ToUse = fmax(Ecm_ToScale, daFunk::var("Ecm"));    \
+        daFunk::Funk ScalingFactor = Ecm_ToUse/daFunk::var("Ecm");      \
+        dNdE = ScalingFactor * daFunk::func_fromThreadsafe(                           \
+            BEreq::dsanyield_sim.pointer(), daFunk::var("mwimp"),         \
+            ScalingFactor * daFunk::var("E"), pdg, hel, yieldpdg, diff, flag)->set("mwimp", \
+            Ecm_ToUse/2);                                    \
+        result.addChannel(dNdE, str_flav_to_mass(P1), str_flav_to_mass(P2), FINAL, EcmMin, EcmMax);
+
+        // specifies also center of mass energy range
+        ADD_CHANNEL(23, "Z0", "Z0", "gamma", 2*90.288, 2*mDM_max)
+        ADD_CHANNEL(24, "W+", "W-", "gamma", 2*79.4475, 2*mDM_max)
+        ADD_CHANNEL(12, "nu_e", "nubar_e", "gamma", 2*std::max(mDM_min, 0.0), 2*mDM_max)  // Zero
+        ADD_CHANNEL(11, "e+", "e-", "gamma", 2*std::max(mDM_min, 0.0), 2*mDM_max)  // Zero
+        ADD_CHANNEL(14, "nu_mu", "nubar_mu", "gamma", 2*std::max(mDM_min, 0.0), 2*mDM_max)  // Zero
+        ADD_CHANNEL(13, "mu+", "mu-", "gamma", 2*std::max(mDM_min, 0.0), 2*mDM_max)
+        ADD_CHANNEL(16, "nu_tau", "nubar_tau", "gamma", 2*std::max(mDM_min, 0.0), 2*mDM_max)  // Zero
+        ADD_CHANNEL(15, "tau+", "tau-", "gamma", 2*std::max(mDM_min, 1.7841), 2*mDM_max)
+        //ADD_CHANNEL(2, "u", "ubar", "gamma", 0., 2*mDM_max)  // Zero
+        ADD_CHANNEL(2, "u", "ubar", "gamma", 2*std::max(mDM_min, 1.35), 2*mDM_max)  // approx by cc
+        //ADD_CHANNEL(1, "d", "dbar", "gamma", 0., 2*mDM_max)  // Zero
+        ADD_CHANNEL(1, "d", "dbar", "gamma", 2*std::max(mDM_min, 1.35), 2*mDM_max)  // approx by cc
+        ADD_CHANNEL(4, "c", "cbar", "gamma", 2*std::max(mDM_min, 1.35), 2*mDM_max)
+        //ADD_CHANNEL(3, "s", "sbar", "gamma", 0., 2*mDM_max)  // Zero
+        ADD_CHANNEL(3, "s", "sbar", "gamma", 2*std::max(mDM_min, 1.35), 2*mDM_max)  // approx by cc
+        ADD_CHANNEL_WITH_SCALING(6, "t", "tbar", "gamma", 2*160.0, 2*mDM_max, 2*173.3)
+        ADD_CHANNEL(5, "b", "bbar", "gamma", 2*std::max(mDM_min, 5.0), 2*mDM_max)
+        ADD_CHANNEL(21, "g", "g", "gamma", 2*std::max(mDM_min, 0.0), 2*mDM_max)
+#undef ADD_CHANNEL_WITH_SCALING
+#undef ADD_CHANNEL
+
+        // Add approximations for single-particle cases.
+        // TODO: Replace by boosted rest frame spectrum Z0
+	  dNdE = daFunk::func_fromThreadsafe(BEreq::dsanyield_sim.pointer(), daFunk::var("Ecm"), daFunk::var("E"), 23, hel,yieldpdg, diff,flag);
+        result.addChannel(dNdE/2, "Z0", "gamma", 90.288, mDM_max);
+        dNdE = daFunk::func_fromThreadsafe(BEreq::dsanyield_sim.pointer(), daFunk::var("Ecm"), daFunk::var("E"), 24, hel,yieldpdg, diff, flag);
+        result.addChannel(dNdE/2, "W+", "gamma", 79.4475, mDM_max);
+        result.addChannel(dNdE/2, "W-", "gamma", 79.4475, mDM_max);
+        dNdE = daFunk::func_fromThreadsafe(BEreq::dsanyield_sim.pointer(), daFunk::var("Ecm"), daFunk::var("E"), 11, hel, yieldpdg, diff, flag);
+        result.addChannel(dNdE/2, str_flav_to_mass("e+"), "gamma", std::max(mDM_min, 0.0), mDM_max);
+        result.addChannel(dNdE/2, str_flav_to_mass("e-"), "gamma", std::max(mDM_min, 0.0), mDM_max);
+        dNdE = daFunk::func_fromThreadsafe(BEreq::dsanyield_sim.pointer(), daFunk::var("Ecm"), daFunk::var("E"), 13, hel, yieldpdg, diff, flag);
+        result.addChannel(dNdE/2, str_flav_to_mass("mu+"), "gamma", std::max(mDM_min, 0.0), mDM_max);
+        result.addChannel(dNdE/2, str_flav_to_mass("mu-"), "gamma", std::max(mDM_min, 0.0), mDM_max);        
+        dNdE = daFunk::func_fromThreadsafe(BEreq::dsanyield_sim.pointer(), daFunk::var("Ecm"), daFunk::var("E"), 15, hel, yieldpdg, diff, flag);
+        result.addChannel(dNdE/2, str_flav_to_mass("tau+"), "gamma", std::max(mDM_min, 1.7841), mDM_max);
+        result.addChannel(dNdE/2, str_flav_to_mass("tau-"), "gamma", std::max(mDM_min, 1.7841), mDM_max);
+
+        double Ecm_ToScale_top = 173.3;
+        daFunk::Funk Ecm_ToUse_top = fmax(Ecm_ToScale_top, daFunk::var("Ecm")); 
+        daFunk::Funk ScalingFactor_top = Ecm_ToUse_top/daFunk::var("Ecm");
+        dNdE = ScalingFactor_top * daFunk::func_fromThreadsafe(                           \
+            BEreq::dsanyield_sim.pointer(), Ecm_ToUse_top,         \
+            ScalingFactor_top * daFunk::var("E"), 6, hel, yieldpdg, diff, flag);  
+        result.addChannel(dNdE/2, str_flav_to_mass("t"), "gamma", 160.0, mDM_max);
+        result.addChannel(dNdE/2, str_flav_to_mass("tbar"), "gamma", 160.0, mDM_max);
+
+        // add channels with "mixed final states", i.e. final state particles with (potentially) different masses        
+        daFunk::Funk Ecm = daFunk::var("Ecm");
+#define ADD_CHANNEL_MIXEDMASSES(pdg1, pdg2, P1, P2, FINAL, m1, m2, EcmMin, EcmMax)                \
+        dNdE_1 = daFunk::func_fromThreadsafe(                           \
+            BEreq::dsanyield_sim.pointer(), daFunk::var("E1"),         \
+            daFunk::var("E"), pdg1, hel, yieldpdg, diff, flag)->set("E1",   \
+            Ecm/2 + (m1*m1 - m2*m2)/(2*Ecm));        \
+        dNdE_2 = daFunk::func_fromThreadsafe(                           \
+            BEreq::dsanyield_sim.pointer(), daFunk::var("E2"),         \
+            daFunk::var("E"), pdg2, hel, yieldpdg, diff, flag)->set("E2",	\
+            Ecm/2 + (m2*m2 - m1*m1)/(2*Ecm));                                   \
+        result.addChannel(0.5*(dNdE_1 + dNdE_2), str_flav_to_mass(P1), str_flav_to_mass(P2), FINAL, EcmMin, EcmMax);
+
+        // - The numerical values for EcmMin and EcmMax are obtained from applying the corresponding two-body kinematics
+        //   to the minimally/maximally allowed center-of-mass energies. Hence, EcmMin depends on the flag allow_yield_extrapolation.
+        
+        if ( allow_yield_extrapolation ) 
+        {
+          ADD_CHANNEL_MIXEDMASSES(2, -1, "u", "dbar", "gamma", 0.0, 0.0, 2*1.35, 2*mDM_max)
+          ADD_CHANNEL_MIXEDMASSES(1, -2, "d", "ubar", "gamma", 0.0, 0.0, 2*1.35, 2*mDM_max)
+          ADD_CHANNEL_MIXEDMASSES(2, -3, "u", "sbar", "gamma", 0.0, 0.0, 2*1.35, 2*mDM_max)
+          ADD_CHANNEL_MIXEDMASSES(3, -2, "s", "ubar", "gamma", 0.0, 0.0, 2*1.35, 2*mDM_max)
+          ADD_CHANNEL_MIXEDMASSES(2, -5, "u", "bbar", "gamma", 0.0, 5.0, 6.530, 2*mDM_max)
+          ADD_CHANNEL_MIXEDMASSES(5, -2, "b", "ubar", "gamma", 5.0, 0.0, 6.530, 2*mDM_max)
+
+          ADD_CHANNEL_MIXEDMASSES(4, -1, "c", "dbar", "gamma", 1.35, 0.0, 3.260, 2*mDM_max)
+          ADD_CHANNEL_MIXEDMASSES(1, -4, "d", "cbar", "gamma", 0.0, 1.35, 3.260, 2*mDM_max)
+          ADD_CHANNEL_MIXEDMASSES(4, -3, "c", "sbar", "gamma", 1.35, 0.0, 3.260, 2*mDM_max)
+          ADD_CHANNEL_MIXEDMASSES(3, -4, "s", "cbar", "gamma", 0.0, 1.35, 3.260, 2*mDM_max)
+          ADD_CHANNEL_MIXEDMASSES(4, -5, "c", "bbar", "gamma", 1.35, 5.0, 6.35, 2*mDM_max)
+          ADD_CHANNEL_MIXEDMASSES(5, -4, "b", "cbar", "gamma", 5.0, 1.35, 6.35, 2*mDM_max)
+
+          ADD_CHANNEL_MIXEDMASSES(6, -1, "t", "dbar", "gamma", 175.0, 0.0, 176.355, 2*mDM_max)
+          ADD_CHANNEL_MIXEDMASSES(1, -6, "d", "tbar", "gamma", 0.0, 175.0, 176.355, 2*mDM_max)
+          ADD_CHANNEL_MIXEDMASSES(6, -3, "t", "sbar", "gamma", 175.0, 0.0, 176.355, 2*mDM_max)
+          ADD_CHANNEL_MIXEDMASSES(3, -6, "s", "tbar", "gamma", 0.0, 175.0, 176.355, 2*mDM_max)
+          ADD_CHANNEL_MIXEDMASSES(6, -5, "t", "bbar", "gamma", 175.0, 5.0, 180.0, 2*mDM_max)
+          ADD_CHANNEL_MIXEDMASSES(5, -6, "b", "tbar", "gamma", 5.0, 175.0, 180.0, 2*mDM_max)
+      }
+      else // in the following, the assigmnents of Ecm_min assume the value mDM_min = 10.0.
+      {
+          ADD_CHANNEL_MIXEDMASSES(2, -1, "u", "dbar", "gamma", 0.0, 0.0, 20.0, 2*mDM_max)
+          ADD_CHANNEL_MIXEDMASSES(1, -2, "d", "ubar", "gamma", 0.0, 0.0, 20.0, 2*mDM_max)
+          ADD_CHANNEL_MIXEDMASSES(2, -3, "u", "sbar", "gamma", 0.0, 0.0, 20.0, 2*mDM_max)
+          ADD_CHANNEL_MIXEDMASSES(3, -2, "s", "ubar", "gamma", 0.0, 0.0, 20.0, 2*mDM_max)
+          ADD_CHANNEL_MIXEDMASSES(2, -5, "u", "bbar", "gamma", 0.0, 5.0, 21.181, 2*mDM_max)
+          ADD_CHANNEL_MIXEDMASSES(5, -2, "b", "ubar", "gamma", 5.0, 0.0, 21.181, 2*mDM_max)
+
+          ADD_CHANNEL_MIXEDMASSES(4, -1, "c", "dbar", "gamma", 1.35, 0.0, 20.091, 2*mDM_max)
+          ADD_CHANNEL_MIXEDMASSES(1, -4, "d", "cbar", "gamma", 0.0, 1.35, 20.091, 2*mDM_max)
+          ADD_CHANNEL_MIXEDMASSES(4, -3, "c", "sbar", "gamma", 1.35, 0.0, 20.091, 2*mDM_max)
+          ADD_CHANNEL_MIXEDMASSES(3, -4, "s", "cbar", "gamma", 0.0, 1.35, 20.091, 2*mDM_max)
+          ADD_CHANNEL_MIXEDMASSES(4, -5, "c", "bbar", "gamma", 1.35, 5.0, 21.099, 2*mDM_max)
+          ADD_CHANNEL_MIXEDMASSES(5, -4, "b", "cbar", "gamma", 5.0, 1.35, 21.099, 2*mDM_max)
+
+          ADD_CHANNEL_MIXEDMASSES(6, -1, "t", "dbar", "gamma", 175.0, 0.0, 185.285, 2*mDM_max)
+          ADD_CHANNEL_MIXEDMASSES(1, -6, "d", "tbar", "gamma", 0.0, 175.0, 185.285, 2*mDM_max)
+          ADD_CHANNEL_MIXEDMASSES(6, -3, "t", "sbar", "gamma", 175.0, 0.0, 185.285, 2*mDM_max)
+          ADD_CHANNEL_MIXEDMASSES(3, -6, "s", "tbar", "gamma", 0.0, 175.0, 185.285, 2*mDM_max)
+          ADD_CHANNEL_MIXEDMASSES(6, -5, "t", "bbar", "gamma", 175.0, 5.0, 185.214, 2*mDM_max)
+          ADD_CHANNEL_MIXEDMASSES(5, -6, "b", "tbar", "gamma", 5.0, 175.0, 185.214, 2*mDM_max)
       }
 
 #undef ADD_CHANNEL_MIXEDMASSES
