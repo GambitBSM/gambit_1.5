@@ -1154,6 +1154,14 @@ namespace Gambit
 
             if(myRank==0)
             {
+                // Warn about excessive buffer length times mpiSize
+                if(get_buffer_length() * mpiSize > 1e7)
+                {
+                    std::ostringstream warn;
+                    warn<<"Warning from HDF5Printer2! Your chosen printer buffer length ("<<get_buffer_length()<<"), multiplied by the number of processes in your job ("<<mpiSize<<"), is very large. During job shutdown the master process receives all remaining print buffer data via MPI, from ALL processes, for efficient writing to disk. This needs to be able to fit into the available RAM. If you are sure that you have enough RAM for this then there is no problem. But please do check, and if needed, reduce the buffer length for this job using the 'buffer_length' option for the printer.";
+                    printer_warning().raise(LOCAL_INFO, warn.str());
+                }
+ 
                 // Check whether a readable output file exists with the name that we want to use.
                 std::string msg_finalfile;
                 if(HDF5::checkFileReadable(file, msg_finalfile))
