@@ -112,9 +112,8 @@ BE_FUNCTION(dsanyield_sim, double, (double&,double&,int&,char&,int&,int&,int&), 
 // BE_VARIABLE(rdpadd, DS_RDPADD,     "rdpadd_",    "rdpadd")    // gRD I/O
 // BE_VARIABLE(rdtime, DS_RDTIME,     "rdtime_",    "rdtime")    // gRD timeout
 // BE_VARIABLE(intdof, DS_INTDOF, "intdof_", "intdof")
-// Direct detection
-// Structure has completely changed here -> ?
-// BE_VARIABLE(ddcom, DS_DDCOM, "ddcom_",    "ddcom")
+
+
 // Halo model common blocks
 BE_VARIABLE(dshmcom, DS6_HMCOM, "dshmcom_", "dshmcom")
 BE_VARIABLE(dshmframevelcom, DS_HMFRAMEVELCOM, "dshmframevelcom_", "dshmframevelcom")
@@ -130,6 +129,7 @@ BE_VARIABLE(sckm, DS_SCKM, "sckm_", "sckm")
 BE_VARIABLE(pmasses, DS_PMASSES, "pmasses_", "pmasses")
 BE_VARIABLE(pwidths, DS_PWIDTHS, "pwidths_", "pwidths")
 BE_VARIABLE(smcoupling, DS_SMCOUPLING, "smcoupling_", "smcoupling")
+BE_VARIABLE(ddcomlegacy, DS_DDCOMLEGACY, "ddcomlegacy_", "ddcomlegacy") //DD
 // only here starts the part that is really MSSM-specific (and not SM/generic)
 BE_VARIABLE(pacodes_mssm, DS_PACODES_MSSM, "pacodes_mssm_", "pacodes_mssm")
 BE_VARIABLE(mssmiuseful, DS_MSSMIUSEFUL, "mssmiuseful_", "mssmiuseful")
@@ -141,6 +141,7 @@ BE_VARIABLE(mssmwidths, DS_MSSMWIDTHS, "mssmwidths_", "mssmwidths")
 BE_VARIABLE(mssmmixing, DS_MSSMMIXING, "mssmmixing_", "mssmmixing")
 BE_VARIABLE(IBintvars, DS_IBINTVARS,"ibintvars_", "IBintvars")
 BE_VARIABLE(anbranch,DS6_NUCOM, "anbranch_", "nu_common_block")
+BE_VARIABLE(ddmssmcom, DS_DDMSSMCOM, "ddmssmcom_", "ddmssmcom") //DD
 
 
 

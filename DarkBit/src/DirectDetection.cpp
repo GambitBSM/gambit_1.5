@@ -50,7 +50,7 @@ namespace Gambit
     //
     //////////////////////////////////////////////////////////////////////////
 
-    /*! \brief Get direct detection couplings from initialized DarkSUSY.
+    /*! \brief Get direct detection couplings from initialized DarkSUSY 5.
     */
     void DD_couplings_DarkSUSY(DM_nucleon_couplings &result)
     {
@@ -134,6 +134,92 @@ namespace Gambit
       logger() << LogTags::debug << " gpa = " << result.gpa << std::endl;
       logger() << LogTags::debug << " gna = " << result.gna << EOM;
     }
+
+    /*! \brief Get direct detection couplings from DarkSUSY 6 initialyed with MSSM module.
+    */
+    void DD_couplings_MSSM_DS6(DM_nucleon_couplings &result)
+    {
+      using namespace Pipes::DD_couplings_MSSM_DS6;
+
+      double fG;
+
+      // Set proton hadronic matrix elements
+      BEreq::ddcomlegacy->ftp(7)  = *Param["fpu"];
+      BEreq::ddcomlegacy->ftp(8)  = *Param["fpd"];
+      BEreq::ddcomlegacy->ftp(10) = *Param["fps"];
+
+      fG = 2./27.*(1. - *Param["fpu"] - *Param["fpd"] - *Param["fps"]);
+      BEreq::ddcomlegacy->ftp(9) = fG;
+      BEreq::ddcomlegacy->ftp(11) = fG;
+      BEreq::ddcomlegacy->ftp(12) = fG;
+
+      logger() << LogTags::debug << "DarkSUSY proton hadronic matrix elements set to:" << endl;
+      logger() << LogTags::debug << "ftp(7) = fpu = " << BEreq::ddcomlegacy->ftp(7);
+      logger() << LogTags::debug << "\tftp(8) = fpd = " << BEreq::ddcomlegacy->ftp(8);
+      logger() << LogTags::debug << "\tftp(10) = fps = " << BEreq::ddcomlegacy->ftp(10) << endl;
+      logger() << LogTags::debug << "ftp(9) = ftp(11) = ftp(12) = 2/27 fG = " <<
+        BEreq::ddcomlegacy->ftp(9) << EOM;
+
+      // Set neutron hadronic matrix elements
+      BEreq::ddcomlegacy->ftn(7)  = *Param["fnu"];
+      BEreq::ddcomlegacy->ftn(8)  = *Param["fnd"];
+      BEreq::ddcomlegacy->ftn(10) = *Param["fns"];
+
+      fG = 2./27.*(1. - *Param["fnu"] - *Param["fnd"] - *Param["fns"]);
+      BEreq::ddcomlegacy->ftn(9) = fG;
+      BEreq::ddcomlegacy->ftn(11) = fG;
+      BEreq::ddcomlegacy->ftn(12) = fG;
+
+      logger() << LogTags::debug << "DarkSUSY neutron hadronic matrix elements set to:" << endl;
+      logger() << LogTags::debug << "ftn(7) = fnu = " << BEreq::ddcomlegacy->ftn(7);
+      logger() << LogTags::debug << "\tftn(8) = fnd = " << BEreq::ddcomlegacy->ftn(8);
+      logger() << LogTags::debug << "\tftn(10) = fns = " << BEreq::ddcomlegacy->ftn(10) << endl;
+      logger() << LogTags::debug << "ftn(9) = ftn(11) = ftn(12) = 2/27 fG = " <<
+        BEreq::ddcomlegacy->ftn(9) << EOM;
+
+      // Set deltaq
+      BEreq::ddcomlegacy->delu = *Param["deltau"];
+      BEreq::ddcomlegacy->deld = *Param["deltad"];
+      BEreq::ddcomlegacy->dels = *Param["deltas"];
+      logger() << LogTags::debug << "DarkSUSY delta q set to:" << endl;
+      logger() << LogTags::debug << "delu = delta u = " << BEreq::ddcomlegacy->delu;
+      logger() << LogTags::debug << "\tdeld = delta d = " << BEreq::ddcomlegacy->deld;
+      logger() << LogTags::debug << "\tdels = delta s = " << BEreq::ddcomlegacy->dels << EOM;
+
+
+      // Loop corrections and pole removal.
+
+      // Option loop<bool>: If true, include 1-loop effects discussed in
+      // Drees Nojiri Phys.Rev. D48 (1993) 3483-3501 (default: true)
+      BEreq::ddmssmcom->dddn = runOptions->getValueOrDef<bool>(true,"loop");
+
+      // Option pole<bool>: If true, include pole in nuclear scattering cross-section.
+      // If false, approximate squark propagator as 1/m_sq^2 (default: false)
+      BEreq::ddmssmcom->ddpole = runOptions->getValueOrDef<bool>(false,"pole");
+
+      // Some version notes:
+      // The default in DS5 is  for both these options to be false (tree-level cross-section with pole removed).
+      // The default in DS6 is to use Drees-Nojiri (1 loop) with the pole removed, which isn't an
+      // option in the official DS5.1.3.  The version in GAMBIT is patched to implement this option though,
+      // so we use it as the default here.
+
+      // Calling DarkSUSY subroutine dsddgpgn(gps,gns,gpa,gna)
+      // to set all four couplings.
+      double* DDcouplings=BEreq::get_DD_couplings();
+      double factor =
+      /// Option rescale_couplings<double>: Rescaling factor for WIMP-nucleon couplings (default 1.)
+      runOptions->getValueOrDef<double>(1., "rescale_couplings");
+      result.gps = factor*DDcouplings[0];// *= factor;
+      result.gns = factor*DDcouplings[1];// *= factor;
+      result.gpa = factor*DDcouplings[2];// *= factor;
+      result.gna = factor*DDcouplings[3];// *= factor;
+      logger() << LogTags::debug << "DarkSUSY dsddgpgn gives:" << std::endl;
+      logger() << LogTags::debug << " gps = " << result.gps << std::endl;
+      logger() << LogTags::debug << " gns = " << result.gns << std::endl;
+      logger() << LogTags::debug << " gpa = " << result.gpa << std::endl;
+      logger() << LogTags::debug << " gna = " << result.gna << EOM;
+    }
+
 
     /*! \brief Get direct detection couplings from initialized MicrOmegas.
     */
