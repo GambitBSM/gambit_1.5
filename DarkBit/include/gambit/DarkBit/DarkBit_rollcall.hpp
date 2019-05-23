@@ -93,6 +93,15 @@ START_MODULE
       BACKEND_REQ(dshmframevelcom,(),DS_HMFRAMEVELCOM)
       BACKEND_REQ(dshmnoclue,(),DS_HMNOCLUE)
     #undef FUNCTION
+    #define FUNCTION DarkSUSY6_PointInit_LocalHalo_func
+      START_FUNCTION(bool)
+      DEPENDENCY(RD_fraction, double)
+      DEPENDENCY(LocalHalo, LocalMaxwellianHalo)
+      BACKEND_REQ(dshmcom,(),DS6_HMCOM)
+      BACKEND_REQ(dshmisodf,(),DS_HMISODF)
+      BACKEND_REQ(dshmframevelcom,(),DS_HMFRAMEVELCOM)
+      BACKEND_REQ(dshmnoclue,(),DS_HMNOCLUE)
+    #undef FUNCTION
   #undef CAPABILITY
 
   // Relic density -----------------------------------------
@@ -874,9 +883,9 @@ START_MODULE
   // Solar capture ------------------------
 
   /// Capture rate of regular dark matter in the Sun (no v-dependent or q-dependent cross-sections) (s^-1).
-  #define CAPABILITY capture_rate_Sun
+  #define CAPABILITY capture_rate_Sun 
   START_CAPABILITY
-    #define FUNCTION capture_rate_Sun_const_xsec
+    #define FUNCTION capture_rate_Sun_const_xsec // DS 5
       START_FUNCTION(double)
       BACKEND_REQ(cap_Sun_v0q0_isoscalar, (DarkSUSY), double, (const double&, const double&, const double&))
       DEPENDENCY(mwimp, double)
@@ -885,6 +894,20 @@ START_MODULE
         #define CONDITIONAL_DEPENDENCY DarkSUSY_PointInit_LocalHalo
         START_CONDITIONAL_DEPENDENCY(bool)
         ACTIVATE_FOR_BACKEND(cap_Sun_v0q0_isoscalar, DarkSUSY)
+        #undef CONDITIONAL_DEPENDENCY
+    #undef FUNCTION
+  
+    #define FUNCTION capture_rate_Sun_const_xsec_DS6 // DS 6
+      START_FUNCTION(double)
+      BACKEND_REQ(cap_Sun_v0q0_isoscalar_DS6, (DarkSUSY), double, (const double&, const double&, const double&, const double&))
+      DEPENDENCY(mwimp, double)
+      DEPENDENCY(sigma_SI_p, double)
+      DEPENDENCY(sigma_SD_p, double)
+      DEPENDENCY(RD_fraction, double)
+      DEPENDENCY(LocalHalo, LocalMaxwellianHalo)
+        #define CONDITIONAL_DEPENDENCY DarkSUSY6_PointInit_LocalHalo
+        START_CONDITIONAL_DEPENDENCY(bool)
+        ACTIVATE_FOR_BACKEND(cap_Sun_v0q0_isoscalar_DS6, DarkSUSY) // JE FIX. How to write this?
         #undef CONDITIONAL_DEPENDENCY
     #undef FUNCTION
 

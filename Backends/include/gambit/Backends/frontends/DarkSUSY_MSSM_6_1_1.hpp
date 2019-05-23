@@ -89,12 +89,14 @@ BE_FUNCTION(dsrdens, void, (double(*)(double&),double&,double&,int&,int&,int&), 
 // Functions used in GamYields.cpp
 BE_FUNCTION(dsanyield_sim, double, (double&,double&,int&,char&,int&,int&,int&), "dsanyield_sim_", "dsanyield_sim")
 
+// Functions used in SunNeutrinos.cpp
+BE_FUNCTION(dssenu_capsuntab, double, (const double&, const double&, const double&, const double&), "dssenu_capsuntab_", "cap_Sun_v0q0_isoscalar_DS6")
 
 // Halo model common blocks
-// BE_VARIABLE(dshmcom, DS_HMCOM, "dshmcom_", "dshmcom")
-// BE_VARIABLE(dshmframevelcom, DS_HMFRAMEVELCOM, "dshmframevelcom_", "dshmframevelcom")
-// BE_VARIABLE(dshmisodf, DS_HMISODF, "dshmisodf_", "dshmisodf")
-// BE_VARIABLE(dshmnoclue, DS_HMNOCLUE, "dshmnoclue_", "dshmnoclue")
+BE_VARIABLE(dshmcom, DS6_HMCOM, "dshmcom_", "dshmcom")
+BE_VARIABLE(dshmframevelcom, DS_HMFRAMEVELCOM, "dshmframevelcom_", "dshmframevelcom")
+BE_VARIABLE(dshmisodf, DS_HMISODF, "dshmisodf_", "dshmisodf")
+BE_VARIABLE(dshmnoclue, DS_HMNOCLUE, "dshmnoclue_", "dshmnoclue")
 
 
 // Common blocks in the DarkSUSY core library
@@ -151,8 +153,6 @@ BE_VARIABLE(dsancoann, DS_DSANCOANN, "dsancoann_", "dsancoann") // RD
 // BE_FUNCTION(dsrdeqn, void, (double(*)(double&),double&,double&,double&,double&,int&), "dsrdeqn_", "dsrdeqn")
 // BE_FUNCTION(dsrdomega, double, (int&,int&,double&,int&,int&,int&), "dsrdomega_", "dsrdomega")
 // BE_FUNCTION(dsrdwintp, double, (double&), "dsrdwintp_", "dsrdwintp")
-
-
 
 
 

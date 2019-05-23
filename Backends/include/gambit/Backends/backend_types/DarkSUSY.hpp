@@ -327,23 +327,6 @@ namespace Gambit
       Fstring<10> ddfsd;
   };
 
-// this one only exists in DS6
-  struct DS_DDCOMLEGACY
-  {
-      Farray<Fdouble, 7, 12> ftp;
-      Farray<Fdouble, 7, 12> ftn;
-      Fdouble delu;
-      Fdouble deld;
-      Fdouble dels;
-  };
-
-// this one only exists in DS6
-  struct DS_DDMSSMCOM
-  {
-      Finteger ddpole;
-      Finteger dddn;
-  };
-
   struct DS_NUCOM
   {
       Farray<Fdouble, 1, 29> wabr;
@@ -368,7 +351,7 @@ namespace Gambit
       Farray<Finteger, 1, 29, 1, 2> yieldchannels_line;
   };
 
-  struct DS_HMCOM
+  struct DS_HMCOM // Only DS 5
   {
       Fdouble rho0;      // non-rescaled local density
       Fdouble rhox;      // rescaled local density
@@ -376,6 +359,32 @@ namespace Gambit
       Fdouble r_0;       // galactocentric distance
       Fdouble v_earth;   // Keplerian velocity of the Earth around the Sun
       Finteger hclumpy;  // 1=smooth 2=clumpy
+  };
+
+  struct DS6_HMCOM // DS 6
+  {
+      Fdouble rho0;      // non-rescaled local density
+      Fdouble v_sun;     // circular speed at the Sun
+      Fdouble r_0;       // galactocentric distance
+      Fdouble v_earth;   // Keplerian velocity of the Earth around the Sun
+      Finteger hclumpy;  // 1=smooth 2=clumpy
+  };
+
+// this one only exists in DS6
+  struct DS_DDCOMLEGACY
+  {
+      Farray<Fdouble, 7, 12> ftp;
+      Farray<Fdouble, 7, 12> ftn;
+      Fdouble delu;
+      Fdouble deld;
+      Fdouble dels;
+  };
+
+// this one only exists in DS6
+  struct DS_DDMSSMCOM
+  {
+      Finteger ddpole;
+      Finteger dddn;
   };
 
   struct DS_HMISODF
