@@ -79,12 +79,15 @@ set(lib "libbbn")
 set(dl "https://alterbbn.hepforge.org/downloads?f=alterbbn_v2.1.tgz")
 set(md5 "016d8e05810e9b09df6e5995da050d94")
 set(dir "${PROJECT_SOURCE_DIR}/Backends/installed/${name}/${ver}")
+set(patch "${PROJECT_SOURCE_DIR}/Backends/patches/${name}/${ver}/${name}_${ver}_fix.diff")
 check_ditch_status(${name} ${ver})
 if(NOT ditched_${name}_${ver})
   ExternalProject_Add(${name}_${ver}
     DOWNLOAD_COMMAND ${DL_BACKEND} ${dl} ${md5} ${dir} ${name} ${ver}
     SOURCE_DIR ${dir}
     BUILD_IN_SOURCE 1
+    # need to go back to a previous (non-broken) version of alterbbn_v2.1. (nobody likes silent updates!)
+    PATCH_COMMAND patch -p1 < ${patch}
     CONFIGURE_COMMAND ""
     #BUILD_COMMAND sed ${dashi} -e "s#CC = gcc#CC = ${CMAKE_C_COMPILER}#g" Makefile
     BUILD_COMMAND sed ${dashi} -e "s#CC = gcc#CC = ${CMAKE_C_COMPILER}#g" Makefile
