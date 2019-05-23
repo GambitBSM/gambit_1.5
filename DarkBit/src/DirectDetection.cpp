@@ -34,6 +34,10 @@
 ///          (ankit.beniwal@adelaide.edu.au)
 ///  \date 2018 August
 ///
+///  \author Torsten Bringmann
+///          (torsten.bringmann@fys.uio.no)
+///  \date 2019 May
+///
 ///  *********************************************
 
 #include "gambit/Elements/gambit_module_headers.hpp"

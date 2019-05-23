@@ -10,7 +10,7 @@
 ///
 ///  \author Torsten Bringmann
 ///          (torsten.bringmann@desy.de)
-///  \date 2013 Jun -- 2016 May
+///  \date 2013 Jun -- 2016 May, 2019
 ///
 ///  \author Christoph Weniger
 ///          (c.weniger@uva.nl)
@@ -40,15 +40,150 @@ namespace Gambit
     //
     //////////////////////////////////////////////////////////////////////////
 
+
     /*! \brief Collects spectrum information about coannihilating particles,
-     *         resonances and threshold energies -- so far directly from DarkSUSY.
+     *         resonances and threshold energies.
      */
-    void RD_spectrum_SUSY(RD_spectrum_type &result)
+    void RD_spectrum_MSSM(RD_spectrum_type &result)
     {
-      using namespace Pipes::RD_spectrum_SUSY;
+      using namespace Pipes::RD_spectrum_MSSM;
+
+      std::string DMid = *Dep::DarkMatter_ID;
+      if ( DMid != "~chi0_1" )
+      {
+        invalid_point().raise(
+            "RD_spectrum_MSSM requires DMid to be ~chi0_1.");
+      }
+      // Neutralino DM is self-conjugate
+      result.isSelfConj = true;
+      // This function reports particle IDs in terms of PDG codes
+      result.particle_index_type = "PDG";
+
+      // Import based on Spectrum objects
+      const Spectrum& matched_spectra = *Dep::MSSM_spectrum;
+      const SubSpectrum& spec = matched_spectra.get_HE();
+      // Import based on decay table from DecayBit
+      const DecayTable* myDecays = &(*Dep::decay_rates);
+
+      result.coannihilatingParticles.clear();
+      result.resonances.clear();
+      result.threshold_energy.clear();
+
+
+      /// Option CoannCharginosNeutralinos<bool>: Specify whether charginos and
+      /// neutralinos are included in coannihilations (default: true)
+      bool CoannCharginosNeutralinos = runOptions->getValueOrDef<bool>(true,
+          "CoannCharginosNeutralinos");
+
+      /// Option CoannSfermions<bool>: Specify whether sfermions are included in
+      /// coannihilations (default: true)
+      bool CoannSfermions = runOptions->getValueOrDef<bool>(true,
+          "CoannSfermions");
+
+      /// Option CoannMaxMass<double>: Maximal sparticle mass to be included in
+      /// coannihilations, in units of DM mass (default: 1.6)
+      double CoannMaxMass = runOptions->getValueOrDef<double>(1.6,
+          "CoannMaxMass");
+
+      // first add neutralino=WIMP=least massive 'coannihilating particle'
+      // Note: translation from PDG codes assumes context integer = 0 here and
+      // in the following. For consistency the same has to be done when
+      // retrieving information from the RD_spectrum_type result
+      int PDGwimp = 1000022;
+      double mWIMP = std::abs(spec.get(Par::Pole_Mass,Models::ParticleDB().long_name(PDGwimp,0)));
+      result.coannihilatingParticles.push_back(
+          RD_coannihilating_particle(PDGwimp, 2, mWIMP));
+
+      #ifdef DARKBIT_DEBUG
+        std::cout << "WIMP mass : "<< std::abs(spec.get(Par::Pole_Mass,"~chi0_1"))
+            << std::endl;
+      #endif
+
+      // add all sparticles that are not too heavy
+      double msp;
+      #define addCoannParticle(PDG0, DOF)                            \
+        msp = std::abs(spec.get(Par::Pole_Mass,Models::ParticleDB().long_name(PDG0,0)));                    \
+        if (msp/mWIMP< CoannMaxMass)                                      \
+           result.coannihilatingParticles.push_back(                      \
+              RD_coannihilating_particle(PDG0, DOF, msp));
+      if(CoannCharginosNeutralinos) // include  neutralino & chargino coannihilation
+      {
+        addCoannParticle(1000023, 2)        // "~chi0_2"
+        addCoannParticle(1000025, 2)        // "~chi0_3"
+        addCoannParticle(1000035, 2)        // "~chi0_4"
+        addCoannParticle(1000024, 4)        // "~chi+_1"
+        addCoannParticle(1000037, 4)        // "~chi+_2"
+      }
+      if(CoannSfermions) // include sfermion coannihilation
+      {
+        addCoannParticle(1000011, 2)        // "~e-_1"
+        addCoannParticle(1000013, 2)        // "~e-_2"
+        addCoannParticle(1000015, 2)        // "~e-_3"
+        addCoannParticle(2000011, 2)        // "~e-_4"
+        addCoannParticle(2000013, 2)        // "~e-_5"
+        addCoannParticle(2000017, 2)        // "~e-_6"
+        addCoannParticle(1000012, 1)        // "~nu_1"
+        addCoannParticle(1000014, 1)        // "~nu_2"
+        addCoannParticle(1000016, 1)        // "~nu_3"
+        addCoannParticle(1000001, 6)        // "~d_1"
+        addCoannParticle(1000003, 6)        // "~d_2"
+        addCoannParticle(1000005, 6)        // "~d_3"
+        addCoannParticle(2000001, 6)        // "~d_4"
+        addCoannParticle(2000003, 6)        // "~d_5"
+        addCoannParticle(2000005, 6)        // "~d_6"
+        addCoannParticle(1000002, 6)        // "~u_1"
+        addCoannParticle(1000004, 6)        // "~u_2"
+        addCoannParticle(1000006, 6)        // "~u_3"
+        addCoannParticle(2000002, 6)        // "~u_4"
+        addCoannParticle(2000004, 6)        // "~u_5"
+        addCoannParticle(2000006, 6)        // "~u_6"
+      }
+      #undef addCoannParticle
+
+      // determine resonances for LSP annihilation
+      std::string reslist[] = {"Z0","h0_2","h0_1","A0","W+","H+"};
+      int resmax=sizeof(reslist) / sizeof(reslist[0]);
+      // the last 2 resonances in the list can only appear for coannihilations
+      if (result.coannihilatingParticles.size() == 1)
+        resmax -= 2;
+      double mres,Gammares;  
+      for (int i=0; i<resmax; i++){
+          mres = std::abs(spec.get(Par::Pole_Mass,reslist[i]));
+          Gammares = myDecays->at(reslist[i]).width_in_GeV;
+          result.resonances.push_back( TH_Resonance(mres,Gammares));
+      };
+
+      // determine thresholds (coannihilation thresholds will be added later); 
+      //   lowest threshold = 2*WIMP rest mass  (unlike DS convention!)
+      result.threshold_energy.push_back(2*mWIMP);
+      std::string thrlist[] = {"W+","Z0","t"};
+      int thrmax=sizeof(thrlist) / sizeof(thrlist[0]);
+      double mthr;
+      for (int i=0; i<thrmax; i++){
+         mthr = std::abs(spec.get(Par::Pole_Mass,thrlist[i]));
+         if (mthr > mWIMP)
+            result.threshold_energy.push_back(2*mthr);
+      }
+
+
+    } // function RD_spectrum_MSSM
+
+
+
+    /*! \brief Collects spectrum information about coannihilating particles,
+     *         resonances and threshold energies -- directly from DarkSUSY 5.
+     */
+    void RD_spectrum_SUSY_DS5(RD_spectrum_type &result)
+    {
+      using namespace Pipes::RD_spectrum_SUSY_DS5;
 
       std::vector<int> colist; //potential coannihilating particles (indices)
       colist.clear();
+
+      // Neutralino DM is self-conjugate
+      result.isSelfConj = true;
+      // This function reports particle IDs in terms of internal DarkSUSY codes
+      result.particle_index_type = "DarkSUSY";
 
       result.coannihilatingParticles.clear();
       result.resonances.clear();
@@ -84,12 +219,6 @@ namespace Gambit
             myintdof->kdof(DSpart->kn(1)) << " " << mymspctm->mass(DSpart->kn(1))
             << std::endl;
       #endif
-
-      // TODO: eventually, this function should not be BE-dependent anymore
-      // (i.e. SUSY particle conventions should follow GAMBUT, not DS etc)!
-      // The use of any
-      // DarkSUSY conventions need thus be moved to RD_annrate_DSprep_func
-
 
       // include  neutralino & chargino coannihilation
       if(CoannCharginosNeutralinos)
@@ -133,6 +262,7 @@ namespace Gambit
       // the last 2 resonances in the list can only appear for coannihilations
       if (result.coannihilatingParticles.size() == 1)
         resmax -= 2;
+      // TB DISCUSS: so resonances are never returned!?  
 
       // determine thresholds; lowest threshold = 2*WIMP rest mass  (unlike DS
       // convention!)
@@ -146,7 +276,7 @@ namespace Gambit
         if (mymspctm->mass(thrlist[i])>result.coannihilatingParticles[0].mass)
           result.threshold_energy.push_back(2*mymspctm->mass(thrlist[i]));
 
-    } // function RD_spectrum_SUSY
+    } // function RD_spectrum_SUSY_DS5
 
 
    /*! \brief Collects information about resonances and threshold energies
@@ -164,6 +294,14 @@ namespace Gambit
       TH_ParticleProperty DMproperty =
               (*Dep::TH_ProcessCatalog).getParticleProperty(DMid);
 
+      // Is DM self-conjugate ?
+      result.isSelfConj = annihilation.isSelfConj;
+      // This function reports particle IDs in terms of internal DarkSUSY codes
+      // TODO: CHECK whether that is actually concsistently implemented 
+      //       -> should be changed to PDG !
+      result.particle_index_type = "DarkSUSY";
+
+
       // get thresholds & resonances from process catalog
       result.resonances = annihilation.resonances_thresholds.resonances;
       result.threshold_energy = annihilation.resonances_thresholds.threshold_energy;
@@ -173,8 +311,6 @@ namespace Gambit
       // NB: particle code (1st entry) is irrelevant (unless Weff is obtained from DS)
       result.coannihilatingParticles.push_back(
           RD_coannihilating_particle(100,1+DMproperty.spin2,DMproperty.mass));
-      // TODO: coannihilation thresholds have to be added once they are included
-      // in the process catalog
 
       #ifdef DARKBIT_DEBUG
         std::cout << "DM dof = " << 1+ DMproperty.spin2 << std::endl;
@@ -254,28 +390,28 @@ namespace Gambit
 
 
     /*! \brief Some helper function to prepare evaluation of Weff from
-     *         DarkSUSY.
+     *         DarkSUSY 5.
      */
-    void RD_annrate_DSprep_func(int &result)
+    void RD_annrate_DSprep_MSSM_func(int &result)
     {
-      using namespace Pipes::RD_annrate_DSprep_func;
+      using namespace Pipes::RD_annrate_DSprep_MSSM_func;
 
-      // Read out location and number of resonances and thresholds from
-      // RDspectrum.
+      // Read out coannihilating particles from RDspectrum.
       RD_spectrum_type specres = *Dep::RD_spectrum;
 
-      // TODO: Here goes a translation of GAMBIT particle identifiers
-      // -> DS particle codes (once RD_spectrum_SUSY is backend independent)
+      if ( specres.particle_index_type != "DarkSUSY" )
+      {
+        invalid_point().raise(
+            "RD_annrate_DSprep_MSSM_func is only optimized for use with DarkSUSY5 and requires internal particle IDs. Try RD_annrate_DS6prep_MSSM_func instead!");
+      }
 
-      //write info about coannihilating particles to DS common blocks
-      //[this is essentially the model-dependent part of dsrdstart]
+      //write model-dependent info about coannihilating particles to DS common blocks
       DS_RDMGEV myrdmgev;
       myrdmgev.nco = specres.coannihilatingParticles.size();
       for (int i=1; i<=myrdmgev.nco; i++) {
         myrdmgev.mco(i)=fabs(specres.coannihilatingParticles[i-1].mass);
         myrdmgev.mdof(i)=specres.coannihilatingParticles[i-1].degreesOfFreedom;
         myrdmgev.kcoann(i)=specres.coannihilatingParticles[i-1].index;
-        // NB: only this particle code is DS/SUSY specific!
       }
 
       double tmp; int itmp;
@@ -309,22 +445,87 @@ namespace Gambit
 
       result=1; // everything OK
 
-    } // function RD_eff_annrate_DSprep_func
+    } // function RD_eff_annrate_DSprep_MSSM_func
+
+
+    /*! \brief Some helper function to prepare evaluation of Weff from
+     *         DarkSUSY 6.
+     */
+    void RD_annrate_DS6prep_MSSM_func(int &result)
+    {
+      using namespace Pipes::RD_annrate_DS6prep_MSSM_func;
+
+      // Read out coannihilating particles from RDspectrum.
+      RD_spectrum_type specres = *Dep::RD_spectrum;
+
+      if (specres.particle_index_type != "DarkSUSY" && specres.particle_index_type != "PDG")
+      {
+        invalid_point().raise(
+            "RD_annrate_DS6prep_MSSM_func requires PDG or internal DS codes!");
+      }
+
+      //write model-dependent info about coannihilating particles to DS common blocks
+      DS_DSANCOANN mydsancoann;
+      mydsancoann.nco = specres.coannihilatingParticles.size();
+      int partID;
+      for (int i=1; i<=mydsancoann.nco; i++) {
+        mydsancoann.mco(i)=fabs(specres.coannihilatingParticles[i-1].mass);
+        mydsancoann.mdof(i)=specres.coannihilatingParticles[i-1].degreesOfFreedom;
+        partID = specres.coannihilatingParticles[i-1].index;
+        mydsancoann.kco(i) = partID;
+        if (specres.particle_index_type == "PDG"){
+           mydsancoann.kco(i) = BEreq::DSparticle_code(Models::ParticleDB().long_name(partID,0));
+        };
+      }
+
+      double tmp; int itmp;
+      for (int i=1; i<=mydsancoann.nco-1; i++) {
+        for (int j=i+1; j<=mydsancoann.nco; j++) {
+          if (mydsancoann.mco(j)<mydsancoann.mco(i)) {
+            tmp=mydsancoann.mco(i);
+            mydsancoann.mco(i)=mydsancoann.mco(j);
+            mydsancoann.mco(j)=tmp;
+            itmp=mydsancoann.mdof(i);
+            mydsancoann.mdof(i)=mydsancoann.mdof(j);
+            mydsancoann.mdof(j)=itmp;
+            itmp=mydsancoann.kco(i);
+            mydsancoann.kco(i)=mydsancoann.kco(j);
+            mydsancoann.kco(j)=itmp;
+          }
+        }
+      #ifdef DARKBIT_RD_DEBUG
+        std::cout << "co : "<< mydsancoann.kco(i) << " " <<
+            mydsancoann.mco(i) << " " << mydsancoann.mdof(i)
+            << std::endl;
+      #endif
+      }
+      #ifdef DARKBIT_RD_DEBUG
+        std::cout << "co : "<< mydsancoann.kco(mydsancoann.nco) << " " <<
+            mydsancoann.mco(mydsancoann.nco) << " " << mydsancoann.mdof(mydsancoann.nco)
+            << std::endl;
+      #endif
+
+      *BEreq::dsancoann = mydsancoann;
+
+      result=1; // everything OK
+
+    } // function RD_eff_annrate_DS6prep_MSSM_func
+
 
 
     /*! \brief Get Weff directly from initialized DarkSUSY.
      * Note that this function does not correct Weff for
      * non-self-conjugate dark matter.
     */
-    void RD_eff_annrate_SUSY(double(*&result)(double&))
+    void RD_eff_annrate_DS(double(*&result)(double&))
     {
-      using namespace Pipes::RD_eff_annrate_SUSY;
+      using namespace Pipes::RD_eff_annrate_DS;
 
       if (BEreq::dsanwx.origin() == "DarkSUSY")
       {
         result=BEreq::dsanwx.pointer();
       }
-    } // function RD_eff_annrate_SUSY
+    } // function RD_eff_annrate_DS
 
 
     /*! \brief Infer Weff from process catalog.
@@ -339,8 +540,10 @@ namespace Gambit
         TH_Process annProc = (*Dep::TH_ProcessCatalog).getProcess(DMid, DMid);
         double mDM = (*Dep::TH_ProcessCatalog).getParticleProperty(DMid).mass;
 
+        // TB: This is taken care of in RD_oh2_DS_general now !
         // If process involves non-self-conjugate DM then we need to add a factor of 1/2 to the final weff. This must be explicitly set in the process catalogue.
-        double k = (annProc.isSelfConj) ? 1. : 0.5;
+        // double k = (annProc.isSelfConj) ? 1. : 0.5;
+        double k=1;
 
         auto Weff = daFunk::zero("peff");
         auto peff = daFunk::var("peff");
@@ -363,16 +566,123 @@ namespace Gambit
       } // function RD_eff_annrate_from_ProcessCatalog
 
 
-    /*! \brief General routine for calculation of relic density, using DarkSUSY
+
+
+    /*! \brief General routine for calculation of relic density, using DarkSUSY 6+ 
      *         Boltzmann solver
      *
      *  Requires:
      *  - RD_thresholds_resonances
      *  - RD_eff_annrate (Weff)
      */
-    void RD_oh2_general(double &result)
+    void RD_oh2_DS_general(double &result)
     {
-      using namespace Pipes::RD_oh2_general;
+      using namespace Pipes::RD_oh2_DS_general;
+
+      // Retrieve ordered list of resonances and thresholds from
+      // RD_thresholds_resonances.
+      RD_spectrum_type myRDspec = *Dep::RD_spectrum_ordered;
+      if (myRDspec.coannihilatingParticles.empty())
+      {
+        DarkBit_error().raise(LOCAL_INFO, "RD_oh2_general: No DM particle!");
+      }
+      double mwimp=myRDspec.coannihilatingParticles[0].mass;
+
+      #ifdef DARKBIT_RD_DEBUG
+        bool tbtest=false;
+      #endif
+
+      /// Option timeout<double>: Maximum core time to allow for relic density
+      /// calculation, in seconds (default: 30s)
+      BEreq::rdtime->rdt_max = runOptions->getValueOrDef<double>(30, "timeout");
+
+      // What follows below implements dsrdomega from DarkSUSY 6+
+      
+      //We start by setting some general common block settings
+      BEreq::dsrdcom();
+      DS_RDPARS myrdpars;
+      /// Option fast<int>: Numerical performance of Boltzmann solver in DS
+      /// (default: 1) [NB: accurate is fast = 0 !]
+      int fast = runOptions->getValueOrDef<int>(1, "fast");
+      switch (fast)
+      {
+        case 0:
+          myrdpars.cosmin=0.996195;myrdpars.waccd=0.005;myrdpars.dpminr=1.0e-4;
+          myrdpars.dpthr=5.0e-4;myrdpars.wdiffr=0.05;myrdpars.wdifft=0.02;
+          break;
+        case 1:
+          myrdpars.cosmin=0.996195;myrdpars.waccd=0.05;myrdpars.dpminr=5.0e-4;
+          myrdpars.dpthr=2.5e-3;myrdpars.wdiffr=0.5;myrdpars.wdifft=0.1;
+          break;
+        default:
+          DarkBit_error().raise(LOCAL_INFO, "Invalid fast flag (should be 0 or 1). Fast > 1 not yet supported in DarkBit::RD_oh2_general.  Please add relevant settings to this routine.");
+      }
+      *BEreq::rdpars = myrdpars;
+
+
+      // now transfer information from myRDspec to DS common blocks
+      int tnco=sizeof(myRDspec.coannihilatingParticles) / sizeof(myRDspec.coannihilatingParticles[0]);
+      int tnrs=sizeof(myRDspec.resonances) / sizeof(myRDspec.resonances[0]);
+      int tnthr=sizeof(myRDspec.threshold_energy) / sizeof(myRDspec.threshold_energy[0]);
+      double tmco[1000], tdof[1000], trm[1000], trw[1000], ttm[1000];
+      for (std::size_t i=0; i<((unsigned int)tnco); i++){
+        tmco[i] = myRDspec.coannihilatingParticles[i].mass;
+        tdof[i] = myRDspec.coannihilatingParticles[i].degreesOfFreedom;
+      }
+      for (std::size_t i=0; i<((unsigned int)tnrs); i++){
+        trm[i] = myRDspec.resonances[i].energy;
+        trw[i] = myRDspec.resonances[i].width;
+      }
+      //DS does not count 2* WIMP rest mass as thr, hence we start at i=1
+      for (std::size_t i=1; i<((unsigned int)tnthr); i++){
+        ttm[i] = myRDspec.threshold_energy[i];
+      }
+      BEreq::dsrdstart(tnco,tmco,tdof,tnrs,trm,trw,tnthr,ttm);
+
+      // always check that invariant rate is OK at least at one point
+      double peff = mwimp/100;
+      double weff = (*Dep::RD_eff_annrate)(peff);
+      if (Utils::isnan(weff))
+            DarkBit_error().raise(LOCAL_INFO, "Weff is NaN in RD_Oh2_general. This means that the function\n"
+                                            "pointed to by RD_eff_annrate returned NaN for the invariant rate\n"
+                                            "entering the relic density calculation.");
+
+      // Finally use DS Boltzmann solver with invariant rate 
+      double oh2, xf;
+      int ierr=0; int iwar=0;
+      BEreq::dsrdens(byVal(*Dep::RD_eff_annrate),oh2,xf,fast,ierr,iwar);
+
+      //Check for NAN result.
+      if ( Utils::isnan(oh2) ) DarkBit_error().raise(LOCAL_INFO, "DarkSUSY returned NaN for relic density!");
+
+      // Check whether DarkSUSY threw some other error
+      if (ierr != 0) DarkBit_error().raise(LOCAL_INFO, "DarkSUSY Boltzmann solver failed.");
+
+      // If the DM particles are not their own antiparticles we need to add the relic
+      // density of anti-DM particles as well
+      result = (myRDspec.isSelfConj) ? oh2 : 2*oh2;
+      
+      logger() << LogTags::debug << "RD_oh2_general: oh2 =" << result << EOM;
+
+      #ifdef DARKBIT_DEBUG
+        std::cout << std::endl << "DM mass = " << mwimp<< std::endl;
+        std::cout << "Oh2     = " << result << std::endl << std::endl;
+      #endif
+
+    } // function RD_oh2_DS_general
+
+
+
+    /*! \brief General routine for calculation of relic density, using DarkSUSY 5 
+     *         Boltzmann solver
+     *
+     *  Requires:
+     *  - RD_thresholds_resonances
+     *  - RD_eff_annrate (Weff)
+     */
+    void RD_oh2_DS5_general(double &result)
+    {
+      using namespace Pipes::RD_oh2_DS5_general;
 
       // Retrieve ordered list of resonances and thresholds from
       // RD_thresholds_resonances.
@@ -597,6 +907,11 @@ namespace Gambit
 
       result = 0.70365e8*myrddof->fh(myrddof->nf)*mwimp*yend;
 
+      // If the DM particles are not their own antiparticles we need to add the relic
+      // density of anti-DM particles as well
+      result = (myRDspec.isSelfConj) ? result : 2*result;
+
+
       logger() << LogTags::debug << "RD_oh2_general: oh2 =" << result << EOM;
 
       #ifdef DARKBIT_DEBUG
@@ -608,8 +923,9 @@ namespace Gambit
         if (tbtest) exit(1);
       #endif
 
+    } // function RD_oh2_DS5_general
 
-    } // function RD_oh2_general
+
 
 
     //////////////////////////////////////////////////////////////////////////

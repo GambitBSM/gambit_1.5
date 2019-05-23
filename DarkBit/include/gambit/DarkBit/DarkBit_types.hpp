@@ -108,6 +108,8 @@ namespace Gambit
       std::vector<RD_coannihilating_particle> coannihilatingParticles;
       std::vector<TH_Resonance> resonances;
       std::vector<double> threshold_energy;
+      std::string particle_index_type;
+      bool isSelfConj;
     };
 
 

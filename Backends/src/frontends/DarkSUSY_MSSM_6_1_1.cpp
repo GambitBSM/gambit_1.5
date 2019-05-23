@@ -61,9 +61,6 @@ BE_INI_FUNCTION
     dsinit();
     mylock.release_lock();
 
-    // TB: should not be needed in DS6 anymore -- check ! FIXME
-    // dsrdinit();
-
     // TB: also this should not be needed in DS6 anymore -- check! FIXME
     // If needed, the parts below need to be updated with dsanyield_sim
     // TB: DISCUSS whether the following is really needed! FIXME
@@ -511,7 +508,7 @@ BE_NAMESPACE
   /// particle codes used internally in DS (as stored in common block /pacodes_mssm/)
   // FIXME: add channel codes! JE: Already forgot, why do we need channel codes?
   // Note: DarkSUSY use the opposite convention on h1_0 and h2_0. The names
-  // used here are the gamibt names where h1_0 hence refers to what DarkSUSY
+  // used here are the gambit names where h1_0 hence refers to what DarkSUSY
   // calls H2. 
   int DSparticle_code(const str& particleID)
   {

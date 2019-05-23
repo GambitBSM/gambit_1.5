@@ -29,6 +29,7 @@
 // Load the library
 LOAD_LIBRARY
 
+BE_ALLOW_MODELS(MSSM63atQ)
 
 // Functions used in DS frontend
 BE_FUNCTION(dsinit, void, (), "dsinit_", "dsinit")
@@ -67,20 +68,6 @@ BE_FUNCTION(dsseyield_ch, double, (const double&, const double&, const double&, 
 BE_FUNCTION(dsddgpgn, void, (DS_gg&, int&), "dsddgpgn_", "dsddgpgn")
 
 
-
-// Functions used in RelicDensity.cpp
-// FIXME: pacodes -> pacodes_mssm, DS_MSPCTM -> smquarkmasses & pmasses, widths -> pwidths
-
-// BE_FUNCTION(dsrdomega, double, (int&,int&,double&,int&,int&,int&), "dsrdomega_", "dsrdomega")
-// BE_FUNCTION(dsrdwintp, double, (double&), "dsrdwintp_", "dsrdwintp")
-// BE_FUNCTION(dsanwx, double, (double&), "dsanwx_", "dsanwx")
-
-// the following should be made obsolete in DS6:
-// BE_FUNCTION(dsrdthlim, void, (), "dsrdthlim_", "dsrdthlim")
-// BE_FUNCTION(dsrdtab, void, (double(*)(double&),double&,int&), "dsrdtab_", "dsrdtab")
-// BE_FUNCTION(dsrdeqn, void, (double(*)(double&),double&,double&,double&,double&,int&), "dsrdeqn_", "dsrdeqn")
-
-
 // Functions used in MSSM.cpp
   BE_FUNCTION(dsgive_model_isasugra, void, (double&,double&,double&,double&,double&), "dsgive_model_isasugra_", "dsgive_model_isasugra")
  BE_FUNCTION(dssigmav0, double, (int&,int&), "dssigmav0_", "dssigmav0")
@@ -91,27 +78,16 @@ BE_FUNCTION(dsddgpgn, void, (DS_gg&, int&), "dsddgpgn_", "dsddgpgn")
  BE_FUNCTION(dsIBwhdxdy, double, (int&, double&, double&), "dsibwhdxdy_", "dsIBwhdxdy")
  BE_FUNCTION(dsIBwwdxdy, double, (int&, double&, double&), "dsibwwdxdy_", "dsIBwwdxdy")
 
+
+// Functions used in RelicDensity.cpp
+BE_FUNCTION(dsanwx, double, (double&), "dsanwx_", "dsanwx")
+BE_FUNCTION(dsrdcom, void, (), "dsrdcom_", "dsrdcom")
+BE_FUNCTION(dsrdstart, void, (int&, double(&)[1000], double(&)[1000], int&, double(&)[1000], double(&)[1000], int&, double(&)[1000]), "dsrdstart_", "dsrdstart")
+BE_FUNCTION(dsrdens, void, (double(*)(double&),double&,double&,int&,int&,int&), "dsrdens_", "dsrdens")
+
+
 // Functions used in GamYields.cpp
 BE_FUNCTION(dsanyield_sim, double, (double&,double&,int&,char&,int&,int&,int&), "dsanyield_sim_", "dsanyield_sim")
-
-
-// TODO: organize the list below in "DS main" and module-dependent part
-// UPDATE common blocks as necessary (i.e. check what has changed
-//        in DS5->DS6) when going through the functions above!
-
-
-// Used in RD_eff_annrate_SUSY_DSprep_func, RD_oh2_general and RD_thresholds_resonances_SingletDM
-// BE_VARIABLE(rdmgev, DS_RDMGEV,     "rdmgev_",    "rdmgev")    // Contains information about coannihilation
-// Appears only in RD_oh2_general
-// BE_VARIABLE(rdpth, DS_RDPTH,       "rdpth_",     "rdpth")     // gRD thresholds
-// BE_VARIABLE(rddof, DS_RDDOF,       "rddof_",     "rddof")     // gRD dofs
-// BE_VARIABLE(rderrors, DS_RDERRORS, "rderrors_", "rderrors")   // gRD errors
-// BE_VARIABLE(rdpars, DS_RDPARS,     "rdpars_",    "rdpars")    // gRD Parameters
-// BE_VARIABLE(rdswitch, DS_RDSWITCH, "rdswitch_",  "rdswitch")  // gRD Switches
-// BE_VARIABLE(rdlun, DS_RDLUN,       "rdlun_",     "rdlun")     // gRD I/O
-// BE_VARIABLE(rdpadd, DS_RDPADD,     "rdpadd_",    "rdpadd")    // gRD I/O
-// BE_VARIABLE(rdtime, DS_RDTIME,     "rdtime_",    "rdtime")    // gRD timeout
-// BE_VARIABLE(intdof, DS_INTDOF, "intdof_", "intdof")
 
 
 // Halo model common blocks
@@ -122,14 +98,15 @@ BE_FUNCTION(dsanyield_sim, double, (double&,double&,int&,char&,int&,int&,int&), 
 
 
 // Common blocks in the DarkSUSY core library
-
+BE_VARIABLE(ddcomlegacy, DS_DDCOMLEGACY, "ddcomlegacy_", "ddcomlegacy") //DD
+BE_VARIABLE(rdtime, DS_RDTIME,     "rdtime_",    "rdtime")    // RD timeout
+BE_VARIABLE(rdpars, DS_RDPARS,     "rdpars_",    "rdpars")    // gRD Parameters
 // Common blocks in the MSSM module library
 BE_VARIABLE(smquarkmasses, DS_SMQUARKMASSES, "smquarkmasses_", "smquarkmasses")
 BE_VARIABLE(sckm, DS_SCKM, "sckm_", "sckm") 
 BE_VARIABLE(pmasses, DS_PMASSES, "pmasses_", "pmasses")
 BE_VARIABLE(pwidths, DS_PWIDTHS, "pwidths_", "pwidths")
 BE_VARIABLE(smcoupling, DS_SMCOUPLING, "smcoupling_", "smcoupling")
-BE_VARIABLE(ddcomlegacy, DS_DDCOMLEGACY, "ddcomlegacy_", "ddcomlegacy") //DD
 // only here starts the part that is really MSSM-specific (and not SM/generic)
 BE_VARIABLE(pacodes_mssm, DS_PACODES_MSSM, "pacodes_mssm_", "pacodes_mssm")
 BE_VARIABLE(mssmiuseful, DS_MSSMIUSEFUL, "mssmiuseful_", "mssmiuseful")
@@ -142,6 +119,7 @@ BE_VARIABLE(mssmmixing, DS_MSSMMIXING, "mssmmixing_", "mssmmixing")
 BE_VARIABLE(IBintvars, DS_IBINTVARS,"ibintvars_", "IBintvars")
 BE_VARIABLE(anbranch,DS6_NUCOM, "anbranch_", "nu_common_block")
 BE_VARIABLE(ddmssmcom, DS_DDMSSMCOM, "ddmssmcom_", "ddmssmcom") //DD
+BE_VARIABLE(dsancoann, DS_DSANCOANN, "dsancoann_", "dsancoann") // RD
 
 
 
@@ -161,6 +139,18 @@ BE_VARIABLE(ddmssmcom, DS_DDMSSMCOM, "ddmssmcom_", "ddmssmcom") //DD
 // BE_FUNCTION(dssusy, void, (int&,int&), "dssusy_", "dssusy")
 // BE_FUNCTION(dssusy_isasugra, void, (int&,int&), "dssusy_isasugra_", "dssusy_isasugra")
 // BE_FUNCTION(dsntcapsuntab, double, (const double&, const double&, const double&), "dsntcapsuntab_", "cap_Sun_v0q0_isoscalar")
+// BE_VARIABLE(rdswitch, DS_RDSWITCH, "rdswitch_",  "rdswitch")  // gRD Switches
+// BE_VARIABLE(rdlun, DS_RDLUN,       "rdlun_",     "rdlun")     // gRD I/O
+// BE_VARIABLE(rdpadd, DS_RDPADD,     "rdpadd_",    "rdpadd")    // gRD I/O
+// BE_VARIABLE(rderrors, DS_RDERRORS, "rderrors_", "rderrors")   // gRD errors
+// BE_VARIABLE(rdpth, DS_RDPTH,       "rdpth_",     "rdpth")     // gRD thresholds
+// BE_VARIABLE(rddof, DS_RDDOF,       "rddof_",     "rddof")     // gRD dofs
+// BE_VARIABLE(intdof, DS_INTDOF, "intdof_", "intdof")
+// BE_FUNCTION(dsrdthlim, void, (), "dsrdthlim_", "dsrdthlim")
+// BE_FUNCTION(dsrdtab, void, (double(*)(double&),double&,int&), "dsrdtab_", "dsrdtab")
+// BE_FUNCTION(dsrdeqn, void, (double(*)(double&),double&,double&,double&,double&,int&), "dsrdeqn_", "dsrdeqn")
+// BE_FUNCTION(dsrdomega, double, (int&,int&,double&,int&,int&,int&), "dsrdomega_", "dsrdomega")
+// BE_FUNCTION(dsrdwintp, double, (double&), "dsrdwintp_", "dsrdwintp")
 
 
 

@@ -99,7 +99,13 @@ START_MODULE
 
   #define CAPABILITY RD_spectrum
   START_CAPABILITY
-    #define FUNCTION RD_spectrum_SUSY
+    #define FUNCTION RD_spectrum_MSSM
+      START_FUNCTION(DarkBit::RD_spectrum_type)
+      DEPENDENCY(MSSM_spectrum, Spectrum)
+      DEPENDENCY(DarkMatter_ID, std::string)
+      DEPENDENCY(decay_rates,DecayTable)
+    #undef FUNCTION
+    #define FUNCTION RD_spectrum_SUSY_DS5
       START_FUNCTION(DarkBit::RD_spectrum_type)
       BACKEND_REQ(mspctm, (), DS_MSPCTM)
       BACKEND_REQ(widths, (), DS_WIDTHS)
@@ -125,20 +131,27 @@ START_MODULE
     #undef FUNCTION
   #undef CAPABILITY
 
-  #define CAPABILITY RD_eff_annrate_DSprep
+  #define CAPABILITY RD_eff_annrate_DSprep_MSSM
   START_CAPABILITY
-    #define FUNCTION RD_annrate_DSprep_func
+    #define FUNCTION RD_annrate_DSprep_MSSM_func
       START_FUNCTION(int)
       DEPENDENCY(RD_spectrum, DarkBit::RD_spectrum_type)
       BACKEND_REQ(rdmgev, (), DS_RDMGEV)
+    #undef FUNCTION
+    #define FUNCTION RD_annrate_DS6prep_MSSM_func
+      START_FUNCTION(int)
+      DEPENDENCY(RD_spectrum, DarkBit::RD_spectrum_type)
+      BACKEND_REQ(dsancoann, (), DS_DSANCOANN)
+      BACKEND_REQ(DSparticle_code, (needs_DS), int, (const str&))
     #undef FUNCTION
   #undef CAPABILITY
 
   #define CAPABILITY RD_eff_annrate
   START_CAPABILITY
-    #define FUNCTION RD_eff_annrate_SUSY
+    #define FUNCTION RD_eff_annrate_DS
       START_FUNCTION(fptr_dd)
-      DEPENDENCY(RD_eff_annrate_DSprep, int)
+      ALLOW_MODELS(MSSM63atQ)
+      MODEL_CONDITIONAL_DEPENDENCY(RD_eff_annrate_DSprep, int, MSSM63atQ)
       BACKEND_REQ(dsanwx, (), double, (double&))
     #undef FUNCTION
     #define FUNCTION RD_eff_annrate_from_ProcessCatalog
@@ -153,7 +166,22 @@ START_MODULE
   #define CAPABILITY RD_oh2
   START_CAPABILITY
 
-    #define FUNCTION RD_oh2_general
+// General Boltzmann solver from DarkSUSY, using arbitrary Weff
+    #define FUNCTION RD_oh2_DS_general
+      START_FUNCTION(double)
+      DEPENDENCY(RD_spectrum_ordered, DarkBit::RD_spectrum_type)
+      DEPENDENCY(RD_eff_annrate, fptr_dd)
+      #ifdef DARKBIT_RD_DEBUG
+        DEPENDENCY(MSSM_spectrum, Spectrum)
+      #endif
+      BACKEND_REQ(rdpars, (), DS_RDPARS)
+      BACKEND_REQ(rdtime, (), DS_RDTIME)
+      BACKEND_REQ(dsrdcom, (), void, ())
+      BACKEND_REQ(dsrdstart,(),void,(int&, double(&)[1000], double(&)[1000], int&, double(&)[1000], double(&)[1000], int&, double(&)[1000]))
+      BACKEND_REQ(dsrdens, (), void, (double(*)(double&), double&, double&, int&, int&, int&))
+    #undef FUNCTION
+
+    #define FUNCTION RD_oh2_DS5_general
       START_FUNCTION(double)
       DEPENDENCY(RD_spectrum_ordered, DarkBit::RD_spectrum_type)
       DEPENDENCY(RD_eff_annrate, fptr_dd)

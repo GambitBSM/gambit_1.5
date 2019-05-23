@@ -15,7 +15,7 @@
 ///
 ///  \author Torsten Bringmann
 ///          (torsten.bringmann@fys.uio.no)
-///  \date 2013 Jun, 2014 Mar, 2015 Apr, 2018 Sep
+///  \date 2013 Jun, 2014 Mar, 2015 Apr, 2018 Sep, 2019 May
 ///
 ///  \author Pat Scott
 ///          (patscott@physics.mcgill.ca)
@@ -38,6 +38,7 @@
 
 namespace Gambit
 {
+ 
   struct DS_IBINTVARS
   {
       Fdouble ibcom_x, ibcom_z, ibcom_mx, ibcom_mp1, ibcom_mp2;
@@ -251,11 +252,20 @@ namespace Gambit
         Fdouble mix_stau;
     };
 
+// only in DarkSUSY 5
   struct DS_RDMGEV
   {
       Farray<Fdouble,1,1000> mco, mdof, rgev, rwid;
       Finteger nco, nres;
       Farray<Finteger,1,1000> kcoann;
+  };
+
+// only in DarkSUSY_MSSM 6
+  struct DS_DSANCOANN
+  {
+      Farray<Fdouble,1,50> mco, mdof;
+      Farray<Finteger,1,50> kco;
+      Finteger nco;
   };
 
   struct DS_RDPTH
@@ -390,6 +400,7 @@ namespace Gambit
       Fdouble vobs;        // speed of earth observer with respect to halo
                           // yearly averaged ????
   };
+
 
 }
 
