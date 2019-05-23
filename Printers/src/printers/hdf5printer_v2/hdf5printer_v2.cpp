@@ -22,16 +22,6 @@ namespace Gambit
 {
   namespace Printers
   {
-    // Template functions to match datatypes to integers (for identifying types in MPI messages)s
-    template<> constexpr int h5v2_type<int      >() {return 0;}
-    template<> constexpr int h5v2_type<uint     >() {return 1;}
-    template<> constexpr int h5v2_type<long     >() {return 2;}
-    template<> constexpr int h5v2_type<ulong    >() {return 3;}
-    template<> constexpr int h5v2_type<longlong >() {return 4;}
-    template<> constexpr int h5v2_type<ulonglong>() {return 5;}
-    template<> constexpr int h5v2_type<float    >() {return 6;}
-    template<> constexpr int h5v2_type<double   >() {return 7;}
-
     /// @{ HDF5DataSetBase member functions
 
     /// Constructor
@@ -1616,12 +1606,13 @@ namespace Gambit
                 //}
 
                 // Attempt to gather sync buffer data from other processes and write it to disk
+                // NOTE! Make sure buffer_length * mpiSize is not too big or will run out of RAM!
                 for(std::size_t r=1; r<mpiSize; r++)
                 {
                     buffermaster.MPI_recv_all_buffers(r);
-                    buffermaster.resynchronise(); // Make sure all sync buffers know about all the newly received points
-                    buffermaster.flush(); // If needed we can collect buffers from several processes before flushing
                 }
+                buffermaster.resynchronise(); // Make sure all sync buffers know about all the newly received points
+                buffermaster.flush();               
                 logger()<< LogTags::printers << LogTags::info << "All synchronised print buffer data has been written to disk!"<<EOM; 
             }
             else if(myRank>0)
@@ -1699,17 +1690,20 @@ namespace Gambit
                 for(std::size_t r=1; r<mpiSize; r++)
                 {
                     RAbuffer.MPI_recv_all_buffers(r);
-                    RAbuffer.resynchronise(); // Still need to do this for RA buffers, since we search for the locations of all scheduled RA writes at once. Invalid points won't overwrite pre-existing valid data (invalid basically means "nothing sent to printer"), so this will not delete anything accidentally (to delete data, need to use reset() function).
-                    RAbuffer.flush();
-                    // Check if everything managed to flush!
-                    if(not RAbuffer.all_buffers_empty())
-                    {
-                        buffer_nonempty_report<<RAbuffer.buffer_status();
-                        buffer_nonempty_warn = true;
-                    }
-                    // Make sure final dataset size is correct for the unsynchronised buffers
-                    RAbuffer.extend_all_datasets_to(final_size);
                 }
+
+                RAbuffer.resynchronise(); // Still need to do this for RA buffers, since we search for the locations of all scheduled RA writes at once. Invalid points won't overwrite pre-existing valid data (invalid basically means "nothing sent to printer"), so this will not delete anything accidentally (to delete data, need to use reset() function).
+                RAbuffer.flush();
+
+                // Check if everything managed to flush!
+                if(not RAbuffer.all_buffers_empty())
+                {
+                    buffer_nonempty_report<<RAbuffer.buffer_status();
+                    buffer_nonempty_warn = true;
+                }
+                // Make sure final dataset size is correct for the unsynchronised buffers
+                RAbuffer.extend_all_datasets_to(final_size);
+
                 logger()<< LogTags::printers << LogTags::info << "All random-access print buffer data has been written to disk! (unless some sync data was missing; check subsequent log messages for possible warnings about this)"<<EOM; 
             }
             else if(myRank>0)

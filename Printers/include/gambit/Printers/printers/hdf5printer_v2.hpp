@@ -93,16 +93,16 @@ namespace Gambit
     // Need a unique integer for each type. We can encode these
     // with a template function:
 
-    // Template functions to match datatypes to integers
+    // Template function to match datatypes to integers
     template<class T> constexpr int h5v2_type();
-    template<> constexpr int h5v2_type<int      >(); 
-    template<> constexpr int h5v2_type<uint     >();
-    template<> constexpr int h5v2_type<long     >();
-    template<> constexpr int h5v2_type<ulong    >();
-    template<> constexpr int h5v2_type<longlong >();
-    template<> constexpr int h5v2_type<ulonglong>();
-    template<> constexpr int h5v2_type<float    >();
-    template<> constexpr int h5v2_type<double   >();
+    template<> constexpr int h5v2_type<int      >() {return 0;}
+    template<> constexpr int h5v2_type<uint     >() {return 1;}
+    template<> constexpr int h5v2_type<long     >() {return 2;}
+    template<> constexpr int h5v2_type<ulong    >() {return 3;}
+    template<> constexpr int h5v2_type<longlong >() {return 4;}
+    template<> constexpr int h5v2_type<ulonglong>() {return 5;}
+    template<> constexpr int h5v2_type<float    >() {return 6;}
+    template<> constexpr int h5v2_type<double   >() {return 7;}
 
     template<class T>
     std::set<T> set_diff(const std::set<T>& set1, const std::set<T>& set2)
