@@ -62,6 +62,10 @@ namespace Gambit
     typedef long long longlong; 
     typedef unsigned long long ulonglong;
 
+    // DEBUG h5v2_BLOCK message counters
+    //static int recv_counter;
+    //static int send_counter;
+
     /// Length of chunks in chunked HDF5 dataset. Affects write/retrieval performance for blocks of data of various sizes.
     /// It is set to an "intermediate" sort of size since that seems to work well enough. 
     static const std::size_t HDF5_CHUNKLENGTH = 100; 
@@ -77,28 +81,28 @@ namespace Gambit
     const int h5v2_bufdata_points(11);
     const int h5v2_bufdata_ranks(12);
     const int h5v2_bufdata_valid(13);
-    // Need a different tag for every datatype we want to send
-    const int h5v2_bufdata_values_int      (20);
-    const int h5v2_bufdata_values_uint     (21);
-    const int h5v2_bufdata_values_long     (22);
-    const int h5v2_bufdata_values_ulong    (23);
-    const int h5v2_bufdata_values_longlong (24);
-    const int h5v2_bufdata_values_ulonglong(25);
-    const int h5v2_bufdata_values_float    (26);
-    const int h5v2_bufdata_values_double   (27);
-    // Message block end tag
-    const int h5v2_END(30); 
+    const int h5v2_bufdata_type(14);
+    const int h5v2_bufdata_values(15);
+    // Message block end tag: 
+    // 1 means "there is another block of messages to receive"
+    // 0 means "there are no more blocks of messages to receive"
+    const int h5v2_BLOCK(30); 
  
-    // Template functions to match datatypes to tags
-    template <class T> int h5v2_bufdata_values();
-    template <> int h5v2_bufdata_values<int      >(); 
-    template <> int h5v2_bufdata_values<uint     >();
-    template <> int h5v2_bufdata_values<long     >();
-    template <> int h5v2_bufdata_values<ulong    >();
-    template <> int h5v2_bufdata_values<longlong >();
-    template <> int h5v2_bufdata_values<ulonglong>();
-    template <> int h5v2_bufdata_values<float    >();
-    template <> int h5v2_bufdata_values<double   >();
+    // The 'h5v2_bufdata_type' messages send an integer encoding
+    // the datatype for the h5v2_bufdata_values messages
+    // Need a unique integer for each type. We can encode these
+    // with a template function:
+
+    // Template functions to match datatypes to integers
+    template<class T> constexpr int h5v2_type();
+    template<> constexpr int h5v2_type<int      >(); 
+    template<> constexpr int h5v2_type<uint     >();
+    template<> constexpr int h5v2_type<long     >();
+    template<> constexpr int h5v2_type<ulong    >();
+    template<> constexpr int h5v2_type<longlong >();
+    template<> constexpr int h5v2_type<ulonglong>();
+    template<> constexpr int h5v2_type<float    >();
+    template<> constexpr int h5v2_type<double   >();
 
     template<class T>
     std::set<T> set_diff(const std::set<T>& set1, const std::set<T>& set2)
@@ -779,8 +783,11 @@ namespace Gambit
                     errmsg<<"Could not find point "<<ppid<<" in buffer! This is a bug, please report it."<<std::endl; 
                     printer_error().raise(LOCAL_INFO, errmsg.str());
                 }
-                pos_buffer      [position] = bit->second;  
-                pos_buffer_valid[position] = vit->second;
+                if(vit->second) // I think there is no reason to write the RA data to disk if it is invalid. Buffers should have been reset if need to clear points.
+                {
+                    pos_buffer      [position] = bit->second;  
+                    pos_buffer_valid[position] = vit->second;
+                }
                 // Erase point from buffer
                 buffer      .erase(bit);
                 buffer_valid.erase(vit);
@@ -851,6 +858,8 @@ namespace Gambit
                 std::vector<unsigned int> ranks; // Will assume all PPIDpairs are valid. I think this is fine to do...
                 std::vector<int> valid; // We have to send the invalid points too, to maintain buffer synchronicity
                 std::vector<T> values;
+                int type(h5v2_type<T>()); // Get integer identifying the type of the data values 
+                int more_buffers = 1; // Flag indicating that there is a block of data to receive 
                 for(auto it=buffer.begin(); it!=buffer.end(); ++it)
                 {
                     pointIDs.push_back(it->first.pointID);
@@ -860,15 +869,22 @@ namespace Gambit
                 }
             
                 // Debug info 
+                logger()<<LogTags::printers<<LogTags::debug<<"Sending points for buffer "<<dset_name()<<std::endl
+                                                           <<" (more_buffers: "<<more_buffers<<")"<<std::endl;
                 for(std::size_t i=0; i<buffer.size(); ++i)
                 {
-                    std::cout<<"Sending point ("<<ranks.at(i)<<", "<<pointIDs.at(i)<<")="<<values.at(i)<<" (valid="<<valid.at(i)<<")"<<std::endl;
+                    logger()<<"   Sending point ("<<ranks.at(i)<<", "<<pointIDs.at(i)<<")="<<values.at(i)<<" (valid="<<valid.at(i)<<")"<<std::endl;
                 }
+                logger()<<EOM;
 
                 // Send the buffers
                 std::size_t Npoints = values.size();
+                myComm.Send(&more_buffers, 1, r, h5v2_BLOCK);
+                //std::cerr<<myComm.Get_rank()<<": sent "<<more_buffers<<std::endl;
+                //send_counter+=1;
                 myComm.Send(&namebuf[0] , namebuf.size(), MPI_CHAR, r, h5v2_bufname);
-                myComm.Send(&values[0]  , Npoints, r, h5v2_bufdata_values<T>());
+                myComm.Send(&type       , 1      , r, h5v2_bufdata_type);
+                myComm.Send(&values[0]  , Npoints, r, h5v2_bufdata_values);
                 myComm.Send(&pointIDs[0], Npoints, r, h5v2_bufdata_points);
                 myComm.Send(&ranks[0]   , Npoints, r, h5v2_bufdata_ranks);
                 myComm.Send(&valid[0]   , Npoints, r, h5v2_bufdata_valid);
@@ -893,15 +909,17 @@ namespace Gambit
             std::vector<T> values(Npoints);
 
             // Receive buffer data 
-            myComm.Recv(&values[0]  , Npoints, r, h5v2_bufdata_values<T>());
+            myComm.Recv(&values[0]  , Npoints, r, h5v2_bufdata_values);
             myComm.Recv(&pointIDs[0], Npoints, r, h5v2_bufdata_points);
             myComm.Recv(&ranks[0]   , Npoints, r, h5v2_bufdata_ranks);
             myComm.Recv(&valid[0]   , Npoints, r, h5v2_bufdata_valid);
 
             // Pack it into this buffer
+            logger()<<LogTags::printers<<LogTags::debug<<"Adding points to buffer "<<dset_name()<<std::endl;
             for(std::size_t i=0; i<Npoints; ++i)
             {
-                std::cout<<"Adding received point ("<<ranks.at(i)<<", "<<pointIDs.at(i)<<")="<<values.at(i)<<" (valid="<<valid.at(i)<<") to buffer "<<dset_name()<<std::endl;
+                // Extra Debug
+                logger()<<"   Adding received point ("<<ranks.at(i)<<", "<<pointIDs.at(i)<<")="<<values.at(i)<<" (valid="<<valid.at(i)<<")"<<std::endl;
                 PPIDpair ppid(pointIDs.at(i), ranks.at(i));
                 if(valid.at(i))
                 {
@@ -912,9 +930,10 @@ namespace Gambit
                     update(ppid);
                 }
             }
+            logger()<<EOM;
 
             // Debug info:
-            std::cout<<"(rank "<<myComm.Get_rank()<<") Final buffer size: "<<N_items_in_buffer()<<" (Npoints was: "<<Npoints<<"), dset="<<dset_name()<<std::endl;
+            //std::cout<<"(rank "<<myComm.Get_rank()<<") Final buffer size: "<<N_items_in_buffer()<<" (Npoints was: "<<Npoints<<"), dset="<<dset_name()<<std::endl;
         }
 #endif   
  
@@ -1069,8 +1088,11 @@ namespace Gambit
         /// Receive buffer data of a known type for a known dataset
         /// Requires status message resulting from a probe for the message to be received
         template<class T>
-        void MPI_recv_buffer(const unsigned int r, const std::string& dset_name, MPI_Status& status)      
+        void MPI_recv_buffer(const unsigned int r, const std::string& dset_name)      
         {
+            // Get number of points to be received
+            MPI_Status status;
+            myComm.Probe(r, h5v2_bufdata_values, &status);
             int Npoints; 
             int err = MPI_Get_count(&status, GMPI::get_mpi_data_type<T>::type(), &Npoints);
             if(err<0)
@@ -1080,9 +1102,10 @@ namespace Gambit
                 printer_error().raise(LOCAL_INFO,msg.str());  
             }
             HDF5Buffer<T>& buffer = get_buffer<T>(dset_name, buffered_points);
+            //std::cout<<"(rank "<<myComm.Get_rank()<<") Npoints: "<<Npoints<<std::endl;
             buffer.MPI_recv_from_rank(r, Npoints);
-            logger()<< LogTags::printers << LogTags::info << "Received "<<Npoints<<" points from rank "<<r<<"'s buffers (for dataset: "<<dset_name<<")"<<EOM;
-            std::cout<<"(rank "<<myComm.Get_rank()<<") Received "<<Npoints<<" from rank "<<r<<". New buffer size is "<<buffer.N_items_in_buffer()<<" (name="<<buffer.dset_name()<<")"<<std::endl;
+            logger()<< LogTags::printers << LogTags::debug << "Received "<<Npoints<<" points from rank "<<r<<"'s buffers (for dataset: "<<dset_name<<")"<<EOM;
+            //std::cout<<"(rank "<<myComm.Get_rank()<<") Received "<<Npoints<<" from rank "<<r<<". New buffer size is "<<buffer.N_items_in_buffer()<<" (name="<<buffer.dset_name()<<")"<<std::endl;
         }
         #endif
 
@@ -1272,7 +1295,12 @@ namespace Gambit
         /// Get pointer to primary printer of this class type
         /// (get_primary_printer returns a pointer-to-base)
         HDF5Printer2* get_HDF5_primary_printer();
-            
+
+#ifdef WITH_MPI
+        /// Get reference to Comm object
+        GMPI::Comm& get_Comm();
+#endif        
+    
       private:
     
         /// Convert pointer-to-base for primary printer into derived type  

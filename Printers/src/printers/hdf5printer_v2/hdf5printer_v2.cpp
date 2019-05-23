@@ -22,15 +22,15 @@ namespace Gambit
 {
   namespace Printers
   {
-    // Template functions to match datatypes to MPI tags
-    template <> int h5v2_bufdata_values<int      >() {return h5v2_bufdata_values_int      ;}
-    template <> int h5v2_bufdata_values<uint     >() {return h5v2_bufdata_values_uint     ;}
-    template <> int h5v2_bufdata_values<long     >() {return h5v2_bufdata_values_long     ;}
-    template <> int h5v2_bufdata_values<ulong    >() {return h5v2_bufdata_values_ulong    ;}
-    template <> int h5v2_bufdata_values<longlong >() {return h5v2_bufdata_values_longlong ;}
-    template <> int h5v2_bufdata_values<ulonglong>() {return h5v2_bufdata_values_ulonglong;}
-    template <> int h5v2_bufdata_values<float    >() {return h5v2_bufdata_values_float    ;}
-    template <> int h5v2_bufdata_values<double   >() {return h5v2_bufdata_values_double   ;}
+    // Template functions to match datatypes to integers (for identifying types in MPI messages)s
+    template<> constexpr int h5v2_type<int      >() {return 0;}
+    template<> constexpr int h5v2_type<uint     >() {return 1;}
+    template<> constexpr int h5v2_type<long     >() {return 2;}
+    template<> constexpr int h5v2_type<ulong    >() {return 3;}
+    template<> constexpr int h5v2_type<longlong >() {return 4;}
+    template<> constexpr int h5v2_type<ulonglong>() {return 5;}
+    template<> constexpr int h5v2_type<float    >() {return 6;}
+    template<> constexpr int h5v2_type<double   >() {return 7;}
 
     /// @{ HDF5DataSetBase member functions
 
@@ -569,21 +569,20 @@ namespace Gambit
     /// Receive buffer data from a specified process until a STOP message is received
     void HDF5MasterBuffer::MPI_recv_all_buffers(const unsigned int r)
     {
-        int stop(0);
-        while(not stop)
+        logger()<< LogTags::printers << LogTags::info << "Checking for buffer data messages from process "<<r<<std::endl
+                << "Number of points in buffer is currently: "<<get_Npoints()<<EOM;
+        int more_buffers = 1;
+        while(more_buffers)
         {
-            MPI_Status status;
-            // Check for stop message  
-            myComm.Probe(r, MPI_ANY_TAG, &status);
-            if(status.MPI_TAG==h5v2_END)
-            {
-                stop = 1;
-                int nullbuf;
-                myComm.Recv(&nullbuf, 1, r, h5v2_END); // Release the sending process!
-            }
-            else if(status.MPI_TAG==h5v2_bufname)
+            // Check "more buffers" message  
+            myComm.Recv(&more_buffers, 1, r, h5v2_BLOCK);
+            //recv_counter+=1;
+            logger()<<LogTags::printers<<LogTags::debug<<"More buffers to receive from process "<<r<<"? "<<more_buffers<<EOM;
+            if(more_buffers)
             {
                 // Retrieve the name of the dataset for the buffer data
+                MPI_Status status;
+                myComm.Probe(r, h5v2_bufname, &status);
                 int name_size;
                 int err = MPI_Get_count(&status, MPI_CHAR, &name_size);
                 if(err<0)
@@ -594,40 +593,37 @@ namespace Gambit
                 }
                 std::string dset_name(name_size, 'x'); // Initialise string to correct size, but filled with x's
                 myComm.Recv(&dset_name[0], name_size, MPI_CHAR, r, h5v2_bufname);
+ 
+                logger()<<LogTags::printers<<LogTags::debug<<"Preparing to receive buffer data from process "<<r<<" for buffer "<<dset_name<<EOM;
    
-                // Determine datatype of the buffer to be sent (can be inferred
-                // from the tag of the next message to come from this process)
-                myComm.Probe(r, MPI_ANY_TAG, &status);
-                switch(status.MPI_TAG) 
+                // Get datatype of buffer data, and call matching receive function for that type
+                int buftype;
+                myComm.Recv(&buftype, 1, r, h5v2_bufdata_type); 
+                switch(buftype) 
                 {
-                    case h5v2_bufdata_values_int      : MPI_recv_buffer<int      >(r, dset_name, status); break;      
-                    case h5v2_bufdata_values_uint     : MPI_recv_buffer<uint     >(r, dset_name, status); break;      
-                    case h5v2_bufdata_values_long     : MPI_recv_buffer<long     >(r, dset_name, status); break;      
-                    case h5v2_bufdata_values_ulong    : MPI_recv_buffer<ulong    >(r, dset_name, status); break;      
-                    case h5v2_bufdata_values_longlong : MPI_recv_buffer<longlong >(r, dset_name, status); break;      
-                    case h5v2_bufdata_values_ulonglong: MPI_recv_buffer<ulonglong>(r, dset_name, status); break;      
-                    case h5v2_bufdata_values_float    : MPI_recv_buffer<float    >(r, dset_name, status); break;      
-                    case h5v2_bufdata_values_double   : MPI_recv_buffer<double   >(r, dset_name, status); break;      
+                    case h5v2_type<int      >(): MPI_recv_buffer<int      >(r, dset_name); break;      
+                    case h5v2_type<uint     >(): MPI_recv_buffer<uint     >(r, dset_name); break;      
+                    case h5v2_type<long     >(): MPI_recv_buffer<long     >(r, dset_name); break;      
+                    case h5v2_type<ulong    >(): MPI_recv_buffer<ulong    >(r, dset_name); break;      
+                    case h5v2_type<longlong >(): MPI_recv_buffer<longlong >(r, dset_name); break;      
+                    case h5v2_type<ulonglong>(): MPI_recv_buffer<ulonglong>(r, dset_name); break;      
+                    case h5v2_type<float    >(): MPI_recv_buffer<float    >(r, dset_name); break;      
+                    case h5v2_type<double   >(): MPI_recv_buffer<double   >(r, dset_name); break;      
                     default:
                        std::ostringstream errmsg;
-                       errmsg<<"Unrecognised datatype tag (tag value = "<<status.MPI_TAG<<") returned for buffer data message from rank "<<r<<" for dataset "<<dset_name<<"!";
+                       errmsg<<"Unrecognised datatype integer (value = "<<buftype<<") received in buffer type message from rank "<<r<<" for dataset "<<dset_name<<"!";
                        printer_error().raise(LOCAL_INFO, errmsg.str());       
-                } 
-            }
-            else
-            {
-                std::ostringstream errmsg;
-                errmsg<<"Next message waiting to be received from rank "<<r<<" is neither a buffer name nor an END command! Something has therefore gone wrong with the message order! I think MPI should preserve these with the blocking calls we are using, so it is probably a bug in the HDF5Printer2 MPI logic.";
-                printer_error().raise(LOCAL_INFO, errmsg.str());       
+                }
             }
         }
 
-        for(auto it=all_buffers.begin(); it!=all_buffers.end(); ++it)
-        {
-            std::cout<<"New buffer length is "<<it->second->N_items_in_buffer()<<" (name="<<it->second->dset_name()<<")"<<std::endl;
-        }
+        // Debug
+        //for(auto it=all_buffers.begin(); it!=all_buffers.end(); ++it)
+        //{
+        //    std::cout<<"New buffer length is "<<it->second->N_items_in_buffer()<<" (name="<<it->second->dset_name()<<")"<<std::endl;
+        //}
 
-        logger()<< LogTags::printers << LogTags::info << "All buffer data successfully received from rank "<<r<<" process!"<<EOM;
+        logger()<< LogTags::printers << LogTags::info << "Finished checking for buffer data messages from process "<<r<<EOM;
     }
     #endif 
 
@@ -1027,12 +1023,13 @@ namespace Gambit
     /// receiving points from another process).
     void HDF5MasterBuffer::resynchronise()
     {
-        std::cout << "(rank "<<myComm.Get_rank()<<") Resynchronising print buffers:" << std::endl;
+        logger()<<LogTags::printers<<LogTags::info<<"Resynchronising print buffers:" << std::endl;
+ 
         // Determine all known points in all buffers
         std::set<PPIDpair> initial_buffer_points = buffered_points_set;
         for(auto it=all_buffers.begin(); it!=all_buffers.end(); ++it)
         {
-            std::cout<<" Buffer has "<<it->second->N_items_in_buffer()<<" items (name="<<it->second->dset_name()<<")"<<std::endl;
+            logger()<<"   Buffer contains "<<it->second->N_items_in_buffer()<<" items (name="<<it->second->dset_name()<<")"<<std::endl;
             std::set<PPIDpair> this_buffer_points = it->second->get_points_set();
             buffered_points_set.insert(this_buffer_points.begin(), this_buffer_points.end());
         }
@@ -1053,9 +1050,10 @@ namespace Gambit
                             std::inserter(new_points, new_points.end())); 
 
         // Debug info:
-        std::cout << "  Initial N points   : "<<initial_buffer_points.size()<<std::endl
-                  << "  Final N points     : "<<buffered_points_set.size()<<std::endl
-                  << "  Difference N points: "<<new_points.size()<<std::endl;
+        logger() << std::endl
+                 << "  Initial N points   : "<<initial_buffer_points.size()<<std::endl
+                 << "  Final N points     : "<<buffered_points_set.size()<<std::endl
+                 << "  Difference N points: "<<new_points.size()<<std::endl;
 
         // Update the buffer variables with the new points
         for(auto jt=new_points.begin(); jt!=new_points.end(); ++jt)
@@ -1068,6 +1066,10 @@ namespace Gambit
             // Update MasterBuffer variables
             buffered_points.push_back(*jt);
         }
+
+        logger() << std::endl
+                 << "Print buffer now contains "<<get_Npoints()<<" items."
+                 << EOM;
     }
 
 
@@ -1136,6 +1138,9 @@ namespace Gambit
         {
             set_resume(get_HDF5_primary_printer()->get_resume());
             get_HDF5_primary_printer()->add_aux_buffer(buffermaster);
+            #ifdef WITH_MPI
+            myComm = get_HDF5_primary_printer()->get_Comm();
+            #endif
         }
         else
         {
@@ -1561,6 +1566,10 @@ namespace Gambit
     // No distinction between final and early termination procedure for this printer.
     void HDF5Printer2::finalise(bool /*abnormal*/)
     {
+        // DEBUG h5v2_BLOCK message counter
+        //recv_counter = 0;
+        //send_counter = 0;
+
         // The primary printer will take care of finalising all output.
         if(not is_auxilliary_printer())
         {
@@ -1592,8 +1601,20 @@ namespace Gambit
             /// Next, every *other* process needs to send all its buffers to rank 0 for printing
             /// Need to repeat this until other processes report that they have no more data
             /// to send.
-            if(myRank==0)
+            if(myRank==0 and mpiSize>1)
             {
+                logger()<< LogTags::printers << LogTags::info << "Preparing to receive synchronised print buffer data from all other processes..."<<EOM;
+
+                //DEBUG! Recv all h5v2_BLOCK messages from rank 1 process
+                //int i=0;
+                //int buf[50];
+                //while(i<50)
+                //{
+                //    myComm.Recv(&buf[i], 1, 1, h5v2_BLOCK);
+                //    std::cerr<<"Message "<<i<<": "<<buf[i]<<std::endl;
+                //    i++;
+                //}
+
                 // Attempt to gather sync buffer data from other processes and write it to disk
                 for(std::size_t r=1; r<mpiSize; r++)
                 {
@@ -1601,9 +1622,11 @@ namespace Gambit
                     buffermaster.resynchronise(); // Make sure all sync buffers know about all the newly received points
                     buffermaster.flush(); // If needed we can collect buffers from several processes before flushing
                 }
+                logger()<< LogTags::printers << LogTags::info << "All synchronised print buffer data has been written to disk!"<<EOM; 
             }
-            else
+            else if(myRank>0)
             {
+                logger()<< LogTags::printers << LogTags::info << "Sending synchronised print buffer data to master process ("<<buffermaster.get_Npoints()<<" points)..."<<EOM; 
                 // Each process needs to flush all its sync printers, one at a time. 
                 buffermaster.MPI_flush_to_rank(0);
                 for(auto it=aux_buffers.begin(); it!=aux_buffers.end(); ++it)
@@ -1615,25 +1638,27 @@ namespace Gambit
                 }
                 // When this is done, inform rank 0 printer that no more sync buffer data
                 // will come from this process
-                int finished(1);
-                // Blocking call. Do not progress until rank 0 printer confirms message
-                // received.
-                myComm.Send(&finished, 1, 0, h5v2_END);
+                int more_buffers = 0;
+                myComm.Send(&more_buffers, 1, 0, h5v2_BLOCK);
+                //std::cerr<<myRank<<": sent "<<more_buffers<<std::endl;
+                //send_counter+=1;
+                logger()<<LogTags::printers<<LogTags::debug<<"Sent buffer END message! "<<more_buffers<<EOM;
             }
             #endif
     
-            /// Now we need to wait until all processes have done this, to make
-            /// sure every single calculated point is on disk. This way the
-            /// RA buffers should be able to fully empty themselves.
-            logger()<<LogTags::printers<<LogTags::info<<"Synchronised buffers flushed for rank "<<myRank<<" printers. Waiting for all processes to flush their sync data before we try to write the RA data."<<EOM;
-#ifdef WITH_MPI
-            myComm.Barrier();
-#endif
+//            /// Now we need to wait until all processes have done this, to make
+//            /// sure every single calculated point is on disk. This way the
+//            /// RA buffers should be able to fully empty themselves.
+//            logger()<<LogTags::printers<<LogTags::info<<"Synchronised buffers flushed for rank "<<myRank<<" printers. Waiting for all processes to flush their sync data before we try to write the RA data."<<EOM;
+//#ifdef WITH_MPI
+//            myComm.Barrier();
+//#endif
 
             std::ostringstream buffer_nonempty_report;
             bool buffer_nonempty_warn(false);
             std::size_t final_size;
 
+            // Flush master process RA print buffers
             if(myRank==0)
             {
                 /// Need to know final nominal dataset size to ensure unsynchronised datasets match synchronised ones.
@@ -1641,7 +1666,8 @@ namespace Gambit
                 final_size = buffermaster.get_next_free_position();
                 buffermaster.close_and_unlock_file();
                 std::cout<<"Final dataset size is "<<final_size<<std::endl;
-
+                logger()<< LogTags::printers << LogTags::info << "Final dataset size is "<<final_size<<EOM;
+ 
                 for(auto it=aux_buffers.begin(); it!=aux_buffers.end(); ++it)
                 {
                     if(not (*it)->is_synchronised())
@@ -1661,8 +1687,11 @@ namespace Gambit
             }
 
             #ifdef WITH_MPI
-            if(myRank==0)
+            // Gather RA print buffer data from all other processes
+            if(myRank==0 and mpiSize>1)
             {
+                logger()<< LogTags::printers << LogTags::info << "Preparing to receive random-access print buffer data from all other processes..."<<EOM;
+ 
                 // Create a dedicate unsynchronised 'aux' buffer handler to receive data from other processes
                 HDF5MasterBuffer RAbuffer(get_filename(),get_groupname(),false,get_buffer_length(),myComm);
 
@@ -1670,6 +1699,7 @@ namespace Gambit
                 for(std::size_t r=1; r<mpiSize; r++)
                 {
                     RAbuffer.MPI_recv_all_buffers(r);
+                    RAbuffer.resynchronise(); // Still need to do this for RA buffers, since we search for the locations of all scheduled RA writes at once. Invalid points won't overwrite pre-existing valid data (invalid basically means "nothing sent to printer"), so this will not delete anything accidentally (to delete data, need to use reset() function).
                     RAbuffer.flush();
                     // Check if everything managed to flush!
                     if(not RAbuffer.all_buffers_empty())
@@ -1680,20 +1710,26 @@ namespace Gambit
                     // Make sure final dataset size is correct for the unsynchronised buffers
                     RAbuffer.extend_all_datasets_to(final_size);
                 }
+                logger()<< LogTags::printers << LogTags::info << "All random-access print buffer data has been written to disk! (unless some sync data was missing; check subsequent log messages for possible warnings about this)"<<EOM; 
             }
-            else
+            else if(myRank>0)
             {
+                logger()<< LogTags::printers << LogTags::info << "Sending random-access print buffer data to master process..."<<EOM;
                 // All other processes send their RA buffer data to rank 0
                 for(auto it=aux_buffers.begin(); it!=aux_buffers.end(); ++it)
                 {
                     if(not (*it)->is_synchronised())
                     {
+                        logger()<<LogTags::printers<<LogTags::info<<"   Sending "<<(*it)->get_Npoints()<<" points..."<<EOM;
                         (*it)->MPI_flush_to_rank(0);
                     }
                 }
                 // End of RA buffer block
-                int finished(1);
-                myComm.Send(&finished, 1, 0, h5v2_END);
+                int more_buffers = 0;
+                myComm.Send(&more_buffers, 1, 0, h5v2_BLOCK);
+                //std::cerr<<myRank<<": sent "<<more_buffers<<std::endl;
+                //send_counter+=1;
+                logger()<<LogTags::printers<<LogTags::debug<<"Sent buffer END message! "<<more_buffers<<EOM; 
             }
             #endif
 
@@ -1706,6 +1742,12 @@ namespace Gambit
                 std::cout<<errmsg.str();
                 printer_warning().raise(LOCAL_INFO, errmsg.str());
             }
+
+            logger()<< LogTags::printers << LogTags::info << "HDF5Printer2 output finalisation complete."<<EOM;
+
+            // DEBUG
+            //logger()<<LogTags::printers<<LogTags::debug<<"h5v2_BLOCK send count: "<<send_counter<<std::endl
+            //                                           <<"h5v2_BLOCK recv count: "<<recv_counter<<EOM;
         }    
     }
 
@@ -1843,6 +1885,10 @@ namespace Gambit
         return options;
     }
 
+#ifdef WITH_MPI
+    /// Get reference to Comm object
+    GMPI::Comm& HDF5Printer2::get_Comm() {return myComm;}
+#endif         
 
     /// @}
    
