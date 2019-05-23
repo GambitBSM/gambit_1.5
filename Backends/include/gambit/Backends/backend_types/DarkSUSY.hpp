@@ -340,10 +340,19 @@ namespace Gambit
       Farray<Finteger, 1, 29, 1, 2> yieldchannels_line;
   };
 
-  struct DS_HMCOM
+  struct DS_HMCOM // Only DS 5
   {
       Fdouble rho0;      // non-rescaled local density
       Fdouble rhox;      // rescaled local density
+      Fdouble v_sun;     // circular speed at the Sun
+      Fdouble r_0;       // galactocentric distance
+      Fdouble v_earth;   // Keplerian velocity of the Earth around the Sun
+      Finteger hclumpy;  // 1=smooth 2=clumpy
+  };
+
+  struct DS6_HMCOM // DS 6
+  {
+      Fdouble rho0;      // non-rescaled local density
       Fdouble v_sun;     // circular speed at the Sun
       Fdouble r_0;       // galactocentric distance
       Fdouble v_earth;   // Keplerian velocity of the Earth around the Sun

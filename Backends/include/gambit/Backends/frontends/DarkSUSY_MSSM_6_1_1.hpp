@@ -116,10 +116,10 @@ BE_FUNCTION(dsanyield_sim, double, (double&,double&,int&,char&,int&,int&,int&), 
 // Structure has completely changed here -> ?
 // BE_VARIABLE(ddcom, DS_DDCOM, "ddcom_",    "ddcom")
 // Halo model common blocks
-// BE_VARIABLE(dshmcom, DS_HMCOM, "dshmcom_", "dshmcom")
-// BE_VARIABLE(dshmframevelcom, DS_HMFRAMEVELCOM, "dshmframevelcom_", "dshmframevelcom")
-// BE_VARIABLE(dshmisodf, DS_HMISODF, "dshmisodf_", "dshmisodf")
-// BE_VARIABLE(dshmnoclue, DS_HMNOCLUE, "dshmnoclue_", "dshmnoclue")
+BE_VARIABLE(dshmcom, DS6_HMCOM, "dshmcom_", "dshmcom")
+BE_VARIABLE(dshmframevelcom, DS_HMFRAMEVELCOM, "dshmframevelcom_", "dshmframevelcom")
+BE_VARIABLE(dshmisodf, DS_HMISODF, "dshmisodf_", "dshmisodf")
+BE_VARIABLE(dshmnoclue, DS_HMNOCLUE, "dshmnoclue_", "dshmnoclue")
 
 
 // Common blocks in the DarkSUSY core library
@@ -159,7 +159,7 @@ BE_VARIABLE(anbranch,DS6_NUCOM, "anbranch_", "nu_common_block")
 // BE_VARIABLE(vrtxs, DS_VRTXS, "vrtxs_", "vrtxs")
 // BE_FUNCTION(dssusy, void, (int&,int&), "dssusy_", "dssusy")
 // BE_FUNCTION(dssusy_isasugra, void, (int&,int&), "dssusy_isasugra_", "dssusy_isasugra")
-// BE_FUNCTION(dsntcapsuntab, double, (const double&, const double&, const double&), "dsntcapsuntab_", "cap_Sun_v0q0_isoscalar")
+BE_FUNCTION(dssenu_capsuntab, double, (const double&, const double&, const double&, const double&), "dssenu_capsuntab_", "cap_Sun_v0q0_isoscalar_DS6")
 
 
 
