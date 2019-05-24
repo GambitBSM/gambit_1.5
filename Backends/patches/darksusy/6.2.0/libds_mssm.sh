@@ -18,3 +18,4 @@ cp ../libisospin.a ./
 for file in ./*.a; do ar x "$file"; done
 cd ../
 gfortran libds_mssm/*.o -shared -fopenmp -o libds_mssm.so 
+rm -rf ./libds_mssm
