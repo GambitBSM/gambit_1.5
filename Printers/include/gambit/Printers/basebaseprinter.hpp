@@ -19,6 +19,10 @@
 ///          (benjamin.farmer@fysik.su.se)
 ///  \date 2015 Feb
 ///
+///  \author Tomas Gonzalo
+///          (tomas.gonzalo@monash.edu)
+///  \date 2019 May
+///
 ///  *********************************************
 
 #ifndef __base_base_printer_hpp__
@@ -72,7 +76,7 @@ namespace Gambit
         bool resume; // Flag to query to determine if printer is appending points to existing output 
 
       public:
-        BaseBasePrinter(): rank(0), printer_enabled(true) {}
+        BaseBasePrinter(): rank(0), printer_enabled(true), printer_cooldown(-1) {}
         virtual ~BaseBasePrinter() {}
         /// Function to signal to the printer to write buffer contents to disk
         //virtual void flush() {}; // TODO: needed?
@@ -101,10 +105,12 @@ namespace Gambit
         virtual void finalise(bool abnormal=false) = 0;
 
         /// "Turn off" printer; i.e. calls to print functions will do nothing while this is active
-        void disable() { printer_enabled = false; }
+        /// Optionally, disable printer just for the next n print calls
+        void disable(int n=-1) { printer_enabled = false; printer_cooldown = n;}
 
         /// "Turn on" printer; print calls will work as normal.
-        void enable() { printer_enabled = true; }
+        /// Reset cooldown
+        void enable() { printer_enabled = true;  printer_cooldown = 0;}
 
         // Printer dispatch function. If a virtual function override exists for
         // the print type, info is passed on, otherwise the function call is resolved
@@ -116,6 +122,8 @@ namespace Gambit
                    const ulong pointID)
         {
           if(printer_enabled) _print(in, label, vertexID, rank, pointID);
+          if(printer_cooldown > 0) printer_cooldown--; // if there's a cooldown, reduce it afer printing
+          if(!printer_cooldown) printer_enabled = true; // if cooldown has ended, re-enable printer
         }
 
         // Overload which automatically determines a unique ID code
@@ -126,11 +134,16 @@ namespace Gambit
                    const ulong pointID)
         {
           if(printer_enabled) _print(in, label, rank, pointID);
+          if(printer_cooldown > 0) printer_cooldown--; // if there's a cooldown, reduce it afer printing
+          if(!printer_cooldown) printer_enabled = true; // if cooldown has ended, re-enable printer
         }
 
       protected:
         /// Flag to check if print functions are enabled or disabled
         bool printer_enabled;
+
+        /// Counter for printer cooldown. If non-zero printer can be disabled for a fixed number of print calls
+        int printer_cooldown;
 
         /// Default _print function. Throws an error if no matching
         /// virtual function for the type of the attempted print is

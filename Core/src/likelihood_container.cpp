@@ -22,6 +22,10 @@
 ///  \date 2013 Aug
 ///  \date 2014 May, June, onwards...
 ///
+///  \author Tomas Gonzalo
+///          (tomas.gonzalo@monash.edu)
+///  \date 2019 May
+///
 ///  *********************************************
 
 #include "gambit/Core/likelihood_container.hpp"
@@ -53,7 +57,7 @@ namespace Gambit
     min_valid_lnlike        (iniFile.getValue<double>("likelihood", "model_invalid_for_lnlike_below")),
     alt_min_valid_lnlike    (iniFile.getValueOrDef<double>(0.5*min_valid_lnlike, "likelihood", "model_invalid_for_lnlike_below_alt")),
     active_min_valid_lnlike (min_valid_lnlike), // can be switched to the alternate value by the scanner
-    print_invalid_points    (iniFile.getValueOrDef<bool>(true, "print_invalid_points")),
+    print_invalid_points    (iniFile.getValueOrDef<bool>(true, "likelihood", "print_invalid_points")),
     intralooptime_label     ("Runtime(ms) intraloop"),
     interlooptime_label     ("Runtime(ms) interloop"),
     totallooptime_label     ("Runtime(ms) totalloop"),
@@ -213,7 +217,7 @@ namespace Gambit
           if (debug) debug_to_cout << "  L" << likelihood_tag << ": ";
 
           // Calculate the likelihood component. The pointID is passed through to the printer call for each functor.
-          dependencyResolver.calcObsLike(*it/*,getPtID()*/);
+          dependencyResolver.calcObsLike(*it,getPtID());
 
           // Switch depending on whether the functor returns floats or doubles and a single likelihood or a vector of them.
           str rtype = return_types[*it];
@@ -293,7 +297,7 @@ namespace Gambit
 
           try
           {
-            dependencyResolver.calcObsLike(*it/*,getPtID()*/);
+            dependencyResolver.calcObsLike(*it,getPtID());
             if (debug) logger() << LogTags::core << "Computed a" << aux_tag << "." << EOM;
           }
           catch(Gambit::invalid_point_exception& e)
@@ -304,14 +308,14 @@ namespace Gambit
         }
       }
 
-      // Print the results, unless the point is invalid and print_invalid_points = false
+      for (auto it = target_vertices.begin(), end = target_vertices.end(); it != end; ++it)
+         dependencyResolver.printObsLike(*it,getPtID());
+      for (auto it = aux_vertices.begin(), end = aux_vertices.end(); it != end; ++it)
+         dependencyResolver.printObsLike(*it,getPtID());
+ 
+      // If the point is invalid and print_invalid_points = false disable the printer
       if(!(point_invalidated and !print_invalid_points))
-      {
-        for (auto it = target_vertices.begin(), end = target_vertices.end(); it != end; ++it)
-           dependencyResolver.printObsLike(*it,getPtID());
-        for (auto it = aux_vertices.begin(), end = aux_vertices.end(); it != end; ++it)
-           dependencyResolver.printObsLike(*it,getPtID());
-      }
+        printer.disable();
 
       // End timing of total likelihood evaluation
       std::chrono::time_point<std::chrono::system_clock> endL = std::chrono::system_clock::now();
@@ -346,7 +350,9 @@ namespace Gambit
     logger() << "Total lnL: " << lnlike << EOM;
     dependencyResolver.resetAll();
 
-    if(point_invalidated) printer.disable(); // Disable the printer so that it doesn't try to output the min_valid_lnlike as a valid likelihood value. ScannerBit will re-enable it when needed again.
+    // Disable the printer so that it doesn't try to output the min_valid_lnlike as a valid likelihood value. ScannerBit will re-enable it when needed again.
+    // Disable only for the next print call
+    if(point_invalidated) printer.disable(1)
 
     logger() << LogTags::core << LogTags::debug << "Returning control to ScannerBit" << EOM;
 
