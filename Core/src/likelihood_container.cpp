@@ -277,6 +277,9 @@ namespace Gambit
           lnlike = active_min_valid_lnlike;
           compute_aux = false;
           point_invalidated = true;
+          // If print_ivalid_points is false disable the printer
+          if(!print_invalid_points)
+            printer.disable();
           if (debug) cout << "Point invalid." << endl;
           break;
         }
@@ -308,14 +311,16 @@ namespace Gambit
         }
       }
 
-      for (auto it = target_vertices.begin(), end = target_vertices.end(); it != end; ++it)
-         dependencyResolver.printObsLike(*it,getPtID());
-      for (auto it = aux_vertices.begin(), end = aux_vertices.end(); it != end; ++it)
-         dependencyResolver.printObsLike(*it,getPtID());
- 
-      // If the point is invalid and print_invalid_points = false disable the printer
-      if(!(point_invalidated and !print_invalid_points))
+      // If the point is invalid and print_invalid_points = false disable the printer, otherwise print vertices
+      if(point_invalidated and !print_invalid_points)
         printer.disable();
+      else
+      {    
+        for (auto it = target_vertices.begin(), end = target_vertices.end(); it != end; ++it)
+           dependencyResolver.printObsLike(*it,getPtID());
+        for (auto it = aux_vertices.begin(), end = aux_vertices.end(); it != end; ++it)
+           dependencyResolver.printObsLike(*it,getPtID());
+      }
 
       // End timing of total likelihood evaluation
       std::chrono::time_point<std::chrono::system_clock> endL = std::chrono::system_clock::now();
@@ -352,7 +357,7 @@ namespace Gambit
 
     // Disable the printer so that it doesn't try to output the min_valid_lnlike as a valid likelihood value. ScannerBit will re-enable it when needed again.
     // Disable only for the next print call
-    if(point_invalidated) printer.disable(1)
+    if(point_invalidated) printer.disable(1);
 
     logger() << LogTags::core << LogTags::debug << "Returning control to ScannerBit" << EOM;
 

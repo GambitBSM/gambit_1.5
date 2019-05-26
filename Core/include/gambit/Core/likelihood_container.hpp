@@ -22,6 +22,10 @@
 ///  \date 2013 Aug
 ///  \date 2014 May, June
 ///
+///  \author Tomas Gonzalo
+///    (tomas.gonzalo@monash.edu)
+///  \date 2019 May
+///
 ///  *********************************************
 
 #ifndef __likelihood_container_hpp__

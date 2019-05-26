@@ -105,8 +105,13 @@ namespace Gambit
         virtual void finalise(bool abnormal=false) = 0;
 
         /// "Turn off" printer; i.e. calls to print functions will do nothing while this is active
-        /// Optionally, disable printer just for the next n print calls
-        void disable(int n=-1) { printer_enabled = false; printer_cooldown = n;}
+        /// Optionally, disable printer just for the next n print calls unless it was already disabled
+        void disable(int n=-1)
+        {
+          if(printer_enabled)
+            printer_cooldown = n;   
+          printer_enabled = false;
+        }
 
         /// "Turn on" printer; print calls will work as normal.
         /// Reset cooldown
