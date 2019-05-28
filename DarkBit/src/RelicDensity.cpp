@@ -584,7 +584,7 @@ namespace Gambit
       RD_spectrum_type myRDspec = *Dep::RD_spectrum_ordered;
       if (myRDspec.coannihilatingParticles.empty())
       {
-        DarkBit_error().raise(LOCAL_INFO, "RD_oh2_general: No DM particle!");
+        DarkBit_error().raise(LOCAL_INFO, "RD_oh2_DS_general: No DM particle!");
       }
       double mwimp=myRDspec.coannihilatingParticles[0].mass;
 
@@ -615,7 +615,7 @@ namespace Gambit
           myrdpars.dpthr=2.5e-3;myrdpars.wdiffr=0.5;myrdpars.wdifft=0.1;
           break;
         default:
-          DarkBit_error().raise(LOCAL_INFO, "Invalid fast flag (should be 0 or 1). Fast > 1 not yet supported in DarkBit::RD_oh2_general.  Please add relevant settings to this routine.");
+          DarkBit_error().raise(LOCAL_INFO, "Invalid fast flag (should be 0 or 1). Fast > 1 not yet supported in DarkBit::RD_oh2_DS_general.  Please add relevant settings to this routine.");
       }
       *BEreq::rdpars = myrdpars;
 
@@ -643,7 +643,7 @@ namespace Gambit
       double peff = mwimp/100;
       double weff = (*Dep::RD_eff_annrate)(peff);
       if (Utils::isnan(weff))
-            DarkBit_error().raise(LOCAL_INFO, "Weff is NaN in RD_Oh2_general. This means that the function\n"
+            DarkBit_error().raise(LOCAL_INFO, "Weff is NaN in RD_oh2_DS_general. This means that the function\n"
                                             "pointed to by RD_eff_annrate returned NaN for the invariant rate\n"
                                             "entering the relic density calculation.");
 
@@ -662,7 +662,7 @@ namespace Gambit
       // density of anti-DM particles as well
       result = (myRDspec.isSelfConj) ? oh2 : 2*oh2;
       
-      logger() << LogTags::debug << "RD_oh2_general: oh2 =" << result << EOM;
+      logger() << LogTags::debug << "RD_oh2_DS_general: oh2 =" << result << EOM;
 
       #ifdef DARKBIT_DEBUG
         std::cout << std::endl << "DM mass = " << mwimp<< std::endl;
@@ -689,7 +689,7 @@ namespace Gambit
       RD_spectrum_type myRDspec = *Dep::RD_spectrum_ordered;
       if (myRDspec.coannihilatingParticles.empty())
       {
-        DarkBit_error().raise(LOCAL_INFO, "RD_oh2_general: No DM particle!");
+        DarkBit_error().raise(LOCAL_INFO, "RD_oh2_DS5_general: No DM particle!");
       }
       double mwimp=myRDspec.coannihilatingParticles[0].mass;
 
@@ -739,7 +739,7 @@ namespace Gambit
           myrdpars.dpthr=2.5e-3;myrdpars.wdiffr=0.5;myrdpars.wdifft=0.1;
           break;
         default:
-          DarkBit_error().raise(LOCAL_INFO, "Invalid fast flag (should be 0 or 1). Fast > 1 not yet supported in DarkBit::RD_oh2_general.  Please add relevant settings to this routine.");
+          DarkBit_error().raise(LOCAL_INFO, "Invalid fast flag (should be 0 or 1). Fast > 1 not yet supported in DarkBit::RD_oh2_DS5_general.  Please add relevant settings to this routine.");
       }
 
       myrdpars.hstep=0.01;myrdpars.hmin=1.0e-9;myrdpars.compeps=0.01;
@@ -833,7 +833,7 @@ namespace Gambit
       double peff = mwimp/100;
       double weff = (*Dep::RD_eff_annrate)(peff);
       if (Utils::isnan(weff))
-            DarkBit_error().raise(LOCAL_INFO, "Weff is NaN in RD_Oh2_general. This means that the function\n"
+            DarkBit_error().raise(LOCAL_INFO, "Weff is NaN in RD_oh2_DS5_general. This means that the function\n"
                                             "pointed to by RD_eff_annrate returned NaN for the invariant rate\n"
                                             "entering the relic density calculation.");
 
@@ -846,7 +846,7 @@ namespace Gambit
           std::cout << "Weff(" << peff << ") = " << weff << std::endl;
           // Check that the invariant rate is OK.
           if (Utils::isnan(weff))
-            DarkBit_error().raise(LOCAL_INFO, "RD debug: Weff is NaN in RD_Oh2_general.");
+            DarkBit_error().raise(LOCAL_INFO, "RD debug: Weff is NaN in RD_oh2_DS5_general.");
         }
         // Set up timing
         std::chrono::time_point<std::chrono::system_clock> start, end;
@@ -912,7 +912,7 @@ namespace Gambit
       result = (myRDspec.isSelfConj) ? result : 2*result;
 
 
-      logger() << LogTags::debug << "RD_oh2_general: oh2 =" << result << EOM;
+      logger() << LogTags::debug << "RD_oh2_DS5_general: oh2 =" << result << EOM;
 
       #ifdef DARKBIT_DEBUG
         std::cout << std::endl << "DM mass = " << mwimp<< std::endl;
