@@ -118,6 +118,7 @@ if(NOT ditched_${name}_${ver})
 endif()
 
 # DarkSUSY base (for all models)
+# FIXME Something needs to be added to make sure the DarkSUSY base and models build one at a time...
 set(name "darksusy")
 set(ver "6.1.1")
 set(dl "staff.fysik.su.se/~edsjo/darksusy/tars/${name}-${ver}.tar.gz")
