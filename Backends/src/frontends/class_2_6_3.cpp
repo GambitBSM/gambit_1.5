@@ -375,7 +375,7 @@ BE_NAMESPACE
       background_at_tau(&ba,tau,ba.long_info,ba.inter_normal, &index, pvecback);
 
       r.push_back(pvecback[ba.index_bg_conf_distance]);
-      dzdr.push_back(pvecback[self.ba.index_bg_H]);
+      dzdr.push_back(pvecback[ba.index_bg_H]);
     }
 
     result.push_back(r);
