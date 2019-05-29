@@ -91,6 +91,7 @@ BE_INI_FUNCTION
   
 // Initialization function for a given MSSM point
 // (previous capaility DarkSUSY_PointInit)
+// FIXME This breaks the backend for every model that is not the MSSM!
   bool result = false;
 
   // If the user provides a file list, just read in SLHA files for debugging
