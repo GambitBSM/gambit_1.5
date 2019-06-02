@@ -252,12 +252,12 @@ namespace Gambit
 
 
       // determine resonances for LSP annihilation
-      int reslist[] = {BEreq::particle_code("Z0"),
-                       BEreq::particle_code("h0_2"),
-                       BEreq::particle_code("h0_1"),
-                       BEreq::particle_code("A0"),
-                       BEreq::particle_code("W+"),
-                       BEreq::particle_code("H+")};
+      int reslist[] = {BEreq::DS5particle_code("Z0"),
+                       BEreq::DS5particle_code("h0_2"),
+                       BEreq::DS5particle_code("h0_1"),
+                       BEreq::DS5particle_code("A0"),
+                       BEreq::DS5particle_code("W+"),
+                       BEreq::DS5particle_code("H+")};
       int resmax=sizeof(reslist) / sizeof(reslist[0]);
       // the last 2 resonances in the list can only appear for coannihilations
       if (result.coannihilatingParticles.size() == 1)
@@ -268,9 +268,9 @@ namespace Gambit
       // convention!)
       result.threshold_energy.push_back(
           2*result.coannihilatingParticles[0].mass);
-      int thrlist[] = {BEreq::particle_code("W+"),
-                       BEreq::particle_code("Z0"),
-                       BEreq::particle_code("t")};
+      int thrlist[] = {BEreq::DS5particle_code("W+"),
+                       BEreq::DS5particle_code("Z0"),
+                       BEreq::DS5particle_code("t")};
       int thrmax=sizeof(thrlist) / sizeof(thrlist[0]);
       for (int i=0; i<thrmax; i++)
         if (mymspctm->mass(thrlist[i])>result.coannihilatingParticles[0].mass)
@@ -474,7 +474,7 @@ namespace Gambit
         partID = specres.coannihilatingParticles[i-1].index;
         mydsancoann.kco(i) = partID;
         if (specres.particle_index_type == "PDG"){
-           mydsancoann.kco(i) = BEreq::DSparticle_code(Models::ParticleDB().long_name(partID,0));
+           mydsancoann.kco(i) = BEreq::DS6particle_code(Models::ParticleDB().long_name(partID,0));
         };
       }
 
@@ -825,9 +825,9 @@ namespace Gambit
 
       // follow wide res treatment for heavy Higgs adopted in DS
       double widthheavyHiggs=
-             BEreq::widths->width(BEreq::particle_code("h0_2"));
+             BEreq::widths->width(BEreq::DS5particle_code("h0_2"));
       if (widthheavyHiggs<0.1)
-        BEreq::widths->width(BEreq::particle_code("h0_2"))=0.1;
+        BEreq::widths->width(BEreq::DS5particle_code("h0_2"))=0.1;
 
       // always check that invariant rate is OK at least at one point
       double peff = mwimp/100;
@@ -896,7 +896,7 @@ namespace Gambit
       // BEreq::dsrdeqn(byVal(*Dep::RD_eff_annrate),xstart,xend,yend,xf,nfcn);
 
       // change heavy Higgs width in DS back to standard value
-      BEreq::widths->width(BEreq::particle_code("h0_2"))
+      BEreq::widths->width(BEreq::DS5particle_code("h0_2"))
          =widthheavyHiggs;
 
       //Check for NAN result.

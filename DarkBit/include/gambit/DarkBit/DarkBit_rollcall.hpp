@@ -120,7 +120,7 @@ START_MODULE
       BACKEND_REQ(widths, (), DS_WIDTHS)
       BACKEND_REQ(intdof, (), DS_INTDOF)
       BACKEND_REQ(pacodes, (), DS_PACODES)
-      BACKEND_REQ(particle_code, (), int, (const str&))
+      BACKEND_REQ(DS5particle_code, (), int, (const str&))
     #undef FUNCTION
     #define FUNCTION RD_spectrum_from_ProcessCatalog
       START_FUNCTION(DarkBit::RD_spectrum_type)
@@ -151,7 +151,7 @@ START_MODULE
       START_FUNCTION(int)
       DEPENDENCY(RD_spectrum, DarkBit::RD_spectrum_type)
       BACKEND_REQ(dsancoann, (), DS_DSANCOANN)
-      BACKEND_REQ(DSparticle_code, (needs_DS), int, (const str&))
+      BACKEND_REQ(DS6particle_code, (needs_DS), int, (const str&))
     #undef FUNCTION
   #undef CAPABILITY
 
@@ -160,7 +160,7 @@ START_MODULE
     #define FUNCTION RD_eff_annrate_DS
       START_FUNCTION(fptr_dd)
       ALLOW_MODELS(MSSM63atQ)
-      MODEL_CONDITIONAL_DEPENDENCY(RD_eff_annrate_DSprep, int, MSSM63atQ)
+      MODEL_CONDITIONAL_DEPENDENCY(RD_eff_annrate_DSprep_MSSM, int, MSSM63atQ)
       BACKEND_REQ(dsanwx, (), double, (double&))
     #undef FUNCTION
     #define FUNCTION RD_eff_annrate_from_ProcessCatalog
@@ -201,7 +201,7 @@ START_MODULE
       BACKEND_REQ(dsrdtab, (), void, (double(*)(double&), double&, int&))
       BACKEND_REQ(dsrdeqn, (), void, (double(*)(double&),double&,double&,double&,double&,int&))
       BACKEND_REQ(dsrdwintp, (), double, (double&))
-      BACKEND_REQ(particle_code, (), int, (const str&))
+      BACKEND_REQ(DS5particle_code, (), int, (const str&))
       BACKEND_REQ(widths, (), DS_WIDTHS)
       BACKEND_REQ(rdmgev, (), DS_RDMGEV)
       BACKEND_REQ(rdpth, (), DS_RDPTH)

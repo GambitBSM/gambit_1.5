@@ -347,10 +347,20 @@ Rules:
       omtype: 1
       # used by RD_oh2_MicrOmegas only
       Beps: 1e-5
+  - capability: RD_eff_annrate_DSprep_MSSM
+    function: RD_annrate_DS6prep_MSSM_func
+
+  - capability : RD_spectrum
+    function: RD_spectrum_MSSM
 
   - capability: TH_ProcessCatalog
     function: TH_ProcessCatalog_DS6_MSSM
     module: DarkBit
+
+  # Make sure to use the correct halo initialization for DS6
+# DISCUSS !
+#  - capability: DarkSUSY_PointInit_LocalHalo
+#    function: DarkSUSY6_PointInit_LocalHalo_func
 
   # Choose to use detailed Fermi Pass 8 dwarf likelihoood from gamlike
   - capability: lnL_FermiLATdwarfs

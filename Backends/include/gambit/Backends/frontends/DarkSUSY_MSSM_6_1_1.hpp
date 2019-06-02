@@ -56,7 +56,7 @@ BE_INI_CONDITIONAL_DEPENDENCY(decay_rates, DecayTable, MSSM63atQ, CMSSM)
 
 // Convenience functions (registration)
 BE_CONV_FUNCTION(DD_couplings, double*, (), "get_DD_couplings")
-BE_CONV_FUNCTION(DSparticle_code, int, (const str&), "particle_code")
+BE_CONV_FUNCTION(DSparticle_code, int, (const str&), "DS6particle_code")
 BE_CONV_FUNCTION(DS_neutral_h_decay_channels, std::vector<std::vector<str>>, (), "get_DS_neutral_h_decay_channels")
 BE_CONV_FUNCTION(DS_charged_h_decay_channels, std::vector<std::vector<str>>, (), "get_DS_charged_h_decay_channels")
 BE_CONV_FUNCTION(neutrino_yield, double, (const double&, const int&, void*&), "nuyield")
