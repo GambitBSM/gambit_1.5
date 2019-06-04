@@ -81,7 +81,7 @@ Printer:
 
 Scanner:
 
-  use_scanner: de
+  use_scanner: multinest
 
   scanners:
 
@@ -304,7 +304,7 @@ Rules:
 
   # Choose to use DarkSUSY rather than Capt'n General for calculating the capture rate of DM in the Sun
   - capability: capture_rate_Sun
-    function: capture_rate_Sun_const_xsec
+    function: capture_rate_Sun_const_xsec_DS6
 
   # Globally permit maximal mixing between gauge and family eigenstates
   - options:
@@ -368,13 +368,13 @@ Rules:
 
   # Choose to use DarkSUSY yield tables for indirect detection
   - capability: SimYieldTable
-    function: SimYieldTable_DarkSUSY
+    function: SimYieldTable_DarkSUSY6
     options:
       allow_yield_extrapolation: true
 
   # Use DarkSUSY or MicrOmegas for calculating direct detection couplings
   - capability: DD_couplings
-    function: DD_couplings_DarkSUSY
+    function: DD_couplings_MSSM_DS6
     #function: DD_couplings_MicrOmegas
 
   # Choose to get decays from DecayBit proper, not from an SLHA file.

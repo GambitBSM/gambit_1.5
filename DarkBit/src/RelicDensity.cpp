@@ -86,11 +86,12 @@ namespace Gambit
           "CoannMaxMass");
 
       // first add neutralino=WIMP=least massive 'coannihilating particle'
-      // Note: translation from PDG codes assumes context integer = 0 here and
+      // Note: translation from PDG codes assumes context integer = 2 here and
       // in the following. For consistency the same has to be done when
       // retrieving information from the RD_spectrum_type result
+      int ContInt = 2;
       int PDGwimp = 1000022;
-      double mWIMP = std::abs(spec.get(Par::Pole_Mass,Models::ParticleDB().long_name(PDGwimp,0)));
+      double mWIMP = std::abs(spec.get(Par::Pole_Mass,Models::ParticleDB().long_name(PDGwimp,ContInt)));
       result.coannihilatingParticles.push_back(
           RD_coannihilating_particle(PDGwimp, 2, mWIMP));
 
@@ -102,7 +103,7 @@ namespace Gambit
       // add all sparticles that are not too heavy
       double msp;
       #define addCoannParticle(PDG0, DOF)                            \
-        msp = std::abs(spec.get(Par::Pole_Mass,Models::ParticleDB().long_name(PDG0,0)));                    \
+        msp = std::abs(spec.get(Par::Pole_Mass,Models::ParticleDB().long_name(PDG0,ContInt)));    \
         if (msp/mWIMP< CoannMaxMass)                                      \
            result.coannihilatingParticles.push_back(                      \
               RD_coannihilating_particle(PDG0, DOF, msp));
@@ -465,6 +466,9 @@ namespace Gambit
       }
 
       //write model-dependent info about coannihilating particles to DS common blocks
+      // Note: translation from PDG codes assumes for consistnecy context integer = 2 here
+      // (as done in RD_spectrum_MSSM)
+      int ContInt = 2;      
       DS_DSANCOANN mydsancoann;
       mydsancoann.nco = specres.coannihilatingParticles.size();
       int partID;
@@ -474,7 +478,7 @@ namespace Gambit
         partID = specres.coannihilatingParticles[i-1].index;
         mydsancoann.kco(i) = partID;
         if (specres.particle_index_type == "PDG"){
-           mydsancoann.kco(i) = BEreq::DS6particle_code(Models::ParticleDB().long_name(partID,0));
+           mydsancoann.kco(i) = BEreq::DS6particle_code(Models::ParticleDB().long_name(partID,ContInt));
         };
       }
 

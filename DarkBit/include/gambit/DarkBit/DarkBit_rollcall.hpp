@@ -81,10 +81,10 @@
 #define MODULE DarkBit
 START_MODULE
 
-  // Function to initialize LocalHalo model in DarkSUSY
-  #define CAPABILITY DarkSUSY_PointInit_LocalHalo
+  // Make sure LocalHalo model is initialized in DarkSUSY
+  #define CAPABILITY DarkSUSY5_PointInit_LocalHalo
   START_CAPABILITY
-    #define FUNCTION DarkSUSY_PointInit_LocalHalo_func
+    #define FUNCTION DarkSUSY5_PointInit_LocalHalo_func
       START_FUNCTION(bool)
       DEPENDENCY(RD_fraction, double)
       DEPENDENCY(LocalHalo, LocalMaxwellianHalo)
@@ -93,6 +93,10 @@ START_MODULE
       BACKEND_REQ(dshmframevelcom,(),DS_HMFRAMEVELCOM)
       BACKEND_REQ(dshmnoclue,(),DS_HMNOCLUE)
     #undef FUNCTION
+  #undef CAPABILITY
+
+  #define CAPABILITY DarkSUSY6_PointInit_LocalHalo
+  START_CAPABILITY
     #define FUNCTION DarkSUSY6_PointInit_LocalHalo_func
       START_FUNCTION(bool)
       DEPENDENCY(RD_fraction, double)
@@ -151,7 +155,7 @@ START_MODULE
       START_FUNCTION(int)
       DEPENDENCY(RD_spectrum, DarkBit::RD_spectrum_type)
       BACKEND_REQ(dsancoann, (), DS_DSANCOANN)
-      BACKEND_REQ(DS6particle_code, (needs_DS), int, (const str&))
+      BACKEND_REQ(DS6particle_code, (), int, (const str&))
     #undef FUNCTION
   #undef CAPABILITY
 
@@ -644,17 +648,17 @@ START_MODULE
 
     #define FUNCTION DD_couplings_DarkSUSY
       START_FUNCTION(DM_nucleon_couplings)
-      BACKEND_REQ(get_DD_couplings, (needs_DS), double*, ())
+      BACKEND_REQ(get_DD_couplings, (), double*, ())
       BACKEND_REQ(mspctm, (), DS_MSPCTM)
-      BACKEND_REQ(ddcom, (DarkSUSY), DS_DDCOM)
+      BACKEND_REQ(ddcom, (), DS_DDCOM)
       ALLOW_JOINT_MODEL(nuclear_params_fnq,MSSM63atQ)
     #undef FUNCTION
 
     #define FUNCTION DD_couplings_MSSM_DS6
       START_FUNCTION(DM_nucleon_couplings)
-      BACKEND_REQ(get_DD_couplings, (needs_DS), double*, ())
-      BACKEND_REQ(ddcomlegacy, (DarkSUSY), DS_DDCOMLEGACY)
-      BACKEND_REQ(ddmssmcom, (DarkSUSY), DS_DDMSSMCOM)
+      BACKEND_REQ(get_DD_couplings, (), double*, ())
+      BACKEND_REQ(ddcomlegacy, (), DS_DDCOMLEGACY)
+      BACKEND_REQ(ddmssmcom, (), DS_DDMSSMCOM)
       ALLOW_JOINT_MODEL(nuclear_params_fnq,MSSM63atQ)
     #undef FUNCTION
 
@@ -887,11 +891,11 @@ START_MODULE
   START_CAPABILITY
     #define FUNCTION capture_rate_Sun_const_xsec // DS 5
       START_FUNCTION(double)
-      BACKEND_REQ(cap_Sun_v0q0_isoscalar, (DarkSUSY), double, (const double&, const double&, const double&))
+      BACKEND_REQ(cap_Sun_v0q0_isoscalar, (), double, (const double&, const double&, const double&))
       DEPENDENCY(mwimp, double)
       DEPENDENCY(sigma_SI_p, double)
       DEPENDENCY(sigma_SD_p, double)
-        #define CONDITIONAL_DEPENDENCY DarkSUSY_PointInit_LocalHalo
+        #define CONDITIONAL_DEPENDENCY DarkSUSY5_PointInit_LocalHalo
         START_CONDITIONAL_DEPENDENCY(bool)
         ACTIVATE_FOR_BACKEND(cap_Sun_v0q0_isoscalar, DarkSUSY)
         #undef CONDITIONAL_DEPENDENCY
@@ -899,7 +903,7 @@ START_MODULE
   
     #define FUNCTION capture_rate_Sun_const_xsec_DS6 // DS 6
       START_FUNCTION(double)
-      BACKEND_REQ(cap_Sun_v0q0_isoscalar_DS6, (DarkSUSY), double, (const double&, const double&, const double&, const double&))
+      BACKEND_REQ(cap_Sun_v0q0_isoscalar_DS6, (), double, (const double&, const double&, const double&, const double&))
       DEPENDENCY(mwimp, double)
       DEPENDENCY(sigma_SI_p, double)
       DEPENDENCY(sigma_SD_p, double)
@@ -907,7 +911,7 @@ START_MODULE
       DEPENDENCY(LocalHalo, LocalMaxwellianHalo)
         #define CONDITIONAL_DEPENDENCY DarkSUSY6_PointInit_LocalHalo
         START_CONDITIONAL_DEPENDENCY(bool)
-        ACTIVATE_FOR_BACKEND(cap_Sun_v0q0_isoscalar_DS6, DarkSUSY) // JE FIX. How to write this?
+        ACTIVATE_FOR_BACKEND(cap_Sun_v0q0_isoscalar_DS6, DarkSUSY)
         #undef CONDITIONAL_DEPENDENCY
     #undef FUNCTION
 
@@ -963,13 +967,13 @@ START_MODULE
     DEPENDENCY(mwimp, double)
     DEPENDENCY(sigmav, double)
     DEPENDENCY(DarkMatter_ID, std::string)
+    BACKEND_OPTION((DarkSUSY, 5.1.1, 5.1.2, 5.1.3), (needs_DS)) // define "needs_DS"
     BACKEND_REQ(nuyield_setup, (needs_DS), void, (const double(&)[29],
      const double(&)[29][3], const double(&)[15], const double(&)[3], const double&,
      const double&))
     BACKEND_REQ(nuyield, (needs_DS), double, (const double&, const int&, void*&))
     BACKEND_REQ(get_DS_neutral_h_decay_channels, (needs_DS), std::vector< std::vector<str> >, ())
     BACKEND_REQ(get_DS_charged_h_decay_channels, (needs_DS), std::vector< std::vector<str> >, ())
-    BACKEND_OPTION((DarkSUSY, 5.1.1, 5.1.2, 5.1.3), (needs_DS))
     #undef FUNCTION
   #undef CAPABILITY
 

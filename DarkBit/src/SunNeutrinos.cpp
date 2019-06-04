@@ -50,7 +50,7 @@ namespace Gambit
       using namespace Pipes::capture_rate_Sun_const_xsec;
 
       if (BEreq::cap_Sun_v0q0_isoscalar.origin()=="DarkSUSY")
-        if(!(*Dep::DarkSUSY_PointInit_LocalHalo))
+        if(!(*Dep::DarkSUSY5_PointInit_LocalHalo))
           DarkBit_error().raise(LOCAL_INFO,"DarkSUSY halo model not initialized!");
 
       // When calculating the solar capture rate, DarkSUSY assumes that the
@@ -715,9 +715,9 @@ namespace Gambit
     }
 
     /// Function to set Local Halo Parameters in DarkSUSY (DS5 only)
-    void DarkSUSY_PointInit_LocalHalo_func(bool &result)
+    void DarkSUSY5_PointInit_LocalHalo_func(bool &result)
     {
-        using namespace Pipes::DarkSUSY_PointInit_LocalHalo_func;
+        using namespace Pipes::DarkSUSY5_PointInit_LocalHalo_func;
 
           LocalMaxwellianHalo LocalHaloParameters = *Dep::LocalHalo;
 

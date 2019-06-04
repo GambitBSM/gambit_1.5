@@ -2032,8 +2032,11 @@ DarkSUSY_PointInit: |
 DarkSUSY_MSSM_6_1_1_init: |
    Initialises an MSSM model point for DarkSUSY 6.1.1.
 
-DarkSUSY_PointInit_LocalHalo: |
-   Initialises Milky Way halo model parameters in DarkSUSY
+DarkSUSY5_PointInit_LocalHalo: |
+   Initialises Milky Way halo model parameters in DarkSUSY5
+
+DarkSUSY6_PointInit_LocalHalo: |
+   Initialises Milky Way halo model parameters in DarkSUSY6+
 
 dump_GammaSpectrum: |
    Dumps gamma-ray yield into ASCII table
@@ -2613,8 +2616,11 @@ raw_nuyield_casc: |
 nuyield_setup: |
    Sets DarkSUSY common blocks with all necessary information to calculate neutrino yields.
 
-particle_code: |
-   Translates GAMBIT string particle identifiers to corresponding DarkSUSY integer codes.
+DS5particle_code: |
+   Translates GAMBIT string particle identifiers to corresponding DarkSUSY 5 integer codes.
+
+DS6particle_code: |
+   Translates GAMBIT string particle identifiers to corresponding DarkSUSY 6 integer codes.
 
 initFromSLHAeaAndDecayTable: |
    Initialises an MSSM model in DarkSUSY from an SLHAea object and a DecayTable.
