@@ -35,7 +35,7 @@
 #define PARENT GeneralCosmoALP
   START_MODEL
   // Units for these parameters are the same as for the GeneralALP.
-  DEFINEPARS(gagg,fa,ma0,thetai)
+  DEFINEPARS(Cagg,fa,ma0,thetai)
   DEFINEPARS(Ya0)
   // Translation to parent, all defined in Axions.cpp:
   INTERPRET_AS_PARENT_FUNCTION(CosmoALP_to_GeneralCosmoALP)
