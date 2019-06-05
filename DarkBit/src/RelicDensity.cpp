@@ -62,6 +62,7 @@ namespace Gambit
       // Import based on Spectrum objects
       const Spectrum& matched_spectra = *Dep::MSSM_spectrum;
       const SubSpectrum& spec = matched_spectra.get_HE();
+      const SubSpectrum& SMspec = matched_spectra.get_LE();
       // Import based on decay table from DecayBit
       const DecayTable* myDecays = &(*Dep::decay_rates);
 
@@ -86,10 +87,10 @@ namespace Gambit
           "CoannMaxMass");
 
       // first add neutralino=WIMP=least massive 'coannihilating particle'
-      // Note: translation from PDG codes assumes context integer = 2 here and
-      // in the following. For consistency the same has to be done when
-      // retrieving information from the RD_spectrum_type result
-      int ContInt = 2;
+      // Note: translation from PDG codes assumes context integer = 0 here and
+      // in the following (essentially "mass ordering"). For consistency the same 
+      // has to be done when retrieving information from the RD_spectrum_type result
+      int ContInt = 0;
       int PDGwimp = 1000022;
       double mWIMP = std::abs(spec.get(Par::Pole_Mass,Models::ParticleDB().long_name(PDGwimp,ContInt)));
       result.coannihilatingParticles.push_back(
@@ -122,7 +123,7 @@ namespace Gambit
         addCoannParticle(1000015, 2)        // "~e-_3"
         addCoannParticle(2000011, 2)        // "~e-_4"
         addCoannParticle(2000013, 2)        // "~e-_5"
-        addCoannParticle(2000017, 2)        // "~e-_6"
+        addCoannParticle(2000015, 2)        // "~e-_6"
         addCoannParticle(1000012, 1)        // "~nu_1"
         addCoannParticle(1000014, 1)        // "~nu_2"
         addCoannParticle(1000016, 1)        // "~nu_3"
@@ -142,17 +143,26 @@ namespace Gambit
       #undef addCoannParticle
 
       // determine resonances for LSP annihilation
-      std::string reslist[] = {"Z0","h0_2","h0_1","A0","W+","H+"};
+      std::string SMreslist[] = {"Z0","W+"};
+      std::string reslist[] = {"h0_2","h0_1","A0","H+"};
+      int resSMmax=sizeof(SMreslist) / sizeof(SMreslist[0]);
       int resmax=sizeof(reslist) / sizeof(reslist[0]);
       // the last 2 resonances in the list can only appear for coannihilations
       if (result.coannihilatingParticles.size() == 1)
-        resmax -= 2;
+        resSMmax -= 1;
+        resmax -= 1;
       double mres,Gammares;  
       for (int i=0; i<resmax; i++){
           mres = std::abs(spec.get(Par::Pole_Mass,reslist[i]));
           Gammares = myDecays->at(reslist[i]).width_in_GeV;
           result.resonances.push_back( TH_Resonance(mres,Gammares));
       };
+      for (int i=0; i<resSMmax; i++){
+          mres = std::abs(SMspec.get(Par::Pole_Mass,SMreslist[i]));
+          Gammares = myDecays->at(SMreslist[i]).width_in_GeV;
+          result.resonances.push_back( TH_Resonance(mres,Gammares));
+      };
+
 
       // determine thresholds (coannihilation thresholds will be added later); 
       //   lowest threshold = 2*WIMP rest mass  (unlike DS convention!)
@@ -161,7 +171,7 @@ namespace Gambit
       int thrmax=sizeof(thrlist) / sizeof(thrlist[0]);
       double mthr;
       for (int i=0; i<thrmax; i++){
-         mthr = std::abs(spec.get(Par::Pole_Mass,thrlist[i]));
+         mthr = std::abs(SMspec.get(Par::Pole_Mass,thrlist[i]));
          if (mthr > mWIMP)
             result.threshold_energy.push_back(2*mthr);
       }
@@ -466,9 +476,9 @@ namespace Gambit
       }
 
       //write model-dependent info about coannihilating particles to DS common blocks
-      // Note: translation from PDG codes assumes for consistnecy context integer = 2 here
+      // Note: translation from PDG codes assumes for consistnecy context integer = 0 here
       // (as done in RD_spectrum_MSSM)
-      int ContInt = 2;      
+      int ContInt = 0;      
       DS_DSANCOANN mydsancoann;
       mydsancoann.nco = specres.coannihilatingParticles.size();
       int partID;
