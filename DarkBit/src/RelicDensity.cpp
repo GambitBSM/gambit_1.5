@@ -610,9 +610,6 @@ namespace Gambit
       //We start by setting some general common block settings
       BEreq::dsrdcom();
       DS_RDPARS *myrdpars = BEreq::rdpars.pointer();
-//      DS_RDDOF *myrddof = BEreq::rddof.pointer();
-//      int k; myrddof->khi=myrddof->nf; myrddof->klo=1;
-
 
       /// Option fast<int>: Numerical performance of Boltzmann solver in DS
       /// (default: 1) [NB: accurate is fast = 0 !]
@@ -631,8 +628,6 @@ namespace Gambit
         default:
           DarkBit_error().raise(LOCAL_INFO, "Invalid fast flag (should be 0 or 1). Fast > 1 not yet supported in DarkBit::RD_oh2_DS_general.  Please add relevant settings to this routine.");
       }
-//      *BEreq::rdpars = myrdpars;
-
 
       // now transfer information from myRDspec to DS common blocks
       int tnco=myRDspec.coannihilatingParticles.size();

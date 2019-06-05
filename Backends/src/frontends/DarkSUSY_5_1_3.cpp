@@ -891,6 +891,7 @@ BE_NAMESPACE
     double gps,gns,gpa,gna;
     dsddgpgn(gps,gns,gpa,gna);
     std::vector<double> couplings;
+    couplings.clear();
     couplings.push_back(gps);
     couplings.push_back(gns);
     couplings.push_back(gpa);

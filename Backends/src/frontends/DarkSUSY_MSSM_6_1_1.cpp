@@ -483,6 +483,7 @@ BE_NAMESPACE
     return result;
   }
 
+
   /// Function DD_couplings returns direct detection couplings gps,gns,gpa,gna
   /// (proton/neutron scalar/axial four-couplinngs)
   /// Provided here because the signature of the corresponding DarkSUSY routine
@@ -498,6 +499,7 @@ BE_NAMESPACE
       piped_errors.request(LOCAL_INFO, err.str());
     } 
     std::vector<double> couplings;
+    couplings.clear();
     couplings.push_back(gg.gg(1,1).re); // gps
     couplings.push_back(gg.gg(1,2).re); // gns
     couplings.push_back(gg.gg(4,1).re); // gpa
