@@ -178,12 +178,12 @@ ObsLikes:
     # - capability:  lnL_gm2
     #   purpose:     LogLike
 
-    # Dark matter likelihoods
-#    - capability: lnL_oh2
-#      purpose:    LogLike
-
-    - capability: lnL_FermiLATdwarfs
+    #Dark matter likelihoods
+    - capability: lnL_oh2
       purpose:    LogLike
+
+    # - capability: lnL_FermiLATdwarfs
+    #   purpose:    LogLike
 
 #    - capability: XENON100_2012_LogLikelihood
 #      purpose:    LogLike
@@ -614,8 +614,8 @@ Logger:
     [DecayBit] : "DecayBit.log"
     [DarkBit] : "DarkBit.log"
     [PrecisionBit] : "PrecisionBit.log"
-    [FlavBit] : "FlavBit.log"
-    [ColliderBit] : "ColliderBit.log"
+    # [FlavBit] : "FlavBit.log"
+    # [ColliderBit] : "ColliderBit.log"
     [SpecBit] : "SpecBit.log"
     [Dependency Resolver] : "dep_resolver.log"
 

@@ -526,7 +526,6 @@ namespace Gambit
     } // function RD_eff_annrate_DS6prep_MSSM_func
 
 
-
     /*! \brief Get Weff directly from initialized DarkSUSY.
      * Note that this function does not correct Weff for
      * non-self-conjugate dark matter.
@@ -535,10 +534,11 @@ namespace Gambit
     {
       using namespace Pipes::RD_eff_annrate_DS;
 
-      if (BEreq::dsanwx.origin() == "DarkSUSY")
+      if ((BEreq::dsanwx.origin() == "DarkSUSY") || (BEreq::dsanwx.origin() == "DarkSUSY_MSSM"))
       {
         result=BEreq::dsanwx.pointer();
       }
+      else DarkBit_error().raise(LOCAL_INFO, "Wrong DarkSUSY backend initialized?");
     } // function RD_eff_annrate_DS
 
 
@@ -656,6 +656,7 @@ namespace Gambit
       // always check that invariant rate is OK at least at one point
       double peff = mwimp/100;
       double weff = (*Dep::RD_eff_annrate)(peff);
+
       if (Utils::isnan(weff))
             DarkBit_error().raise(LOCAL_INFO, "Weff is NaN in RD_oh2_DS_general. This means that the function\n"
                                             "pointed to by RD_eff_annrate returned NaN for the invariant rate\n"
