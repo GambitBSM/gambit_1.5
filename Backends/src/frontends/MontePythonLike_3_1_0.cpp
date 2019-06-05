@@ -29,11 +29,24 @@ BE_INI_FUNCTION
 	// py::dict kwargs = py::dict("number"_a=1234, "say"_a="hello", "to"_a=some_instance);
 	std::cout << "   (MontePythonLike init): begining ini function "<< std::endl;
 
+	/*
 	// These things all need to be passed from CosmoBit
 	pybind11::str root = "/home/janina/code/gambit_devel/Backends/installed/";
 	pybind11::dict path_dict = pybind11::dict("MontePython"_a="/home/janina/code/gambit_devel/Backends/installed/montepythonlike/3.1.0/montepython/", "data"_a="/home/janina/code/gambit_devel/Backends/installed/montepythonlike/3.1.0/data/",
 		"cosmo"_a="/home/janina/code/gambit_devel/Backends/installed/exoclass/2.7.0/", "root"_a=root);
 	//pybind11::isinstance<py::list>(obj)
+	*/
+
+	// S.B. made some fixes using some of the variables in the Backends
+	// namespace so it works on my machine!
+	// e.g. in this scope,
+	// backendDir = $GAMBIT/Backends/installed/montepythonlike/3.1.0
+
+	pybind11::dict path_dict = pybind11::dict("MontePython"_a=backendDir+"/montepython/",
+											  "data"_a=backendDir+"/data/",
+											  "cosmo"_a=backendDir+"/../../exoclass/2.7.0/", 
+											  "root"_a=backendDir+"/../../");
+	
 	auto experiments = pybind11::make_tuple("bao");
 
 	pybind11::dict cosmo_arguments;
@@ -43,15 +56,20 @@ BE_INI_FUNCTION
 	pybind11::str command_line = "" ;
 	
 
-	pybind11::str path_dat = "/home/janina/code/montepython_public/montepython/likelihoods/bao/bao.data";
+	//pybind11::str path_dat = "/home/janina/code/montepython_public/montepython/likelihoods/bao/bao.data";
+	pybind11::str path_dat = backendDir+"/montepython/likelihoods/bao/bao.data";
 	
 	std::cout << "   (MontePythonLike init): before Likelihood object "<< std::endl;
 
-	pybind11::object data = MontePythonLike.attr("Data")("",path_dat,experiments,mcmc_parameters);
+	// S.B. TODO: somehow need to add a dependency on ExoClass/Class/etc, if the 
+	// directory needs to live in the path_dict object.
+
+	// Import Data object from MontePython
+	pybind11::object data = MontePythonLike.attr("Data")("",path_dict,experiments,mcmc_parameters);
 	
 	//pybind11::object bao = py::eval("my_variable + 10", scope).cast<int>();
 
-	pybind11::object Likelihood = MontePythonLike.attr("Likelihood")(path_dict, data, command_line);
+	pybind11::object Likelihood = MontePythonLike.attr("Likelihood")(path_dat, data, command_line);
 
 	//std::cout<< "   (MontePythonLike init): before loglkl "<< std::endl;
 	//pybind11::dbl chi;

@@ -15,7 +15,7 @@
 ///  *********************************************
 
 #define BACKENDNAME MontePythonLike
-#define BACKENDLANG Python
+#define BACKENDLANG Python2
 #define VERSION 3.1.0
 #define SAFE_VERSION 3_1_0
 
