@@ -886,21 +886,17 @@ BE_NAMESPACE
   /// Function DD_couplings returns direct detection couplings gps,gns,gpa,gna
   /// (proton/neutron scalar/axial four-couplings)
   /// Provided here because the signature of the corresponding DarkSUSY 
-  double* DD_couplings()
+  std::vector<double> DD_couplings()
   {
     double gps,gns,gpa,gna;
     dsddgpgn(gps,gns,gpa,gna);
-    cout << "gps " << gps << endl;
-    double couplings[4];
-    couplings[0]=gps;
-    couplings[1]=gns;
-    couplings[2]=gpa;
-    couplings[3]=gna;
-    cout << "couplings[0] " << couplings[0] << endl;
-    double* result = couplings;
-    return result;
+    std::vector<double> couplings;
+    couplings.push_back(gps);
+    couplings.push_back(gns);
+    couplings.push_back(gpa);
+    couplings.push_back(gna);
+    return couplings;
   }
-
 
   /// Returns the vector of neutral Higgs decay channels in DarkSUSY
   std::vector< std::vector<str> > DS_neutral_h_decay_channels()
