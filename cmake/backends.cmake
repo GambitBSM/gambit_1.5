@@ -475,6 +475,7 @@ set(name "montepythonlike")
 set(ver "3.1.0")
 set(dl "null")
 set(dir "${PROJECT_SOURCE_DIR}/Backends/installed/${name}/${ver}")
+set(patchdir "${PROJECT_SOURCE_DIR}/Backends/patches/${name}/${ver}/")
 #set(lib "libmontepythonlike")
 check_ditch_status(${name} ${ver})
 if(NOT ditched_${name}_${ver})
@@ -483,7 +484,8 @@ if(NOT ditched_${name}_${ver})
     GIT_TAG 3.1.0
     SOURCE_DIR ${dir}
     BUILD_IN_SOURCE 1
-    CONFIGURE_COMMAND ""
+    /Backends/patches/montepythonlike/3.1.0
+    CONFIGURE_COMMAND ${CMAKE_COMMAND} -E copy ${patchdir}/MontePythonLike.py ${dir}/MontePythonLike.py
     BUILD_COMMAND ""
     INSTALL_COMMAND ""
   )
