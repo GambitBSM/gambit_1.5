@@ -648,7 +648,7 @@ START_MODULE
 
     #define FUNCTION DD_couplings_DarkSUSY
       START_FUNCTION(DM_nucleon_couplings)
-      BACKEND_REQ(get_DD_couplings, (), double*, ())
+      BACKEND_REQ(get_DD_couplings, (), std::vector<double>, ())
       BACKEND_REQ(mspctm, (), DS_MSPCTM)
       BACKEND_REQ(ddcom, (), DS_DDCOM)
       ALLOW_JOINT_MODEL(nuclear_params_fnq,MSSM63atQ)
@@ -656,7 +656,7 @@ START_MODULE
 
     #define FUNCTION DD_couplings_MSSM_DS6
       START_FUNCTION(DM_nucleon_couplings)
-      BACKEND_REQ(get_DD_couplings, (), double*, ())
+      BACKEND_REQ(get_DD_couplings, (), std::vector<double>, ())
       BACKEND_REQ(ddcomlegacy, (), DS_DDCOMLEGACY)
       BACKEND_REQ(ddmssmcom, (), DS_DDMSSMCOM)
       ALLOW_JOINT_MODEL(nuclear_params_fnq,MSSM63atQ)
