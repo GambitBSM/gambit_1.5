@@ -16,17 +16,17 @@ Parameters:
   StandardModel_SLHA2: !import include/StandardModel_SLHA2_scan.yaml
 
   # Nuclear matrix parameters.
-  nuclear_params_sigmas_sigmal:
-    sigmas:
-      range:  [19, 67]
-    sigmal:
-      range:  [31, 85]
-    deltau:
-      fixed_value:  0.842
-    deltad:
-      fixed_value: -0.427
-    deltas:
-      fixed_value: -0.085
+#  nuclear_params_sigmas_sigmal:
+#    sigmas:
+#      range:  [19, 67]
+#    sigmal:
+#      range:  [31, 85]
+#    deltau:
+#      fixed_value:  0.842
+#    deltad:
+#      fixed_value: -0.427
+#    deltas:
+#      fixed_value: -0.085
 
   # SUSY parameters.
   CMSSM:
@@ -46,17 +46,17 @@ Parameters:
     SignMu: 1
 
   # Dark matter halo parameters.
-  Halo_gNFW_rho0:
-    rho0:
-      range: [.2, .8]
-    v0: 235.0
-    vesc: 550.0
-    vrot: 235.0
-    rs: 20.0
-    r_sun: 8.5
-    alpha: 1
-    beta: 3
-    gamma: 1
+#  Halo_gNFW_rho0:
+#    rho0:
+#      range: [.2, .8]
+#    v0: 235.0
+#    vesc: 550.0
+#    vrot: 235.0
+#    rs: 20.0
+#    r_sun: 8.5
+#    alpha: 1
+#    beta: 3
+#    gamma: 1
 
 
 Priors:
@@ -179,52 +179,52 @@ ObsLikes:
     #   purpose:     LogLike
 
     # Dark matter likelihoods
-    - capability: lnL_oh2
-      purpose:    LogLike
+#    - capability: lnL_oh2
+#      purpose:    LogLike
 
     - capability: lnL_FermiLATdwarfs
       purpose:    LogLike
 
-    - capability: XENON100_2012_LogLikelihood
-      purpose:    LogLike
+#    - capability: XENON100_2012_LogLikelihood
+#      purpose:    LogLike
 
-    - capability: XENON1T_2018_LogLikelihood
-      purpose:    LogLike
+#    - capability: XENON1T_2018_LogLikelihood
+#      purpose:    LogLike
 
-    - capability: LUX_2016_LogLikelihood
-      purpose:    LogLike
+#    - capability: LUX_2016_LogLikelihood
+#      purpose:    LogLike
 
-    - capability: PandaX_2016_LogLikelihood
-      purpose:    LogLike
+#    - capability: PandaX_2016_LogLikelihood
+#      purpose:    LogLike
 
-    - capability: PandaX_2017_LogLikelihood
-      purpose:    LogLike
+#    - capability: PandaX_2017_LogLikelihood
+#      purpose:    LogLike
 
-    - capability: PICO_2L_LogLikelihood
-      purpose:    LogLike
+#    - capability: PICO_2L_LogLikelihood
+#      purpose:    LogLike
 
-    - capability: PICO_60_LogLikelihood
-      purpose:    LogLike
+#    - capability: PICO_60_LogLikelihood
+#      purpose:    LogLike
 
-    - capability: PICO_60_2017_LogLikelihood
-      purpose:    LogLike
+#    - capability: PICO_60_2017_LogLikelihood
+#      purpose:    LogLike
 
-    - capability: SuperCDMS_2014_LogLikelihood
-      purpose:    LogLike
+#    - capability: SuperCDMS_2014_LogLikelihood
+#      purpose:    LogLike
 
-    - capability: SIMPLE_2014_LogLikelihood
-      purpose:    LogLike
+#    - capability: SIMPLE_2014_LogLikelihood
+#      purpose:    LogLike
 
-    - capability: IC79_loglike
-      purpose:    LogLike
+#    - capability: IC79_loglike
+#      purpose:    LogLike
 
     # SI nuclear nuisance parameter likelihood
-    - capability: lnL_SI_nuclear_parameters
-      purpose:    LogLike
+#    - capability: lnL_SI_nuclear_parameters
+#      purpose:    LogLike
 
     # DM Local Halo likelihoods
-    - capability: lnL_rho0
-      purpose: LogLike
+#    - capability: lnL_rho0
+#      purpose: LogLike
 
     #- capability: lnL_vrot
     #  purpose: LogLike
@@ -261,26 +261,26 @@ ObsLikes:
     # - purpose:    Observable
     #   capability: LHCEventLoopInfo
 
-    - purpose:    Observable
-      capability: RD_oh2
+#    - purpose:    Observable
+#      capability: RD_oh2
 
     - purpose:    Observable
       capability: mwimp
 
-    - purpose:    Observable
-      capability: sigmav
+#    - purpose:    Observable
+#      capability: sigmav
 
-    - purpose:    Observable
-      capability: sigma_SI_p
+#    - purpose:    Observable
+#      capability: sigma_SI_p
 
-    - purpose:    Observable
-      capability: sigma_SI_n
+#    - purpose:    Observable
+#      capability: sigma_SI_n
 
-    - purpose:    Observable
-      capability: sigma_SD_p
+#    - purpose:    Observable
+#      capability: sigma_SD_p
 
-    - purpose:    Observable
-      capability: sigma_SD_n
+#    - purpose:    Observable
+#      capability: sigma_SD_n
 
     # - purpose:    Observable
     #   capability: bsgamma
