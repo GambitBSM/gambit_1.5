@@ -484,8 +484,9 @@ if(NOT ditched_${name}_${ver})
     GIT_TAG 3.1.0
     SOURCE_DIR ${dir}
     BUILD_IN_SOURCE 1
-    /Backends/patches/montepythonlike/3.1.0
     CONFIGURE_COMMAND ${CMAKE_COMMAND} -E copy ${patchdir}/MontePythonLike.py ${dir}/MontePythonLike.py
+    # S.B. we should remove this in the future. Ok for now, while we do dev.
+    COMMAND ${CMAKE_COMMAND} -E copy ${dir}/montepython/io_mp.py ${dir}/io_mp.py
     BUILD_COMMAND ""
     INSTALL_COMMAND ""
   )
