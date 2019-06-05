@@ -153,7 +153,7 @@ START_MODULE
     #undef FUNCTION
     #define FUNCTION RD_annrate_DS6prep_MSSM_func
       START_FUNCTION(int)
-      DEPENDENCY(RD_spectrum, DarkBit::RD_spectrum_type)
+      DEPENDENCY(RD_spectrum_ordered, DarkBit::RD_spectrum_type)
       BACKEND_REQ(dsancoann, (), DS_DSANCOANN)
       BACKEND_REQ(DS6particle_code, (), int, (const str&))
     #undef FUNCTION

@@ -97,17 +97,18 @@ namespace Gambit
           RD_coannihilating_particle(PDGwimp, 2, mWIMP));
 
       #ifdef DARKBIT_DEBUG
-        std::cout << "WIMP mass : "<< std::abs(spec.get(Par::Pole_Mass,"~chi0_1"))
+        std::cout << "WIMP mass : "<< mWIMP
             << std::endl;
       #endif
 
       // add all sparticles that are not too heavy
       double msp;
-      #define addCoannParticle(PDG0, DOF)                            \
+      #define addCoannParticle(PDG0, DOF)                       \
         msp = std::abs(spec.get(Par::Pole_Mass,Models::ParticleDB().long_name(PDG0,ContInt)));    \
-        if (msp/mWIMP< CoannMaxMass)                                      \
+        if (msp/mWIMP< CoannMaxMass){                                      \
            result.coannihilatingParticles.push_back(                      \
-              RD_coannihilating_particle(PDG0, DOF, msp));
+              RD_coannihilating_particle(PDG0, DOF, msp)); \
+              }
       if(CoannCharginosNeutralinos) // include  neutralino & chargino coannihilation
       {
         addCoannParticle(1000023, 2)        // "~chi0_2"
@@ -152,17 +153,17 @@ namespace Gambit
         resSMmax -= 1;
         resmax -= 1;
       double mres,Gammares;  
-      for (int i=0; i<resmax; i++){
-          mres = std::abs(spec.get(Par::Pole_Mass,reslist[i]));
-          Gammares = myDecays->at(reslist[i]).width_in_GeV;
-          result.resonances.push_back( TH_Resonance(mres,Gammares));
-      };
       for (int i=0; i<resSMmax; i++){
           mres = std::abs(SMspec.get(Par::Pole_Mass,SMreslist[i]));
           Gammares = myDecays->at(SMreslist[i]).width_in_GeV;
-          result.resonances.push_back( TH_Resonance(mres,Gammares));
+          result.resonances.push_back(TH_Resonance(mres,Gammares));
       };
-
+      for (int i=0; i<resmax; i++){
+          mres = std::abs(spec.get(Par::Pole_Mass,reslist[i]));
+          Gammares = myDecays->at(reslist[i]).width_in_GeV;
+          result.resonances.push_back(TH_Resonance(mres,Gammares));
+      };
+ 
 
       // determine thresholds (coannihilation thresholds will be added later); 
       //   lowest threshold = 2*WIMP rest mass  (unlike DS convention!)
@@ -172,8 +173,9 @@ namespace Gambit
       double mthr;
       for (int i=0; i<thrmax; i++){
          mthr = std::abs(SMspec.get(Par::Pole_Mass,thrlist[i]));
-         if (mthr > mWIMP)
+         if (mthr > mWIMP){
             result.threshold_energy.push_back(2*mthr);
+         }   
       }
 
 
@@ -441,13 +443,13 @@ namespace Gambit
           }
         }
       #ifdef DARKBIT_RD_DEBUG
-        std::cout << "co : "<< myrdmgev.kcoann(i) << " " <<
+        std::cout << "DSprep_MSSM - co : "<< myrdmgev.kcoann(i) << " " <<
             myrdmgev.mco(i) << " " << myrdmgev.mdof(i)
             << std::endl;
       #endif
       }
       #ifdef DARKBIT_RD_DEBUG
-        std::cout << "co : "<< myrdmgev.kcoann(myrdmgev.nco) << " " <<
+        std::cout << "DSprep_MSSM - co : "<< myrdmgev.kcoann(myrdmgev.nco) << " " <<
             myrdmgev.mco(myrdmgev.nco) << " " << myrdmgev.mdof(myrdmgev.nco)
             << std::endl;
       #endif
@@ -466,8 +468,8 @@ namespace Gambit
     {
       using namespace Pipes::RD_annrate_DS6prep_MSSM_func;
 
-      // Read out coannihilating particles from RDspectrum.
-      RD_spectrum_type specres = *Dep::RD_spectrum;
+      // Read out coannihilating particles from RDspectrum_ordered.
+      RD_spectrum_type specres = *Dep::RD_spectrum_ordered;
 
       if (specres.particle_index_type != "DarkSUSY" && specres.particle_index_type != "PDG")
       {
@@ -490,34 +492,31 @@ namespace Gambit
         if (specres.particle_index_type == "PDG"){
            mydsancoann.kco(i) = BEreq::DS6particle_code(Models::ParticleDB().long_name(partID,ContInt));
         };
-      }
-
-      double tmp; int itmp;
-      for (int i=1; i<=mydsancoann.nco-1; i++) {
-        for (int j=i+1; j<=mydsancoann.nco; j++) {
-          if (mydsancoann.mco(j)<mydsancoann.mco(i)) {
-            tmp=mydsancoann.mco(i);
-            mydsancoann.mco(i)=mydsancoann.mco(j);
-            mydsancoann.mco(j)=tmp;
-            itmp=mydsancoann.mdof(i);
-            mydsancoann.mdof(i)=mydsancoann.mdof(j);
-            mydsancoann.mdof(j)=itmp;
-            itmp=mydsancoann.kco(i);
-            mydsancoann.kco(i)=mydsancoann.kco(j);
-            mydsancoann.kco(j)=itmp;
-          }
-        }
       #ifdef DARKBIT_RD_DEBUG
-        std::cout << "co : "<< mydsancoann.kco(i) << " " <<
+        std::cout << "DS6prep_MSSM - co : "<< partID << " " << mydsancoann.kco(i) << " " <<
             mydsancoann.mco(i) << " " << mydsancoann.mdof(i)
             << std::endl;
       #endif
       }
-      #ifdef DARKBIT_RD_DEBUG
-        std::cout << "co : "<< mydsancoann.kco(mydsancoann.nco) << " " <<
-            mydsancoann.mco(mydsancoann.nco) << " " << mydsancoann.mdof(mydsancoann.nco)
-            << std::endl;
-      #endif
+
+
+      //TB not needed: RD_eff_annrate_DS6prep_MSSM_func depends on RD_spectrum*_ordered*
+      //double tmp; int itmp;
+      //for (int i=1; i<=mydsancoann.nco-1; i++) {
+      //  for (int j=i+1; j<=mydsancoann.nco; j++) {
+      //    if (mydsancoann.mco(j)<mydsancoann.mco(i)) {
+      //      tmp=mydsancoann.mco(i);
+      //      mydsancoann.mco(i)=mydsancoann.mco(j);
+      //      mydsancoann.mco(j)=tmp;
+      //      itmp=mydsancoann.mdof(i);
+      //      mydsancoann.mdof(i)=mydsancoann.mdof(j);
+      //     mydsancoann.mdof(j)=itmp;
+      //      itmp=mydsancoann.kco(i);
+      //      mydsancoann.kco(i)=mydsancoann.kco(j);
+      //      mydsancoann.kco(j)=itmp;
+      //    }
+      //  }
+      // }
 
       *BEreq::dsancoann = mydsancoann;
 
@@ -527,7 +526,7 @@ namespace Gambit
 
 
     /*! \brief Get Weff directly from initialized DarkSUSY.
-     * Note that this function does not correct Weff for
+     * Note that this function does not (and should not) correct Weff for
      * non-self-conjugate dark matter.
     */
     void RD_eff_annrate_DS(double(*&result)(double&))
@@ -586,7 +585,7 @@ namespace Gambit
      *         Boltzmann solver
      *
      *  Requires:
-     *  - RD_thresholds_resonances
+     *  - RD_thresholds_resonances from RD_spectrum_ordered
      *  - RD_eff_annrate (Weff)
      */
     void RD_oh2_DS_general(double &result)
@@ -602,10 +601,6 @@ namespace Gambit
       }
       double mwimp=myRDspec.coannihilatingParticles[0].mass;
 
-      #ifdef DARKBIT_RD_DEBUG
-        bool tbtest=false;
-      #endif
-
       /// Option timeout<double>: Maximum core time to allow for relic density
       /// calculation, in seconds (default: 30s)
       BEreq::rdtime->rdt_max = runOptions->getValueOrDef<double>(30, "timeout");
@@ -614,43 +609,62 @@ namespace Gambit
       
       //We start by setting some general common block settings
       BEreq::dsrdcom();
-      DS_RDPARS myrdpars;
+      DS_RDPARS *myrdpars = BEreq::rdpars.pointer();
+//      DS_RDDOF *myrddof = BEreq::rddof.pointer();
+//      int k; myrddof->khi=myrddof->nf; myrddof->klo=1;
+
+
       /// Option fast<int>: Numerical performance of Boltzmann solver in DS
       /// (default: 1) [NB: accurate is fast = 0 !]
       int fast = runOptions->getValueOrDef<int>(1, "fast");
+
       switch (fast)
       {
         case 0:
-          myrdpars.cosmin=0.996195;myrdpars.waccd=0.005;myrdpars.dpminr=1.0e-4;
-          myrdpars.dpthr=5.0e-4;myrdpars.wdiffr=0.05;myrdpars.wdifft=0.02;
+          myrdpars->cosmin=0.996195;myrdpars->waccd=0.005;myrdpars->dpminr=1.0e-4;
+          myrdpars->dpthr=5.0e-4;myrdpars->wdiffr=0.05;myrdpars->wdifft=0.02;
           break;
         case 1:
-          myrdpars.cosmin=0.996195;myrdpars.waccd=0.05;myrdpars.dpminr=5.0e-4;
-          myrdpars.dpthr=2.5e-3;myrdpars.wdiffr=0.5;myrdpars.wdifft=0.1;
+          myrdpars->cosmin=0.996195;myrdpars->waccd=0.05;myrdpars->dpminr=5.0e-4;
+          myrdpars->dpthr=2.5e-3;myrdpars->wdiffr=0.5;myrdpars->wdifft=0.1;
           break;
         default:
           DarkBit_error().raise(LOCAL_INFO, "Invalid fast flag (should be 0 or 1). Fast > 1 not yet supported in DarkBit::RD_oh2_DS_general.  Please add relevant settings to this routine.");
       }
-      *BEreq::rdpars = myrdpars;
+//      *BEreq::rdpars = myrdpars;
 
 
       // now transfer information from myRDspec to DS common blocks
-      int tnco=sizeof(myRDspec.coannihilatingParticles) / sizeof(myRDspec.coannihilatingParticles[0]);
-      int tnrs=sizeof(myRDspec.resonances) / sizeof(myRDspec.resonances[0]);
-      int tnthr=sizeof(myRDspec.threshold_energy) / sizeof(myRDspec.threshold_energy[0]);
+      int tnco=myRDspec.coannihilatingParticles.size();
+      int tnrs=myRDspec.resonances.size();
+      int tnthr=myRDspec.threshold_energy.size();
       double tmco[1000], tdof[1000], trm[1000], trw[1000], ttm[1000];
       for (std::size_t i=0; i<((unsigned int)tnco); i++){
         tmco[i] = myRDspec.coannihilatingParticles[i].mass;
         tdof[i] = myRDspec.coannihilatingParticles[i].degreesOfFreedom;
+      #ifdef DARKBIT_RD_DEBUG
+        std::cout << "RD_oh2_DS_general - co : "<< tmco[i]  << " " << tdof[i] << std::endl;
+      #endif
       }
       for (std::size_t i=0; i<((unsigned int)tnrs); i++){
         trm[i] = myRDspec.resonances[i].energy;
         trw[i] = myRDspec.resonances[i].width;
+      #ifdef DARKBIT_RD_DEBUG
+        std::cout << "RD_oh2_DS_general - res : "<< trm[i]  << " " << trw[i] << std::endl;
+      #endif
       }
       //DS does not count 2* WIMP rest mass as thr, hence we start at i=1
-      for (std::size_t i=1; i<((unsigned int)tnthr); i++){
+      tnthr -=tnthr;
+      for (std::size_t i=1; i<((unsigned int)tnthr+1); i++){
         ttm[i] = myRDspec.threshold_energy[i];
+      #ifdef DARKBIT_RD_DEBUG
+        std::cout << "RD_oh2_DS_general - thr : "<< ttm[i] << std::endl;
+      #endif
       }
+      #ifdef DARKBIT_RD_DEBUG
+        std::cout << "RD_oh2_DS_general - tnco,tnrs,tnthr : "<< tnco << " " << tnrs << " " 
+                  << tnthr << std::endl;
+      #endif
       BEreq::dsrdstart(tnco,tmco,tdof,tnrs,trm,trw,tnthr,ttm);
 
       // always check that invariant rate is OK at least at one point

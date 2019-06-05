@@ -22,7 +22,7 @@
 
 #include "gambit/Backends/frontend_macros.hpp"
 /// TODO: include HERE a standard version for DS6, and make the
-///       following minimal versions only
+///       following a minimal version only (specific for the 	MSSM)
 #include "gambit/Backends/frontends/DarkSUSY_MSSM_6_1_1.hpp"
 #include "gambit/Utils/file_lock.hpp"
 #include "gambit/Utils/mpiwrapper.hpp"
@@ -172,10 +172,7 @@ BE_INI_FUNCTION
   }
 
   else if (ModelInUse("MSSM63atQ") || ModelInUse("CMSSM"))
-  {
-   std::cout << "DEBUG TB : ModelInUse(MSSM63atQ) " << std::endl;
-
-  
+  {  
     SLHAstruct mySLHA;
     /// Option use_dsSLHAread<bool>: Use DS internal SLHA reader to initialize backend (false)
     bool use_dsSLHAread = runOptions->getValueOrDef<bool>(false, "use_dsSLHAread");
@@ -250,13 +247,11 @@ BE_INI_FUNCTION
     // Do pure diskless SLHA initialisation, including (s)particle widths from GAMBIT.
     else
     {
-       std::cout << "DEBUG TB : starting diskless DS ini " << std::endl;
           if (init_diskless(mySLHA, *Dep::decay_rates) == 0 )
           {          
             logger() << LogTags::debug << "Using diskless SLHA interface to DarkSUSY." << EOM;
             int unphys,warning; 
             dsmodelsetup(unphys,warning);
-       std::cout << "DEBUG TB : DS ini succeeded with unphys,warning = " << unphys<<", "<<warning<<std::endl;
             
     if (unphys < 0) {
       backend_warning().raise(LOCAL_INFO,
@@ -280,8 +275,6 @@ BE_INI_FUNCTION
           }
         }
         
-       std::cout << "DEBUG TB : End of backend ini " << std::endl;
-    
       }
       if (!result) {
         backend_warning().raise(LOCAL_INFO,
