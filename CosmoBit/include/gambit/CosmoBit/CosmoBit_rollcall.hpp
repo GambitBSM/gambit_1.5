@@ -572,6 +572,15 @@ START_MODULE
      #undef FUNCTION
   #undef CAPABILITY
 
+    #define CAPABILITY MontePythonLike
+     START_CAPABILITY
+     #define FUNCTION init_MontePythonLike
+      START_FUNCTION(double)
+      ALLOW_MODELS(LCDM)
+      BACKEND_REQ(test_MontePythonLike,(libmontepythonlike),void,())
+     #undef FUNCTION
+  #undef CAPABILITY
+
 #undef MODULE
 
 #endif /* defined __CosmoBit_rollcall_hpp__ */

@@ -3161,6 +3161,19 @@ namespace Gambit
       result = -0.5*chi2;
     }
 
+
+    double init_MontePythonLike(double &result)
+    {
+      using namespace Pipes::init_MontePythonLike;
+
+      std::cout << "(CosmoBit): init_MontePythonLike start"<< std::endl;
+
+      BEreq::test_MontePythonLike;
+
+      std::cout << "(CosmoBit): init_MontePythonLike end"<< std::endl;
+    }
+
+
   }
 }
 
