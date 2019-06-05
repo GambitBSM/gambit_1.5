@@ -884,17 +884,20 @@ BE_NAMESPACE
   }
 
   /// Function DD_couplings returns direct detection couplings gps,gns,gpa,gna
-  /// (proton/neutron scalar/axial four-couplinngs)
+  /// (proton/neutron scalar/axial four-couplings)
   /// Provided here because the signature of the corresponding DarkSUSY 
   double* DD_couplings()
   {
     double gps,gns,gpa,gna;
     dsddgpgn(gps,gns,gpa,gna);
-    double *result=0;
-    result[0]=gps;
-    result[1]=gns;
-    result[2]=gpa;
-    result[3]=gna;
+    cout << "gps " << gps << endl;
+    double couplings[4];
+    couplings[0]=gps;
+    couplings[1]=gns;
+    couplings[2]=gpa;
+    couplings[3]=gna;
+    cout << "couplings[0] " << couplings[0] << endl;
+    double* result = couplings;
     return result;
   }
 
