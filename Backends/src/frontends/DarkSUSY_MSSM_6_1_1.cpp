@@ -504,11 +504,12 @@ BE_NAMESPACE
       err << "Error from DarkSUSY::dsddgpgn function when calling DD_couplings().  ierr = " << ierr;
       piped_errors.request(LOCAL_INFO, err.str());
     } 
-    double *result=0;
-    result[0]=gg.gg(1,1).re; // gps
-    result[1]=gg.gg(1,2).re; // gns
-    result[2]=gg.gg(4,1).re; // gpa
-    result[3]=gg.gg(4,2).re; // gna
+    double couplings[4];
+    couplings[0]=gg.gg(1,1).re; // gps
+    couplings[1]=gg.gg(1,2).re; // gns
+    couplings[2]=gg.gg(4,1).re; // gpa
+    couplings[3]=gg.gg(4,2).re; // gna
+    double* result = couplings;
     return result;
   }
 
