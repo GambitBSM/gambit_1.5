@@ -261,8 +261,8 @@ ObsLikes:
     # - purpose:    Observable
     #   capability: LHCEventLoopInfo
 
-#    - purpose:    Observable
-#      capability: RD_oh2
+    - purpose:    Observable
+      capability: RD_oh2
 
     - purpose:    Observable
       capability: mwimp
@@ -349,6 +349,10 @@ Rules:
       Beps: 1e-5
   - capability: RD_eff_annrate_DSprep_MSSM
     function: RD_annrate_DS6prep_MSSM_func
+
+# TB DISCUSS !!!!
+#  - capability: RD_eff_annrate
+#    function: RD_annrate_DS
 
   - capability : RD_spectrum
     function: RD_spectrum_MSSM
