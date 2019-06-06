@@ -597,7 +597,7 @@ namespace Gambit {
         int flag = 0;      // some flag
         int yieldpdg = 22;  // gamma ray yield (pdg code)
 	int diff=1;         // differential yields (=1)
-	char hel='0';       // helicity
+        char*hel =  (char *)"0"; //helicity
         daFunk::Funk dNdE;
         daFunk::Funk dNdE_1;
         daFunk::Funk dNdE_2;

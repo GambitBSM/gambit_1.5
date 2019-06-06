@@ -421,7 +421,7 @@ BE_NAMESPACE
     int iistat = 0;
     int t1=3; // nu mu
     int t2=4; // nu_mu-bar
-    const char object[3] = "su";
+    const char*object =  (char *)"su";
 
     double tmp=0;
     int twoj=0.0;
@@ -441,17 +441,17 @@ BE_NAMESPACE
 	  twol=0;
 	}
 	if ((ptype == 1) or (ptype == 3)) { // particles
-	  tmp=dsseyield_sim_ls(anmwimp,pow(10.0,log10E),10.0,DSanpdg1[i],DSanpdg2[i],twoj,cp,twos,twol,object[0],3,t1,iistat);
+	  tmp=dsseyield_sim_ls(anmwimp,pow(10.0,log10E),10.0,DSanpdg1[i],DSanpdg2[i],twoj,cp,twos,twol,object,3,t1,iistat);
 	    if ((iistat bitand 8) == 8) { // not simulated channel
-	      tmp=dsseyield_ch(anmwimp,pow(10.0,log10E),10.0,DSanpdg1[i],DSanpdg2[i],object[0],3,t1,iistat);
+	      tmp=dsseyield_ch(anmwimp,pow(10.0,log10E),10.0,DSanpdg1[i],DSanpdg2[i],object,3,t1,iistat);
 	    }
 	  result += 1e-30 * DSanbr[i] * tmp;
 	  istat=(istat bitor iistat);
 	}
 	if ((ptype == 2) or (ptype == 3)) { // anti-particles
-	  tmp=dsseyield_sim_ls(anmwimp,pow(10.0,log10E),10.0,DSanpdg1[i],DSanpdg2[i],twoj,cp,twos,twol,object[0],3,t2,iistat);
+	  tmp=dsseyield_sim_ls(anmwimp,pow(10.0,log10E),10.0,DSanpdg1[i],DSanpdg2[i],twoj,cp,twos,twol,object,3,t2,iistat);
 	    if ((iistat bitand 8) == 8) { // not simulated channel
-	      tmp=dsseyield_ch(anmwimp,pow(10.0,log10E),10.0,DSanpdg1[i],DSanpdg2[i],object[0],3,t2,iistat);
+	      tmp=dsseyield_ch(anmwimp,pow(10.0,log10E),10.0,DSanpdg1[i],DSanpdg2[i],object,3,t2,iistat);
 	    }
 	  result += 1e-30 * DSanbr[i] * tmp;
 	  istat=(istat bitor iistat);

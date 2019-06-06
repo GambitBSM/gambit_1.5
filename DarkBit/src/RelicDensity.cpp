@@ -680,7 +680,18 @@ namespace Gambit
       if ( Utils::isnan(oh2) ) DarkBit_error().raise(LOCAL_INFO, "DarkSUSY returned NaN for relic density!");
 
       // Check whether DarkSUSY threw some other error
-      if (ierr != 0) DarkBit_error().raise(LOCAL_INFO, "DarkSUSY Boltzmann solver failed.");
+      
+      
+      std::cout << std::endl << "dsrdens : " << oh2 << ", " << xf << ", " <<fast<< ", " <<ierr<< ", " <<iwar<< std::endl;
+      
+      // Check whether DarkSUSY threw an error
+      if (ierr == 1024)
+      {
+        invalid_point().raise("DarkSUSY invariant rate tabulation timed out.");
+      }  
+      else if(ierr != 0){
+        DarkBit_error().raise(LOCAL_INFO, "DarkSUSY Boltzmann solver failed.");
+      }
 
       // If the DM particles are not their own antiparticles we need to add the relic
       // density of anti-DM particles as well

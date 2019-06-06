@@ -139,7 +139,7 @@ namespace Gambit
       logger() << LogTags::debug << " gna = " << result.gna << EOM;
     }
 
-    /*! \brief Get direct detection couplings from DarkSUSY 6 initialyed with MSSM module.
+    /*! \brief Get direct detection couplings from DarkSUSY 6 initialized with MSSM module.
     */
     void DD_couplings_MSSM_DS6(DM_nucleon_couplings &result)
     {

@@ -63,8 +63,8 @@ BE_CONV_FUNCTION(neutrino_yield, double, (const double&, const int&, void*&), "n
 BE_CONV_FUNCTION(dsgenericwimp_nusetup, void, (const double(&)[29], const double(&)[29][3], const double(&)[15], const double(&)[3], const double&, const double&), "nuyield_setup")
 BE_CONV_FUNCTION(init_diskless, int, (const SLHAstruct&, const DecayTable&), "initFromSLHAeaAndDecayTable")
 // Functions used by convenience functions
-BE_FUNCTION(dsseyield_sim_ls, double, (const double&, const double&, const double&, const int&, const int&, const int&, const int&, const int&, const int&, const char&, const int&, const int&, const int&), "dsseyield_sim_ls_", "raw_nuyield_sim")
-BE_FUNCTION(dsseyield_ch, double, (const double&, const double&, const double&, const int&, const int&, const char&, const int&, const int&, const int&), "dsseyield_ch_", "raw_nuyield_casc")
+BE_FUNCTION(dsseyield_sim_ls, double, (const double&, const double&, const double&, const int&, const int&, const int&, const int&, const int&, const int&, const char*, const int&, const int&, const int&), "dsseyield_sim_ls_", "raw_nuyield_sim")
+BE_FUNCTION(dsseyield_ch, double, (const double&, const double&, const double&, const int&, const int&, const char*, const int&, const int&, const int&), "dsseyield_ch_", "raw_nuyield_casc")
 BE_FUNCTION(dsddgpgn, void, (DS_gg&, int&), "dsddgpgn_", "dsddgpgn")
 
 
@@ -87,7 +87,7 @@ BE_FUNCTION(dsrdens, void, (double(*)(double&),double&,double&,int&,int&,int&), 
 
 
 // Functions used in GamYields.cpp
-BE_FUNCTION(dsanyield_sim, double, (double&,double&,int&,char&,int&,int&,int&), "dsanyield_sim_", "dsanyield_sim")
+BE_FUNCTION(dsanyield_sim, double, (double&,double&,int&,char*,int&,int&,int&), "dsanyield_sim_", "dsanyield_sim")
 
 // Functions used in SunNeutrinos.cpp
 BE_FUNCTION(dssenu_capsuntab, double, (const double&, const double&, const double&, const double&), "dssenu_capsuntab_", "cap_Sun_v0q0_isoscalar_DS6")
