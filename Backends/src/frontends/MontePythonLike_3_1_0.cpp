@@ -81,7 +81,6 @@ BE_INI_FUNCTION
 	//pybind11::dbl chi;
 	//std::cout << BAO_like.attr("loglkl")("","") << std::endl;
 
-	//std::cout << "   (MontePythonLike init): chi is " << chi << std::endl;
 }
 END_BE_INI_FUNCTION
 
@@ -97,6 +96,8 @@ BE_NAMESPACE
   void test_MontePythonLike()
   {
   	//pybind11::str like_name = ""
+	//auto chi = Likelihood.attr("loglkl")("","");
+	//LikeObj.attr("loglkl")("","");
 	std::cout << "   		(MontePythonLike test) "  << std::endl;
   }
 
