@@ -4,7 +4,7 @@
          # following functions are only to output the desired numbers
          return
  
-+    def compute_fudged_cosmo(self,&ba, &th, &pt, &tr, &pm, &sp, &nl, &le):
++    cdef compute_fudged_cosmo(self, background ba, thermo th, perturbs pt, transfers tr, primordial pm, spectra sp, nonlinear nl, lensing le):
 +
 +        # self.ncp will contain the list of computed modules (under the form of
 +        # a set, instead of a python list)

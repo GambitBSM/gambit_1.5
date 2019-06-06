@@ -1084,6 +1084,7 @@ if(NOT ditched_${name}_${ver})
     SOURCE_DIR ${dir}
     BUILD_IN_SOURCE 1
     PATCH_COMMAND patch -p1 < ${patch}/${name}_${ver}.diff
+    COMMAND patch -p0 < ${patch}/classy.dif
     ## PATCH_COMMAND patch -p0 < ${patch}/primordial_header.dif
     ## COMMAND patch -p0 < ${patch}/primordial_source.dif
     ## COMMAND patch -p0 < ${patch}/input_source.dif
@@ -1094,13 +1095,12 @@ if(NOT ditched_${name}_${ver})
     ## COMMAND patch -p0 < ${patch}/thermo_source.dif
     ## COMMAND patch -p0 < ${patch}/backgrnd_source.dif
     CONFIGURE_COMMAND ""
-    BUILD_COMMAND ${CMAKE_MAKE_PROGRAM} CC=${CMAKE_C_COMPILER} OMPFLAG= OPTFLAG= CCFLAG=${BACKEND_C_FLAGS} LDFLAG=${BACKEND_C_FLAGS} all
+    BUILD_COMMAND ${CMAKE_MAKE_PROGRAM} CC=${CMAKE_C_COMPILER} OMPFLAG=-fopenmp OPTFLAG= CCFLAG=${BACKEND_C_FLAGS} LDFLAG=${BACKEND_C_FLAGS} all
     COMMAND ${CMAKE_COMMAND} -E make_directory lib
     COMMAND ${CMAKE_COMMAND} -E echo "${CMAKE_C_COMPILER} ${CMAKE_SHARED_LIBRARY_CREATE_C_FLAGS} ${BACKEND_C_FLAGS} -o lib/${lib}.so build/*.o" > make_so.sh
     COMMAND chmod u+x make_so.sh
     COMMAND ./make_so.sh
     INSTALL_COMMAND ""
-    #PATCH_COMMAND patch -p1 < ${patch}/classy.dif
   )
   add_extra_targets("backend" ${name} ${ver} ${dir} ${dl} clean)
   set_as_default_version("backend" ${name} ${ver})
@@ -1122,14 +1122,14 @@ if(NOT ditched_${name}_${ver})
     BUILD_IN_SOURCE 1
     PATCH_COMMAND patch -p1 < ${patch}/${name}_${ver}.diff
     COMMAND patch -p1 < ${patch}/${name}_${ver}_decay_fix.diff
+    COMMAND patch -p0 < ${patch}/classy.dif
     CONFIGURE_COMMAND ""
-    BUILD_COMMAND ${CMAKE_MAKE_PROGRAM} CC=${CMAKE_C_COMPILER} OMPFLAG= OPTFLAG= CCFLAG=${BACKEND_C_FLAGS} LDFLAG=${BACKEND_C_FLAGS} all
+    BUILD_COMMAND ${CMAKE_MAKE_PROGRAM} CC=${CMAKE_C_COMPILER} OMPFLAG=-fopenmp OPTFLAG= CCFLAG=${BACKEND_C_FLAGS} LDFLAG=${BACKEND_C_FLAGS} all
     COMMAND ${CMAKE_COMMAND} -E make_directory lib
     COMMAND ${CMAKE_COMMAND} -E echo "${CMAKE_C_COMPILER} ${CMAKE_SHARED_LIBRARY_CREATE_C_FLAGS} ${BACKEND_C_FLAGS} -o lib/${lib}.so build/*.o" > make_so.sh
     COMMAND chmod u+x make_so.sh
     COMMAND ./make_so.sh
     INSTALL_COMMAND ""
-    #PATCH_COMMAND patch -p1 < ${patch}/classy.dif
   )
   add_extra_targets("backend" ${name} ${ver} ${dir} ${dl} clean)
   set_as_default_version("backend" ${name} ${ver})
