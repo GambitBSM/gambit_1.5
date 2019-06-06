@@ -132,7 +132,7 @@ BE_VARIABLE(dshmisodf, DS_HMISODF, "dshmisodf_", "dshmisodf")
 BE_VARIABLE(dshmnoclue, DS_HMNOCLUE, "dshmnoclue_", "dshmnoclue")
 
 // Convenience functions (registration)
-BE_CONV_FUNCTION(DD_couplings, double*, (), "get_DD_couplings")
+BE_CONV_FUNCTION(DD_couplings, std::vector<double>, (), "get_DD_couplings")
 BE_CONV_FUNCTION(neutrino_yield, double, (const double&, const int&, void*&), "nuyield")
 BE_CONV_FUNCTION(dsgenericwimp_nusetup, void, (const double(&)[29], const double(&)[29][3], const double(&)[15],
                                                const double(&)[3], const double&, const double&), "nuyield_setup")

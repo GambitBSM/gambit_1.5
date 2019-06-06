@@ -589,7 +589,7 @@ int main(int argc, char* argv[])
     cout << "Omega h^2 from MicrOmegas: " << RD_oh2_MicrOmegas(0) << endl;
 
     // Retrieve and print DarkSUSY result
-    cout << "Omega h^2 from RD_oh2_general routine: " << RD_oh2_general(0) << endl;
+    cout << "Omega h^2 from RD_oh2_DS5_general routine: " << RD_oh2_DS5_general(0) << endl;
 
     cout << "Relic density lnL: " << lnL_oh2_Simple(0) << endl;
     cout << endl;
@@ -598,10 +598,10 @@ int main(int argc, char* argv[])
     cout << " sigma_SI_p [cm^2]: " << endl;
     cout << "    MO: " << sigma_SI_p_MO << endl;
 
-    cout << "    DS: " << sigma_SI_p_DS << endl;
+    cout << "    DS5: " << sigma_SI_p_DS << endl;
     cout << " sigma_SD_p [cm^2]: " << endl;
     cout << "    MO: " << sigma_SD_p_MO << endl;
-    cout << "    DS: " << sigma_SD_p_DS << endl;
+    cout << "    DS5: " << sigma_SD_p_DS << endl;
 
     cout << "LUX 2016 lnL: " << LUX_2016_GetLogLikelihood(0) << endl;
     cout << "IceCube 79 lnL: " << IC79_loglike(0) << endl;

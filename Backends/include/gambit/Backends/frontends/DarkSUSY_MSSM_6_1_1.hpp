@@ -55,7 +55,7 @@ BE_INI_CONDITIONAL_DEPENDENCY(decay_rates, DecayTable, MSSM63atQ, CMSSM)
 
 
 // Convenience functions (registration)
-BE_CONV_FUNCTION(DD_couplings, double*, (), "get_DD_couplings")
+BE_CONV_FUNCTION(DD_couplings, std::vector<double>, (), "get_DD_couplings")
 BE_CONV_FUNCTION(DSparticle_code, int, (const str&), "DS6particle_code")
 BE_CONV_FUNCTION(DS_neutral_h_decay_channels, std::vector<std::vector<str>>, (), "get_DS_neutral_h_decay_channels")
 BE_CONV_FUNCTION(DS_charged_h_decay_channels, std::vector<std::vector<str>>, (), "get_DS_charged_h_decay_channels")
@@ -69,7 +69,7 @@ BE_FUNCTION(dsddgpgn, void, (DS_gg&, int&), "dsddgpgn_", "dsddgpgn")
 
 
 // Functions used in MSSM.cpp
-  BE_FUNCTION(dsgive_model_isasugra, void, (double&,double&,double&,double&,double&), "dsgive_model_isasugra_", "dsgive_model_isasugra")
+ BE_FUNCTION(dsgive_model_isasugra, void, (double&,double&,double&,double&,double&), "dsgive_model_isasugra_", "dsgive_model_isasugra")
  BE_FUNCTION(dssigmav0, double, (int&,int&), "dssigmav0_", "dssigmav0")
  BE_FUNCTION(dssigmav0tot, double, (), "dssigmav0tot_", "dssigmav0tot")
  BE_FUNCTION(dsIBffdxdy, double, (int&, double&, double&), "dsibffdxdy_", "dsIBffdxdy")
