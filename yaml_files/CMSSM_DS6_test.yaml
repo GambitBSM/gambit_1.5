@@ -29,21 +29,27 @@ Parameters:
       fixed_value: -0.085
 
   # SUSY parameters.
+#  CMSSM:
+#    M0:
+#      range: [50, 1e4]
+#      prior_type: log
+#    M12:
+#      range: [50, 1e4]
+#      prior_type: log
+#    A0:
+#      range: [-1e4, 1e4]
+#      flat_start: -1e2
+#      flat_end: 1e2
+#      prior_type: double_log_flat_join
+#    TanBeta:
+#      range: [3.0, 70]
+#    SignMu: 1
   CMSSM:
-    M0:
-      range: [50, 1e4]
-      prior_type: log
-    M12:
-      range: [50, 1e4]
-      prior_type: log
-    A0:
-      range: [-1e4, 1e4]
-      flat_start: -1e2
-      flat_end: 1e2
-      prior_type: double_log_flat_join
-    TanBeta:
-      range: [3.0, 70]
+    A0: 62.2053
+    M0: 1045.43
+    M12: 317.233
     SignMu: 1
+    TanBeta: 49.6361
 
 
   # Dark matter halo parameters.
@@ -183,38 +189,38 @@ ObsLikes:
     - capability: lnL_oh2
       purpose:    LogLike
 
-#    - capability: lnL_FermiLATdwarfs
-#      purpose:    LogLike
+    - capability: lnL_FermiLATdwarfs
+      purpose:    LogLike
 
-#    - capability: XENON100_2012_LogLikelihood
-#      purpose:    LogLike
+    - capability: XENON100_2012_LogLikelihood
+      purpose:    LogLike
 
     - capability: XENON1T_2018_LogLikelihood
       purpose:    LogLike
 
-#    - capability: LUX_2016_LogLikelihood
-#      purpose:    LogLike
+    - capability: LUX_2016_LogLikelihood
+      purpose:    LogLike
 
-#    - capability: PandaX_2016_LogLikelihood
-#      purpose:    LogLike
+    - capability: PandaX_2016_LogLikelihood
+      purpose:    LogLike
 
-#    - capability: PandaX_2017_LogLikelihood
-#      purpose:    LogLike
+    - capability: PandaX_2017_LogLikelihood
+      purpose:    LogLike
 
-#    - capability: PICO_2L_LogLikelihood
-#      purpose:    LogLike
+    - capability: PICO_2L_LogLikelihood
+      purpose:    LogLike
 
-#    - capability: PICO_60_LogLikelihood
-#      purpose:    LogLike
+    - capability: PICO_60_LogLikelihood
+      purpose:    LogLike
 
-#    - capability: PICO_60_2017_LogLikelihood
-#      purpose:    LogLike
+    - capability: PICO_60_2017_LogLikelihood
+      purpose:    LogLike
 
-#    - capability: SuperCDMS_2014_LogLikelihood
-#      purpose:    LogLike
+    - capability: SuperCDMS_2014_LogLikelihood
+      purpose:    LogLike
 
-#    - capability: SIMPLE_2014_LogLikelihood
-#      purpose:    LogLike
+    - capability: SIMPLE_2014_LogLikelihood
+      purpose:    LogLike
 
 #    - capability: IC79_loglike
 #      purpose:    LogLike
@@ -271,16 +277,16 @@ ObsLikes:
     - purpose:    Observable
       capability: sigmav
 
-#    - purpose:    Observable
-#      capability: sigma_SI_p
+    - purpose:    Observable
+      capability: sigma_SI_p
 
-#    - purpose:    Observable
-#      capability: sigma_SI_n
+    - purpose:    Observable
+      capability: sigma_SI_n
 
-#    - purpose:    Observable
-#      capability: sigma_SD_p
+    - purpose:    Observable
+      capability: sigma_SD_p
 
-#    - purpose:    Observable
+    - purpose:    Observable
       capability: sigma_SD_n
 
     # - purpose:    Observable
@@ -360,11 +366,6 @@ Rules:
   - capability: TH_ProcessCatalog
     function: TH_ProcessCatalog_DS6_MSSM
     module: DarkBit
-
-  # Make sure to use the correct halo initialization for DS6
-# DISCUSS !
-  - capability: DarkSUSY_PointInit_LocalHalo
-    function: DarkSUSY6_PointInit_LocalHalo_func
 
   # Choose to use detailed Fermi Pass 8 dwarf likelihoood from gamlike
   - capability: lnL_FermiLATdwarfs

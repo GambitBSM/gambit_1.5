@@ -61,21 +61,20 @@ BE_INI_FUNCTION
     dsinit();
     mylock.release_lock();
 
-    // TB: also this should not be needed in DS6 anymore -- check! FIXME
-    // If needed, the parts below need to be updated with dsanyield_sim
-    // TB: DISCUSS whether the following is really needed! FIXME
-    // If yes, organize better!
     //// Initialize yield tables for use in cascade decays (initialize more if needed)
-    //dshainit(151); // Initialize positron tables
-    //dshainit(152); // Initialize gamma ray tables
-    //dshainit(154); // Initialize antiproton tables
-    //// Call dshayield for first call initialization of variables
-    //double tmp1 = 100.0;
-    //double tmp2 = 10.0;
-    //int tmp3 = 15;
-    //int tmp4 = 152;
-    //int tmp5 = 0;
-    //dshayield(tmp1,tmp2,tmp3,tmp4,tmp5);
+    // This makes sure that different processes later don't read the yield tables
+    // from disk simultaneously
+    int istat=0;
+    double mdm=100.0, egev=10.0;
+    int pdg=5, yieldpdg, diff=1;
+    char*hel =  (char *)"0";
+    
+    yieldpdg = 22;// gamma rays
+    double tmp=dsanyield_sim(mdm,egev,pdg,hel,yieldpdg,diff,istat);
+    yieldpdg = -2212; //antiprotons
+    double tmp=dsanyield_sim(mdm,egev,pdg,hel,yieldpdg,diff,istat);
+    yieldpdg = -11; //positrons
+    double tmp=dsanyield_sim(mdm,egev,pdg,hel,yieldpdg,diff,istat);
 
     scan_level = false;
 

@@ -679,11 +679,6 @@ namespace Gambit
       //Check for NAN result.
       if ( Utils::isnan(oh2) ) DarkBit_error().raise(LOCAL_INFO, "DarkSUSY returned NaN for relic density!");
 
-      // Check whether DarkSUSY threw some other error
-      
-      
-      std::cout << std::endl << "dsrdens : " << oh2 << ", " << xf << ", " <<fast<< ", " <<ierr<< ", " <<iwar<< std::endl;
-      
       // Check whether DarkSUSY threw an error
       if (ierr == 1024)
       {
