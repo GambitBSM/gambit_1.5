@@ -69,13 +69,13 @@ BE_INI_FUNCTION
 	
 	//pybind11::object bao = py::eval("my_variable + 10", scope).cast<int>();
 
-	pybind11::object Likelihood = MontePythonLike.attr("Likelihood")(path_dat, data, command_line);
+	pybind11::object LikeObj = MontePythonLike.attr("Likelihood")(path_dat, data, command_line);
 
 	//std::cout<< "   (MontePythonLike init): before loglkl "<< std::endl;
 	//pybind11::dbl chi;
-	Likelihood.attr("loglkl")("","");
+	auto chi = LikeObj.attr("loglkl")("","");
 
-	//std::cout << "   (MontePythonLike init): chi is " << chi << std::endl;
+	std::cout << "   (MontePythonLike init): chi is " << chi << std::endl;
 }
 END_BE_INI_FUNCTION
 
@@ -88,6 +88,8 @@ BE_NAMESPACE
   void test_MontePythonLike()
   {
   	//pybind11::str like_name = ""
+	//auto chi = Likelihood.attr("loglkl")("","");
+	//LikeObj.attr("loglkl")("","");
 	std::cout << "   		(MontePythonLike test) "  << std::endl;
   }
 
