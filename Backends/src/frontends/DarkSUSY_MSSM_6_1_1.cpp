@@ -70,11 +70,11 @@ BE_INI_FUNCTION
     char*hel =  (char *)"0";
     
     yieldpdg = 22;// gamma rays
-    double tmp=dsanyield_sim(mdm,egev,pdg,hel,yieldpdg,diff,istat);
+    dsanyield_sim(mdm,egev,pdg,hel,yieldpdg,diff,istat);
     yieldpdg = -2212; //antiprotons
-    double tmp=dsanyield_sim(mdm,egev,pdg,hel,yieldpdg,diff,istat);
+    dsanyield_sim(mdm,egev,pdg,hel,yieldpdg,diff,istat);
     yieldpdg = -11; //positrons
-    double tmp=dsanyield_sim(mdm,egev,pdg,hel,yieldpdg,diff,istat);
+    dsanyield_sim(mdm,egev,pdg,hel,yieldpdg,diff,istat);
 
     scan_level = false;
 

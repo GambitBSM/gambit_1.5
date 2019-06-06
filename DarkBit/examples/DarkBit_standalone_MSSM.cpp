@@ -222,6 +222,15 @@ int main(int argc, char* argv[])
     else DarkSUSY_5_1_3_init.setOption<bool>("use_dsSLHAread", true);
     DarkSUSY_5_1_3_init.reset_and_calculate();
 
+    // Initialize DarkSUSY 5 Local Halo Model
+    DarkSUSY5_PointInit_LocalHalo_func.resolveDependency(&ExtractLocalMaxwellianHalo);
+    DarkSUSY5_PointInit_LocalHalo_func.resolveDependency(&RD_fraction_one);
+    DarkSUSY5_PointInit_LocalHalo_func.resolveBackendReq(&Backends::DarkSUSY_5_1_3::Functown::dshmcom);
+    DarkSUSY5_PointInit_LocalHalo_func.resolveBackendReq(&Backends::DarkSUSY_5_1_3::Functown::dshmisodf);
+    DarkSUSY5_PointInit_LocalHalo_func.resolveBackendReq(&Backends::DarkSUSY_5_1_3::Functown::dshmframevelcom);
+    DarkSUSY5_PointInit_LocalHalo_func.resolveBackendReq(&Backends::DarkSUSY_5_1_3::Functown::dshmnoclue);
+    DarkSUSY5_PointInit_LocalHalo_func.reset_and_calculate();
+
     // Initialize DarkSUSY 6 MSSM backend
     DarkSUSY_MSSM_6_1_1_init.notifyOfModel("MSSM30atQ");
     DarkSUSY_MSSM_6_1_1_init.resolveDependency(&createSpectrum);
@@ -234,15 +243,6 @@ int main(int argc, char* argv[])
     // Assume for direct and indirect detection likelihoods that dark matter
     // density is always the measured one (regardless of relic density results)
     RD_fraction_one.reset_and_calculate();
-
-    // Initialize DarkSUSY 5 Local Halo Model
-    DarkSUSY5_PointInit_LocalHalo_func.resolveDependency(&ExtractLocalMaxwellianHalo);
-    DarkSUSY5_PointInit_LocalHalo_func.resolveDependency(&RD_fraction_one);
-    DarkSUSY5_PointInit_LocalHalo_func.resolveBackendReq(&Backends::DarkSUSY_5_1_3::Functown::dshmcom);
-    DarkSUSY5_PointInit_LocalHalo_func.resolveBackendReq(&Backends::DarkSUSY_5_1_3::Functown::dshmisodf);
-    DarkSUSY5_PointInit_LocalHalo_func.resolveBackendReq(&Backends::DarkSUSY_5_1_3::Functown::dshmframevelcom);
-    DarkSUSY5_PointInit_LocalHalo_func.resolveBackendReq(&Backends::DarkSUSY_5_1_3::Functown::dshmnoclue);
-    DarkSUSY5_PointInit_LocalHalo_func.reset_and_calculate();
 
 
     // ---- Relic density ----
@@ -306,12 +306,57 @@ int main(int argc, char* argv[])
     RD_oh2_DS5_general.resolveBackendReq(&Backends::DarkSUSY_5_1_3::Functown::rdtime);
     RD_oh2_DS5_general.setOption<int>("fast", 1);  // 0: normal; 1: fast; 2: dirty
     RD_oh2_DS5_general.reset_and_calculate();
+    double oh2_DS5 = RD_oh2_DS5_general(0);
 
     // Calculate WMAP likelihoods -- Choose one of the two relic density calculators
     // by uncommenting the appropriate line.
     //lnL_oh2_Simple.resolveDependency(&RD_oh2_MicrOmegas);
     lnL_oh2_Simple.resolveDependency(&RD_oh2_DS5_general);
     lnL_oh2_Simple.reset_and_calculate();
+
+//--------
+    // Relic density calculation with GAMBIT routines and DarkSUSY 6:
+    RD_spectrum_MSSM.resolveDependency(&createDecays);
+    RD_spectrum_MSSM.resolveDependency(&createSpectrum);
+    std::cout << "DEBUG A" << std::endl;
+    RD_spectrum_MSSM.resolveDependency(&DarkMatter_ID_MSSM);
+    std::cout << "DEBUG B" << std::endl;
+    // Below true if charginos and neutralinos are included in coannihilations:
+    RD_spectrum_MSSM.setOption<bool>("CoannCharginosNeutralinos", true);
+    // Below true if sfermions are included in coannihilations:
+    RD_spectrum_MSSM.setOption<bool>("CoannSfermions", true);
+    // Maximum sparticle mass to be icluded in coannihilations, in units of DM mass:
+    RD_spectrum_MSSM.setOption<double>("CoannMaxMass", 1.6);
+    std::cout << "DEBUG C" << std::endl;
+    RD_spectrum_MSSM.reset_and_calculate();
+
+    std::cout << "DEBUG D" << std::endl;
+
+    RD_spectrum_ordered_func.resolveDependency(&RD_spectrum_MSSM);
+    RD_spectrum_ordered_func.reset_and_calculate();
+
+    RD_annrate_DS6prep_MSSM_func.resolveDependency(&RD_spectrum_ordered_func);
+    RD_annrate_DS6prep_MSSM_func.resolveBackendReq(&Backends::DarkSUSY_MSSM_6_1_1::Functown::dsancoann);
+    RD_annrate_DS6prep_MSSM_func.resolveBackendReq(&Backends::DarkSUSY_MSSM_6_1_1::Functown::DSparticle_code);
+    RD_annrate_DS6prep_MSSM_func.reset_and_calculate();
+
+    RD_eff_annrate_DS.notifyOfModel("MSSM30atQ");
+    RD_eff_annrate_DS.resolveDependency(&RD_annrate_DS6prep_MSSM_func);
+    RD_eff_annrate_DS.resolveBackendReq(&Backends::DarkSUSY_MSSM_6_1_1::Functown::dsanwx);
+    RD_eff_annrate_DS.reset_and_calculate();
+
+    RD_oh2_DS_general.resolveDependency(&RD_spectrum_ordered_func);
+    RD_oh2_DS_general.resolveDependency(&RD_eff_annrate_DS);
+    RD_oh2_DS_general.resolveBackendReq(&Backends::DarkSUSY_MSSM_6_1_1::Functown::rdpars);
+    RD_oh2_DS_general.resolveBackendReq(&Backends::DarkSUSY_MSSM_6_1_1::Functown::rdtime);
+    RD_oh2_DS_general.resolveBackendReq(&Backends::DarkSUSY_MSSM_6_1_1::Functown::dsrdcom);
+    RD_oh2_DS_general.resolveBackendReq(&Backends::DarkSUSY_MSSM_6_1_1::Functown::dsrdstart);
+    RD_oh2_DS_general.resolveBackendReq(&Backends::DarkSUSY_MSSM_6_1_1::Functown::dsrdens);
+    RD_oh2_DS_general.setOption<int>("fast", 1);  // 0: normal; 1: fast; 2: dirty
+    RD_oh2_DS_general.reset_and_calculate();
+    double oh2_DS6 = RD_oh2_DS_general(0);
+//--------
+
 
 
     // ---- Set up basic internal structures for direct & indirect detection ----
@@ -619,7 +664,8 @@ int main(int argc, char* argv[])
 
     file << "Omega h^2:"<< endl;
     file << "  MO: " << RD_oh2_MicrOmegas(0) << endl;
-    file << "  DS5: " << RD_oh2_DS5_general(0) << endl;
+    file << "  DS5: " << oh2_DS5 << endl;
+    file << "  DS5: " << oh2_DS6 << endl;
 
     file << "WMAP lnL: " << lnL_oh2_Simple(0) << endl;
     file << endl;
