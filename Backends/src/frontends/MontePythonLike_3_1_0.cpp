@@ -24,67 +24,76 @@
 
 BE_INI_FUNCTION
 {
-  // Empty ini function.
 	using namespace pybind11::literals; // to bring in the `_a` literal
-	// py::dict kwargs = py::dict("number"_a=1234, "say"_a="hello", "to"_a=some_instance);
 	std::cout << "   (MontePythonLike init): begining ini function "<< std::endl;
 
-	/*
-	// These things all need to be passed from CosmoBit
-	pybind11::str root = "/home/janina/code/gambit_devel/Backends/installed/";
-	pybind11::dict path_dict = pybind11::dict("MontePython"_a="/home/janina/code/gambit_devel/Backends/installed/montepythonlike/3.1.0/montepython/", "data"_a="/home/janina/code/gambit_devel/Backends/installed/montepythonlike/3.1.0/data/",
-		"cosmo"_a="/home/janina/code/gambit_devel/Backends/installed/exoclass/2.7.0/", "root"_a=root);
-	//pybind11::isinstance<py::list>(obj)
-	*/
-
-	// S.B. made some fixes using some of the variables in the Backends
-	// namespace so it works on my machine!
-	// e.g. in this scope,
-	// backendDir = $GAMBIT/Backends/installed/montepythonlike/3.1.0
+	// S.B. TODO: Hmmm - somehow need to add a dependency on ExoClass/Class/etc, if the 
+	// directory needs to live in the path_dict object. 
 
 	pybind11::dict path_dict = pybind11::dict("MontePython"_a=backendDir+"/montepython/",
 											  "data"_a=backendDir+"/data/",
 											  "cosmo"_a=backendDir+"/../../exoclass/2.7.0/", 
 											  "root"_a=backendDir+"/../../");
-	
-	auto experiments = pybind11::make_tuple("bao");
 
-	pybind11::dict cosmo_arguments;
+	// S.B: So this mcmc_parameters variable will always be empty, right?
+	// Since we never use MP itself to scan...
 	pybind11::dict mcmc_parameters;
-	std::cout << "   (MontePythonLike init): before fill data dict "<< std::endl;
-	//pybind11::dict data_dict = pybind11::dict("path"_a=path_dict, "cosmo_arguments"_a=cosmo_arguments);
-	pybind11::str command_line = "" ;
+	pybind11::str command_line = ""; // And this?
+
+	// Root likelihood path.
+	std::string like_path = backendDir+"/montepython/likelihoods/";
 	
+	// In the future, this will be an array of experiments used in the scan.
+	// For now, just do BAOs
+	pybind11::tuple experiments = pybind11::make_tuple("bao");
+	// Location of the BAO data
+	pybind11::str bao_path = like_path +"/bao/bao.data";
 
-	//pybind11::str path_dat = "/home/janina/code/montepython_public/montepython/likelihoods/bao/bao.data";
-	pybind11::str path_dat = backendDir+"/montepython/likelihoods/bao/bao.data";
+	// Maybe make a dictionary?
+	// dict = {
+	//			"bao":      "/bao/bao.data",
+	//			"Pantheon": "/Pantheon/Pantheon.data"
+	//			...
+	//		   }
+	// In fact we can make this a macro/function, probably, since
+	// it looks like the experiment + likelihood share a name in MP. Best day ever!
 	
-	std::cout << "   (MontePythonLike init): before Likelihood object "<< std::endl;
-
-	// S.B. TODO: somehow need to add a dependency on ExoClass/Class/etc, if the 
-	// directory needs to live in the path_dict object.
-
+	
 	// Import Data object from MontePython
-	pybind11::object data = MontePythonLike.attr("Data")("",path_dict,experiments,mcmc_parameters);
+	pybind11::object data = 
+		MontePythonLike.attr("Data")("",path_dict,experiments,mcmc_parameters);
 	
-	//pybind11::object bao = py::eval("my_variable + 10", scope).cast<int>();
+	// // Pass the Data object to the Likelihood object internal to MontePython.
+	pybind11::object Likelihood = 
+		MontePythonLike.attr("Likelihood")(bao_path, data, command_line);
 
-	pybind11::object Likelihood = MontePythonLike.attr("Likelihood")(path_dat, data, command_line);
+	pybind11::module sys = pybind11::module::import("sys");
+	sys.attr("path").attr("append")(like_path);
+
+	pybind11::module bao = pybind11::module::import("bao");
+
+	pybind11::object BAO = 
+		bao.attr("bao")(bao_path, data, command_line);
+
+	std::cout << "num_points = " << BAO.attr("num_points").cast<int>() << std::endl;
 
 	//std::cout<< "   (MontePythonLike init): before loglkl "<< std::endl;
 	//pybind11::dbl chi;
-	Likelihood.attr("loglkl")("","");
+	//std::cout << BAO_like.attr("loglkl")("","") << std::endl;
 
 	//std::cout << "   (MontePythonLike init): chi is " << chi << std::endl;
 }
 END_BE_INI_FUNCTION
 
-/// TODO -
-/// Set nuisance parameters for scans within directdm (BE_INI_FUNCTION)
-
 BE_NAMESPACE
 {
   
+  // std::vector<pybind11::object> Likelihoods init_MP_likes()
+  // {
+  // 	...
+
+  // }
+
   void test_MontePythonLike()
   {
   	//pybind11::str like_name = ""
