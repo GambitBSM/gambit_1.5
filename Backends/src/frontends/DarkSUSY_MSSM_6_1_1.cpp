@@ -499,13 +499,14 @@ BE_NAMESPACE
 
 
   /// Function DD_couplings returns direct detection couplings gps,gns,gpa,gna
-  /// (proton/neutron scalar/axial four-couplinngs)
+  /// (proton/neutron scalar/axial four-couplings)
   /// Provided here because the signature of the corresponding DarkSUSY routine
   std::vector<double> DD_couplings()
   {
     int ierr = 0;
-    DS_gg gg;
+    Farray<Fdouble_complex,1,27,1,2> gg;
     dsddgpgn(gg,ierr);
+    std::cout << "TB TEST - couplings: " << gg(1,1).re <<", " << gg(4,1).re << std::endl;
     if (ierr > 0)
     {
       std::ostringstream err;
@@ -514,10 +515,12 @@ BE_NAMESPACE
     } 
     std::vector<double> couplings;
     couplings.clear();
-    couplings.push_back(gg.gg(1,1).re); // gps
-    couplings.push_back(gg.gg(1,2).re); // gns
-    couplings.push_back(gg.gg(4,1).re); // gpa
-    couplings.push_back(gg.gg(4,2).re); // gna
+    couplings.push_back(gg(1,1).re); // gps
+    couplings.push_back(gg(1,2).re); // gns
+    couplings.push_back(gg(4,1).re); // gpa
+    couplings.push_back(gg(4,2).re); // gna
+    
+    
     return couplings;
   }
 

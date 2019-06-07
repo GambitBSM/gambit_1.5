@@ -235,10 +235,18 @@ int main(int argc, char* argv[])
     DarkSUSY_MSSM_6_1_1_init.notifyOfModel("MSSM30atQ");
     DarkSUSY_MSSM_6_1_1_init.resolveDependency(&createSpectrum);
     DarkSUSY_MSSM_6_1_1_init.resolveDependency(&createDecays);
-
     if (decays) DarkSUSY_MSSM_6_1_1_init.setOption<bool>("use_dsSLHAread", false);
     else DarkSUSY_MSSM_6_1_1_init.setOption<bool>("use_dsSLHAread", true);
     DarkSUSY_MSSM_6_1_1_init.reset_and_calculate();
+
+    // Initialize DarkSUSY 6 Local Halo Model
+//    DarkSUSY6_PointInit_LocalHalo_func.resolveDependency(&ExtractLocalMaxwellianHalo);
+//    DarkSUSY6_PointInit_LocalHalo_func.resolveDependency(&RD_fraction_one);
+//    DarkSUSY6_PointInit_LocalHalo_func.resolveBackendReq(&Backends::DarkSUSY_MSSM_6_1_1::Functown::dshmcom);
+//    DarkSUSY6_PointInit_LocalHalo_func.resolveBackendReq(&Backends::DarkSUSY_MSSM_6_1_1::Functown::dshmisodf);
+//    DarkSUSY6_PointInit_LocalHalo_func.resolveBackendReq(&Backends::DarkSUSY_MSSM_6_1_1::Functown::dshmframevelcom);
+//    DarkSUSY6_PointInit_LocalHalo_func.resolveBackendReq(&Backends::DarkSUSY_MSSM_6_1_1::Functown::dshmnoclue);
+//    DarkSUSY6_PointInit_LocalHalo_func.reset_and_calculate();
 
     // Assume for direct and indirect detection likelihoods that dark matter
     // density is always the measured one (regardless of relic density results)
@@ -308,47 +316,9 @@ int main(int argc, char* argv[])
     RD_oh2_DS5_general.reset_and_calculate();
     double oh2_DS5 = RD_oh2_DS5_general(0);
 
-//--------
-
     // Set identifier for DM particle
     DarkMatter_ID_MSSM.resolveDependency(&createSpectrum);
     DarkMatter_ID_MSSM.reset_and_calculate();
-
-    // Relic density calculation with GAMBIT routines and DarkSUSY 6:
-    RD_spectrum_MSSM.resolveDependency(&createDecays);
-    RD_spectrum_MSSM.resolveDependency(&createSpectrum);
-    RD_spectrum_MSSM.resolveDependency(&DarkMatter_ID_MSSM);
-    // Below true if charginos and neutralinos are included in coannihilations:
-    RD_spectrum_MSSM.setOption<bool>("CoannCharginosNeutralinos", true);
-    // Below true if sfermions are included in coannihilations:
-    RD_spectrum_MSSM.setOption<bool>("CoannSfermions", true);
-    // Maximum sparticle mass to be icluded in coannihilations, in units of DM mass:
-    RD_spectrum_MSSM.setOption<double>("CoannMaxMass", 1.6);
-    RD_spectrum_MSSM.reset_and_calculate();
-
-    RD_spectrum_ordered_func.resolveDependency(&RD_spectrum_MSSM);
-    RD_spectrum_ordered_func.reset_and_calculate();
-
-    RD_annrate_DS6prep_MSSM_func.resolveDependency(&RD_spectrum_ordered_func);
-    RD_annrate_DS6prep_MSSM_func.resolveBackendReq(&Backends::DarkSUSY_MSSM_6_1_1::Functown::dsancoann);
-    RD_annrate_DS6prep_MSSM_func.resolveBackendReq(&Backends::DarkSUSY_MSSM_6_1_1::Functown::DSparticle_code);
-    RD_annrate_DS6prep_MSSM_func.reset_and_calculate();
-
-    RD_eff_annrate_DS.notifyOfModel("MSSM30atQ");
-    RD_eff_annrate_DS.resolveDependency(&RD_annrate_DS6prep_MSSM_func);
-    RD_eff_annrate_DS.resolveBackendReq(&Backends::DarkSUSY_MSSM_6_1_1::Functown::dsanwx);
-    RD_eff_annrate_DS.reset_and_calculate();
-
-    RD_oh2_DS_general.resolveDependency(&RD_spectrum_ordered_func);
-    RD_oh2_DS_general.resolveDependency(&RD_eff_annrate_DS);
-    RD_oh2_DS_general.resolveBackendReq(&Backends::DarkSUSY_MSSM_6_1_1::Functown::rdpars);
-    RD_oh2_DS_general.resolveBackendReq(&Backends::DarkSUSY_MSSM_6_1_1::Functown::rdtime);
-    RD_oh2_DS_general.resolveBackendReq(&Backends::DarkSUSY_MSSM_6_1_1::Functown::dsrdcom);
-    RD_oh2_DS_general.resolveBackendReq(&Backends::DarkSUSY_MSSM_6_1_1::Functown::dsrdstart);
-    RD_oh2_DS_general.resolveBackendReq(&Backends::DarkSUSY_MSSM_6_1_1::Functown::dsrdens);
-    RD_oh2_DS_general.setOption<int>("fast", 1);  // 0: normal; 1: fast; 2: dirty
-    RD_oh2_DS_general.reset_and_calculate();
-    double oh2_DS6 = RD_oh2_DS_general(0);
 
     // Calculate WMAP likelihoods -- Choose one of the 3 relic density calculators
     // by uncommenting the appropriate line.
@@ -356,8 +326,6 @@ int main(int argc, char* argv[])
     //lnL_oh2_Simple.resolveDependency(&RD_oh2_DS5_general);
     lnL_oh2_Simple.resolveDependency(&RD_oh2_DS_general);
     lnL_oh2_Simple.reset_and_calculate();
-
-//--------
 
     // ---- Set up basic internal structures for direct & indirect detection ----
 
@@ -433,6 +401,7 @@ int main(int argc, char* argv[])
     LUX_2016_GetLogLikelihood.resolveBackendReq(&Backends::DDCalc_2_0_0::Functown::DDCalc_Experiment);
     LUX_2016_GetLogLikelihood.resolveBackendReq(&Backends::DDCalc_2_0_0::Functown::DDCalc_LogLikelihood);
     LUX_2016_GetLogLikelihood.reset_and_calculate();
+    double lnLUX_DS5 = LUX_2016_GetLogLikelihood(0);
 
     // Set generic scattering cross-section for later use
     double sigma_SI_p_DS, sigma_SI_p_MO;
@@ -626,9 +595,45 @@ int main(int argc, char* argv[])
     UnitTest_DarkBit.reset_and_calculate();
 
 
-    // ---- Now do the same for indirect detection and DarkSUSY 6----
+    // --------------------------------------------------------------
+    // -------------- Now do the same for DarkSUSY 6 ----------------
     // --------------------------------------------------------------
     
+    // Relic density calculation with GAMBIT routines and DarkSUSY 6:
+    RD_spectrum_MSSM.resolveDependency(&createDecays);
+    RD_spectrum_MSSM.resolveDependency(&createSpectrum);
+    RD_spectrum_MSSM.resolveDependency(&DarkMatter_ID_MSSM);
+    // Below true if charginos and neutralinos are included in coannihilations:
+    RD_spectrum_MSSM.setOption<bool>("CoannCharginosNeutralinos", true);
+    // Below true if sfermions are included in coannihilations:
+    RD_spectrum_MSSM.setOption<bool>("CoannSfermions", true);
+    // Maximum sparticle mass to be icluded in coannihilations, in units of DM mass:
+    RD_spectrum_MSSM.setOption<double>("CoannMaxMass", 1.6);
+    RD_spectrum_MSSM.reset_and_calculate();
+
+    RD_spectrum_ordered_func.resolveDependency(&RD_spectrum_MSSM);
+    RD_spectrum_ordered_func.reset_and_calculate();
+
+    RD_annrate_DS6prep_MSSM_func.resolveDependency(&RD_spectrum_ordered_func);
+    RD_annrate_DS6prep_MSSM_func.resolveBackendReq(&Backends::DarkSUSY_MSSM_6_1_1::Functown::dsancoann);
+    RD_annrate_DS6prep_MSSM_func.resolveBackendReq(&Backends::DarkSUSY_MSSM_6_1_1::Functown::DSparticle_code);
+    RD_annrate_DS6prep_MSSM_func.reset_and_calculate();
+
+    RD_eff_annrate_DS.notifyOfModel("MSSM30atQ");
+    RD_eff_annrate_DS.resolveDependency(&RD_annrate_DS6prep_MSSM_func);
+    RD_eff_annrate_DS.resolveBackendReq(&Backends::DarkSUSY_MSSM_6_1_1::Functown::dsanwx);
+    RD_eff_annrate_DS.reset_and_calculate();
+
+    RD_oh2_DS_general.resolveDependency(&RD_spectrum_ordered_func);
+    RD_oh2_DS_general.resolveDependency(&RD_eff_annrate_DS);
+    RD_oh2_DS_general.resolveBackendReq(&Backends::DarkSUSY_MSSM_6_1_1::Functown::rdpars);
+    RD_oh2_DS_general.resolveBackendReq(&Backends::DarkSUSY_MSSM_6_1_1::Functown::rdtime);
+    RD_oh2_DS_general.resolveBackendReq(&Backends::DarkSUSY_MSSM_6_1_1::Functown::dsrdcom);
+    RD_oh2_DS_general.resolveBackendReq(&Backends::DarkSUSY_MSSM_6_1_1::Functown::dsrdstart);
+    RD_oh2_DS_general.resolveBackendReq(&Backends::DarkSUSY_MSSM_6_1_1::Functown::dsrdens);
+    RD_oh2_DS_general.setOption<int>("fast", 1);  // 0: normal; 1: fast; 2: dirty
+    RD_oh2_DS_general.reset_and_calculate();
+    double oh2_DS6 = RD_oh2_DS_general(0);
     
     // Set up process catalog based on DarkSUSY annihilation rates
     TH_ProcessCatalog_DS6_MSSM.resolveDependency(&createSpectrum);
@@ -731,23 +736,76 @@ int main(int argc, char* argv[])
     lnL_FermiLATdwarfs_gamLike.reset_and_calculate();
     double lnLFermi_DS6 = lnL_FermiLATdwarfs_gamLike(0);
 
-   // ---- IceCube limits ----
+   // ---- Direct detection and IceCube limits ----
+
+    // Calculate DD couplings with DarkSUSY
+    DD_couplings_MSSM_DS6.notifyOfModel("nuclear_params_fnq");
+    DD_couplings_MSSM_DS6.resolveDependency(&Models::nuclear_params_fnq::Functown::primary_parameters);
+    DD_couplings_MSSM_DS6.resolveBackendReq(&Backends::DarkSUSY_MSSM_6_1_1::Functown::DD_couplings);
+    DD_couplings_MSSM_DS6.resolveBackendReq(&Backends::DarkSUSY_MSSM_6_1_1::Functown::ddcomlegacy);
+    DD_couplings_MSSM_DS6.resolveBackendReq(&Backends::DarkSUSY_MSSM_6_1_1::Functown::ddmssmcom);
+    // The below calculates the DD couplings using the full 1 loop calculation of
+    // Drees Nojiri Phys.Rev. D48 (1993) 3483
+    DD_couplings_MSSM_DS6.setOption<bool>("loop", true);
+    // When the calculation is done at tree level (loop = false), setting the below to false
+    // approximates the squark propagator as 1/m_sq^2 to avoid poles.
+    // DD_couplings_DarkSUSY.setOption<bool>("pole", false);
+    DD_couplings_MSSM_DS6.reset_and_calculate();
+
+    // Initialize DDCalc backend
+//    Backends::DDCalc_2_0_0::Functown::DDCalc_CalcRates_simple.setStatus(2);
+//    Backends::DDCalc_2_0_0::Functown::DDCalc_Experiment.setStatus(2);
+//    Backends::DDCalc_2_0_0::Functown::DDCalc_LogLikelihood.setStatus(2);
+//    DDCalc_2_0_0_init.resolveDependency(&ExtractLocalMaxwellianHalo);
+//    DDCalc_2_0_0_init.resolveDependency(&RD_fraction_one);
+//    DDCalc_2_0_0_init.resolveDependency(&mwimp_generic);
+    //Choose between the two backends
+    //DDCalc_2_0_0_init.resolveDependency(&DD_couplings_MicrOmegas);
+//    DDCalc_2_0_0_init.resolveDependency(&DD_couplings_MSSM_DS6);
+//    DDCalc_2_0_0_init.reset_and_calculate();
+
+    // Calculate direct detection rates for LUX 2016
+//    LUX_2016_Calc.resolveBackendReq(&Backends::DDCalc_2_0_0::Functown::DDCalc_Experiment);
+//    LUX_2016_Calc.resolveBackendReq(&Backends::DDCalc_2_0_0::Functown::DDCalc_CalcRates_simple);
+//    LUX_2016_Calc.reset_and_calculate();
+
+    // Calculate direct detection likelihood for LUX 2016
+//    LUX_2016_GetLogLikelihood.resolveDependency(&LUX_2016_Calc);
+//    LUX_2016_GetLogLikelihood.resolveBackendReq(&Backends::DDCalc_2_0_0::Functown::DDCalc_Experiment);
+//    LUX_2016_GetLogLikelihood.resolveBackendReq(&Backends::DDCalc_2_0_0::Functown::DDCalc_LogLikelihood);
+//    LUX_2016_GetLogLikelihood.reset_and_calculate();
+    double lnLUX_DS6 ;// = LUX_2016_GetLogLikelihood(0);
+
+    // Set generic scattering cross-section for later use
+    sigma_SI_p_simple.resolveDependency(&DD_couplings_MSSM_DS6);
+    sigma_SI_p_simple.reset_and_calculate();
+    double sigma_SI_p_DS6 = sigma_SI_p_simple(0);
+
+    sigma_SD_p_simple.resolveDependency(&DD_couplings_MSSM_DS6);
+    sigma_SD_p_simple.reset_and_calculate();
+    double sigma_SD_p_DS6 = sigma_SD_p_simple(0);
+
+
+//    cout << "DEBUG 1" << endl;
 
     // Initialize DarkSUSY 6 Local Halo Model
- //   DarkSUSY6_PointInit_LocalHalo_func.resolveDependency(&ExtractLocalMaxwellianHalo);
- //   DarkSUSY6_PointInit_LocalHalo_func.resolveDependency(&RD_fraction_one);
- //   DarkSUSY6_PointInit_LocalHalo_func.resolveBackendReq(&Backends::DarkSUSY_MSSM_6_1_1::Functown::dshmcom);
- //   DarkSUSY6_PointInit_LocalHalo_func.resolveBackendReq(&Backends::DarkSUSY_MSSM_6_1_1::Functown::dshmisodf);
- //   DarkSUSY6_PointInit_LocalHalo_func.resolveBackendReq(&Backends::DarkSUSY_MSSM_6_1_1::Functown::dshmframevelcom);
- //   DarkSUSY6_PointInit_LocalHalo_func.resolveBackendReq(&Backends::DarkSUSY_MSSM_6_1_1::Functown::dshmnoclue);
- //   DarkSUSY6_PointInit_LocalHalo_func.reset_and_calculate();
+//    DarkSUSY6_PointInit_LocalHalo_func.resolveDependency(&ExtractLocalMaxwellianHalo);
+//    DarkSUSY6_PointInit_LocalHalo_func.resolveDependency(&RD_fraction_one);
+//    DarkSUSY6_PointInit_LocalHalo_func.resolveBackendReq(&Backends::DarkSUSY_MSSM_6_1_1::Functown::dshmcom);
+//    DarkSUSY6_PointInit_LocalHalo_func.resolveBackendReq(&Backends::DarkSUSY_MSSM_6_1_1::Functown::dshmisodf);
+//    DarkSUSY6_PointInit_LocalHalo_func.resolveBackendReq(&Backends::DarkSUSY_MSSM_6_1_1::Functown::dshmframevelcom);
+//    DarkSUSY6_PointInit_LocalHalo_func.resolveBackendReq(&Backends::DarkSUSY_MSSM_6_1_1::Functown::dshmnoclue);
+//    DarkSUSY6_PointInit_LocalHalo_func.reset_and_calculate();
+
+//    cout << "DEBUG 2" << endl;
 
     // Infer WIMP capture rate in Sun
 //    capture_rate_Sun_const_xsec_DS6.resolveDependency(&mwimp_generic);
 //    capture_rate_Sun_const_xsec_DS6.resolveDependency(&sigma_SI_p_simple);
- //   capture_rate_Sun_const_xsec_DS6.resolveDependency(&sigma_SD_p_simple);
+//    capture_rate_Sun_const_xsec_DS6.resolveDependency(&sigma_SD_p_simple);
 //    capture_rate_Sun_const_xsec_DS6.resolveDependency(&RD_fraction_one);
 //    capture_rate_Sun_const_xsec_DS6.resolveBackendReq(&Backends::DarkSUSY_MSSM_6_1_1::Functown::dssenu_capsuntab);
+//    capture_rate_Sun_const_xsec_DS6.resolveDependency(&ExtractLocalMaxwellianHalo);
 //    capture_rate_Sun_const_xsec_DS6.resolveDependency(&DarkSUSY6_PointInit_LocalHalo_func);
 //    capture_rate_Sun_const_xsec_DS6.reset_and_calculate();
 
@@ -812,7 +870,7 @@ int main(int argc, char* argv[])
 //    IC79_loglike.resolveDependency(&IC79SL_bgloglike);
 //    IC79_loglike.resolveDependency(&IC79SL_loglike);
 //    IC79_loglike.reset_and_calculate();
-    double IC79_DS6; // = IC79_loglike(0);
+    double IC79_DS6;//= IC79_loglike(0);
 
 
 
@@ -831,30 +889,33 @@ int main(int argc, char* argv[])
     cout << endl;
 
     // Print scattering cross section for DS and MO:
-    cout << " sigma_SI_p [cm^2]: " << endl;
+    cout << " sigma_SI_p [cm^2] -- " << endl;
     cout << "    MO: " << sigma_SI_p_MO << endl;
-
     cout << "    DS5: " << sigma_SI_p_DS << endl;
-    cout << " sigma_SD_p [cm^2]: " << endl;
+    cout << "    DS6: " << sigma_SI_p_DS6 << endl;
+    cout << " sigma_SD_p [cm^2] -- " << endl;
     cout << "    MO: " << sigma_SD_p_MO << endl;
     cout << "    DS5: " << sigma_SD_p_DS << endl;
+    cout << "    DS6: " << sigma_SD_p_DS6 << endl;
 
-    cout << "LUX 2016 lnL: " << LUX_2016_GetLogLikelihood(0) << endl;
+    cout << "LUX 2016 lnL -- " << endl;
+    cout << "    DS5: " <<  lnLUX_DS5 << endl;
+    cout << "    DS6: " <<  lnLUX_DS6 << endl;
     cout << endl;  
 
     cout << "IceCube 79 lnL -- " << endl;
-    cout << "DarkSUSY 5:" << IC79_DS5 << endl;
-    cout << "DarkSUSY 6:" << IC79_DS6 << endl;
+    cout << "    DS5: " <<  IC79_DS5 << endl;
+    cout << "    DS6: " << IC79_DS6 << endl;
     cout << endl;  
 
     cout << "<sigma v> [cm^3/s] -- "<< endl;
-    cout << "DarkSUSY 5:" << sv0_DS5  << endl;
-    cout << "DarkSUSY 6:" << sv0_DS6  << endl;
+    cout << "    DS5: " <<  sv0_DS5  << endl;
+    cout << "    DS6: " <<  sv0_DS6  << endl;
     cout << endl;  
 
     cout << "Fermi LAT dwarf spheroidal lnL -- " << endl;
-    cout << "DarkSUSY 5:" << lnLFermi_DS5 << endl;
-    cout << "DarkSUSY 6:" << lnLFermi_DS6 << endl;
+    cout << "    DS5: " <<  lnLFermi_DS5 << endl;
+    cout << "    DS6: " <<  lnLFermi_DS6 << endl;
 
 
     // ---- Dump output into file ----

@@ -65,7 +65,7 @@ BE_CONV_FUNCTION(init_diskless, int, (const SLHAstruct&, const DecayTable&), "in
 // Functions used by convenience functions
 BE_FUNCTION(dsseyield_sim_ls, double, (const double&, const double&, const double&, const int&, const int&, const int&, const int&, const int&, const int&, const char*, const int&, const int&, const int&), "dsseyield_sim_ls_", "raw_nuyield_sim")
 BE_FUNCTION(dsseyield_ch, double, (const double&, const double&, const double&, const int&, const int&, const char*, const int&, const int&, const int&), "dsseyield_ch_", "raw_nuyield_casc")
-BE_FUNCTION(dsddgpgn, void, (DS_gg&, int&), "dsddgpgn_", "dsddgpgn")
+BE_FUNCTION(dsddgpgn, void, (Farray<Fdouble_complex,1,27,1,2>&, int&), "dsddgpgn_", "dsddgpgn")
 
 
 // Functions used in MSSM.cpp
