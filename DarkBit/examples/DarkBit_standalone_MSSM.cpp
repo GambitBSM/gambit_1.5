@@ -631,8 +631,8 @@ int main(int argc, char* argv[])
     cout << "Omega h^2 from MicrOmegas: " << RD_oh2_MicrOmegas(0) << endl;
 
     // Retrieve and print DarkSUSY result
-    cout << "Omega h^2 from RD_oh2_DS5_general routine: " << RD_oh2_DS5_general(0) << endl;
-    cout << "Omega h^2 from RD_oh2_general_DS_general routine (DarkSUSY 6): " << oh2_DS6 << endl;
+    cout << "Omega h^2 from RD_oh2_DS5_general routine: " << oh2_DS5 << endl;
+    cout << "Omega h^2 from RD_oh2_DS_general routine (DarkSUSY 6): " << oh2_DS6 << endl;
 
     cout << "Relic density lnL: " << lnL_oh2_Simple(0) << endl;
     cout << endl;
@@ -662,7 +662,7 @@ int main(int argc, char* argv[])
     file << "Omega h^2:"<< endl;
     file << "  MO: " << RD_oh2_MicrOmegas(0) << endl;
     file << "  DS5: " << oh2_DS5 << endl;
-    file << "  DS5: " << oh2_DS6 << endl;
+    file << "  DS6: " << oh2_DS6 << endl;
 
     file << "WMAP lnL: " << lnL_oh2_Simple(0) << endl;
     file << endl;
