@@ -308,13 +308,12 @@ int main(int argc, char* argv[])
     RD_oh2_DS5_general.reset_and_calculate();
     double oh2_DS5 = RD_oh2_DS5_general(0);
 
-    // Calculate WMAP likelihoods -- Choose one of the two relic density calculators
-    // by uncommenting the appropriate line.
-    //lnL_oh2_Simple.resolveDependency(&RD_oh2_MicrOmegas);
-    lnL_oh2_Simple.resolveDependency(&RD_oh2_DS5_general);
-    lnL_oh2_Simple.reset_and_calculate();
-
 //--------
+
+    // Set identifier for DM particle
+    DarkMatter_ID_MSSM.resolveDependency(&createSpectrum);
+    DarkMatter_ID_MSSM.reset_and_calculate();
+
     // Relic density calculation with GAMBIT routines and DarkSUSY 6:
     RD_spectrum_MSSM.resolveDependency(&createDecays);
     RD_spectrum_MSSM.resolveDependency(&createSpectrum);
@@ -350,15 +349,17 @@ int main(int argc, char* argv[])
     RD_oh2_DS_general.setOption<int>("fast", 1);  // 0: normal; 1: fast; 2: dirty
     RD_oh2_DS_general.reset_and_calculate();
     double oh2_DS6 = RD_oh2_DS_general(0);
+
+    // Calculate WMAP likelihoods -- Choose one of the 3 relic density calculators
+    // by uncommenting the appropriate line.
+    //lnL_oh2_Simple.resolveDependency(&RD_oh2_MicrOmegas);
+    //lnL_oh2_Simple.resolveDependency(&RD_oh2_DS5_general);
+    lnL_oh2_Simple.resolveDependency(&RD_oh2_DS_general);
+    lnL_oh2_Simple.reset_and_calculate();
+
 //--------
 
-
-
     // ---- Set up basic internal structures for direct & indirect detection ----
-
-    // Set identifier for DM particle
-    DarkMatter_ID_MSSM.resolveDependency(&createSpectrum);
-    DarkMatter_ID_MSSM.reset_and_calculate();
 
     // Set up process catalog based on DarkSUSY annihilation rates
     TH_ProcessCatalog_MSSM.resolveDependency(&createSpectrum);
@@ -631,6 +632,7 @@ int main(int argc, char* argv[])
 
     // Retrieve and print DarkSUSY result
     cout << "Omega h^2 from RD_oh2_DS5_general routine: " << RD_oh2_DS5_general(0) << endl;
+    cout << "Omega h^2 from RD_oh2_general_DS_general routine (DarkSUSY 6): " << oh2_DS6 << endl;
 
     cout << "Relic density lnL: " << lnL_oh2_Simple(0) << endl;
     cout << endl;
