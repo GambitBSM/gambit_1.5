@@ -143,7 +143,7 @@ namespace Gambit {
                 {
                    /* Still no good; error */
                    std::ostringstream errmsg;
-                   errmsg << "Failed to open existing HDF5 file, then failed to create new one! ("<<fname<<")";
+                   errmsg << "Failed to open existing HDF5 file, then failed to create new one! ("<<fname<<"). The file may exist but be unreadable. You can check this by trying to inspect it with the 'h5ls' command line tool.";
                    printer_error().raise(LOCAL_INFO, errmsg.str());
                 }
                 else
