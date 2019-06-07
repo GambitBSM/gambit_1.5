@@ -3168,7 +3168,8 @@ namespace Gambit
 
       std::cout << "(CosmoBit): init_MontePythonLike start"<< std::endl;
 
-      BEreq::test_MontePythonLike;
+      pybind11::object cosmo;
+      BEreq::test_MontePythonLike(cosmo);
 
       std::cout << "(CosmoBit): init_MontePythonLike end"<< std::endl;
     }

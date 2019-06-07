@@ -577,7 +577,7 @@ START_MODULE
      #define FUNCTION init_MontePythonLike
       START_FUNCTION(double)
       ALLOW_MODELS(LCDM)
-      BACKEND_REQ(test_MontePythonLike,(libmontepythonlike),void,())
+      BACKEND_REQ(test_MontePythonLike,(libmontepythonlike),void,(pybind11::object&))
      #undef FUNCTION
   #undef CAPABILITY
 
