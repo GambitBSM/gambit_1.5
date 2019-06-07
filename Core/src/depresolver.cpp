@@ -626,11 +626,8 @@ namespace Gambit
     }
 
     // Evaluates ObsLike vertex, and everything it depends on, and prints results
-    void DependencyResolver::calcObsLike(VertexID vertex, const int pointID)
+    void DependencyResolver::calcObsLike(VertexID vertex)
     {
-      // pointID is supplied by the scanner, and is used to tell the printer which model
-      // point the results should be associated with.
-
       if (SortedParentVertices.find(vertex) == SortedParentVertices.end())
         core_error().raise(LOCAL_INFO, "Tried to calculate a function not in or not at top of dependency graph.");
       std::vector<VertexID> order = SortedParentVertices.at(vertex);

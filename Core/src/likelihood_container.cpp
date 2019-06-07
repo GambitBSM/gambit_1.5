@@ -209,8 +209,8 @@ namespace Gambit
           std::ostringstream debug_to_cout;
           if (debug) debug_to_cout << "  L" << likelihood_tag << ": ";
 
-          // Calculate the likelihood component. The pointID is passed through to the printer call for each functor.
-          dependencyResolver.calcObsLike(*it,getPtID());
+          // Calculate the likelihood component.
+          dependencyResolver.calcObsLike(*it);
 
           // Switch depending on whether the functor returns floats or doubles and a single likelihood or a vector of them.
           str rtype = return_types[*it];
@@ -293,7 +293,7 @@ namespace Gambit
 
           try
           {
-            dependencyResolver.calcObsLike(*it,getPtID());
+            dependencyResolver.calcObsLike(*it);
             if (debug) logger() << LogTags::core << "Computed a" << aux_tag << "." << EOM;
           }
           catch(Gambit::invalid_point_exception& e)
