@@ -601,12 +601,7 @@ namespace Gambit
       }
       double mwimp=myRDspec.coannihilatingParticles[0].mass;
 
-      /// Option timeout<double>: Maximum core time to allow for relic density
-      /// calculation, in seconds (default: 30s)
-      BEreq::rdtime->rdt_max = runOptions->getValueOrDef<double>(30, "timeout");
-
       // What follows below implements dsrdomega from DarkSUSY 6+
-      
       //We start by setting some general common block settings
       BEreq::dsrdcom();
       DS_RDPARS *myrdpars = BEreq::rdpars.pointer();
@@ -614,6 +609,10 @@ namespace Gambit
       /// Option fast<int>: Numerical performance of Boltzmann solver in DS
       /// (default: 1) [NB: accurate is fast = 0 !]
       int fast = runOptions->getValueOrDef<int>(1, "fast");
+
+      /// Option timeout<double>: Maximum core time to allow for relic density
+      /// calculation, in seconds (default: 30s)
+      BEreq::rdtime->rdt_max = runOptions->getValueOrDef<double>(30, "timeout");
 
       switch (fast)
       {
