@@ -27,7 +27,7 @@
 #
 #************************************************
 
-# Check for MPI libraries; enable manually with "cmake -DMPI=ON .."
+# Check for MPI libraries; enable manually with "cmake -DWITH_MPI=ON .."
 option(WITH_MPI "Compile with MPI enabled" OFF)
 if(WITH_MPI)
   find_package(MPI)
@@ -178,17 +178,17 @@ endif()
 # Check for ROOT.
 option(WITH_ROOT "Compile with ROOT enabled" OFF)
 if(WITH_ROOT)
-  find_package(ROOT)
+  find_package(ROOT 6)
+  if (ROOT_VERSION VERSION_LESS 6)
+    set (ROOT_FOUND FALSE)
+  endif()
   if(NOT ROOT_FOUND)
-    message("${BoldRed}   ROOT not found.${ColourReset}")
+    message("${BoldRed}   ROOT 6 not found.${ColourReset}")
   endif()
 else()
   message("${BoldCyan} X ROOT support is deactivated. Set -DWITH_ROOT=ON to activate ROOT support in GAMBIT.${ColourReset}")
 endif()
 if (WITH_ROOT AND ROOT_FOUND)
-  if (ROOT_VERSION VERSION_GREATER 6)
-    set (ROOT_6_OR_LATER_FOUND 1)
-  endif()
   include_directories(${ROOT_INCLUDE_DIR})
   set (EXCLUDE_ROOT FALSE)
 else()
