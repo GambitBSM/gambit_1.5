@@ -318,19 +318,14 @@ int main(int argc, char* argv[])
     // Relic density calculation with GAMBIT routines and DarkSUSY 6:
     RD_spectrum_MSSM.resolveDependency(&createDecays);
     RD_spectrum_MSSM.resolveDependency(&createSpectrum);
-    std::cout << "DEBUG A" << std::endl;
     RD_spectrum_MSSM.resolveDependency(&DarkMatter_ID_MSSM);
-    std::cout << "DEBUG B" << std::endl;
     // Below true if charginos and neutralinos are included in coannihilations:
     RD_spectrum_MSSM.setOption<bool>("CoannCharginosNeutralinos", true);
     // Below true if sfermions are included in coannihilations:
     RD_spectrum_MSSM.setOption<bool>("CoannSfermions", true);
     // Maximum sparticle mass to be icluded in coannihilations, in units of DM mass:
     RD_spectrum_MSSM.setOption<double>("CoannMaxMass", 1.6);
-    std::cout << "DEBUG C" << std::endl;
     RD_spectrum_MSSM.reset_and_calculate();
-
-    std::cout << "DEBUG D" << std::endl;
 
     RD_spectrum_ordered_func.resolveDependency(&RD_spectrum_MSSM);
     RD_spectrum_ordered_func.reset_and_calculate();

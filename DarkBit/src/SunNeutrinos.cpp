@@ -237,7 +237,6 @@ namespace Gambit
       double Higgs_mass_charged;
 
       // Set annihilation branching fractions
-      // TODO: needs to be fixed once BFs are available directly from TH_Process
       std::string DMid = *Dep::DarkMatter_ID;
       TH_Process annProc = Dep::TH_ProcessCatalog->getProcess(DMid, DMid);
       std::vector< std::vector<str> > neutral_channels = BEreq::get_DS_neutral_h_decay_channels();
@@ -313,7 +312,6 @@ namespace Gambit
           LOCAL_INFO, "H- decays exist in process catalog but not H+.");
 
       // Set the neutral Higgs decay branching fractions
-      // TODO: needs to be fixed once BFs are available directly from TH_Process
       for (int i=0; i<3; i++)       // Loop over the three neutral Higgs
       {
 
@@ -460,7 +458,7 @@ namespace Gambit
       #endif
 
       // Set up DarkSUSY to do neutrino yields for this particular WIMP
-      BEreq::nuyield_setup(annihilation_bf, Higgs_decay_BFs_neutral,
+      BEreq::DS_nuyield_setup(annihilation_bf, Higgs_decay_BFs_neutral,
           Higgs_decay_BFs_charged, Higgs_masses_neutral,
           Higgs_mass_charged, *Dep::mwimp);
 

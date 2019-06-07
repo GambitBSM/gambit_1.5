@@ -305,81 +305,84 @@ BE_NAMESPACE
    const double (&Higgs_decay_BFs_charged)[15], const double (&Higgs_masses_neutral)[3], const double &Higgs_mass_charged,
    const double &mwimp)
   {
-
     // Transfer WIMP mass common block.
     anmwimp = mwimp;
 
     // Transfer branching fractions to WIMP annihilation common blocks.
     // For channel indices, see dswayieldone.f
-    DSanbr[0]=0.0; // not used, keep Fortran numbering below
+    DSanbr.clear();
+    DSanbr.push_back(0.0);
+//    DSanbr[0]=0.0; // not used, keep Fortran numbering below
     for (int i=1; i<=29; i++)
     {
-      DSanbr[i] = annihilation_bf[i-1];
+        DSanbr.push_back(annihilation_bf[i-1]);
+//      DSanbr[i] = annihilation_bf[i-1];
     }
 
     // Setup PDG common blocks
-    DSanpdg1[0]=10000; // not used, as I keep the same numbering as for Fortran
-    DSanpdg2[0]=10000;  
-    DSanpdg1[1]=25;  // h h
-    DSanpdg2[1]=25;
-    DSanpdg1[2]=25;  // h H
-    DSanpdg2[2]=35;
-    DSanpdg1[3]=35;  // H H
-    DSanpdg2[3]=35;
-    DSanpdg1[4]=36;  // A A
-    DSanpdg2[4]=36;
-    DSanpdg1[5]=25;  // h A
-    DSanpdg2[5]=36;
-    DSanpdg1[6]=35;  // H A
-    DSanpdg2[6]=36;
-    DSanpdg1[7]=37;  // H+ H-
-    DSanpdg2[7]=-37;
-    DSanpdg1[8]=23;  // Z h
-    DSanpdg2[8]=25;
-    DSanpdg1[9]=23;  // Z H
-    DSanpdg2[9]=35;
-    DSanpdg1[10]=23;  // Z A
-    DSanpdg2[10]=36;
-    DSanpdg1[11]=24;  // W+ H-
-    DSanpdg2[11]=-37;
-    DSanpdg1[12]=23;  // Z Z
-    DSanpdg2[12]=23;
-    DSanpdg1[13]=24;  // W+ W-
-    DSanpdg2[13]=-24;
-    DSanpdg1[14]=12;  // nue nuebar
-    DSanpdg2[14]=-12;
-    DSanpdg1[15]=11;  // e- e+
-    DSanpdg2[15]=-11;
-    DSanpdg1[16]=14;  // numu numubar
-    DSanpdg2[16]=-14;
-    DSanpdg1[17]=13;  // mu- mu+
-    DSanpdg2[17]=-13;
-    DSanpdg1[18]=16;  // nutau nutaubar
-    DSanpdg2[18]=-16;
-    DSanpdg1[19]=15;  // tau- tau+
-    DSanpdg2[19]=-15;
-    DSanpdg1[20]=2;   // u ubar
-    DSanpdg2[20]=-2;
-    DSanpdg1[21]=1;   // d dbar
-    DSanpdg2[21]=-1;
-    DSanpdg1[22]=4;   // c cbar
-    DSanpdg2[22]=-4;
-    DSanpdg1[23]=3;   // s sbar
-    DSanpdg2[23]=-3;
-    DSanpdg1[24]=6;   // t tbar
-    DSanpdg2[24]=-6;
-    DSanpdg1[25]=5;   // b bbar
-    DSanpdg2[25]=-5;
-    DSanpdg1[26]=21;   // gluon gluon
-    DSanpdg2[26]=21;
-    DSanpdg1[27]=10000;   // (not used)
-    DSanpdg2[27]=10000;
-    DSanpdg1[28]=22;   // gamma gamma
-    DSanpdg2[28]=22;
-    DSanpdg1[29]=22;   // gamma Z
-    DSanpdg2[29]=23; 
+    DSanpdg1.clear();
+    DSanpdg2.clear();
+    DSanpdg1.push_back(10000); // not used, as I keep the same numbering as for Fortran
+    DSanpdg2.push_back(10000);  
+    DSanpdg1.push_back(25);  // h h
+    DSanpdg2.push_back(25);
+    DSanpdg1.push_back(25);  // h H
+    DSanpdg2.push_back(35);
+    DSanpdg1.push_back(35);  // H H
+    DSanpdg2.push_back(35);
+    DSanpdg1.push_back(36);  // A A
+    DSanpdg2.push_back(36);
+    DSanpdg1.push_back(25);  // h A
+    DSanpdg2.push_back(36);
+    DSanpdg1.push_back(35);  // H A
+    DSanpdg2.push_back(36);
+    DSanpdg1.push_back(37);  // H+ H-
+    DSanpdg2.push_back(-37);
+    DSanpdg1.push_back(23);  // Z h
+    DSanpdg2.push_back(25);
+    DSanpdg1.push_back(23);  // Z H
+    DSanpdg2.push_back(35);
+    DSanpdg1.push_back(23);  // Z A
+    DSanpdg2.push_back(36);
+    DSanpdg1.push_back(24);  // W+ H-
+    DSanpdg2.push_back(-37);
+    DSanpdg1.push_back(23);  // Z Z
+    DSanpdg2.push_back(23);
+    DSanpdg1.push_back(24);  // W+ W-
+    DSanpdg2.push_back(-24);
+    DSanpdg1.push_back(12);  // nue nuebar
+    DSanpdg2.push_back(-12);
+    DSanpdg1.push_back(11);  // e- e+
+    DSanpdg2.push_back(-11);
+    DSanpdg1.push_back(14);  // numu numubar
+    DSanpdg2.push_back(-14);
+    DSanpdg1.push_back(13);  // mu- mu+
+    DSanpdg2.push_back(-13);
+    DSanpdg1.push_back(16);  // nutau nutaubar
+    DSanpdg2.push_back(-16);
+    DSanpdg1.push_back(15);  // tau- tau+
+    DSanpdg2.push_back(-15);
+    DSanpdg1.push_back(2);   // u ubar
+    DSanpdg2.push_back(-2);
+    DSanpdg1.push_back(1);   // d dbar
+    DSanpdg2.push_back(-1);
+    DSanpdg1.push_back(4);   // c cbar
+    DSanpdg2.push_back(-4);
+    DSanpdg1.push_back(3);   // s sbar
+    DSanpdg2.push_back(-3);
+    DSanpdg1.push_back(6);   // t tbar
+    DSanpdg2.push_back(-6);
+    DSanpdg1.push_back(5);   // b bbar
+    DSanpdg2.push_back(-5);
+    DSanpdg1.push_back(21);   // gluon gluon
+    DSanpdg2.push_back(21);
+    DSanpdg1.push_back(10000);   // (not used)
+    DSanpdg2.push_back(10000);
+    DSanpdg1.push_back(22);   // gamma gamma
+    DSanpdg2.push_back(22);
+    DSanpdg1.push_back(22);   // gamma Z
+    DSanpdg2.push_back(23); 
 
-      
     // Transfer Higgs decay branching fractions (not widths) to Higgs decay common blocks.
     // The total width is not relevant, as all Higgs decay in flight eventually, so
     // only the BFs are needed to calculate the yields into neutrinos from decays in flight.
@@ -390,6 +393,7 @@ BE_NAMESPACE
         anbranch->ans0br(j,i) = Higgs_decay_BFs_neutral[j-1][i-1];
       }
     }
+
     for (int i=1; i<=15; i++)   // Loop over the known charged Higgs decay channels
     {
       anbranch->anscbr(i) = Higgs_decay_BFs_charged[i-1];
@@ -439,20 +443,31 @@ BE_NAMESPACE
 	  twos=0;
 	  twol=0;
 	}
+	iistat=0;
 	if ((ptype == 1) or (ptype == 3)) { // particles
 	  tmp=dsseyield_sim_ls(anmwimp,pow(10.0,log10E),10.0,DSanpdg1[i],DSanpdg2[i],twoj,cp,twos,twol,object,3,t1,iistat);
 	    if ((iistat bitand 8) == 8) { // not simulated channel
-	      tmp=dsseyield_ch(anmwimp,pow(10.0,log10E),10.0,DSanpdg1[i],DSanpdg2[i],object,3,t1,iistat);
+	     
+        tmp=dsseyield_ch(anmwimp,pow(10.0,log10E),10.0,DSanpdg1[i],DSanpdg2[i],object,3,t1,iistat);
 	    }
 	  result += 1e-30 * DSanbr[i] * tmp;
+
+      // The following is just a warning, not an error: unpolarized yields
+      // are used even if polarized yields are asked for   
+      if ((iistat bitand 16) == 16) iistat -= 16;
 	  istat=(istat bitor iistat);
 	}
 	if ((ptype == 2) or (ptype == 3)) { // anti-particles
 	  tmp=dsseyield_sim_ls(anmwimp,pow(10.0,log10E),10.0,DSanpdg1[i],DSanpdg2[i],twoj,cp,twos,twol,object,3,t2,iistat);
 	    if ((iistat bitand 8) == 8) { // not simulated channel
-	      tmp=dsseyield_ch(anmwimp,pow(10.0,log10E),10.0,DSanpdg1[i],DSanpdg2[i],object,3,t2,iistat);
+
+          tmp=dsseyield_ch(anmwimp,pow(10.0,log10E),10.0,DSanpdg1[i],DSanpdg2[i],object,3,t2,iistat);
 	    }
 	  result += 1e-30 * DSanbr[i] * tmp;
+
+      // The following is just a warning, not an error: unpolarized yields
+      // are used even if polarized yields are asked for   
+      if ((iistat bitand 16) == 16) iistat -= 16;
 	  istat=(istat bitor iistat);
 	}
 

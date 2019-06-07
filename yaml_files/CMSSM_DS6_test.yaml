@@ -29,27 +29,21 @@ Parameters:
       fixed_value: -0.085
 
   # SUSY parameters.
-#  CMSSM:
-#    M0:
-#      range: [50, 1e4]
-#      prior_type: log
-#    M12:
-#      range: [50, 1e4]
-#      prior_type: log
-#    A0:
-#      range: [-1e4, 1e4]
-#      flat_start: -1e2
-#      flat_end: 1e2
-#      prior_type: double_log_flat_join
-#    TanBeta:
-#      range: [3.0, 70]
-#    SignMu: 1
   CMSSM:
-    A0: 62.2053
-    M0: 1045.43
-    M12: 317.233
+    M0:
+      range: [50, 1e4]
+      prior_type: log
+    M12:
+      range: [50, 1e4]
+      prior_type: log
+    A0:
+      range: [-1e4, 1e4]
+      flat_start: -1e2
+      flat_end: 1e2
+      prior_type: double_log_flat_join
+    TanBeta:
+      range: [3.0, 70]
     SignMu: 1
-    TanBeta: 49.6361
 
 
   # Dark matter halo parameters.
@@ -222,16 +216,16 @@ ObsLikes:
     - capability: SIMPLE_2014_LogLikelihood
       purpose:    LogLike
 
-#    - capability: IC79_loglike
-#      purpose:    LogLike
+    - capability: IC79_loglike
+      purpose:    LogLike
 
     # SI nuclear nuisance parameter likelihood
-#    - capability: lnL_SI_nuclear_parameters
-#      purpose:    LogLike
+    - capability: lnL_SI_nuclear_parameters
+      purpose:    LogLike
 
     # DM Local Halo likelihoods
-#    - capability: lnL_rho0
-#      purpose: LogLike
+    - capability: lnL_rho0
+      purpose: LogLike
 
     #- capability: lnL_vrot
     #  purpose: LogLike

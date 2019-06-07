@@ -967,13 +967,12 @@ START_MODULE
     DEPENDENCY(mwimp, double)
     DEPENDENCY(sigmav, double)
     DEPENDENCY(DarkMatter_ID, std::string)
-    BACKEND_OPTION((DarkSUSY, 5.1.1, 5.1.2, 5.1.3), (needs_DS)) // define "needs_DS"
-    BACKEND_REQ(nuyield_setup, (needs_DS), void, (const double(&)[29],
+    BACKEND_REQ(DS_nuyield_setup, (), void, (const double(&)[29],
      const double(&)[29][3], const double(&)[15], const double(&)[3], const double&,
      const double&))
-    BACKEND_REQ(nuyield, (needs_DS), double, (const double&, const int&, void*&))
-    BACKEND_REQ(get_DS_neutral_h_decay_channels, (needs_DS), std::vector< std::vector<str> >, ())
-    BACKEND_REQ(get_DS_charged_h_decay_channels, (needs_DS), std::vector< std::vector<str> >, ())
+    BACKEND_REQ(nuyield, (), double, (const double&, const int&, void*&))
+    BACKEND_REQ(get_DS_neutral_h_decay_channels, (), std::vector< std::vector<str> >, ())
+    BACKEND_REQ(get_DS_charged_h_decay_channels, (), std::vector< std::vector<str> >, ())
     #undef FUNCTION
   #undef CAPABILITY
 
