@@ -128,6 +128,12 @@ namespace Gambit
        /// (calls broadcast_shutdown_signal, just does extra things as well)
        //void do_emergency_MPI_shutdown(bool use_mpi_abort=true);
 
+       /// Shutdown codes receivable via MPI (not MPI tags)
+       //static const int ERROR = 0; // Not in use
+       static const int SOFT_SHUTDOWN = 1;
+       static const int EMERGENCY_SHUTDOWN = 2;
+       static const int NO_MORE_MESSAGES = -1;
+
        /// Broadcast signal to shutdown all processes
        /// By default sends emergency shutdown code.
        void broadcast_shutdown_signal(int shutdown_code=EMERGENCY_SHUTDOWN);
@@ -185,11 +191,6 @@ namespace Gambit
        GMPI::Comm* signalComm;
        bool _comm_rdy;
  
-       /// Shutdown codes receivable via MPI (not MPI tags)
-       //static const int ERROR = 0; // Not in use
-       static const int SOFT_SHUTDOWN = 1;
-       static const int EMERGENCY_SHUTDOWN = 2;
-       static const int NO_MORE_MESSAGES = -1;
        static std::string shutdown_name(int shutdown_code);
         
        /// Flag to check if shutdown message has already been broadcast

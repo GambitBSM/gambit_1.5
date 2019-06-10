@@ -307,7 +307,7 @@ int main(int argc, char* argv[])
       // (it is needed to prevent MPI_Finalize from locking up,
       // but there is no point doing it if we aren't going to
       // call MPI_Finalize)
-      signaldata().broadcast_shutdown_signal(-1); // Tell all other processes that we are done sending messages
+      signaldata().broadcast_shutdown_signal(SignalData::NO_MORE_MESSAGES); // Tell all other processes that we are done sending messages
       signaldata().ensure_no_more_shutdown_messages();
       logger()<<"All shutdown messages successfully Recv'd on this process!"<<EOM;
     }

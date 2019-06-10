@@ -430,7 +430,7 @@ namespace Gambit
            {
               int code;
               signalComm->Recv(&code, 1, rank, signalComm->mytag);
-              if(code==-1) more_messages = false;
+              if(code==NO_MORE_MESSAGES) more_messages = false;
               loop++;
               if(loop>2*mpiSize)
               {
@@ -493,7 +493,7 @@ namespace Gambit
    {
      if(MPIsize>1)
      {
-       if(not shutdown_broadcast_done)
+       if(shutdown_code==NO_MORE_MESSAGES or not shutdown_broadcast_done)
        {
          if(comm_ready())
          {
