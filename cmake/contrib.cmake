@@ -70,6 +70,7 @@ if(WITH_RESTFRAMES)
   set(EXCLUDE_RESTFRAMES FALSE)
 else()
   message("   RestFrames-dependent analyses in ColliderBit will be deactivated.")
+  execute_process(COMMAND ${CMAKE_COMMAND} -E remove_directory ${restframes_CONTRIB_DIR})
   set(EXCLUDE_RESTFRAMES TRUE)
 endif()
 
