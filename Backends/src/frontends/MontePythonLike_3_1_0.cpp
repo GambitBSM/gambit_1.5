@@ -45,8 +45,19 @@ BE_NAMESPACE
 
 	// S.B: So this mcmc_parameters variable will always be empty, right?
 	// Since we never use MP itself to scan...
+	// (JR) yes, we don't use MP to scan but the likelihoods will call the 
+	// current values of the cosmo & nuissance parameters from the mcmc_parameters dict
+	// So as soon as the other problems are solved we need to fill this
+	// with the right params and pass it 
 	pybind11::dict mcmc_parameters;
-	pybind11::str command_line = ""; // And this?
+	pybind11::str command_line = ""; 
+	// And this? 
+	// (JR) internally needed in MP for sampling reasons etc. We don't need it but I keept it as argument
+	// so we do not have to modify the MP code too much
+	// If we removed it we would have to change the initialisation of each Likelihood 
+	// object in each MP Likelihood we use. -> Likelihood.__init__(self, path, data, command_line)
+	// So I thought it is easer to pass an empty string instead of patching every single Likelihood
+
 
 	// Root likelihood path.
 	std::string like_path = backendDir+"/montepython/likelihoods/";
@@ -59,6 +70,8 @@ BE_NAMESPACE
 	//		   }
 	// In fact we can make this a macro/function, probably, since
 	// it looks like the experiment + likelihood share a name in MP. Best day ever!
+	// (JR) xD hahaha, that is a great idea!! I'll be on it as soon as I've dealt with 
+	// the other stuff (and after popping the bottle ;))
 
 	// In the future, this will be an array of experiments used in the scan.
 	// For now, just do BAOs
@@ -69,11 +82,6 @@ BE_NAMESPACE
 	// Import Data object from MontePython
 	pybind11::object data = 
 		MontePythonLike.attr("Data")("",path_dict,experiments,mcmc_parameters);
-
-	// Pass the Data object to the Likelihood object internal to MontePython.
-	// do we need this?
-	//pybind11::object Likelihood = 
-	//	MontePythonLike.attr("Likelihood")(bao_path, data, command_line);
 
 	// Add the path to the likelihoods in MP to sys.path.
 	pybind11::module sys = pybind11::module::import("sys");
@@ -95,15 +103,21 @@ BE_NAMESPACE
 
 
     // temporary
+    //sys.attr("path").attr("append")("/Backends/installed/class/2.6.3/python/build/lib.linux-x86_64-2.7/classy.so");
     sys.attr("path").attr("append")("/Backends/installed/exoclass/2.7.0/python/build/lib.linux-x86_64-2.7/classy.so");
     pybind11::module classy = pybind11::module::import("classy");
 
     pybind11::object Class = classy.attr("Class")();
+    Class.attr("set_default")();
+    Class.attr("compute")();
+    Class.attr("compute")();
     double age = Class.attr("age")().cast<double>();
 
     std::cout << age << std::endl;
 
     pybind11::object baologlike = BAO.attr("loglkl")(Class, data);
+
+    pybind11::print(baologlike);
 
     /*	1. create instance of Class() object in CLASS frontend
     *   2. pass this back to CosmoBit 
