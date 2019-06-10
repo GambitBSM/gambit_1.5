@@ -133,7 +133,11 @@ namespace Gambit
        void broadcast_shutdown_signal(int shutdown_code=EMERGENCY_SHUTDOWN);
  
        /// Absorb any extra shutdown messages that may be unreceived (for cleanup before MPI_Finalize)
+       /// (DEPRECATED! Delete once 'ensure_no_more_shutdown_messages' method is fully adopted)
        void discard_excess_shutdown_messages();
+
+       /// Recv shutdown messages until 'no more messages' code is received, from every process.
+       void ensure_no_more_shutdown_messages();
        #endif
 
        /// Add a new loop time to internal array used to decide barrier timeout
@@ -185,6 +189,7 @@ namespace Gambit
        //static const int ERROR = 0; // Not in use
        static const int SOFT_SHUTDOWN = 1;
        static const int EMERGENCY_SHUTDOWN = 2;
+       static const int NO_MORE_MESSAGES = -1;
        static std::string shutdown_name(int shutdown_code);
         
        /// Flag to check if shutdown message has already been broadcast
