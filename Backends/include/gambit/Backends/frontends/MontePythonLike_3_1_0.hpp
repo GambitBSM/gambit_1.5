@@ -21,9 +21,12 @@
 
 LOAD_LIBRARY
 
-BE_CONV_FUNCTION(get_MP_loglike, double, (std::string), "get_MP_loglike")
+BE_CONV_FUNCTION(get_MP_loglike, double, (CosmoBit::Classy_cosmo_container&), "get_MP_loglike")
 
-BE_INI_DEPENDENCY(classy_python_obj,CosmoBit::Classy_cosmo_container)
+BE_CONV_FUNCTION(create_data_object, pybind11::object, (), "create_data_object")
+BE_CONV_FUNCTION(create_likelihood_objects, map_str_dbl, (pybind11::object &), "create_likelihood_objects")
+
+//BE_INI_DEPENDENCY(classy_python_obj,CosmoBit::Classy_cosmo_container)
 
 // Undefine macros to avoid conflict with other backends
 #include "gambit/Backends/backend_undefs.hpp"

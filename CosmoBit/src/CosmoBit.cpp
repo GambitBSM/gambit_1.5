@@ -3179,7 +3179,7 @@ namespace Gambit
       std::cout << "(CosmoBit): init_MontePythonLike start"<< std::endl;
 
       // (JR) call MP loglike -> atm this will crash when calculating the 2nd point since the ccc.data python object does not exist anymore
-      result = BEreq::get_MP_loglike("bao");
+      //result = BEreq::get_MP_loglike("bao");
 
       std::cout << "(CosmoBit): get_MP_loglike end with resutl "<< result << std::endl;
       result = 5.;
@@ -3192,7 +3192,15 @@ namespace Gambit
       // to bring in the `_a` literal
       using namespace pybind11::literals; 
 
-      Classy_cosmo_container ccc = *Dep::classy_python_obj;
+
+      pybind11::object data = BEreq::create_data_object();
+      //std::map<std::string, pybind11::object> likelihoods = BEreq::create_likelihood_objects(data);
+      map_str_dbl likelihoods = BEreq::create_likelihood_objects(data);
+      
+      CosmoBit::Classy_cosmo_container ccc(data, likelihoods);
+
+      BEreq::classy_2_6_3_create_python_obj(ccc.cosmo);
+      //ccc = *Dep::classy_python_obj;
  
       std::cout << "(CosmoBit): test_classy start"<< std::endl;
 
@@ -3204,6 +3212,16 @@ namespace Gambit
       BEreq::classy_2_6_3_set_parameter(ccc);
 
       std::cout << "(CosmoBit): test_classy end"<< std::endl;
+
+      std::cout << "(CosmoBit): init_MontePythonLike start"<< std::endl;
+
+      // (JR) call MP loglike -> atm this will crash when calculating the 2nd point since the ccc.data python object does not exist anymore
+      std::string like_name = "bao";
+      result = BEreq::get_MP_loglike(ccc);
+
+      std::cout << "(CosmoBit): get_MP_loglike end with resutl "<< result << std::endl;
+
+
     }
 
 

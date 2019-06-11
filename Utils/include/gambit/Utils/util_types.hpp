@@ -53,6 +53,9 @@
 #include "gambit/Utils/variadic_functions.hpp"
 #include "gambit/Utils/local_info.hpp"
 
+//#include <pybind11/pybind11.h>
+//#include <pybind11/stl_bind.h>
+
 namespace Gambit
 {
 
@@ -73,6 +76,9 @@ namespace Gambit
 
   /// Shorthand for an int-int pair to double map
   typedef std::map< std::pair < int, int >, double> map_intpair_dbl;
+
+  /// Shorthand for a string to pybing object map map
+  //typedef std::map<std::string,pybind11::object> map_str_pyobj;
 
   // Useful unqualified functions
   using std::cout;

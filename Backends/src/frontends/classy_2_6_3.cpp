@@ -63,13 +63,18 @@ BE_NAMESPACE
 
   void classy_2_6_3_set_parameter(CosmoBit::Classy_cosmo_container & ccc )
   {
-  	// Need to call MP init before that such that output for class gets filled with all necessary entries
-  	//pybind11::dict combined_in_dict = combine_py_dicts(ccc.cosmo_input_dict, ccc.cosmo_prec_dict);
-  	//ccc.cosmo.attr("set")(combined_in_dict);
+  	// (JR) Should MP init before that such that output for class gets filled with all necessary entries
   	
+  	// (JR) combinding dicts does not work atm, fix later
+  	/*pybind11::dict combined_in_dict = combine_py_dicts(ccc.cosmo_input_dict, ccc.cosmo_prec_dict);
+  	//ccc.cosmo.attr("set")(combined_in_dict); */
+  	
+  	// set cosmological parameters
   	ccc.cosmo.attr("set")(ccc.cosmo_input_dict);
   	
     std::cout << "		(classy frontend) after set parameters "<< std::endl;
+
+    // run class
   	ccc.cosmo.attr("compute")();
   	double age = ccc.cosmo.attr("age")().cast<double>();
   	double h = ccc.cosmo.attr("h")().cast<double>();
