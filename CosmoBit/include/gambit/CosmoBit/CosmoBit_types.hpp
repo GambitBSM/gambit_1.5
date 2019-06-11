@@ -50,22 +50,42 @@ namespace Gambit
 
     //typedef std::map<std::string,pybind11::object> map_str_pyobj;
     
-    class Classy_cosmo_container
+    class MPLike_data_container
     {
+    /* Class holing MPLIke data structure & map with initialised Likelihoods objects; this is
+        separated form the Classy_cosmo_container since it needs to be initialised as 'static const'
+        such that the initialisation and reading in of data only happens once. 
+        This is essential since the parsing of the data at initialisation of a Likelihood object can take
+        much longer than the actual Likelihood calculation. 
+        --
+        Memebers:
+        --
+        pybind11::object data : MPLike data structure
+        map_str_pyobj likelihoods : map likelihood name to initialised MPLike likelihood object
+    */
     public:
-        Classy_cosmo_container();
-        Classy_cosmo_container(pybind11::object &data_in, map_str_dbl likelihoods_in);
-
-        //pybind11::object cosmo;
+        MPLike_data_container();
+        MPLike_data_container(pybind11::object &data_in, map_str_dbl likelihoods_in);
+        
         pybind11::object data;
         //map_str_pyobj likelihoods;
         map_str_dbl likelihoods;
 
-        //pybind11::dict cosmo_input_dict;
-        //pybind11::dict cosmo_prec_dict;
+    };
 
+    class Classy_cosmo_container
+    {
+    /* Class holding python object cosmo which is an instance of the class Class() from classy (Python wrapper for CLASS)
+        This needs to be passed around between the classy frontend, CosmoBit & the MPLike frontend. 
+    */
+    public:
+        Classy_cosmo_container(){}
+        pybind11::object cosmo;
+        pybind11::dict cosmo_input_dict;
+        pybind11::dict cosmo_prec_dict;
+
+        // eventually write function that can create an array/list of experiments requested in yaml file
         //void set_likelihoods(std::vector<std::string>){std::cout<<"Need to implement conversion string -> like object";};
-        
     };
 
     class BBN_container

@@ -3185,25 +3185,7 @@ namespace Gambit
       result = 5.;
     }
 
-   /* void test_static_const(CosmoBit::Classy_cosmo_container &ccc)
-    {
-      using namespace Pipes::test_static_const;
-      pybind11::object data;
-      map_str_dbl likelihoods;
-      static bool first_run = true;
-      if(first_run)
-      {
-        data = BEreq::create_data_object();
-        likelihoods = BEreq::create_likelihood_objects(data);
-        first_run = false;
-      }
-      //std::map<std::string, pybind11::object> likelihoods = BEreq::create_likelihood_objects(data);
-      CosmoBit::Classy_cosmo_container a(data, likelihoods);
-      ccc = a;
-      std::cout << "Print ccc "<< ccc.likelihoods.at("bao") << std::endl;
-
-    }*/
-
+  
     void test_classy(double & result)
     {
       using namespace Pipes::test_classy;
@@ -3222,7 +3204,7 @@ namespace Gambit
       }
       //std::map<std::string, pybind11::object> likelihoods = BEreq::create_likelihood_objects(data);
       
-      static const CosmoBit::Classy_cosmo_container ccc(data, likelihoods);
+      static const CosmoBit::MPLike_data_container ccc(data, likelihoods);
 
       //static CosmoBit::Classy_cosmo_container ccc = *Dep::static_const;
 
