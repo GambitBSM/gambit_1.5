@@ -757,7 +757,6 @@ endif()
                             towrite += " "*4 + "set (" + plug_type[i] + "_plugin_found_incs_" + directory
                             towrite += " \"${" +  plug_type[i] + "_plugin_found_incs_" + directory + "}"
                             towrite += "    \\\"" + inc + "\\\": ${ROOT_INCLUDE_DIRS}\\n\")\n"
-                            towrite += " message(\"scanner_plugin_found_incs_great: ${scanner_plugin_found_incs_great}\")\n"
                             towrite += "endif()\n\n"
                         else:
                             inc_name = plug_type[i] + "_" + directory + "_" + re.sub(r";|/|\.", "_", inc) + "_INCLUDE_PATH"
