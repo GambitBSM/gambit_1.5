@@ -20,6 +20,7 @@
 #include <iostream>
 #include <signal.h>
 #include <omp.h>
+#include <time.h> // For nanosleep (posix only)
 #include <cmath>
 #include "gambit/Utils/signal_handling.hpp"
 #include "gambit/Utils/mpiwrapper.hpp"

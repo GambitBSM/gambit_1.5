@@ -310,6 +310,11 @@ int main(int argc, char* argv[])
       signaldata().broadcast_shutdown_signal(SignalData::NO_MORE_MESSAGES); // Tell all other processes that we are done sending messages
       signaldata().ensure_no_more_shutdown_messages();
       logger()<<"All shutdown messages successfully Recv'd on this process!"<<EOM;
+
+      // DEBUG: Check for unreceived messages of any tag
+      // int timeout_sec(10);
+      // errorComm.check_for_unreceived_messages(timeout_sec);
+      // scanComm.check_for_unreceived_messages(0); // No need to wait again
     }
 
     #endif
