@@ -565,6 +565,7 @@ set( PLUGIN_INCLUDE_DIRECTORIES
                 ${Boost_INCLUDE_DIR}
                 ${GSL_INCLUDE_DIRS}
                 ${ROOT_INCLUDE_DIR}
+                ${ROOT_INCLUDE_DIRS}
                 ${PROJECT_SOURCE_DIR}/ScannerBit/include/gambit/ScannerBit
 )\n
 if( ${PLUG_VERBOSE} )
@@ -748,10 +749,15 @@ endif()
                             towrite += " "*4 + "set (" + plug_type[i] + "_plugin_includes_" + directory + "\n"
                             towrite += " "*8 + "${" + plug_type[i] + "_plugin_includes_" + directory + "}\n"
                             towrite += " "*8 + "${ROOT_INCLUDE_DIR}\n"
+                            towrite += " "*8 + "${ROOT_INCLUDE_DIRS}\n"
                             towrite += " "*4 + ")\n"
                             towrite += " "*4 + "set (" + plug_type[i] + "_plugin_found_incs_" + directory
                             towrite += " \"${" +  plug_type[i] + "_plugin_found_incs_" + directory + "}"
                             towrite += "    \\\"" + inc + "\\\": ${ROOT_INCLUDE_DIR}\\n\")\n"
+                            towrite += " "*4 + "set (" + plug_type[i] + "_plugin_found_incs_" + directory
+                            towrite += " \"${" +  plug_type[i] + "_plugin_found_incs_" + directory + "}"
+                            towrite += "    \\\"" + inc + "\\\": ${ROOT_INCLUDE_DIRS}\\n\")\n"
+                            towrite += " message(\"scanner_plugin_found_incs_great: ${scanner_plugin_found_incs_great}\")\n"
                             towrite += "endif()\n\n"
                         else:
                             inc_name = plug_type[i] + "_" + directory + "_" + re.sub(r";|/|\.", "_", inc) + "_INCLUDE_PATH"
