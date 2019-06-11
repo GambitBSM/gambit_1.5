@@ -65,6 +65,17 @@ BE_INI_FUNCTION
 		// Root likelihood path.
 		std::string like_path = backendDir+"/montepython/likelihoods/";
 
+		// Maybe make a dictionary?
+		// dict = {
+		//			"bao":      "/bao/bao.data",
+		//			"Pantheon": "/Pantheon/Pantheon.data"
+		//			...
+		//		   }
+		// In fact we can make this a macro/function, probably, since
+		// it looks like the experiment + likelihood share a name in MP. Best day ever!
+		// (JR) xD hahaha, that is a great idea!! I'll be on it as soon as I've dealt with 
+		// the other stuff (and after popping the bottle ;))
+
 		// In the future, this will be an array of experiments used in the scan.
 		// For now, just do BAOs
 		pybind11::tuple experiments = pybind11::make_tuple("bao");
