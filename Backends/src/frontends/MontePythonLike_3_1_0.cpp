@@ -28,14 +28,15 @@ BE_NAMESPACE
 {
   using namespace pybind11::literals; // to bring in the `_a` literal
   
-  double get_MP_loglike(CosmoBit::Classy_cosmo_container & ccc)
+  double get_MP_loglike(const CosmoBit::Classy_cosmo_container & ccc, pybind11::object & cosmo)
   {
 	//std::string like = "bao"; // add like_string as argument
   	std::string like = "bao";
-    std::cout << "   		(MontePythonLike) cosmo h  "<< ccc.cosmo.attr("h")().cast<double>() << std::endl;
+    std::cout << "   		(MontePythonLike) cosmo h  "<< cosmo.attr("h")().cast<double>() << std::endl;
     std::cout << "   		(MontePythonLike) before calling loglkl " << std::endl;
 
-  	double result = ccc.likelihoods[like];//.attr("loglkl")(ccc.cosmo, ccc.data).cast<double>();
+    // need to use likelihood.at() since it is a const map -> [] can create entry & can't be used on const object
+  	double result = ccc.likelihoods.at(like);//.attr("loglkl")(cosmo, ccc.data).cast<double>();
 
     std::cout << "   		(MontePythonLike) computed BAO loglike to be " << result << std::endl;
     return result;

@@ -57,7 +57,12 @@ namespace Gambit
       BBN_abund.resize(NNUC+1, 0.);
       BBN_covmat.resize(NNUC+1, std::vector<double>(NNUC+1,0.));
     }
-    
+    Classy_cosmo_container::Classy_cosmo_container(){std::cout<<"Called default constructor";}
+    Classy_cosmo_container::Classy_cosmo_container(pybind11::object &data_in, map_str_dbl likelihoods_in): data(data_in), likelihoods(likelihoods_in) 
+    {
+      std::cout<<"------------ called Classy_cosmo_container constructor ----------------" << std::endl;
+    }
+
     //Classy_cosmo_container::Classy_cosmo_container(pybind11::object & data_in, map_str_pyobj likelihoods_in): data(data_in), likelihoods(likelihoods_in) {}
     //{
     //  data = data_in;

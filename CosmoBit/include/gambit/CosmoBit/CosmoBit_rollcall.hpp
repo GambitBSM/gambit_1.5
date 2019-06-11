@@ -577,35 +577,49 @@ START_MODULE
      #define FUNCTION init_MontePythonLike
       START_FUNCTION(double)
       ALLOW_MODELS(LCDM)
-      DEPENDENCY(classy_python_obj, CosmoBit::Classy_cosmo_container)
-      BACKEND_REQ(get_MP_loglike,(libmontepythonlike),double,(CosmoBit::Classy_cosmo_container&))
+      DEPENDENCY(classy_python_obj, pybind11::object)
+      BACKEND_REQ(get_MP_loglike,(libmontepythonlike),double,(const CosmoBit::Classy_cosmo_container&, pybind11::object&))
      #undef FUNCTION
   #undef CAPABILITY
 
     #define CAPABILITY classy_python_obj
      START_CAPABILITY
      #define FUNCTION create_classy_python_obj
-      START_FUNCTION(CosmoBit::Classy_cosmo_container)
+      START_FUNCTION(pybind11::object)
       ALLOW_MODELS(LCDM)
       BACKEND_REQ(classy_2_6_3_create_python_obj,(classy),void,(pybind11::object&))
-      BACKEND_REQ(classy_2_6_3_set_parameter,(classy),void,(CosmoBit::Classy_cosmo_container &))
+      BACKEND_REQ(classy_2_6_3_set_parameter,(classy),void,(pybind11::object&, pybind11::dict&))
 
      #undef FUNCTION
   #undef CAPABILITY
+
+  /*  #define CAPABILITY static_const
+     START_CAPABILITY
+     #define FUNCTION test_static_const
+      START_FUNCTION(CosmoBit::Classy_cosmo_container)
+      ALLOW_MODELS(LCDM)
+      BACKEND_REQ(create_likelihood_objects,(libmontepythonlike),map_str_dbl,(pybind11::object&))
+      BACKEND_REQ(create_data_object,(libmontepythonlike),pybind11::object,())
+      //BACKEND_REQ(classy_2_6_3_create_python_obj,(classy),void,(pybind11::object&))
+      //BACKEND_REQ(classy_2_6_3_set_parameter,(classy),void,(pybind11::object&, pybind11::dict&))
+
+     #undef FUNCTION
+  #undef CAPABILITY*/
   
   #define CAPABILITY cap_test_classy
      START_CAPABILITY
      #define FUNCTION test_classy
       START_FUNCTION(double)
       ALLOW_MODELS(LCDM)
-      DEPENDENCY(classy_python_obj, CosmoBit::Classy_cosmo_container)
+      DEPENDENCY(classy_python_obj, pybind11::object)
+      //DEPENDENCY(static_const, CosmoBit::Classy_cosmo_container)
       BACKEND_REQ(classy_2_6_3_create_python_obj,(classy),void,(pybind11::object&))
-      BACKEND_REQ(classy_2_6_3_set_parameter,(classy),void,(CosmoBit::Classy_cosmo_container &))
+      BACKEND_REQ(classy_2_6_3_set_parameter,(classy),void,(pybind11::object&, pybind11::dict&))
 
       //BACKEND_REQ(create_likelihood_objects,(libmontepythonlike),map_str_pyobj,(pybind11::object&))
       BACKEND_REQ(create_likelihood_objects,(libmontepythonlike),map_str_dbl,(pybind11::object&))
       BACKEND_REQ(create_data_object,(libmontepythonlike),pybind11::object,())
-      BACKEND_REQ(get_MP_loglike,(libmontepythonlike),double,(CosmoBit::Classy_cosmo_container&))
+      BACKEND_REQ(get_MP_loglike,(libmontepythonlike),double,(const CosmoBit::Classy_cosmo_container&, pybind11::object&))
      #undef FUNCTION
   #undef CAPABILITY
 
