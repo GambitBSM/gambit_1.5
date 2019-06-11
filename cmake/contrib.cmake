@@ -80,6 +80,8 @@ if(NOT EXCLUDE_RESTFRAMES)
   set(ver "${restframes_VERSION}")
   set(dir "${restframes_CONTRIB_DIR}")
   set(patch "${PROJECT_SOURCE_DIR}/contrib/patches/${name}/${ver}/patch_${name}_${ver}.dif")
+  set(RESTFRAMES_CPP "${CMAKE_C_COMPILER} -E")
+  set(RESTFRAMES_CXXCPP "${CMAKE_CXX_COMPILER} -E")
   set(RESTFRAMES_LDFLAGS "-L${dir}/lib -lRestFrames")
   set(CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_RPATH};${dir}/lib")
   include_directories("${dir}" "${dir}/inc")
@@ -88,7 +90,7 @@ if(NOT EXCLUDE_RESTFRAMES)
              COMMAND ${CMAKE_COMMAND} -E chdir ${dir} git checkout -q v${ver}
     SOURCE_DIR ${dir}
     BUILD_IN_SOURCE 1
-    CONFIGURE_COMMAND ./configure -prefix=${dir}
+    CONFIGURE_COMMAND ./configure -prefix=${dir} CC=${CMAKE_C_COMPILER} CFLAGS=${BACKEND_C_FLAGS} CPP=${RESTFRAMES_CPP} CXX=${CMAKE_CXX_COMPILER} CXXFLAGS=${BACKEND_CXX_FLAGS} CXXCPP=${RESTFRAMES_CXXCPP}
     # Patch RestFrames to set the CPLUS_INCLUDE_PATH environment variable correctly when RestFrames is loaded.
     # This avoids having to run setup_RestFrames.sh.
     PATCH_COMMAND patch -p1 < ${patch}
