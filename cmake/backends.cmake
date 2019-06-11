@@ -1106,6 +1106,33 @@ if(NOT ditched_${name}_${ver})
   set_as_default_version("backend" ${name} ${ver})
 endif()
 
+
+# classy
+set(name "classy")
+set(ver "2.6.3")
+set(lib "classy")
+set(patch "${PROJECT_SOURCE_DIR}/Backends/patches/${name}/${ver}")
+set(dl "https://github.com/lesgourg/class_public/archive/v${ver}.tar.gz")
+set(md5 "e6eb0fd721bb1098e642f5d1970501ce")
+set(dir "${PROJECT_SOURCE_DIR}/Backends/installed/${name}/${ver}")
+check_ditch_status(${name} ${ver})
+if(NOT ditched_${name}_${ver})
+  ExternalProject_Add(${name}_${ver}
+    DOWNLOAD_COMMAND ${DL_BACKEND} ${dl} ${md5} ${dir}
+    SOURCE_DIR ${dir}
+    BUILD_IN_SOURCE 1
+    CONFIGURE_COMMAND ""
+    BUILD_COMMAND ${CMAKE_MAKE_PROGRAM} CC=${CMAKE_C_COMPILER} OMPFLAG=-fopenmp OPTFLAG= CCFLAG=${BACKEND_C_FLAGS} LDFLAG=${BACKEND_C_FLAGS} all
+    COMMAND ${CMAKE_COMMAND} -E make_directory lib
+    COMMAND ${CMAKE_COMMAND} -E echo "${CMAKE_C_COMPILER} ${CMAKE_SHARED_LIBRARY_CREATE_C_FLAGS} ${BACKEND_C_FLAGS} -o lib/${lib}.so build/*.o" > make_so.sh
+    COMMAND chmod u+x make_so.sh
+    COMMAND ./make_so.sh
+    INSTALL_COMMAND ""
+  )
+  add_extra_targets("backend" ${name} ${ver} ${dir} ${dl} clean)
+  set_as_default_version("backend" ${name} ${ver})
+endif()
+
 # exoclass
 set(name "exoclass")
 set(ver "2.7.0")

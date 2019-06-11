@@ -36,6 +36,10 @@
 #include "gambit/Backends/backend_types/class.hpp"
 #include <valarray>
 
+#include <pybind11/stl.h>
+#include <pybind11/stl_bind.h>
+#include <pybind11/functional.h>
+
 namespace Gambit
 {
 
@@ -44,6 +48,23 @@ namespace Gambit
 
     typedef std::map< std::string,std::valarray < double > > map_str_valarray_dbl;
     
+    class Classy_cosmo_container
+    {
+    public:
+        //Classy_cosmo_container();
+        //~Classy_cosmo_container();
+
+        pybind11::object cosmo;
+        pybind11::object data;
+        std::map<std::string, pybind11::object> likelihoods;
+
+        pybind11::dict cosmo_input_dict;
+        pybind11::dict cosmo_prec_dict;
+
+        void set_likelihoods(std::vector<std::string>){std::cout<<"Need to implement conversion string -> like object";};
+        
+    };
+
     class BBN_container
     {
       public:

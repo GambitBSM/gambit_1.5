@@ -73,6 +73,10 @@ ObsLikes:
     module:       CosmoBit
     type:         double
 
+  - purpose:      LogLike
+    capability:   cap_test_classy
+    module:       CosmoBit
+    type:         double
 
 #======== Rule entries ========
 Rules:

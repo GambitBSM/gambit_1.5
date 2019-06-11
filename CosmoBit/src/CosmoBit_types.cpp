@@ -34,7 +34,7 @@ namespace Gambit
 {
   namespace CosmoBit
   {
-    
+
     BBN_container::BBN_container()
     { 
       // maps elements to their position in 'ratioH' array in AlterBBN holding 

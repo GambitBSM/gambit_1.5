@@ -577,7 +577,28 @@ START_MODULE
      #define FUNCTION init_MontePythonLike
       START_FUNCTION(double)
       ALLOW_MODELS(LCDM)
-      BACKEND_REQ(test_MontePythonLike,(libmontepythonlike),void,(pybind11::object&))
+      DEPENDENCY(classy_python_obj, CosmoBit::Classy_cosmo_container)
+      BACKEND_REQ(get_MP_loglike,(libmontepythonlike),double,(std::string))
+     #undef FUNCTION
+  #undef CAPABILITY
+
+    #define CAPABILITY classy_python_obj
+     START_CAPABILITY
+     #define FUNCTION create_classy_python_obj
+      START_FUNCTION(CosmoBit::Classy_cosmo_container)
+      ALLOW_MODELS(LCDM)
+      BACKEND_REQ(classy_2_6_3_create_python_obj,(classy),void,(pybind11::object&))
+      BACKEND_REQ(classy_2_6_3_set_parameter,(classy),void,(CosmoBit::Classy_cosmo_container &))
+     #undef FUNCTION
+  #undef CAPABILITY
+  
+  #define CAPABILITY cap_test_classy
+     START_CAPABILITY
+     #define FUNCTION test_classy
+      START_FUNCTION(double)
+      ALLOW_MODELS(LCDM)
+      DEPENDENCY(classy_python_obj, CosmoBit::Classy_cosmo_container)
+      BACKEND_REQ(classy_2_6_3_set_parameter,(classy),void,(CosmoBit::Classy_cosmo_container &))
      #undef FUNCTION
   #undef CAPABILITY
 

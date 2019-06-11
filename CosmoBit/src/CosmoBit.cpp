@@ -3161,17 +3161,49 @@ namespace Gambit
       result = -0.5*chi2;
     }
 
+    void create_classy_python_obj(Classy_cosmo_container &result)
+    {
+      using namespace Pipes::create_classy_python_obj;
 
-    double init_MontePythonLike(double &result)
+      // create instance of classy class Class()
+      BEreq::classy_2_6_3_create_python_obj(result.cosmo);
+
+      std::cout << "(CosmoBit): initialised ccc.cosmo object"<< std::endl;
+    }
+
+
+    void init_MontePythonLike(double &result)
     {
       using namespace Pipes::init_MontePythonLike;
 
       std::cout << "(CosmoBit): init_MontePythonLike start"<< std::endl;
 
-      pybind11::object cosmo;
-      BEreq::test_MontePythonLike(cosmo);
+      // (JR) call MP loglike -> atm this will crash when calculating the 2nd point since the ccc.data python object does not exist anymore
+      result = BEreq::get_MP_loglike("bao");
 
-      std::cout << "(CosmoBit): init_MontePythonLike end"<< std::endl;
+      std::cout << "(CosmoBit): get_MP_loglike end with resutl "<< result << std::endl;
+      result = 5.;
+    }
+
+    void test_classy(double & result)
+    {
+      using namespace Pipes::test_classy;
+
+      // to bring in the `_a` literal
+      using namespace pybind11::literals; 
+
+      Classy_cosmo_container ccc = *Dep::classy_python_obj;
+ 
+      std::cout << "(CosmoBit): test_classy start"<< std::endl;
+
+      // (JR) fill class input dict with some parameters -- just prelimnary has to be done correctly similar
+      // to class_set_parameters function for class backend
+      ccc.cosmo_input_dict = pybind11::dict("h"_a=*Param["H0"]/100., "output"_a="nCl lCl tCl", "YHe"_a=0.245, "omega_b"_a=*Param["omega_b"]);
+
+      // (JR) Sets parameters & runs class computation -- should be separated into 2 steps in the future
+      BEreq::classy_2_6_3_set_parameter(ccc);
+
+      std::cout << "(CosmoBit): test_classy end"<< std::endl;
     }
 
 
