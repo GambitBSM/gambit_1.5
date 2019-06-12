@@ -36,6 +36,8 @@
 // it looks like the experiment + likelihood share a name in MP. Best day ever!
 // (JR) xD hahaha, that is a great idea!! I'll be on it as soon as I've dealt with 
 // the other stuff (and after popping the bottle ;)
+// 
+// --> No macros needed so far.. :(
 
 BE_NAMESPACE
 {
@@ -60,20 +62,12 @@ BE_NAMESPACE
   pybind11::object create_data_object(std::vector<std::string>& experiments)
   {
 
-  	pybind11::dict path_dict = pybind11::dict("MontePython"_a=backendDir+"/montepython/",
-  											  "data"_a=backendDir+"/data/",
+  	pybind11::dict path_dict = pybind11::dict("MontePython"_a=backendDir,
+  											  "data"_a=backendDir+"/../data/",
   											  "cosmo"_a=backendDir+"/../../../classy/2.6.3/", 
   											  "root"_a=backendDir+"/../../../");
 
   	pybind11::dict mcmc_parameters;  // Empty - we do our own sampling, cheers.
-
-  	/*
-  	// In the future, this will be an array of experiments used in the scan.
-  	// For now, just do BAOs
-  	pybind11::tuple experiments = pybind11::make_tuple("bao");
-  	// Location of the BAO data
-  	pybind11::str bao_path = like_path +"/bao/bao.data";
-  	*/
 
   	// Cast the list of experiments to a tuple, for MP to fire up...
   	pybind11::tuple MP_experiments = pybind11::make_tuple(experiments);
@@ -88,35 +82,6 @@ BE_NAMESPACE
 
   	return data;
   }
-
-/*  //std::map<std::string, pybind11::object> create_likelihood_objects(pybind11::object  & data)
-  map_str_dbl create_likelihood_objects(pybind11::object& data)
-  {
-
-  	pybind11::str command_line = ""; 
-
-  	// Root likelihood path.
-  	std::string like_path = backendDir+"/montepython/likelihoods/";
-  	pybind11::str bao_path = like_path +"/bao/bao.data";
-
-  	pybind11::module sys = pybind11::module::import("sys");
-  	sys.attr("path").attr("append")(like_path);
-
-  	// Now we can import the bao likelihood module & create BAO likelihood object
-  	pybind11::module bao = pybind11::module::import("bao");
-
-  	std::cout << "   		(MPLike init_MPLike_Likelihoods) About to create BAO" << std::endl;
-  	pybind11::object BAO = bao.attr("bao")(bao_path, data, command_line);
-  	
-  	//std::map<std::string, pybind11::object> likelihoods;
-  	map_str_dbl likelihoods;
-  	likelihoods["bao"] = 420.;
-
-  	std::cout << "   		(MPLike init_MPLike_Likelihoods) finished Likelihood init" << std::endl;
-  	return likelihoods;
-  		
-  }  */
-  // v2
   
   map_str_pyobj create_likelihood_objects(pybind11::object& data, std::vector<std::string>& experiments)
   {
@@ -124,13 +89,14 @@ BE_NAMESPACE
   	pybind11::str command_line = ""; 
 
   	// Root likelihood path.
-  	std::string like_path = backendDir+"/montepython/likelihoods/";
+
+  	std::string like_path = backendDir+"/likelihoods/";
+  	std::cout << like_path << std::endl;
 
 	// Add the Likelihood path to sys so we can import it in Python
   	pybind11::module sys = pybind11::module::import("sys");
   	sys.attr("path").attr("append")(like_path);
 
-  	//std::map<std::string, pybind11::object> likelihoods;
   	map_str_pyobj likelihoods;
 
   	// Now go through each experiment one by one, and initialise the Likelihood containers in
@@ -139,11 +105,9 @@ BE_NAMESPACE
   	for (std::vector<std::string>::const_iterator it = experiments.begin(); it != experiments.end(); ++it)
   	{
   		std::string exp_name = *it;
-  		//std::transform(exp_name.begin(), exp_name.end(), exp_name.begin(), ::tolower);
 		pybind11::str     exp_path = like_path + "/" + exp_name + "/" + exp_name + ".data";
 		pybind11::module  exp_module = pybind11::module::import(exp_name.c_str());
 		pybind11::object  EXP_MODULE = exp_module.attr(exp_name.c_str())(exp_path, data, command_line);
-		//likelihoods[exp_name] = 420. + i;
 		likelihoods[exp_name] = EXP_MODULE;
 		i++;
   	}
