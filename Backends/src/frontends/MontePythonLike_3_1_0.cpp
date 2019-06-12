@@ -62,8 +62,8 @@ BE_NAMESPACE
 
   	pybind11::dict path_dict = pybind11::dict("MontePython"_a=backendDir+"/montepython/",
   											  "data"_a=backendDir+"/data/",
-  											  "cosmo"_a=backendDir+"/../../classy/2.6.3/", 
-  											  "root"_a=backendDir+"/../../");
+  											  "cosmo"_a=backendDir+"/../../../classy/2.6.3/", 
+  											  "root"_a=backendDir+"/../../../");
 
   	pybind11::dict mcmc_parameters;  // Empty - we do our own sampling, cheers.
 
