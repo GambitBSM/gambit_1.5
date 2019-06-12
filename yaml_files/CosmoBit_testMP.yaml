@@ -31,7 +31,7 @@ Parameters:
 
  # neutrino masses
  #StandardModel_numass_single: !import include/StandardModel_numass_single_scan.yaml
- #StandardModel_numass_degenerate: !import include/StandardModel_numass_degenerate_scan.yaml
+ StandardModel_numass_degenerate: !import include/StandardModel_numass_degenerate_scan.yaml
 
  # Cosmological nuisance parameters (except for Planck CMB Likelihoods) 
  #cosmo_nuisance_params: !import include/cosmo_nuisance_params.yaml
@@ -96,7 +96,7 @@ Rules:
   - capability: MP_experiment_names
     function: set_MP_experiment_names
     options:
-      Likelihoods: ["WiggleZ","hst"]  
+      Likelihoods: ["bao"]  
       # should eventually be possible to choose any MP like, atm only bao & Pantheon safe to use
       # still need to write a proper patch for MPLike backend & test all Likes
 

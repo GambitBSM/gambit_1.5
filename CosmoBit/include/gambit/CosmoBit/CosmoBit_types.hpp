@@ -48,9 +48,6 @@ namespace Gambit
   {
 
     typedef std::map< std::string,std::valarray < double > > map_str_valarray_dbl;
-
-    // This should live in TYPES
-    //typedef std::map<std::string,pybind11::object> map_str_pyobj;
     
     class MPLike_data_container
     {

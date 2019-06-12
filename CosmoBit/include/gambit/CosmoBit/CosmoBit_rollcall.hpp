@@ -622,8 +622,11 @@ START_MODULE
      #define FUNCTION set_classy_parameters_LCDM
       START_FUNCTION(pybind11::dict)
       ALLOW_MODELS(LCDM)
-      //DEPENDENCY(get_Classy_cosmo_container, CosmoBit::Classy_cosmo_container)
-      //BACKEND_REQ(classy_create_class_instance,(classy),void,(pybind11::object&))
+      DEPENDENCY(NuMasses_SM, map_str_dbl)
+      DEPENDENCY(Helium_abundance,std::vector<double>)
+      DEPENDENCY(T_cmb, double)
+      DEPENDENCY(T_ncdm, double)
+      DEPENDENCY(class_Nur, double)
      #undef FUNCTION
   #undef CAPABILITY
   
@@ -651,17 +654,6 @@ START_MODULE
       BACKEND_REQ(get_MP_loglike,           (libmontepythonlike), double,           (const CosmoBit::MPLike_data_container&, pybind11::object&, std::string&))
     #undef FUNCTION
   #undef CAPABILITY
-
-  /// Calculates the lnL contribution for each experimental
-  /// dataset from MontePython 
-  //#define CAPABILITY MP_LogLike_per_experiment
-  //  START_CAPABILITY
-  //  #define FUNCTION calc_MP_LogLike_per_experiment
-  //    START_FUNCTION(map_str_dbl)
-  //    DEPENDENCY(MP_LogLikes, map_str_dbl)
-  //    ALLOW_MODELS(LCDM)
-  //  #undef FUNCTION
-  //#undef CAPABILITY
       
   /// Calculates the total lnL from MontePython 
   #define CAPABILITY MP_Combined_LogLike

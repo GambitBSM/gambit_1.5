@@ -3161,6 +3161,14 @@ namespace Gambit
       result = -0.5*chi2;
     }
 
+/***********************************************/
+/* Interface to CLASS Python wrapper, 'classy' */
+/***********************************************/
+
+    /// Initialises the container within CosmoBit from classy. This holds
+    /// an instance of the classy class Class() (Yep, I know...) 
+    /// which can be handed over to MontePython, or just used to compute 
+    /// some observables.
     void init_Classy_cosmo_container(CosmoBit::Classy_cosmo_container& ccc)
     {
       using namespace Pipes::init_Classy_cosmo_container;
@@ -3176,6 +3184,9 @@ namespace Gambit
       std::cout << "(CosmoBit): initialised cosmo object & computed vals"<< std::endl;
     }
     
+    /// Initialises the container within CosmoBit from classy, but designed specifically
+    /// to be used when MontePython is in use. This will ensure additional outputs are
+    /// computed by classyCLASS to be passed to MontePython.
     void init_Classy_cosmo_container_with_MPLike(CosmoBit::Classy_cosmo_container& ccc)
     {
       using namespace Pipes::init_Classy_cosmo_container_with_MPLike;
@@ -3197,15 +3208,87 @@ namespace Gambit
       std::cout << "(CosmoBit): initialised cosmo object & computed vals"<< std::endl;
     }
 
+    /// Set the LCDM parameters in classy. Looks at the parameters used in a run,
+    /// and passes them to classy in the form of a Python dictionary.
     void set_classy_parameters_LCDM(pybind11::dict& result)
     {
       using namespace Pipes::set_classy_parameters_LCDM;
       using namespace pybind11::literals;
 
-      // void create_classy_python_obj(pybind11::object & result)
-      // this should become equivalent to class_set_parameter_LCDM_family eventually
-      result = pybind11::dict("h"_a=*Param["H0"]/100., "output"_a="nCl lCl tCl", "YHe"_a=0.245, "omega_b"_a=*Param["omega_b"], "ln10^{10}A_s"_a=*Param["ln10A_s"],
-      "n_s"_a=*Param["n_s"],"omega_cdm"_a=*Param["omega_cdm"],"tau_reio"_a=*Param["tau_reio"]);
+
+      map_str_dbl NuMasses_SM = *Dep::NuMasses_SM;
+      int N_ncdm = (int)NuMasses_SM["N_ncdm"];
+
+      // Number of non-cold DM species
+      if (N_ncdm > 0.)
+      {
+        result["N_ncdm"] = N_ncdm;   
+
+        std::vector<double> m_ncdm = m_ncdm_classInput(NuMasses_SM);
+        std::vector<double> T_ncdm(N_ncdm,*Dep::T_ncdm);
+
+        std::ostringstream ss1, ss2;
+        std::string separator;
+        for (auto x : m_ncdm) {
+          ss1 << separator << x;
+          separator = ",";
+        }
+        separator = "";
+        for (auto x : T_ncdm) {
+          ss2 << separator << x;
+          separator = ",";
+        }
+
+        std::cout << ss1.str() << " " << ss2.str() << std::endl;
+
+        // result["m_ncdm"] = ss1.str();
+        // result["T_ncdm"] = ss2.str();
+      }
+      else
+      {
+        result["T_ncdm"] = *Dep::T_ncdm;
+      }
+      result["N_ur"] = *Dep::class_Nur; // Number of ultra relativistic species
+      result["output"] = "tCl pCl lCl";
+      // TODO -- from Class() object...? 
+      result["l_max_scalars"] = 2508;
+      result["lensing"] = "yes";
+      result["T_cmb"] = *Dep::T_cmb;
+      result["omega_b"] = *Param["omega_b"];
+      result["omega_cdm"] = *Param["omega_cdm"];
+      result["H0"] = *Param["H0"];
+      result["ln10^{10}A_s"] = *Param["ln10A_s"];
+      result["n_s"] = *Param["n_s"];
+      result["tau_reio"] = *Param["tau_reio"];
+      std::vector<double> Helium_abundance = *Dep::Helium_abundance;
+      result["YHe"] = Helium_abundance.at(0); // .at(0): mean, .at(1): uncertainty
+      
+      // Other MontePython input direct from the YAML file
+      YAML::Node classy_dict;
+      if (runOptions->hasKey("classy_dict"))
+      {
+        classy_dict = runOptions->getValue<YAML::Node>("classy_dict");
+        for (auto it=classy_dict.begin(); it != classy_dict.end(); it++)
+        {
+          std::string name = it->first.as<std::string>();
+          std::string value = it->second.as<std::string>();
+          // Check if the key exists in the dictionary
+          if (!result.contains(name.c_str()))
+          {
+            result[name.c_str()] = value;
+          }
+          // If it does, throw an error, there's some YAML conflict going on.
+          else
+          {
+            CosmoBit_error().raise(LOCAL_INFO, "The key " + name + " already "
+              "exists in the CLASSY dictionary. Please check your YAML file.");
+          }
+
+        }
+      }
+
+      //result = pybind11::dict("h"_a=*Param["H0"]/100., "output"_a="nCl lCl tCl", "YHe"_a=0.245, "omega_b"_a=*Param["omega_b"], "ln10^{10}A_s"_a=*Param["ln10A_s"],
+      //"n_s"_a=*Param["n_s"],"omega_cdm"_a=*Param["omega_cdm"],"tau_reio"_a=*Param["tau_reio"]);
 
       std::cout << "(CosmoBit): set ccc.cosmo_input_dict values to "<< std::endl;
       pybind11::print("      ",result);
@@ -3255,9 +3338,9 @@ namespace Gambit
 
       std::cout << "entered init_cosmo_args_from_MPLike"<< std::endl;
 
-      // CosmoBit::MPLike_data_container should only be created once when calculating the first point
-      // after that is has to be kept alive since it contains a vector with the initialised MPLike 
-      // Likelihood objects
+      // CosmoBit::MPLike_data_container should only be created once when calculating the first point.
+      // After that is has to be kept alive since it contains a vector with the initialised MPLike 
+      // Likelihood objects.
       clock_t tStart = clock();
       static pybind11::object data;
       static bool first_run = true;
@@ -3268,16 +3351,12 @@ namespace Gambit
         first_run = false;
       }
 
-      std::cout << "entered init_cosmo_args_from_MPLike 2"<< std::endl;
       result = data.attr("cosmo_arguments");
 
       cout << "(CosmoBit) time took to load up data element "<< (double)(clock() - tStart)/CLOCKS_PER_SEC<<std::endl;
 
-      //logger() << " '"<<filename<<"'." << EOM;
     }
 
-
-    /// TODO: change from map_str_dbl -> map_str_pyobj
     /// Computes lnL for each experiment initialised in MontePython
     void calc_MP_LogLikes(map_str_dbl & result)
     {
@@ -3288,9 +3367,9 @@ namespace Gambit
 
       std::cout << "(CosmoBit): init_MontePythonLike start"<< std::endl;
       
-      // CosmoBit::MPLike_data_container should only be created once when calculating the first point
-      // after that is has to be kept alive since it contains a vector with the initialised MPLike 
-      // Likelihood objects
+      // CosmoBit::MPLike_data_container should only be created once when calculating the first point.
+      // After that is has to be kept alive since it contains a vector with the initialised MPLike 
+      // Likelihood objects.
       pybind11::object data;
       map_str_pyobj likelihoods;
       static bool first_run = true;
@@ -3318,33 +3397,11 @@ namespace Gambit
         it != experiments.end(); ++it)
       {
         std::string like_name = *it;
-        std::cout << "Iterator it "<< like_name << std::endl;
         result[like_name] = BEreq::get_MP_loglike(mplike_cont, ccc.cosmo, like_name);
       }
 
       std::cout << "(CosmoBit): get_MP_loglike end with result "<< result << std::endl;
-      //result["test"] = 5.;
-      //result["another_test"] = 415.;
     }
-
-    /// Calculates the lnL contribution for each experimental
-    /// dataset from MontePython.
-    /*void calc_MP_LogLike_per_experiment(map_str_dbl& result)
-    {
-      using namespace Pipes::calc_MP_LogLike_per_experiment;
-
-      // map_str_pyobj MP_lnLs = *Dep::MP_LogLikes;
-      map_str_dbl MP_lnLs = *Dep::MP_LogLikes;
-
-      // Only needed when this is a map_str_pyobj I think?
-      for (auto it = MP_lnLs.begin(); it != MP_lnLs.end(); ++it)
-      { 
-        std::cout<<"clac MPLike per experiments " << it->first<<std::endl;
-        result[it->first] = 420./2.;
-
-      }
-
-    }*/
 
     /// Computes the combined lnL from the set of experiments 
     /// given to MontePython.
@@ -3376,19 +3433,6 @@ namespace Gambit
 
 
     }
-
-    // /// Function to return the BAO likelihood from MontePython
-    // void lnL_BAO_MP(double& result)
-    // {
-    //   // The name of the likelihood
-    //   std::string& likename = *Dep::likelihood_name;
-    //   // The python object
-    //   pybind11::object cosmo = *Dep::classy_python_obj;
-    //   // The Data-Likelihood container
-    //   CosmoBit::Classy_cosmo_container ccc = *Dep::
-    //   result = BEreq::get_MP_loglike(ccc, cosmo);
-    // }
-
 
   }
 }
