@@ -41,15 +41,14 @@ BE_NAMESPACE
 {
   using namespace pybind11::literals; // to bring in the `_a` literal
     
-  double get_MP_loglike(const CosmoBit::MPLike_data_container& mplike, pybind11::object& cosmo)
+  double get_MP_loglike(const CosmoBit::MPLike_data_container& mplike, pybind11::object& cosmo, std::string& experiment)
   {
-	//std::string like = "bao"; // add like_string as argument
-  	std::string like = "bao";
+
     std::cout << "   		(MontePythonLike) cosmo h  "<< cosmo.attr("h")().cast<double>() << std::endl;
     std::cout << "   		(MontePythonLike) before calling loglkl " << std::endl;
 
     // need to use likelihood.at() since it is a const map -> [] can create entry & can't be used on const object
-  	double result = mplike.likelihoods.at(like);//.attr("loglkl")(cosmo, ccc.data).cast<double>();
+  	double result = mplike.likelihoods.at(experiment).attr("loglkl")(cosmo, mplike.data).cast<double>();
     
     std::cout << "   		(MontePythonLike) computed BAO loglike to be " << result << std::endl;
     
@@ -119,7 +118,7 @@ BE_NAMESPACE
   }  */
   // v2
   
-  map_str_dbl create_likelihood_objects(pybind11::object& data, std::vector<std::string>& experiments)
+  map_str_pyobj create_likelihood_objects(pybind11::object& data, std::vector<std::string>& experiments)
   {
 
   	pybind11::str command_line = ""; 
@@ -132,7 +131,7 @@ BE_NAMESPACE
   	sys.attr("path").attr("append")(like_path);
 
   	//std::map<std::string, pybind11::object> likelihoods;
-  	map_str_dbl likelihoods;
+  	map_str_pyobj likelihoods;
 
   	// Now go through each experiment one by one, and initialise the Likelihood containers in
   	// MontePython, then add them to a dictionary to pass back to CosmoBit.
@@ -144,7 +143,8 @@ BE_NAMESPACE
 		pybind11::str     exp_path = like_path + "/" + exp_name + "/" + exp_name + ".data";
 		pybind11::module  exp_module = pybind11::module::import(exp_name.c_str());
 		pybind11::object  EXP_MODULE = exp_module.attr(exp_name.c_str())(exp_path, data, command_line);
-		likelihoods[exp_name] = 420. + i;
+		//likelihoods[exp_name] = 420. + i;
+		likelihoods[exp_name] = EXP_MODULE;
 		i++;
   	}
 

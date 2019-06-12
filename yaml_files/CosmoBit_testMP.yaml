@@ -77,9 +77,9 @@ ObsLikes:
     capability:   MP_Combined_LogLike
     module:       CosmoBit
     type:         double
-
+  
   - purpose:      Observable
-    capability:   MP_LogLike_per_experiment
+    capability:   MP_LogLikes
     type:         map_str_dbl
 #
   #- purpose:      LogLike
@@ -89,11 +89,14 @@ ObsLikes:
 
 #======== Rule entries ========
 Rules:
+  - capability: get_Classy_cosmo_container
+    function: init_Classy_cosmo_container_with_MPLike
+    module: CosmoBit
 
   - capability: MP_experiment_names
     function: set_MP_experiment_names
     options:
-      Likelihoods: ["Pantheon", "bao"]  
+      Likelihoods: ["bao","hst"]  
       # should eventually be possible to choose any MP like, atm only bao & Pantheon safe to use
       # still need to write a proper patch for MPLike backend & test all Likes
 

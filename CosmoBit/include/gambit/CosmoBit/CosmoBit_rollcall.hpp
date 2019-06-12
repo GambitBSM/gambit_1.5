@@ -581,6 +581,14 @@ START_MODULE
      #undef FUNCTION
   #undef CAPABILITY
 
+
+  #define CAPABILITY MP_experiment_names
+     START_CAPABILITY
+     #define FUNCTION set_MP_experiment_names
+      START_FUNCTION(std::vector<std::string>)
+     #undef FUNCTION
+  #undef CAPABILITY
+
   #define CAPABILITY cosmo_args_from_MPLike
      START_CAPABILITY
      #define FUNCTION init_cosmo_args_from_MPLike
@@ -590,15 +598,16 @@ START_MODULE
      #undef FUNCTION
   #undef CAPABILITY
 
-  #define CAPABILITY MP_experiment_names
-     START_CAPABILITY
-     #define FUNCTION set_MP_experiment_names
-      START_FUNCTION(std::vector<std::string>)
-     #undef FUNCTION
-  #undef CAPABILITY
-
     #define CAPABILITY get_Classy_cosmo_container
      START_CAPABILITY
+     #define FUNCTION init_Classy_cosmo_container_with_MPLike
+      START_FUNCTION(CosmoBit::Classy_cosmo_container)
+      DEPENDENCY(cosmo_args_from_MPLike, pybind11::dict)
+      DEPENDENCY(set_classy_parameters, pybind11::dict)
+      ALLOW_MODELS(LCDM)
+      BACKEND_REQ(classy_create_class_instance,(classy),void,(pybind11::object&))
+      BACKEND_REQ(classy_compute,(classy),void,(CosmoBit::Classy_cosmo_container&))
+     #undef FUNCTION
      #define FUNCTION init_Classy_cosmo_container
       START_FUNCTION(CosmoBit::Classy_cosmo_container)
       DEPENDENCY(set_classy_parameters, pybind11::dict)
@@ -632,36 +641,34 @@ START_MODULE
   #define CAPABILITY MP_LogLikes
     START_CAPABILITY
     #define FUNCTION calc_MP_LogLikes
-      START_FUNCTION(map_str_dbl) // for now
-      // START_FUNCTION(map_str_pyobj)
+      START_FUNCTION(map_str_dbl) 
       ALLOW_MODELS(LCDM)
       DEPENDENCY(get_Classy_cosmo_container, CosmoBit::Classy_cosmo_container)
       DEPENDENCY(MP_experiment_names, std::vector<std::string>)
       BACKEND_REQ(classy_compute,           (classy),             void,             (CosmoBit::Classy_cosmo_container&))
-      BACKEND_REQ(create_likelihood_objects,(libmontepythonlike), map_str_dbl,      (pybind11::object&,std::vector<std::string>&))
+      BACKEND_REQ(create_likelihood_objects,(libmontepythonlike), map_str_pyobj,    (pybind11::object&, std::vector<std::string>&))
       BACKEND_REQ(create_data_object,       (libmontepythonlike), pybind11::object, (std::vector<std::string>&))
-      BACKEND_REQ(get_MP_loglike,           (libmontepythonlike), double,           (const CosmoBit::MPLike_data_container&, pybind11::object&))
+      BACKEND_REQ(get_MP_loglike,           (libmontepythonlike), double,           (const CosmoBit::MPLike_data_container&, pybind11::object&, std::string&))
     #undef FUNCTION
   #undef CAPABILITY
 
   /// Calculates the lnL contribution for each experimental
   /// dataset from MontePython 
-  #define CAPABILITY MP_LogLike_per_experiment
-    START_CAPABILITY
-    #define FUNCTION calc_MP_LogLike_per_experiment
-      START_FUNCTION(map_str_dbl)
-      // DEPENDENCY(MP_LogLikes, map_str_pyobj)
-      DEPENDENCY(MP_LogLikes, map_str_dbl) // for now
-      ALLOW_MODELS(LCDM)
-    #undef FUNCTION
-  #undef CAPABILITY
+  //#define CAPABILITY MP_LogLike_per_experiment
+  //  START_CAPABILITY
+  //  #define FUNCTION calc_MP_LogLike_per_experiment
+  //    START_FUNCTION(map_str_dbl)
+  //    DEPENDENCY(MP_LogLikes, map_str_dbl)
+  //    ALLOW_MODELS(LCDM)
+  //  #undef FUNCTION
+  //#undef CAPABILITY
       
   /// Calculates the total lnL from MontePython 
   #define CAPABILITY MP_Combined_LogLike
     START_CAPABILITY
     #define FUNCTION calc_MP_combined_LogLike
       START_FUNCTION(double)
-      DEPENDENCY(MP_LogLike_per_experiment, map_str_dbl)
+      DEPENDENCY(MP_LogLikes, map_str_dbl)
       ALLOW_MODELS(LCDM)
     #undef FUNCTION
   #undef CAPABILITY

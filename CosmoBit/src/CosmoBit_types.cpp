@@ -58,16 +58,10 @@ namespace Gambit
       BBN_covmat.resize(NNUC+1, std::vector<double>(NNUC+1,0.));
     }
     
-    MPLike_data_container::MPLike_data_container(){std::cout<<"Called default constructor";}
-    MPLike_data_container::MPLike_data_container(pybind11::object &data_in, map_str_dbl likelihoods_in): data(data_in), likelihoods(likelihoods_in) 
-    {
-      std::cout<<"------------ called MPLike_data_container constructor ----------------" << std::endl;
-    }
+    MPLike_data_container::MPLike_data_container(){}
+    MPLike_data_container::MPLike_data_container(pybind11::object &data_in, map_str_pyobj likelihoods_in): data(data_in), likelihoods(likelihoods_in){}
 
-    void Classy_cosmo_container::set_input_dict(pybind11::dict input_dict)
-    {
-      cosmo_input_dict = input_dict;
-    }
+    void Classy_cosmo_container::set_input_dict(pybind11::dict input_dict) {cosmo_input_dict = input_dict;}
 
     SM_time_evo::SM_time_evo(double t0, double tf, double N_t) : grid_size(N_t), t_grid(N_t), T_evo(N_t), Tnu_evo(N_t), H_evo(N_t), H_int(N_t)
     {

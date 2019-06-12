@@ -3175,6 +3175,27 @@ namespace Gambit
 
       std::cout << "(CosmoBit): initialised cosmo object & computed vals"<< std::endl;
     }
+    
+    void init_Classy_cosmo_container_with_MPLike(CosmoBit::Classy_cosmo_container& ccc)
+    {
+      using namespace Pipes::init_Classy_cosmo_container_with_MPLike;
+
+      // create instance of classy class Class()
+      BEreq::classy_create_class_instance(ccc.cosmo);
+
+      static pybind11::dict MP_cosmo_arguments = *Dep::cosmo_args_from_MPLike;
+
+      // add the arguments from Mp_cosmo_arguments which are not yet in cosmo_input_dict to it
+      // also take care: you might have to merge output
+      pybind11::print(MP_cosmo_arguments);
+
+      pybind11::dict cosmo_input_dict = *Dep::set_classy_parameters;
+      ccc.set_input_dict(cosmo_input_dict);
+
+      BEreq::classy_compute(ccc);
+
+      std::cout << "(CosmoBit): initialised cosmo object & computed vals"<< std::endl;
+    }
 
     void set_classy_parameters_LCDM(pybind11::dict& result)
     {
@@ -3203,52 +3224,51 @@ namespace Gambit
     {
       using namespace Pipes::set_MP_experiment_names;
 
-      // Now try to read from yaml option which likes are in use instead of fixing by hand
-      //result.push_back("bao");
-      //result.push_back("Pantheon");
-      //result.push_back("kids450_qe_likelihood_public");
 
-      //static std::vector<std::vector<str> > analyses;
       static bool first = true;
-        // Only run this once
-        if (first)
-        {
-          // Read analysis names from the yaml file
-          std::vector<std::string> default_analyses;  // The default is empty lists of analyses
-          result = runOptions->getValueOrDef<std::vector<std::string> >(default_analyses, "Likelihoods");
+      if (first)
+      {
 
-          // Check that the analysis names listed in the yaml file all correspond to actual ColliderBit analyses
-          for (std::string & name : result)
-          {
-            std::cout << "Read option  "<< name <<std::endl;
+        // Read analysis names from the yaml file
+        std::vector<std::string> default_analyses;  // The default is empty lists of analyses
+        result = runOptions->getValueOrDef<std::vector<std::string> >(default_analyses, "Likelihoods");
+
+        // Check that the analysis names listed in the yaml file all correspond to actual ColliderBit analyses
+        for (std::string & name : result)
+        {
+          std::cout << "Read option  "<< name <<std::endl;
             
-            /*if (!checkAnalysis(analysis_name)) // add some check if likelihood is know (maybe MP does that automatically?)
-            {
-              str errmsg = "The analysis " + analysis_name + " is not a known ColliderBit analysis.";
-              ColliderBit_error().raise(LOCAL_INFO, errmsg);
-            }*/
+          /*if (!checkAnalysis(analysis_name)) // add some check if likelihood is know (maybe MP does that automatically?)
+          {
+            str errmsg = "The analysis " + analysis_name + " is not a known ColliderBit analysis.";
+            ColliderBit_error().raise(LOCAL_INFO, errmsg);
+          }*/
           
-          }
-          first = false;
         }
+        first = false;
+      }
     }
 
     void init_cosmo_args_from_MPLike(pybind11::dict &result)
     {
       using namespace Pipes::init_cosmo_args_from_MPLike;
 
-      std::vector<std::string> experiments = *Dep::MP_experiment_names;
+      std::cout << "entered init_cosmo_args_from_MPLike"<< std::endl;
+
       // CosmoBit::MPLike_data_container should only be created once when calculating the first point
       // after that is has to be kept alive since it contains a vector with the initialised MPLike 
       // Likelihood objects
       clock_t tStart = clock();
-      pybind11::object data;
+      static pybind11::object data;
       static bool first_run = true;
       if(first_run)
       {
+        std::vector<std::string> experiments = *Dep::MP_experiment_names;
         data = BEreq::create_data_object(experiments);
         first_run = false;
       }
+
+      std::cout << "entered init_cosmo_args_from_MPLike 2"<< std::endl;
       result = data.attr("cosmo_arguments");
 
       cout << "(CosmoBit) time took to load up data element "<< (double)(clock() - tStart)/CLOCKS_PER_SEC<<std::endl;
@@ -3259,7 +3279,7 @@ namespace Gambit
 
     /// TODO: change from map_str_dbl -> map_str_pyobj
     /// Computes lnL for each experiment initialised in MontePython
-    void calc_MP_LogLikes(map_str_dbl& result)
+    void calc_MP_LogLikes(map_str_dbl & result)
     {
       using namespace Pipes::calc_MP_LogLikes;
 
@@ -3272,7 +3292,7 @@ namespace Gambit
       // after that is has to be kept alive since it contains a vector with the initialised MPLike 
       // Likelihood objects
       pybind11::object data;
-      map_str_dbl likelihoods;
+      map_str_pyobj likelihoods;
       static bool first_run = true;
       if(first_run)
       {
@@ -3297,18 +3317,19 @@ namespace Gambit
       for (std::vector<std::string>::const_iterator it = experiments.begin();
         it != experiments.end(); ++it)
       {
-        // todo!
-        // call to get_MP_loglike
+        std::string like_name = *it;
+        std::cout << "Iterator it "<< like_name << std::endl;
+        result[like_name] = BEreq::get_MP_loglike(mplike_cont, ccc.cosmo, like_name);
       }
 
       std::cout << "(CosmoBit): get_MP_loglike end with result "<< result << std::endl;
-      result["test"] = 5.;
-      result["another_test"] = 415.;
+      //result["test"] = 5.;
+      //result["another_test"] = 415.;
     }
 
     /// Calculates the lnL contribution for each experimental
     /// dataset from MontePython.
-    void calc_MP_LogLike_per_experiment(map_str_dbl& result)
+    /*void calc_MP_LogLike_per_experiment(map_str_dbl& result)
     {
       using namespace Pipes::calc_MP_LogLike_per_experiment;
 
@@ -3316,12 +3337,14 @@ namespace Gambit
       map_str_dbl MP_lnLs = *Dep::MP_LogLikes;
 
       // Only needed when this is a map_str_pyobj I think?
-      // for (auto it = MP_lnLs.begin(); it != MP_lnLs.end(); ++it)
-      // {
+      for (auto it = MP_lnLs.begin(); it != MP_lnLs.end(); ++it)
+      { 
+        std::cout<<"clac MPLike per experiments " << it->first<<std::endl;
+        result[it->first] = 420./2.;
 
-      // }
-      result = MP_lnLs;
-    }
+      }
+
+    }*/
 
     /// Computes the combined lnL from the set of experiments 
     /// given to MontePython.
@@ -3329,7 +3352,7 @@ namespace Gambit
     {
       using namespace Pipes::calc_MP_combined_LogLike;
 
-      map_str_dbl MP_lnLs = *Dep::MP_LogLike_per_experiment;
+      map_str_dbl MP_lnLs = *Dep::MP_LogLikes;
 
       // Iterate through map of doubles and return one big fat double.
       double lnL = 0.;

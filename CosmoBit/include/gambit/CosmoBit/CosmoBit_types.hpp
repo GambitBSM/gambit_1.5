@@ -34,6 +34,7 @@
 #define __CosmoBit_types_hpp__
 
 #include "gambit/Backends/backend_types/class.hpp"
+#include "gambit/Backends/backend_types/MontePythonLike.hpp"
 #include <valarray>
 
 #include <pybind11/stl.h>
@@ -67,11 +68,10 @@ namespace Gambit
     public:
 
         MPLike_data_container();
-        MPLike_data_container(pybind11::object &data_in, map_str_dbl likelihoods_in);
+        MPLike_data_container(pybind11::object &data_in, map_str_pyobj likelihoods_in);
         
         pybind11::object data;
-        //map_str_pyobj likelihoods;
-        map_str_dbl likelihoods;
+        map_str_pyobj likelihoods;
 
     };
 
