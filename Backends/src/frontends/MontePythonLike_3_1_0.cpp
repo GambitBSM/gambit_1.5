@@ -50,10 +50,10 @@ BE_NAMESPACE
   pybind11::object create_data_object(std::vector<std::string>& experiments)
   {
 
-  	pybind11::dict path_dict = pybind11::dict("MontePython"_a=backendDir+"/montepython/",
-  											  "data"_a=backendDir+"/data/",
-  											  "cosmo"_a=backendDir+"/../../classy/2.6.3/", 
-  											  "root"_a=backendDir+"/../../");
+  	pybind11::dict path_dict = pybind11::dict("MontePython"_a=backendDir,
+  											  "data"_a=backendDir+"/../data/",
+  											  "cosmo"_a=backendDir+"/../../../classy/2.6.3/", 
+  											  "root"_a=backendDir+"/../../../");
 
   	// TODO nuisance parameters and other Cosmology to go here...
   	pybind11::dict mcmc_parameters;
@@ -78,13 +78,14 @@ BE_NAMESPACE
   	pybind11::str command_line = ""; 
 
   	// Root likelihood path.
-  	std::string like_path = backendDir+"/montepython/likelihoods/";
+
+  	std::string like_path = backendDir+"/likelihoods/";
+  	std::cout << like_path << std::endl;
 
 	// Add the Likelihood path to sys so we can import it in Python
   	pybind11::module sys = pybind11::module::import("sys");
   	sys.attr("path").attr("append")(like_path);
 
-  	//std::map<std::string, pybind11::object> likelihoods;
   	map_str_pyobj likelihoods;
 
   	// Now go through each experiment one by one, and initialise the Likelihood containers in

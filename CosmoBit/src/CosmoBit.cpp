@@ -3238,11 +3238,9 @@ namespace Gambit
           ss2 << separator << x;
           separator = ",";
         }
-
-        std::cout << ss1.str() << " " << ss2.str() << std::endl;
-
-        // result["m_ncdm"] = ss1.str();
-        // result["T_ncdm"] = ss2.str();
+        
+        result["m_ncdm"] = ss1.str();
+        result["T_ncdm"] = ss2.str();
       }
       else
       {
