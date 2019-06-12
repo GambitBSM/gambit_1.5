@@ -581,11 +581,29 @@ START_MODULE
      #undef FUNCTION
   #undef CAPABILITY
 
+  #define CAPABILITY cosmo_args_from_MPLike
+     START_CAPABILITY
+     #define FUNCTION init_cosmo_args_from_MPLike
+      START_FUNCTION(pybind11::dict)
+      DEPENDENCY(MP_experiment_names, std::vector<std::string>)
+      BACKEND_REQ(create_data_object,(libmontepythonlike),pybind11::object,(std::vector<std::string>&))
+     #undef FUNCTION
+  #undef CAPABILITY
+
+
+  #define CAPABILITY MP_experiment_names
+     START_CAPABILITY
+     #define FUNCTION set_MP_experiment_names
+      START_FUNCTION(std::vector<std::string>)
+     #undef FUNCTION
+  #undef CAPABILITY
+
     #define CAPABILITY MontePythonLike
      START_CAPABILITY
      #define FUNCTION init_MontePythonLike
       START_FUNCTION(double)
-      ALLOW_MODELS(LCDM)
+      //ALLOW_MODELS(LCDM)
+      DEPENDENCY(MP_experiment_names, std::vector<std::string>)
       DEPENDENCY(get_Classy_cosmo_container, CosmoBit::Classy_cosmo_container)
 
       //BACKEND_REQ(classy_compute,(classy),void,(pybind11::object&, pybind11::dict&))

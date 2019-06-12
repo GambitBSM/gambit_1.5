@@ -3196,12 +3196,40 @@ namespace Gambit
       using namespace Pipes::compute_Omega0_m_the_classy_way;
 
       CosmoBit::Classy_cosmo_container ccc = *Dep::get_Classy_cosmo_container;
-      std::cout << "(CosmoBit): Omega0_m_classy way "<< std::endl;
-      pybind11::print("      ",ccc.cosmo.attr("Omega0_m")());
       result = ccc.cosmo.attr("Omega0_m")().cast<double>();
     }
 
+    void set_MP_experiment_names(std::vector<std::string> & result)
+    {
+      using namespace Pipes::set_MP_experiment_names;
 
+      result.push_back("bao");
+      result.push_back("Pantheon");
+      result.push_back("kids450_qe_likelihood_public");
+    }
+
+    void init_cosmo_args_from_MPLike(pybind11::dict &result)
+    {
+      using namespace Pipes::init_cosmo_args_from_MPLike;
+
+      std::vector<std::string> experiments = *Dep::MP_experiment_names;
+      // CosmoBit::MPLike_data_container should only be created once when calculating the first point
+      // after that is has to be kept alive since it contains a vector with the initialised MPLike 
+      // Likelihood objects
+      clock_t tStart = clock();
+      pybind11::object data;
+      static bool first_run = true;
+      if(first_run)
+      {
+        data = BEreq::create_data_object(experiments);
+        first_run = false;
+      }
+      result = data.attr("cosmo_arguments");
+
+      cout << "(CosmoBit) time took to load up data element "<< (double)(clock() - tStart)/CLOCKS_PER_SEC<<std::endl;
+
+      //logger() << " '"<<filename<<"'." << EOM;
+    }
 
     void init_MontePythonLike(double &result)
     {
@@ -3210,12 +3238,12 @@ namespace Gambit
       std::cout << "(CosmoBit): init_MontePythonLike start"<< std::endl;
       
       // TODO
-      std::vector<std::string> experiments;
-      experiments.push_back("bao");
-      experiments.push_back("Pantheon");
-      experiments.push_back("kids450_qe_likelihood_public");
+      //std::vector<std::string> experiments;
+      //experiments.push_back("bao");
+      //experiments.push_back("Pantheon");
+      //experiments.push_back("kids450_qe_likelihood_public");
 
-
+      std::vector<std::string> experiments = *Dep::MP_experiment_names;
       // CosmoBit::MPLike_data_container should only be created once when calculating the first point
       // after that is has to be kept alive since it contains a vector with the initialised MPLike 
       // Likelihood objects

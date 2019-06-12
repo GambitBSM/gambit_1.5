@@ -68,15 +68,20 @@ Scanner:
 #======== Observables of interest ========
 ObsLikes:
  
+  - purpose:      Obs
+    capability:   Omega0_m_the_classy_way
+    module:       CosmoBit
+    type:         double
+  
   - purpose:      LogLike
     capability:   MontePythonLike
     module:       CosmoBit
     type:         double
-
-  - purpose:      LogLike
-    capability:   cap_test_classy
-    module:       CosmoBit
-    type:         double
+#
+  #- purpose:      LogLike
+  #  capability:   cap_test_classy
+  #  module:       CosmoBit
+  #  type:         double
 
 #======== Rule entries ========
 Rules:
