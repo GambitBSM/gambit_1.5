@@ -86,6 +86,7 @@ namespace Gambit
         pybind11::dict cosmo_input_dict;
         pybind11::dict cosmo_prec_dict;
 
+        void set_input_dict(pybind11::dict input_dict);
         // eventually write function that can create an array/list of experiments requested in yaml file
         //void set_likelihoods(std::vector<std::string>){std::cout<<"Need to implement conversion string -> like object";};
     };

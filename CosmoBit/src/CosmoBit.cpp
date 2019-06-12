@@ -3161,26 +3161,28 @@ namespace Gambit
       result = -0.5*chi2;
     }
 
-    //void init_Classy_cosmo_container(CosmoBit::Classy_cosmo_container& ccc)
-    void init_Classy_cosmo_container(double & ccc)
+    void init_Classy_cosmo_container(CosmoBit::Classy_cosmo_container& ccc)
     {
       using namespace Pipes::init_Classy_cosmo_container;
 
       // create instance of classy class Class()
-      //BEreq::classy_create_class_instance(ccc.cosmo);
+      BEreq::classy_create_class_instance(ccc.cosmo);
 
       std::cout << "(CosmoBit): initialised cosmo object"<< std::endl;
     }
 
     //void create_classy_python_obj(pybind11::object & result)
-    void set_classy_parameters_LCDM(double & ccc)
+    void set_classy_parameters_LCDM(pybind11::dict& result)
     {
       using namespace Pipes::set_classy_parameters_LCDM;
       using namespace pybind11::literals;
-      // create instance of classy class Class()
-      //BEreq::classy_2_6_3_create_python_obj(result);
 
-      std::cout << "(CosmoBit): initialised cosmo object"<< std::endl;
+      result = pybind11::dict("h"_a=*Param["H0"]/100., "output"_a="nCl lCl tCl", "YHe"_a=0.245, "omega_b"_a=*Param["omega_b"], "ln10A_s"_a=*Param["ln10A_s"],
+      "n_s"_a=*Param["n_s"],"omega_cdm"_a=*Param["omega_cdm"],"tau_reio"_a=*Param["tau_reio"]);
+
+      std::cout << "(CosmoBit): set ccc.cosmo_input_dict values to "<< std::endl;
+      pybind11::print("      ",result);
+
     }
 
 
@@ -3189,11 +3191,44 @@ namespace Gambit
       using namespace Pipes::init_MontePythonLike;
 
       std::cout << "(CosmoBit): init_MontePythonLike start"<< std::endl;
+      
+      // TODO
+      std::vector<std::string> experiments;
+      experiments.push_back("bao");
+      experiments.push_back("Pantheon");
+      experiments.push_back("kids450_qe_likelihood_public");
 
-      // (JR) call MP loglike -> atm this will crash when calculating the 2nd point since the ccc.data python object does not exist anymore
-      //result = BEreq::get_MP_loglike("bao");
 
-      std::cout << "(CosmoBit): get_MP_loglike end with resutl "<< result << std::endl;
+      // CosmoBit::MPLike_data_container should only be created once when calculating the first point
+      // after that is has to be kept alive since it contains a vector with the initialised MPLike 
+      // Likelihood objects
+      pybind11::object data;
+      map_str_dbl likelihoods;
+      static bool first_run = true;
+      if(first_run)
+      {
+        data = BEreq::create_data_object(experiments);
+        likelihoods = BEreq::create_likelihood_objects(data,experiments);
+        first_run = false;
+      }
+      
+      static const CosmoBit::MPLike_data_container mplike_cont(data, likelihoods);
+      
+      // Test if cosmo_arguments dictionary contains parameters that need to go into ccc.cosmo_input_dict 
+      // (values depend on used likelihoods)  --- Works! 
+      pybind11::print(mplike_cont.data.attr("cosmo_arguments"));
+      
+      // Create instance of classy class Class
+      CosmoBit::Classy_cosmo_container ccc = *Dep::get_Classy_cosmo_container;
+
+      pybind11::dict cosmo_input_dict = *Dep::set_classy_parameters;
+      ccc.set_input_dict(cosmo_input_dict);
+
+      pybind11::print("    second time  ",ccc.cosmo_input_dict);
+
+      //BEreq::classy_compute(ccc);
+
+      std::cout << "(CosmoBit): get_MP_loglike end with result "<< result << std::endl;
       result = 5.;
     }
 
@@ -3208,65 +3243,6 @@ namespace Gambit
 
 
     }
-
-    /*void test_classy(double & result)
-    {
-      using namespace Pipes::test_classy;
-
-      // to bring in the `_a` literal
-      using namespace pybind11::literals; 
-
-      // TODO
-      std::vector<std::string> experiments;
-      experiments.push_back("bao");
-      experiments.push_back("Pantheon");
-
-      pybind11::object data;
-      map_str_dbl likelihoods;
-      static bool first_run = true;
-      if(first_run)
-      {
-        data = BEreq::create_data_object(experiments);
-        likelihoods = BEreq::create_likelihood_objects(data, experiments);
-        // likelihoods = BEreq::create_likelihood_objects(data);
-        first_run = false;
-      }
-      //std::map<std::string, pybind11::object> likelihoods = BEreq::create_likelihood_objects(data);
-      
-      static const CosmoBit::MPLike_data_container ccc(data, likelihoods);
-
-      //static CosmoBit::Classy_cosmo_container ccc = *Dep::static_const;
-
-      //vector Likelihoods = ["bao", "Pantheon",....]
-
-      // pass to MP to calc logLike for every single likelihood
-      // pass data.cosmo_arguments dict to classy 
-
-      //BEreq::classy_2_6_3_create_python_obj(ccc.cosmo);
-      pybind11::object cosmo = *Dep::classy_python_obj;
- 
-      std::cout << "(CosmoBit): test_classy start"<< std::endl;
-
-      // (JR) fill class input dict with some parameters -- just prelimnary has to be done correctly similar
-      // to class_set_parameters function for class backend
-      
-      pybind11::dict cosmo_input_dict = pybind11::dict("h"_a=*Param["H0"]/100., "output"_a="nCl lCl tCl", "YHe"_a=0.245, "omega_b"_a=*Param["omega_b"]);
-
-      // (JR) Sets parameters & runs class computation -- should be separated into 2 steps in the future
-      BEreq::classy_2_6_3_set_parameter(cosmo, cosmo_input_dict);
-
-      std::cout << "(CosmoBit): test_classy end"<< std::endl;
-
-      std::cout << "(CosmoBit): init_MontePythonLike start"<< std::endl;
-
-      // (JR) call MP loglike -> atm this will crash when calculating the 2nd point since the ccc.data python object does not exist anymore
-      std::string like_name = "bao";
-      result = BEreq::get_MP_loglike(ccc, cosmo);
-
-      std::cout << "(CosmoBit): get_MP_loglike end with resutl "<< result << std::endl;
-
-
-    }*/
 
     // /// Function to return the BAO likelihood from MontePython
     // void lnL_BAO_MP(double& result)
