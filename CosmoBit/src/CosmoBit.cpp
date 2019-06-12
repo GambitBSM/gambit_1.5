@@ -3203,9 +3203,34 @@ namespace Gambit
     {
       using namespace Pipes::set_MP_experiment_names;
 
-      result.push_back("bao");
-      result.push_back("Pantheon");
+      // Now try to read from yaml option which likes are in use instead of fixing by hand
+      //result.push_back("bao");
+      //result.push_back("Pantheon");
       //result.push_back("kids450_qe_likelihood_public");
+
+      //static std::vector<std::vector<str> > analyses;
+      static bool first = true;
+        // Only run this once
+        if (first)
+        {
+          // Read analysis names from the yaml file
+          std::vector<std::string> default_analyses;  // The default is empty lists of analyses
+          result = runOptions->getValueOrDef<std::vector<std::string> >(default_analyses, "Likelihoods");
+
+          // Check that the analysis names listed in the yaml file all correspond to actual ColliderBit analyses
+          for (std::string & name : result)
+          {
+            std::cout << "Read option  "<< name <<std::endl;
+            
+            /*if (!checkAnalysis(analysis_name)) // add some check if likelihood is know (maybe MP does that automatically?)
+            {
+              str errmsg = "The analysis " + analysis_name + " is not a known ColliderBit analysis.";
+              ColliderBit_error().raise(LOCAL_INFO, errmsg);
+            }*/
+          
+          }
+          first = false;
+        }
     }
 
     void init_cosmo_args_from_MPLike(pybind11::dict &result)
