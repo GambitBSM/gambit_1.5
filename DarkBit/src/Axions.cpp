@@ -1592,10 +1592,13 @@ namespace Gambit
      void calc_RParameter(double &result)
      {
        using namespace Pipes::calc_RParameter;
-       const ModelParameters& params = *Dep::GeneralCosmoALP_parameters;
-       double gaee2 = gsl_pow_2(1.0E+13 * std::fabs(params.at("gaee")));
-       double gagg = 1.0E+10*std::fabs(params.at("gagg")); // gagg needs to be in 10^-10 GeV^-1.
-       double lgma0 = log10(params.at("ma0"));
+       //const ModelParameters& params = *Dep::GeneralCosmoALP_parameters;
+       //double gaee2 = gsl_pow_2(1.0E+13 * std::fabs(params.at("gaee")));
+       //double gagg = 1.0E+10*std::fabs(params.at("gagg")); // gagg needs to be in 10^-10 GeV^-1.
+       //double lgma0 = log10(params.at("ma0"));
+       double gaee2 = gsl_pow_2(1.0E+13*std::fabs(*Param["gaee"]));
+       double gagg = 1.0E+10*std::fabs(std::fabs(*Param["gagg"]));
+       double lgma0 = log10(*Param["ma0"]);
        // Value for He-abundance Y from 1503.08146: <Y> = 0.2515(17).
        const double Y = 0.2515;
        // Use interpolation for the finite-mass correction.
@@ -1802,9 +1805,12 @@ namespace Gambit
     void calc_lnL_SN1987A_DecayApprox (double &result)
     {
       using namespace Pipes::calc_lnL_SN1987A_DecayApprox;
-      const ModelParameters& params = *Dep::GeneralCosmoALP_parameters;
-      double lgg = log10(std::fabs(params.at("gagg")));
-      double lgm = log10(params.at("ma0"));
+      //const ModelParameters& params = *Dep::GeneralCosmoALP_parameters;
+      //double lgg = log10(std::fabs(params.at("gagg")));
+      //double lgm = log10(params.at("ma0"));
+      double lgg = log10(std::fabs(*Param["gagg"]));
+      double lgm = log10(*Param["ma0"]);
+
       result = 0.0;
 
       bool inside_exclusion_region = ( (lgm > 4.0) && (lgm < 8.100544) && (lgg > -11.498333) && (lgg > -9.754647-0.5*(lgm-4.0)) && (lgg < -9.990374-2.0*(lgm-8.100544)) );
