@@ -25,7 +25,7 @@
 
 LOAD_LIBRARY
 
-BE_CONV_FUNCTION(get_MP_loglike, 	 		double,			  (const CosmoBit::Classy_cosmo_container&, pybind11::object&), "get_MP_loglike")
+BE_CONV_FUNCTION(get_MP_loglike, 	 		double,			  (const CosmoBit::MPLike_data_container&, pybind11::object&), "get_MP_loglike")
 BE_CONV_FUNCTION(create_data_object, 		pybind11::object, (std::vector<std::string>&), 									"create_data_object")
 //BE_CONV_FUNCTION(create_likelihood_objects, map_str_dbl, 	  (pybind11::object&), 											"create_likelihood_objects")
 BE_CONV_FUNCTION(create_likelihood_objects, map_str_dbl, 	  (pybind11::object&, std::vector<std::string>&),				"create_likelihood_objects")

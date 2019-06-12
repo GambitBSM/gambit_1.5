@@ -3209,7 +3209,7 @@ namespace Gambit
       }
       //std::map<std::string, pybind11::object> likelihoods = BEreq::create_likelihood_objects(data);
       
-      static const CosmoBit::Classy_cosmo_container ccc(data, likelihoods);
+      static const CosmoBit::MPLike_data_container ccc(data, likelihoods);
 
       //static CosmoBit::Classy_cosmo_container ccc = *Dep::static_const;
 

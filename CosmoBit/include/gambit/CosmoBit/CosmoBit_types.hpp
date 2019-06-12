@@ -51,18 +51,43 @@ namespace Gambit
     // This should live in TYPES
     //typedef std::map<std::string,pybind11::object> map_str_pyobj;
     
-    // Container for the Data and Likelihood structures from the Classy 
-    // Python interface to CLASS
+    class MPLike_data_container
+    {
+    /* Class holing MPLIke data structure & map with initialised Likelihoods objects; this is
+        separated form the Classy_cosmo_container since it needs to be initialised as 'static const'
+        such that the initialisation and reading in of data only happens once. 
+        This is essential since the parsing of the data at initialisation of a Likelihood object can take
+        much longer than the actual Likelihood calculation. 
+        --
+        Memebers:
+        --
+        pybind11::object data : MPLike data structure
+        map_str_pyobj likelihoods : map likelihood name to initialised MPLike likelihood object
+    */
+    public:
+
+        MPLike_data_container();
+        MPLike_data_container(pybind11::object &data_in, map_str_dbl likelihoods_in);
+        
+        pybind11::object data;
+        //map_str_pyobj likelihoods;
+        map_str_dbl likelihoods;
+
+    };
+
     class Classy_cosmo_container
     {
+    /* Class holding python object cosmo which is an instance of the class Class() from classy (Python wrapper for CLASS)
+        This needs to be passed around between the classy frontend, CosmoBit & the MPLike frontend. 
+    */
     public:
-        Classy_cosmo_container();
-        Classy_cosmo_container(pybind11::object &data_in, map_str_dbl likelihoods_in);
+        Classy_cosmo_container(){}
+        pybind11::object cosmo;
+        pybind11::dict cosmo_input_dict;
+        pybind11::dict cosmo_prec_dict;
 
-        pybind11::object data;      // The Data structures imported in MontePython
-        map_str_dbl likelihoods;    // The Likelihood objects imported in MontePython
-        //map_str_pyobj likelihoods; 
-
+        // eventually write function that can create an array/list of experiments requested in yaml file
+        //void set_likelihoods(std::vector<std::string>){std::cout<<"Need to implement conversion string -> like object";};
     };
 
     class BBN_container
