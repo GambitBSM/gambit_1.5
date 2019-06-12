@@ -3205,7 +3205,7 @@ namespace Gambit
 
       result.push_back("bao");
       result.push_back("Pantheon");
-      result.push_back("kids450_qe_likelihood_public");
+      //result.push_back("kids450_qe_likelihood_public");
     }
 
     void init_cosmo_args_from_MPLike(pybind11::dict &result)
@@ -3231,19 +3231,18 @@ namespace Gambit
       //logger() << " '"<<filename<<"'." << EOM;
     }
 
-    void init_MontePythonLike(double &result)
+
+    /// TODO: change from map_str_dbl -> map_str_pyobj
+    /// Computes lnL for each experiment initialised in MontePython
+    void calc_MP_LogLikes(map_str_dbl& result)
     {
-      using namespace Pipes::init_MontePythonLike;
+      using namespace Pipes::calc_MP_LogLikes;
+
+      // A list of the experiments initialised in the YAML file
+      std::vector<std::string> experiments = *Dep::MP_experiment_names;
 
       std::cout << "(CosmoBit): init_MontePythonLike start"<< std::endl;
       
-      // TODO
-      //std::vector<std::string> experiments;
-      //experiments.push_back("bao");
-      //experiments.push_back("Pantheon");
-      //experiments.push_back("kids450_qe_likelihood_public");
-
-      std::vector<std::string> experiments = *Dep::MP_experiment_names;
       // CosmoBit::MPLike_data_container should only be created once when calculating the first point
       // after that is has to be kept alive since it contains a vector with the initialised MPLike 
       // Likelihood objects
@@ -3253,7 +3252,7 @@ namespace Gambit
       if(first_run)
       {
         data = BEreq::create_data_object(experiments);
-        likelihoods = BEreq::create_likelihood_objects(data,experiments);
+        likelihoods = BEreq::create_likelihood_objects(data, experiments);
         first_run = false;
       }
       
@@ -3266,14 +3265,56 @@ namespace Gambit
       // Create instance of classy class Class
       CosmoBit::Classy_cosmo_container ccc = *Dep::get_Classy_cosmo_container;
 
-
-
       pybind11::print("    second time  ",ccc.cosmo_input_dict);
 
-  
+      // Loop through the list of experiments, and query the lnL from the
+      // MontePython backend
+      for (std::vector<std::string>::const_iterator it = experiments.begin();
+        it != experiments.end(); ++it)
+      {
+        // todo!
+        // call to get_MP_loglike
+      }
 
       std::cout << "(CosmoBit): get_MP_loglike end with result "<< result << std::endl;
-      result = 5.;
+      result["test"] = 5.;
+      result["another_test"] = 415.;
+    }
+
+    /// Calculates the lnL contribution for each experimental
+    /// dataset from MontePython.
+    void calc_MP_LogLike_per_experiment(map_str_dbl& result)
+    {
+      using namespace Pipes::calc_MP_LogLike_per_experiment;
+
+      // map_str_pyobj MP_lnLs = *Dep::MP_LogLikes;
+      map_str_dbl MP_lnLs = *Dep::MP_LogLikes;
+
+      // Only needed when this is a map_str_pyobj I think?
+      // for (auto it = MP_lnLs.begin(); it != MP_lnLs.end(); ++it)
+      // {
+
+      // }
+      result = MP_lnLs;
+    }
+
+    /// Computes the combined lnL from the set of experiments 
+    /// given to MontePython.
+    void calc_MP_combined_LogLike(double& result)
+    {
+      using namespace Pipes::calc_MP_combined_LogLike;
+
+      map_str_dbl MP_lnLs = *Dep::MP_LogLike_per_experiment;
+
+      // Iterate through map of doubles and return one big fat double.
+      double lnL = 0.;
+      for (const auto &p : MP_lnLs)
+      {
+        std::cout << "Likelihood name: "  << p.first << std::endl;
+        std::cout << "Likelihood value: " << p.second<< std::endl;
+        lnL += p.second;
+      }
+      result = lnL;
     }
 
     void test_classy(double & result)

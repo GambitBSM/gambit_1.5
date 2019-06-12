@@ -74,9 +74,13 @@ ObsLikes:
     type:         double
   
   - purpose:      LogLike
-    capability:   MontePythonLike
+    capability:   MP_Combined_LogLike
     module:       CosmoBit
     type:         double
+
+  - purpose:      Observable
+    capability:   MP_LogLike_per_experiment
+    type:         map_str_dbl
 #
   #- purpose:      LogLike
   #  capability:   cap_test_classy
