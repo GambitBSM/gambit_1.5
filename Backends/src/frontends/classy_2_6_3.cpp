@@ -53,7 +53,7 @@ BE_NAMESPACE
 {
   using namespace pybind11::literals; // to bring in the `_a` literal
 
-  void classy_2_6_3_create_python_obj(pybind11::object& result)
+  void classy_create_class_instance(pybind11::object& result)
   {
 		result = classy.attr("Class")();
   }
@@ -65,7 +65,7 @@ BE_NAMESPACE
   	return combined_dict;
   }
 
-  void classy_2_6_3_set_parameter(pybind11::object& cosmo, pybind11::dict& cosmo_input_dict)
+  void classy_compute(pybind11::object& cosmo, pybind11::dict& cosmo_input_dict)
   {
   	// (JR) Should MP init before that such that output for class gets filled with all necessary entries
   	

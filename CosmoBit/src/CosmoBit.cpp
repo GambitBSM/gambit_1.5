@@ -3161,12 +3161,24 @@ namespace Gambit
       result = -0.5*chi2;
     }
 
-    void create_classy_python_obj(pybind11::object & result)
+    //void init_Classy_cosmo_container(CosmoBit::Classy_cosmo_container& ccc)
+    void init_Classy_cosmo_container(double & ccc)
     {
-      using namespace Pipes::create_classy_python_obj;
+      using namespace Pipes::init_Classy_cosmo_container;
 
       // create instance of classy class Class()
-      BEreq::classy_2_6_3_create_python_obj(result);
+      //BEreq::classy_create_class_instance(ccc.cosmo);
+
+      std::cout << "(CosmoBit): initialised cosmo object"<< std::endl;
+    }
+
+    //void create_classy_python_obj(pybind11::object & result)
+    void set_classy_parameters_LCDM(double & ccc)
+    {
+      using namespace Pipes::set_classy_parameters_LCDM;
+      using namespace pybind11::literals;
+      // create instance of classy class Class()
+      //BEreq::classy_2_6_3_create_python_obj(result);
 
       std::cout << "(CosmoBit): initialised cosmo object"<< std::endl;
     }
@@ -3186,6 +3198,18 @@ namespace Gambit
     }
 
     void test_classy(double & result)
+    {
+      using namespace Pipes::test_classy;
+
+      // does nothing.. just here to test (yaml file calls this function)
+
+      result = *Dep::MontePythonLike;
+      std::cout << "(CosmoBit): get_MP_loglike end with resutl "<< result << std::endl;
+
+
+    }
+
+    /*void test_classy(double & result)
     {
       using namespace Pipes::test_classy;
 
@@ -3242,7 +3266,7 @@ namespace Gambit
       std::cout << "(CosmoBit): get_MP_loglike end with resutl "<< result << std::endl;
 
 
-    }
+    }*/
 
     // /// Function to return the BAO likelihood from MontePython
     // void lnL_BAO_MP(double& result)
