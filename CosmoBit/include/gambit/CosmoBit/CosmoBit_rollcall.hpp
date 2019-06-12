@@ -337,6 +337,15 @@ START_MODULE
       ALLOW_MODELS(LCDM_dNeffCMB_dNeffBBN_etaBBN)
      #undef FUNCTION
   #undef CAPABILITY
+
+  #define CAPABILITY Omega0_m_the_classy_way
+       START_CAPABILITY
+       #define FUNCTION compute_Omega0_m_the_classy_way
+        START_FUNCTION(double)
+        DEPENDENCY(get_Classy_cosmo_container, CosmoBit::Classy_cosmo_container)
+        ALLOW_MODELS(LCDM_dNeffCMB_dNeffBBN_etaBBN)
+       #undef FUNCTION
+    #undef CAPABILITY
   
   #define CAPABILITY Omega0_b
      START_CAPABILITY
@@ -578,9 +587,9 @@ START_MODULE
       START_FUNCTION(double)
       ALLOW_MODELS(LCDM)
       DEPENDENCY(get_Classy_cosmo_container, CosmoBit::Classy_cosmo_container)
-      DEPENDENCY(set_classy_parameters, pybind11::dict)
 
-      BACKEND_REQ(classy_compute,(classy),void,(pybind11::object&, pybind11::dict&))
+      //BACKEND_REQ(classy_compute,(classy),void,(pybind11::object&, pybind11::dict&))
+      BACKEND_REQ(classy_compute,(classy),void,(CosmoBit::Classy_cosmo_container&))
       BACKEND_REQ(create_likelihood_objects,(libmontepythonlike),map_str_dbl,(pybind11::object&,std::vector<std::string>&))
       BACKEND_REQ(create_data_object,(libmontepythonlike),pybind11::object,(std::vector<std::string>&))
       
@@ -592,8 +601,10 @@ START_MODULE
      START_CAPABILITY
      #define FUNCTION init_Classy_cosmo_container
       START_FUNCTION(CosmoBit::Classy_cosmo_container)
+      DEPENDENCY(set_classy_parameters, pybind11::dict)
       ALLOW_MODELS(LCDM)
       BACKEND_REQ(classy_create_class_instance,(classy),void,(pybind11::object&))
+      BACKEND_REQ(classy_compute,(classy),void,(CosmoBit::Classy_cosmo_container&))
      #undef FUNCTION
   #undef CAPABILITY
 
@@ -602,9 +613,8 @@ START_MODULE
      #define FUNCTION set_classy_parameters_LCDM
       START_FUNCTION(pybind11::dict)
       ALLOW_MODELS(LCDM)
-      DEPENDENCY(get_Classy_cosmo_container, CosmoBit::Classy_cosmo_container)
+      //DEPENDENCY(get_Classy_cosmo_container, CosmoBit::Classy_cosmo_container)
       //BACKEND_REQ(classy_create_class_instance,(classy),void,(pybind11::object&))
-      //BACKEND_REQ(classy_compute,(classy),void,(CosmoBit::Classy_cosmo_container&))
      #undef FUNCTION
   #undef CAPABILITY
   
@@ -614,6 +624,7 @@ START_MODULE
       START_FUNCTION(double)
       ALLOW_MODELS(LCDM)
       DEPENDENCY(MontePythonLike, double)
+      DEPENDENCY(Omega0_m_the_classy_way,double)
      #undef FUNCTION
   #undef CAPABILITY
 

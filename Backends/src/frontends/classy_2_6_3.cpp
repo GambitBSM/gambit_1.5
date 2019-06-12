@@ -65,7 +65,8 @@ BE_NAMESPACE
   	return combined_dict;
   }
 
-  void classy_compute(pybind11::object& cosmo, pybind11::dict& cosmo_input_dict)
+  //void classy_compute(pybind11::object& cosmo, pybind11::dict& cosmo_input_dict)
+  void classy_compute(CosmoBit::Classy_cosmo_container& ccc)
   {
   	// (JR) Should MP init before that such that output for class gets filled with all necessary entries
   	
@@ -74,14 +75,14 @@ BE_NAMESPACE
   	//ccc.cosmo.attr("set")(combined_in_dict); */
   	
   	// set cosmological parameters
-  	cosmo.attr("set")(cosmo_input_dict);
+  	ccc.cosmo.attr("set")(ccc.cosmo_input_dict);
   	
     std::cout << "		(classy frontend) after set parameters "<< std::endl;
 
     // run class
-  	cosmo.attr("compute")();
-  	double age = cosmo.attr("age")().cast<double>();
-  	double h = cosmo.attr("h")().cast<double>();
+  	ccc.cosmo.attr("compute")();
+  	double age = ccc.cosmo.attr("age")().cast<double>();
+  	double h = ccc.cosmo.attr("h")().cast<double>();
 
     std::cout << "		(classy frontend) computed age to be "<< age << std::endl;
     std::cout << "		(classy frontend) computed h "<< h << std::endl;

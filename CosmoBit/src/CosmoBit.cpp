@@ -3168,22 +3168,39 @@ namespace Gambit
       // create instance of classy class Class()
       BEreq::classy_create_class_instance(ccc.cosmo);
 
-      std::cout << "(CosmoBit): initialised cosmo object"<< std::endl;
+      pybind11::dict cosmo_input_dict = *Dep::set_classy_parameters;
+      ccc.set_input_dict(cosmo_input_dict);
+
+      BEreq::classy_compute(ccc);
+
+      std::cout << "(CosmoBit): initialised cosmo object & computed vals"<< std::endl;
     }
 
-    //void create_classy_python_obj(pybind11::object & result)
     void set_classy_parameters_LCDM(pybind11::dict& result)
     {
       using namespace Pipes::set_classy_parameters_LCDM;
       using namespace pybind11::literals;
 
-      result = pybind11::dict("h"_a=*Param["H0"]/100., "output"_a="nCl lCl tCl", "YHe"_a=0.245, "omega_b"_a=*Param["omega_b"], "ln10A_s"_a=*Param["ln10A_s"],
+      // void create_classy_python_obj(pybind11::object & result)
+      // this should become equivalent to class_set_parameter_LCDM_family eventually
+      result = pybind11::dict("h"_a=*Param["H0"]/100., "output"_a="nCl lCl tCl", "YHe"_a=0.245, "omega_b"_a=*Param["omega_b"], "ln10^{10}A_s"_a=*Param["ln10A_s"],
       "n_s"_a=*Param["n_s"],"omega_cdm"_a=*Param["omega_cdm"],"tau_reio"_a=*Param["tau_reio"]);
 
       std::cout << "(CosmoBit): set ccc.cosmo_input_dict values to "<< std::endl;
       pybind11::print("      ",result);
 
     }
+
+    void compute_Omega0_m_the_classy_way(double & result)
+    {
+      using namespace Pipes::compute_Omega0_m_the_classy_way;
+
+      CosmoBit::Classy_cosmo_container ccc = *Dep::get_Classy_cosmo_container;
+      std::cout << "(CosmoBit): Omega0_m_classy way "<< std::endl;
+      pybind11::print("      ",ccc.cosmo.attr("Omega0_m")());
+      result = ccc.cosmo.attr("Omega0_m")().cast<double>();
+    }
+
 
 
     void init_MontePythonLike(double &result)
@@ -3221,12 +3238,11 @@ namespace Gambit
       // Create instance of classy class Class
       CosmoBit::Classy_cosmo_container ccc = *Dep::get_Classy_cosmo_container;
 
-      pybind11::dict cosmo_input_dict = *Dep::set_classy_parameters;
-      ccc.set_input_dict(cosmo_input_dict);
+
 
       pybind11::print("    second time  ",ccc.cosmo_input_dict);
 
-      //BEreq::classy_compute(ccc);
+  
 
       std::cout << "(CosmoBit): get_MP_loglike end with result "<< result << std::endl;
       result = 5.;

@@ -28,7 +28,7 @@ LOAD_LIBRARY
 //BE_FUNCTION(init, void, (), "init", "MontePythonLike_init")
 
 BE_CONV_FUNCTION(classy_create_class_instance, void, (pybind11::object&), 				 "classy_create_class_instance")
-BE_CONV_FUNCTION(classy_compute, 	 void, (pybind11::object&, pybind11::dict&), "classy_compute")
+BE_CONV_FUNCTION(classy_compute, 	 void, (CosmoBit::Classy_cosmo_container&), "classy_compute")
 //BE_CONV_FUNCTION(classy_2_6_3_set_parameter, void, (pybind11::dict, pybind11::dict), "classy_2_6_3_set_parameter")
 
 // Undefine macros to avoid conflict with other backends
