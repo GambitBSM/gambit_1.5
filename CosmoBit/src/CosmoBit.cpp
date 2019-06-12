@@ -3185,25 +3185,6 @@ namespace Gambit
       result = 5.;
     }
 
-   /* void test_static_const(CosmoBit::Classy_cosmo_container &ccc)
-    {
-      using namespace Pipes::test_static_const;
-      pybind11::object data;
-      map_str_dbl likelihoods;
-      static bool first_run = true;
-      if(first_run)
-      {
-        data = BEreq::create_data_object();
-        likelihoods = BEreq::create_likelihood_objects(data);
-        first_run = false;
-      }
-      //std::map<std::string, pybind11::object> likelihoods = BEreq::create_likelihood_objects(data);
-      CosmoBit::Classy_cosmo_container a(data, likelihoods);
-      ccc = a;
-      std::cout << "Print ccc "<< ccc.likelihoods.at("bao") << std::endl;
-
-    }*/
-
     void test_classy(double & result)
     {
       using namespace Pipes::test_classy;
@@ -3211,13 +3192,19 @@ namespace Gambit
       // to bring in the `_a` literal
       using namespace pybind11::literals; 
 
+      // TODO
+      std::vector<std::string> experiments;
+      experiments.push_back("bao");
+      experiments.push_back("Pantheon");
+
       pybind11::object data;
       map_str_dbl likelihoods;
       static bool first_run = true;
       if(first_run)
       {
-        data = BEreq::create_data_object();
-        likelihoods = BEreq::create_likelihood_objects(data);
+        data = BEreq::create_data_object(experiments);
+        likelihoods = BEreq::create_likelihood_objects(data, experiments);
+        // likelihoods = BEreq::create_likelihood_objects(data);
         first_run = false;
       }
       //std::map<std::string, pybind11::object> likelihoods = BEreq::create_likelihood_objects(data);
@@ -3256,6 +3243,18 @@ namespace Gambit
 
 
     }
+
+    // /// Function to return the BAO likelihood from MontePython
+    // void lnL_BAO_MP(double& result)
+    // {
+    //   // The name of the likelihood
+    //   std::string& likename = *Dep::likelihood_name;
+    //   // The python object
+    //   pybind11::object cosmo = *Dep::classy_python_obj;
+    //   // The Data-Likelihood container
+    //   CosmoBit::Classy_cosmo_container ccc = *Dep::
+    //   result = BEreq::get_MP_loglike(ccc, cosmo);
+    // }
 
 
   }

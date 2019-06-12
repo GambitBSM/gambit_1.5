@@ -48,24 +48,21 @@ namespace Gambit
 
     typedef std::map< std::string,std::valarray < double > > map_str_valarray_dbl;
 
+    // This should live in TYPES
     //typedef std::map<std::string,pybind11::object> map_str_pyobj;
     
+    // Container for the Data and Likelihood structures from the Classy 
+    // Python interface to CLASS
     class Classy_cosmo_container
     {
     public:
         Classy_cosmo_container();
         Classy_cosmo_container(pybind11::object &data_in, map_str_dbl likelihoods_in);
 
-        //pybind11::object cosmo;
-        pybind11::object data;
-        //map_str_pyobj likelihoods;
-        map_str_dbl likelihoods;
+        pybind11::object data;      // The Data structures imported in MontePython
+        map_str_dbl likelihoods;    // The Likelihood objects imported in MontePython
+        //map_str_pyobj likelihoods; 
 
-        //pybind11::dict cosmo_input_dict;
-        //pybind11::dict cosmo_prec_dict;
-
-        //void set_likelihoods(std::vector<std::string>){std::cout<<"Need to implement conversion string -> like object";};
-        
     };
 
     class BBN_container

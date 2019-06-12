@@ -2,7 +2,7 @@
 //   *********************************************
 ///  \file
 ///
-///  Frontend header for the DirectDM backend.
+///  Frontend header for the classy backend.
 ///
 ///  *********************************************
 ///
@@ -10,6 +10,10 @@
 ///
 ///  \author Janina Renk
 ///          (janina.renk@fysik.su.se)
+///  \date 2019 June
+///
+///  \author Sanjay Bloor
+///          (sanjay.bloor12@imperial.ac.uk)
 ///  \date 2019 June
 ///
 ///  *********************************************
@@ -23,8 +27,8 @@ LOAD_LIBRARY
 
 //BE_FUNCTION(init, void, (), "init", "MontePythonLike_init")
 
-BE_CONV_FUNCTION(classy_2_6_3_create_python_obj, void, (pybind11::object&), "classy_2_6_3_create_python_obj")
-BE_CONV_FUNCTION(classy_2_6_3_set_parameter, void, (pybind11::object&,pybind11::dict&), "classy_2_6_3_set_parameter")
+BE_CONV_FUNCTION(classy_2_6_3_create_python_obj, void, (pybind11::object&), 				 "classy_2_6_3_create_python_obj")
+BE_CONV_FUNCTION(classy_2_6_3_set_parameter, 	 void, (pybind11::object&, pybind11::dict&), "classy_2_6_3_set_parameter")
 //BE_CONV_FUNCTION(classy_2_6_3_set_parameter, void, (pybind11::dict, pybind11::dict), "classy_2_6_3_set_parameter")
 
 // Undefine macros to avoid conflict with other backends
