@@ -96,7 +96,7 @@ Rules:
   - capability: MP_experiment_names
     function: set_MP_experiment_names
     options:
-      Likelihoods: ["bao","hst"]  
+      Likelihoods: ["WiggleZ","hst"]  
       # should eventually be possible to choose any MP like, atm only bao & Pantheon safe to use
       # still need to write a proper patch for MPLike backend & test all Likes
 
