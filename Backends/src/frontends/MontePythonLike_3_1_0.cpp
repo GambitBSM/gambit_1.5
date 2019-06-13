@@ -80,7 +80,6 @@ BE_NAMESPACE
   	// Root likelihood path.
 
   	std::string like_path = backendDir+"/likelihoods/";
-  	std::cout << like_path << std::endl;
 
 	// Add the Likelihood path to sys so we can import it in Python
   	pybind11::module sys = pybind11::module::import("sys");

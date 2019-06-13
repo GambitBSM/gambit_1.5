@@ -69,9 +69,40 @@ Scanner:
 ObsLikes:
  
   - purpose:      Obs
-    capability:   Omega0_m_the_classy_way
-    module:       CosmoBit
-    type:         double
+    capability:   Omega0_m
+    function:     get_Omega0_m_classy 
+
+  - purpose:      Obs
+    capability:   Omega0_b
+    function:     get_Omega0_b_classy
+  
+  - purpose:      Obs
+    capability:   Omega0_cdm
+    function:     get_Omega0_cdm_classy
+  
+  - purpose:      Obs
+    capability:   Omega0_r
+    function:     get_Omega0_r_classy
+  
+  - purpose:      Obs
+    capability:   Omega0_g
+    function:     get_Omega0_g_classy
+  
+  - purpose:      Obs
+    capability:   Omega0_ur
+    function:     get_Omega0_ur_classy
+
+  - purpose:      Obs
+    capability:   Omega0_ncdm
+    function:     get_Omega0_ncdm_classy  
+
+  - purpose:      Obs
+    capability:   Sigma8
+    function:     get_Sigma8_classy
+
+  - purpose:      Obs
+    capability:   rs_drag
+    function:     get_rs_drag_classy
   
   - purpose:      LogLike
     capability:   MP_Combined_LogLike
@@ -95,6 +126,12 @@ Rules:
       failsafe: 1
       err: 0
 
+  - capability: set_classy_parameters
+    function: set_classy_parameters_LCDM
+    options:
+      #l_max: 1000
+      output: "lCl pCl tCl mPk"
+
   - capability: get_Classy_cosmo_container
     function: init_Classy_cosmo_container_with_MPLike
     module: CosmoBit
@@ -102,7 +139,7 @@ Rules:
   - capability: MP_experiment_names
     function: set_MP_experiment_names
     options:
-      Likelihoods: ["bao"]  
+      Likelihoods: ["bao"]
       # should eventually be possible to choose any MP like, atm only bao & Pantheon safe to use
       # still need to write a proper patch for MPLike backend & test all Likes
 
