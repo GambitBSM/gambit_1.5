@@ -3508,6 +3508,9 @@ namespace Gambit
 
       std::cout << "(CosmoBit) entered init_cosmo_args_from_MPLike"<< std::endl;
 
+      // Need to know where CLASSY lives
+      std::string classyDir = BEreq::path_to_classy();
+
       // CosmoBit::MPLike_data_container should only be created once when calculating the first point.
       // After that is has to be kept alive since it contains a vector with the initialised MPLike 
       // Likelihood objects.
@@ -3517,7 +3520,7 @@ namespace Gambit
       if(first_run)
       {
         std::vector<std::string> experiments = *Dep::MP_experiment_names;
-        data = BEreq::create_data_object(experiments);
+        data = BEreq::create_data_object(experiments, classyDir);
         first_run = false;
       }
 
@@ -3537,6 +3540,9 @@ namespace Gambit
       std::vector<std::string> experiments = *Dep::MP_experiment_names;
 
       std::cout << "(CosmoBit): init_MontePythonLike start"<< std::endl;
+
+      // Need to know where CLASSY lives
+      std::string classyDir = BEreq::path_to_classy();
       
       // CosmoBit::MPLike_data_container should only be created once when calculating the first point.
       // After that is has to be kept alive since it contains a vector with the initialised MPLike 
@@ -3546,7 +3552,7 @@ namespace Gambit
       static bool first_run = true;
       if(first_run)
       {
-        data = BEreq::create_data_object(experiments);
+        data = BEreq::create_data_object(experiments, classyDir);
         likelihoods = BEreq::create_likelihood_objects(data, experiments);
         first_run = false;
       }

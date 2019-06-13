@@ -695,7 +695,8 @@ START_MODULE
      #define FUNCTION init_cosmo_args_from_MPLike
       START_FUNCTION(pybind11::dict)
       DEPENDENCY(MP_experiment_names, std::vector<std::string>)
-      BACKEND_REQ(create_data_object,(libmontepythonlike),pybind11::object,(std::vector<std::string>&))
+      BACKEND_REQ(path_to_classy,     (classy),             std::string,      ())
+      BACKEND_REQ(create_data_object, (libmontepythonlike), pybind11::object, (std::vector<std::string>&, std::string&))
      #undef FUNCTION
   #undef CAPABILITY
 
@@ -737,7 +738,7 @@ START_MODULE
       START_FUNCTION(double)
       ALLOW_MODELS(LCDM)
       DEPENDENCY(MontePythonLike, double)
-      DEPENDENCY(Omega0_m_the_classy_way,double)
+      DEPENDENCY(Omega0_m,double)
      #undef FUNCTION
   #undef CAPABILITY
 
@@ -752,9 +753,10 @@ START_MODULE
       DEPENDENCY(MP_experiment_names,       std::vector<std::string>)
       //DEPENDENCY(parameter_dict_for_MPLike, pybind11::dict&)
 
+      BACKEND_REQ(path_to_classy,           (classy),             std::string,      ())
       BACKEND_REQ(classy_compute,           (classy),             void,             (CosmoBit::Classy_cosmo_container&))
       BACKEND_REQ(create_likelihood_objects,(libmontepythonlike), map_str_pyobj,    (pybind11::object&, std::vector<std::string>&))
-      BACKEND_REQ(create_data_object,       (libmontepythonlike), pybind11::object, (std::vector<std::string>&))
+      BACKEND_REQ(create_data_object,       (libmontepythonlike), pybind11::object, (std::vector<std::string>&, std::string&))
       BACKEND_REQ(get_MP_loglike,           (libmontepythonlike), double,           (const CosmoBit::MPLike_data_container&, pybind11::object&, std::string&))
     #undef FUNCTION
   #undef CAPABILITY

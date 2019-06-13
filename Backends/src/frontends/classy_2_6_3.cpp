@@ -53,6 +53,13 @@ BE_NAMESPACE
 {
   using namespace pybind11::literals; // to bring in the `_a` literal
 
+  // Returns a string of the path to the CLASSY object with respect to backendDir.
+  std::string path_to_classy()
+  {
+    std::string path = "classy/2.6.3/";
+    return path;
+  }
+
   void classy_create_class_instance(pybind11::object& result)
   {
 		result = classy.attr("Class")();
@@ -91,13 +98,3 @@ BE_NAMESPACE
 
 }
 END_BE_NAMESPACE
-
-
-
-/*void init_class_cosmo(pybind11::object & cosmo)
-  {
-	cosmo = classy.attr("Class")();
-	// cleanup cosmo structure every time backend is called to make sure there is no
-	// contamination with computations from previous point (it is okay to be called on empty structure)
-	cosmo.attr("struct_cleanup")(); 
-  }*/
