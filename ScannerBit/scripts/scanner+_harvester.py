@@ -748,12 +748,8 @@ endif()
                             towrite += "if (" + inc + "_FOUND)\n"
                             towrite += " "*4 + "set (" + plug_type[i] + "_plugin_includes_" + directory + "\n"
                             towrite += " "*8 + "${" + plug_type[i] + "_plugin_includes_" + directory + "}\n"
-                            towrite += " "*8 + "${ROOT_INCLUDE_DIR}\n"
                             towrite += " "*8 + "${ROOT_INCLUDE_DIRS}\n"
                             towrite += " "*4 + ")\n"
-                            towrite += " "*4 + "set (" + plug_type[i] + "_plugin_found_incs_" + directory
-                            towrite += " \"${" +  plug_type[i] + "_plugin_found_incs_" + directory + "}"
-                            towrite += "    \\\"" + inc + "\\\": ${ROOT_INCLUDE_DIR}\\n\")\n"
                             towrite += " "*4 + "set (" + plug_type[i] + "_plugin_found_incs_" + directory
                             towrite += " \"${" +  plug_type[i] + "_plugin_found_incs_" + directory + "}"
                             towrite += "    \\\"" + inc + "\\\": ${ROOT_INCLUDE_DIRS}\\n\")\n"

@@ -195,7 +195,15 @@ else()
 endif()
 if (WITH_ROOT AND ROOT_FOUND)
   message("${BoldYellow}   Found ROOT version ${ROOT_VERSION}.${ColourReset}")
-  include_directories(${ROOT_INCLUDE_DIR} ${ROOT_INCLUDE_DIRS})
+  if ("${ROOT_INCLUDE_DIRS}" STREQUAL "")
+    if ("${ROOT_INCLUDE_DIR}" STREQUAL "")
+      message(FATAL_ERROR "${BoldRed}FindROOT.cmake has not provided any include dir."
+                          "This is a ROOT bug; please report it to the ROOT developers."
+                          "You can set -DWITH_ROOT=OFF to compile GAMBIT without ROOT.${ColourReset}")
+    endif()
+    set(ROOT_INCLUDE_DIRS "${ROOT_INCLUDE_DIR}")
+  endif()
+  include_directories(${ROOT_INCLUDE_DIRS})
   add_definitions(${ROOT_DEFINITIONS})
   # Check if ROOT has been compiled with the same standard as we are using here.  If not, downgrade to the standard that ROOT was compiled with.
   set(CXX17 "-std=c\\+\\+17")
