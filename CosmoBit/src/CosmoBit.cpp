@@ -3261,7 +3261,7 @@ namespace Gambit
       std::vector<double> Helium_abundance = *Dep::Helium_abundance;
       result["YHe"] = Helium_abundance.at(0); // .at(0): mean, .at(1): uncertainty
       
-      // Other MontePython input direct from the YAML file
+      // Other Class input direct from the YAML file
       YAML::Node classy_dict;
       if (runOptions->hasKey("classy_dict"))
       {
@@ -3301,6 +3301,30 @@ namespace Gambit
       result = ccc.cosmo.attr("Omega0_m")().cast<double>();
     }
 
+    /*void set_parameter_dict_for_MPLike(pybind11::dict & result)
+    {
+      //using namespace Pipes::set_parameter_dict_for_MPLike;
+      using namespace pybind11::literals;
+
+      for (auto it=Param.begin(); it != Param.end(); it++)
+      {
+        std::string name = it->first;
+        //pybind11::str name_py = PyUnicode_DecodeLatin1(name.data(), name.length());
+        double value = *Param[name];
+        //result[name_py] = *Param[name];
+        std::cout<<"    (CosmoBit)  Parameters are "<< name << " with value " << byVal(value)<<std::endl;
+      }
+      std::cout<<"    (CosmoBit) Using Likelihood with cosmological nuisance parameters.. setting values for MPLike data.mcmc_parameters dict"<<std::endl;      
+    }*/
+
+    void pass_empty_parameter_dict_for_MPLike(pybind11::dict & result)
+    {
+      //using namespace Pipes::pass_empty_parameter_dict_for_MPLike;
+      using namespace pybind11::literals;
+
+      std::cout<<"    (CosmoBit) No Likelihood with cosmological nuisance parameters in use.. doing nothing in parameter_dict_for_MPLike "<<std::endl;      
+    }
+
     void set_MP_experiment_names(std::vector<std::string> & result)
     {
       using namespace Pipes::set_MP_experiment_names;
@@ -3311,15 +3335,15 @@ namespace Gambit
       {
 
         // Read analysis names from the yaml file
-        std::vector<std::string> default_analyses;  // The default is empty lists of analyses
+        std::vector<std::string> default_analyses;  // The default is empty lists of analyses TODO : deal with what happens if no Like is specified, throw error
         result = runOptions->getValueOrDef<std::vector<std::string> >(default_analyses, "Likelihoods");
 
         // Check that the analysis names listed in the yaml file all correspond to actual ColliderBit analyses
         for (std::string & name : result)
         {
-          std::cout << "Read option  "<< name <<std::endl;
+          std::cout << "(CosmoBit) Read MontePythonLike option  "<< name <<std::endl;
             
-          /*if (!checkAnalysis(analysis_name)) // add some check if likelihood is know (maybe MP does that automatically?)
+          /*if (!checkAnalysis(analysis_name)) // TODO add check if likelihood implemented (similar to what we did in MPLike patch file)
           {
             str errmsg = "The analysis " + analysis_name + " is not a known ColliderBit analysis.";
             ColliderBit_error().raise(LOCAL_INFO, errmsg);
@@ -3334,7 +3358,7 @@ namespace Gambit
     {
       using namespace Pipes::init_cosmo_args_from_MPLike;
 
-      std::cout << "entered init_cosmo_args_from_MPLike"<< std::endl;
+      std::cout << "(CosmoBit) entered init_cosmo_args_from_MPLike"<< std::endl;
 
       // CosmoBit::MPLike_data_container should only be created once when calculating the first point.
       // After that is has to be kept alive since it contains a vector with the initialised MPLike 
@@ -3359,6 +3383,7 @@ namespace Gambit
     void calc_MP_LogLikes(map_str_dbl & result)
     {
       using namespace Pipes::calc_MP_LogLikes;
+      using namespace pybind11::literals;
 
       // A list of the experiments initialised in the YAML file
       std::vector<std::string> experiments = *Dep::MP_experiment_names;
@@ -3383,6 +3408,14 @@ namespace Gambit
       // Test if cosmo_arguments dictionary contains parameters that need to go into ccc.cosmo_input_dict 
       // (values depend on used likelihoods)  --- Works! 
       pybind11::print(mplike_cont.data.attr("cosmo_arguments"));
+
+      pybind11::print("mcmc_parameters contains ", mplike_cont.data.attr("mcmc_parameters"));
+
+      //pybind11::dict add_mcmc_params = pybind11::dict("M"_a=420.);//*Dep::parameter_dict_for_MPLike;
+      //mplike_cont.data.attr("mcmc_parameters") = add_mcmc_params;
+
+      //pybind11::print("mcmc_parameters contains ", mplike_cont.data.attr("mcmc_parameters"));
+
       
       // Create instance of classy class Class
       CosmoBit::Classy_cosmo_container ccc = *Dep::get_Classy_cosmo_container;

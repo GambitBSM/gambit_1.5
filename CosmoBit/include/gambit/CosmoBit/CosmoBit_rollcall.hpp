@@ -581,6 +581,16 @@ START_MODULE
      #undef FUNCTION
   #undef CAPABILITY
 
+  //#define CAPABILITY parameter_dict_for_MPLike
+  //   START_CAPABILITY
+  //   #define FUNCTION set_parameter_dict_for_MPLike
+  //    START_FUNCTION(pybind11::dict)
+  //    ALLOW_MODELS(cosmo_nuisance_params_JLA)
+  //   #undef FUNCTION
+  //   #define FUNCTION pass_empty_parameter_dict_for_MPLike
+  //     START_FUNCTION(pybind11::dict)
+  //   #undef FUNCTION
+  //#undef CAPABILITY
 
   #define CAPABILITY MP_experiment_names
      START_CAPABILITY
@@ -646,8 +656,11 @@ START_MODULE
     #define FUNCTION calc_MP_LogLikes
       START_FUNCTION(map_str_dbl) 
       ALLOW_MODELS(LCDM)
-      DEPENDENCY(get_Classy_cosmo_container, CosmoBit::Classy_cosmo_container)
-      DEPENDENCY(MP_experiment_names, std::vector<std::string>)
+
+      DEPENDENCY(get_Classy_cosmo_container,CosmoBit::Classy_cosmo_container)
+      DEPENDENCY(MP_experiment_names,       std::vector<std::string>)
+      //DEPENDENCY(parameter_dict_for_MPLike, pybind11::dict&)
+
       BACKEND_REQ(classy_compute,           (classy),             void,             (CosmoBit::Classy_cosmo_container&))
       BACKEND_REQ(create_likelihood_objects,(libmontepythonlike), map_str_pyobj,    (pybind11::object&, std::vector<std::string>&))
       BACKEND_REQ(create_data_object,       (libmontepythonlike), pybind11::object, (std::vector<std::string>&))

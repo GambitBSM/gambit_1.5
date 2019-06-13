@@ -16,7 +16,7 @@
 ///
 ///  \author Janina Renk
 ///          (janina.renk@fysik.su.se)
-///   \date 2019 Feb
+///   \date 2019 Feb, Jun
 ///
 ///  *********************************************
 
@@ -119,6 +119,25 @@ void MODEL_NAMESPACE::LCDM_to_LCDM_dNeffCMB (const ModelParameters &myP, ModelPa
   targetP.setValue("n_s", myP.getValue("n_s") );
   targetP.setValue("tau_reio", myP.getValue("tau_reio") );
   targetP.setValue("dNeff", 0. );
+}
+
+#undef PARENT
+#undef MODEL
+
+
+#define MODEL  cosmo_nuisance_params_Pantheon
+#define PARENT cosmo_nuisance_params_JLA
+
+// Translation function definition
+void MODEL_NAMESPACE::cosmo_nuisance_params_Pantheon_to_cosmo_nuisance_params_JLA (const ModelParameters &myP, ModelParameters &targetP)
+{
+  USE_MODEL_PIPE(PARENT) // get pipe for "interpret as PARENT" function
+  logger()<<"Running interpret_as_parent calculations for cosmo_nuisance_params_Pantheon --> cosmo_nuisance_params_JLA ..."<<LogTags::info<<EOM;
+
+  targetP.setValue("M", myP.getValue("M"));
+  targetP.setValue("alpha",0.);
+  targetP.setValue("beta", 0. );
+  targetP.setValue("Delta_M", 0. );
 }
 
 #undef PARENT
