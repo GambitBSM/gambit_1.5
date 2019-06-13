@@ -47,7 +47,7 @@ Printer:
 
 Scanner:
 
-  use_scanner: great
+  use_scanner: random
 
   scanners:
 
