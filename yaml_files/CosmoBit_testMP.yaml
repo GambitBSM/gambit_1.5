@@ -34,7 +34,7 @@ Parameters:
  StandardModel_numass_degenerate: !import include/StandardModel_numass_degenerate_scan.yaml
 
  # Cosmological nuisance parameters (except for Planck CMB Likelihoods) 
- #cosmo_nuisance_params: !import include/cosmo_nuisance_params.yaml
+ #cosmo_nuisance_param_Pantheon: !import include/cosmo_nuisance_params_Pantheon.yaml
 
 #======== Prior setup ========
 Priors:
@@ -89,6 +89,12 @@ ObsLikes:
 
 #======== Rule entries ========
 Rules:
+
+  - capability: AlterBBN_setInput
+    options:
+      failsafe: 1
+      err: 0
+
   - capability: get_Classy_cosmo_container
     function: init_Classy_cosmo_container_with_MPLike
     module: CosmoBit
