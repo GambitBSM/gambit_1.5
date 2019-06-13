@@ -36,6 +36,62 @@ namespace Gambit
         return (2.*pow(pi,2)/45.) * (43./11.) * pow((_kB_eV_over_K_*T),3);
     }
 
+    // function to merge python dictionary b into a. If both dictionaries have the same key
+    // the values of the keys will be concatenated (without duplicating an entry)
+    // -> very specific for merging the classy input dictionaries
+    // typical example for this would be 
+    // dict a: 'output' : 'tCl nCl' and 
+    // dict b: 'output' : 'tCl mPk' => mPk has
+    // to be added to 'output' : 'tCl nCl mPk'
+    void merge_pybind_dicts(pybind11::dict& a, pybind11::dict& b) 
+    {
+      // loop through 2nd dict (better if this is the shorter one)
+      for (auto item : b)
+      { 
+        pybind11::str key = pybind11::str(item.first);
+        pybind11::str arg = pybind11::str(item.second);
+        
+        // if item not contained in b but not a it will be added to a
+        if(!a.attr("has_key")(key).cast<bool>())
+        {
+          a[key] = arg;
+          std::cout << "Adding key = " << std::string(pybind11::str(item.first)) << ", "<< "value=" << std::string(pybind11::str(item.second)) << std::endl;
+        }
+        // if item contained in both: split b by spaces and iterate through single entries 
+        // to see if they are included in a
+        else
+        { 
+          pybind11::print("check if kez is ouptu", key, " ",key.attr("find")(pybind11::str("output")).cast<int>());
+          if(key.attr("find")(pybind11::str("output")).cast<int>()!=-1)
+          {
+            // split string by spaces into list
+            pybind11::list list = b[key].attr("split")();
+            for(auto it : list)
+            { 
+              std::string list_entry = std::string(pybind11::str(it));
+              
+              // python string.find("x") returns -1 if "x" not contained
+              if(a[key].attr("find")(pybind11::str(list_entry)).cast<int>()==-1)
+              { 
+                // add part of b[key] string that is not contained in a[key] string to a[key]
+                std::string new_arg=std::string(pybind11::str(a[key]))+std::string(" ")+std::string(list_entry);
+                a[key]= new_arg;
+              }
+            }
+          }
+          else
+          {
+            std::cout <<"___________________________________________________________________"<<std::endl;
+            std::cout <<"___________________________________________________________________"<<std::endl;
+            std::cout << "Both dictionaries to merge contain key" << std::string(key) << "with entries "
+                << std::string(pybind11::str(a[key]))<< " and " << std::string(pybind11::str(b[key])) << ". Don't know how to deal with that, yet." << std::endl;
+            std::cout <<"___________________________________________________________________"<<std::endl;
+            std::cout <<"___________________________________________________________________"<<std::endl;
+          }
+        }
+      }
+    }
+
     std::vector<double> m_ncdm_classInput(std::map<std::string,double> NuMasses_SM)
     {
       std::vector<double> numasses;

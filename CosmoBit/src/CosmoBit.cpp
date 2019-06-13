@@ -3186,7 +3186,7 @@ namespace Gambit
     
     /// Initialises the container within CosmoBit from classy, but designed specifically
     /// to be used when MontePython is in use. This will ensure additional outputs are
-    /// computed by classyCLASS to be passed to MontePython.
+    /// computed by classy CLASS to be passed to MontePython.
     void init_Classy_cosmo_container_with_MPLike(CosmoBit::Classy_cosmo_container& ccc)
     {
       using namespace Pipes::init_Classy_cosmo_container_with_MPLike;
@@ -3194,15 +3194,23 @@ namespace Gambit
       // create instance of classy class Class()
       BEreq::classy_create_class_instance(ccc.cosmo);
 
+      // get extra cosmo_arguments from MP (gives a dictionary with output values that need
+      // to be set for the class run)
       static pybind11::dict MP_cosmo_arguments = *Dep::cosmo_args_from_MPLike;
-
-      // add the arguments from Mp_cosmo_arguments which are not yet in cosmo_input_dict to it
-      // also take care: you might have to merge output
-      pybind11::print(MP_cosmo_arguments);
+      pybind11::print("  ----|> Extra cosmo_arguments needed from MP Likelihoods: ",MP_cosmo_arguments);
 
       pybind11::dict cosmo_input_dict = *Dep::set_classy_parameters;
+
+      // add the arguments from Mp_cosmo_arguments which are not yet in cosmo_input_dict to it
+      // also takes care of merging the "output" key values
+      merge_pybind_dicts(cosmo_input_dict,MP_cosmo_arguments);
+
+      pybind11::print("  ----|> Combined dict", cosmo_input_dict);
+
+      // set the input dict of Classy cosmo container
       ccc.set_input_dict(cosmo_input_dict);
 
+      // actual CLASS run through classy
       BEreq::classy_compute(ccc);
 
       std::cout << "(CosmoBit): initialised cosmo object & computed vals"<< std::endl;
@@ -3260,6 +3268,8 @@ namespace Gambit
       result["tau_reio"] = *Param["tau_reio"];
       std::vector<double> Helium_abundance = *Dep::Helium_abundance;
       result["YHe"] = Helium_abundance.at(0); // .at(0): mean, .at(1): uncertainty
+
+
       
       // Other Class input direct from the YAML file
       YAML::Node classy_dict;
@@ -3301,34 +3311,39 @@ namespace Gambit
       result = ccc.cosmo.attr("Omega0_m")().cast<double>();
     }
 
-    /*void set_parameter_dict_for_MPLike(pybind11::dict & result)
+    /// function to fill the mcmc_parameters dictionary of MontePython's Data object with current 
+    /// values of nuisance parameters
+    void set_parameter_dict_for_MPLike(pybind11::dict & result)
     {
-      //using namespace Pipes::set_parameter_dict_for_MPLike;
+      using namespace Pipes::set_parameter_dict_for_MPLike;
       using namespace pybind11::literals;
 
       for (auto it=Param.begin(); it != Param.end(); it++)
       {
         std::string name = it->first;
-        //pybind11::str name_py = PyUnicode_DecodeLatin1(name.data(), name.length());
         double value = *Param[name];
-        //result[name_py] = *Param[name];
+        result[name.c_str()] = pybind11::dict("current"_a=*Param[name],"scale"_a=1.); // scale always 1 in GAMBIT
         std::cout<<"    (CosmoBit)  Parameters are "<< name << " with value " << byVal(value)<<std::endl;
       }
       std::cout<<"    (CosmoBit) Using Likelihood with cosmological nuisance parameters.. setting values for MPLike data.mcmc_parameters dict"<<std::endl;      
-    }*/
+    }
 
+    /// function to fill the mcmc_parameters dictionary of MontePython's Data object with current 
+    /// This version of the capability 'parameter_dict_for_MPLike' is used when no Likelihood with nuisance parameters is in use
+    /// just passes an empty py dictionary
     void pass_empty_parameter_dict_for_MPLike(pybind11::dict & result)
     {
-      //using namespace Pipes::pass_empty_parameter_dict_for_MPLike;
+      using namespace Pipes::pass_empty_parameter_dict_for_MPLike;
       using namespace pybind11::literals;
 
       std::cout<<"    (CosmoBit) No Likelihood with cosmological nuisance parameters in use.. doing nothing in parameter_dict_for_MPLike "<<std::endl;      
     }
 
+    /// Set the names of all experiments in use for scan 
+    /// basically reads in the runOption 'Likelihoods' of capability MP_experiment_names
     void set_MP_experiment_names(std::vector<std::string> & result)
     {
       using namespace Pipes::set_MP_experiment_names;
-
 
       static bool first = true;
       if (first)
@@ -3354,6 +3369,10 @@ namespace Gambit
       }
     }
 
+    /// When initialising the MontePython Likelihood objects they add the output that needs to be computed by class
+    /// to the input dictionary. We need to get these before starting the class run
+    /// e.g. for Planck_SZ likelihood the entries {'output': ' mPk ', 'P_k_max_h/Mpc': '1.'} need to be added 
+    /// to compute all needed observables
     void init_cosmo_args_from_MPLike(pybind11::dict &result)
     {
       using namespace Pipes::init_cosmo_args_from_MPLike;
@@ -3364,18 +3383,20 @@ namespace Gambit
       // After that is has to be kept alive since it contains a vector with the initialised MPLike 
       // Likelihood objects.
       clock_t tStart = clock();
-      static pybind11::object data;
       static bool first_run = true;
+      static pybind11::object data;
       if(first_run)
       {
         std::vector<std::string> experiments = *Dep::MP_experiment_names;
         data = BEreq::create_data_object(experiments);
+        map_str_pyobj likelihoods = BEreq::create_likelihood_objects(data, experiments);
         first_run = false;
       }
-
+      
       result = data.attr("cosmo_arguments");
 
-      cout << "(CosmoBit) time took to load up data element "<< (double)(clock() - tStart)/CLOCKS_PER_SEC<<std::endl;
+      std::cout << "(CosmoBit) time took to create data & likelihood objects "<< (double)(clock() - tStart)/CLOCKS_PER_SEC<<std::endl;
+      pybind11::print("     cosmo_arguments are ", result);
 
     }
 
@@ -3405,22 +3426,16 @@ namespace Gambit
       
       static const CosmoBit::MPLike_data_container mplike_cont(data, likelihoods);
       
-      // Test if cosmo_arguments dictionary contains parameters that need to go into ccc.cosmo_input_dict 
-      // (values depend on used likelihoods)  --- Works! 
-      pybind11::print(mplike_cont.data.attr("cosmo_arguments"));
+      // pass current values of nuisance parameters to data.mcmc_parameters dictionary for likelihood computation in MP
+      mplike_cont.data.attr("mcmc_parameters") = *Dep::parameter_dict_for_MPLike;
 
-      pybind11::print("mcmc_parameters contains ", mplike_cont.data.attr("mcmc_parameters"));
+      // Test if cosmo_arguments & mcmc_parameters dictionaries contain (nuisance) parameters that need to go into ccc.cosmo_input_dict 
+      // and likelihood calculation (values depend on used likelihoods)  --- Works! 
+      pybind11::print("(CosmoBit) data.cosmo_arguments contains ", mplike_cont.data.attr("cosmo_arguments"));
+      pybind11::print("(CosmoBit) data.mcmc_parameters contains ", mplike_cont.data.attr("mcmc_parameters"));
 
-      //pybind11::dict add_mcmc_params = pybind11::dict("M"_a=420.);//*Dep::parameter_dict_for_MPLike;
-      //mplike_cont.data.attr("mcmc_parameters") = add_mcmc_params;
-
-      //pybind11::print("mcmc_parameters contains ", mplike_cont.data.attr("mcmc_parameters"));
-
-      
       // Create instance of classy class Class
       CosmoBit::Classy_cosmo_container ccc = *Dep::get_Classy_cosmo_container;
-
-      pybind11::print("    second time  ",ccc.cosmo_input_dict);
 
       // Loop through the list of experiments, and query the lnL from the
       // MontePython backend
@@ -3460,7 +3475,7 @@ namespace Gambit
       // does nothing.. just here to test (yaml file calls this function)
 
       result = *Dep::MontePythonLike;
-      std::cout << "(CosmoBit): get_MP_loglike end with resutl "<< result << std::endl;
+      std::cout << "(CosmoBit): get_MP_loglike end with result "<< result << std::endl;
 
 
     }

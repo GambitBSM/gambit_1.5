@@ -32,12 +32,15 @@
 #include <map>
 #include <string>
 #include <sstream>
+#include <pybind11/stl.h>
 
 namespace Gambit
 {
 
   namespace CosmoBit
   {
+
+    void merge_pybind_dicts(pybind11::dict& a, pybind11::dict& b);
 
     // fast interpolation for grids defined on equally-spaced log space
     class fast_interpolation {
