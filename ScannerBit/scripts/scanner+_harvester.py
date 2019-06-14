@@ -715,6 +715,7 @@ endif()
                             towrite += "endif()\n\n"
                         else:
                             lib_name = plug_type[i] + "_" + directory + "_" + lib + "_LIBRARY"
+                            towrite += "unset(" + lib_name + " CACHE)\n"
                             towrite += "find_library( " + lib_name + " " + lib + " HINTS ${" + plug_type[i] + "_plugin_lib_paths_" + directory + "} )\n"
                             towrite += "if( " + lib_name + " STREQUAL \"" + lib_name + "-NOTFOUND\" )\n"
                             towrite += "    message(\"-- Did not find "+ plug_type[i] + " library " + lib + " for " + directory + ". Disabling scanners that depend on this.\")\n"
@@ -756,6 +757,7 @@ endif()
                             towrite += "endif()\n\n"
                         else:
                             inc_name = plug_type[i] + "_" + directory + "_" + re.sub(r";|/|\.", "_", inc) + "_INCLUDE_PATH"
+                            towrite += "unset(" + inc_name + " CACHE)\n"
                             towrite += "find_path( " + inc_name + " \"" + inc + "\" HINTS ${" + plug_type[i] + "_plugin_includes_" + directory + "})\n"
                             towrite += "if( NOT " + inc_name + " STREQUAL \"" + inc_name + "-NOTFOUND\" )\n"
                             towrite += " "*4 + "set (" + plug_type[i] + "_plugin_includes_" + directory + "\n"
@@ -765,7 +767,7 @@ endif()
                             towrite += " "*4 + "set (" + plug_type[i] + "_plugin_found_incs_" + directory
                             towrite += " \"${" +  plug_type[i] + "_plugin_found_incs_" + directory + "}"
                             towrite += "    \\\"" + inc + "\\\": ${" + inc_name + "}\\n\")\n"
-                            towrite += "    message(\"-- Found " + plug_type[i] + " header: ${inc_name}/" + inc + "\")\n"
+                            towrite += "    message(\"-- Found " + plug_type[i] + " header: ${" + inc_name + "}/" + inc + "\")\n"
                             towrite += "else()\n"
                             towrite += " "*4 + "set (" + plug_type[i] + "_ok_flag_" + directory + " \"    file_missing: \\\"" + inc + "\\\"\")\n"
                             towrite += "    message(\"-- Did not find "+ plug_type[i] + " header " + inc + ". Disabling scanners that depend on this.\")\n"
