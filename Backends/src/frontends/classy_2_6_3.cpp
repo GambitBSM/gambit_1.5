@@ -28,24 +28,7 @@
 
 BE_INI_FUNCTION
 {
-	/*static bool first_init = true;
-	if (first_init)
-	{
-	  // create instance of class Class() from classy
-		std::cout << "		(classy frontend) Created cosmo struct in frontend" << std::endl;
-		CosmoBit::classy_cosmo_container.cosmo = classy.attr("Class")();
-	}
-	first_init = false;
 
-	//cosmo = classy.attr("Class")();
-	//scan_level = false;
-	// cleanup cosmo structure every time backend is called to make sure there is no
-	// contamination with computations from previous point (it is okay to be called on empty structure)
-	std::cout << "		(classy frontend) About to clean up csomo sturct" << std::endl;
-	
-	CosmoBit::classy_cosmo_container.cosmo.attr("struct_cleanup")(); 
-
-	std::cout << "		(classy frontend) cleaned up csomo sturct" << std::endl;*/
 }
 END_BE_INI_FUNCTION
 
@@ -76,11 +59,7 @@ BE_NAMESPACE
   void classy_compute(CosmoBit::Classy_cosmo_container& ccc)
   {
   	// (JR) Should MP init before that such that output for class gets filled with all necessary entries
-  	
-  	// (JR) combinding dicts does not work atm, fix later
-  	/*pybind11::dict combined_in_dict = combine_py_dicts(ccc.cosmo_input_dict, ccc.cosmo_prec_dict);
-  	//ccc.cosmo.attr("set")(combined_in_dict); */
-  	
+  	  	
   	// set cosmological parameters
   	ccc.cosmo.attr("set")(ccc.cosmo_input_dict);
   	
@@ -95,7 +74,6 @@ BE_NAMESPACE
     //std::cout << "		(classy frontend) computed age to be "<< age << std::endl;
     //std::cout << "		(classy frontend) computed h "<< h << std::endl;
   }
-
 
 }
 END_BE_NAMESPACE

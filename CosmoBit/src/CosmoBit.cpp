@@ -25,6 +25,10 @@
 ///  \date 2018 June
 ///  \date 2019 Mar,June
 ///
+///  \author Sanjay Bloor
+///          (sanjay.bloor12@imperial.ac.uk)
+///  \date 2019 June
+///
 ///  *********************************************
 #include <cmath>
 #include <functional>

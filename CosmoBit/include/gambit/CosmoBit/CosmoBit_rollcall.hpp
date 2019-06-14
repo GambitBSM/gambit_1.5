@@ -27,6 +27,10 @@
 ///  \date 2018 Jun
 ///  \date 2019 Mar
 ///
+///  \author Sanjay Bloor
+///          (sanjay.bloor12@imperial.ac.uk)
+///  \date 2019 June
+///
 ///  *********************************************
 
 #ifndef __CosmoBit_rollcall_hpp__
