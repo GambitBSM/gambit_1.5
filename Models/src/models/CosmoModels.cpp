@@ -135,9 +135,7 @@ void MODEL_NAMESPACE::cosmo_nuisance_params_Pantheon_to_cosmo_nuisance_params_JL
   logger()<<"Running interpret_as_parent calculations for cosmo_nuisance_params_Pantheon --> cosmo_nuisance_params_JLA ..."<<LogTags::info<<EOM;
 
   targetP.setValue("M", myP.getValue("M"));
-  targetP.setValue("alpha",0.);
-  targetP.setValue("beta", 0. );
-  targetP.setValue("Delta_M", 0. );
+  // the rest (alpha, beta & Delta_M) automatically defaults to 0
 }
 
 #undef PARENT

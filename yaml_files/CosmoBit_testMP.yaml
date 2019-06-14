@@ -1,23 +1,18 @@
 ##########################################################################
-## Test CosmoBit Likelihoods
+## Test class vs. classy Backend and MontePython Likelihoods
 ##   - Using random sampler
-##   - Using the Planck-lite likelihood for high-l
-##     (Either TT or TTTEEE -> Specified in 'Rules')
-##   - Using BBN Likelihood
-##   - Using BAO Likelihood
-##   - Using Sigma8 Likelihood
-##   - Computing local H0 Likelihood as observable
+##   - Using BAO (2014), Pantheon & Planck_SZ (sigma8) Likelihood
 ##
-##  To test this you need to make the backends 'class', 'alterbbn' and 'plc'.
-##  You also need to download the Planck data and set the path to it in the
-##  rules for 
-##  - capability: plc_2_0_init
-##    options:
-##      planck_path: path/to/your/planck/data
+##  To test this you need to make the backends 'class', 'alterbbn', 'classy' and 'montepythonlike'.
 ##
-## Janina Renk <janina.renk@fysik.su.se>
-## 2018 Nov
+## \author Sanjay Bloor <sanjay.bloor12@imperial.ac.uk>
+##      \date 2019 Jun
+##
+## \author Janina Renk <janina.renk@fysik.su.se>
+##      \date 2019 Jun
+##
 ##########################################################################
+
 
 
 #======== Input parameter declarations =======
@@ -25,9 +20,6 @@ Parameters:
  
  # --- import model parameters for models to scan over ---
  LCDM: !import include/LCDM_scan.yaml        # base LCDM
- #LCDM_dNeffCMB: !import include/LCDM_dNeffCMB_scan.yaml
- #LCDM_dNeffCMB_dNeffBBN: !import include/LCDM_dNeffCMB_dNeffBBN_scan.yaml
- #LCDM_dNeffCMB_dNeffBBN_etaBBN: !import include/LCDM_dNeffCMB_dNeffBBN_etaBBN_scan.yaml
 
  # neutrino masses
  #StandardModel_numass_single: !import include/StandardModel_numass_single_scan.yaml
@@ -96,13 +88,15 @@ ObsLikes:
     capability:   Omega0_ncdm
     function:     get_Omega0_ncdm_classy  
 
-  - purpose:      Obs
-    capability:   Sigma8
-    function:     get_Sigma8_classy
+  - purpose:      LogLike
+    capability:   Pantheon_LogLike
 
-  - purpose:      Obs
-    capability:   rs_drag
-    function:     get_rs_drag_classy
+  - purpose:      LogLike
+    capability:   BAO_LogLike
+
+  - purpose:      LogLike
+    capability:   sigma8_LogLike
+
   
   - purpose:      LogLike
     capability:   MP_Combined_LogLike
@@ -112,25 +106,32 @@ ObsLikes:
   - purpose:      Observable
     capability:   MP_LogLikes
     type:         map_str_dbl
-#
-  #- purpose:      LogLike
-  #  capability:   cap_test_classy
-  #  module:       CosmoBit
-  #  type:         double
 
 #======== Rule entries ========
 Rules:
 
-  - capability: AlterBBN_setInput
-    options:
-      failsafe: 1
-      err: 0
 
+  # class through c interface
+  - capability: class_set_parameter
+    options:
+      class_dict: 
+        output: "tCl pCl lCl mPk" # need to add matter power spectrum for sigma8 computation
+        k_pivot: 0.05
+
+  # classy (class through python wrapper)
   - capability: set_classy_parameters
     function: set_classy_parameters_LCDM
     options:
       #l_max: 1000
-      output: "lCl pCl tCl mPk"
+      # /\
+      # ||  (JR) we should not set this by default when using the python wrapper: if only bg needed 
+      #     classy will complain that it did not read the input parameter.
+      #     If we use Planck through MP this should be taken care of by itself anyway
+      output: " "   # classy + MP: even when no output specified all spectra etc. the likelihoods need
+                    # are calculated since the MP Likelihood initialisation is taking care of this for us! 
+      lensing: "no" # heads-up: changed default to 'no'in function 'set_classy_parameters_LCDM' as well
+                    # since otherwise the automatic output setting will not work
+      l_max_scalars : 
 
   - capability: get_Classy_cosmo_container
     function: init_Classy_cosmo_container_with_MPLike
@@ -139,10 +140,43 @@ Rules:
   - capability: MP_experiment_names
     function: set_MP_experiment_names
     options:
-      Likelihoods: ["bao","Pantheon","Planck_SZ",]  
+      #Likelihoods: ["bao","Pantheon","Planck_SZ",]  
+      Likelihoods: ["bao_smallz_2014","Pantheon","Planck_SZ"]  
       # should eventually be possible to choose any MP like, atm only bao, Pantheon, Planck_SZ (& kids after 
-      # downloading data and when commenting out line 'parser_mp.existing_file(fname)') safe to use
+      # downloading data and when commenting out line 'parser_mp.existing_file(fname)', will include that into 
+      # build step soon) safe to use;
       # still need to write a proper patch for MPLike backend & test all Likes
+
+  # next 3 rules: all to calculate Likelihoods the class way (not the classy way)
+  # verified that BAO, Pantheon & Planck_SZ all give same result the class way & classy way (through MP)
+  - capability: BAO_LogLike
+    options:
+      DataFile:  BAO_2014.dat
+
+  - capability: sigma8_LogLike
+    function: compute_sigma8_LogLike
+    dependencies:
+      - capability: Omega0_m
+        function: compute_Omega0_m
+        module: CosmoBit
+    options:
+      DataFile: "Planck_SZ.dat"
+
+  - capability: Omega0_m
+    function: compute_Omega0_m
+    dependencies:
+      - capability: Omega0_b
+        function: compute_Omega0_b
+        module: CosmoBit
+      - capability: Omega0_cdm
+        function: compute_Omega0_cdm
+        module: CosmoBit
+
+  # to speed up Neff calc for testing
+  - capability: AlterBBN_setInput
+    options:
+      failsafe: 1
+      err: 0
 
   - capability: T_cmb
     options:

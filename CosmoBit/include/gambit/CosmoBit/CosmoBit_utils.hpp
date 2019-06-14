@@ -20,6 +20,7 @@
 ///  \author Janina Renk
 ///          (janina.renk@fysik.su.se)
 ///  \date 2019 Mar
+///  \date 2019 June
 ///
 ///  *********************************************
 

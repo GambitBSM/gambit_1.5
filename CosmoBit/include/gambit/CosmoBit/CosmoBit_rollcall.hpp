@@ -643,10 +643,11 @@ START_MODULE
    START_CAPABILITY
    #define FUNCTION compute_Pantheon_LogLike
     START_FUNCTION(double)
-    ALLOW_MODEL_DEPENDENCE(LCDM_dNeffCMB_dNeffBBN_etaBBN,cosmo_nuisance_params)
-    MODEL_GROUP(cosmology, (LCDM_dNeffCMB_dNeffBBN_etaBBN))
-    MODEL_GROUP(nuisance, (cosmo_nuisance_params))
-    ALLOW_MODEL_COMBINATION(cosmology,nuisance)
+    //ALLOW_MODEL_DEPENDENCE(LCDM_dNeffCMB_dNeffBBN_etaBBN,cosmo_nuisance_params)
+    //MODEL_GROUP(cosmology, (LCDM_dNeffCMB_dNeffBBN_etaBBN))
+    //MODEL_GROUP(nuisance, (cosmo_nuisance_params,cosmo_nuisance_params_Pantheon))
+    //ALLOW_MODEL_COMBINATION(cosmology,nuisance)
+    ALLOW_MODELS(cosmo_nuisance_params_Pantheon)
     BACKEND_REQ(class_get_Dl,(class_tag),double,(double))
    #undef FUNCTION
   #undef CAPABILITY
@@ -733,16 +734,6 @@ START_MODULE
      #undef FUNCTION
   #undef CAPABILITY
   
-  #define CAPABILITY cap_test_classy
-     START_CAPABILITY
-     #define FUNCTION test_classy
-      START_FUNCTION(double)
-      ALLOW_MODELS(LCDM)
-      DEPENDENCY(MontePythonLike, double)
-      DEPENDENCY(Omega0_m,double)
-     #undef FUNCTION
-  #undef CAPABILITY
-
   /// Calculates lnL for each experiment using the experiment names
   #define CAPABILITY MP_LogLikes
     START_CAPABILITY

@@ -10,7 +10,7 @@
 ///
 ///  \author Janina Renk
 ///          (janina.renk@fysik.su.se)
-///  \date 2019 Mar
+///  \date 20190 Mar, June
 ///  *********************************************
 
 //#include <string>
@@ -55,13 +55,14 @@ namespace Gambit
         if(!a.attr("has_key")(key).cast<bool>())
         {
           a[key] = arg;
-          std::cout << "Adding key = " << std::string(pybind11::str(item.first)) << ", "<< "value=" << std::string(pybind11::str(item.second)) << std::endl;
+          //std::cout << "Adding key = " << std::string(pybind11::str(item.first)) << ", "<< "value=" << std::string(pybind11::str(item.second)) << std::endl;
         }
         // if item contained in both: split b by spaces and iterate through single entries 
         // to see if they are included in a
         else
         { 
-          pybind11::print("check if kez is ouptu", key, " ",key.attr("find")(pybind11::str("output")).cast<int>());
+          
+          // python string.find("x") returns -1 if "x" not contained
           if(key.attr("find")(pybind11::str("output")).cast<int>()!=-1)
           {
             // split string by spaces into list
@@ -81,10 +82,12 @@ namespace Gambit
           }
           else
           {
+            // (JR) TODO see what other combinations could go wrong here -> different likelihoods
+            // asking for different redshift bins?
             std::cout <<"___________________________________________________________________"<<std::endl;
             std::cout <<"___________________________________________________________________"<<std::endl;
             std::cout << "Both dictionaries to merge contain key" << std::string(key) << "with entries "
-                << std::string(pybind11::str(a[key]))<< " and " << std::string(pybind11::str(b[key])) << ". Don't know how to deal with that, yet." << std::endl;
+                << std::string(pybind11::str(a[key]))<< " and " << std::string(pybind11::str(b[key])) << ". Don't know how to deal with that, yet. Will be taken care of soon." << std::endl;
             std::cout <<"___________________________________________________________________"<<std::endl;
             std::cout <<"___________________________________________________________________"<<std::endl;
           }

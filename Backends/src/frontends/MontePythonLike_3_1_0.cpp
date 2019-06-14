@@ -34,12 +34,10 @@ BE_NAMESPACE
   double get_MP_loglike(const CosmoBit::MPLike_data_container& mplike, pybind11::object& cosmo, std::string& experiment)
   {
 
-    std::cout << "   		(MontePythonLike) before calling loglkl " << std::endl;
-
+    //std::cout << "   		(MontePythonLike) before calling loglkl " << std::endl;
+    
     // need to use likelihood.at() since it is a const map -> [] can create entry & can't be used on const object
   	double result = mplike.likelihoods.at(experiment).attr("loglkl")(cosmo, mplike.data).cast<double>();
-    
-    std::cout << "   		(MontePythonLike) computed "<< experiment <<" loglike to be " << result << std::endl;
     
     return result;
   }
@@ -61,9 +59,7 @@ BE_NAMESPACE
   	pybind11::tuple MP_experiments = pybind11::make_tuple(experiments);
 
   	// Import Data object from MontePython
-  	std::cout << "   		(MPLike init_MPLike_Likelihoods) About to init data object" << std::endl;
   	pybind11::object data = MontePythonLike.attr("Data")("", path_dict, MP_experiments, mcmc_parameters);
-  	std::cout << "   		(MPLike init_MPLike_Likelihoods) Data object initialised!" << std::endl;
 
   	return data;
   }
@@ -97,7 +93,7 @@ BE_NAMESPACE
 		likelihoods[exp_name] = EXP_MODULE;
   	}
 
-  	std::cout << "   		(MPLike init_MPLike_Likelihoods) finished Likelihood init" << std::endl;
+  	//std::cout << "  (MPLike init_MPLike_Likelihoods) finished Likelihood init" << std::endl;
   	return likelihoods;
   		
   }

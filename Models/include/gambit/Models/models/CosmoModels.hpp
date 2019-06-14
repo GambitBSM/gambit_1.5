@@ -17,6 +17,7 @@
 ///  \author Janina Renk
 ///          (janina.renk@fysik.su.se)
 ///  \date 2018 Oct
+///  \date 2019 June
 ///  *********************************************
 
 #ifndef __CosmoModels_hpp__

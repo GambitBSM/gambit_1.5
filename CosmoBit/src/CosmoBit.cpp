@@ -20,6 +20,11 @@
 ///  \date 2018 Jan - May
 ///  \date 2019 Jan - Feb
 ///
+///  \author Janina Renk
+///          (janina.renk@fysik.su.se)
+///  \date 2018 June
+///  \date 2019 Mar,June
+///
 ///  *********************************************
 #include <cmath>
 #include <functional>
@@ -3003,7 +3008,7 @@ namespace Gambit
 
       int ie,je;
       double dl,chi2;
-      double M = *Param["M_AbsMag_SNe"]; 
+      double M = *Param["M"]; 
 
       if(read_data == false)
       {
@@ -3123,6 +3128,7 @@ namespace Gambit
             err << "Type " << type << " in "<< ie+1 <<". data point in BAO data file '"<<filename <<"' not recognised.";
             CosmoBit_error().raise(LOCAL_INFO, err.str());
         }
+        //pybind11::print("         (MOntePython internal) compute BAO for z = ", z, ": ",theo," ",data["mean"][ie]," ",data["sigma"][ie]);
         chi2 += pow((theo - data["mean"][ie]) / data["sigma"][ie],2);
       }
       result = -0.5*chi2;
@@ -3255,9 +3261,12 @@ namespace Gambit
         result["T_ncdm"] = *Dep::T_ncdm;
       }
       result["N_ur"] = *Dep::class_Nur; // Number of ultra relativistic species
-      result["output"] = runOptions->getValueOrDef<str>("tCl pCl lCl", "output");
-      result["l_max_scalars"] = runOptions->getValueOrDef<int>(2508., "l_max");
-      result["lensing"] = "yes";
+      result["output"] = runOptions->getValueOrDef<str>("", "output");
+      // JR we should not set this by default when using the python wrapper: if only bg needed 
+      // classy will complain that it did not read the input parameter
+      // if we use Planck through MP this should be taken care of by itself anyway
+      //result["l_max_scalars"] = runOptions->getValueOrDef<int>(2508., "l_max"); 
+      result["lensing"] = runOptions->getValueOrDef<str>("no","lensing");
       result["T_cmb"] = *Dep::T_cmb;
       result["omega_b"] = *Param["omega_b"];
       result["omega_cdm"] = *Param["omega_cdm"];
@@ -3299,17 +3308,6 @@ namespace Gambit
 
     }
 
-    void test_classy(double & result)
-    {
-      using namespace Pipes::test_classy;
-
-      // does nothing.. just here to test (yaml file calls this function)
-
-      result = *Dep::MontePythonLike;
-      std::cout << "(CosmoBit): get_MP_loglike end with resutl "<< result << std::endl;
-
-
-    }
 
     /* Classy getter functions */
 
@@ -3471,7 +3469,7 @@ namespace Gambit
         std::string name = it->first;
         double value = *Param[name];
         result[name.c_str()] = pybind11::dict("current"_a=*Param[name],"scale"_a=1.); // scale always 1 in GAMBIT
-        std::cout<<"    (CosmoBit)  Parameters are "<< name << " with value " << byVal(value)<<std::endl;
+        std::cout<<"    (CosmoBit) Nuisance parameters are "<< name << " with value " << byVal(value)<<std::endl;
       }
       std::cout<<"    (CosmoBit) Using Likelihood with cosmological nuisance parameters.. setting values for MPLike data.mcmc_parameters dict"<<std::endl;      
     }
@@ -3539,7 +3537,7 @@ namespace Gambit
       if(first_run)
       {
         std::vector<std::string> experiments = *Dep::MP_experiment_names;
-        data = BEreq::create_data_object(experiments);
+        data = BEreq::create_data_object(experiments,classyDir);
         map_str_pyobj likelihoods = BEreq::create_likelihood_objects(data, experiments);
         first_run = false;
       }
@@ -3600,7 +3598,7 @@ namespace Gambit
         result[like_name] = BEreq::get_MP_loglike(mplike_cont, ccc.cosmo, like_name);
       }
 
-      std::cout << "(CosmoBit): get_MP_loglike end with result "<< result << std::endl;
+      std::cout << "(CosmoBit): get_MP_loglike end with result \n"<< result << std::endl;
     }
 
     /// Computes the combined lnL from the set of experiments 

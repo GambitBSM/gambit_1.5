@@ -88,11 +88,12 @@ BE_NAMESPACE
 
     // run class
   	ccc.cosmo.attr("compute")();
-  	double age = ccc.cosmo.attr("age")().cast<double>();
-  	double h = ccc.cosmo.attr("h")().cast<double>();
-
-    std::cout << "		(classy frontend) computed age to be "<< age << std::endl;
-    std::cout << "		(classy frontend) computed h "<< h << std::endl;
+  	
+  	// for testing -- keep it for now just in case.. 
+  	//double age = ccc.cosmo.attr("age")().cast<double>();
+  	//double h = ccc.cosmo.attr("h")().cast<double>();
+    //std::cout << "		(classy frontend) computed age to be "<< age << std::endl;
+    //std::cout << "		(classy frontend) computed h "<< h << std::endl;
   }
 
 
