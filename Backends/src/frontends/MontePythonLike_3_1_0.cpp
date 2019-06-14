@@ -2,7 +2,7 @@
 //   *********************************************
 ///  \file
 ///
-///  Frontend source for the DirectDM backend.
+///  Frontend source for the MontePython backend.
 ///
 ///  *********************************************
 ///
@@ -46,12 +46,12 @@ BE_NAMESPACE
 
   /// Creates a MontePython 'Data' object. 
   /// This is initialised with a list of the relevant experimental limits to import. 
-  pybind11::object create_data_object(std::vector<std::string>& experiments)
+  /// Also needs to know where CLASSY lives. 
+  pybind11::object create_data_object(std::vector<std::string>& experiments, std::string& classyDir)
   {
-
   	pybind11::dict path_dict = pybind11::dict("MontePython"_a=backendDir,
   											  "data"_a=backendDir+"/../data/",
-  											  "cosmo"_a=backendDir+"/../../../classy/2.6.3/", 
+  											  "cosmo"_a=backendDir+"/../../../"+classyDir, 
   											  "root"_a=backendDir+"/../../../");
 
   	// TODO nuisance parameters and other Cosmology to go here...
@@ -79,7 +79,6 @@ BE_NAMESPACE
   	// Root likelihood path.
 
   	std::string like_path = backendDir+"/likelihoods/";
-  	std::cout << like_path << std::endl;
 
 	// Add the Likelihood path to sys so we can import it in Python
   	pybind11::module sys = pybind11::module::import("sys");

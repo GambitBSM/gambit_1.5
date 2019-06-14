@@ -3255,9 +3255,8 @@ namespace Gambit
         result["T_ncdm"] = *Dep::T_ncdm;
       }
       result["N_ur"] = *Dep::class_Nur; // Number of ultra relativistic species
-      result["output"] = "tCl pCl lCl";
-      // TODO -- from Class() object...? 
-      result["l_max_scalars"] = 2508;
+      result["output"] = runOptions->getValueOrDef<str>("tCl pCl lCl", "output");
+      result["l_max_scalars"] = runOptions->getValueOrDef<int>(2508., "l_max");
       result["lensing"] = "yes";
       result["T_cmb"] = *Dep::T_cmb;
       result["omega_b"] = *Param["omega_b"];
@@ -3295,21 +3294,170 @@ namespace Gambit
         }
       }
 
-      //result = pybind11::dict("h"_a=*Param["H0"]/100., "output"_a="nCl lCl tCl", "YHe"_a=0.245, "omega_b"_a=*Param["omega_b"], "ln10^{10}A_s"_a=*Param["ln10A_s"],
-      //"n_s"_a=*Param["n_s"],"omega_cdm"_a=*Param["omega_cdm"],"tau_reio"_a=*Param["tau_reio"]);
-
       std::cout << "(CosmoBit): set ccc.cosmo_input_dict values to "<< std::endl;
       pybind11::print("      ",result);
 
     }
 
-    void compute_Omega0_m_the_classy_way(double & result)
+    void test_classy(double & result)
     {
-      using namespace Pipes::compute_Omega0_m_the_classy_way;
+      using namespace Pipes::test_classy;
+
+      // does nothing.. just here to test (yaml file calls this function)
+
+      result = *Dep::MontePythonLike;
+      std::cout << "(CosmoBit): get_MP_loglike end with resutl "<< result << std::endl;
+
+
+    }
+
+    /* Classy getter functions */
+
+    /// Energy densities *today* (Omega0)
+
+    /// Matter
+    void get_Omega0_m_classy(double& result)
+    {
+      using namespace Pipes::get_Omega0_m_classy;
 
       CosmoBit::Classy_cosmo_container ccc = *Dep::get_Classy_cosmo_container;
       result = ccc.cosmo.attr("Omega0_m")().cast<double>();
     }
+
+    /// Baryons
+    void get_Omega0_b_classy(double& result)
+    {
+      using namespace Pipes::get_Omega0_b_classy;
+
+      CosmoBit::Classy_cosmo_container ccc = *Dep::get_Classy_cosmo_container;
+      result = ccc.cosmo.attr("Omega_b")().cast<double>();
+    }
+
+    /// Cold Dark Matter
+    void get_Omega0_cdm_classy(double& result)
+    {
+      using namespace Pipes::get_Omega0_cdm_classy;
+
+      CosmoBit::Classy_cosmo_container ccc = *Dep::get_Classy_cosmo_container;
+      // TODO -- does not currently work
+      //result = ccc.cosmo.attr("Omega0_cdm")().cast<double>();
+      result = 0.;    }
+
+    /// Radiation
+    void get_Omega0_r_classy(double& result)
+    {
+      using namespace Pipes::get_Omega0_r_classy;
+
+      CosmoBit::Classy_cosmo_container ccc = *Dep::get_Classy_cosmo_container;
+      // TODO -- does not currently work
+      //result = ccc.cosmo.attr("Omega0_r")().cast<double>();
+      result = 0.;
+    }
+
+    /// Photons
+    void get_Omega0_g_classy(double& result)
+    {
+      using namespace Pipes::get_Omega0_g_classy;
+
+      CosmoBit::Classy_cosmo_container ccc = *Dep::get_Classy_cosmo_container;
+      result = ccc.cosmo.attr("Omega_g")().cast<double>();
+    }
+
+    /// Ultra-relativistic
+    void get_Omega0_ur_classy(double& result)
+    {
+      using namespace Pipes::get_Omega0_ur_classy;
+
+      CosmoBit::Classy_cosmo_container ccc = *Dep::get_Classy_cosmo_container;
+      // TODO -- does not currently work
+      //result = ccc.cosmo.attr("Omega0_ur")().cast<double>();
+      result = 0.;
+    }
+
+    /// Non-cold Dark Matter
+    void get_Omega0_ncdm_classy(double& result)
+    {
+      using namespace Pipes::get_Omega0_ncdm_classy;
+
+      CosmoBit::Classy_cosmo_container ccc = *Dep::get_Classy_cosmo_container;
+      // TODO -- does not currently work
+      // result = ccc.cosmo.attr("Omega0_ncdm")().cast<double>();
+      result = 0.;
+    }
+
+    /// Other observables.
+
+    /// Sigma8
+    void get_Sigma8_classy(double& result)
+    {
+      using namespace Pipes::get_Sigma8_classy;
+
+      // We need to check if the matter power spectrum is
+      // being computed or not. If not, throw an error.
+      pybind11::dict classy_params = *Dep::set_classy_parameters;
+      pybind11::str output = classy_params["output"];
+      if (output.attr("find")("mPk").cast<int>() == -1) {
+        CosmoBit_error().raise(LOCAL_INFO, "CLASSY can not compute "
+          "σ8 unless you ask for the matter power spectrum.\n"
+          "Try adding the following entry to your YAML file:\n"
+          "  - capability: set_classy_parameters\n"
+          "    function: set_classy_parameters_LCDM\n"
+          "    options:\n"
+          "        output: \"lCl pCl tCl mPk\"");
+      }
+
+      CosmoBit::Classy_cosmo_container ccc = *Dep::get_Classy_cosmo_container;
+      result = ccc.cosmo.attr("sigma8")().cast<double>();
+    }
+
+    /// Effective number of neutrino species
+    // (mostly for cross-checking!)
+    void get_Neff_classy(double& result)
+    {
+      using namespace Pipes::get_Neff_classy;
+
+      CosmoBit::Classy_cosmo_container ccc = *Dep::get_Classy_cosmo_container;
+      result = ccc.cosmo.attr("Neff")().cast<double>();
+    }
+
+    /// Comoving sound horizon at Baryon drag epoch
+    void get_rs_drag_classy(double& result)
+    {
+      using namespace Pipes::get_rs_drag_classy;
+
+      CosmoBit::Classy_cosmo_container ccc = *Dep::get_Classy_cosmo_container;
+      result = ccc.cosmo.attr("rs_drag")().cast<double>();
+    }
+
+    /// for the future, maybe -- or to live in CB_utils/frontend...
+    /// Angular distance
+    /*
+    void get_angular_distance_classy(double& result)
+    {
+      using namespace Pipes::get_angular_distance_classy;
+      double z = ...?
+      CosmoBit::Classy_cosmo_container ccc = *Dep::get_Classy_cosmo_container;
+      result = ccc.cosmo.attr("angular_distance")(z).cast<double>();
+    }    
+    void get_luminosity_distance_classy(double& result)
+    {
+      using namespace Pipes::get_luminosity_distance_classy;
+      double z = ...?
+      CosmoBit::Classy_cosmo_container ccc = *Dep::get_Classy_cosmo_container;
+      result = ccc.cosmo.attr("luminosity_distance")(z).cast<double>();
+    }
+    void get_scale_invariant_growth_factor(double& result)
+    {
+      using namespace Pipes::get_scale_invariant_growth_factor;
+      double z = ...?
+      CosmoBit::Classy_cosmo_container ccc = *Dep::get_Classy_cosmo_container;
+      result = ccc.cosmo.attr("scale_invariant_growth_factor")(z).cast<double>();
+    }
+    */
+
+/***************/
+/* MontePython */
+/***************/
 
     /// function to fill the mcmc_parameters dictionary of MontePython's Data object with current 
     /// values of nuisance parameters
@@ -3379,6 +3527,9 @@ namespace Gambit
 
       std::cout << "(CosmoBit) entered init_cosmo_args_from_MPLike"<< std::endl;
 
+      // Need to know where CLASSY lives
+      std::string classyDir = BEreq::path_to_classy();
+
       // CosmoBit::MPLike_data_container should only be created once when calculating the first point.
       // After that is has to be kept alive since it contains a vector with the initialised MPLike 
       // Likelihood objects.
@@ -3410,6 +3561,9 @@ namespace Gambit
       std::vector<std::string> experiments = *Dep::MP_experiment_names;
 
       std::cout << "(CosmoBit): init_MontePythonLike start"<< std::endl;
+
+      // Need to know where CLASSY lives
+      std::string classyDir = BEreq::path_to_classy();
       
       // CosmoBit::MPLike_data_container should only be created once when calculating the first point.
       // After that is has to be kept alive since it contains a vector with the initialised MPLike 
@@ -3419,7 +3573,7 @@ namespace Gambit
       static bool first_run = true;
       if(first_run)
       {
-        data = BEreq::create_data_object(experiments);
+        data = BEreq::create_data_object(experiments, classyDir);
         likelihoods = BEreq::create_likelihood_objects(data, experiments);
         first_run = false;
       }
@@ -3467,19 +3621,6 @@ namespace Gambit
       }
       result = lnL;
     }
-
-    void test_classy(double & result)
-    {
-      using namespace Pipes::test_classy;
-
-      // does nothing.. just here to test (yaml file calls this function)
-
-      result = *Dep::MontePythonLike;
-      std::cout << "(CosmoBit): get_MP_loglike end with result "<< result << std::endl;
-
-
-    }
-
   }
 }
 

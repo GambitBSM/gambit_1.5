@@ -221,3 +221,12 @@ else()
   set(itch "${itch}" "sqliteprinter" "sqlitereader")
 endif()
 
+# Check for Cython
+find_package(Cython QUIET)
+if(CYTHON_FOUND)
+  include_directories(${CYTHON_INCLUDE_DIRS})
+  message("-- Found Cython libraries: ${CYTHON_EXECUTABLE}")
+else()
+  message("${BoldRed}   No Cython libraries found. Excluding MontePython from GAMBIT configuration.${ColourReset}")
+  set(itch "${itch}" "montepython")
+endif()
