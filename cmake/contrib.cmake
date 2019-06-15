@@ -63,6 +63,9 @@ endif()
 
 set(restframes_VERSION "1.0.2")
 set(restframes_CONTRIB_DIR "${PROJECT_SOURCE_DIR}/contrib/RestFrames-${restframes_VERSION}")
+set(rf-rmstring "${CMAKE_BINARY_DIR}/restframes-prefix/src/restframes-stamp/restframes")
+set(rf-clean-stamps ${rf-rmstring}-configure ${rf-rmstring}-build ${rf-rmstring}-install ${rf-rmstring}-done)
+set(rf-nuke-stamps ${rf-rmstring}-download ${rf-rmstring}-mkdir ${rf-rmstring}-patch ${rf-rmstring}-update)
 set(RestFrames_LIBRARY ${restframes_CONTRIB_DIR}/lib/librestframes.so)
 if(WITH_RESTFRAMES)
   message("-- RestFrames-dependent analyses in ColliderBit will be activated.")
@@ -71,6 +74,7 @@ if(WITH_RESTFRAMES)
 else()
   message("   RestFrames-dependent analyses in ColliderBit will be deactivated.")
   execute_process(COMMAND ${CMAKE_COMMAND} -E remove_directory ${restframes_CONTRIB_DIR})
+  execute_process(COMMAND ${CMAKE_COMMAND} -E remove -f ${rf-clean-stamps} ${rf-nuke-stamps})
   set(EXCLUDE_RESTFRAMES TRUE)
 endif()
 
@@ -102,12 +106,11 @@ if(NOT EXCLUDE_RESTFRAMES)
   # Add install name tool step for OSX
   add_install_name_tool_step(${name} ${dir}/lib libRestFrames.dylib)
   # Add clean-restframes and nuke-restframes
-  set(rmstring "${CMAKE_BINARY_DIR}/restframes-prefix/src/restframes-stamp/restframes")
-  add_custom_target(clean-restframes COMMAND ${CMAKE_COMMAND} -E remove -f ${rmstring}-configure ${rmstring}-build ${rmstring}-install ${rmstring}-done
-    COMMAND [ -e ${dir} ] && cd ${dir} && ([ -e makefile ] || [ -e Makefile ] && ${CMAKE_MAKE_PROGRAM} distclean) || true)
+  add_custom_target(clean-restframes COMMAND ${CMAKE_COMMAND} -E remove -f ${rf-clean-stamps}
+                                     COMMAND [ -e ${dir} ] && cd ${dir} && ([ -e makefile ] || [ -e Makefile ] && ${CMAKE_MAKE_PROGRAM} distclean) || true)
   add_dependencies(distclean clean-restframes)
-  add_custom_target(nuke-restframes COMMAND ${CMAKE_COMMAND} -E remove -f ${rmstring}-download ${rmstring}-mkdir ${rmstring}-patch ${rmstring}-update
-    COMMAND ${CMAKE_COMMAND} -E remove_directory "${dir}" || true)
+  add_custom_target(nuke-restframes COMMAND ${CMAKE_COMMAND} -E remove -f ${rf-nuke-stamps}
+                                    COMMAND ${CMAKE_COMMAND} -E remove_directory "${dir}" || true)
   add_dependencies(nuke-restframes clean-restframes)
   add_dependencies(nuke-contrib nuke-restframes)
   add_dependencies(nuke-all nuke-restframes)
