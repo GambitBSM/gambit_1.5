@@ -205,6 +205,7 @@ if (WITH_ROOT AND ROOT_FOUND)
   endif()
   include_directories(${ROOT_INCLUDE_DIRS})
   add_definitions(${ROOT_DEFINITIONS})
+  set(CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_RPATH};$ENV{ROOTSYS}/lib")
   # Check if ROOT has been compiled with the same standard as we are using here.  If not, downgrade to the standard that ROOT was compiled with.
   set(CXX17 "-std=c\\+\\+17")
   set(CXX14 "-std=c\\+\\+14")
