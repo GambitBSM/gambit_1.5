@@ -769,7 +769,6 @@ endif()
                             towrite += "    \\\"" + inc + "\\\": ${" + inc_name + "}\\n\")\n"
                             towrite += "    message(\"-- Found " + plug_type[i] + " header: ${" + inc_name + "}/" + inc + "\")\n"
                             towrite += "else()\n"
-                            towrite += " "*4 + "set (" + plug_type[i] + "_ok_flag_" + directory + " \"    file_missing: \\\"" + inc + "\\\"\")\n"
                             towrite += "    message(\"-- Did not find "+ plug_type[i] + " header " + inc + ". Disabling scanners that depend on this.\")\n"
                             towrite += "endif()\n\n"
             towrite += "if( NOT ${" + plug_type[i] + "_plugin_linked_libs_" + directory + "} STREQUAL \"\" OR NOT ${" + plug_type[i] + "_plugin_found_incs_" + directory + "} STREQUAL \"\")\n"

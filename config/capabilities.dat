@@ -3769,6 +3769,9 @@ FH_FlavourObs: |
 gamLike_1_0_0_init: |
    Initialisation of gamLike.
 
+gamLike_1_0_1_init: |
+   Initialisation of gamLike.
+
 init: |
    Initialise variables in gamLike.
 lnL: |
