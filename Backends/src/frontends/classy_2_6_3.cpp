@@ -48,18 +48,18 @@ BE_NAMESPACE
 		result = classy.attr("Class")();
   }
   
-  //pybind11::object cosmo;
-  pybind11::dict combine_py_dicts(pybind11::dict a, pybind11::dict b)
-  {
-  	pybind11::dict combined_dict = pybind11::eval("dict(a.items() + b.items() +[(k, op(a[k], b[k])) for k in set(b) & set(a)])");
-  	return combined_dict;
-  }
-
   //void classy_compute(pybind11::object& cosmo, pybind11::dict& cosmo_input_dict)
   void classy_compute(CosmoBit::Classy_cosmo_container& ccc)
   {
   	// (JR) Should MP init before that such that output for class gets filled with all necessary entries
-  	  	
+  	
+    // Clean CLASS (the equivalent of the struct_free() in the `main` of CLASS -- don't want a memory leak, do we
+    ccc.cosmo.attr("struct_cleanup")();
+
+    // Actually only strictly necessary when cosmology is changed completely between two different runs
+    // but just to make sure nothing's going wrong do it anyways..
+    ccc.cosmo.attr("empty")();
+
   	// set cosmological parameters
   	ccc.cosmo.attr("set")(ccc.cosmo_input_dict);
   	
