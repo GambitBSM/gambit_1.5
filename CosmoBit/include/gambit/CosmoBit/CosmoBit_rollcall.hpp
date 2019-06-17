@@ -419,7 +419,7 @@ START_MODULE
 
     #define FUNCTION get_Omega0_g_classy
       START_FUNCTION(double)
-      DEPENDENCY(get_Classy_cosmo_container, CosmoBit::Classy_cosmo_container)
+      DEPENDENCY(T_cmb, double)
       ALLOW_MODELS(LCDM_dNeffCMB_dNeffBBN_etaBBN)
     #undef FUNCTION
 

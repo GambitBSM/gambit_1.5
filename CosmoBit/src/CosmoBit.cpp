@@ -3361,8 +3361,9 @@ namespace Gambit
     {
       using namespace Pipes::get_Omega0_g_classy;
 
-      CosmoBit::Classy_cosmo_container ccc = *Dep::get_Classy_cosmo_container;
-      result = ccc.cosmo.attr("Omega_g")().cast<double>();
+      // No need to call classy here -- can calculate it from the CMB temperature
+      double h = *Param["H0"]/100.;
+      result = (4.*_sigmaB_SI_/_c_SI_*pow(*Dep::T_cmb,4.)) / (3.*_c_SI_*_c_SI_*1.e10*h*h/_Mpc_SI_/_Mpc_SI_/8./pi/_GN_SI_);
     }
 
     /// Ultra-relativistic
