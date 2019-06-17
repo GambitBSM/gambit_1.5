@@ -107,7 +107,8 @@ scanner_plugin(great, version(1, 0, 0))
       mpi.Barrier();
     #endif
 
-    // Creating GreAT Model, i.e. parameter space and function to be minimised
+    // Creating GreAT Model, i.e. parameter space and function to be minimised.
+    // This is new'd because a TGreATManager later takes ownership of it and deletes it internally.
     TGreatModel* MyModel = new TGreatModel();
 
     // Setting up the hypercube parameter space
@@ -148,9 +149,9 @@ scanner_plugin(great, version(1, 0, 0))
 
     // 2) Define the estimator
     // TGreatEstimator<typename T>(TTree*)
-    TGreatEstimator<TGreatMCMCAlgorithmCovariance>* estimator = new TGreatEstimator<TGreatMCMCAlgorithmCovariance>(mcmc);
+    TGreatEstimator<TGreatMCMCAlgorithmCovariance> estimator(mcmc);
     // Show the scan statistics
-    estimator->ShowStatistics();
+    estimator.ShowStatistics();
 
     // Setup auxilliary stream. It is only needed by the master process
     if(MPIrank == 0)
@@ -167,10 +168,10 @@ scanner_plugin(great, version(1, 0, 0))
       Scanner::printer* ind_samples_printer(data.printer->get_stream("ind_samples"));
       static const int MPIrank = data.likelihood_function->getRank();
 
-      TGreatMCMCSample *prev_sample = estimator->GetFirstIndSample();
+      TGreatMCMCSample *prev_sample = estimator.GetFirstIndSample();
       unsigned int multiplicity = 0;
 
-      for(TGreatMCMCSample *sample = estimator->GetFirstIndSample(); sample != 0; sample = estimator->GetNextIndSample())
+      for(TGreatMCMCSample *sample = estimator.GetFirstIndSample(); sample != 0; sample = estimator.GetNextIndSample())
       {
         // count samples to get their posterior weight and save them
         if(prev_sample->GetID() == sample->GetID())
