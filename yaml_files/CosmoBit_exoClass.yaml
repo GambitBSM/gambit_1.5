@@ -19,7 +19,8 @@
 Parameters:
  
  # --- import model parameters for models to scan over ---
- LCDM: !import include/LCDM_scan.yaml        # base LCDM
+ #LCDM: !import include/LCDM_scan.yaml        # base LCDM
+ LCDM_ExtdNeffCMB_ExtetaBBN: !import include/LCDM_scan.yaml
 
  # neutrino masses
  #StandardModel_numass_single: !import include/StandardModel_numass_single_scan.yaml
@@ -27,6 +28,21 @@ Parameters:
 
  # Cosmological nuisance parameters (except for Planck CMB Likelihoods) 
  cosmo_nuisance_params_Pantheon: !import include/cosmo_nuisance_params_Pantheon.yaml
+
+ # model parameters for "TestDecayingDM"
+ CosmoALP:
+   fa: 1.0
+   ma0:
+     fixed_value: 1e6
+     #range: [1.0E+2, 1.0E+7]
+     #prior_type: log
+   gagg: 6.87106e-08
+     #range: [1e-15, 1e-5]
+     #prior_type: log
+   thetai: 0.0
+   Ya0: 0.03     
+     #range: [1.0E-15, 1.0E-3]
+     #prior_type: log
 
 #======== Prior setup ========
 Priors:
@@ -64,39 +80,11 @@ ObsLikes:
     capability:   Omega0_m
     function:     get_Omega0_m_classy 
 
-  - purpose:      Obs
-    capability:   Omega0_b
-    function:     get_Omega0_b_classy
-  
-  - purpose:      Obs
-    capability:   Omega0_cdm
-    function:     get_Omega0_cdm_classy
-  
-  - purpose:      Obs
-    capability:   Omega0_r
-    function:     get_Omega0_r_classy
-  
-  - purpose:      Obs
-    capability:   Omega0_g
-    function:     get_Omega0_g_classy
-  
-  - purpose:      Obs
-    capability:   Omega0_ur
-    function:     get_Omega0_ur_classy
-
-  - purpose:      Obs
-    capability:   Omega0_ncdm
-    function:     get_Omega0_ncdm_classy  
-
   - purpose:      LogLike
     capability:   Pantheon_LogLike
 
   - purpose:      LogLike
     capability:   BAO_LogLike
-
-  - purpose:      LogLike
-    capability:   sigma8_LogLike
-
   
   - purpose:      LogLike
     capability:   MP_Combined_LogLike
@@ -115,7 +103,7 @@ Rules:
   - capability: class_set_parameter
     options:
       class_dict: 
-        output: "tCl" # need to add matter power spectrum for sigma8 computation
+        output: "tCl lCl" # need to add matter power spectrum for sigma8 computation
         k_pivot: 0.05
 
   # classy (class through python wrapper)
@@ -127,11 +115,12 @@ Rules:
       # ||  (JR) we should not set this by default when using the python wrapper: if only bg needed 
       #     classy will complain that it did not read the input parameter.
       #     If we use Planck through MP this should be taken care of by itself anyway
-      output: " "   # classy + MP: even when no output specified all spectra etc. the likelihoods need
-                    # are calculated since the MP Likelihood initialisation is taking care of this for us! 
-      lensing: "no" # heads-up: changed default to 'no'in function 'set_classy_parameters_LCDM' as well
-                    # since otherwise the automatic output setting will not work
-      energy_deposition_function : "GAMBIT"
+      classy_dict:
+        #output: " "   # classy + MP: even when no output specified all spectra etc. the likelihoods need
+                      # are calculated since the MP Likelihood initialisation is taking care of this for us! 
+        #lensing: "no" # heads-up: changed default to 'no'in function 'set_classy_parameters_LCDM' as well
+                      # since otherwise the automatic output setting will not work
+        #energy_deposition_function : "GAMBIT"
 
   # you have to set by hand if you want to set the class parameters with or without setting arguments from MontePython Likelihoods
   # if the montepythonlike backend is installed (if not it should automatically choose the function 'init_Classy_cosmo_container')
@@ -148,6 +137,12 @@ Rules:
       # downloading data and when commenting out line 'parser_mp.existing_file(fname)', will include that into 
       # build step soon) safe to use;
       # still need to write a proper patch for MPLike backend & test all Likes
+
+  - capability: DM_fraction
+    function: DM_fraction_CosmoALP
+
+  - capability: lifetime
+    function: lifetime_CosmoALP
 
   # next 3 rules: all to calculate Likelihoods the class way (not the classy way)
   # verified that BAO, Pantheon & Planck_SZ all give same result the class way & classy way (through MP)
@@ -197,7 +192,7 @@ KeyValues:
 
   debug: true
 
-  default_output_path: "runs/CosmoBit_testMP"
+  default_output_path: "runs/CosmoBit_exoclass"
 
   rng: ranlux48
 

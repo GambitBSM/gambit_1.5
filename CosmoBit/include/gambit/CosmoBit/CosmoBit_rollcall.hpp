@@ -89,6 +89,16 @@ START_MODULE
     BACKEND_REQ(DA_efficiency_function, (DarkAges_tag) ,DarkAges::fz_table,())
     #undef FUNCTION
   #undef CAPABILITY
+  
+  #define CAPABILITY classy_energy_injection_efficiency_input
+  START_CAPABILITY
+    #define FUNCTION get_classy_energy_injection_efficiency_input
+    START_FUNCTION(map_str_dblptr)
+    ALLOW_MODELS(TestDecayingDM)
+    BACKEND_REQ(classy_set_energy_injection_efficiency_input,(classy),map_str_dblptr,())
+    BACKEND_OPTION((classy,exo_2.7.0), (classy) ) // this only works if exoclass is in use
+    #undef FUNCTION
+  #undef CAPABILITY
 
   #define CAPABILITY f_effective
   START_CAPABILITY
@@ -712,14 +722,14 @@ START_MODULE
       START_FUNCTION(CosmoBit::Classy_cosmo_container)
       DEPENDENCY(cosmo_args_from_MPLike, pybind11::dict)
       DEPENDENCY(set_classy_parameters, pybind11::dict)
-      ALLOW_MODELS(LCDM)
+      ALLOW_MODELS(LCDM_dNeffCMB_dNeffBBN_etaBBN)
       BACKEND_REQ(classy_create_class_instance,(classy),void,(pybind11::object&))
       BACKEND_REQ(classy_compute,(classy),void,(CosmoBit::Classy_cosmo_container&))
      #undef FUNCTION
      #define FUNCTION init_Classy_cosmo_container
       START_FUNCTION(CosmoBit::Classy_cosmo_container)
       DEPENDENCY(set_classy_parameters, pybind11::dict)
-      ALLOW_MODELS(LCDM)
+      ALLOW_MODELS(LCDM_dNeffCMB_dNeffBBN_etaBBN)
       BACKEND_REQ(classy_create_class_instance,(classy),void,(pybind11::object&))
       BACKEND_REQ(classy_compute,(classy),void,(CosmoBit::Classy_cosmo_container&))
      #undef FUNCTION
@@ -729,12 +739,15 @@ START_MODULE
      START_CAPABILITY
      #define FUNCTION set_classy_parameters_LCDM
       START_FUNCTION(pybind11::dict)
-      ALLOW_MODELS(LCDM)
+      ALLOW_MODELS(LCDM_dNeffCMB_dNeffBBN_etaBBN)
       DEPENDENCY(NuMasses_SM, map_str_dbl)
       DEPENDENCY(Helium_abundance,std::vector<double>)
       DEPENDENCY(T_cmb, double)
       DEPENDENCY(T_ncdm, double)
       DEPENDENCY(class_Nur, double)
+      MODEL_CONDITIONAL_DEPENDENCY(lifetime,double,TestDecayingDM)
+      MODEL_CONDITIONAL_DEPENDENCY(DM_fraction,double,TestDecayingDM)
+      MODEL_CONDITIONAL_DEPENDENCY(classy_energy_injection_efficiency_input,map_str_dblptr,TestDecayingDM)
      #undef FUNCTION
   #undef CAPABILITY
   
@@ -743,7 +756,7 @@ START_MODULE
     START_CAPABILITY
     #define FUNCTION calc_MP_LogLikes
       START_FUNCTION(map_str_dbl) 
-      ALLOW_MODELS(LCDM)
+      ALLOW_MODELS(LCDM_dNeffCMB_dNeffBBN_etaBBN)
 
       DEPENDENCY(get_Classy_cosmo_container,CosmoBit::Classy_cosmo_container)
       DEPENDENCY(MP_experiment_names,       std::vector<std::string>)
@@ -762,7 +775,7 @@ START_MODULE
     #define FUNCTION calc_MP_combined_LogLike
       START_FUNCTION(double)
       DEPENDENCY(MP_LogLikes, map_str_dbl)
-      ALLOW_MODELS(LCDM)
+      ALLOW_MODELS(LCDM_dNeffCMB_dNeffBBN_etaBBN)
     #undef FUNCTION
   #undef CAPABILITY
 
