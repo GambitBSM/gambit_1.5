@@ -322,8 +322,7 @@ function(add_gambit_executable executablename LIBRARIES)
       set(LIBRARIES ${LIBRARIES} ${SQLITE3_LIBRARIES})
   endif()
 
-
-  target_link_libraries(${executablename} PRIVATE ${LIBRARIES} yaml-cpp)
+  target_link_libraries(${executablename} PRIVATE ${LIBRARIES} yaml-cpp gambit_preload)
   add_dependencies(${executablename} mkpath)
 
   #For checking if all the needed libs are present.  Never add them manually with -lsomelib!!
