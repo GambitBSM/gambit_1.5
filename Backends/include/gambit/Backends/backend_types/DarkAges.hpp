@@ -20,6 +20,9 @@
 
 namespace Gambit
 {
+  // Shorthand for map from string to pointer to double (here atm, should probably move into classy or DarkAges types) TODO
+  typedef std::map<std::string,double*> map_str_dblptr;
+  
   namespace DarkAges
   {
     struct injectionSpectrum
@@ -37,6 +40,10 @@ namespace Gambit
       std::vector<double> f_hion;
       std::vector<double> f_heion;
       std::vector<double> f_lowe;
+      // Added for classy interface to exoclass
+      int num_lines;
+      map_str_dblptr ptrs_to_member_vecs; 
+      
     };
   }
 }

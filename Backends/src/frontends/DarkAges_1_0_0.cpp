@@ -54,21 +54,34 @@ BE_NAMESPACE
   DarkAges::fz_table gather_results()
   {
     DarkAges::fz_table result;
-    pybind11::array_t<double> tmp;
     logger().send("Message from 'gather_results' backend convenience function in DarkAges v1.0.0 wrapper (Start)",LogTags::info);
-    tmp =  get_result("redshift");
-    result.redshift = cast_np_to_std(tmp);
-    tmp =  get_result("Heat");
-    result.f_heat = cast_np_to_std(tmp);
-    tmp =  get_result("Ly-A");
-    result.f_lya = cast_np_to_std(tmp);
-    tmp =  get_result("H-Ion");
-    result.f_hion = cast_np_to_std(tmp);
-    tmp =  get_result("He-Ion");
-    result.f_heion = cast_np_to_std(tmp);
-    tmp =  get_result("LowE");
-    result.f_lowe = cast_np_to_std(tmp);
+
+    // Using result.<vector>.at(0) instead of .front() since it's safer -> .front() on empty vector will cause a SegFault, .at(0)
+    // gives proper error message
+
+    result.redshift = cast_np_to_std(get_result("redshift"));
+    result.ptrs_to_member_vecs["annihil_coef_xe"] = &result.redshift.at(0);
+
+    result.f_heat = cast_np_to_std(get_result("Heat"));
+    result.ptrs_to_member_vecs["annihil_coef_heat"] = &result.f_heat.at(0);
+
+    result.f_lya = cast_np_to_std(get_result("Ly-A"));
+    result.ptrs_to_member_vecs["annihil_coef_lya"] = &result.f_lya.at(0);
+
+    result.f_hion = cast_np_to_std(get_result("H-Ion"));
+    result.ptrs_to_member_vecs["annihil_coef_ionH"] = &result.f_hion.at(0);
+
+    result.f_heion = cast_np_to_std(get_result("He-Ion"));
+    result.ptrs_to_member_vecs["annihil_coef_ionHe"] = &result.f_heion.at(0);
+
+    result.f_lowe = cast_np_to_std(get_result("LowE"));
+    result.ptrs_to_member_vecs["annihil_coef_lowE"] = &result.f_lowe.at(0);
+
+    // get lengths of the vectors (should be the same for all). needs to be passed to classy
+    result.num_lines = result.redshift.size();
+
     logger().send("Message from 'gather_results' backend convenience function in DarkAges v1.0.0 wrapper (Done casting NumPy-arrays into std vectors)",LogTags::info);
+
 
     return result;
   }

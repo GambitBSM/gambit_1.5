@@ -90,16 +90,6 @@ START_MODULE
     #undef FUNCTION
   #undef CAPABILITY
   
-  #define CAPABILITY classy_energy_injection_efficiency_input
-  START_CAPABILITY
-    #define FUNCTION get_classy_energy_injection_efficiency_input
-    START_FUNCTION(map_str_dblptr)
-    ALLOW_MODELS(TestDecayingDM)
-    BACKEND_REQ(classy_set_energy_injection_efficiency_input,(classy),map_str_dblptr,())
-    BACKEND_OPTION((classy,exo_2.7.0), (classy) ) // this only works if exoclass is in use
-    #undef FUNCTION
-  #undef CAPABILITY
-
   #define CAPABILITY f_effective
   START_CAPABILITY
     #define FUNCTION f_effective_func
@@ -747,7 +737,7 @@ START_MODULE
       DEPENDENCY(class_Nur, double)
       MODEL_CONDITIONAL_DEPENDENCY(lifetime,double,TestDecayingDM)
       MODEL_CONDITIONAL_DEPENDENCY(DM_fraction,double,TestDecayingDM)
-      MODEL_CONDITIONAL_DEPENDENCY(classy_energy_injection_efficiency_input,map_str_dblptr,TestDecayingDM)
+      MODEL_CONDITIONAL_DEPENDENCY(energy_injection_efficiency,DarkAges::fz_table,TestDecayingDM)
      #undef FUNCTION
   #undef CAPABILITY
   

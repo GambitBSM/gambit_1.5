@@ -26,9 +26,6 @@ namespace Gambit
 
   /// Shorthand for a string to pybing object map map to avoid commas in macros
   typedef std::map<std::string,pybind11::object> map_str_pyobj;
-
-  // Shorthand for map from string to pointer to double (here atm, should probably move into classy or DarkAges types) TODO
-  typedef std::map<std::string,double*> map_str_dblptr;
   
 }
 

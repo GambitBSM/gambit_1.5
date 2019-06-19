@@ -266,16 +266,6 @@ namespace Gambit
       result = BEreq::DA_efficiency_function();
     }
 
-    void get_classy_energy_injection_efficiency_input(map_str_dblptr& result)
-    {
-      using namespace Pipes::get_classy_energy_injection_efficiency_input;
-      result = BEreq::classy_set_energy_injection_efficiency_input();
-
-      std::cout << "  In Gambit annihil_coef_xe with "<< &result["annihil_coef_xe"][0]<< " and " << &result["annihil_coef_xe"][1]<< std::endl;
-      std::cout << "  In Gambit annihil_coef_xe with "<< result["annihil_coef_xe"][0]<< " and " << result["annihil_coef_xe"][1]<< std::endl;
-
-    }
-
 
     void f_effective_func(double& result)
     {
@@ -3278,16 +3268,14 @@ namespace Gambit
       }
       result["N_ur"] = *Dep::class_Nur; // Number of ultra relativistic species
 
-      // (JR) thinking about it again we don't need output to default in this implementation
+      // (JR) we don't need 'output' to default to something in this implementation
       // if the user does not ask for anything extra than everything MP wants will be included
-      // if more stuff shall be computed it will be added below when looping through classy_dict run options
+      // if more stuff should be computed it will be added at the end of this function
+      // when looping through classy_dict run options
 
       /*result["output"] = runOptions->getValue<str>("output");
-      // JR we should not set this by default when using the python wrapper: if only bg needed 
-      // classy will complain that it did not read the input parameter
-      // if we use Planck through MP this should be taken care of by itself anyway
-      //result["l_max_scalars"] = runOptions->getValueOrDef<int>(2508., "l_max"); 
-      //result["lensing"] = runOptions->getValue<str>("lensing"); */
+        result["l_max_scalars"] = runOptions->getValueOrDef<int>(2508., "l_max"); 
+        result["lensing"] = runOptions->getValue<str>("lensing"); */
 
       result["T_cmb"] = *Dep::T_cmb;
       result["omega_b"] = *Param["omega_b"];
@@ -3301,34 +3289,37 @@ namespace Gambit
 
       if (ModelInUse("TestDecayingDM"))  // TODO: need to test if class or exo_class in use! does not work -> (JR) should be fixed with classy implementation
       {
-        result["energy_deposition_function"] = "GAMBIT";
         result["tau_dcdm"] = *Dep::lifetime;
         result["decay_fraction"] = *Dep::DM_fraction;
+
+        // flag passed to CLASS to signal that the energy_deposition_function is coming from GAMBIT
+        // we patched exoclass to accept this. An alternative way without patching would be to write the tables to disk &
+        // just have CLASS read in the file. To avoid the repeated file writing & deleting we pass pointers to the vector/arrays 
+        // to CLASS instead
+        result["energy_deposition_function"] = "GAMBIT";
+
+        // Get the results from the DarkAges tables that hold extra information to be passed to the CLASS thermodynamics structure
+        DarkAges::fz_table fz = *Dep::energy_injection_efficiency;
         
-        // get the pointers to the arrays that need to be passed to class from the exoclassy frontend
-        map_str_dblptr input_arrays = *Dep::classy_energy_injection_efficiency_input;
-        result["annihil_coef_num_lines"] = 64;
-
-        std::cout << "  In classy annihil_coef_xe with "<< &input_arrays["annihil_coef_xe"][0]<< " and " << &input_arrays["annihil_coef_xe"][1]<<" " << &input_arrays["annihil_coef_xe"][2]<< std::endl;
-        std::cout << "  In classy annihil_coef_xe with "<< input_arrays["annihil_coef_xe"][0]<< " and " << input_arrays["annihil_coef_xe"][1]<<" " << input_arrays["annihil_coef_xe"][2]<< std::endl;
-
-        // add all inputs to python dictionary that is passed to classy
-        for (auto it=input_arrays.begin(); it != input_arrays.end(); it++) 
+        // set the lengths of the input tables (since we are passing pointers to arrays CLASS has to know how long they are)
+        result["annihil_coef_num_lines"] = fz.num_lines;
+        
+        // add the pointers to arrays class needs to know about to input dictionary
+        // Note: 
+        //    - memory addresses are passed as strings (python wrapper for CLASS converts every entry to a string internally so
+        //      we need to do that for the memory addresses before python casts them to something else)
+        //    - fz.ptrs_to_member_vecs : map from string to double*, where the string contains the name of the CLASS input 
+        //      parameter and the pointer points to the vector holding the values that should be passed 
+        for (auto it=fz.ptrs_to_member_vecs.begin(); it != fz.ptrs_to_member_vecs.end(); it++) 
         {
           std::string key = it->first;
+
+          // convert memory address 'it->second' to string 'address'
           std::ostringstream oss;
           oss << it->second;
           std::string address(oss.str());
           result[key.c_str()] = address.c_str();
-          //address << (void const *)this;
-          //std:string name = address.str();
-          //pybind11::print("Adding key ", key, "with value ", it->second);
-          pybind11::print("");
-          std::cout << "Trying to print address for key "<< key << " "<< it->second << " second try "<< address << std::endl;
-          pybind11::print(" Address of  annihil_coef_xe is ", address );
-          pybind11::print("");
         }      
-
       }
       
       // Other Class input direct from the YAML file

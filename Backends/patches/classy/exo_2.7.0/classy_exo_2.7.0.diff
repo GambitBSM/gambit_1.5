@@ -33,19 +33,147 @@ index 77cf1202..e2bf86f2 100644
  
    /** - non-cold relics (ncdm) */
    class_read_int("N_ncdm",N_ncdm);
-@@ -1601,6 +1600,12 @@ int input_read_parameters(
+@@ -1601,6 +1601,140 @@ int input_read_parameters(
          pth->has_on_the_spot = _FALSE_;
- 	flag3=_TRUE_;
+  flag3=_TRUE_;
        }
++      // check if exo-class is used with gambit 
 +      if (strcmp(string1,"GAMBIT") == 0) {
-+	pth->energy_deposition_function=GAMBIT;
-+	pth->energy_repart_coefficient = no_factorization;
-+	pth->has_on_the_spot = _FALSE_;
-+	flag3=_TRUE_;
++      /* NOTE:
++        This is to read in values stored in a vector/array and pass the entries to a dynamically allocated
++        array in class. 
++        Here: e.g. double* pth->annihil_coef_xe will be set to point to address of newly allocated space which
++            will be filled with entries of passed vector
++
++        Complication: If python wrapper is used all input values are converted to strings, including the pointers
++          to the vectors/arrays to be passed.
++
++        What is done in the following is:
++          1) Read in pointers to vectors as strings
++          2) Convert strings to memory address & initialise a double pointer pointing to it
++          3) Free potentially allocated memory of pth->_some_thermodynamics_double_pointer_& allocate new space
++          4) Copy the values of the passed vector to the newly allocated space
++      */
++         // set CLASS parameters to signal that annihilation coefficients will be filled differently
++         pth->energy_deposition_function=GAMBIT;
++         pth->energy_repart_coefficient = no_factorization;
++         pth->has_on_the_spot = _FALSE_;
++         flag3=_TRUE_;
++
++         // initialise flags & chars here -- flag1-flag3 already defined, patch might be easier to maintain if
++         // these definitions happen here within the patched part
++         int flag0,flag4,flag5,flag6,flag7,flag8,flag9; 
++         char address4 [_ARGUMENT_LENGTH_MAX_], address5 [_ARGUMENT_LENGTH_MAX_], address6 [_ARGUMENT_LENGTH_MAX_];
++         char address7 [_ARGUMENT_LENGTH_MAX_], address8 [_ARGUMENT_LENGTH_MAX_], address9 [_ARGUMENT_LENGTH_MAX_];
++
++         // read in number of entries each vector has
++         class_call(parser_read_int(pfc,"annihil_coef_num_lines",&pth->annihil_coef_num_lines,&flag0,errmsg),
++             errmsg,
++             errmsg);
++
++         // 1) Read in pointers to vectors as strings
++         class_call(parser_read_string(pfc,"annihil_coef_xe",&address4,&flag4,errmsg),
++             errmsg,
++             errmsg);
++         class_call(parser_read_string(pfc,"annihil_coef_heat",&address5,&flag5,errmsg),
++             errmsg,
++             errmsg);
++         class_call(parser_read_string(pfc,"annihil_coef_lya",&address6,&flag6,errmsg),
++             errmsg,
++             errmsg);
++         class_call(parser_read_string(pfc,"annihil_coef_ionH",&address7,&flag7,errmsg),
++             errmsg,
++             errmsg);
++         class_call(parser_read_string(pfc,"annihil_coef_ionHe",&address8,&flag8,errmsg),
++             errmsg,
++             errmsg);
++         class_call(parser_read_string(pfc,"annihil_coef_lowE",&address9,&flag9,errmsg),
++             errmsg,
++             errmsg);
++         
++         // Check that all values needed for the calculation have been passed. If not throw error
++         class_test(((flag0 == _FALSE_) || (flag4 == _FALSE_) || (flag5 == _FALSE_) || (flag6 == _FALSE_) || (flag7 == _FALSE_)
++                    || (flag8 == _FALSE_) || (flag9 == _FALSE_)),
++                    errmsg,
++                    "You set the parameter energy_deposition_function to GAMBIT, this means you also haveto specify the input values for \n- annihil_coef_num_lines \n- annihil_coef_xe \n- annihil_coef_heat \n- annihil_coef_lya \n- annihil_coef_ionH\n- annihil_coef_ionHe\n- annihil_coef_lowE\n Check that all of them are passed.");
++
++
++          // 2) Convert strings to memory address & initialise a double pointer pointing to it
++          unsigned long ul;
++          sscanf(address4, "%lx", &ul);
++          double * ptr_a4 = (double *) ul;
++
++          sscanf(address5, "%lx", &ul);
++          double * ptr_a5 = (double*) ul;
++
++          sscanf(address6, "%lx", &ul);
++          double * ptr_a6 =  (double*) ul;
++
++          sscanf(address7, "%lx", &ul);
++          double * ptr_a7 = (double*) ul;
++
++          sscanf(address8, "%lx", &ul);
++          double * ptr_a8 = (double*) ul;
++
++          sscanf(address9, "%lx", &ul);
++          double * ptr_a9 = (double*) ul;
++
++
++          // just checking if that worked ..
++          /*printf("     CLASS internal \n\n\n");
++          for (int it = 0; it < pth->annihil_coef_num_lines; it++)
++          {
++             printf("              passed address4 at %i with %e at address %p\n", it, &ptr_a4[it],ptr_a4[it]);
++          }*/
++
++          
++          // 3) Free potentially allocated memory of pth->_some_thermodynamics_double_pointer_& allocate new space
++          //    (since this is the begining of a run nothing should be allocated already, but this is more explicit
++          //    and just to make sure..)
++          free(pth->annihil_coef_xe);
++          free(pth->annihil_coef_heat);
++          free(pth->annihil_coef_lya);
++          free(pth->annihil_coef_ionH);
++          free(pth->annihil_coef_ionHe); 
++          free(pth->annihil_coef_lowE);
++
++          class_alloc(pth->annihil_coef_xe   , pth->annihil_coef_num_lines*sizeof(double),pth->error_message);
++          class_alloc(pth->annihil_coef_heat , pth->annihil_coef_num_lines*sizeof(double),pth->error_message);
++          class_alloc(pth->annihil_coef_lya  , pth->annihil_coef_num_lines*sizeof(double),pth->error_message);
++          class_alloc(pth->annihil_coef_ionH , pth->annihil_coef_num_lines*sizeof(double),pth->error_message);
++          class_alloc(pth->annihil_coef_ionHe, pth->annihil_coef_num_lines*sizeof(double),pth->error_message);
++          class_alloc(pth->annihil_coef_lowE , pth->annihil_coef_num_lines*sizeof(double),pth->error_message);
++
++          // 4) Copy the values of the passed vector to the newly allocated space
++          for (int it = 0; it < pth->annihil_coef_num_lines; it++)
++          {
++             pth->annihil_coef_xe[it] = ptr_a4[it];
++             pth->annihil_coef_heat[it] = ptr_a5[it];
++             pth->annihil_coef_lya[it] = ptr_a6[it];
++             pth->annihil_coef_ionH[it] = ptr_a7[it];
++             pth->annihil_coef_ionHe[it] = ptr_a8[it];
++             pth->annihil_coef_lowE[it] = ptr_a9[it];
++          }
++          
++
++         // check again if it worked .. 
++         //for (int it = 0; it < pth->annihil_coef_num_lines; it++)
++         // {
++         //   printf("              filled annihil_coef_xe at %i with %e at address %p\n", it, pth->annihil_coef_xe[it],&pth->annihil_coef_xe[it]);
++         // }        
++
++          // allocate space for the other structure members that have same length as the above arrays
++          // the allocation for these is skipped in the thermodynamics.c routine if the GAMBIT file format is passed
++          class_alloc(pth->annihil_coef_dd_heat , pth->annihil_coef_num_lines*sizeof(double),pth->error_message);
++          class_alloc(pth->annihil_coef_dd_lya  , pth->annihil_coef_num_lines*sizeof(double),pth->error_message);
++          class_alloc(pth->annihil_coef_dd_ionH , pth->annihil_coef_num_lines*sizeof(double),pth->error_message);
++          class_alloc(pth->annihil_coef_dd_ionHe, pth->annihil_coef_num_lines*sizeof(double),pth->error_message);
++          class_alloc(pth->annihil_coef_dd_lowE , pth->annihil_coef_num_lines*sizeof(double),pth->error_message);
 +      }
++
        if (strcmp(string1,"from_file") == 0) {
- 	pth->energy_deposition_function=function_from_file;
- 	class_call(parser_read_string(pfc,"energy deposition function file",&string1,&flag1,errmsg),
+  pth->energy_deposition_function=function_from_file;
+  class_call(parser_read_string(pfc,"energy deposition function file",&string1,&flag1,errmsg),
 diff --git a/source/thermodynamics.c b/source/thermodynamics.c
 index ddc40b2e..7d527e74 100755
 --- a/source/thermodynamics.c
