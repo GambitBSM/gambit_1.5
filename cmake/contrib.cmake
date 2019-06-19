@@ -30,33 +30,29 @@ set(true_nl \"\\n\")
 set(DL_CONTRIB "${PROJECT_SOURCE_DIR}/cmake/scripts/safe_dl.sh" "${CMAKE_BINARY_DIR}" "${CMAKE_COMMAND}")
 
 # Define a series of functions and macros to be used for cleaning ditched components and adding nuke and clean targets for contributed codes
-macro(tag_path var package)
-  set(var "${CMAKE_BINARY_DIR}/${package}-prefix/src/${package}-stamp/${package}")
-endmacro()
-macro(clean_tags var prefix)
-  set(var "${prefix}-configure ${prefix}-build ${prefix}-install ${prefix}-done")
-endmacro()
-macro(nuke_tags var prefix)
-  set(var "${prefix}-download ${prefix}-mkdir ${prefix}-patch ${prefix}-update")
+macro(get_paths package build_path clean_stamps nuke_stamps)
+  set(stamp_path "${CMAKE_BINARY_DIR}/${package}-prefix/src/${package}-stamp/${package}")
+  set(${build_path} "${CMAKE_BINARY_DIR}/${package}-prefix/src/${package}-build")
+  set(${clean_stamps} ${stamp_path}-configure ${stamp_path}-build ${stamp_path}-install ${stamp_path}-done)
+  set(${nuke_stamps} ${stamp_path}-download ${stamp_path}-mkdir ${stamp_path}-patch ${stamp_path}-update)
 endmacro()
 
 function(nuke_ditched_contrib_content package dir)
-  tag_path(path package)
-  clean_tags(ctags path)
-  nuke_tags(ntags path)
-  execute_process(COMMAND ${CMAKE_COMMAND} -E remove_directory ${dir})
-  execute_process(COMMAND ${CMAKE_COMMAND} -E remove -f ${ctags} ${ntags})
+  get_paths(${package} build_path clean-stamps nuke-stamps)
+  execute_process(COMMAND ${CMAKE_COMMAND} -E remove_directory "${build_path}")
+  execute_process(COMMAND ${CMAKE_COMMAND} -E remove_directory "${dir}")
+  execute_process(COMMAND ${CMAKE_COMMAND} -E remove -f ${clean-stamps} ${nuke-stamps})
 endfunction()
 
-function(add_contrib_clean_and_nuke package)
-  tag_path(path package)
-  clean_tags(ctags path)
-  nuke_tags(ntags path)
-  add_custom_target(clean-${package} COMMAND ${CMAKE_COMMAND} -E remove -f ${ctags}
-    COMMAND [ -e ${dir} ] && cd ${dir} && ([ -e makefile ] || [ -e Makefile ] && ${CMAKE_MAKE_PROGRAM} distclean) || true)
+function(add_contrib_clean_and_nuke package dir clean)
+  get_paths(${package} build_path clean-stamps nuke-stamps)
+  add_custom_target(clean-${package} COMMAND ${CMAKE_COMMAND} -E remove -f ${clean-stamps}
+                                     COMMAND [ -e ${dir} ] && cd ${dir} && ([ -e makefile ] || [ -e Makefile ] && ${CMAKE_MAKE_PROGRAM} ${clean}) || true
+                                     COMMAND [ -e ${build_path} ] && cd ${build_path} && ([ -e makefile ] || [ -e Makefile ] && ${CMAKE_MAKE_PROGRAM} ${clean}) || true)
   add_dependencies(distclean clean-${package})
-  add_custom_target(nuke-${package} COMMAND ${CMAKE_COMMAND} -E remove -f ${ntags}
-    COMMAND ${CMAKE_COMMAND} -E remove_directory "${dir}" || true)
+  add_custom_target(nuke-${package} COMMAND ${CMAKE_COMMAND} -E remove -f ${nuke-stamps}
+                                    COMMAND ${CMAKE_COMMAND} -E remove_directory "${build_path}"
+                                    COMMAND ${CMAKE_COMMAND} -E remove_directory "${dir}")
   add_dependencies(nuke-${package} clean-${package})
   add_dependencies(nuke-contrib nuke-${package})
   add_dependencies(nuke-all nuke-${package})
@@ -134,7 +130,7 @@ if(NOT EXCLUDE_RESTFRAMES)
   # Add install name tool step for OSX
   add_install_name_tool_step(${name} ${dir}/lib libRestFrames.dylib)
   # Add clean-restframes and nuke-restframes
-  add_contrib_clean_and_nuke(${name})
+  add_contrib_clean_and_nuke(${name} ${dir} distclean)
 endif()
 
 #contrib/HepMC3; include only if ColliderBit is in use and WITH_HEPMC=ON.
@@ -178,7 +174,7 @@ if(NOT EXCLUDE_HEPMC)
     INSTALL_COMMAND ""
     )
   # Add clean-hepmc and nuke-hepmc
-  add_contrib_clean_and_nuke(${name})
+  add_contrib_clean_and_nuke(${name} ${dir} clean)
 endif()
 
 #contrib/fjcore-3.2.0
