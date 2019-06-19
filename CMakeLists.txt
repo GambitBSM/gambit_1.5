@@ -569,10 +569,19 @@ endforeach()
 # If ColliderBit is in use, make the collider_harvest step a dependency of ColliderBit
 if(";${GAMBIT_BITS};" MATCHES ";ColliderBit;")
   add_dependencies(ColliderBit collider_harvest)
-  # If RestFrames is in use, make RestFrames a dependency of ColliderBit
+  # If RestFrames is in use, make it a dependency of ColliderBit
   if(NOT EXCLUDE_RESTFRAMES)
     add_dependencies(ColliderBit restframes)
   endif()
+  # If HepMC is in use, make it a dependency of ColliderBit
+  if(NOT EXCLUDE_HEPMC)
+    add_dependencies(ColliderBit hepmc)
+  endif()
+endif()
+
+# If SpecBit is in use, make flexiblesusy a dependency of SpecBit
+if(";${GAMBIT_BITS};" MATCHES ";ColliderBit;")
+  add_dependencies(SpecBit flexiblesusy)
 endif()
 
 # Add the executables

@@ -391,15 +391,22 @@ function(add_standalone executablename)
                                ${HARVEST_TOOLS}
                                ${PROJECT_BINARY_DIR}/CMakeCache.txt)
 
+    # Add linking flags for ROOT, RestFrames and/or HepMC if required.
+    if (USES_COLLIDERBIT)
+      if (NOT EXCLUDE_ROOT)
+        set(ARG_LIBRARIES ${ARG_LIBRARIES} ${ROOT_LIBRARIES})
+        if (NOT EXCLUDE_RESTFRAMES)
+          set(ARG_LIBRARIES ${ARG_LIBRARIES} ${RESTFRAMES_LDFLAGS})
+        endif()
+      endif()
+      if (NOT EXCLUDE_HEPMC)
+        set(ARG_LIBRARIES ${ARG_LIBRARIES} ${HEPMC_LDFLAGS})
+      endif()
+    endif()
+
     # Do ad hoc checks for stuff that will eventually be BOSSed and removed from here.
     if (USES_SPECBIT AND NOT EXCLUDE_FLEXIBLESUSY)
       set(ARG_LIBRARIES ${ARG_LIBRARIES} ${flexiblesusy_LDFLAGS})
-    endif()
-    if (USES_COLLIDERBIT AND NOT EXCLUDE_ROOT)
-      set(ARG_LIBRARIES ${ARG_LIBRARIES} ${ROOT_LIBRARIES})
-      if (NOT EXCLUDE_RESTFRAMES)
-        set(ARG_LIBRARIES ${ARG_LIBRARIES} ${RESTFRAMES_LDFLAGS})
-      endif()
     endif()
 
     add_gambit_executable(${executablename} "${ARG_LIBRARIES}"
@@ -408,13 +415,10 @@ function(add_standalone executablename)
                                   ${GAMBIT_ALL_COMMON_OBJECTS}
                           HEADERS ${ARG_HEADERS})
 
-    # Do more ad hoc checks for stuff that will eventually be BOSSed and removed from here
-    if (USES_SPECBIT AND NOT EXCLUDE_FLEXIBLESUSY)
-      add_dependencies(${executablename} flexiblesusy)
-    endif()
-    if (USES_COLLIDERBIT AND NOT EXCLUDE_RESTFRAMES)
-      add_dependencies(${executablename} restframes)
-    endif()
+    # Add each of the declared dependencies
+    foreach(dep ${ARG_DEPENDENCIES})
+      add_dependencies(${executablename} ${dep})
+    endforeach()
 
     # Add the new executable to the standalones target
     add_dependencies(standalones ${executablename})

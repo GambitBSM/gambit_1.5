@@ -151,8 +151,8 @@ set(ver "3.1.1")
 set(dir "${PROJECT_SOURCE_DIR}/contrib/HepMC3-${ver}")
 if(WITH_HEPMC)
   message("-- HepMC-dependent functions in ColliderBit will be activated.")
-  message("-- ColliderBit Solo (CBS) will be activated.")
   message("   HepMC v${ver} will be downloaded and installed when building GAMBIT.")
+  message("   ColliderBit Solo (CBS) will be activated.")
   set(EXCLUDE_HEPMC FALSE)
 else()
   message("   HepMC-dependent functions in ColliderBit will be deactivated.")
@@ -162,10 +162,12 @@ else()
 endif()
 
 if(NOT EXCLUDE_HEPMC)
-  set(lib "libhepmc3")
+  set(lib "libHepMC3_static")
   set(md5 "a9cfc6e95eff5c13a0a5a9311ad75aa7")
   set(dl "https://hepmc.web.cern.ch/hepmc/releases/HepMC3-${ver}.tar.gz")
+  set(build_dir "${PROJECT_BINARY_DIR}/${name}-prefix/src/${name}-build")
   include_directories("${dir}/include")
+  set(HEPMC_LDFLAGS "-L${build_dir} -l${lib}")
   set(CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_RPATH};${dir}/lib")
   ExternalProject_Add(${name}
     DOWNLOAD_COMMAND ${DL_CONTRIB} ${dl} ${md5} ${dir} ${name} ${ver}
@@ -175,8 +177,6 @@ if(NOT EXCLUDE_HEPMC)
     BUILD_COMMAND ${CMAKE_MAKE_PROGRAM}
     INSTALL_COMMAND ""
     )
-  # Add install name tool step for OSX
-  add_install_name_tool_step(${name} ${dir}/lib ${lib}.dylib)
   # Add clean-hepmc and nuke-hepmc
   add_contrib_clean_and_nuke(${name})
 endif()
