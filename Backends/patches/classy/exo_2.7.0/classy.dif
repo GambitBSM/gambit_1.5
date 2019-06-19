@@ -1,0 +1,34 @@
+--- python/classy.pyx	2018-09-21 07:00:18.000000000 +0200
++++ python/classy.pyx	2019-06-06 16:54:44.517245217 +0200
+@@ -386,6 +386,31 @@
+         # following functions are only to output the desired numbers
+         return
+ 
++    cdef compute_fudged_cosmo(self, background ba, thermo th, perturbs pt, transfers tr, primordial pm, spectra sp, nonlinear nl, lensing le):
++
++        # self.ncp will contain the list of computed modules (under the form of
++        # a set, instead of a python list)
++        self.ncp=set()
++
++        self.ba = ba
++        self.ncp.add("background")
++        self.th = th
++        self.ncp.add("thermodynamics")
++        self.pt = pt
++        self.ncp.add("perturb")
++        self.tr = tr
++        self.ncp.add("transfer")
++        self.pm = pm
++        self.self.ncp.add("primordial")
++        self.sp = sp
++        self.ncp.add("spectra")
++        self.nl = nl
++        self.ncp.add("nonlinear")
++        self.le = le
++        self.ncp.add("lensing")
++
++        return
++
+     def raw_cl(self, lmax=-1, nofail=False):
+         """
+         raw_cl(lmax=-1, nofail=False)

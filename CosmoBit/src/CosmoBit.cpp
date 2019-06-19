@@ -3307,7 +3307,7 @@ namespace Gambit
         
         // get the pointers to the arrays that need to be passed to class from the exoclassy frontend
         map_str_dblptr input_arrays = *Dep::classy_energy_injection_efficiency_input;
-        result["annihil_coef_num_lines"] = 30;
+        result["annihil_coef_num_lines"] = 64;
 
         std::cout << "  In classy annihil_coef_xe with "<< &input_arrays["annihil_coef_xe"][0]<< " and " << &input_arrays["annihil_coef_xe"][1]<<" " << &input_arrays["annihil_coef_xe"][2]<< std::endl;
         std::cout << "  In classy annihil_coef_xe with "<< input_arrays["annihil_coef_xe"][0]<< " and " << input_arrays["annihil_coef_xe"][1]<<" " << input_arrays["annihil_coef_xe"][2]<< std::endl;
