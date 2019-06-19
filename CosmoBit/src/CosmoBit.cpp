@@ -3322,29 +3322,33 @@ namespace Gambit
         }      
       }
       
-      // Other Class input direct from the YAML file
-      YAML::Node classy_dict;
-      if (runOptions->hasKey("classy_dict"))
+      // Other Class input direct from the YAML file 
+      static bool first_run = true;
+      if(first_run)
       {
-        classy_dict = runOptions->getValue<YAML::Node>("classy_dict");
-        for (auto it=classy_dict.begin(); it != classy_dict.end(); it++)
+        first_run = false;
+        YAML::Node classy_dict;
+        if (runOptions->hasKey("classy_dict"))
         {
-          std::string name = it->first.as<std::string>();
-          std::string value = it->second.as<std::string>();
-          // Check if the key exists in the dictionary
-          if (!result.contains(name.c_str()))
+          classy_dict = runOptions->getValue<YAML::Node>("classy_dict");
+          for (auto it=classy_dict.begin(); it != classy_dict.end(); it++)
           {
-            result[name.c_str()] = value;
+            std::string name = it->first.as<std::string>();
+            std::string value = it->second.as<std::string>();
+            // Check if the key exists in the dictionary
+            if (!result.contains(name.c_str()))
+            {
+              result[name.c_str()] = value;
+            }
+            // If it does, throw an error, there's some YAML conflict going on.
+            else
+            {
+              CosmoBit_error().raise(LOCAL_INFO, "The key " + name + " already "
+                "exists in the CLASSY dictionary. You are probably trying to override a model parameter. If you really"
+                "want to do this you should define an extra function to set the class parameters for the model you "
+                "are considering.");
+            }
           }
-          // If it does, throw an error, there's some YAML conflict going on.
-          else
-          {
-            CosmoBit_error().raise(LOCAL_INFO, "The key " + name + " already "
-              "exists in the CLASSY dictionary. You are probably trying to override a model parameter. If you really"
-              "want to do this you should define an extra function to set the class parameters for the model you "
-              "are considering.");
-          }
-
         }
       }
 
