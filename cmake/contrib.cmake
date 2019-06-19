@@ -26,6 +26,42 @@ include(ExternalProject)
 set(nl "___totally_unlikely_to_occur_naturally___")
 set(true_nl \"\\n\")
 
+# Define the download command to use for contributed packages
+set(DL_CONTRIB "${PROJECT_SOURCE_DIR}/cmake/scripts/safe_dl.sh" "${CMAKE_BINARY_DIR}" "${CMAKE_COMMAND}")
+
+# Define a series of functions and macros to be used for cleaning ditched components and adding nuke and clean targets for contributed codes
+macro(tag_path var package)
+  set(var "${CMAKE_BINARY_DIR}/${package}-prefix/src/${package}-stamp/${package}")
+endmacro()
+macro(clean_tags var prefix)
+  set(var "${prefix}-configure ${prefix}-build ${prefix}-install ${prefix}-done")
+endmacro()
+macro(nuke_tags var prefix)
+  set(var "${prefix}-download ${prefix}-mkdir ${prefix}-patch ${prefix}-update")
+endmacro()
+
+function(nuke_ditched_contrib_content package dir)
+  tag_path(path package)
+  clean_tags(ctags path)
+  nuke_tags(ntags path)
+  execute_process(COMMAND ${CMAKE_COMMAND} -E remove_directory ${dir})
+  execute_process(COMMAND ${CMAKE_COMMAND} -E remove -f ${ctags} ${ntags})
+endfunction()
+
+function(add_contrib_clean_and_nuke package)
+  tag_path(path package)
+  clean_tags(ctags path)
+  nuke_tags(ntags path)
+  add_custom_target(clean-${package} COMMAND ${CMAKE_COMMAND} -E remove -f ${ctags}
+    COMMAND [ -e ${dir} ] && cd ${dir} && ([ -e makefile ] || [ -e Makefile ] && ${CMAKE_MAKE_PROGRAM} distclean) || true)
+  add_dependencies(distclean clean-${package})
+  add_custom_target(nuke-${package} COMMAND ${CMAKE_COMMAND} -E remove -f ${ntags}
+    COMMAND ${CMAKE_COMMAND} -E remove_directory "${dir}" || true)
+  add_dependencies(nuke-${package} clean-${package})
+  add_dependencies(nuke-contrib nuke-${package})
+  add_dependencies(nuke-all nuke-${package})
+endfunction()
+
 #contrib/slhaea
 include_directories("${PROJECT_SOURCE_DIR}/contrib/slhaea/include")
 
@@ -61,35 +97,27 @@ elseif(NOT ROOT_FOUND)
   set(WITH_RESTFRAMES OFF)
 endif()
 
-set(restframes_VERSION "1.0.2")
-set(restframes_CONTRIB_DIR "${PROJECT_SOURCE_DIR}/contrib/RestFrames-${restframes_VERSION}")
-set(rf-rmstring "${CMAKE_BINARY_DIR}/restframes-prefix/src/restframes-stamp/restframes")
-set(rf-clean-stamps ${rf-rmstring}-configure ${rf-rmstring}-build ${rf-rmstring}-install ${rf-rmstring}-done)
-set(rf-nuke-stamps ${rf-rmstring}-download ${rf-rmstring}-mkdir ${rf-rmstring}-patch ${rf-rmstring}-update)
-set(RestFrames_LIBRARY ${restframes_CONTRIB_DIR}/lib/librestframes.so)
+set(name "restframes")
+set(ver "1.0.2")
+set(dir "${PROJECT_SOURCE_DIR}/contrib/RestFrames-${ver}")
 if(WITH_RESTFRAMES)
   message("-- RestFrames-dependent analyses in ColliderBit will be activated.")
-  message("   RestFrames v${restframes_VERSION} will be downloaded and installed when building GAMBIT.")
+  message("   RestFrames v${ver} will be downloaded and installed when building GAMBIT.")
   set(EXCLUDE_RESTFRAMES FALSE)
 else()
   message("   RestFrames-dependent analyses in ColliderBit will be deactivated.")
-  execute_process(COMMAND ${CMAKE_COMMAND} -E remove_directory ${restframes_CONTRIB_DIR})
-  execute_process(COMMAND ${CMAKE_COMMAND} -E remove -f ${rf-clean-stamps} ${rf-nuke-stamps})
+  nuke_ditched_contrib_content(${name} ${dir})
   set(EXCLUDE_RESTFRAMES TRUE)
 endif()
 
-# Add RestFrames as an external project that GAMBIT can depend on
 if(NOT EXCLUDE_RESTFRAMES)
-  set(name "restframes")
-  set(ver "${restframes_VERSION}")
-  set(dir "${restframes_CONTRIB_DIR}")
   set(patch "${PROJECT_SOURCE_DIR}/contrib/patches/${name}/${ver}/patch_${name}_${ver}.dif")
   set(RESTFRAMES_CPP "${CMAKE_C_COMPILER} -E")
   set(RESTFRAMES_CXXCPP "${CMAKE_CXX_COMPILER} -E")
   set(RESTFRAMES_LDFLAGS "-L${dir}/lib -lRestFrames")
   set(CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_RPATH};${dir}/lib")
   include_directories("${dir}" "${dir}/inc")
-  ExternalProject_Add(restframes
+  ExternalProject_Add(${name}
     DOWNLOAD_COMMAND git clone https://github.com/crogan/RestFrames ${dir}
              COMMAND ${CMAKE_COMMAND} -E chdir ${dir} git checkout -q v${ver}
     SOURCE_DIR ${dir}
@@ -106,16 +134,52 @@ if(NOT EXCLUDE_RESTFRAMES)
   # Add install name tool step for OSX
   add_install_name_tool_step(${name} ${dir}/lib libRestFrames.dylib)
   # Add clean-restframes and nuke-restframes
-  add_custom_target(clean-restframes COMMAND ${CMAKE_COMMAND} -E remove -f ${rf-clean-stamps}
-                                     COMMAND [ -e ${dir} ] && cd ${dir} && ([ -e makefile ] || [ -e Makefile ] && ${CMAKE_MAKE_PROGRAM} distclean) || true)
-  add_dependencies(distclean clean-restframes)
-  add_custom_target(nuke-restframes COMMAND ${CMAKE_COMMAND} -E remove -f ${rf-nuke-stamps}
-                                    COMMAND ${CMAKE_COMMAND} -E remove_directory "${dir}" || true)
-  add_dependencies(nuke-restframes clean-restframes)
-  add_dependencies(nuke-contrib nuke-restframes)
-  add_dependencies(nuke-all nuke-restframes)
+  add_contrib_clean_and_nuke(${name})
 endif()
 
+#contrib/HepMC3; include only if ColliderBit is in use and WITH_HEPMC=ON.
+option(WITH_HEPMC "Compile with HepMC enabled" OFF)
+if(NOT WITH_HEPMC)
+  message("${BoldCyan} X HepMC is deactivated. Set -DWITH_HEPMC=ON to activate HepMC.${ColourReset}")
+elseif(NOT ";${GAMBIT_BITS};" MATCHES ";ColliderBit;")
+  message("${BoldCyan} X ColliderBit is not in use: excluding HepMC from GAMBIT configuration.${ColourReset}")
+  set(WITH_HEPMC OFF)
+endif()
+
+set(name "hepmc")
+set(ver "3.1.1")
+set(dir "${PROJECT_SOURCE_DIR}/contrib/HepMC3-${ver}")
+if(WITH_HEPMC)
+  message("-- HepMC-dependent functions in ColliderBit will be activated.")
+  message("-- ColliderBit Solo (CBS) will be activated.")
+  message("   HepMC v${ver} will be downloaded and installed when building GAMBIT.")
+  set(EXCLUDE_HEPMC FALSE)
+else()
+  message("   HepMC-dependent functions in ColliderBit will be deactivated.")
+  message("   ColliderBit Solo (CBS) will be deactivated.")
+  nuke_ditched_contrib_content(${name} ${dir})
+  set(EXCLUDE_HEPMC TRUE)
+endif()
+
+if(NOT EXCLUDE_HEPMC)
+  set(lib "libhepmc3")
+  set(md5 "a9cfc6e95eff5c13a0a5a9311ad75aa7")
+  set(dl "https://hepmc.web.cern.ch/hepmc/releases/HepMC3-${ver}.tar.gz")
+  include_directories("${dir}/include")
+  set(CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_RPATH};${dir}/lib")
+  ExternalProject_Add(${name}
+    DOWNLOAD_COMMAND ${DL_CONTRIB} ${dl} ${md5} ${dir} ${name} ${ver}
+    SOURCE_DIR ${dir}
+    CMAKE_COMMAND ${CMAKE_COMMAND} ..
+    CMAKE_ARGS -DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE} -DCMAKE_CXX_COMPILER=${CMAKE_CXX_COMPILER} -DCMAKE_CXX_FLAGS=${BACKEND_CXX_FLAGS}
+    BUILD_COMMAND ${CMAKE_MAKE_PROGRAM}
+    INSTALL_COMMAND ""
+    )
+  # Add install name tool step for OSX
+  add_install_name_tool_step(${name} ${dir}/lib ${lib}.dylib)
+  # Add clean-hepmc and nuke-hepmc
+  add_contrib_clean_and_nuke(${name})
+endif()
 
 #contrib/fjcore-3.2.0
 set(fjcore_INCLUDE_DIR "${PROJECT_SOURCE_DIR}/contrib/fjcore-3.2.0")
