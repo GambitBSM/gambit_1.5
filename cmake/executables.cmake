@@ -34,9 +34,9 @@ if(EXISTS "${PROJECT_SOURCE_DIR}/Core/")
     if (NOT EXCLUDE_RESTFRAMES)
       set(gambit_XTRA ${gambit_XTRA} ${RESTFRAMES_LDFLAGS})
     endif()
-    if (NOT EXCLUDE_HEPMC)
-      set(gambit_XTRA ${gambit_XTRA} ${HEPMC_LDFLAGS})
-    endif()
+  endif()
+  if (NOT EXCLUDE_HEPMC)
+    set(gambit_XTRA ${gambit_XTRA} ${HEPMC_LDFLAGS})
   endif()
   add_gambit_executable(${PROJECT_NAME} "${gambit_XTRA}"
                         SOURCES ${PROJECT_SOURCE_DIR}/Core/src/gambit.cpp

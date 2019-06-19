@@ -162,7 +162,7 @@ else()
 endif()
 
 if(NOT EXCLUDE_HEPMC)
-  set(lib "libHepMC3_static")
+  set(lib "HepMC3_static")
   set(md5 "a9cfc6e95eff5c13a0a5a9311ad75aa7")
   set(dl "https://hepmc.web.cern.ch/hepmc/releases/HepMC3-${ver}.tar.gz")
   set(build_dir "${PROJECT_BINARY_DIR}/${name}-prefix/src/${name}-build")
