@@ -37,6 +37,7 @@
 #include <stdlib.h>     /* malloc, free, rand */
 #include <string>
 #include <valarray>
+#include <stdint.h> // safe memory addresses as int
 
 #include <gsl/gsl_blas.h>
 #include <gsl/gsl_errno.h>
@@ -3314,11 +3315,9 @@ namespace Gambit
         {
           std::string key = it->first;
 
-          // convert memory address 'it->second' to string 'address'
-          std::ostringstream oss;
-          oss << it->second;
-          std::string address(oss.str());
-          result[key.c_str()] = address.c_str();
+          // convert memory address 'it->second' to int 'addr'
+          uintptr_t addr = reinterpret_cast<uintptr_t>(it->second);
+          result[key.c_str()] = addr;
         }      
       }
       
