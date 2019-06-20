@@ -66,7 +66,9 @@ set_target_properties(gambit_preload PROPERTIES
   LIBRARY_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/contrib"
   RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/contrib"
 )
-if (NOT ${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
+if (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
+  set(gambit_preload_LDFLAGS "-L${CMAKE_BINARY_DIR}/contrib -lgambit_preload")
+else()
   set(gambit_preload_LDFLAGS "-L${CMAKE_BINARY_DIR}/contrib -Wl,--no-as-needed -lgambit_preload")
 endif()
 set(CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_RPATH};${CMAKE_BINARY_DIR}/contrib")
