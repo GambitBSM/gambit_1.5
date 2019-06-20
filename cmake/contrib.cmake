@@ -60,6 +60,16 @@ endfunction()
 
 #contrib/preload
 add_library(gambit_preload SHARED "${PROJECT_SOURCE_DIR}/contrib/preload/gambit_preload.cpp")
+target_include_directories(gambit_preload PRIVATE "${PROJECT_SOURCE_DIR}/cmake/include")
+set_target_properties(gambit_preload PROPERTIES
+  ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/contrib"
+  LIBRARY_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/contrib"
+  RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/contrib"
+)
+if (NOT ${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
+  set(gambit_preload_LDFLAGS "-L${CMAKE_BINARY_DIR}/contrib -Wl,--no-as-needed -lgambit_preload")
+endif()
+set(CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_RPATH};${CMAKE_BINARY_DIR}/contrib")
 
 #contrib/slhaea
 include_directories("${PROJECT_SOURCE_DIR}/contrib/slhaea/include")
@@ -114,7 +124,7 @@ if(NOT EXCLUDE_RESTFRAMES)
   set(RESTFRAMES_CXXCPP "${CMAKE_CXX_COMPILER} -E")
   set(RESTFRAMES_LDFLAGS "-L${dir}/lib -lRestFrames")
   set(RESTFRAMES_INCLUDE "${dir}/inc")
-  include_directories(RESTFRAMES_INCLUDE)
+  include_directories(${RESTFRAMES_INCLUDE})
   set(CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_RPATH};${dir}/lib")
   ExternalProject_Add(${name}
     DOWNLOAD_COMMAND git clone https://github.com/crogan/RestFrames ${dir}
