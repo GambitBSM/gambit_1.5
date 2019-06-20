@@ -307,7 +307,9 @@ int main(int argc, char* argv[])
       // 1000*1000 messages will be sent. Could be slow.
     #endif
 
-    if(rank == 0) cout << "Calling MPI_Finalize..." << endl; // Debug
+    #ifdef WITH_MPI
+      if(rank == 0) cout << "Calling MPI_Finalize..." << endl;
+    #endif
   } // End main scope; want to destruct all communicators before MPI_Finalize() is called
 
   #ifdef WITH_MPI
