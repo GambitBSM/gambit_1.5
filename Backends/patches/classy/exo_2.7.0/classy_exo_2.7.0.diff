@@ -33,7 +33,7 @@ index 77cf1202..e2bf86f2 100644
  
    /** - non-cold relics (ncdm) */
    class_read_int("N_ncdm",N_ncdm);
-@@ -1601,6 +1601,140 @@ int input_read_parameters(
+@@ -1601,6 +1601,129 @@ int input_read_parameters(
          pth->has_on_the_spot = _FALSE_;
   flag3=_TRUE_;
        }
