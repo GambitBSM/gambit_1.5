@@ -322,7 +322,12 @@ function(add_gambit_executable executablename LIBRARIES)
       set(LIBRARIES ${LIBRARIES} ${SQLITE3_LIBRARIES})
   endif()
 
-  target_link_libraries(${executablename} PRIVATE ${LIBRARIES} yaml-cpp ${gambit_preload_LDFLAGS})
+  if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
+    target_link_libraries(${executablename} PRIVATE ${gambit_preload_LDFLAGS} ${LIBRARIES} yaml-cpp)
+  else()
+    target_link_libraries(${executablename} PRIVATE ${LIBRARIES} yaml-cpp ${gambit_preload_LDFLAGS})
+  endif()
+
   add_dependencies(${executablename} mkpath)
 
   #For checking if all the needed libs are present.  Never add them manually with -lsomelib!!
