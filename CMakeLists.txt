@@ -580,7 +580,7 @@ if(";${GAMBIT_BITS};" MATCHES ";ColliderBit;")
 endif()
 
 # If SpecBit is in use, make flexiblesusy a dependency of SpecBit
-if(";${GAMBIT_BITS};" MATCHES ";ColliderBit;")
+if(";${GAMBIT_BITS};" MATCHES ";SpecBit;")
   add_dependencies(SpecBit flexiblesusy)
 endif()
 

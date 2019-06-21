@@ -128,16 +128,22 @@ if(NOT EXCLUDE_RESTFRAMES)
   set(RESTFRAMES_INCLUDE "${dir}/inc")
   include_directories(${RESTFRAMES_INCLUDE})
   set(CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_RPATH};${dir}/lib")
+  set(RESTFRAMES_CONFIG_LDFLAGS "-L${CMAKE_BINARY_DIR}/contrib -Wl,-rpath,${CMAKE_BINARY_DIR}/contrib")
+  if (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
+    set(RESTFRAMES_CONFIG_LIBS "-lgambit_preload")
+  else()
+    set(RESTFRAMES_CONFIG_LIBS "-Wl,--no-as-needed -lgambit_preload")
+  endif()
   ExternalProject_Add(${name}
     DOWNLOAD_COMMAND git clone https://github.com/crogan/RestFrames ${dir}
              COMMAND ${CMAKE_COMMAND} -E chdir ${dir} git checkout -q v${ver}
     SOURCE_DIR ${dir}
     BUILD_IN_SOURCE 1
-    CONFIGURE_COMMAND ./configure -prefix=${dir} CC=${CMAKE_C_COMPILER} CFLAGS=${BACKEND_C_FLAGS} CPP=${RESTFRAMES_CPP} CXX=${CMAKE_CXX_COMPILER} CXXFLAGS=${BACKEND_CXX_FLAGS} CXXCPP=${RESTFRAMES_CXXCPP}
+    CONFIGURE_COMMAND ./configure -prefix=${dir} CC=${CMAKE_C_COMPILER} CFLAGS=${BACKEND_C_FLAGS} CPP=${RESTFRAMES_CPP} CXX=${CMAKE_CXX_COMPILER} CXXFLAGS=${BACKEND_CXX_FLAGS} CXXCPP=${RESTFRAMES_CXXCPP} LDFLAGS=${RESTFRAMES_CONFIG_LDFLAGS} LIBS=${RESTFRAMES_CONFIG_LIBS}
     BUILD_COMMAND ${CMAKE_MAKE_PROGRAM}
     INSTALL_COMMAND ${CMAKE_MAKE_PROGRAM} install
     )
-  # Force the preload library to come before RestFrames (in theory our link order does this already, but just in case)
+  # Force the preload library to come before RestFrames
   target_link_libraries(${name} gambit_preload)
   # Add install name tool step for OSX
   add_install_name_tool_step(${name} ${dir}/lib libRestFrames.dylib)
