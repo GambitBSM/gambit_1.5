@@ -35,14 +35,6 @@
 # Require a minimum cmake version of 2.8.5
 cmake_minimum_required(VERSION 2.8.5 FATAL_ERROR)
 
-# Flush the cached compiler variables if the user has specified them on the command line, to force re-idetification of compilers given without full paths
-if(CMAKE_C_COMPILER)
-  unset(CMAKE_C_COMPILER CACHE)
-endif()
-if(CMAKE_CXX_COMPILER)
-  unset(CMAKE_CXX_COMPILER CACHE)
-endif()
-
 SET(CMAKE_BUILD_TYPE_STRING "Choose the type of build, options are: None Debug Release Release_03 RelWithDebInfo MinSizeRel.")
 if(NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
   SET(CMAKE_BUILD_TYPE None CACHE STRING "${CMAKE_BUILD_TYPE_STRING}" FORCE)
