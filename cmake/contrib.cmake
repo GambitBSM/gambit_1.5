@@ -308,6 +308,17 @@ if(";${GAMBIT_BITS};" MATCHES ";SpecBit;")
     INSTALL_COMMAND ""
   )
 
+  # Add clean info
+  set(rmstring "${CMAKE_BINARY_DIR}/flexiblesusy-prefix/src/flexiblesusy-stamp/flexiblesusy")
+  add_custom_target(clean-flexiblesusy COMMAND ${CMAKE_COMMAND} -E remove -f ${rmstring}-configure ${rmstring}-build ${rmstring}-install ${rmstring}-done
+                                       COMMAND [ -e ${FS_DIR} ] && cd ${FS_DIR} && ([ -e makefile ] || [ -e Makefile ] && ${CMAKE_MAKE_PROGRAM} clean) || true)
+  add_custom_target(distclean-flexiblesusy COMMAND cd ${FS_DIR} && ([ -e makefile ] || [ -e Makefile ] && ${CMAKE_MAKE_PROGRAM} distclean) || true)
+  add_custom_target(nuke-flexiblesusy)
+  add_dependencies(distclean-flexiblesusy clean-flexiblesusy)
+  add_dependencies(nuke-flexiblesusy distclean-flexiblesusy)
+  add_dependencies(distclean distclean-flexiblesusy)
+  add_dependencies(nuke-all nuke-flexiblesusy)
+
   # Set linking commands.  Link order matters! The core flexiblesusy libraries need to come after the model libraries but before the other link flags.
   set(CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_RPATH};${FS_DIR}/src")
   set(flexiblesusy_LDFLAGS "-L${FS_DIR}/src -lflexisusy ${flexiblesusy_LDFLAGS}")
@@ -347,9 +358,7 @@ if(";${GAMBIT_BITS};" MATCHES ";SpecBit;")
      message("${BoldRed}-- Configuring FlexibleSUSY failed.  Here's what I tried to do:\n${config_command}\n${output}${ColourReset}" )
      message(FATAL_ERROR "Configuring FlexibleSUSY failed." )
   endif()
-  set(rmstring "${CMAKE_BINARY_DIR}/flexiblesusy-prefix/src/flexiblesusy-stamp/flexiblesusy")
   execute_process(COMMAND ${CMAKE_COMMAND} -E touch ${rmstring}-configure)
-
   message("${Yellow}-- Configuring FlexibleSUSY - done.${ColourReset}")
 
 
@@ -358,14 +367,3 @@ else()
   set (EXCLUDE_FLEXIBLESUSY TRUE)
 
 endif()
-
-
-# Add clean info
-add_custom_target(clean-flexiblesusy COMMAND ${CMAKE_COMMAND} -E remove -f ${rmstring}-configure ${rmstring}-build ${rmstring}-install ${rmstring}-done
-                                     COMMAND [ -e ${FS_DIR} ] && cd ${dir} && ([ -e makefile ] || [ -e Makefile ] && ${CMAKE_MAKE_PROGRAM} clean) || true)
-add_custom_target(distclean-flexiblesusy COMMAND cd ${FS_DIR} && ([ -e makefile ] || [ -e Makefile ] && ${CMAKE_MAKE_PROGRAM} distclean) || true)
-add_custom_target(nuke-flexiblesusy)
-add_dependencies(distclean-flexiblesusy clean-flexiblesusy)
-add_dependencies(nuke-flexiblesusy distclean-flexiblesusy)
-add_dependencies(distclean distclean-flexiblesusy)
-add_dependencies(nuke-all nuke-flexiblesusy)
