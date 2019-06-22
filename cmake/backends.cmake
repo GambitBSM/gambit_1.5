@@ -299,6 +299,12 @@ if(NOT ditched_${name}_${ver})
 endif()
 
 
+# Ditch all MicrOmegas backends if using clang, as clang is apparently not supported by MO3.
+if("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang" OR "${CMAKE_CXX_COMPILER_ID}" STREQUAL "AppleClang")
+  message("   Compiling with clang; disabling MicrOmegas support in GAMBIT configuration.")
+  set (itch "${itch}" "micromegas")
+endif()
+
 # MicrOmegas base (for all models)
 set(name "micromegas")
 set(ver "3.6.9.2")

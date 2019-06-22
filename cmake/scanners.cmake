@@ -248,7 +248,7 @@ if(NOT ditched_${name}_${ver})
     PATCH_COMMAND patch -p1 < ${patch}
     CMAKE_COMMAND ${CMAKE_COMMAND} ..
     CMAKE_ARGS -DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE} -DCMAKE_CXX_COMPILER=${CMAKE_CXX_COMPILER} -DCMAKE_CXX_FLAGS=${BACKEND_CXX_FLAGS}
-    BUILD_COMMAND ${CMAKE_MAKE_PROGRAM}
+    BUILD_COMMAND ${CMAKE_MAKE_PROGRAM} ${name}
     INSTALL_COMMAND ${CMAKE_COMMAND} -E create_symlink ${build_dir}/Manager/Manager_Dict_rdict.pcm ${build_dir}/lib/Manager_Dict_rdict.pcm
             COMMAND ${CMAKE_COMMAND} -E create_symlink ${build_dir}/MCMC/MCMC_Dict_rdict.pcm ${build_dir}/lib/MCMC_Dict_rdict.pcm
   )
