@@ -28,7 +28,7 @@ static void initializer()
   outstream << "\n\x1b[1;33mGAMBIT " << GAMBIT_VERSION_MAJOR << "." << GAMBIT_VERSION_MINOR << "." << GAMBIT_VERSION_REVISION;
   std::string patch(GAMBIT_VERSION_PATCH);
   if (patch != "") outstream << "-" << patch;
-  outstream << "\nhttp://gambit.hepforge.org\n\x1b[0m";
+  outstream << "\nhttp://gambit.hepforge.org\n\n\x1b[0m";
   printf("%s", outstream.str().c_str());
   #ifndef EXCLUDE_RESTFRAMES
     const char* oldenv = getenv("CPLUS_INCLUDE_PATH");
