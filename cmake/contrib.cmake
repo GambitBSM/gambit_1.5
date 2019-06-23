@@ -59,19 +59,22 @@ function(add_contrib_clean_and_nuke package dir clean)
 endfunction()
 
 #contrib/preload
-add_library(gambit_preload SHARED "${PROJECT_SOURCE_DIR}/contrib/preload/gambit_preload.cpp")
-target_include_directories(gambit_preload PRIVATE "${PROJECT_SOURCE_DIR}/cmake/include")
-set_target_properties(gambit_preload PROPERTIES
-  ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/contrib"
-  LIBRARY_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/contrib"
-  RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/contrib"
+set(name "gambit_preload")
+set(dir "${CMAKE_BINARY_DIR}/contrib")
+add_library(${name} SHARED "${PROJECT_SOURCE_DIR}/contrib/preload/gambit_preload.cpp")
+target_include_directories(${name} PRIVATE "${PROJECT_SOURCE_DIR}/cmake/include")
+set_target_properties(${name} PROPERTIES
+  ARCHIVE_OUTPUT_DIRECTORY "${dir}"
+  LIBRARY_OUTPUT_DIRECTORY "${dir}"
+  RUNTIME_OUTPUT_DIRECTORY "${dir}"
 )
+add_install_name_tool_step(${name} ${dir} libgambit_preload.dylib)
 if (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
-  set(gambit_preload_LDFLAGS "-L${CMAKE_BINARY_DIR}/contrib -lgambit_preload")
+  set(gambit_preload_LDFLAGS "-L${dir} -lgambit_preload")
 else()
-  set(gambit_preload_LDFLAGS "-L${CMAKE_BINARY_DIR}/contrib -Wl,--no-as-needed -lgambit_preload")
+  set(gambit_preload_LDFLAGS "-L${dir} -Wl,--no-as-needed -lgambit_preload")
 endif()
-set(CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_RPATH};${CMAKE_BINARY_DIR}/contrib")
+set(CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_RPATH};${dir}")
 
 #contrib/slhaea
 include_directories("${PROJECT_SOURCE_DIR}/contrib/slhaea/include")
