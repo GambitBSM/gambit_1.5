@@ -144,7 +144,7 @@ if(NOT EXCLUDE_RESTFRAMES)
     INSTALL_COMMAND ${CMAKE_MAKE_PROGRAM} install
     )
   # Force the preload library to come before RestFrames
-  target_link_libraries(${name} gambit_preload)
+  add_dependencies(${name} gambit_preload)
   # Add install name tool step for OSX
   add_install_name_tool_step(${name} ${dir}/lib libRestFrames.dylib)
   # Add clean-restframes and nuke-restframes
