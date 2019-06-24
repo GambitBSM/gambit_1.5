@@ -16,6 +16,14 @@ diff --git a/source/input.c b/source/input.c
 index 77cf1202..e2bf86f2 100644
 --- a/source/input.c
 +++ b/source/input.c
+@@ -5,6 +5,7 @@
+  */
+ 
+ #include "input.h"
++#include <stdint.h> // to get uintptr_t type to convert int to pointer
+ 
+ /**
+  * Use this routine to extract initial parameters from files 'xxx.ini'
 @@ -792,7 +792,7 @@ int input_read_parameters(
        pba->Omega_ini_dcdm = param1;
      if (flag2 == _TRUE_)
@@ -33,7 +41,7 @@ index 77cf1202..e2bf86f2 100644
  
    /** - non-cold relics (ncdm) */
    class_read_int("N_ncdm",N_ncdm);
-@@ -1601,6 +1601,129 @@ int input_read_parameters(
+@@ -1601,6 +1602,145 @@
          pth->has_on_the_spot = _FALSE_;
   flag3=_TRUE_;
        }
@@ -46,12 +54,14 @@ index 77cf1202..e2bf86f2 100644
 +            will be filled with entries of passed vector
 +
 +        Complication: If python wrapper is used all input values are converted to strings, including the pointers
-+          to the vectors/arrays to be passed. Therefore memory addresses are converted to int, read in as int here
-+          and then converted back to memory addresses
++          to the vectors/arrays to be passed. Therefore memory addresses are converted to uintptr_t, read in as string
++          here, converted to uintptr_t and then back to memory addresses. We have to go through uintptr_t since this
++          type is designed to be long enough to store memory addresses on the current systems. (Int would be too 
++          short, hence, we can not use the class parser_read_int but have to read it in as string first.)
 +
 +        What is done in the following is:
-+          1) Read in pointers to vectors as ints
-+          2) Convert strings to memory address & initialise a double pointer pointing to it
++          1) Read in pointers to vectors as strings
++          2) Convert strings to uintptr_t, then to memory address & initialise a double pointer pointing to it
 +          3) Free potentially allocated memory of pth->_some_thermodynamics_double_pointer_& allocate new space
 +          4) Copy the values of the passed vector to the newly allocated space
 +      */
@@ -64,32 +74,54 @@ index 77cf1202..e2bf86f2 100644
 +         // initialise flags & chars here -- flag1-flag3 already defined, patch might be easier to maintain if
 +         // these definitions happen here within the patched part
 +         int flag0,flag4,flag5,flag6,flag7,flag8,flag9; 
-+         int addr4,addr5,addr6,addr7,addr8,addr9;
++         char addr [_ARGUMENT_LENGTH_MAX_];
++         uintptr_t ul;
 +
 +         // read in number of entries each vector has
 +         class_call(parser_read_int(pfc,"annihil_coef_num_lines",&pth->annihil_coef_num_lines,&flag0,errmsg),
 +             errmsg,
 +             errmsg);
 +
-+         // 1) Read in pointers to vectors as ints
-+         class_call(parser_read_int(pfc,"annihil_coef_xe",&addr4,&flag4,errmsg),
++         // 1) Read in pointers to vector as string
++         class_call(parser_read_string(pfc,"annihil_coef_xe",&addr,&flag4,errmsg),
 +             errmsg,
 +             errmsg);
-+         class_call(parser_read_int(pfc,"annihil_coef_heat",&addr5,&flag5,errmsg),
++         // 2) Convert string to uintptr_t and then back to memory address;
++         //    initialise a double pointer pointing to it
++         sscanf(addr, "%lu", &ul);
++         double* ptr_xe = (double*) ul;
++
++         class_call(parser_read_string(pfc,"annihil_coef_heat",&addr,&flag5,errmsg),
 +             errmsg,
 +             errmsg);
-+         class_call(parser_read_int(pfc,"annihil_coef_lya",&addr6,&flag6,errmsg),
++         sscanf(addr, "%lu", &ul);
++         double* ptr_heat = (double*) ul;
++
++         class_call(parser_read_string(pfc,"annihil_coef_lya",&addr,&flag6,errmsg),
 +             errmsg,
 +             errmsg);
-+         class_call(parser_read_int(pfc,"annihil_coef_ionH",&addr7,&flag7,errmsg),
++         sscanf(addr, "%lu", &ul);
++         double* ptr_lya = (double*) ul;
++         
++         class_call(parser_read_string(pfc,"annihil_coef_ionH",&addr,&flag7,errmsg),
 +             errmsg,
 +             errmsg);
-+         class_call(parser_read_int(pfc,"annihil_coef_ionHe",&addr8,&flag8,errmsg),
++         sscanf(addr, "%lu", &ul);
++         double* ptr_ionH = (double*) ul;
++         
++
++         class_call(parser_read_string(pfc,"annihil_coef_ionHe",&addr,&flag8,errmsg),
 +             errmsg,
 +             errmsg);
-+         class_call(parser_read_int(pfc,"annihil_coef_lowE",&addr9,&flag9,errmsg),
++         sscanf(addr, "%lu", &ul);
++         double* ptr_ionHe = (double*) ul;
++         
++         class_call(parser_read_string(pfc,"annihil_coef_lowE",&addr,&flag9,errmsg),
 +             errmsg,
 +             errmsg);
++         sscanf(addr, "%lu", &ul);
++         double* ptr_lowE = (double*) ul;
++         
 +         
 +         // Check that all values needed for the calculation have been passed. If not throw error
 +         class_test(((flag0 == _FALSE_) || (flag4 == _FALSE_) || (flag5 == _FALSE_) || (flag6 == _FALSE_) || (flag7 == _FALSE_)
@@ -97,28 +129,20 @@ index 77cf1202..e2bf86f2 100644
 +                    errmsg,
 +                    "You set the parameter energy_deposition_function to GAMBIT, this means you also haveto specify the input values for \n- annihil_coef_num_lines \n- annihil_coef_xe \n- annihil_coef_heat \n- annihil_coef_lya \n- annihil_coef_ionH\n- annihil_coef_ionHe\n- annihil_coef_lowE\n Check that all of them are passed.");
 +
-+
-+          // 2) Convert ints back to memory address & initialise a double pointer pointing to it
-+          double * ptr_a4 = (double*) addr4;
-+          double * ptr_a5 = (double*) addr5;
-+          double * ptr_a6 = (double*) addr6;
-+          double * ptr_a7 = (double*) addr7;
-+          double * ptr_a8 = (double*) addr8;
-+          double * ptr_a9 = (double*) addr9;
-+
++          
 +          // just checking if that worked ..
-+          /*printf("     CLASS internal \n\n\n");
-+          printf("              read int to be \n", addr4);
-+          printf("              passed address4 to point to %p\n", &ptr_a4);
++          /*printf("     CLASS internal \n\n\n");          
 +          for (int it = 0; it < pth->annihil_coef_num_lines; it++)
 +          {
-+             printf("              passed address4 at %i with %e at address %p\n", it, &ptr_a4[it],ptr_a4[it]);
++             printf("              passed xe coefficients at %i with %e at address %p\n", it, &ptr_xe[it],ptr_xe[it]);
 +          }*/
 +
 +          
 +          // 3) Free potentially allocated memory of pth->_some_thermodynamics_double_pointer_& allocate new space
 +          //    (since this is the begining of a run nothing should be allocated already, but this is more explicit
 +          //    and just to make sure..)
++          // check if something is allocated already
++          // check what default to 
 +          free(pth->annihil_coef_xe);
 +          free(pth->annihil_coef_heat);
 +          free(pth->annihil_coef_lya);
@@ -136,20 +160,20 @@ index 77cf1202..e2bf86f2 100644
 +          // 4) Copy the values of the passed vector to the newly allocated space
 +          for (int it = 0; it < pth->annihil_coef_num_lines; it++)
 +          {
-+             pth->annihil_coef_xe[it] = ptr_a4[it];
-+             pth->annihil_coef_heat[it] = ptr_a5[it];
-+             pth->annihil_coef_lya[it] = ptr_a6[it];
-+             pth->annihil_coef_ionH[it] = ptr_a7[it];
-+             pth->annihil_coef_ionHe[it] = ptr_a8[it];
-+             pth->annihil_coef_lowE[it] = ptr_a9[it];
++             pth->annihil_coef_xe[it] = ptr_xe[it];
++             pth->annihil_coef_heat[it] = ptr_heat[it];
++             pth->annihil_coef_lya[it] = ptr_lya[it];
++             pth->annihil_coef_ionH[it] = ptr_ionH[it];
++             pth->annihil_coef_ionHe[it] = ptr_ionHe[it];
++             pth->annihil_coef_lowE[it] = ptr_lowE[it];
 +          }
 +          
 +
 +         // check again if it worked .. 
-+         //for (int it = 0; it < pth->annihil_coef_num_lines; it++)
-+         // {
-+         //   printf("              filled annihil_coef_xe at %i with %e at address %p\n", it, pth->annihil_coef_xe[it],&pth->annihil_coef_xe[it]);
-+         // }        
++         /*for (int it = 0; it < pth->annihil_coef_num_lines; it++)
++          {
++            printf("              filled annihil_coef_xe at %i with %e at address %p\n", it, pth->annihil_coef_xe[it],&pth->annihil_coef_xe[it]);
++          }*/        
 +
 +          // allocate space for the other structure members that have same length as the above arrays
 +          // the allocation for these is skipped in the thermodynamics.c routine if the GAMBIT file format is passed
