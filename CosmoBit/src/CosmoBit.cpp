@@ -3536,32 +3536,50 @@ namespace Gambit
 
     /// Set the names of all experiments in use for scan 
     /// basically reads in the runOption 'Likelihoods' of capability MP_experiment_names
-    void set_MP_experiment_names(std::vector<std::string> & result)
+    void set_MP_experiment_names(map_str_str & result)
     {
       using namespace Pipes::set_MP_experiment_names;
 
       static bool first = true;
       if (first)
       {
+        // get list of likelihoods implemented in MP
+        std::vector<str> avail_likes = BEreq::get_MP_availible_likelihoods();
 
-        // Read analysis names from the yaml file
-        std::vector<std::string> default_analyses;  // The default is empty lists of analyses TODO : deal with what happens if no Like is specified, throw error
-        result = runOptions->getValueOrDef<std::vector<std::string> >(default_analyses, "Likelihoods");
+        // read in requested likelihoods
+        YAML::Node MP_Likelihoods;
+        MP_Likelihoods = runOptions->getValue<YAML::Node>("Likelihoods");
 
-        // Check that the analysis names listed in the yaml file all correspond to actual ColliderBit analyses
-        for (std::string & name : result)
+        // create string -> string map mapping the likelihood name to the '.data' file that will
+        // be used to initialise likelihood object in MP. If you want to use the default one simply
+        // set the the data-file string to "default"
+        for (auto it=MP_Likelihoods.begin(); it != MP_Likelihoods.end(); it++)
         {
-          std::cout << "(CosmoBit) Read MontePythonLike option  "<< name <<std::endl;
-            
-          /*if (!checkAnalysis(analysis_name)) // TODO add check if likelihood implemented (similar to what we did in MPLike patch file)
+          std::string likelihood = it->first.as<std::string>();
+          std::string data_file = it->second.as<std::string>();
+
+          // check if requested likelihood is contained in vector of implemented likelihoods
+          // if not throw error & list all available options
+          if (std::find(avail_likes.begin(), avail_likes.end(), likelihood) == avail_likes.end())
           {
-            str errmsg = "The analysis " + analysis_name + " is not a known ColliderBit analysis.";
-            ColliderBit_error().raise(LOCAL_INFO, errmsg);
-          }*/
-          
-        }
+            
+            str errmsg = "Likelihood '" + likelihood + "' is not implemented in MontePython. Check for typos or implement it.\nLikelihoods currently available are:\n"; 
+            for(auto const& value: avail_likes)
+            {
+              errmsg += ("\t"+value+"\n");
+            }
+            CosmoBit_error().raise(LOCAL_INFO,errmsg);
+          }
+          else
+          {
+            result[likelihood] = data_file;
+            std::cout << "(CosmoBit) Read MontePythonLike option  "<< likelihood << ", using data file " << data_file <<std::endl; // TODO: delete after testing
+            logger() << "Read MontePythonLike option "<< likelihood << ", using data file " << data_file<< EOM;
+          }
+        }    
         first = false;
       }
+
     }
 
     /// When initialising the MontePython Likelihood objects they add the output that needs to be computed by class
@@ -3585,9 +3603,10 @@ namespace Gambit
       static pybind11::object data;
       if(first_run)
       {
-        std::vector<std::string> experiments = *Dep::MP_experiment_names;
-        data = BEreq::create_data_object(experiments,classyDir);
-        map_str_pyobj likelihoods = BEreq::create_likelihood_objects(data, experiments);
+        map_str_str experiments = *Dep::MP_experiment_names;
+        pybind11::print(experiments);
+        data = BEreq::create_MP_data_object(experiments,classyDir);
+        map_str_pyobj likelihoods = BEreq::create_MP_likelihood_objects(data, experiments);
         first_run = false;
       }
       
@@ -3605,7 +3624,7 @@ namespace Gambit
       using namespace pybind11::literals;
 
       // A list of the experiments initialised in the YAML file
-      std::vector<std::string> experiments = *Dep::MP_experiment_names;
+      map_str_str experiments = *Dep::MP_experiment_names;
 
       std::cout << "(CosmoBit): init_MontePythonLike start"<< std::endl;
 
@@ -3620,8 +3639,8 @@ namespace Gambit
       static bool first_run = true;
       if(first_run)
       {
-        data = BEreq::create_data_object(experiments, classyDir);
-        likelihoods = BEreq::create_likelihood_objects(data, experiments);
+        data = BEreq::create_MP_data_object(experiments, classyDir);
+        likelihoods = BEreq::create_MP_likelihood_objects(data, experiments);
         first_run = false;
       }
       
@@ -3640,10 +3659,10 @@ namespace Gambit
 
       // Loop through the list of experiments, and query the lnL from the
       // MontePython backend
-      for (std::vector<std::string>::const_iterator it = experiments.begin();
-        it != experiments.end(); ++it)
+      for (auto const& it : experiments)
       {
-        std::string like_name = *it;
+        // likelihood names are keys of experiment map (str, str map mapping likelihood name to .data file)
+        std::string like_name = it.first;
         result[like_name] = BEreq::get_MP_loglike(mplike_cont, ccc.cosmo, like_name);
       }
 

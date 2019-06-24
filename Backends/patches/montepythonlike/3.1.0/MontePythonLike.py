@@ -60,6 +60,7 @@ class Likelihood(object):
         #if not data.log_flag:
         #    path = os.path.join(command_line.folder, 'log.param')
 
+        #print("About to read from data file")
         # Define some default fields
         self.data_directory = os.path.abspath(data.path['data'])
         #print self.data_directory
@@ -75,6 +76,7 @@ class Likelihood(object):
                 exec("setattr(self, elem, getattr(data.%s, elem))" % self.name)
 
         # Read values from the data file
+        print("About to read from data file", path)
         self.read_from_file(path, data, command_line)
         
         # Default state
@@ -172,16 +174,15 @@ class Likelihood(object):
                         self.dictionary[name] = value
             data_file.seek(0)
             data_file.close()
+        else:
+            raise io_mp.ConfigurationError("Could not open file %s. Make sure it exists and check for typos!\n \t (Remember to pass the path to the file relative to your GAMBIT directory)" % path)
 
-        # Checking that at least one line was read, exiting otherwise
-        #if counter == 0:
-        #    raise io_mp.ConfigurationError(
-        #        "No information on %s likelihood " % self.name +
-        #        "was found in the %s file.\n" % path +
-        #        "This can result from a failed initialization of a previous " +
-        #        "run. To solve this, you can do a \n " +
-        #        "]$ rm -rf %s \n " % command_line.folder +
-        #        "Be sure there is noting in it before doing this !")
+
+         #Checking that at least one line was read, exiting otherwise
+        if counter == 0:
+            raise io_mp.ConfigurationError(
+                "No information on %s likelihood " % self.name +
+                "was found in the %s file.\n" % path )
 
     
     def need_cosmo_arguments(self, data, dictionary):
@@ -2506,7 +2507,7 @@ class Data(object):
 
     """
 
-    def __init__(self, command_line, path, experiments, mcmc_parameters):  
+    def __init__(self, command_line, path, experiments):  
         """
         The Data class holds the cosmological information, the parameters from
         the MCMC run, the information coming from the likelihoods. It is a wide
@@ -2614,8 +2615,8 @@ class Data(object):
 
         :rtype:   dict
         """
-        #self.mcmc_parameters = od()
-        self.mcmc_parameters = mcmc_parameters
+        self.mcmc_parameters = {}
+        #self.mcmc_parameters = mcmc_parameters
         """
         Ordered dictionary of dictionaries, it contains everything needed by
         the :mod:`mcmc` module for the MCMC procedure.  Every parameter name
@@ -3511,3 +3512,21 @@ class Data(object):
 
         # Store itself into the context
         ctx.add('data', self)
+
+
+def get_availible_likelihoods(backendDir):
+    ''' Function that reads and returns a list of all folder names in the MontePython/montepython/likelihoods folder.
+        The output is used in GAMBIT to check if the user requested to use a likelihood which is actually not availible
+        in the installed version of MontePython. 
+        
+        Input:
+        ------
+        str backendDir: string containing backend directory of MontePython
+
+        Output:
+        -------
+        list output: list of strings containing the names of available likelihoods
+    '''
+    output = [dI for dI in os.listdir(backendDir+"/likelihoods/") if os.path.isdir(os.path.join(backendDir+'/likelihoods/',dI))]
+
+    return output

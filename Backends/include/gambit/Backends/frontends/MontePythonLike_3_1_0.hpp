@@ -25,9 +25,10 @@
 
 LOAD_LIBRARY
 
-BE_CONV_FUNCTION(get_MP_loglike, 	 		double,			  (const CosmoBit::MPLike_data_container&, pybind11::object&, std::string&), "get_MP_loglike")
-BE_CONV_FUNCTION(create_data_object, 		pybind11::object, (std::vector<std::string>&, std::string&),	   							 "create_data_object")
-BE_CONV_FUNCTION(create_likelihood_objects, map_str_pyobj, 	  (pybind11::object&, std::vector<std::string>&),							 "create_likelihood_objects")
+BE_CONV_FUNCTION(get_MP_availible_likelihoods, 	std::vector<str>,		(),		 																 	"get_MP_availible_likelihoods")
+BE_CONV_FUNCTION(get_MP_loglike, 	 			double,			 	(const CosmoBit::MPLike_data_container&, pybind11::object&, std::string&),	"get_MP_loglike")
+BE_CONV_FUNCTION(create_MP_data_object, 		pybind11::object, 	(map_str_str&, std::string&),	   							 	"create_MP_data_object")
+BE_CONV_FUNCTION(create_MP_likelihood_objects, 	map_str_pyobj, 	  	(pybind11::object&, map_str_str&),							 	"create_MP_likelihood_objects")
 
 // Undefine macros to avoid conflict with other backends
 #include "gambit/Backends/backend_undefs.hpp"

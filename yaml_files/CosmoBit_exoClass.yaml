@@ -131,8 +131,14 @@ Rules:
   - capability: MP_experiment_names
     function: set_MP_experiment_names
     options:
-      #Likelihoods: ["bao","Pantheon","Planck_SZ",]  
-      Likelihoods: ["bao_smallz_2014","Pantheon"] #,"Planck_SZ"]  
+      # add likelihoods to be used for scan here & set path to the '<likelihood_name>.data' file containing
+      # the settings you want the likelihood to run with (e.g. path to data, which z-bins to use... ). 
+      # Note that the path has to be relative to your GAMBIT directory. 
+      # If you set it so "default" the default MontePython file 'likelihoods/<likelihood_name>/<likelihood_name>.data'
+      # will be used
+      Likelihoods: 
+        bao_smallz_2014: default #../montepython_public/montepython/likelihoods/bao_smallz_2014/bao_smallz_2014.data
+        Pantheon: default
       # should eventually be possible to choose any MP like, atm only bao, Pantheon, Planck_SZ (& kids after 
       # downloading data and when commenting out line 'parser_mp.existing_file(fname)', will include that into 
       # build step soon) safe to use;
