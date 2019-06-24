@@ -28,7 +28,7 @@ void MODEL_NAMESPACE::CosmoALP_to_GeneralCosmoALP (const ModelParameters &mypara
 {
     logger()<<"Running interpret_as_parent calculations for CosmoALP -> GeneralCosmoALP ..."<<EOM;
 
-    const double alpha_red = 1E-9*alpha_EM/sqrt(2.0*pi);
+    const double alpha_red = alpha_EM/(2.0*pi);
     double fa  = myparams["fa"];
 
     parentparams.setValue("gagg", alpha_red*myparams["Cagg"]/fa);
