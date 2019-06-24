@@ -1149,7 +1149,6 @@ if(NOT ditched_${name}_${ver})
     BUILD_IN_SOURCE 1
     PATCH_COMMAND patch -p1 < ${patch}/${name}_${ver}.diff
     COMMAND patch -p1 < ${patch}/${name}_${ver}_decay_fix.diff
-    COMMAND patch -p0 < ${patch}/classy.dif
     CONFIGURE_COMMAND ""
     BUILD_COMMAND ${CMAKE_MAKE_PROGRAM} CC=${CMAKE_C_COMPILER} OMPFLAG=-fopenmp OPTFLAG= CCFLAG=${BACKEND_C_FLAGS} LDFLAG=${BACKEND_C_FLAGS} all
     COMMAND ${CMAKE_COMMAND} -E make_directory lib
@@ -1177,7 +1176,6 @@ if(NOT ditched_${name}_${ver})
     BUILD_IN_SOURCE 1
     PATCH_COMMAND patch -p1 < ${patch}/${name}_${ver}.diff
     COMMAND patch -p1 < ${patch}/${name}_${ver}_decay_fix.diff
-    COMMAND patch -p0 < ${patch}/classy.dif
     CONFIGURE_COMMAND ""
     BUILD_COMMAND ${CMAKE_MAKE_PROGRAM} CC=${CMAKE_C_COMPILER} OMPFLAG=-fopenmp OPTFLAG= CCFLAG=${BACKEND_C_FLAGS} LDFLAG=${BACKEND_C_FLAGS} all
     COMMAND ${CMAKE_COMMAND} -E make_directory lib
