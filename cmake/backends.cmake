@@ -486,8 +486,7 @@ if(NOT ditched_${name}_${ver})
     BUILD_IN_SOURCE 1
     CONFIGURE_COMMAND ${CMAKE_COMMAND} -E copy ${patchdir}/MontePythonLike.py ${dir}/montepython/MontePythonLike.py
     COMMAND ${CMAKE_COMMAND} -E copy ${patchdir}/MPLike_patch_script.py ${dir}/montepython/MPLike_patch_script.py
-    # S.B. we should remove this in the future. Ok for now, while we do dev.
-    #COMMAND ${CMAKE_COMMAND} -E copy ${dir}/montepython/io_mp.py ${dir}/io_mp.py
+    COMMAND ${CMAKE_COMMAND} -E copy ${patchdir}/sdss_lrgDR7_fiducialmodel.dat ${dir}/data/sdss_lrgDR7/sdss_lrgDR7_fiducialmodel.dat
     BUILD_COMMAND ""
     INSTALL_COMMAND python ${dir}/montepython/MPLike_patch_script.py
   )
