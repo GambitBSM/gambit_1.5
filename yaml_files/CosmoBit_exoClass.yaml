@@ -27,7 +27,7 @@ Parameters:
  StandardModel_numass_degenerate: !import include/StandardModel_numass_degenerate_scan.yaml
 
  # Cosmological nuisance parameters (except for Planck CMB Likelihoods) 
- cosmo_nuisance_params_Pantheon: !import include/cosmo_nuisance_params_Pantheon.yaml
+ cosmo_nuisance_params: !import include/cosmo_nuisance_params.yaml
 
  # model parameters for "TestDecayingDM"
  CosmoALP:
@@ -110,17 +110,17 @@ Rules:
   - capability: set_classy_parameters
     function: set_classy_parameters_LCDM
     options:
-      #l_max: 1000
-      # /\
-      # ||  (JR) we should not set this by default when using the python wrapper: if only bg needed 
-      #     classy will complain that it did not read the input parameter.
-      #     If we use Planck through MP this should be taken care of by itself anyway
       classy_dict:
         #output: " "   # classy + MP: even when no output specified all spectra etc. the likelihoods need
                       # are calculated since the MP Likelihood initialisation is taking care of this for us! 
         #lensing: "no" # heads-up: changed default to 'no'in function 'set_classy_parameters_LCDM' as well
                       # since otherwise the automatic output setting will not work
         #energy_deposition_function : "GAMBIT"
+        #l_max: 1000
+        # /\
+        # ||  (JR) we should not set this by default when using the python wrapper: if only bg needed 
+        #     classy will complain that it did not read the input parameter.
+        #     If we use Planck through MP this should be taken care of by itself anyway
 
   # you have to set by hand if you want to set the class parameters with or without setting arguments from MontePython Likelihoods
   # if the montepythonlike backend is installed (if not it should automatically choose the function 'init_Classy_cosmo_container')

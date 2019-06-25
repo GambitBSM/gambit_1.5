@@ -86,7 +86,7 @@ START_MODULE
     #define FUNCTION energy_injection_efficiency_func
     START_FUNCTION(DarkAges::fz_table)
     ALLOW_MODELS(TestDecayingDM)
-    BACKEND_REQ(DA_efficiency_function, (DarkAges_tag) ,DarkAges::fz_table,())
+    BACKEND_REQ(DA_efficiency_function, (DarkAges_tag), DarkAges::fz_table,())
     #undef FUNCTION
   #undef CAPABILITY
   
@@ -651,7 +651,7 @@ START_MODULE
     //MODEL_GROUP(cosmology, (LCDM_dNeffCMB_dNeffBBN_etaBBN))
     //MODEL_GROUP(nuisance, (cosmo_nuisance_params,cosmo_nuisance_params_Pantheon))
     //ALLOW_MODEL_COMBINATION(cosmology,nuisance)
-    ALLOW_MODELS(cosmo_nuisance_params_Pantheon)
+    ALLOW_MODELS(cosmo_nuisance_params)
     BACKEND_REQ(class_get_Dl,(class_tag),double,(double))
    #undef FUNCTION
   #undef CAPABILITY
@@ -681,7 +681,7 @@ START_MODULE
      START_CAPABILITY
      #define FUNCTION set_parameter_dict_for_MPLike
       START_FUNCTION(pybind11::dict)
-      ALLOW_MODELS(cosmo_nuisance_params_JLA)
+      ALLOW_MODELS(cosmo_nuisance_params)
      #undef FUNCTION
      #define FUNCTION pass_empty_parameter_dict_for_MPLike
        START_FUNCTION(pybind11::dict)

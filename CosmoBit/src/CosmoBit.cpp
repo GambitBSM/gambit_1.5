@@ -3513,14 +3513,33 @@ namespace Gambit
       using namespace Pipes::set_parameter_dict_for_MPLike;
       using namespace pybind11::literals;
 
+      // The loop has to be executed for every parameter point. It takes about 0.00023 s -> ~4 minutes for 1e6 points 
       for (auto it=Param.begin(); it != Param.end(); it++)
       {
         std::string name = it->first;
         double value = *Param[name];
-        result[name.c_str()] = pybind11::dict("current"_a=*Param[name],"scale"_a=1.); // scale always 1 in GAMBIT
-        std::cout<<"    (CosmoBit) Nuisance parameters are "<< name << " with value " << byVal(value)<<std::endl;
+
+        // check if any models are scanned for which we had to rename the nuisance parameters due to 
+        //    a) parameters having the same name  -> e.g. 'epsilon' and 'sigma_NL'
+        //    b) parameter names containing symbols that can't be used in macros -> e.g. "^" in 'beta_0^Euclid'
+
+        // a) have to rename parameters epsilon_ska, epsilon_euclid,.. to "epsilon" as they are implemented in MontePython
+        if (name.find("epsilon") != std::string::npos){name="epsilon";}
+        
+        // a) have to rename parameters sigma_NL_ska, sigma_NL_euclid,.. to "sigma_NL" as they are implemented in MontePython
+        else if (name.find("sigma_NL") != std::string::npos){name="sigma_NL";}
+
+        // b) get the "^" characters back into the parameter names 
+        //   -> beta_x<experiment> has to be beta_x^<experiment> where x = 0 or 1 and <experiment> = Euclid, SKA1 or SKA2
+        //if(ModelInUse("cosmo_nuisance_params_euclid_pk") or ModelInUse("cosmo_nuisance_params_ska"))
+        else if (name.find("beta_")!= std::string::npos){name = name.insert(6,"^");}
+          
+        result[name.c_str()] = pybind11::dict("current"_a=value,"scale"_a=1.); // scale always 1 in GAMBIT
+        //std::cout<<"    (CosmoBit) Nuisance parameters are "<< name << " with value " << byVal(value)<<std::endl;
       }
+      
       std::cout<<"    (CosmoBit) Using Likelihood with cosmological nuisance parameters.. setting values for MPLike data.mcmc_parameters dict"<<std::endl;      
+    
     }
 
     /// function to fill the mcmc_parameters dictionary of MontePython's Data object with current 

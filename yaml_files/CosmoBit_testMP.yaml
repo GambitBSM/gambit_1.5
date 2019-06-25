@@ -26,7 +26,7 @@ Parameters:
  StandardModel_numass_degenerate: !import include/StandardModel_numass_degenerate_scan.yaml
 
  # Cosmological nuisance parameters (except for Planck CMB Likelihoods) 
- cosmo_nuisance_params_Pantheon: !import include/cosmo_nuisance_params_Pantheon.yaml
+ cosmo_nuisance_params: !import include/cosmo_nuisance_params.yaml
 
 #======== Prior setup ========
 Priors:
@@ -115,7 +115,7 @@ Rules:
   - capability: class_set_parameter
     options:
       class_dict: 
-        output: "tCl" # need to add matter power spectrum for sigma8 computation
+       # output: "tCl" # need to add matter power spectrum for sigma8 computation
         k_pivot: 0.05
 
   # classy (class through python wrapper)
@@ -127,11 +127,11 @@ Rules:
       # ||  (JR) we should not set this by default when using the python wrapper: if only bg needed 
       #     classy will complain that it did not read the input parameter.
       #     If we use Planck through MP this should be taken care of by itself anyway
-      output: " "   # classy + MP: even when no output specified all spectra etc. the likelihoods need
+      #output: " "   # classy + MP: even when no output specified all spectra etc. the likelihoods need
                     # are calculated since the MP Likelihood initialisation is taking care of this for us! 
-      lensing: "no" # heads-up: changed default to 'no'in function 'set_classy_parameters_LCDM' as well
+      #lensing: "no" # heads-up: changed default to 'no'in function 'set_classy_parameters_LCDM' as well
                     # since otherwise the automatic output setting will not work
-      energy_deposition_function : "GAMBIT"
+      #energy_deposition_function : "GAMBIT"
 
   # you have to set by hand if you want to set the class parameters with or without setting arguments from MontePython Likelihoods
   # if the montepythonlike backend is installed (if not it should automatically choose the function 'init_Classy_cosmo_container')
@@ -143,7 +143,9 @@ Rules:
     function: set_MP_experiment_names
     options:
       #Likelihoods: ["bao","Pantheon","Planck_SZ",]  
-      Likelihoods: ["bao_smallz_2014","Pantheon"] #,"Planck_SZ"]  
+      Likelihoods: 
+        bao_smallz_2014: default
+        Pantheon: default #,"Planck_SZ"]  
       # should eventually be possible to choose any MP like, atm only bao, Pantheon, Planck_SZ (& kids after 
       # downloading data and when commenting out line 'parser_mp.existing_file(fname)', will include that into 
       # build step soon) safe to use;
