@@ -623,7 +623,7 @@ endif()
                 nothing_excluded = True
                 if plug[3] == "excluded":
                     nothing_excluded = False
-                    towrite += "set (" + plug_type[i] + "_ok_flag_" + directory + " \"    user: " + plug[4] + "\\n\")\n\n"
+                    towrite += "set (" + plug_type[i] + "_ok_flag_" + directory + " \"    Missing scanner plugin " + plug[4] + "\")\n\n"
             if (nothing_excluded):
                 towrite += "set (" + plug_type[i] + "_ok_flag_" + directory + " \"\")\n\n"
 
@@ -719,7 +719,11 @@ endif()
                             towrite += "find_library( " + lib_name + " " + lib + " HINTS ${" + plug_type[i] + "_plugin_lib_paths_" + directory + "} )\n"
                             towrite += "if( " + lib_name + " STREQUAL \"" + lib_name + "-NOTFOUND\" )\n"
                             towrite += "    message(\"-- Did not find "+ plug_type[i] + " library " + lib + " for " + directory + ". Disabling scanners that depend on this.\")\n"
-                            towrite += "    set(" + plug_type[i] + "_ok_flag_" + directory + "${" + plug_type[i] + "_ok_flag_" + directory + "} \"lib" + lib + ".so\")\n"
+                            towrite += "    if ( " + plug_type[i] + "_ok_flag_" + directory + " STREQUAL \"\" )\n"
+                            towrite += "      set(" + plug_type[i] + "_ok_flag_" + directory + " \"lib" + lib + ".so\")\n"
+                            towrite += "    else()\n"
+                            towrite += "      set(" + plug_type[i] + "_ok_flag_" + directory + " \"${" + plug_type[i] + "_ok_flag_" + directory + "}, lib" + lib + ".so\")\n"
+                            towrite += "    endif()\n"
                             towrite += "else()\n"
                             towrite += " "*4 + "get_filename_component(lib_path ${" + lib_name + "} PATH)\n"
                             towrite += " "*4 + "get_filename_component(lib_name ${" + lib_name + "} NAME_WE)\n"
