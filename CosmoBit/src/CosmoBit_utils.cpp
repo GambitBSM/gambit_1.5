@@ -46,8 +46,9 @@ namespace Gambit
     void merge_pybind_dicts(pybind11::dict& a, pybind11::dict& b) 
     {
       // loop through 2nd dict (better if this is the shorter one)
+      static bool first_run = true;
       for (auto item : b)
-      { 
+      {  
         pybind11::str key = pybind11::str(item.first);
         pybind11::str arg = pybind11::str(item.second);
         
@@ -82,17 +83,24 @@ namespace Gambit
           }
           else
           {
-            // (JR) TODO see what other combinations could go wrong here -> different likelihoods
-            // asking for different redshift bins?
-            std::cout <<"___________________________________________________________________"<<std::endl;
-            std::cout <<"___________________________________________________________________"<<std::endl;
-            std::cout << "Both dictionaries to merge contain key" << std::string(key) << "with entries "
-                << std::string(pybind11::str(a[key]))<< " and " << std::string(pybind11::str(b[key])) << ". Don't know how to deal with that, yet. Will be taken care of soon." << std::endl;
-            std::cout <<"___________________________________________________________________"<<std::endl;
-            std::cout <<"___________________________________________________________________"<<std::endl;
+            if(first_run)
+            {
+              // (JR) TODO see what other combinations could go wrong here -> different likelihoods
+              // asking for different redshift bins?
+              // But need this check only on the first run (the inputs we are worries about are 
+              // parameters specifying which output CLASS should produce so they won't change 
+              // in-between the calculation of different points in one scan)
+              std::cout <<"___________________________________________________________________"<<std::endl;
+              std::cout <<"___________________________________________________________________"<<std::endl;
+              std::cout << "Both dictionaries to merge contain key" << std::string(key) << "with entries "
+                  << std::string(pybind11::str(a[key]))<< " and " << std::string(pybind11::str(b[key])) << ". Don't know how to deal with that, yet. Will be taken care of soon." << std::endl;
+              std::cout <<"___________________________________________________________________"<<std::endl;
+              std::cout <<"___________________________________________________________________"<<std::endl;
+            }
           }
         }
       }
+      first_run = false;
     }
 
     std::vector<double> m_ncdm_classInput(std::map<std::string,double> NuMasses_SM)
