@@ -346,7 +346,8 @@ def main(argv):
             for current_location_file in location_files:
 
                 # Load the locations yaml file, and work out which libs are present
-                yaml_file = yaml.load(open(current_location_file))
+                yaml_loader = yaml.full_load if hasattr(yaml, 'full_load') else yaml.load
+                yaml_file = yaml_loader(open(current_location_file))
 
                 if yaml_file:
                     if plugin_name in yaml_file and plugin[1] == plugin_type:
