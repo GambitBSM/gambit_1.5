@@ -1121,8 +1121,10 @@ if(NOT ditched_${name}_${ver})
     SOURCE_DIR ${dir}
     BUILD_IN_SOURCE 1
     CONFIGURE_COMMAND ""
-    COMMAND ${CMAKE_COMMAND} -E make_directory lib
+    COMMAND sed ${dashi} -e "s#autosetup.py install#autosetup.py build#g" Makefile
     BUILD_COMMAND ${CMAKE_MAKE_PROGRAM} CC=${CMAKE_C_COMPILER} OMPFLAG=-fopenmp OPTFLAG= CCFLAG=${BACKEND_C_FLAGS} LDFLAG=${BACKEND_C_FLAGS} all
+    COMMAND ${CMAKE_COMMAND} -E make_directory lib
+    COMMAND find python/ -name "classy.so" | xargs -I {} cp "{}" lib/
     INSTALL_COMMAND ""
   )
   add_extra_targets("backend" ${name} ${ver} ${dir} ${dl} clean)
@@ -1145,8 +1147,10 @@ if(NOT ditched_${name}_${ver})
     PATCH_COMMAND patch -p1 < ${patch}/${name}_${ver}.diff
     COMMAND patch -p1 < ${patch}/${name}_${ver}_decay_fix.diff
     CONFIGURE_COMMAND ""
-    COMMAND ${CMAKE_COMMAND} -E make_directory lib
+    COMMAND sed ${dashi} -e "s#autosetup.py install#autosetup.py build#g" Makefile
     BUILD_COMMAND ${CMAKE_MAKE_PROGRAM} CC=${CMAKE_C_COMPILER} OMPFLAG=-fopenmp OPTFLAG= CCFLAG=${BACKEND_C_FLAGS} LDFLAG=${BACKEND_C_FLAGS} all
+    COMMAND ${CMAKE_COMMAND} -E make_directory lib
+    COMMAND find python/ -name "classy.so" | xargs -I {} cp "{}" lib/
     INSTALL_COMMAND ""
   )
   add_extra_targets("backend" ${name} ${ver} ${dir} ${dl} clean)
