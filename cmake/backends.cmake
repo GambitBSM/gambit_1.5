@@ -1084,7 +1084,6 @@ if(NOT ditched_${name}_${ver})
     SOURCE_DIR ${dir}
     BUILD_IN_SOURCE 1
     PATCH_COMMAND patch -p1 < ${patch}/${name}_${ver}.diff
-    COMMAND patch -p0 < ${patch}/classy.dif
     ## PATCH_COMMAND patch -p0 < ${patch}/primordial_header.dif
     ## COMMAND patch -p0 < ${patch}/primordial_source.dif
     ## COMMAND patch -p0 < ${patch}/input_source.dif
@@ -1095,7 +1094,7 @@ if(NOT ditched_${name}_${ver})
     ## COMMAND patch -p0 < ${patch}/thermo_source.dif
     ## COMMAND patch -p0 < ${patch}/backgrnd_source.dif
     CONFIGURE_COMMAND ""
-    BUILD_COMMAND ${CMAKE_MAKE_PROGRAM} CC=${CMAKE_C_COMPILER} OMPFLAG=-fopenmp OPTFLAG= CCFLAG=${BACKEND_C_FLAGS} LDFLAG=${BACKEND_C_FLAGS} all
+    BUILD_COMMAND ${CMAKE_MAKE_PROGRAM} CC=${CMAKE_C_COMPILER} OMPFLAG= OPTFLAG= CCFLAG=${BACKEND_C_FLAGS} LDFLAG=${BACKEND_C_FLAGS} class
     COMMAND ${CMAKE_COMMAND} -E make_directory lib
     COMMAND ${CMAKE_COMMAND} -E echo "${CMAKE_C_COMPILER} ${CMAKE_SHARED_LIBRARY_CREATE_C_FLAGS} ${BACKEND_C_FLAGS} -o lib/${lib}.so build/*.o" > make_so.sh
     COMMAND chmod u+x make_so.sh
@@ -1122,11 +1121,8 @@ if(NOT ditched_${name}_${ver})
     SOURCE_DIR ${dir}
     BUILD_IN_SOURCE 1
     CONFIGURE_COMMAND ""
-    BUILD_COMMAND ${CMAKE_MAKE_PROGRAM} CC=${CMAKE_C_COMPILER} OMPFLAG=-fopenmp OPTFLAG= CCFLAG=${BACKEND_C_FLAGS} LDFLAG=${BACKEND_C_FLAGS} all
     COMMAND ${CMAKE_COMMAND} -E make_directory lib
-    COMMAND ${CMAKE_COMMAND} -E echo "${CMAKE_C_COMPILER} ${CMAKE_SHARED_LIBRARY_CREATE_C_FLAGS} ${BACKEND_C_FLAGS} -o lib/${lib}.so build/*.o" > make_so.sh
-    COMMAND chmod u+x make_so.sh
-    COMMAND ./make_so.sh
+    BUILD_COMMAND ${CMAKE_MAKE_PROGRAM} CC=${CMAKE_C_COMPILER} OMPFLAG=-fopenmp OPTFLAG= CCFLAG=${BACKEND_C_FLAGS} LDFLAG=${BACKEND_C_FLAGS} all
     INSTALL_COMMAND ""
   )
   add_extra_targets("backend" ${name} ${ver} ${dir} ${dl} clean)
@@ -1149,11 +1145,8 @@ if(NOT ditched_${name}_${ver})
     PATCH_COMMAND patch -p1 < ${patch}/${name}_${ver}.diff
     COMMAND patch -p1 < ${patch}/${name}_${ver}_decay_fix.diff
     CONFIGURE_COMMAND ""
-    BUILD_COMMAND ${CMAKE_MAKE_PROGRAM} CC=${CMAKE_C_COMPILER} OMPFLAG=-fopenmp OPTFLAG= CCFLAG=${BACKEND_C_FLAGS} LDFLAG=${BACKEND_C_FLAGS} all
     COMMAND ${CMAKE_COMMAND} -E make_directory lib
-    COMMAND ${CMAKE_COMMAND} -E echo "${CMAKE_C_COMPILER} ${CMAKE_SHARED_LIBRARY_CREATE_C_FLAGS} ${BACKEND_C_FLAGS} -o lib/${lib}.so build/*.o" > make_so.sh
-    COMMAND chmod u+x make_so.sh
-    COMMAND ./make_so.sh
+    BUILD_COMMAND ${CMAKE_MAKE_PROGRAM} CC=${CMAKE_C_COMPILER} OMPFLAG=-fopenmp OPTFLAG= CCFLAG=${BACKEND_C_FLAGS} LDFLAG=${BACKEND_C_FLAGS} all
     INSTALL_COMMAND ""
   )
   add_extra_targets("backend" ${name} ${ver} ${dir} ${dl} clean)
@@ -1176,7 +1169,7 @@ if(NOT ditched_${name}_${ver})
     PATCH_COMMAND patch -p1 < ${patch}/${name}_${ver}.diff
     COMMAND patch -p1 < ${patch}/${name}_${ver}_decay_fix.diff
     CONFIGURE_COMMAND ""
-    BUILD_COMMAND ${CMAKE_MAKE_PROGRAM} CC=${CMAKE_C_COMPILER} OMPFLAG=-fopenmp OPTFLAG= CCFLAG=${BACKEND_C_FLAGS} LDFLAG=${BACKEND_C_FLAGS} all
+    BUILD_COMMAND ${CMAKE_MAKE_PROGRAM} CC=${CMAKE_C_COMPILER} OMPFLAG= OPTFLAG= CCFLAG=${BACKEND_C_FLAGS} LDFLAG=${BACKEND_C_FLAGS} class
     COMMAND ${CMAKE_COMMAND} -E make_directory lib
     COMMAND ${CMAKE_COMMAND} -E echo "${CMAKE_C_COMPILER} ${CMAKE_SHARED_LIBRARY_CREATE_C_FLAGS} ${BACKEND_C_FLAGS} -o lib/${lib}.so build/*.o" > make_so.sh
     COMMAND chmod u+x make_so.sh
