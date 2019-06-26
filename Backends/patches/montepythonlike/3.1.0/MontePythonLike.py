@@ -1902,7 +1902,10 @@ class Likelihood_mpk(Likelihood):
                     "parameter %s from likelihood %s will be replaced by " +
                     "the common knowledge routine" % (key, self.name))
             except:
-                if type(value) != type('foo'):
+                # (JR) had to adopt these check to work properly with ascii & unicode strings
+                #   original line was -> 'if type(value) != type('foo')' 
+                #   which crashed if one of the strings was unicode formated
+                if ((not isinstance(value, str)) and (not isinstance(value,unicode))):
                     exec("self.%s = %s" % (key, value))
                 else:
                     exec("self.%s = '%s'" % (key, value))
