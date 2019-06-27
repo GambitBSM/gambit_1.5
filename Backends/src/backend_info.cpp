@@ -569,7 +569,6 @@ namespace Gambit
       if (not python_started) start_python();
 
       // Add the path to the backend to the Python system path
-      pybind11::object sys_path = sys->attr("path");
       pybind11::object sys_path_insert = sys_path.attr("insert");
       sys_path_insert(0,path_dir(be, ver));
 
@@ -589,16 +588,15 @@ namespace Gambit
         return;
       }
 
-      // -- Check if the loaded moule is the one which we expect. (Is the module at the expected path?) --
-      // Get relevant functions of os
+      // Check if the loaded moule has actually come from the expected path.
+      // First get the relevant os functions.
       pybind11::object os_path = os->attr("path");
       pybind11::object os_path_split = os_path.attr("split");
-
       // Get the path to the loaded module (Split the path at the last '/')
       pybind11::tuple full_loaded_path = os_path_split( new_module->attr("__file__") );
-      // For Pyhton modules with an underlying '__init__.py' script we need to repeat this split step
+      // For Python modules with an underlying '__init__.py' script we need to repeat this split step
       if ((full_loaded_path[1]).cast<str>().find("__init__") != str::npos)
-	full_loaded_path = os_path_split(full_loaded_path[0]);
+        full_loaded_path = os_path_split(full_loaded_path[0]);
 
       // Compare the expected and the actual location. If they differ, declare the module as broken.
       const str loaded_loc = (full_loaded_path[0]).cast<str>();
@@ -607,12 +605,11 @@ namespace Gambit
       {
         err << "Failed to import Python module from " << path << "." << endl
             << "A module with the same name was loaded but its location is not what is expected" << endl
-            << "Got: " << loaded_loc << " (exptected: " << expected_loc << ")" << endl;
+            << "Got: " << loaded_loc << " (expected: " << expected_loc << ")" << endl;
         backend_warning().raise(LOCAL_INFO, err.str());
         works[be+ver] = false;
         return;
       }
-      // --
 
       // Remove the path to the backend from the Python system path
       pybind11::object sys_path_remove = sys_path.attr("remove");
