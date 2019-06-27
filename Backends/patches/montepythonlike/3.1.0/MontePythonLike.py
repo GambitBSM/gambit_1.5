@@ -181,6 +181,44 @@ class Likelihood(object):
                 "No information on %s likelihood " % self.name +
                 "was found in the %s file.\n" % path )
 
+
+    def get_cl(self, cosmo, l_max=-1):
+        """
+        Return the :math:`C_{\ell}` from the cosmological code in
+        :math:`\mu {\\rm K}^2`
+
+        """
+        # get C_l^XX from the cosmological code
+        cl = cosmo.lensed_cl(int(l_max))
+
+        # convert dimensionless C_l's to C_l in muK**2
+        T = cosmo.T_cmb()
+        for key in cl.iterkeys():
+            # All quantities need to be multiplied by this factor, except the
+            # phi-phi term, that is already dimensionless
+            if key not in ['pp', 'ell']:
+                cl[key] *= (T*1.e6)**2
+
+        return cl
+
+    def get_unlensed_cl(self, cosmo, l_max=-1):
+        """
+        Return the :math:`C_{\ell}` from the cosmological code in
+        :math:`\mu {\\rm K}^2`
+
+        """
+        # get C_l^XX from the cosmological code
+        cl = cosmo.raw_cl(l_max)
+
+        # convert dimensionless C_l's to C_l in muK**2
+        T = cosmo.T_cmb()
+        for key in cl.iterkeys():
+            # All quantities need to be multiplied by this factor, except the
+            # phi-phi term, that is already dimensionless
+            if key not in ['pp', 'ell']:
+                cl[key] *= (T*1.e6)**2
+
+        return cl
     
     def need_cosmo_arguments(self, data, dictionary):
         """
@@ -297,6 +335,31 @@ class Likelihood(object):
                 exec ("cl['tt'][l] += nuisance_value*self.%s_contamination[l]" % nuisance)
 
         return cl
+
+    def add_nuisance_prior(self, lkl, data):
+
+        raise io_mp.LikelihoodError(
+            "Entered the Likelihood object's attribute ' add_nuisance_prior'\n" +
+            "ATM I don't know how to deal with that (if we have to do it at all?)\n" +
+            "in GAMBIT -- so let's not support these likelihoods for now.\n"+
+            "(This is relevant in the following likelihoods:\n \t'achbar'\n'bicep'\n \n")
+
+        
+        # Recover the current value of the nuisance parameter.
+        for nuisance in self.use_nuisance:
+            nuisance_value = float(
+                data.mcmc_parameters[nuisance]['current'] *
+                data.mcmc_parameters[nuisance]['scale'])
+
+            # add prior on nuisance parameters
+            if getattr(self, "%s_prior_variance" % nuisance) > 0:
+                # convenience variables
+                prior_center = getattr(self, "%s_prior_center" % nuisance)
+                prior_variance = getattr(self, "%s_prior_variance" % nuisance)
+                lkl += -0.5*((nuisance_value-prior_center)/prior_variance)**2
+            
+
+        return lkl
 
     def computeLikelihood(self, ctx):
         """
@@ -1906,8 +1969,10 @@ class Likelihood_mpk(Likelihood):
                 #   original line was -> 'if type(value) != type('foo')' 
                 #   which crashed if one of the strings was unicode formated
                 if ((not isinstance(value, str)) and (not isinstance(value,unicode))):
+                    print("                     In non string type")
                     exec("self.%s = %s" % (key, value))
                 else:
+                    print("                     In string type")
                     exec("self.%s = '%s'" % (key, value))
 
     # compute likelihood
@@ -2808,7 +2873,7 @@ class Data(object):
         # Recover the cosmological code version (and git hash if relevant).
         # To implement a new cosmological code, please add another case to the
         # test below.
-        if self.cosmological_module_name == 'CLASS':
+        '''if self.cosmological_module_name == 'CLASS':
             # Official version number
             common_file_path = os.path.join(
                 self.path['cosmo'], 'include', 'common.h')
@@ -2844,7 +2909,7 @@ class Data(object):
 
             # If using an existing log.param, read in and compare this number
             # to the already stored one
-            '''if self.param.find('log.param') != -1:
+            if self.param.find('log.param') != -1:
                 try:
                     version, git_version, git_branch = self.read_version(
                         self.param_file)
@@ -2870,12 +2935,12 @@ class Data(object):
                     # This error is raised when the regular expression match
                     # failed - due to comparing to an old log.param that did
                     # not have this feature properly implemented. Ignore this.
-                    pass '''
+                    pass
 
         else:
             raise io_mp.CosmologicalModuleError(
                 "If you want to check for another cosmological module version"
-                " please add an elif clause to this part")
+                " please add an elif clause to this part") '''
 
         # End of initialisation with the parameter file
         #self.param_file.close()

@@ -3415,31 +3415,6 @@ namespace Gambit
       result = BEreq::class_get_rs();
     }
 
-    /// for the future, maybe -- or to live in CB_utils/frontend...
-    /// Angular distance
-    /*
-    void get_angular_distance_classy(double& result)
-    {
-      using namespace Pipes::get_angular_distance_classy;
-      double z = ...?
-      CosmoBit::Classy_cosmo_container ccc = *Dep::get_Classy_cosmo_container;
-      result = ccc.cosmo.attr("angular_distance")(z).cast<double>();
-    }    
-    void get_luminosity_distance_classy(double& result)
-    {
-      using namespace Pipes::get_luminosity_distance_classy;
-      double z = ...?
-      CosmoBit::Classy_cosmo_container ccc = *Dep::get_Classy_cosmo_container;
-      result = ccc.cosmo.attr("luminosity_distance")(z).cast<double>();
-    }
-    void get_scale_invariant_growth_factor(double& result)
-    {
-      using namespace Pipes::get_scale_invariant_growth_factor;
-      double z = ...?
-      CosmoBit::Classy_cosmo_container ccc = *Dep::get_Classy_cosmo_container;
-      result = ccc.cosmo.attr("scale_invariant_growth_factor")(z).cast<double>();
-    }
-    */
 
 /***************/
 /* MontePython */
@@ -3549,9 +3524,6 @@ namespace Gambit
       using namespace Pipes::init_cosmo_args_from_MPLike;
 
       std::cout << "(CosmoBit) entered init_cosmo_args_from_MPLike"<< std::endl;
-
-      // Need to know where CLASSY lives
-      std::string classyDir = BEreq::path_to_classy();
 
       // CosmoBit::MPLike_data_container should only be created once when calculating the first point.
       // After that is has to be kept alive since it contains a vector with the initialised MPLike 

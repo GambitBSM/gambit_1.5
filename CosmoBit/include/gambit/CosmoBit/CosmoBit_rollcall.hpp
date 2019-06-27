@@ -680,7 +680,6 @@ START_MODULE
      #define FUNCTION init_cosmo_args_from_MPLike
       START_FUNCTION(pybind11::dict)
       DEPENDENCY(MP_experiment_names, map_str_str)
-      BACKEND_REQ(path_to_classy,               (classy),             std::string,      ())
       BACKEND_REQ(create_MP_likelihood_objects, (libmontepythonlike), map_str_pyobj,    (pybind11::object&, map_str_str&))
       BACKEND_REQ(create_MP_data_object,        (libmontepythonlike), pybind11::object, (map_str_str&, std::string&))
      #undef FUNCTION
