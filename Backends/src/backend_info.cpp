@@ -569,6 +569,7 @@ namespace Gambit
       if (not python_started) start_python();
 
       // Add the path to the backend to the Python system path
+      pybind11::object sys_path = sys->attr("path");
       pybind11::object sys_path_insert = sys_path.attr("insert");
       sys_path_insert(0,path_dir(be, ver));
 
