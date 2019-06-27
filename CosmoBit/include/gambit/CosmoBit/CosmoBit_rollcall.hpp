@@ -693,7 +693,6 @@ START_MODULE
       ALLOW_MODELS(LCDM_dNeffCMB_dNeffBBN_etaBBN)
       DEPENDENCY(cosmo_args_from_MPLike,  pybind11::dict)
       DEPENDENCY(set_classy_parameters,   pybind11::dict)
-ntainer&))
      #undef FUNCTION
      #define FUNCTION init_Classy_cosmo_container
       START_FUNCTION(pybind11::dict)

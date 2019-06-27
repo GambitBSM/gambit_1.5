@@ -41,7 +41,7 @@ BE_CONV_FUNCTION(class_get_scale_independent_growth_factor, double, (double), "c
 BE_CONV_FUNCTION(class_get_scale_independent_growth_factor_f, double, (double), "class_get_scale_independent_growth_factor_f")
 BE_CONV_FUNCTION(class_get_Hz, double, (double), "class_get_Hz")
 BE_CONV_FUNCTION(class_get_rs, double, (), "class_get_rs")
-BE_CONV_FUNCTION(class_get_Omega_m, double, (), "class_get_Omega_m")
+BE_CONV_FUNCTION(class_get_Omega0_m, double, (), "class_get_Omega_m")
 BE_CONV_FUNCTION(class_get_Omega0_nu, double, (), "class_get_Omega0_nu")
 BE_CONV_FUNCTION(class_get_Omega0_Lambda, double, (), "class_get_Omega0_Lambda")
 BE_CONV_FUNCTION(class_get_sigma8, double, (), "class_get_sigma8")

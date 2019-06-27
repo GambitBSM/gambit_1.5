@@ -141,7 +141,7 @@ BE_INI_FUNCTION
   static bool first_run = true;
   if(first_run)
   {
-    cosmo = = classy.attr("Class")();
+    cosmo = classy.attr("Class")();
     first_run = false;
   }
 
