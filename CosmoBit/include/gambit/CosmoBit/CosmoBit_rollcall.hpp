@@ -352,7 +352,7 @@ START_MODULE
 
     #define FUNCTION get_Omega0_m_classy
       START_FUNCTION(double)
-      DEPENDENCY(get_Classy_cosmo_container, CosmoBit::Classy_cosmo_container)
+      BACKEND_REQ(class_get_Omega0_m,(classy),double,())
       ALLOW_MODELS(LCDM_dNeffCMB_dNeffBBN_etaBBN)
     #undef FUNCTION
 
@@ -366,12 +366,6 @@ START_MODULE
       ALLOW_MODELS(LCDM_dNeffCMB_dNeffBBN_etaBBN)
     #undef FUNCTION
 
-    #define FUNCTION get_Omega0_b_classy
-      START_FUNCTION(double)
-      DEPENDENCY(get_Classy_cosmo_container, CosmoBit::Classy_cosmo_container)
-      ALLOW_MODELS(LCDM_dNeffCMB_dNeffBBN_etaBBN)
-    #undef FUNCTION
-
   #undef CAPABILITY
   
   #define CAPABILITY Omega0_cdm
@@ -379,12 +373,6 @@ START_MODULE
 
     #define FUNCTION compute_Omega0_cdm
       START_FUNCTION(double)
-      ALLOW_MODELS(LCDM_dNeffCMB_dNeffBBN_etaBBN)
-    #undef FUNCTION
-
-    #define FUNCTION get_Omega0_cdm_classy
-      START_FUNCTION(double)
-      DEPENDENCY(get_Classy_cosmo_container, CosmoBit::Classy_cosmo_container)
       ALLOW_MODELS(LCDM_dNeffCMB_dNeffBBN_etaBBN)
     #undef FUNCTION
 
@@ -399,25 +387,19 @@ START_MODULE
       DEPENDENCY(Omega0_ur, double)
       ALLOW_MODELS(LCDM_dNeffCMB_dNeffBBN_etaBBN)
     #undef FUNCTION
-
+/*
     #define FUNCTION get_Omega0_r_classy
       START_FUNCTION(double)
       DEPENDENCY(get_Classy_cosmo_container, CosmoBit::Classy_cosmo_container)
       ALLOW_MODELS(LCDM_dNeffCMB_dNeffBBN_etaBBN)
     #undef FUNCTION
-
+*/
   #undef CAPABILITY
   
   #define CAPABILITY Omega0_g
     START_CAPABILITY
 
     #define FUNCTION compute_Omega0_g
-      START_FUNCTION(double)
-      DEPENDENCY(T_cmb, double)
-      ALLOW_MODELS(LCDM_dNeffCMB_dNeffBBN_etaBBN)
-    #undef FUNCTION
-
-    #define FUNCTION get_Omega0_g_classy
       START_FUNCTION(double)
       DEPENDENCY(T_cmb, double)
       ALLOW_MODELS(LCDM_dNeffCMB_dNeffBBN_etaBBN)
@@ -434,13 +416,13 @@ START_MODULE
       DEPENDENCY(class_Nur, double)
       //ALLOW_MODELS(LCDM_dNeffCMB_dNeffBBN_etaBBN)
     #undef FUNCTION
-
+/*
     #define FUNCTION get_Omega0_ur_classy
       START_FUNCTION(double)
       DEPENDENCY(get_Classy_cosmo_container, CosmoBit::Classy_cosmo_container)
       ALLOW_MODELS(LCDM_dNeffCMB_dNeffBBN_etaBBN)
     #undef FUNCTION
-
+*/
   #undef CAPABILITY
   
   #define CAPABILITY Omega0_ncdm
@@ -451,13 +433,13 @@ START_MODULE
       DEPENDENCY(T_cmb, double)
       ALLOW_MODELS(LCDM_dNeffCMB_dNeffBBN_etaBBN,StandardModel_SLHA2)
     #undef FUNCTION
-
+/*
     #define FUNCTION get_Omega0_ncdm_classy
       START_FUNCTION(double)
       DEPENDENCY(get_Classy_cosmo_container, CosmoBit::Classy_cosmo_container)
       ALLOW_MODELS(LCDM_dNeffCMB_dNeffBBN_etaBBN)
     #undef FUNCTION
-
+*/
   #undef CAPABILITY
 
   #define CAPABILITY eta0
@@ -478,8 +460,7 @@ START_MODULE
 
     #define FUNCTION get_rs_drag_classy
       START_FUNCTION(double)
-      DEPENDENCY(get_Classy_cosmo_container, CosmoBit::Classy_cosmo_container)
-      ALLOW_MODELS(LCDM_dNeffCMB_dNeffBBN_etaBBN)
+      BACKEND_REQ(class_get_rs,(classy),double,())
     #undef FUNCTION
 
   #undef CAPABILITY
@@ -490,8 +471,7 @@ START_MODULE
 
     #define FUNCTION get_Neff_classy
       START_FUNCTION(double)
-      DEPENDENCY(get_Classy_cosmo_container, CosmoBit::Classy_cosmo_container)
-      ALLOW_MODELS(LCDM_dNeffCMB_dNeffBBN_etaBBN)
+      BACKEND_REQ(class_get_Neff,(classy),double,())
     #undef FUNCTION
 
   #undef CAPABILITY
@@ -558,9 +538,8 @@ START_MODULE
   
     #define FUNCTION get_Sigma8_classy
       START_FUNCTION(double)
-      DEPENDENCY(get_Classy_cosmo_container, CosmoBit::Classy_cosmo_container)
-      DEPENDENCY(set_classy_parameters, pybind11::dict)
-      ALLOW_MODELS(LCDM_dNeffCMB_dNeffBBN_etaBBN)
+      DEPENDENCY(Omega0_m, double)
+      BACKEND_REQ(class_get_sigma8,(class_tag),double,())
     #undef FUNCTION
 
   #undef CAPABILITY
@@ -710,19 +689,16 @@ START_MODULE
     #define CAPABILITY get_Classy_cosmo_container
      START_CAPABILITY
      #define FUNCTION init_Classy_cosmo_container_with_MPLike
-      START_FUNCTION(CosmoBit::Classy_cosmo_container)
+      START_FUNCTION(pybind11::dict)
       ALLOW_MODELS(LCDM_dNeffCMB_dNeffBBN_etaBBN)
       DEPENDENCY(cosmo_args_from_MPLike,  pybind11::dict)
       DEPENDENCY(set_classy_parameters,   pybind11::dict)
-      BACKEND_REQ(classy_create_class_instance, (classy), void, (pybind11::object&))
-      BACKEND_REQ(classy_compute,               (classy), void, (CosmoBit::Classy_cosmo_container&))
+ntainer&))
      #undef FUNCTION
      #define FUNCTION init_Classy_cosmo_container
-      START_FUNCTION(CosmoBit::Classy_cosmo_container)
+      START_FUNCTION(pybind11::dict)
       ALLOW_MODELS(LCDM_dNeffCMB_dNeffBBN_etaBBN)
       DEPENDENCY(set_classy_parameters, pybind11::dict)
-      BACKEND_REQ(classy_compute,               (classy), void, (CosmoBit::Classy_cosmo_container&))
-      BACKEND_REQ(classy_create_class_instance, (classy), void, (pybind11::object&))
      #undef FUNCTION
   #undef CAPABILITY
 
@@ -750,9 +726,8 @@ START_MODULE
       ALLOW_MODELS(LCDM_dNeffCMB_dNeffBBN_etaBBN)
       DEPENDENCY(MP_experiment_names,         map_str_str)
       DEPENDENCY(parameter_dict_for_MPLike,   pybind11::dict)
-      DEPENDENCY(get_Classy_cosmo_container,  CosmoBit::Classy_cosmo_container)
       BACKEND_REQ(path_to_classy,               (classy),             std::string,      ())
-      BACKEND_REQ(classy_compute,               (classy),             void,             (CosmoBit::Classy_cosmo_container&))
+      BACKEND_REQ(get_classy_cosmo_object,               (classy),             pybind11::object,      ())
       BACKEND_REQ(get_MP_loglike,               (libmontepythonlike), double,           (const CosmoBit::MPLike_data_container&, pybind11::object&, std::string&))
       BACKEND_REQ(create_MP_data_object,        (libmontepythonlike), pybind11::object, (map_str_str&, std::string&))
       BACKEND_REQ(create_MP_likelihood_objects, (libmontepythonlike), map_str_pyobj,    (pybind11::object&, map_str_str&))

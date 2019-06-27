@@ -3182,51 +3182,34 @@ namespace Gambit
     /// an instance of the classy class Class() (Yep, I know...) 
     /// which can be handed over to MontePython, or just used to compute 
     /// some observables.
-    void init_Classy_cosmo_container(CosmoBit::Classy_cosmo_container& ccc)
+    void init_Classy_cosmo_container(pybind11::dict& result)
     {
       using namespace Pipes::init_Classy_cosmo_container;
 
-      // create instance of classy class Class()
-      BEreq::classy_create_class_instance(ccc.cosmo);
+      result = *Dep::set_classy_parameters;
 
-      pybind11::dict cosmo_input_dict = *Dep::set_classy_parameters;
-      ccc.set_input_dict(cosmo_input_dict);
-
-      BEreq::classy_compute(ccc);
-
-      std::cout << "(CosmoBit): initialised cosmo object & computed vals"<< std::endl;
+      //std::cout << "(CosmoBit): initialised cosmo object & computed vals"<< std::endl;
     }
     
     /// Initialises the container within CosmoBit from classy, but designed specifically
     /// to be used when MontePython is in use. This will ensure additional outputs are
     /// computed by classy CLASS to be passed to MontePython.
-    void init_Classy_cosmo_container_with_MPLike(CosmoBit::Classy_cosmo_container& ccc)
+    void init_Classy_cosmo_container_with_MPLike(pybind11::dict& result)
     {
       using namespace Pipes::init_Classy_cosmo_container_with_MPLike;
-
-      // create instance of classy class Class()
-      BEreq::classy_create_class_instance(ccc.cosmo);
 
       // get extra cosmo_arguments from MP (gives a dictionary with output values that need
       // to be set for the class run)
       static pybind11::dict MP_cosmo_arguments = *Dep::cosmo_args_from_MPLike;
-      pybind11::print("  ----|> Extra cosmo_arguments needed from MP Likelihoods: ",MP_cosmo_arguments);
+      //pybind11::print("  ----|> Extra cosmo_arguments needed from MP Likelihoods: ",MP_cosmo_arguments);
 
-      pybind11::dict cosmo_input_dict = *Dep::set_classy_parameters;
+      result = *Dep::set_classy_parameters;
 
       // add the arguments from Mp_cosmo_arguments which are not yet in cosmo_input_dict to it
       // also takes care of merging the "output" key values
-      merge_pybind_dicts(cosmo_input_dict,MP_cosmo_arguments);
+      merge_pybind_dicts(result,MP_cosmo_arguments);
 
-      pybind11::print("  ----|> Combined dict", cosmo_input_dict);
-
-      // set the input dict of Classy cosmo container
-      ccc.set_input_dict(cosmo_input_dict);
-
-      // actual CLASS run through classy
-      BEreq::classy_compute(ccc);
-
-      std::cout << "(CosmoBit): initialised cosmo object & computed vals"<< std::endl;
+      //pybind11::print("  ----|> Combined dict", result);
     }
 
     /// Set the LCDM parameters in classy. Looks at the parameters used in a run,
@@ -3366,29 +3349,9 @@ namespace Gambit
     {
       using namespace Pipes::get_Omega0_m_classy;
 
-      CosmoBit::Classy_cosmo_container ccc = *Dep::get_Classy_cosmo_container;
-      result = ccc.cosmo.attr("Omega0_m")().cast<double>();
+      result = BEreq::class_get_Omega0_m();
     }
-
-    /// Baryons
-    void get_Omega0_b_classy(double& result)
-    {
-      using namespace Pipes::get_Omega0_b_classy;
-
-      CosmoBit::Classy_cosmo_container ccc = *Dep::get_Classy_cosmo_container;
-      result = ccc.cosmo.attr("Omega_b")().cast<double>();
-    }
-
-    /// Cold Dark Matter
-    void get_Omega0_cdm_classy(double& result)
-    {
-      using namespace Pipes::get_Omega0_cdm_classy;
-
-      CosmoBit::Classy_cosmo_container ccc = *Dep::get_Classy_cosmo_container;
-      // TODO -- does not currently work
-      //result = ccc.cosmo.attr("Omega0_cdm")().cast<double>();
-      result = 0.;    }
-
+    /*
     /// Radiation
     void get_Omega0_r_classy(double& result)
     {
@@ -3399,17 +3362,7 @@ namespace Gambit
       //result = ccc.cosmo.attr("Omega0_r")().cast<double>();
       result = 0.;
     }
-
-    /// Photons
-    void get_Omega0_g_classy(double& result)
-    {
-      using namespace Pipes::get_Omega0_g_classy;
-
-      // No need to call classy here -- can calculate it from the CMB temperature
-      double h = *Param["H0"]/100.;
-      result = (4.*_sigmaB_SI_/_c_SI_*pow(*Dep::T_cmb,4.)) / (3.*_c_SI_*_c_SI_*1.e10*h*h/_Mpc_SI_/_Mpc_SI_/8./pi/_GN_SI_);
-    }
-
+    
     /// Ultra-relativistic
     void get_Omega0_ur_classy(double& result)
     {
@@ -3420,7 +3373,7 @@ namespace Gambit
       //result = ccc.cosmo.attr("Omega0_ur")().cast<double>();
       result = 0.;
     }
-
+    
     /// Non-cold Dark Matter
     void get_Omega0_ncdm_classy(double& result)
     {
@@ -3431,7 +3384,7 @@ namespace Gambit
       // result = ccc.cosmo.attr("Omega0_ncdm")().cast<double>();
       result = 0.;
     }
-
+    */
     /// Other observables.
 
     /// Sigma8
@@ -3439,22 +3392,10 @@ namespace Gambit
     {
       using namespace Pipes::get_Sigma8_classy;
 
-      // We need to check if the matter power spectrum is
-      // being computed or not. If not, throw an error.
-      pybind11::dict classy_params = *Dep::set_classy_parameters;
-      pybind11::str output = classy_params["output"];
-      if (output.attr("find")("mPk").cast<int>() == -1) {
-        CosmoBit_error().raise(LOCAL_INFO, "CLASSY can not compute "
-          "σ8 unless you ask for the matter power spectrum.\n"
-          "Try adding the following entry to your YAML file:\n"
-          "  - capability: set_classy_parameters\n"
-          "    function: set_classy_parameters_LCDM\n"
-          "    options:\n"
-          "        output: \"lCl pCl tCl mPk\"");
-      }
+      double sigma8 = BEreq::class_get_sigma8();
+      double Omega0_m = *Dep::Omega0_m;
 
-      CosmoBit::Classy_cosmo_container ccc = *Dep::get_Classy_cosmo_container;
-      result = ccc.cosmo.attr("sigma8")().cast<double>();
+      result = sigma8*pow(Omega0_m/0.3, 0.5);
     }
 
     /// Effective number of neutrino species
@@ -3463,8 +3404,7 @@ namespace Gambit
     {
       using namespace Pipes::get_Neff_classy;
 
-      CosmoBit::Classy_cosmo_container ccc = *Dep::get_Classy_cosmo_container;
-      result = ccc.cosmo.attr("Neff")().cast<double>();
+      result = BEreq::class_get_Neff();
     }
 
     /// Comoving sound horizon at Baryon drag epoch
@@ -3472,8 +3412,7 @@ namespace Gambit
     {
       using namespace Pipes::get_rs_drag_classy;
 
-      CosmoBit::Classy_cosmo_container ccc = *Dep::get_Classy_cosmo_container;
-      result = ccc.cosmo.attr("rs_drag")().cast<double>();
+      result = BEreq::class_get_rs();
     }
 
     /// for the future, maybe -- or to live in CB_utils/frontend...
@@ -3674,7 +3613,7 @@ namespace Gambit
       pybind11::print("(CosmoBit) data.mcmc_parameters contains ", mplike_cont.data.attr("mcmc_parameters"));
 
       // Create instance of classy class Class
-      CosmoBit::Classy_cosmo_container ccc = *Dep::get_Classy_cosmo_container;
+      pybind11::object cosmo = BEreq::get_classy_cosmo_object();
 
       // Loop through the list of experiments, and query the lnL from the
       // MontePython backend
@@ -3682,7 +3621,7 @@ namespace Gambit
       {
         // likelihood names are keys of experiment map (str, str map mapping likelihood name to .data file)
         std::string like_name = it.first;
-        result[like_name] = BEreq::get_MP_loglike(mplike_cont, ccc.cosmo, like_name);
+        result[like_name] = BEreq::get_MP_loglike(mplike_cont, cosmo, like_name);
       }
 
       std::cout << "(CosmoBit): get_MP_loglike end with result \n"<< result << std::endl;
