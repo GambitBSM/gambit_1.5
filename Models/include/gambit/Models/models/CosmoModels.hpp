@@ -214,17 +214,17 @@ DEFINEPARS(lambda,mu,N_pivot,omega_b,omega_cdm,H0,tau_reio)
 #undef MODEL
 
 #define MODEL Planck_TT
-  #define PARENT Planck_TTTEEE
+  //#define PARENT Planck_TTTEEE
     START_MODEL
     DEFINEPARS(A_cib_217,cib_index,xi_sz_cib,A_sz,ps_A_100_100,ps_A_143_143,ps_A_143_217,ps_A_217_217,ksz_norm,gal545_A_100,gal545_A_143,gal545_A_143_217,gal545_A_217,calib_100T,calib_217T,A_planck)
-  #undef PARENT
+  //#undef PARENT
 #undef MODEL
 
 #define MODEL Planck_lite
-  #define PARENT Planck_TT
+  //#define PARENT Planck_TT
     START_MODEL
     DEFINEPARS(A_planck)
-  #undef PARENT
+  //#undef PARENT
 #undef MODEL
 
 //#define MODEL inflation

@@ -21,6 +21,7 @@
 ///          (stoecker@physik.rwth-aachen.de)
 ///  \date 2017 Nov
 ///  \date 2018 Jan,Feb, Mar
+///  \date 2019 Jan, Feb, June
 ///
 ///  \author Janina Renk
 ///          (janina.renk@fysik.su.se)
@@ -221,12 +222,47 @@ START_MODULE
     #undef FUNCTION
   #undef CAPABILITY
 
-  #define CAPABILITY class_get_spectra
+  #define CAPABILITY Cl_TT
   START_CAPABILITY
-    #define FUNCTION class_get_spectra_func
-    START_FUNCTION(CosmoBit::Class_container)
-    BACKEND_REQ(get_ptr_to_class,(class_tag),CosmoBit::Class_container,())
-    BACKEND_REQ(class_get_cl,(class_tag),std::vector< double >, (str))
+    #define FUNCTION class_get_Cl_TT
+    START_FUNCTION(std::vector<double>)
+    BACKEND_REQ(class_get_cl,(class_tag),std::vector<double>, (str))
+    FORCE_SAME_BACKEND(class_tag)
+    #undef FUNCTION
+  #undef CAPABILITY
+
+  #define CAPABILITY Cl_TE
+  START_CAPABILITY
+    #define FUNCTION class_get_Cl_TE
+    START_FUNCTION(std::vector<double>)
+    BACKEND_REQ(class_get_cl,(class_tag),std::vector<double>, (str))
+    FORCE_SAME_BACKEND(class_tag)
+    #undef FUNCTION
+  #undef CAPABILITY
+
+  #define CAPABILITY Cl_EE
+  START_CAPABILITY
+    #define FUNCTION class_get_Cl_EE
+    START_FUNCTION(std::vector<double>)
+    BACKEND_REQ(class_get_cl,(class_tag),std::vector<double>, (str))
+    FORCE_SAME_BACKEND(class_tag)
+    #undef FUNCTION
+  #undef CAPABILITY
+
+  #define CAPABILITY Cl_BB
+  START_CAPABILITY
+    #define FUNCTION class_get_Cl_BB
+    START_FUNCTION(std::vector<double>)
+    BACKEND_REQ(class_get_cl,(class_tag),std::vector<double>, (str))
+    FORCE_SAME_BACKEND(class_tag)
+    #undef FUNCTION
+  #undef CAPABILITY
+
+  #define CAPABILITY Cl_PhiPhi
+  START_CAPABILITY
+    #define FUNCTION class_get_Cl_PhiPhi
+    START_FUNCTION(std::vector<double>)
+    BACKEND_REQ(class_get_cl,(class_tag),std::vector<double>, (str))
     FORCE_SAME_BACKEND(class_tag)
     #undef FUNCTION
   #undef CAPABILITY
@@ -235,7 +271,10 @@ START_MODULE
   START_CAPABILITY
     #define FUNCTION function_Planck_lowp_TT_loglike
     START_FUNCTION(double)
-    DEPENDENCY(class_get_spectra,CosmoBit::Class_container)
+    DEPENDENCY(Cl_TT,std::vector<double>)
+    DEPENDENCY(Cl_TE,std::vector<double>)
+    DEPENDENCY(Cl_EE,std::vector<double>)
+    DEPENDENCY(Cl_BB,std::vector<double>)
     ALLOW_MODELS(Planck_TTTEEE,Planck_TT,Planck_lite)
     BACKEND_REQ(clik_compute_loglike, (clik_tag), double ,(clik_object*,double*,clik_error**))
     BACKEND_REQ(clik_initialize_error, (clik_tag), clik_error* ,())
@@ -247,34 +286,38 @@ START_MODULE
   START_CAPABILITY
     #define FUNCTION function_Planck_high_TT_loglike
     START_FUNCTION(double)
-    DEPENDENCY(class_get_spectra,CosmoBit::Class_container)
+    DEPENDENCY(Cl_TT,std::vector<double>)
     ALLOW_MODELS(Planck_TT)
     BACKEND_REQ(clik_compute_loglike, (clik_tag), double ,(clik_object*,double*,clik_error**))
     BACKEND_REQ(clik_initialize_error, (clik_tag), clik_error* ,())
     BACKEND_REQ(return_high_TT,(clik_tag),clik_object*,())
     #undef FUNCTION
 
-    #define FUNCTION function_Planck_high_TTTEEE_loglike
-    START_FUNCTION(double)
-    DEPENDENCY(class_get_spectra,CosmoBit::Class_container)
-    ALLOW_MODELS(Planck_TTTEEE)
-    BACKEND_REQ(clik_compute_loglike, (clik_tag), double ,(clik_object*,double*,clik_error**))
-    BACKEND_REQ(clik_initialize_error, (clik_tag), clik_error* ,())
-    BACKEND_REQ(return_high_TTTEEE,(clik_tag),clik_object*,())
-    #undef FUNCTION
-
     #define FUNCTION function_Planck_high_TT_lite_loglike
     START_FUNCTION(double)
-    DEPENDENCY(class_get_spectra,CosmoBit::Class_container)
+    DEPENDENCY(Cl_TT,std::vector<double>)
     ALLOW_MODELS(Planck_lite)
     BACKEND_REQ(clik_compute_loglike, (clik_tag), double ,(clik_object*,double*,clik_error**))
     BACKEND_REQ(clik_initialize_error, (clik_tag), clik_error* ,())
     BACKEND_REQ(return_high_TT_lite,(clik_tag),clik_object*,())
     #undef FUNCTION
 
+    #define FUNCTION function_Planck_high_TTTEEE_loglike
+    START_FUNCTION(double)
+    DEPENDENCY(Cl_TT,std::vector<double>)
+    DEPENDENCY(Cl_TE,std::vector<double>)
+    DEPENDENCY(Cl_EE,std::vector<double>)
+    ALLOW_MODELS(Planck_TTTEEE)
+    BACKEND_REQ(clik_compute_loglike, (clik_tag), double ,(clik_object*,double*,clik_error**))
+    BACKEND_REQ(clik_initialize_error, (clik_tag), clik_error* ,())
+    BACKEND_REQ(return_high_TTTEEE,(clik_tag),clik_object*,())
+    #undef FUNCTION
+
     #define FUNCTION function_Planck_high_TTTEEE_lite_loglike
     START_FUNCTION(double)
-    DEPENDENCY(class_get_spectra,CosmoBit::Class_container)
+    DEPENDENCY(Cl_TT,std::vector<double>)
+    DEPENDENCY(Cl_TE,std::vector<double>)
+    DEPENDENCY(Cl_EE,std::vector<double>)
     ALLOW_MODELS(Planck_lite)
     BACKEND_REQ(clik_compute_loglike, (clik_tag), double ,(clik_object*,double*,clik_error**))
     BACKEND_REQ(clik_initialize_error, (clik_tag), clik_error* ,())
@@ -286,7 +329,10 @@ START_MODULE
   START_CAPABILITY
     #define FUNCTION function_Planck_lensing_loglike
     START_FUNCTION(double)
-    DEPENDENCY(class_get_spectra,CosmoBit::Class_container)
+    DEPENDENCY(Cl_TT,std::vector<double>)
+    DEPENDENCY(Cl_TE,std::vector<double>)
+    DEPENDENCY(Cl_EE,std::vector<double>)
+    DEPENDENCY(Cl_PhiPhi,std::vector<double>)
     ALLOW_MODELS(Planck_TTTEEE,Planck_TT,Planck_lite)
     BACKEND_REQ(clik_lensing_compute_loglike, (clik_tag), double ,(clik_lensing_object*,double*,clik_error**))
     BACKEND_REQ(clik_initialize_error, (clik_tag), clik_error* ,())

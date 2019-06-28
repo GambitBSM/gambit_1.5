@@ -18,7 +18,7 @@
 ///          (stoecker@physik.rwth-aachen.de)
 ///  \date 2017 Nov
 ///  \date 2018 Jan - May
-///  \date 2019 Jan - Feb
+///  \date 2019 Jan, Feb, June
 ///
 ///  \author Janina Renk
 ///          (janina.renk@fysik.su.se)
@@ -1968,30 +1968,123 @@ namespace Gambit
       }
     }
 
-    void class_get_spectra_func(Class_container& cosmo)
+    void class_get_Cl_TT(std::vector<double>& result)
     {
-//      std::cout << "Last seen alive in: class_get_spectra_func" << std::endl;
-      using namespace Pipes::class_get_spectra_func;
-      cosmo = BEreq::get_ptr_to_class();
+      using namespace Pipes::class_get_Cl_TT;
+      result = BEreq::class_get_cl("tt");
+    }
 
-      cosmo.Cl_TT = BEreq::class_get_cl("tt");
-      cosmo.Cl_TE = BEreq::class_get_cl("te");
-      cosmo.Cl_EE = BEreq::class_get_cl("ee");
-      cosmo.Cl_BB = BEreq::class_get_cl("bb");
-      cosmo.Cl_PhiPhi = BEreq::class_get_cl("pp");
+    void class_get_Cl_TE(std::vector<double>& result)
+    {
+      using namespace Pipes::class_get_Cl_TE;
+      result = BEreq::class_get_cl("te");
+    }
+
+    void class_get_Cl_EE(std::vector<double>& result)
+    {
+      using namespace Pipes::class_get_Cl_EE;
+      result = BEreq::class_get_cl("ee");
+    }
+
+    void class_get_Cl_BB(std::vector<double>& result)
+    {
+      using namespace Pipes::class_get_Cl_BB;
+      result = BEreq::class_get_cl("bb");
+    }
+
+    void class_get_Cl_PhiPhi(std::vector<double>& result)
+    {
+      using namespace Pipes::class_get_Cl_PhiPhi;
+      result = BEreq::class_get_cl("pp");
+    }
+
+    void function_Planck_lowp_TT_loglike(double& result)
+    {
+      using namespace Pipes::function_Planck_lowp_TT_loglike;
+
+      double  cl_and_pars[121];
+      int idx_tt, idx_te, idx_ee, idx_bb;
+
+      std::vector<double> Cl_TT = *Dep::Cl_TT;
+      std::vector<double> Cl_EE = *Dep::Cl_EE;
+      std::vector<double> Cl_TE = *Dep::Cl_TE;
+      std::vector<double> Cl_BB = *Dep::Cl_BB;
+
+      // Check if the sizes of the Cl arrays are suitable. If not ask the user to adjust the inputs for CLASS
+      if( Cl_TT.size() < 30 || Cl_EE.size() < 30 || Cl_TE.size() < 30 || Cl_BB.size() < 30 )
+      {
+        std::ostringstream err;
+        err << "For \"function_Planck_lowp_TT_loglike\" the Cl need to be calculated for l up to 29.\n";
+        err << "The given Cl spectra do not provide this range. Please adjust the input for CLASS.";
+        err << " (\"l_max_scalars\" should be at least 29)";
+        CosmoBit_error().raise(LOCAL_INFO, err.str());
+      }
+
+      //--------------------------------------------------------------------------
+      //------addition of the Cl for TT, TE, EE and BB to Cl array----------------
+      //--------------------------------------------------------------------------
+      for(int ii = 0; ii < 30 ; ii++)
+      {
+        idx_tt = ii;
+        idx_ee = ii + 30;
+        idx_bb = ii + (2 * 30);
+        idx_te = ii + (3 * 30);
+        if (ii >= 2)
+        {
+          cl_and_pars[idx_tt] = Cl_TT.at(ii);
+          cl_and_pars[idx_ee] = Cl_EE.at(ii);
+          cl_and_pars[idx_bb] = Cl_BB.at(ii);
+          cl_and_pars[idx_te] = Cl_TE.at(ii);
+        }
+        else
+        {
+          cl_and_pars[idx_tt] = 0.;
+          cl_and_pars[idx_te] = 0.;
+          cl_and_pars[idx_bb] = 0.;
+          cl_and_pars[idx_te] = 0.;
+        }
+      }
+
+      //--------------------------------------------------------------------------
+      //------addition of nuisance parameters to Cl array-------------------------
+      //--------------------------------------------------------------------------
+      cl_and_pars[120] = *Param["A_planck"];
+
+      //--------------------------------------------------------------------------
+      //------calculation of the planck loglikelihood-----------------------------
+      //--------------------------------------------------------------------------
+      clik_object* lowl_clikid;
+      clik_error *_err;
+
+      lowl_clikid = BEreq::return_lowp_TT();
+      _err = BEreq::clik_initialize_error();
+
+      result = BEreq::clik_compute_loglike(byVal(lowl_clikid),
+               byVal(cl_and_pars),
+               &_err);
     }
 
     void function_Planck_high_TT_loglike(double& result)
     {
-//      std::cout << "Last seen alive in: function_Planck_high_TT_loglike" << std::endl;
       using namespace Pipes::function_Planck_high_TT_loglike;
 
       double  cl_and_pars[2525];
       int idx_tt;
-      Class_container cosmo = *Dep::class_get_spectra;
+
+      std::vector<double> Cl_TT = *Dep::Cl_TT;
+
+      // Check if the sizes of the Cl arrays are suitable. If not ask the user to adjust the inputs for CLASS
+      if( Cl_TT.size() < 2509 )
+      {
+        std::ostringstream err;
+        err << "For \"function_Planck_high_TT_loglike\" the Cl need to be calculated for l up to 2508.\n";
+        err << "The given Cl spectra do not provide this range. Please adjust the input for CLASS.";
+        err <<" (\"l_max_scalars\" should be at least 2508)";
+        CosmoBit_error().raise(LOCAL_INFO, err.str());
+      }
 
       //--------------------------------------------------------------------------
-      //------addition of the Cl for TT, TE, EE and BB to Cl array----------------
+      //------addition of the Cl for TT to Cl array-------------------------------
       //--------------------------------------------------------------------------
 
       for(int ii = 0; ii < 2509 ; ii++)
@@ -2000,7 +2093,7 @@ namespace Gambit
 
         if (ii >= 2)
         {
-          cl_and_pars[idx_tt] = cosmo.Cl_TT.at(ii);
+          cl_and_pars[idx_tt] = Cl_TT.at(ii);
         }
         else
         {
@@ -2039,18 +2132,81 @@ namespace Gambit
       result = BEreq::clik_compute_loglike(byVal(high_clikid),
                byVal(cl_and_pars),
                &_err);
+    }
 
-//      std::cout << "Log likelihood (of high_TT) is : " << result << std::endl;
+    void function_Planck_high_TT_lite_loglike(double& result)
+    {
+      using namespace Pipes::function_Planck_high_TT_lite_loglike;
+
+      double cl_and_pars[2510];
+      int idx_tt;
+
+      std::vector<double> Cl_TT = *Dep::Cl_TT;
+
+      // Check if the sizes of the Cl arrays are suitable. If not ask the user to adjust the inputs for CLASS
+      if ( Cl_TT.size() < 2509 )
+      {
+        std::ostringstream err;
+        err << "For \"function_Planck_high_TT_lite_loglike\" the Cl need to be calculated for l up to 2508.\n";
+        err << "The given Cl spectra do not provide this range. Please adjust the input for CLASS.";
+        err << " (\"l_max_scalars\" should be at least 2508)";
+        CosmoBit_error().raise(LOCAL_INFO, err.str());
+      }
+
+      //--------------------------------------------------------------------------
+      //------addition of the Cl for TT to Cl array-------------------------------
+      //--------------------------------------------------------------------------
+      for(int ii = 0; ii < 2509 ; ii++)
+      {
+        idx_tt = ii;
+        if (ii >= 2)
+        {
+          cl_and_pars[idx_tt] = Cl_TT.at(ii);
+        }
+        else
+        {
+          cl_and_pars[idx_tt] = 0.;
+        }
+      }
+
+      //--------------------------------------------------------------------------
+      //------addition of nuisance parameters to Cl array-------------------------
+      //--------------------------------------------------------------------------
+      cl_and_pars[2509] = *Param["A_planck"];
+
+      //--------------------------------------------------------------------------
+      //------calculation of the planck loglikelihood-----------------------------
+      //--------------------------------------------------------------------------
+      clik_object* high_clikid;
+      clik_error *_err;
+
+      high_clikid = BEreq::return_high_TT_lite();
+      _err = BEreq::clik_initialize_error();
+      result = BEreq::clik_compute_loglike(byVal(high_clikid),
+               byVal(cl_and_pars),
+               &_err);
     }
 
     void function_Planck_high_TTTEEE_loglike(double& result)
     {
-      //std::cout << "Last seen alive in: function_Planck_high_TTTEEE_loglike" << std::endl;
       using namespace Pipes::function_Planck_high_TTTEEE_loglike;
 
       double  cl_and_pars[7621];
       int idx_tt, idx_te, idx_ee;
-      Class_container cosmo = *Dep::class_get_spectra;
+
+      std::vector<double> Cl_TT = *Dep::Cl_TT;
+      std::vector<double> Cl_TE = *Dep::Cl_TE;
+      std::vector<double> Cl_EE = *Dep::Cl_EE;
+
+      // Check if the sizes of the Cl arrays are suitable. If not, ask the user to adjust the inputs for CLASS
+      if ( Cl_TT.size() < 2509 || Cl_TE.size() < 2509 || Cl_EE.size() < 2509 )
+      {
+        std::ostringstream err;
+        err << "For \"function_Planck_high_TTTEEE_loglike\" the Cl need to be calculated for l up to 2508.\n";
+        err << "The given Cl spectra do not provide this range. Please adjust the input for CLASS.";
+        err << " (\"l_max_scalars\" should be at least 2508)";
+        CosmoBit_error().raise(LOCAL_INFO, err.str());
+      }
 
       //--------------------------------------------------------------------------
       //------addition of the Cl for TT, TE and EE to Cl array--------------------
@@ -2062,9 +2218,9 @@ namespace Gambit
         idx_te = ii + (2 * 2509);
         if (ii >= 2)
         {
-          cl_and_pars[idx_tt] = cosmo.Cl_TT.at(ii);
-          cl_and_pars[idx_ee] = cosmo.Cl_EE.at(ii);
-          cl_and_pars[idx_te] = cosmo.Cl_TE.at(ii);
+          cl_and_pars[idx_tt] = Cl_TT.at(ii);
+          cl_and_pars[idx_ee] = Cl_EE.at(ii);
+          cl_and_pars[idx_te] = Cl_TE.at(ii);
         }
         else
         {
@@ -2126,63 +2282,28 @@ namespace Gambit
       result = BEreq::clik_compute_loglike(byVal(high_clikid),
                byVal(cl_and_pars),
                &_err);
-
-//      std::cout << "Log likelihood (of high_TTTEEE) is : " << result << std::endl;
-    }
-
-    void function_Planck_high_TT_lite_loglike(double& result)
-    {
-      //std::cout << "Last seen alive in: function_Planck_high_TT_lite_loglike" << std::endl;
-      using namespace Pipes::function_Planck_high_TT_lite_loglike;
-
-      double cl_and_pars[2510];
-      int idx_tt;
-      Class_container cosmo = *Dep::class_get_spectra;
-
-      //--------------------------------------------------------------------------
-      //------addition of the Cl for TT, TE, EE and BB to Cl array----------------
-      //--------------------------------------------------------------------------
-      for(int ii = 0; ii < 2509 ; ii++)
-      {
-        idx_tt = ii;
-        if (ii >= 2)
-        {
-          cl_and_pars[idx_tt] = cosmo.Cl_TT.at(ii);
-        }
-        else
-        {
-          cl_and_pars[idx_tt] = 0.;
-        }
-      }
-
-      //--------------------------------------------------------------------------
-      //------addition of nuisance parameters to Cl array-------------------------
-      //--------------------------------------------------------------------------
-      cl_and_pars[2509] = *Param["A_planck"];
-
-      //--------------------------------------------------------------------------
-      //------calculation of the planck loglikelihood-----------------------------
-      //--------------------------------------------------------------------------
-      clik_object* high_clikid;
-      clik_error *_err;
-
-      high_clikid = BEreq::return_high_TT_lite();
-      _err = BEreq::clik_initialize_error();
-      result = BEreq::clik_compute_loglike(byVal(high_clikid),
-               byVal(cl_and_pars),
-               &_err);
-
-//      std::cout << "Log likelihood (of high_TT_lite) is : " << result << std::endl;
     }
 
     void function_Planck_high_TTTEEE_lite_loglike(double& result)
     {
-      //std::cout << "Last seen alive in: function_Planck_high_TTTEEE_lite_loglike" << std::endl;
       using namespace Pipes::function_Planck_high_TTTEEE_lite_loglike;
 
       double  cl_and_pars[7528];
       int idx_tt, idx_te, idx_ee;
-      Class_container cosmo = *Dep::class_get_spectra;
+
+      std::vector<double> Cl_TT = *Dep::Cl_TT;
+      std::vector<double> Cl_TE = *Dep::Cl_TE;
+      std::vector<double> Cl_EE = *Dep::Cl_EE;
+
+      // Check if the sizes of the Cl arrays are suitable. If not, ask the user to adjust the inputs for CLASS
+      if ( Cl_TT.size() < 2509 || Cl_TE.size() < 2509 || Cl_EE.size() < 2509 )
+      {
+        std::ostringstream err;
+        err << "For \"function_Planck_high_TTTEEE_lite_loglike\" the Cl need to be calculated for l up to 2508.\n";
+        err << "The given Cl spectra do not provide this range. Please adjust the input for CLASS.";
+        err << " (\"l_max_scalars\" should be at least 2508)";
+        CosmoBit_error().raise(LOCAL_INFO, err.str());
+      }
 
       //--------------------------------------------------------------------------
       //------addition of the Cl for TT, TE and EE to Cl array--------------------
@@ -2194,9 +2315,9 @@ namespace Gambit
         idx_te = ii + (2 * 2509);
         if (ii >= 2)
         {
-          cl_and_pars[idx_tt] = cosmo.Cl_TT.at(ii);
-          cl_and_pars[idx_ee] = cosmo.Cl_EE.at(ii);
-          cl_and_pars[idx_te] = cosmo.Cl_TE.at(ii);
+          cl_and_pars[idx_tt] = Cl_TT.at(ii);
+          cl_and_pars[idx_ee] = Cl_EE.at(ii);
+          cl_and_pars[idx_te] = Cl_TE.at(ii);
         }
         else
         {
@@ -2223,21 +2344,32 @@ namespace Gambit
       result = BEreq::clik_compute_loglike(byVal(high_clikid),
                byVal(cl_and_pars),
                &_err);
-
-      //std::cout << "Log likelihood (of high_TTTEEE_lite) is : " << result << std::endl;
     }
 
     void function_Planck_lensing_loglike(double& result)
     {
-      //std::cout << "Last seen alive in: function_Planck_lensing_loglike" << std::endl;
       using namespace Pipes::function_Planck_lensing_loglike;
 
       double  cl_and_pars[8197];
       int idx_pp, idx_tt, idx_te, idx_ee;
-      Class_container cosmo = *Dep::class_get_spectra;
+
+      std::vector<double> Cl_PhiPhi = *Dep::Cl_PhiPhi;
+      std::vector<double> Cl_TT = *Dep::Cl_TT;
+      std::vector<double> Cl_TE = *Dep::Cl_TE;
+      std::vector<double> Cl_EE = *Dep::Cl_EE;
+
+      // Check if the sizes of the Cl arrays are suitable. If not, ask the user to adjust the inputs for CLASS
+      if ((Cl_PhiPhi.size() < 2049) || (Cl_TT.size() < 2049) || (Cl_TE.size() < 2049) || (Cl_EE.size() < 2049))
+      {
+        std::ostringstream err;
+        err << "For \"function_Planck_lensing_loglike\" the Cl need to be calculated for l up to 2048.\n";
+        err << "The given Cl spectra do not provide this range. Please adjust the input for CLASS.";
+        err << " (\"l_max_scalars\" should be at least 2048)";
+        CosmoBit_error().raise(LOCAL_INFO, err.str());
+      }
 
       //--------------------------------------------------------------------------
-      //------addition of the Cl for PhiPhi,  TT, TE and EE to Cl array-----------
+      //------addition of the Cl for PhiPhi, TT, TE and EE to Cl array-----------
       //--------------------------------------------------------------------------
       for(int ii = 0; ii < 2049 ; ii++)
       {
@@ -2247,10 +2379,10 @@ namespace Gambit
         idx_te = ii + (3 * 2049);
         if (ii >= 2)
         {
-          cl_and_pars[idx_pp] = cosmo.Cl_PhiPhi.at(ii);
-          cl_and_pars[idx_tt] = cosmo.Cl_TT.at(ii);
-          cl_and_pars[idx_ee] = cosmo.Cl_EE.at(ii);
-          cl_and_pars[idx_te] = cosmo.Cl_TE.at(ii);
+          cl_and_pars[idx_pp] = Cl_PhiPhi.at(ii);
+          cl_and_pars[idx_tt] = Cl_TT.at(ii);
+          cl_and_pars[idx_ee] = Cl_EE.at(ii);
+          cl_and_pars[idx_te] = Cl_TE.at(ii);
         }
         else
         {
@@ -2277,65 +2409,7 @@ namespace Gambit
       result = BEreq::clik_lensing_compute_loglike(byVal(lensing_clikid),
                byVal(cl_and_pars),
                &_err);
-
-//      std::cout << "Log likelihood (of lensing) is : " << result << std::endl;
     }
-
-    void function_Planck_lowp_TT_loglike(double& result)
-    {
-      //std::cout << "Last seen alive in: function_Planck_lowp_TT_loglike" << std::endl;
-      using namespace Pipes::function_Planck_lowp_TT_loglike;
-
-      double  cl_and_pars[121];
-      int idx_tt, idx_te, idx_ee, idx_bb;
-      Class_container cosmo = *Dep::class_get_spectra;
-
-      //--------------------------------------------------------------------------
-      //------addition of the Cl for TT, TE, EE and BB to Cl array----------------
-      //--------------------------------------------------------------------------
-      for(int ii = 0; ii < 30 ; ii++)
-      {
-        idx_tt = ii;
-        idx_ee = ii + 30;
-        idx_bb = ii + (2 * 30);
-        idx_te = ii + (3 * 30);
-        if (ii >= 2)
-        {
-          cl_and_pars[idx_tt] = cosmo.Cl_TT.at(ii);
-          cl_and_pars[idx_ee] = cosmo.Cl_EE.at(ii);
-          cl_and_pars[idx_bb] = cosmo.Cl_BB.at(ii);
-          cl_and_pars[idx_te] = cosmo.Cl_TE.at(ii);
-        }
-        else
-        {
-          cl_and_pars[idx_tt] = 0.;
-          cl_and_pars[idx_te] = 0.;
-          cl_and_pars[idx_bb] = 0.;
-          cl_and_pars[idx_te] = 0.;
-        }
-      }
-
-      //--------------------------------------------------------------------------
-      //------addition of nuisance parameters to Cl array-------------------------
-      //--------------------------------------------------------------------------
-      cl_and_pars[120] = *Param["A_planck"];
-
-      //--------------------------------------------------------------------------
-      //------calculation of the planck loglikelihood-----------------------------
-      //--------------------------------------------------------------------------
-      clik_object* lowl_clikid;
-      clik_error *_err;
-
-      lowl_clikid = BEreq::return_lowp_TT();
-      _err = BEreq::clik_initialize_error();
-
-      result = BEreq::clik_compute_loglike(byVal(lowl_clikid),
-               byVal(cl_and_pars),
-               &_err);
-
-//      std::cout << "Log likelihood (of lowp_TT) is : " << result << std::endl;
-    }
-
 
 // ***************************************************************************************************************
 
