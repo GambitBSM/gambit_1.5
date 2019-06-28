@@ -25,13 +25,6 @@
 
 LOAD_LIBRARY
 
-//BE_FUNCTION(init, void, (), "init", "MontePythonLike_init")
-
-BE_CONV_FUNCTION(path_to_classy, std::string, (), "path_to_classy")
-//BE_CONV_FUNCTION(classy_create_class_instance, void, (pybind11::object&), 				 "classy_create_class_instance")
-//BE_CONV_FUNCTION(classy_compute, 	 void, (CosmoBit::Classy_cosmo_container&), "classy_compute")
-//BE_CONV_FUNCTION(classy_2_6_3_set_parameter, void, (pybind11::dict, pybind11::dict), "classy_2_6_3_set_parameter")
-
 BE_CONV_FUNCTION(get_classy_cosmo_object, pybind11::object, (), "get_classy_cosmo_object")
 
 //BE_CONV_FUNCTION(class_get_cl, std::vector<double>, (str), "class_get_cl")

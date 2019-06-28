@@ -3535,7 +3535,7 @@ namespace Gambit
       {
         map_str_str experiments = *Dep::MP_experiment_names;
         pybind11::print(experiments);
-        data = BEreq::create_MP_data_object(experiments,classyDir);
+        data = BEreq::create_MP_data_object(experiments);
         map_str_pyobj likelihoods = BEreq::create_MP_likelihood_objects(data, experiments);
         first_run = false;
       }
@@ -3557,9 +3557,6 @@ namespace Gambit
       map_str_str experiments = *Dep::MP_experiment_names;
 
       std::cout << "(CosmoBit): init_MontePythonLike start"<< std::endl;
-
-      // Need to know where CLASSY lives
-      std::string classyDir = BEreq::path_to_classy();
       
       // CosmoBit::MPLike_data_container should only be created once when calculating the first point.
       // After that is has to be kept alive since it contains a vector with the initialised MPLike 
@@ -3569,7 +3566,7 @@ namespace Gambit
       static bool first_run = true;
       if(first_run)
       {
-        data = BEreq::create_MP_data_object(experiments, classyDir);
+        data = BEreq::create_MP_data_object(experiments);
         likelihoods = BEreq::create_MP_likelihood_objects(data, experiments);
         first_run = false;
       }

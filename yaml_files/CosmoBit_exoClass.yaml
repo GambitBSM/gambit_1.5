@@ -76,9 +76,9 @@ Scanner:
 #======== Observables of interest ========
 ObsLikes:
  
-  - purpose:      Obs
-    capability:   Omega0_m
-    function:     get_Omega0_m_classy 
+  #- purpose:      Obs
+  #  capability:   Omega0_m
+  #  function:     get_Omega0_m_classy 
 
   - purpose:      LogLike
     capability:   Pantheon_LogLike

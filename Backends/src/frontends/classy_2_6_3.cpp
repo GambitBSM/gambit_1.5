@@ -31,12 +31,6 @@ BE_NAMESPACE
 {
   pybind11::object cosmo;
 
-  // Returns a string of the path to the CLASSY object with respect to backendDir.
-  std::string path_to_classy()
-  {
-    std::string path = "classy/2.6.3/";
-    return path;
-  }
 
   // return cosmo object. Need to pass this to MontePython for Likelihoods calculations
   pybind11::object get_classy_cosmo_object()

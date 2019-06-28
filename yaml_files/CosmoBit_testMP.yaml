@@ -54,39 +54,39 @@ Scanner:
 
     random:
       plugin: random
-      point_number: 2
+      point_number: 5
       like:  LogLike
 
 #======== Observables of interest ========
 ObsLikes:
  
-  - purpose:      Obs
-    capability:   Omega0_m
-    function:     get_Omega0_m_classy 
-
-  - purpose:      Obs
-    capability:   Omega0_b
-    function:     get_Omega0_b_classy
-  
-  - purpose:      Obs
-    capability:   Omega0_cdm
-    function:     get_Omega0_cdm_classy
-  
-  - purpose:      Obs
-    capability:   Omega0_r
-    function:     get_Omega0_r_classy
-  
-  - purpose:      Obs
-    capability:   Omega0_g
-    function:     get_Omega0_g_classy
-  
-  - purpose:      Obs
-    capability:   Omega0_ur
-    function:     get_Omega0_ur_classy
-
-  - purpose:      Obs
-    capability:   Omega0_ncdm
-    function:     get_Omega0_ncdm_classy  
+#  - purpose:      Obs
+#    capability:   Omega0_m
+#    function:     get_Omega0_m_classy 
+#
+#  - purpose:      Obs
+#    capability:   Omega0_b
+#    function:     get_Omega0_b_classy
+#  
+#  - purpose:      Obs
+#    capability:   Omega0_cdm
+#    function:     get_Omega0_cdm_classy
+#  
+#  - purpose:      Obs
+#    capability:   Omega0_r
+#    function:     get_Omega0_r_classy
+#  
+#  - purpose:      Obs
+#    capability:   Omega0_g
+#    function:     get_Omega0_g_classy
+#  
+#  - purpose:      Obs
+#    capability:   Omega0_ur
+#    function:     get_Omega0_ur_classy
+#
+#  - purpose:      Obs
+#    capability:   Omega0_ncdm
+#    function:     get_Omega0_ncdm_classy  
 
   - purpose:      LogLike
     capability:   Pantheon_LogLike
@@ -94,8 +94,8 @@ ObsLikes:
   - purpose:      LogLike
     capability:   BAO_LogLike
 
-  - purpose:      LogLike
-    capability:   sigma8_LogLike
+  #- purpose:      LogLike
+  #  capability:   sigma8_LogLike
 
   
   - purpose:      LogLike
@@ -117,6 +117,17 @@ Rules:
       class_dict: 
        # output: "tCl" # need to add matter power spectrum for sigma8 computation
         k_pivot: 0.05
+
+  - capability: class_get_Dl
+    backends:
+      - {backend: class, version: 2.6.3}
+  
+
+
+  - capability: Pantheon_LogLike
+    backends:
+      - {backend: class, version: 2.6.3}
+
 
   # classy (class through python wrapper)
   - capability: set_classy_parameters
@@ -154,6 +165,8 @@ Rules:
   # next 3 rules: all to calculate Likelihoods the class way (not the classy way)
   # verified that BAO, Pantheon & Planck_SZ all give same result the class way & classy way (through MP)
   - capability: BAO_LogLike
+    backends:
+      - {backend: class, version: 2.6.3}
     options:
       DataFile:  BAO_2014.dat
 
