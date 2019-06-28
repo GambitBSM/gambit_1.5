@@ -30,7 +30,7 @@
 BE_NAMESPACE
 {
 
-  pybind11::object cosmo;
+  pybind11::object static cosmo;
 
   // return cosmo object. Need to pass this to MontePython for Likelihoods calculations
   pybind11::object get_classy_cosmo_object()

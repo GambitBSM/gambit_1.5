@@ -70,7 +70,7 @@ Scanner:
 
     random:
       plugin: random
-      point_number: 2
+      point_number: 4
       like:  LogLike
 
 #======== Observables of interest ========
@@ -150,9 +150,15 @@ Rules:
   - capability: lifetime
     function: lifetime_CosmoALP
 
+  - capability: Pantheon_LogLike
+    backends:
+      - {backend: exoclass, version: 2.7.0}
+
   # next 3 rules: all to calculate Likelihoods the class way (not the classy way)
   # verified that BAO, Pantheon & Planck_SZ all give same result the class way & classy way (through MP)
   - capability: BAO_LogLike
+    backends:
+    - {backend: exoclass, version: 2.7.0}
     options:
       DataFile:  BAO_2014.dat
 

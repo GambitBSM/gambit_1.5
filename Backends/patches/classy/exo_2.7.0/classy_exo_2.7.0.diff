@@ -41,7 +41,7 @@ index 77cf1202..e2bf86f2 100644
  
    /** - non-cold relics (ncdm) */
    class_read_int("N_ncdm",N_ncdm);
-@@ -1601,6 +1602,145 @@
+@@ -1601,6 +1601,138 @@
          pth->has_on_the_spot = _FALSE_;
   flag3=_TRUE_;
        }
@@ -62,7 +62,7 @@ index 77cf1202..e2bf86f2 100644
 +        What is done in the following is:
 +          1) Read in pointers to vectors as strings
 +          2) Convert strings to uintptr_t, then to memory address & initialise a double pointer pointing to it
-+          3) Free potentially allocated memory of pth->_some_thermodynamics_double_pointer_& allocate new space
++          3) Allocate new space for pth->_some_thermodynamics_double_pointer
 +          4) Copy the values of the passed vector to the newly allocated space
 +      */
 +         // set CLASS parameters to signal that annihilation coefficients will be filled differently
@@ -138,17 +138,10 @@ index 77cf1202..e2bf86f2 100644
 +          }*/
 +
 +          
-+          // 3) Free potentially allocated memory of pth->_some_thermodynamics_double_pointer_& allocate new space
-+          //    (since this is the begining of a run nothing should be allocated already, but this is more explicit
-+          //    and just to make sure..)
-+          // check if something is allocated already
-+          // check what default to 
-+          free(pth->annihil_coef_xe);
-+          free(pth->annihil_coef_heat);
-+          free(pth->annihil_coef_lya);
-+          free(pth->annihil_coef_ionH);
-+          free(pth->annihil_coef_ionHe); 
-+          free(pth->annihil_coef_lowE);
++          // 3) allocate new space
++          //    (since this is the begining of a run and we clean all structures before each new point 
++          //    the pointers 'pth->annihil_coef_xe'... are not pointing to anything at the moment
++          //    so we can be sure we want have a 
 +
 +          class_alloc(pth->annihil_coef_xe   , pth->annihil_coef_num_lines*sizeof(double),pth->error_message);
 +          class_alloc(pth->annihil_coef_heat , pth->annihil_coef_num_lines*sizeof(double),pth->error_message);
