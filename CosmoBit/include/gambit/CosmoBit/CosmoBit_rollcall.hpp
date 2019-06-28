@@ -626,11 +626,7 @@ START_MODULE
    START_CAPABILITY
    #define FUNCTION compute_Pantheon_LogLike
     START_FUNCTION(double)
-    //ALLOW_MODEL_DEPENDENCE(LCDM_dNeffCMB_dNeffBBN_etaBBN,cosmo_nuisance_params)
-    //MODEL_GROUP(cosmology, (LCDM_dNeffCMB_dNeffBBN_etaBBN))
-    //MODEL_GROUP(nuisance, (cosmo_nuisance_params,cosmo_nuisance_params_Pantheon))
-    //ALLOW_MODEL_COMBINATION(cosmology,nuisance)
-    ALLOW_MODELS(cosmo_nuisance_params)
+    ALLOW_MODELS(cosmo_nuisance_params_Pantheon)
     BACKEND_REQ(class_get_Dl,(class_tag),double,(double))
    #undef FUNCTION
   #undef CAPABILITY
@@ -660,7 +656,12 @@ START_MODULE
      START_CAPABILITY
      #define FUNCTION set_parameter_dict_for_MPLike
       START_FUNCTION(pybind11::dict)
-      ALLOW_MODELS(cosmo_nuisance_params)
+      ALLOW_MODELS(cosmo_nuisance_params_JLA,cosmo_nuisance_params_BK14,cosmo_nuisance_params_CFHTLens_correlation)
+      ALLOW_MODELS(cosmo_nuisance_params_euclid_lensing,cosmo_nuisance_params_euclid_pk,cosmo_nuisance_params_ISW)
+      ALLOW_MODELS(cosmo_nuisance_params_kids450_qe_likelihood_public,cosmo_nuisance_params_ska,cosmo_nuisance_params_wmap)
+      // if you implement new MontePython likelihoods with new nuisance parameters add the name of your new
+      // nuisance parameter model (to be defined in Models/include/gambit/Models/models/CosmoNuisanceModels.hpp)
+      //ALLOW_MODELS(cosmo_nuisance_params_FOR_YOUR_NEW_LIKE) 
      #undef FUNCTION
      #define FUNCTION pass_empty_parameter_dict_for_MPLike
        START_FUNCTION(pybind11::dict)
