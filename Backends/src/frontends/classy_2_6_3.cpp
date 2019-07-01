@@ -33,14 +33,8 @@
 
 BE_NAMESPACE
 {
-  pybind11::object cosmo;
+  pybind11::object static cosmo;
 
-  // Returns a string of the path to the CLASSY object with respect to backendDir.
-  std::string path_to_classy()
-  {
-    std::string path = "classy/2.6.3/";
-    return path;
-  }
 
   // return cosmo object. Need to pass this to MontePython for Likelihoods calculations
   pybind11::object get_classy_cosmo_object()
@@ -154,7 +148,7 @@ BE_NAMESPACE
     return rs_d;
   }
 
-  // returns sigma8
+  // returns sigma8 at z = 0
   double class_get_sigma8()
   {
     // in CosmoBit.cpp test if ClassInput contains mPk -> otherwise SegFault when trying to compute sigma9
@@ -177,7 +171,8 @@ END_BE_NAMESPACE
 BE_INI_FUNCTION
 { 
 
-  pybind11::dict cosmo_input_dict = *Dep::get_Classy_cosmo_container;
+  CosmoBit::ClassyInput input_container= *Dep::get_classy_cosmo_container;
+  pybind11::dict cosmo_input_dict = input_container.get_input_dict();
   
   static bool first_run = true;
   if(first_run)

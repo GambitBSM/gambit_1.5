@@ -187,13 +187,13 @@ namespace Gambit
       addEntry(key,stringified_val.str());
     }
 
+
     std::string ClassInput::print_entries_to_logger()
     {
       using namespace LogTags;
       std::ostringstream log_msg;
       log_msg << "Parameters passed to class: \n \n";
       std::map<std::string,std::string> in_map = get_map();
-      int len_of_input = in_map.size();
       for(auto iter=in_map.begin(); iter != in_map.end(); iter++)
       {
         log_msg << iter->first.c_str() << " = " << iter->second.c_str() << " \n"; // uncomment if you want class input to be printed in terminal before class call 
@@ -209,6 +209,138 @@ namespace Gambit
     std::map<std::string,std::string> ClassInput::get_map()
     {
       return input_list;
+    }
+
+/*
+    ----------  ClassyInput Methods ---------
+    In the following the methods of the Class 'ClassyInput' are implemented. 
+    ClassyInput has the attribute 'input_dict' which is a python dictionary 
+    containing the input parameters for CLASS
+
+*/
+
+
+    // add all entries from extra_entries to input_dict, will throw an error if 
+    // one entry is contained in both dictionaries
+    // returns 1 if adding was successful, -1 if an entries 
+    // appeared twice -> need to throw an error since overwriting CLASS input
+    // without realising it can be dangerous
+    int ClassyInput::addDict(pybind11::dict extra_entries)
+    {
+      int success = 1;
+      for (auto item : extra_entries)
+      {
+        pybind11::str key = pybind11::str(item.first);
+        pybind11::str arg = pybind11::str(item.second);
+
+        if(!input_dict.attr("has_key")(key).cast<bool>())
+        {
+          input_dict[key] = arg;
+          //std::cout << "Adding key = " << std::string(pybind11::str(item.first)) << ", "<< "value=" << std::string(pybind11::str(item.second)) << std::endl;
+        }
+        else
+        {
+          success = -1;
+          break;
+        }
+      }
+      return success;
+    }
+
+    // function to merge python dictionary extra_entries into input_dict. If both dictionaries have the same key
+    // the values of the keys will be concatenated (without duplicating an entry)
+    // -> very specific for merging the classy input dictionaries
+    // typical example for this would be 
+    // dict input_dict: 'output' : 'tCl nCl' and 
+    // dict extra_entries: 'output' : 'tCl mPk' => mPk has to be added such that 'output' : 'tCl nCl mPk'
+    void ClassyInput::merge_input_dicts(pybind11::dict extra_entries) 
+    {
+      // loop through 2nd dict (better if this is the shorter one)
+      static bool first_run = true;
+      for (auto item : extra_entries)
+      {  
+        pybind11::str key = pybind11::str(item.first);
+        pybind11::str arg = pybind11::str(item.second);
+        
+        // if item not contained in b but not a it will be added to a
+        if(!input_dict.attr("has_key")(key).cast<bool>())
+        {
+          input_dict[key] = arg;
+          //std::cout << "Adding key = " << std::string(pybind11::str(item.first)) << ", "<< "value=" << std::string(pybind11::str(item.second)) << std::endl;
+        }
+        // if item contained in both: split extra_entries by spaces and iterate through single entries 
+        // to see if they are included in input_dict
+        else
+        { 
+          
+          // python string.find("x") returns -1 if "x" not contained
+          if(key.attr("find")(pybind11::str("output")).cast<int>()!=-1)
+          {
+            // split string by spaces into list
+            pybind11::list list = extra_entries[key].attr("split")();
+            for(auto it : list)
+            { 
+              std::string list_entry = std::string(pybind11::str(it));
+              
+              // python string.find("x") returns -1 if "x" not contained
+              if(input_dict[key].attr("find")(pybind11::str(list_entry)).cast<int>()==-1)
+              { 
+                // add part of extra_entries[key] string that is not contained in input_dict[key] string to input_dict[key]
+                std::string new_arg=std::string(pybind11::str(input_dict[key]))+std::string(" ")+std::string(list_entry);
+                input_dict[key]= new_arg;
+              }
+            }
+          }
+          else
+          {
+            if(first_run)
+            {
+              // (JR) TODO see what other combinations could go wrong here -> different likelihoods
+              // asking for different redshift bins?
+              // But need this check only on the first run (the inputs we are worries about are 
+              // parameters specifying which output CLASS should produce so they won't change 
+              // in-between the calculation of different points in one scan)
+              std::cout <<"___________________________________________________________________"<<std::endl;
+              std::cout <<"___________________________________________________________________"<<std::endl;
+              std::cout << "Both dictionaries to merge contain key" << std::string(key) << "with entries "
+                  << std::string(pybind11::str(input_dict[key]))<< " and " << std::string(pybind11::str(extra_entries[key])) << ". Don't know how to deal with that, yet. Will be taken care of soon." << std::endl;
+              std::cout <<"___________________________________________________________________"<<std::endl;
+              std::cout <<"___________________________________________________________________"<<std::endl;
+            }
+          }
+        }
+      }
+      first_run = false;
+    }
+
+
+    // return stringstream to print current entries of 
+    // input_dict (can be send to logger)
+    std::string ClassyInput::print_entries_to_logger()
+    {
+      using namespace LogTags;
+      std::ostringstream log_msg;
+      log_msg << "Parameters passed to class: \n \n";
+      for (auto item : input_dict)
+      {  
+        pybind11::str key = pybind11::str(item.first);
+        pybind11::str value = pybind11::str(item.second);
+
+        log_msg << std::string(key) << " = " << std::string(value) << " \n"; // uncomment if you want class input to be printed in terminal before class call 
+      }
+      return log_msg.str();
+    }
+
+    // clear CLASS input dictionary
+    void ClassyInput::clear()
+    {
+      input_dict.attr("clear")();
+    }
+
+    // return CLASS input dictionary
+    pybind11::dict ClassyInput::get_input_dict()
+    {
+      return input_dict;
     }
 
   }

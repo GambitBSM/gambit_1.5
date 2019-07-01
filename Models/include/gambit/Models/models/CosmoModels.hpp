@@ -232,30 +232,4 @@ DEFINEPARS(lambda,mu,N_pivot,omega_b,omega_cdm,H0,tau_reio)
 //DEFINEPARS(num_inflaton, potential_choice, slowroll_infl_end, instreheat, vparam_rows, use_deltaN_SR, evaluate_modes, use_horiz_cross_approx, get_runningofrunning, ic_sampling, energy_scale, numb_samples, save_iso_N, N_iso_ref, param_sampling, vp_prior_min, vp_prior_max, varying_N_pivot, use_first_priorval, phi_init0, dphi_init0, vparams, N_pivot, k_pivot, dlnk, turning_choice  calc_full_pk,  steps,  kmin,  kmax,  phi0_priors_min,  phi0_priors_max,  dphi0_priors_min,  dphi0_priors_max,  N_pivot_prior_min,  N_pivot_prior_max)
 //#undef MODEL
 
-
-#define MODEL cosmo_nuisance_params 
-  START_MODEL
-  // Supernova likelihood params (Pantheon, JLA, Union)
-  DEFINEPARS(alpha,beta,M,Delta_M) 
-  // BK14
-  DEFINEPARS(BBdust,BBsync,BBalphadust,BBbetadust,BBTdust,BBalphasync,BBbetasync,BBdustsynccorr,EEtoBB_dust,EEtoBBsync)
-  // CFHTLens_correlation 
-  DEFINEPARS(epsilon_CFHT)
-  // euclid_lensing
-  DEFINEPARS(epsilon_euclid)
-  // euclid_pk
-  DEFINEPARS(sigma_NL_euclid,beta_0Euclid,beta_1Euclid,P_shot) 
-  // ISW
-  DEFINEPARS(A_ISW,b0_sdss,b1_sdss,b2_sdss,b3_sdss,b4_sdss,b0_qso,b1_qso,b2_qso,b0_mpz,b1_mpz,b2_mpz,b0_wisc,b1_wisc,b2_wisc,b0_nvss)
-  // kids450_qe_likelihood_public
-  DEFINEPARS(m_corr,A_IA,exp_IA,A_bary,A_noise_z1,A_noise_z2,A_noise_z3)
-  // ska
-  DEFINEPARS(sigma_NL_ska,beta_0IM,beta_1IM,Omega_HI0,alpha_HI,beta_0SKA1,beta_1SKA1,beta_0SKA2,beta_1SKA2,epsilon_ska)
-  // wmap
-  DEFINEPARS(A_SZ)
-  // your_new_like_nuisance_parameters -> add them here! Make sure that the name is unambiguous 
-  // so it does not clash with another parameter name definition & that it does not contain special characters like "^"
-  // DEFINEPARS(your_param1,your_param2,your_param3) 
-#undef MODEL
-
 #endif

@@ -184,7 +184,7 @@ namespace Gambit
       private:
         std::map<std::string,std::string> input_list;
     };
-
+    
     // Container for the structs of Class
     class Class_container
     {
@@ -206,6 +206,54 @@ namespace Gambit
         std::vector<double> k_ar; // Corresponding wavenumbers.
 
         std::string backend_in_use;
+    };
+
+
+/*
+    ----------  ClassyInput Methods ---------
+    In the following the methods of the Class 'ClassyInput' are implemented. 
+    ClassyInput has the attribute 'input_dict' which is a python dictionary 
+    containing the input parameters for CLASS
+
+*/
+    // Class that manages the input dictionary for classy
+    class ClassyInput
+    {
+      public:
+        // add all entries from extra_entries to input_dict, will throw an error if 
+        // one entry is contained in both dictionaries
+        // returns 1 if adding was successful, -1 if an entries 
+        // appeared twice -> need to throw an error since overwriting CLASS input
+        // without realising it can be dangerous
+        int addDict(pybind11::dict extra_entries);
+
+        void addEntry(str key,double value){input_dict[key.c_str()]=value;};
+        void addEntry(str key,int value){input_dict[key.c_str()]=value;};
+        //void addEntry(str key,int value){input_dict[key.c_str()]=value;};
+        void addEntry(str key,str value){input_dict[key.c_str()]=value.c_str();};
+
+        bool hasKey(str key){return input_dict.contains(key.c_str());};
+        //int addEntry(str key,std::ostringstream value){input_dict[key.c_str()]=value.c_str()};
+        
+        // add all entries from extra_entries to input_dict, will overwrite any value
+        // contained in input_dict if 
+        // we actually should not allow to overwrite .. 
+        //void addEntries_and_overwrite(pybind11::dict extra_entries);
+
+        // merge 
+        void merge_input_dicts(pybind11::dict extra_entries);
+        
+        // routine to print CLASS input values to logger
+        std::string print_entries_to_logger();
+
+        // clears all entries from input_dict
+        void clear();
+
+        // return input_dict
+        pybind11::dict get_input_dict();
+
+      private:
+        pybind11::dict input_dict;
     };
   }
 }

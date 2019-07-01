@@ -50,13 +50,12 @@ BE_NAMESPACE
 
   /// Creates a MontePython 'Data' object. 
   /// This is initialised with a list of the relevant experimental limits to import. 
-  /// Also needs to know where CLASSY lives. 
-  pybind11::object create_MP_data_object(map_str_str& experiments, std::string& classyDir)
+  pybind11::object create_MP_data_object(map_str_str& experiments)
   {
 
   	pybind11::dict path_dict = pybind11::dict("MontePython"_a=backendDir,
   											  "data"_a=backendDir+"/../data/",
-  											  "cosmo"_a=backendDir+"/../../../"+classyDir, 
+  											  "cosmo"_a=backendDir+"",  // we never want to class CLASS from MP so there is no need to pass anything here 
   											  "root"_a=backendDir+"/../../../");
 
   	// Cast the list of experiments to a tuple, for MP to fire up...

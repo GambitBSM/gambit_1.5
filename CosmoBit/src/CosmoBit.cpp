@@ -3256,10 +3256,11 @@ namespace Gambit
     /// an instance of the classy class Class() (Yep, I know...) 
     /// which can be handed over to MontePython, or just used to compute 
     /// some observables.
-    void init_Classy_cosmo_container(pybind11::dict& result)
+    void init_classy_cosmo_container(CosmoBit::ClassyInput& result)
     {
-      using namespace Pipes::init_Classy_cosmo_container;
+      using namespace Pipes::init_classy_cosmo_container;
 
+      pybind11::print("  ----|> init_classy_cosmo_container");
       result = *Dep::set_classy_parameters;
 
       //std::cout << "(CosmoBit): initialised cosmo object & computed vals"<< std::endl;
@@ -3268,31 +3269,34 @@ namespace Gambit
     /// Initialises the container within CosmoBit from classy, but designed specifically
     /// to be used when MontePython is in use. This will ensure additional outputs are
     /// computed by classy CLASS to be passed to MontePython.
-    void init_Classy_cosmo_container_with_MPLike(pybind11::dict& result)
+    void init_classy_cosmo_container_with_MPLike(CosmoBit::ClassyInput& result)
     {
-      using namespace Pipes::init_Classy_cosmo_container_with_MPLike;
+      using namespace Pipes::init_classy_cosmo_container_with_MPLike;
 
       // get extra cosmo_arguments from MP (gives a dictionary with output values that need
       // to be set for the class run)
       static pybind11::dict MP_cosmo_arguments = *Dep::cosmo_args_from_MPLike;
-      //pybind11::print("  ----|> Extra cosmo_arguments needed from MP Likelihoods: ",MP_cosmo_arguments);
+      pybind11::print("  ----|> Extra cosmo_arguments needed from MP Likelihoods: ",MP_cosmo_arguments);
 
       result = *Dep::set_classy_parameters;
 
       // add the arguments from Mp_cosmo_arguments which are not yet in cosmo_input_dict to it
       // also takes care of merging the "output" key values
-      merge_pybind_dicts(result,MP_cosmo_arguments);
+      result.merge_input_dicts(MP_cosmo_arguments);
 
+      pybind11::print("  ----|> test if dic contains everything ", result.get_input_dict(),"\n");
       //pybind11::print("  ----|> Combined dict", result);
     }
 
     /// Set the LCDM parameters in classy. Looks at the parameters used in a run,
     /// and passes them to classy in the form of a Python dictionary.
-    void set_classy_parameters_LCDM(pybind11::dict& result)
+    void set_classy_parameters_LCDM(CosmoBit::ClassyInput& result)
     {
       using namespace Pipes::set_classy_parameters_LCDM;
       using namespace pybind11::literals;
 
+      // clear all entries from previous parameter point
+      result.clear();
 
       map_str_dbl NuMasses_SM = *Dep::NuMasses_SM;
       int N_ncdm = (int)NuMasses_SM["N_ncdm"];
@@ -3300,85 +3304,55 @@ namespace Gambit
       // Number of non-cold DM species
       if (N_ncdm > 0.)
       {
-        result["N_ncdm"] = N_ncdm;   
+        result.addEntry("N_ncdm", N_ncdm);   
 
         std::vector<double> m_ncdm = m_ncdm_classInput(NuMasses_SM);
         std::vector<double> T_ncdm(N_ncdm,*Dep::T_ncdm);
 
         std::ostringstream ss1, ss2;
         std::string separator;
-        for (auto x : m_ncdm) {
+        for (auto x : m_ncdm) 
+        {
           ss1 << separator << x;
           separator = ",";
         }
         separator = "";
-        for (auto x : T_ncdm) {
+        for (auto x : T_ncdm) 
+        {
           ss2 << separator << x;
           separator = ",";
         }
         
-        result["m_ncdm"] = ss1.str();
-        result["T_ncdm"] = ss2.str();
+        result.addEntry("m_ncdm", ss1.str());
+        result.addEntry("T_ncdm", ss2.str());
       }
       else
       {
-        result["T_ncdm"] = *Dep::T_ncdm;
+        result.addEntry("T_ncdm",*Dep::T_ncdm);
       }
-      result["N_ur"] = *Dep::class_Nur; // Number of ultra relativistic species
+      result.addEntry("N_ur",*Dep::class_Nur); // Number of ultra relativistic species
 
       // (JR) we don't need 'output' to default to something in this implementation
       // if the user does not ask for anything extra than everything MP wants will be included
       // if more stuff should be computed it will be added at the end of this function
       // when looping through classy_dict run options
 
-      /*result["output"] = runOptions->getValue<str>("output");
-        result["l_max_scalars"] = runOptions->getValueOrDef<int>(2508., "l_max"); 
-        result["lensing"] = runOptions->getValue<str>("lensing"); */
+      result.addEntry("H0",           *Param["H0"]);
+      result.addEntry("n_s" ,         *Param["n_s"]);
+      result.addEntry("T_cmb",        *Dep::T_cmb);
+      result.addEntry("omega_b",      *Param["omega_b"]);
+      result.addEntry("tau_reio",     *Param["tau_reio"]);
+      result.addEntry("omega_cdm",    *Param["omega_cdm"]);
+      result.addEntry("ln10^{10}A_s", *Param["ln10A_s"]);
 
-      result["T_cmb"] = *Dep::T_cmb;
-      result["omega_b"] = *Param["omega_b"];
-      result["omega_cdm"] = *Param["omega_cdm"];
-      result["H0"] = *Param["H0"];
-      result["ln10^{10}A_s"] = *Param["ln10A_s"];
-      result["n_s"] = *Param["n_s"];
-      result["tau_reio"] = *Param["tau_reio"];
       std::vector<double> Helium_abundance = *Dep::Helium_abundance;
-      result["YHe"] = Helium_abundance.at(0); // .at(0): mean, .at(1): uncertainty
+      result.addEntry("YHe", Helium_abundance.at(0)); // .at(0): mean, .at(1): uncertainty
 
-      if (ModelInUse("TestDecayingDM"))  // TODO: need to test if class or exo_class in use! does not work -> (JR) should be fixed with classy implementation
-      {
-        result["tau_dcdm"] = *Dep::lifetime;
-        result["decay_fraction"] = *Dep::DM_fraction;
-
-        // flag passed to CLASS to signal that the energy_deposition_function is coming from GAMBIT
-        // we patched exoclass to accept this. An alternative way without patching would be to write the tables to disk &
-        // just have CLASS read in the file. To avoid the repeated file writing & deleting we pass pointers to the vector/arrays 
-        // to CLASS instead
-        result["energy_deposition_function"] = "GAMBIT";
-
-        // Get the results from the DarkAges tables that hold extra information to be passed to the CLASS thermodynamics structure
-        DarkAges::fz_table fz = *Dep::energy_injection_efficiency;
-        
-        // set the lengths of the input tables (since we are passing pointers to arrays CLASS has to know how long they are)
-        result["annihil_coef_num_lines"] = fz.num_lines;
-        
-        // add the pointers to arrays class needs to know about to input dictionary
-        // Note: 
-        //    - memory addresses are passed as strings (python wrapper for CLASS converts every entry to a string internally so
-        //      we need to do that for the memory addresses before python casts them to something else)
-        //    - fz.ptrs_to_member_vecs : map from string to double*, where the string contains the name of the CLASS input 
-        //      parameter and the pointer points to the vector holding the values that should be passed 
-        for (auto it=fz.ptrs_to_member_vecs.begin(); it != fz.ptrs_to_member_vecs.end(); it++) 
-        {
-          std::string key = it->first;
-
-          // convert memory address 'it->second' to int 'addr'
-          uintptr_t addr = reinterpret_cast<uintptr_t>(it->second);
-          result[key.c_str()] = addr;
-        }      
-      }
+      // TODO: need to test if class or exo_class in use! does not work -> (JR) should be fixed with classy implementation
+      if (ModelInUse("TestDecayingDM")){result.addDict(*Dep::model_dep_classy_parameters);}
       
       // Other Class input direct from the YAML file 
+      // check if these are already contained in the input dictionary -- if so throw an error
       static bool first_run = true;
       if(first_run)
       {
@@ -3392,9 +3366,9 @@ namespace Gambit
             std::string name = it->first.as<std::string>();
             std::string value = it->second.as<std::string>();
             // Check if the key exists in the dictionary
-            if (!result.contains(name.c_str()))
+            if (!result.hasKey(name.c_str()))
             {
-              result[name.c_str()] = value;
+              result.addEntry(name.c_str(),value);
             }
             // If it does, throw an error, there's some YAML conflict going on.
             else
@@ -3408,10 +3382,51 @@ namespace Gambit
         }
       }
 
-      std::cout << "(CosmoBit): set ccc.cosmo_input_dict values to "<< std::endl;
-      pybind11::print("      ",result);
+      //std::cout << "(CosmoBit): set ccc.cosmo_input_dict values to "<< std::endl;
+      //pybind11::print("      ",result.get_input_dict());
 
     }
+
+  void model_dep_classy_parameters_TestDecayingDM(pybind11::dict &result)
+  { 
+    using namespace Pipes::model_dep_classy_parameters_TestDecayingDM;
+
+    // make sure nothing from previous run is contained
+    result.clear();
+
+    result["tau_dcdm"] = *Dep::lifetime;
+    result["decay_fraction"] = *Dep::DM_fraction;
+
+    // flag passed to CLASS to signal that the energy_deposition_function is coming from GAMBIT
+    // we patched exoclass to accept this. An alternative way without patching would be to write the tables to disk &
+    // just have CLASS read in the file. To avoid the repeated file writing & deleting we pass pointers to the vector/arrays 
+    // to CLASS instead
+    result["energy_deposition_function"] = "GAMBIT";
+
+    // Get the results from the DarkAges tables that hold extra information to be passed to the CLASS thermodynamics structure
+    DarkAges::fz_table fz = *Dep::energy_injection_efficiency;
+    
+    // set the lengths of the input tables (since we are passing pointers to arrays CLASS has to know how long they are)
+    result["annihil_coef_num_lines"] = fz.num_lines;
+    
+    // add the pointers to arrays class needs to know about to input dictionary
+    // Note: 
+    //    - memory addresses are passed as strings (python wrapper for CLASS converts every entry to a string internally so
+    //      we need to do that for the memory addresses before python casts them to something else)
+    //    - fz.ptrs_to_member_vecs : map from string to double*, where the string contains the name of the CLASS input 
+    //      parameter and the pointer points to the vector holding the values that should be passed 
+    for (auto it=fz.ptrs_to_member_vecs.begin(); it != fz.ptrs_to_member_vecs.end(); it++) 
+    {
+      std::string key = it->first;
+
+      // convert memory address 'it->second' to int 'addr'
+      uintptr_t addr = reinterpret_cast<uintptr_t>(it->second);
+      result[key.c_str()] = addr;
+      std::cout << " memory address of key " << key.c_str() << " is "<< addr << std::endl;
+    }      
+    pybind11::print(" Setting params for Decaying DM ", result,"\n");
+  }
+
 
 
     /* Classy getter functions */
@@ -3609,7 +3624,7 @@ namespace Gambit
       {
         map_str_str experiments = *Dep::MP_experiment_names;
         pybind11::print(experiments);
-        data = BEreq::create_MP_data_object(experiments,classyDir);
+        data = BEreq::create_MP_data_object(experiments);
         map_str_pyobj likelihoods = BEreq::create_MP_likelihood_objects(data, experiments);
         first_run = false;
       }
@@ -3631,9 +3646,6 @@ namespace Gambit
       map_str_str experiments = *Dep::MP_experiment_names;
 
       std::cout << "(CosmoBit): init_MontePythonLike start"<< std::endl;
-
-      // Need to know where CLASSY lives
-      std::string classyDir = BEreq::path_to_classy();
       
       // CosmoBit::MPLike_data_container should only be created once when calculating the first point.
       // After that is has to be kept alive since it contains a vector with the initialised MPLike 
@@ -3643,7 +3655,7 @@ namespace Gambit
       static bool first_run = true;
       if(first_run)
       {
-        data = BEreq::create_MP_data_object(experiments, classyDir);
+        data = BEreq::create_MP_data_object(experiments);
         likelihoods = BEreq::create_MP_likelihood_objects(data, experiments);
         first_run = false;
       }

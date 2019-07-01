@@ -672,11 +672,7 @@ START_MODULE
    START_CAPABILITY
    #define FUNCTION compute_Pantheon_LogLike
     START_FUNCTION(double)
-    //ALLOW_MODEL_DEPENDENCE(LCDM_dNeffCMB_dNeffBBN_etaBBN,cosmo_nuisance_params)
-    //MODEL_GROUP(cosmology, (LCDM_dNeffCMB_dNeffBBN_etaBBN))
-    //MODEL_GROUP(nuisance, (cosmo_nuisance_params,cosmo_nuisance_params_Pantheon))
-    //ALLOW_MODEL_COMBINATION(cosmology,nuisance)
-    ALLOW_MODELS(cosmo_nuisance_params)
+    ALLOW_MODELS(cosmo_nuisance_params_Pantheon)
     BACKEND_REQ(class_get_Dl,(class_tag),double,(double))
    #undef FUNCTION
   #undef CAPABILITY
@@ -706,7 +702,12 @@ START_MODULE
      START_CAPABILITY
      #define FUNCTION set_parameter_dict_for_MPLike
       START_FUNCTION(pybind11::dict)
-      ALLOW_MODELS(cosmo_nuisance_params)
+      ALLOW_MODELS(cosmo_nuisance_params_JLA,cosmo_nuisance_params_BK14,cosmo_nuisance_params_CFHTLens_correlation)
+      ALLOW_MODELS(cosmo_nuisance_params_euclid_lensing,cosmo_nuisance_params_euclid_pk,cosmo_nuisance_params_ISW)
+      ALLOW_MODELS(cosmo_nuisance_params_kids450_qe_likelihood_public,cosmo_nuisance_params_ska,cosmo_nuisance_params_wmap)
+      // if you implement new MontePython likelihoods with new nuisance parameters add the name of your new
+      // nuisance parameter model (to be defined in Models/include/gambit/Models/models/CosmoNuisanceModels.hpp)
+      //ALLOW_MODELS(cosmo_nuisance_params_FOR_YOUR_NEW_LIKE) 
      #undef FUNCTION
      #define FUNCTION pass_empty_parameter_dict_for_MPLike
        START_FUNCTION(pybind11::dict)
@@ -727,38 +728,50 @@ START_MODULE
       START_FUNCTION(pybind11::dict)
       DEPENDENCY(MP_experiment_names, map_str_str)
       BACKEND_REQ(create_MP_likelihood_objects, (libmontepythonlike), map_str_pyobj,    (pybind11::object&, map_str_str&))
-      BACKEND_REQ(create_MP_data_object,        (libmontepythonlike), pybind11::object, (map_str_str&, std::string&))
+      BACKEND_REQ(create_MP_data_object,        (libmontepythonlike), pybind11::object, (map_str_str&))
      #undef FUNCTION
   #undef CAPABILITY
 
-    #define CAPABILITY get_Classy_cosmo_container
+    #define CAPABILITY get_classy_cosmo_container
      START_CAPABILITY
-     #define FUNCTION init_Classy_cosmo_container_with_MPLike
-      START_FUNCTION(pybind11::dict)
+     #define FUNCTION init_classy_cosmo_container_with_MPLike
+      START_FUNCTION(CosmoBit::ClassyInput)
       ALLOW_MODELS(LCDM_dNeffCMB_dNeffBBN_etaBBN)
       DEPENDENCY(cosmo_args_from_MPLike,  pybind11::dict)
-      DEPENDENCY(set_classy_parameters,   pybind11::dict)
+      DEPENDENCY(set_classy_parameters,   CosmoBit::ClassyInput)
      #undef FUNCTION
-     #define FUNCTION init_Classy_cosmo_container
-      START_FUNCTION(pybind11::dict)
+     #define FUNCTION init_classy_cosmo_container
+      START_FUNCTION(CosmoBit::ClassyInput)
       ALLOW_MODELS(LCDM_dNeffCMB_dNeffBBN_etaBBN)
-      DEPENDENCY(set_classy_parameters, pybind11::dict)
+      DEPENDENCY(set_classy_parameters, CosmoBit::ClassyInput)
      #undef FUNCTION
   #undef CAPABILITY
 
     #define CAPABILITY set_classy_parameters
      START_CAPABILITY
      #define FUNCTION set_classy_parameters_LCDM
-      START_FUNCTION(pybind11::dict)
+      START_FUNCTION(CosmoBit::ClassyInput)
       ALLOW_MODELS(LCDM_dNeffCMB_dNeffBBN_etaBBN)
       DEPENDENCY(NuMasses_SM, map_str_dbl)
       DEPENDENCY(T_cmb,             double)
       DEPENDENCY(T_ncdm,            double)
       DEPENDENCY(class_Nur,         double)
       DEPENDENCY(Helium_abundance,  std::vector<double>)
-      MODEL_CONDITIONAL_DEPENDENCY(lifetime,                    double,             TestDecayingDM)
-      MODEL_CONDITIONAL_DEPENDENCY(DM_fraction,                 double,             TestDecayingDM)
-      MODEL_CONDITIONAL_DEPENDENCY(energy_injection_efficiency, DarkAges::fz_table, TestDecayingDM)
+      MODEL_CONDITIONAL_DEPENDENCY(model_dep_classy_parameters, pybind11::dict,  TestDecayingDM)
+      //MODEL_CONDITIONAL_DEPENDENCY(lifetime,                    double,             TestDecayingDM)
+      //MODEL_CONDITIONAL_DEPENDENCY(DM_fraction,                 double,             TestDecayingDM)
+      //MODEL_CONDITIONAL_DEPENDENCY(energy_injection_efficiency, DarkAges::fz_table, TestDecayingDM)
+     #undef FUNCTION
+  #undef CAPABILITY
+
+  #define CAPABILITY model_dep_classy_parameters
+     START_CAPABILITY
+     #define FUNCTION model_dep_classy_parameters_TestDecayingDM
+      START_FUNCTION(pybind11::dict)
+      ALLOW_MODELS(TestDecayingDM)
+      DEPENDENCY(lifetime,                    double)
+      DEPENDENCY(DM_fraction,                 double)
+      DEPENDENCY(energy_injection_efficiency, DarkAges::fz_table)
      #undef FUNCTION
   #undef CAPABILITY
   
@@ -770,10 +783,9 @@ START_MODULE
       ALLOW_MODELS(LCDM_dNeffCMB_dNeffBBN_etaBBN)
       DEPENDENCY(MP_experiment_names,         map_str_str)
       DEPENDENCY(parameter_dict_for_MPLike,   pybind11::dict)
-      BACKEND_REQ(path_to_classy,               (classy),             std::string,      ())
       BACKEND_REQ(get_classy_cosmo_object,               (classy),             pybind11::object,      ())
       BACKEND_REQ(get_MP_loglike,               (libmontepythonlike), double,           (const CosmoBit::MPLike_data_container&, pybind11::object&, std::string&))
-      BACKEND_REQ(create_MP_data_object,        (libmontepythonlike), pybind11::object, (map_str_str&, std::string&))
+      BACKEND_REQ(create_MP_data_object,        (libmontepythonlike), pybind11::object, (map_str_str&))
       BACKEND_REQ(create_MP_likelihood_objects, (libmontepythonlike), map_str_pyobj,    (pybind11::object&, map_str_str&))
     #undef FUNCTION
   #undef CAPABILITY

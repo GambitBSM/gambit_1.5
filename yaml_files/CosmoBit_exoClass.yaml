@@ -27,7 +27,7 @@ Parameters:
  StandardModel_numass_degenerate: !import include/StandardModel_numass_degenerate_scan.yaml
 
  # Cosmological nuisance parameters (except for Planck CMB Likelihoods) 
- cosmo_nuisance_params: !import include/cosmo_nuisance_params.yaml
+ cosmo_nuisance_params_Pantheon: !import include/cosmo_nuisance_params_Pantheon.yaml
 
  # nuisance parameters in Planck likelihood
  Planck_lite: !import include/Planck_lite_scan.yaml
@@ -73,7 +73,7 @@ Scanner:
 
     random:
       plugin: random
-      point_number: 2
+      point_number: 4
       like:  LogLike
 
 #======== Observables of interest ========
@@ -101,6 +101,9 @@ ObsLikes:
 
   - purpose:      LogLike
     capability:   BAO_LogLike
+  
+  - purpose:      LogLike
+    capability:   sigma8_LogLike
   
   - purpose:      LogLike
     capability:   MP_Combined_LogLike
@@ -131,6 +134,7 @@ Rules:
       class_dict: 
         output: "tCl lCl mPk" # need to add matter power spectrum for sigma8 computation
         k_pivot: 0.05
+        P_k_max_h/Mpc: 1.
 
   # classy (class through python wrapper)
   - capability: set_classy_parameters
@@ -150,8 +154,8 @@ Rules:
 
   # you have to set by hand if you want to set the class parameters with or without setting arguments from MontePython Likelihoods
   # if the montepythonlike backend is installed (if not it should automatically choose the function 'init_Classy_cosmo_container')
-  - capability: get_Classy_cosmo_container
-    function: init_Classy_cosmo_container_with_MPLike
+  - capability: get_classy_cosmo_container
+    function: init_classy_cosmo_container_with_MPLike
     module: CosmoBit
 
   - capability: MP_experiment_names
@@ -165,6 +169,7 @@ Rules:
       Likelihoods: 
         bao_smallz_2014: default #../montepython_public/montepython/likelihoods/bao_smallz_2014/bao_smallz_2014.data
         Pantheon: default
+        Planck_SZ: default
       # should eventually be possible to choose any MP like, atm only bao, Pantheon, Planck_SZ (& kids after 
       # downloading data and when commenting out line 'parser_mp.existing_file(fname)', will include that into 
       # build step soon) safe to use;
@@ -176,9 +181,15 @@ Rules:
   - capability: lifetime
     function: lifetime_CosmoALP
 
+  - capability: Pantheon_LogLike
+    backends:
+      - {backend: exoclass, version: 2.7.0}
+
   # next 3 rules: all to calculate Likelihoods the class way (not the classy way)
   # verified that BAO, Pantheon & Planck_SZ all give same result the class way & classy way (through MP)
   - capability: BAO_LogLike
+    backends:
+    - {backend: exoclass, version: 2.7.0}
     options:
       DataFile:  BAO_2014.dat
 
@@ -189,7 +200,7 @@ Rules:
         function: compute_Omega0_m
         module: CosmoBit
     options:
-      DataFile: "Planck_SZ.dat"
+      DataFile: "Planck_SZ_MontePython.dat"
 
   - capability: Omega0_m
     function: compute_Omega0_m
