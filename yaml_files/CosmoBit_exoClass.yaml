@@ -29,6 +29,9 @@ Parameters:
  # Cosmological nuisance parameters (except for Planck CMB Likelihoods) 
  cosmo_nuisance_params: !import include/cosmo_nuisance_params.yaml
 
+ # nuisance parameters in Planck likelihood
+ Planck_lite: !import include/Planck_lite_scan.yaml
+
  # model parameters for "TestDecayingDM"
  CosmoALP:
    fa: 1.0
@@ -76,6 +79,19 @@ Scanner:
 #======== Observables of interest ========
 ObsLikes:
  
+  - purpose:      LogLike
+    capability:   compute_Planck_high_TT_loglike
+
+  - purpose:      LogLike
+    capability:   compute_Planck_lensing_loglike
+
+# We better should not use this likelihood for quick tests.
+# It takes ages to load.
+#
+#  - purpose:      LogLike
+#    capability:   compute_Planck_lowp_TT_loglike
+#
+
   - purpose:      Obs
     capability:   Omega0_m
     function:     get_Omega0_m_classy 
@@ -98,12 +114,22 @@ ObsLikes:
 #======== Rule entries ========
 Rules:
 
+#####
+##  Since the "Planck_lite" model fits to be used by
+##  the marginalized (lite) versions of both, the TT
+##  and the TTTEEE, likelihoods, we need to resolve
+##  this ambiguity manually.
+#####
+
+  - capability: compute_Planck_high_TT_loglike
+    function: function_Planck_high_TT_lite_loglike
+    module: CosmoBit
 
   # class through c interface
   - capability: class_set_parameter
     options:
       class_dict: 
-        output: "tCl lCl" # need to add matter power spectrum for sigma8 computation
+        output: "tCl lCl mPk" # need to add matter power spectrum for sigma8 computation
         k_pivot: 0.05
 
   # classy (class through python wrapper)
@@ -111,12 +137,12 @@ Rules:
     function: set_classy_parameters_LCDM
     options:
       classy_dict:
-        #output: " "   # classy + MP: even when no output specified all spectra etc. the likelihoods need
+        output: "tCl lCl pCl mPk"   # classy + MP: even when no output specified all spectra etc. the likelihoods need
                       # are calculated since the MP Likelihood initialisation is taking care of this for us! 
-        #lensing: "no" # heads-up: changed default to 'no'in function 'set_classy_parameters_LCDM' as well
+        lensing: "yes" # heads-up: changed default to 'no'in function 'set_classy_parameters_LCDM' as well
                       # since otherwise the automatic output setting will not work
         #energy_deposition_function : "GAMBIT"
-        #l_max: 1000
+        l_max_scalars: 2508
         # /\
         # ||  (JR) we should not set this by default when using the python wrapper: if only bg needed 
         #     classy will complain that it did not read the input parameter.
@@ -184,6 +210,10 @@ Rules:
   - capability: T_cmb
     options:
       T_cmb: 2.7255
+
+  - capability: plc_2_0_init
+    options:
+      planck_path: /YOUR/PATH/TO/plc_2.0
 
 #======== Logging setup ========
 Logger:

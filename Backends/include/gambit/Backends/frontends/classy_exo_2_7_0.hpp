@@ -16,6 +16,10 @@
 ///          (sanjay.bloor12@imperial.ac.uk)
 ///  \date 2019 June
 ///
+///  \author Patrick Stoecker
+///          (stoecker@physik.rwth-aachen.de)
+///  \date 2019 July
+///
 ///  *********************************************
 
 #define BACKENDNAME classy
@@ -33,7 +37,7 @@ BE_CONV_FUNCTION(path_to_classy, std::string, (), "path_to_classy")
 
 BE_CONV_FUNCTION(get_classy_cosmo_object, pybind11::object, (), "get_classy_cosmo_object")
 
-//BE_CONV_FUNCTION(class_get_cl, std::vector<double>, (str), "class_get_cl")
+BE_CONV_FUNCTION(class_get_cl, std::vector<double>, (str), "class_get_cl")
 BE_CONV_FUNCTION(class_get_Da, double, (double), "class_get_Da")
 BE_CONV_FUNCTION(class_get_Dl, double, (double), "class_get_Dl")
 BE_CONV_FUNCTION(class_get_scale_independent_growth_factor, double, (double), "class_get_scale_independent_growth_factor")
