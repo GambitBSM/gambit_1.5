@@ -173,6 +173,7 @@ END_BE_NAMESPACE
 
 BE_INI_FUNCTION
 { 
+  using namespace pybind11::literals;
 
   CosmoBit::ClassyInput input_container= *Dep::get_classy_cosmo_container;
   pybind11::dict cosmo_input_dict = input_container.get_input_dict();
@@ -190,6 +191,20 @@ BE_INI_FUNCTION
   // Actually only strictly necessary when cosmology is changed completely between two different runs
   // but just to make sure nothing's going wrong do it anyways..
   cosmo.attr("empty")();
+
+  // If we use the Planck Likelihoods we must ensure that certain parameters of CLASS
+  // are set. In the ideal case, this is manged by the addEntry() method of ClassInput.
+  // For the time being, we set these additional paramaters here.
+  //
+  // !! NEEDS FIX !!!
+  //
+  //
+  if (*InUse::class_get_cl)
+  {
+    pybind11::dict additional_dict = pybind11::dict( "lensing"_a="yes", "output"_a = "tCl pCl lCl mPk", "l_max_scalars"_a=2508 );
+    cosmo_input_dict.attr("update")(additional_dict);
+    pybind11::print("(This is classy. The function 'class_get_cl' will be called. this triggers to override the inputs for 'lensing','output', and 'l_max_scalars'.)\n\nThe inputs which are now handed over to the Classy wrapper are:\n",cosmo_input_dict);
+  }
 
   // set cosmological parameters
   cosmo.attr("set")(cosmo_input_dict);

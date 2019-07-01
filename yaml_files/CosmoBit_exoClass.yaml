@@ -141,12 +141,12 @@ Rules:
     function: set_classy_parameters_LCDM
     options:
       classy_dict:
-        output: "tCl lCl pCl mPk"   # classy + MP: even when no output specified all spectra etc. the likelihoods need
+        #output: "tCl lCl pCl mPk"   # classy + MP: even when no output specified all spectra etc. the likelihoods need
                       # are calculated since the MP Likelihood initialisation is taking care of this for us! 
-        lensing: "yes" # heads-up: changed default to 'no'in function 'set_classy_parameters_LCDM' as well
+        #lensing: "yes" # heads-up: changed default to 'no'in function 'set_classy_parameters_LCDM' as well
                       # since otherwise the automatic output setting will not work
         #energy_deposition_function : "GAMBIT"
-        l_max_scalars: 2508
+        #l_max_scalars: 2508
         # /\
         # ||  (JR) we should not set this by default when using the python wrapper: if only bg needed 
         #     classy will complain that it did not read the input parameter.
