@@ -87,6 +87,9 @@ ObsLikes:
     capability:   BAO_LogLike
   
   - purpose:      LogLike
+    capability:   sigma8_LogLike
+  
+  - purpose:      LogLike
     capability:   MP_Combined_LogLike
     module:       CosmoBit
     type:         double
@@ -103,8 +106,9 @@ Rules:
   - capability: class_set_parameter
     options:
       class_dict: 
-        output: "tCl lCl" # need to add matter power spectrum for sigma8 computation
+        output: "tCl lCl mPk" # need to add matter power spectrum for sigma8 computation
         k_pivot: 0.05
+        P_k_max_h/Mpc: 1.
 
   # classy (class through python wrapper)
   - capability: set_classy_parameters
@@ -124,8 +128,8 @@ Rules:
 
   # you have to set by hand if you want to set the class parameters with or without setting arguments from MontePython Likelihoods
   # if the montepythonlike backend is installed (if not it should automatically choose the function 'init_Classy_cosmo_container')
-  - capability: get_Classy_cosmo_container
-    function: init_Classy_cosmo_container_with_MPLike
+  - capability: get_classy_cosmo_container
+    function: init_classy_cosmo_container_with_MPLike
     module: CosmoBit
 
   - capability: MP_experiment_names
@@ -139,6 +143,7 @@ Rules:
       Likelihoods: 
         bao_smallz_2014: default #../montepython_public/montepython/likelihoods/bao_smallz_2014/bao_smallz_2014.data
         Pantheon: default
+        Planck_SZ: default
       # should eventually be possible to choose any MP like, atm only bao, Pantheon, Planck_SZ (& kids after 
       # downloading data and when commenting out line 'parser_mp.existing_file(fname)', will include that into 
       # build step soon) safe to use;
@@ -169,7 +174,7 @@ Rules:
         function: compute_Omega0_m
         module: CosmoBit
     options:
-      DataFile: "Planck_SZ.dat"
+      DataFile: "Planck_SZ_MontePython.dat"
 
   - capability: Omega0_m
     function: compute_Omega0_m

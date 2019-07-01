@@ -107,7 +107,7 @@ BE_NAMESPACE
     return rs_d;
   }
 
-  // returns sigma8
+  // returns sigma8 at z = 0
   double class_get_sigma8()
   {
     // in CosmoBit.cpp test if ClassInput contains mPk -> otherwise SegFault when trying to compute sigma9
@@ -130,7 +130,8 @@ END_BE_NAMESPACE
 BE_INI_FUNCTION
 { 
 
-  pybind11::dict cosmo_input_dict = *Dep::get_Classy_cosmo_container;
+  CosmoBit::ClassyInput input_container= *Dep::get_classy_cosmo_container;
+  pybind11::dict cosmo_input_dict = input_container.get_input_dict();
   
   static bool first_run = true;
   if(first_run)

@@ -686,34 +686,46 @@ START_MODULE
      #undef FUNCTION
   #undef CAPABILITY
 
-    #define CAPABILITY get_Classy_cosmo_container
+    #define CAPABILITY get_classy_cosmo_container
      START_CAPABILITY
-     #define FUNCTION init_Classy_cosmo_container_with_MPLike
-      START_FUNCTION(pybind11::dict)
+     #define FUNCTION init_classy_cosmo_container_with_MPLike
+      START_FUNCTION(CosmoBit::ClassyInput)
       ALLOW_MODELS(LCDM_dNeffCMB_dNeffBBN_etaBBN)
       DEPENDENCY(cosmo_args_from_MPLike,  pybind11::dict)
-      DEPENDENCY(set_classy_parameters,   pybind11::dict)
+      DEPENDENCY(set_classy_parameters,   CosmoBit::ClassyInput)
      #undef FUNCTION
-     #define FUNCTION init_Classy_cosmo_container
-      START_FUNCTION(pybind11::dict)
+     #define FUNCTION init_classy_cosmo_container
+      START_FUNCTION(CosmoBit::ClassyInput)
       ALLOW_MODELS(LCDM_dNeffCMB_dNeffBBN_etaBBN)
-      DEPENDENCY(set_classy_parameters, pybind11::dict)
+      DEPENDENCY(set_classy_parameters, CosmoBit::ClassyInput)
      #undef FUNCTION
   #undef CAPABILITY
 
     #define CAPABILITY set_classy_parameters
      START_CAPABILITY
      #define FUNCTION set_classy_parameters_LCDM
-      START_FUNCTION(pybind11::dict)
+      START_FUNCTION(CosmoBit::ClassyInput)
       ALLOW_MODELS(LCDM_dNeffCMB_dNeffBBN_etaBBN)
       DEPENDENCY(NuMasses_SM, map_str_dbl)
       DEPENDENCY(T_cmb,             double)
       DEPENDENCY(T_ncdm,            double)
       DEPENDENCY(class_Nur,         double)
       DEPENDENCY(Helium_abundance,  std::vector<double>)
-      MODEL_CONDITIONAL_DEPENDENCY(lifetime,                    double,             TestDecayingDM)
-      MODEL_CONDITIONAL_DEPENDENCY(DM_fraction,                 double,             TestDecayingDM)
-      MODEL_CONDITIONAL_DEPENDENCY(energy_injection_efficiency, DarkAges::fz_table, TestDecayingDM)
+      MODEL_CONDITIONAL_DEPENDENCY(model_dep_classy_parameters, pybind11::dict,  TestDecayingDM)
+      //MODEL_CONDITIONAL_DEPENDENCY(lifetime,                    double,             TestDecayingDM)
+      //MODEL_CONDITIONAL_DEPENDENCY(DM_fraction,                 double,             TestDecayingDM)
+      //MODEL_CONDITIONAL_DEPENDENCY(energy_injection_efficiency, DarkAges::fz_table, TestDecayingDM)
+     #undef FUNCTION
+  #undef CAPABILITY
+
+  #define CAPABILITY model_dep_classy_parameters
+     START_CAPABILITY
+     #define FUNCTION model_dep_classy_parameters_TestDecayingDM
+      START_FUNCTION(pybind11::dict)
+      ALLOW_MODELS(TestDecayingDM)
+      DEPENDENCY(lifetime,                    double)
+      DEPENDENCY(DM_fraction,                 double)
+      DEPENDENCY(energy_injection_efficiency, DarkAges::fz_table)
      #undef FUNCTION
   #undef CAPABILITY
   

@@ -425,6 +425,7 @@ BE_NAMESPACE
   }
 
 
+  // returns sigma8 at redshit z
   double class_get_sigma8(double z)
   {
     double tau;

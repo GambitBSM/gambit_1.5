@@ -117,6 +117,8 @@ Rules:
       class_dict: 
        # output: "tCl" # need to add matter power spectrum for sigma8 computation
         k_pivot: 0.05
+        output: mPk
+        P_k_max_h/Mpc: 1.
 
   - capability: class_get_Dl
     backends:
@@ -146,8 +148,8 @@ Rules:
 
   # you have to set by hand if you want to set the class parameters with or without setting arguments from MontePython Likelihoods
   # if the montepythonlike backend is installed (if not it should automatically choose the function 'init_Classy_cosmo_container')
-  - capability: get_Classy_cosmo_container
-    function: init_Classy_cosmo_container_with_MPLike
+  - capability: get_classy_cosmo_container
+    function: init_classy_cosmo_container_with_MPLike
     module: CosmoBit
 
   - capability: MP_experiment_names
