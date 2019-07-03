@@ -5,16 +5,21 @@
 ###################################
 
 Parameters:
+
+  LCDM_dNeffCMB_dNeffBBN_etaBBN: !import include/LCDM_dNeffCMB_dNeffBBN_etaBBN_scan.yaml
+
   CosmoALP:
     fa: 1.0
     ma0:
       range: [1.0E+2, 1.0E+7]
       prior_type: log
-    gagg:
-      range: [1.0E-13, 1.0]
+    Cagg:
+      range: [0.1, 1.0]
       prior_type: log
     thetai: 0.0
-    Ya0: 0.0
+    f0_thermal:
+      range: [0.0, 2.0]
+    T_R: 5.0
 
 ##############################
  # Prior setup
@@ -38,7 +43,7 @@ Printer:
 ##############################
 
 Scanner:
-  use_scanner: grid
+  use_scanner: random
 
   scanners:
     mn:
@@ -65,7 +70,7 @@ Scanner:
       grid_pts: 500
     random:
       plugin: random
-      point_number: 1
+      point_number: 1000
       like: LogLike
 
 ###############################
@@ -75,6 +80,10 @@ Scanner:
 ObsLikes:
   - capability: lnL_RParameter
     purpose: LogLike
+
+  - capability: DM_fraction
+    purpose: Observable
+    module: CosmoBit
 
 #########################
  # Rules
@@ -100,5 +109,7 @@ KeyValues:
   default_output_path: "runs/validation/CosmoBit/ALP"
   likelihood:
     model_invalid_for_lnlike_below: -1e6
+
+  debug: true
 
 # End of file
