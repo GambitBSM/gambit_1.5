@@ -220,15 +220,15 @@ namespace Gambit
 */
 
 
-    // add all entries from extra_entries to input_dict, will throw an error if 
+    // add all entries from extra_dict to input_dict, will throw an error if 
     // one entry is contained in both dictionaries
     // returns 1 if adding was successful, -1 if an entries 
     // appeared twice -> need to throw an error since overwriting CLASS input
     // without realising it can be dangerous
-    int ClassyInput::addDict(pybind11::dict extra_entries)
+    int ClassyInput::addDict(pybind11::dict extra_dict)
     {
       int success = 1;
-      for (auto item : extra_entries)
+      for (auto item : extra_dict)
       {
         pybind11::str key = pybind11::str(item.first);
         pybind11::str arg = pybind11::str(item.second);
@@ -247,49 +247,75 @@ namespace Gambit
       return success;
     }
 
-    // function to merge python dictionary extra_entries into input_dict. If both dictionaries have the same key
+    // function to merge python dictionary extra_dict into input_dict. If both dictionaries have the same key
     // the values of the keys will be concatenated (without duplicating an entry)
     // -> very specific for merging the classy input dictionaries
     // typical example for this would be 
     // dict input_dict: 'output' : 'tCl nCl' and 
-    // dict extra_entries: 'output' : 'tCl mPk' => mPk has to be added such that 'output' : 'tCl nCl mPk'
-    void ClassyInput::merge_input_dicts(pybind11::dict extra_entries) 
+    // dict extra_dict: 'output' : 'tCl mPk' => mPk has to be added such that 'output' : 'tCl nCl mPk'
+    void ClassyInput::merge_input_dicts(pybind11::dict extra_dict) 
     {
-      // loop through 2nd dict (better if this is the shorter one)
+      // loop through extra_dict (should typically be the shorter one)
       static bool first_run = true;
-      for (auto item : extra_entries)
+      for (auto item : extra_dict)
       {  
         pybind11::str key = pybind11::str(item.first);
         pybind11::str arg = pybind11::str(item.second);
         
-        // if item not contained in b but not a it will be added to a
+        // if item not contained in extra_dict but not in input_dict it will be added to input_dict
         if(!input_dict.attr("has_key")(key).cast<bool>())
         {
           input_dict[key] = arg;
           //std::cout << "Adding key = " << std::string(pybind11::str(item.first)) << ", "<< "value=" << std::string(pybind11::str(item.second)) << std::endl;
         }
-        // if item contained in both: split extra_entries by spaces and iterate through single entries 
-        // to see if they are included in input_dict
+
+        // if item contained in both: have to decide on a case-by-case basis what to do! 
         else
         { 
-          
-          // python string.find("x") returns -1 if "x" not contained
-          if(key.attr("find")(pybind11::str("output")).cast<int>()!=-1)
+          // if 'output' is defined twice the entries have to be merged
+          // e.g. input_dict['output'] = 'A B C'
+          //      extra_dict['output'] = 'A B X Y'
+          // should result in input_dict['output'] = 'A B C X Y'
+          if(key.attr("find")(pybind11::str("output")).cast<int>()!=-1) // (python string.find("x") returns -1 if "x" not contained)
           {
-            // split string by spaces into list
-            pybind11::list list = extra_entries[key].attr("split")();
+            // split string of extra_dict['output'] by spaces into list 
+            // (-> in the example above this would give list = ['A', 'B', 'X', 'Y'])
+            pybind11::list list = extra_dict[key].attr("split")();
+            // iterate through list and check if current item is also contained in input_dict['output']
+            // if it is not it will be added
             for(auto it : list)
             { 
               std::string list_entry = std::string(pybind11::str(it));
-              
-              // python string.find("x") returns -1 if "x" not contained
+
+              // add entry if it is not already in input_dict['output']
               if(input_dict[key].attr("find")(pybind11::str(list_entry)).cast<int>()==-1)
               { 
-                // add part of extra_entries[key] string that is not contained in input_dict[key] string to input_dict[key]
+                // add part of extra_dict[key] string that is not contained in input_dict[key] string to input_dict[key]
                 std::string new_arg=std::string(pybind11::str(input_dict[key]))+std::string(" ")+std::string(list_entry);
                 input_dict[key]= new_arg;
               }
             }
+          }
+
+          // if 'l_max...' (scalars or tensors) is defined twice use the maximum requested value
+          // e.g. input_dict['l_max_scalars'] = '500'
+          //      extra_dict['l_max_scalars'] = '2500'
+          // should result in input_dict['l_max_scalars'] = '2500'
+          else if(key.attr("find")(pybind11::str("l_max")).cast<int>()!=-1)
+          {
+            // cast pybind11::detail::item_accessor to pybind11::str, to c++ string and then to int
+            //  (I know... the problem is that the yaml file entries are all parsed as strings so 
+            //  we don't have to distinguish between the different types of different CLASS input keys. 
+            //  The python wrapper parses everything as string so it is fine. Only here, where we actually
+            //  have to compare the passed numbers this causes troubles and we have to cast from a python 
+            //  string to a c++ int to be able to tell which entry is the larger one. If you have an idea
+            //  to make this nicer --> go for it!!)
+            int lmax_input_dict = std::stoi(std::string(pybind11::str(input_dict[key])));
+            int lmax_extra_dict = std::stoi(std::string(pybind11::str(extra_dict[key])));
+
+            // if lmax_extra_dict is higher than the entry in the input_dict, replace is
+            if (lmax_input_dict < lmax_extra_dict){input_dict[key] = lmax_extra_dict;}
+            // if not 'input_dict'already contains the higher value and there is nothing to do here. 
           }
           else
           {
@@ -297,13 +323,13 @@ namespace Gambit
             {
               // (JR) TODO see what other combinations could go wrong here -> different likelihoods
               // asking for different redshift bins?
-              // But need this check only on the first run (the inputs we are worries about are 
+              // But need this check only on the first run (the inputs we are worried about are 
               // parameters specifying which output CLASS should produce so they won't change 
               // in-between the calculation of different points in one scan)
               std::cout <<"___________________________________________________________________"<<std::endl;
               std::cout <<"___________________________________________________________________"<<std::endl;
               std::cout << "Both dictionaries to merge contain key" << std::string(key) << "with entries "
-                  << std::string(pybind11::str(input_dict[key]))<< " and " << std::string(pybind11::str(extra_entries[key])) << ". Don't know how to deal with that, yet. Will be taken care of soon." << std::endl;
+                  << std::string(pybind11::str(input_dict[key]))<< " and " << std::string(pybind11::str(extra_dict[key])) << ". Don't know how to deal with that, yet. Will be taken care of soon." << std::endl;
               std::cout <<"___________________________________________________________________"<<std::endl;
               std::cout <<"___________________________________________________________________"<<std::endl;
             }
@@ -312,7 +338,6 @@ namespace Gambit
       }
       first_run = false;
     }
-
 
     // return stringstream to print current entries of 
     // input_dict (can be send to logger)
@@ -329,18 +354,6 @@ namespace Gambit
         log_msg << std::string(key) << " = " << std::string(value) << " \n"; // uncomment if you want class input to be printed in terminal before class call 
       }
       return log_msg.str();
-    }
-
-    // clear CLASS input dictionary
-    void ClassyInput::clear()
-    {
-      input_dict.attr("clear")();
-    }
-
-    // return CLASS input dictionary
-    pybind11::dict ClassyInput::get_input_dict()
-    {
-      return input_dict;
     }
 
   }

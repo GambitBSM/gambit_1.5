@@ -3351,9 +3351,9 @@ namespace Gambit
       // TODO: need to test if class or exo_class in use! does not work -> (JR) should be fixed with classy implementation
       if (ModelInUse("TestDecayingDM")){result.addDict(*Dep::model_dep_classy_parameters);}
       
-      // Other Class input direct from the YAML file 
-      // check if these are already contained in the input dictionary -- if so throw an error
+      // Other CLASS input direct from the YAML file, only read before first CLASS run
       static bool first_run = true;
+      static pybind11::dict yaml_file_input;
       if(first_run)
       {
         first_run = false;
@@ -3365,25 +3365,14 @@ namespace Gambit
           {
             std::string name = it->first.as<std::string>();
             std::string value = it->second.as<std::string>();
-            // Check if the key exists in the dictionary
-            if (!result.hasKey(name.c_str()))
-            {
-              result.addEntry(name.c_str(),value);
-            }
-            // If it does, throw an error, there's some YAML conflict going on.
-            else
-            {
-              CosmoBit_error().raise(LOCAL_INFO, "The key " + name + " already "
-                "exists in the CLASSY dictionary. You are probably trying to override a model parameter. If you really"
-                "want to do this you should define an extra function to set the class parameters for the model you "
-                "are considering.");
-            }
+
+            yaml_file_input[name.c_str()] = value;
           }
         }
       }
-
-      //std::cout << "(CosmoBit): set ccc.cosmo_input_dict values to "<< std::endl;
-      //pybind11::print("      ",result.get_input_dict());
+      // add input from yaml file to CLASS dictionary
+      // check if these are already contained in the input dictionary -- if so throw an error
+      result.merge_input_dicts(yaml_file_input);
 
     }
 
@@ -3422,7 +3411,8 @@ namespace Gambit
       // convert memory address 'it->second' to int 'addr'
       uintptr_t addr = reinterpret_cast<uintptr_t>(it->second);
       result[key.c_str()] = addr;
-      std::cout << " memory address of key " << key.c_str() << " is "<< addr << std::endl;
+      // for testing, will keep it here for now..
+      //std::cout << " memory address of key " << key.c_str() << " is "<< addr << std::endl; 
     }      
     pybind11::print(" Setting params for Decaying DM ", result,"\n");
   }
