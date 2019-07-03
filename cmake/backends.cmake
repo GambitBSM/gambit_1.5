@@ -1120,6 +1120,7 @@ if(NOT ditched_${name}_${ver})
     DOWNLOAD_COMMAND ${DL_BACKEND} ${dl} ${md5} ${dir}
     SOURCE_DIR ${dir}
     BUILD_IN_SOURCE 1
+    PATCH_COMMAND patch -p1 < ${patch}/${name}_${ver}_classy.diff
     CONFIGURE_COMMAND ""
     COMMAND sed ${dashi} -e "s#autosetup.py install#autosetup.py build#g" Makefile
     BUILD_COMMAND ${CMAKE_MAKE_PROGRAM} CC=${CMAKE_C_COMPILER} OMPFLAG=-fopenmp OPTFLAG= CCFLAG=${BACKEND_C_FLAGS} LDFLAG=${BACKEND_C_FLAGS} all
@@ -1146,6 +1147,7 @@ if(NOT ditched_${name}_${ver})
     BUILD_IN_SOURCE 1
     PATCH_COMMAND patch -p1 < ${patch}/${name}_${ver}.diff
     COMMAND patch -p1 < ${patch}/${name}_${ver}_decay_fix.diff
+    COMMAND patch -p1 < ${patch}/${name}_${ver}_classy.diff
     CONFIGURE_COMMAND ""
     COMMAND sed ${dashi} -e "s#autosetup.py install#autosetup.py build#g" Makefile
     BUILD_COMMAND ${CMAKE_MAKE_PROGRAM} CC=${CMAKE_C_COMPILER} OMPFLAG=-fopenmp OPTFLAG= CCFLAG=${BACKEND_C_FLAGS} LDFLAG=${BACKEND_C_FLAGS} all

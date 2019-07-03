@@ -69,15 +69,9 @@ BE_NAMESPACE
     // Loop through all l from 0 to len
     for (int l=0; l < len; l++)
     {
-      if (l < 2)
-      {
-	// The entries for l=0 and l=1 are zero per defintion
-	result[l] = 0;
-      }
-      else
-      {
-	result[l] = factor*cltemp[l];
-      }
+      // The entries for l=0 and l=1 are zero per defintion
+      if (l < 2){result[l] = 0;}
+      else      {result[l] = factor*cltemp[l];}
     }
 
     return result;
@@ -120,29 +114,51 @@ BE_NAMESPACE
     return H_z;
   }
 
+  // returns Omega radiation today
+  double class_get_Omega0_r()
+  {
+    double Omega0_r = cosmo.attr("Omega_r")().cast<double>();
+    return Omega0_r;
+  }
+
+  // returns Omega of ultra-relativistic species today
+  double class_get_Omega0_ur()
+  {
+    double Omega0_ur = cosmo.attr("Omega_ur")().cast<double>();
+    return Omega0_ur;
+  }
+
   // returns Omega matter today
   double class_get_Omega0_m()
   {
-    double Omega0_m = cosmo.attr("Omega0_m")().cast<double>();
+    double Omega0_m = cosmo.attr("Omega_m")().cast<double>();
     return Omega0_m;
   }
-  
-  // TODO: add functions to return Omega0_ncdm, Omega0_ur and Omega0_r, 
 
+  // returns Omega ncdm today (contains contributions of all ncdm species)
+  double class_get_Omega0_ncdm_tot()
+  {
+    double Omega0_ncdm = cosmo.attr("Omega_ncdm_tot")().cast<double>();
+    return Omega0_ncdm;
+  }
 
+/* you *could* also have this function in principle, however since the containts
+  the contribution from ALL ncdm components it is not in general true, that Omega_ncdm = Omega_nu
+  so I would not reccomend doing it. 
   // returns Omega nu today
   double class_get_Omega0_nu()
   {
-    double Omega0_nu = cosmo.attr("Omega0_nu")().cast<double>();
+    double Omega0_nu = cosmo.attr("Omega_nu")().cast<double>();
     return Omega0_nu;
   }
-
-  // returns Omega nu today
+*/
+  // returns Omega_Lambda
   double class_get_Omega0_Lambda()
   {
-    double Omega0_Lambda = cosmo.attr("Omega0_Lambda")().cast<double>();
+    double Omega0_Lambda = cosmo.attr("Omega_Lambda")().cast<double>();
     return Omega0_Lambda;
   }
+
 
   // returns sound horizon at drag
   double class_get_rs()

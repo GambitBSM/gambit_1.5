@@ -404,6 +404,7 @@ START_MODULE
 
   #undef CAPABILITY
 
+
   #define CAPABILITY Omega0_b
     START_CAPABILITY
     
@@ -413,6 +414,7 @@ START_MODULE
     #undef FUNCTION
 
   #undef CAPABILITY
+
   
   #define CAPABILITY Omega0_cdm
     START_CAPABILITY
@@ -423,6 +425,7 @@ START_MODULE
     #undef FUNCTION
 
   #undef CAPABILITY
+
   
   #define CAPABILITY Omega0_r
     START_CAPABILITY
@@ -433,14 +436,14 @@ START_MODULE
       DEPENDENCY(Omega0_ur, double)
       ALLOW_MODELS(LCDM_dNeffCMB_dNeffBBN_etaBBN)
     #undef FUNCTION
-/*
+
     #define FUNCTION get_Omega0_r_classy
       START_FUNCTION(double)
-      DEPENDENCY(get_Classy_cosmo_container, CosmoBit::Classy_cosmo_container)
-      ALLOW_MODELS(LCDM_dNeffCMB_dNeffBBN_etaBBN)
+      BACKEND_REQ(class_get_Omega0_r,(classy),double,())
     #undef FUNCTION
-*/
+
   #undef CAPABILITY
+
   
   #define CAPABILITY Omega0_g
     START_CAPABILITY
@@ -453,24 +456,35 @@ START_MODULE
 
   #undef CAPABILITY
   
+
   #define CAPABILITY Omega0_ur
     START_CAPABILITY
 
     #define FUNCTION compute_Omega0_ur
       START_FUNCTION(double)
-      DEPENDENCY(Omega0_g, double)
-      DEPENDENCY(class_Nur, double)
-      //ALLOW_MODELS(LCDM_dNeffCMB_dNeffBBN_etaBBN)
+        DEPENDENCY(Omega0_g, double)
+        DEPENDENCY(class_Nur, double)
     #undef FUNCTION
-/*
-    #define FUNCTION get_Omega0_ur_classy
+
+    #define FUNCTION get_Omega0_ur_classy  
       START_FUNCTION(double)
-      DEPENDENCY(get_Classy_cosmo_container, CosmoBit::Classy_cosmo_container)
-      ALLOW_MODELS(LCDM_dNeffCMB_dNeffBBN_etaBBN)
+        BACKEND_REQ(class_get_Omega0_ur,(classy),double,())
     #undef FUNCTION
-*/
+
+  #undef CAPABILITY
+
+
+  #define CAPABILITY Omega0_ncdm_tot
+    START_CAPABILITY
+
+    #define FUNCTION get_Omega0_ncdm_tot_classy 
+      START_FUNCTION(double)
+        BACKEND_REQ(class_get_Omega0_ncdm_tot,(classy),double,())
+    #undef FUNCTION
+
   #undef CAPABILITY
   
+
   #define CAPABILITY Omega0_ncdm
     START_CAPABILITY
 
@@ -479,13 +493,7 @@ START_MODULE
       DEPENDENCY(T_cmb, double)
       ALLOW_MODELS(LCDM_dNeffCMB_dNeffBBN_etaBBN,StandardModel_SLHA2)
     #undef FUNCTION
-/*
-    #define FUNCTION get_Omega0_ncdm_classy
-      START_FUNCTION(double)
-      DEPENDENCY(get_Classy_cosmo_container, CosmoBit::Classy_cosmo_container)
-      ALLOW_MODELS(LCDM_dNeffCMB_dNeffBBN_etaBBN)
-    #undef FUNCTION
-*/
+
   #undef CAPABILITY
 
   #define CAPABILITY eta0

@@ -81,9 +81,10 @@ ObsLikes:
  
   - purpose:      LogLike
     capability:   compute_Planck_high_TT_loglike
-
-  - purpose:      LogLike
-    capability:   compute_Planck_lensing_loglike
+    function:     function_Planck_high_TT_lite_loglike
+#
+#  - purpose:      LogLike
+#    capability:   compute_Planck_lensing_loglike
 
 # We better should not use this likelihood for quick tests.
 # It takes ages to load.
@@ -102,8 +103,9 @@ ObsLikes:
   - purpose:      LogLike
     capability:   BAO_LogLike
   
-  - purpose:      LogLike
-    capability:   sigma8_LogLike
+  - purpose:      Observable
+    capability:   Omega0_r
+    function:     get_Omega0_r_classy
   
   - purpose:      LogLike
     capability:   MP_Combined_LogLike
@@ -124,9 +126,8 @@ Rules:
 ##  this ambiguity manually.
 #####
 
-  - capability: compute_Planck_high_TT_loglike
-    function: function_Planck_high_TT_lite_loglike
-    module: CosmoBit
+ # - capability: compute_Planck_high_TT_loglike
+ #   module: CosmoBit
 
   # class through c interface
   - capability: class_set_parameter
@@ -169,7 +170,7 @@ Rules:
       Likelihoods: 
         bao_smallz_2014: default #../montepython_public/montepython/likelihoods/bao_smallz_2014/bao_smallz_2014.data
         Pantheon: default
-        Planck_SZ: default
+        #Planck_SZ: default
       # should eventually be possible to choose any MP like, atm only bao, Pantheon, Planck_SZ (& kids after 
       # downloading data and when commenting out line 'parser_mp.existing_file(fname)', will include that into 
       # build step soon) safe to use;
@@ -183,18 +184,23 @@ Rules:
 
   - capability: Pantheon_LogLike
     backends:
-      - {backend: exoclass, version: 2.7.0}
+      - {backend: classy, version: exo_2.7.0}
 
   # next 3 rules: all to calculate Likelihoods the class way (not the classy way)
   # verified that BAO, Pantheon & Planck_SZ all give same result the class way & classy way (through MP)
   - capability: BAO_LogLike
     backends:
-    - {backend: exoclass, version: 2.7.0}
+    - {backend: classy, version: exo_2.7.0}
     options:
       DataFile:  BAO_2014.dat
 
+  #- capability: Omega0_r
+  #  function: get_Omega0_ur_classy
+
   - capability: sigma8_LogLike
     function: compute_sigma8_LogLike
+    backends:
+    - {backend: classy, version: exo_2.7.0}
     dependencies:
       - capability: Omega0_m
         function: compute_Omega0_m
@@ -224,7 +230,7 @@ Rules:
 
   - capability: plc_2_0_init
     options:
-      planck_path: /YOUR/PATH/TO/plc_2.0
+      planck_path: /home/janina/code/PlanckLike/plc_2.0
 
 #======== Logging setup ========
 Logger:

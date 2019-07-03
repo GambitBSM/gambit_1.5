@@ -3440,16 +3440,13 @@ namespace Gambit
 
       result = BEreq::class_get_Omega0_m();
     }
-    /*
+
     /// Radiation
     void get_Omega0_r_classy(double& result)
     {
       using namespace Pipes::get_Omega0_r_classy;
 
-      CosmoBit::Classy_cosmo_container ccc = *Dep::get_Classy_cosmo_container;
-      // TODO -- does not currently work
-      //result = ccc.cosmo.attr("Omega0_r")().cast<double>();
-      result = 0.;
+      result = BEreq::class_get_Omega0_r();
     }
     
     /// Ultra-relativistic
@@ -3457,24 +3454,16 @@ namespace Gambit
     {
       using namespace Pipes::get_Omega0_ur_classy;
 
-      CosmoBit::Classy_cosmo_container ccc = *Dep::get_Classy_cosmo_container;
-      // TODO -- does not currently work
-      //result = ccc.cosmo.attr("Omega0_ur")().cast<double>();
-      result = 0.;
+      result = BEreq::class_get_Omega0_ur();
     }
     
     /// Non-cold Dark Matter
-    void get_Omega0_ncdm_classy(double& result)
+    void get_Omega0_ncdm_tot_classy(double& result)
     {
-      using namespace Pipes::get_Omega0_ncdm_classy;
+      using namespace Pipes::get_Omega0_ncdm_tot_classy;
 
-      CosmoBit::Classy_cosmo_container ccc = *Dep::get_Classy_cosmo_container;
-      // TODO -- does not currently work
-      // result = ccc.cosmo.attr("Omega0_ncdm")().cast<double>();
-      result = 0.;
+      result = BEreq::class_get_Omega0_ncdm_tot();
     }
-    */
-    /// Other observables.
 
     /// Sigma8
     void get_Sigma8_classy(double& result)
