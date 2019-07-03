@@ -23,6 +23,21 @@
 
 #include "gambit/Models/models/Axions.hpp"
 
+#define MODEL GeneralCosmoALP
+#define FRIEND TestDecayingDM
+void MODEL_NAMESPACE::GeneralCosmoALP_to_TestDecayingDM (const ModelParameters &myparams, ModelParameters &friendparams)
+{
+    USE_MODEL_PIPE(FRIEND) // get pipe for "interpret as friend" function
+    logger()<<"Running interpret_as_friend calculations for GeneralCosmoALP -> TestDecayingDM ..."<<EOM;
+
+    friendparams.setValue("lifetime", *Dep::lifetime);
+    friendparams.setValue("mass", 1e-9*myparams["ma0"]); // Convert units from eV (GeneralCosmoALP) to GeV (TestDecayingDM)
+    friendparams.setValue("BR", 0.); // ALP decays exclusively into photons
+    friendparams.setValue("fraction", *Dep::DM_fraction);
+}
+#undef FRIEND
+#undef MODEL
+
 #define MODEL CosmoALP
 void MODEL_NAMESPACE::CosmoALP_to_GeneralCosmoALP (const ModelParameters &myparams, ModelParameters &parentparams)
 {
@@ -40,19 +55,6 @@ void MODEL_NAMESPACE::CosmoALP_to_GeneralCosmoALP (const ModelParameters &mypara
     parentparams.setValue("thetai", myparams["thetai"]);
     parentparams.setValue("Ya0", myparams["Ya0"]);
 }
-
-#define FRIEND TestDecayingDM
-void MODEL_NAMESPACE::CosmoALP_to_TestDecayingDM (const ModelParameters &myparams, ModelParameters &friendparams)
-{
-    USE_MODEL_PIPE(FRIEND) // get pipe for "interpret as friend" function
-    logger()<<"Running interpret_as_friend calculations for CosmoALP -> TestDecayingDM ..."<<EOM;
-
-    friendparams.setValue("lifetime", *Dep::lifetime);
-    friendparams.setValue("mass", 1e-9*myparams["ma0"]); // Convert units from eV (CosmoALP) to GeV (TestDecayingDM)
-    friendparams.setValue("BR", 0.); // ALP decays exclusively into photons
-    friendparams.setValue("fraction", *Dep::DM_fraction);
-}
-#undef FRIEND
 #undef MODEL
 
 #define MODEL GeneralALP

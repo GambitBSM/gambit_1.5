@@ -38,12 +38,12 @@ Parameters:
  
  # Model Parameters of CosmoALP
  CosmoALP:
-   fa: 1.0
+   Cagg: 1.0
    ma0:
      range: [1.0E+2, 1.0E+7]
      prior_type: log
-   gagg:
-     range: [1.0E-13, 1.0]
+   fa:
+     range: [1.0E0, 1.0E13]
      prior_type: log
    thetai: 0.0
    Ya0:
@@ -148,7 +148,7 @@ ObsLikes:
 Rules:
 
   - capability: DM_fraction
-    function: DM_fraction_CosmoALP
+    function: DM_fraction_ALP
 
  
   - capability: BBN_LogLike

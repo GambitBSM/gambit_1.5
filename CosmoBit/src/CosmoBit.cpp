@@ -160,10 +160,11 @@ namespace Gambit
       spectrum.spec_ph.resize(1,BR_ph*2e9);
     }
 
-    void lifetime_CosmoALP(double& result)
+    void lifetime_ALP_agg(double& result)
     {
-      // lifetime in s
-      using namespace Pipes::lifetime_CosmoALP;
+      // lifetime in s if onlz the decay a -> g g is open.
+      using namespace Pipes::lifetime_ALP_agg;
+
       double gagg = *Param["gagg"]; // in GeV^-1
       double ma = *Param["ma0"]; // in eV
 
@@ -187,9 +188,9 @@ namespace Gambit
       }
     }
 
-    void minimum_abundance_CosmoALP(double& result)
+    void minimum_abundance_ALP(double& result)
     {
-      using namespace Pipes::minimum_abundance_CosmoALP;
+      using namespace Pipes::minimum_abundance_ALP;
 
       // Read T_R in MeV and convert it to GeV
       static double T_R_in_GeV = 1e-3*(runOptions->getValueOrDef<double>(5.,"T_R")); // Read T_R in MeV and convert it to GeV
@@ -205,9 +206,9 @@ namespace Gambit
       result = Ya0_min;
     }
 
-    void DM_fraction_CosmoALP(double& result)
+    void DM_fraction_ALP(double& result)
     {
-      using namespace Pipes::DM_fraction_CosmoALP;
+      using namespace Pipes::DM_fraction_ALP;
       double Ya0 = *Param["Ya0"]; // ALP abundance (after production)
       double ma0 = *Param["ma0"]; // non-thermal ALP mass in eV
       double T = *Dep::T_cmb; // CMB temperature in K
@@ -2401,7 +2402,7 @@ namespace Gambit
           if (status != GSL_SUCCESS)
           {
             std::ostringstream err;
-            err << "Failed to solve differential equation to compute dNeffCMB and etaBB for Cosmo_ALP model at iteration step "<< ii <<". Invalidating point";
+            err << "Failed to solve differential equation to compute dNeffCMB and etaBB for GeneralCosmoALP model at iteration step "<< ii <<". Invalidating point";
             invalid_point().raise(err.str());
           }
           T_evo[jj] = y[0];
@@ -2423,14 +2424,14 @@ namespace Gambit
       if( ((fabs(temp_eta_ratio-eta_ratio) > epsrel) || fabs(temp_dNeff - dNeff) > epsrel) && (ii >= max_iter) )
       {
         std::ostringstream err;
-        err << "Computation of dNeffCMB and etaBBN for Cosmo_ALP model did not converge after n = "<< ii <<" iterations. You can increase the maximum number of iterations with the run Option 'max_iter'. Invalidating point.";
+        err << "Computation of dNeffCMB and etaBBN for GeneralCosmoALP model did not converge after n = "<< ii <<" iterations. You can increase the maximum number of iterations with the run Option 'max_iter'. Invalidating point.";
         invalid_point().raise(err.str());
       }
 
       result["dNeff"] = dNeff;
       result["Neff_ratio"] = Neff_ALP/Neff_SM;
       result["eta_ratio"] = eta_ratio;
-      logger() << "CosmoALP model: calculated Neff @BBN to be " << result["dNeff"] <<", and etaBB(ALP)/etaBBN(SM) = " << result["eta_ratio"] << ". Calculation converged after "<< ii <<" iterations." << EOM;
+      logger() << "GeneralCosmoALP model: calculated Neff @BBN to be " << result["dNeff"] <<", and etaBB(ALP)/etaBBN(SM) = " << result["eta_ratio"] << ". Calculation converged after "<< ii <<" iterations." << EOM;
 
     }
 

@@ -49,13 +49,13 @@ START_MODULE
 
   #define CAPABILITY DM_fraction
   START_CAPABILITY
-    #define FUNCTION DM_fraction_CosmoALP
+    #define FUNCTION DM_fraction_ALP
     START_FUNCTION(double)
     DEPENDENCY(T_cmb, double)
     DEPENDENCY(minimum_abundance,double)
     DEPENDENCY(lifetime,double)
-    ALLOW_MODEL_DEPENDENCE(CosmoALP,LCDM_dNeffCMB_dNeffBBN_etaBBN)
-    MODEL_GROUP(alp,(CosmoALP))
+    ALLOW_MODEL_DEPENDENCE(GeneralCosmoALP,LCDM_dNeffCMB_dNeffBBN_etaBBN)
+    MODEL_GROUP(alp,(GeneralCosmoALP))
     MODEL_GROUP(cosmo,(LCDM_dNeffCMB_dNeffBBN_etaBBN))
     ALLOW_MODEL_COMBINATION(cosmo,alp)
     #undef FUNCTION
@@ -63,17 +63,17 @@ START_MODULE
 
   #define CAPABILITY lifetime
   START_CAPABILITY
-    #define FUNCTION lifetime_CosmoALP
+    #define FUNCTION lifetime_ALP_agg
     START_FUNCTION(double)
-    ALLOW_MODELS(CosmoALP)
+    ALLOW_MODELS(GeneralCosmoALP)
     #undef FUNCTION
   #undef CAPABILITY
 
   #define CAPABILITY minimum_abundance
   START_CAPABILITY
-    #define FUNCTION minimum_abundance_CosmoALP
+    #define FUNCTION minimum_abundance_ALP
     START_FUNCTION(double)
-    ALLOW_MODELS(CosmoALP)
+    ALLOW_MODELS(GeneralCosmoALP)
     #undef FUNCTION
   #undef CAPABILITY
 
