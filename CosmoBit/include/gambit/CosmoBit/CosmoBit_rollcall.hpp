@@ -54,8 +54,9 @@ START_MODULE
     DEPENDENCY(T_cmb, double)
     DEPENDENCY(minimum_abundance,double)
     DEPENDENCY(lifetime,double)
-    ALLOW_MODEL_DEPENDENCE(CosmoALP,LCDM_dNeffCMB_dNeffBBN_etaBBN)
-    MODEL_GROUP(alp,(CosmoALP))
+    DEPENDENCY(RD_oh2, double)
+    ALLOW_MODEL_DEPENDENCE(GeneralCosmoALP,LCDM_dNeffCMB_dNeffBBN_etaBBN)
+    MODEL_GROUP(alp,(GeneralCosmoALP))
     MODEL_GROUP(cosmo,(LCDM_dNeffCMB_dNeffBBN_etaBBN))
     ALLOW_MODEL_COMBINATION(cosmo,alp)
     #undef FUNCTION
@@ -65,7 +66,7 @@ START_MODULE
   START_CAPABILITY
     #define FUNCTION lifetime_CosmoALP
     START_FUNCTION(double)
-    ALLOW_MODELS(CosmoALP)
+    ALLOW_MODELS(GeneralCosmoALP)
     #undef FUNCTION
   #undef CAPABILITY
 
@@ -73,7 +74,7 @@ START_MODULE
   START_CAPABILITY
     #define FUNCTION minimum_abundance_CosmoALP
     START_FUNCTION(double)
-    ALLOW_MODELS(CosmoALP)
+    ALLOW_MODELS(GeneralCosmoALP)
     #undef FUNCTION
   #undef CAPABILITY
 
@@ -102,7 +103,7 @@ START_MODULE
     ALLOW_MODELS(Planck_TTTEEE,Planck_TT,Planck_lite)
     #undef FUNCTION
   #undef CAPABILITY
-  
+
   #define CAPABILITY NuMasses_SM
   START_CAPABILITY
     #define FUNCTION set_NuMasses_SM
@@ -129,7 +130,7 @@ START_MODULE
     DEPENDENCY(external_dNeff_etaBBN, map_str_dbl)
     DEPENDENCY(NuMasses_SM, map_str_dbl)
     #undef FUNCTION
-  
+
   #undef CAPABILITY
 
   #define CAPABILITY class_set_parameter
@@ -297,14 +298,14 @@ START_MODULE
       START_FUNCTION(double)
     #undef FUNCTION
   #undef CAPABILITY
-  
-#define CAPABILITY T_ncdm_SM // needed in addition to T_ncdm since T_ncdm of non-SM models assume a fiducial value to base calculation on 
+
+#define CAPABILITY T_ncdm_SM // needed in addition to T_ncdm since T_ncdm of non-SM models assume a fiducial value to base calculation on
     START_CAPABILITY
     #define FUNCTION set_T_ncdm_SM
       START_FUNCTION(double)
     #undef FUNCTION
   #undef CAPABILITY
-  
+
   #define CAPABILITY T_ncdm
     START_CAPABILITY
     #define FUNCTION set_T_ncdm
@@ -326,7 +327,7 @@ START_MODULE
         ALLOW_MODELS(LCDM_dNeffCMB_dNeffBBN_etaBBN)
        #undef FUNCTION
     #undef CAPABILITY
-  
+
     #define CAPABILITY Omega0_m
      START_CAPABILITY
      #define FUNCTION compute_Omega0_m
@@ -337,7 +338,7 @@ START_MODULE
       ALLOW_MODELS(LCDM_dNeffCMB_dNeffBBN_etaBBN)
      #undef FUNCTION
   #undef CAPABILITY
-  
+
   #define CAPABILITY Omega0_b
      START_CAPABILITY
      #define FUNCTION compute_Omega0_b
@@ -345,7 +346,7 @@ START_MODULE
       ALLOW_MODELS(LCDM_dNeffCMB_dNeffBBN_etaBBN)
      #undef FUNCTION
   #undef CAPABILITY
-  
+
   #define CAPABILITY Omega0_cdm
      START_CAPABILITY
      #define FUNCTION compute_Omega0_cdm
@@ -353,7 +354,7 @@ START_MODULE
       ALLOW_MODELS(LCDM_dNeffCMB_dNeffBBN_etaBBN)
      #undef FUNCTION
   #undef CAPABILITY
-  
+
   #define CAPABILITY Omega0_r
        START_CAPABILITY
        #define FUNCTION compute_Omega0_r
@@ -363,7 +364,7 @@ START_MODULE
         ALLOW_MODELS(LCDM_dNeffCMB_dNeffBBN_etaBBN)
        #undef FUNCTION
     #undef CAPABILITY
-  
+
   #define CAPABILITY Omega0_g
        START_CAPABILITY
        #define FUNCTION compute_Omega0_g
@@ -372,7 +373,7 @@ START_MODULE
         ALLOW_MODELS(LCDM_dNeffCMB_dNeffBBN_etaBBN)
        #undef FUNCTION
     #undef CAPABILITY
-  
+
   #define CAPABILITY Omega0_ur
        START_CAPABILITY
        #define FUNCTION compute_Omega0_ur
@@ -382,7 +383,7 @@ START_MODULE
         //ALLOW_MODELS(LCDM_dNeffCMB_dNeffBBN_etaBBN)
        #undef FUNCTION
     #undef CAPABILITY
-  
+
   #define CAPABILITY Omega0_ncdm
        START_CAPABILITY
        #define FUNCTION compute_Omega0_ncdm
@@ -429,7 +430,7 @@ START_MODULE
      START_FUNCTION(double)
         DEPENDENCY(etaCMB, double)
         DEPENDENCY(external_dNeff_etaBBN, map_str_dbl)
-        ALLOW_MODELS(LCDM_ExtdNeffCMB_ExtetaBBN) // To make sure this function is used to fulfill etaBBN capability in model translation function 
+        ALLOW_MODELS(LCDM_ExtdNeffCMB_ExtetaBBN) // To make sure this function is used to fulfill etaBBN capability in model translation function
    #undef FUNCTION
   #undef CAPABILITY
 

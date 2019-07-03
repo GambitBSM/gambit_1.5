@@ -38,7 +38,8 @@ void MODEL_NAMESPACE::CosmoALP_to_GeneralCosmoALP (const ModelParameters &mypara
     parentparams.setValue("Tchi", 1E99);
     parentparams.setValue("beta", 0);
     parentparams.setValue("thetai", myparams["thetai"]);
-    parentparams.setValue("Ya0", myparams["Ya0"]);
+    parentparams.setValue("f0_thermal", myparams["f0_thermal"]);
+    parentparams.setValue("T_R", myparams["T_R"]);
 }
 
 #define FRIEND TestDecayingDM
@@ -67,8 +68,10 @@ void MODEL_NAMESPACE::GeneralALP_to_GeneralCosmoALP (const ModelParameters &mypa
     parentparams.setValue("Tchi", myparams["Tchi"]);
     parentparams.setValue("beta", myparams["beta"]);
     parentparams.setValue("thetai", myparams["thetai"]);
-    // Set Ya0 = 0 to avoid unnecessary relic density calculation...
-    parentparams.setValue("Ya0", 0);
+    // Set f0_thermal = 0, i.e. no thermal component.
+    parentparams.setValue("f0_thermal", 0);
+    // Use default reheating temperature of 5 MeV.
+    parentparams.setValue("T_R", 5.);
 }
 #undef MODEL
 

@@ -187,64 +187,60 @@ namespace Gambit
       }
     }
 
+    // Compute the abundance of ALPs expected from thermal production via Primakoff processes
     void minimum_abundance_CosmoALP(double& result)
     {
       using namespace Pipes::minimum_abundance_CosmoALP;
 
-      // Read T_R in MeV and convert it to GeV
-      static double T_R_in_GeV = 1e-3*(runOptions->getValueOrDef<double>(5.,"T_R")); // Read T_R in MeV and convert it to GeV
+      double gagg = *Param["gagg"];                 // Read axion-photon coupling in GeV^-1
+      double T_R_in_GeV = 1e-3 * (*Param["T_R"]);   // Read reheating temperature in MeV and convert it to GeV
 
-      // check for stupid input (T_R < m_e)
-      // Throw an error if the user really pushed it that far.
+      // Check for stupid input (T_R < m_e) and throw an error if the user really pushed it that far.
       if (m_electron >= T_R_in_GeV)
         CosmoBit_error().raise(LOCAL_INFO,"The reheating temperature is below the electron mass.");
 
-      double gagg = *Param["gagg"]; // in GeV^-1
-      double Ya0_min = 1.56e-5 * pow(gagg,2) * m_planck * (T_R_in_GeV - m_electron);
+      result = 1.56e-5 * pow(gagg,2) * m_planck * (T_R_in_GeV - m_electron);
 
-      result = Ya0_min;
     }
 
+    // The fraction of dark matter in decaying ALPs at the time of production
     void DM_fraction_CosmoALP(double& result)
     {
       using namespace Pipes::DM_fraction_CosmoALP;
-      double Ya0 = *Param["Ya0"]; // ALP abundance (after production)
-      double ma0 = *Param["ma0"]; // non-thermal ALP mass in eV
-      double T = *Dep::T_cmb; // CMB temperature in K
-      double ssm0 = entropy_density_SM(T); // SM entropy density today in eV^3 (cf. footnote 24 of PDG2018-Astrophysical parameters)
-      double rho0_a = Ya0 * ma0 * ssm0; // energy density of axions today in eV^4
 
-      double omega_cdm = *Param["omega_cdm"]; // omega_cdm = Omega_cdm * h^2
       const double rho0_crit_by_h2 = 3.*pow(m_planck_red*1e9,2) * pow((1e5*1e9*hbar/_Mpc_SI_),2); // rho0_crit/(h^2)
+      const double t_rec = 1e12;                     // Age of the Universe at recombination in s
+
+      double f0_thermal = *Param["f0_thermal"];      // Fraction of DM in ALPs at production, due to thermal production
+      double omega_ma = *Dep::RD_oh2;                // Cosmological density of ALPs from vacuum misalignment
+      double ma0 = *Param["ma0"];                    // non-thermal ALP mass in eV
+      double T = *Dep::T_cmb;                        // CMB temperature in K
+      double omega_cdm = *Param["omega_cdm"];        // omega_cdm = Omega_cdm * h^2
+      double tau_a = *Dep::lifetime;                 // ALP lifetime in s
+
+      // Consistency check: if the ALP abundance from all thermal processes is less than that expected just from Primakoff processes, invalidate this point.
+      double Ya0_min = *Dep::minimum_abundance;
+      double ssm0 = entropy_density_SM(T);           // SM entropy density today in eV^3 (cf. footnote 24 of PDG2018-Astrophysical parameters)
       double rho0_cdm = omega_cdm * rho0_crit_by_h2; // rho0_cdm = Omega_cdm * rho0_crit;
+      double rho0_thermal = f0_thermal * rho0_cdm;   // energy density of axions today in eV^4
+      double Ya0 = rho0_thermal / (ma0 * ssm0);      // ALP abundance at production
+      if (Ya0 < Ya0_min)
+      {
+        std::ostringstream err;
+        err << "The choice of Ya0 (" << Ya0 << ") is in contradiction with the minimum abundance Ya0_min (";
+        err << Ya0_min << ") produced via Primakoff processes.";
+        invalid_point().raise(err.str());
+      }
 
-      double xi_ini = rho0_a / rho0_cdm; // Initial fraction of decauying dark matter (rho_dcdm / rho_cdm) and the naive value if decay of the ALP would be neglected.
-      double tau_a = *Dep::lifetime;
-      const double t_rec = 1e12;
+      // Compute the total fraction of DM in ALPs at production
+      double xi_ini = f0_thermal + omega_ma/omega_cdm;
+
+      // Consistency check: invalidate if there are more ALPs than dark matter at the time of recombination (t ~ 1e12s)
       double xi_at_rec = xi_ini * exp(-t_rec/tau_a );
-
-      // invalidate if there are more ALPs than dark matter at the time of recombination (t ~ 1e12s)
       if (xi_at_rec  > 1.)
       {
         std::ostringstream err;
         err << "ALPs are over-abundant (n_a > n_cdm) at t = 10^12 s. (n_a/n_cdm = "<< xi_at_rec <<")";
-        invalid_point().raise(err.str());
-      }
-
-      // TODO: Make the part which follows down below a proper likelihood
-
-      // Consistency check if value for xi (rho0_a / rh0_cdm) is in contradiction with
-      // T_R > 5 MeV (or user input). If so, invalidate the point.
-      // (Reason: T_R predicts a minimum abundance Ya0_min through Primakoff processes. Any additional production mechanism would only increase Ya0)
-      double Ya0_min = *Dep::minimum_abundance;
-      if (Ya0 < Ya0_min)
-      {
-        std::ostringstream err;
-        err << "The choice of Ya0 (";
-        err << Ya0;
-        err << ") is in contradiction with the minimum abundance Ya0_min (";
-        err << Ya0_min;
-        err << ") produced via Primakoff processes.";
         invalid_point().raise(err.str());
       }
 
