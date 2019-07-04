@@ -13,6 +13,9 @@
 ///  \date 2016 Oct
 ///  \date 2017 Jan
 ///
+///  \author Patrick Stoecker
+///          (stoecker@physik.rwth-aachen.de)
+///  \date 2019 Feb, July
 ///
 ///  \author Janina Renk
 ///          (janina.renk@fysik.su.se)
@@ -22,48 +25,61 @@
 #ifndef __CosmoModels_hpp__
 #define __CosmoModels_hpp__
 
-#define MODEL LCDM_dNeffCMB_dNeffBBN_etaBBN
-  START_MODEL
-  DEFINEPARS(omega_b,omega_cdm,H0,ln10A_s,n_s,tau_reio,dNeff,dNeff_BBN,eta_BBN)
-#undef MODEL
-
-#define MODEL LCDM_dNeffCMB_dNeffBBN
- #define PARENT LCDM_dNeffCMB_dNeffBBN_etaBBN
-  START_MODEL
-  DEFINEPARS(omega_b,omega_cdm,H0,ln10A_s,n_s,tau_reio,dNeff,dNeff_BBN)
-  INTERPRET_AS_PARENT_FUNCTION(LCDM_dNeffCMB_dNeffBBN_to_LCDM_dNeffCMB_dNeffBBN_etaBBN)
-  INTERPRET_AS_PARENT_DEPENDENCY(etaBBN, double)
- #undef PARENT
-#undef MODEL
-
-#define MODEL LCDM_dNeffCMB
- #define PARENT LCDM_dNeffCMB_dNeffBBN
-  START_MODEL
-  DEFINEPARS(omega_b,omega_cdm,H0,ln10A_s,n_s,tau_reio,dNeff)
-  INTERPRET_AS_PARENT_FUNCTION(LCDM_dNeffCMB_to_LCDM_dNeffCMB_dNeffBBN)
- #undef PARENT
-#undef MODEL
-
-// get dNeff from external calculation (e.g. for ALPs)
-#define MODEL LCDM_ExtdNeffCMB_ExtetaBBN
- #define PARENT LCDM_dNeffCMB_dNeffBBN_etaBBN
-  START_MODEL
-  DEFINEPARS(omega_b,omega_cdm,H0,ln10A_s,n_s,tau_reio)
-  INTERPRET_AS_PARENT_FUNCTION(LCDM_ExtdNeffCMB_ExtetaBBN_to_LCDM_dNeffCMB_dNeffBBN_etaBBN)
-  INTERPRET_AS_PARENT_DEPENDENCY(etaBBN, double)
-  INTERPRET_AS_PARENT_DEPENDENCY(ExtdNeffCMB, double)
- #undef PARENT
-#undef MODEL
-
 #define MODEL LCDM
- #define PARENT LCDM_dNeffCMB
   START_MODEL
   DEFINEPARS(omega_b,omega_cdm,H0,ln10A_s,n_s,tau_reio)
-  INTERPRET_AS_PARENT_FUNCTION(LCDM_to_LCDM_dNeffCMB)
+#undef MODEL
+
+#define MODEL etaBBN_rBBN_rCMB_dNeffBBN_dNeffCMB
+  START_MODEL
+  DEFINEPARS(eta_BBN)
+  MAP_TO_CAPABILITY(eta_BBN, etaBBN)
+  DEFINEPARS(r_BBN,r_CMB)
+  DEFINEPARS(dNeff_BBN,dNeff_CMB)
+#undef MODEL
+
+#define MODEL etaBBN
+ #define PARENT etaBBN_rBBN_rCMB_dNeffBBN_dNeffCMB
+  START_MODEL
+  DEFINEPARS(eta_BBN)
+  INTERPRET_AS_PARENT_FUNCTION(etaBBN_to_etaBBN_rBBN_rCMB_dNeffBBN_dNeffCMB)
+ #undef PARENT
+#undef MODEL
+    
+#define MODEL rBBN_rCMB
+ #define PARENT etaBBN_rBBN_rCMB_dNeffBBN_dNeffCMB
+  START_MODEL
+  DEFINEPARS(r_BBN,r_CMB)
+  INTERPRET_AS_PARENT_FUNCTION(rBBN_rCMB_to_etaBBN_rBBN_rCMB_dNeffBBN_dNeffCMB)
+  INTERPRET_AS_PARENT_DEPENDENCY(eta0, double)
  #undef PARENT
 #undef MODEL
 
+#define MODEL rCMB
+ #define PARENT rBBN_rCMB
+  START_MODEL
+  DEFINEPARS(r_CMB)
+  INTERPRET_AS_PARENT_FUNCTION(rCMB_to_rBBN_rCMB)
+ #undef PARENT
+#undef MODEL
 
+#define MODEL dNeffBBN_dNeffCMB
+ #define PARENT etaBBN_rBBN_rCMB_dNeffBBN_dNeffCMB
+  START_MODEL
+  DEFINEPARS(dNeff_BBN,dNeff_CMB)
+  INTERPRET_AS_PARENT_FUNCTION(dNeffBBN_dNeffCMB_to_etaBBN_rBBN_rCMB_dNeffBBN_dNeffCMB)
+  INTERPRET_AS_PARENT_DEPENDENCY(eta0, double)
+ #undef PARENT
+#undef MODEL
+
+#define MODEL dNeffCMB
+ #define PARENT dNeffBBN_dNeffCMB
+  START_MODEL
+  DEFINEPARS(dNeff_CMB)
+  INTERPRET_AS_PARENT_FUNCTION(dNeffCMB_to_dNeffBBN_dNeffCMB)
+ #undef PARENT
+#undef MODEL
+  
 /*
 #define MODEL rLCDM
 START_MODEL

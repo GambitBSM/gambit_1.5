@@ -36,6 +36,26 @@ void MODEL_NAMESPACE::GeneralCosmoALP_to_TestDecayingDM (const ModelParameters &
     friendparams.setValue("fraction", *Dep::DM_fraction);
 }
 #undef FRIEND
+
+#define FRIEND etaBBN_rBBN_rCMB_dNeffBBN_dNeffCMB
+void MODEL_NAMESPACE::GeneralCosmoALP_to_etaBBN_rBBN_rCMB_dNeffBBN_dNeffCMB (const ModelParameters &myparams, ModelParameters &friendparams)
+{
+    USE_MODEL_PIPE(FRIEND) // get pipe for "interpret as friend" function
+    logger()<<"Running interpret_as_friend calculations for GeneralCosmoALP -> etaBBN_rBBN_rCMB_dNeffBBN_dNeffCMB ..."<<EOM;
+
+    // Get the results for the entropy evolution between BBN and CMB
+    // and map them onto r_BBN/CMB and dNeff_BBN/CMB.
+    map_str_dbl Neff_results = *Dep::external_dNeff_etaBBN;
+
+    // We assume that the initial ratio r (at BBN) is unchanged
+    friendparams.setValue("r_BBN", 1.0);
+    friendparams.setValue("r_CMB", pow(Neff_results["Neff_ratio"], 1./4.));
+    // No dark raddiation
+    friendparams.setValue("dNeff_BBN", 0.0);
+    friendparams.setValue("dNeff_CMB", 0.0);
+    friendparams.setValue("eta_BBN", (*Dep::eta0)*Neff_results["eta_ratio"]);
+}
+#undef FRIEND
 #undef MODEL
 
 #define MODEL CosmoALP

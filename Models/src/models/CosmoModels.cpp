@@ -12,7 +12,7 @@
 ///
 ///  \author Patrick Stöcker
 ///          (stoecker@physik.rwth-aachen.de)
-///  \date 2019 Feb
+///  \date 2019 Feb, Jun
 ///
 ///  \author Janina Renk
 ///          (janina.renk@fysik.su.se)
@@ -33,94 +33,105 @@
 
 /////////////// translation functions for Cosmology models ///////////////////////////
 
-#define MODEL  LCDM_dNeffCMB_dNeffBBN
-#define PARENT LCDM_dNeffCMB_dNeffBBN_etaBBN
+#define MODEL etaBBN
+#define PARENT etaBBN_rBBN_rCMB_dNeffBBN_dNeffCMB
 
-// Translation function definition
-void MODEL_NAMESPACE::LCDM_dNeffCMB_dNeffBBN_to_LCDM_dNeffCMB_dNeffBBN_etaBBN (const ModelParameters &myP, ModelParameters &targetP)
+void MODEL_NAMESPACE::etaBBN_to_etaBBN_rBBN_rCMB_dNeffBBN_dNeffCMB (const ModelParameters &myP, ModelParameters &targetP)
 {
   USE_MODEL_PIPE(PARENT) // get pipe for "interpret as PARENT" function
-  logger()<<"Running interpret_as_parent calculations for LCDM_dNeffCMB_dNeffBBN --> LCDM_dNeffCMB_dNeffBBN_etaBBN ..."<<LogTags::info<<EOM;
+  logger()<<"Running interpret_as_parent calculations for etaBBN --> etaBBN_rBBN_rCMB_dNeffBBN_dNeffCMB ..."<<LogTags::info<<EOM;
 
-  targetP.setValue("omega_b", myP.getValue("omega_b"));
-  targetP.setValue("omega_cdm",myP.getValue("omega_cdm"));
-  targetP.setValue("H0", myP.getValue("H0") );
-  targetP.setValue("ln10A_s", myP.getValue("ln10A_s") );
-  targetP.setValue("n_s", myP.getValue("n_s") );
-  targetP.setValue("tau_reio", myP.getValue("tau_reio") );
-  targetP.setValue("dNeff", myP.getValue("dNeff") );
-  targetP.setValue("dNeff_BBN", myP.getValue("dNeff_BBN") );
-
-  targetP.setValue("eta_BBN", *Dep::etaBBN );
+  // Set eta_BBN
+  targetP.setValue("eta_BBN", myP.getValue("eta_BBN"));
+  
+  // No dNeff due to an altered neutrino temperature
+  targetP.setValue("r_BBN", 1.);
+  targetP.setValue("r_CMB", 1.);
+  
+  // No dNeff due to additional radiation
+  targetP.setValue("dNeff_BBN", 0.);
+  targetP.setValue("dNeff_CMB", 0.);
 }
 
 #undef PARENT
 #undef MODEL
 
-#define MODEL  LCDM_dNeffCMB
-#define PARENT LCDM_dNeffCMB_dNeffBBN
+#define MODEL rBBN_rCMB
+#define PARENT etaBBN_rBBN_rCMB_dNeffBBN_dNeffCMB
 
-// Translation function definition
-void MODEL_NAMESPACE::LCDM_dNeffCMB_to_LCDM_dNeffCMB_dNeffBBN (const ModelParameters &myP, ModelParameters &targetP)
+void MODEL_NAMESPACE::rBBN_rCMB_to_etaBBN_rBBN_rCMB_dNeffBBN_dNeffCMB (const ModelParameters &myP, ModelParameters &targetP)
 {
   USE_MODEL_PIPE(PARENT) // get pipe for "interpret as PARENT" function
-  logger()<<"Running interpret_as_parent calculations for LCDM_dNeffCMB --> LCDM_dNeffCMB_dNeffBBN ..."<<LogTags::info<<EOM;
+  logger()<<"Running interpret_as_parent calculations for rBBN_rCMB --> etaBBN_rBBN_rCMB_dNeffBBN_dNeffCMB ..."<<LogTags::info<<EOM;
 
-  targetP.setValue("omega_b", myP.getValue("omega_b"));
-  targetP.setValue("omega_cdm",myP.getValue("omega_cdm"));
-  targetP.setValue("H0", myP.getValue("H0") );
-  targetP.setValue("ln10A_s", myP.getValue("ln10A_s") );
-  targetP.setValue("n_s", myP.getValue("n_s") );
-  targetP.setValue("tau_reio", myP.getValue("tau_reio") );
-  targetP.setValue("dNeff", myP.getValue("dNeff") );
-  targetP.setValue("dNeff_BBN", myP.getValue("dNeff") );
+  // Set eta_BBN (This requires that eta0 / omega_b is known, i.e. LCDM is in use)
+  // -- The dependency_resolver will figure that out --
+  targetP.setValue("eta_BBN", *Dep::eta0);
+  
+  // Set the respective values of r
+  targetP.setValue("r_BBN", myP.getValue("r_BBN"));
+  targetP.setValue("r_CMB", myP.getValue("r_CMB"));
+  
+  // No dNeff due to additional radiation
+  targetP.setValue("dNeff_BBN", 0.);
+  targetP.setValue("dNeff_CMB", 0.);
 }
 
 #undef PARENT
 #undef MODEL
 
-#define MODEL  LCDM_ExtdNeffCMB_ExtetaBBN
-#define PARENT LCDM_dNeffCMB_dNeffBBN_etaBBN
+#define MODEL rCMB
+#define PARENT rBBN_rCMB
 
-// Translation function definition
-void MODEL_NAMESPACE::LCDM_ExtdNeffCMB_ExtetaBBN_to_LCDM_dNeffCMB_dNeffBBN_etaBBN (const ModelParameters &myP, ModelParameters &targetP)
+void MODEL_NAMESPACE::rCMB_to_rBBN_rCMB (const ModelParameters &myP, ModelParameters &targetP)
 {
   USE_MODEL_PIPE(PARENT) // get pipe for "interpret as PARENT" function
-  logger()<<"Running interpret_as_parent calculations for LCDM_ExtdNeffCMB_ExtetaBBN --> LCDM_dNeffCMB_dNeffBBN_etaBBN ..."<<LogTags::info<<EOM;
+  logger()<<"Running interpret_as_parent calculations for rCMB --> rBBN_rCMB ..."<<LogTags::info<<EOM;
 
-  targetP.setValue("omega_b", myP.getValue("omega_b"));
-  targetP.setValue("omega_cdm",myP.getValue("omega_cdm"));
-  targetP.setValue("H0", myP.getValue("H0") );
-  targetP.setValue("ln10A_s", myP.getValue("ln10A_s") );
-  targetP.setValue("n_s", myP.getValue("n_s") );
-  targetP.setValue("tau_reio", myP.getValue("tau_reio") );
-
-  targetP.setValue("eta_BBN", *Dep::etaBBN);
-  targetP.setValue("dNeff_BBN", 0. );
-  targetP.setValue("dNeff", *Dep::ExtdNeffCMB );
+  // Set the respective values of r
+  targetP.setValue("r_BBN", myP.getValue("r_CMB"));
+  targetP.setValue("r_CMB", myP.getValue("r_CMB"));
 }
 
 #undef PARENT
 #undef MODEL
 
-#define MODEL  LCDM
-#define PARENT LCDM_dNeffCMB
+#define MODEL dNeffBBN_dNeffCMB
+#define PARENT etaBBN_rBBN_rCMB_dNeffBBN_dNeffCMB
 
-// Translation function definition
-void MODEL_NAMESPACE::LCDM_to_LCDM_dNeffCMB (const ModelParameters &myP, ModelParameters &targetP)
+void MODEL_NAMESPACE::dNeffBBN_dNeffCMB_to_etaBBN_rBBN_rCMB_dNeffBBN_dNeffCMB (const ModelParameters &myP, ModelParameters &targetP)
 {
   USE_MODEL_PIPE(PARENT) // get pipe for "interpret as PARENT" function
-  logger()<<"Running interpret_as_parent calculations for LCDM --> LCDM_dNeffCMB ..."<<LogTags::info<<EOM;
+  logger()<<"Running interpret_as_parent calculations for dNeffBBN_dNeffCMB --> etaBBN_rBBN_rCMB_dNeffBBN_dNeffCMB ..."<<LogTags::info<<EOM;
 
-  targetP.setValue("omega_b", myP.getValue("omega_b"));
-  targetP.setValue("omega_cdm",myP.getValue("omega_cdm"));
-  targetP.setValue("H0", myP.getValue("H0") );
-  targetP.setValue("ln10A_s", myP.getValue("ln10A_s") );
-  targetP.setValue("n_s", myP.getValue("n_s") );
-  targetP.setValue("tau_reio", myP.getValue("tau_reio") );
-  targetP.setValue("dNeff", 0. );
+  // Set eta_BBN (This requires that eta0 / omega_b is known, i.e. LCDM is in use)
+  // -- The dependency_resolver will figure that out --
+  targetP.setValue("eta_BBN", *Dep::eta0);
+  
+  // No dNeff due to an altered neutrino temperature
+  targetP.setValue("r_BBN", 1.);
+  targetP.setValue("r_CMB", 1.);
+  
+  // Set the respective values of dNeff
+  targetP.setValue("dNeff_BBN", myP.getValue("dNeff_BBN"));
+  targetP.setValue("dNeff_CMB", myP.getValue("dNeff_CMB"));
 }
 
 #undef PARENT
 #undef MODEL
 
+#define MODEL dNeffCMB
+#define PARENT dNeffBBN_dNeffCMB
+
+void MODEL_NAMESPACE::dNeffCMB_to_dNeffBBN_dNeffCMB (const ModelParameters &myP, ModelParameters &targetP)
+{
+  USE_MODEL_PIPE(PARENT) // get pipe for "interpret as PARENT" function
+  logger()<<"Running interpret_as_parent calculations for dNeffCMB --> dNeffBBN_dNeffCMB ..."<<LogTags::info<<EOM;
+
+  // Set the respective values of dNeff
+  targetP.setValue("dNeff_BBN", myP.getValue("dNeff_CMB"));
+  targetP.setValue("dNeff_CMB", myP.getValue("dNeff_CMB"));
+}
+
+#undef PARENT
+#undef MODEL

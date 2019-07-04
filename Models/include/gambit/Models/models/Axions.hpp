@@ -20,6 +20,7 @@
 #define __GeneralALP_hpp__
 
 #include "gambit/Models/models/demo.hpp"
+#include "gambit/Models/models/CosmoModels.hpp"
 
 // General axion model with parametric temperature-dependent mass and cosmological applications.
 #define MODEL GeneralCosmoALP
@@ -35,6 +36,11 @@
   // The mapping CosmoALP_to_TestDecayingDM depends on the lifetime and the fraction rho_a/rho_cdm (mapping of the mass is trivial).
   INTERPRET_AS_X_DEPENDENCY(TestDecayingDM,lifetime,double)
   INTERPRET_AS_X_DEPENDENCY(TestDecayingDM,DM_fraction,double)
+  
+  // Friendship with "etaBBN_rBBN_rCMB_dNeffBBN_dNeffCMB" (Mapping is defined in Axions.cpp)
+  INTERPRET_AS_X_FUNCTION(etaBBN_rBBN_rCMB_dNeffBBN_dNeffCMB,GeneralCosmoALP_to_etaBBN_rBBN_rCMB_dNeffBBN_dNeffCMB)
+  INTERPRET_AS_X_DEPENDENCY(etaBBN_rBBN_rCMB_dNeffBBN_dNeffCMB,external_dNeff_etaBBN,map_str_dbl)
+  INTERPRET_AS_X_DEPENDENCY(etaBBN_rBBN_rCMB_dNeffBBN_dNeffCMB,eta0,double)
 #undef MODEL
 
 // Simplified general axion model with parametric temperature-independent mass and cosmological applications.

@@ -24,14 +24,14 @@
 Parameters:
  
  # --- import model parameters for models to scan over ---
- LCDM_ExtdNeffCMB_ExtetaBBN: !import include/LCDM_ExtdNeffCMB_ExtetaBBN_scan.yaml       
+ LCDM: !import include/LCDM_scan.yaml       
  
  # neutrino masses
  #StandardModel_numass_single: !import include/StandardModel_numass_single_scan.yaml
  StandardModel_numass_degenerate: !import include/StandardModel_numass_degenerate_scan.yaml
 
  # nuisance parameters in Planck likelihood
- #Planck_lite: !import include/Planck_lite_scan.yaml
+ Planck_lite: !import include/Planck_lite_scan.yaml
 
  # Cosmological nuisance parameters (except for Planck CMB Likelihoods) 
  cosmo_nuisance_params: !import include/cosmo_nuisance_params.yaml
@@ -39,16 +39,16 @@ Parameters:
  # Model Parameters of CosmoALP
  CosmoALP:
    Cagg: 1.0
+   fa:
+     range: [1e2, 1e12]
+     prior_type: log
    ma0:
      range: [1.0E+2, 1.0E+7]
      prior_type: log
-   fa:
-     range: [1.0E0, 1.0E13]
-     prior_type: log
    thetai: 0.0
-   Ya0:
-     range: [1.0E-15, 1.0E-3]
-     prior_type: log
+   f0_thermal:
+      range: [1e-12, 1e1]
+   T_R: 5.0
 
 #======== Prior setup ========
 Priors:
@@ -76,7 +76,7 @@ Scanner:
 
     random:
       plugin: random
-      point_number: 3
+      point_number: 10
       like:  LogLike
 
 #======== Observables of interest ========
@@ -91,7 +91,12 @@ ObsLikes:
     capability:   BBN_LogLike
     module:       CosmoBit
     type:         double
-  
+
+  - purpose:      LogLike
+    capability:   lnL_SN1987A_DecayApprox
+    module:       DarkBit
+    type:         double
+
   - purpose:      Observable
     capability:   H0_LogLike
     module:       CosmoBit
@@ -102,10 +107,10 @@ ObsLikes:
     module:       CosmoBit
     type:         double
 
- # - purpose:      LogLike  # commented to make this not depended on plc and the download of Planck data
- #   capability:   compute_Planck_high_TT_loglike
- #   module:       CosmoBit
- #   type:         double
+  - purpose:      LogLike  # commented to make this not depended on plc and the download of Planck data
+    capability:   compute_Planck_high_TT_loglike
+    module:       CosmoBit
+    type:         double
   
   - purpose:      Observable
     capability:   Helium_abundance
@@ -118,39 +123,26 @@ ObsLikes:
     type:         std::vector<double>
 
   - purpose:      Observable
-    capability:   Helium3_abundance
-    module:       CosmoBit
-    type:         std::vector<double>
-
-  - purpose:      Observable
-    capability:   Lithium7_abundance
-    module:       CosmoBit
-    type:         std::vector<double>
-
-  - purpose:      Observable
-    capability:   Beryllium7_abundance
-    module:       CosmoBit
-    type:         std::vector<double>
-
-  - purpose:      Observable
-    capability:   n0_g
-    module:       CosmoBit
-    type:         double
-   
-  - purpose:      Observable
     capability:   etaBBN
-    module:       CosmoBit
     type:         double
-
-
 
 #======== Rule entries ========
 Rules:
 
   - capability: DM_fraction
-    function: DM_fraction_ALP
+    module: CosmoBit
 
- 
+#####
+##  Since the "Planck_lite" model fits to be used by 
+##  the marginalized (lite) versions of both, the TT
+##  and the TTTEEE, likelihoods, we need to resolve
+##  this ambiguity manually.
+#####
+
+  - capability: compute_Planck_high_TT_loglike
+    function: function_Planck_high_TT_lite_loglike
+    module: CosmoBit
+
   - capability: BBN_LogLike
     options:
       DataFile: PDG_2017.dat # Use both, the Yp and D/H measurement as given in PDG 2017
@@ -168,7 +160,7 @@ Rules:
 
   - capability: AlterBBN_setInput
     options:
-      failsafe: 1
+      failsafe: 3
       err: 0
 
   - capability: external_dNeff_etaBBN
@@ -176,6 +168,16 @@ Rules:
       grid_size: 3000   # set grid size of time grid to solve differntial equation to compute dNeff and etaBBN for CosmoALP model (default: 3000)
       max_iter: 8       # set max. number of iterations until convergence (of default 1e-6 accuracy) is reached. If not: point invalidated
 
+  - capability: plc_2_0_init
+    options:
+      #planck_path: /PATH/TO/plc_2.0
+
+  - capability: lifetime
+    function: lifetime_ALP_agg
+    # Should points with a lifetime large than 1e17 be rejected?
+    options:
+      do_rejection: true
+      reject_tau_bigger_than: 1e17
 
 
 #======== Logging setup ========
