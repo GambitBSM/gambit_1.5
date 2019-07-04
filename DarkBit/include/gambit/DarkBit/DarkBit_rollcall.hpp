@@ -220,10 +220,10 @@ START_MODULE
       DEPENDENCY(RD_oh2_Xf, ddpair)
     #undef FUNCTION
 
-    // Routine for axion energy density today
+    // Routine for computing axion energy density today from vacuum misalignment, assuming no axion decays.
     #define FUNCTION RD_oh2_Axions
       START_FUNCTION(double)
-        ALLOW_MODEL(GeneralALP)
+        ALLOW_MODEL(GeneralCosmoALP)
         DEPENDENCY(AxionOscillationTemperature, double)
         DEPENDENCY(T_cmb, double)
     #undef FUNCTION
@@ -1424,7 +1424,6 @@ START_MODULE
     #define FUNCTION calc_RParameter
     START_FUNCTION(double)
     ALLOW_MODEL(GeneralCosmoALP)
-    //DEPENDENCY(GeneralCosmoALP_parameters, ModelParameters)
     #undef FUNCTION
   #undef CAPABILITY
 
@@ -1482,7 +1481,6 @@ START_MODULE
     #define FUNCTION calc_lnL_SN1987A_DecayApprox
     START_FUNCTION(double)
     ALLOW_MODEL(GeneralCosmoALP)
-    //DEPENDENCY(GeneralCosmoALP_parameters, ModelParameters)
     #undef FUNCTION
   #undef CAPABILITY
 
