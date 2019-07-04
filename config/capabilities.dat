@@ -3789,6 +3789,7 @@ calculate_amu_2loop_non_tan_beta_resummed: |
 calculate_uncertainty_amu_2loop: |
    Calculates the uncertainty on the anomalous magnetic moment of the muon at 2 loops.
 
+
 #----------------------------
 #  Axion-related capabilities
 #----------------------------
@@ -4217,7 +4218,7 @@ T_cmb: |
   Sets CMB temperature (to 2.7255 if not specified in yaml file via runOption).
 
 T_ncdm_SM: |
-  Temperature of non-cold DM components in units of T_cmb in the SM, fixed to 0.71611. This is larger than the value obtained by assuming instantaneous neutrino decoupling to account for the effect of flavour oscillations (hep-ph/0506164). 
+  Temperature of non-cold DM components in units of T_cmb in the SM, fixed to 0.71611. This is larger than the value obtained by assuming instantaneous neutrino decoupling to account for the effect of flavour oscillations (hep-ph/0506164).
 
 T_ncdm: |
   Sets temperature of non-cold DM components in units of T_cmb (fixed to 0.71611, uncomment line in function set_Tncdm to be able to  specify it in yaml file via runOption).
@@ -4292,15 +4293,15 @@ LCDM_dNeffCMB_dNeffBBN_etaBBN_parameters: |
    etaBBN, baryon to photon ratio at BBN (eta at CMB set by omega_b)
 
 LCDM_ExtdNeffCMB_ExtetaBBN_parameters: |
-   as LCDM_parameters but with two additional 'externally' derived parameters. I.e. the parameters are not free in a cosmological sense but can rather be derived from other sources. E.g. the presence of an extra light particle, like an ALP. 
-   dNeff, extra relativistic degrees of freedom @CMB release (Neff=3.064+dNeff), can be called via capability ExtdNeffCMB, derived in external_dNeff_etaBBN for the according considered model. 
+   as LCDM_parameters but with two additional 'externally' derived parameters. I.e. the parameters are not free in a cosmological sense but can rather be derived from other sources. E.g. the presence of an extra light particle, like an ALP.
+   dNeff, extra relativistic degrees of freedom @CMB release (Neff=3.064+dNeff), can be called via capability ExtdNeffCMB, derived in external_dNeff_etaBBN for the according considered model.
    etaBBN, baryon to photon ratio at BBN (eta at CMB set by omega_b), can be called via capability etaBBN computed by a function for the according considered model; derived with dNeff in capability external_dNeff_etaBBN.
 
 ExtNeffCMB: |
-   Capability to set or compute non-standard values of dNeff at CMB release. E.g. needed for the CosmoALP model. 
+   Capability to set or compute non-standard values of dNeff at CMB release. E.g. needed for the CosmoALP model.
 
 external_dNeff_etaBBN: |
-   Compute dNeff @CMB and etaBBN for non-standard models. E.g. needed for the CosmoALP model. 
+   Compute dNeff @CMB and etaBBN for non-standard models. E.g. needed for the CosmoALP model.
 
 
 inf_SR1quad_LCDMt_parameters: |
