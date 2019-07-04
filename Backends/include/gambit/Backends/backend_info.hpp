@@ -19,10 +19,6 @@
 ///          (t.e.gonzalo@fys.uio.no)
 ///  \date 2017 Jun
 ///
-///  \author Patrick Stoecker
-///          (stoecker@physik.rwth-aachen.de)
-///  \date 2019 Jun
-///
 ///  *********************************************
 
 #ifndef __backend_info_hpp__
@@ -209,9 +205,6 @@ namespace Gambit
 
           /// Python sys modudle
           pybind11::module* sys;
-
-          /// Python os modudle
-          pybind11::module* os;
 
           /// Pointer to the Python interpreter
           pybind11::scoped_interpreter* python_interpreter;
