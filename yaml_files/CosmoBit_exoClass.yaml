@@ -19,8 +19,7 @@
 Parameters:
  
  # --- import model parameters for models to scan over ---
- #LCDM: !import include/LCDM_scan.yaml        # base LCDM
- LCDM_ExtdNeffCMB_ExtetaBBN: !import include/LCDM_scan.yaml
+ LCDM: !import include/LCDM_scan.yaml        # base LCDM
 
  # neutrino masses
  #StandardModel_numass_single: !import include/StandardModel_numass_single_scan.yaml
@@ -32,20 +31,19 @@ Parameters:
  # nuisance parameters in Planck likelihood
  Planck_lite: !import include/Planck_lite_scan.yaml
 
- # model parameters for "TestDecayingDM"
+ # model parameters for "CosmoALP"
  CosmoALP:
-   fa: 1.0
+   Cagg: 1.0
+   fa:
+     range: [1e2, 1e12]
+     prior_type: log
    ma0:
-     fixed_value: 1e6
-     #range: [1.0E+2, 1.0E+7]
-     #prior_type: log
-   gagg: 6.87106e-08
-     #range: [1e-15, 1e-5]
-     #prior_type: log
+     range: [1.0E+2, 1.0E+7]
+     prior_type: log
    thetai: 0.0
-   Ya0: 0.03     
-     #range: [1.0E-15, 1.0E-3]
-     #prior_type: log
+   f0_thermal:
+      range: [1e-12, 1e1]
+   T_R: 5.0
 
 #======== Prior setup ========
 Priors:
@@ -82,9 +80,9 @@ ObsLikes:
   - purpose:      LogLike
     capability:   compute_Planck_high_TT_loglike
     function:     function_Planck_high_TT_lite_loglike
-#
-#  - purpose:      LogLike
-#    capability:   compute_Planck_lensing_loglike
+
+  - purpose:      LogLike
+    capability:   compute_Planck_lensing_loglike
 
 # We better should not use this likelihood for quick tests.
 # It takes ages to load.
@@ -118,22 +116,6 @@ ObsLikes:
 
 #======== Rule entries ========
 Rules:
-
-#####
-##  Since the "Planck_lite" model fits to be used by
-##  the marginalized (lite) versions of both, the TT
-##  and the TTTEEE, likelihoods, we need to resolve
-##  this ambiguity manually.
-#####
-
-
-  # class through c interface
-  - capability: class_set_parameter
-    options:
-      class_dict: 
-        output: "tCl lCl mPk" # need to add matter power spectrum for sigma8 computation
-        k_pivot: 0.05
-        P_k_max_h/Mpc: 1.
 
   # classy (class through python wrapper)
   - capability: set_classy_parameters
@@ -169,43 +151,29 @@ Rules:
       Likelihoods: 
         bao_smallz_2014: default #../montepython_public/montepython/likelihoods/bao_smallz_2014/bao_smallz_2014.data
         Pantheon: default
-        #Planck_SZ: default
+        Planck_SZ: default
       # should eventually be possible to choose any MP like, atm only bao, Pantheon, Planck_SZ (& kids after 
       # downloading data and when commenting out line 'parser_mp.existing_file(fname)', will include that into 
       # build step soon) safe to use;
       # still need to write a proper patch for MPLike backend & test all Likes
 
   - capability: DM_fraction
-    function: DM_fraction_CosmoALP
+    function: DM_fraction_ALP
 
   - capability: lifetime
-    function: lifetime_CosmoALP
-
-  - capability: Pantheon_LogLike
-    backends:
-      - {backend: classy, version: exo_2.7.0}
-
-  # next 3 rules: all to calculate Likelihoods the class way (not the classy way)
-  # verified that BAO, Pantheon & Planck_SZ all give same result the class way & classy way (through MP)
-  - capability: BAO_LogLike
-    backends:
-    - {backend: classy, version: exo_2.7.0}
-    options:
-      DataFile:  BAO_2014.dat
+    function: lifetime_ALP_agg
 
   #- capability: Omega0_r
   #  function: get_Omega0_ur_classy
 
   - capability: sigma8_LogLike
     function: compute_sigma8_LogLike
-    backends:
-    - {backend: classy, version: exo_2.7.0}
-    dependencies:
-      - capability: Omega0_m
-        function: compute_Omega0_m
-        module: CosmoBit
     options:
       DataFile: "Planck_SZ_MontePython.dat"
+
+  - capability: BAO_LogLike
+    options:
+      DataFile:  BAO_2014.dat
 
   - capability: Omega0_m
     function: compute_Omega0_m
@@ -229,7 +197,7 @@ Rules:
 
   - capability: plc_2_0_init
     options:
-      planck_path: /home/janina/code/PlanckLike/plc_2.0
+      #planck_path: /PATH/TO/plc_2.0
 
 #======== Logging setup ========
 Logger:

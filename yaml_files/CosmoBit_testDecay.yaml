@@ -45,7 +45,7 @@ Parameters:
  TestDecayingDM: !import include/TestDecayingDM_scan.yaml
 
  # nuisance paramters for other cosmological likelihoods
- cosmo_nuisance_params: !import include/cosmo_nuisance_params.yaml
+ cosmo_nuisance_params_Pantheon: !import include/cosmo_nuisance_params_Pantheon.yaml
 
 #======== Prior setup ========
 Priors:
@@ -98,11 +98,11 @@ ObsLikes:
     module:       CosmoBit
     type:         double
   
-  - purpose:      LogLike
-    capability:   sigma8_LogLike
+  - purpose:      Observable
+    capability:   H0_LogLike
     module:       CosmoBit
     type:         double
-  
+
   - purpose:      Observable
     capability:   Helium_abundance
     module:       CosmoBit
@@ -113,18 +113,12 @@ ObsLikes:
     module:       CosmoBit
     type:         std::vector<double>
 
-  - purpose:      Observable
-    capability:   Sigma8
-    module:       CosmoBit
-    type:         double
-
-  - purpose:      Observable
-    capability:   Omega0_m
-    module:       CosmoBit
-    type:         double
-
 #======== Rule entries ========
 Rules:
+
+  - capability: T_cmb
+    options:
+      T_cmb: 2.7255
 
 #####
 ##  Since the "Planck_lite" model fits to be used by 
@@ -139,13 +133,35 @@ Rules:
 
 #####
 ##
+##  Inputs for class / classy
+##
+####
+
+  - capability: get_classy_cosmo_container
+    function: init_classy_cosmo_container
+
+  # classy (class through python wrapper)
+  - capability: set_classy_parameters
+    options:
+      classy_dict:
+        output: "tCl lCl pCl"
+        lensing: "yes"
+        l_max_scalars: 2508
+
+  # class (class through C++ interface --> will become outdated)
+  - capability: set_class_parameters
+    options:
+      classy_dict:
+        output: "tCl lCl pCl"
+        lensing: "yes"
+        l_max_scalars: 2508
+
+
+#####
+##
 ##  Specify data files for BAO, BBN, H0 and sigma8 Likelihoods
 ##
 ####
-  
-  - capability: T_cmb
-    options:
-      T_cmb: 2.7255
 
   - capability: BAO_LogLike
     options:
@@ -164,15 +180,11 @@ Rules:
     options:
       #planck_path: /PATH/TO/plc_2.0
 
-  - capability: sigma8_LogLike
-    options:
-        DataFile: Planck_SZ.dat
-
-  - capability: class_set_parameter
-    options:
-      class_dict: 
-        output: "tCl pCl lCl mPk" # need to add matter power spectrum for sigma8 computation
-        k_pivot: 0.05
+#####
+##
+##  Settings for AlterBBN and treatment of uncertainties
+##
+####
 
   - capability: AlterBBN_setInput
     options:

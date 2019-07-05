@@ -34,8 +34,8 @@ Parameters:
  Planck_lite: !import include/Planck_lite_scan.yaml
 
  # Cosmological nuisance parameters (except for Planck CMB Likelihoods) 
- cosmo_nuisance_params: !import include/cosmo_nuisance_params.yaml
- 
+ cosmo_nuisance_params_Pantheon: !import include/cosmo_nuisance_params_Pantheon.yaml
+
  # Model Parameters of CosmoALP
  CosmoALP:
    Cagg: 1.0
@@ -97,6 +97,11 @@ ObsLikes:
     module:       DarkBit
     type:         double
 
+  - purpose:      LogLike
+    capability:   lnL_RParameter
+    module:       DarkBit
+    type:         double
+
   - purpose:      Observable
     capability:   H0_LogLike
     module:       CosmoBit
@@ -140,8 +145,27 @@ Rules:
 #####
 
   - capability: compute_Planck_high_TT_loglike
-    function: function_Planck_high_TT_lite_loglike
-    module: CosmoBit
+    function: function_Planck_high_TTTEEE_lite_loglike
+
+  - capability: get_classy_cosmo_container
+    function: init_classy_cosmo_container
+
+  # classy (class through python wrapper)
+  - capability: set_classy_parameters
+    options:
+      classy_dict:
+        output: "tCl lCl pCl"
+        lensing: "yes"
+        l_max_scalars: 2508
+
+  # class (class through C++ interface --> will become outdated)
+  - capability: set_class_parameters
+    options:
+      classy_dict:
+        output: "tCl lCl pCl"
+        lensing: "yes"
+        l_max_scalars: 2508
+
 
   - capability: BBN_LogLike
     options:
@@ -152,11 +176,9 @@ Rules:
     options:
       DataFile:  BAO_2014.dat
   
-  
   - capability: H0_LogLike
     options:
       DataFile:  SH0ES.dat
-
 
   - capability: AlterBBN_setInput
     options:

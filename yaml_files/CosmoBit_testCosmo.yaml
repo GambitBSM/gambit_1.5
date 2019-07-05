@@ -42,7 +42,7 @@ Parameters:
  Planck_lite: !import include/Planck_lite_scan.yaml
  
  # nuisance paramters for other cosmological likelihoods
- cosmo_nuisance_params: !import include/cosmo_nuisance_params.yaml
+ cosmo_nuisance_params_Pantheon: !import include/cosmo_nuisance_params_Pantheon.yaml
 
 #======== Prior setup ========
 Priors:
@@ -99,11 +99,16 @@ ObsLikes:
     capability:   compute_Planck_high_TT_loglike
     module:       CosmoBit
     type:         double
-  
+
   - purpose:      LogLike
-    capability:   sigma8_LogLike
+    capability:   compute_Planck_lensing_loglike
     module:       CosmoBit
     type:         double
+
+#  - purpose:      LogLike
+#    capability:   sigma8_LogLike
+#    module:       CosmoBit
+#    type:         double
   
   - purpose:      Observable
     capability:   Helium_abundance
@@ -132,16 +137,22 @@ ObsLikes:
 
   - purpose:      Observable
     capability:   Sigma8
-    module:       CosmoBit
-    type:         double
 
   - purpose:      Observable
     capability:   Omega0_m
-    module:       CosmoBit
-    type:         double
 
 #======== Rule entries ========
 Rules:
+
+  - capability: T_cmb
+    options:
+      T_cmb: 2.7255
+
+  - capability:   Omega0_m
+    function:     get_Omega0_m_classy
+
+  - capability:   Sigma8
+    function:     get_Sigma8_classy
 
 #####
 ##  Since the "Planck_lite" model fits to be used by 
@@ -156,13 +167,36 @@ Rules:
 
 #####
 ##
-##  Specify data files for BAO, BBN, H0 and sigma8 Likelihoods
+##  Inputs for class / classy
 ##
 ####
 
-  - capability: T_cmb
+  - capability: get_classy_cosmo_container
+    function: init_classy_cosmo_container
+
+  # classy (class through python wrapper)
+  - capability: set_classy_parameters
     options:
-      T_cmb: 2.7255
+      classy_dict:
+        output: "tCl lCl pCl mPk"
+        lensing: "yes"
+        l_max_scalars: 2508
+        P_k_max_h/Mpc: 1.
+
+  # class (class through C++ interface --> will become outdated)
+  - capability: set_class_parameters
+    options:
+      classy_dict:
+        output: "tCl lCl pCl mPk"
+        lensing: "yes"
+        l_max_scalars: 2508
+        P_k_max_h/Mpc: 1.
+
+#####
+##
+##  Specify data files for BAO, BBN, H0 and sigma8 Likelihoods
+##
+####
 
   - capability: BAO_LogLike
     options:
@@ -180,16 +214,12 @@ Rules:
   - capability: plc_2_0_init
     options:
       planck_path: /scratch/work/stoecker/plc_2.0
-      
-  - capability: sigma8_LogLike
-    options:
-        DataFile: Planck_SZ.dat
 
-  - capability: class_set_parameter
-    options:
-      class_dict: 
-        output: "tCl pCl lCl mPk" # need to add matter power spectrum for sigma8 computation
-        k_pivot: 0.05
+#####
+##
+##  Settings for AlterBBN and treatment of uncertainties
+##
+####
 
   - capability: AlterBBN_setInput
     options:
@@ -201,12 +231,6 @@ Rules:
       correlation_matrix: [[1.0,0.2],[0.2,1.0]]
       relative_errors: [1e-3,1e-2]
       elements: [Yp,D]
-
-  - capability: external_dNeff_etaBBN
-    options:
-      grid_size: 3000
-      max_iter: 8
-
 
 #======== Logging setup ========
 Logger:

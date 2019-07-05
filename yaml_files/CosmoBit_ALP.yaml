@@ -81,6 +81,9 @@ ObsLikes:
   - capability: lnL_RParameter
     purpose: LogLike
 
+  - capability: lnL_SN1987A_DecayApprox
+    purpose: LogLike
+
   - capability: DM_fraction
     purpose: Observable
     module: CosmoBit
