@@ -717,13 +717,11 @@ START_MODULE
      START_CAPABILITY
      #define FUNCTION init_classy_cosmo_container_with_MPLike
       START_FUNCTION(CosmoBit::ClassyInput)
-      ALLOW_MODELS(LCDM_dNeffCMB_dNeffBBN_etaBBN)
       DEPENDENCY(cosmo_args_from_MPLike,  pybind11::dict)
       DEPENDENCY(set_classy_parameters,   CosmoBit::ClassyInput)
      #undef FUNCTION
      #define FUNCTION init_classy_cosmo_container
       START_FUNCTION(CosmoBit::ClassyInput)
-      ALLOW_MODELS(LCDM_dNeffCMB_dNeffBBN_etaBBN)
       DEPENDENCY(set_classy_parameters, CosmoBit::ClassyInput)
      #undef FUNCTION
   #undef CAPABILITY
@@ -761,7 +759,6 @@ START_MODULE
     START_CAPABILITY
     #define FUNCTION calc_MP_LogLikes
       START_FUNCTION(map_str_dbl) 
-      //ALLOW_MODELS(LCDM_dNeffCMB_dNeffBBN_etaBBN)
       DEPENDENCY(MP_experiment_names,         map_str_str)
       DEPENDENCY(parameter_dict_for_MPLike,   pybind11::dict)
       BACKEND_REQ(get_classy_cosmo_object,               (classy),             pybind11::object,      ())
@@ -777,7 +774,6 @@ START_MODULE
     #define FUNCTION calc_MP_combined_LogLike
       START_FUNCTION(double)
       DEPENDENCY(MP_LogLikes, map_str_dbl)
-      //ALLOW_MODELS(LCDM_dNeffCMB_dNeffBBN_etaBBN)
     #undef FUNCTION
   #undef CAPABILITY
 
