@@ -23,33 +23,59 @@
 
 #include "gambit/Models/models/Axions.hpp"
 
+#define MODEL GeneralCosmoALP
+#define FRIEND TestDecayingDM
+void MODEL_NAMESPACE::GeneralCosmoALP_to_TestDecayingDM (const ModelParameters &myparams, ModelParameters &friendparams)
+{
+    USE_MODEL_PIPE(FRIEND) // get pipe for "interpret as friend" function
+    logger()<<"Running interpret_as_friend calculations for GeneralCosmoALP -> TestDecayingDM ..."<<EOM;
+
+    friendparams.setValue("lifetime", *Dep::lifetime);
+    friendparams.setValue("mass", 1e-9*myparams["ma0"]); // Convert units from eV (GeneralCosmoALP) to GeV (TestDecayingDM)
+    friendparams.setValue("BR", 0.); // ALP decays exclusively into photons
+    friendparams.setValue("fraction", *Dep::DM_fraction);
+}
+#undef FRIEND
+
+#define FRIEND etaBBN_rBBN_rCMB_dNeffBBN_dNeffCMB
+void MODEL_NAMESPACE::GeneralCosmoALP_to_etaBBN_rBBN_rCMB_dNeffBBN_dNeffCMB (const ModelParameters &myparams, ModelParameters &friendparams)
+{
+    USE_MODEL_PIPE(FRIEND) // get pipe for "interpret as friend" function
+    logger()<<"Running interpret_as_friend calculations for GeneralCosmoALP -> etaBBN_rBBN_rCMB_dNeffBBN_dNeffCMB ..."<<EOM;
+
+    // Get the results for the entropy evolution between BBN and CMB
+    // and map them onto r_BBN/CMB and dNeff_BBN/CMB.
+    map_str_dbl Neff_results = *Dep::external_dNeff_etaBBN;
+
+    // We assume that the initial ratio r (at BBN) is unchanged
+    friendparams.setValue("r_BBN", 1.0);
+    friendparams.setValue("r_CMB", pow(Neff_results["Neff_ratio"], 1./4.));
+    // No dark raddiation
+    friendparams.setValue("dNeff_BBN", 0.0);
+    friendparams.setValue("dNeff_CMB", 0.0);
+    friendparams.setValue("eta_BBN", (*Dep::eta0)*Neff_results["eta_ratio"]);
+}
+#undef FRIEND
+#undef MODEL
+
 #define MODEL CosmoALP
 void MODEL_NAMESPACE::CosmoALP_to_GeneralCosmoALP (const ModelParameters &myparams, ModelParameters &parentparams)
 {
     logger()<<"Running interpret_as_parent calculations for CosmoALP -> GeneralCosmoALP ..."<<EOM;
 
-    parentparams.setValue("gagg", myparams["gagg"]);
+    const double alpha_red = alpha_EM/(2.0*pi);
+    double fa  = myparams["fa"];
+
+    parentparams.setValue("gagg", alpha_red*myparams["Cagg"]/fa);
     parentparams.setValue("gaee", 0);
-    parentparams.setValue("fa", myparams["fa"]);
+    parentparams.setValue("fa", fa);
     parentparams.setValue("ma0", myparams["ma0"]);
     parentparams.setValue("Tchi", 1E99);
     parentparams.setValue("beta", 0);
     parentparams.setValue("thetai", myparams["thetai"]);
-    parentparams.setValue("Ya0", myparams["Ya0"]);
+    parentparams.setValue("f0_thermal", myparams["f0_thermal"]);
+    parentparams.setValue("T_R", myparams["T_R"]);
 }
-
-#define FRIEND TestDecayingDM
-void MODEL_NAMESPACE::CosmoALP_to_TestDecayingDM (const ModelParameters &myparams, ModelParameters &friendparams)
-{
-    USE_MODEL_PIPE(FRIEND) // get pipe for "interpret as friend" function
-    logger()<<"Running interpret_as_friend calculations for CosmoALP -> TestDecayingDM ..."<<EOM;
-
-    friendparams.setValue("lifetime", *Dep::lifetime);
-    friendparams.setValue("mass", 1e-9*myparams["ma0"]); // Convert units from eV (CosmoALP) to GeV (TestDecayingDM)
-    friendparams.setValue("BR", 0.); // ALP decays exclusively into photons
-    friendparams.setValue("fraction", *Dep::DM_fraction);
-}
-#undef FRIEND
 #undef MODEL
 
 #define MODEL GeneralALP
@@ -64,8 +90,10 @@ void MODEL_NAMESPACE::GeneralALP_to_GeneralCosmoALP (const ModelParameters &mypa
     parentparams.setValue("Tchi", myparams["Tchi"]);
     parentparams.setValue("beta", myparams["beta"]);
     parentparams.setValue("thetai", myparams["thetai"]);
-    // Set Ya0 = 0 to avoid unnecessary relic density calculation...
-    parentparams.setValue("Ya0", 0);
+    // Set f0_thermal = 0, i.e. no thermal component.
+    parentparams.setValue("f0_thermal", 0);
+    // Use default reheating temperature of 5 MeV.
+    parentparams.setValue("T_R", 5.);
 }
 #undef MODEL
 
@@ -74,13 +102,13 @@ void MODEL_NAMESPACE::QCDAxion_to_GeneralALP (const ModelParameters &myparams, M
 {
     logger()<<"Running interpret_as_parent calculations for QCDAxion -> GeneralALP ..."<<EOM;
 
-    const double alpha_red = alpha_EM/sqrt(2.0*pi);
+    const double alpha_red = alpha_EM/(2.0*pi);
     double fa  = myparams["fa"];
     double L2  = myparams["LambdaChi"]*myparams["LambdaChi"];
     double EoN = myparams["EoverN"];
     double CG  = myparams["CaggQCD"];
 
-    parentparams.setValue("gagg", 1E-9*alpha_red*std::fabs(EoN-CG)/fa);
+    parentparams.setValue("gagg", alpha_red*std::fabs(EoN-CG)/fa);
     parentparams.setValue("gaee", m_electron*myparams["Caee"]/fa);
     parentparams.setValue("fa", fa);
     parentparams.setValue("ma0", 1E+3*L2/fa);
@@ -158,15 +186,15 @@ void MODEL_NAMESPACE::ConstantMassALP_to_GeneralALP (const ModelParameters &mypa
 {
     logger()<<"Running interpret_as_parent calculations for ConstantMassALP -> GeneralALP ..."<<EOM;
 
-    const double alpha_red = alpha_EM/sqrt(2.0*pi);
+    const double alpha_red = alpha_EM/(2.0*pi);
 
     double L2 = myparams["Lambda"]*myparams["Lambda"];
-    double FA = myparams["fa"];
+    double fa = myparams["fa"];
 
-    parentparams.setValue("gagg", 1E-9*alpha_red*myparams["Cagg"]/FA);
-    parentparams.setValue("gaee", m_electron*myparams["Caee"]/FA);
-    parentparams.setValue("fa", FA);
-    parentparams.setValue("ma0", 1E+3*L2/FA);
+    parentparams.setValue("gagg", alpha_red*myparams["Cagg"]/fa);
+    parentparams.setValue("gaee", m_electron*myparams["Caee"]/fa);
+    parentparams.setValue("fa", fa);
+    parentparams.setValue("ma0", 1E+3*L2/fa);
     parentparams.setValue("Tchi", 1.0E99);
     parentparams.setValue("beta", 0);
     parentparams.setValue("thetai", myparams["thetai"]);

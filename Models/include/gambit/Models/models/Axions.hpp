@@ -20,31 +20,38 @@
 #define __GeneralALP_hpp__
 
 #include "gambit/Models/models/demo.hpp"
+#include "gambit/Models/models/CosmoModels.hpp"
 
 // General axion model with parametric temperature-dependent mass and cosmological applications.
 #define MODEL GeneralCosmoALP
   START_MODEL
   // Physical units: gagg [GeV^-1], gaee [dimensionless], fa [GeV], ma0 [eV]
-  //                 Tchi [MeV], beta [dimensionless], thetai [dimensionless], Ya0 [dimensionless]
+  //                 Tchi [MeV], beta [dimensionless], thetai [dimensionless], f0_thermal [dimensionless], T_R [MeV]
   DEFINEPARS(gagg,gaee,fa,ma0,Tchi,beta,thetai)
-  DEFINEPARS(Ya0)
+  DEFINEPARS(f0_thermal, T_R)
+  
+  // Friendship with "TestDecayingDM" (Mapping is defined in Axions.cpp)
+  // (Energy injection into CMB)
+  INTERPRET_AS_X_FUNCTION(TestDecayingDM,GeneralCosmoALP_to_TestDecayingDM)
+  // The mapping CosmoALP_to_TestDecayingDM depends on the lifetime and the fraction rho_a/rho_cdm (mapping of the mass is trivial).
+  INTERPRET_AS_X_DEPENDENCY(TestDecayingDM,lifetime,double)
+  INTERPRET_AS_X_DEPENDENCY(TestDecayingDM,DM_fraction,double)
+  
+  // Friendship with "etaBBN_rBBN_rCMB_dNeffBBN_dNeffCMB" (Mapping is defined in Axions.cpp)
+  INTERPRET_AS_X_FUNCTION(etaBBN_rBBN_rCMB_dNeffBBN_dNeffCMB,GeneralCosmoALP_to_etaBBN_rBBN_rCMB_dNeffBBN_dNeffCMB)
+  INTERPRET_AS_X_DEPENDENCY(etaBBN_rBBN_rCMB_dNeffBBN_dNeffCMB,external_dNeff_etaBBN,map_str_dbl)
+  INTERPRET_AS_X_DEPENDENCY(etaBBN_rBBN_rCMB_dNeffBBN_dNeffCMB,eta0,double)
 #undef MODEL
 
 // Simplified general axion model with parametric temperature-independent mass and cosmological applications.
 #define MODEL CosmoALP
 #define PARENT GeneralCosmoALP
   START_MODEL
-  // Units for these parameters are the same as for the GeneralALP.
-  DEFINEPARS(gagg,fa,ma0,thetai)
-  DEFINEPARS(Ya0)
+  // Units for these parameters are the same as for the GeneralCosmoALP.
+  DEFINEPARS(Cagg,fa,ma0,thetai)
+  DEFINEPARS(f0_thermal,T_R)
   // Translation to parent, all defined in Axions.cpp:
   INTERPRET_AS_PARENT_FUNCTION(CosmoALP_to_GeneralCosmoALP)
-
-  // Start friendship with "TestDayingDM" (Mapping is defined in Axions.cpp)
-  INTERPRET_AS_X_FUNCTION(TestDecayingDM,CosmoALP_to_TestDecayingDM)
-  // The mapping CosmoALP_to_TestDecayingDM depends on the lifetime and the fraction rho_a/rho_cdm (mapping of the mass is trivial).
-  INTERPRET_AS_X_DEPENDENCY(TestDecayingDM,lifetime,double)
-  INTERPRET_AS_X_DEPENDENCY(TestDecayingDM,DM_fraction,double)
 #undef PARENT
 #undef MODEL
 

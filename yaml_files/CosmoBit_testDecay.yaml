@@ -25,9 +25,14 @@ Parameters:
  
  # --- import model parameters for models to scan over ---
  LCDM: !import include/LCDM_scan.yaml        # base LCDM
- #LCDM_dNeffCMB: !import include/LCDM_dNeffCMB_scan.yaml
- #LCDM_dNeffCMB_dNeffBBN: !import include/LCDM_dNeffCMB_dNeffBBN_scan.yaml
- #LCDM_dNeffCMB_dNeffBBN_etaBBN: !import include/LCDM_dNeffCMB_dNeffBBN_etaBBN_scan.yaml
+
+ # Everything Neff and eta related
+ #etaBBN:                             !import include/etaBBN.yaml
+ #rCMB:                               !import include/rCMB.yaml
+ #rBBN_rCMB:                          !import include/rBBN_rCMB.yaml
+ #dNeffCMB:                           !import include/dNeffCMB.yaml
+ #dNeffBBN_dNeffCMB:                  !import include/dNeffBBN_dNeffCMB.yaml
+ etaBBN_rBBN_rCMB_dNeffBBN_dNeffCMB: !import include/etaBBN_rBBN_rCMB_dNeffBBN_dNeffCMB.yaml
 
  # neutrino masses
  StandardModel_numass_single: !import include/StandardModel_numass_single_scan.yaml
@@ -157,8 +162,8 @@ Rules:
 
   - capability: plc_2_0_init
     options:
-      #planck_path: /home/janina/code/PlanckLike/plc_2.0 # set by hand: path/to/your/planck/data
-      
+      #planck_path: /PATH/TO/plc_2.0
+
   - capability: sigma8_LogLike
     options:
         DataFile: Planck_SZ.dat
@@ -169,7 +174,7 @@ Rules:
         output: "tCl pCl lCl mPk" # need to add matter power spectrum for sigma8 computation
         k_pivot: 0.05
 
-  - capability: AlterBBN_modelinfo
+  - capability: AlterBBN_setInput
     options:
       failsafe: 1
       err: 0

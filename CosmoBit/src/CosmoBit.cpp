@@ -86,7 +86,7 @@ namespace Gambit
       -(1.0+pow(10.0,a)*c*c)/(1.0+pow(10.0,a)*x*x);
     }
 
-    
+
     // Returns SMASH potential value given parameters and field amplitude
     double pot_SMASH(double lambda, double phi, double xi)
     {
@@ -170,10 +170,11 @@ namespace Gambit
       spectrum.spec_ph.resize(1,BR_ph*2e9);
     }
 
-    void lifetime_CosmoALP(double& result)
+    void lifetime_ALP_agg(double& result)
     {
-      // lifetime in s
-      using namespace Pipes::lifetime_CosmoALP;
+      // lifetime in s if onlz the decay a -> g g is open.
+      using namespace Pipes::lifetime_ALP_agg;
+
       double gagg = *Param["gagg"]; // in GeV^-1
       double ma = *Param["ma0"]; // in eV
 
@@ -197,43 +198,59 @@ namespace Gambit
       }
     }
 
-    void minimum_abundance_CosmoALP(double& result)
+    // Compute the abundance of ALPs expected from thermal production via Primakoff processes
+    void minimum_abundance_ALP(double& result)
     {
-      using namespace Pipes::minimum_abundance_CosmoALP;
+      using namespace Pipes::minimum_abundance_ALP;
 
-      // Read T_R in MeV and convert it to GeV
-      static double T_R_in_GeV = 1e-3*(runOptions->getValueOrDef<double>(5.,"T_R")); // Read T_R in MeV and convert it to GeV
+      double gagg = *Param["gagg"];                 // Read axion-photon coupling in GeV^-1
+      double T_R_in_GeV = 1e-3 * (*Param["T_R"]);   // Read reheating temperature in MeV and convert it to GeV
 
-      // check for stupid input (T_R < m_e)
-      // Throw an error if the user really pushed it that far.
+      // Check for stupid input (T_R < m_e) and throw an error if the user really pushed it that far.
       if (m_electron >= T_R_in_GeV)
         CosmoBit_error().raise(LOCAL_INFO,"The reheating temperature is below the electron mass.");
 
-      double gagg = *Param["gagg"]; // in GeV^-1
-      double Ya0_min = 1.56e-5 * pow(gagg,2) * m_planck * (T_R_in_GeV - m_electron);
+      result = 1.56e-5 * pow(gagg,2) * m_planck * (T_R_in_GeV - m_electron);
 
-      result = Ya0_min;
     }
 
-    void DM_fraction_CosmoALP(double& result)
+    // The fraction of dark matter in decaying ALPs at the time of production
+    void DM_fraction_ALP(double& result)
     {
-      using namespace Pipes::DM_fraction_CosmoALP;
-      double Ya0 = *Param["Ya0"]; // ALP abundance (after production)
-      double ma0 = *Param["ma0"]; // non-thermal ALP mass in eV
-      double T = *Dep::T_cmb; // CMB temperature in K
-      double ssm0 = entropy_density_SM(T); // SM entropy density today in eV^3 (cf. footnote 24 of PDG2018-Astrophysical parameters)
-      double rho0_a = Ya0 * ma0 * ssm0; // energy density of axions today in eV^4
+      using namespace Pipes::DM_fraction_ALP;
 
-      double omega_cdm = *Param["omega_cdm"]; // omega_cdm = Omega_cdm * h^2
       const double rho0_crit_by_h2 = 3.*pow(m_planck_red*1e9,2) * pow((1e5*1e9*hbar/_Mpc_SI_),2); // rho0_crit/(h^2)
+      const double t_rec = 1e12;                     // Age of the Universe at recombination in s
+
+      double f0_thermal = *Param["f0_thermal"];      // Fraction of DM in ALPs at production, due to thermal production
+      double omega_ma = 0.0;                         // Cosmological density of ALPs from vacuum misalignment
+      if (abs(*Param["thetai"]) > 1e-9)              // Only calculate if thetai is non zero
+	omega_ma = *Dep::RD_oh2;
+
+      double ma0 = *Param["ma0"];                    // non-thermal ALP mass in eV
+      double T = *Dep::T_cmb;                        // CMB temperature in K
+      double omega_cdm = *Param["omega_cdm"];        // omega_cdm = Omega_cdm * h^2
+      double tau_a = *Dep::lifetime;                 // ALP lifetime in s
+
+      // Consistency check: if the ALP abundance from all thermal processes is less than that expected just from Primakoff processes, invalidate this point.
+      double Ya0_min = *Dep::minimum_abundance;
+      double ssm0 = entropy_density_SM(T);           // SM entropy density today in eV^3 (cf. footnote 24 of PDG2018-Astrophysical parameters)
       double rho0_cdm = omega_cdm * rho0_crit_by_h2; // rho0_cdm = Omega_cdm * rho0_crit;
+      double rho0_thermal = f0_thermal * rho0_cdm;   // energy density of axions today in eV^4
+      double Ya0 = rho0_thermal / (ma0 * ssm0);      // ALP abundance at production
+      if (Ya0 < Ya0_min)
+      {
+        std::ostringstream err;
+        err << "The choice of Ya0 (" << Ya0 << ") is in contradiction with the minimum abundance Ya0_min (";
+        err << Ya0_min << ") produced via Primakoff processes.";
+        invalid_point().raise(err.str());
+      }
 
-      double xi_ini = rho0_a / rho0_cdm; // Initial fraction of decauying dark matter (rho_dcdm / rho_cdm) and the naive value if decay of the ALP would be neglected.
-      double tau_a = *Dep::lifetime;
-      const double t_rec = 1e12;
+      // Compute the total fraction of DM in ALPs at production
+      double xi_ini = f0_thermal + omega_ma/omega_cdm;
+
+      // Consistency check: invalidate if there are more ALPs than dark matter at the time of recombination (t ~ 1e12s)
       double xi_at_rec = xi_ini * exp(-t_rec/tau_a );
-
-      // invalidate if there are more ALPs than dark matter at the time of recombination (t ~ 1e12s)
       if (xi_at_rec  > 1.)
       {
         std::ostringstream err;
@@ -241,24 +258,23 @@ namespace Gambit
         invalid_point().raise(err.str());
       }
 
-      // TODO: Make the part which follows down below a proper likelihood
-
-      // Consistency check if value for xi (rho0_a / rh0_cdm) is in contradiction with
-      // T_R > 5 MeV (or user input). If so, invalidate the point.
-      // (Reason: T_R predicts a minimum abundance Ya0_min through Primakoff processes. Any additional production mechanism would only increase Ya0)
-      double Ya0_min = *Dep::minimum_abundance;
-      if (Ya0 < Ya0_min)
-      {
-        std::ostringstream err;
-        err << "The choice of Ya0 (";
-        err << Ya0;
-        err << ") is in contradiction with the minimum abundance Ya0_min (";
-        err << Ya0_min;
-        err << ") produced via Primakoff processes.";
-        invalid_point().raise(err.str());
-      }
-
       result = xi_ini;
+    }
+
+    void total_DM_abundance_ALP(double& result)
+    {
+      using namespace Pipes::total_DM_abundance_ALP;
+
+      const double rho0_crit_by_h2 = 3.*pow(m_planck_red*1e9,2) * pow((1e5*1e9*hbar/_Mpc_SI_),2); // rho0_crit/(h^2)
+      double omega_cdm = *Param["omega_cdm"];  // omega_cdm = Omega_cdm * h^2
+      double fraction = *Dep::DM_fraction;
+      double rho0_ALP = omega_cdm * fraction* rho0_crit_by_h2; // rho0_cdm = Omega_cdm * rho0_crit
+
+      double ma0 = *Param["ma0"];
+      double TCMB = *Dep::T_cmb;
+      double ssm0 = entropy_density_SM(TCMB);
+
+      result = rho0_ALP / (ma0 * ssm0);
     }
 
     void energy_injection_efficiency_func(DarkAges::fz_table& result)
@@ -336,7 +352,7 @@ namespace Gambit
     void set_NuMasses_SM(map_str_dbl &result)
     {
       using namespace Pipes::set_NuMasses_SM;
-      
+
       double mNu1, mNu2, mNu3;
       int N_ncdm = 0;
       if (ModelInUse("StandardModel_SLHA2"))
@@ -408,7 +424,7 @@ namespace Gambit
       int N_ncdm = (int)NuMasses_SM["N_ncdm"];
 
       if (N_ncdm > 0.)
-      { 
+      {
         cosmo.input.addEntry("N_ncdm",N_ncdm);
         cosmo.input.addEntry("m_ncdm",m_ncdm_classInput(NuMasses_SM));
 
@@ -417,14 +433,16 @@ namespace Gambit
       }
       else
       {
-        cosmo.input.addEntry("T_ncdm", *Dep::T_ncdm); 
+        cosmo.input.addEntry("T_ncdm", *Dep::T_ncdm);
       }
 
       cosmo.input.addEntry("N_ur",*Dep::class_Nur);
 
-      cosmo.input.addEntry("output","tCl pCl lCl");
+      cosmo.input.addEntry("output","tCl pCl lCl mPk");
       cosmo.input.addEntry("l_max_scalars",l_max);
       cosmo.input.addEntry("lensing","yes");
+      cosmo.input.addEntry("non linear","halofit");
+      cosmo.input.addEntry("P_k_max_h/Mpc",1);
 
       cosmo.input.addEntry("T_cmb",*Dep::T_cmb);
       cosmo.input.addEntry("omega_b",*Param["omega_b"]);
@@ -434,7 +452,7 @@ namespace Gambit
       cosmo.input.addEntry("n_s",*Param["n_s"]);
       cosmo.input.addEntry("tau_reio",*Param["tau_reio"]);
 
-      if (ModelInUse("TestDecayingDM"))  // TODO: need to test if class or exo_class in use! does not work 
+      if (ModelInUse("TestDecayingDM"))  // TODO: need to test if class or exo_class in use! does not work
       {
         cosmo.input.addEntry("energy_deposition_function","GAMBIT");
         cosmo.input.addEntry("tau_dcdm",*Dep::lifetime);
@@ -2421,12 +2439,12 @@ namespace Gambit
         y[0]: stores SM T[t0]
       */
 
-      fast_interpolation injection_inter = *(static_cast<fast_interpolation*>(params)); 
+      fast_interpolation injection_inter = *(static_cast<fast_interpolation*>(params));
       f[0] = (15.0/(4.0*pi*pi)) * injection_inter.interp(t)/pow(y[0], 3) - 3.7978719e-7*y[0]*y[0]*y[0];
       return GSL_SUCCESS;
     }
 
-    void compute_dNeff_etaBBN_ALP(map_str_dbl &result)  // takes about 0.2 s with 3000 grid points and 1e-6 convergence criterion atm 
+    void compute_dNeff_etaBBN_ALP(map_str_dbl &result)  // takes about 0.2 s with 3000 grid points and 1e-6 convergence criterion atm
     {
       using namespace Pipes::compute_dNeff_etaBBN_ALP;
 
@@ -2447,20 +2465,20 @@ namespace Gambit
       std::valarray<double> t_grid(grid_size), T_evo(grid_size), Tnu_grid(grid_size), na_grid(grid_size), injection_grid(grid_size); // arrays containing time dependence of variables
 
       SM_time_evo SM(t0,tf,grid_size);  // set time evolution of SM
-      t_grid = SM.get_t_grid();         // has to be updated when solving the differential equation 
+      t_grid = SM.get_t_grid();         // has to be updated when solving the differential equation
       T_evo = SM.get_T_evo();
 
       // --- model parameters ----
-      double Ya0 = *Param["Ya0"];
+      double Ya0 = *Dep::total_DM_abundance;
       double T0 = T_evo[0];
       double ssm_at_T0 = entropy_density_SM(T0, true);; // T0 in units of keV, set T_in_eV=True to interpret it correctly
-      
+
       double na_t0 = Ya0 * ssm_at_T0;     // initial number density of a at t=t0, in units keV^3.
       double m_a = 1e-3*(*Param["ma0"]);  // mass of a in keV
       double tau_a = *Dep::lifetime;      // lifetime of a in seconds
 
       // loop over iterations until convergence or max_iter is reached
-      while( ((fabs(temp_eta_ratio-eta_ratio) > epsrel) || fabs(temp_dNeff - dNeff) > epsrel) && (ii <= max_iter) ) 
+      while( ((fabs(temp_eta_ratio-eta_ratio) > epsrel) || fabs(temp_dNeff - dNeff) > epsrel) && (ii <= max_iter) )
       {
         temp_eta_ratio = eta_ratio;  // to check for convergence
         temp_dNeff = dNeff;
@@ -2484,7 +2502,7 @@ namespace Gambit
           if (status != GSL_SUCCESS)
           {
             std::ostringstream err;
-            err << "Failed to solve differential equation to compute dNeffCMB and etaBB for Cosmo_ALP model at iteration step "<< ii <<". Invalidating point";
+            err << "Failed to solve differential equation to compute dNeffCMB and etaBB for GeneralCosmoALP model at iteration step "<< ii <<". Invalidating point";
             invalid_point().raise(err.str());
           }
           T_evo[jj] = y[0];
@@ -2506,14 +2524,14 @@ namespace Gambit
       if( ((fabs(temp_eta_ratio-eta_ratio) > epsrel) || fabs(temp_dNeff - dNeff) > epsrel) && (ii >= max_iter) )
       {
         std::ostringstream err;
-        err << "Computation of dNeffCMB and etaBBN for Cosmo_ALP model did not converge after n = "<< ii <<" iterations. You can increase the maximum number of iterations with the run Option 'max_iter'. Invalidating point.";
+        err << "Computation of dNeffCMB and etaBBN for GeneralCosmoALP model did not converge after n = "<< ii <<" iterations. You can increase the maximum number of iterations with the run Option 'max_iter'. Invalidating point.";
         invalid_point().raise(err.str());
       }
 
       result["dNeff"] = dNeff;
       result["Neff_ratio"] = Neff_ALP/Neff_SM;
       result["eta_ratio"] = eta_ratio;
-      logger() << "CosmoALP model: calculated Neff @BBN to be " << result["dNeff"] <<", and etaBB(ALP)/etaBBN(SM) = " << result["eta_ratio"] << ". Calculation converged after "<< ii <<" iterations." << EOM;
+      logger() << "GeneralCosmoALP model: calculated Neff @BBN to be " << result["dNeff"] <<", and etaBB(ALP)/etaBBN(SM) = " << result["eta_ratio"] << ". Calculation converged after "<< ii <<" iterations." << EOM;
 
     }
 
@@ -2537,8 +2555,8 @@ namespace Gambit
       // set to 0.71611 in units of photon temperature, above the instantaneous decoupling value (4/11)^(1/3)
       // to recover Sum_i mNu_i/omega = 93.14 eV resulting from studies of active neutrino decoupling (hep-ph/0506164)
       result = 0.71611;
-      // This standard values enters in many assumption entering class. Therefore changing this value in 
-      // the yaml file is disabled at the moment. If you still want to modify it uncomment the line below and 
+      // This standard values enters in many assumption entering class. Therefore changing this value in
+      // the yaml file is disabled at the moment. If you still want to modify it uncomment the line below and
       // you can set is as a run option (as T_cmb).
       // result = runOptions->getValueOrDef<double>(0.71611,"T_ncdm");
     }
@@ -2547,18 +2565,8 @@ namespace Gambit
     {
       using namespace Pipes::set_T_ncdm;
 
-      result = *Dep::T_ncdm_SM;
-    }
-
-    void set_T_ncdm_CosmoALP(double &result)
-    {
-      using namespace Pipes::set_T_ncdm_CosmoALP;
-
-      map_str_dbl dNeff_CosmoALP = *Dep::external_dNeff_etaBBN;
-      // SM value of 0.71611 (see set_T_ncdm) multiplied by (Neff_ALP/Neff_SM)^(1/4) = T_nu_ALP/T_nu_SM
-      // to account for modified Neutrino temperature today (ALPs heat gamma w.r.t. to photons -> Neutrino today are cooler)
-      result = 0.71611*pow(dNeff_CosmoALP["Neff_ratio"], 1./4.);
-
+      // Take the SM value of T_ncdm (T_nu) and multiply it with the value of r_CMB; 
+      result = (*Param["r_CMB"])*(*Dep::T_ncdm_SM);
     }
 
     void calculate_eta0(double &result)
@@ -2567,7 +2575,7 @@ namespace Gambit
 
       double ngamma, nb;
       ngamma = 16*pi*zeta3*pow(*Dep::T_cmb*_kB_eV_over_K_/_hc_eVcm_,3); // photon number density today
-      nb = *Param["omega_b"]*3*100*1e3*100*1e3/_Mpc_SI_/_Mpc_SI_/(8*pi*_GN_cgs_*_m_proton_g_); // baryon number density today
+      nb = *Param["omega_b"]*3*100*1e3*100*1e3/_Mpc_SI_/_Mpc_SI_/(8*pi*_GN_cgs_* m_proton*1e9*eV2g); // baryon number density today
 
       result =  nb/ngamma;
       logger() << "Baryon to photon ratio (eta) today computed to be " << result << EOM;
@@ -2618,16 +2626,16 @@ namespace Gambit
     {
       using namespace Pipes::compute_n0_g;
 
-      result = 2./pi/pi*zeta3 *pow(*Dep::T_cmb*_kB_eV_over_K_,3.)/pow(_hP_eVs_*_c_SI_/2./pi,3)/100/100/100; // result per cm^3  
+      result = 2./pi/pi*zeta3 *pow(*Dep::T_cmb*_kB_eV_over_K_,3.)/pow(_hP_eVs_*_c_SI_/2./pi,3)/100/100/100; // result per cm^3
     }
 
     void compute_Omega0_ur(double &result)
     {
       using namespace Pipes::compute_Omega0_ur;
 
-      // Capability class_Nur takes care of setting N_ur right for considered number of 
+      // Capability class_Nur takes care of setting N_ur right for considered number of
       // massive neutrinos & extra model dependent contributions
-      result = (*Dep::class_Nur)*7./8.*pow(4./11.,4./3.)*(*Dep::Omega0_g); 
+      result = (*Dep::class_Nur)*7./8.*pow(4./11.,4./3.)*(*Dep::Omega0_g);
     }
 
     void compute_Omega0_ncdm(double &result)
@@ -2648,7 +2656,7 @@ namespace Gambit
       }
 
       double h = *Param["H0"]/100;
-      result = mNu_tot_eV/(93.14*h*h);  // TODO: heads up: explicit assumption of T_ncdm = 0.71611 and T_cmb goes in here. Has to be generalised  
+      result = mNu_tot_eV/(93.14*h*h);  // TODO: heads up: explicit assumption of T_ncdm = 0.71611 and T_cmb goes in here. Has to be generalised
     }
 
     void compute_Omega0_r(double &result)
@@ -2656,10 +2664,12 @@ namespace Gambit
       using namespace Pipes::compute_Omega0_r;
 
       result = *Dep::Omega0_g + (*Dep::Omega0_ur);
-      //std::cout << "omega0_g g " << *Dep::Omega0_g << " omega_ur " << *Dep::Omega0_ur <<  std::endl; 
+      //std::cout << "omega0_g g " << *Dep::Omega0_g << " omega_ur " << *Dep::Omega0_ur <<  std::endl;
     }
 
-
+/*
+    (PS: Not sure if we really need this step in between. For all our casess so far we directly could map from eta0 to eta_BBN (up to constnat factors in front))
+ * 
     void calculate_etaCMB_SM(double &result)
     {
       using namespace Pipes::calculate_etaCMB_SM;
@@ -2667,7 +2677,8 @@ namespace Gambit
       result =  *Dep::eta0; // in SM the baryon to photon ratio does not change between today an CMB release
       logger() << "Baryon to photon ratio (eta) @CMB computed to be " << result << EOM;
     }
-
+*/
+/* Is now superceeded by the MAP_TO_CAPABILITY macro within the model definition.
     void set_etaBBN(double &result)
     {
       using namespace Pipes::set_etaBBN;
@@ -2675,80 +2686,40 @@ namespace Gambit
       result =  *Param["eta_BBN"]; // in SM the baryon to photon ratio does not change between today an CMB release
       logger() << "Baryon to photon ratio (eta) @BBN set to be " << result << EOM;
     }
+*/
 
-    void calculate_etaBBN_SM(double &result)
+    void set_class_Nur(double &result)
     {
-      using namespace Pipes::calculate_etaBBN_SM;
-
-      result =  *Dep::etaCMB; // in SM the baryon to photon ratio does not change between today an CMB release
-      logger() << "Baryon to photon ratio (eta) @BBN computed to be " << result << EOM;
-    }
-
-    void calculate_etaBBN_ALP(double &result)
-    {
-      using namespace Pipes::calculate_etaBBN_ALP;
-
-       map_str_dbl dNeff_etaBBN = *Dep::external_dNeff_etaBBN;
-       result = (*Dep::etaCMB) * dNeff_etaBBN["eta_ratio"];
-       logger() << "Baryon to photon ratio (eta) @BBN computed to be " << result << EOM;
-    }
-
-    void calculate_dNeffCMB_ALP(double &result)
-    {
-      using namespace Pipes::calculate_dNeffCMB_ALP;
-     
-      map_str_dbl dNeff_etaBBN = *Dep::external_dNeff_etaBBN;
-      result = dNeff_etaBBN["dNeff"];
-      logger() << "dNeff for ALP calculated to be " << result << EOM;
-
-    }
-
-     void set_class_Nur_LCDM_family(double &result)
-    {
-      using namespace Pipes::set_class_Nur_LCDM_family;
+      using namespace Pipes::set_class_Nur;
 
       map_str_dbl NuMasses_SM = *Dep::NuMasses_SM;
-      result = *Param["dNeff"] + NuMasses_SM["N_ur_SMnu"];
-      logger() << "N_ur for LCDM family calculated to be " << result << EOM;
-    }
-
-
-    void set_class_Nur_CosmoALP(double &result)
-    {
-      using namespace Pipes::set_class_Nur_CosmoALP;
-
-      map_str_dbl dNeff_etaBBN = *Dep::external_dNeff_etaBBN;
-      map_str_dbl NuMasses_SM = *Dep::NuMasses_SM;
-      // N_ur = (NeffCMB_CosmoALP/NeffCMB_SM) * Nur_SM , to rescale the value for N_ur from non-instantaneous 
+      // N_ur = (T_ncdm_BSM/T_ncdm_SM)^4 * Nur_SM + dNeff_BSM , to rescale the value for N_ur from non-instantaneous 
       // decoupling with the standard value of 3.046 to the according contribution for a modified Neutrino temperature
-      // (CosmoALP model heats CMB photons w.r.t. to neutrinos)
+      // (GeneralCosmoALP model heats CMB photons w.r.t. to neutrinos)
       // TODO: refer to relevant section in paper!
-      result = dNeff_etaBBN["Neff_ratio"]*NuMasses_SM["N_ur_SMnu"];
-      logger() << "N_ur for ALP calculated to be " << result << EOM;
+      result = pow((*Param["r_CMB"]),4)*(NuMasses_SM["N_ur_SMnu"]) + (*Param["dNeff_CMB"]);
+      logger() << "N_ur calculated to be " << result << EOM;
     }
-
 
 /// -----------
 /// BBN related functions (call AlterBBN, BBN abundances & Likelihood)
 /// -----------
 
-    void AlterBBN_Input_LCDM_dNeffCMB_dNeffBBN_etaBBN(map_str_dbl &result)
+    void AlterBBN_Input(map_str_dbl &result)
     {
       // add parameters of relicparam structure that should be set to non-default values
-      // to the AlterBBN_input map. 
+      // to the AlterBBN_input map.
       // If you want to modify a parameter which has not been used in CosmoBit before simply
-      // add it to the function 'fill_cosmomodel' in 'AlterBBN_<version>.cpp' and to the 
+      // add it to the function 'fill_cosmomodel' in 'AlterBBN_<version>.cpp' and to the
       // set of 'known' parameters 'known_relicparam_options'
-      using namespace Pipes::AlterBBN_Input_LCDM_dNeffCMB_dNeffBBN_etaBBN;
+      using namespace Pipes::AlterBBN_Input;
 
-      result["eta0"] = *Param["eta_BBN"];  // eta AFTER BBN (variable during)
-      result["Nnu"]=3.046;                 // contribution from SM neutrinos
-      result["dNnu"]=*Param["dNeff_BBN"];  // dNnu: within AlterBBN scenarios in which the sum Nnu+dNnu is the same are identical
+      result["eta0"] = *Param["eta_BBN"];    // eta AFTER BBN (variable during)
+      result["Nnu"]=3.046*(*Param["r_BBN"]); // contribution from SM neutrinos
+      result["dNnu"]=*Param["dNeff_BBN"];    // dNnu: within AlterBBN scenarios in which the sum Nnu+dNnu is the same are identical
       result["failsafe"] = runOptions->getValueOrDef<double>(3,"failsafe");
       result["err"] = runOptions->getValueOrDef<double>(3,"err");
 
-      std::cout << "Set AlterBBN with parameters eta = " << result["eta0"] << ", Nnu = " << result["Nnu"] << ", dNeffBBN = " << result["dNnu"] << std::endl;
-      std::cout << " failsafe = " << result["failsafe"] << " and err = " << result["err"] << std::endl;
       logger() << "Set AlterBBN with parameters eta = " << result["eta0"] << ", Nnu = " << result["Nnu"] << ", dNeffBBN = " << result["dNnu"] << EOM;
       logger() << "     and error params: failsafe = " << result["failsafe"] << ", err = " << result["err"] << EOM;
     }
@@ -2877,7 +2848,7 @@ namespace Gambit
       map_str_dbl AlterBBN_input = *Dep::AlterBBN_setInput; // fill AlterBBN_input map with the parameters for the model in consideration
       int nucl_err = BEreq::call_nucl_err(AlterBBN_input, byVal(ratioH), byVal(cov_ratioH[0]));
 
-      // TODO: replace .at() by [] to speed up 
+      // TODO: replace .at() by [] to speed up
       std::vector<double> err_ratio(NNUC+1,0);
       if (use_fudged_correlations)
       {

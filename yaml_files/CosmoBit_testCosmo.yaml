@@ -24,11 +24,15 @@
 Parameters:
  
  # --- import model parameters for models to scan over ---
- #LCDM: !import include/LCDM_scan.yaml        # base LCDM
- 
- #LCDM_dNeffCMB: !import include/LCDM_dNeffCMB_scan.yaml
- #LCDM_dNeffCMB_dNeffBBN: !import include/LCDM_dNeffCMB_dNeffBBN_scan.yaml
- LCDM_dNeffCMB_dNeffBBN_etaBBN: !import include/LCDM_dNeffCMB_dNeffBBN_etaBBN_scan.yaml
+ LCDM: !import include/LCDM_scan.yaml        # base LCDM
+
+ # Everything Neff and eta related
+ #etaBBN:                             !import include/etaBBN.yaml
+ #rCMB:                               !import include/rCMB.yaml
+ #rBBN_rCMB:                          !import include/rBBN_rCMB.yaml
+ #dNeffCMB:                           !import include/dNeffCMB.yaml
+ #dNeffBBN_dNeffCMB:                  !import include/dNeffBBN_dNeffCMB.yaml
+ etaBBN_rBBN_rCMB_dNeffBBN_dNeffCMB: !import include/etaBBN_rBBN_rCMB_dNeffBBN_dNeffCMB.yaml
 
  # neutrino masses
  StandardModel_numass_single: !import include/StandardModel_numass_single_scan.yaml
@@ -163,12 +167,6 @@ Rules:
   - capability: BAO_LogLike
     options:
       DataFile:  BAO_2014.dat
-    backends:
-      - {backend: class, version: 2.6.3}
-
-  - capability: Pantheon_LogLike
-    backends:
-      - {backend: class, version: 2.6.3}
 
   - capability: BBN_LogLike
     options:
@@ -181,17 +179,11 @@ Rules:
 
   - capability: plc_2_0_init
     options:
-      planck_path: /home/janina/code/PlanckLike/plc_2.0 # set by hand: path/to/your/planck/data
+      planck_path: /scratch/work/stoecker/plc_2.0
       
   - capability: sigma8_LogLike
     options:
         DataFile: Planck_SZ.dat
-    backends:
-      - {backend: exoclass, version: 2.7.0}
-
-  - capability: Sigma8
-    backends:
-      - {backend: class, version: 2.6.3}
 
   - capability: class_set_parameter
     options:
@@ -199,9 +191,9 @@ Rules:
         output: "tCl pCl lCl mPk" # need to add matter power spectrum for sigma8 computation
         k_pivot: 0.05
 
-  - capability: AlterBBN_modelinfo
+  - capability: AlterBBN_setInput
     options:
-      failsafe: 1
+      failsafe: 3
       err: 0
 
   - capability: BBN_abundances
@@ -215,11 +207,6 @@ Rules:
       grid_size: 3000
       max_iter: 8
 
-  - capability: class_get_spectra
-    backends:
-      - {backend: exoclass, version: 2.7.0}
-
-
 
 #======== Logging setup ========
 Logger:
@@ -227,7 +214,6 @@ Logger:
     [Debug]      : "debug.log"
     [Default]      : "default.log"
     [CosmoBit]  : "CosmoBit.log"
-    [Scanner]      : "Scanner.log"
 
 #======== Generic Name/Value Section ========
 KeyValues:
