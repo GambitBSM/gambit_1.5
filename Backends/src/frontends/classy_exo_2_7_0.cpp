@@ -186,11 +186,8 @@ BE_NAMESPACE
 }
 END_BE_NAMESPACE
 
-
 BE_INI_FUNCTION
 { 
-  using namespace pybind11::literals;
-
   CosmoBit::ClassyInput input_container= *Dep::get_classy_cosmo_container;
   pybind11::dict cosmo_input_dict = input_container.get_input_dict();
 
@@ -213,8 +210,39 @@ BE_INI_FUNCTION
   
   std::cout << "    (classy frontend) after set parameters "<< std::endl;
 
-  // run class
-  cosmo.attr("compute")();
-
+  // Try to run class and catch potential errors
+  try
+  {
+    cosmo.attr("compute")();
+  }
+  catch (std::exception &e)
+  {
+    std::string errMssg = "Could not succesfully execute cosmo.compute() in classy_exo_2.7.0\n";
+    std::string rawErrMessage(e.what());
+    // If the error is a CosmoSevereError raise an backend_error ...
+    if (rawErrMessage.find("CosmoSevereError") != std::string::npos)
+    {
+      errMssg += "Caught a \'CosmoSevereError\':\n\n";
+      errMssg += rawErrMessage;
+      backend_error().raise(LOCAL_INFO,errMssg);
+    }
+    // .. but if it is 'only' a CosmoComputationError, just invalidate thew parameter point
+    else if (rawErrMessage.find("CosmoComputationError") != std::string::npos)
+    {
+      errMssg += "Caught a \'CosmoComputationError\':\n\n";
+      errMssg += rawErrMessage;
+      invalid_point().raise(errMssg);
+    }
+    // any other error (which shouldn't occur) get's also caught as invalid point.
+    else
+    {
+      errMssg += "Caught an unspecified error:\n\n";
+      errMssg += rawErrMessage;
+      cout << "An unspecified error occured during compute() in classy_exo_2.7.0:\n";
+      cout << rawErrMessage;
+      cout << "\n(This point gets invalidated) " << endl;
+      invalid_point().raise(errMssg);
+    }
+  }
 }
 END_BE_INI_FUNCTION
