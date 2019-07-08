@@ -52,7 +52,6 @@ namespace Gambit
   const double m_neutron = m_neutron_amu * atomic_mass_unit;    // neutron mass (GeV/c^2)
   const double m_electron = 0.5109989461e-3;                    // electron mass (GeV/c^2)
   const double alpha_EM = 7.2973525664e-3;                      // fine structure constant
-  const double T_CMB = 2.7255;                                  // present day CMB temperature (K)
 
   /// Values from Particle Data Group 2018 (http://pdg.lbl.gov/2018/reviews/rpp2018-rev-phys-constants.pdf)
   /// @FIXME: this need cleaning up -- there is no reason to have so much duplication nor to prefix all these with an underscore

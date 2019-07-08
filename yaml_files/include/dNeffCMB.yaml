@@ -1,0 +1,10 @@
+###########################################################################
+## Parameter of dNeffCMB
+##
+## Patrick Stoecker <stoecker@physik.rwth-aachen.de>
+## 2019, July
+##########################################################################
+
+dNeff_CMB:
+  prior_type: flat
+  range: [0.,2.]

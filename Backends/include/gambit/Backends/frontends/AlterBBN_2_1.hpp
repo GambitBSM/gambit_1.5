@@ -25,7 +25,7 @@
 LOAD_LIBRARY
 
 
-BE_ALLOW_MODELS(LCDM_dNeffCMB_dNeffBBN_etaBBN)
+//BE_ALLOW_MODELS(LCDM_dNeffCMB_dNeffBBN_etaBBN)
 
 BE_FUNCTION(Init_cosmomodel, void, (AlterBBN::AlterBBN_2_1::relicparam*), "Init_cosmomodel", "Init_cosmomodel")
 BE_FUNCTION(nucl_err, int, (AlterBBN::AlterBBN_2_1::relicparam*,double*,double*), "nucl_err", "nucl_err")

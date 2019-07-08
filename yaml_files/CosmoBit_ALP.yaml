@@ -6,7 +6,7 @@
 
 Parameters:
 
-  LCDM_dNeffCMB_dNeffBBN_etaBBN: !import include/LCDM_dNeffCMB_dNeffBBN_etaBBN_scan.yaml
+  LCDM: !import include/LCDM_scan.yaml
 
   CosmoALP:
     fa: 1.0
