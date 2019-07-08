@@ -1618,6 +1618,7 @@ namespace Gambit
       double ma0 = *Param["ma0"];
       double beta = *Param["beta"];
       double Tchi = *Param["Tchi"];
+      // Do computations assuming thetai >= 0.
       double thetai = *Param["thetai"];
       double fa = *Param["fa"];
       double Tosc = *Dep::AxionOscillationTemperature;
@@ -1625,66 +1626,71 @@ namespace Gambit
       // For sampling purposes only: Map pi < thetai < 3*pi to its equivalent value in (-pi,pi].
       if ( (thetai>pi) && (thetai<3.0*pi) ) {thetai = thetai - 2.0*pi;};
 
-      // TCMB in MeV.
-      const double TCMB = *Dep::T_cmb*K2eV*1.0E-6;
-      // Critical energy density today * h^2 (in eV^4).
-      const double ede_crit_today = 3.0*2.69862E-11;
-
-      struct AxionEDT_params p = {ma0, beta, Tchi, thetai, Tosc};
-
-      // Function, Jacobian, number of dimensions + pointer to params.
-      gsl_odeiv2_system sys = {scal_field_eq, scal_field_eq_jac, 2, &p};
-      // Evolution from Temp = 1e5 x Tosc to Temp = 0.001 x Tosc.
-      double tau2 = -0.001, tau1 = -1E5;
-      // Initial conditions for (u and v = u') as functions of temperature:
-      double y[2] = {1.0, 0.0};
-      // Settings for the driver: pointer to the ODE system sys, the gsl method, initial step size,
-      // absolute accuracy in y[0] and y[1], relative accuracy in y[0] and y[1].
-      // Other possible choices: gsl_odeiv2_step_rk4 (classic), gsl_odeiv2_step_rk8pd, gsl_odeiv2_step_rkf45 (standard choices).
-      gsl_odeiv2_driver * d = gsl_odeiv2_driver_alloc_y_new (&sys, gsl_odeiv2_step_bsimp, -0.1*tau1, 1E-8, 1E-8);
-
-      // Numerically solve ODE by continuing the integration well into the harmonic and adiabatic regime (stopping conditions
-      // via check1 = |\hat(theta)| and check2 = 3H/m need to be satisfied).
-      double new_step;
-      double check1 = 1.0, check2 = 1.0;
-      int i = 0;
-
-      #ifdef AXION_DEBUG_MODE
-        std::cout << "DEBUGGING INFO for relic density calculation:\n"
-                     "#'temperature' theta dtheta/dtau" << std::endl;
-      #endif
-
-      do
+      // Only do computations if thetai > 0.
+      result = 0.0;
+      if (fabs(thetai) > 0)
       {
-        i++;
-        new_step = -pow(10.0, 1.0 + (log10(-tau2)-1.0)*i/1000.0);
-        int status = gsl_odeiv2_driver_apply (d, &tau1, new_step, y);
-        if (status != GSL_SUCCESS) {std::cout << "Error, return value = " << d << std::endl;};
-        check1 = fabs(thetai)*sqrt(gsl_pow_2( fabs(y[0]) ) + gsl_pow_2( fabs((-new_step)*y[1]*hubble_rad_dom(-new_step*Tosc)/(ma0*axion_mass_temp(-new_step*Tosc,beta,Tchi))) ));
-        check2 = 3.0*hubble_rad_dom(-new_step*Tosc)/(ma0*axion_mass_temp(-new_step*Tosc,beta,Tchi));
+        // TCMB in MeV.
+        const double TCMB = *Dep::T_cmb*K2eV*1.0E-6;
+        // Critical energy density today * h^2 (in eV^4).
+        const double ede_crit_today = 3.0*2.69862E-11;
+
+        struct AxionEDT_params p = {ma0, beta, Tchi, thetai, Tosc};
+
+        // Function, Jacobian, number of dimensions + pointer to params.
+        gsl_odeiv2_system sys = {scal_field_eq, scal_field_eq_jac, 2, &p};
+        // Evolution from Temp = 1e5 x Tosc to Temp = 0.001 x Tosc.
+        double tau2 = -0.001, tau1 = -1E5;
+        // Initial conditions for (u and v = u') as functions of temperature:
+        double y[2] = {1.0, 0.0};
+        // Settings for the driver: pointer to the ODE system sys, the gsl method, initial step size,
+        // absolute accuracy in y[0] and y[1], relative accuracy in y[0] and y[1].
+        // Other possible choices: gsl_odeiv2_step_rk4 (classic), gsl_odeiv2_step_rk8pd, gsl_odeiv2_step_rkf45 (standard choices).
+        gsl_odeiv2_driver * d = gsl_odeiv2_driver_alloc_y_new (&sys, gsl_odeiv2_step_bsimp, -0.1*tau1, 1E-8, 1E-8);
+
+        // Numerically solve ODE by continuing the integration well into the harmonic and adiabatic regime (stopping conditions
+        // via check1 = |hat(theta)| and check2 = 3H/m need to be satisfied).
+        double new_step;
+        double check1 = 1.0, check2 = 1.0;
+        int i = 0;
 
         #ifdef AXION_DEBUG_MODE
-          std::cout << -new_step << " " << thetai*y[0] << " " << -tau2*thetai*y[1] << std::endl;
+          std::cout << "DEBUGGING INFO for relic density calculation:\n"
+                       "#'temperature' theta dtheta/dtau" << std::endl;
         #endif
 
-      } while ( ((check1>1.0E-2) || (check2>1.0E-3)) && (i<1E3) );
+        do
+        {
+          i++;
+          new_step = -pow(10.0, 1.0 + (log10(-tau2)-1.0)*i/1000.0);
+          int status = gsl_odeiv2_driver_apply (d, &tau1, new_step, y);
+          if (status != GSL_SUCCESS) {std::cout << "Error, return value = " << d << std::endl;};
+          check1 = fabs(thetai)*sqrt(gsl_pow_2( fabs(y[0]) ) + gsl_pow_2( fabs((-new_step)*y[1]*hubble_rad_dom(-new_step*Tosc)/(ma0*axion_mass_temp(-new_step*Tosc,beta,Tchi))) ));
+          check2 = 3.0*hubble_rad_dom(-new_step*Tosc)/(ma0*axion_mass_temp(-new_step*Tosc,beta,Tchi));
 
-      i++;
-      if (i>=1E+3)
-      {
-        std::ostringstream buffer;
-        buffer << "T_end: " << -new_step << " | theta_hat_val: " << check1 << ", theta_der: "<< -tau2*y[1]*thetai << ", 3H/m_osc: " << 3.0*hubble_rad_dom(Tosc)/(ma0*axion_mass_temp(-new_step*Tosc,beta,Tchi)) << ", 3H/m: " << check2 << " .\n";
-        DarkBit_warning().raise(LOCAL_INFO, "WARNING! Maximum number of integration steps reached for energy density calculator!\n         "+buffer.str());
+          #ifdef AXION_DEBUG_MODE
+            std::cout << -new_step << " " << thetai*y[0] << " " << -tau2*thetai*y[1] << std::endl;
+          #endif
+
+        } while ( ((check1>1.0E-2) || (check2>1.0E-3)) && (i<1E3) );
+
+        i++;
+        if (i>=1E+3)
+        {
+          std::ostringstream buffer;
+          buffer << "T_end: " << -new_step << " | theta_hat_val: " << check1 << ", theta_der: "<< -tau2*y[1]*thetai << ", 3H/m_osc: " << 3.0*hubble_rad_dom(Tosc)/(ma0*axion_mass_temp(-new_step*Tosc,beta,Tchi)) << ", 3H/m: " << check2 << " .\n";
+          DarkBit_warning().raise(LOCAL_INFO, "WARNING! Maximum number of integration steps reached for energy density calculator!\n         "+buffer.str());
+        };
+
+        // Calculate the axion energy density at the stopping point.
+        double ede = 1E+18*gsl_pow_2(fa)*(0.5*gsl_pow_2(y[1]*thetai*hubble_rad_dom(-new_step*Tosc)*(-new_step)) + gsl_pow_2(ma0*axion_mass_temp(-new_step*Tosc,beta,Tchi))*(1.0 - gsl_sf_cos(y[0]*thetai)));
+        // Use conservation of entropy to scale the axion energy density to its present value (relative to the critical energy density).
+        double OmegaAh2 = ede*gsl_pow_3(TCMB/(-new_step*Tosc))*(gStar_S(TCMB)/gStar_S(-new_step*Tosc))*(1.0/axion_mass_temp(-new_step*Tosc,beta,Tchi))/ede_crit_today;
+
+        gsl_odeiv2_driver_free (d);
+
+        result = OmegaAh2;
       };
-
-      // Calculate the axion energy density at the stopping point.
-      double ede = 1E+18*gsl_pow_2(fa)*(0.5*gsl_pow_2(y[1]*thetai*hubble_rad_dom(-new_step*Tosc)*(-new_step)) + gsl_pow_2(ma0*axion_mass_temp(-new_step*Tosc,beta,Tchi))*(1.0 - gsl_sf_cos(y[0]*thetai)));
-      // Use conservation of entropy to scale the axion energy density to its present value (relative to the critical energy density).
-      double OmegaAh2 = ede*gsl_pow_3(TCMB/(-new_step*Tosc))*(gStar_S(TCMB)/gStar_S(-new_step*Tosc))*(1.0/axion_mass_temp(-new_step*Tosc,beta,Tchi))/ede_crit_today;
-
-      gsl_odeiv2_driver_free (d);
-
-      result = OmegaAh2;
     }
 
     //////////////////////////////////////////////
