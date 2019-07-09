@@ -28,6 +28,8 @@
 #include <gsl/gsl_sf.h>
 #include <gsl/gsl_sf_trig.h>
 #include <gsl/gsl_spline.h>
+#include <gsl/gsl_interp2d.h>
+#include <gsl/gsl_spline2d.h>
 #include <gsl/gsl_histogram.h>
 #include <gsl/gsl_roots.h>
 #include <gsl/gsl_matrix.h>
@@ -138,6 +140,119 @@ namespace Gambit
     double AxionInterpolator::lower() { return lo; };
     double AxionInterpolator::upper() { return up; };
 
+
+    /*! \brief Two-dimensional integration container for bilinear interpolation and bicubic splines.
+     */
+
+    // AxionInterpolator2D class: Provides a 2-D interpolation container based on the gsl library.
+    // Can be declared static for efficiency & easy one-time initialisation of interpolating functions.
+    class AxionInterpolator2D
+    {
+      public:
+        // Overloaded class creators for the AxionInterpolator class using the init function below.
+        AxionInterpolator2D(std::string file, std::string type);
+        AxionInterpolator2D(std::string file);
+        AxionInterpolator2D();
+        // Routine to access interpolated values.
+        double interpolate(double x, double y);
+        // Routine to check if a point is inside the interpolating box.
+        bool is_inside_box(double x, double y);
+      private:
+        // Initialiser for the AxionInterpolator2D class.
+        void init(std::string file, std::string type);
+        // The gsl objects for the interpolating functions that need to be available to the class routines.
+        gsl_interp_accel *x_acc;
+        gsl_interp_accel *y_acc;
+        gsl_spline2d *spline;
+        // Upper and lower "x" and "y" values available to the interpolating function.
+        double x_lo, y_lo, x_up, y_up;
+    };
+
+    // Initialiser for the AxionInterpolator class.
+    void AxionInterpolator2D::init(std::string file, std::string type)
+    {
+      // Check if file exists.
+      if (not(Utils::file_exists(file)))
+      {
+        DarkBit_error().raise(LOCAL_INFO, "ERROR! File '"+file+"' not found!");
+      } else {
+        logger() << LogTags::debug << "Reading data from file '"+file+"' and interpolating it with '"+type+"' method." << EOM;
+      };
+      // Read numerical values from data file.
+      ASCIItableReader tab (file);
+      tab.setcolnames("x", "y", "z");
+      // Initialise gsl interpolation routine.
+      // Get unique entries of "x" and "y" for the grid and grid size.
+      std::vector<double> x_vec = tab["x"];
+      sort(x_vec.begin(), x_vec.end());
+      x_vec.erase(unique(x_vec.begin(), x_vec.end()), x_vec.end());
+      int nx = x_vec.size();
+      std::vector<double> y_vec = tab["y"];
+      sort(y_vec.begin(), y_vec.end());
+      y_vec.erase(unique(y_vec.begin(), y_vec.end()), y_vec.end());
+      int ny = y_vec.size();
+      int n_grid_pts = tab["z"].size();
+
+      if (nx*ny != n_grid_pts)
+      {
+        DarkBit_error().raise(LOCAL_INFO, "ERROR! The number of grid points ("+std::to_string(n_grid_pts)+") for AxionInterpolator2D does not equal the number of unique 'x' and 'y' values ("+std::to_string(nx)+" and "+std::to_string(ny)+")!\n       Check formatting of the file: '"+file+"'.");
+      };
+
+      const double* x = &x_vec[0];
+      const double* y = &y_vec[0];
+      // Allocate memory for "z" values array in gsl format
+      double* z = (double*) malloc(nx * ny * sizeof(double));
+
+      if (type == "bicubic")
+      {
+        spline = gsl_spline2d_alloc(gsl_interp2d_bicubic, nx, ny);
+      }
+      else if (type == "bilinear")
+      {
+        spline = gsl_spline2d_alloc(gsl_interp2d_bilinear, nx, ny);
+      }
+      else
+      {
+        DarkBit_error().raise(LOCAL_INFO, "ERROR! Interpolation type '"+type+"' not known to class AxionInterpolator2D.\n       Available types: 'bilinear' and 'bicubic'.");
+      };
+
+      x_acc = gsl_interp_accel_alloc();
+      y_acc = gsl_interp_accel_alloc();
+
+      // Determine first and last "x" and "y" values and grid step size.
+      x_lo = x_vec.front();
+      x_up = x_vec.back();
+      y_lo = y_vec.front();
+      y_up = y_vec.back();
+      double x_delta = (x_up-x_lo) / (nx-1);
+      double y_delta = (y_up-y_lo) / (ny-1);
+
+      // Intialise grid.
+      for (int i = 0; i < n_grid_pts; i++)
+      {
+        // Determine appropriate indices for the grid points.
+        double temp = (tab["x"][i]-x_lo) / x_delta;
+        int ind_x = (int) (temp+0.5);
+        temp = (tab["y"][i]-y_lo) / y_delta;
+        int ind_y = (int) (temp+0.5);
+
+        std::cout << ind_x << "/" << nx-1 << " " << tab["x"][i] << " vs " << x[ind_x] << " " << ind_y << "/" << ny-1 << " " << tab["y"][i] << " vs " << y[ind_y] << std::endl;
+
+        gsl_spline2d_set(spline, z, ind_x, ind_y, tab["z"][i]);
+      };
+        gsl_spline2d_init (spline, x, y, z, nx, ny);
+    };
+
+    // Overloaded class creators for the AxionInterpolator class using the init function above.
+    AxionInterpolator2D::AxionInterpolator2D(std::string file, std::string type) { init(file, type); };
+    AxionInterpolator2D::AxionInterpolator2D(std::string file) { init(file, "bilinear"); };
+    AxionInterpolator2D::AxionInterpolator2D() {};
+
+    // Routine to access interpolated values.
+    double AxionInterpolator2D::interpolate(double x, double y) { return gsl_spline2d_eval(spline, x, y, x_acc, y_acc); };
+
+    // Routine to check if a point is inside the interpolating box.
+    bool AxionInterpolator2D::is_inside_box(double x, double y) { return ((x >= x_lo) && (x <= x_up) && (y >= y_lo) && (y <= y_up)); };
 
      /*! \brief H.E.S.S.-likelihood-related interpolation routines.
      */
@@ -621,7 +736,7 @@ namespace Gambit
                        "and model '"+solar_model_gaee+"' for axion-electron interactions.\n\n"
                        "coupling log10(m/eV) [erg_low/keV, erg_high/keV] log10(counts)" << std::endl;
         #endif
-        for(int bin = 0; bin < n_bins; bin++)
+        for (int bin = 0; bin < n_bins; bin++)
         {
           erg_lo = erg_hi;
           erg_hi += bin_delta;
@@ -1503,6 +1618,7 @@ namespace Gambit
       double ma0 = *Param["ma0"];
       double beta = *Param["beta"];
       double Tchi = *Param["Tchi"];
+      // Do computations assuming thetai >= 0.
       double thetai = *Param["thetai"];
       double fa = *Param["fa"];
       double Tosc = *Dep::AxionOscillationTemperature;
@@ -1510,66 +1626,71 @@ namespace Gambit
       // For sampling purposes only: Map pi < thetai < 3*pi to its equivalent value in (-pi,pi].
       if ( (thetai>pi) && (thetai<3.0*pi) ) {thetai = thetai - 2.0*pi;};
 
-      // TCMB in MeV.
-      const double TCMB = *Dep::T_cmb*K2eV*1.0E-6;
-      // Critical energy density today * h^2 (in eV^4).
-      const double ede_crit_today = 3.0*2.69862E-11;
-
-      struct AxionEDT_params p = {ma0, beta, Tchi, thetai, Tosc};
-
-      // Function, Jacobian, number of dimensions + pointer to params.
-      gsl_odeiv2_system sys = {scal_field_eq, scal_field_eq_jac, 2, &p};
-      // Evolution from Temp = 1e5 x Tosc to Temp = 0.001 x Tosc.
-      double tau2 = -0.001, tau1 = -1E5;
-      // Initial conditions for (u and v = u') as functions of temperature:
-      double y[2] = {1.0, 0.0};
-      // Settings for the driver: pointer to the ODE system sys, the gsl method, initial step size,
-      // absolute accuracy in y[0] and y[1], relative accuracy in y[0] and y[1].
-      // Other possible choices: gsl_odeiv2_step_rk4 (classic), gsl_odeiv2_step_rk8pd, gsl_odeiv2_step_rkf45 (standard choices).
-      gsl_odeiv2_driver * d = gsl_odeiv2_driver_alloc_y_new (&sys, gsl_odeiv2_step_bsimp, -0.1*tau1, 1E-8, 1E-8);
-
-      // Numerically solve ODE by continuing the integration well into the harmonic and adiabatic regime (stopping conditions
-      // via check1 = |\hat(theta)| and check2 = 3H/m need to be satisfied).
-      double new_step;
-      double check1 = 1.0, check2 = 1.0;
-      int i = 0;
-
-      #ifdef AXION_DEBUG_MODE
-        std::cout << "DEBUGGING INFO for relic density calculation:\n"
-                     "#'temperature' theta dtheta/dtau" << std::endl;
-      #endif
-
-      do
+      // Only do computations if thetai > 0.
+      result = 0.0;
+      if (fabs(thetai) > 0)
       {
-        i++;
-        new_step = -pow(10.0, 1.0 + (log10(-tau2)-1.0)*i/1000.0);
-        int status = gsl_odeiv2_driver_apply (d, &tau1, new_step, y);
-        if (status != GSL_SUCCESS) {std::cout << "Error, return value = " << d << std::endl;};
-        check1 = fabs(thetai)*sqrt(gsl_pow_2( fabs(y[0]) ) + gsl_pow_2( fabs((-new_step)*y[1]*hubble_rad_dom(-new_step*Tosc)/(ma0*axion_mass_temp(-new_step*Tosc,beta,Tchi))) ));
-        check2 = 3.0*hubble_rad_dom(-new_step*Tosc)/(ma0*axion_mass_temp(-new_step*Tosc,beta,Tchi));
+        // TCMB in MeV.
+        const double TCMB = *Dep::T_cmb*K2eV*1.0E-6;
+        // Critical energy density today * h^2 (in eV^4).
+        const double ede_crit_today = 3.0*2.69862E-11;
+
+        struct AxionEDT_params p = {ma0, beta, Tchi, thetai, Tosc};
+
+        // Function, Jacobian, number of dimensions + pointer to params.
+        gsl_odeiv2_system sys = {scal_field_eq, scal_field_eq_jac, 2, &p};
+        // Evolution from Temp = 1e5 x Tosc to Temp = 0.001 x Tosc.
+        double tau2 = -0.001, tau1 = -1E5;
+        // Initial conditions for (u and v = u') as functions of temperature:
+        double y[2] = {1.0, 0.0};
+        // Settings for the driver: pointer to the ODE system sys, the gsl method, initial step size,
+        // absolute accuracy in y[0] and y[1], relative accuracy in y[0] and y[1].
+        // Other possible choices: gsl_odeiv2_step_rk4 (classic), gsl_odeiv2_step_rk8pd, gsl_odeiv2_step_rkf45 (standard choices).
+        gsl_odeiv2_driver * d = gsl_odeiv2_driver_alloc_y_new (&sys, gsl_odeiv2_step_bsimp, -0.1*tau1, 1E-8, 1E-8);
+
+        // Numerically solve ODE by continuing the integration well into the harmonic and adiabatic regime (stopping conditions
+        // via check1 = |hat(theta)| and check2 = 3H/m need to be satisfied).
+        double new_step;
+        double check1 = 1.0, check2 = 1.0;
+        int i = 0;
 
         #ifdef AXION_DEBUG_MODE
-          std::cout << -new_step << " " << thetai*y[0] << " " << -tau2*thetai*y[1] << std::endl;
+          std::cout << "DEBUGGING INFO for relic density calculation:\n"
+                       "#'temperature' theta dtheta/dtau" << std::endl;
         #endif
 
-      } while ( ((check1>1.0E-2) || (check2>1.0E-3)) && (i<1E3) );
+        do
+        {
+          i++;
+          new_step = -pow(10.0, 1.0 + (log10(-tau2)-1.0)*i/1000.0);
+          int status = gsl_odeiv2_driver_apply (d, &tau1, new_step, y);
+          if (status != GSL_SUCCESS) {std::cout << "Error, return value = " << d << std::endl;};
+          check1 = fabs(thetai)*sqrt(gsl_pow_2( fabs(y[0]) ) + gsl_pow_2( fabs((-new_step)*y[1]*hubble_rad_dom(-new_step*Tosc)/(ma0*axion_mass_temp(-new_step*Tosc,beta,Tchi))) ));
+          check2 = 3.0*hubble_rad_dom(-new_step*Tosc)/(ma0*axion_mass_temp(-new_step*Tosc,beta,Tchi));
 
-      i++;
-      if (i>=1E+3)
-      {
-        std::ostringstream buffer;
-        buffer << "T_end: " << -new_step << " | theta_hat_val: " << check1 << ", theta_der: "<< -tau2*y[1]*thetai << ", 3H/m_osc: " << 3.0*hubble_rad_dom(Tosc)/(ma0*axion_mass_temp(-new_step*Tosc,beta,Tchi)) << ", 3H/m: " << check2 << " .\n";
-        DarkBit_warning().raise(LOCAL_INFO, "WARNING! Maximum number of integration steps reached for energy density calculator!\n         "+buffer.str());
+          #ifdef AXION_DEBUG_MODE
+            std::cout << -new_step << " " << thetai*y[0] << " " << -tau2*thetai*y[1] << std::endl;
+          #endif
+
+        } while ( ((check1>1.0E-2) || (check2>1.0E-3)) && (i<1E3) );
+
+        i++;
+        if (i>=1E+3)
+        {
+          std::ostringstream buffer;
+          buffer << "T_end: " << -new_step << " | theta_hat_val: " << check1 << ", theta_der: "<< -tau2*y[1]*thetai << ", 3H/m_osc: " << 3.0*hubble_rad_dom(Tosc)/(ma0*axion_mass_temp(-new_step*Tosc,beta,Tchi)) << ", 3H/m: " << check2 << " .\n";
+          DarkBit_warning().raise(LOCAL_INFO, "WARNING! Maximum number of integration steps reached for energy density calculator!\n         "+buffer.str());
+        };
+
+        // Calculate the axion energy density at the stopping point.
+        double ede = 1E+18*gsl_pow_2(fa)*(0.5*gsl_pow_2(y[1]*thetai*hubble_rad_dom(-new_step*Tosc)*(-new_step)) + gsl_pow_2(ma0*axion_mass_temp(-new_step*Tosc,beta,Tchi))*(1.0 - gsl_sf_cos(y[0]*thetai)));
+        // Use conservation of entropy to scale the axion energy density to its present value (relative to the critical energy density).
+        double OmegaAh2 = ede*gsl_pow_3(TCMB/(-new_step*Tosc))*(gStar_S(TCMB)/gStar_S(-new_step*Tosc))*(1.0/axion_mass_temp(-new_step*Tosc,beta,Tchi))/ede_crit_today;
+
+        gsl_odeiv2_driver_free (d);
+
+        result = OmegaAh2;
       };
-
-      // Calculate the axion energy density at the stopping point.
-      double ede = 1E+18*gsl_pow_2(fa)*(0.5*gsl_pow_2(y[1]*thetai*hubble_rad_dom(-new_step*Tosc)*(-new_step)) + gsl_pow_2(ma0*axion_mass_temp(-new_step*Tosc,beta,Tchi))*(1.0 - gsl_sf_cos(y[0]*thetai)));
-      // Use conservation of entropy to scale the axion energy density to its present value (relative to the critical energy density).
-      double OmegaAh2 = ede*gsl_pow_3(TCMB/(-new_step*Tosc))*(gStar_S(TCMB)/gStar_S(-new_step*Tosc))*(1.0/axion_mass_temp(-new_step*Tosc,beta,Tchi))/ede_crit_today;
-
-      gsl_odeiv2_driver_free (d);
-
-      result = OmegaAh2;
     }
 
     //////////////////////////////////////////////
@@ -1801,7 +1922,7 @@ namespace Gambit
     //////////////////////////////////////////////////////////////////////////////
 
     // Capability function to calculate the likelihood for axion decay SN 1987A
-    // Current approximation: Rule out axions inside the contours of Fig.  in .
+    // Current approximation: Rule out axions inside the contours of Fig. 8 in arXiv:1702.02964.
     void calc_lnL_SN1987A_DecayApprox (double &result)
     {
       using namespace Pipes::calc_lnL_SN1987A_DecayApprox;
@@ -1815,6 +1936,26 @@ namespace Gambit
 
       bool inside_exclusion_region = ( (lgm > 4.0) && (lgm < 8.100544) && (lgg > -11.498333) && (lgg > -9.754647-0.5*(lgm-4.0)) && (lgg < -9.990374-2.0*(lgm-8.100544)) );
       if (inside_exclusion_region) { result = -0.5*9.00; };
+    }
+
+    ////////////////////////////////////////////////////////////
+    //      SN 1987A limits (from axion-to-photon decay)      //
+    ////////////////////////////////////////////////////////////
+
+    // Capability function to calculate the likelihood for axion decay SN 1987A
+    // Based on MC simulations by Marie Lecroq (following arXiv:1702.02964).
+    void calc_lnL_SN1987A_Decay (double &result)
+    {
+      using namespace Pipes::calc_lnL_SN1987A_Decay;
+      double lgg = log10(std::fabs(*Param["gagg"]));
+      double lgm = log10(*Param["ma0"]);
+      result = 0.0;
+
+      // Initialise interpolation class with MC data from file.
+      static AxionInterpolator2D fluence (GAMBIT_DIR "/DarkBit/data/SN1987A_DecayFluence.dat");
+      const double sigma = 0.59333;
+
+      if (fluence.is_inside_box(lgm,lgg)) { result = -0.5*gsl_pow_2(fluence.interpolate(lgm,lgg)/sigma); };
     }
 
     //////////////////////////////////////////////////////////////////

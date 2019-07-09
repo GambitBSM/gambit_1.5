@@ -223,9 +223,7 @@ namespace Gambit
       const double t_rec = 1e12;                     // Age of the Universe at recombination in s
 
       double f0_thermal = *Param["f0_thermal"];      // Fraction of DM in ALPs at production, due to thermal production
-      double omega_ma = 0.0;                         // Cosmological density of ALPs from vacuum misalignment
-      if (abs(*Param["thetai"]) > 1e-9)              // Only calculate if thetai is non zero
-	omega_ma = *Dep::RD_oh2;
+      double omega_ma = *Dep::RD_oh2;                // Cosmological density of ALPs from vacuum misalignment
 
       double ma0 = *Param["ma0"];                    // non-thermal ALP mass in eV
       double T = *Dep::T_cmb;                        // CMB temperature in K

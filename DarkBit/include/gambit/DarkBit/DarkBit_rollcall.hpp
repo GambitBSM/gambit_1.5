@@ -1484,6 +1484,14 @@ START_MODULE
     #undef FUNCTION
   #undef CAPABILITY
 
+  #define CAPABILITY lnL_SN1987A_Decay
+  START_CAPABILITY
+    #define FUNCTION calc_lnL_SN1987A_Decay
+    START_FUNCTION(double)
+    ALLOW_MODEL(GeneralCosmoALP)
+    #undef FUNCTION
+  #undef CAPABILITY
+
   #define CAPABILITY lnL_HESS_GCMF
   START_CAPABILITY
     #define FUNCTION calc_lnL_HESS_GCMF
