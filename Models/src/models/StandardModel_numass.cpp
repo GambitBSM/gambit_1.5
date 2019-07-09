@@ -13,7 +13,7 @@
 ///
 ///  \author Patrick Stöcker
 ///          (stoecker@physik.rwth-aachen.de)
-///  \date 2019 Feb
+///  \date 2019 Feb, Jul
 ///
 ///  *********************************************
 
@@ -70,3 +70,39 @@ void MODEL_NAMESPACE::StandardModel_numass_degenerate_to_StandardModel_SLHA2 (co
 #undef PARENT
 #undef MODEL
 
+// (PS:) Please note that in this implementation we assume the parameter dmNu3l
+// to be the one which has the higher absolute value in the given hierarchy.
+// This agrres with the convention of NuFit (cf. 1811.05487)
+//
+// !-> This inverted to the definition of StandardModel_mNudiff <-!
+#define MODEL StandardModel_numass_split
+#define PARENT StandardModel_SLHA2
+
+void MODEL_NAMESPACE::StandardModel_numass_split_to_StandardModel_SLHA2 (const ModelParameters &myP, ModelParameters &targetP)
+{
+
+  logger()<<"Running interpret_as_parent calculations for StandardModel_numass_split --> StandardModel_SLHA2."<<LogTags::info<<EOM;
+
+  // Copy all the "non-neutrino" paramters of the SLHA2 block.
+  targetP.setValues(myP,false);
+
+  if (myP["dmNu3l"] > 0.)  // normal hierarchy, l = 1
+  {
+   targetP.setValue("mNu1", myP["mNu_light"]*1e-9);
+   targetP.setValue("mNu2",
+       pow(myP["mNu_light"]*myP["mNu_light"]+myP["dmNu21"], 0.5)*1e-9);
+   targetP.setValue("mNu3",
+       pow(myP["mNu_light"]*myP["mNu_light"]+myP["dmNu3l"], 0.5)*1e-9);
+  }
+  else // inverted hierarchy, l = 2
+  {
+   targetP.setValue("mNu3", myP["mNu_light"]*1e-9);
+   targetP.setValue("mNu2",
+       pow(myP["mNu_light"]*myP["mNu_light"]-myP["dmNu3l"], 0.5)*1e-9);
+   targetP.setValue("mNu1",
+       pow(myP["mNu_light"]*myP["mNu_light"]-myP["dmNu3l"]-myP["dmNu21"], 0.5)*1e-9);
+  }
+}
+
+#undef PARENT
+#undef MODEL

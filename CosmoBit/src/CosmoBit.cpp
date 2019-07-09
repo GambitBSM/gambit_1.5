@@ -442,6 +442,40 @@ namespace Gambit
       result["mNu3"]=mNu3;
     }
 
+    void dmNu21_LogLike_gaussian(double& result)
+    {
+      using namespace Pipes::dmNu21_LogLike_gaussian;
+
+      // Use 1811.05487:
+      // dmNu21 = (7.39  +0.21-0.20) 1e-5 eV^2
+
+      double pred_mean = *Param["dmNu21"];
+
+      const double obs_mean = 7.39e-5;
+      const double obs_err = 0.21e-5;
+      const double pred_err = 0.;
+
+      result = Stats::gaussian_loglikelihood(pred_mean, obs_mean, pred_err, obs_err, false);
+    }
+
+    void dmNu3l_LogLike_gaussian(double& result)
+    {
+      using namespace Pipes::dmNu3l_LogLike_gaussian;
+
+      // Use 1811.05487:
+      // (NH) dmNu31 = (+2.525  +0.033-0.032) 1e-3 eV^2
+      // (NH) dmNu31 = (-2.512  +0.034-0.032) 1e-3 eV^2
+
+      double pred_mean = *Param["dmNu3l"];
+      bool NH = (pred_mean > 0.0);
+
+      double obs_mean = NH ? 2.525e-3 : -2.512e-3;
+      double obs_err = NH ?  0.034e-3 :  0.033e-3;
+      const double pred_err = 0.;
+
+      result = Stats::gaussian_loglikelihood(pred_mean, obs_mean, pred_err, obs_err, false);
+    }
+
     void class_set_parameter_LCDM_family(Class_container& cosmo)
     {
       using namespace Pipes::class_set_parameter_LCDM_family;
