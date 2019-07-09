@@ -463,8 +463,8 @@ namespace Gambit
       using namespace Pipes::dmNu3l_LogLike_gaussian;
 
       // Use 1811.05487:
-      // (NH) dmNu31 = (+2.525  +0.033-0.032) 1e-3 eV^2
-      // (NH) dmNu31 = (-2.512  +0.034-0.032) 1e-3 eV^2
+      // (NH - l=1) dmNu31 = (+2.525  +0.033-0.032) 1e-3 eV^2
+      // (IH - l=2) dmNu32 = (-2.512  +0.034-0.032) 1e-3 eV^2
 
       double pred_mean = *Param["dmNu3l"];
       bool NH = (pred_mean > 0.0);

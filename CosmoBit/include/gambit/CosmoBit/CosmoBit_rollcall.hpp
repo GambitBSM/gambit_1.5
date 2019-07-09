@@ -141,7 +141,7 @@ START_MODULE
 
   #undef CAPABILITY
 
-  // (PS) Implemtation of neutrino mass spliting.
+  // (PS) Gauusian 'priors' on neutrino mass spliting.
   #define CAPABILITY dmNu21_LogLike
   START_CAPABILITY
     #define FUNCTION dmNu21_LogLike_gaussian
