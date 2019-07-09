@@ -412,6 +412,38 @@ namespace Gambit
       }
     }
 
+    // (JR) set neutrino masses with realistic masses (computed from mass)
+    void set_NuMasses_NuBit(map_str_dbl &result)
+    {
+      //using namespace Pipes::set_NuMasses_NuBit;
+
+      double mNu1, mNu2, mNu3;
+
+      double mNu_light = 0.001; // *Param["mNu_light"] mass of lightest nu in eV --> model parameter, should get it from Nu model (TODO)
+      double dmNu21 = 7.45e-5;  // *Param["dmNu21"] mass splitting Delta m_12 ^2 in eV^2 --> model parameter, should get it from Nu model (TODO)
+      double dmNu3l = 2.484e-3; // *Param["dmNu3l"] mass splitting Delta m_31 ^2 in eV^2 --> model parameter, should get it from Nu model (TODO)
+      
+      if (dmNu3l > 0)
+      {
+        mNu1 = mNu_light; 
+        mNu2 = sqrt(mNu_light*mNu_light + dmNu21);
+        mNu3 = sqrt(mNu_light*mNu_light + dmNu3l);
+      }
+      else
+      {
+        mNu1 = sqrt(mNu_light*mNu_light - dmNu3l);
+        mNu2 = sqrt(mNu_light*mNu_light - dmNu3l + dmNu21);
+        mNu3 = mNu_light;
+      }
+                
+      result["N_ncdm"] = 3;          // we know there are 3 massive neutrinos
+      result["N_ur_SMnu"]= 0.00641;  // dNeff= 0.00641 for 3 massive neutrinos at CMB release
+
+      result["mNu1"]=mNu1;
+      result["mNu2"]=mNu2;
+      result["mNu3"]=mNu3;
+    }
+
     void class_set_parameter_LCDM_family(Class_container& cosmo)
     {
       using namespace Pipes::class_set_parameter_LCDM_family;
@@ -2638,6 +2670,8 @@ namespace Gambit
       result = (*Dep::class_Nur)*7./8.*pow(4./11.,4./3.)*(*Dep::Omega0_g);
     }
 
+
+    // (JR) delete when CLASS c interface is removed.
     void compute_Omega0_ncdm(double &result)
     {
       using namespace Pipes::compute_Omega0_ncdm;

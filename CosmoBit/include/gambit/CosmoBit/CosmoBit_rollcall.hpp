@@ -128,6 +128,17 @@ START_MODULE
     START_FUNCTION(map_str_dbl)
     ALLOW_MODELS(StandardModel_SLHA2)
     #undef FUNCTION
+
+    // (JR) commented atm but imo we should use a realistic neutrino model
+    /*
+    #define FUNCTION set_NuMasses_NuBit 
+    START_FUNCTION(map_str_dbl)
+    // need to allow neutrino model containing lightest nu mass, 
+    // mass splittings & IH or NH parameters here
+    //ALLOW_MODELS(StandardModel_mNudiff)
+    #undef FUNCTION 
+    */
+
   #undef CAPABILITY
 
   #define CAPABILITY class_Nur
