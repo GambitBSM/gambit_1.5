@@ -135,10 +135,27 @@ START_MODULE
     START_FUNCTION(map_str_dbl)
     // need to allow neutrino model containing lightest nu mass, 
     // mass splittings & IH or NH parameters here
-    //ALLOW_MODELS(StandardModel_mNudiff)
-    #undef FUNCTION 
+    //ALLOW_MODELS(StandardModel_numass_split)
+    #undef FUNCTION
     */
 
+  #undef CAPABILITY
+
+  // (PS) Gauusian 'priors' on neutrino mass spliting.
+  #define CAPABILITY dmNu21_LogLike
+  START_CAPABILITY
+    #define FUNCTION dmNu21_LogLike_gaussian
+    START_FUNCTION(double)
+    ALLOW_MODELS(StandardModel_numass_split)
+    #undef FUNCTION
+  #undef CAPABILITY
+
+  #define CAPABILITY dmNu3l_LogLike
+  START_CAPABILITY
+    #define FUNCTION dmNu3l_LogLike_gaussian
+    START_FUNCTION(double)
+    ALLOW_MODELS(StandardModel_numass_split)
+    #undef FUNCTION
   #undef CAPABILITY
 
   #define CAPABILITY class_Nur

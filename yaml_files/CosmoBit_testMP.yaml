@@ -31,7 +31,9 @@ Parameters:
 
  # neutrino masses
  #StandardModel_numass_single: !import include/StandardModel_numass_single_scan.yaml
- StandardModel_numass_degenerate: !import include/StandardModel_numass_degenerate_scan.yaml
+ #StandardModel_numass_degenerate: !import include/StandardModel_numass_degenerate_scan.yaml
+ StandardModel_numass_split: !import include/StandardModel_numass_split_NH_scan.yaml
+ #StandardModel_numass_split: !import include/StandardModel_numass_split_IH_scan.yaml
 
  # Cosmological nuisance parameters (except for Planck CMB Likelihoods) 
  cosmo_nuisance_params_Pantheon: !import include/cosmo_nuisance_params_Pantheon.yaml
@@ -114,6 +116,16 @@ ObsLikes:
   - purpose:      Observable
     capability:   MP_LogLikes
     type:         map_str_dbl
+
+  - purpose:      LogLike
+    capability:   dmNu21_LogLike
+    module:       CosmoBit
+    type:         double
+
+  - purpose:      LogLike
+    capability:   dmNu3l_LogLike
+    module:       CosmoBit
+    type:         double
 
 #======== Rule entries ========
 Rules:
