@@ -725,7 +725,7 @@ START_MODULE
   #define CAPABILITY MP_experiment_names
      START_CAPABILITY
      #define FUNCTION set_MP_experiment_names
-      START_FUNCTION(map_str_str)
+      START_FUNCTION(map_str_map_str_str)
       BACKEND_REQ(get_MP_availible_likelihoods, (libmontepythonlike), std::vector<str>, ())
      #undef FUNCTION
   #undef CAPABILITY
@@ -734,7 +734,7 @@ START_MODULE
      START_CAPABILITY
      #define FUNCTION init_cosmo_args_from_MPLike
       START_FUNCTION(pybind11::dict)
-      DEPENDENCY(MP_experiment_names, map_str_str)
+      DEPENDENCY(MP_experiment_names, map_str_map_str_str)
       BACKEND_REQ(create_MP_likelihood_objects, (libmontepythonlike), map_str_pyobj,    (pybind11::object&, map_str_str&))
       BACKEND_REQ(create_MP_data_object,        (libmontepythonlike), pybind11::object, (map_str_str&))
      #undef FUNCTION
@@ -789,7 +789,7 @@ START_MODULE
     #define FUNCTION calc_MP_LogLikes
       START_FUNCTION(map_str_dbl) 
       ALLOW_MODELS(LCDM_dNeffCMB_dNeffBBN_etaBBN)
-      DEPENDENCY(MP_experiment_names,         map_str_str)
+      DEPENDENCY(MP_experiment_names,         map_str_map_str_str)
       DEPENDENCY(parameter_dict_for_MPLike,   pybind11::dict)
       BACKEND_REQ(get_classy_cosmo_object,               (classy),             pybind11::object,      ())
       BACKEND_REQ(get_MP_loglike,               (libmontepythonlike), double,           (const CosmoBit::MPLike_data_container&, pybind11::object&, std::string&))
@@ -805,6 +805,22 @@ START_MODULE
       START_FUNCTION(double)
       DEPENDENCY(MP_LogLikes, map_str_dbl)
       ALLOW_MODELS(LCDM_dNeffCMB_dNeffBBN_etaBBN)
+    #undef FUNCTION
+  #undef CAPABILITY
+
+  /// Calculates lnL for each experiment using the experiment names
+  /// but DOES NOT add them to the lnL used to steer GAMBIT scans!
+  #define CAPABILITY MP_Observables
+    START_CAPABILITY
+    #define FUNCTION calc_MP_observables
+      START_FUNCTION(map_str_dbl) 
+      ALLOW_MODELS(LCDM_dNeffCMB_dNeffBBN_etaBBN)
+      DEPENDENCY(MP_experiment_names,         map_str_map_str_str)
+      DEPENDENCY(parameter_dict_for_MPLike,   pybind11::dict)
+      BACKEND_REQ(get_classy_cosmo_object,               (classy),             pybind11::object,      ())
+      BACKEND_REQ(get_MP_loglike,               (libmontepythonlike), double,           (const CosmoBit::MPLike_data_container&, pybind11::object&, std::string&))
+      BACKEND_REQ(create_MP_data_object,        (libmontepythonlike), pybind11::object, (map_str_str&))
+      BACKEND_REQ(create_MP_likelihood_objects, (libmontepythonlike), map_str_pyobj,    (pybind11::object&, map_str_str&))
     #undef FUNCTION
   #undef CAPABILITY
 
