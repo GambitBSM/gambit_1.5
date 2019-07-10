@@ -1,0 +1,45 @@
+--- a/python/classy.pyx	2017-10-24 14:42:41.000000000 +0100
++++ b/python/classy.pyx	2019-07-03 12:45:27.100272668 +0100
+@@ -828,8 +828,8 @@
+     def Omega_m(self):
+         return self.ba.Omega0_b+self.ba.Omega0_cdm+self.ba.Omega0_ncdm_tot + self.ba.Omega0_dcdm
+ 
+-    #def Omega_r(self):
+-    #    return self.ba.Omega0_g+self.ba.Omega0_ur
++    def Omega_r(self):
++        return self.ba.Omega0_g+self.ba.Omega0_ur+self.ba.Omega0_dr
+ 
+     def Omega_Lambda(self):
+         return self.ba.Omega0_lambda
+@@ -843,6 +843,21 @@
+     def omega_b(self):
+         return self.ba.Omega0_b * self.ba.h * self.ba.h
+ 
++    def Omega_dcdm(self):                   # (JR) added 
++        return self.ba.Omega0_dcdm
++    
++    def Omega_dr(self):                     # (JR) added 
++        return self.ba.Omega0_dr
++    
++    def Omega_dcdmdr(self):                     # (JR) added 
++        return self.ba.Omega0_dcdmdr
++
++    def Omega_ncdm_tot(self):                     # (JR) added 
++        return self.ba.Omega0_ncdm_tot
++    
++    def Omega_ur(self):                     # (JR) added 
++        return self.ba.Omega0_ur
++
+     def Neff(self):
+         return self.ba.Neff
+
+--- a/python/cclassy.pxd	2019-07-03 12:43:33.138033238 +0100
++++ b/python/cclassy.pxd	2019-07-03 12:43:09.645573577 +0100
+@@ -60,6 +60,7 @@
+         double cs2_fld
+         double Omega0_ur
+         double Omega0_dcdmdr
++        double Omega0_dr           # (JR) added
+         double Omega0_scf
+ 
+         int bt_size
