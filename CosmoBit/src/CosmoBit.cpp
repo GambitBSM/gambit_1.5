@@ -3573,8 +3573,8 @@ namespace Gambit
     }
 
     /// Set the names of all experiments in use for scan 
-    /// basically reads in the runOption 'Likelihoods' of capability MP_experiment_names
-    void set_MP_experiment_names(map_str_str & result)
+    /// basically reads in the runOptions 'Likelihoods' and/or 'Observables' of capability MP_experiment_names
+    void set_MP_experiment_names(map_str_map_str_str & result)
     {
       using namespace Pipes::set_MP_experiment_names;
 
@@ -3586,8 +3586,8 @@ namespace Gambit
 
         // read in requested likelihoods
         YAML::Node MP_Likelihoods;
-        MP_Likelihoods = runOptions->getValue<YAML::Node>("Likelihoods");
-
+        if (runOptions->hasKey("Likelihoods")) MP_Likelihoods = runOptions->getValue<YAML::Node>("Likelihoods");
+        
         // create string -> string map mapping the likelihood name to the '.data' file that will
         // be used to initialise likelihood object in MP. If you want to use the default one simply
         // set the the data-file string to "default"
@@ -3610,14 +3610,42 @@ namespace Gambit
           }
           else
           {
-            result[likelihood] = data_file;
+            result["Likelihoods"][likelihood] = data_file;
             std::cout << "(CosmoBit) Read MontePythonLike option  "<< likelihood << ", using data file " << data_file <<std::endl; // TODO: delete after testing
             logger() << "Read MontePythonLike option "<< likelihood << ", using data file " << data_file<< EOM;
+          }
+        }   
+
+        // & Observables
+        YAML::Node MP_Observables;
+        if (runOptions->hasKey("Observables")) MP_Observables = runOptions->getValue<YAML::Node>("Observables");
+
+        for (auto it=MP_Observables.begin(); it != MP_Observables.end(); it++)
+        {
+          std::string obs = it->first.as<std::string>();
+          std::string data_file = it->second.as<std::string>();
+
+          // check if requested likelihood is contained in vector of implemented likelihoods
+          // if not throw error & list all available options
+          if (std::find(avail_likes.begin(), avail_likes.end(), obs) == avail_likes.end())
+          {
+            
+            str errmsg = "Likelihood '" + obs + "' is not implemented in MontePython. Check for typos or implement it.\nLikelihoods currently available are:\n"; 
+            for(auto const& value: avail_likes)
+            {
+              errmsg += ("\t"+value+"\n");
+            }
+            CosmoBit_error().raise(LOCAL_INFO,errmsg);
+          }
+          else
+          {
+            result["Observables"][obs] = data_file;
+            std::cout << "(CosmoBit) Read MontePythonLike option  "<< obs << ", using data file " << data_file <<std::endl; // TODO: delete after testing
+            logger() << "Read MontePythonLike option "<< obs << ", using data file " << data_file<< EOM;
           }
         }    
         first = false;
       }
-
     }
 
     /// When initialising the MontePython Likelihood objects they add the output that needs to be computed by class
@@ -3638,7 +3666,34 @@ namespace Gambit
       static pybind11::object data;
       if(first_run)
       {
-        map_str_str experiments = *Dep::MP_experiment_names;
+        // This is a map with the following structure:
+        // { Likelihoods: {likelihood1: mode, likelihood2: mode...}
+        //   Observables: {observable1: mode, observable2: mode...} }
+        map_str_map_str_str experiment_names = *Dep::MP_experiment_names;
+        
+        // We need to pull the names of all Likelihoods AND observables
+        // to initialise the data structures in MontePython
+        map_str_str experiments;
+
+        if (experiment_names.find("Likelihoods") != experiment_names.end())
+        {
+          for (auto it = experiment_names.at("Likelihoods").begin(); 
+                    it != experiment_names.at("Likelihoods").end(); ++it)
+          {
+            // Add each experiment : datafile pair to the map_str_str.
+            experiments[it->first] = it->second;
+          }
+        }
+        if (experiment_names.find("Observables") != experiment_names.end())
+        {
+          for (auto it = experiment_names.at("Observables").begin(); 
+                    it != experiment_names.at("Observables").end(); ++it)
+          {
+            // Add each experiment : datafile pair to the map_str_str.
+            experiments[it->first] = it->second;
+          }
+        }
+
         pybind11::print(experiments);
         data = BEreq::create_MP_data_object(experiments);
         map_str_pyobj likelihoods = BEreq::create_MP_likelihood_objects(data, experiments);
@@ -3659,8 +3714,33 @@ namespace Gambit
       using namespace pybind11::literals;
 
       // A list of the experiments initialised in the YAML file
-      map_str_str experiments = *Dep::MP_experiment_names;
+      // This is a map with the following structure:
+      // { Likelihoods: {likelihood1: mode, likelihood2: mode...}
+      //   Observables: {observable1: mode, observable2: mode...} }
+      map_str_map_str_str experiment_names = *Dep::MP_experiment_names;
+      
+      // We need to pull the names of all Likelihoods AND observables
+      // to initialise the data structures in MontePython
+      map_str_str experiments;
 
+      if (experiment_names.find("Likelihoods") != experiment_names.end())
+      {
+        for (auto it = experiment_names.at("Likelihoods").begin(); 
+                  it != experiment_names.at("Likelihoods").end(); ++it)
+        {
+          // Add each experiment : datafile pair to the map_str_str.
+          experiments[it->first] = it->second;
+        }
+      }
+      if (experiment_names.find("Observables") != experiment_names.end())
+      {
+        for (auto it = experiment_names.at("Observables").begin(); 
+                  it != experiment_names.at("Observables").end(); ++it)
+        {
+          // Add each experiment : datafile pair to the map_str_str.
+          experiments[it->first] = it->second;
+        }
+      }
       std::cout << "(CosmoBit): init_MontePythonLike start"<< std::endl;
       
       // CosmoBit::MPLike_data_container should only be created once when calculating the first point.
@@ -3691,11 +3771,16 @@ namespace Gambit
 
       // Loop through the list of experiments, and query the lnL from the
       // MontePython backend
-      for (auto const& it : experiments)
+      // Only if the experiment is requested as a Likelihood. 
+      // Separate function below for observables.
+      if (experiment_names.find("Likelihoods") != experiment_names.end())
       {
-        // likelihood names are keys of experiment map (str, str map mapping likelihood name to .data file)
-        std::string like_name = it.first;
-        result[like_name] = BEreq::get_MP_loglike(mplike_cont, cosmo, like_name);
+        for (auto const& it : experiment_names.at("Likelihoods"))
+        {
+          // likelihood names are keys of experiment map (str, str map mapping likelihood name to .data file)
+          std::string like_name = it.first;
+          result[like_name] = BEreq::get_MP_loglike(mplike_cont, cosmo, like_name);
+        }
       }
 
       std::cout << "(CosmoBit): get_MP_loglike end with result \n"<< result << std::endl;
@@ -3718,6 +3803,83 @@ namespace Gambit
         lnL += p.second;
       }
       result = lnL;
+    }
+
+    /// Computes lnL for each experiment initialised in MontePython
+    /// but DOES NOT add it to the compound lnL in GAMBIT. 
+    /// This should be used when one wishes to grab a Likelihood from 
+    /// MontePython but does not want it to steer the scans
+    /// (e.g. for forecasting; conflicting likelihoods; etc.) -- use with caution!
+    void calc_MP_observables(map_str_dbl & result)
+    {
+      using namespace Pipes::calc_MP_LogLikes;
+      using namespace pybind11::literals;
+
+      // A list of the experiments initialised in the YAML file
+      // This is a map with the following structure:
+      // { Likelihoods: {likelihood1: mode, likelihood2: mode...}
+      //   Observables: {observable1: mode, observable2: mode...} }
+      map_str_map_str_str experiment_names = *Dep::MP_experiment_names;
+      
+      // We need to pull the names of all Likelihoods AND observables
+      // to initialise the data structures in MontePython
+      map_str_str experiments;
+
+      if (experiment_names.find("Likelihoods") != experiment_names.end())
+      {
+        for (auto it = experiment_names.at("Likelihoods").begin(); 
+                  it != experiment_names.at("Likelihoods").end(); ++it)
+        {
+          // Add each experiment : datafile pair to the map_str_str.
+          experiments[it->first] = it->second;
+        }
+      }
+      if (experiment_names.find("Observables") != experiment_names.end())
+      {
+        for (auto it = experiment_names.at("Observables").begin(); 
+                  it != experiment_names.at("Observables").end(); ++it)
+        {
+          // Add each experiment : datafile pair to the map_str_str.
+          experiments[it->first] = it->second;
+        }
+      }
+      std::cout << "(CosmoBit): init_MontePythonLike start"<< std::endl;
+      
+      // CosmoBit::MPLike_data_container should only be created once when calculating the first point.
+      // After that is has to be kept alive since it contains a vector with the initialised MPLike 
+      // Likelihood objects.
+      pybind11::object data;
+      map_str_pyobj likelihoods;
+      static bool first_run = true;
+      if(first_run)
+      {
+        data = BEreq::create_MP_data_object(experiments);
+        likelihoods = BEreq::create_MP_likelihood_objects(data, experiments);
+        first_run = false;
+      }
+      
+      static const CosmoBit::MPLike_data_container mplike_cont(data, likelihoods);
+      
+      // pass current values of nuisance parameters to data.mcmc_parameters dictionary for likelihood computation in MP
+      mplike_cont.data.attr("mcmc_parameters") = *Dep::parameter_dict_for_MPLike;
+
+      // Create instance of classy class Class
+      pybind11::object cosmo = BEreq::get_classy_cosmo_object();
+
+      // Loop through the list of experiments, and query the lnL from the
+      // MontePython backend.
+      // ONLY if the experiment is requested as an observable. 
+      std::cout << "(CosmoBit): here's some observables, not added to lnL total: \n"<< result << std::endl;
+      if (experiment_names.find("Observables") != experiment_names.end())
+      {
+        for (auto const& it : experiment_names.at("Observables"))
+        {
+          // likelihood names are keys of experiment map (str, str map mapping likelihood name to .data file)
+          std::string like_name = it.first;
+          result[like_name] = BEreq::get_MP_loglike(mplike_cont, cosmo, like_name);
+          std::cout << "lnL value for " << it.first << " saved as " << result.at(like_name) << std::endl;
+        }
+      }
     }
   }
 }

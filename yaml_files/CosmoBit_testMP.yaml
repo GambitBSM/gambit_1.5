@@ -64,7 +64,7 @@ Scanner:
 
     random:
       plugin: random
-      point_number: 5
+      point_number: 50
       like:  LogLike
 
 #======== Observables of interest ========
@@ -98,23 +98,30 @@ ObsLikes:
 #    capability:   Omega0_ncdm
 #    function:     get_Omega0_ncdm_classy  
 
-  - purpose:      LogLike
-    capability:   Pantheon_LogLike
+#  - purpose:      LogLike
+#    capability:   Pantheon_LogLike
 
-  - purpose:      LogLike
-    capability:   BAO_LogLike
+#   - purpose:      LogLike
+#     capability:   BAO_LogLike
 
   #- purpose:      LogLike
   #  capability:   sigma8_LogLike
 
-  
+  # The total lnL from MontePython
   - purpose:      LogLike
     capability:   MP_Combined_LogLike
     module:       CosmoBit
     type:         double
   
+  # A breakdown of each likelihood component in the above total lnL
   - purpose:      Observable
     capability:   MP_LogLikes
+    type:         map_str_dbl
+  
+  # Any observables requested by the user -- these are basically
+  # additional likelihoods -- so as not to optimise on lnL.
+  - purpose:      Observable
+    capability:   MP_Observables
     type:         map_str_dbl
 
   - purpose:      LogLike
@@ -131,24 +138,22 @@ ObsLikes:
 Rules:
 
 
-  # class through c interface
-  - capability: class_set_parameter
-    options:
-      class_dict: 
-       # output: "tCl" # need to add matter power spectrum for sigma8 computation
-        k_pivot: 0.05
-        output: mPk
-        P_k_max_h/Mpc: 1.
-
-  - capability: class_get_Dl
-    backends:
-      - {backend: class, version: 2.6.3}
-  
-
-
-  - capability: Pantheon_LogLike
-    backends:
-      - {backend: class, version: 2.6.3}
+  # # class through c interface
+  # - capability: class_set_parameter
+  #   options:
+  #     class_dict: 
+  #      # output: "tCl" # need to add matter power spectrum for sigma8 computation
+  #       k_pivot: 0.05
+  #       output: mPk lCl pCl
+  #       P_k_max_h/Mpc: 1.
+  #
+  # - capability: class_get_Dl
+  #   backends:
+  #     - {backend: class, version: 2.6.3}  
+  #
+  # - capability: Pantheon_LogLike
+  #   backends:
+  #     - {backend: class, version: 2.6.3}
 
 
   # classy (class through python wrapper)
@@ -183,33 +188,35 @@ Rules:
       # downloading data and when commenting out line 'parser_mp.existing_file(fname)', will include that into 
       # build step soon) safe to use;
       # still need to write a proper patch for MPLike backend & test all Likes
+      Observables:
+        WiggleZ: default
 
   # next 3 rules: all to calculate Likelihoods the class way (not the classy way)
   # verified that BAO, Pantheon & Planck_SZ all give same result the class way & classy way (through MP)
-  - capability: BAO_LogLike
-    backends:
-      - {backend: class, version: 2.6.3}
-    options:
-      DataFile:  BAO_2014.dat
-
-  - capability: sigma8_LogLike
-    function: compute_sigma8_LogLike
-    dependencies:
-      - capability: Omega0_m
-        function: compute_Omega0_m
-        module: CosmoBit
-    options:
-      DataFile: "Planck_SZ.dat"
-
-  - capability: Omega0_m
-    function: compute_Omega0_m
-    dependencies:
-      - capability: Omega0_b
-        function: compute_Omega0_b
-        module: CosmoBit
-      - capability: Omega0_cdm
-        function: compute_Omega0_cdm
-        module: CosmoBit
+  # - capability: BAO_LogLike
+  #   backends:
+  #     - {backend: class, version: 2.6.3}
+  #   options:
+  #     DataFile:  BAO_2014.dat
+  #
+  # - capability: sigma8_LogLike
+  #   function: compute_sigma8_LogLike
+  #   dependencies:
+  #     - capability: Omega0_m
+  #       function: compute_Omega0_m
+  #       module: CosmoBit
+  #   options:
+  #     DataFile: "Planck_SZ.dat"
+  #
+  # - capability: Omega0_m
+  #   function: compute_Omega0_m
+  #   dependencies:
+  #     - capability: Omega0_b
+  #       function: compute_Omega0_b
+  #       module: CosmoBit
+  #     - capability: Omega0_cdm
+  #       function: compute_Omega0_cdm
+  #       module: CosmoBit
 
   # to speed up Neff calc for testing
   - capability: AlterBBN_setInput
