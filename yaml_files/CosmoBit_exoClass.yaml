@@ -111,18 +111,26 @@ ObsLikes:
 
   - purpose:      LogLike
     capability:   BAO_LogLike
-  
+
   - purpose:      Observable
     capability:   Omega0_r
     function:     get_Omega0_r_classy
-  
+
+  # The total lnL from MontePython
   - purpose:      LogLike
     capability:   MP_Combined_LogLike
     module:       CosmoBit
     type:         double
-  
+
+  # A breakdown of each likelihood component in the above total lnL
   - purpose:      Observable
     capability:   MP_LogLikes
+    type:         map_str_dbl
+
+  # Any observables requested by the user -- these are basically
+  # additional likelihoods -- so as not to optimise on lnL.
+  - purpose:      Observable
+    capability:   MP_Observables
     type:         map_str_dbl
 
 #======== Rule entries ========
@@ -167,6 +175,8 @@ Rules:
       # downloading data and when commenting out line 'parser_mp.existing_file(fname)', will include that into 
       # build step soon) safe to use;
       # still need to write a proper patch for MPLike backend & test all Likes
+      Observables:
+        WiggleZ: default
 
   - capability: DM_fraction
     function: DM_fraction_ALP
