@@ -27,6 +27,7 @@ Parameters:
  #rBBN_rCMB:                          !import include/rBBN_rCMB.yaml
  #dNeffCMB:                           !import include/dNeffCMB.yaml
  #dNeffBBN_dNeffCMB:                  !import include/dNeffBBN_dNeffCMB.yaml
+ #rBBN_rCMB_dNeffBBN_dNeffCMB:        !import include/rBBN_rCMB_dNeffBBN_dNeffCMB.yaml
  etaBBN_rBBN_rCMB_dNeffBBN_dNeffCMB: !import include/etaBBN_rBBN_rCMB_dNeffBBN_dNeffCMB.yaml
 
  # neutrino masses
