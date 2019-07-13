@@ -2628,7 +2628,7 @@ namespace Gambit
       using namespace Pipes::AlterBBN_Input;
 
       result["eta0"] = *Param["eta_BBN"];    // eta AFTER BBN (variable during)
-      result["Nnu"]=3.046*(*Param["r_BBN"]); // contribution from SM neutrinos
+      result["Nnu"]=3.046*pow((*Param["r_BBN"]),4); // contribution from SM neutrinos
       result["dNnu"]=*Param["dNeff_BBN"];    // dNnu: within AlterBBN scenarios in which the sum Nnu+dNnu is the same are identical
       result["failsafe"] = runOptions->getValueOrDef<double>(3,"failsafe");
       result["err"] = runOptions->getValueOrDef<double>(3,"err");
