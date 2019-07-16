@@ -187,6 +187,7 @@ namespace Gambit
 
        /// Extra data needed in MPI mode
        #ifdef WITH_MPI
+         int MPIsize;
          GMPI::Comm* signalComm;
          bool _comm_rdy;
 
