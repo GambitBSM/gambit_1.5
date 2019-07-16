@@ -30,21 +30,21 @@
      // Ignore that some parameters don't exist in the parent, as these are set below.
      targetP.setValues(myP,false);
 
-     if (myP["dmNu3l"] > 0.)  // normal hierarchy, l = 2
+     if (myP["dmNu3l"] > 0.)  // normal hierarchy, l = 1
      {
        targetP.setValue("mNu1", myP["mNu_light"]*1e-9);
        targetP.setValue("mNu2",
            pow(myP["mNu_light"]*myP["mNu_light"]+myP["dmNu21"], 0.5)*1e-9);
        targetP.setValue("mNu3",
-           pow(myP["mNu_light"]*myP["mNu_light"]+myP["dmNu3l"]+myP["dmNu21"], 0.5)*1e-9);
+           pow(myP["mNu_light"]*myP["mNu_light"]+myP["dmNu3l"], 0.5)*1e-9);
      }
-     else // inverted hierarchy, l = 1
+     else // inverted hierarchy, l = 2
      {
        targetP.setValue("mNu3", myP["mNu_light"]*1e-9);
-       targetP.setValue("mNu1",
-           pow(myP["mNu_light"]*myP["mNu_light"]-myP["dmNu3l"], 0.5)*1e-9);
        targetP.setValue("mNu2",
-           pow(myP["mNu_light"]*myP["mNu_light"]-myP["dmNu3l"]+myP["dmNu21"], 0.5)*1e-9);
+           pow(myP["mNu_light"]*myP["mNu_light"]-myP["dmNu3l"], 0.5)*1e-9);
+       targetP.setValue("mNu1",
+           pow(myP["mNu_light"]*myP["mNu_light"]-myP["dmNu3l"]-myP["dmNu21"], 0.5)*1e-9);
      }
   }
 
