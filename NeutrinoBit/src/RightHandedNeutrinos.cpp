@@ -1272,61 +1272,85 @@ namespace Gambit
       using namespace Pipes::lnL_mbb_0nubb;
       result = *Dep::lnL_mbb_0nubb_KamLAND_Zen + *Dep::lnL_mbb_0nubb_GERDA;
     }
-    
-    
-    // CKM unitarity constraint: optimize on Vus from Theta [PDG 2016]
-    void calc_Vus(double& result_Vus)
+
+    // Helper function to fill all needed experimental info for CKM unitarity
+    void fill_ckm_exp(Matrix3cd &Theta, double GF, triplet<double> (&Vus_exp)[8], triplet<double> &Vud_exp, double (&f)[8])
     {
-      using namespace Pipes::calc_Vus;
-      SMInputs sminputs = *Dep::SMINPUTS;
-      Matrix3cd Theta = *Dep::SeesawI_Theta;
-      double G_mu = sminputs.GF;
-      
+
+      // Vus
       // Experimental values determined for K and tau decays. From table 1 in 1502.00477
       double V_us_exp[] = {0.2163, 0.2166, 0.2155, 0.2160, 0.2158, 0.2262, 0.2214, 0.2173};
       double err_V_us_exp[] = {0.0006, 0.0006, 0.0013, 0.0011, 0.0014, 0.0013, 0.0022, 0.0022};
       double f_plus = 0.959;
       double err_f_plus = 0.005;
       for(int i=0; i<5; i++)
-        {
-          V_us_exp[i] /= f_plus;
-          err_V_us_exp[i] = sqrt(pow(err_V_us_exp[i] / f_plus,2) + pow(V_us_exp[i] * err_f_plus / f_plus, 2));
-        }
+      {
+        V_us_exp[i] /= f_plus;
+        err_V_us_exp[i] = sqrt(pow(err_V_us_exp[i] / f_plus,2) + pow(V_us_exp[i] * err_f_plus / f_plus, 2));
+      }
+ 
+      // Fill Vus_exp triplet
+      for(int i=0; i<8; i++)
+      {
+        Vus_exp[i].central = V_us_exp[i];
+        Vus_exp[i].upper = err_V_us_exp[i];
+        Vus_exp[i].lower = err_V_us_exp[i];
+      }
 
+      // Vud
       // Combined value from the PDG
       static double V_ud_exp = 0.97417;
       static double err_V_ud_exp = 0.00021;
-      // for the minimalization it's much better to transform the Vud experimental result to Vus the same as we do for theory and minalize onlu Vus
-      static double V_us_from_Vud=sqrt(1.-V_ud_exp*V_ud_exp);
-      static double err_V_us_from_Vud_exp= ( (V_ud_exp)/(sqrt(1-V_ud_exp*V_ud_exp))  ) * err_V_ud_exp;
-      
-                                             
-      double f[8];
-      Matrix3d ThetaNorm = (Theta * Theta.adjoint()).real();
+ 
+      // Fill Vud_exp triplet
+      Vud_exp.central = V_ud_exp;
+      Vud_exp.upper = err_V_ud_exp;
+      Vud_exp.lower = err_V_ud_exp;
 
-      f[0] = pow(sminputs.GF/G_mu,2)*(1 - ThetaNorm(0,0));
+      // f
+      Matrix3d ThetaNorm = (Theta * Theta.adjoint()).real();
+      double Gmu = sqrt(GF*GF*(1. - ThetaNorm(1,1) - ThetaNorm(0,0)));
+
+      f[0] = pow(GF/Gmu,2)*(1 - ThetaNorm(0,0));
       f[1] = f[0];
       f[2] = f[0];
-      f[3] = pow(sminputs.GF/G_mu,2)*(1 - ThetaNorm(1,1));
+      f[3] = pow(GF/Gmu,2)*(1 - ThetaNorm(1,1));
       f[4] = f[3];
       f[5] = 1 + ThetaNorm(1,1);
       f[6] = 1 + ThetaNorm(0,0) + ThetaNorm(1,1) - ThetaNorm(2,2);
       f[7] = 1 + 0.2*ThetaNorm(0,0) - 0.9*ThetaNorm(1,1) - 0.2*ThetaNorm(2,2);
+    }
+     
+    // CKM unitarity constraint: optimize on Vus from Theta [PDG 2016]
+    void calc_Vus(double& result_Vus)
+    {
+      using namespace Pipes::calc_Vus;
+      SMInputs sminputs = *Dep::SMINPUTS;
+      Matrix3cd Theta = *Dep::SeesawI_Theta;
 
+      // Fill experimental data
+      triplet<double> V_us_exp[8];
+      triplet<double> V_ud_exp;
+      double f[8];
+      fill_ckm_exp(Theta, sminputs.GF, V_us_exp, V_ud_exp, f);
+      
+      // For the minimalization it's much better to transform the Vud experimental result to Vus the same as we do for theory and minimize only Vus
+      static double V_us_from_Vud=sqrt(1.-V_ud_exp.central*V_ud_exp.central);
+      static double err_V_us_from_Vud_exp= ( (V_ud_exp.central)/(sqrt(1-V_ud_exp.central*V_ud_exp.central))  ) * V_ud_exp.upper;
+                                             
       double est_Vus = 0.;
-      double sum_nominator = 0;
+      double sum_numerator = 0;
       double sum_denominator = 0;
       for (int i=0; i<7; i++)
-        {
-          sum_nominator += (V_us_exp[i]/f[i]) / (err_V_us_exp[i]*err_V_us_exp[i] /( f[i]*f[i]));
-          sum_denominator += 1./(err_V_us_exp[i]*err_V_us_exp[i] /( f[i]*f[i]));
-
-        }
+      {
+        sum_numerator += (V_us_exp[i].central/f[i]) / (V_us_exp[i].upper*V_us_exp[i].upper /( f[i]*f[i]));
+        sum_denominator += 1./(V_us_exp[i].upper*V_us_exp[i].upper /( f[i]*f[i]));
+      }
       // now vud
-      sum_nominator += (V_us_from_Vud /f[0]) / ( (err_V_us_from_Vud_exp*err_V_us_from_Vud_exp)/( f[0]*f[0]));
+      sum_numerator += (V_us_from_Vud /f[0]) / ( (err_V_us_from_Vud_exp*err_V_us_from_Vud_exp)/( f[0]*f[0]));
       sum_denominator +=  1./( (err_V_us_from_Vud_exp*err_V_us_from_Vud_exp) /( f[0]*f[0]) );
 
-      est_Vus = sum_nominator/sum_denominator;
+      est_Vus = sum_numerator/sum_denominator;
       
       result_Vus = est_Vus;
     }
@@ -1337,42 +1361,20 @@ namespace Gambit
       using namespace Pipes::lnL_ckm_Vusmin;
       SMInputs sminputs = *Dep::SMINPUTS;
       Matrix3cd Theta = *Dep::SeesawI_Theta;
-      double G_mu = sminputs.GF;
       double V_us = *Dep::calc_Vus;
 
-      // Experimental values determined for K and tau decays. From table 1 in 1502.00477
-      double V_us_exp[] = {0.2163, 0.2166, 0.2155, 0.2160, 0.2158, 0.2262, 0.2214, 0.2173};
-      double err_V_us_exp[] = {0.0006, 0.0006, 0.0013, 0.0011, 0.0014, 0.0013, 0.0022, 0.0022};
-      double f_plus = 0.959;
-      double err_f_plus = 0.005;
-      for(int i=0; i<5; i++)
-        {
-          V_us_exp[i] /= f_plus;
-          err_V_us_exp[i] = sqrt(pow(err_V_us_exp[i] / f_plus,2) + pow(V_us_exp[i] * err_f_plus / f_plus, 2));
-        }
-
-      // Combined value from the PDG
-      static double V_ud_exp = 0.97417;
-      static double err_V_ud_exp = 0.00021;
-
+      // Fill experimental data
+      triplet<double> V_us_exp[8];
+      triplet<double> V_ud_exp;
       double f[8];
-      Matrix3d ThetaNorm = (Theta * Theta.adjoint()).real();
-
-      f[0] = pow(sminputs.GF/G_mu,2)*(1 - ThetaNorm(0,0));
-      f[1] = f[0];
-      f[2] = f[0];
-      f[3] = pow(sminputs.GF/G_mu,2)*(1 - ThetaNorm(1,1));
-      f[4] = f[3];
-      f[5] = 1 + ThetaNorm(1,1);
-      f[6] = 1 + ThetaNorm(0,0) + ThetaNorm(1,1) - ThetaNorm(2,2);
-      f[7] = 1 + 0.2*ThetaNorm(0,0) - 0.9*ThetaNorm(1,1) - 0.2*ThetaNorm(2,2);
-
+      fill_ckm_exp(Theta, sminputs.GF, V_us_exp, V_ud_exp, f);
+ 
       double chi2 = 0.0;
       for (int i=0; i<7; i++)
-        chi2 += pow( (sqrt(pow(V_us,2)*f[i]) - V_us_exp[i]) / err_V_us_exp[i], 2);
+        chi2 += pow( (sqrt(pow(V_us,2)*f[i]) - V_us_exp[i].central) / V_us_exp[i].upper, 2);
       // According to 1407.6607 the correction for Vud is the same as K->pi e nu (f[0])
       double V_ub = 3.94e-3;
-      chi2 += pow( (sqrt((1 - pow(V_us,2) - pow(V_ub,2))*f[0]) - V_ud_exp)/ err_V_ud_exp/1.20, 2);
+      chi2 += pow( (sqrt((1 - pow(V_us,2) - pow(V_ub,2))*f[0]) - V_ud_exp.central)/ V_ud_exp.upper/1.20, 2);
       result_ckm = -0.5*chi2;
     }
   
@@ -1382,42 +1384,19 @@ namespace Gambit
       using namespace Pipes::lnL_ckm_Vus;
       SMInputs sminputs = *Dep::SMINPUTS;
       Matrix3cd Theta = *Dep::SeesawI_Theta;
-      double G_mu = sminputs.GF;
       double V_us = *Param["CKM_lambda"];
-      
 
-      // Experimental values determined for K and tau decays. From table 1 in 1502.00477
-      double V_us_exp[] = {0.2163, 0.2166, 0.2155, 0.2160, 0.2158, 0.2262, 0.2214, 0.2173};
-      double err_V_us_exp[] = {0.0006, 0.0006, 0.0013, 0.0011, 0.0014, 0.0013, 0.0022, 0.0022};
-      double f_plus = 0.959;
-      double err_f_plus = 0.005;
-      for(int i=0; i<5; i++)
-        {
-          V_us_exp[i] /= f_plus;
-          err_V_us_exp[i] = sqrt(pow(err_V_us_exp[i] / f_plus,2) + pow(V_us_exp[i] * err_f_plus / f_plus, 2));
-        }
-
-      // Combined value from the PDG
-      static double V_ud_exp = 0.97417;
-      static double err_V_ud_exp = 0.00021;
-
+      // Fill experimental data
+      triplet<double> V_us_exp[8];
+      triplet<double> V_ud_exp;
       double f[8];
-      Matrix3d ThetaNorm = (Theta * Theta.adjoint()).real();
-
-      f[0] = pow(sminputs.GF/G_mu,2)*(1 - ThetaNorm(0,0));
-      f[1] = f[0];
-      f[2] = f[0];
-      f[3] = pow(sminputs.GF/G_mu,2)*(1 - ThetaNorm(1,1));
-      f[4] = f[3];
-      f[5] = 1 + ThetaNorm(1,1);
-      f[6] = 1 + ThetaNorm(0,0) + ThetaNorm(1,1) - ThetaNorm(2,2);
-      f[7] = 1 + 0.2*ThetaNorm(0,0) - 0.9*ThetaNorm(1,1) - 0.2*ThetaNorm(2,2);
+      fill_ckm_exp(Theta, sminputs.GF, V_us_exp, V_ud_exp, f);
 
       double chi2 = 0.0;
       for (int i=0; i<7; i++)
-        chi2 += pow( (sqrt(pow(V_us,2)*f[i]) - V_us_exp[i]) / err_V_us_exp[i], 2);
+        chi2 += pow( (sqrt(pow(V_us,2)*f[i]) - V_us_exp[i].central) / V_us_exp[i].upper, 2);
       // According to 1407.6607 the correction for Vud is the same as K->pi e nu (f[0])
-      chi2 += pow( (sqrt((1 - pow(V_us,2))*f[0]) - V_ud_exp)/ err_V_ud_exp, 2);
+      chi2 += pow( (sqrt((1 - pow(V_us,2))*f[0]) - V_ud_exp.central)/ V_ud_exp.upper, 2);
       result_ckm = -0.5*chi2;
     }
     

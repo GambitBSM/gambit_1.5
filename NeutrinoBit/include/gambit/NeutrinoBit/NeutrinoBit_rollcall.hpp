@@ -23,6 +23,8 @@
 ///  \author Tomas Gonzalo
 ///          (t.e.gonzalo@fys.uio.no)
 ///  \date 2017 July
+///  \date 2018
+///  \date 2019
 ///
 ///  \author Julia Harz
 ///          (jharz@lpthe.jussieu.fr)
@@ -712,7 +714,6 @@ START_MODULE
     ALLOW_MODELS(RightHandedNeutrinos, StandardModel_SLHA2)
     DEPENDENCY(SMINPUTS, SMInputs)
     DEPENDENCY(SeesawI_Theta, Eigen::Matrix3cd)
-    DEPENDENCY(get_Vus, double)
     #undef FUNCTION
   #undef CAPABILITY
 
