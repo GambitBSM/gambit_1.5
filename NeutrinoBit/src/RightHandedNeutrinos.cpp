@@ -2,7 +2,8 @@
 //   *********************************************
 ///  \file
 ///
-///  Right handed neutrino scan; using Casas-Ibarra parameterization
+///  Module function definitions for NeutrinoBit 
+///  exclusive for right-handed neutrinos
 ///
 ///  *********************************************
 /// 
@@ -15,6 +16,9 @@
 ///  \author Tomas Gonzalo
 ///          (t.e.gonzalo@fys.uio.no)
 ///  \date 2017 Oct
+///  \date 2018
+///  \date 2019
+///
 ///  \author Marcin Chrzaszcz
 ///          (mchrzasz@cern.ch)
 ///  \date 2018
@@ -47,6 +51,7 @@ namespace Gambit
 {
   namespace NeutrinoBit
   {
+    // Decay widths of RHNs, for BBN (N -> pi0 nu)
     // All formulae for Gamma come from [arXiv:0705:1729], except where mentioned.
     void Gamma_RHN2pi0nu(std::vector<double>& result)
     {
@@ -75,6 +80,7 @@ namespace Gambit
       result = gamma;
     }
 
+    // Decay widths of RHNs, for BBN (N -> pi+ l-)
     void Gamma_RHN2piplusl(std::vector<double>& result)
     {
       using namespace Pipes::Gamma_RHN2piplusl;
@@ -108,6 +114,7 @@ namespace Gambit
       result = gamma;
     }
 
+    // Decay widths of RHNs, for BBN (N -> K+ l-)
     void Gamma_RHN2Kplusl(std::vector<double>& result)
     {
       using namespace Pipes::Gamma_RHN2Kplusl;
@@ -141,6 +148,7 @@ namespace Gambit
       result = gamma;
     }
 
+    // Decay widths of RHNs, for BBN (N -> D+ l-)
     void Gamma_RHN2Dplusl(std::vector<double>& result)
     {
       using namespace Pipes::Gamma_RHN2Dplusl;
@@ -174,6 +182,7 @@ namespace Gambit
       result = gamma;
     }
 
+    // Decay widths of RHNs, for BBN (N -> Ds+ l-)
     void Gamma_RHN2Dsl(std::vector<double>& result)
     {
       using namespace Pipes::Gamma_RHN2Dsl;
@@ -207,6 +216,7 @@ namespace Gambit
       result = gamma;
     }
 
+    // Decay widths of RHNs, for BBN (N -> B+ l-)
     void Gamma_RHN2Bplusl(std::vector<double>& result)
     {
       using namespace Pipes::Gamma_RHN2Bplusl;
@@ -240,6 +250,7 @@ namespace Gambit
       result = gamma;
     }
 
+    // Decay widths of RHNs, for BBN (N -> Bs+ l-)
     void Gamma_RHN2Bsl(std::vector<double>& result)
     {
       using namespace Pipes::Gamma_RHN2Bsl;
@@ -273,6 +284,7 @@ namespace Gambit
       result = gamma;
     }
 
+    // Decay widths of RHNs, for BBN (N -> Bc+ l-)
     void Gamma_RHN2Bcl(std::vector<double>& result)
     {
       using namespace Pipes::Gamma_RHN2Bcl;
@@ -306,6 +318,7 @@ namespace Gambit
       result = gamma;
     }
 
+    // Decay widths of RHNs, for BBN (N -> eta nu)
     void Gamma_RHN2etanu(std::vector<double>& result)
     {
       using namespace Pipes::Gamma_RHN2etanu;
@@ -333,6 +346,7 @@ namespace Gambit
       result = gamma;
     }
 
+    // Decay widths of RHNs, for BBN (N -> eta' nu)
     void Gamma_RHN2etaprimenu(std::vector<double>& result)
     {
       using namespace Pipes::Gamma_RHN2etaprimenu;
@@ -360,6 +374,7 @@ namespace Gambit
       result = gamma;
     }
 
+    // Decay widths of RHNs, for BBN (N -> rho+ l-)
     void Gamma_RHN2rhoplusl(std::vector<double>& result)
     {
       using namespace Pipes::Gamma_RHN2rhoplusl;
@@ -393,6 +408,7 @@ namespace Gambit
       result = gamma;
     }
 
+    // Decay widths of RHNs, for BBN (N -> rho0 nu)
     void Gamma_RHN2rho0nu(std::vector<double>& result)
     {
       using namespace Pipes::Gamma_RHN2rho0nu;
@@ -420,6 +436,7 @@ namespace Gambit
       result = gamma;
     }
 
+    // Decay widths of RHNs, for BBN (N -> nu nu nu)
     void Gamma_RHN23nu(std::vector<double>& result)
     {
       using namespace Pipes::Gamma_RHN23nu;
@@ -450,6 +467,7 @@ namespace Gambit
      return (1 - (7*pow(xa,2)) - (7*pow(xb,2)) - (7*pow(xa,4)) - (7*pow(xb,4)) + (12*pow(xa,2)*pow(xb,2)) - (7*pow(xa,2)*pow(xb,4)) - (7*pow(xa,4)*pow(xb,2)) + pow(xa,6) + pow(xb,6));
     }
 
+    // Decay widths of RHNs, for BBN (N -> l+ l- nu)
     // Formula is from [arXiv:1208.4607v2]
     void Gamma_RHN2llnu(std::vector<double>& result)
     {
@@ -494,12 +512,12 @@ namespace Gambit
       return pow(x,4)*log((1-(3*pow(x,2.0))-((1-pow(x,2.0))*sqrt(1 - (4*pow(x,2.0))))) / (pow(x,2.0)*(1+sqrt(1 - (4*pow(x,2.0))))) );
     }
 
+    // Decay widths of RHNs, for BBN (N -> nu l+ l-)
     void Gamma_RHN2null(std::vector<double>& result)
     {
       using namespace Pipes::Gamma_RHN2null;
       SMInputs sminputs = *Dep::SMINPUTS;
       static double G_F_sq = pow(sminputs.GF, 2);
-      // TODO: get either from PrecisionBit or sminputs
       static double s_W_sq = 0.22336;  // get from within GAMBIT in future
       static double C1 = 0.25*(1 - (4*s_W_sq) + (8*pow(s_W_sq,2)));
       static double C2 = 0.5*s_W_sq*((2*s_W_sq) - 1);
@@ -543,19 +561,18 @@ namespace Gambit
     // Helper function; formula is in [arXiv:1208.4607v2]
     double f_u(double x)
     {
-      // TODO: get either from PrecisionBit or sminputs
       static double s_W_sq = 0.22336;  // get from within GAMBIT in future
       static double C1 = s_W_sq*(3 - (4*s_W_sq));
       return (0.25 - ((2/9)*C1) - ((3.5-((20/9)*C1))*pow(x,2)) - ((0.5+(4*C1))*pow(x,4)) - ((3-(8*C1))*pow(x,6)));
     }
 
+    // Decay widths of RHNs, for BBN (N -> nu u ubar)
     // Formula is from [arXiv:1208.4607v2]
     void Gamma_RHN2nuuubar(std::vector<double>& result)
     {
       using namespace Pipes::Gamma_RHN2nuuubar;
       SMInputs sminputs = *Dep::SMINPUTS;
       static double G_F_sq = pow(sminputs.GF, 2);
-      // TODO: get either from PrecisionBit or sminputs
       static double s_W_sq = 0.22336;  // get from within GAMBIT in future
       static double C1 = s_W_sq*(3 - (4*s_W_sq));
       std::vector<double> m_uquark(3), gamma(3), M(3);
@@ -590,19 +607,18 @@ namespace Gambit
     // Helper function; formula is in [arXiv:1208.4607v2]
     double f_d(double x)
     {
-      // TODO: get either from PrecisionBit or sminputs
       static double s_W_sq = 0.22336;  // get from within GAMBIT in future
       static double C2 = s_W_sq*(3 - (2*s_W_sq));
       return (0.25 - ((1/9)*C2) - (((2/7)-((10/9)*C2))*pow(x,2)) - ((0.5+(2*C2))*pow(x,4)) - ((3-(4*C2))*pow(x,6)));
     }
 
+    // Decay widths of RHNs, for BBN (N -> nu d dbar)
     // Formula is from [arXiv:1208.4607v2]
     void Gamma_RHN2nuddbar(std::vector<double>& result)
     {
       using namespace Pipes::Gamma_RHN2nuddbar;
       SMInputs sminputs = *Dep::SMINPUTS;
       static double G_F_sq = pow(sminputs.GF, 2);
-      // TODO: get either from PrecisionBit or sminputs
       static double s_W_sq = 0.22336;  // get from within GAMBIT in future
       static double C2 = s_W_sq*(3 - (2*s_W_sq));
       std::vector<double> m_dquark(3), gamma(3), M(3);
@@ -657,6 +673,7 @@ namespace Gambit
       return result;
     }
 
+    // Decay widths of RHNs, for BBN (N -> l u dbar)
     // Formula is from [arXiv:1208.4607v2]
     void Gamma_RHN2ludbar(std::vector<double>& result)
     {
@@ -763,17 +780,12 @@ namespace Gambit
       {
         if((hbar/gamma[i])>0.1)
         {
-          //std::ostringstream msg;
-          //msg << "Lifetime is longer than 0.1s; point is invalidated by BBN constraint.";
-          //logger() << msg.str() << EOM;
           result_bbn = -100;
-          //invalid_point().raise(msg.str());
-          //break;
         }
       }
     }
 
-    // Lepton universality constraint: R_(e,mu)_pi/R_(e,mu)_K should be within experimental limits [R_pi_SM, R_K_SM: Phys. Rev. Lett 99, 231801; R_tau_SM: Int. J. Mod. Phys. A 24, 715, 2009; R_pi experimental limits: Phys. Rev. Lett. 70, 17; R_K experimental limits (NA62): Phys. Lett. B 719 (2013), 326; R_tau experimental limits: Phys. Rev. D 86, 010001]
+    // Lepton universality constraint: R_{e,mu)^pi. Computation from 1502.00477. R_pi_SM from Phys. Rev. Lett 99, 231801.
     void RHN_R_pi(double& R_pi)
     {
       using namespace Pipes::RHN_R_pi;
@@ -783,17 +795,9 @@ namespace Gambit
       static double r_e_pi = pow(sminputs.mE,2)/pow(m_pi,2);
       static double r_mu_pi = pow(sminputs.mMu,2)/pow(m_pi,2);
       double e_f_pi = 0.0, mu_f_pi = 0.0, d_r_pi = 1.0;
-//      std::vector<double> M(6), r_I_pi(6), G_e_pi = {0.0,0.0,0.0,0.0,0.0,0.0}, G_mu_pi = {0.0,0.0,0.0,0.0,0.0,0.0};
       std::vector<double> M(3), r_I_pi(3), G_e_pi = {0.0,0.0,0.0}, G_mu_pi = {0.0,0.0,0.0};
       Matrix3d Usq = Dep::SeesawI_Theta->cwiseAbs2();
-      //Matrix3d Vsq = Dep::SeesawI_Vnu->cwiseAbs2();
 
-      /*M[0] = *Param["mNu1"];
-      M[1] = *Param["mNu2"];
-      M[2] = *Param["mNu3"];
-      M[3] = *Param["M_1"];
-      M[4] = *Param["M_2"];
-      M[5] = *Param["M_3"];*/
       M[0] = *Param["M_1"];
       M[1] = *Param["M_2"];
       M[2] = *Param["M_3"];
@@ -805,7 +809,6 @@ namespace Gambit
         if(M[i] + sminputs.mMu < m_pi)
         {
           G_mu_pi[i] = ( r_mu_pi + r_I_pi[i] - pow((r_mu_pi - r_I_pi[i]), 2) ) * sqrt(1.0 - 2.0*(r_mu_pi + r_I_pi[i]) + pow(r_mu_pi - r_I_pi[i], 2)) / (r_mu_pi * pow((1.0 - r_mu_pi), 2));
-          //G_mu_pi[i] = ( r_mu_pi + r_I_pi[i] - pow((r_mu_pi - r_I_pi[i]), 2) ) * sqrt(1.0 - 2.0*(r_mu_pi + r_I_pi[i]) + pow(r_mu_pi - r_I_pi[i], 2));
         } 
         else
           G_mu_pi[i] = 0.0;
@@ -813,7 +816,6 @@ namespace Gambit
         if(M[i] + sminputs.mE < m_pi)
         {
           G_e_pi[i] = ( r_e_pi + r_I_pi[i] - pow(r_e_pi - r_I_pi[i], 2) ) * sqrt(1.0 - 2.0*(r_e_pi + r_I_pi[i]) + pow((r_e_pi - r_I_pi[i]), 2)) / (r_e_pi * pow((1.0 - r_e_pi), 2));
-          //G_e_pi[i] = ( r_e_pi + r_I_pi[i] - pow((r_e_pi - r_I_pi[i]), 2) ) * sqrt(1.0 - 2.0*(r_e_pi + r_I_pi[i]) + pow((r_e_pi - r_I_pi[i]), 2));
         }
         else
           G_e_pi[i] = 0.0;
@@ -821,24 +823,14 @@ namespace Gambit
         e_f_pi += Usq(0,i) * (G_e_pi[i] - 1.0);
         mu_f_pi += Usq(1,i) * (G_mu_pi[i] - 1.0);
   
-        /*if(i<3)
-        {
-          e_f_pi  += Vsq(0,i) * G_e_pi[i];
-          mu_f_pi += Vsq(1,i) * G_mu_pi[i];
-        }
-        else
-        {
-          e_f_pi  +=  Usq(0,i-3) * G_e_pi[i];
-          mu_f_pi +=  Usq(1,i-3) * G_mu_pi[i];
-        }*/
       }
 
       d_r_pi = ((1.0 + e_f_pi)/(1.0 + mu_f_pi));
       R_pi = R_pi_SM * d_r_pi;
-      //R_pi = e_f_pi / mu_f_pi;
  
     }
 
+    // Lepton universality constraint: R_(e,mu)^K. Computation from 1502.00477. R_K_SM from Phys. Rev. Lett 99, 231801.
     void RHN_R_K(double& R_K)
     {
       using namespace Pipes::RHN_R_K;
@@ -848,17 +840,9 @@ namespace Gambit
       static double r_e_K = pow(sminputs.mE,2)/pow(m_K,2);
       static double r_mu_K = pow(sminputs.mMu,2)/pow(m_K,2);
       double e_f_K = 0.0, mu_f_K = 0.0, d_r_K = 1.0;
-//      std::vector<double> M(6), r_I_K(6), G_e_K = {0.0,0.0,0.0,0.0,0.0,0.0}, G_mu_K = {0.0,0.0,0.0,0.0,0.0,0.0};
       std::vector<double> M(3), r_I_K(3), G_e_K = {0.0,0.0,0.0}, G_mu_K = {0.0,0.0,0.0};
       Matrix3d Usq = Dep::SeesawI_Theta->cwiseAbs2();
-//      Matrix3d Vsq = Dep::SeesawI_Vnu->cwiseAbs2();
 
-      /*M[0] = *Param["mNu1"];
-      M[1] = *Param["mNu2"];
-      M[2] = *Param["mNu3"];
-      M[3] = *Param["M_1"];
-      M[4] = *Param["M_2"];
-      M[5] = *Param["M_3"];*/
       M[0] = *Param["M_1"];
       M[1] = *Param["M_2"];
       M[2] = *Param["M_3"];
@@ -867,20 +851,16 @@ namespace Gambit
       {
         r_I_K[i] = pow(M[i], 2)/pow(m_K,2);
 
-//        if(M[i] + sminputs.mMu < m_K and M[i] + sminputs.mMu > m_pi)
         if(M[i] + sminputs.mMu < m_K)
         {
           G_mu_K[i] = ( r_mu_K + r_I_K[i] - pow((r_mu_K - r_I_K[i]), 2) ) * sqrt(1.0 - 2.0*(r_mu_K + r_I_K[i]) + pow(r_mu_K - r_I_K[i], 2)) / (r_mu_K * pow((1.0 - r_mu_K), 2));
-          //G_mu_K[i] = ( r_mu_K + r_I_K[i] - pow((r_mu_K - r_I_K[i]), 2) ) * sqrt(1.0 - 2.0*(r_mu_K + r_I_K[i]) + pow(r_mu_K - r_I_K[i], 2));
         } 
         else
           G_mu_K[i] = 0.0;
 
-//        if(M[i] + sminputs.mE < m_K and M[i] + sminputs.mE > m_pi)
         if(M[i] + sminputs.mE < m_K)
         {
           G_e_K[i] = ( r_e_K + r_I_K[i] - pow((r_e_K - r_I_K[i]), 2) ) * sqrt(1.0 - 2.0*(r_e_K + r_I_K[i]) + pow((r_e_K - r_I_K[i]), 2)) / (r_e_K * pow((1.0 - r_e_K), 2));
-          //G_e_K[i] = ( r_e_K + r_I_K[i] - pow((r_e_K - r_I_K[i]), 2) ) * sqrt(1.0 - 2.0*(r_e_K + r_I_K[i]) + pow((r_e_K - r_I_K[i]), 2));
         }
         else
           G_e_K[i] = 0.0;
@@ -888,33 +868,21 @@ namespace Gambit
         e_f_K += Usq(0,i) * (G_e_K[i] - 1.0);
         mu_f_K += Usq(1,i) * (G_mu_K[i] - 1.0);
           
-        /*if(i<3)
-        {
-         e_f_K  += Vsq(0,i) * G_e_K[i];
-         mu_f_K += Vsq(1,i) * G_mu_K[i];
-        }
-        else
-        {
-          e_f_K  +=  Usq(0,i-3) * G_e_K[i];
-          mu_f_K += Usq(1,i-3) * G_mu_K[i];
-        }*/
       }
 
       d_r_K = ((1.0 + e_f_K)/(1.0 + mu_f_K));
       R_K = R_K_SM * d_r_K;
-//        R_K = e_f_K/mu_f_K;
     }
 
+    // Lepton universality constraint: R_(e,mu)^tau. Computation from 1502.00477. R_tau_SM from Int. J. Mod. Phys. A 24, 715, 2009.
     void RHN_R_tau(double& R_tau)
     {
       using namespace Pipes::RHN_R_tau;
       SMInputs sminputs = *Dep::SMINPUTS;
       static double m_tau = sminputs.mTau;  // GeV
       static double R_tau_SM = 0.973;
-      //static double r_e_tau = pow(sminputs.mE,2)/pow(m_tau,2);
-      //static double r_mu_tau = pow(sminputs.mMu,2)/pow(m_tau,2);
       double e_f_tau = 0.0, mu_f_tau = 0.0, d_r_tau = 1.0;
-      std::vector<double> M(3)/*, r_I_tau(3), G_e_tau = {0.0,0.0,0.0}, G_mu_tau = {0.0,0.0,0.0}*/;
+      std::vector<double> M(3);
       Matrix3d Usq = Dep::SeesawI_Theta->cwiseAbs2();
 
       M[0] = *Param["M_1"];
@@ -923,25 +891,6 @@ namespace Gambit
 
       for (int i=0; i<3; i++)
       {
-        /*r_I_tau[i] = pow(M[i], 2)/pow(m_tau,2);
-
-        if(M[i] + sminputs.mMu < m_tau)
-        {
-          G_mu_tau[i] = (r_mu_tau + r_I_tau[i] - pow((r_mu_tau - r_I_tau[i]), 2) * sqrt(1.0 - 2.0*(r_mu_tau + r_I_tau[i]) + pow(r_mu_tau - r_I_tau[i], 2))) / (r_mu_tau * pow((1.0 - r_mu_tau), 2));
-        } 
-        else
-          G_mu_tau[i] = 0.0;
-
-        if(M[i] + sminputs.mE < m_tau)
-        {
-          G_e_tau[i] = (r_e_tau + r_I_tau[i] - pow((r_e_tau - r_I_tau[i]), 2) * sqrt(1.0 - 2.0*(r_e_tau + r_I_tau[i]) + pow((r_e_tau - r_I_tau[i]), 2))) / (r_e_tau * pow((1.0 - r_e_tau), 2));
-        }
-        else
-          G_e_tau[i] = 0.0;
-        */  
-        //e_f_tau += Usq(0,i) * (G_e_tau[i] - 1.0);
-        //mu_f_tau += Usq(1,i) * (G_mu_tau[i] - 1.0);
-
         if(M[i] > m_tau)
         {
           e_f_tau  -= Usq(0,i);
@@ -965,7 +914,6 @@ namespace Gambit
     void RHN_R_W(std::vector<double> &R_W)
     {
       using namespace Pipes::RHN_R_W;
-      //Matrix3d ThetaNorm = (*Dep::SeesawI_Theta * Dep::SeesawI_Theta->adjoint()).real();
       std::vector<double> Wdecays = *Dep::W_to_l_decays;
 
       R_W.clear();
@@ -973,21 +921,20 @@ namespace Gambit
       R_W.push_back(Wdecays[1]/Wdecays[0]);
       R_W.push_back(Wdecays[2]/Wdecays[0]);
       R_W.push_back(Wdecays[2]/Wdecays[1]);
-      //R_W.push_back(sqrt((1.0 - ThetaNorm(1,1))/(1.0 - ThetaNorm(0,0))));
-      //R_W.push_back(sqrt((1.0 - ThetaNorm(2,2))/(1.0 - ThetaNorm(0,0))));
-      //R_W.push_back(sqrt((1.0 - ThetaNorm(2,2))/(1.0 - ThetaNorm(1,1))));
     }
 
+    // Log-likelihood for the lepton universality constraint R_(e,mu)^K
     void lnL_R_K(double& result)
     {
       using namespace Pipes::lnL_R_K;
       double R_K = *Dep::R_K;
-      double R_K_exp = 2.488e-5; // 1212.4012
+      double R_K_exp = 2.488e-5; // 1212.4012 (Phys. Lett. B 719 (2013), 326)
       double R_K_err = 0.010e-5;
 
       result = Stats::gaussian_loglikelihood(R_K, R_K_exp, 0.0, R_K_err, false);
     }
 
+    // Log-likelihood for the lepton universality constraint R_(e,mu)^pi
     void lnL_R_pi(double& result)
     {
       using namespace Pipes::lnL_R_pi;
@@ -998,16 +945,18 @@ namespace Gambit
       result = Stats::gaussian_loglikelihood(R_pi, R_pi_exp, 0.0, R_pi_err, false);
     }
 
+    // Log-likelihood for the lepton universality constraint R_(e,mu)^tau
     void lnL_R_tau(double& result)
     {
       using namespace Pipes::lnL_R_tau;
       double R_tau = *Dep::R_tau;
-      double R_tau_exp = 0.9762; // 1612.07233 
+      double R_tau_exp = 0.9762; // 1612.07233 (Phys. Rev. D 86, 010001) 
       double R_tau_err = 0.0028;
 
       result = Stats::gaussian_loglikelihood(R_tau, R_tau_exp, 0.0, R_tau_err, false);
     }
-    
+ 
+    // Log-likelihood for the lepton universality constraint R_(e,mu)^W 
     void lnL_R_W(double& result)
     {
       using namespace Pipes::lnL_R_W;
@@ -1021,56 +970,19 @@ namespace Gambit
       result += Stats::gaussian_loglikelihood(R_W[2], R_W_exp[2], 0.0, R_W_err[2], false);
     }
 
-/*    void lnL_lepuniv(double& result_lepuniv)
+    // Calculate 0nubb half-life [1/yr] for 136Xe 0nubb detector, for the RHN model
+    void RHN_Thalf_0nubb_Xe(double& result)
     {
-      using namespace Pipes::lnL_lepuniv;
-      double R_pi = *Dep::R_pi;
-      double R_K = *Dep::R_K;
-      double R_tau = *Dep::R_tau;
-      std::vector<double> R_W = *Dep::R_W;
-
-      double R_pi_exp = 1.235e-4; // Phys.Rev.Lett. 70 (1993) 17-20  
-      double R_pi_err = 0.005e-4;
-      double R_K_exp = 2.488e-5; // 1212.4012
-      double R_K_err = 0.010e-5;
-      double R_tau_exp = 0.9762; // 1612.07233 
-      double R_tau_err = 0.0028;
-      std::vector<double> R_W_exp = {0.986, 1.043, 1.070}; // PDG 18
-      std::vector<double> R_W_err = {0.013, 0.024, 0.026}; // PDG 18
-
-      result_lepuniv = 0;
-      result_lepuniv += Stats::gaussian_loglikelihood(R_pi, R_pi_exp, 0.0, R_pi_err, false);
-      result_lepuniv += Stats::gaussian_loglikelihood(R_K, R_K_exp, 0.0, R_K_err, false);
-      result_lepuniv += Stats::gaussian_loglikelihood(R_tau, R_tau_exp, 0.0, R_tau_err, false);
-      if (runOptions->getValueOrDef<bool>(true, "include_R_W"))
-      {
-        result_lepuniv += Stats::gaussian_loglikelihood(R_W[0], R_W_exp[0], 0.0, R_W_err[0], false);
-        result_lepuniv += Stats::gaussian_loglikelihood(R_W[1], R_W_exp[1], 0.0, R_W_err[1], false);
-        result_lepuniv += Stats::gaussian_loglikelihood(R_W[2], R_W_exp[2], 0.0, R_W_err[2], false);
-      }
-    }
-*/
-    // Calculate 0nubb half-life [1/yr] for 136Xe 0nubb detector, for right-handed
-    // neutrino model
-    // TODO: Rename gamma --> Thalf, since this is what is really calculated
-    void RHN_Gamma_0nubb_Xe(double& result)
-    {
-      using namespace Pipes::RHN_Gamma_0nubb_Xe;
+      using namespace Pipes::RHN_Thalf_0nubb_Xe;
       double mp, A_0nubb_Xe, p2_0nubb_Xe, prefactor;
       std::vector<double> M(3);
       std::complex<double> sum = {0.0,0.0};
 
       // Relevant model parameters
-      //Matrix3cd m_light = *Dep::m_nu;
-      //Matrix3cd U_light = *Dep::UPMNS;
       Matrix3cd theta = *Dep::SeesawI_Theta;
       M[0] = *Param["M_1"];
       M[1] = *Param["M_2"];
       M[2] = *Param["M_3"];
-
-      // NOTE: For the time being, we retreive nuisance parameters as yaml file options for the
-      // A_0nubb_Xe = *Param["A_0nubb_Xe"];  // Range: 4.41 - 19.7 [1e-10 1/yr]
-      // p2_0nubb_Xe = pow(*Param["p_0nubb_Xe"], 2.0);  // Range: 178.0 - 211.0 [MeV]
 
       // Nuisance parameters following the definitions in Faessler et al. 2014 (1408.6077)
       A_0nubb_Xe = runOptions->getValueOrDef<double>(8.74, "A");
@@ -1083,36 +995,24 @@ namespace Gambit
       prefactor = A_0nubb_Xe*mp*mp/p2_0nubb_Xe/p2_0nubb_Xe;
       for (int i=0; i<3; i++)
       {
-//          sum += pow(U_light(0,i),2)*m_light(i,i) + pow(theta(0,i),2)*M[i]*p2_0nubb_Xe/(p2_0nubb_Xe+pow(M[i], 2.0));
-//          sum += (pow(U_light(0,i),2)*m_light(i,i)*p2_0nubb_Xe/(p2_0nubb_Xe+(m_light(i,i)*m_light(i,i)))) + (pow(theta(0,i),2)*M[i]*p2_0nubb_Xe/(p2_0nubb_Xe+pow(M[i],2.0)));
         sum+=pow(theta(0,i),2)*M[i]*p2_0nubb_Xe/(p2_0nubb_Xe+pow(M[i], 2));
       }
       result = prefactor * abs(sum) * abs(sum);
     }
     
-    
-
-    // Calculate 0nubb half-life [1/yr] for 76Ge 0nubb detector, for right-handed
-    // neutrino model
-    // TODO: Rename gamma --> Thalf, since this is what is really calculated
-    void RHN_Gamma_0nubb_Ge(double& result)
+    // Calculate 0nubb half-life [1/yr] for 76Ge 0nubb detector, for the RHN model
+    void RHN_Thalf_0nubb_Ge(double& result)
     {
-      using namespace Pipes::RHN_Gamma_0nubb_Ge;
+      using namespace Pipes::RHN_Thalf_0nubb_Ge;
       double mp, A_0nubb_Ge, p2_0nubb_Ge, prefactor;
       std::vector<double> M(3);
       std::complex<double> sum = {0.0,0.0};
 
       // Relevant model parameters
-      //Matrix3cd m_light = *Dep::m_nu;
-      //Matrix3cd U_light = *Dep::UPMNS;
       Matrix3cd theta = *Dep::SeesawI_Theta;
       M[0] = *Param["M_1"];
       M[1] = *Param["M_2"];
       M[2] = *Param["M_3"];
-
-      // NOTE: For the time being, we retreive nuisance parameters as yaml file options for the
-      // A_0nubb_Ge = *Param["A_0nubb_Ge"];  // Range: 2.55 - 11.5 [1e-10 1/yr]
-      // p2_0nubb_Ge = pow(*Param["p_0nubb_Ge"], 2.0);  // Range: 159.0 - 193.0 [MeV]
 
       // Nuisance parameters following the definitions in Faessler et al. 2014 (1408.6077)
       A_0nubb_Ge = runOptions->getValueOrDef<double>(5.05, "A");
@@ -1123,12 +1023,10 @@ namespace Gambit
 
       // Lifetime equation is adopted from Faessler+14, Eq. (13)
       prefactor = A_0nubb_Ge*mp*mp/p2_0nubb_Ge/p2_0nubb_Ge;
-        for (int i=0; i<3; i++)
-        {
-//          sum += pow(U_light(0,i),2)*m_light(i,i) + pow(theta(0,i),2)*M[i]*p2_0nubb_Ge/(p2_0nubb_Ge+pow(M[i], 2.0));
-//          sum += (pow(U_light(0,i),2)*m_light(i,i)*p2_0nubb_Ge/(p2_0nubb_Ge+(m_light(i,i)*m_light(i,i)))) + (pow(theta(0,i),2)*M[i]*p2_0nubb_Ge/(p2_0nubb_Ge+pow(M[i],2.0)));
-          sum+=pow(theta(0,i),2)*M[i]*p2_0nubb_Ge/(p2_0nubb_Ge+pow(M[i], 2));
-        }
+      for (int i=0; i<3; i++)
+      {
+        sum+=pow(theta(0,i),2)*M[i]*p2_0nubb_Ge/(p2_0nubb_Ge+pow(M[i], 2));
+      }
       result = prefactor * abs(sum) * abs(sum);
     }
 
@@ -1138,10 +1036,10 @@ namespace Gambit
       using namespace Pipes::lnL_0nubb_KamLAND_Zen;
       double tau_limit = 1.07e26;  // [yr] 90% CL
 
-      double Gamma = *Dep::Gamma_0nubb_Xe;
+      double Thalf = *Dep::Thalf_0nubb_Xe;
 
       // Factor 1.28155 corresponds to one-sided UL at 90% CL
-      result = Stats::gaussian_loglikelihood(Gamma, 0., 0., 1./tau_limit/1.28155, false);
+      result = Stats::gaussian_loglikelihood(Thalf, 0., 0., tau_limit/1.28155, false);
     }
 
     // GERDA: Phys. Rev. Lett. 111 (2013) 122503
@@ -1149,13 +1047,12 @@ namespace Gambit
     void lnL_0nubb_GERDA(double& result)
     {
       using namespace Pipes::lnL_0nubb_GERDA;
-//       double tau_limit = 2.1e25;  // [yr] 90% CL
       double tau_limit = 5.3e25;  // [yr] 90% CL
 
-      double Gamma = *Dep::Gamma_0nubb_Ge;
+      double Thalf = *Dep::Thalf_0nubb_Ge;
 
       // Factor 1.28155 corresponds to one-sided UL at 90% CL
-      result = Stats::gaussian_loglikelihood(Gamma, 0., 0., 1./tau_limit/1.28155, false);
+      result = Stats::gaussian_loglikelihood(Thalf, 0., 0., tau_limit/1.28155, false);
     }
 
     // Unified 0nubb likelihood
@@ -1165,9 +1062,7 @@ namespace Gambit
       result = *Dep::lnL_0nubb_KamLAND_Zen + *Dep::lnL_0nubb_GERDA;
     }
 
-    // Calculate mbb for 136Xe 0nubb detector, for right-handed
-    // neutrino model
-    // 
+    // Calculate mbb for 136Xe 0nubb detector, for the RHN model
     void RHN_mbb_0nubb_Xe(double& result)
     {
       using namespace Pipes::RHN_mbb_0nubb_Xe;
@@ -1182,10 +1077,6 @@ namespace Gambit
       M[0] = *Param["M_1"];
       M[1] = *Param["M_2"];
       M[2] = *Param["M_3"];
-
-      // NOTE: For the time being, we retreive nuisance parameters as yaml file options for the
-      // A_0nubb_Xe = *Param["A_0nubb_Xe"];  // Range: 4.41 - 19.7 [1e-10 1/yr]
-      // p2_0nubb_Xe = pow(*Param["p_0nubb_Xe"], 2.0);  // Range: 178.0 - 211.0 [MeV]
 
       // Nuisance parameters following the definitions in Faessler et al. 2014 (1408.6077)
       p2_0nubb_Xe = pow(runOptions->getValueOrDef<double>(178.0, "p"), 2);
@@ -1203,9 +1094,7 @@ namespace Gambit
       result = abs(sum);
     } 
     
-    // Calculate mbb for 76Ge 0nubb detector, for right-handed
-    // neutrino model
-    // 
+    // Calculate mbb for 76Ge 0nubb detector, for the RHN model
     void RHN_mbb_0nubb_Ge(double& result)
     {
       using namespace Pipes::RHN_mbb_0nubb_Ge;
@@ -1220,10 +1109,6 @@ namespace Gambit
       M[0] = *Param["M_1"];
       M[1] = *Param["M_2"];
       M[2] = *Param["M_3"];
-
-      // NOTE: For the time being, we retreive nuisance parameters as yaml file options for the
-      // A_0nubb_Ge = *Param["A_0nubb_Ge"];  // Range: 2.55 - 5.05 [1e-10 1/yr]
-      // p2_0nubb_Ge = pow(*Param["p_0nubb_Ge"], 2.0);  // Range: 159.0 - 163.0 [MeV]
 
       // Nuisance parameters following the definitions in Faessler et al. 2014 (1408.6077)
       p2_0nubb_Ge = pow(runOptions->getValueOrDef<double>(159.0, "p"), 2);
@@ -1241,7 +1126,7 @@ namespace Gambit
       result = abs(sum);
     } 
     
-        // KamLAND-Zen: Phys. Rev. Lett 117 (2016) 082503
+    // KamLAND-Zen: Phys. Rev. Lett 117 (2016) 082503
     void lnL_mbb_0nubb_KamLAND_Zen(double& result)
     {
       using namespace Pipes::lnL_mbb_0nubb_KamLAND_Zen;
@@ -1250,7 +1135,8 @@ namespace Gambit
       double mbb = *Dep::mbb_0nubb_Xe;
 
       // Factor 1.28155 corresponds to one-sided UL at 90% CL
-      result = Stats::gaussian_loglikelihood(mbb, 0., 0., mbb_limit*1.28155, false);
+      //TODO :result = Stats::gaussian_loglikelihood(mbb, 0., 0., mbb_limit*1.28155, false);
+      result = Stats::gaussian_loglikelihood(mbb, 0., 0., mbb_limit/1.28155, false);
     }
 
     // GERDA: Phys. Rev. Lett. 111 (2013) 122503
@@ -1263,7 +1149,8 @@ namespace Gambit
       double mbb = *Dep::mbb_0nubb_Ge;
 
       // Factor 1.28155 corresponds to one-sided UL at 90% CL
-      result = Stats::gaussian_loglikelihood(mbb, 0., 0., mbb_limit*1.28155, false);
+      // TODO :result = Stats::gaussian_loglikelihood(mbb, 0., 0., mbb_limit*1.28155, false);
+      result = Stats::gaussian_loglikelihood(mbb, 0., 0., mbb_limit/1.28155, false);
     }
 
     // Unified 0nubb likelihood based on mbb
@@ -1276,7 +1163,6 @@ namespace Gambit
     // Helper function to fill all needed experimental info for CKM unitarity
     void fill_ckm_exp(Matrix3cd &Theta, double GF, triplet<double> (&Vus_exp)[8], triplet<double> &Vud_exp, double (&f)[8])
     {
-
       // Vus
       // Experimental values determined for K and tau decays. From table 1 in 1502.00477
       double V_us_exp[] = {0.2163, 0.2166, 0.2155, 0.2160, 0.2158, 0.2262, 0.2214, 0.2173};
@@ -1463,13 +1349,11 @@ namespace Gambit
         if ( (M[i] < low_lim) or (M[i] > upp_lim) )
         {
           result += -0.5*log(2.0*pi/1.28/1.28);
-          //result += 0;
         }
         else
         {
           U[i] = s(M[i]);
           result += Stats::gaussian_upper_limit(mixing_sq[i]/U[i], 0, 0, 1/1.28, false);  // exp_error = abs(exp_value - 90CL_value), exp_value = 0, 1.28: 90% CL limit for half-Gaussian.
-          //result += - (mixing_sq[i]/U[i] > 0 ? 0.5*pow(mixing_sq[i]/U[i],2) * pow(1.28,2) : 0.0);
         }
       }
     }
@@ -1775,13 +1659,11 @@ namespace Gambit
         if ( (M[i] < low_lim) or (M[i] > upp_lim) )
         {
           result += -0.5*log(2.0*pi/1.64/1.64);
-          //result += 0;
         }
         else
         {
           U[i] = s(M[i]);
           result += Stats::gaussian_upper_limit(pow(mixing_sq[i]/U[i],2), 0, 0, 1/1.64, false);  // exp_error = abs(exp_value - 95CL_value), exp_value = 0, 1.64: 95% CL limit for half-Gaussian.
-          //result += - (pow(mixing_sq[i]/U[i],2) > 0 ? 0.5*pow(mixing_sq[i]/U[i],4) * pow(1.64,2) : 0.0); // exp_error = abs(exp_value - 95CL_value), exp_value = 0, 1.64: 95% CL limit for half-Gaussian.
         }
       }
     }
@@ -1817,13 +1699,11 @@ namespace Gambit
         if ( (M[i] < low_lim) or (M[i] > upp_lim) )
         {
           result += -0.5*log(2.0*pi/1.64/1.64);
-          //result += 0;
         }
         else
         {
           U[i] = s(M[i]);
           result += Stats::gaussian_upper_limit(pow(mixing_sq[i]/U[i],2), 0, 0, 1/1.64, false); // exp_error = abs(exp_value - 95CL_value), exp_value = 0, 1.64: 95% CL limit for half-Gaussian.
-          //result += - (pow(mixing_sq[i]/U[i],2) > 0 ? 0.5*pow(mixing_sq[i]/U[i],4) * pow(1.64,2) : 0.0); // exp_error = abs(exp_value - 95CL_value), exp_value = 0, 1.64: 95% CL limit for half-Gaussian.
         }
       }
     }
@@ -1859,13 +1739,11 @@ namespace Gambit
         if ( (M[i] < low_lim) or (M[i] > upp_lim) )
         {
           result += -0.5*log(2.0*pi/1.28/1.28);
-          //result += 0;
         }
         else
         {
           U[i] = s(M[i])/sqrt(2);  // Division by sqrt(2) to account for Majorana nature.
           result += Stats::gaussian_upper_limit(mixing_sq[i]/U[i], 0, 0,  1/1.28, false); // exp_error = abs(exp_value - 90CL_value), exp_value = 0, 1.28: 90% CL limit for half-Gaussian.
-          //result += - (mixing_sq[i]/U[i] > 0 ? 0.5*pow(mixing_sq[i]/U[i],2) * pow(1.28,2) : 0.0);
         }
       }
     }
@@ -1941,13 +1819,11 @@ namespace Gambit
         if ( (M[i] < low_lim) or (M[i] > upp_lim) )
         {
           result += -0.5*log(2*pi/1.28/1.28);
-          //result += 0;
         }
         else
         {
           U[i] = s(M[i])/sqrt(2);  // Division by sqrt(2) to account for Majorana nature.
           result += Stats::gaussian_upper_limit(pow(mixing_sq[i]/U[i],2), 0, 0, 1/1.28, false); // exp_error = abs(exp_value - 95CL_value), exp_value = 0, 1.28: 90% CL limit for half-Gaussian.
-          //result += - (pow(mixing_sq[i]/U[i],2)> 0 ? 0.5*pow(mixing_sq[i]/U[i],4) * pow(1.28,2) : 0.0);
         }
       }
     }
@@ -1983,13 +1859,11 @@ namespace Gambit
         if ( (M[i] < low_lim) or (M[i] > upp_lim) )
         {
           result += -0.5*log(2.0*pi/1.64/1.64);
-          //result += 0;
         }
         else
         {
           U[i] = s(M[i]);
           result += Stats::gaussian_upper_limit(pow(mixing_sq[i]/U[i],2), 0, 0, 1/1.64, false);  // exp_error = abs(exp_value - 95CL_value), exp_value = 0, 1.64: 95% CL limit for half-Gaussian.
-          //result += - (pow(mixing_sq[i]/U[i],2) > 0 ? 0.5*pow(mixing_sq[i]/U[i],4) * pow(1.64,2) : 0.0); // exp_error = abs(exp_value - 95CL_value), exp_value = 0, 1.64: 95% CL limit for half-Gaussian.
         }
       }
     }
@@ -2025,17 +1899,16 @@ namespace Gambit
         if ( (M[i] < low_lim) or (M[i] > upp_lim) )
         {
           result += -0.5*log(2.0*pi/1.64/1.64);
-          //result += 0;
         }
         else
         {
           U[i] = s(M[i]);
           result += Stats::gaussian_upper_limit(pow(mixing_sq[i]/U[i],2), 0, 0, 1/1.64, false);  // exp_error = abs(exp_value - 95CL_value), exp_value = 0, 1.64: 95% CL limit for half-Gaussian.
-          //result += - (pow(mixing_sq[i]/U[i],2) > 0 ? 0.5*pow(mixing_sq[i]/U[i],4) * pow(1.64,2) : 0.0); // exp_error = abs(exp_value - 95CL_value), exp_value = 0, 1.64: 95% CL limit for half-Gaussian.
         }
       }
     }
 
+    // Squared matrix element |Theta(1,1)|^2
     void Ue1(double& Ue1_sq)
     {
       using namespace Pipes::Ue1;
@@ -2057,12 +1930,14 @@ namespace Gambit
       }
     }
 
+    // Phase of matrix element Theta(1,1)
     void Ue1_phase(double& Ue1_p)
     {
       using namespace Pipes::Ue1_phase;
       Ue1_p = std::arg((*Dep::SeesawI_Theta)(0,0));
     }
 
+    // Squared matrix element |Theta(2,1)|^2
     void Um1(double& Um1_sq)
     {
       using namespace Pipes::Um1;
@@ -2085,12 +1960,14 @@ namespace Gambit
  
     }
 
+    // Phase of matrix element Theta(2,1)
     void Um1_phase(double& Um1_p)
     {
       using namespace Pipes::Um1_phase;
       Um1_p = std::arg((*Dep::SeesawI_Theta)(1,0));
     }
 
+    // Squared matrix element |Theta(3,1)|^2
     void Ut1(double& Ut1_sq)
     {
       using namespace Pipes::Ut1;
@@ -2113,12 +1990,14 @@ namespace Gambit
  
     }
 
+    // Phase of matrix element Theta(3,1)
     void Ut1_phase(double& Ut1_p)
     {
       using namespace Pipes::Ut1_phase;
       Ut1_p = std::arg((*Dep::SeesawI_Theta)(2,0));
     }
 
+    // Squared matrix element |Theta(1,2)|^2
     void Ue2(double& Ue2_sq)
     {
       using namespace Pipes::Ue2;
@@ -2141,12 +2020,14 @@ namespace Gambit
  
     }
 
+    // Phase of matrix element Theta(1,2)
     void Ue2_phase(double& Ue2_p)
     {
       using namespace Pipes::Ue2_phase;
       Ue2_p = std::arg((*Dep::SeesawI_Theta)(0,1));
     }
 
+    // Squared matrix element |Theta(2,2)|^2
     void Um2(double& Um2_sq)
     {
       using namespace Pipes::Um2;
@@ -2169,12 +2050,14 @@ namespace Gambit
  
     }
 
+    // Phase of matrix element Theta(2,2)
     void Um2_phase(double& Um2_p)
     {
       using namespace Pipes::Um2_phase;
       Um2_p = std::arg((*Dep::SeesawI_Theta)(1,1));
     }
 
+    // Squared matrix element |Theta(3,2)|^2
     void Ut2(double& Ut2_sq)
     {
       using namespace Pipes::Ut2;
@@ -2197,12 +2080,14 @@ namespace Gambit
  
     }
 
+    // Phase of matrix element Theta(3,2)
     void Ut2_phase(double& Ut2_p)
     {
       using namespace Pipes::Ut2_phase;
       Ut2_p = std::arg((*Dep::SeesawI_Theta)(2,1));
     }
 
+    // Squared matrix element |Theta(1,3)|^2
     void Ue3(double& Ue3_sq)
     {
       using namespace Pipes::Ue3;
@@ -2225,12 +2110,14 @@ namespace Gambit
  
     }
 
+    // Phase of matrix element Theta(1,3)
     void Ue3_phase(double& Ue3_p)
     {
       using namespace Pipes::Ue3_phase;
       Ue3_p = std::arg((*Dep::SeesawI_Theta)(0,2));
     }
 
+    // Squared matrix element |Theta(2,3)|^2
     void Um3(double& Um3_sq)
     {
       using namespace Pipes::Um3;
@@ -2253,12 +2140,14 @@ namespace Gambit
  
     }
 
+    // Phase of matrix element Theta(2,3)
     void Um3_phase(double& Um3_p)
     {
       using namespace Pipes::Um3_phase;
       Um3_p = std::arg((*Dep::SeesawI_Theta)(1,2));
     }
 
+    // Squared matrix element |Theta(3,3)|^2
     void Ut3(double& Ut3_sq)
     {
       using namespace Pipes::Ut3;
@@ -2281,12 +2170,14 @@ namespace Gambit
  
     }
 
+    // Phase of matrix element Theta(3,3)
     void Ut3_phase(double& Ut3_p)
     {
       using namespace Pipes::Ut3_phase;
       Ut3_p = std::arg((*Dep::SeesawI_Theta)(2,2));
     }
 
+    // Step-function log likelihood on the perturbativity of the Yukawas
     void perturbativity_likelihood(double &lnL)
     {
       using namespace Pipes::perturbativity_likelihood;
@@ -2315,7 +2206,8 @@ namespace Gambit
           }
     }
 
-    void coupling_slide(double &lnL)
+    // Artificial slide likelihood on couplings and masses
+    void RHN_coupling_slide(double &lnL)
     {
       using namespace Pipes::coupling_slide;
       int I = runOptions->getValueOrDef<int>(1, "I");
@@ -2329,19 +2221,9 @@ namespace Gambit
       double Ut1 = *Dep::Ut1;
       double Ut2 = *Dep::Ut2;
       double Ut3 = *Dep::Ut3;
+
       if (flavour > 0)
       {
-	if (runOptions->getValueOrDef<bool>(true, "Ut_lim"))
-	{
-          if( ((M[0] > 60) and (Ut1 > 1e-4)) or ((M[1] > 60) and (Ut2 > 1e-4)) or ((M[2] > 60) and (Ut3 > 1e-4)) )
-          {
-            std::ostringstream msg;
-            msg << "Tau coupling restricted; point invalidated.";
-            logger() << msg.str() << EOM;
-            invalid_point().raise(msg.str());
-            return ;
-          }
-        }	  
         double U = (Dep::SeesawI_Theta->cwiseAbs2())(flavour-1,I-1);
         lnL = slope*log10(std::min(U, 1.)) + mslope*log10(M[I-1]);
       }

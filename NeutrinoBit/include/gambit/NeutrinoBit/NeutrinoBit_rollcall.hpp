@@ -580,21 +580,9 @@ START_MODULE
     #undef FUNCTION
   #undef CAPABILITY
 
-
-//  #define CAPABILITY lnLlepuniv
-//  START_CAPABILITY
-//    #define FUNCTION lnL_lepuniv
-//    START_FUNCTION(double)
-//    DEPENDENCY(R_pi, double)
-//    DEPENDENCY(R_K, double)
-//    DEPENDENCY(R_tau, double)
-//    DEPENDENCY(R_W, std::vector<double>)
-//    #undef FUNCTION
-//  #undef CAPABILITY
-
-  #define CAPABILITY Gamma_0nubb_Xe
+  #define CAPABILITY Thalf_0nubb_Xe
   START_CAPABILITY
-    #define FUNCTION RHN_Gamma_0nubb_Xe
+    #define FUNCTION RHN_Thalf_0nubb_Xe
     START_FUNCTION(double)
     DEPENDENCY(m_nu, Eigen::Matrix3cd)
     DEPENDENCY(UPMNS, Eigen::Matrix3cd)
@@ -607,13 +595,13 @@ START_MODULE
   START_CAPABILITY
     #define FUNCTION lnL_0nubb_KamLAND_Zen
     START_FUNCTION(double)
-    DEPENDENCY(Gamma_0nubb_Xe, double)
+    DEPENDENCY(Thalf_0nubb_Xe, double)
     #undef FUNCTION
   #undef CAPABILITY
 
-  #define CAPABILITY Gamma_0nubb_Ge
+  #define CAPABILITY Thalf_0nubb_Ge
   START_CAPABILITY
-    #define FUNCTION RHN_Gamma_0nubb_Ge
+    #define FUNCTION RHN_Thalf_0nubb_Ge
     START_FUNCTION(double)
     DEPENDENCY(m_nu, Eigen::Matrix3cd)
     DEPENDENCY(UPMNS, Eigen::Matrix3cd)
@@ -626,7 +614,7 @@ START_MODULE
   START_CAPABILITY
     #define FUNCTION lnL_0nubb_GERDA
     START_FUNCTION(double)
-    DEPENDENCY(Gamma_0nubb_Ge, double)
+    DEPENDENCY(Thalf_0nubb_Ge, double)
     #undef FUNCTION
   #undef CAPABILITY
 
@@ -718,7 +706,6 @@ START_MODULE
   #undef CAPABILITY
 
 
-
   #define CAPABILITY lnLpienu
   START_CAPABILITY
     #define FUNCTION lnL_pienu
@@ -732,7 +719,6 @@ START_MODULE
 
   #define CAPABILITY lnLps191e
   START_CAPABILITY
-
     #define FUNCTION lnL_ps191_e
     START_FUNCTION(double)
     ALLOW_MODEL(RightHandedNeutrinos)
@@ -746,12 +732,10 @@ START_MODULE
     DEPENDENCY(Ut2, double)
     DEPENDENCY(Ut3, double)
     #undef FUNCTION
-
   #undef CAPABILITY
 
   #define CAPABILITY lnLps191mu
   START_CAPABILITY
-
     #define FUNCTION lnL_ps191_mu
     START_FUNCTION(double)
     ALLOW_MODEL(RightHandedNeutrinos)
@@ -765,12 +749,10 @@ START_MODULE
     DEPENDENCY(Ut2, double)
     DEPENDENCY(Ut3, double)
     #undef FUNCTION
-
   #undef CAPABILITY
 
   #define CAPABILITY lnLcharme
   START_CAPABILITY
-
     #define FUNCTION lnL_charm_e
     START_FUNCTION(double)
     ALLOW_MODEL(RightHandedNeutrinos)
@@ -784,12 +766,10 @@ START_MODULE
     DEPENDENCY(Ut2, double)
     DEPENDENCY(Ut3, double)
     #undef FUNCTION
-
   #undef CAPABILITY
 
   #define CAPABILITY lnLcharmmu
   START_CAPABILITY
-
     #define FUNCTION lnL_charm_mu
     START_FUNCTION(double)
     ALLOW_MODEL(RightHandedNeutrinos)
@@ -803,12 +783,10 @@ START_MODULE
     DEPENDENCY(Ut2, double)
     DEPENDENCY(Ut3, double)
     #undef FUNCTION
-
   #undef CAPABILITY
 
   #define CAPABILITY lnLdelphi_shortlived
   START_CAPABILITY
-
     #define FUNCTION lnL_delphi_short_lived
     START_FUNCTION(double)
     ALLOW_MODEL(RightHandedNeutrinos)
@@ -822,12 +800,10 @@ START_MODULE
     DEPENDENCY(Ut2, double)
     DEPENDENCY(Ut3, double)
     #undef FUNCTION
-
   #undef CAPABILITY
 
   #define CAPABILITY lnLdelphi_longlived
   START_CAPABILITY
-
     #define FUNCTION lnL_delphi_long_lived
     START_FUNCTION(double)
     ALLOW_MODEL(RightHandedNeutrinos)
@@ -841,12 +817,10 @@ START_MODULE
     DEPENDENCY(Ut2, double)
     DEPENDENCY(Ut3, double)
     #undef FUNCTION
-
   #undef CAPABILITY
 
   #define CAPABILITY lnLatlase
   START_CAPABILITY
-
     #define FUNCTION lnL_atlas_e
     START_FUNCTION(double)
     ALLOW_MODEL(RightHandedNeutrinos)
@@ -854,12 +828,10 @@ START_MODULE
     DEPENDENCY(Ue2, double)
     DEPENDENCY(Ue3, double)
     #undef FUNCTION
-
   #undef CAPABILITY
 
   #define CAPABILITY lnLatlasmu
   START_CAPABILITY
-
     #define FUNCTION lnL_atlas_mu
     START_FUNCTION(double)
     ALLOW_MODEL(RightHandedNeutrinos)
@@ -867,12 +839,10 @@ START_MODULE
     DEPENDENCY(Um2, double)
     DEPENDENCY(Um3, double)
     #undef FUNCTION
-
   #undef CAPABILITY
 
   #define CAPABILITY lnLe949
   START_CAPABILITY
-
     #define FUNCTION lnL_e949
     START_FUNCTION(double)
     ALLOW_MODEL(RightHandedNeutrinos)
@@ -880,12 +850,10 @@ START_MODULE
     DEPENDENCY(Um2, double)
     DEPENDENCY(Um3, double)
     #undef FUNCTION
-
   #undef CAPABILITY
 
   #define CAPABILITY lnLnutev
   START_CAPABILITY
-
     #define FUNCTION lnL_nutev
     START_FUNCTION(double)
     ALLOW_MODEL(RightHandedNeutrinos)
@@ -893,12 +861,10 @@ START_MODULE
     DEPENDENCY(Um2, double)
     DEPENDENCY(Um3, double)
     #undef FUNCTION
-
   #undef CAPABILITY
 
   #define CAPABILITY lnLcharmtau
   START_CAPABILITY
-
     #define FUNCTION lnL_charm_tau
     START_FUNCTION(double)
     ALLOW_MODEL(RightHandedNeutrinos)
@@ -906,12 +872,10 @@ START_MODULE
     DEPENDENCY(Ut2, double)
     DEPENDENCY(Ut3, double)
     #undef FUNCTION
-
   #undef CAPABILITY
 
   #define CAPABILITY lnLlhce
   START_CAPABILITY
-
     #define FUNCTION lnL_lhc_e
     START_FUNCTION(double)
     ALLOW_MODEL(RightHandedNeutrinos)
@@ -919,12 +883,10 @@ START_MODULE
     DEPENDENCY(Ue2, double)
     DEPENDENCY(Ue3, double)
     #undef FUNCTION
-
   #undef CAPABILITY
 
   #define CAPABILITY lnLlhcmu
   START_CAPABILITY
-
     #define FUNCTION lnL_lhc_mu
     START_FUNCTION(double)
     ALLOW_MODEL(RightHandedNeutrinos)
@@ -932,7 +894,6 @@ START_MODULE
     DEPENDENCY(Um2, double)
     DEPENDENCY(Um3, double)
     #undef FUNCTION
-
   #undef CAPABILITY
 
   // Perturbativity of the Yukawa couplings (from arXiv:1509.02678)
@@ -945,7 +906,6 @@ START_MODULE
     ALLOW_MODEL(RightHandedNeutrinos)
     #undef FUNCTION
   #undef CAPABILITY
-
 
   // Active neutrino likelihoods
   #define CAPABILITY theta12
@@ -1043,7 +1003,7 @@ START_MODULE
     #undef FUNCTION
   #undef CAPABILITY
 
-  #define CAPABILITY RHN_coupling_slide
+  #define CAPABILITY coupling_slide
   START_CAPABILITY
     #define FUNCTION coupling_slide
     START_FUNCTION(double)
