@@ -245,8 +245,6 @@ Rules:
       relative_errors: [1e-3,1e-2]
       elements: [Yp,D]
 
-<<<<<<< HEAD
-=======
   - capability: external_dNeff_etaBBN
     options:
       grid_size: 3000
@@ -261,7 +259,6 @@ Rules:
     options:
       allow_negative_delta_neff: false
 
->>>>>>> CosmoBit_ALP
 #======== Logging setup ========
 Logger:
   redirection:
