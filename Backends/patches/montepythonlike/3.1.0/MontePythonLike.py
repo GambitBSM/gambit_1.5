@@ -1701,6 +1701,15 @@ class Likelihood_mpk(Likelihood):
         if self.use_sdssDR7:
             self.need_cosmo_arguments(data, {'z_max_pk': self.zmax})
             self.need_cosmo_arguments(data, {'P_k_max_h/Mpc': 7.5*self.kmax})
+            
+            # (JR) this was previously done in the likelihood calculation 
+            # -> takes a lot of time and can cause problems when multiple MPI processes try to 
+            # access the file. Within GAMBIT we don't ever have to create this file since it is 
+            # included in the patch so we can do it when loading the likelihood
+            print("Trying to load %s" % os.path.join(self.data_directory,'sdss_lrgDR7/sdss_lrgDR7_fiducialmodel.dat'))
+            fiducial = np.loadtxt(os.path.join(self.data_directory,'sdss_lrgDR7/sdss_lrgDR7_fiducialmodel.dat'))
+            self.fiducial_SDSSDR7 = fiducial[:,1:4]
+            self.fiducial_SDSSDR7_nlratio = fiducial[:,1:7]
         else:
             self.need_cosmo_arguments(
                 data, {'P_k_max_h/Mpc': khmax, 'z_max_pk': self.redshift})
@@ -2125,16 +2134,10 @@ class Likelihood_mpk(Likelihood):
                     self.create_fid = False
                     print ('             Fiducial created')
 
-            # Load fiducial model
-            #joined2 = os.path.join(self.data_directory, "sdss_lrgDR7/sdss_lrgDR7_fiducialmodel.dat")
-            #joined = os.path.join(self.data_directory,'/sdss_lrgDR7/sdss_lrgDR7_fiducialmodel.dat')
-            #print("Data directory %s" % self.data_directory )
-            #print("Data directory %s and 2nd try %s" %  (joined, joined2))
-            print("Trying to load %s" % os.path.join(self.data_directory,'sdss_lrgDR7/sdss_lrgDR7_fiducialmodel.dat'))
-            fiducial = np.loadtxt(os.path.join(self.data_directory,'sdss_lrgDR7/sdss_lrgDR7_fiducialmodel.dat'))
-            #fiducial = np.loadtxt('data/sdss_lrgDR7/sdss_lrgDR7_fiducialmodel.dat')
-            fid = fiducial[:,1:4]
-            fidnlratio = fiducial[:,4:7]
+            # Load fiducial model (loaded data in likelihood initialisation to save time and avoid 
+            # problems when several MPI processes try to access one file multiple times during a scan)
+            fid = self.fiducial_SDSSDR7
+            fidnlratio = self.fiducial_SDSSDR7_nlratio
 
             # Put all factors together to obtain the P(k) for each redshift bin
             Pnear=np.interp(kh,kh,Psmear[:,0]*(nlratio[:,0]/fidnlratio[:,0])*fid[:,0]*D_growth[0]**(-2.))
