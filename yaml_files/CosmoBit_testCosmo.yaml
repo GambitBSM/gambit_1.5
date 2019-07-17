@@ -245,6 +245,20 @@ Rules:
       relative_errors: [1e-3,1e-2]
       elements: [Yp,D]
 
+  - capability: external_dNeff_etaBBN
+    options:
+      grid_size: 3000
+      max_iter: 8
+
+   # Allow for negative values of dNeff_BBN and dNeffBBN_dNeffCMB
+   #  -> In this form, the option is set for all CosmoBit function and applies
+   #     for both parameters at once.
+   #     If this should only apply for dNeffBBN or dNeffCMB eclusively,
+   #     consider to make this as a rule of the respective capability / function.
+  - module: CosmoBit
+    options:
+      allow_negative_delta_neff: false
+
 #======== Logging setup ========
 Logger:
   redirection:

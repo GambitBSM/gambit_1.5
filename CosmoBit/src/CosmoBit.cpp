@@ -2763,7 +2763,19 @@ namespace Gambit
       // decoupling with the standard value of 3.046 to the according contribution for a modified Neutrino temperature
       // (GeneralCosmoALP model heats CMB photons w.r.t. to neutrinos)
       // TODO: refer to relevant section in paper!
-      result = pow((*Param["r_CMB"]),4)*(NuMasses_SM["N_ur_SMnu"]) + (*Param["dNeff_CMB"]);
+
+      // Check if the input for dNeff is negative (unphysical)
+      static bool allow_negative_dNeff = runOptions->getValueOrDef<bool>(false,"allow_negative_delta_neff");
+      double dNeffCMB_rad =  *Param["dNeff_CMB"];
+      if ( (!allow_negative_dNeff) && (dNeffCMB_rad < 0.0) )
+      {
+        std::string err = "A negative value for \"dNeff_CMB\" is unphysical and is not allowed in CosmoBit by default!\n\n";
+        err += "If you want to proceed with megative values, please set the \"allow_negative_delta_neff\"-rule to \"true\" within the yaml-file.";
+        CosmoBit_error().raise(LOCAL_INFO,err.c_str());
+      }
+
+      // If the check is passed, set the result.
+      result = pow((*Param["r_CMB"]),4)*(NuMasses_SM["N_ur_SMnu"]) + dNeffCMB_rad;
       logger() << "N_ur calculated to be " << result << EOM;
     }
 
@@ -2780,9 +2792,20 @@ namespace Gambit
       // set of 'known' parameters 'known_relicparam_options'
       using namespace Pipes::AlterBBN_Input;
 
+      // Check if the input for dNeff is negative (unphysical)
+      static bool allow_negative_dNeff = runOptions->getValueOrDef<bool>(false,"allow_negative_delta_neff");
+      double dNeffBBN_rad =  *Param["dNeff_BBN"];
+      if ( (!allow_negative_dNeff) && (dNeffBBN_rad < 0.0) )
+      {
+        std::string err = "A negative value for \"dNeff_BBN\" is unphysical and is not allowed in CosmoBit by default!\n\n";
+        err += "If you want to proceed with megative values, please set the \"allow_negative_delta_neff\"-rule to \"true\" within the yaml-file.";
+        CosmoBit_error().raise(LOCAL_INFO,err.c_str());
+      }
+
+      //If check is passed, set teh inputs.
       result["eta0"] = *Param["eta_BBN"];    // eta AFTER BBN (variable during)
       result["Nnu"]=3.046*pow((*Param["r_BBN"]),4); // contribution from SM neutrinos
-      result["dNnu"]=*Param["dNeff_BBN"];    // dNnu: within AlterBBN scenarios in which the sum Nnu+dNnu is the same are identical
+      result["dNnu"]=dNeffBBN_rad;    // dNnu: within AlterBBN scenarios in which the sum Nnu+dNnu is the same are identical
       result["failsafe"] = runOptions->getValueOrDef<double>(3,"failsafe");
       result["err"] = runOptions->getValueOrDef<double>(3,"err");
 
