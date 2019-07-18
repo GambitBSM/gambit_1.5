@@ -86,7 +86,7 @@ if(NOT ditched_${name}_${ver})
     DOWNLOAD_COMMAND ${DL_BACKEND} ${dl} ${md5} ${dir} ${name} ${ver}
     SOURCE_DIR ${dir}
     BUILD_IN_SOURCE 1
-    # need to go back to a previous (non-broken) version of alterbbn_v2.1. (nobody likes silent updates!)
+    # Apply patch for alterbbn_v2.1. to fix problems with dNnu
     PATCH_COMMAND patch -p1 < ${patch}
     CONFIGURE_COMMAND ""
     #BUILD_COMMAND sed ${dashi} -e "s#CC = gcc#CC = ${CMAKE_C_COMPILER}#g" Makefile
