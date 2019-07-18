@@ -328,7 +328,7 @@ function(add_gambit_executable executablename LIBRARIES)
     target_link_libraries(${executablename} PRIVATE ${LIBRARIES} yaml-cpp ${gambit_preload_LDFLAGS})
   endif()
 
-  add_dependencies(${executablename} mkpath)
+  add_dependencies(${executablename} mkpath gambit_preload)
 
   #For checking if all the needed libs are present.  Never add them manually with -lsomelib!!
   if(VERBOSE)
