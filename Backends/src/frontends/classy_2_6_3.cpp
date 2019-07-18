@@ -206,11 +206,12 @@ BE_INI_FUNCTION
   cosmo.attr("empty")();
 
   // set cosmological parameters
+  logger() << LogTags::debug << "[classy_2.6.3] These are the inputs:\n\n";
+  logger() << pybind11::repr(cosmo_input_dict) << EOM;
   cosmo.attr("set")(cosmo_input_dict);
-  
-  std::cout << "    (classy frontend) after set parameters "<< std::endl;
 
   // Try to run class and catch potential errors
+  logger() << LogTags::info << "[classy_2.6.3] Start to run \"cosmo.compute\"" << EOM;
   try
   {
     cosmo.attr("compute")();
@@ -244,5 +245,6 @@ BE_INI_FUNCTION
       invalid_point().raise(errMssg);
     }
   }
+  logger() << LogTags::info << "[classy_2.6.3] \"cosmo.compute\" was successful" << EOM;
 }
 END_BE_INI_FUNCTION

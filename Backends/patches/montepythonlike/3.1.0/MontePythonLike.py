@@ -1978,10 +1978,10 @@ class Likelihood_mpk(Likelihood):
                 #   original line was -> 'if type(value) != type('foo')' 
                 #   which crashed if one of the strings was unicode formated
                 if ((not isinstance(value, str)) and (not isinstance(value,unicode))):
-                    print("                     In non string type")
+                    #print("                     In non string type")
                     exec("self.%s = %s" % (key, value))
                 else:
-                    print("                     In string type")
+                    #print("                     In string type")
                     exec("self.%s = '%s'" % (key, value))
 
     # compute likelihood

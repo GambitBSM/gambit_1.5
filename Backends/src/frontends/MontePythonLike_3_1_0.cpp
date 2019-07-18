@@ -41,10 +41,13 @@ BE_NAMESPACE
   /// mplike, using the CLASS Python object cosmo.
   double get_MP_loglike(const CosmoBit::MPLike_data_container& mplike, pybind11::object& cosmo, std::string& experiment)
   {
-    
+    logger() << LogTags::info << "[MontePythonLike_3.1.0]:  Start evaluation for -> " << experiment << " <-" << EOM;
+
     // need to use likelihood.at() since it is a const map -> [] can create entry & can't be used on const object
-  	double result = mplike.likelihoods.at(experiment).attr("loglkl")(cosmo, mplike.data).cast<double>();
-    
+    double result = mplike.likelihoods.at(experiment).attr("loglkl")(cosmo, mplike.data).cast<double>();
+    logger() << LogTags::info << "[MontePythonLike_3.1.0]:  Finished evaluation for -> " << experiment << " <-";
+    logger() << " and got: " << result <<  EOM;
+
     return result;
   }
 
