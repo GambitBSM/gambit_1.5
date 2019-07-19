@@ -80,7 +80,7 @@ macro(retrieve_bits bits root excludes quiet)
 
   foreach(child ${children})
     string(FIND ${child} ".dSYM" FOUND_DSYM)
-    if(IS_DIRECTORY ${root}/${child} AND ${FOUND_DSYM} EQUAL -1)
+    if(IS_DIRECTORY ${root}/${child} AND EXISTS ${root}/${child}/CMakeLists.txt AND ${FOUND_DSYM} EQUAL -1)
 
       # Work out if this Bit should be excluded or not.  Never exclude ScannerBit.
       set(excluded "NO")
