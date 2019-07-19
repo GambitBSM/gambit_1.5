@@ -838,6 +838,26 @@ START_MODULE
     #undef FUNCTION
   #undef CAPABILITY
 
+  #define CAPABILITY W_to_l_decays
+  START_CAPABILITY
+    #define FUNCTION RHN_W_to_l_decays
+    START_FUNCTION(std::vector<double>)
+    DEPENDENCY(SMINPUTS, SMInputs)
+    DEPENDENCY(mw, triplet<double>)
+    DEPENDENCY(SeesawI_Theta, Eigen::Matrix3cd)
+    ALLOW_MODEL(RightHandedNeutrinos)
+    #undef FUNCTION
+  #undef CAPABILITY
+
+  #define CAPABILITY lnL_W_decays
+  START_CAPABILITY
+    #define FUNCTION lnL_W_decays_chi2
+    START_FUNCTION(double)
+    DEPENDENCY(W_to_l_decays, std::vector<double>)
+    DEPENDENCY(W_plus_decay_rates, DecayTable::Entry)
+    #undef FUNCTION
+  #undef CAPABILITY
+
   #define CAPABILITY lnL_Higgs_invWidth
   START_CAPABILITY
     #define FUNCTION lnL_Higgs_invWidth_SMlike
