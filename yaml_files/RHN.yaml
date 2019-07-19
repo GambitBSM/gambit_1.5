@@ -30,8 +30,8 @@ Parameters:
     CKM_etabar  :  0.353
 
     mNu_light:
-      range: [1E-6, 0.23]
-      prior_type: flat
+      range: [1E-7, 0.23]
+      prior_type: log
     dmNu21:
       range: [6e-5, 9e-5]
       prior_type: flat
@@ -60,10 +60,10 @@ Parameters:
   # Right Handed Neutrino Parameters
   RightHandedNeutrinos_diff:
     M_1:
-      range: [2, 60]
+      range: [0.06, 500]
       prior_type: log
     delta_M21:
-      range: [1E-20, 1E-10]
+      range: [1E-10, .1]
       prior_type: log
     M_3:
       range: [0.06, 500]
@@ -138,9 +138,6 @@ ObsLikes:
   - capability: lnL_bbn
     purpose: LogLike
 
-#  - capability: lnLlepuniv
-#    purpose: LogLike
-
   - capability: lnL_R_K
     purpose: Observable
 
@@ -156,12 +153,6 @@ ObsLikes:
   - capability: LUV_LL
     purpose: LogLike
 
-  - capability: mbb_0nubb_Xe
-    purpose: Observable
-
-  - capability: mbb_0nubb_Ge
-    purpose: Observable
-
   - capability: lnL_mbb_0nubb_KamLAND_Zen
     purpose: LogLike
 
@@ -172,7 +163,7 @@ ObsLikes:
     purpose: LogLike
 
   - capability: l2lgamma_lnL
-    purpose: LogLike 
+    purpose: LogLike
 
   - capability: l2lll_lnL
     purpose: LogLike
@@ -335,20 +326,19 @@ ObsLikes:
   - capability: Ut3_phase
     purpose: Observable
 
-  - capability: RHN_coupling_slide
-    purpose: LogLike
+  - capability: mbb_0nubb_Xe
+    purpose: Observable
+
+  - capability: mbb_0nubb_Ge
+    purpose: Observable
 
   - capability: calc_Vus
     purpose: Observable
 
+  - capability: Gamma_BBN
+    purpose: Observable
+ 
 Rules:
-  - function: coupling_slide
-    options:
-      I: 1
-      i: 3
-      slope: 0.5
-      mslope: 0.0
-      Ut_lim: true
 
   - capability: RKstar_0045_11
     function: RHN_RKstar_0045_11
