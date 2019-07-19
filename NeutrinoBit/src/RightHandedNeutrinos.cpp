@@ -2207,7 +2207,7 @@ namespace Gambit
     }
 
     // Artificial slide likelihood on couplings and masses
-    void RHN_coupling_slide(double &lnL)
+    void coupling_slide(double &lnL)
     {
       using namespace Pipes::coupling_slide;
       int I = runOptions->getValueOrDef<int>(1, "I");
@@ -2218,9 +2218,6 @@ namespace Gambit
       M[0] = *Param["M_1"];
       M[1] = *Param["M_2"];
       M[2] = *Param["M_3"];
-      double Ut1 = *Dep::Ut1;
-      double Ut2 = *Dep::Ut2;
-      double Ut3 = *Dep::Ut3;
 
       if (flavour > 0)
       {

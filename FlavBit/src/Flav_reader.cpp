@@ -154,12 +154,14 @@ namespace Gambit
       M_cor_cov = boost::numeric::ublas::identity_matrix<double>(number_measurements);
       for(int i=0; i<number_measurements; ++i)
       {
-        if(debug)
-         cout<<"Correlation size: "<< measurements[i].corr.size()<<endl;
+        #ifdef FLAVBIT_DEBUG
+          cout<<"Correlation size: "<< measurements[i].corr.size()<<endl;
+        #endif
         for ( unsigned icorr=0; icorr< measurements[i].corr.size(); ++icorr)
         {
-          if(debug)
+          #ifdef FLAVBIT_DEBUG
             cout<<"Searching for correlation: "<< measurements[i].corr[icorr].corr_name <<endl;
+          #endif
           int i_corr_index=get_measurement_for_corr(measurements[i].corr[icorr].corr_name  );
           M_cor_cov(i_corr_index,i)=measurements[i].corr[icorr].corr_val;
         }
@@ -217,10 +219,9 @@ namespace Gambit
     {
       int jmax = is_true_matrix ? number_measurements : 1;
       cout<<name<<endl;
-      for(unsigned int i=0; i < M.size1(); ++i)
+      for(int i=0; i < number_measurements; ++i)
       {
-        for(unsigned int j=0; j < M.size2(); ++j)
-          cout << M(i,j) << "\t";
+        for(int j=0 ; j< jmax; ++j) cout<<M(i,j)<<"\t";
         cout<<endl;
       }
     }
@@ -230,10 +231,9 @@ namespace Gambit
     {
       int jmax = is_true_matrix ? number_measurements : 1;
       cout<<name<<endl;
-      for(unsigned int i=0; i < M.size1(); ++i)
+      for(int i=0; i < number_measurements; ++i)
       {
-        for(unsigned int j=0; j < M.size2(); ++j) 
-          cout << M(i,j).first << ":" << M(i,j).second << "\t";
+        for(int j=0 ; j< jmax; ++j) cout<<M(i,j).first<<":"<<M(i,j).second<<"\t";
         cout<<endl;
       }
     }

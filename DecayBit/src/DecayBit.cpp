@@ -3505,11 +3505,11 @@ namespace Gambit
       if(ModelInUse("MSSM63atQ") or ModelInUse("MSSM63atMGUT"))
       {
         const triplet<double> gamma_chi_0 = *Dep::Z_gamma_chi_0;
-        gamma_inv = gamma_chi_0.central;
+        gamma_inv += gamma_chi_0.central;
         // Average + and - errors
         const double tau_chi_0 = 0.5 * (gamma_chi_0.upper + gamma_chi_0.lower);
         // Add theory errors in quadrature
-        tau = std::sqrt(pow(tau_nu, 2) + pow(tau_chi_0, 2));
+        tau = std::sqrt(pow(tau, 2) + pow(tau_chi_0, 2));
       }
 
       lnL = Stats::gaussian_loglikelihood(gamma_inv, SM_Z::gamma_inv.mu, tau, SM_Z::gamma_inv.sigma, false);
@@ -3519,7 +3519,7 @@ namespace Gambit
     void Z_gamma_nu_2l(triplet<double>& gamma)
     {
       /**
-         @brief Calculate width of \f$Z\f$ decays to neutrinos,
+         @brief Calculate width of \f$Z\f$ decays to neutrinos (with RHN correction if present),
          \f$\Gamma(Z\to\nu\nu)\f$ at two-loop in GeV
 
          @warning This uses input \f$\alpha(M_Z)\f$ - does not include input

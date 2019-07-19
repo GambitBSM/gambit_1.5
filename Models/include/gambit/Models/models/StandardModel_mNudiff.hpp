@@ -2,47 +2,16 @@
 //   *********************************************
 ///  \file
 ///  
-///  Standard Model parameters, defined in SLHA2
-///  conventions. Corresponds directly to the
-///  SLHA2 "SMINPUTS" block.
-///
-///  SMINPUTS is also a CAPABILITY that module
-///  writers may be interested in using.
-///
-///  SLHA2 conventions:
-///
-///  SMINPUTS block description: 
-///
-///    // SLHA1
-///    alphainv;  // 1: Inverse electromagnetic coupling at the Z pole in the MSbar scheme (with 5 active flavours)
-///    GF;        // 2: Fermi constant (in units of GeV^-2)
-///    alphaS;    // 3: Strong coupling at the Z pole in the MSbar scheme (with 5 active flavours). 
-///    mZ;        // 4: Z pole mass
-///    mBmB;      // 5: b quark running mass in the MSbar scheme (at mB)
-///    mT;        // 6: Top quark pole mass
-///    mTau;      // 7: Tau pole mass
-///    
-///    // SLHA2
-///    mNu3;      // 8: Heaviest neutrino pole mass
-///    
-///    mE;        // 11: Electron pole mass
-///    mNu1;      // 12: Lightest neutrino pole mass
-///    mMu;       // 13: Muon pole mass
-///    mNu2;      // 14: Second lightest neutrino pole mass
-///    
-///    mD;        // 21: d quark running mass in the MSbar scheme at 2 GeV        
-///    mU;        // 22: u quark running mass in the MSbar scheme at 2 GeV        
-///    mS;        // 23: s quark running mass in the MSbar scheme at 2 GeV        
-///    mCmC;      // 24: c quark running mass in the MSbar scheme at mC      
-///    
+///  Standard Model parameters, inhereting from SLHA2
+///  model, but using differential neutrino masses
 ///
 ///  *********************************************
 ///
 ///  Authors (add name and date if you modify):
 ///
-///  \author Ben Farmer
-///          (benjamin.farmer@fysik.su.se)
-///    \date 2014 Sep - Dec, 2015 Jan - Mar
+///  \author Tomas Gonzalo
+///          (tomas.gonzalo@monash.edu)
+///  \date 2018
 ///  
 ///  *********************************************
 

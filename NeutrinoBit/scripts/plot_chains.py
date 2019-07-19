@@ -64,7 +64,7 @@ def show_lnL(rhn, i = 1, I = 1, tag = 'TAG', partial = True, total =
     def f(rhn, name):
         print name
         plt.clf()
-        plt.title(name)
+        #plt.title(name)
         lnL = rhn.lnL[mask]
 
         if name == 'total':
@@ -78,9 +78,10 @@ def show_lnL(rhn, i = 1, I = 1, tag = 'TAG', partial = True, total =
             imax = lnL.argmax()
             w = -lnL_partial[imax] + lnL_partial
             indices = np.argsort(w)
-            vmax = 2
-            vmin = -2
-            cmap =  'terrain'
+            vmax = 0
+            vmin = -nsigmas**2*0.5
+            cmap = 'viridis'
+            #cmap =  'terrain'
 #        else:
 #            lnL_partial = rhn.lnL_partial[name][mask]
 #            imax = lnL.argmax()
@@ -101,8 +102,8 @@ def show_lnL(rhn, i = 1, I = 1, tag = 'TAG', partial = True, total =
         plt.xlim([-1, 3.0])
         plt.ylim([-10, -1])
         plt.colorbar()
-        plt.xlabel("log10(M%i/GeV)"%I)
-        plt.ylabel("log10(U%i%i)"%(i,I))
+        plt.xlabel(r"$\log_{10}(M_{%i}$ [GeV])"%I)
+        plt.ylabel(r"$\log_{10}(|U_{%i%i}|^2)$"%(i,I))
 
         print 'save...'
         plt.tight_layout(pad=0.3)
@@ -112,8 +113,8 @@ def show_lnL(rhn, i = 1, I = 1, tag = 'TAG', partial = True, total =
     if total:
         f(rhn, 'total')
     if partial:
-        xlist = ['ckm', 'R_K', 'R_pi', 'R_tau', 'sin']
-        for name in rhn.lnL_partial:
+        xlist = ['lnL_ckm', 'lnL_Z_inv']
+        for name in xlist:
             #if any([x in name for x in xlist]):
                 f(rhn, name)
 
@@ -704,7 +705,7 @@ def show_Vus(rhn, tag = "TAG"):
 if __name__ == "__main__":
 #    all9(mode = 't')
     TAG = sys.argv[2]
-    rhn = RHN_Chain(sys.argv[1], MODEL = 'diff',
+    rhn = RHN_Chain(sys.argv[1], MODEL = 'full',
             print_keys = False, renormalize = False, sub_slide = False)
     #triangle(rhn, tag = 'combo2', Ue1th = 0.0, M1th = 0.0)
     #show_mbb(rhn)
@@ -733,9 +734,10 @@ if __name__ == "__main__":
     #show_survival_fraction(rhn, exclude = ['inv', 'LUV', 'md21', 
     #    'theta13', 'md3l', 'deltaCP', 'theta12', 'theta23'])
     #show_lnL_hist(rhn)
-    if len(sys.argv) < 5 or sys.argv[4] == "Ue1" :
-      show_lnL(rhn, i = 1, I = 1, tag = TAG, partial = False, total = True)
-    if len(sys.argv) < 5 or sys.argv[4] == "Um1" :
-      show_lnL(rhn, i = 2, I = 1, tag = TAG, partial = False, total = True)
-    if len(sys.argv) < 5 or sys.argv[4] == "Ut1" :
-      show_lnL(rhn, i = 3, I = 1, tag = TAG, partial = False, total = True)
+    if len(sys.argv) > 3 and sys.argv[3] == "partial":
+      partial = True
+    else:
+      partial = False
+    #show_lnL(rhn, i = 1, I = 1, tag = TAG, partial = partial, total = False)
+    #show_lnL(rhn, i = 2, I = 1, tag = TAG, partial = partial, total = False)
+    show_lnL(rhn, i = 3, I = 1, tag = TAG, partial = partial, total = False)

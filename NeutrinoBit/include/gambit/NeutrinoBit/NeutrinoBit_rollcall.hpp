@@ -1003,7 +1003,7 @@ START_MODULE
     #undef FUNCTION
   #undef CAPABILITY
 
-  #define CAPABILITY coupling_slide
+  #define CAPABILITY RHN_coupling_slide
   START_CAPABILITY
     #define FUNCTION coupling_slide
     START_FUNCTION(double)
