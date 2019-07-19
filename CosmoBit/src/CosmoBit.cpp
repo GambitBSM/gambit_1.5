@@ -2935,7 +2935,7 @@ namespace Gambit
       }
 
       map_str_dbl AlterBBN_input = *Dep::AlterBBN_setInput; // fill AlterBBN_input map with the parameters for the model in consideration
-      int nucl_err = BEreq::call_nucl_err(AlterBBN_input, byVal(ratioH), byVal(cov_ratioH[0]));
+      int nucl_err = BEreq::call_nucl_err(AlterBBN_input, &ratioH[0], &(cov_ratioH[0][0]));
 
       // TODO: replace .at() by [] to speed up
       std::vector<double> err_ratio(NNUC+1,0);
