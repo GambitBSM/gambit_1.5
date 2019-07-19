@@ -1039,7 +1039,7 @@ namespace Gambit
       double Thalf = *Dep::Thalf_0nubb_Xe;
 
       // Factor 1.28155 corresponds to one-sided UL at 90% CL
-      result = Stats::gaussian_loglikelihood(Thalf, 0., 0., tau_limit/1.28155, false);
+      result = Stats::gaussian_upper_limit(Thalf, 0., 0., tau_limit/1.28155, false);
     }
 
     // GERDA: Phys. Rev. Lett. 111 (2013) 122503
@@ -1052,7 +1052,7 @@ namespace Gambit
       double Thalf = *Dep::Thalf_0nubb_Ge;
 
       // Factor 1.28155 corresponds to one-sided UL at 90% CL
-      result = Stats::gaussian_loglikelihood(Thalf, 0., 0., tau_limit/1.28155, false);
+      result = Stats::gaussian_upper_limit(Thalf, 0., 0., tau_limit/1.28155, false);
     }
 
     // Unified 0nubb likelihood
@@ -1136,7 +1136,7 @@ namespace Gambit
 
       // Factor 1.28155 corresponds to one-sided UL at 90% CL
       //TODO :result = Stats::gaussian_loglikelihood(mbb, 0., 0., mbb_limit*1.28155, false);
-      result = Stats::gaussian_loglikelihood(mbb, 0., 0., mbb_limit/1.28155, false);
+      result = Stats::gaussian_upper_limit(mbb, 0., 0., mbb_limit/1.28155, false);
     }
 
     // GERDA: Phys. Rev. Lett. 111 (2013) 122503
@@ -1150,7 +1150,7 @@ namespace Gambit
 
       // Factor 1.28155 corresponds to one-sided UL at 90% CL
       // TODO :result = Stats::gaussian_loglikelihood(mbb, 0., 0., mbb_limit*1.28155, false);
-      result = Stats::gaussian_loglikelihood(mbb, 0., 0., mbb_limit/1.28155, false);
+      result = Stats::gaussian_upper_limit(mbb, 0., 0., mbb_limit/1.28155, false);
     }
 
     // Unified 0nubb likelihood based on mbb

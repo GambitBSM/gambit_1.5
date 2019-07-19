@@ -11,13 +11,16 @@
 ///  \author Tomas Gonzalo
 ///          (t.e.gonzalo@fys.uio.no)
 ///  \date 2017 July
+///  \date 2018, 2019
 ///
 ///  \author Julia Harz
 ///          (jharz@lpthe.jussieu.fr)
 ///  \date 2018 April
 ///
 ///  *********************************************
+
 #define _USE_MATH_DEFINES
+
 #include "gambit/Elements/gambit_module_headers.hpp"
 #include "gambit/NeutrinoBit/NeutrinoBit_rollcall.hpp"
 #include <unsupported/Eigen/MatrixFunctions>
@@ -54,7 +57,7 @@ namespace Gambit
     }
 
 
-    // Neutrino mass matrix from true SM neutrino model
+    // Neutrino mass matrix from true SM neutrino model (in GeV)
     void M_nu(Eigen::Matrix3cd& m_nu)
     {
       using namespace Pipes::M_nu;
@@ -95,6 +98,7 @@ namespace Gambit
 
     }
 
+    // Solar neutrino mass splitting \Delta m_{21}^2 (in GeV)
     void md21(double &m21)
     {
       using namespace Pipes::md21;
@@ -103,6 +107,7 @@ namespace Gambit
       m21 = pow(mnu(1,1).real(),2) - pow(mnu(0,0).real(), 2);
     }
 
+    // Atmospheric neutrino mass splitting for normal hierarchy \Delta m_{31}^2 (in GeV)
     void md31(double &m31)
     {
       using namespace Pipes::md31;
@@ -111,6 +116,7 @@ namespace Gambit
       m31 = pow(mnu(2,2).real(),2) - pow(mnu(0,0).real(), 2);
     }
 
+    // Atmospheric neutrino mass splitting for inverted hierarchy \Delta m_{32}^2 (in GeV)
     void md32(double &m32)
     {
       using namespace Pipes::md32;
@@ -119,7 +125,7 @@ namespace Gambit
       m32 = pow(mnu(2,2).real(),2) - pow(mnu(1,1).real(), 2);
     }
 
-
+    // Lightest active neutrino mass (in GeV)
     void min_mass(double &minmass)
     {
       using namespace Pipes::min_mass;
@@ -131,7 +137,7 @@ namespace Gambit
         minmass = mnu(2,2).real();
     }
  
-    // PMNS matrix in the Casas-Ibarra paramtetrization
+    // PMNS matrix (with Majorana phases)
     void UPMNS(Eigen::Matrix3cd& U_nu)
     {
       using namespace Pipes::UPMNS;
@@ -175,7 +181,7 @@ namespace Gambit
       return 1.0/pow(4.0*pi, 2.0) * ( (3.0*log(pow(M/m_Z, 2.0)))/((pow(M/m_Z, 2.0)) - 1.0) + (log(pow(M/m_H, 2.0)))/((pow(M/m_H, 2.0)) - 1.0));
     }
 
-    // Theta matrix in Seesaw I in the Casas-Ibarra parametrization
+    // Active-sterile (Theta) matrix in Seesaw I in the Casas-Ibarra parametrization
     void CI_Theta(Eigen::Matrix3cd& Theta)  // capability: SeesawI_Theta
     {
       using namespace Pipes::CI_Theta;
@@ -249,7 +255,7 @@ namespace Gambit
       R_12(2,1) = 0.0;
       R_12(2,2) = 1.0;
 
-      //std::string order = runOptions->getValueOrDef<std::string>("321", "R_order");
+      // Ordering of R matrices
       float Rorder = *Param["Rorder"];
 
       if ((0. <= Rorder) && (Rorder < 1.))
@@ -272,6 +278,7 @@ namespace Gambit
         invalid_point().raise(msg.str());
       }
 
+      // CI Theta matrix
       if(mnu != Eigen::Matrix3cd::Zero() and M_twid != Eigen::Matrix3cd::Zero())
         Theta = I * *Dep::UPMNS * mnu.sqrt() * R * M_twid.inverse();
 
@@ -300,7 +307,7 @@ namespace Gambit
       }
     }
 
-
+    // Ative neutrino mixing matrix. PMNS with Theta^2 corrections
     void Vnu(Eigen::Matrix3cd &V)
     {
       using namespace Pipes::Vnu;
@@ -311,6 +318,7 @@ namespace Gambit
 
     }
 
+    // Unitarity checks of the PMNS matrix
     void Unitarity_UPMNS(bool &unitarity)
     {
       using namespace Pipes::Unitarity_UPMNS;
@@ -342,6 +350,7 @@ namespace Gambit
    
     }
 
+    // Unitarity checks of the active neutrino mixing matrix
     void Unitarity_SeesawI(bool &unitarity)
     {
       using namespace Pipes::Unitarity_SeesawI;
@@ -385,8 +394,7 @@ namespace Gambit
       }
     }
 
-
-// Function to fill a spline object from a file
+    // Helper function to fill a spline object from a file
     tk::spline filling_spline(std::string file)
     {
       tk::spline s;
@@ -419,14 +427,15 @@ namespace Gambit
     }
     
     
-    // Active neutrino likelihoods
+    // Active neutrino likelihoods from digitised likelihood contours from NuFit (1811.05487)
+    // Solar mixing angle \theta_{12}
     void theta12(double &result)
     {
       using namespace Pipes::theta12;
       result = *Param["theta12"];
     }
 
-    
+    // Nuisance likelihood on solar mixing angle 
     void theta12_lnL(double &result)
     {
       using namespace Pipes::theta12_lnL;
@@ -444,14 +453,13 @@ namespace Gambit
         spline_t12_n = filling_spline("NeutrinoBit/data/T12n.csv");
         read_table_n = false;
       }
-      else if (read_table_i and (*Dep::ordering == 0)) // inverted odering
+      else if (read_table_i and (*Dep::ordering == 0)) // Inverted odering
       {
         spline_t12_i = filling_spline("NeutrinoBit/data/T12i.csv");
         read_table_i = false;
       }
       
-      
-      
+      // Invalidate outside the ranges
       if ((pow(sin(*Dep::theta12),2) < low_lim) or (pow(sin(*Dep::theta12),2) > upp_lim))
       {
         std::ostringstream msg;
@@ -462,7 +470,7 @@ namespace Gambit
       }
       else
       {
-         if   (*Dep::ordering == 1)
+         if (*Dep::ordering == 1)
          {    
            result = -0.5*spline_t12_n(pow(sin(*Dep::theta12),2));
          }
@@ -473,15 +481,14 @@ namespace Gambit
       }
     }
     
-    
-
+    // Atmospheric mixing angle \theta_{23} 
     void theta23(double &result)
     {
       using namespace Pipes::theta23;
       result = *Param["theta23"];
     }
 
-
+    // Nuisance likelihood on atmospheric mixing angle
     void theta23_lnL(double &result)
     {
       using namespace Pipes::theta23_lnL;
@@ -498,13 +505,13 @@ namespace Gambit
         spline_t23_n = filling_spline("NeutrinoBit/data/T23n.csv");
         read_table_n = false;
       }
-      else if (read_table_i and *Dep::ordering == 0) // inverted odering
+      else if (read_table_i and *Dep::ordering == 0) // Inverted odering
       {
         spline_t23_i = filling_spline("NeutrinoBit/data/T23i.csv");
         read_table_i = false;
       }
       
-      
+      // Invalidate outside the ranges
       if  ((pow(sin(*Dep::theta23),2) < low_lim)  or (pow(sin(*Dep::theta23),2) > upp_lim)) 
       {
         std::ostringstream msg;
@@ -526,14 +533,14 @@ namespace Gambit
       }
     }
     
-    
+    // Reactor mixing angle \theta_{13}
     void theta13(double &result)
     {
       using namespace Pipes::theta13;
       result = *Param["theta13"];
     }
 
-    
+    // Nuisance likelihood on reactor mixing angle
     void theta13_lnL(double &result)
     {
       using namespace Pipes::theta13_lnL;
@@ -550,11 +557,13 @@ namespace Gambit
         spline_t13_n = filling_spline("NeutrinoBit/data/T13n.csv");
         read_table_n = false;
       }
-      else if (read_table_i and *Dep::ordering == 0) // inverted odering
+      else if (read_table_i and *Dep::ordering == 0) // Inverted odering
       {
         spline_t13_i = filling_spline("NeutrinoBit/data/T13i.csv");
         read_table_i = false;
-      }      
+      }
+
+      // Invalidate outside ranges
       if  ((pow(sin(*Dep::theta13),2) < low_lim) or (pow(sin(*Dep::theta13),2) > upp_lim))
       {
           std::ostringstream msg;
@@ -576,14 +585,14 @@ namespace Gambit
       }
     }    
     
-
+    // CP violating phase
     void deltaCP(double &result)
     {
       using namespace Pipes::deltaCP;
       result = *Param["delta13"];
     }
 
-    
+    // Nuisance likelihood on CP violating phase
     void deltaCP_lnL(double &result)
     {
       using namespace Pipes::deltaCP_lnL;
@@ -600,13 +609,13 @@ namespace Gambit
         spline_CP_n = filling_spline("NeutrinoBit/data/CPn.csv");
         read_table_n = false;
       }
-      else if (read_table_i and *Dep::ordering == 0) // inverted odering
+      else if (read_table_i and *Dep::ordering == 0) // Inverted odering
       {
         spline_CP_i = filling_spline("NeutrinoBit/data/CPi.csv");
         read_table_i = false;
       }
 
-      
+      // Invalidate outside ranges
       if  (((*Dep::deltaCP*360.0)/(2.0*M_PI) < low_lim) or ((*Dep::deltaCP*360.0)/(2.0*M_PI) > upp_lim))
       {
         std::ostringstream msg;
@@ -628,8 +637,7 @@ namespace Gambit
       }
     }
     
-
-    
+    // Nuisance likelihood on solar mass splitting
     void md21_lnL(double &result)
     {
       using namespace Pipes::md21_lnL;
@@ -641,23 +649,22 @@ namespace Gambit
       static double low_lim = -6.0;  
       static double upp_lim = -3.0;  
       
-
       if (read_table_n and *Dep::ordering == 1) // Normal odering
       {
         // Removed highly disfavoured local minima to avoid confusing scans
         spline_md21_n = filling_spline("NeutrinoBit/data/DMS1n.csv");
         read_table_n = false;
       }
-      else if (read_table_i and *Dep::ordering == 0) // inverted odering
+      else if (read_table_i and *Dep::ordering == 0) // Inverted odering
       {
         // Removed highly disfavoured local minima to avoid confusing scans
         spline_md21_i = filling_spline("NeutrinoBit/data/DMS1i.csv");
         read_table_i = false;
       }
 
-      
+      // Invalidate outside ranges
       if  ((log10(*Dep::md21 * pow(10,18)) < low_lim) or (log10(*Dep::md21 * pow(10,18)) > upp_lim) or (*Dep::md21 * pow(10,18)<0))
-       {
+      {
           std::ostringstream msg;
           msg << "md12 outside NuFit range; point is invalidated by active neutrino constraint.";
           logger() << msg.str() << EOM;
@@ -677,7 +684,7 @@ namespace Gambit
       }
     }  
  
-    
+    // Nuisance likelihood on atmospheric mass splitting
     void md3l_lnL(double &result)
     {
       using namespace Pipes::md3l_lnL;
@@ -691,13 +698,12 @@ namespace Gambit
       static double low_lim_i = -7.0;  
       static double upp_lim_i = -0.2; 
           
-
       if (read_table_n and *Dep::ordering == 1) // Normal odering
       {
         spline_md31_n = filling_spline("NeutrinoBit/data/DMAn.csv");
         read_table_n = false;
       }  
-      else if (read_table_i and *Dep::ordering == 0) // inverted odering
+      else if (read_table_i and *Dep::ordering == 0) // Inverted odering
       {
         spline_md32_i = filling_spline("NeutrinoBit/data/DMAi.csv");
         read_table_i = false;
@@ -705,6 +711,7 @@ namespace Gambit
       
       if (*Dep::ordering == 1)
       {
+        // Invalidate outside ranges
         if ((*Dep::md31 * pow(10,21) < low_lim_n) or (*Dep::md31 * pow(10,21) > upp_lim_n))
         {
           std::ostringstream msg;
@@ -717,6 +724,7 @@ namespace Gambit
       }
       else if (*Dep::ordering == 0)
       {
+        // Invalidate outside ranges
         if ((*Dep::md32 * pow(10,21) < low_lim_i) or (*Dep::md32 * pow(10,21) > upp_lim_i))
         {
           std::ostringstream msg;
@@ -729,7 +737,8 @@ namespace Gambit
       }     
     }
 
-    // Sum of neutrino likelihoods
+    // Limit on the sum of neutrino likelihoods from Planck (1502.01589)
+    // This is not very conservative, it does not affect the scan but be wary of this limit
     void sum_mnu_lnL(double &result)
     {
       using namespace Pipes::sum_mnu_lnL;
