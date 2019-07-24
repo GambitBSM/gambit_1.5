@@ -124,8 +124,8 @@ ObsLikes:
     module:       CosmoBit
     type:         double
 
-  - purpose:      LogLike  # commented to make this not depended on plc and the download of Planck data
-    capability:   compute_Planck_high_TT_loglike
+  - purpose:      LogLike
+    capability:   Planck_highl_loglike
     module:       CosmoBit
     type:         double
   
@@ -156,8 +156,8 @@ Rules:
 ##  this ambiguity manually.
 #####
 
-  - capability: compute_Planck_high_TT_loglike
-    function: function_Planck_high_TTTEEE_lite_loglike
+  - capability: Planck_highl_loglike
+    function: function_Planck_highl_TTTEEE_lite_loglike
 
   - capability: get_classy_cosmo_container
     function: init_classy_cosmo_container

@@ -109,12 +109,12 @@ ObsLikes:
     type:         double
 
   - purpose:      LogLike
-    capability:   compute_Planck_high_TT_loglike
+    capability:   Planck_highl_loglike
     module:       CosmoBit
     type:         double
 
   - purpose:      LogLike
-    capability:   compute_Planck_lensing_loglike
+    capability:   Planck_lensing_loglike
     module:       CosmoBit
     type:         double
 
@@ -174,8 +174,8 @@ Rules:
 ##  this ambiguity manually.
 #####
 
-  - capability: compute_Planck_high_TT_loglike
-    function: function_Planck_high_TT_lite_loglike
+  - capability: Planck_highl_loglike
+    function: function_Planck_highl_TT_lite_loglike
     module: CosmoBit
 
 #####
@@ -226,7 +226,7 @@ Rules:
 
   - capability: plc_2_0_init
     options:
-      planck_path: /scratch/work/stoecker/plc_2.0
+      #planck_path: /PATH/TO/plc_2.0
 
 #####
 ##

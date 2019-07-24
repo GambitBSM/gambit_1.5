@@ -297,65 +297,62 @@ START_MODULE
     #undef FUNCTION
   #undef CAPABILITY
 
-  #define CAPABILITY compute_Planck_lowp_TT_loglike
+  #define CAPABILITY Planck_lowl_loglike
   START_CAPABILITY
-    #define FUNCTION function_Planck_lowp_TT_loglike
+    #define FUNCTION function_Planck_lowl_TT_loglike
+    START_FUNCTION(double)
+    DEPENDENCY(Cl_TT,std::vector<double>)
+    ALLOW_MODELS(Planck_TTTEEE,Planck_TT,Planck_lite)
+    BACKEND_REQ(plc_loglike_lowl_TT,(),double,(double*))
+    #undef FUNCTION
+
+    #define FUNCTION function_Planck_lowl_TEB_loglike
     START_FUNCTION(double)
     DEPENDENCY(Cl_TT,std::vector<double>)
     DEPENDENCY(Cl_TE,std::vector<double>)
     DEPENDENCY(Cl_EE,std::vector<double>)
     DEPENDENCY(Cl_BB,std::vector<double>)
     ALLOW_MODELS(Planck_TTTEEE,Planck_TT,Planck_lite)
-    BACKEND_REQ(clik_compute_loglike, (clik_tag), double ,(clik_object*,double*,clik_error**))
-    BACKEND_REQ(clik_initialize_error, (clik_tag), clik_error* ,())
-    BACKEND_REQ(return_lowp_TT,(clik_tag),clik_object*,())
+    BACKEND_REQ(plc_loglike_lowl_TEB,(),double,(double*))
     #undef FUNCTION
   #undef CAPABILITY
 
-  #define CAPABILITY compute_Planck_high_TT_loglike
+  #define CAPABILITY Planck_highl_loglike
   START_CAPABILITY
-    #define FUNCTION function_Planck_high_TT_loglike
+    #define FUNCTION function_Planck_highl_TT_loglike
     START_FUNCTION(double)
     DEPENDENCY(Cl_TT,std::vector<double>)
     ALLOW_MODELS(Planck_TT)
-    BACKEND_REQ(clik_compute_loglike, (clik_tag), double ,(clik_object*,double*,clik_error**))
-    BACKEND_REQ(clik_initialize_error, (clik_tag), clik_error* ,())
-    BACKEND_REQ(return_high_TT,(clik_tag),clik_object*,())
+    BACKEND_REQ(plc_loglike_highl_TT,(),double,(double*))
     #undef FUNCTION
 
-    #define FUNCTION function_Planck_high_TT_lite_loglike
+    #define FUNCTION function_Planck_highl_TT_lite_loglike
     START_FUNCTION(double)
     DEPENDENCY(Cl_TT,std::vector<double>)
     ALLOW_MODELS(Planck_lite)
-    BACKEND_REQ(clik_compute_loglike, (clik_tag), double ,(clik_object*,double*,clik_error**))
-    BACKEND_REQ(clik_initialize_error, (clik_tag), clik_error* ,())
-    BACKEND_REQ(return_high_TT_lite,(clik_tag),clik_object*,())
+    BACKEND_REQ(plc_loglike_highl_TT_lite,(),double,(double*))
     #undef FUNCTION
 
-    #define FUNCTION function_Planck_high_TTTEEE_loglike
+    #define FUNCTION function_Planck_highl_TTTEEE_loglike
     START_FUNCTION(double)
     DEPENDENCY(Cl_TT,std::vector<double>)
     DEPENDENCY(Cl_TE,std::vector<double>)
     DEPENDENCY(Cl_EE,std::vector<double>)
     ALLOW_MODELS(Planck_TTTEEE)
-    BACKEND_REQ(clik_compute_loglike, (clik_tag), double ,(clik_object*,double*,clik_error**))
-    BACKEND_REQ(clik_initialize_error, (clik_tag), clik_error* ,())
-    BACKEND_REQ(return_high_TTTEEE,(clik_tag),clik_object*,())
+    BACKEND_REQ(plc_loglike_highl_TTTEEE,(),double,(double*))
     #undef FUNCTION
 
-    #define FUNCTION function_Planck_high_TTTEEE_lite_loglike
+    #define FUNCTION function_Planck_highl_TTTEEE_lite_loglike
     START_FUNCTION(double)
     DEPENDENCY(Cl_TT,std::vector<double>)
     DEPENDENCY(Cl_TE,std::vector<double>)
     DEPENDENCY(Cl_EE,std::vector<double>)
     ALLOW_MODELS(Planck_lite)
-    BACKEND_REQ(clik_compute_loglike, (clik_tag), double ,(clik_object*,double*,clik_error**))
-    BACKEND_REQ(clik_initialize_error, (clik_tag), clik_error* ,())
-    BACKEND_REQ(return_high_TTTEEE_lite,(clik_tag),clik_object*,())
+    BACKEND_REQ(plc_loglike_highl_TTTEEE_lite,(),double,(double*))
     #undef FUNCTION
   #undef CAPABILITY
 
-  #define CAPABILITY compute_Planck_lensing_loglike
+  #define CAPABILITY Planck_lensing_loglike
   START_CAPABILITY
     #define FUNCTION function_Planck_lensing_loglike
     START_FUNCTION(double)
@@ -364,9 +361,7 @@ START_MODULE
     DEPENDENCY(Cl_EE,std::vector<double>)
     DEPENDENCY(Cl_PhiPhi,std::vector<double>)
     ALLOW_MODELS(Planck_TTTEEE,Planck_TT,Planck_lite)
-    BACKEND_REQ(clik_lensing_compute_loglike, (clik_tag), double ,(clik_lensing_object*,double*,clik_error**))
-    BACKEND_REQ(clik_initialize_error, (clik_tag), clik_error* ,())
-    BACKEND_REQ(return_lensing,(clik_tag),clik_lensing_object*,())
+    BACKEND_REQ(plc_loglike_lensing,(),double,(double*))
     #undef FUNCTION
   #undef CAPABILITY
 

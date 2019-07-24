@@ -107,7 +107,7 @@ ObsLikes:
     type:         double
 
   - purpose:      LogLike
-    capability:   compute_Planck_high_TT_loglike
+    capability:   Planck_highl_loglike
     module:       CosmoBit
     type:         double
   
@@ -140,8 +140,8 @@ Rules:
 ##  this ambiguity manually.
 #####
 
-  - capability: compute_Planck_high_TT_loglike
-    function: function_Planck_high_TT_lite_loglike
+  - capability: Planck_highl_loglike
+    function: function_Planck_highl_TT_lite_loglike
     module: CosmoBit
 
 #####

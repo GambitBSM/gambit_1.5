@@ -89,17 +89,20 @@ ObsLikes:
     type:         double
 
   - purpose:      LogLike
-    capability:   compute_Planck_high_TT_loglike
-    function:     function_Planck_high_TT_lite_loglike
+    capability:   Planck_highl_loglike
+    function:     function_Planck_highl_TT_lite_loglike
+    #function:     function_Planck_highl_TTTEEE_lite_loglike
 
   - purpose:      LogLike
-    capability:   compute_Planck_lensing_loglike
+    capability:   Planck_lensing_loglike
 
 # We better should not use this likelihood for quick tests.
-# It takes ages to load.
+# lowl_TEB takes ages to load.
 #
 #  - purpose:      LogLike
-#    capability:   compute_Planck_lowp_TT_loglike
+#    capability:   Planck_lowl_loglike
+#    function:     function_Planck_lowl_TEB_loglike
+#    #function:     function_Planck_lowl_TT_loglike
 #
 
   - purpose:      Obs
