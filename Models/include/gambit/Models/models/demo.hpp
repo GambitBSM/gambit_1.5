@@ -11,6 +11,7 @@
 ///  \author Ben Farmer
 ///  \date 2013 May
 ///  \date 2014 Mar
+///  \date 2019 Jul
 ///
 ///  \author Pat Scott
 ///  \date 2013 Sep
@@ -223,6 +224,42 @@
 #undef MODEL
 
 */
+
+// Model demonstration the use of "ordinary" module functions directly in a model namespace
+// (rather than putting them in some other module)
+// Basically the generalisation of MAP_TO_CAPABILITY, just using the normal module function
+// macros
+// 
+#define MODEL demo_CAP
+  START_MODEL
+  DEFINEPARS(a,b,c)
+
+  #define MODULE MODEL // Slightly hacky, can we make this unnecessary?
+  #define CAPABILITY a_cap
+  START_CAPABILITY
+
+    #define FUNCTION get_a_cap
+    START_FUNCTION(unsigned int)
+    ALLOW_MODELS(demo_CAP)
+    #undef FUNCTION
+
+  #undef CAPABILITY
+  #undef MODULE
+
+  // The "module function" definition
+  void MODEL_NAMESPACE::get_a_cap(const unsigned int& result)
+  {
+      // Get the Pipes for the interpret-as-parent function
+      //USE_MODEL_PIPE(MODEL)
+      // Or just do the normal thing for a module function:
+      using namespace Pipes::get_a_cap;
+
+      logger()<<"Running 'get_a_cap' function in model-module 'demo_CAP'"<<EOM;     
+    
+      result = *Param.at("a")
+  }
+
+#undef MODEL
 
 #endif /* defined(__demo_hpp__) */
 

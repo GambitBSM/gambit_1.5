@@ -32,7 +32,7 @@
 #include <boost/preprocessor/seq/for_each.hpp>
 
 #ifdef __model_rollcall_hpp__
-  #include "gambit/Elements/module_macros_incore.hpp"
+  #include "gambit/Elements/module_macros_incore_defs.hpp"
   #ifndef STANDALONE
     #include "gambit/Core/ini_functions.hpp"
   #endif
@@ -42,14 +42,20 @@
   #define INTERPRET_AS_X_FUNCTION(MODEL_X,FUNC)                   CORE_INTERPRET_AS_X_FUNCTION(MODEL_X,FUNC)
   #define INTERPRET_AS_PARENT_FUNCTION(FUNC)                      CORE_INTERPRET_AS_PARENT_FUNCTION(FUNC)
   #define INTERPRET_AS_X_DEPENDENCY(MODEL_X, DEP, TYPE)           CORE_INTERPRET_AS_X_DEPENDENCY(MODEL_X, DEP, TYPE)
+  // "Traditional" module macros
+  #define START_CAPABILITY                                        CORE_START_CAPABILITY(MODEL,CAPABILITY)
+
 #else
-  #include "gambit/Elements/module_macros_inmodule.hpp"
+  #include "gambit/Elements/module_macros_inmodule_defs.hpp"
   #define START_MODEL                                             MODULE_START_MODEL
   #define DEFINEPARS(...)                                         /* Do nothing */
   #define MAP_TO_CAPABILITY(PARAMETER,CAPABILITY)                 /* Do nothing */
   #define INTERPRET_AS_X_FUNCTION(MODEL_X,FUNC)                   MODULE_INTERPRET_AS_X_FUNCTION(MODEL_X,FUNC)
   #define INTERPRET_AS_PARENT_FUNCTION(FUNC)                      MODULE_INTERPRET_AS_X_FUNCTION(PARENT,FUNC)
   #define INTERPRET_AS_X_DEPENDENCY(MODEL_X, DEP, TYPE)           MODULE_INTERPRET_AS_X_DEPENDENCY(MODEL_X, DEP, TYPE)
+  // "Traditional" module macros
+  #define START_CAPABILITY                                        MODULE_START_CAPABILITY(MODEL)
+
 #endif
 
 #ifndef STANDALONE
