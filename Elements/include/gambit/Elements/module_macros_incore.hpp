@@ -55,6 +55,35 @@
 
 #include "gambit/Elements/module_macros_incore_defs.hpp"
 
+/// Models and Modules define different versions of these redirections macros.
+/// So we need to undef them in case they have already been defined.
+/// (by the time this header is included they should have done their job)
+/// We could just overwrite them, but this way avoids compiler warnings.
+#undef START_CAPABILITY                  
+#undef LONG_START_CAPABILITY  
+#undef DECLARE_FUNCTION
+#undef LONG_DECLARE_FUNCTION
+#undef DEPENDENCY                             
+#undef LONG_DEPENDENCY
+#undef NEEDS_MANAGER                                
+#undef ALLOW_MODELS
+#undef ALLOWED_MODEL
+#undef ALLOWED_MODEL_DEPENDENCE
+#undef ALLOW_MODEL_COMBINATION                      
+#undef MODEL_GROUP
+#undef BE_GROUP
+#undef DECLARE_BACKEND_REQ
+#undef LONG_DECLARE_BACKEND_REQ
+#undef ACTIVATE_BACKEND_REQ_FOR_MODELS
+#undef START_CONDITIONAL_DEPENDENCY                
+#undef ACTIVATE_DEP_BE
+#undef ACTIVATE_FOR_MODELS                          
+#undef MODEL_CONDITIONAL_DEPENDENCY      
+#undef BACKEND_OPTION         
+#undef LONG_BACKEND_OPTION
+#undef FORCE_SAME_BACKEND                           
+#undef CLASSLOAD_NEEDED                             
+
 /// \name Rollcall macros (redirection within the Core).
 /// These are called from within rollcall headers in each module to
 /// register module functions, their capabilities, return types, dependencies,
