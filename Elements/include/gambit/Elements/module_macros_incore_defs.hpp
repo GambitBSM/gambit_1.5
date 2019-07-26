@@ -329,7 +329,7 @@
 
 /// Redirection of \link START_CAPABILITY() START_CAPABILITY\endlink when
 /// invoked from within the core.
-#define CORE_START_CAPABILITY(MODULE, CAPABILITY)                              \
+#define CORE_START_CAPABILITY(MODULE, CAPABILITY, IS_MODEL)                    \
                                                                                \
   IF_TOKEN_UNDEFINED(MODULE,FAIL("You must define MODULE before calling "      \
    "START_CAPABILITY."))                                                       \
@@ -339,9 +339,11 @@
                                                                                \
   namespace Gambit                                                             \
   {                                                                            \
-                                                                               \
     /* Add CAPABILITY to the global set of things that can be calculated*/     \
     ADD_TAG_IN_CURRENT_NAMESPACE(CAPABILITY)                                   \
+                                                                               \
+    /* Put everything inside the Models namespace if this is a model-module */ \
+    BOOST_PP_IIF(IS_MODEL, namespace Models {, )                               \
                                                                                \
     namespace MODULE                                                           \
     {                                                                          \
@@ -355,12 +357,15 @@
                                                                                \
     }                                                                          \
                                                                                \
+    /* End Models namespace */                                                 \
+    BOOST_PP_IIF(IS_MODEL, }, )                                                \
+                                                                               \
   }                                                                            \
 
 
 /// Redirection of \link START_FUNCTION() START_FUNCTION\endlink when invoked
 /// from within the core.
-#define CORE_DECLARE_FUNCTION(MODULE, CAPABILITY, FUNCTION, TYPE, FLAG)        \
+#define CORE_DECLARE_FUNCTION(MODULE, CAPABILITY, FUNCTION, TYPE, FLAG, IS_MODEL)\
                                                                                \
   IF_TOKEN_UNDEFINED(MODULE,FAIL("You must define MODULE before calling "      \
    "START_FUNCTION."))                                                         \
@@ -373,6 +378,8 @@
                                                                                \
   namespace Gambit                                                             \
   {                                                                            \
+    /* Put everything inside the Models namespace if this is a model-module */ \
+    BOOST_PP_IIF(IS_MODEL, namespace Models {, )                               \
                                                                                \
     /* Fail if a void-type function is declared, unless it can manage loops or \
        is an initialisation function. */                                       \
@@ -407,6 +414,9 @@
       /* Wrap it in a functor */                                               \
       MAKE_FUNCTOR(FUNCTION,TYPE,CAPABILITY,MODULE,BOOST_PP_EQUAL(FLAG, 1))    \
     }                                                                          \
+                                                                               \
+    /* End Models namespace */                                                 \
+    BOOST_PP_IIF(IS_MODEL, }, )                                                \
                                                                                \
   }                                                                            \
 
@@ -672,7 +682,7 @@
   }                                                                            \
 
 /// Redirection of ALLOW_MODEL when invoked from within the core.
-#define CORE_ALLOWED_MODEL(MODULE,FUNCTION,MODEL)                              \
+#define CORE_ALLOWED_MODEL(MODULE,FUNCTION,MODEL,IS_MODEL)                     \
                                                                                \
   IF_TOKEN_UNDEFINED(MODULE,FAIL("You must define MODULE before calling "      \
    "ALLOW_MODEL(S)."))                                                         \
@@ -682,14 +692,20 @@
                                                                                \
   namespace Gambit                                                             \
   {                                                                            \
+    /* Put everything inside the Models namespace if this is a model-module */ \
+    BOOST_PP_IIF(IS_MODEL, namespace Models {, )                               \
+                                                                               \
     /* Add MODEL to global set of tags of recognised models */                 \
     ADD_MODEL_TAG_IN_CURRENT_NAMESPACE(MODEL)                                  \
     CORE_ALLOWED_MODEL_ARRANGE_DEP(MODULE,FUNCTION,MODEL)                      \
     CORE_ALLOW_MODEL(MODULE,FUNCTION,MODEL)                                    \
-  }                                                                            \
+                                                                               \
+    /* End Models namespace */                                                 \
+    BOOST_PP_IIF(IS_MODEL, }, )                                                \
+ }                                                                             \
 
 /// Redirection of ALLOW_MODEL_DEPENDENCE when invoked from within the core.
-#define CORE_ALLOW_MODEL_DEPENDENCE(MODULE,FUNCTION,MODEL)                     \
+#define CORE_ALLOW_MODEL_DEPENDENCE(MODULE,FUNCTION,MODEL,IS_MODEL)            \
                                                                                \
   IF_TOKEN_UNDEFINED(MODULE,FAIL("You must define MODULE before calling "      \
    "ALLOW_MODEL_DEPENDENCE."))                                                 \
@@ -699,10 +715,16 @@
                                                                                \
   namespace Gambit                                                             \
   {                                                                            \
+    /* Put everything inside the Models namespace if this is a model-module */ \
+    BOOST_PP_IIF(IS_MODEL, namespace Models {, )                               \
+                                                                               \
     /* Add MODEL to global set of tags of recognised models */                 \
     ADD_MODEL_TAG_IN_CURRENT_NAMESPACE(MODEL)                                  \
     CORE_ALLOWED_MODEL_ARRANGE_DEP(MODULE,FUNCTION,MODEL)                      \
-  }                                                                            \
+                                                                               \
+    /* End Models namespace */                                                 \
+    BOOST_PP_IIF(IS_MODEL, }, )                                                \
+ }                                                                             \
 
 /// Set up the dependency on the parameters object of a given model.
 #define CORE_ALLOWED_MODEL_ARRANGE_DEP(MODULE,FUNCTION,MODEL)                  \
@@ -843,7 +865,7 @@
 
 
 /// Redirection of ALLOW_MODEL_COMBINATION when invoked from the Core.
-#define CORE_ALLOW_MODEL_COMBINATION(MODULE,FUNCTION,COMBO)                    \
+#define CORE_ALLOW_MODEL_COMBINATION(MODULE,FUNCTION,IS_MODEL,COMBO)           \
   IF_TOKEN_UNDEFINED(MODULE,FAIL("You must define MODULE before calling "      \
    "ALLOW_MODEL_COMBINATION."))                                                \
   IF_TOKEN_UNDEFINED(FUNCTION,FAIL("You must define FUNCTION before calling "  \
@@ -853,6 +875,9 @@
   /* Register the combination as allowed with the functor */                   \
   namespace Gambit                                                             \
   {                                                                            \
+    /* Put everything inside the Models namespace if this is a model-module */ \
+    BOOST_PP_IIF(IS_MODEL, namespace Models {, )                               \
+                                                                               \
     namespace MODULE                                                           \
     {                                                                          \
                                                                                \
@@ -874,11 +899,14 @@
       }                                                                        \
                                                                                \
     }                                                                          \
-  }                                                                            \
+                                                                               \
+    /* End Models namespace */                                                 \
+    BOOST_PP_IIF(IS_MODEL, }, )                                                \
+ }                                                                             \
 
 
 /// Redirection of MODEL_GROUP when invoked from within the Core.
-#define CORE_MODEL_GROUP(MODULE,FUNCTION,GROUPNAME,GROUP)                      \
+#define CORE_MODEL_GROUP(MODULE,FUNCTION,GROUPNAME,GROUP,IS_MODEL)             \
   IF_TOKEN_UNDEFINED(MODULE,FAIL("You must define MODULE before calling "      \
    "MODEL_GROUP."))                                                            \
   IF_TOKEN_UNDEFINED(FUNCTION,FAIL("You must define FUNCTION before calling "  \
@@ -888,6 +916,9 @@
   /* Register the group with the functor */                                    \
   namespace Gambit                                                             \
   {                                                                            \
+    /* Put everything inside the Models namespace if this is a model-module */ \
+    BOOST_PP_IIF(IS_MODEL, namespace Models {, )                               \
+                                                                               \
     namespace MODULE                                                           \
     {                                                                          \
                                                                                \
@@ -906,10 +937,12 @@
       }                                                                        \
                                                                                \
     }                                                                          \
-  }                                                                            \
+    /* End Models namespace */                                                 \
+    BOOST_PP_IIF(IS_MODEL, }, )                                                \
+ }                                                                             \
 
 /// Redirection of BACKEND_GROUP(GROUP) when invoked from within the Core.
-#define CORE_BE_GROUP(GROUP)                                                   \
+#define CORE_BE_GROUP(GROUP,IS_MODEL)                                          \
                                                                                \
   IF_TOKEN_UNDEFINED(MODULE,FAIL("You must define MODULE before calling "      \
    "BACKEND_GROUP."))                                                          \
@@ -922,6 +955,9 @@
                                                                                \
   namespace Gambit                                                             \
   {                                                                            \
+    /* Put everything inside the Models namespace if this is a model-module */ \
+    BOOST_PP_IIF(IS_MODEL, namespace Models {, )                               \
+                                                                               \
     namespace MODULE                                                           \
     {                                                                          \
       namespace Pipes                                                          \
@@ -949,13 +985,15 @@
         }                                                                      \
       }                                                                        \
     }                                                                          \
-  }                                                                            \
+    /* End Models namespace */                                                 \
+    BOOST_PP_IIF(IS_MODEL, }, )                                                \
+ }                                                                             \
 
 
 /// Redirection of BACKEND_REQ(GROUP, REQUIREMENT, (TAGS), TYPE, [(ARGS)])
 /// for declaring backend requirements when invoked from within the Core.
 #define CORE_BACKEND_REQ(MODULE, CAPABILITY, FUNCTION, GROUP, REQUIREMENT,     \
-                         TAGS, TYPE, ARGS, IS_VARIABLE)                        \
+                         TAGS, TYPE, ARGS, IS_VARIABLE, IS_MODEL)              \
                                                                                \
   IF_TOKEN_UNDEFINED(MODULE,FAIL("You must define MODULE before calling "      \
    "BACKEND_REQ."))                                                            \
@@ -968,6 +1006,8 @@
                                                                                \
   namespace Gambit                                                             \
   {                                                                            \
+    /* Put everything inside the Models namespace if this is a model-module */ \
+    BOOST_PP_IIF(IS_MODEL, namespace Models {, )                               \
                                                                                \
     /* If scan-level initialisation functions are implemented, the macro should\
     fail here if the user has tried to declare that a scan-level initialisation\
@@ -1076,12 +1116,15 @@
                                                                                \
     }                                                                          \
                                                                                \
+    /* End Models namespace */                                                 \
+    BOOST_PP_IIF(IS_MODEL, }, )                                                \
+                                                                               \
   }                                                                            \
 
 
 /// Redirection of BACKEND_OPTION(BACKEND_AND_VERSIONS, TAGS) when invoked from
 /// within the core.
-#define CORE_BACKEND_OPTION(MODULE, CAPABILITY, FUNCTION, BE_AND_VER,TAGS)     \
+#define CORE_BACKEND_OPTION(MODULE, CAPABILITY, FUNCTION, BE_AND_VER,TAGS,IS_MODEL) \
                                                                                \
   IF_TOKEN_UNDEFINED(MODULE,FAIL("You must define MODULE before calling "      \
    "BACKEND_OPTION."))                                                         \
@@ -1094,6 +1137,8 @@
                                                                                \
   namespace Gambit                                                             \
   {                                                                            \
+    /* Put everything inside the Models namespace if this is a model-module */ \
+    BOOST_PP_IIF(IS_MODEL, namespace Models {, )                               \
                                                                                \
     namespace MODULE                                                           \
     {                                                                          \
@@ -1119,11 +1164,14 @@
                                                                                \
     }                                                                          \
                                                                                \
+    /* End Models namespace */                                                 \
+    BOOST_PP_IIF(IS_MODEL, }, )                                                \
+                                                                               \
   }                                                                            \
 
 
 /// Redirection of FORCE_SAME_BACKEND(TAGS) when invoked from within the core.
-#define CORE_FORCE_SAME_BACKEND(...)                                           \
+#define CORE_FORCE_SAME_BACKEND(IS_MODEL,...)                                  \
                                                                                \
   IF_TOKEN_UNDEFINED(MODULE,FAIL("You must define MODULE before calling "      \
    "FORCE_SAME_BACKEND."))                                                     \
@@ -1136,6 +1184,8 @@
                                                                                \
   namespace Gambit                                                             \
   {                                                                            \
+    /* Put everything inside the Models namespace if this is a model-module */ \
+    BOOST_PP_IIF(IS_MODEL, namespace Models {, )                               \
                                                                                \
     namespace MODULE                                                           \
     {                                                                          \
@@ -1157,6 +1207,8 @@
       }                                                                        \
                                                                                \
     }                                                                          \
+    /* End Models namespace */                                                 \
+    BOOST_PP_IIF(IS_MODEL, }, )                                                \
                                                                                \
   }                                                                            \
 
@@ -1165,7 +1217,7 @@
 /// Redirection of START_CONDITIONAL_DEPENDENCY(TYPE) when invoked from within
 /// the core.
 #define CORE_START_CONDITIONAL_DEPENDENCY(MODULE, CAPABILITY, FUNCTION,        \
- CONDITIONAL_DEPENDENCY, TYPE)                                                 \
+ CONDITIONAL_DEPENDENCY, TYPE, IS_MODEL)                                       \
                                                                                \
   IF_TOKEN_UNDEFINED(MODULE,FAIL("You must define MODULE before calling "      \
    "START_CONDITIONAL_DEPENDENCY."))                                           \
@@ -1181,9 +1233,11 @@
                                                                                \
   namespace Gambit                                                             \
   {                                                                            \
-                                                                               \
     /* Add DEP to global set of tags of recognised module capabilities/deps */ \
     ADD_TAG_IN_CURRENT_NAMESPACE(CONDITIONAL_DEPENDENCY)                       \
+                                                                               \
+    /* Put everything inside the Models namespace if this is a model-module */ \
+    BOOST_PP_IIF(IS_MODEL, namespace Models {, )                               \
                                                                                \
     namespace MODULE                                                           \
     {                                                                          \
@@ -1203,13 +1257,15 @@
       DEPENDENCY_COMMON_2(CONDITIONAL_DEPENDENCY, FUNCTION)                    \
                                                                                \
     }                                                                          \
+    /* End Models namespace */                                                 \
+    BOOST_PP_IIF(IS_MODEL, }, )                                                \
                                                                                \
   }                                                                            \
 
 
 /// Redirection of ACTIVATE_DEP_BE(BACKEND_REQ, BACKEND, VERSTRING) when
 /// invoked from within the core.
-#define CORE_ACTIVATE_DEP_BE(BACKEND_REQ, BACKEND, VERSTRING)                  \
+#define CORE_ACTIVATE_DEP_BE(BACKEND_REQ, BACKEND, VERSTRING, IS_MODEL)        \
                                                                                \
   IF_TOKEN_UNDEFINED(MODULE,FAIL("You must define MODULE before calling "      \
    "ACTIVATE_FOR_BACKEND."))                                                   \
@@ -1225,6 +1281,8 @@
                                                                                \
   namespace Gambit                                                             \
   {                                                                            \
+    /* Put everything inside the Models namespace if this is a model-module */ \
+    BOOST_PP_IIF(IS_MODEL, namespace Models {, )                               \
                                                                                \
     /* Add BACKEND to global set of recognised backend tags */                 \
     ADD_BETAG_IN_CURRENT_NAMESPACE(BACKEND)                                    \
@@ -1282,12 +1340,14 @@
       }                                                                        \
                                                                                \
     }                                                                          \
+    /* End Models namespace */                                                 \
+    BOOST_PP_IIF(IS_MODEL, }, )                                                \
                                                                                \
   }                                                                            \
 
 
 /// Redirection of ACTIVATE_BACKEND_REQ_FOR_MODELS when invoked from the Core.
-#define CORE_BE_MODEL_RULE(MODELS,TAGS)                                        \
+#define CORE_BE_MODEL_RULE(MODELS,TAGS,IS_MODEL)                               \
                                                                                \
   IF_TOKEN_UNDEFINED(MODULE,FAIL("You must define MODULE before calling "      \
    "ACTIVATE_BACKEND_REQ_FOR_MODEL(S)."))                                      \
@@ -1300,6 +1360,8 @@
                                                                                \
   namespace Gambit                                                             \
   {                                                                            \
+    /* Put everything inside the Models namespace if this is a model-module */ \
+    BOOST_PP_IIF(IS_MODEL, namespace Models {, )                               \
                                                                                \
     namespace MODULE                                                           \
     {                                                                          \
@@ -1311,14 +1373,15 @@
        set_backend_rule_for_model(Functown::FUNCTION,#MODELS,#TAGS);           \
                                                                                \
     }                                                                          \
-                                                                               \
+    /* End Models namespace */                                                 \
+    BOOST_PP_IIF(IS_MODEL, }, )                                                \
   }                                                                            \
 
 
 /// Redirection of ACTIVATE_FOR_MODELS(MODELSTRING) when invoked from within
 /// the core, inside a CONDITIONAL_DEPENDENCY definition.
 #define ACTIVATE_DEP_MODEL(MODULE, CAPABILITY, FUNCTION,                       \
- CONDITIONAL_DEPENDENCY,MODELSTRING)                                           \
+ CONDITIONAL_DEPENDENCY,IS_MODEL,MODELSTRING)                                  \
                                                                                \
   IF_TOKEN_UNDEFINED(MODULE,FAIL("You must define MODULE before calling "      \
    "ACTIVATE_FOR_MODEL(S)."))                                                  \
@@ -1334,6 +1397,8 @@
                                                                                \
   namespace Gambit                                                             \
   {                                                                            \
+    /* End Models namespace */                                                 \
+    BOOST_PP_IIF(IS_MODEL, }, )                                                \
                                                                                \
     namespace MODULE                                                           \
     {                                                                          \
@@ -1382,12 +1447,14 @@
       }                                                                        \
                                                                                \
     }                                                                          \
+    /* End Models namespace */                                                 \
+    BOOST_PP_IIF(IS_MODEL, }, )                                                \
                                                                                \
   }                                                                            \
 
 
 /// Redirection of NEEDS_CLASSES_FROM when invoked from within the Core.
-#define CORE_CLASSLOAD_NEEDED(BACKEND, VERSTRING)                              \
+#define CORE_CLASSLOAD_NEEDED(BACKEND, VERSTRING, IS_MODEL)                    \
                                                                                \
   IF_TOKEN_UNDEFINED(MODULE,FAIL("You must define MODULE before calling "      \
    "NEEDS_CLASSES_FROM."))                                                     \
@@ -1400,6 +1467,8 @@
                                                                                \
   namespace Gambit                                                             \
   {                                                                            \
+    /* Put everything inside the Models namespace if this is a model-module */ \
+    BOOST_PP_IIF(IS_MODEL, namespace Models {, )                               \
                                                                                \
     namespace MODULE                                                           \
     {                                                                          \
@@ -1409,6 +1478,9 @@
        VERSTRING, STRINGIFY(CAT(Default_,BACKEND)));                           \
                                                                                \
     }                                                                          \
+                                                                               \
+    /* End Models namespace */                                                 \
+    BOOST_PP_IIF(IS_MODEL, }, )                                                \
                                                                                \
   }                                                                            \
 

@@ -66,17 +66,17 @@
 
 /// Registers the current \link CAPABILITY() CAPABILITY\endlink of the current
 /// \link MODULE() MODULE\endlink.
-#define START_CAPABILITY                                  CORE_START_CAPABILITY(MODULE, CAPABILITY)
+#define START_CAPABILITY                                  CORE_START_CAPABILITY(MODULE, CAPABILITY, NOT_MODEL)
 /// Long (all argument) version of \link START_CAPABILITY() START_CAPABILITY\endlink.
-#define LONG_START_CAPABILITY(MODULE, CAPABILITY)         CORE_START_CAPABILITY(MODULE, CAPABILITY)
+#define LONG_START_CAPABILITY(MODULE, CAPABILITY)         CORE_START_CAPABILITY(MODULE, CAPABILITY, NOT_MODEL)
 
 /// Registers the current \link FUNCTION() FUNCTION\endlink of the current
 /// \link MODULE() MODULE\endlink as a provider
 /// of the current \link CAPABILITY() CAPABILITY\endlink, returning a result of
 /// type \em TYPE.
-#define DECLARE_FUNCTION(TYPE, FLAG)                      CORE_DECLARE_FUNCTION(MODULE, CAPABILITY, FUNCTION, TYPE, FLAG)
+#define DECLARE_FUNCTION(TYPE, FLAG)                      CORE_DECLARE_FUNCTION(MODULE, CAPABILITY, FUNCTION, TYPE, FLAG, NOT_MODEL)
 /// Long (all argument) version of \link DECLARE_FUNCTION() DECLARE_FUNCTION\endlink.
-#define LONG_DECLARE_FUNCTION(MODULE, CAPABILITY, FUNCTION, TYPE, FLAG) CORE_DECLARE_FUNCTION(MODULE, CAPABILITY, FUNCTION, TYPE, FLAG)
+#define LONG_DECLARE_FUNCTION(MODULE, CAPABILITY, FUNCTION, TYPE, FLAG) CORE_DECLARE_FUNCTION(MODULE, CAPABILITY, FUNCTION, TYPE, FLAG, NOT_MODEL)
 
 /// Indicates that the current \link FUNCTION() FUNCTION\endlink of the current
 /// \link MODULE() MODULE\endlink must be managed by another function (in the same
@@ -93,25 +93,27 @@
 /// Long (all argument) version of \link DEPENDENCY() DEPENDENCY\endlink.
 #define LONG_DEPENDENCY(MODULE, FUNCTION, DEP, TYPE)      CORE_DEPENDENCY(DEP, TYPE, MODULE, FUNCTION, NOT_MODEL)
 
+#define ALLOW_MODELS(...)                                 ALLOW_MODELS_AB(MODULE, FUNCTION, __VA_ARGS__)
+
 /// Indicate that the current \link FUNCTION() FUNCTION\endlink may only be used with
 /// specific model \em MODEL, or combinations given via ALLOW_MODEL_COMBINATION.
 /// If both this and ALLOW_MODEL_COMBINATION are absent, all models are allowed, but
 /// model parameters will not generally be accessible from within the module funtion.
-#define ALLOWED_MODEL(MODULE,FUNCTION,MODEL)              CORE_ALLOWED_MODEL(MODULE,FUNCTION,MODEL)
+#define ALLOWED_MODEL(MODULE,FUNCTION,MODEL)              CORE_ALLOWED_MODEL(MODULE,FUNCTION,MODEL,NOT_MODEL)
 
 /// Indicate that the current \link FUNCTION() FUNCTION\endlink may be used with a
 /// specific model \em MODEL, but only in combination with others given via ALLOW_MODEL_COMBINATION.
-#define ALLOWED_MODEL_DEPENDENCE(MODULE,FUNCTION,MODEL)   CORE_ALLOW_MODEL_DEPENDENCE(MODULE,FUNCTION,MODEL)
+#define ALLOWED_MODEL_DEPENDENCE(MODULE,FUNCTION,MODEL)   CORE_ALLOW_MODEL_DEPENDENCE(MODULE,FUNCTION,MODEL,NOT_MODEL)
 
 /// Indicate that the current \link FUNCTION() FUNCTION\endlink may only be used with
 /// the specific model combination given, with other combinations passed in the same
 /// way, or with individual models speficied via ALLOW_MODEL(S).  If both this and
 /// ALLOW_MODEL(s) are absent, all models are allowed but no model parameters will be
 /// accessible from within the module funtion.
-#define ALLOW_MODEL_COMBINATION(...)                      CORE_ALLOW_MODEL_COMBINATION(MODULE,FUNCTION,(__VA_ARGS__))
+#define ALLOW_MODEL_COMBINATION(...)                      CORE_ALLOW_MODEL_COMBINATION(MODULE,FUNCTION,NOT_MODEL,(__VA_ARGS__))
 
 /// Define a model GROUP of name GROUPNAME for use with ALLOW_MODEL_COMBINATION.
-#define MODEL_GROUP(GROUPNAME,GROUP)                      CORE_MODEL_GROUP(MODULE,FUNCTION,GROUPNAME,GROUP)
+#define MODEL_GROUP(GROUPNAME,GROUP)                      CORE_MODEL_GROUP(MODULE,FUNCTION,GROUPNAME,GROUP,NOT_MODEL)
 
 /// BACKEND_REQ indicates that the current \link FUNCTION() FUNCTION\endlink requires one
 /// backend variable or function to be available from a capability group \em GROUP,
@@ -122,12 +124,12 @@
 /// members of the same \em GROUP.  Note that \em GROUPs are automatically declared the
 /// first time that they are mentioned in a BACKEND_REQ statement.
 #define DECLARE_BACKEND_REQ(GROUP, REQUIREMENT, TAGS, TYPE, ARGS, IS_VARIABLE) \
-                                                          CORE_BACKEND_REQ(MODULE, CAPABILITY, FUNCTION, GROUP, REQUIREMENT, TAGS, TYPE, ARGS, IS_VARIABLE)
+                                                          CORE_BACKEND_REQ(MODULE, CAPABILITY, FUNCTION, GROUP, REQUIREMENT, TAGS, TYPE, ARGS, IS_VARIABLE, NOT_MODEL)
 #define LONG_DECLARE_BACKEND_REQ(MODULE, CAPABILITY, FUNCTION, GROUP, REQUIREMENT, TAGS, TYPE, ARGS, IS_VARIABLE) \
-                                                          CORE_BACKEND_REQ(MODULE, CAPABILITY, FUNCTION, GROUP, REQUIREMENT, TAGS, TYPE, ARGS, IS_VARIABLE)
+                                                          CORE_BACKEND_REQ(MODULE, CAPABILITY, FUNCTION, GROUP, REQUIREMENT, TAGS, TYPE, ARGS, IS_VARIABLE, NOT_MODEL)
 
 /// Declare a backend group, from which one backend requirement must be activated.
-#define BE_GROUP(GROUP)                                   CORE_BE_GROUP(GROUP)
+#define BE_GROUP(GROUP)                                   CORE_BE_GROUP(GROUP,NOT_MODEL)
 
 /// Define a rule that uses TAGS to determine which backend requirements of the current
 /// \link FUNCTION() FUNCTION\endlink are explicitly activated when one or more models
@@ -137,7 +139,7 @@
 /// activated regardless of the model(s) being scanned.  Note that all rules have
 /// _immediate_ effect, so only apply to BACKEND_REQs of the current FUNCTION that have
 /// already been declared!
-#define ACTIVATE_BACKEND_REQ_FOR_MODELS(MODELS,TAGS)      CORE_BE_MODEL_RULE(MODELS,TAGS)
+#define ACTIVATE_BACKEND_REQ_FOR_MODELS(MODELS,TAGS)      CORE_BE_MODEL_RULE(MODELS,TAGS,NOT_MODEL)
 
 /// Define a rule that uses TAGS to determine a set of backend requirements of the current
 /// \link FUNCTION() FUNCTION\endlink that are permitted to be fulfilled by the indicated
@@ -152,7 +154,7 @@
 /// of the current FUNCTION that have already been declared!
 #define BACKEND_OPTION(BACKEND_AND_VERSIONS,TAGS)         LONG_BACKEND_OPTION(MODULE, CAPABILITY, FUNCTION, BACKEND_AND_VERSIONS,TAGS)
 #define LONG_BACKEND_OPTION(MODULE, CAPABILITY, FUNCTION, BACKEND_AND_VERSIONS,TAGS) \
-                                                          CORE_BACKEND_OPTION(MODULE, CAPABILITY, FUNCTION, BACKEND_AND_VERSIONS,TAGS)
+                                                          CORE_BACKEND_OPTION(MODULE, CAPABILITY, FUNCTION, BACKEND_AND_VERSIONS,TAGS, NOT_MODEL)
 
 /// Define a rule that certain sets of backend requirements need to be resolved by the same backend.
 /// The sets are identified by tags, any number of which can be passed to FORCE_SAME_BACKEND.
@@ -160,32 +162,32 @@
 /// by the dependency resolver to use functions from the same backend.  Note that all rules have
 /// _immediate_ effect, so only apply to BACKEND_REQs of the current FUNCTION that have
 /// already been declared!
-#define FORCE_SAME_BACKEND(...)                           CORE_FORCE_SAME_BACKEND(__VA_ARGS__)
+#define FORCE_SAME_BACKEND(...)                           CORE_FORCE_SAME_BACKEND(NOT_MODEL,__VA_ARGS__)
 
 /// Indicate that the current \link FUNCTION() FUNCTION\endlink may depend on the
 /// presence of another module function that can supply capability
 /// \link CONDITIONAL_DEPENDENCY() CONDITIONAL_DEPENDENCY\endlink, with return type
 /// \em TYPE.
 #define START_CONDITIONAL_DEPENDENCY(TYPE)                CORE_START_CONDITIONAL_DEPENDENCY(MODULE, CAPABILITY, \
-                                                           FUNCTION, CONDITIONAL_DEPENDENCY, TYPE)
+                                                           FUNCTION, CONDITIONAL_DEPENDENCY, TYPE, NOT_MODEL)
 
 /// Indicate that the current \link CONDITIONAL_DEPENDENCY() CONDITIONAL_DEPENDENCY\endlink
 /// should be activated if the backend requirement \em BACKEND_REQ of the current
 /// \link FUNCTION() FUNCTION\endlink is filled by a backend function from \em BACKEND.
 /// The versions of \em BACKEND that this applies to are passed in \em VERSTRING.
-#define ACTIVATE_DEP_BE(BACKEND_REQ, BACKEND, VERSTRING)  CORE_ACTIVATE_DEP_BE(BACKEND_REQ, BACKEND, VERSTRING)
+#define ACTIVATE_DEP_BE(BACKEND_REQ, BACKEND, VERSTRING)  CORE_ACTIVATE_DEP_BE(BACKEND_REQ, BACKEND, VERSTRING, NOT_MODEL)
 
 /// Indicate that the current \link CONDITIONAL_DEPENDENCY() CONDITIONAL_DEPENDENCY\endlink
 /// should be activated if the model being scanned matches one of the models passed as an argument.
-#define ACTIVATE_FOR_MODELS(...)                          ACTIVATE_DEP_MODEL(MODULE, CAPABILITY, FUNCTION, CONDITIONAL_DEPENDENCY, #__VA_ARGS__)
+#define ACTIVATE_FOR_MODELS(...)                          ACTIVATE_DEP_MODEL(MODULE, CAPABILITY, FUNCTION, CONDITIONAL_DEPENDENCY, NOT_MODEL, #__VA_ARGS__)
 
 /// Quick, one-line declaration of model-conditional dependencies
-#define MODEL_CONDITIONAL_DEPENDENCY(DEP, TYPE, ...)      CORE_START_CONDITIONAL_DEPENDENCY(MODULE, CAPABILITY, FUNCTION, DEP, TYPE) \
-                                                          ACTIVATE_DEP_MODEL(MODULE, CAPABILITY, FUNCTION, DEP, #__VA_ARGS__)
+#define MODEL_CONDITIONAL_DEPENDENCY(DEP, TYPE, ...)      CORE_START_CONDITIONAL_DEPENDENCY(MODULE, CAPABILITY, FUNCTION, DEP, TYPE, NOT_MODEL) \
+                                                          ACTIVATE_DEP_MODEL(MODULE, CAPABILITY, FUNCTION, DEP, NOT_MODEL #__VA_ARGS__)
 
 /// Indicate that the current \link FUNCTION() FUNCTION\endlink requires classes that
 /// must be loaded from \em BACKEND, version \em VERSION.
-#define CLASSLOAD_NEEDED(BACKEND, VERSION)               CORE_CLASSLOAD_NEEDED(BACKEND, VERSION)
+#define CLASSLOAD_NEEDED(BACKEND, VERSION)               CORE_CLASSLOAD_NEEDED(BACKEND, VERSION, NOT_MODEL)
 /// @}
 
 

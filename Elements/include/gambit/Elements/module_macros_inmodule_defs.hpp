@@ -68,16 +68,20 @@
 
 /// Redirection of \link START_CAPABILITY() START_CAPABILITY\endlink when
 /// invoked from within a module.
+/// bjf> Does this actually do anything? Isn't MODULE always defined because
+/// it is the macro argument here?
 #define MODULE_START_CAPABILITY(MODULE)                                        \
   IF_TOKEN_UNDEFINED(MODULE,FAIL("You must define MODULE before calling "      \
    "START_CAPABILITY."))                                                       \
 
 /// Redirection of \link START_FUNCTION() START_FUNCTION\endlink when invoked
-/// from within a module.
-#define MODULE_DECLARE_FUNCTION(MODULE, FUNCTION, TYPE, CAN_MANAGE)            \
+/// from within a module (or model-module)
+#define MODULE_DECLARE_FUNCTION(MODULE, FUNCTION, TYPE, CAN_MANAGE, IS_MODEL)  \
                                                                                \
   namespace Gambit                                                             \
   {                                                                            \
+    /* Put everything inside the Models namespace if this is a model-module */ \
+    BOOST_PP_IIF(IS_MODEL, namespace Models {, )                               \
                                                                                \
     namespace MODULE                                                           \
     {                                                                          \
@@ -113,6 +117,9 @@
       }                                                                        \
                                                                                \
     }                                                                          \
+                                                                               \
+    /* End Models namespace */                                                 \
+    BOOST_PP_IIF(IS_MODEL, }, )                                                \
                                                                                \
   }                                                                            \
 
@@ -188,10 +195,12 @@
 
 
 /// Redirection of ALLOW_MODEL when invoked from within a module.
-#define MODULE_ALLOWED_MODEL(MODULE,FUNCTION,MODEL)                            \
+#define MODULE_ALLOWED_MODEL(MODULE,FUNCTION,MODEL,IS_MODEL)                   \
                                                                                \
   namespace Gambit                                                             \
   {                                                                            \
+    /* Put everything inside the Models namespace if this is a model-module */ \
+    BOOST_PP_IIF(IS_MODEL, namespace Models {, )                               \
                                                                                \
     namespace MODULE                                                           \
     {                                                                          \
@@ -209,14 +218,19 @@
                                                                                \
     }                                                                          \
                                                                                \
+    /* End Models namespace */                                                 \
+    BOOST_PP_IIF(IS_MODEL, }, )                                                \
+                                                                               \
   }                                                                            \
 
 
 /// Redirection of BACKEND_GROUP(GROUP) when invoked from within a module.
-#define MODULE_BE_GROUP(GROUP)                                                 \
+#define MODULE_BE_GROUP(GROUP,IS_MODEL)                                        \
                                                                                \
   namespace Gambit                                                             \
   {                                                                            \
+    /* Put everything inside the Models namespace if this is a model-module */ \
+    BOOST_PP_IIF(IS_MODEL, namespace Models {, )                               \
     namespace MODULE                                                           \
     {                                                                          \
       namespace Pipes                                                          \
@@ -232,16 +246,21 @@
         }                                                                      \
       }                                                                        \
     }                                                                          \
+    /* End Models namespace */                                                 \
+    BOOST_PP_IIF(IS_MODEL, }, )                                                \
   }                                                                            \
 
 
 /// Redirection of BACKEND_REQ(GROUP, REQUIREMENT, (TAGS), TYPE, [(ARGS)])
 /// for declaring backend requirements when invoked from within a module.
 #define MODULE_BACKEND_REQ(MODULE, FUNCTION, GROUP, REQ, TAGS, TYPE, ARGS,     \
-                           IS_VARIABLE)                                        \
+                           IS_VARIABLE,IS_MODEL)                               \
                                                                                \
   namespace Gambit                                                             \
   {                                                                            \
+    /* Put everything inside the Models namespace if this is a model-module */ \
+    BOOST_PP_IIF(IS_MODEL, namespace Models {, )                               \
+                                                                               \
     namespace MODULE                                                           \
     {                                                                          \
       namespace Pipes                                                          \
@@ -261,7 +280,9 @@
         }                                                                      \
       }                                                                        \
     }                                                                          \
-  }                                                                            \
+    /* End Models namespace */                                                 \
+    BOOST_PP_IIF(IS_MODEL, }, )                                                \
+ }                                                                             \
 
 /// @}
 

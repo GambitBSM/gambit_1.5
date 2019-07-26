@@ -234,7 +234,6 @@
   START_MODEL
   DEFINEPARS(a,b,c)
 
-  #define MODULE MODEL // Slightly hacky, can we make this unnecessary?
   #define CAPABILITY a_cap
   START_CAPABILITY
 
@@ -244,19 +243,24 @@
     #undef FUNCTION
 
   #undef CAPABILITY
-  #undef MODULE
 
   // The "module function" definition
-  void MODEL_NAMESPACE::get_a_cap(const unsigned int& result)
-  {
-      // Get the Pipes for the interpret-as-parent function
-      //USE_MODEL_PIPE(MODEL)
-      // Or just do the normal thing for a module function:
-      using namespace Pipes::get_a_cap;
+  // Have to put it in the right namespace, and can't used MODEL_NAMESPACE macro unless
+  // we change something in the START_FUNCTION macro to first declare the function in
+  // the right namespace.
+  namespace Gambit {
+    namespace Models {
+      namespace MODEL {
+        void get_a_cap(unsigned int& result)
+        {
+            using namespace Pipes::get_a_cap;
 
-      logger()<<"Running 'get_a_cap' function in model-module 'demo_CAP'"<<EOM;     
-    
-      result = *Param.at("a")
+            logger()<<"Running 'get_a_cap' function in model-module 'demo_CAP'"<<EOM;     
+          
+            result = *Param.at("a");
+        }
+      }
+    }
   }
 
 #undef MODEL
