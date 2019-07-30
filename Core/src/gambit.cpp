@@ -96,6 +96,13 @@ int main(int argc, char* argv[])
       int rank = 0;
     #endif
 
+    // Check number of OpenMP threads used
+    int n_omp_threads = 1;
+    #pragma omp parallel
+    {
+      if(omp_get_thread_num()==0) n_omp_threads = omp_get_num_threads();
+    }
+
     try
     {
       // Parse command line arguments, launching into the appropriate diagnostic mode
@@ -106,6 +113,7 @@ int main(int argc, char* argv[])
       {
         cout << endl << "Starting GAMBIT" << endl;
         cout << "----------" << endl;
+        cout << "Running with "<< n_omp_threads << " OpenMP threads per MPI process (set by the environment variable OMP_NUM_THREADS)." << endl;
         if(Core().found_inifile) cout << "YAML file: "<< filename << endl;
       }
 
@@ -114,6 +122,7 @@ int main(int argc, char* argv[])
       for(int i=0;i<argc;i++){ logger() << arguments[i] << " "; }
       logger() << endl;
       logger() << core << "Starting GAMBIT" << EOM;
+      logger() << core << "Running with "<< n_omp_threads << " OpenMP threads per MPI process (set by the environment variable OMP_NUM_THREADS)." << EOM;
       if( Core().resume ) logger() << core << "Attempting to resume scan..." << EOM;
       logger() << core << "Registered module functors [Core().getModuleFunctors().size()]: ";
       logger() << Core().getModuleFunctors().size() << endl;
