@@ -1069,6 +1069,31 @@ if(NOT ditched_${name}_${ver})
     INSTALL_COMMAND python2 ${dir}/waf install
   )
   add_extra_targets("backend" ${name} ${ver} ${dir} ${dl} clean)
+endif()
+
+set(name "plc")
+set(ver "3.0")
+set(lib "libclik")
+set(dl "http://pla.esac.esa.int/pla/aio/product-action?COSMOLOGY.FILE_ID=COM_Likelihood_Code-v3.0_R3.00.tar.gz")
+set(md5 "23a7d80cffe3156b33575becbee7ac15")
+set(dir "${PROJECT_SOURCE_DIR}/Backends/installed/${name}/${ver}")
+set(cfitsio_name "cfitsio")
+set(cfitsio_ver "3.390")
+set(cfitsio_dir "${PROJECT_SOURCE_DIR}/Backends/installed/${cfitsio_name}/${cfitsio_ver}")
+check_ditch_status(${name} ${ver})
+if(NOT ditched_${name}_${ver})
+  ExternalProject_Add(${name}_${ver}
+    DEPENDS ${cfitsio_name}_${cfitsio_ver}
+    DOWNLOAD_COMMAND ${DL_BACKEND} ${dl} ${md5} ${dir} ${name} ${ver} "retain container folder"
+    SOURCE_DIR ${dir}
+    BUILD_IN_SOURCE 1
+    # Since someone put a tarball into a tarball, we need to extract again
+    PATCH_COMMAND tar -C ${dir}/ -xf ${dir}/code/plc_3.0/plc-3.0.tar.bz2 --strip-components=1
+    CONFIGURE_COMMAND python2 ${dir}/waf configure --cfitsio_include=${cfitsio_dir}/include --cfitsio_lib=${cfitsio_dir}/lib
+    BUILD_COMMAND ""
+    INSTALL_COMMAND python2 ${dir}/waf install
+  )
+  add_extra_targets("backend" ${name} ${ver} ${dir} ${dl} clean)
   set_as_default_version("backend" ${name} ${ver})
 endif()
 

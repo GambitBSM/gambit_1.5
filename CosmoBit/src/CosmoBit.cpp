@@ -2199,6 +2199,174 @@ namespace Gambit
 
     }
 
+    void function_Planck_lowl_TT_2018_loglike(double& result)
+    {
+      using namespace Pipes::function_Planck_lowl_TT_2018_loglike;
+
+      // Array containing the relevant Cl and nuiisance paramters
+      // The order will be the following:
+      // TT[0-29] - Nuiisance parameter
+      // (c.f. https://wiki.cosmos.esa.int/planck-legacy-archive/index.php/CMB_spectrum_%26_Likelihood_Code)
+      double cl_and_pars[31];
+      int idx_tt;
+
+      std::vector<double> Cl_TT = *Dep::Cl_TT;
+
+      // Check if the sizes of the Cl arrays are suitable. If not ask the user to adjust the inputs for CLASS
+      if( Cl_TT.size() < 30)
+      {
+        std::ostringstream err;
+        err << "For \"function_Planck_lowl_TT_2018_loglike\" the Cl need to be calculated for l up to 29.\n";
+        err << "The given Cl spectra do not provide this range. Please adjust the input for CLASS.";
+        err << " (\"l_max_scalars\" should be at least 29)";
+        CosmoBit_error().raise(LOCAL_INFO, err.str());
+      }
+
+      //--------------------------------------------------------------------------
+      //------addition of the Cl for TT to Cl array-------------------------------
+      //--------------------------------------------------------------------------
+      for(int ii = 0; ii < 30 ; ii++)
+      {
+        idx_tt = ii;
+        if (ii >= 2)
+        {
+          cl_and_pars[idx_tt] = Cl_TT.at(ii);
+        }
+        else
+        {
+          cl_and_pars[idx_tt] = 0.;
+        }
+      }
+
+      //--------------------------------------------------------------------------
+      //------addition of nuisance parameters to Cl array-------------------------
+      //--------------------------------------------------------------------------
+      cl_and_pars[30] = *Param["A_planck"];
+
+      //--------------------------------------------------------------------------
+      //------calculation of the planck loglikelihood-----------------------------
+      //--------------------------------------------------------------------------
+      result = BEreq::plc_loglike_lowl_TT_2018(&cl_and_pars[0]);
+
+    }
+
+    void function_Planck_lowl_EE_2018_loglike(double& result)
+    {
+      using namespace Pipes::function_Planck_lowl_EE_2018_loglike;
+
+      // Array containing the relevant Cl and nuiisance paramters
+      // The order will be the following:
+      // EE[0-29] - Nuiisance parameter
+      // (c.f. https://wiki.cosmos.esa.int/planck-legacy-archive/index.php/CMB_spectrum_%26_Likelihood_Code)
+      double cl_and_pars[31];
+      int idx_ee;
+
+      std::vector<double> Cl_EE = *Dep::Cl_EE;
+
+      // Check if the sizes of the Cl arrays are suitable. If not ask the user to adjust the inputs for CLASS
+      if( Cl_EE.size() < 30)
+      {
+        std::ostringstream err;
+        err << "For \"function_Planck_lowl_EE_2018_loglike\" the Cl need to be calculated for l up to 29.\n";
+        err << "The given Cl spectra do not provide this range. Please adjust the input for CLASS.";
+        err << " (\"l_max_scalars\" should be at least 29)";
+        CosmoBit_error().raise(LOCAL_INFO, err.str());
+      }
+
+      //--------------------------------------------------------------------------
+      //------addition of the Cl for TT to Cl array-------------------------------
+      //--------------------------------------------------------------------------
+      for(int ii = 0; ii < 30 ; ii++)
+      {
+        idx_ee = ii;
+        if (ii >= 2)
+        {
+          cl_and_pars[idx_ee] = Cl_EE.at(ii);
+        }
+        else
+        {
+          cl_and_pars[idx_ee] = 0.;
+        }
+      }
+
+      //--------------------------------------------------------------------------
+      //------addition of nuisance parameters to Cl array-------------------------
+      //--------------------------------------------------------------------------
+      cl_and_pars[30] = *Param["A_planck"];
+
+      //--------------------------------------------------------------------------
+      //------calculation of the planck loglikelihood-----------------------------
+      //--------------------------------------------------------------------------
+      result = BEreq::plc_loglike_lowl_EE_2018(&cl_and_pars[0]);
+
+    }
+
+    void function_Planck_lowl_TTEE_2018_loglike(double& result)
+    {
+      using namespace Pipes::function_Planck_lowl_TTEE_2018_loglike;
+
+      // This function combines the lowl TT 2018 and the lowl EE 2018 likelihood
+
+      // Array containing the relevant Cl and nuiisance paramters for the TT part
+      // The order will be the following:
+      // TT[0-29] - Nuiisance parameter
+      // (c.f. https://wiki.cosmos.esa.int/planck-legacy-archive/index.php/CMB_spectrum_%26_Likelihood_Code)
+      double cl_and_pars_TT[31];
+      int idx_tt;
+
+      // Same as above but now for EE
+      // The order will be the following:
+      // EE[0-29] - Nuiisance parameter
+      double cl_and_pars_EE[31];
+      int idx_ee;
+
+      std::vector<double> Cl_TT = *Dep::Cl_TT;
+      std::vector<double> Cl_EE = *Dep::Cl_EE;
+
+      // Check if the sizes of the Cl arrays are suitable. If not ask the user to adjust the inputs for CLASS
+      if( Cl_TT.size() < 30 || Cl_EE.size() < 30)
+      {
+        std::ostringstream err;
+        err << "For \"function_Planck_lowl_TTEE_2018_loglike\" the Cl need to be calculated for l up to 29.\n";
+        err << "The given Cl spectra do not provide this range. Please adjust the input for CLASS.";
+        err << " (\"l_max_scalars\" should be at least 29)";
+        CosmoBit_error().raise(LOCAL_INFO, err.str());
+      }
+
+      //--------------------------------------------------------------------------
+      //------addition of the Cl for TT (EE) to Cl arrays-------------------------
+      //--------------------------------------------------------------------------
+      for(int ii = 0; ii < 30 ; ii++)
+      {
+        idx_tt = ii;
+        idx_ee = ii;
+        if (ii >= 2)
+        {
+          cl_and_pars_TT[idx_tt] = Cl_TT.at(ii);
+          cl_and_pars_EE[idx_ee] = Cl_EE.at(ii);
+        }
+        else
+        {
+          cl_and_pars_TT[idx_tt] = 0.;
+          cl_and_pars_EE[idx_ee] = 0.;
+        }
+      }
+
+      //--------------------------------------------------------------------------
+      //------addition of nuisance parameters to Cl arrays------------------------
+      //--------------------------------------------------------------------------
+      cl_and_pars_TT[30] = *Param["A_planck"];
+      cl_and_pars_EE[30] = *Param["A_planck"];
+
+      //--------------------------------------------------------------------------
+      //------calculation of the planck loglikelihood-----------------------------
+      //--------------------------------------------------------------------------
+      result = 0.0;
+      result += BEreq::plc_loglike_lowl_TT_2018(&cl_and_pars_TT[0]);
+      result += BEreq::plc_loglike_lowl_EE_2018(&cl_and_pars_EE[0]);
+
+    }
+
     void function_Planck_highl_TT_2015_loglike(double& result)
     {
       using namespace Pipes::function_Planck_highl_TT_2015_loglike;
@@ -2474,6 +2642,283 @@ namespace Gambit
 
     }
 
+    void function_Planck_highl_TT_2018_loglike(double& result)
+    {
+      using namespace Pipes::function_Planck_highl_TT_2018_loglike;
+
+      // Array containing the relevant Cl and nuiisance paramters
+      // The order will be the following:
+      // TT[0-2508] - Nuiisance parameters
+      // (c.f. https://wiki.cosmos.esa.int/planck-legacy-archive/index.php/CMB_spectrum_%26_Likelihood_Code)
+      double  cl_and_pars[2529];
+
+      int idx_tt;
+
+      std::vector<double> Cl_TT = *Dep::Cl_TT;
+
+      // Check if the sizes of the Cl arrays are suitable. If not ask the user to adjust the inputs for CLASS
+      if( Cl_TT.size() < 2509 )
+      {
+        std::ostringstream err;
+        err << "For \"function_Planck_highl_TT_2018_loglike\" the Cl need to be calculated for l up to 2508.\n";
+        err << "The given Cl spectra do not provide this range. Please adjust the input for CLASS.";
+        err <<" (\"l_max_scalars\" should be at least 2508)";
+        CosmoBit_error().raise(LOCAL_INFO, err.str());
+      }
+
+      //--------------------------------------------------------------------------
+      //------addition of the Cl for TT to Cl array-------------------------------
+      //--------------------------------------------------------------------------
+
+      for(int ii = 0; ii < 2509 ; ii++)
+      {
+        idx_tt = ii;
+
+        if (ii >= 2)
+        {
+          cl_and_pars[idx_tt] = Cl_TT.at(ii);
+        }
+        else
+        {
+          cl_and_pars[idx_tt] = 0.;
+        }
+      }
+
+      //--------------------------------------------------------------------------
+      //------addition of nuisance parameters to Cl array-------------------------
+      //--------------------------------------------------------------------------
+      cl_and_pars[2509] = *Param["A_cib_217"];
+      cl_and_pars[2510] = *Param["cib_index"];
+      cl_and_pars[2511] = *Param["xi_sz_cib"];
+      cl_and_pars[2512] = *Param["A_sz"];
+      cl_and_pars[2513] = *Param["ps_A_100_100"];
+      cl_and_pars[2514] = *Param["ps_A_143_143"];
+      cl_and_pars[2515] = *Param["ps_A_143_217"];
+      cl_and_pars[2516] = *Param["ps_A_217_217"];
+      cl_and_pars[2517] = *Param["ksz_norm"];
+      cl_and_pars[2518] = *Param["gal545_A_100"];
+      cl_and_pars[2519] = *Param["gal545_A_143"];
+      cl_and_pars[2520] = *Param["gal545_A_143_217"];
+      cl_and_pars[2521] = *Param["gal545_A_217"];
+      // set A_sbpx_... to 1. (4 nusissance parameter)
+      for (int i = 0; i < 4; i++) cl_and_pars[(i+2522)] = 1.;
+      cl_and_pars[2526] = *Param["calib_100T"];
+      cl_and_pars[2527] = *Param["calib_217T"];
+      cl_and_pars[2528] = *Param["A_planck"];
+
+      //--------------------------------------------------------------------------
+      //------calculation of the planck loglikelihood-----------------------------
+      //--------------------------------------------------------------------------
+      result = BEreq::plc_loglike_highl_TT_2018(&cl_and_pars[0]);
+
+    }
+
+    void function_Planck_highl_TT_lite_2018_loglike(double& result)
+    {
+      using namespace Pipes::function_Planck_highl_TT_lite_2018_loglike;
+
+      // Array containing the relevant Cl and nuiisance paramters
+      // The order will be the following:
+      // TT[0-2508] - Nuiisance parameter
+      // (c.f. https://wiki.cosmos.esa.int/planck-legacy-archive/index.php/CMB_spectrum_%26_Likelihood_Code)
+      double cl_and_pars[2510];
+
+      int idx_tt;
+
+      std::vector<double> Cl_TT = *Dep::Cl_TT;
+
+      // Check if the sizes of the Cl arrays are suitable. If not ask the user to adjust the inputs for CLASS
+      if ( Cl_TT.size() < 2509 )
+      {
+        std::ostringstream err;
+        err << "For \"function_Planck_highl_TT_lite_2018_loglike\" the Cl need to be calculated for l up to 2508.\n";
+        err << "The given Cl spectra do not provide this range. Please adjust the input for CLASS.";
+        err << " (\"l_max_scalars\" should be at least 2508)";
+        CosmoBit_error().raise(LOCAL_INFO, err.str());
+      }
+
+      //--------------------------------------------------------------------------
+      //------addition of the Cl for TT to Cl array-------------------------------
+      //--------------------------------------------------------------------------
+      for(int ii = 0; ii < 2509 ; ii++)
+      {
+        idx_tt = ii;
+        if (ii >= 2)
+        {
+          cl_and_pars[idx_tt] = Cl_TT.at(ii);
+        }
+        else
+        {
+          cl_and_pars[idx_tt] = 0.;
+        }
+      }
+
+      //--------------------------------------------------------------------------
+      //------addition of nuisance parameters to Cl array-------------------------
+      //--------------------------------------------------------------------------
+      cl_and_pars[2509] = *Param["A_planck"];
+
+      //--------------------------------------------------------------------------
+      //------calculation of the planck loglikelihood-----------------------------
+      //--------------------------------------------------------------------------
+      result = BEreq::plc_loglike_highl_TT_lite_2018(&cl_and_pars[0]);
+
+    }
+
+    void function_Planck_highl_TTTEEE_2018_loglike(double& result)
+    {
+      using namespace Pipes::function_Planck_highl_TTTEEE_2018_loglike;
+
+      // Array containing the relevant Cl and nuissance paramters
+      // The order will be the following:
+      // TT[0-2508] - EE[0-2508] - TE[0-2508] - Nuiisance parameters
+      // (c.f. https://wiki.cosmos.esa.int/planck-legacy-archive/index.php/CMB_spectrum_%26_Likelihood_Code)
+      double  cl_and_pars[7574];
+      int idx_tt, idx_te, idx_ee;
+
+      std::vector<double> Cl_TT = *Dep::Cl_TT;
+      std::vector<double> Cl_TE = *Dep::Cl_TE;
+      std::vector<double> Cl_EE = *Dep::Cl_EE;
+
+      // Check if the sizes of the Cl arrays are suitable. If not, ask the user to adjust the inputs for CLASS
+      if ( Cl_TT.size() < 2509 || Cl_TE.size() < 2509 || Cl_EE.size() < 2509 )
+      {
+        std::ostringstream err;
+        err << "For \"function_Planck_highl_TTTEEE_2018_loglike\" the Cl need to be calculated for l up to 2508.\n";
+        err << "The given Cl spectra do not provide this range. Please adjust the input for CLASS.";
+        err << " (\"l_max_scalars\" should be at least 2508)";
+        CosmoBit_error().raise(LOCAL_INFO, err.str());
+      }
+
+      //--------------------------------------------------------------------------
+      //------addition of the Cl for TT, EE and TE to Cl array--------------------
+      //--------------------------------------------------------------------------
+      for(int ii = 0; ii < 2509 ; ii++)
+      {
+        idx_tt = ii;
+        idx_ee = ii + 2509;
+        idx_te = ii + (2 * 2509);
+        if (ii >= 2)
+        {
+          cl_and_pars[idx_tt] = Cl_TT.at(ii);
+          cl_and_pars[idx_ee] = Cl_EE.at(ii);
+          cl_and_pars[idx_te] = Cl_TE.at(ii);
+        }
+        else
+        {
+          cl_and_pars[idx_tt] = 0.;
+          cl_and_pars[idx_ee] = 0.;
+          cl_and_pars[idx_te] = 0.;
+        }
+      }
+
+      //--------------------------------------------------------------------------
+      //------addition of nuisance parameters to Cl array-------------------------
+      //--------------------------------------------------------------------------
+      cl_and_pars[7527] = *Param["A_cib_217"];
+      cl_and_pars[7528] = *Param["cib_index"];
+      cl_and_pars[7529] = *Param["xi_sz_cib"];
+      cl_and_pars[7530] = *Param["A_sz"];
+      cl_and_pars[7531] = *Param["ps_A_100_100"];
+      cl_and_pars[7532] = *Param["ps_A_143_143"];
+      cl_and_pars[7533] = *Param["ps_A_143_217"];
+      cl_and_pars[7534] = *Param["ps_A_217_217"];
+      cl_and_pars[7535] = *Param["ksz_norm"];
+      cl_and_pars[7536] = *Param["gal545_A_100"];
+      cl_and_pars[7537] = *Param["gal545_A_143"];
+      cl_and_pars[7538] = *Param["gal545_A_143_217"];
+      cl_and_pars[7539] = *Param["gal545_A_217"];
+      cl_and_pars[7540] = *Param["galf_EE_A_100"];
+      cl_and_pars[7541] = *Param["galf_EE_A_100_143"];
+      cl_and_pars[7542] = *Param["galf_EE_A_100_217"];
+      cl_and_pars[7543] = *Param["galf_EE_A_143"];
+      cl_and_pars[7544] = *Param["galf_EE_A_143_217"];
+      cl_and_pars[7545] = *Param["galf_EE_A_217"];
+      cl_and_pars[7546] = *Param["galf_EE_index"];
+      cl_and_pars[7547] = *Param["galf_TE_A_100"];
+      cl_and_pars[7548] = *Param["galf_TE_A_100_143"];
+      cl_and_pars[7549] = *Param["galf_TE_A_100_217"];
+      cl_and_pars[7550] = *Param["galf_TE_A_143"];
+      cl_and_pars[7551] = *Param["galf_TE_A_143_217"];
+      cl_and_pars[7552] = *Param["galf_TE_A_217"];
+      cl_and_pars[7553] = *Param["galf_TE_index"];
+      // set A_cnoise_.. and A_sbpx_... to 1. (13 nusissance parameter)
+      for (int i = 0; i < 13; i++) cl_and_pars[(i+7554)] = 1.;
+      cl_and_pars[7667] = *Param["calib_100T"];
+      cl_and_pars[7668] = *Param["calib_217T"];
+      cl_and_pars[7669] = *Param["calib_100P"];
+      cl_and_pars[7670] = *Param["calib_143P"];
+      cl_and_pars[7671] = *Param["calib_217P"];
+      cl_and_pars[7672] = *Param["A_pol"];
+      cl_and_pars[7673] = *Param["A_planck"];
+
+      //--------------------------------------------------------------------------
+      //------calculation of the planck loglikelihood-----------------------------
+      //--------------------------------------------------------------------------
+      result = BEreq::plc_loglike_highl_TTTEEE_2018(&cl_and_pars[0]);
+
+    }
+
+    void function_Planck_highl_TTTEEE_lite_2018_loglike(double& result)
+    {
+      using namespace Pipes::function_Planck_highl_TTTEEE_lite_2018_loglike;
+
+      // Array containing the relevant Cl and nuissance paramters
+      // The order will be the following:
+      // TT[0-2508] - EE[0-2508] - TE[0-2508] - Nuiisance parameter
+      // (c.f. https://wiki.cosmos.esa.int/planck-legacy-archive/index.php/CMB_spectrum_%26_Likelihood_Code)
+      double  cl_and_pars[7528];
+
+      int idx_tt, idx_te, idx_ee;
+
+      std::vector<double> Cl_TT = *Dep::Cl_TT;
+      std::vector<double> Cl_TE = *Dep::Cl_TE;
+      std::vector<double> Cl_EE = *Dep::Cl_EE;
+
+      // Check if the sizes of the Cl arrays are suitable. If not, ask the user to adjust the inputs for CLASS
+      if ( Cl_TT.size() < 2509 || Cl_TE.size() < 2509 || Cl_EE.size() < 2509 )
+      {
+        std::ostringstream err;
+        err << "For \"function_Planck_highl_TTTEEE_lite_2018_loglike\" the Cl need to be calculated for l up to 2508.\n";
+        err << "The given Cl spectra do not provide this range. Please adjust the input for CLASS.";
+        err << " (\"l_max_scalars\" should be at least 2508)";
+        CosmoBit_error().raise(LOCAL_INFO, err.str());
+      }
+
+      //--------------------------------------------------------------------------
+      //------addition of the Cl for TT, EE and TE to Cl array--------------------
+      //--------------------------------------------------------------------------
+      for(int ii = 0; ii < 2509 ; ii++)
+      {
+        idx_tt = ii;
+        idx_ee = ii + 2509;
+        idx_te = ii + (2 * 2509);
+        if (ii >= 2)
+        {
+          cl_and_pars[idx_tt] = Cl_TT.at(ii);
+          cl_and_pars[idx_ee] = Cl_EE.at(ii);
+          cl_and_pars[idx_te] = Cl_TE.at(ii);
+        }
+        else
+        {
+          cl_and_pars[idx_tt] = 0.;
+          cl_and_pars[idx_ee] = 0.;
+          cl_and_pars[idx_te] = 0.;
+        }
+      }
+
+      //--------------------------------------------------------------------------
+      //------addition of nuisance parameters to Cl array-------------------------
+      //--------------------------------------------------------------------------
+      cl_and_pars[7527] = *Param["A_planck"];
+
+      //--------------------------------------------------------------------------
+      //------calculation of the planck loglikelihood-----------------------------
+      //--------------------------------------------------------------------------
+      result = BEreq::plc_loglike_highl_TTTEEE_lite_2018(&cl_and_pars[0]);
+
+    }
+
     void function_Planck_lensing_2015_loglike(double& result)
     {
       using namespace Pipes::function_Planck_lensing_2015_loglike;
@@ -2535,6 +2980,122 @@ namespace Gambit
       //------calculation of the planck loglikelihood-----------------------------
       //--------------------------------------------------------------------------
       result = BEreq::plc_loglike_lensing_2015(&cl_and_pars[0]);
+
+    }
+
+    void function_Planck_lensing_2018_loglike(double& result)
+    {
+      using namespace Pipes::function_Planck_lensing_2018_loglike;
+
+      // Array containing the relevant Cl and nuissance paramters
+      // The order will be the following:
+      // PhiPhi[0-2500] - TT[0-2500] - EE[0-2500] - TE[0-2500] - Nuiisance parameters
+      // (c.f. https://wiki.cosmos.esa.int/planck-legacy-archive/index.php/CMB_spectrum_%26_Likelihood_Code)
+      double  cl_and_pars[10005];
+
+      int idx_pp, idx_tt, idx_te, idx_ee;
+
+      std::vector<double> Cl_PhiPhi = *Dep::Cl_PhiPhi;
+      std::vector<double> Cl_TT = *Dep::Cl_TT;
+      std::vector<double> Cl_TE = *Dep::Cl_TE;
+      std::vector<double> Cl_EE = *Dep::Cl_EE;
+
+      // Check if the sizes of the Cl arrays are suitable. If not, ask the user to adjust the inputs for CLASS
+      if ((Cl_PhiPhi.size() < 2501) || (Cl_TT.size() < 2501) || (Cl_TE.size() < 2501) || (Cl_EE.size() < 2501))
+      {
+        std::ostringstream err;
+        err << "For \"function_Planck_lensing_2018_loglike\" the Cl need to be calculated for l up to 2500.\n";
+        err << "The given Cl spectra do not provide this range. Please adjust the input for CLASS.";
+        err << " (\"l_max_scalars\" should be at least 2500)";
+        CosmoBit_error().raise(LOCAL_INFO, err.str());
+      }
+
+      //--------------------------------------------------------------------------
+      //------addition of the Cl for PhiPhi, TT, EE and TE to Cl array-----------
+      //--------------------------------------------------------------------------
+      for(int ii = 0; ii < 2501 ; ii++)
+      {
+        idx_pp = ii;
+        idx_tt = ii + 2501;
+        idx_ee = ii + (2 * 2501);
+        idx_te = ii + (3 * 2501);
+        if (ii >= 2)
+        {
+          cl_and_pars[idx_pp] = Cl_PhiPhi.at(ii);
+          cl_and_pars[idx_tt] = Cl_TT.at(ii);
+          cl_and_pars[idx_ee] = Cl_EE.at(ii);
+          cl_and_pars[idx_te] = Cl_TE.at(ii);
+        }
+        else
+        {
+          cl_and_pars[idx_pp] = 0.;
+          cl_and_pars[idx_tt] = 0.;
+          cl_and_pars[idx_ee] = 0.;
+          cl_and_pars[idx_te] = 0.;
+        }
+      }
+
+      //--------------------------------------------------------------------------
+      //------addition of nuisance parameters to Cl array-------------------------
+      //--------------------------------------------------------------------------
+      cl_and_pars[10004] = *Param["A_planck"];
+
+      //--------------------------------------------------------------------------
+      //------calculation of the planck loglikelihood-----------------------------
+      //--------------------------------------------------------------------------
+      result = BEreq::plc_loglike_lensing_2018(&cl_and_pars[0]);
+
+    }
+
+    void function_Planck_lensing_marged_2018_loglike(double& result)
+    {
+      using namespace Pipes::function_Planck_lensing_marged_2018_loglike;
+
+      // Array containing the relevant Cl and nuissance paramters
+      // The order will be the following:
+      // PhiPhi[0-2500] - Nuiisance parameters
+      // (c.f. https://wiki.cosmos.esa.int/planck-legacy-archive/index.php/CMB_spectrum_%26_Likelihood_Code)
+      double  cl_and_pars[2502];
+
+      int idx_pp;
+
+      std::vector<double> Cl_PhiPhi = *Dep::Cl_PhiPhi;
+
+      // Check if the sizes of the Cl arrays are suitable. If not, ask the user to adjust the inputs for CLASS
+      if ((Cl_PhiPhi.size() < 2501))
+      {
+        std::ostringstream err;
+        err << "For \"function_Planck_lensing_marged_2018_loglike\" the Cl need to be calculated for l up to 2500.\n";
+        err << "The given Cl spectra do not provide this range. Please adjust the input for CLASS.";
+        err << " (\"l_max_scalars\" should be at least 2500)";
+        CosmoBit_error().raise(LOCAL_INFO, err.str());
+      }
+
+      //--------------------------------------------------------------------------
+      //------addition of the Cl for PhiPhi, TT, EE and TE to Cl array-----------
+      //--------------------------------------------------------------------------
+      for(int ii = 0; ii < 2501 ; ii++)
+      {
+        idx_pp = ii;
+        if (ii >= 2)
+        {
+          cl_and_pars[idx_pp] = Cl_PhiPhi.at(ii);
+        }
+        else
+        {
+          cl_and_pars[idx_pp] = 0.;
+        }
+      }
+
+      //--------------------------------------------------------------------------
+      //------addition of nuisance parameters to Cl array-------------------------
+      //--------------------------------------------------------------------------
+      cl_and_pars[2501] = *Param["A_planck"];
+
+      //--------------------------------------------------------------------------
+      //------calculation of the planck loglikelihood-----------------------------
+      //--------------------------------------------------------------------------
+      result = BEreq::plc_loglike_lensing_marged_2018(&cl_and_pars[0]);
 
     }
 
