@@ -51,7 +51,7 @@ if(*InUse::CAT(plc_loglike_,NAME))                                              
       backend_error().raise(LOCAL_INFO,ErrMssg.c_str());                                                  \
     }                                                                                                     \
     char* clik_path = (char*)full_path.c_str();                                                           \
-    CAT(TYPE,_map)[STRINGIFY(NAME)] = CAT(TYPE,_init) (clik_path, NULL);                                  \
+    CAT(TYPE,_map)[STRINGIFY(NAME)] = CAT(TYPE,_init) (clik_path, &plc_Error);                            \
   }
 
 // Definition of "double plc_loglike_NAME(double* cl_and_pars)"
@@ -67,7 +67,19 @@ if(*InUse::CAT(plc_loglike_,NAME))                                              
       mssg += "\" in the map of activated likelihoods.";                                                  \
       backend_error().raise(LOCAL_INFO,mssg.c_str());                                                     \
     }                                                                                                     \
-    return CAT(TYPE,_compute) (CAT(TYPE,_map)[name], cl_and_pars, NULL);                                  \
+    double res;                                                                                           \
+    res =  CAT(TYPE,_compute) (CAT(TYPE,_map)[name], cl_and_pars, &plc_Error);                            \
+    if (isError(plc_Error))                                                                               \
+    {                                                                                                     \
+      std::string ErrMssg = "Calling \"";                                                                 \
+      ErrMssg +=  std::string(STRINGIFY(CAT(plc_loglike_,NAME))) + "\" ";                                 \
+      ErrMssg += "was not successful.\n\n";                                                               \
+      char forwardedErr[4096];                                                                            \
+      stringError(byVal(forwardedErr), plc_Error);                                                        \
+      ErrMssg += forwardedErr;                                                                            \
+      invalid_point().raise(ErrMssg.c_str());                                                             \
+    }                                                                                                     \
+    return res;                                                                                           \
   }                                                                                                       \
 
 // Macros end here.
@@ -75,11 +87,13 @@ if(*InUse::CAT(plc_loglike_,NAME))                                              
 BE_NAMESPACE
 {
   // Static varibales to be kept alive in the frontend for the scan.
-  //  -> Prefix to the plc_2.0 dataa folder
+  //  -> Prefix to the plc_2.0 data folder
   static std::string plc_location;
   //  -> Container for all activated likelihood objects
   static std::map<std::string, clik_object* > clik_map;
   static std::map<std::string, clik_lensing_object* > clik_lensing_map;
+  //  -> Error structure for error management
+  static clik_error* plc_Error;
 
   void set_planck_path(std::string& planck_path)
   {
@@ -124,7 +138,10 @@ END_BE_NAMESPACE
 
 BE_INI_FUNCTION
 {
-  // The Backend initialisation is only relevant for the first parameter point
+  // get "fresh" clik_error
+  plc_Error = initError();
+
+  // Most of the Backend initialisation is only relevant for the first parameter point
   static bool scan_level = true;
   if (scan_level)
   {

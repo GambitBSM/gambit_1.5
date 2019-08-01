@@ -41,7 +41,6 @@ if(*InUse::CAT(plc_loglike_,NAME))                                              
 }                                                                                        \
 
 // Definition of "void initialize_NAME()"  [Helper functions - Not registered in the header]
-// The wildcard "VERSION" is not relevant for this version of the frontend
 #define PLC_INITIALIZE(NAME,TYPE,VERSION,LOC,PRINT_NAME)                                 \
                                                                                          \
   void CAT(initialize_,NAME) ()                                                          \
@@ -100,6 +99,7 @@ BE_NAMESPACE
   //  -> Container for all activated likelihood objects
   static std::map<std::string, clik_object* > clik_map;
   static std::map<std::string, clik_lensing_object* > clik_lensing_map;
+  //  -> Error structure for error management
   static clik_error* plc_Error;
 
   void set_planck_path_2(std::string& planck_path)

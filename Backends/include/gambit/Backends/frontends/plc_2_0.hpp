@@ -32,6 +32,9 @@
 LOAD_LIBRARY
 
 // Internal function of plc (Not intended to be called directly)
+BE_FUNCTION(initError, clik_error* , (),"initError","clik_initialize_error")
+BE_FUNCTION(isError, int , (clik_error*),"_isError","clik_is_error")
+BE_FUNCTION(stringError, void , (char*, clik_error*),"stringError","clik_string_error")
 BE_FUNCTION(clik_init, clik_object*, (char*,clik_error**),"clik_init","clik_initialize")
 BE_FUNCTION(clik_lensing_init, clik_lensing_object*, (char*,clik_error**),"clik_lensing_init","clik_lensing_initialize")
 BE_FUNCTION(clik_compute, double, (clik_object*,double*,clik_error**), "clik_compute","clik_compute_loglike")
