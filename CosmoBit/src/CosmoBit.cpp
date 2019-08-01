@@ -2084,9 +2084,9 @@ namespace Gambit
 
 // Planck Likelihoods
 
-    void function_Planck_lowl_TT_loglike(double& result)
+    void function_Planck_lowl_TT_2015_loglike(double& result)
     {
-      using namespace Pipes::function_Planck_lowl_TT_loglike;
+      using namespace Pipes::function_Planck_lowl_TT_2015_loglike;
 
       // Array containing the relevant Cl and nuiisance paramters
       // The order will be the following:
@@ -2101,14 +2101,14 @@ namespace Gambit
       if( Cl_TT.size() < 30)
       {
         std::ostringstream err;
-        err << "For \"function_Planck_lowl_TT_loglike\" the Cl need to be calculated for l up to 29.\n";
+        err << "For \"function_Planck_lowl_TT_2015_loglike\" the Cl need to be calculated for l up to 29.\n";
         err << "The given Cl spectra do not provide this range. Please adjust the input for CLASS.";
         err << " (\"l_max_scalars\" should be at least 29)";
         CosmoBit_error().raise(LOCAL_INFO, err.str());
       }
 
       //--------------------------------------------------------------------------
-      //------addition of the Cl for TT, TE, EE and BB to Cl array----------------
+      //------addition of the Cl for TT to Cl array-------------------------------
       //--------------------------------------------------------------------------
       for(int ii = 0; ii < 30 ; ii++)
       {
@@ -2131,13 +2131,13 @@ namespace Gambit
       //--------------------------------------------------------------------------
       //------calculation of the planck loglikelihood-----------------------------
       //--------------------------------------------------------------------------
-      result = BEreq::plc_loglike_lowl_TT(&cl_and_pars[0]);
+      result = BEreq::plc_loglike_lowl_TT_2015(&cl_and_pars[0]);
 
     }
 
-    void function_Planck_lowl_TEB_loglike(double& result)
+    void function_Planck_lowl_TEB_2015_loglike(double& result)
     {
-      using namespace Pipes::function_Planck_lowl_TEB_loglike;
+      using namespace Pipes::function_Planck_lowl_TEB_2015_loglike;
 
       // Array containing the relevant Cl and nuiisance paramters
       // The order will be the following:
@@ -2156,7 +2156,7 @@ namespace Gambit
       if( Cl_TT.size() < 30 || Cl_EE.size() < 30 || Cl_TE.size() < 30 || Cl_BB.size() < 30 )
       {
         std::ostringstream err;
-        err << "For \"function_Planck_lowl_TEB_loglike\" the Cl need to be calculated for l up to 29.\n";
+        err << "For \"function_Planck_lowl_TEB_2015_loglike\" the Cl need to be calculated for l up to 29.\n";
         err << "The given Cl spectra do not provide this range. Please adjust the input for CLASS.";
         err << " (\"l_max_scalars\" should be at least 29)";
         CosmoBit_error().raise(LOCAL_INFO, err.str());
@@ -2195,13 +2195,13 @@ namespace Gambit
       //--------------------------------------------------------------------------
       //------calculation of the planck loglikelihood-----------------------------
       //--------------------------------------------------------------------------
-      result = BEreq::plc_loglike_lowl_TEB(&cl_and_pars[0]);
+      result = BEreq::plc_loglike_lowl_TEB_2015(&cl_and_pars[0]);
 
     }
 
-    void function_Planck_highl_TT_loglike(double& result)
+    void function_Planck_highl_TT_2015_loglike(double& result)
     {
-      using namespace Pipes::function_Planck_highl_TT_loglike;
+      using namespace Pipes::function_Planck_highl_TT_2015_loglike;
 
       // Array containing the relevant Cl and nuiisance paramters
       // The order will be the following:
@@ -2217,7 +2217,7 @@ namespace Gambit
       if( Cl_TT.size() < 2509 )
       {
         std::ostringstream err;
-        err << "For \"function_Planck_highl_TT_loglike\" the Cl need to be calculated for l up to 2508.\n";
+        err << "For \"function_Planck_highl_TT_2015_loglike\" the Cl need to be calculated for l up to 2508.\n";
         err << "The given Cl spectra do not provide this range. Please adjust the input for CLASS.";
         err <<" (\"l_max_scalars\" should be at least 2508)";
         CosmoBit_error().raise(LOCAL_INFO, err.str());
@@ -2264,13 +2264,13 @@ namespace Gambit
       //--------------------------------------------------------------------------
       //------calculation of the planck loglikelihood-----------------------------
       //--------------------------------------------------------------------------
-      result = BEreq::plc_loglike_highl_TT(&cl_and_pars[0]);
+      result = BEreq::plc_loglike_highl_TT_2015(&cl_and_pars[0]);
 
     }
 
-    void function_Planck_highl_TT_lite_loglike(double& result)
+    void function_Planck_highl_TT_lite_2015_loglike(double& result)
     {
-      using namespace Pipes::function_Planck_highl_TT_lite_loglike;
+      using namespace Pipes::function_Planck_highl_TT_lite_2015_loglike;
 
       // Array containing the relevant Cl and nuiisance paramters
       // The order will be the following:
@@ -2286,7 +2286,7 @@ namespace Gambit
       if ( Cl_TT.size() < 2509 )
       {
         std::ostringstream err;
-        err << "For \"function_Planck_highl_TT_lite_loglike\" the Cl need to be calculated for l up to 2508.\n";
+        err << "For \"function_Planck_highl_TT_lite_2015_loglike\" the Cl need to be calculated for l up to 2508.\n";
         err << "The given Cl spectra do not provide this range. Please adjust the input for CLASS.";
         err << " (\"l_max_scalars\" should be at least 2508)";
         CosmoBit_error().raise(LOCAL_INFO, err.str());
@@ -2316,13 +2316,13 @@ namespace Gambit
       //--------------------------------------------------------------------------
       //------calculation of the planck loglikelihood-----------------------------
       //--------------------------------------------------------------------------
-      result = BEreq::plc_loglike_highl_TT_lite(&cl_and_pars[0]);
+      result = BEreq::plc_loglike_highl_TT_lite_2015(&cl_and_pars[0]);
 
     }
 
-    void function_Planck_highl_TTTEEE_loglike(double& result)
+    void function_Planck_highl_TTTEEE_2015_loglike(double& result)
     {
-      using namespace Pipes::function_Planck_highl_TTTEEE_loglike;
+      using namespace Pipes::function_Planck_highl_TTTEEE_2015_loglike;
 
       // Array containing the relevant Cl and nuissance paramters
       // The order will be the following:
@@ -2339,7 +2339,7 @@ namespace Gambit
       if ( Cl_TT.size() < 2509 || Cl_TE.size() < 2509 || Cl_EE.size() < 2509 )
       {
         std::ostringstream err;
-        err << "For \"function_Planck_highl_TTTEEE_loglike\" the Cl need to be calculated for l up to 2508.\n";
+        err << "For \"function_Planck_highl_TTTEEE_2015_loglike\" the Cl need to be calculated for l up to 2508.\n";
         err << "The given Cl spectra do not provide this range. Please adjust the input for CLASS.";
         err << " (\"l_max_scalars\" should be at least 2508)";
         CosmoBit_error().raise(LOCAL_INFO, err.str());
@@ -2410,13 +2410,13 @@ namespace Gambit
       //--------------------------------------------------------------------------
       //------calculation of the planck loglikelihood-----------------------------
       //--------------------------------------------------------------------------
-      result = BEreq::plc_loglike_highl_TTTEEE(&cl_and_pars[0]);
+      result = BEreq::plc_loglike_highl_TTTEEE_2015(&cl_and_pars[0]);
 
     }
 
-    void function_Planck_highl_TTTEEE_lite_loglike(double& result)
+    void function_Planck_highl_TTTEEE_lite_2015_loglike(double& result)
     {
-      using namespace Pipes::function_Planck_highl_TTTEEE_lite_loglike;
+      using namespace Pipes::function_Planck_highl_TTTEEE_lite_2015_loglike;
 
       // Array containing the relevant Cl and nuissance paramters
       // The order will be the following:
@@ -2434,7 +2434,7 @@ namespace Gambit
       if ( Cl_TT.size() < 2509 || Cl_TE.size() < 2509 || Cl_EE.size() < 2509 )
       {
         std::ostringstream err;
-        err << "For \"function_Planck_highl_TTTEEE_lite_loglike\" the Cl need to be calculated for l up to 2508.\n";
+        err << "For \"function_Planck_highl_TTTEEE_lite_2015_loglike\" the Cl need to be calculated for l up to 2508.\n";
         err << "The given Cl spectra do not provide this range. Please adjust the input for CLASS.";
         err << " (\"l_max_scalars\" should be at least 2508)";
         CosmoBit_error().raise(LOCAL_INFO, err.str());
@@ -2470,13 +2470,13 @@ namespace Gambit
       //--------------------------------------------------------------------------
       //------calculation of the planck loglikelihood-----------------------------
       //--------------------------------------------------------------------------
-      result = BEreq::plc_loglike_highl_TTTEEE_lite(&cl_and_pars[0]);
+      result = BEreq::plc_loglike_highl_TTTEEE_lite_2015(&cl_and_pars[0]);
 
     }
 
-    void function_Planck_lensing_loglike(double& result)
+    void function_Planck_lensing_2015_loglike(double& result)
     {
-      using namespace Pipes::function_Planck_lensing_loglike;
+      using namespace Pipes::function_Planck_lensing_2015_loglike;
 
       // Array containing the relevant Cl and nuissance paramters
       // The order will be the following:
@@ -2495,7 +2495,7 @@ namespace Gambit
       if ((Cl_PhiPhi.size() < 2049) || (Cl_TT.size() < 2049) || (Cl_TE.size() < 2049) || (Cl_EE.size() < 2049))
       {
         std::ostringstream err;
-        err << "For \"function_Planck_lensing_loglike\" the Cl need to be calculated for l up to 2048.\n";
+        err << "For \"function_Planck_lensing_2015_loglike\" the Cl need to be calculated for l up to 2048.\n";
         err << "The given Cl spectra do not provide this range. Please adjust the input for CLASS.";
         err << " (\"l_max_scalars\" should be at least 2048)";
         CosmoBit_error().raise(LOCAL_INFO, err.str());
@@ -2534,7 +2534,7 @@ namespace Gambit
       //--------------------------------------------------------------------------
       //------calculation of the planck loglikelihood-----------------------------
       //--------------------------------------------------------------------------
-      result = BEreq::plc_loglike_lensing(&cl_and_pars[0]);
+      result = BEreq::plc_loglike_lensing_2015(&cl_and_pars[0]);
 
     }
 

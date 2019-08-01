@@ -299,69 +299,69 @@ START_MODULE
 
   #define CAPABILITY Planck_lowl_loglike
   START_CAPABILITY
-    #define FUNCTION function_Planck_lowl_TT_loglike
+    #define FUNCTION function_Planck_lowl_TT_2015_loglike
     START_FUNCTION(double)
     DEPENDENCY(Cl_TT,std::vector<double>)
     ALLOW_MODELS(Planck_TTTEEE,Planck_TT,Planck_lite)
-    BACKEND_REQ(plc_loglike_lowl_TT,(),double,(double*))
+    BACKEND_REQ(plc_loglike_lowl_TT_2015,(),double,(double*))
     #undef FUNCTION
 
-    #define FUNCTION function_Planck_lowl_TEB_loglike
+    #define FUNCTION function_Planck_lowl_TEB_2015_loglike
     START_FUNCTION(double)
     DEPENDENCY(Cl_TT,std::vector<double>)
     DEPENDENCY(Cl_TE,std::vector<double>)
     DEPENDENCY(Cl_EE,std::vector<double>)
     DEPENDENCY(Cl_BB,std::vector<double>)
     ALLOW_MODELS(Planck_TTTEEE,Planck_TT,Planck_lite)
-    BACKEND_REQ(plc_loglike_lowl_TEB,(),double,(double*))
+    BACKEND_REQ(plc_loglike_lowl_TEB_2015,(),double,(double*))
     #undef FUNCTION
   #undef CAPABILITY
 
   #define CAPABILITY Planck_highl_loglike
   START_CAPABILITY
-    #define FUNCTION function_Planck_highl_TT_loglike
+    #define FUNCTION function_Planck_highl_TT_2015_loglike
     START_FUNCTION(double)
     DEPENDENCY(Cl_TT,std::vector<double>)
     ALLOW_MODELS(Planck_TT)
-    BACKEND_REQ(plc_loglike_highl_TT,(),double,(double*))
+    BACKEND_REQ(plc_loglike_highl_TT_2015,(),double,(double*))
     #undef FUNCTION
 
-    #define FUNCTION function_Planck_highl_TT_lite_loglike
+    #define FUNCTION function_Planck_highl_TT_lite_2015_loglike
     START_FUNCTION(double)
     DEPENDENCY(Cl_TT,std::vector<double>)
     ALLOW_MODELS(Planck_lite)
-    BACKEND_REQ(plc_loglike_highl_TT_lite,(),double,(double*))
+    BACKEND_REQ(plc_loglike_highl_TT_lite_2015,(),double,(double*))
     #undef FUNCTION
 
-    #define FUNCTION function_Planck_highl_TTTEEE_loglike
+    #define FUNCTION function_Planck_highl_TTTEEE_2015_loglike
     START_FUNCTION(double)
     DEPENDENCY(Cl_TT,std::vector<double>)
     DEPENDENCY(Cl_TE,std::vector<double>)
     DEPENDENCY(Cl_EE,std::vector<double>)
     ALLOW_MODELS(Planck_TTTEEE)
-    BACKEND_REQ(plc_loglike_highl_TTTEEE,(),double,(double*))
+    BACKEND_REQ(plc_loglike_highl_TTTEEE_2015,(),double,(double*))
     #undef FUNCTION
 
-    #define FUNCTION function_Planck_highl_TTTEEE_lite_loglike
+    #define FUNCTION function_Planck_highl_TTTEEE_lite_2015_loglike
     START_FUNCTION(double)
     DEPENDENCY(Cl_TT,std::vector<double>)
     DEPENDENCY(Cl_TE,std::vector<double>)
     DEPENDENCY(Cl_EE,std::vector<double>)
     ALLOW_MODELS(Planck_lite)
-    BACKEND_REQ(plc_loglike_highl_TTTEEE_lite,(),double,(double*))
+    BACKEND_REQ(plc_loglike_highl_TTTEEE_lite_2015,(),double,(double*))
     #undef FUNCTION
   #undef CAPABILITY
 
   #define CAPABILITY Planck_lensing_loglike
   START_CAPABILITY
-    #define FUNCTION function_Planck_lensing_loglike
+    #define FUNCTION function_Planck_lensing_2015_loglike
     START_FUNCTION(double)
     DEPENDENCY(Cl_TT,std::vector<double>)
     DEPENDENCY(Cl_TE,std::vector<double>)
     DEPENDENCY(Cl_EE,std::vector<double>)
     DEPENDENCY(Cl_PhiPhi,std::vector<double>)
     ALLOW_MODELS(Planck_TTTEEE,Planck_TT,Planck_lite)
-    BACKEND_REQ(plc_loglike_lensing,(),double,(double*))
+    BACKEND_REQ(plc_loglike_lensing_2015,(),double,(double*))
     #undef FUNCTION
   #undef CAPABILITY
 

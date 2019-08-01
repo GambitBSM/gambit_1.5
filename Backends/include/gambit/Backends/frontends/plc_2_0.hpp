@@ -18,7 +18,7 @@
 ///  \author Patrick Stoecker
 ///          (stoecker@physik.rwth-aachen.de)
 ///  \date 2017 Nov
-///  \date 2019 July
+///  \date 2019 July, Aug
 ///
 ///  *********************************************
 
@@ -39,13 +39,13 @@ BE_FUNCTION(clik_lensing_compute, double, (clik_lensing_object*,double*,clik_err
 
 // All relevant data and variables will be kept within the fronted.
 // Define convenience functions for the communication with the outside world
-BE_CONV_FUNCTION(plc_loglike_highl_TTTEEE,double,(double*),"plc_loglike_highl_TTTEEE",(Planck_TTTEEE))
-BE_CONV_FUNCTION(plc_loglike_highl_TT,double,(double*),"plc_loglike_highl_TT",(Planck_TT))
-BE_CONV_FUNCTION(plc_loglike_highl_TTTEEE_lite,double,(double*),"plc_loglike_highl_TTTEEE_lite",(Planck_lite))
-BE_CONV_FUNCTION(plc_loglike_highl_TT_lite,double,(double*),"plc_loglike_highl_TT_lite",(Planck_lite))
-BE_CONV_FUNCTION(plc_loglike_lowl_TEB,double,(double*),"plc_loglike_lowl_TEB",(Planck_TTTEEE, Planck_TT,Planck_lite))
-BE_CONV_FUNCTION(plc_loglike_lowl_TT,double,(double*),"plc_loglike_lowl_TT",(Planck_TTTEEE, Planck_TT,Planck_lite))
-BE_CONV_FUNCTION(plc_loglike_lensing,double,(double*),"plc_loglike_lensing",(Planck_TTTEEE, Planck_TT, Planck_lite))
+BE_CONV_FUNCTION(plc_loglike_highl_TTTEEE_2015,double,(double*),"plc_loglike_highl_TTTEEE_2015",(Planck_TTTEEE))
+BE_CONV_FUNCTION(plc_loglike_highl_TT_2015,double,(double*),"plc_loglike_highl_TT_2015",(Planck_TT))
+BE_CONV_FUNCTION(plc_loglike_highl_TTTEEE_lite_2015,double,(double*),"plc_loglike_highl_TTTEEE_lite_2015",(Planck_lite))
+BE_CONV_FUNCTION(plc_loglike_highl_TT_lite_2015,double,(double*),"plc_loglike_highl_TT_lite_2015",(Planck_lite))
+BE_CONV_FUNCTION(plc_loglike_lowl_TEB_2015,double,(double*),"plc_loglike_lowl_TEB_2015",(Planck_TTTEEE, Planck_TT,Planck_lite))
+BE_CONV_FUNCTION(plc_loglike_lowl_TT_2015,double,(double*),"plc_loglike_lowl_TT_2015",(Planck_TTTEEE, Planck_TT,Planck_lite))
+BE_CONV_FUNCTION(plc_loglike_lensing_2015,double,(double*),"plc_loglike_lensing_2015",(Planck_TTTEEE, Planck_TT, Planck_lite))
 
 // Undefine macros to avoid conflict with other backends
 #include "gambit/Backends/backend_undefs.hpp"
