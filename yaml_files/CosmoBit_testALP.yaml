@@ -114,18 +114,23 @@ ObsLikes:
     module:       DarkBit
     type:         double
 
-  - purpose:      Observable
-    capability:   H0_LogLike
-    module:       CosmoBit
-    type:         double
+#  - purpose:      LogLike
+#    capability:   Pantheon_LogLike
+#    module:       CosmoBit
+#    type:         double
 
   - purpose:      LogLike
-    capability:   Pantheon_LogLike
+    capability:   Planck_lowl_loglike
     module:       CosmoBit
     type:         double
 
   - purpose:      LogLike
     capability:   Planck_highl_loglike
+    module:       CosmoBit
+    type:         double
+
+  - purpose:      LogLike
+    capability:   Planck_lensing_loglike
     module:       CosmoBit
     type:         double
   
@@ -156,8 +161,17 @@ Rules:
 ##  this ambiguity manually.
 #####
 
+  - capability: Planck_lowl_loglike
+    function: function_Planck_lowl_TT_2018_loglike
+    #function: function_Planck_lowl_TTEE_2018_loglike
+
   - capability: Planck_highl_loglike
-    function: function_Planck_highl_TTTEEE_lite_loglike
+    function: function_Planck_highl_TTTEEE_lite_2018_loglike
+    #function: function_Planck_highl_TT_lite_2018_loglike
+
+  - capability: Planck_lensing_loglike
+    function: function_Planck_lensing_2018_loglike
+    #function: function_Planck_lensing_marged_2018_loglike
 
   - capability: get_classy_cosmo_container
     function: init_classy_cosmo_container
@@ -181,8 +195,8 @@ Rules:
 
   - capability: BBN_LogLike
     options:
-      DataFile: PDG_2017.dat # Use both, the Yp and D/H measurement as given in PDG 2017
-      #DataFile: PDG_2017_updated.dat # Use the Yp measurement from PDG 2017 and the updated D/H measurement of 1801.08023
+      #DataFile: PDG_2017.dat # Use both, the Yp and D/H measurement as given in PDG 2017
+      DataFile: PDG_2017_updated.dat # Use the Yp measurement from PDG 2017 and the updated D/H measurement of 1801.08023
 
   - capability: BAO_LogLike
     options:
@@ -202,9 +216,10 @@ Rules:
       grid_size: 3000   # set grid size of time grid to solve differntial equation to compute dNeff and etaBBN for CosmoALP model (default: 3000)
       max_iter: 8       # set max. number of iterations until convergence (of default 1e-6 accuracy) is reached. If not: point invalidated
 
-  - capability: plc_2_0_init
+  - capability: plc_3_0_init
     options:
-      #planck_path: /PATH/TO/plc_2.0
+      #plc_2.0_path: /PATH/TO/plc_2.0
+      #plc_3.0_path: /PATH/TO/plc_3.0
 
   - capability: lifetime
     function: lifetime_ALP_agg

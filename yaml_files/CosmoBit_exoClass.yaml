@@ -90,20 +90,18 @@ ObsLikes:
 
   - purpose:      LogLike
     capability:   Planck_highl_loglike
-    function:     function_Planck_highl_TT_lite_loglike
+    function:     function_Planck_highl_TT_lite_2018_loglike
     #function:     function_Planck_highl_TTTEEE_lite_loglike
 
   - purpose:      LogLike
     capability:   Planck_lensing_loglike
+    function:     function_Planck_lensing_2018_loglike
+    #function:     function_Planck_lensing_marged_2018_loglike
 
-# We better should not use this likelihood for quick tests.
-# lowl_TEB takes ages to load.
-#
-#  - purpose:      LogLike
-#    capability:   Planck_lowl_loglike
-#    function:     function_Planck_lowl_TEB_loglike
-#    #function:     function_Planck_lowl_TT_loglike
-#
+  - purpose:      LogLike
+    capability:   Planck_lowl_loglike
+    function:     function_Planck_lowl_TTEE_2018_loglike
+    #function:     function_Planck_lowl_TT_2018_loglike
 
   - purpose:      Obs
     capability:   Omega0_m
@@ -219,9 +217,10 @@ Rules:
     options:
       T_cmb: 2.7255
 
-  - capability: plc_2_0_init
+  - capability: plc_3_0_init
     options:
-      #planck_path: /PATH/TO/plc_2.0
+      #plc_2.0_path: /PATH/TO/plc_2.0
+      #plc_3.0_path: /PATH/TO/plc_3.0
 
 #======== Logging setup ========
 Logger:
