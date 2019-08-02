@@ -29,19 +29,18 @@
 ///
 ///  *********************************************
 
-#include "gambit/Elements/gambit_module_headers.hpp"
-#include "gambit/NeutrinoBit/NeutrinoBit_rollcall.hpp"
-#include "gambit/Utils/numerical_constants.hpp"
-#include <Eigen/Sparse>
-#include <Eigen/Dense>
-#include <unsupported/Eigen/MatrixFunctions>
 #include <cmath>
 #include <iomanip>
 #include <iostream>
 #include <fstream>
 #include <sstream>
-#include "gambit/NeutrinoBit/spline.h"
+
+#include "gambit/Elements/gambit_module_headers.hpp"
+#include "gambit/Utils/numerical_constants.hpp"
+#include <unsupported/Eigen/MatrixFunctions>
 #include "gambit/Utils/statistics.hpp"
+#include "gambit/NeutrinoBit/NeutrinoBit_rollcall.hpp"
+#include "gambit/NeutrinoBit/NeutrinoInterpolator.hpp"
 
 //#define NEUTRINOBIT_DEBUG
 
@@ -1286,44 +1285,11 @@ namespace Gambit
       result_ckm = -0.5*chi2;
     }
     
-    // Function to fill a spline object from a file
-    tk::spline fill_spline(std::string file)
-    {
-      tk::spline s;
-      std::vector<double> M_temp, U_temp;
-
-      std::vector<std::pair<double,double> > array;
-      std::ifstream f(GAMBIT_DIR "/"+file);
-      while(f.good())
-      {
-        std::string line;
-        getline(f, line);
-        if (!f.good())
-          break;
-        std::stringstream iss(line);
-        std::pair<double,double> point;
-        iss >> point.first;
-        iss.ignore();
-        iss >> point.second;
-        array.push_back(point);
-      }
-
-      for (unsigned int i=0; i<array.size(); i++)
-      {
-        M_temp.push_back(array[i].first);
-        U_temp.push_back(array[i].second);
-      }
-      s.set_points(M_temp, U_temp);
-
-      return s;
-    }
-
     // Likelihood contribution from PIENU; searched for extra peaks in the spectrum of pi -> mu + nu. Constrains |U_ei|^2 at 90% in the mass range 60-129 MeV. [Phys. Rev. D, 84 (052002), 2011] (arXiv:1106.4055)
     void lnL_pienu(double& result)
     {
       using namespace Pipes::lnL_pienu;
-      static bool read_table = true;
-      static tk::spline s;
+
       // Mass range of experiment
       static double low_lim = 0.06060759493670887;  // GeV
       static double upp_lim = 0.12926582278481014;  // GeV
@@ -1336,11 +1302,7 @@ namespace Gambit
       M[1] = *Param["M_2"];
       M[2] = *Param["M_3"];
 
-      if (read_table)
-      {
-        s = fill_spline("NeutrinoBit/data/pienu.csv");
-        read_table = false;
-      }
+      static NeutrinoInterpolator s("NeutrinoBit/data/pienu.csv");
 
       // Assume Gaussian errors with zero mean and that limits scale as |U|^2.
       result = 0;
@@ -1352,7 +1314,7 @@ namespace Gambit
         }
         else
         {
-          U[i] = s(M[i]);
+          U[i] = s.eval(M[i]);
           result += Stats::gaussian_upper_limit(mixing_sq[i]/U[i], 0, 0, 1/1.28, false);  // exp_error = abs(exp_value - 90CL_value), exp_value = 0, 1.28: 90% CL limit for half-Gaussian.
         }
       }
@@ -1362,8 +1324,7 @@ namespace Gambit
     void lnL_ps191_e(double& result)
     {
       using namespace Pipes::lnL_ps191_e;
-      static bool read_table = true;
-      static tk::spline s;
+
       // Mass range of experiment
       static double low_lim = 0.011810586;  // GeV
       static double upp_lim = 0.4491907842;  // GeV
@@ -1379,11 +1340,7 @@ namespace Gambit
       M[1] = *Param["M_2"];
       M[2] = *Param["M_3"];
 
-      if (read_table)
-      {
-        s = fill_spline("NeutrinoBit/data/ps191_e.csv");
-        read_table = false;
-      }
+      static NeutrinoInterpolator s("NeutrinoBit/data/ps191_e.csv");
 
       // Assume scaling with |U|^4, zero bkg, number of events at 90% CL is
       // reverse engineered.  We assume that lnL = mu_sig is a faithful
@@ -1395,7 +1352,7 @@ namespace Gambit
           result += 0;
         else
         {
-          U[i] = s(M[i]);
+          U[i] = s.eval(M[i]);
           result += -2.44*(mixing_sq[i]/pow(U[i],2));
         }
       }
@@ -1405,8 +1362,7 @@ namespace Gambit
     void lnL_ps191_mu(double& result)
     {
       using namespace Pipes::lnL_ps191_mu;
-      static bool read_table = true;
-      static tk::spline s;
+
       // Mass range of experiment
       static double low_lim = 0.0103348894;  // GeV
       static double upp_lim = 0.3610401587;  // GeV
@@ -1422,11 +1378,7 @@ namespace Gambit
       M[1] = *Param["M_2"];
       M[2] = *Param["M_3"];
 
-      if (read_table)
-      {
-        s = fill_spline("NeutrinoBit/data/ps191_mu.csv");
-        read_table = false;
-      }
+      static NeutrinoInterpolator s("NeutrinoBit/data/ps191_mu.csv");
 
       // Assume scaling with |U|^4, zero bkg, number of events at 90% CL is
       // reverse engineered.  We assume that lnL = mu_sig is a faithful
@@ -1438,7 +1390,7 @@ namespace Gambit
           result += 0;
         else
         {
-          U[i] = s(M[i]);
+          U[i] = s.eval(M[i]);
           result += -2.44*(mixing_sq[i]/pow(U[i],2));
         }
       }
@@ -1448,8 +1400,7 @@ namespace Gambit
     void lnL_charm_e(double& result)
     {
       using namespace Pipes::lnL_charm_e;
-      static bool read_table = true;
-      static tk::spline s;
+
       // Mass range of experiment
       static double low_lim = 0.1595725833606568;  // GeV
       static double upp_lim = 2.0814785578102417;  // GeV
@@ -1465,11 +1416,7 @@ namespace Gambit
       M[1] = *Param["M_2"];
       M[2] = *Param["M_3"];
 
-      if (read_table)
-      {
-        s = fill_spline("NeutrinoBit/data/charm_e.csv");
-        read_table = false;
-      }
+      static NeutrinoInterpolator s("NeutrinoBit/data/charm_e.csv");
 
       // Assume scaling with |U|^4, zero bkg, number of events at 90% CL is
       // reverse engineered.  We assume that lnL = mu_sig is a faithful
@@ -1481,7 +1428,7 @@ namespace Gambit
           result += 0;
         else
         {
-          U[i] = s(M[i])/sqrt(2);  // Division by sqrt(2) to account for Majorana nature.
+          U[i] = s.eval(M[i])/sqrt(2);  // Division by sqrt(2) to account for Majorana nature.
           result += -2.44*(mixing_sq[i]/pow(U[i],2));
         }
       }
@@ -1491,8 +1438,7 @@ namespace Gambit
     void lnL_charm_mu(double& result)
     {
       using namespace Pipes::lnL_charm_mu;
-      static bool read_table = true;
-      static tk::spline s;
+
       // Mass range of experiment
       static double low_lim = 0.4483153374997989;  // GeV
       static double upp_lim = 1.9231171483448785;  // GeV
@@ -1508,11 +1454,7 @@ namespace Gambit
       M[1] = *Param["M_2"];
       M[2] = *Param["M_3"];
 
-      if (read_table)
-      {
-        s = fill_spline("NeutrinoBit/data/charm_mu.csv");
-        read_table = false;
-      }
+      static NeutrinoInterpolator s("NeutrinoBit/data/charm_mu.csv");
 
       // Assume scaling with |U|^4, zero bkg, number of events at 90% CL is
       // reverse engineered.  We assume that lnL = mu_sig is a faithful
@@ -1524,7 +1466,7 @@ namespace Gambit
           result += 0;
         else
         {
-          U[i] = s(M[i])/sqrt(2);  // Division by sqrt(2) to account for Majorana nature.
+          U[i] = s.eval(M[i])/sqrt(2);  // Division by sqrt(2) to account for Majorana nature.
           result += -2.44*(mixing_sq[i]/pow(U[i],2));
         }
       }
@@ -1534,8 +1476,7 @@ namespace Gambit
     void lnL_delphi_short_lived(double& result)
     {
       using namespace Pipes::lnL_delphi_short_lived;
-      static bool read_table = true;
-      static tk::spline s;
+
       // Mass range of experiment
       static double low_lim = 1.8102188251700203;  // GeV
       static double upp_lim = 80.00000000000006;  // GeV
@@ -1554,11 +1495,7 @@ namespace Gambit
       M[1] = *Param["M_2"];
       M[2] = *Param["M_3"];
 
-      if (read_table)
-      {
-        s = fill_spline("NeutrinoBit/data/delphi_short_lived.csv");
-        read_table = false;
-      }
+      static NeutrinoInterpolator s("NeutrinoBit/data/delphi_short_lived.csv");
 
       // Assume scaling with |U|^4, zero bkg, number of events at 95% CL is
       // reverse engineered.  We assume that lnL = mu_sig is a faithful
@@ -1572,7 +1509,7 @@ namespace Gambit
         {
           for (int j=i; j<9; j+=3)
           {
-            U[i] = s(M[i]);
+            U[i] = s.eval(M[i]);
             result += -3.09*(pow(mixing_sq[j]/U[i],2));
           }
         }
@@ -1583,8 +1520,7 @@ namespace Gambit
     void lnL_delphi_long_lived(double& result)
     {
       using namespace Pipes::lnL_delphi_long_lived;
-      static bool read_table = true;
-      static tk::spline s;
+
       // Mass range of experiment
       static double low_lim = 0.4383563;  // GeV
       static double upp_lim = 4.1954595;  // GeV
@@ -1603,11 +1539,7 @@ namespace Gambit
       M[1] = *Param["M_2"];
       M[2] = *Param["M_3"];
 
-      if (read_table)
-      {
-        s = fill_spline("NeutrinoBit/data/delphi_long_lived.csv");
-        read_table = false;
-      }
+      static NeutrinoInterpolator s("NeutrinoBit/data/delphi_long_lived.csv");
 
       // Assume scaling with |U|^4, zero bkg, number of events at 95% CL is
       // reverse engineered.  We assume that lnL = mu_sig is a faithful
@@ -1621,7 +1553,7 @@ namespace Gambit
         {
           for (int j=i; j<9; j+=3)
           {
-            U[i] = s(M[i]);
+            U[i] = s.eval(M[i]);
             result += -3.09*(pow(mixing_sq[j]/U[i],2));
           }
         }
@@ -1632,8 +1564,7 @@ namespace Gambit
     void lnL_atlas_e(double& result)
     {
       using namespace Pipes::lnL_atlas_e;
-      static bool read_table = true;
-      static tk::spline s;
+
       // Mass range of experiment
       static double low_lim = 100.1041668;  // GeV
       static double upp_lim = 476.1458333;  // GeV
@@ -1646,11 +1577,7 @@ namespace Gambit
       M[1] = *Param["M_2"];
       M[2] = *Param["M_3"];
 
-      if (read_table)
-      {
-        s = fill_spline("NeutrinoBit/data/atlas_e.csv");
-        read_table = false;
-      }
+      static NeutrinoInterpolator s("NeutrinoBit/data/atlas_e.csv");
 
       // Assume Gaussian errors with zero mean and that limits scale as |U|^4.
       result = 0;
@@ -1662,7 +1589,7 @@ namespace Gambit
         }
         else
         {
-          U[i] = s(M[i]);
+          U[i] = s.eval(M[i]);
           result += Stats::gaussian_upper_limit(pow(mixing_sq[i]/U[i],2), 0, 0, 1/1.64, false);  // exp_error = abs(exp_value - 95CL_value), exp_value = 0, 1.64: 95% CL limit for half-Gaussian.
         }
       }
@@ -1672,8 +1599,7 @@ namespace Gambit
     void lnL_atlas_mu(double& result)
     {
       using namespace Pipes::lnL_atlas_mu;
-      static bool read_table = true;
-      static tk::spline s;
+
       // Mass range of experiment
       static double low_lim = 101.89094090419824;  // GeV
       static double upp_lim = 500.76903192219294;  // GeV
@@ -1686,11 +1612,7 @@ namespace Gambit
       M[1] = *Param["M_2"];
       M[2] = *Param["M_3"];
 
-      if (read_table)
-      {
-        s = fill_spline("NeutrinoBit/data/atlas_mu.csv");
-        read_table = false;
-      }
+      static NeutrinoInterpolator s("NeutrinoBit/data/atlas_mu.csv");
 
       // Assume Gaussian errors with zero mean and that limits scale as |U|^4.
       result = 0;
@@ -1702,7 +1624,7 @@ namespace Gambit
         }
         else
         {
-          U[i] = s(M[i]);
+          U[i] = s.eval(M[i]);
           result += Stats::gaussian_upper_limit(pow(mixing_sq[i]/U[i],2), 0, 0, 1/1.64, false); // exp_error = abs(exp_value - 95CL_value), exp_value = 0, 1.64: 95% CL limit for half-Gaussian.
         }
       }
@@ -1712,8 +1634,7 @@ namespace Gambit
     void lnL_e949(double& result)
     {
       using namespace Pipes::lnL_e949;
-      static bool read_table = true;
-      static tk::spline s;
+
       // Mass range of experiment
       static double low_lim = 0.1794613032227713;  // GeV
       static double upp_lim = 0.2995365796283227;  // GeV
@@ -1726,11 +1647,7 @@ namespace Gambit
       M[1] = *Param["M_2"];
       M[2] = *Param["M_3"];
 
-      if (read_table)
-      {
-        s = fill_spline("NeutrinoBit/data/e949.csv");
-        read_table = false;
-      }
+      static NeutrinoInterpolator s("NeutrinoBit/data/e949.csv");
 
       // Assume Gaussian errors with zero mean and that limits scale as |U|^2.
       result = 0;
@@ -1742,7 +1659,7 @@ namespace Gambit
         }
         else
         {
-          U[i] = s(M[i])/sqrt(2);  // Division by sqrt(2) to account for Majorana nature.
+          U[i] = s.eval(M[i])/sqrt(2);  // Division by sqrt(2) to account for Majorana nature.
           result += Stats::gaussian_upper_limit(mixing_sq[i]/U[i], 0, 0,  1/1.28, false); // exp_error = abs(exp_value - 90CL_value), exp_value = 0, 1.28: 90% CL limit for half-Gaussian.
         }
       }
@@ -1752,8 +1669,7 @@ namespace Gambit
     void lnL_nutev(double& result)
     {
       using namespace Pipes::lnL_nutev;
-      static bool read_table = true;
-      static tk::spline s;
+
       // Mass range of experiment
       static double low_lim = 0.2116390354;  // GeV
       static double upp_lim = 2.0161957132;  // GeV
@@ -1766,11 +1682,7 @@ namespace Gambit
       M[1] = *Param["M_2"];
       M[2] = *Param["M_3"];
 
-      if (read_table)
-      {
-        s = fill_spline("NeutrinoBit/data/nutev.csv");
-        read_table = false;
-      }
+      static NeutrinoInterpolator s("NeutrinoBit/data/nutev.csv");
 
       // Assume scaling with |U|^4, zero bkg, number of events at 90% CL is
       // reverse engineered.  We assume that lnL = mu_sig is a faithful
@@ -1782,7 +1694,7 @@ namespace Gambit
           result += 0;
         else
         {
-          U[i] = s(M[i]);
+          U[i] = s.eval(M[i]);
           result += -2.44*(pow(mixing_sq[i]/U[i],2));
         }
       }
@@ -1792,8 +1704,7 @@ namespace Gambit
     void lnL_charm_tau(double& result)
     {
       using namespace Pipes::lnL_charm_tau;
-      static bool read_table = true;
-      static tk::spline s;
+
       // Mass range of experiment
       static double low_lim = 0.010685579196217497;  // GeV
       static double upp_lim = 0.288745725563687;  // GeV
@@ -1806,11 +1717,7 @@ namespace Gambit
       M[1] = *Param["M_2"];
       M[2] = *Param["M_3"];
 
-      if (read_table)
-      {
-        s = fill_spline("NeutrinoBit/data/tau.csv");
-        read_table = false;
-      }
+      static NeutrinoInterpolator s("NeutrinoBit/data/tau.csv");
 
       // Assume Gaussian errors with zero mean and that limits scale as |U|^4.
       result = 0;
@@ -1822,7 +1729,7 @@ namespace Gambit
         }
         else
         {
-          U[i] = s(M[i])/sqrt(2);  // Division by sqrt(2) to account for Majorana nature.
+          U[i] = s.eval(M[i])/sqrt(2);  // Division by sqrt(2) to account for Majorana nature.
           result += Stats::gaussian_upper_limit(pow(mixing_sq[i]/U[i],2), 0, 0, 1/1.28, false); // exp_error = abs(exp_value - 95CL_value), exp_value = 0, 1.28: 90% CL limit for half-Gaussian.
         }
       }
@@ -1832,8 +1739,7 @@ namespace Gambit
     void lnL_lhc_e(double& result)
     {
       using namespace Pipes::lnL_lhc_e;
-      static bool read_table = true;
-      static tk::spline s;
+
       // Mass range of experiment
       static double low_lim = 1.0293246;  // GeV
       static double upp_lim = 1e3;  // GeV
@@ -1846,11 +1752,7 @@ namespace Gambit
       M[1] = *Param["M_2"];
       M[2] = *Param["M_3"];
 
-      if (read_table)
-      {
-        s = fill_spline("NeutrinoBit/data/lhc_e.csv");
-        read_table = false;
-      }
+      static NeutrinoInterpolator s("NeutrinoBit/data/lhc_e.csv");
 
       // Assume Gaussian errors with zero mean and that limits scale as |U|^4.
       result = 0;
@@ -1862,7 +1764,7 @@ namespace Gambit
         }
         else
         {
-          U[i] = s(M[i]);
+          U[i] = s.eval(M[i]);
           result += Stats::gaussian_upper_limit(pow(mixing_sq[i]/U[i],2), 0, 0, 1/1.64, false);  // exp_error = abs(exp_value - 95CL_value), exp_value = 0, 1.64: 95% CL limit for half-Gaussian.
         }
       }
@@ -1872,8 +1774,7 @@ namespace Gambit
     void lnL_lhc_mu(double& result)
     {
       using namespace Pipes::lnL_lhc_mu;
-      static bool read_table = true;
-      static tk::spline s;
+
       // Mass range of experiment
       static double low_lim = 1.0145564;  // GeV
       static double upp_lim = 985.652549;  // GeV
@@ -1886,11 +1787,7 @@ namespace Gambit
       M[1] = *Param["M_2"];
       M[2] = *Param["M_3"];
 
-      if (read_table)
-      {
-        s = fill_spline("NeutrinoBit/data/lhc_mu.csv");
-        read_table = false;
-      }
+      static NeutrinoInterpolator s("NeutrinoBit/data/lhc_mu.csv");
 
       // Assume Gaussian errors with zero mean and that limits scale as |U|^4.
       result = 0;
@@ -1902,7 +1799,7 @@ namespace Gambit
         }
         else
         {
-          U[i] = s(M[i]);
+          U[i] = s.eval(M[i]);
           result += Stats::gaussian_upper_limit(pow(mixing_sq[i]/U[i],2), 0, 0, 1/1.64, false);  // exp_error = abs(exp_value - 95CL_value), exp_value = 0, 1.64: 95% CL limit for half-Gaussian.
         }
       }

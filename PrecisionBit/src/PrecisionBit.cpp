@@ -1130,9 +1130,9 @@ namespace Gambit
     // EWPO corrections from heavy neutrinos, from 1407.6607 and 1502.00477
 
     // Weak mixing angle sinW2, calculation from 1211.1864
-    void RHN_sinW2(triplet<double> &result)
+    void RHN_sinW2_eff(triplet<double> &result)
     {
-      using namespace Pipes::RHN_sinW2;
+      using namespace Pipes::RHN_sinW2_eff;
       Eigen::Matrix3cd Theta = *Dep::SeesawI_Theta;
       Eigen::Matrix3d ThetaNorm = (Theta * Theta.adjoint()).real();
 
@@ -1144,21 +1144,12 @@ namespace Gambit
       result.lower = result.upper;
     }
 
-    void lnL_sinW2_chi2(double &result)
-    {
-      using namespace Pipes::lnL_sinW2_chi2;
-      double theory_uncert = std::max(Dep::sinW2->upper, Dep::sinW2->lower);
-      /// Option profile_systematics<bool>: Use likelihood version that has been profiled over systematic errors (default false)
-      bool profile = runOptions->getValueOrDef<bool>(false, "profile_systematics");
-      result = Stats::gaussian_loglikelihood(Dep::sinW2->central, 0.23155, theory_uncert, 0.00005, profile);
-    }
-
     // Mass of W boson, calculation from 1502.00477
     void RHN_mw(triplet<double> &result)
     {
       using namespace Pipes::RHN_mw;
       Eigen::Matrix3cd Theta = *Dep::SeesawI_Theta;
-      triplet<double> sinW2 = *Dep::sinW2;
+      triplet<double> sinW2 = *Dep::prec_sinW2_eff;
       Eigen::Matrix3d ThetaNorm = (Theta * Theta.adjoint()).real();
 
       // SM precision calculation, from 1211.1864

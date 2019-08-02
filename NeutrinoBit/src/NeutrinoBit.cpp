@@ -21,15 +21,16 @@
 
 #define _USE_MATH_DEFINES
 
-#include "gambit/Elements/gambit_module_headers.hpp"
-#include "gambit/NeutrinoBit/NeutrinoBit_rollcall.hpp"
-#include <unsupported/Eigen/MatrixFunctions>
 #include <iomanip>
 #include <iostream>
 #include <fstream>
 #include <sstream>
-#include "gambit/NeutrinoBit/spline.h"
+#include <unsupported/Eigen/MatrixFunctions>
+
+#include "gambit/Elements/gambit_module_headers.hpp"
 #include "gambit/Utils/statistics.hpp"
+#include "gambit/NeutrinoBit/NeutrinoBit_rollcall.hpp"
+#include "gambit/NeutrinoBit/NeutrinoInterpolator.hpp"
 
 namespace Gambit
 {
@@ -394,39 +395,6 @@ namespace Gambit
       }
     }
 
-    // Helper function to fill a spline object from a file
-    tk::spline filling_spline(std::string file)
-    {
-      tk::spline s;
-      std::vector<double> M_temp, U_temp;
-
-      std::vector<std::pair<double,double> > array;
-      std::ifstream f(GAMBIT_DIR "/"+file);
-      while(f.good())
-      {
-        std::string line;
-        getline(f, line);
-        if (!f.good())
-          break;
-        std::stringstream iss(line);
-        std::pair<double,double> point;
-        iss >> point.first;
-        iss.ignore();
-        iss >> point.second;
-        array.push_back(point);
-      }
-
-      for (unsigned int i=0; i<array.size(); i++)
-      {
-        M_temp.push_back(array[i].first);
-        U_temp.push_back(array[i].second);
-      }
-      s.set_points(M_temp, U_temp);
-
-      return s;
-    }
-    
-    
     // Active neutrino likelihoods from digitised likelihood contours from NuFit (1811.05487)
     // Solar mixing angle \theta_{12}
     void theta12(double &result)
@@ -440,25 +408,9 @@ namespace Gambit
     {
       using namespace Pipes::theta12_lnL;
 
-      static bool read_table_n = true;
-      static bool read_table_i = true;
-      static tk::spline spline_t12_n;
-      static tk::spline spline_t12_i;
       static double low_lim = 0.170;  
       static double upp_lim = 0.830;  
-      
 
-      if (read_table_n and (*Dep::ordering == 1)) // Normal odering
-      {
-        spline_t12_n = filling_spline("NeutrinoBit/data/T12n.csv");
-        read_table_n = false;
-      }
-      else if (read_table_i and (*Dep::ordering == 0)) // Inverted odering
-      {
-        spline_t12_i = filling_spline("NeutrinoBit/data/T12i.csv");
-        read_table_i = false;
-      }
-      
       // Invalidate outside the ranges
       if ((pow(sin(*Dep::theta12),2) < low_lim) or (pow(sin(*Dep::theta12),2) > upp_lim))
       {
@@ -470,13 +422,17 @@ namespace Gambit
       }
       else
       {
-         if (*Dep::ordering == 1)
+         if (*Dep::ordering == 1) // Normal ordering
          {    
-           result = -0.5*spline_t12_n(pow(sin(*Dep::theta12),2));
+           static NeutrinoInterpolator spline_t12_n("NeutrinoBit/data/T12n.csv");
+ 
+           result = -0.5*spline_t12_n.eval(pow(sin(*Dep::theta12),2));
          }
-         else if (*Dep::ordering == 0)
+         else if (*Dep::ordering == 0) // Inverted ordering
          {
-           result = -0.5*spline_t12_i(pow(sin(*Dep::theta12),2));
+           static NeutrinoInterpolator spline_t12_i("NeutrinoBit/data/T12i.csv");
+ 
+           result = -0.5*spline_t12_i.eval(pow(sin(*Dep::theta12),2));
          }
       }
     }
@@ -493,23 +449,8 @@ namespace Gambit
     {
       using namespace Pipes::theta23_lnL;
 
-      static bool read_table_n = true;
-      static bool read_table_i = true;
-      static tk::spline spline_t23_n;
-      static tk::spline spline_t23_i;
       static double low_lim = 0.250;  
       static double upp_lim = 0.750;  
-      
-      if (read_table_n and *Dep::ordering == 1) // Normal odering
-      {
-        spline_t23_n = filling_spline("NeutrinoBit/data/T23n.csv");
-        read_table_n = false;
-      }
-      else if (read_table_i and *Dep::ordering == 0) // Inverted odering
-      {
-        spline_t23_i = filling_spline("NeutrinoBit/data/T23i.csv");
-        read_table_i = false;
-      }
       
       // Invalidate outside the ranges
       if  ((pow(sin(*Dep::theta23),2) < low_lim)  or (pow(sin(*Dep::theta23),2) > upp_lim)) 
@@ -522,13 +463,17 @@ namespace Gambit
       }     
       else
       {
-        if (*Dep::ordering == 1)
-        {    
-          result = -0.5*spline_t23_n(pow(sin(*Dep::theta23),2));
-        }
-        else if (*Dep::ordering == 0)
+        if (*Dep::ordering == 1) // Normal ordering
         {
-          result = -0.5*spline_t23_i(pow(sin(*Dep::theta23),2));
+          static NeutrinoInterpolator spline_t23_n("NeutrinoBit/data/T23n.csv");
+
+          result = -0.5*spline_t23_n.eval(pow(sin(*Dep::theta23),2));
+        }
+        else if (*Dep::ordering == 0) // Inverted ordering
+        {
+          static NeutrinoInterpolator spline_t23_i("NeutrinoBit/data/T23i.csv");
+ 
+          result = -0.5*spline_t23_i.eval(pow(sin(*Dep::theta23),2));
         }
       }
     }
@@ -545,24 +490,9 @@ namespace Gambit
     {
       using namespace Pipes::theta13_lnL;
 
-      static bool read_table_n = true;
-      static bool read_table_i = true;
-      static tk::spline spline_t13_n;
-      static tk::spline spline_t13_i;
       static double low_lim = 0.00;  
       static double upp_lim = 0.07;  
       
-      if (read_table_n and *Dep::ordering == 1) // Normal odering
-      {
-        spline_t13_n = filling_spline("NeutrinoBit/data/T13n.csv");
-        read_table_n = false;
-      }
-      else if (read_table_i and *Dep::ordering == 0) // Inverted odering
-      {
-        spline_t13_i = filling_spline("NeutrinoBit/data/T13i.csv");
-        read_table_i = false;
-      }
-
       // Invalidate outside ranges
       if  ((pow(sin(*Dep::theta13),2) < low_lim) or (pow(sin(*Dep::theta13),2) > upp_lim))
       {
@@ -574,13 +504,17 @@ namespace Gambit
       }
       else
       {
-        if (*Dep::ordering == 1)
-        {    
-          result = -0.5*spline_t13_n(pow(sin(*Dep::theta13),2));
-        }
-        else if (*Dep::ordering == 0)
+        if (*Dep::ordering == 1) // Normal ordering
         {
-          result = -0.5*spline_t13_i(pow(sin(*Dep::theta13),2));
+          static NeutrinoInterpolator spline_t13_n("NeutrinoBit/data/T13n.csv");
+
+          result = -0.5*spline_t13_n.eval(pow(sin(*Dep::theta13),2));
+        }
+        else if (*Dep::ordering == 0) // Inverted ordering
+        {
+          static NeutrinoInterpolator spline_t13_i("NeutrinoBit/data/T13i.csv");
+
+          result = -0.5*spline_t13_i.eval(pow(sin(*Dep::theta13),2));
         }
       }
     }    
@@ -597,24 +531,9 @@ namespace Gambit
     {
       using namespace Pipes::deltaCP_lnL;
 
-      static bool read_table_n = true;
-      static bool read_table_i = true;
-      static tk::spline spline_CP_i;
-      static tk::spline spline_CP_n;
       static double low_lim = -180;  
       static double upp_lim = 360;  
       
-      if (read_table_n and *Dep::ordering == 1) // Normal odering
-      {
-        spline_CP_n = filling_spline("NeutrinoBit/data/CPn.csv");
-        read_table_n = false;
-      }
-      else if (read_table_i and *Dep::ordering == 0) // Inverted odering
-      {
-        spline_CP_i = filling_spline("NeutrinoBit/data/CPi.csv");
-        read_table_i = false;
-      }
-
       // Invalidate outside ranges
       if  (((*Dep::deltaCP*360.0)/(2.0*M_PI) < low_lim) or ((*Dep::deltaCP*360.0)/(2.0*M_PI) > upp_lim))
       {
@@ -626,13 +545,17 @@ namespace Gambit
       }
       else
       {
-        if (*Dep::ordering == 1)
-        {    
-          result = -0.5*spline_CP_n((*Dep::deltaCP*360.0)/(2.0*M_PI));
-        }
-        else if (*Dep::ordering == 0)
+        if (*Dep::ordering == 1) // Normal ordering
         {
-          result = -0.5*spline_CP_i((*Dep::deltaCP*360.0)/(2.0*M_PI));
+          static NeutrinoInterpolator spline_CP_n("NeutrinoBit/data/CPn.csv");
+
+          result = -0.5*spline_CP_n.eval((*Dep::deltaCP*360.0)/(2.0*M_PI));
+        }
+        else if (*Dep::ordering == 0) // Inverted ordering
+        {
+          static NeutrinoInterpolator spline_CP_i("NeutrinoBit/data/CPi.csv");
+
+          result = -0.5*spline_CP_i.eval((*Dep::deltaCP*360.0)/(2.0*M_PI));
         }
       }
     }
@@ -642,26 +565,9 @@ namespace Gambit
     {
       using namespace Pipes::md21_lnL;
 
-      static bool read_table_n = true;
-      static bool read_table_i = true;
-      static tk::spline spline_md21_n;
-      static tk::spline spline_md21_i;
       static double low_lim = -6.0;  
       static double upp_lim = -3.0;  
       
-      if (read_table_n and *Dep::ordering == 1) // Normal odering
-      {
-        // Removed highly disfavoured local minima to avoid confusing scans
-        spline_md21_n = filling_spline("NeutrinoBit/data/DMS1n.csv");
-        read_table_n = false;
-      }
-      else if (read_table_i and *Dep::ordering == 0) // Inverted odering
-      {
-        // Removed highly disfavoured local minima to avoid confusing scans
-        spline_md21_i = filling_spline("NeutrinoBit/data/DMS1i.csv");
-        read_table_i = false;
-      }
-
       // Invalidate outside ranges
       if  ((log10(*Dep::md21 * pow(10,18)) < low_lim) or (log10(*Dep::md21 * pow(10,18)) > upp_lim) or (*Dep::md21 * pow(10,18)<0))
       {
@@ -673,13 +579,19 @@ namespace Gambit
       }   
       else
       {
-        if (*Dep::ordering == 1)
+        if (*Dep::ordering == 1) // Normal ordering
         {    
-          result = -0.5*spline_md21_n(log10(*Dep::md21 * pow(10,18)));
+          // Removed highly disfavoured local minima to avoid confusing scans
+          static NeutrinoInterpolator spline_md21_n("NeutrinoBit/data/DMS1n.csv");
+
+          result = -0.5*spline_md21_n.eval(log10(*Dep::md21 * pow(10,18)));
         }
-        else if (*Dep::ordering == 0)
+        else if (*Dep::ordering == 0) // Inverted ordering
         {
-          result = -0.5*spline_md21_i(log10(*Dep::md21 * pow(10,18)));
+          // Removed highly disfavoured local minima to avoid confusing scans
+          static NeutrinoInterpolator spline_md21_i("NeutrinoBit/data/DMS1i.csv");
+
+          result = -0.5*spline_md21_i.eval(log10(*Dep::md21 * pow(10,18)));
         }
       }
     }  
@@ -689,27 +601,12 @@ namespace Gambit
     {
       using namespace Pipes::md3l_lnL;
 
-      static bool read_table_n = true;
-      static bool read_table_i = true;
-      static tk::spline spline_md31_n;
-      static tk::spline spline_md32_i;
       static double low_lim_n = 0.2;  
       static double upp_lim_n = 7.0; 
       static double low_lim_i = -7.0;  
       static double upp_lim_i = -0.2; 
           
-      if (read_table_n and *Dep::ordering == 1) // Normal odering
-      {
-        spline_md31_n = filling_spline("NeutrinoBit/data/DMAn.csv");
-        read_table_n = false;
-      }  
-      else if (read_table_i and *Dep::ordering == 0) // Inverted odering
-      {
-        spline_md32_i = filling_spline("NeutrinoBit/data/DMAi.csv");
-        read_table_i = false;
-      }
-      
-      if (*Dep::ordering == 1)
+      if (*Dep::ordering == 1) // Normal ordering
       {
         // Invalidate outside ranges
         if ((*Dep::md31 * pow(10,21) < low_lim_n) or (*Dep::md31 * pow(10,21) > upp_lim_n))
@@ -720,9 +617,14 @@ namespace Gambit
           invalid_point().raise(msg.str());
           return;
         }
-        else result = -0.5*spline_md31_n(*Dep::md31 * pow(10,21));
+        else
+        {
+          static NeutrinoInterpolator spline_md31_n("NeutrinoBit/data/DMAn.csv");
+
+          result = -0.5*spline_md31_n.eval(*Dep::md31 * pow(10,21));
+        }
       }
-      else if (*Dep::ordering == 0)
+      else if (*Dep::ordering == 0) // Inverted ordering
       {
         // Invalidate outside ranges
         if ((*Dep::md32 * pow(10,21) < low_lim_i) or (*Dep::md32 * pow(10,21) > upp_lim_i))
@@ -733,7 +635,13 @@ namespace Gambit
           invalid_point().raise(msg.str());
           return;
         }
-        else result = -0.5*spline_md32_i(*Dep::md32 * pow(10,21));
+        else
+        {
+          static NeutrinoInterpolator spline_md32_i("NeutrinoBit/data/DMAi.csv");
+
+          result = -0.5*spline_md32_i.eval(*Dep::md32 * pow(10,21));
+        }
+        
       }     
     }
 

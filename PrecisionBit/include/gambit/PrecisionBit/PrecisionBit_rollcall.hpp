@@ -236,27 +236,18 @@ START_MODULE
   #undef CAPABILITY
 
   // EWPO corrections from heavy neutrinos
-  #define CAPABILITY sinW2
-  START_CAPABILITY
-    #define FUNCTION RHN_sinW2
+  #define CAPABILITY prec_sinW2_eff
+    #define FUNCTION RHN_sinW2_eff
     START_FUNCTION(triplet<double>)
     DEPENDENCY(SeesawI_Theta, Eigen::Matrix3cd)
     ALLOW_MODEL(RightHandedNeutrinos)
     #undef FUNCTION
   #undef CAPABILITY
 
-  #define CAPABILITY lnL_sinW2
-  START_CAPABILITY
-    #define FUNCTION lnL_sinW2_chi2
-    START_FUNCTION(double)
-    DEPENDENCY(sinW2, triplet<double>)
-    #undef FUNCTION
-  #undef CAPABILITY
- 
   #define CAPABILITY mw
     #define FUNCTION RHN_mw
     START_FUNCTION(triplet<double>)
-    DEPENDENCY(sinW2, triplet<double>)
+    DEPENDENCY(prec_sinW2_eff, triplet<double>)
     DEPENDENCY(SeesawI_Theta, Eigen::Matrix3cd)
     ALLOW_MODEL(RightHandedNeutrinos)
     #undef FUNCTION
