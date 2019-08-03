@@ -1,15 +1,15 @@
 ##########################################################################
 ## Nuissance parameter of "Planck_lite"
-## Please note that A_planck need to
-## be scanned with a Gaussian prior
-## (c.f. wiki.cosmos.esa.int/planckpla2015/index.php/CMB_spectrum_%26_Likelihood_Code)
+##
+## Gaussian priors on chosen parameters as recommenrded by Planck.
+## Should not be scanned with  "Planck_nuissance_prior_loglike"
 ##
 ## Patrick Stoecker <stoecker@physik.rwth-aachen.de>
 ## 2018, Jan
+## 2019, Aug
 ##########################################################################
 
 A_planck:
   prior_type: gaussian
-  range: [0.95,1.05]
   mean: [1.0]
   sigs: [0.0025]

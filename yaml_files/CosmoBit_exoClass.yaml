@@ -31,7 +31,8 @@ Parameters:
  cosmo_nuisance_params_Pantheon: !import include/cosmo_nuisance_params_Pantheon.yaml
 
  # nuisance parameters in Planck likelihood
- Planck_lite: !import include/Planck_lite_scan.yaml
+ Planck_lite: !import include/Planck_2018/Planck_lite_flat.yaml
+ #Planck_lite: !import include/Planck_2018/Planck_lite_gauss.yaml
 
  # model parameters for "CosmoALP"
  CosmoALP:
@@ -85,6 +86,11 @@ ObsLikes:
 
   - purpose:      LogLike
     capability:   dmNu3l_LogLike
+    module:       CosmoBit
+    type:         double
+
+  - purpose:      LogLike
+    capability:   Planck_nuissance_prior_loglike
     module:       CosmoBit
     type:         double
 

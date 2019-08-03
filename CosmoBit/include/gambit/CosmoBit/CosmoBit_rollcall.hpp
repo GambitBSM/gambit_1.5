@@ -114,11 +114,19 @@ START_MODULE
     #undef FUNCTION
   #undef CAPABILITY
 
-  #define CAPABILITY lnL_A_planck
+  #define CAPABILITY Planck_nuissance_prior_loglike
   START_CAPABILITY
-    #define FUNCTION lnL_A_planck_gaussian
+    #define FUNCTION compute_Planck_nuissance_prior_loglike
     START_FUNCTION(double)
-    ALLOW_MODELS(Planck_TTTEEE,Planck_TT,Planck_lite)
+    ALLOW_MODELS(Planck_lite,Planck_TT,Planck_TTTEEE)
+    #undef FUNCTION
+  #undef CAPABILITY
+
+  #define CAPABILITY Planck_sz_prior_loglike
+  START_CAPABILITY
+    #define FUNCTION compute_Planck_sz_prior
+    START_FUNCTION(double)
+    ALLOW_MODELS(Planck_TT,Planck_TTTEEE)
     #undef FUNCTION
   #undef CAPABILITY
 

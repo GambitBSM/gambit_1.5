@@ -42,8 +42,8 @@ Parameters:
  #StandardModel_numass_split: !import include/StandardModel_numass_split_IH_scan.yaml
 
  # nuisance parameters in Planck likelihood
- Planck_lite: !import include/Planck_lite_scan.yaml
- 
+ Planck_lite: !import include/Planck_2018/Planck_lite_gauss.yaml
+
  # nuisance paramters for other cosmological likelihoods
  cosmo_nuisance_params_Pantheon: !import include/cosmo_nuisance_params_Pantheon.yaml
 
@@ -184,8 +184,8 @@ Rules:
     #function: function_Planck_lowl_TTEE_2018_loglike
 
   - capability: Planck_highl_loglike
-    function: function_Planck_highl_TTTEEE_lite_2018_loglike
-    #function: function_Planck_highl_TT_lite_2018_loglike
+    function: function_Planck_highl_TT_lite_2018_loglike
+    #function: function_Planck_highl_TTTEEE_lite_2018_loglike
 
   - capability: Planck_lensing_loglike
     function: function_Planck_lensing_2018_loglike
@@ -258,11 +258,6 @@ Rules:
       correlation_matrix: [[1.0,0.2],[0.2,1.0]]
       relative_errors: [1e-3,1e-2]
       elements: [Yp,D]
-
-  - capability: external_dNeff_etaBBN
-    options:
-      grid_size: 3000
-      max_iter: 8
 
    # Allow for negative values of dNeff_BBN and dNeffBBN_dNeffCMB
    #  -> In this form, the option is set for all CosmoBit function and applies

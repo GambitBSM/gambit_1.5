@@ -334,18 +334,80 @@ namespace Gambit
       }
     }
 
-    void lnL_A_planck_gaussian(double& result)
+    void compute_Planck_nuissance_prior_loglike(double& result)
     {
-      using namespace Pipes::lnL_A_planck_gaussian;
+      using namespace Pipes::compute_Planck_nuissance_prior_loglike;
 
-      double obs_mean = runOptions->getValueOrDef<double>(1.,"mean");
-      double obs_err = runOptions->getValueOrDef<double>(0.0025,"sigma") ;
-      double pred_mean = *Param["A_planck"];
-      double pred_err = 0.0;
+      static std::map<std::string, std::vector<double> > data;
 
-      result = Stats::gaussian_loglikelihood(pred_mean, obs_mean, pred_err, obs_err, false);
+      static bool first = true;
+      if (first)
+      {
+        first = false;
+        std::string filename = GAMBIT_DIR "/CosmoBit/data/Planck/";
+        if (runOptions->hasKey("prior_file"))
+        {
+          filename += runOptions->getValue<std::string>("prior_file");
+        }
+        else
+        {
+          std::string version = runOptions->getValueOrDef<std::string>("2018","version");
+          filename += "priors_" + version + ".dat";
+        }
+        ASCIIdictReader reader(filename);
+        logger() << LogTags::info << "Read priors for Planck nuissance parameters from file '"<<filename<<"'." << EOM;
+        std::map<std::string, std::vector<double> > tmp = reader.get_dict();
+
+        int modelcode = -1;
+        if (ModelInUse("Planck_lite"))
+          modelcode = 1;
+        else if (ModelInUse("Planck_TT"))
+          modelcode = 3;
+        else if (ModelInUse("Planck_TTTEEE"))
+          modelcode = 7;
+
+        data.empty();
+        for (auto iter=tmp.begin(); iter != tmp.end(); iter++)
+        {
+          //std::cout << "Read data: " << iter->first << " --- " << iter->second << std::endl;
+          if ( int(iter->second[0]) <= modelcode )
+          {
+            std::string key = iter->first;
+            try
+            {
+              *Param[key];
+            }
+            catch (std::exception &e)
+            {
+              std::ostringstream err;
+              err << "Caught an undefined model parameter. The planck nuissance parameter \"" << key << "\" is not known.\n\n";
+              err << "Original error was:\n\n" << e.what();
+              CosmoBit_error().raise(LOCAL_INFO,err.str());
+            }
+            data[iter->first] = std::vector<double>({iter->second[1], iter->second[2]});
+          }
+        }
+      }
+
+      result = 0.0;
+      for (auto iter = data.begin(); iter != data.end(); iter++)
+      {
+        //std::cout << "Use data: " << iter->first << " --- " << iter->second << std::endl;
+        result += Stats::gaussian_loglikelihood((*Param[iter->first]), iter->second[0], 0.0, iter->second[1], false);
+      }
     }
 
+    void compute_Planck_sz_prior(double& result)
+    {
+      using namespace Pipes::compute_Planck_sz_prior;
+
+      // SZ- prior: Prior on the tSZ and kSZ amplitudes.
+      // Correlation is unconstrained by Planck. Use prior based on SPT and ACT data.
+      // (cf. https://arxiv.org/pdf/1507.02704.pdf -- eq. 32)
+      double ksz_norm = *Param["ksz_norm"];
+      double A_sz = *Param["A_sz"];
+      result = Stats::gaussian_loglikelihood((ksz_norm + 1.6*A_sz), 9.5, 0.0, 3.0, false);
+    }
 
     void set_NuMasses_SM(map_str_dbl &result)
     {

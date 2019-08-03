@@ -42,7 +42,7 @@ Parameters:
  #StandardModel_numass_split: !import include/StandardModel_numass_split_IH_scan.yaml
 
  # nuisance parameters in Planck likelihood
- Planck_lite: !import include/Planck_lite_scan.yaml
+ Planck_lite: !import include/Planck_2018/Planck_lite_gauss.yaml
 
  # model parameters for "TestDecayingDM"
  TestDecayingDM: !import include/TestDecayingDM_scan.yaml
@@ -108,7 +108,7 @@ ObsLikes:
 
   - purpose:      LogLike
     capability:   Planck_highl_loglike
-    function:     function_Planck_highl_TTTEEE_lite_loglike
+    function:     function_Planck_highl_TTTEEE_lite_2018_loglike
     #function:     function_Planck_highl_TT_lite_2018_loglike
 
   - purpose:      LogLike
