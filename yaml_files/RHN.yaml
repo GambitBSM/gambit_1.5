@@ -349,6 +349,21 @@ Rules:
   - capability: RK
     function: RHN_RK
 
+Logger:
+
+  redirection:
+    [Debug] : "debug.log"
+    [Default] : "default.log"
+    [DecayBit] : "DecayBit.log"
+    [DarkBit] : "DarkBit.log"
+    [PrecisionBit] : "PrecisionBit.log"
+    [FlavBit] : "FlavBit.log"
+    [ColliderBit] : "ColliderBit.log"
+    [SpecBit] : "SpecBit.log"
+    [NeutrinoBit] : "NeutrinoBit.log"
+    [Dependency Resolver] : "dep_resolver.log"
+
+
 KeyValues:
 
   dependency_resolution:
