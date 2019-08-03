@@ -2844,13 +2844,13 @@ namespace Gambit
       cl_and_pars[7553] = *Param["galf_TE_index"];
       // set A_cnoise_.. and A_sbpx_... to 1. (13 nusissance parameter)
       for (int i = 0; i < 13; i++) cl_and_pars[(i+7554)] = 1.;
-      cl_and_pars[7667] = *Param["calib_100T"];
-      cl_and_pars[7668] = *Param["calib_217T"];
-      cl_and_pars[7669] = *Param["calib_100P"];
-      cl_and_pars[7670] = *Param["calib_143P"];
-      cl_and_pars[7671] = *Param["calib_217P"];
-      cl_and_pars[7672] = *Param["A_pol"];
-      cl_and_pars[7673] = *Param["A_planck"];
+      cl_and_pars[7567] = *Param["calib_100T"];
+      cl_and_pars[7568] = *Param["calib_217T"];
+      cl_and_pars[7569] = *Param["calib_100P"];
+      cl_and_pars[7570] = *Param["calib_143P"];
+      cl_and_pars[7571] = *Param["calib_217P"];
+      cl_and_pars[7572] = *Param["A_pol"];
+      cl_and_pars[7573] = *Param["A_planck"];
 
       //--------------------------------------------------------------------------
       //------calculation of the planck loglikelihood-----------------------------
