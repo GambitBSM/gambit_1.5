@@ -40,12 +40,9 @@ namespace Gambit
         // Read file
         std::vector<std::pair<double,double> > array;
         std::ifstream f(GAMBIT_DIR "/"+file);
-        while(f.good())
+        std::string line;
+        while(getline(f, line))
         {
-          std::string line;
-          getline(f, line);
-          if (!f.good())
-            break;
           std::stringstream iss(line);
           std::pair<double,double> point;
           iss >> point.first;
