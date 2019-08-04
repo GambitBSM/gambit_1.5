@@ -356,7 +356,10 @@ namespace Gambit
         }
         ASCIIdictReader reader(filename);
         logger() << LogTags::info << "Read priors for Planck nuissance parameters from file '"<<filename<<"'." << EOM;
-        std::map<std::string, std::vector<double> > tmp = reader.get_dict();
+
+	std::map<std::string, std::vector<double> > tmp = reader.get_dict();
+	logger() << LogTags::info << "Found the follwing prior for planck parameters ( name -- [modelcode, mean, sig] )\n\n";
+	logger() << LogTags::info << tmp << EOM;
 
         int modelcode = -1;
         if (ModelInUse("Planck_lite"))
@@ -387,6 +390,8 @@ namespace Gambit
             data[iter->first] = std::vector<double>({iter->second[1], iter->second[2]});
           }
         }
+	logger() << LogTags::info << "Gaussian prior an Planck parameters used in this scan (name -- [mean, sig]):\n\n" << data << EOM;
+	logger() << LogTags::info << "Data for Planck nuissance priors read." << EOM;
       }
 
       result = 0.0;

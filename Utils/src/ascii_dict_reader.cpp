@@ -33,7 +33,7 @@ namespace Gambit
     std::string line;
     while(std::getline(in, line))
     {
-      if (line[0] == '#') continue;  // Ignore comments lines, starting with "#"
+      if (line[0] == '#' || line.empty() ) continue;  // Ignore comments lines, starting with "#" and empty lines
       std::stringstream ss(line);
 
       double tmp;
