@@ -357,9 +357,9 @@ namespace Gambit
         ASCIIdictReader reader(filename);
         logger() << LogTags::info << "Read priors for Planck nuissance parameters from file '"<<filename<<"'." << EOM;
 
-	std::map<std::string, std::vector<double> > tmp = reader.get_dict();
-	logger() << LogTags::info << "Found the follwing prior for planck parameters ( name -- [modelcode, mean, sig] )\n\n";
-	logger() << LogTags::info << tmp << EOM;
+        std::map<std::string, std::vector<double> > tmp = reader.get_dict();
+        logger() << LogTags::info << "Found the follwing prior for planck parameters ( name -- [modelcode, mean, sig] )\n\n";
+        logger() << LogTags::info << tmp << EOM;
 
         int modelcode = -1;
         if (ModelInUse("Planck_lite"))
@@ -390,8 +390,8 @@ namespace Gambit
             data[iter->first] = std::vector<double>({iter->second[1], iter->second[2]});
           }
         }
-	logger() << LogTags::info << "Gaussian prior an Planck parameters used in this scan (name -- [mean, sig]):\n\n" << data << EOM;
-	logger() << LogTags::info << "Data for Planck nuissance priors read." << EOM;
+        logger() << LogTags::info << "Gaussian prior an Planck parameters used in this scan (name -- [mean, sig]):\n\n" << data << EOM;
+        logger() << LogTags::info << "Data for Planck nuissance priors read." << EOM;
       }
 
       result = 0.0;
@@ -475,72 +475,6 @@ namespace Gambit
             CosmoBit_error().raise(LOCAL_INFO, err.str());
           }
       }
-    }
-
-    // (JR) set neutrino masses with realistic masses (computed from mass)
-    void set_NuMasses_NuBit(map_str_dbl &result)
-    {
-      //using namespace Pipes::set_NuMasses_NuBit;
-
-      double mNu1, mNu2, mNu3;
-
-      double mNu_light = 0.001; // *Param["mNu_light"] mass of lightest nu in eV --> model parameter, should get it from Nu model (TODO)
-      double dmNu21 = 7.45e-5;  // *Param["dmNu21"] mass splitting Delta m_12 ^2 in eV^2 --> model parameter, should get it from Nu model (TODO)
-      double dmNu3l = 2.484e-3; // *Param["dmNu3l"] mass splitting Delta m_31 ^2 in eV^2 --> model parameter, should get it from Nu model (TODO)
-      
-      if (dmNu3l > 0)
-      {
-        mNu1 = mNu_light; 
-        mNu2 = sqrt(mNu_light*mNu_light + dmNu21);
-        mNu3 = sqrt(mNu_light*mNu_light + dmNu3l);
-      }
-      else
-      {
-        mNu1 = sqrt(mNu_light*mNu_light - dmNu3l);
-        mNu2 = sqrt(mNu_light*mNu_light - dmNu3l + dmNu21);
-        mNu3 = mNu_light;
-      }
-                
-      result["N_ncdm"] = 3;          // we know there are 3 massive neutrinos
-      result["N_ur_SMnu"]= 0.00641;  // dNeff= 0.00641 for 3 massive neutrinos at CMB release
-
-      result["mNu1"]=mNu1;
-      result["mNu2"]=mNu2;
-      result["mNu3"]=mNu3;
-    }
-
-    void dmNu21_LogLike_gaussian(double& result)
-    {
-      using namespace Pipes::dmNu21_LogLike_gaussian;
-
-      // Use 1811.05487:
-      // dmNu21 = (7.39  +0.21-0.20) 1e-5 eV^2
-
-      double pred_mean = *Param["dmNu21"];
-
-      const double obs_mean = 7.39e-5;
-      const double obs_err = 0.21e-5;
-      const double pred_err = 0.;
-
-      result = Stats::gaussian_loglikelihood(pred_mean, obs_mean, pred_err, obs_err, false);
-    }
-
-    void dmNu3l_LogLike_gaussian(double& result)
-    {
-      using namespace Pipes::dmNu3l_LogLike_gaussian;
-
-      // Use 1811.05487:
-      // (NH - l=1) dmNu31 = (+2.525  +0.033-0.032) 1e-3 eV^2
-      // (IH - l=2) dmNu32 = (-2.512  +0.034-0.032) 1e-3 eV^2
-
-      double pred_mean = *Param["dmNu3l"];
-      bool NH = (pred_mean > 0.0);
-
-      double obs_mean = NH ? 2.525e-3 : -2.512e-3;
-      double obs_err = NH ?  0.034e-3 :  0.033e-3;
-      const double pred_err = 0.;
-
-      result = Stats::gaussian_loglikelihood(pred_mean, obs_mean, pred_err, obs_err, false);
     }
 
     void class_set_parameter_LCDM_family(Class_container& cosmo)
@@ -4549,4 +4483,3 @@ namespace Gambit
     }
   }
 }
-

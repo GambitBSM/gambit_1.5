@@ -32,9 +32,7 @@ Parameters:
 
  # neutrino masses
  #StandardModel_numass_single: !import include/StandardModel_numass_single_scan.yaml
- #StandardModel_numass_degenerate: !import include/StandardModel_numass_degenerate_scan.yaml
- StandardModel_numass_split: !import include/StandardModel_numass_split_NH_scan.yaml
- #StandardModel_numass_split: !import include/StandardModel_numass_split_IH_scan.yaml
+ StandardModel_numass_degenerate: !import include/StandardModel_numass_degenerate_scan.yaml
 
  # Cosmological nuisance parameters (except for Planck CMB Likelihoods) 
  cosmo_nuisance_params_Pantheon: !import include/cosmo_nuisance_params_Pantheon.yaml
