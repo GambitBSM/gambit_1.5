@@ -1,6 +1,6 @@
 #*** GAMBIT ***********************
-# This file automatically generated
-# by utlities.cmake. Do not modify.
+# This file automatically generated 
+# by utlities.cmake. Do not modify. 
 #**********************************
 
 set(GAMBIT_VERSION_MAJOR 1)
