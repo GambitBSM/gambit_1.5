@@ -72,7 +72,5 @@ KeyValues:
 
   default_output_path: "runs/DarkAges_test"
 
-  rng: ranlux48
-
   likelihood:
     model_invalid_for_lnlike_below: -1e6

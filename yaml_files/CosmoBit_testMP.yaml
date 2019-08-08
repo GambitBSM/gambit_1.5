@@ -251,7 +251,5 @@ KeyValues:
 
   default_output_path: "runs/CosmoBit_testMP"
 
-  rng: ranlux48
-
   likelihood:
     model_invalid_for_lnlike_below: -1e6
