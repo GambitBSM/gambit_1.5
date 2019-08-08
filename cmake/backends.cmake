@@ -69,6 +69,10 @@
 #          (janina.renk@fysik.su.se)
 #  \data 2018 Jun
 #
+#  \author Patrick Stöcker
+#          (stoecker@physik.rwth-aachen.de)
+#  \date 2019 Aug
+#
 #************************************************
 
 
@@ -80,7 +84,7 @@ set(dl "https://alterbbn.hepforge.org/downloads?f=alterbbn_v2.1.tgz")
 set(md5 "016d8e05810e9b09df6e5995da050d94")
 set(dir "${PROJECT_SOURCE_DIR}/Backends/installed/${name}/${ver}")
 set(patch "${PROJECT_SOURCE_DIR}/Backends/patches/${name}/${ver}/${name}_${ver}_fix.diff")
-check_ditch_status(${name} ${ver})
+check_ditch_status(${name} ${ver} ${dir})
 if(NOT ditched_${name}_${ver})
   ExternalProject_Add(${name}_${ver}
     DOWNLOAD_COMMAND ${DL_BACKEND} ${dl} ${md5} ${dir} ${name} ${ver}
@@ -112,7 +116,7 @@ set(lib "libbbn")
 set(dl "https://alterbbn.hepforge.org/downloads/alterbbn_v2.0.tgz")
 set(md5 "cca5fb50440f25dc61fbfb6dbf61b32b")
 set(dir "${PROJECT_SOURCE_DIR}/Backends/installed/${name}/${ver}")
-check_ditch_status(${name} ${ver})
+check_ditch_status(${name} ${ver} ${dir})
 if(NOT ditched_${name}_${ver})
   ExternalProject_Add(${name}_${ver}
     DOWNLOAD_COMMAND ${DL_BACKEND} ${dl} ${md5} ${dir} ${name} ${ver}
@@ -518,7 +522,7 @@ set(dl "null")
 set(dir "${PROJECT_SOURCE_DIR}/Backends/installed/${name}/${ver}")
 set(patchdir "${PROJECT_SOURCE_DIR}/Backends/patches/${name}/${ver}/")
 #set(lib "libmontepythonlike")
-check_ditch_status(${name} ${ver})
+check_ditch_status(${name} ${ver} ${dir})
 if(NOT ditched_${name}_${ver})
   ExternalProject_Add(${name}_${ver}
     GIT_REPOSITORY https://github.com/brinckmann/montepython_public.git
@@ -1089,7 +1093,7 @@ set(dl "http://heasarc.gsfc.nasa.gov/FTP/software/fitsio/c/cfitsio3390.tar.gz")
 set(md5 "e92dd2a4282a1c50d46167041a29fc67")
 set(dir "${PROJECT_SOURCE_DIR}/Backends/installed/${name}/${ver}")
 set(CFITSIO_SO ".so")
-check_ditch_status(${name} ${ver})
+check_ditch_status(${name} ${ver} ${dir})
 if(NOT ditched_${name}_${ver})
   ExternalProject_Add(${name}_${ver}
     DOWNLOAD_COMMAND ${DL_BACKEND} ${dl} ${md5} ${dir}
@@ -1113,7 +1117,7 @@ set(dir "${PROJECT_SOURCE_DIR}/Backends/installed/${name}/${ver}")
 set(cfitsio_name "cfitsio")
 set(cfitsio_ver "3.390")
 set(cfitsio_dir "${PROJECT_SOURCE_DIR}/Backends/installed/${cfitsio_name}/${cfitsio_ver}")
-check_ditch_status(${name} ${ver})
+check_ditch_status(${name} ${ver} ${dir})
 if(NOT ditched_${name}_${ver})
   ExternalProject_Add(${name}_${ver}
     DEPENDS ${cfitsio_name}_${cfitsio_ver}
@@ -1136,7 +1140,7 @@ set(dir "${PROJECT_SOURCE_DIR}/Backends/installed/${name}/${ver}")
 set(cfitsio_name "cfitsio")
 set(cfitsio_ver "3.390")
 set(cfitsio_dir "${PROJECT_SOURCE_DIR}/Backends/installed/${cfitsio_name}/${cfitsio_ver}")
-check_ditch_status(${name} ${ver})
+check_ditch_status(${name} ${ver} ${dir})
 if(NOT ditched_${name}_${ver})
   ExternalProject_Add(${name}_${ver}
     DEPENDS ${cfitsio_name}_${cfitsio_ver}
@@ -1161,7 +1165,7 @@ set(patch "${PROJECT_SOURCE_DIR}/Backends/patches/${name}/${ver}")
 set(dl "https://github.com/lesgourg/class_public/archive/v${ver}.tar.gz")
 set(md5 "e6eb0fd721bb1098e642f5d1970501ce")
 set(dir "${PROJECT_SOURCE_DIR}/Backends/installed/${name}/${ver}")
-check_ditch_status(${name} ${ver})
+check_ditch_status(${name} ${ver} ${dir})
 if(NOT ditched_${name}_${ver})
   ExternalProject_Add(${name}_${ver}
     DOWNLOAD_COMMAND ${DL_BACKEND} ${dl} ${md5} ${dir}
@@ -1198,7 +1202,7 @@ set(patch "${PROJECT_SOURCE_DIR}/Backends/patches/${name}/${ver}")
 set(dl "https://github.com/lesgourg/class_public/archive/v${ver}.tar.gz")
 set(md5 "e6eb0fd721bb1098e642f5d1970501ce")
 set(dir "${PROJECT_SOURCE_DIR}/Backends/installed/${name}/${ver}")
-check_ditch_status(${name} ${ver})
+check_ditch_status(${name} ${ver} ${dir})
 if(NOT ditched_${name}_${ver})
   ExternalProject_Add(${name}_${ver}
     DOWNLOAD_COMMAND ${DL_BACKEND} ${dl} ${md5} ${dir}
@@ -1223,7 +1227,7 @@ set(patch "${PROJECT_SOURCE_DIR}/Backends/patches/${name}/${ver}")
 set(dl "https://github.com/lesgourg/class_public/archive/ExoCLASS.tar.gz")
 set(md5 "54e5700ebef5ac8ef6c3a073edaa87ea")
 set(dir "${PROJECT_SOURCE_DIR}/Backends/installed/${name}/${ver}")
-check_ditch_status(${name} ${ver})
+check_ditch_status(${name} ${ver} ${dir})
 if(NOT ditched_${name}_${ver})
   ExternalProject_Add(${name}_${ver}
     DOWNLOAD_COMMAND ${DL_BACKEND} ${dl} ${md5} ${dir}
@@ -1250,7 +1254,7 @@ set(patch "${PROJECT_SOURCE_DIR}/Backends/patches/${name}/${ver}")
 set(dl "https://github.com/lesgourg/class_public/archive/ExoCLASS.tar.gz")
 set(md5 "54e5700ebef5ac8ef6c3a073edaa87ea")
 set(dir "${PROJECT_SOURCE_DIR}/Backends/installed/${name}/${ver}")
-check_ditch_status(${name} ${ver})
+check_ditch_status(${name} ${ver} ${dir})
 if(NOT ditched_${name}_${ver})
   ExternalProject_Add(${name}_${ver}
     DOWNLOAD_COMMAND ${DL_BACKEND} ${dl} ${md5} ${dir}
@@ -1278,7 +1282,7 @@ set(ver "1.0.0")
 set(lib "DarkAges_for_GAMBIT")
 set(dl "null")
 set(dir "${PROJECT_SOURCE_DIR}/Backends/installed/${name}/${ver}")
-check_ditch_status(${name} ${ver})
+check_ditch_status(${name} ${ver} ${dir})
 if(NOT ditched_${name}_${ver})
   ExternalProject_Add(${name}_${ver}
     GIT_REPOSITORY https://github.com/pstoecker/DarkAges.git
@@ -1297,7 +1301,7 @@ set(ver "1.1.0")
 set(lib "DarkAges_for_GAMBIT")
 set(dl "null")
 set(dir "${PROJECT_SOURCE_DIR}/Backends/installed/${name}/${ver}")
-check_ditch_status(${name} ${ver})
+check_ditch_status(${name} ${ver} ${dir})
 if(NOT ditched_${name}_${ver})
   ExternalProject_Add(${name}_${ver}
     GIT_REPOSITORY https://github.com/pstoecker/DarkAges.git
@@ -1321,6 +1325,7 @@ set(md5 "03f99f02c572ea34383a0888fb0658d6")
 set(dir "${PROJECT_SOURCE_DIR}/Backends/installed/${name}/${ver}")
 set(patch "${PROJECT_SOURCE_DIR}/Backends/patches/${name}/${ver}")
 set(driver "${PROJECT_SOURCE_DIR}/Backends/include/gambit/Backends/backend_types/MultiModeCode_2_0_0")
+check_ditch_status(${name} ${ver} ${dir})
 if(NOT ditched_${name}_${ver})
   ExternalProject_Add(${name}_${ver}
     DOWNLOAD_COMMAND ${DL_BACKEND} ${dl} ${md5} ${dir}
