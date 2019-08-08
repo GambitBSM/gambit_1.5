@@ -24,61 +24,65 @@ namespace Gambit
   namespace NeutrinoBit
   {
 
-  class NeutrinoInterpolator
-  {
-    private:
+    class NeutrinoInterpolator
+    {
+      private:
 
-      // GSL objects
-      gsl_interp_accel *acc;
-      gsl_spline *spline;
+        // GSL objects
+        gsl_interp_accel *acc;
+        gsl_spline *spline;
 
-    public:
+      public:
 
-      // Constructor
-      NeutrinoInterpolator(std::string file)
-      {
-        // Read file
-        std::vector<std::pair<double,double> > array;
-        std::ifstream f(GAMBIT_DIR "/"+file);
-        std::string line;
-        while(getline(f, line))
+        // Constructor
+        NeutrinoInterpolator(std::string file)
         {
-          std::stringstream iss(line);
-          std::pair<double,double> point;
-          iss >> point.first;
-          iss.ignore();
-          iss >> point.second;
-          array.push_back(point);
-        }
-        unsigned int npoints = array.size();
+          // Read file
+          std::vector<std::pair<double,double> > array;
+          std::ifstream f(GAMBIT_DIR "/"+file);
+          std::string line;
+          while(getline(f, line))
+          {
+            std::stringstream iss(line);
+            std::pair<double,double> point;
+            iss >> point.first;
+            iss.ignore();
+            iss >> point.second;
+            array.push_back(point);
+          }
+          unsigned int npoints = array.size();
 
-        // Fill axes
-        double x[npoints], y[npoints];
-        for (unsigned int i=0; i<npoints; i++)
+          // Fill axes
+          double x[npoints], y[npoints];
+          for (unsigned int i=0; i<npoints; i++)
+          {
+            x[i] = array[i].first;
+            y[i] = array[i].second;
+          }
+ 
+          // Create and initialize spline
+          acc = gsl_interp_accel_alloc();
+          spline = gsl_spline_alloc(gsl_interp_cspline, npoints);
+          gsl_spline_init(spline, x, y, npoints);
+
+        }
+
+        // Delete copy constructor and assignment operator to avoid shallow copies
+        NeutrinoInterpolator(const NeutrinoInterpolator&) = delete;
+        NeutrinoInterpolator& operator=(const NeutrinoInterpolator&) = delete;     
+
+        // Destructor
+        ~NeutrinoInterpolator()
         {
-          x[i] = array[i].first;
-          y[i] = array[i].second;
+          gsl_spline_free (spline);
+          gsl_interp_accel_free (acc);
         }
 
-        // Create and initialize spline
-        acc = gsl_interp_accel_alloc();
-        spline = gsl_spline_alloc(gsl_interp_cspline, npoints);
-        gsl_spline_init(spline, x, y, npoints);
-
-      }
-
-      // Destructor
-      ~NeutrinoInterpolator()
-      {
-        gsl_spline_free (spline);
-        gsl_interp_accel_free (acc);
-      }
-
-      // Evaluation function
-      double eval(double x)
-      {
-        return gsl_spline_eval(spline, x, acc);
-      }
+        // Evaluation function
+        double eval(double x)
+        {
+          return gsl_spline_eval(spline, x, acc);
+        }
 
     };
 

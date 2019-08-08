@@ -101,7 +101,7 @@ Scanner:
 
     random:
       plugin: random
-      point_number: 1
+      point_number: 1000
       like: LogLike
 
     de:
@@ -124,7 +124,7 @@ ObsLikes:
   - capability: lnL_W_mass
     purpose: LogLike
 
-  - capability: lnL_sinW2
+  - capability: lnL_sinW2_eff
     purpose: LogLike
 
   - capability: lnL_Z_inv

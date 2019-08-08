@@ -74,8 +74,12 @@ namespace Gambit
         AxionInterpolator(std::string file, std::string type);
         AxionInterpolator(std::string file);
         AxionInterpolator();
+        AxionInterpolator& operator=(AxionInterpolator&&);
         // Destructor
         ~AxionInterpolator();
+        // Delete copy constructor and assignment operator to avoid shallow copies
+        AxionInterpolator(const AxionInterpolator&) = delete;
+        AxionInterpolator operator=(const AxionInterpolator&) = delete;
         // Routine to access interpolated values.
         double interpolate(double x);
         // Routine to access upper and lower boundaries of available data.
@@ -133,6 +137,19 @@ namespace Gambit
     AxionInterpolator::AxionInterpolator(std::string file) { init(file, "linear"); };
     AxionInterpolator::AxionInterpolator() {};
 
+    // Move assignment operator
+    AxionInterpolator& AxionInterpolator::operator=(AxionInterpolator&& interp)
+    {
+      if(this != &interp)
+      {
+        std::swap(acc,interp.acc);
+        std::swap(spline,interp.spline);
+        std::swap(lo,interp.lo);
+        std::swap(up,interp.up);
+      }
+      return *this;
+    }
+
     // Destructor
     AxionInterpolator::~AxionInterpolator()
     {
@@ -177,6 +194,9 @@ namespace Gambit
         HESS_Interpolator(std::string file);
         // Class destructor
         ~HESS_Interpolator();
+        // Delete copy constructor and assignment operator to avoid shallow copies
+        HESS_Interpolator(const HESS_Interpolator&) = delete;
+        HESS_Interpolator operator=(const HESS_Interpolator&) = delete;
         // Container for the tabulated data.
         ASCIItableReader interp_lnL;
         // Routine to return interpolated log-likelihood values.
@@ -301,6 +321,10 @@ namespace Gambit
         SolarModel();
         SolarModel(std::string file);
         ~SolarModel();
+        SolarModel& operator=(SolarModel&&);
+        // Delete copy constructor and assignment operator to avoid shallow copies
+        SolarModel(const SolarModel&) = delete;
+        SolarModel operator=(const SolarModel&) = delete;
         // Min. and max. radius of the solar model file (distance r from the centre of the Sun in units of the solar radius)
         double r_lo, r_hi;
         // Routine to return the screening parameter kappa^2 (kappa^-1 = Debye-Hueckel radius).
@@ -412,6 +436,18 @@ namespace Gambit
 
       logger() << LogTags::info << "Initialisation of solar model from file '"+file+"' complete!" << std::endl;
       logger() << LogTags::debug << "Entries in model file: " << pts << " for solar radius in [" << data["radius"][0] << ", " << data["radius"][pts-1] << "]." << EOM;
+    }
+
+    // Move assignment operator
+    SolarModel& SolarModel::operator=(SolarModel &&model)
+    { 
+      if (this != &model)
+      {
+        std::swap(data,model.data);
+        std::swap(accel,model.accel);
+        std::swap(linear_interp, model.linear_interp);
+      }
+      return *this;
     }
 
     // Class destructor
@@ -544,10 +580,14 @@ namespace Gambit
     {
       public:
         CAST_SolarModel_Interpolator(std::string solar_model_gagg, std::string solar_model_gaee, std::string data_set);
+        CAST_SolarModel_Interpolator(CAST_SolarModel_Interpolator&&);
         ~CAST_SolarModel_Interpolator();
+        // Delete copy constructor and assignment operator to avoid shallow copies
+        CAST_SolarModel_Interpolator(const CAST_SolarModel_Interpolator&) = delete;
+        CAST_SolarModel_Interpolator operator=(const CAST_SolarModel_Interpolator&) = delete;
         std::vector<double> evaluate_gagg_contrib(double m_ax);
         std::vector<double> evaluate_gaee_contrib(double m_ax);
-      private:
+     private:
         int n_bins;
         ASCIItableReader gagg_data;
         ASCIItableReader gaee_data;
@@ -614,7 +654,7 @@ namespace Gambit
         {
           if (Utils::file_exists(darkbitdata_path+"SolarModel_"+solar_model_gagg+".dat"))
           {
-            model_gagg = SolarModel(darkbitdata_path+"SolarModel_"+solar_model_gagg+".dat");
+            model_gagg = std::move(SolarModel(darkbitdata_path+"SolarModel_"+solar_model_gagg+".dat"));
           } else {
             DarkBit_error().raise(LOCAL_INFO, "ERROR! No solar model file found for '"+solar_model_gagg+"'.\n"
                                               "       Check 'DarkBit/data' for files named 'SolarModel_*.dat' for available options *.");
@@ -628,7 +668,7 @@ namespace Gambit
         {
           if (Utils::file_exists(darkbitdata_path+"CAST/"+"Axion_Spectrum_"+solar_model_gaee+"_gaee.dat"))
           {
-            gaee_spectrum = AxionInterpolator(darkbitdata_path+"CAST/"+"Axion_Spectrum_"+solar_model_gaee+"_gaee.dat");
+            gaee_spectrum = std::move(AxionInterpolator(darkbitdata_path+"CAST/"+"Axion_Spectrum_"+solar_model_gaee+"_gaee.dat"));
           } else {
             DarkBit_error().raise(LOCAL_INFO, "ERROR! No spectrum file found for axion-electron interactions and model '"+solar_model_gaee+"'.\n"
                                               "       Check 'DarkBit/data' for files named 'Axion_Spectrum_*_gaee.dat' for available options *.");
@@ -774,6 +814,18 @@ namespace Gambit
         gsl_spline_init (gaee_linear_interp[bin], mass_gaee, flux_gaee, gaee_pts);
       };
     }
+
+    // Move constructor
+    CAST_SolarModel_Interpolator::CAST_SolarModel_Interpolator(CAST_SolarModel_Interpolator &&interp) :
+      n_bins(std::move(interp.n_bins)),
+      gagg_data(std::move(interp.gagg_data)),
+      gaee_data(std::move(interp.gaee_data)),
+      eff_exp_data(std::move(interp.eff_exp_data)),
+      gagg_acc(std::move(interp.gagg_acc)),
+      gaee_acc(std::move(interp.gaee_acc)),
+      gagg_linear_interp(std::move(interp.gagg_linear_interp)),
+      gaee_linear_interp(std::move(interp.gaee_linear_interp))
+    {}
 
     // Class destructor
     CAST_SolarModel_Interpolator::~CAST_SolarModel_Interpolator()
@@ -1093,7 +1145,7 @@ namespace Gambit
         for (int e = 0; e < n_exps; e++)
         {
           CAST_SolarModel_Interpolator dummy (solar_model_gagg, solar_model_gaee, "CAST2017_"+exp_names[e]);
-          lg_ref_counts.push_back(dummy);
+          lg_ref_counts.push_back(std::move(dummy));
         };
       };
       lg_ref_counts_not_calculated = false;
@@ -1700,6 +1752,10 @@ namespace Gambit
           gsl_spline_free (spline);
           gsl_interp_accel_free (acc);
         }
+
+        // Delete copy constructor and assignment operator to avoid shallow copies
+        WDInterpolator(const WDInterpolator&) = delete;
+        WDInterpolator operator=(const WDInterpolator&) = delete;
 
         // Init
         void init(std::vector<double> x, std::vector<double> y, int npoints)
