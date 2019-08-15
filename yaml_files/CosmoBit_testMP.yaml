@@ -123,16 +123,6 @@ ObsLikes:
     capability:   MP_Observables
     type:         map_str_dbl
 
-  - purpose:      LogLike
-    capability:   dmNu21_LogLike
-    module:       CosmoBit
-    type:         double
-
-  - purpose:      LogLike
-    capability:   dmNu3l_LogLike
-    module:       CosmoBit
-    type:         double
-
 #======== Rule entries ========
 Rules:
 

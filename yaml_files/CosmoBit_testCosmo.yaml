@@ -37,7 +37,10 @@ Parameters:
 
  # neutrino masses
  #StandardModel_numass_single: !import include/StandardModel_numass_single_scan.yaml
- StandardModel_numass_degenerate: !import include/StandardModel_numass_degenerate_scan.yaml
+ #StandardModel_numass_degenerate: !import include/StandardModel_numass_degenerate_scan.yaml
+ StandardModel_mNudiff: !import include/StandardModel_mNudiff_both_scan.yaml
+ #StandardModel_mNudiff: !import include/StandardModel_mNudiff_NH_scan.yaml
+ #StandardModel_mNudiff: !import include/StandardModel_mNudiff_IH_scan.yaml
 
  # nuisance parameters in Planck likelihood
  Planck_lite: !import include/Planck_2018/Planck_lite_gauss.yaml
@@ -77,14 +80,19 @@ Scanner:
 #======== Observables of interest ========
 ObsLikes:
   - purpose:      LogLike
-    capability:   dmNu21_LogLike
-    module:       CosmoBit
+    capability:   md21_lnL
+    module:       NeutrinoBit
     type:         double
 
   - purpose:      LogLike
-    capability:   dmNu3l_LogLike
-    module:       CosmoBit
+    capability:   md3l_lnL
+    module:       NeutrinoBit
     type:         double
+
+  - purpose:      Observable
+    capability:   ordering
+    module:       NeutrinoBit
+    type:         bool
 
   - purpose:      LogLike
     capability:   BAO_LogLike
