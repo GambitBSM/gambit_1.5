@@ -204,33 +204,46 @@ namespace Gambit
 
     }
 
-    // The fraction of dark matter in decaying ALPs at the time of production
-    void DM_fraction_ALP(double& result)
+    // Compute the minimal fraction of dark matter in ALPs expected from thermal production via Primakoff processes
+    void minimum_fraction_ALP(double& result)
     {
-      using namespace Pipes::DM_fraction_ALP;
+      using namespace Pipes::minimum_fraction_ALP;
 
       const double rho0_crit_by_h2 = 3.*pow(m_planck_red*1e9,2) * pow((1e5*1e9*hbar/_Mpc_SI_),2); // rho0_crit/(h^2)
-      const double t_rec = 1e12;                     // Age of the Universe at recombination in s
-
-      double f0_thermal = *Param["f0_thermal"];      // Fraction of DM in ALPs at production, due to thermal production
-      double omega_ma = *Dep::RD_oh2;                // Cosmological density of ALPs from vacuum misalignment
 
       double ma0 = *Param["ma0"];                    // non-thermal ALP mass in eV
       double T = *Dep::T_cmb;                        // CMB temperature in K
       double omega_cdm = *Param["omega_cdm"];        // omega_cdm = Omega_cdm * h^2
-      double tau_a = *Dep::lifetime;                 // ALP lifetime in s
 
       // Consistency check: if the ALP abundance from all thermal processes is less than that expected just from Primakoff processes, invalidate this point.
       double Ya0_min = *Dep::minimum_abundance;
       double ssm0 = entropy_density_SM(T);           // SM entropy density today in eV^3 (cf. footnote 24 of PDG2018-Astrophysical parameters)
       double rho0_cdm = omega_cdm * rho0_crit_by_h2; // rho0_cdm = Omega_cdm * rho0_crit;
-      double rho0_thermal = f0_thermal * rho0_cdm;   // energy density of axions today in eV^4
-      double Ya0 = rho0_thermal / (ma0 * ssm0);      // ALP abundance at production
-      if (Ya0 < Ya0_min)
+      double rho0_min = Ya0_min * ma0 * ssm0;        // energy density of axions today in eV^4
+      result = rho0_min / rho0_cdm;
+    }
+
+    // The fraction of dark matter in decaying ALPs at the time of production
+    void DM_fraction_ALP(double& result)
+    {
+      using namespace Pipes::DM_fraction_ALP;
+
+      const double t_rec = 1e12;                     // Age of the Universe at recombination in s
+
+      double f0_thermal = *Param["f0_thermal"];      // Fraction of DM in ALPs at production, due to thermal production
+      double omega_ma = *Dep::RD_oh2;                // Cosmological density of ALPs from vacuum misalignment
+
+      double omega_cdm = *Param["omega_cdm"];        // omega_cdm = Omega_cdm * h^2
+      double tau_a = *Dep::lifetime;                 // ALP lifetime in s
+
+      // Consistency check: if the ALP abundance from all thermal processes is less than that expected just from Primakoff processes, invalidate this point.
+      double f0_min = *Dep::minimum_fraction;
+      if (f0_thermal < f0_min)
       {
         std::ostringstream err;
-        err << "The choice of Ya0 (" << Ya0 << ") is in contradiction with the minimum abundance Ya0_min (";
-        err << Ya0_min << ") produced via Primakoff processes.";
+        err << "The choice of f0_thermal (" << f0_thermal;
+        err << ") is in contradiction with the minimum dark matter fraction f0_min (";
+        err << f0_min << ") produced via Primakoff processes.";
         invalid_point().raise(err.str());
       }
 
