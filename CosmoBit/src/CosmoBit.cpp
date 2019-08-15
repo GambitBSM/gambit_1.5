@@ -414,26 +414,35 @@ namespace Gambit
       result = Stats::gaussian_loglikelihood((ksz_norm + 1.6*A_sz), 9.5, 0.0, 3.0, false);
     }
 
+    void set_NuMasses_SM_baseline(map_str_dbl &result)
+    {
+      // Fallback for NuMasses_SM capability if Neutrino masses are not set, i.e. neither StandardModel_SLHA2 nor any child is in use
+      // The Planck baseline analysis assumes a single massive neutrino with a fixed masss of 0.06 eV.
+      using namespace Pipes::set_NuMasses_SM_baseline;
+
+      result["mNu1"] = 0.06;
+      result["mNu2"] = 0.0;
+      result["mNu3"] = 0.0;
+
+      result["N_ncdm"] = 1;
+
+      result["mNu_tot_eV"] = 0.06;
+
+      result["N_ur_SMnu"]= 2.0328;  // dNeff= 2.0328 for 1 massive neutrino at CMB release
+    }
+
     void set_NuMasses_SM(map_str_dbl &result)
     {
       using namespace Pipes::set_NuMasses_SM;
 
       double mNu1, mNu2, mNu3;
       int N_ncdm = 0;
-      if (ModelInUse("StandardModel_SLHA2"))
-      {
-        // (PS) Heads up! The units in StandardModel_SLHA2 are GeV
-        // Here we are using eV
-        mNu1 = 1e9*(*Param["mNu1"]);
-        mNu2 = 1e9*(*Param["mNu2"]);
-        mNu3 = 1e9*(*Param["mNu3"]);
-      }
-      else
-      {
-        mNu1 = 0.06;
-        mNu2 = 0.;
-        mNu3 = 0.;
-      }
+
+      // (PS) Heads up! The units in StandardModel_SLHA2 are GeV
+      // Here we are using eV
+      mNu1 = 1e9*(*Param["mNu1"]);
+      mNu2 = 1e9*(*Param["mNu2"]);
+      mNu3 = 1e9*(*Param["mNu3"]);
 
       if(mNu1 > 0.)
         N_ncdm++;
@@ -447,6 +456,8 @@ namespace Gambit
       result["mNu3"]=mNu3;
 
       result["N_ncdm"] = N_ncdm;
+
+      result["mNu_tot_eV"] = mNu1 + mNu2 + mNu3;
 
       switch (N_ncdm)
       {
@@ -475,6 +486,14 @@ namespace Gambit
             CosmoBit_error().raise(LOCAL_INFO, err.str());
           }
       }
+    }
+
+    void get_mNu_tot(double& result)
+    {
+      using namespace Pipes::get_mNu_tot;
+
+      map_str_dbl NuMasses = *Dep::NuMasses_SM;
+      result = NuMasses["mNu_tot_eV"];
     }
 
     void class_set_parameter_LCDM_family(Class_container& cosmo)
