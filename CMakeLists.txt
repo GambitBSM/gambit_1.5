@@ -65,11 +65,12 @@ endforeach()
 project(gambit C CXX Fortran)
 
 # Make sure the user hasn't accidentally set the C++ compiler to the C compiler.
-if (CMAKE_CXX_COMPILER MATCHES "gcc.*$")
+get_filename_component(CXX_COMPILER_NAME ${CMAKE_CXX_COMPILER} NAME)
+if (CXX_COMPILER_NAME MATCHES "gcc.*$")
   message(FATAL_ERROR "\nYou have set CMAKE_CXX_COMPILER to gcc.  Did you mean g++?")
-elseif (CMAKE_CXX_COMPILER MATCHES "clang($|-.*)")
+elseif (CXX_COMPILER_NAME MATCHES "clang($|-.*)")
   message(FATAL_ERROR "\nYou have set CMAKE_CXX_COMPILER to clang.  Did you mean clang++?")
-elseif (CMAKE_CXX_COMPILER MATCHES "icc.*$")
+elseif (CXX_COMPILER_NAME MATCHES "icc.*$")
   message(FATAL_ERROR "\nYou have set CMAKE_CXX_COMPILER to icc.  Did you mean icpc?")
 endif()
 
