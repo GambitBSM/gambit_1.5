@@ -240,14 +240,18 @@
     #define FUNCTION get_a_cap
     START_FUNCTION(unsigned int)
     ALLOW_MODELS(demo_CAP)
-    #undef FUNCTION
+    DEPENDENCY(xsection, double) // From ExampleBit_A
+    // Other module-function macros not tested in model context
+    // Please submit a bug report if they don't work for you! 
+   #undef FUNCTION
 
   #undef CAPABILITY
 
   // The "module function" definition
   // Have to put it in the right namespace, and can't used MODEL_NAMESPACE macro unless
   // we change something in the START_FUNCTION macro to first declare the function in
-  // the right namespace.
+  // the right namespace. So just used the below as the template for what the namespace
+  // should be.
   namespace Gambit {
     namespace Models {
       namespace MODEL {
@@ -255,9 +259,11 @@
         {
             using namespace Pipes::get_a_cap;
 
+            double xsec = *Dep::xsection; // Just for demonstration purposes
+ 
             logger()<<"Running 'get_a_cap' function in model-module 'demo_CAP'"<<EOM;     
           
-            result = *Param.at("a");
+            result = *Param.at("a") * xsec;
         }
       }
     }
