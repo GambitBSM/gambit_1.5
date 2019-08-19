@@ -94,7 +94,7 @@
         namespace FUNCTION                                                     \
         {                                                                      \
           /* Declare the parameters safe-pointer map as external. */           \
-          extern Models::safe_param_map<safe_ptr<double> > Param;              \
+          extern Models::safe_param_map<safe_ptr<const double> > Param;        \
           /* Declare pointer to model-in-use function as external. */          \
           BOOST_PP_IIF(IS_TYPE(ModelParameters,TYPE), ,                        \
            extern bool (*ModelInUse)(str); )                                   \
