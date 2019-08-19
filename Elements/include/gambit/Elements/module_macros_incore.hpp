@@ -212,7 +212,7 @@
 
 /// Quick, one-line declaration of model-conditional dependencies
 #define MODEL_CONDITIONAL_DEPENDENCY(DEP, TYPE, ...)      CORE_START_CONDITIONAL_DEPENDENCY(MODULE, CAPABILITY, FUNCTION, DEP, TYPE, NOT_MODEL) \
-                                                          ACTIVATE_DEP_MODEL(MODULE, CAPABILITY, FUNCTION, DEP, NOT_MODEL #__VA_ARGS__)
+                                                          ACTIVATE_DEP_MODEL(MODULE, CAPABILITY, FUNCTION, DEP, NOT_MODEL, #__VA_ARGS__)
 
 /// Indicate that the current \link FUNCTION() FUNCTION\endlink requires classes that
 /// must be loaded from \em BACKEND, version \em VERSION.
