@@ -55,7 +55,7 @@ namespace Gambit
         ( const typename MI::InputParameters& input
         , const SMInputs& sminputs
         , const Options& runOptions
-        , const std::map<str, safe_ptr<double> >& input_Param
+        , const std::map<str, safe_ptr<const double> >& input_Param
         )
     {
       softsusy::QedQcd oneset;
@@ -138,7 +138,7 @@ namespace Gambit
 
 
     template <class T>
-    void fill_MDM_input(T& input, const std::map<str, safe_ptr<double> >& Param,SMInputs sminputs)
+    void fill_MDM_input(T& input, const std::map<str, safe_ptr<const double> >& Param,SMInputs sminputs)
     {
       double mH = *Param.at("mH");
       double mChi = *Param.at("mChi");
