@@ -118,7 +118,7 @@ namespace Gambit
         }
         else
         {
-          result = getValue(keys...);
+          result = getValue<TYPE>(keys...);
         }
         return result;
       }
