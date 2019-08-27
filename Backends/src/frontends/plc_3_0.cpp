@@ -65,6 +65,7 @@ if(*InUse::CAT(plc_loglike_,NAME))                                              
   double CAT(plc_loglike_,NAME)(double* cl_and_pars)                                     \
   {                                                                                      \
     const std::string name = STRINGIFY(NAME);                                            \
+    logger() << "Calling \""<< STRINGIFY(CAT(plc_loglike_,NAME)) << "\":" << EOM;        \
     if (CAT(TYPE,_map).count(name) == 0)                                                 \
     {                                                                                    \
       std::string mssg = "Could not find the Likelihood object \"";                      \
@@ -82,7 +83,13 @@ if(*InUse::CAT(plc_loglike_,NAME))                                              
       char forwardedErr[4096];                                                           \
       stringError(byVal(forwardedErr), plc_Error);                                       \
       ErrMssg += forwardedErr;                                                           \
+      logger() << ErrMssg << "\n\nPoint will be invalidated.\n" << EOM;                  \
       invalid_point().raise(ErrMssg.c_str());                                            \
+    }                                                                                    \
+    else                                                                                 \
+    {                                                                                    \
+      logger() << "Calling \""<< STRINGIFY(CAT(plc_loglike_,NAME)) << "\"";              \
+      logger() << " was successfull. Got " << res << EOM;                                \
     }                                                                                    \
     return res;                                                                          \
   }                                                                                      \
