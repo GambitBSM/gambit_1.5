@@ -2076,6 +2076,15 @@ namespace Gambit
     {
       using namespace Pipes::class_get_Cl_TT;
       result = BEreq::class_get_cl("tt");
+
+      // Loop through the TT spectrum and check if there is a negative value. If so, invalidate.
+      for (auto it=result.begin(); it != result.end(); it++)
+      {
+        if (*it < 0.0)
+        {
+          invalid_point().raise("Found a negative value in the TT spectrum.");
+        }
+      }
     }
 
     void class_get_Cl_TE(std::vector<double>& result)
@@ -2088,18 +2097,45 @@ namespace Gambit
     {
       using namespace Pipes::class_get_Cl_EE;
       result = BEreq::class_get_cl("ee");
+
+      // Loop through the EE spectrum and check if there is a negative value. If so, invalidate.
+      for (auto it=result.begin(); it != result.end(); it++)
+      {
+        if (*it < 0.0)
+        {
+          invalid_point().raise("Found a negative value in the EE spectrum.");
+        }
+      }
     }
 
     void class_get_Cl_BB(std::vector<double>& result)
     {
       using namespace Pipes::class_get_Cl_BB;
       result = BEreq::class_get_cl("bb");
+
+      // Loop through the BB spectrum and check if there is a negative value. If so, invalidate.
+      for (auto it=result.begin(); it != result.end(); it++)
+      {
+        if (*it < 0.0)
+        {
+          invalid_point().raise("Found a negative value in the BB spectrum.");
+        }
+      }
     }
 
     void class_get_Cl_PhiPhi(std::vector<double>& result)
     {
       using namespace Pipes::class_get_Cl_PhiPhi;
       result = BEreq::class_get_cl("pp");
+
+      // Loop through the PhiPhi spectrum and check if there is a negative value. If so, invalidate.
+      for (auto it=result.begin(); it != result.end(); it++)
+      {
+        if (*it < 0.0)
+        {
+          invalid_point().raise("Found a negative value in the PhiPhi spectrum.");
+        }
+      }
     }
 
 // Planck Likelihoods
