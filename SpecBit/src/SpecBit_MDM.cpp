@@ -170,8 +170,8 @@ namespace Gambit
       double step = log10(scale) / pts;
       double runto;
 
-      //const double ul = std::sqrt(4.0 * Pi); // Maximum value for perturbative couplings, same perturbativity bound that FlexibleSUSY uses
-      double ul = 4.0 * Pi;
+      //const double ul = std::sqrt(4.0 * pi); // Maximum value for perturbative couplings, same perturbativity bound that FlexibleSUSY uses
+      double ul = 4.0 * pi;
       for (int i=0;i<pts;i++)
       {
         runto = pow(10,step*float(i+1.0)); // scale to run spectrum to
@@ -201,8 +201,8 @@ namespace Gambit
           std::ostringstream label;
           label << name <<" "<< Par::toString.at(tag);
 
-          if (name == "lambda_h"){ul =  2*Pi;}
-          else {ul = 4.0 * Pi;}
+          if (name == "lambda_h"){ul =  2*pi;}
+          else {ul = 4.0 * pi;}
 
           if(shape.size()==1 and shape[0]==1)
           {
