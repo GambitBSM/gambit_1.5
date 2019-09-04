@@ -34,15 +34,6 @@
   DEFINEPARS(x)
 #undef MODEL
 
-// A dummy model for decaying dark matter
-#define MODEL TestDecayingDM
-  START_MODEL
-  DEFINEPARS(mass,lifetime,fraction,BR)
-  MAP_TO_CAPABILITY(mass, DM_mass)
-  MAP_TO_CAPABILITY(lifetime, lifetime)
-  MAP_TO_CAPABILITY(fraction, DM_fraction)
-#undef MODEL
-
 // The following are some examples that demonstrate the available ways to declare
 // models and their relationships.  These are commented out as they are not necessary for  
 // any of the module examples, but you can uncomment and experiment with them in order to

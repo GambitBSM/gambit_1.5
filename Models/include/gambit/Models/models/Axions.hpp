@@ -19,7 +19,7 @@
 #ifndef __GeneralALP_hpp__
 #define __GeneralALP_hpp__
 
-#include "gambit/Models/models/demo.hpp"
+#include "gambit/Models/models/CosmoEnergyInjection.hpp"
 #include "gambit/Models/models/CosmoModels.hpp"
 
 // General axion model with parametric temperature-dependent mass and cosmological applications.
