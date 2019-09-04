@@ -92,8 +92,8 @@ void MODEL_NAMESPACE::GeneralALP_to_GeneralCosmoALP (const ModelParameters &mypa
     parentparams.setValue("thetai", myparams["thetai"]);
     // Set f0_thermal = 0, i.e. no thermal component.
     parentparams.setValue("f0_thermal", 0);
-    // Use default reheating temperature of 5 MeV.
-    parentparams.setValue("T_R", 5.);
+    // Use extremely high reheating temperature to guarantee that Tosc < T_R
+    parentparams.setValue("T_R", 1.0E99);
 }
 #undef MODEL
 
