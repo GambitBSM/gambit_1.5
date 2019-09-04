@@ -81,7 +81,7 @@ ObsLikes:
   - capability: lnL_RParameter
     purpose: LogLike
 
-  - capability: lnL_SN1987A_DecayApprox
+  - capability: lnL_SN1987A_Decay
     purpose: LogLike
 
   - capability: DM_fraction

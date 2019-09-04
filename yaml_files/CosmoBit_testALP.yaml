@@ -111,7 +111,7 @@ ObsLikes:
     type:         double
 
   - purpose:      LogLike
-    capability:   lnL_SN1987A_DecayApprox
+    capability:   lnL_SN1987A_Decay
     module:       DarkBit
     type:         double
 
