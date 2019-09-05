@@ -516,7 +516,7 @@ END_BE_NAMESPACE
 BE_INI_FUNCTION
 {
   static bool scan_level = true;
-  bool has_energy_injection = ModelInUse("TestDecayingDM");
+  bool has_energy_injection = ModelInUse("DecayingDM_general");
 
   if (!scan_level)
   {

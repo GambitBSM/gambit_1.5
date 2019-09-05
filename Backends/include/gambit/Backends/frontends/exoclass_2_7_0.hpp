@@ -75,7 +75,7 @@ BE_CONV_FUNCTION(class_get_sigma8, double, (double), "class_get_sigma8")
 BE_CONV_FUNCTION(get_exoclass_2_7_0, CosmoBit::Class_container, (), "get_ptr_to_class")
 
 BE_INI_DEPENDENCY(class_set_parameter,CosmoBit::Class_container)
-BE_INI_CONDITIONAL_DEPENDENCY(energy_injection_efficiency, DarkAges::fz_table, TestDecayingDM)
+BE_INI_CONDITIONAL_DEPENDENCY(energy_injection_efficiency, DarkAges::fz_table, DecayingDM_general)
 
 // Undefine macros to avoid conflict with other backends
 #include "gambit/Backends/backend_undefs.hpp"

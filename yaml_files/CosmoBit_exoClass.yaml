@@ -44,8 +44,8 @@ Parameters:
  Planck_lite: !import include/Planck_2018/Planck_lite_flat.yaml
  #Planck_lite: !import include/Planck_2018/Planck_lite_gauss.yaml
 
- # model parameters for "TestDecayingDM"
- TestDecayingDM: !import include/TestDecayingDM_scan.yaml
+ # model parameters for "DecayingDM_general"
+ DecayingDM_general: !import include/DecayingDM_general_scan.yaml
 
 #======== Prior setup ========
 Priors:

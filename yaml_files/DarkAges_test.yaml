@@ -3,7 +3,7 @@
 
 Parameters:
 
-  TestDecayingDM:
+  DecayingDM_general:
     mass:
       range: [0.01, 100]
       prior_type: log

@@ -30,12 +30,12 @@
   DEFINEPARS(gagg,gaee,fa,ma0,Tchi,beta,thetai)
   DEFINEPARS(f0_thermal, T_R)
   
-  // Friendship with "TestDecayingDM" (Mapping is defined in Axions.cpp)
+  // Friendship with "DecayingDM_photon" (Mapping is defined in Axions.cpp)
   // (Energy injection into CMB)
-  INTERPRET_AS_X_FUNCTION(TestDecayingDM,GeneralCosmoALP_to_TestDecayingDM)
-  // The mapping CosmoALP_to_TestDecayingDM depends on the lifetime and the fraction rho_a/rho_cdm (mapping of the mass is trivial).
-  INTERPRET_AS_X_DEPENDENCY(TestDecayingDM,lifetime,double)
-  INTERPRET_AS_X_DEPENDENCY(TestDecayingDM,DM_fraction,double)
+  INTERPRET_AS_X_FUNCTION(DecayingDM_photon,GeneralCosmoALP_to_DecayingDM_photon)
+  // The mapping CosmoALP_to_DecayingDM_photon depends on the lifetime and the fraction rho_a/rho_cdm (mapping of the mass is trivial).
+  INTERPRET_AS_X_DEPENDENCY(DecayingDM_photon,lifetime,double)
+  INTERPRET_AS_X_DEPENDENCY(DecayingDM_photon,DM_fraction,double)
   
   // Friendship with "etaBBN_rBBN_rCMB_dNeffBBN_dNeffCMB" (Mapping is defined in Axions.cpp)
   INTERPRET_AS_X_FUNCTION(etaBBN_rBBN_rCMB_dNeffBBN_dNeffCMB,GeneralCosmoALP_to_etaBBN_rBBN_rCMB_dNeffBBN_dNeffCMB)

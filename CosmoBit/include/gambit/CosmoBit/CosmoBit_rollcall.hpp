@@ -46,9 +46,9 @@ START_MODULE
 
   #define CAPABILITY injection_spectrum
   START_CAPABILITY
-    #define FUNCTION injection_spectrum_ToyModel
+    #define FUNCTION injection_spectrum_decayingDM
     START_FUNCTION(DarkAges::injectionSpectrum)
-    ALLOW_MODELS(TestDecayingDM)
+    ALLOW_MODELS(DecayingDM_general)
     #undef FUNCTION
   #undef CAPABILITY
 
@@ -113,7 +113,7 @@ START_MODULE
   START_CAPABILITY
     #define FUNCTION energy_injection_efficiency_func
     START_FUNCTION(DarkAges::fz_table)
-    ALLOW_MODELS(TestDecayingDM)
+    ALLOW_MODELS(DecayingDM_general)
     BACKEND_REQ(DA_efficiency_function, (DarkAges_tag), DarkAges::fz_table,())
     #undef FUNCTION
   #undef CAPABILITY
@@ -122,7 +122,7 @@ START_MODULE
   START_CAPABILITY
     #define FUNCTION f_effective_func
     START_FUNCTION(double)
-    ALLOW_MODELS(TestDecayingDM)
+    ALLOW_MODELS(DecayingDM_general)
     DEPENDENCY(energy_injection_efficiency,DarkAges::fz_table)
     #undef FUNCTION
   #undef CAPABILITY
@@ -182,9 +182,9 @@ START_MODULE
     DEPENDENCY(T_ncdm, double)
     DEPENDENCY(class_Nur, double)
     DEPENDENCY(NuMasses_SM, map_str_dbl )
-    ALLOW_MODELS(LCDM,TestDecayingDM)
-    MODEL_CONDITIONAL_DEPENDENCY(lifetime,double,TestDecayingDM)
-    MODEL_CONDITIONAL_DEPENDENCY(DM_fraction,double,TestDecayingDM)
+    ALLOW_MODELS(LCDM,DecayingDM_general)
+    MODEL_CONDITIONAL_DEPENDENCY(lifetime,double,DecayingDM_general)
+    MODEL_CONDITIONAL_DEPENDENCY(DM_fraction,double,DecayingDM_general)
     #undef FUNCTION
 
 
@@ -837,18 +837,18 @@ START_MODULE
       DEPENDENCY(T_ncdm,            double)
       DEPENDENCY(class_Nur,         double)
       DEPENDENCY(Helium_abundance,  std::vector<double>)
-      MODEL_CONDITIONAL_DEPENDENCY(model_dep_classy_parameters, pybind11::dict,  TestDecayingDM)
-      //MODEL_CONDITIONAL_DEPENDENCY(lifetime,                    double,             TestDecayingDM)
-      //MODEL_CONDITIONAL_DEPENDENCY(DM_fraction,                 double,             TestDecayingDM)
-      //MODEL_CONDITIONAL_DEPENDENCY(energy_injection_efficiency, DarkAges::fz_table, TestDecayingDM)
+      MODEL_CONDITIONAL_DEPENDENCY(model_dep_classy_parameters, pybind11::dict,  DecayingDM_general)
+      //MODEL_CONDITIONAL_DEPENDENCY(lifetime,                    double,             DecayingDM_general)
+      //MODEL_CONDITIONAL_DEPENDENCY(DM_fraction,                 double,             DecayingDM_general)
+      //MODEL_CONDITIONAL_DEPENDENCY(energy_injection_efficiency, DarkAges::fz_table, DecayingDM_general)
      #undef FUNCTION
   #undef CAPABILITY
 
   #define CAPABILITY model_dep_classy_parameters
      START_CAPABILITY
-     #define FUNCTION model_dep_classy_parameters_TestDecayingDM
+     #define FUNCTION model_dep_classy_parameters_DecayingDM_general
       START_FUNCTION(pybind11::dict)
-      ALLOW_MODELS(TestDecayingDM)
+      ALLOW_MODELS(DecayingDM_general)
       DEPENDENCY(lifetime,                    double)
       DEPENDENCY(DM_fraction,                 double)
       DEPENDENCY(energy_injection_efficiency, DarkAges::fz_table)

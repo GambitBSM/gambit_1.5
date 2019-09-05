@@ -4347,7 +4347,7 @@ Omega0_b: |
 Sigma8:  |
   Returns sigma8.
 
-TestDecayingDM_parameters: |
+DecayingDM_general_parameters: |
    mass, mass of the dark matter candidate [in GeV]
    lifetime, lifetime of said DM candidate [in s]
    fraction, fraction of how much the decaying DM component contributes to all DM.
@@ -4454,18 +4454,18 @@ f_effective: |
 DM_mass: |
     Dark matter mass (in GeV).
 
-    --> DUMMY for the use with TestDecayingDM <--
+    --> DUMMY for the use with DecayingDM_general <--
 
 DM_fraction: |
     fraction of the abundance of the dark matter candidate in question
     (mostly a decaying component) contributing to the total DM abundance.
 
-    --> DUMMY for the use with TestDecayingDM <--
+    --> DUMMY for the use with DecayingDM_general <--
 
 lifetime: |
     lifetime of the decaying dark matter component (in s).
 
-    --> DUMMY for the use with TestDecayingDM <--
+    --> DUMMY for the use with DecayingDM_general <--
 
 injection_spectrum: |
     Spectrum of electrons/positrons and photons injected by
@@ -4474,7 +4474,7 @@ injection_spectrum: |
     The relative contribution of the electron and photon channel is
     given by the branching ratio (BR).
 
-    --> DUMMY for the use with TestDecayingDM <--
+    --> DUMMY for the use with DecayingDM_general <--
 
 AlterBBN_2_0_init: |
     Initialise AlterBBN.

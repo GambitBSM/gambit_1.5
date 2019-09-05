@@ -669,7 +669,7 @@ plik_dx11dr2_HM_v18_TT: |
    calib_217T          - the relative calibration between the 217 and 143 spectra
    A_planck            - the Planck absolute calibration.
 
-TestDecayingDM: |
+DecayingDM_general: |
 
   Toy model of decaying dark matter.
 

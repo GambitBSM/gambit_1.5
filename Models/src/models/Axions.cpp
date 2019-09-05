@@ -24,15 +24,14 @@
 #include "gambit/Models/models/Axions.hpp"
 
 #define MODEL GeneralCosmoALP
-#define FRIEND TestDecayingDM
-void MODEL_NAMESPACE::GeneralCosmoALP_to_TestDecayingDM (const ModelParameters &myparams, ModelParameters &friendparams)
+#define FRIEND DecayingDM_photon
+void MODEL_NAMESPACE::GeneralCosmoALP_to_DecayingDM_photon (const ModelParameters &myparams, ModelParameters &friendparams)
 {
     USE_MODEL_PIPE(FRIEND) // get pipe for "interpret as friend" function
-    logger()<<"Running interpret_as_friend calculations for GeneralCosmoALP -> TestDecayingDM ..."<<EOM;
+    logger()<<"Running interpret_as_friend calculations for GeneralCosmoALP -> DecayingDM_photon ..."<<EOM;
 
     friendparams.setValue("lifetime", *Dep::lifetime);
-    friendparams.setValue("mass", 1e-9*myparams["ma0"]); // Convert units from eV (GeneralCosmoALP) to GeV (TestDecayingDM)
-    friendparams.setValue("BR", 0.); // ALP decays exclusively into photons
+    friendparams.setValue("mass", 1e-9*myparams["ma0"]); // Convert units from eV (GeneralCosmoALP) to GeV (DecayingDM_photon)
     friendparams.setValue("fraction", *Dep::DM_fraction);
 }
 #undef FRIEND

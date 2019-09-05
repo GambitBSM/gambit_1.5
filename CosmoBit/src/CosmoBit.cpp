@@ -153,9 +153,9 @@ namespace Gambit
       return As;
     }
 
-    void injection_spectrum_ToyModel(DarkAges::injectionSpectrum& spectrum)
+    void injection_spectrum_decayingDM(DarkAges::injectionSpectrum& spectrum)
     {
-      using namespace Pipes::injection_spectrum_ToyModel;
+      using namespace Pipes::injection_spectrum_decayingDM;
 
       double m = *Param["mass"];
       double BR_el = *Param["BR"];
@@ -549,7 +549,7 @@ namespace Gambit
       cosmo.input.addEntry("n_s",*Param["n_s"]);
       cosmo.input.addEntry("tau_reio",*Param["tau_reio"]);
 
-      if (ModelInUse("TestDecayingDM"))  // TODO: need to test if class or exo_class in use! does not work
+      if (ModelInUse("DecayingDM_general"))  // TODO: need to test if class or exo_class in use! does not work
       {
         cosmo.input.addEntry("energy_deposition_function","GAMBIT");
         cosmo.input.addEntry("tau_dcdm",*Dep::lifetime);
@@ -4078,7 +4078,7 @@ namespace Gambit
       result.addEntry("YHe", Helium_abundance.at(0)); // .at(0): mean, .at(1): uncertainty
 
       // TODO: need to test if class or exo_class in use! does not work -> (JR) should be fixed with classy implementation
-      if (ModelInUse("TestDecayingDM")){result.addDict(*Dep::model_dep_classy_parameters);}
+      if (ModelInUse("DecayingDM_general")){result.addDict(*Dep::model_dep_classy_parameters);}
 
       // Other CLASS input direct from the YAML file, only read before first CLASS run
       static bool first_run = true;
@@ -4105,9 +4105,9 @@ namespace Gambit
 
     }
 
-  void model_dep_classy_parameters_TestDecayingDM(pybind11::dict &result)
+  void model_dep_classy_parameters_DecayingDM_general(pybind11::dict &result)
   {
-    using namespace Pipes::model_dep_classy_parameters_TestDecayingDM;
+    using namespace Pipes::model_dep_classy_parameters_DecayingDM_general;
 
     // make sure nothing from previous run is contained
     result.clear();
