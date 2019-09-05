@@ -73,13 +73,15 @@ namespace Gambit
     {
       public:
         // Overloaded class creators for the AxionInterpolator class using the init function below.
+        AxionInterpolator();
+        AxionInterpolator(const std::vector<double> x, const std::vector<double> y, std::string type);
+        AxionInterpolator(const std::vector<double> x, const std::vector<double> y);
         AxionInterpolator(std::string file, std::string type);
         AxionInterpolator(std::string file);
-        AxionInterpolator();
         AxionInterpolator& operator=(AxionInterpolator&&);
-        // Destructor
+        // Destructor.
         ~AxionInterpolator();
-        // Delete copy constructor and assignment operator to avoid shallow copies
+        // Delete copy constructor and assignment operator to avoid shallow copies.
         AxionInterpolator(const AxionInterpolator&) = delete;
         AxionInterpolator operator=(const AxionInterpolator&) = delete;
         // Routine to access interpolated values.
@@ -90,6 +92,7 @@ namespace Gambit
       private:
         // Initialiser for the AxionInterpolator class.
         void init(std::string file, std::string type);
+        void init(const std::vector<double> x, const std::vector<double> y, std::string type);
         // The gsl objects for the interpolating functions.
         gsl_interp_accel *acc;
         gsl_spline *spline;
@@ -97,6 +100,37 @@ namespace Gambit
         double lo;
         double up;
     };
+
+    // Default constructor.
+    AxionInterpolator::AxionInterpolator() {};
+
+    // Initialiser for the AxionInterpolator class.
+    void AxionInterpolator::init(const std::vector<double> x, const std::vector<double> y, std::string type)
+    {
+      int pts = x.size();
+      // Get first and last value of the "x" component.
+      lo = x.front();
+      up = x.back();
+      acc = gsl_interp_accel_alloc ();
+      if (type == "cspline")
+      {
+        spline = gsl_spline_alloc (gsl_interp_cspline, pts);
+      }
+      else if (type == "linear")
+      {
+        spline = gsl_spline_alloc (gsl_interp_linear, pts);
+      }
+      else
+      {
+        DarkBit_error().raise(LOCAL_INFO, "ERROR! Interpolation type '"+type+"' not known to class AxionInterpolator.\n       Available types: 'linear' and 'cspline'.");
+      };
+
+      gsl_spline_init (spline, &x[0], &y[0], pts);
+    };
+
+    // Overloaded class creators for the AxionInterpolator class using the init function above.
+    AxionInterpolator::AxionInterpolator(const std::vector<double> x, const std::vector<double> y, std::string type) { init(x, y, type); };
+    AxionInterpolator::AxionInterpolator(const std::vector<double> x, const std::vector<double> y) { init(x, y, "linear"); };
 
     // Initialiser for the AxionInterpolator class.
     void AxionInterpolator::init(std::string file, std::string type)
@@ -111,33 +145,13 @@ namespace Gambit
       // Read numerical values from data file.
       ASCIItableReader tab (file);
       tab.setcolnames("x", "y");
-      // Initialise gsl interpolation routine.
-      int pts = tab["x"].size();
-      const double* x = &tab["x"][0];
-      const double* y = &tab["y"][0];
-      acc = gsl_interp_accel_alloc ();
-      if (type == "cspline")
-      {
-        spline = gsl_spline_alloc (gsl_interp_cspline, pts);
-      }
-      else if (type == "linear")
-      {
-        spline = gsl_spline_alloc (gsl_interp_linear, pts);
-      }
-      else
-      {
-        DarkBit_error().raise(LOCAL_INFO, "ERROR! Interpolation type '"+type+"' not known to class AxionInterpolator.\n       Available types: 'linear' and 'cspline'.");
-      };
-      gsl_spline_init (spline, x, y, pts);
-      // Get first and last value of the "x" component.
-      lo = tab["x"].front();
-      up = tab["x"].back();
+
+      init(tab["x"],tab["y"],type);
     };
 
     // Overloaded class creators for the AxionInterpolator class using the init function above.
     AxionInterpolator::AxionInterpolator(std::string file, std::string type) { init(file, type); };
     AxionInterpolator::AxionInterpolator(std::string file) { init(file, "linear"); };
-    AxionInterpolator::AxionInterpolator() {};
 
     // Move assignment operator
     AxionInterpolator& AxionInterpolator::operator=(AxionInterpolator&& interp)
@@ -155,8 +169,8 @@ namespace Gambit
     // Destructor
     AxionInterpolator::~AxionInterpolator()
     {
-        gsl_spline_free (spline);
-        gsl_interp_accel_free (acc);
+      gsl_spline_free (spline);
+      gsl_interp_accel_free (acc);
     }
 
     // Routine to access interpolated values.
@@ -176,9 +190,15 @@ namespace Gambit
     {
       public:
         // Overloaded class creators for the AxionInterpolator class using the init function below.
+        AxionInterpolator2D();
         AxionInterpolator2D(std::string file, std::string type);
         AxionInterpolator2D(std::string file);
-        AxionInterpolator2D();
+        AxionInterpolator2D& operator=(AxionInterpolator2D&&);
+        // Destructor.
+        ~AxionInterpolator2D();
+        // Delete copy constructor and assignment operator to avoid shallow copies.
+        AxionInterpolator2D(const AxionInterpolator2D&) = delete;
+        AxionInterpolator2D operator=(const AxionInterpolator2D&) = delete;
         // Routine to access interpolated values.
         double interpolate(double x, double y);
         // Routine to check if a point is inside the interpolating box.
@@ -193,6 +213,30 @@ namespace Gambit
         // Upper and lower "x" and "y" values available to the interpolating function.
         double x_lo, y_lo, x_up, y_up;
     };
+
+    // Move assignment operator
+    AxionInterpolator2D& AxionInterpolator2D::operator=(AxionInterpolator2D&& interp)
+    {
+      if(this != &interp)
+      {
+        std::swap(x_acc,interp.x_acc);
+        std::swap(y_acc,interp.y_acc);
+        std::swap(spline,interp.spline);
+        std::swap(x_lo,interp.x_lo);
+        std::swap(x_up,interp.x_up);
+        std::swap(y_lo,interp.y_lo);
+        std::swap(y_up,interp.y_up);
+      }
+      return *this;
+    }
+
+    // Destructor
+    AxionInterpolator2D::~AxionInterpolator2D()
+    {
+      gsl_spline2d_free (spline);
+      gsl_interp_accel_free (x_acc);
+      gsl_interp_accel_free (y_acc);
+    }
 
     // Initialiser for the AxionInterpolator class.
     void AxionInterpolator2D::init(std::string file, std::string type)
@@ -1857,53 +1901,15 @@ namespace Gambit
     //      White Dwarf cooling hints      //
     /////////////////////////////////////////
 
-    // White Dwarf interpolator class
-    class WDInterpolator
-    {
-      private:
-
-        gsl_interp_accel *acc;
-        gsl_spline *spline;
-
-      public:
-
-        // Constructor
-        WDInterpolator(int npoints)
-        {
-          acc = gsl_interp_accel_alloc();
-          spline = gsl_spline_alloc(gsl_interp_cspline, npoints);
-        }
-
-        // Destructor
-        ~WDInterpolator()
-        {
-          gsl_spline_free (spline);
-          gsl_interp_accel_free (acc);
-        }
-
-        // Delete copy constructor and assignment operator to avoid shallow copies
-        WDInterpolator(const WDInterpolator&) = delete;
-        WDInterpolator operator=(const WDInterpolator&) = delete;
-
-        // Init
-        void init(std::vector<double> x, std::vector<double> y, int npoints)
-        {
-          gsl_spline_init(spline, x.data(), y.data(), npoints);
-        }
-
-        // Evaluation function
-        double eval(double x)
-        {
-          return gsl_spline_eval(spline, x, acc);
-        }
-    };
-
     // Capability function to compute the cooling likelihood of G117-B15A (1205.6180; observations from Kepler+ (2011)).
     void calc_lnL_WDVar_G117B15A(double &result)
     {
       using namespace Pipes::calc_lnL_WDVar_G117B15A;
       // Rescale coupling to be used in their model prediction.
       double x = (1.0E+14 * std::fabs(*Param["gaee"]))/2.8;
+      // We only have predictions up to x = 30. Limits should get stronger for x > 30, so
+      // it is conservative to use the prediction for x = 30 for x > 30.
+      x = std::min(x,30.0);
 
       // Values for the model prediction provided by the authors.
       const std::vector<double> xvals   = {0.0, 1.0, 2.5, 5.0, 7.5, 10.0, 12.5, 15.0, 17.5, 20.1, 22.5, 25.0, 27.5, 30.0};
@@ -1911,24 +1917,9 @@ namespace Gambit
       const double err = 0.09;
 
       // Use interpolation for the model predction, but only initialise once.
-      static bool init_flag = false;
-      static WDInterpolator interp(14);
-      if (not(init_flag))
-      {
-        interp.init (xvals, dPidts, 14);
-        init_flag = true;
-      };
+      static AxionInterpolator period_change (xvals, dPidts, "cspline");
 
-      // We only have predictions up to x = 30. Limits should get stronger for x > 30, so
-      // it is conservative to use the prediction for x = 30 for x > 30.
-      double pred;
-      if (x > 30.0)
-      {
-        pred = interp.eval (30.0);
-      } else {
-        pred = interp.eval (x);
-      };
-
+      double pred = period_change.interpolate(x);
       result = -0.5 * gsl_pow_2(4.19 - pred) / (0.73*0.73 + err*err);
     }
 
@@ -1938,31 +1929,18 @@ namespace Gambit
       using namespace Pipes::calc_lnL_WDVar_R548;
       // Rescale coupling to be used in their model prediction.
       double x = (1.0E+14 * std::fabs(*Param["gaee"]))/2.8;
+      // We only have predictions up to x = 30. Limits should get stronger for x > 30, so
+      // it is conservative to use the prodiction for x = 30 for x > 30.
+      x = std::min(x,30.0);
 
       // Values for the model prediction provided by the authors.
       const std::vector<double> xvals   = {0.0, 1.0, 2.5, 5.0, 7.5, 10.0, 12.5, 15.0, 17.5, 20.0, 22.5, 25.0, 27.5, 30.0};
       const std::vector<double> dPidts  = {1.075373, 1.095319, 1.123040, 1.289434, 1.497666, 1.869437, 2.300523, 2.844954, 3.379978, 4.086028, 4.847149, 5.754807, 6.714841, 7.649140};
       const double err = 0.09;
 
-      // Use interpolation for the model predction, but only initialise once.
-      static bool init_flag = false;
-      static WDInterpolator interp(14);
-      if (not(init_flag))
-      {
-        interp.init (xvals, dPidts, 14);
-        init_flag = true;
-      };
+      static AxionInterpolator period_change (xvals, dPidts, "cspline");
 
-      // We only have predictions up to x = 30. Limits should get stronger for x > 30, so
-      // it is conservative to use the prodiction for x = 30 for x > 30.
-      double pred;
-      if (x > 30.0)
-      {
-        pred = interp.eval (30.0);
-      } else {
-        pred = interp.eval (x);
-      };
-
+      double pred = period_change.interpolate(x);
       result = -0.5 * gsl_pow_2(3.3 - pred) / (1.1*1.1 + err*err);
     }
 
@@ -1972,31 +1950,20 @@ namespace Gambit
       using namespace Pipes::calc_lnL_WDVar_PG1351489;
       // Rescale coupling to be used in their model prediction.
       double x = (1.0E+14 * std::fabs(*Param["gaee"]))/2.8;
+      // We only have predictions up to x = 20. Limits should get stronger for x > 20, so
+      // it is conservative to use the prodiction for x = 20 for x > 20.
+      x = std::min(x,20.0);
 
       // Values for the model prediction provided by the authors.
       const std::vector<double> xvals = {0.0, 2.0, 4.0, 6.0, 8.0, 10.0, 12.0, 14.0, 16.0, 18.0, 20.0};
       const std::vector<double> dPidts = {0.90878126, 0.96382008, 1.2022906, 1.5712931, 2.1220619, 2.8002354, 3.6172605, 4.5000560, 5.5256592, 6.5055283, 7.5341296};
       const double err = 0.5;
 
-      // Use interpolation for the model predction, but only initialise once.
-      static bool init_flag = false;
-      static WDInterpolator interp(11);
-      if (not(init_flag))
-      {
-        interp.init (xvals, dPidts, 11);
-        init_flag = true;
-      };
+      static AxionInterpolator period_change (xvals, dPidts, "cspline");
 
       // We only have predictions up to x = 20. Limits should get stronger for x > 20, so
       // it is conservative to use the prodiction for x = 20 for x > 20.
-      double pred;
-      if (x > 20.0)
-      {
-        pred = interp.eval (20.0);
-      } else {
-        pred = interp.eval (x);
-      };
-
+      double pred = period_change.interpolate(x);
       result = -0.5 * gsl_pow_2(2.0 - pred) / (0.9*0.9 + err*err);
     }
 
@@ -2006,31 +1973,18 @@ namespace Gambit
       using namespace Pipes::calc_lnL_WDVar_L192;
       // Rescale coupling to be used in their model prediction.
       double x = (1.0E+14 * std::fabs(*Param["gaee"]))/2.8;
+      // We only have predictions up to x = 30. Limits should get stronger for x > 30, so
+      // it is conservative to use the prediction for x = 30 for x > 30.
+      x = std::min(x,23.0);
 
       // Values for the model prediction provided by the authors.
       const std::vector<double> xvals = {0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0, 11.0, 12.0, 13.0, 14.0, 15.0, 16.0, 17.0, 18.0, 19.0, 20.0, 21.0, 22.0, 23.0, 24.0, 25.0, 26.0, 27.0, 28.0, 29.0, 30.0};
       const std::vector<double> dPidts = {2.41, 2.40, 2.44, 2.42, 2.50, 2.57, 2.63, 2.74, 2.83, 2.99, 3.15, 3.32, 3.52, 3.70, 3.90, 4.08, 4.42, 4.69, 4.98, 5.34, 5.62, 6.02, 6.27, 6.62, 7.04, 7.38, 7.89, 8.09, 8.65, 9.16, 9.62};
       const double err = 0.85;
 
-      // Use interpolation for the model predction, but only initialise once.
-      static bool init_flag = false;
-      static WDInterpolator interp(31);
-      if (not(init_flag))
-      {
-        interp.init (xvals, dPidts, 31);
-        init_flag = true;
-      };
+      static AxionInterpolator period_change (xvals, dPidts, "cspline");
 
-      // We only have predictions up to x = 30. Limits should get stronger for x > 30, so
-      // it is conservative to use the prediction for x = 30 for x > 30.
-      double pred;
-      if (x > 30.0)
-      {
-        pred = interp.eval (30.0);
-      } else {
-        pred = interp.eval (x);
-      };
-
+      double pred = period_change.interpolate(x);
       result = -0.5 * gsl_pow_2(3.0 - pred) / (0.6*0.6 + err*err);
     }
 
