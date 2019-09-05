@@ -342,7 +342,7 @@ namespace Gambit
         };
       };
     }
- 
+
     // Destructor
     HESS_Interpolator::~HESS_Interpolator()
     {
@@ -553,7 +553,7 @@ namespace Gambit
 
     // Move assignment operator
     SolarModel& SolarModel::operator=(SolarModel &&model)
-    { 
+    {
       if (this != &model)
       {
         std::swap(data,model.data);
@@ -949,7 +949,7 @@ namespace Gambit
         gsl_spline_free (gaee_li);
       for(auto gaee_ac : gaee_acc)
         gsl_interp_accel_free (gaee_ac);
- 
+
     }
 
     // Returns reference value counts for the photon-axion contribution.
@@ -1873,10 +1873,10 @@ namespace Gambit
           acc = gsl_interp_accel_alloc();
           spline = gsl_spline_alloc(gsl_interp_cspline, npoints);
         }
-     
+
         // Destructor
         ~WDInterpolator()
-        { 
+        {
           gsl_spline_free (spline);
           gsl_interp_accel_free (acc);
         }
@@ -2034,66 +2034,60 @@ namespace Gambit
       result = -0.5 * gsl_pow_2(3.0 - pred) / (0.6*0.6 + err*err);
     }
 
-    //////////////////////////////////////////////////////////////////////////////////////////////
-    //      SN 1987A limits (from axion-photon conversion in the B-field of the Milky Way)      //
-    //////////////////////////////////////////////////////////////////////////////////////////////
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    //      SN 1987A limits (from axion-photon conversion in the B-field of the Milky Way or axion-photon decay)      //
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    // Capability function to calculate the likelihood for SN 1987A (based on model prediction from 1410.3747
-    // and data from 25 to 100 MeV photons interpreted by Chupp et al., Phys. Rev. Lett. 62, 505 (1989)).
+    // Capability function to calculate the likelihood for SN 1987A (based on data from 25 to 100 MeV photons, interpreted
+    // by Chupp et al., Phys. Rev. Lett. 62, 505 (1989). Use 10 sec of data for conversion and 223 sec for decay.
     void calc_lnL_SN1987A (double &result)
     {
       using namespace Pipes::calc_lnL_SN1987A;
-      double ma0  = (1.0E+10*(*Param["ma0"]))/5.433430;
-      double gagg = (1.0E+12*std::fabs(*Param["gagg"]))/5.339450;
+      double f_10s = *Dep::PhotonFluence_SN1987A_Conversion;
+      double f_223s = *Dep::PhotonFluence_SN1987A_Decay;
 
-      // Standard devation of the null observation.
-      const double sigma = 0.2;
+      // Standard devations of the null observation.
+      const double sigma_10s = 0.2;
+      const double sigma_223s = 0.59333;
 
-      double obs = 0.570589*gsl_pow_4(gagg);
-      if (ma0 > 1.0) { obs = obs*pow(ma0, -4.021046); };
+      double ratio = std::max(f_10s/sigma_10s, f_223s/sigma_223s);
 
-      result = -0.5 * gsl_pow_2(obs/sigma);
+      result = -0.5*ratio*ratio;
     }
 
-    //////////////////////////////////////////////////////////////////////////////
-    //      Approximation for SN 1987A limits (from axion-to-photon decay)      //
-    //////////////////////////////////////////////////////////////////////////////
+    //////////////////////////////////////////////////////////////////////////////////////////////////////
+    //      SN 1987A photon fluence (from axion-photon conversion in the B-field of the Milky Way)      //
+    //////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    // Capability function to calculate the likelihood for axion decay SN 1987A
-    // Current approximation: Rule out axions inside the contours of Fig. 8 in arXiv:1702.02964.
-    void calc_lnL_SN1987A_DecayApprox (double &result)
+    // Capability function to calculate the photon fluence from SN 1987A as a result of axion-photon
+    // conversion in the B-field of the Milky Way (based on arXiv:1410.3747).
+    void calc_PhotonFluence_SN1987A_Conversion (double &result)
     {
-      using namespace Pipes::calc_lnL_SN1987A_DecayApprox;
-      //const ModelParameters& params = *Dep::GeneralCosmoALP_parameters;
-      //double lgg = log10(std::fabs(params.at("gagg")));
-      //double lgm = log10(params.at("ma0"));
-      double lgg = log10(std::fabs(*Param["gagg"]));
-      double lgm = log10(*Param["ma0"]);
+      using namespace Pipes::calc_PhotonFluence_SN1987A_Conversion;
+      double m = (1.0E+10*(*Param["ma0"]))/5.433430;
+      double g = (1.0E+12*std::fabs(*Param["gagg"]))/5.339450;
 
-      result = 0.0;
-
-      bool inside_exclusion_region = ( (lgm > 4.0) && (lgm < 8.100544) && (lgg > -11.498333) && (lgg > -9.754647-0.5*(lgm-4.0)) && (lgg < -9.990374-2.0*(lgm-8.100544)) );
-      if (inside_exclusion_region) { result = -0.5*9.00; };
+      result = 0.570589*gsl_pow_4(g);
+      if (m > 1.0) { result = result*pow(m, -4.021046); };
     }
 
-    ////////////////////////////////////////////////////////////
-    //      SN 1987A limits (from axion-to-photon decay)      //
-    ////////////////////////////////////////////////////////////
+    ////////////////////////////////////////////////////////////////////////
+    //       SN 1987A photon fluence (from axion decay into photons)      //
+    ////////////////////////////////////////////////////////////////////////
 
-    // Capability function to calculate the likelihood for axion decay SN 1987A
-    // Based on MC simulations by Marie Lecroq (following arXiv:1702.02964).
-    void calc_lnL_SN1987A_Decay (double &result)
+    // Capability function to calculate the photon fluence from SN 1987A as a result of axion decay.
+    // Based on MC simulations by Marie Lecroq & Sebastian Hoof (following arXiv:1702.02964).
+    void calc_PhotonFluence_SN1987A_Decay (double &result)
     {
-      using namespace Pipes::calc_lnL_SN1987A_Decay;
+      using namespace Pipes::calc_PhotonFluence_SN1987A_Decay;
       double lgg = log10(std::fabs(*Param["gagg"]));
       double lgm = log10(*Param["ma0"]);
       result = 0.0;
 
       // Initialise interpolation class with MC data from file.
       static AxionInterpolator2D fluence (GAMBIT_DIR "/DarkBit/data/SN1987A_DecayFluence.dat");
-      const double sigma = 0.59333;
 
-      if (fluence.is_inside_box(lgm,lgg)) { result = -0.5*gsl_pow_2(fluence.interpolate(lgm,lgg)/sigma); };
+      if (fluence.is_inside_box(lgm,lgg)) { result = fluence.interpolate(lgm,lgg); };
     }
 
     //////////////////////////////////////////////////////////////////
@@ -2109,7 +2103,7 @@ namespace Gambit
 
       // Compute the domensionless parameters Epsilon and Gamma from the axion mass and axion-photon coupling (see 1311.3148).
       const double c_epsilon = 0.071546787;
-      const double c_gamma   = 0.015274036*370.0/sqrt(37.0);
+      const double c_gamma = 0.015274036*370.0/sqrt(37.0);
       double epsilon = log10(m_ax*c_epsilon) + 5.0;
       double gamma = log10(gagg*c_gamma) + 20.0;
 

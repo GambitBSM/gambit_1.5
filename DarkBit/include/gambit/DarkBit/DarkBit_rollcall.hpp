@@ -1473,20 +1473,22 @@ START_MODULE
     #define FUNCTION calc_lnL_SN1987A
     START_FUNCTION(double)
     ALLOW_MODEL(GeneralCosmoALP)
+    DEPENDENCY(PhotonFluence_SN1987A_Conversion, double)
+    DEPENDENCY(PhotonFluence_SN1987A_Decay, double)
     #undef FUNCTION
   #undef CAPABILITY
 
-  #define CAPABILITY lnL_SN1987A_DecayApprox
+  #define CAPABILITY PhotonFluence_SN1987A_Conversion
   START_CAPABILITY
-    #define FUNCTION calc_lnL_SN1987A_DecayApprox
+    #define FUNCTION calc_PhotonFluence_SN1987A_Conversion
     START_FUNCTION(double)
     ALLOW_MODEL(GeneralCosmoALP)
     #undef FUNCTION
   #undef CAPABILITY
 
-  #define CAPABILITY lnL_SN1987A_Decay
+  #define CAPABILITY PhotonFluence_SN1987A_Decay
   START_CAPABILITY
-    #define FUNCTION calc_lnL_SN1987A_Decay
+    #define FUNCTION calc_PhotonFluence_SN1987A_Decay
     START_FUNCTION(double)
     ALLOW_MODEL(GeneralCosmoALP)
     #undef FUNCTION
