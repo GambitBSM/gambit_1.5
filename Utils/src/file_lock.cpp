@@ -203,7 +203,7 @@ namespace Gambit
       /// @{ Members of ProcessLock class
 
       /// Initialise prefix path name to lock files, and extension
-      const std::string ProcessLock::lock_prefix(GAMBIT_DIR "/scratch/process_locks/");
+      const std::string ProcessLock::lock_prefix(GAMBIT_DIR "/scratch/run_time/process_locks/");
       const std::string ProcessLock::lock_suffix(".lock");
 
       /// Constructor
