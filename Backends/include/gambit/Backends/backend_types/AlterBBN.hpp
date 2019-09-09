@@ -185,6 +185,83 @@ namespace Gambit
         double life_neutron;
       };
     }
+
+    namespace AlterBBN_2_2
+    {
+      /* structure containing the cosmological model parameters */
+      struct relicparam
+      {
+        int entropy_model,energy_model;
+        double dd0,ndd,Tdend,Tddeq; // dark density
+        double sd0,nsd,Tsend; // dark entropy
+        double Sigmad0,nSigmad,TSigmadend; // dark entropy injection
+        double Sigmarad0,nSigmarad,TSigmaradend; // standard entropy injection
+        double nt0,nnt,Tnend; // non-thermal production of relics
+        int coupd; // dark fluid coupling to plasma
+
+        double quintn2,quintn3,quintn4,quintT12,quintT23,quintT34; // effective quintessence model
+
+        int phi_model; // decaying scalar field model switch
+        double eta_phi,Gamma_phi,rhot_phi_Tmax,n_phi; // eta_phi = b / m_phi
+        double rhot_phi0,Tphi0;
+        double T_RH;
+        double Sigmatildestar;
+        double Sigmatildestar_max;
+        double Tstdstar_max;
+
+        double mgravitino; // gravitino mass
+
+        double relicmass;
+        int scalar;
+
+        int solver; // switch for linear or logarithmic differential equation solver
+        int beta_samples;
+
+        double Tfo,Tmax; // Freeze out and maximal temperature
+
+        int full_comput; // Switch to deactivate the fast freeze out temperature determination
+
+        double table_eff[276][3];   // Reads values from the SgStar files
+
+        int use_table_rhoPD;
+        double table_rhoPD[2][NTABMAX];
+        int size_table_rhoPD;
+
+        /*---------------------*/
+        /* AlterBBN parameters */
+        /*---------------------*/
+
+        int err;
+        int failsafe;               // Switch for the integration method
+        double eta0;                // Initial Baryon to photon ratio
+        double Nnu;                 // Number of Neutrinos (e+- included)
+        double dNnu;                // Number of extra neutrinos (delta N_nu)
+        double life_neutron,life_neutron_error;      // neutron lifetime
+        double xinu1,xinu2,xinu3;   // [e-,neutrino], [muon,neutrino], [tau,neutrino] respectively (degeneracy parameters)
+        double m_chi;               // Mass of WIMP
+        double g_chi;               // dof of WIMP
+        double Tinit;               // Initial temperature
+        double Tnudec;              // Neutrino decoupling temperature
+        int wimp;                   // Switch to enable (1) / disable (0) wimps
+        int SMC_wimp;               // wimp coupling to SM particles. 1 for EM, 2 for neutrino, 3 for neutrino and equivalent neutrino
+        int selfConjugate;          // 1/0 for self-conjugate/non-self-conjugate WIMP
+        int fermion;
+        int EM_coupled, neut_coupled, neuteq_coupled;
+        double fierz;               // Fierz interference term from LQ sector
+        double B_chi;               // branching ratio of WIMP DM of mass m_p < m_chi < m_n to explain tau_n anomaly
+        double rhob0;               // current baryon density
+        double b_cdm_ratio;         // current ratio of baryon density to cold dark matter density
+        int constraints;		       	// 1=Yp, 2=+H2/H, 3=+Li7/H, 4=+He3/H
+      };
+
+      struct errorparam
+      /* structure containing the cosmological model parameters */
+      {
+        int errnumber;              // process number for error calculation
+        double random[NNUCREAC+2];  // random numbers for Monte Carlo
+        double life_neutron;
+      };
+    }
   }
 }
 
