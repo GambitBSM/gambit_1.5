@@ -827,8 +827,11 @@ START_MODULE
      #undef FUNCTION
   #undef CAPABILITY
 
+    // set CLASS input parameters for ..
     #define CAPABILITY set_classy_parameters
      START_CAPABILITY
+     // .. LCDM family tree; takes care of different input for different models through the 
+     // conditional model dependencies on 'model_dependent_classy_parameters' 
      #define FUNCTION set_classy_parameters_LCDM
       START_FUNCTION(CosmoBit::ClassyInput)
       ALLOW_MODELS(LCDM)
@@ -837,14 +840,29 @@ START_MODULE
       DEPENDENCY(T_ncdm,            double)
       DEPENDENCY(class_Nur,         double)
       DEPENDENCY(Helium_abundance,  std::vector<double>)
-      MODEL_CONDITIONAL_DEPENDENCY(model_dep_classy_parameters, pybind11::dict,  DecayingDM_general)
+      MODEL_CONDITIONAL_DEPENDENCY(model_dependent_classy_parameters, pybind11::dict,  DecayingDM_general)
       //MODEL_CONDITIONAL_DEPENDENCY(lifetime,                    double,             DecayingDM_general)
       //MODEL_CONDITIONAL_DEPENDENCY(DM_fraction,                 double,             DecayingDM_general)
       //MODEL_CONDITIONAL_DEPENDENCY(energy_injection_efficiency, DarkAges::fz_table, DecayingDM_general)
      #undef FUNCTION
-  #undef CAPABILITY
+    
+     // .. different inflation models; takes care of different input for different models through the 
+     // conditional model dependencies on 'model_dependent_classy_parameters'  
+     #define FUNCTION set_classy_parameters_Inflation
+      START_FUNCTION(CosmoBit::ClassyInput)
+         ALLOW_MODELS(LCDMtensor,inf_SR1quad_LCDMt,inf_1quarInf_LCDMt,tinf_1mono32Inf_LCDMt,inf_1linearInf_LCDMt,inf_1hilltopInf_LCDMt,inf_smashInf_LCDMt)
+         DEPENDENCY(T_cmb,             double)
+         DEPENDENCY(T_ncdm,            double)
+         DEPENDENCY(class_Nur,         double)
+         DEPENDENCY(NuMasses_SM,       map_str_dbl)
+         //DEPENDENCY(Helium_abundance,  std::vector<double>)
+         DEPENDENCY(model_dependent_classy_parameters, pybind11::dict)
+     #undef FUNCTION
 
-  #define CAPABILITY model_dep_classy_parameters
+  #undef CAPABILITY
+  
+  // set extra parameters for CLASS run for non-standard cosmological models
+  #define CAPABILITY model_dependent_classy_parameters
      START_CAPABILITY
      #define FUNCTION model_dep_classy_parameters_DecayingDM_general
       START_FUNCTION(pybind11::dict)
@@ -853,7 +871,46 @@ START_MODULE
       DEPENDENCY(DM_fraction,                 double)
       DEPENDENCY(energy_injection_efficiency, DarkAges::fz_table)
      #undef FUNCTION
+
+    #define FUNCTION model_dependent_classy_parameters_LCDMtensor
+      START_FUNCTION(pybind11::dict)
+        ALLOW_MODELS(LCDMtensor)
+    #undef FUNCTION
+  
+    #define FUNCTION model_dependent_classy_parameters_inflation_multimode
+      START_FUNCTION(pybind11::dict)
+        ALLOW_MODELS(inf_SR1quad_LCDMt,inf_1quarInf_LCDM,tinf_1mono32Inf_LCDMt,inf_1linearInf_LCDMt,inf_1hilltopInf_LCDMt)
+        DEPENDENCY(multimode_results,     gambit_inflation_observables)
+        DEPENDENCY(multimode_pk_setting,  int)
+    #undef FUNCTION
+
+    #define FUNCTION model_dependent_classy_parameters_smashInf
+      START_FUNCTION(pybind11::dict)
+        ALLOW_MODELS(inf_smashInf_LCDMt)
+    #undef FUNCTION
+
   #undef CAPABILITY
+
+  // pass settings to multimode, run it and return the structure containing the results 
+  #define CAPABILITY multimode_results
+     START_CAPABILITY
+     #define FUNCTION get_multimode_results
+      START_FUNCTION(gambit_inflation_observables)
+        ALLOW_MODELS(inf_SR1quad_LCDMt,inf_1quarInf_LCDMt,inf_1mono32Inf_LCDMt,inf_1linearInf_LCDMt,inf_1hilltopInf_LCDMt)
+        DEPENDENCY(multimode_pk_setting,int)
+        BACKEND_REQ(multimodecode_gambit_driver,(modecode_tag), void, (gambit_inflation_observables*,int&,int&,int&,int&,int&,int&,int&,int&,int&,int&,double&,int&,int&,double&,int&,double*,double*,int&,int&,double*,double*,double*,double&,double&,double&,int&,int&,double&,double*,double*,double*,double*,double&,double&))
+     #undef FUNCTION
+  #undef CAPABILITY  
+
+  // read in multimode setting for power spectrum calculation
+  // -> this needs to be an extra capability or somehow accessible to 
+  //    be able to adopt the CLASS input accordingly
+  #define CAPABILITY multimode_pk_setting
+     START_CAPABILITY
+     #define FUNCTION set_multimode_pk
+      START_FUNCTION(int)
+      #undef FUNCTION
+  #undef CAPABILITY  
   
   /// Calculates lnL for each experiment using the experiment names
   #define CAPABILITY MP_LogLikes
