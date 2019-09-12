@@ -1359,12 +1359,7 @@ if(NOT ditched_${name}_${ver})
     DOWNLOAD_COMMAND ${DL_BACKEND} ${dl} ${md5} ${dir}
     SOURCE_DIR ${dir}
     BUILD_IN_SOURCE 1
-    PATCH_COMMAND patch -p1 < ${patch}/modpk.dif
-          COMMAND patch -p1 < ${patch}/modpk_modules.dif
-          COMMAND patch -p1 < ${patch}/modpk_backgrnd_2.dif
-          COMMAND patch -p1 < ${patch}/modpk_potential.dif
-          COMMAND patch -p1 < ${patch}/modpk_utils.dif
-          COMMAND patch -p1 < ${patch}/multimodecode_driver.dif
+    PATCH_COMMAND patch -p1 < ${patch}/multimodecode.diff
     CONFIGURE_COMMAND ""
     BUILD_COMMAND ${CMAKE_MAKE_PROGRAM} FC=${CMAKE_Fortran_COMPILER} F90C=${CMAKE_Fortran_COMPILER} FFLAG=${BACKEND_Fortran_FLAGS}
     COMMAND ${CMAKE_COMMAND} -E copy ${driver}/multimodecode_gambit.f90 ${dir}
