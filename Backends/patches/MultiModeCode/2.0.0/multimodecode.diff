@@ -1,0 +1,438 @@
+diff --git a/modpk.f90 b/modpk.f90
+index 1ad7e4313..3607d3a73 100644
+--- a/modpk.f90
++++ b/modpk.f90
+@@ -18,15 +18,105 @@ MODULE access_modpk
+ 
+ CONTAINS
+ 
+-  SUBROUTINE potinit
++  SUBROUTINE potinit(observs)
+     USE modpkparams
+     USE modpk_observables
+     USE background_evolution, ONLY : backgrnd
+     USE potential, ONLY : initialphi
++    use modpk_numerics, only : locate, polint, array_polint
+     use modpk_icsampling, only : ic_flags, ic_sampling
+     IMPLICIT NONE
+ 
++	type(observables), intent(inout) :: observs
++
++    integer*4 :: ii
++    real(dp) :: dchidrho, derr,rho_init,slowroll_efolds
++    real(dp) :: xi,beta,lambda
++
++    chiHarray = 0e0_dp
++    rhoHarray = 0e0_dp
++    potHarray = 0e0_dp
++    dpotHarray = 0e0_dp
++    d2potHarray = 0e0_dp
++
++    if (potential_choice == 18) then !! build potential for SMASH inflation
++      xi = 10**vparams(1,1)
++      beta = 10**vparams(2,1)
++      lambda = 10**vparams(3,1)
++
++      print*,"phi_init0 =",phi_init0
++
++      do ii=1,builtpot
++        rhoHarray(ii) = 5e0_dp*phi_init0(1) - dble(ii)*(1e-3_dp)*phi_init0(1)
++        chiHarray(ii) = (sqrt(1e0_dp+6e0_dp*xi/beta)*&
++                        asinh(sqrt(1e0_dp+6e0_dp*xi/beta)*&
++                        sqrt(xi)*rhoHarray(ii)) - &
++                        sqrt(6e0_dp*xi/beta) * &
++                        asinh(sqrt(6e0_dp*xi/beta) * &
++                        sqrt(xi)*rhoHarray(ii)/ &
++                        sqrt(1e0_dp+(sqrt(xi)*rhoHarray(ii))**2))) /&
++                        sqrt(xi/beta)
++		potHarray(ii) = lambda/4e0_dp*rhoHarray(ii)**4 / &
++                        (1e0_dp+xi*rhoHarray(ii)**2)**2
++        dchidrho = sqrt(beta*(1e0_dp+xi*rhoHarray(ii)**2) +&
++                        6e0_dp*xi**2*rhoHarray(ii)**2) / &
++                        (1e0_dp+xi*rhoHarray(ii)**2)
++        dpotHarray(ii) = (lambda*rhoHarray(ii)**3/dchidrho)/(1e0_dp + &
++						  xi*rhoHarray(ii)**2)**2*(1e0_dp - &
++                          rhoHarray(ii)**2*xi/(1e0_dp+xi *&
++                          rhoHarray(ii)**2))
++
++        if (ii > 1) then
++          d2potHarray(ii-1) = (dpotHarray(ii)-dpotHarray(ii-1)) / &
++                              (chiHarray(ii)-chiHarray(ii-1))
++	    end if
++
++        if (ii > 2) then
++          d3potHarray(ii-2) = (d2potHarray(ii-1)-d2potHarray(ii-2)) / &
++							  (chiHarray(ii-1)-chiHarray(ii-2))
++		end if
++      end do
++
++      ii = locate(chiHarray,phi_init0(1))
++      call polint(chiHarray(ii:ii+4), rhoHarray(ii:ii+4), phi_init0(1), rho_init, derr)
++
++      !slowroll_efolds = (0.06250000000000001*beta)/xi - &
++      !                  (0.0625*Sqrt(beta**2 + &
++      !                  32.*beta*xi + &
++	  !					192.*xi**2))/xi + &
++      !                  0.125*beta*rho_init**2 + &
++	  !					0.75*xi*rho_init**2 + &
++      !                  0.75*Log(1. + (0.5000000000000001* &
++      !                  (-1.*beta + Sqrt(beta**2 + &
++	  !					32.*beta*xi + &
++      !                  192.*xi**2)))/ &
++      !                  (beta + 6.*xi)) - &
++      !                  0.75*Log(1. + xi*rho_init**2)
++      ! if (slowroll_efolds < 30. .or. slowroll_efolds > 120.) then
++	  !  observs%is_ic_ok = .false.
++	  !  print*, "SMASH: Initial conditions: SR efolds =", slowroll_efolds
++      !  RETURN
++      !else
++      observs%is_ic_ok = .true.
++	  !end if
++
++      print*, "we are still inside!"
++
++      call polint(chiHarray((size(d2potHarray)-4):size(d2potHarray)-1),&
++                  d2potHarray((size(d2potHarray)-4):size(d2potHarray)-1),&
++                  chiHarray(size(d2potHarray)),d2potHarray(size(d2potHarray)), derr)
++
++      d3potHarray(size(d2potHarray)-1) = (d2potHarray(size(d2potHarray)) - &
++                                          d2potHarray(size(d2potHarray)-1)) / &
++                                         (chiHarray(size(d2potHarray)) - &
++                                          chiHarray(size(d2potHarray)-1))
++
++      call polint(chiHarray((size(d3potHarray)-4):size(d3potHarray)-1),&
++                  d3potHarray((size(d3potHarray)-4):size(d3potHarray)-1),&
++				  chiHarray(size(d3potHarray)),d3potHarray(size(d3potHarray)), derr)
++
+ 
++    end if
+     !
+     !     Solve the background equations
+     !
+##	diff --git a/modpk_backgrnd.f90 b/modpk_backgrnd.f90
+##	index bcfdf96d0..497d7d0c5 100644
+##	--- a/modpk_backgrnd.f90
+##	+++ b/modpk_backgrnd.f90
+##	@@ -23,7 +23,9 @@ CONTAINS
+##	     use modpk_icsampling, only : save_iso_N, N_iso_ref, phi_iso_N, &
+##	       dphi_iso_N, ic_sampling, ic_flags
+##
+##	-    INTEGER*4 :: i,j, rescl_count
+##	+    INTEGER*4 :: i,j,ii, rescl_count
+##	+
+##	+    real(dp) :: dchidrho, derr
+##
+##	     real(dp) :: phi_init_trial(size(phi_init))
+##	     real(dp) :: alpha_e,dalpha,V_end,dv,dh
+##	@@ -244,10 +246,10 @@ CONTAINS
+##
+##	           end if
+##
+##	-          IF (a_end .GT. a_end_inst) THEN
+##	-             PRINT*,'MODECODE: inflation ends too late with this N_pivot', N_pivot
+##	-             pk_bad = run_outcome%bad_reheat
+##	-             RETURN
+##	+          !IF (a_end .GT. a_end_inst) THEN
+##	+          !   PRINT*,'MODECODE: inflation ends too late with this N_pivot', N_pivot
+##	+          !   pk_bad = run_outcome%bad_reheat
+##	+          !   RETURN
+##	           ENDIF
+##	        END IF
+##
+##	@@ -347,6 +349,9 @@ CONTAINS
+##
+##	       dphi_init0 = y(size(y)/2+1 : (size(y)))
+##
+##	+      if (potential_choice==18) then
+##	+				y(size(y)/2+1 : (size(y))) = 0.0e0_dp
+##	+
+##	     else
+##	
+##	       h_init = getH(phi_init_trial,dphi_init0)
+##	@@ -539,7 +544,7 @@ CONTAINS
+##	        !or to homogeneously rescale all the fields. It is better to work on a case by case basis.
+##	        !
+##
+##	-       IF (size(phi_init) .eq. 1) THEN
+##	+       IF (size(phi_init) .eq. 1) .and. .not. (potential_choice .eq. 18)) THEN
+##	           IF(alpha_e.LT.(N_pivot+20.e0_dp)) THEN
+##	              IF ((potential_choice.eq.6).and.(vparams(1,1)<-2.e0_dp)) THEN
+##	                 phi_init_trial = phi_init*0.9e0_dp
+diff --git a/modpk_modules.f90 b/modpk_modules.f90
+index 3226d39fd..9b2419fc1 100644
+--- a/modpk_modules.f90
++++ b/modpk_modules.f90
+@@ -28,7 +28,8 @@ MODULE modpkparams
+   INTEGER :: potential_choice
+ 
+   INTEGER*4 :: nactual_bg, nactual_mode
+-  INTEGER, PARAMETER :: nsteps=1e5
++  INTEGER, PARAMETER :: nsteps=1e6
++  INTEGER, PARAMETER :: builtpot=1e4
+   real(dp), PARAMETER :: M_Pl=1.0e0_dp
+   real(dp), PARAMETER :: Mpc2Mpl=2.6245e-57_dp
+   real(dp) :: k_pivot, N_pivot, N_tot, H_pivot
+@@ -39,7 +40,9 @@ MODULE modpkparams
+   real(dp), ALLOCATABLE :: phidot_sign(:)
+   real(dp) :: Nefold_max=100000.e0_dp
+   real(dp) :: lna(nsteps)
+-  real(dp) :: hubarr(nsteps), log_aharr(nsteps), epsarr(nsteps), dtheta_dN(nsteps)
++  real(dp) :: hubarr(nsteps), log_aharr(nsteps), epsarr(nsteps), dtheta_dN(nsteps), &
++				chiHarray(builtpot), rhoHarray(builtpot), potHarray(builtpot), &
++                dpotHarray(builtpot), d2potHarray(builtpot), d3potHarray(builtpot)
+   LOGICAL :: slowroll_infl_end
+   LOGICAL :: slowroll_start=.false.
+ 
+@@ -167,6 +170,7 @@ module modpk_observables
+   !Type to save the ICs and observs. Add new observables here
+   type :: observables
+     real(dp), dimension(:), allocatable :: ic
++    logical :: is_ic_ok !parameter range check for SMASH
+     !Spectra amplitudes
+     real(dp) :: As
+     real(dp) :: A_iso
+@@ -189,6 +193,10 @@ module modpk_observables
+     !Non-Gaussianity
+     real(dp) :: f_NL
+     real(dp) :: tau_NL
++    real(dp) , dimension(:), allocatable :: k_array
++    real(dp) , dimension(:), allocatable :: pks_array
++    real(dp) , dimension(:), allocatable :: pkt_array
++    integer :: k_size
+     contains
+       procedure, public :: printout => ic_print_observables
+       procedure, public :: print_header => ic_print_headers
+diff --git a/modpk_potential.f90 b/modpk_potential.f90
+index 630ec5bcd..090b413ae 100644
+--- a/modpk_potential.f90
++++ b/modpk_potential.f90
+@@ -48,7 +48,7 @@ contains
+     integer :: phi_light_index
+     real(dp) :: lambda4(size(phi)), alpha2(num_inflaton)
+ 
+-    real(dp) :: lambda2
++    real(dp) :: lambda2, derr
+     real(dp), dimension(size(phi),size(phi)) :: m2_matrix
+     integer :: i,j, temp_choice
+ 
+@@ -284,6 +284,10 @@ contains
+           cos(2.0e0_dp*pi*phi(ii) - 2.0e0_dp*pi*phi(jj))
+       end do; end do
+ 
++    case(18)
++      ! SMASH potential - see deriv. expressions in modpk_backgrnd
++      ii = locate(chiHarray,phi(1))
++      call polint(chiHarray(ii:ii+4), potHarray(ii:ii+4), phi(1), V_potential, derr)
+ 
+ 
+     case default
+@@ -334,7 +338,7 @@ contains
+     real(dp) :: p_exp
+     integer :: ii
+ 
+-    real(dp) :: V0, twopi
++    real(dp) :: V0, twopi, derr(size(phi))
+     real(dp), dimension(size(phi)) :: A_i
+     real(dp), dimension(size(phi),size(phi)) :: B_ij
+     integer :: alpha, beta
+@@ -501,6 +505,10 @@ contains
+            end do
+          end do
+ 
++       case(18)
++       ! SMASH potential - see deriv. expressions in modpk_backgrnd
++         ii = locate(chiHarray,phi(1))
++         call polint(chiHarray(ii:ii+4), dpotHarray(ii:ii+4), phi(1), first_deriv(1), derr(1))
+ 
+        !END MULTIFIELD
+        case default
+@@ -542,7 +550,7 @@ contains
+     real(dp), dimension(size(phi),size(phi)) :: m2_matrix
+ 
+     real(dp), dimension(size(phi)) :: location_phi, step_size, step_slope
+-    real(dp), dimension(size(phi)) :: stepsize
++    real(dp), dimension(size(phi)) :: stepsize, derr
+     real(dp), dimension(:,:), allocatable :: numderiv
+     real(dp), dimension(:), allocatable :: numderiv1
+ 
+@@ -771,6 +779,10 @@ contains
+            end do
+          end do
+ 
++       case(18)
++       ! SMASH potential - see deriv. expressions in modpk_backgrnd
++         ii = locate(chiHarray,phi(1))
++         call polint(chiHarray(ii:ii+4), d2potHarray(ii:ii+4), phi(1), second_deriv(1,1), derr(1))
+ 
+        case default
+ 
+@@ -794,13 +806,13 @@ contains
+   !of the scalar running, alpha_s
+   function d3Vdphi3(phi) result(third_deriv)
+     real(dp), intent(in) :: phi(:)
+-    real(dp) :: third_deriv(size(phi),size(phi),size(phi))
++    real(dp) :: third_deriv(size(phi),size(phi),size(phi))!,lambda(size(phi))
+     real(dp) :: m2_V(size(phi))
+     integer :: ii
+ 
+     real(dp) :: p_exp
+ 
+-    real(dp), dimension(size(phi)) :: location_phi, step_size, step_slope
++    real(dp), dimension(size(phi)) :: location_phi, step_size, step_slope, derr
+ 
+     third_deriv = 0e0_dp
+ 
+@@ -808,6 +820,16 @@ contains
+     case(1)
+       m2_V = 10.e0_dp**(vparams(1,:))
+       third_deriv=0e0_dp
++
++    ! temporary solution, will work on this later.
++    ! case(3)
++    !  lambda = 10.e0_dp**vparams(1,:)
++    !  third_deriv=0e0_dp
++    !  forall (i = 1:size(phi)) third_deriv(i,i,i) = 6.e0_dp*lambda(i)*phi(i)
++
++    case(4)
++      third_deriv=0e0_dp
++
+     case(14)
+ 
+       !Multifield step potential
+@@ -852,6 +874,13 @@ contains
+           m2_V(ii)*abs(phi(ii))**(p_exp-3.0e0_dp)
+       end do
+ 
++     case(18)
++     ! SMASH potential - see deriv. expressions in modpk_backgrnd
++       ii = locate(chiHarray,phi(1))
++       call polint(chiHarray(ii:ii+4), d3potHarray(ii:ii+4), &
++                         phi(1), third_deriv(1,1,1), derr(1))
++       ! print*,"third_deriv(1,1,1) = ", third_deriv(1,1,1), "derr(1)" , derr(1)
++
+     case default
+ 
+       print*, "MODECODE: potential_choice =", potential_choice
+@@ -923,9 +952,17 @@ contains
+     !
+     real(dp) :: getEps
+     real(dp), INTENT(IN) :: phi(:), dphi(:)
+-
+-    !MULTIFIELD
+-    getEps = 0.5e0_dp*(M_Pl)**2 * dot_product(dphi,dphi)
++    real(dp), dimension(size(phi)) ::  dVpot
++    real(dp) ::  Vpot
++
++    if (potential_choice == 18) then
++      Vpot = pot(phi)
++      dVpot = dVdphi(phi)
++      getEps = 0.5e0_dp*(dVpot(1)/Vpot)**2
++ 	else
++      !MULTIFIELD
++      getEps = 0.5e0_dp*(M_Pl)**2 * dot_product(dphi,dphi)
++	end if
+ 
+     if (getEps >=3.0e0_dp) then
+       print*, "MODECODE: epsilon =", getEps
+diff --git a/modpk_utils.f90 b/modpk_utils.f90
+index 77866a5a9..6a42c3336 100644
+--- a/modpk_utils.f90
++++ b/modpk_utils.f90
+@@ -92,8 +92,8 @@ CONTAINS
+     real(dp), DIMENSION(:), INTENT(OUT) :: yprime
+ 
+     !MULTIFIELD
+-    real(dp), DIMENSION(size(y)/2) :: p, delp
+-    real(dp) :: hubble,dhubble, eps
++    real(dp), DIMENSION(size(y)/2) :: p, delp, dVpot
++    real(dp) :: hubble,dhubble, eps, Vpot
+     !END MULTIFIEND
+ 
+     integer :: i
+@@ -106,6 +106,9 @@ CONTAINS
+     !MULTIFIELD
+     p = y(1 : size(y)/2)
+     delp = y(size(y)/2+1 : size(y))
++
++    Vpot = pot(p)
++		dVpot = dVdphi(p)
+     !END MULTIFIELD
+ 
+     if (.not. use_t) then
+@@ -157,12 +160,31 @@ CONTAINS
+     !MULTIFIELD
+     if (.not. use_t) then
+       !Derivs wrt e-folds
+-      hubble=getH(p,delp)
+-      dhubble=getdHdalpha(p,delp)
+ 
+       yprime(1 : size(y)/2) = delp
+-      yprime(size(y)/2+1 : size(y)) = -((3.0e0_dp+dhubble/hubble)*delp+&
+-        dVdphi(p)/hubble/hubble)
++
++      ! if (potential_choice == 18) then
++      !  yprime(size(y)/2+1: size(y)) = -3.0e0_dp*delp + &
++      !                   delp**3/2.0e0_dp - (3.0e0_dp - &
++      !                   delp**2/2.0e0_dp)* &
++      !                   sqrt(2.0e0_dp*getEps(p,delp))
++        ! print*, "hubble = ", hubble
++        ! print*, "dhubble = ", dhubble
++				! print*, "delp = " , delp
++				! print*, "getEps(p,delp) = ", getEps(p,delp)
++        ! print*, "-dhubble/hubble**2 = ", -dhubble/hubble**2
++        ! print*, " -3.0e0_dp*delp(1) = ", -3.0e0_dp*delp(1)
++        ! print*, " delp(1)**3/2.0e0_dp = ", delp(1)**3/2.0e0_dp
++        ! print*, "y from inside utils = " , yprime(size(y)/2+1: size(y))
++        ! print*, " sqrt(2eps) = ", sqrt(2.0e0_dp*dVpot(1)/Vpot)
++
++	  ! else
++        hubble=getH(p,delp)
++        dhubble=getdHdalpha(p,delp)
++
++        yprime(size(y)/2+1 : size(y)) = -((3.0e0_dp+dhubble/hubble)*delp+&
++          dVdphi(p)/hubble/hubble)
++    ! end if
+     else
+ 
+       !Derivs in cosmic time
+diff --git a/multimodecode_driver.f90 b/multimodecode_driver.f90
+index 3ba54a28c..d8e972e52 100644
+--- a/multimodecode_driver.f90
++++ b/multimodecode_driver.f90
+@@ -5,6 +5,7 @@ program multimodecode
+   use modpk_utils
+   use camb_interface
+   use access_modpk, only : evolve, potinit
++  use modpk_numerics
+   use internals
+   use modpk_icsampling
+   use modpk_io, only : out_opt
+@@ -24,6 +25,9 @@ program multimodecode
+   !Cosmology
+   real(dp) :: dlnk
+ 
++  !SMASH!
++  real(dp) :: slowroll_efolds
++
+   !Sampling parameters for ICs
+   integer :: numb_samples
+   integer :: out_adiab
+@@ -432,8 +436,17 @@ program multimodecode
+         observs_SR%ic = observs%ic
+       end if
+ 
++
+       !Initialize potential and calc background
+-      call potinit
++      call potinit(observs)
++
++      print*,"outside of potinit"
++      if (potential_choice == 18) then
++        if (.not. observs%is_ic_ok) then
++          print*, "ICs for SMASH potential resulted in too long(or short) inflation."
++          RETURN
++        end if
++      end if
+ 
+       !For outputting field values at horiz crossing
+       if (out_opt%fields_horiz) then
