@@ -1143,7 +1143,7 @@ namespace Gambit
         std::map<ulong, ulonglong> get_highest_PPIDs(const int mpisize);
  
         /// Open (and lock) output HDF5 file and obtain HDF5 handles
-        void lock_and_open_file();
+        void lock_and_open_file(const char access_type='w'); // read/write allowed by default
 
         /// Close (and unlock) output HDF5 file and release HDF5 handles
         void close_and_unlock_file();

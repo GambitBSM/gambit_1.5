@@ -629,7 +629,7 @@ namespace Gambit
     }
 
     /// Open (and lock) output HDF5 file and obtain HDF5 handles
-    void HDF5MasterBuffer::lock_and_open_file()
+    void HDF5MasterBuffer::lock_and_open_file(const char access_type)
     {
         if(have_lock)
         {
@@ -649,7 +649,7 @@ namespace Gambit
         hdf5out.get_lock();
 
         // Open the file and target groups
-        file_id  = HDF5::openFile(file,false,'w');
+        file_id  = HDF5::openFile(file,false,access_type);
         group_id = HDF5::openGroup(file_id,group);
 
         // Set the target dataset write location to the chosen group
@@ -882,7 +882,7 @@ namespace Gambit
     // (assumes file is closed)
     std::map<ulong, ulonglong> HDF5MasterBuffer::get_highest_PPIDs(const int mpisize)
     {
-        lock_and_open_file();
+        lock_and_open_file('r');
 
         std::map<ulong, ulonglong> highests;
         for(int i=0; i<mpisize; ++i)
