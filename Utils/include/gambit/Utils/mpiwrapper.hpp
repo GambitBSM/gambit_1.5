@@ -306,10 +306,16 @@ namespace Gambit
             }
 
             /// Blocking wait for e.g. Isend to complete
-            //void Wait(MPI_Request *request, MPI_Status *status)
-            //{
-            //   MPI_Wait(MPI_Request *request, MPI_Status *status)
-            // }
+            void Wait(MPI_Request *request)
+            {
+               MPI_Status status;
+               int errflag = MPI_Wait(request, &status);
+               if(errflag!=0) {
+                 std::ostringstream errmsg;
+                 errmsg << "Error performing MPI_Wait! Received error flag: "<<errflag;
+                 utils_error().raise(LOCAL_INFO, errmsg.str());
+               }
+            }
 
             // Non-blocking probe for messages waiting to be delivered
             bool Iprobe(int source, int tag, MPI_Status* in_status=NULL /*out*/)

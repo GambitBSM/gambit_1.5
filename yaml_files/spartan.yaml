@@ -35,7 +35,7 @@ Printer:
     output_file: "results.hdf5"
     group: "/spartan"
     delete_file_on_restart: true
-    buffer_length: 100000
+    buffer_length: 100
     #disable_autorepair: true
 
   #printer: ascii
@@ -48,7 +48,7 @@ Printer:
 
 Scanner:
 
-  use_scanner: random
+  use_scanner: de
 
   scanners:
 
@@ -98,8 +98,8 @@ Rules:
 
   # None required, since no module dependencies to be resolved.
   - capability: normaldist_loglike   
-    #options:
-    #    probability_of_validity: 0.9
+    options:
+        probability_of_validity: 1.0
 
 Logger:
 
