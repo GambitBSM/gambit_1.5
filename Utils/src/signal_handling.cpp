@@ -505,13 +505,9 @@ namespace Gambit
    {
      int mpiSize = signalComm->Get_size();
      int myRank = signalComm->Get_rank();
-     // Ensure all shutdown messages from this process have been fully sent
-     for(auto it=msgs.begin(); it!=msgs.end(); ++it)
-     {
-        it->second.Wait();
-     }
-            
-     // Recv all shutdown messages from other processes 
+           
+     // Recv all shutdown messages from other processes
+     logger() << LogTags::core << LogTags::info << "Receiving all shutdown messages" << EOM;
      for(int rank=0; rank<mpiSize; rank++)
      {
         if(rank!=myRank)
@@ -538,6 +534,16 @@ namespace Gambit
            }
         }
      }
+
+     // Ensure all shutdown messages from this process have been fully sent
+     // (not necessary for the corresponding Recv's to complete, so no deadlock problem,
+     // but needed to confirm that the messages were sent and allow MPI to clean them up
+     // properly).
+     logger()<<LogTags::core << LogTags::info<<"Cleaning up shutdown message send buffers"<<EOM;
+     for(auto it=msgs.begin(); it!=msgs.end(); ++it)
+     {
+        it->second.Wait();
+     } 
    }
    #endif
 
