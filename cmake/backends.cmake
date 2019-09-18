@@ -1200,15 +1200,6 @@ if(NOT ditched_${name}_${ver})
     SOURCE_DIR ${dir}
     BUILD_IN_SOURCE 1
     PATCH_COMMAND patch -p1 < ${patch}/${name}_${ver}.diff
-    ## PATCH_COMMAND patch -p0 < ${patch}/primordial_header.dif
-    ## COMMAND patch -p0 < ${patch}/primordial_source.dif
-    ## COMMAND patch -p0 < ${patch}/input_source.dif
-    ## COMMAND patch -p0 < ${patch}/output_source.dif
-    ## COMMAND patch -p0 < ${patch}/spectra_source.dif
-    ## COMMAND patch -p0 < ${patch}/transfer_source.dif
-    ## COMMAND patch -p0 < ${patch}/perturbations_source.dif
-    ## COMMAND patch -p0 < ${patch}/thermo_source.dif
-    ## COMMAND patch -p0 < ${patch}/backgrnd_source.dif
     CONFIGURE_COMMAND ""
     BUILD_COMMAND ${CMAKE_MAKE_PROGRAM} CC=${CMAKE_C_COMPILER} OMPFLAG= OPTFLAG= CCFLAG=${BACKEND_C_FLAGS} LDFLAG=${BACKEND_C_FLAGS} class
     COMMAND ${CMAKE_COMMAND} -E make_directory lib
