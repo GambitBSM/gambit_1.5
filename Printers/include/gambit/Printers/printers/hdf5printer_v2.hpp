@@ -87,7 +87,9 @@ namespace Gambit
     // 1 means "there is another block of messages to receive"
     // 0 means "there are no more blocks of messages to receive"
     const int h5v2_BLOCK(30); 
- 
+    // "Begin sending data" tag
+    const int h5v2_BEGIN(31); 
+  
     // The 'h5v2_bufdata_type' messages send an integer encoding
     // the datatype for the h5v2_bufdata_values messages
     // Need a unique integer for each type. We can encode these

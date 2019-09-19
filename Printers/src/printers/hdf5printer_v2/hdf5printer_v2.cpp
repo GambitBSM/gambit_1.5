@@ -559,9 +559,13 @@ namespace Gambit
     /// Receive buffer data from a specified process until a STOP message is received
     void HDF5MasterBuffer::MPI_recv_all_buffers(const unsigned int r)
     {
-        logger()<< LogTags::printers << LogTags::info << "Checking for buffer data messages from process "<<r<<std::endl
+        logger()<< LogTags::printers << LogTags::info << "Asking process "<<r<<" to begin sending buffer data"<<std::endl
                 << "Number of points in buffer is currently: "<<get_Npoints()<<EOM;
         int more_buffers = 1;
+        // Send a message to the process to trigger it to begin sending buffer data (if any exists)
+        int begin_sending = 1;
+        myComm.Send(&begin_sending, 1, r, h5v2_BEGIN);
+                
         while(more_buffers)
         {
             // Check "more buffers" message  
@@ -1625,6 +1629,9 @@ namespace Gambit
             }
             else if(myRank>0)
             {
+                logger()<< LogTags::printers << LogTags::info << "Waiting for master process to request final sync print buffer data..."<<EOM;
+                int begin_sending;
+                myComm.Recv(&begin_sending, 1, 0, h5v2_BEGIN);
                 logger()<< LogTags::printers << LogTags::info << "Sending synchronised print buffer data to master process ("<<buffermaster.get_Npoints()<<" points)..."<<EOM; 
                 // Each process needs to flush all its sync printers, one at a time. 
                 buffermaster.MPI_flush_to_rank(0);
@@ -1716,6 +1723,10 @@ namespace Gambit
             }
             else if(myRank>0)
             {
+                logger()<< LogTags::printers << LogTags::info << "Waiting for master process to request final random-access print buffer data..."<<EOM;
+                int begin_sending;
+                myComm.Recv(&begin_sending, 1, 0, h5v2_BEGIN);
+ 
                 logger()<< LogTags::printers << LogTags::info << "Sending random-access print buffer data to master process..."<<EOM;
                 // All other processes send their RA buffer data to rank 0
                 for(auto it=aux_buffers.begin(); it!=aux_buffers.end(); ++it)

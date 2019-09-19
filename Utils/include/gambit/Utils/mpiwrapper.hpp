@@ -268,6 +268,25 @@ namespace Gambit
                #endif
             }
 
+            /// Blocking synchronous send (will not return until matching Recv is posted)
+            void Ssend(void *buf, int count, MPI_Datatype datatype,
+                                  int destination, int tag)
+            {
+               #ifdef MPI_MSG_DEBUG
+               std::cout<<"rank "<<Get_rank()<<": Ssend() called (count="<<count<<", destination="<<destination<<", tag="<<tag<<")"<<std::endl;
+               #endif
+               int errflag;
+               errflag = MPI_Ssend(buf, count, datatype, destination, tag, boundcomm);
+               if(errflag!=0) {
+                 std::ostringstream errmsg;
+                 errmsg << "Error performing MPI_Ssend! Received error flag: "<<errflag;
+                 utils_error().raise(LOCAL_INFO, errmsg.str());
+               }
+               #ifdef MPI_MSG_DEBUG
+               std::cout<<"rank "<<Get_rank()<<": Ssend() finished"<<std::endl;
+               #endif
+            }
+
             /// Templated blocking send
             template<class T>
             void Send(T *buf, int count,
@@ -277,6 +296,14 @@ namespace Gambit
                Send(buf, count, datatype, destination, tag);
             }
 
+            /// Templated blocking synchronous send
+            template<class T>
+            void Ssend(T *buf, int count,
+                      int destination, int tag)
+            {
+               static const MPI_Datatype datatype = get_mpi_data_type<T>::type();
+               Ssend(buf, count, datatype, destination, tag);
+            }
 
             /// Non-blocking send
             void Isend(void *buf, int count, MPI_Datatype datatype,
