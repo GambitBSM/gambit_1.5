@@ -33,10 +33,15 @@
 // since the structure of these functions are redundant
 
 // Check if we will calll "plc_loglike_NAME()" in the scan. If so, then run "initialize_NAME()"
-#define CHECK_AND_ACTIVATE(NAME)                                                         \
+// First check if the respective path (plc2_location or plc3_location) is already set.
+#define CHECK_AND_ACTIVATE(NAME,VERSION)                                                 \
                                                                                          \
 if(*InUse::CAT(plc_loglike_,NAME))                                                       \
 {                                                                                        \
+  if ( CAT_3(plc,VERSION,_location).empty() )                                            \
+  {                                                                                      \
+    CAT(set_planck_path_,VERSION) ( CAT_3(planck,VERSION,_path) );                       \
+  }                                                                                      \
   CAT(initialize_,NAME) ();                                                              \
 }                                                                                        \
 
@@ -219,26 +224,23 @@ BE_INI_FUNCTION
       planck3_path = runOptions->getValueOrDef<std::string>(PLC3_PATH,"plc_3.0_path");
     }
 
-    set_planck_path_2(planck2_path);
-    set_planck_path_3(planck3_path);
-
     // Check whcih lilelihood is used and initialise it when needed.
-    CHECK_AND_ACTIVATE(highl_TTTEEE_2015)
-    CHECK_AND_ACTIVATE(highl_TT_2015)
-    CHECK_AND_ACTIVATE(highl_TTTEEE_lite_2015)
-    CHECK_AND_ACTIVATE(highl_TT_lite_2015)
-    CHECK_AND_ACTIVATE(lowl_TEB_2015)
-    CHECK_AND_ACTIVATE(lowl_TT_2015)
-    CHECK_AND_ACTIVATE(lensing_2015)
+    CHECK_AND_ACTIVATE(highl_TTTEEE_2015,2)
+    CHECK_AND_ACTIVATE(highl_TT_2015,2)
+    CHECK_AND_ACTIVATE(highl_TTTEEE_lite_2015,2)
+    CHECK_AND_ACTIVATE(highl_TT_lite_2015,2)
+    CHECK_AND_ACTIVATE(lowl_TEB_2015,2)
+    CHECK_AND_ACTIVATE(lowl_TT_2015,2)
+    CHECK_AND_ACTIVATE(lensing_2015,2)
 
-    CHECK_AND_ACTIVATE(highl_TTTEEE_2018)
-    CHECK_AND_ACTIVATE(highl_TT_2018)
-    CHECK_AND_ACTIVATE(highl_TTTEEE_lite_2018)
-    CHECK_AND_ACTIVATE(highl_TT_lite_2018)
-    CHECK_AND_ACTIVATE(lowl_TT_2018)
-    CHECK_AND_ACTIVATE(lowl_EE_2018)
-    CHECK_AND_ACTIVATE(lensing_2018)
-    CHECK_AND_ACTIVATE(lensing_marged_2018)
+    CHECK_AND_ACTIVATE(highl_TTTEEE_2018,3)
+    CHECK_AND_ACTIVATE(highl_TT_2018,3)
+    CHECK_AND_ACTIVATE(highl_TTTEEE_lite_2018,3)
+    CHECK_AND_ACTIVATE(highl_TT_lite_2018,3)
+    CHECK_AND_ACTIVATE(lowl_TT_2018,3)
+    CHECK_AND_ACTIVATE(lowl_EE_2018,3)
+    CHECK_AND_ACTIVATE(lensing_2018,3)
+    CHECK_AND_ACTIVATE(lensing_marged_2018,3)
   }
   scan_level = false;
 }
