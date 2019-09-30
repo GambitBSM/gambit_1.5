@@ -559,13 +559,15 @@ namespace Gambit
     /// Receive buffer data from a specified process until a STOP message is received
     void HDF5MasterBuffer::MPI_recv_all_buffers(const unsigned int r)
     {
-        logger()<< LogTags::printers << LogTags::info << "Asking process "<<r<<" to begin sending buffer data"<<std::endl
-                << "Number of points in buffer is currently: "<<get_Npoints()<<EOM;
+        logger()<< LogTags::printers << LogTags::info << "Asking process "<<r<<" to begin sending buffer data"<<EOM;
+        //        << "Number of points in buffer is currently: "<<get_Npoints()<<EOM;
         int more_buffers = 1;
         // Send a message to the process to trigger it to begin sending buffer data (if any exists)
         int begin_sending = 1;
         myComm.Send(&begin_sending, 1, r, h5v2_BEGIN);
-                
+        
+        int max_Npoints = 0; // Track largest buffer sent, for reporting general number of points recv'd
+        int Nbuffers = 0; // Number of buffers recv'd        
         while(more_buffers)
         {
             // Check "more buffers" message  
@@ -574,6 +576,7 @@ namespace Gambit
             logger()<<LogTags::printers<<LogTags::debug<<"More buffers to receive from process "<<r<<"? "<<more_buffers<<EOM;
             if(more_buffers)
             {
+                Nbuffers+=1;
                 // Retrieve the name of the dataset for the buffer data
                 MPI_Status status;
                 myComm.Probe(r, h5v2_bufname, &status);
@@ -587,37 +590,48 @@ namespace Gambit
                 }
                 std::string dset_name(name_size, 'x'); // Initialise string to correct size, but filled with x's
                 myComm.Recv(&dset_name[0], name_size, MPI_CHAR, r, h5v2_bufname);
- 
+
                 logger()<<LogTags::printers<<LogTags::debug<<"Preparing to receive buffer data from process "<<r<<" for buffer "<<dset_name<<EOM;
    
                 // Get datatype of buffer data, and call matching receive function for that type
                 int buftype;
-                myComm.Recv(&buftype, 1, r, h5v2_bufdata_type); 
+                myComm.Recv(&buftype, 1, r, h5v2_bufdata_type);
+                int Npoints = 0;
                 switch(buftype) 
                 {
-                    case h5v2_type<int      >(): MPI_recv_buffer<int      >(r, dset_name); break;      
-                    case h5v2_type<uint     >(): MPI_recv_buffer<uint     >(r, dset_name); break;      
-                    case h5v2_type<long     >(): MPI_recv_buffer<long     >(r, dset_name); break;      
-                    case h5v2_type<ulong    >(): MPI_recv_buffer<ulong    >(r, dset_name); break;      
-                    case h5v2_type<longlong >(): MPI_recv_buffer<longlong >(r, dset_name); break;      
-                    case h5v2_type<ulonglong>(): MPI_recv_buffer<ulonglong>(r, dset_name); break;      
-                    case h5v2_type<float    >(): MPI_recv_buffer<float    >(r, dset_name); break;      
-                    case h5v2_type<double   >(): MPI_recv_buffer<double   >(r, dset_name); break;      
+                    case h5v2_type<int      >(): Npoints = MPI_recv_buffer<int      >(r, dset_name); break;      
+                    case h5v2_type<uint     >(): Npoints = MPI_recv_buffer<uint     >(r, dset_name); break;      
+                    case h5v2_type<long     >(): Npoints = MPI_recv_buffer<long     >(r, dset_name); break;      
+                    case h5v2_type<ulong    >(): Npoints = MPI_recv_buffer<ulong    >(r, dset_name); break;      
+                    case h5v2_type<longlong >(): Npoints = MPI_recv_buffer<longlong >(r, dset_name); break;      
+                    case h5v2_type<ulonglong>(): Npoints = MPI_recv_buffer<ulonglong>(r, dset_name); break;      
+                    case h5v2_type<float    >(): Npoints = MPI_recv_buffer<float    >(r, dset_name); break;      
+                    case h5v2_type<double   >(): Npoints = MPI_recv_buffer<double   >(r, dset_name); break;      
                     default:
                        std::ostringstream errmsg;
                        errmsg<<"Unrecognised datatype integer (value = "<<buftype<<") received in buffer type message from rank "<<r<<" for dataset "<<dset_name<<"!";
                        printer_error().raise(LOCAL_INFO, errmsg.str());       
                 }
+                if(Npoints>max_Npoints) max_Npoints = Npoints;
             }
         }
 
+        logger()<<LogTags::printers<<LogTags::info;
+        if(max_Npoints==0)
+        {
+           logger()<<"No print buffer data recv'd from rank "<<r<<" process"<<std::endl;
+        }
+        else
+        {
+           logger()<<"Recv'd "<<Nbuffers<<" dataset buffers from rank "<<r<<"; the largest one contained "<<max_Npoints<<" points"<<std::endl; 
+        }
         // Debug
         //for(auto it=all_buffers.begin(); it!=all_buffers.end(); ++it)
         //{
         //    std::cout<<"New buffer length is "<<it->second->N_items_in_buffer()<<" (name="<<it->second->dset_name()<<")"<<std::endl;
         //}
 
-        logger()<< LogTags::printers << LogTags::info << "Finished checking for buffer data messages from process "<<r<<EOM;
+        logger()<<"Finished checking for buffer data messages from process "<<r<<EOM;
     }
     #endif 
 
@@ -1605,7 +1619,8 @@ namespace Gambit
             /// to send.
             if(myRank==0 and mpiSize>1)
             {
-                logger()<< LogTags::printers << LogTags::info << "Preparing to receive synchronised print buffer data from all other processes..."<<EOM;
+                logger()<< LogTags::printers << LogTags::info << "Preparing to receive synchronised print buffer data from all other processes"<<std::endl;
+                logger()<< "Number of points in rank 0 buffer is currently: "<<buffermaster.get_Npoints()<<EOM;
 
                 //DEBUG! Recv all h5v2_BLOCK messages from rank 1 process
                 //int i=0;

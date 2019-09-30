@@ -1090,7 +1090,7 @@ namespace Gambit
         /// Receive buffer data of a known type for a known dataset
         /// Requires status message resulting from a probe for the message to be received
         template<class T>
-        void MPI_recv_buffer(const unsigned int r, const std::string& dset_name)      
+        int MPI_recv_buffer(const unsigned int r, const std::string& dset_name)      
         {
             // Get number of points to be received
             MPI_Status status;
@@ -1108,6 +1108,7 @@ namespace Gambit
             buffer.MPI_recv_from_rank(r, Npoints);
             logger()<< LogTags::printers << LogTags::debug << "Received "<<Npoints<<" points from rank "<<r<<"'s buffers (for dataset: "<<dset_name<<")"<<EOM;
             //std::cout<<"(rank "<<myComm.Get_rank()<<") Received "<<Npoints<<" from rank "<<r<<". New buffer size is "<<buffer.N_items_in_buffer()<<" (name="<<buffer.dset_name()<<")"<<std::endl;
+            return Npoints;
         }
         #endif
 

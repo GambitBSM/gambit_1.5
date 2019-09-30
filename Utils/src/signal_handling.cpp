@@ -507,20 +507,20 @@ namespace Gambit
      int myRank = signalComm->Get_rank();
            
      // Recv all shutdown messages from other processes
-     logger() << LogTags::core << LogTags::info << "Receiving all shutdown messages" << EOM;
+     logger() << LogTags::core << LogTags::debug << "Receiving all shutdown messages" << EOM;
      for(int rank=0; rank<mpiSize; rank++)
      {
         if(rank!=myRank)
         {
-           std::cerr<<"Rank "<<myRank<<" attempting to cleanup shutdown messages from rank "<<rank<<std::endl;
+           //std::cerr<<"Rank "<<myRank<<" attempting to cleanup shutdown messages from rank "<<rank<<std::endl;
            int loop = 0;
            bool more_messages = true;
            while(more_messages)
            {
               int code;
-              std::cerr<<"Rank "<<myRank<<": Messages waiting from rank "<<rank<<"? "<<signalComm->Iprobe(rank, signalComm->mytag)<<std::endl;
+              //std::cerr<<"Rank "<<myRank<<": Messages waiting from rank "<<rank<<"? "<<signalComm->Iprobe(rank, signalComm->mytag)<<std::endl;
               signalComm->Recv(&code, 1, rank, signalComm->mytag);
-              std::cerr<<"Rank "<<myRank<<": received code "<<shutdown_name(code)<<" from rank "<<rank<<std::endl;
+              //std::cerr<<"Rank "<<myRank<<": received code "<<shutdown_name(code)<<" from rank "<<rank<<std::endl;
               if(code==NO_MORE_MESSAGES) more_messages = false;
               loop++;
               if(loop>2*mpiSize)
@@ -609,7 +609,6 @@ namespace Gambit
            #endif
            msgs[shutdown_code].ISendToAll();
            logger() << LogTags::core << LogTags::info << shutdown_name(shutdown_code) <<" code broadcast to all processes" << EOM;
-           std::cerr<<"Rank "<<myrank()<<": "<<shutdown_name(shutdown_code) <<" code broadcast to all processes" << std::endl;
           }
          else
          {
