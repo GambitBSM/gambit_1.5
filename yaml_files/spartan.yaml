@@ -55,12 +55,12 @@ Scanner:
     random:
       plugin: random
       like: LogLike
-      point_number: 10000
+      point_number: 1000
 
     de:
       plugin: diver
       like: LogLike
-      NP: 500
+      NP: 5000
 
     multinest:
       plugin: multinest

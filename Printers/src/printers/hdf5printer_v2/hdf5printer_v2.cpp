@@ -14,6 +14,7 @@
 ///
 ///  *********************************************
 //
+#include <math.h>
 #include "gambit/Printers/printers/hdf5printer/hdf5tools.hpp"
 #include "gambit/Printers/printers/hdf5printer_v2.hpp"
 #include "gambit/Utils/util_functions.hpp"
@@ -556,16 +557,29 @@ namespace Gambit
         buffered_points_set.clear();
     }
 
-    /// Receive buffer data from a specified process until a STOP message is received
-    void HDF5MasterBuffer::MPI_recv_all_buffers(const unsigned int r)
+    /// Give process r permission to begin sending its buffer data
+    // Don't do this for all processes at once, as MPI can run out of 
+    // Recv request IDs behind the scenes if thousands of processes are
+    // trying to send it lots of stuff at once. But it is good to let
+    // many processes start sending data before we need it, so that the
+    // Recv goes quickly (and is effectively already done in the background)
+    // when we get to it. 
+    void HDF5MasterBuffer::MPI_request_buffer_data(const unsigned int r)
     {
         logger()<< LogTags::printers << LogTags::info << "Asking process "<<r<<" to begin sending buffer data"<<EOM;
-        //        << "Number of points in buffer is currently: "<<get_Npoints()<<EOM;
-        int more_buffers = 1;
         // Send a message to the process to trigger it to begin sending buffer data (if any exists)
         int begin_sending = 1;
         myComm.Send(&begin_sending, 1, r, h5v2_BEGIN);
+    }
+
+    /// Receive buffer data from a specified process until a STOP message is received
+    void HDF5MasterBuffer::MPI_recv_all_buffers(const unsigned int r)
+    {
+        // MAKE SURE MPI_request_buffer_data(r) HAS BEEN CALLED BEFORE THIS FUNCTION!
+        // Otherwise a deadlock will occur because we will wait forever for buffer data
+        // that will never be sent.
         
+        int more_buffers = 1;
         int max_Npoints = 0; // Track largest buffer sent, for reporting general number of points recv'd
         int Nbuffers = 0; // Number of buffers recv'd        
         while(more_buffers)
@@ -755,6 +769,22 @@ namespace Gambit
             it->second->update(ppid);
         }
     }
+
+    /// Report number of buffers that we are managing
+    std::size_t HDF5MasterBuffer::get_Nbuffers()
+    {
+        return all_buffers.size();
+    }
+
+    /// Report upper limit estimate of size of all buffer data in MB
+    // Used to trigger dump to disk if buffer is using too much RAM
+    // All datasets treated as doubles for simplicity
+    double HDF5MasterBuffer::get_sizeMB()
+    {
+        double Nbytes = (8.+4.) * (double)get_Nbuffers() * (double)get_Npoints();
+        return pow(2,-20) * Nbytes; // bytes -> MB (base 2) 
+    }
+
 
     /// Determine the next free index in the output datasets
     std::size_t HDF5MasterBuffer::get_next_free_position()
@@ -1617,6 +1647,9 @@ namespace Gambit
             /// Next, every *other* process needs to send all its buffers to rank 0 for printing
             /// Need to repeat this until other processes report that they have no more data
             /// to send.
+            const double RAMlimit = 500.; // MB; dump data if buffer size exceeds this
+            const std::size_t MAXrecv = 50; // Maximum number of processes to send buffer data at one time
+
             if(myRank==0 and mpiSize>1)
             {
                 logger()<< LogTags::printers << LogTags::info << "Preparing to receive synchronised print buffer data from all other processes"<<std::endl;
@@ -1636,10 +1669,28 @@ namespace Gambit
                 // NOTE! Make sure buffer_length * mpiSize is not too big or will run out of RAM!
                 for(std::size_t r=1; r<mpiSize; r++)
                 {
+                    if(r % MAXrecv == 1)
+                    {
+                        // Allow the next MAXrecv processes to start sending their buffer data
+                        for(std::size_t r2=r; (r2<r+MAXrecv and r2<mpiSize); r2++)
+                        { buffermaster.MPI_request_buffer_data(r2); }
+                    }
                     buffermaster.MPI_recv_all_buffers(r);
+                    buffermaster.resynchronise(); // Make sure all sync buffers know about all the newly received points
+                    // Check buffer RAM usage: if amount of data is getting large then dump it to disk.
+                    if(buffermaster.get_sizeMB()>RAMlimit)
+                    {
+                        std::stringstream bsize;
+                        std::stringstream maxsize;
+                        bsize.precision(1);
+                        bsize << buffermaster.get_sizeMB();
+                        maxsize.precision(0);
+                        maxsize << RAMlimit; 
+                        logger()<<LogTags::printers<<LogTags::info<<" Buffer size exceeds "<<maxsize.str()<<" MB after Recv from process "<<r<<" (is ~"<<bsize.str()<<" MB); dumping to disk."<<EOM;
+                        buffermaster.flush();
+                    }               
                 }
-                buffermaster.resynchronise(); // Make sure all sync buffers know about all the newly received points
-                buffermaster.flush();               
+                if(not buffermaster.all_buffers_empty()) buffermaster.flush();               
                 logger()<< LogTags::printers << LogTags::info << "All synchronised print buffer data has been written to disk!"<<EOM; 
             }
             else if(myRank>0)
@@ -1719,11 +1770,28 @@ namespace Gambit
                 // Attempt to gather RA buffer data from other processes and write it to disk
                 for(std::size_t r=1; r<mpiSize; r++)
                 {
+                    if(r % MAXrecv == 1)
+                    {
+                        // Allow the next MAXrecv processes to start sending their buffer data
+                        for(std::size_t r2=r; (r2<r+MAXrecv and r2<mpiSize); r2++)
+                        { RAbuffer.MPI_request_buffer_data(r2); }
+                    }
                     RAbuffer.MPI_recv_all_buffers(r);
+                    RAbuffer.resynchronise(); // Still need to do this for RA buffers, since we search for the locations of all scheduled RA writes at once. Invalid points won't overwrite pre-existing valid data (invalid basically means "nothing sent to printer"), so this will not delete anything accidentally (to delete data, need to use reset() function).
+                    // Check buffer RAM usage: if amount of data is getting large then dump it to disk.
+                    if(RAbuffer.get_sizeMB()>RAMlimit)
+                    {
+                        std::stringstream bsize;
+                        std::stringstream maxsize;
+                        bsize.precision(1);
+                        bsize << RAbuffer.get_sizeMB();
+                        maxsize.precision(0);
+                        maxsize << RAMlimit; 
+                        logger()<<LogTags::printers<<LogTags::info<<" RA buffer size exceeds "<<maxsize.str()<<" MB after Recv from process "<<r<<" (is ~"<<bsize.str()<<" MB); dumping to disk."<<EOM;
+                        RAbuffer.flush();
+                    }               
                 }
-
-                RAbuffer.resynchronise(); // Still need to do this for RA buffers, since we search for the locations of all scheduled RA writes at once. Invalid points won't overwrite pre-existing valid data (invalid basically means "nothing sent to printer"), so this will not delete anything accidentally (to delete data, need to use reset() function).
-                RAbuffer.flush();
+                if(not RAbuffer.all_buffers_empty()) RAbuffer.flush();               
 
                 // Check if everything managed to flush!
                 if(not RAbuffer.all_buffers_empty())

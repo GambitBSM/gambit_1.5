@@ -1084,6 +1084,9 @@ namespace Gambit
         /// (only gathers data from buffers known to that process)
         void MPI_flush_to_rank(const unsigned int rank);
 
+        /// Give process 'rank' permission to begin sending its buffer data
+        void MPI_request_buffer_data(const unsigned int rank);
+ 
         /// Receive buffer data from a specified process until a STOP message is received
         void MPI_recv_all_buffers(const unsigned int rank);
   
@@ -1156,6 +1159,12 @@ namespace Gambit
  
         /// Get next available position in the synchronised output datasets
         std::size_t get_next_free_position();
+
+        /// Report number of buffers that we are managing
+        std::size_t get_Nbuffers();
+
+        /// Report upper limit estimate of size of all buffer data in MB
+        double get_sizeMB();
 
       private:
 
