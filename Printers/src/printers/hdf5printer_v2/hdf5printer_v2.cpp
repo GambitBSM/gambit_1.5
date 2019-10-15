@@ -1648,7 +1648,7 @@ namespace Gambit
             /// Need to repeat this until other processes report that they have no more data
             /// to send.
             const double RAMlimit = 500.; // MB; dump data if buffer size exceeds this
-            const std::size_t MAXrecv = 50; // Maximum number of processes to send buffer data at one time
+            const std::size_t MAXrecv = 100; // Maximum number of processes to send buffer data at one time
 
             if(myRank==0 and mpiSize>1)
             {
@@ -1669,14 +1669,11 @@ namespace Gambit
                 // NOTE! Make sure buffer_length * mpiSize is not too big or will run out of RAM!
                 for(std::size_t r=1; r<mpiSize; r++)
                 {
-                    if(r % MAXrecv == 1)
-                    {
-                        // Allow the next MAXrecv processes to start sending their buffer data
-                        for(std::size_t r2=r; (r2<r+MAXrecv and r2<mpiSize); r2++)
-                        { buffermaster.MPI_request_buffer_data(r2); }
-                    }
+                    // Allow the next of MAXrecv processes to start sending their buffer data
+                    // (the first MAXrecv processes start sending without permission)
+                    if(r+MAXrecv<mpiSize) buffermaster.MPI_request_buffer_data(r+MAXrecv);
+                    // Do the Recvs
                     buffermaster.MPI_recv_all_buffers(r);
-                    buffermaster.resynchronise(); // Make sure all sync buffers know about all the newly received points
                     // Check buffer RAM usage: if amount of data is getting large then dump it to disk.
                     if(buffermaster.get_sizeMB()>RAMlimit)
                     {
@@ -1687,17 +1684,29 @@ namespace Gambit
                         maxsize.precision(0);
                         maxsize << RAMlimit; 
                         logger()<<LogTags::printers<<LogTags::info<<" Buffer size exceeds "<<maxsize.str()<<" MB after Recv from process "<<r<<" (is ~"<<bsize.str()<<" MB); dumping to disk."<<EOM;
+                        buffermaster.resynchronise(); // Make sure all sync buffers know about all the newly received points
                         buffermaster.flush();
                     }               
                 }
-                if(not buffermaster.all_buffers_empty()) buffermaster.flush();               
+                if(not buffermaster.all_buffers_empty()) 
+                {
+                    buffermaster.resynchronise(); // Make sure all sync buffers know about all the newly received points
+                    buffermaster.flush();
+                }     
                 logger()<< LogTags::printers << LogTags::info << "All synchronised print buffer data has been written to disk!"<<EOM; 
             }
             else if(myRank>0)
             {
-                logger()<< LogTags::printers << LogTags::info << "Waiting for master process to request final sync print buffer data..."<<EOM;
-                int begin_sending;
-                myComm.Recv(&begin_sending, 1, 0, h5v2_BEGIN);
+                if(myRank>MAXrecv)
+                {
+                    logger()<< LogTags::printers << LogTags::info << "Waiting for master process to request final sync print buffer data..."<<EOM;
+                    int begin_sending;
+                    myComm.Recv(&begin_sending, 1, 0, h5v2_BEGIN);
+                }
+                else
+                {
+                    logger()<< LogTags::printers << LogTags::info << "This process has rank less than or equal to MAXrecv ("<<MAXrecv<<"), therefore we will not wait for permission from master process before initiating synchronised buffer data Send. Will start this immediately."<<EOM; 
+                }
                 logger()<< LogTags::printers << LogTags::info << "Sending synchronised print buffer data to master process ("<<buffermaster.get_Npoints()<<" points)..."<<EOM; 
                 // Each process needs to flush all its sync printers, one at a time. 
                 buffermaster.MPI_flush_to_rank(0);
@@ -1770,14 +1779,11 @@ namespace Gambit
                 // Attempt to gather RA buffer data from other processes and write it to disk
                 for(std::size_t r=1; r<mpiSize; r++)
                 {
-                    if(r % MAXrecv == 1)
-                    {
-                        // Allow the next MAXrecv processes to start sending their buffer data
-                        for(std::size_t r2=r; (r2<r+MAXrecv and r2<mpiSize); r2++)
-                        { RAbuffer.MPI_request_buffer_data(r2); }
-                    }
+                    // Allow the next of MAXrecv processes to start sending their buffer data
+                    // (the first MAXrecv processes start sending without permission)
+                    if(r+MAXrecv<mpiSize) buffermaster.MPI_request_buffer_data(r+MAXrecv);
+                    // Do the Recvs
                     RAbuffer.MPI_recv_all_buffers(r);
-                    RAbuffer.resynchronise(); // Still need to do this for RA buffers, since we search for the locations of all scheduled RA writes at once. Invalid points won't overwrite pre-existing valid data (invalid basically means "nothing sent to printer"), so this will not delete anything accidentally (to delete data, need to use reset() function).
                     // Check buffer RAM usage: if amount of data is getting large then dump it to disk.
                     if(RAbuffer.get_sizeMB()>RAMlimit)
                     {
@@ -1788,10 +1794,15 @@ namespace Gambit
                         maxsize.precision(0);
                         maxsize << RAMlimit; 
                         logger()<<LogTags::printers<<LogTags::info<<" RA buffer size exceeds "<<maxsize.str()<<" MB after Recv from process "<<r<<" (is ~"<<bsize.str()<<" MB); dumping to disk."<<EOM;
+                        RAbuffer.resynchronise(); // Still need to do this for RA buffers, since we search for the locations of all scheduled RA writes at once. Invalid points won't overwrite pre-existing valid data (invalid basically means "nothing sent to printer"), so this will not delete anything accidentally (to delete data, need to use reset() function).
                         RAbuffer.flush();
                     }               
                 }
-                if(not RAbuffer.all_buffers_empty()) RAbuffer.flush();               
+                if(not RAbuffer.all_buffers_empty())
+                {
+                    RAbuffer.resynchronise(); // Still need to do this for RA buffers, since we search for the locations of all scheduled RA writes at once. Invalid points won't overwrite pre-existing valid data (invalid basically means "nothing sent to printer"), so this will not delete anything accidentally (to delete data, need to use reset() function).
+                    RAbuffer.flush();               
+                }
 
                 // Check if everything managed to flush!
                 if(not RAbuffer.all_buffers_empty())
@@ -1806,10 +1817,16 @@ namespace Gambit
             }
             else if(myRank>0)
             {
-                logger()<< LogTags::printers << LogTags::info << "Waiting for master process to request final random-access print buffer data..."<<EOM;
-                int begin_sending;
-                myComm.Recv(&begin_sending, 1, 0, h5v2_BEGIN);
- 
+                if(myRank>MAXrecv)
+                {
+                    logger()<< LogTags::printers << LogTags::info << "Waiting for master process to request final random-access print buffer data..."<<EOM;
+                    int begin_sending;
+                    myComm.Recv(&begin_sending, 1, 0, h5v2_BEGIN);
+                }
+                else
+                {
+                    logger()<< LogTags::printers << LogTags::info << "This process has rank less than or equal to MAXrecv ("<<MAXrecv<<"), therefore we will not wait for permission from master process before initiating random-access buffer data Send. Will start this immediately."<<EOM; 
+                }
                 logger()<< LogTags::printers << LogTags::info << "Sending random-access print buffer data to master process..."<<EOM;
                 // All other processes send their RA buffer data to rank 0
                 for(auto it=aux_buffers.begin(); it!=aux_buffers.end(); ++it)
