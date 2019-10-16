@@ -77,6 +77,40 @@ namespace Gambit
          return !( l == r );
      }
 
+     // A chunk of points for a buffer from HDF5Printer2 (i.e. for a single dataset)
+     struct EXPORT_SYMBOLS HDF5bufferchunk
+     {
+         static const int SIZE=10;
+         int name_id; // Type will be pre-associated with the name in a separate step
+         double values[SIZE]; // Small chunksize since people tend to use small buffers when many MPI processes used
+         unsigned long long pointIDs[SIZE];
+         unsigned int ranks[SIZE];
+         int valid[SIZE]
+     }
+
+     #ifdef WITH_MPI
+     MPI_Datatype mpi_HDF5bufferchunk_type;
+
+     void define_mpiHDF5bufferchunk()
+     {
+        int nblocks = 5;
+        int blocklengths[5] = {1,SIZE,SIZE,SIZE,SIZE};
+        MPI_Datatype types[5];
+        types[0] = MPI_INT;
+        types[1] = MPI_DOUBLE;
+        types[2] = MPI_UNSIGNED_LONG_LONG;
+        types[3] = MPI_UNSIGNED_INT;
+        types[4] = MPI_INT;
+        MPI_Aint offsets[5];
+        offsets[0] = offsetof(HDF5bufferchunk, name_id);
+        offsets[1] = offsetof(HDF5bufferchunk, values);
+        offsets[2] = offsetof(HDF5bufferchunk, pointIDs);
+        offsets[3] = offsetof(HDF5bufferchunk, ranks);
+        offsets[4] = offsetof(HDF5bufferchunk, valid);
+        MPI_Type_create_struct(nblocks, blocklengths, offsets, types, &mpi_HDF5bufferchunk_type);
+        MPI_Type_commit(&mpi_HDF5bufferchunk_type);
+     }
+     #endif
 
      // DEPRECATED! We no longer actually send this stuff via MPI,
      // and there were slight issues with non-standards compliance

@@ -119,6 +119,17 @@ namespace Gambit
     // Null pointID object, use for unassigned pointIDs
     EXPORT_SYMBOLS extern const PPIDpair nullpoint;
 
+    // A chunk of points for a buffer from HDF5Printer2 (i.e. for a single dataset)
+    struct EXPORT_SYMBOLS HDF5bufferchunk
+    {
+        static const SIZE=10;
+        int name_id; // Type will be pre-associated with the name in a separate step
+        double values[SIZE]; // Small chunksize since people tend to use small buffers when many MPI processes used
+        unsigned long long pointIDs[SIZE];
+        unsigned int ranks[SIZE];
+        int valid[SIZE]
+    }
+
   } // end namespace Printers
 
   // DEPRECATED! We no longer actually send this stuff via MPI, 
