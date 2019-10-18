@@ -51,7 +51,7 @@ if(*InUse::CAT(plc_loglike_,NAME))                                              
       backend_error().raise(LOCAL_INFO,ErrMssg.c_str());                                                  \
     }                                                                                                     \
     char* clik_path = (char*)full_path.c_str();                                                           \
-    CAT(TYPE,_map)[STRINGIFY(NAME)] = CAT(TYPE,_init) (clik_path, &plc_Error);                            \
+    CAT(TYPE,_map)[STRINGIFY(NAME)] = CAT(TYPE,_init) (clik_path, NULL);                                  \
   }
 
 // Definition of "double plc_loglike_NAME(double* cl_and_pars)"
@@ -69,6 +69,7 @@ if(*InUse::CAT(plc_loglike_,NAME))                                              
       backend_error().raise(LOCAL_INFO,mssg.c_str());                                                     \
     }                                                                                                     \
     double res;                                                                                           \
+    clik_error* plc_Error = initError();                                                                  \
     res =  CAT(TYPE,_compute) (CAT(TYPE,_map)[name], cl_and_pars, &plc_Error);                            \
     if (isError(plc_Error))                                                                               \
     {                                                                                                     \
@@ -86,6 +87,7 @@ if(*InUse::CAT(plc_loglike_,NAME))                                              
       logger() << "Calling \""<< STRINGIFY(CAT(plc_loglike_,NAME)) << "\"";                               \
       logger() << " was successfull. Got " << res << EOM;                                                 \
     }                                                                                                     \
+    cleanupError(&plc_Error);                                                                             \
     return res;                                                                                           \
   }                                                                                                       \
 
@@ -99,8 +101,6 @@ BE_NAMESPACE
   //  -> Container for all activated likelihood objects
   static std::map<std::string, clik_object* > clik_map;
   static std::map<std::string, clik_lensing_object* > clik_lensing_map;
-  //  -> Error structure for error management
-  static clik_error* plc_Error;
 
   void set_planck_path(std::string& planck_path)
   {
@@ -145,9 +145,6 @@ END_BE_NAMESPACE
 
 BE_INI_FUNCTION
 {
-  // get "fresh" clik_error
-  plc_Error = initError();
-
   // Most of the Backend initialisation is only relevant for the first parameter point
   static bool scan_level = true;
   if (scan_level)
