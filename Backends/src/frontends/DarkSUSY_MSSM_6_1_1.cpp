@@ -506,7 +506,6 @@ BE_NAMESPACE
     int ierr = 0;
     Farray<Fcomplex8,1,27,1,2> gg;
     dsddgpgn(gg,ierr);
-    std::cout << "TB TEST - couplings: " << gg(1,1).re <<", " << gg(4,1).re << std::endl;
     if (ierr > 0)
     {
       std::ostringstream err;
