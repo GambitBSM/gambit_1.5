@@ -504,7 +504,7 @@ BE_NAMESPACE
   std::vector<double> DD_couplings()
   {
     int ierr = 0;
-    Farray<Fdouble_complex,1,27,1,2> gg;
+    Farray<Fcomplex8,1,27,1,2> gg;
     dsddgpgn(gg,ierr);
     std::cout << "TB TEST - couplings: " << gg(1,1).re <<", " << gg(4,1).re << std::endl;
     if (ierr > 0)
