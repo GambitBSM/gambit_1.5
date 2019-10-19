@@ -1726,7 +1726,85 @@ namespace Gambit
                 logger()<<LogTags::printers<<LogTags::debug<<"Sent buffer END message! "<<more_buffers<<EOM;
             }
             #endif
-    
+  
+            gather_and_print(buffermaster);
+
+            //////
+            // Method 2: Distribution via gatherv
+            // First need to gatherv information on buffer sizes to be sent
+            std::vector<std::size_t> pointsbuffers(2);
+            std::vector<std::size_t> pointsbuffersperprocess(2*mpiSize); // number of points and buffers to be recv'd for each process
+            std::vector<std::size_t> pointsperprocess(mpiSize);
+            std::vector<std::size_t> buffersperprocess(mpiSize);
+
+            pointsbuffers.push_back(buffermaster.get_Npoints());
+            pointsbuffers.push_back(buffermaster.get_Nbuffers());
+            if(myRank==0)
+            {
+               myComm.Gather(pointsbuffers, pointsbuffersperprocess, 2, 2, 0);
+               for(int i=0; i<mpiSize; i++)
+               {
+                  int j = 2*i;
+                  int k = 2*i+1;
+                  pointsperprocess .push_back(pointsbuffersperprocess.at(j));
+                  buffersperprocess.push_back(pointsbuffersperprocess.at(k));
+               }
+            }
+            else
+            {
+               std::vector<std::size_t> nullrecv; // Other processes don't recv anything, but need a placeholder argument
+               myComm.Gather(pointsbuffers, nullrecv, 2, 2, 0);
+            }
+
+            // Now we know how many points we need to recv per process, can figure out
+            // how many we can recv at once.
+            static const size_t CHUNKSIZE = (HDF5bufferchunk.SIZE * HDF5bufferchunk.NBUFFERS);
+            double Nbytes_total_MB = pow(2,-20) * (8.+4.) * (double)get_Nbuffers() * (double)get_Npoints();
+            int NGathers = (Nbytes_total_MB + RAMlimit - 1) / RAMlimit; // ceil(Nbytes/RAMlimit)
+
+            // Need to split processes into new communicators depending on
+            // how many Gathers we need to do to avoid RAM limits
+            // Do this by creating new communicator groups containing only the specified processes
+            int groupsize = (mpiSize + NGathers - 1) / NGathers; // ceil(mpiSize/NGathers)
+            for(int i=0; i<NGathers; i++)
+            {
+                // Create new communicator group for the Gather
+                std::vector<int> group;
+                group.push_back(0); // Always need rank 0
+                int groupstart = i*groupsize;
+                bool ingroup(false);
+                for(int j=groupstart; j<groupstart+groupsize; j++)
+                {
+                    if(j==mpiSize) break; // No more processes!
+                    group.push_back(j);
+                    if(myRank==j) ingroup = true;
+                }
+                std::stringstream ss;
+                ss<<"Gather group "<<i;
+                subComm = myComm.spawn_new(group,ss.str());
+
+                // Pack print buffer data into send buffer
+                std::vector<HDF5bufferchunk> sendbuf;
+                // TODO: do pack!
+
+                // Do the Gatherv!
+                if(rank==0)
+                {
+                   std::vector<HDF5bufferchunk> recvbuf;
+                   subComm.Gatherv(sendbuf, recvbuf, sendbuf.size(), recvcounts, 0);
+                   // TODO: Move data into our buffer and print! 
+                }
+                else if(ingroup)
+                {
+                   std::vector<HDF5bufferchunk> nullbuf;
+                   std::vector<int> nullcounts;
+                   subComm.Gatherv(sendbuf, nullbuf, sendbuf.size(), nullcounts, 0);                
+                }
+                // Done this chunk!
+            }
+
+            //////
+
 //            /// Now we need to wait until all processes have done this, to make
 //            /// sure every single calculated point is on disk. This way the
 //            /// RA buffers should be able to fully empty themselves.
@@ -2001,6 +2079,83 @@ namespace Gambit
 #ifdef WITH_MPI
     /// Get reference to Comm object
     GMPI::Comm& HDF5Printer2::get_Comm() {return myComm;}
+
+    // Gather buffer data from all processes via MPI and print it on rank 0
+    void HDF5Printer2::gather_and_print(HDF5MasterBuffer& buffermaster)
+    {
+        // First need to gatherv information on buffer sizes to be sent
+        std::vector<std::size_t> pointsbuffers(2);
+        std::vector<std::size_t> pointsbuffersperprocess(2*mpiSize); // number of points and buffers to be recv'd for each process
+        std::vector<std::size_t> pointsperprocess(mpiSize);
+        std::vector<std::size_t> buffersperprocess(mpiSize);
+
+        pointsbuffers.push_back(buffermaster.get_Npoints());
+        pointsbuffers.push_back(buffermaster.get_Nbuffers());
+        if(myRank==0)
+        {
+           myComm.Gather(pointsbuffers, pointsbuffersperprocess, 2, 2, 0);
+           for(int i=0; i<mpiSize; i++)
+           {
+              int j = 2*i;
+              int k = 2*i+1;
+              pointsperprocess .push_back(pointsbuffersperprocess.at(j));
+              buffersperprocess.push_back(pointsbuffersperprocess.at(k));
+           }
+        }
+        else
+        {
+           std::vector<std::size_t> nullrecv; // Other processes don't recv anything, but need a placeholder argument
+           myComm.Gather(pointsbuffers, nullrecv, 2, 2, 0);
+        }
+
+        // Now we know how many points we need to recv per process, can figure out
+        // how many we can recv at once.
+        // Need to compute MB of storage required by each process
+        std::vector<std::vector<int>> groups;
+        double running_tot_MB = 0;
+        for(int i=1; i<mpiSize; i++)
+        {
+           double N_MB = pow(2,-20) * (8.+4.) * (double)buffersperprocess.at(i) * (double)pointsperprocess.at(i);
+           running_tot_MB += N_MB;
+           if((running_tot_MB > RAMlimit) and (groups.back.size()!=0))
+           {
+              // Make a new group each time we go over the RAM limit, so long as the previous group wasn't empty
+              groups.push_back(std::vector<int>());    
+           }
+           groups.back().push_back(i);
+        }
+
+        static const size_t CHUNKSIZE = (HDF5bufferchunk.SIZE * HDF5bufferchunk.NBUFFERS);
+
+        for(int i=0; i<groups.size(); i++)
+        {
+            // Create new communicator group for the Gather
+            groups.at(i).push_back(0); // Always need rank 0
+
+            std::stringstream ss;
+            ss<<"Gather group "<<i;
+            subComm = myComm.spawn_new(groups.at(i),ss.str());
+
+            // Pack print buffer data into send buffer
+            std::vector<HDF5bufferchunk> sendbuf;
+            // TODO: do pack!
+
+            // Do the Gatherv!
+            if(rank==0)
+            {
+               std::vector<HDF5bufferchunk> recvbuf;
+               subComm.Gatherv(sendbuf, recvbuf, sendbuf.size(), recvcounts, 0);
+               // TODO: Move data into our buffer and print! 
+            }
+            HDF5Printer2:: else if(ingroup)
+            {
+               std::vector<HDF5bufferchunk> nullbuf;
+               std::vector<int> nullcounts;
+               subComm.Gatherv(sendbuf, nullbuf, sendbuf.size(), nullcounts, 0);                
+            }
+            // Done this chunk!
+        }
+    }
 #endif         
 
     /// @}

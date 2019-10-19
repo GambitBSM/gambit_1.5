@@ -29,8 +29,16 @@
 // Code!
 namespace Gambit
 {
-  namespace Printers 
-  {
+   namespace GMPI
+   {
+      // Forward declare MPI type getter template function
+      template<typename T, typename Enable=void>
+      struct get_mpi_data_type;
+   }
+
+  
+   namespace Printers 
+   {
     /// vertexID / sub-print index pair
     /// Identifies individual buffers (I call them VertexBuffer, but actually there can be more than one per vertex) 
     //typedef std::pair<int,unsigned int> VBIDpair;
@@ -122,15 +130,24 @@ namespace Gambit
     // A chunk of points for a buffer from HDF5Printer2 (i.e. for a single dataset)
     struct EXPORT_SYMBOLS HDF5bufferchunk
     {
-        static const SIZE=10;
-        int name_id; // Type will be pre-associated with the name in a separate step
-        double values[SIZE]; // Small chunksize since people tend to use small buffers when many MPI processes used
+        static const size_t SIZE=10; // Number of points in this chunk. Kept small since people send to use small buffers with large MPI sizes
+        static const size_t NBUFFERS=10; // Number of buffers combined into this chunk
+        int name_id[NBUFFERS]; // IDs for buffers. Types will be pre-associated with the name in a separate step
         unsigned long long pointIDs[SIZE];
         unsigned int ranks[SIZE];
-        int valid[SIZE]
+        double values[NBUFFERS][SIZE];
+        int valid[NBUFFERS][SIZE]
     }
 
   } // end namespace Printers
+
+  namespace GMPI { 
+     template<> 
+     struct get_mpi_data_type<Printers::HDF5bufferchunk> 
+     { 
+       static MPI_Datatype type();
+     }; 
+  }
 
   // DEPRECATED! We no longer actually send this stuff via MPI, 
   // and there were slight issues with non-standards compliance

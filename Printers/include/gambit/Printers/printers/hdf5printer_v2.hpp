@@ -1327,6 +1327,9 @@ namespace Gambit
 #ifdef WITH_MPI
         // Gambit MPI communicator context for use within the hdf5 printer system
         GMPI::Comm myComm; // initially attaches to MPI_COMM_WORLD
+
+        // Gather buffer data from all processes via MPI and print it on rank 0
+        void gather_and_print(HDF5MasterBuffer& buffermaster);
 #endif
 
         /// Object interfacing to HDF5 file and all datasets

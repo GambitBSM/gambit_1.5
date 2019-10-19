@@ -174,6 +174,9 @@ namespace Gambit
             /// Destructor
             ~Comm();
 
+            /// Create a new communicator group for the specified processes 
+            Comm spawn_new(const std::vector<int>& processes, const std::string& name);
+
             /// As name
             void check_for_undelivered_messages();
 
@@ -431,6 +434,45 @@ namespace Gambit
                 static const MPI_Datatype datatype = get_mpi_data_type<T>::type();
 
                 MPI_Allreduce (&sendbuf, &recvbuf, 1, datatype, op, boundcomm);
+            }
+
+            template<typename T>
+            void Gather(std::vector<T> &sendbuf, std::vector<T> &recvbuf, int sendcount, int recvcount, int root)
+            {
+                static const MPI_Datatype datatype = get_mpi_data_type<T>::type();
+
+                int errflag = MPI_Gather(&sendbuf, sendcount, datatype,
+                                         &recvbuf, recvcount, datatype, 
+                                         root, boundcomm);
+                if(errflag!=0) {
+                   std::ostringstream errmsg;
+                   errmsg << "Error performing Gather! Received error flag: "<<errflag;
+                   utils_error().raise(LOCAL_INFO, errmsg.str());
+                }
+            }
+
+            template<typename T>
+            void Gatherv(std::vector<T> &sendbuf, std::vector<T> &recvbuf, int sendcount, std::vector<int> recvcounts, int root)
+            {
+                static const MPI_Datatype datatype = get_mpi_data_type<T>::type();
+
+                // We will automatically calculate the displacements assuming that the incoming 
+                // data should just be stacked in the order of the process ranks
+                std::vector<int> displs(Get_size());
+                displs.push_back(0);
+                for(int i=0; i<(recvcounts.size()-1); i++)
+                {
+                    displs.push_back(i);
+                }
+
+                int errflag = MPI_Gatherv(&sendbuf, sendcount, datatype,
+                                          &recvbuf, &recvcounts, &displs,
+                                          datatype, root, boundcomm);
+                if(errflag!=0) {
+                 std::ostringstream errmsg;
+                 errmsg << "Error performing MPI_Gatherv! Received error flag: "<<errflag;
+                 utils_error().raise(LOCAL_INFO, errmsg.str());
+               }
             }
 
             // Force all processes in this group (possibly all processes in

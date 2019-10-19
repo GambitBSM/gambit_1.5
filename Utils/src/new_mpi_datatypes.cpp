@@ -187,7 +187,7 @@ namespace Gambit
   // /// Definition needed for specialisation of GMPI::get_mpi_data_type<T>() to VBIDpair type
   // /// so that template MPI Send and Receive functions work.
   // //template<> MPI_Datatype GMPI::get_mpi_data_type<Printers::VBIDpair>() { return Printers::mpi_VBIDpair_type; }
-  // #ifdef WITH_MPI
+  #ifdef WITH_MPI
   // MPI_Datatype GMPI::get_mpi_data_type<Printers::VBIDpair>::type()
   // { return Printers::mpi_VBIDpair_type; }
 
@@ -196,6 +196,9 @@ namespace Gambit
 
   // MPI_Datatype GMPI::get_mpi_data_type<Printers::PPIDpair>::type()
   // { return Printers::mpi_PPIDpair_type; }
-  // #endif
+
+  MPI_Datatype GMPI::get_mpi_data_type<Printers::HDF5bufferchunk>::type()
+  { return Printers::mpi_HDF5bufferchunk_type; }
+  #endif
 
 } // end namespace Gambit

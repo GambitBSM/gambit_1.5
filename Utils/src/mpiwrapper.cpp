@@ -65,6 +65,30 @@ namespace Gambit
          }
       }
 
+      /// Create a new communicator group from this one for the specified processes 
+      Comm Comm::spawn_new(const std::vector<int> processes, const std::string& name)
+      {
+         // Create group
+         MPI_Group group_world, new_group;
+         MPI_Comm_group(boundcomm, &group_world);
+         MPI_Group_incl(group_world, processes.size(), &processes, &new_group);
+
+         // Create new communicator 
+         MPI_Comm new_comm;
+         int ierr;
+         errflag = MPI_Comm_create(boundcomm, new_group, new_comm);
+
+         // Check for error
+         if(errflag!=0)
+         {
+           std::ostringstream errmsg;
+           errmsg << "Error performing MPI_Comm_create while attempting to create a new communicator group! Received error flag: "<<errflag;
+           utils_error().raise(LOCAL_INFO, errmsg.str());
+         }
+
+         return Comm(new_comm, name);
+      }
+
       /// Duplicate input communicator into boundcomm
       /// (creates new context)
       /// NOTE! MPI_Comm_dup is a COLLECTIVE call, so all processes
