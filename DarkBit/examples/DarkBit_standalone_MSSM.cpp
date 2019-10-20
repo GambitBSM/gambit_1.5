@@ -669,7 +669,7 @@ int main(int argc, char* argv[])
     SimYieldTable_DarkSUSY6.reset_and_calculate();
 
     // Collect missing final states for simulation in cascade MC
-    GA_missingFinalStates.resolveDependency(&TH_ProcessCatalog_MSSM);
+    GA_missingFinalStates.resolveDependency(&TH_ProcessCatalog_DS6_MSSM);
     GA_missingFinalStates.resolveDependency(&SimYieldTable_DarkSUSY6);
     GA_missingFinalStates.resolveDependency(&DarkMatter_ID_MSSM);
     GA_missingFinalStates.reset_and_calculate();
@@ -787,17 +787,6 @@ int main(int argc, char* argv[])
     double sigma_SD_p_DS6 = sigma_SD_p_simple(0);
 
 
-    // Initialize DarkSUSY 6 Local Halo Model
-//    DarkSUSY6_PointInit_LocalHalo_func.resolveDependency(&ExtractLocalMaxwellianHalo);
-//    DarkSUSY6_PointInit_LocalHalo_func.resolveDependency(&RD_fraction_one);
-//    DarkSUSY6_PointInit_LocalHalo_func.resolveBackendReq(&Backends::DarkSUSY_MSSM_6_1_1::Functown::dshmcom);
-//    DarkSUSY6_PointInit_LocalHalo_func.resolveBackendReq(&Backends::DarkSUSY_MSSM_6_1_1::Functown::dshmisodf);
-//    DarkSUSY6_PointInit_LocalHalo_func.resolveBackendReq(&Backends::DarkSUSY_MSSM_6_1_1::Functown::dshmframevelcom);
-//    DarkSUSY6_PointInit_LocalHalo_func.resolveBackendReq(&Backends::DarkSUSY_MSSM_6_1_1::Functown::dshmnoclue);
-//    DarkSUSY6_PointInit_LocalHalo_func.reset_and_calculate();
-
-//    cout << "DEBUG 2" << endl;
-
     // Infer WIMP capture rate in Sun
     capture_rate_Sun_const_xsec_DS6.resolveDependency(&mwimp_generic);
     capture_rate_Sun_const_xsec_DS6.resolveDependency(&sigma_SI_p_simple);
@@ -811,7 +800,6 @@ int main(int argc, char* argv[])
     // Infer WIMP equilibration time in Sun
     equilibration_time_Sun.resolveDependency(&TH_ProcessCatalog_DS6_MSSM);
     equilibration_time_Sun.resolveDependency(&DarkMatter_ID_MSSM);
-    equilibration_time_Sun.resolveDependency(&mwimp_generic);
     equilibration_time_Sun.resolveDependency(&mwimp_generic);
     equilibration_time_Sun.resolveDependency(&capture_rate_Sun_const_xsec_DS6);
     equilibration_time_Sun.reset_and_calculate();
