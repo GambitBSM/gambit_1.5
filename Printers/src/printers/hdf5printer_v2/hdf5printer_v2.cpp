@@ -583,7 +583,7 @@ namespace Gambit
     /// Get names of all datasets in the group that we are pointed at
     std::vector<std::pair<std::string,int>> HDF5MasterBuffer::get_all_dset_names_on_disk()
     {
-         ensure_file_is_open();
+         lock_and_open_file();
 
          // Get all object names in the group 
          std::vector<std::string> names = HDF5::lsGroup(group_id);
@@ -600,6 +600,8 @@ namespace Gambit
                  dset_names_and_types.push_back(std::make_pair(*it,type));
              }
          }
+
+         close_and_unlock_file();
 
          return dset_names_and_types;
     }
@@ -1825,17 +1827,18 @@ namespace Gambit
             std::vector<HDF5MasterBuffer*> sync_buffers;
             std::vector<HDF5MasterBuffer*> RA_buffers;
             sync_buffers.push_back(&buffermaster);
-            for(auto it=aux_buffers.begin(); it!=aux_buffers.end(); ++it)
-            {
-                if((*it)->is_synchronised())
-                {
-                    sync_buffers.push_back(*it);
-                }
-                else
-                {
-                    RA_buffers.push_back(*it);
-                }
-            }
+            //for(auto it=aux_buffers.begin(); it!=aux_buffers.end(); ++it)
+            //{
+            //    if((*it)->is_synchronised())
+            //    {
+            //        sync_buffers.push_back(*it);
+            //    }
+            //    else
+            //    {
+            //        RA_buffers.push_back(*it);
+            //    }
+            //}
+            std::vector<std::size_t> test(10000);
             gather_and_print(buffermaster,sync_buffers,true);
             #endif
 
@@ -2222,10 +2225,10 @@ namespace Gambit
             std::string recvnames_str(recvnames.begin(), recvnames.end());
             std::vector<std::string> all_buf_names_and_types = Utils::split(recvnames_str,delim);
             std::set<std::pair<std::string,int>> all_buf_pairs; // Remove duplicates via set
-            std::cerr<<"Splitting into buffer names and types..."<<std::endl;
-            std::cerr<<"Input: "<<recvnames_str<<std::endl;
-            std::cerr<<"All size: "<<all_buf_names_and_types.size()<<std::endl;
-            std::cerr<<"All: "<<all_buf_names_and_types<<std::endl;
+            logger()<<LogTags::printers<<LogTags::debug<<"Splitting received buffer name string..."<<std::endl;
+            logger()<<"Input: "<<recvnames_str<<std::endl;
+            logger()<<"All size: "<<all_buf_names_and_types.size()<<std::endl;
+            logger()<<"All: "<<all_buf_names_and_types<<std::endl;
             for(auto it=all_buf_names_and_types.begin(); it!=all_buf_names_and_types.end(); ++it)
             {
                 if(*it!="")
@@ -2237,17 +2240,22 @@ namespace Gambit
                     std::cerr<<*it<<std::endl;
                     int type(std::stoi(*it));
                     all_buf_pairs.insert(std::make_pair(name,type));
+                    logger()<<"   Inserted: type:"<<type<<"; name"<<name<<std::endl;
                 }
             }
+            logger()<<EOM;
 
             // Add the buffers that are already on disk
             // (do this via any of the buffer managers; they should all be managing buffers in the same
             //  HDF5 group or else none of this will work anyway)
             std::vector<std::pair<std::string,int>> existing_bufs = masterbuffers.at(0)->get_all_dset_names_on_disk();
+            logger()<<LogTags::printers<<LogTags::debug<<"Adding buffer names already on disk:"<<std::endl;
             for(auto it=existing_bufs.begin(); it!=existing_bufs.end(); ++it)
             {
                 all_buf_pairs.insert(*it);
+                logger()<<"   Added: type:"<<it->second<<"; name:"<<it->first<<std::endl;
             }
+            logger()<<EOM;
 
             // Figure out ID codes for all the buffers based on their order
             // in the unique set. Should end up the same on all processes.
@@ -2263,23 +2271,33 @@ namespace Gambit
         sendnames = std::vector<char>(namestr.begin(), namestr.end());
         std::vector<int> size(1);
         size[0] = sendnames.size();
+        logger()<<LogTags::printers<<LogTags::debug<<"Broadcasting size of composited buffer name string"<<std::endl;
+        logger()<<"   namestr:"<<namestr<<EOM; 
         // Broadcast the required recv buffer size
         myComm.Bcast(size, 1, 0);
+        logger()<<LogTags::printers<<LogTags::debug<<"Received:"<<size<<EOM;
+       
         if(rank!=0) sendnames = std::vector<char>(size.at(0));
 
-        // Broadcast the buffer names in the order defining their ID codes 
+        // Broadcast the buffer names in the order defining their ID codes
+        logger()<<LogTags::printers<<LogTags::debug<<"Broadcasting composited buffer name string"<<std::endl; 
+        logger()<<"   sendnames:"<<sendnames<<EOM;
         myComm.Bcast(sendnames, size.at(0), 0); 
- 
+        logger()<<LogTags::printers<<LogTags::debug<<"Received:"<<sendnames<<EOM;
+  
         // Split them back into their individual buffer names
         std::string recvnames_str(recvnames.begin(), recvnames.end());
         std::vector<std::string> buf_order = Utils::split(recvnames_str,delim);
  
         // Compute map of ID codes
         std::map<std::string,int> idcodes;
+        logger()<<LogTags::printers<<LogTags::debug<<"Computing buffer ID codes:"<<std::endl; 
         for(std::size_t i=0; i<buf_order.size(); i++)
         {
            idcodes[buf_order.at(i)] = i;
+           logger()<<"   "<<i<<": "<<buf_order.at(i)<<std::endl;
         }
+        logger()<<EOM;
 
         return std::make_pair(idcodes,ordered_bufs); // Note: ordered_bufs only filled on rank 0!
     }
@@ -2289,12 +2307,18 @@ namespace Gambit
     {
         // First need to gatherv information on buffer sizes to be sent
         std::vector<std::size_t> pointsbuffers(2);
-        std::vector<std::size_t> pointsbuffersperprocess(2*mpiSize); // number of points and buffers to be recv'd for each process
+        std::vector<std::size_t> pointsbuffersperprocess(mpiSize*2); // number of points and buffers to be recv'd for each process
         std::vector<std::size_t> pointsperprocess(mpiSize);
         std::vector<std::size_t> buffersperprocess(mpiSize);
 
         // Count points and buffers across all buffer manager objects
         auto it=masterbuffers.begin();
+        if(it==masterbuffers.end())
+        {
+            std::ostringstream errmsg;
+            errmsg<<"No buffers supplied for gathering!";
+            printer_error().raise(LOCAL_INFO, errmsg.str());       
+        }
         pointsbuffers.push_back((*it)->get_Npoints());
         pointsbuffers.push_back((*it)->get_Nbuffers());
         ++it;
