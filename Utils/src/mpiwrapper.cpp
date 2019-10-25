@@ -65,18 +65,17 @@ namespace Gambit
          }
       }
 
-      /// Create a new communicator group from this one for the specified processes 
-      Comm Comm::spawn_new(const std::vector<int> processes, const std::string& name)
+      /// Create a new communicator group from WORLD for the specified processes 
+      Comm::Comm(const std::vector<int>& processes, const std::string& name)
+         : boundcomm(), myname(name)
       {
          // Create group
          MPI_Group group_world, new_group;
-         MPI_Comm_group(boundcomm, &group_world);
-         MPI_Group_incl(group_world, processes.size(), &processes, &new_group);
+         MPI_Comm_group(MPI_COMM_WORLD, &group_world);
+         MPI_Group_incl(group_world, processes.size(), &processes[0], &new_group);
 
          // Create new communicator 
-         MPI_Comm new_comm;
-         int ierr;
-         errflag = MPI_Comm_create(boundcomm, new_group, new_comm);
+         int errflag = MPI_Comm_create(MPI_COMM_WORLD, new_group, &boundcomm);
 
          // Check for error
          if(errflag!=0)
@@ -85,8 +84,6 @@ namespace Gambit
            errmsg << "Error performing MPI_Comm_create while attempting to create a new communicator group! Received error flag: "<<errflag;
            utils_error().raise(LOCAL_INFO, errmsg.str());
          }
-
-         return Comm(new_comm, name);
       }
 
       /// Duplicate input communicator into boundcomm

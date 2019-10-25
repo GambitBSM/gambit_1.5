@@ -29,12 +29,12 @@
 // Code!
 namespace Gambit
 {
-   namespace GMPI
-   {
-      // Forward declare MPI type getter template function
-      template<typename T, typename Enable=void>
-      struct get_mpi_data_type;
-   }
+   //namespace GMPI
+   //{
+   //   // Forward declare MPI type getter template function
+   //   template<typename T, typename Enable=void>
+   //   struct get_mpi_data_type;
+   //}
 
   
    namespace Printers 
@@ -130,14 +130,17 @@ namespace Gambit
     // A chunk of points for a buffer from HDF5Printer2 (i.e. for a single dataset)
     struct EXPORT_SYMBOLS HDF5bufferchunk
     {
-        static const size_t SIZE=10; // Number of points in this chunk. Kept small since people send to use small buffers with large MPI sizes
-        static const size_t NBUFFERS=10; // Number of buffers combined into this chunk
+        static const std::size_t SIZE=10; // Number of points in this chunk. Kept small since people tend to use small buffers with large MPI sizes
+        static const std::size_t NBUFFERS=10; // Number of buffers combined into this chunk
+        std::size_t used_size;
+        std::size_t used_nbuffers;
         int name_id[NBUFFERS]; // IDs for buffers. Types will be pre-associated with the name in a separate step
         unsigned long long pointIDs[SIZE];
         unsigned int ranks[SIZE];
         double values[NBUFFERS][SIZE];
-        int valid[NBUFFERS][SIZE]
-    }
+        long long values_int[NBUFFERS][SIZE]; // Sometimes need to transmit ints. Could do separately, but try this for now.
+        int valid[NBUFFERS][SIZE];
+    };
 
   } // end namespace Printers
 

@@ -94,18 +94,7 @@ namespace Gambit
     // the datatype for the h5v2_bufdata_values messages
     // Need a unique integer for each type. We can encode these
     // with a template function:
-
-    // Template function to match datatypes to integers
-    template<class T> constexpr int h5v2_type();
-    template<> constexpr int h5v2_type<int      >() {return 0;}
-    template<> constexpr int h5v2_type<uint     >() {return 1;}
-    template<> constexpr int h5v2_type<long     >() {return 2;}
-    template<> constexpr int h5v2_type<ulong    >() {return 3;}
-    template<> constexpr int h5v2_type<longlong >() {return 4;}
-    template<> constexpr int h5v2_type<ulonglong>() {return 5;}
-    template<> constexpr int h5v2_type<float    >() {return 6;}
-    template<> constexpr int h5v2_type<double   >() {return 7;}
-
+   
     template<class T>
     std::set<T> set_diff(const std::set<T>& set1, const std::set<T>& set2)
     {
@@ -119,8 +108,9 @@ namespace Gambit
     class HDF5DataSetBase
     {
       public:
+          HDF5DataSetBase(const std::string& name, const hid_t hdftype_id);
           HDF5DataSetBase(const std::string& name);
-         ~HDF5DataSetBase();
+          ~HDF5DataSetBase();
   
          /// Open dataset on disk and obtain HDF5 handles
          void open_dataset(hid_t location_id);
@@ -144,6 +134,19 @@ namespace Gambit
          /// Extend dataset to the specified size, filling it with default values
          void extend_dset_to(const std::size_t new_size);
 
+         /// Retrieve name of the dataset we are supposed to access
+         std::string myname() const;
+
+         /// Retrieve the integer type ID for this dataset 
+         int get_type_id() const;
+
+         /// Retrieve the HDF5 type ID for this dataset 
+         hid_t get_hdftype_id() const;
+
+         /// Variable tracking whether the dataset is known to exist in the output file yet
+         bool get_exists_on_disk() const;
+         void set_exists_on_disk();
+
       private:
 
          // Dataset and chunk dimension specification arrays
@@ -164,14 +167,14 @@ namespace Gambit
          /// Variable tracking size of dataset on disk
          std::size_t virtual_dset_length;
 
+         /// Variable tracking whether the dataset is known to exist in the output file yet
+         bool exists_on_disk;
+
       protected:
 
          /// HDF5 dataset identifer
          hid_t dset_id;
  
-         /// Retrieve name of the dataset we are supposed to access
-         std::string myname() const;
-
          /// Enforce that the dataset must be open for whatever follows (or else an error is thrown)
          void ensure_dataset_is_open() const;
 
@@ -187,6 +190,11 @@ namespace Gambit
          /// Obtain memory and dataspace identifiers for writing to a hyperslab in the dataset
          std::pair<hid_t,hid_t> select_hyperslab(std::size_t offset, std::size_t length) const;
  
+         /// HDF5 type ID for this dataset 
+         hid_t hdftype_id;
+
+         /// Integer identifier for the template type of this dataset (determined by derived type)
+         int type_id;
     };
 
     /// Constructable class for doing basic operations on a HDF5 dataset
@@ -205,7 +213,7 @@ namespace Gambit
 
          /// Constructor
          HDF5DataSet(const std::string& name)
-           : HDF5DataSetBase(name)
+           : HDF5DataSetBase(name,get_hdf5_data_type<T>::type())
          {}
         
          /// Write a vector of data to disk at the target position
@@ -273,7 +281,7 @@ namespace Gambit
              ensure_dataset_is_open();
 
              // Get the C interface identifier for the type of the output dataset
-             hid_t expected_dtype = hdftype_id;
+             hid_t expected_dtype = get_hdftype_id();
              hid_t dtype = H5Dget_type(get_dset_id()); // type with which the dset was created
              if(not H5Tequal(dtype, expected_dtype))
              {
@@ -315,7 +323,7 @@ namespace Gambit
              hid_t dspace_id   = selection_ids.second;
 
              // Write the data to the hyperslab.
-             herr_t status = H5Dwrite(get_dset_id(), hdftype_id, memspace_id, dspace_id, H5P_DEFAULT, buffer);
+             herr_t status = H5Dwrite(get_dset_id(), get_hdftype_id(), memspace_id, dspace_id, H5P_DEFAULT, buffer);
              if(status<0)
              {
                 std::ostringstream errmsg;
@@ -407,7 +415,7 @@ namespace Gambit
              if(errflag<0) error_occurred = true; 
 
              // Get the C interface identifier for the type of the output dataset
-             hid_t expected_dtype = hdftype_id;
+             hid_t expected_dtype = get_hdftype_id();
              hid_t dtype = H5Dget_type(get_dset_id()); // type with which the dset was created
              if(not H5Tequal(dtype, expected_dtype))
              {
@@ -457,7 +465,7 @@ namespace Gambit
              void* buffer = &chunkdata[0]; // pointer to contiguous memory within the buffer vector
 
              // Get the data from the hyperslab.
-             herr_t err_read = H5Dread(get_dset_id(), hdftype_id, memspace_id, dspace_id, H5P_DEFAULT, buffer);
+             herr_t err_read = H5Dread(get_dset_id(), get_hdftype_id(), memspace_id, dspace_id, H5P_DEFAULT, buffer);
 
              if(err_read<0)
              {
@@ -509,16 +517,7 @@ namespace Gambit
          /// Create a new dataset at the specified location
          void create_dataset(hid_t location_id);
 
-      private:
-
-         /// HDF5 identifier for the template type of this dataset
-         static const hid_t hdftype_id;
-
     };
-
-    /// HDF5 identifier for the template type of this dataset
-    template<class T>
-    const hid_t HDF5DataSet<T>::hdftype_id = get_hdf5_data_type<T>::type();
  
     /// Create a (chunked) dataset
     template<class T>
@@ -570,7 +569,7 @@ namespace Gambit
         }
 
         // Create the dataset
-        hid_t dset_id = H5Dcreate2(location_id, myname().c_str(), hdftype_id, dspace_id, H5P_DEFAULT, cparms_id, H5P_DEFAULT);
+        hid_t dset_id = H5Dcreate2(location_id, myname().c_str(), get_hdftype_id(), dspace_id, H5P_DEFAULT, cparms_id, H5P_DEFAULT);
         if(dset_id<0)
         {
             std::ostringstream errmsg;
@@ -582,6 +581,9 @@ namespace Gambit
         H5Sclose(dspace_id);
         H5Pclose(cparms_id);
         H5Dclose(dset_id);
+
+        // Register that the dataset now exists on disk
+        set_exists_on_disk();
     }
 
 
@@ -596,6 +598,9 @@ namespace Gambit
         /// Report name of dataset for which we are the buffer
         std::string dset_name() const;
 
+        /// Report whether the dataset for which we are the buffer is known to exist on disk yet
+        virtual bool exists_on_disk() const = 0;
+
         /// Make sure buffer includes the input point (data will be set as 'invalid' unless given elsewhere)
         virtual void update(const PPIDpair& ppid) = 0;
  
@@ -605,9 +610,16 @@ namespace Gambit
         /// Empty buffer to disk as arbitrarily positioned data
         virtual void random_flush(const hid_t loc_id, const std::map<PPIDpair,std::size_t>& position_map) = 0;
 
+        // Retrieve buffer data in specified order (leaving it empty!) along with type ID in
+        // As a double.
+        virtual std::pair<std::vector<double>,std::vector<int>> flush_to_vector_dbl(const std::vector<PPIDpair>& order) = 0;
+        // int version
+        virtual std::pair<std::vector<long long>,std::vector<int>> flush_to_vector_int(const std::vector<PPIDpair>& order) = 0;
+ 
 #ifdef WITH_MPI
         /// Send buffer contents to another process
         virtual void MPI_flush_to_rank(const unsigned int r) = 0;
+
 #endif 
 
         /// Make sure datasets exist on disk with the correct name and size
@@ -624,6 +636,9 @@ namespace Gambit
 
         /// Report all the points in this buffer
         std::set<PPIDpair> get_points_set() const; 
+
+        /// Retrieve the integer type ID for this dataset 
+        virtual int get_type_id() const = 0;
 
       private:
 
@@ -830,6 +845,13 @@ namespace Gambit
             my_dataset_valid.ensure_dataset_exists(loc_id,length);
         }
 
+        /// Report whether the dataset for which we are the buffer exists on disk yet
+        bool exists_on_disk() const
+        {
+            return my_dataset.get_exists_on_disk();
+            // TODO: Should make sure that 'valid' dataset also exists on disk
+        }
+
         // Report the number of items currently in the buffer;
         std::size_t N_items_in_buffer()
         {
@@ -937,8 +959,88 @@ namespace Gambit
             // Debug info:
             //std::cout<<"(rank "<<myComm.Get_rank()<<") Final buffer size: "<<N_items_in_buffer()<<" (Npoints was: "<<Npoints<<"), dset="<<dset_name()<<std::endl;
         }
-#endif   
+
+        void add_float_block(const HDF5bufferchunk& chunk, const std::size_t buf)
+        {
+            // Pack it into this buffer
+            logger()<<LogTags::printers<<LogTags::debug<<"Adding 'float type' points to buffer "<<dset_name()<<std::endl;
+            for(std::size_t i=0; i<chunk.used_size; ++i)
+            {
+                // Extra Debug
+                logger()<<"   Adding received point ("<<chunk.ranks[i]<<", "<<chunk.pointIDs[i]<<")="<<chunk.values[buf][i]<<" (valid="<<chunk.valid[buf][i]<<")"<<std::endl;
+                PPIDpair ppid(chunk.pointIDs[i], chunk.ranks[i]);
+                if(chunk.valid[buf][i])
+                {
+                    append(static_cast<T>(chunk.values[buf][i]), ppid); // T might be int or something, so need to cast (the function needs to compile even if we won't use it in this case)
+                }
+                else
+                {
+                    update(ppid);
+                }
+            }
+            logger()<<EOM;
+        }
+
+        void add_int_block(const HDF5bufferchunk& chunk, const std::size_t buf)
+        {
+            // Pack it into this buffer
+            logger()<<LogTags::printers<<LogTags::debug<<"Adding 'int type' points to buffer "<<dset_name()<<std::endl;
+            for(std::size_t i=0; i<chunk.used_size; ++i)
+            {
+                // Extra Debug
+                logger()<<"   Adding received point ("<<chunk.ranks[i]<<", "<<chunk.pointIDs[i]<<")="<<chunk.values[buf][i]<<" (valid="<<chunk.valid[buf][i]<<")"<<std::endl;
+                PPIDpair ppid(chunk.pointIDs[i], chunk.ranks[i]);
+                if(chunk.valid[buf][i])
+                {
+                    append(static_cast<T>(chunk.values_int[buf][i]), ppid);
+                }
+                else
+                {
+                    update(ppid);
+                }
+            }
+            logger()<<EOM;
+        }
  
+        // Retrieve buffer data in specified order (leaving it empty!)
+        // As a double.
+        std::pair<std::vector<double>,std::vector<int>> flush_to_vector_dbl(const std::vector<PPIDpair>& order)
+        {
+            std::vector<double> out_values;
+            std::vector<int> out_valid;
+            for(auto it=order.begin(); it!=order.end(); ++it)
+            {
+                out_values.push_back((double)buffer.at(*it));
+                out_valid .push_back(buffer_valid.at(*it));
+            }
+            buffer      .clear();
+            buffer_valid.clear();
+            buffer_set  .clear();
+            return std::make_pair(out_values,out_valid);
+        }
+
+        // int version
+        std::pair<std::vector<long long>,std::vector<int>> flush_to_vector_int(const std::vector<PPIDpair>& order)
+        {
+            std::vector<long long> out_values;
+            std::vector<int> out_valid;
+            for(auto it=order.begin(); it!=order.end(); ++it)
+            {
+                out_values.push_back((long long)buffer.at(*it));
+                out_valid .push_back(buffer_valid.at(*it));
+            }
+            buffer      .clear();
+            buffer_valid.clear();
+            buffer_set  .clear();
+            return std::make_pair(out_values,out_valid);
+        }
+#endif   
+        /// Retrieve the integer type ID for the buffered dataset 
+        int get_type_id() const
+        {
+            return my_dataset.get_type_id();
+        }
+
       private:
 
         /// Object that provides an interface to the output HDF5 dataset matching this buffer
@@ -1113,6 +1215,25 @@ namespace Gambit
             //std::cout<<"(rank "<<myComm.Get_rank()<<") Received "<<Npoints<<" from rank "<<r<<". New buffer size is "<<buffer.N_items_in_buffer()<<" (name="<<buffer.dset_name()<<")"<<std::endl;
             return Npoints;
         }
+
+        /// Copy an MPI-transmitted block of buffer data into our buffer
+        template<class T>
+        void MPI_add_int_block_to_buffer(const HDF5bufferchunk& chunk, const std::string& dset_name, const std::size_t dset_index)
+        {
+            HDF5Buffer<T>& buffer = get_buffer<T>(dset_name, buffered_points);
+            buffer.add_int_block(chunk,dset_index);
+        }
+
+        template<class T>
+        void MPI_add_float_block_to_buffer(const HDF5bufferchunk& chunk, const std::string& dset_name, const std::size_t dset_index)
+        {
+            HDF5Buffer<T>& buffer = get_buffer<T>(dset_name, buffered_points);
+            buffer.add_float_block(chunk,dset_index);
+        }
+
+        // Add a vector of buffer chunk data to the buffers managed by this object 
+        void add_to_buffers(const std::vector<HDF5bufferchunk>& blocks, const std::vector<std::pair<std::string,int>>& buf_types);
+            
         #endif
 
         /// Clear all data in buffers ***and on disk*** for this printer
@@ -1165,6 +1286,15 @@ namespace Gambit
 
         /// Report upper limit estimate of size of all buffer data in MB
         double get_sizeMB();
+
+        /// Get names and types of all datasets in the group that we are pointed at
+        std::vector<std::pair<std::string,int>> get_all_dset_names_on_disk();
+
+        /// Retrieve a map containing pointers to all buffers managed by this object
+        const std::map<std::string,HDF5BufferBase*>& get_all_buffers();
+     
+        /// Retrieve set containing all points currently known to be in these buffers
+        const std::set<PPIDpair>& get_all_points();
 
       private:
 
@@ -1325,11 +1455,21 @@ namespace Gambit
         std::size_t mpiSize;
 
 #ifdef WITH_MPI
-        // Gambit MPI communicator context for use within the hdf5 printer system
+        /// Gambit MPI communicator context for use within the hdf5 printer system
         GMPI::Comm myComm; // initially attaches to MPI_COMM_WORLD
 
-        // Gather buffer data from all processes via MPI and print it on rank 0
-        void gather_and_print(HDF5MasterBuffer& buffermaster);
+        /// Determine ID codes to use for buffer transmission
+        std::pair<std::map<std::string,int>,std::vector<std::pair<std::string,int>>> get_buffer_idcodes(const std::vector<HDF5MasterBuffer*>& masterbuffers);
+
+        /// Gather buffer data from all processes via MPI and print it on rank 0
+        void gather_and_print(HDF5MasterBuffer& out_printbuffer, const std::vector<HDF5MasterBuffer*>& masterbuffers, bool sync);
+
+       // Gather (via MPI) all HDF5 buffer chunk data from a set of managed buffers
+       std::vector<HDF5bufferchunk> gather_all(GMPI::Comm& comm, const std::vector<HDF5MasterBuffer*>& masterbuffers, const std::map<std::string,int>& buf_ids);
+ 
+        static constexpr double RAMlimit = 500.; // MB; dump data if buffer size exceeds this
+        static constexpr std::size_t MAXrecv = 100; // Maximum number of processes to send buffer data at one time
+
 #endif
 
         /// Object interfacing to HDF5 file and all datasets

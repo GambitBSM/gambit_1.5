@@ -77,36 +77,33 @@ namespace Gambit
          return !( l == r );
      }
 
-     // A chunk of points for a buffer from HDF5Printer2 (i.e. for a single dataset)
-     struct EXPORT_SYMBOLS HDF5bufferchunk
-     {
-         static const int SIZE=10;
-         int name_id; // Type will be pre-associated with the name in a separate step
-         double values[SIZE]; // Small chunksize since people tend to use small buffers when many MPI processes used
-         unsigned long long pointIDs[SIZE];
-         unsigned int ranks[SIZE];
-         int valid[SIZE]
-     }
-
      #ifdef WITH_MPI
      MPI_Datatype mpi_HDF5bufferchunk_type;
 
      void define_mpiHDF5bufferchunk()
      {
-        int nblocks = 5;
-        int blocklengths[5] = {1,SIZE,SIZE,SIZE,SIZE};
-        MPI_Datatype types[5];
-        types[0] = MPI_INT;
-        types[1] = MPI_DOUBLE;
-        types[2] = MPI_UNSIGNED_LONG_LONG;
-        types[3] = MPI_UNSIGNED_INT;
-        types[4] = MPI_INT;
-        MPI_Aint offsets[5];
-        offsets[0] = offsetof(HDF5bufferchunk, name_id);
-        offsets[1] = offsetof(HDF5bufferchunk, values);
-        offsets[2] = offsetof(HDF5bufferchunk, pointIDs);
-        offsets[3] = offsetof(HDF5bufferchunk, ranks);
-        offsets[4] = offsetof(HDF5bufferchunk, valid);
+        static const std::size_t SIZE = HDF5bufferchunk::SIZE;
+        static const std::size_t NBUFFERS = HDF5bufferchunk::NBUFFERS;
+        int nblocks = 8;
+        int blocklengths[8] = {1,1,NBUFFERS,SIZE,SIZE,NBUFFERS*SIZE,NBUFFERS*SIZE,NBUFFERS*SIZE};
+        MPI_Datatype types[8];
+        types[0] = MPI_UNSIGNED;
+        types[1] = MPI_UNSIGNED;
+        types[2] = MPI_INT;
+        types[3] = MPI_UNSIGNED_LONG_LONG;
+        types[4] = MPI_UNSIGNED;
+        types[5] = MPI_DOUBLE;
+        types[6] = MPI_LONG_LONG;
+        types[7] = MPI_INT;
+        MPI_Aint offsets[8];
+        offsets[0] = offsetof(HDF5bufferchunk, used_size);
+        offsets[1] = offsetof(HDF5bufferchunk, used_nbuffers);
+        offsets[2] = offsetof(HDF5bufferchunk, name_id);
+        offsets[3] = offsetof(HDF5bufferchunk, pointIDs);
+        offsets[4] = offsetof(HDF5bufferchunk, ranks);
+        offsets[5] = offsetof(HDF5bufferchunk, values);
+        offsets[6] = offsetof(HDF5bufferchunk, values_int);
+        offsets[7] = offsetof(HDF5bufferchunk, valid);
         MPI_Type_create_struct(nblocks, blocklengths, offsets, types, &mpi_HDF5bufferchunk_type);
         MPI_Type_commit(&mpi_HDF5bufferchunk_type);
      }

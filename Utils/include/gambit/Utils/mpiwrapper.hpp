@@ -171,6 +171,10 @@ namespace Gambit
             /// Constructor which copies existing communicator into boundcomm
             Comm(const MPI_Comm& comm, const std::string& name);
 
+            /// Constructor which creates a communicator gruop from WORLD containing
+            /// only the specified processes
+            Comm(const std::vector<int>& processes, const std::string& name);
+
             /// Destructor
             ~Comm();
 
@@ -413,11 +417,11 @@ namespace Gambit
             }
 
             template <typename T>
-            void Bcast (T &buffer, int count, int root) 
+            void Bcast (std::vector<T>& buffer, int count, int root) 
             {
                 static const MPI_Datatype datatype = get_mpi_data_type<T>::type();
                 
-                MPI_Bcast (&buffer, count, datatype, root, boundcomm);
+                MPI_Bcast (&buffer[0], count, datatype, root, boundcomm);
             }
 
             template<typename T>
@@ -437,12 +441,14 @@ namespace Gambit
             }
 
             template<typename T>
-            void Gather(std::vector<T> &sendbuf, std::vector<T> &recvbuf, int sendcount, int recvcount, int root)
+            void Gather(std::vector<T> &sendbuf, std::vector<T> &recvbuf, int root)
             {
                 static const MPI_Datatype datatype = get_mpi_data_type<T>::type();
 
-                int errflag = MPI_Gather(&sendbuf, sendcount, datatype,
-                                         &recvbuf, recvcount, datatype, 
+                int sendcount = sendbuf.size();
+                int recvcount = sendbuf.size();
+                int errflag = MPI_Gather(&sendbuf[0], sendcount, datatype,
+                                         &recvbuf[0], recvcount, datatype, 
                                          root, boundcomm);
                 if(errflag!=0) {
                    std::ostringstream errmsg;
@@ -452,7 +458,7 @@ namespace Gambit
             }
 
             template<typename T>
-            void Gatherv(std::vector<T> &sendbuf, std::vector<T> &recvbuf, int sendcount, std::vector<int> recvcounts, int root)
+            void Gatherv(std::vector<T> &sendbuf, std::vector<T> &recvbuf, const std::vector<int>& recvcounts, int root)
             {
                 static const MPI_Datatype datatype = get_mpi_data_type<T>::type();
 
@@ -460,17 +466,61 @@ namespace Gambit
                 // data should just be stacked in the order of the process ranks
                 std::vector<int> displs(Get_size());
                 displs.push_back(0);
-                for(int i=0; i<(recvcounts.size()-1); i++)
+                for(std::size_t i=0; i<(recvcounts.size()-1); i++)
                 {
                     displs.push_back(i);
                 }
 
-                int errflag = MPI_Gatherv(&sendbuf, sendcount, datatype,
-                                          &recvbuf, &recvcounts, &displs,
+                int sendcount = sendbuf.size();
+                int errflag = MPI_Gatherv(&sendbuf[0], sendcount, datatype,
+                                          &recvbuf[0], &recvcounts[0], &displs[0],
                                           datatype, root, boundcomm);
                 if(errflag!=0) {
                  std::ostringstream errmsg;
                  errmsg << "Error performing MPI_Gatherv! Received error flag: "<<errflag;
+                 utils_error().raise(LOCAL_INFO, errmsg.str());
+               }
+            }
+
+            template<typename T>
+            void AllGather(std::vector<T> &sendbuf, std::vector<T> &recvbuf)
+            {
+               static const MPI_Datatype datatype = get_mpi_data_type<T>::type();
+
+               int sendcount = sendbuf.size();
+               int recvcount = sendbuf.size();
+               int errflag = MPI_Allgather(&sendbuf, sendcount, datatype,
+                                           &recvbuf, recvcount, datatype, boundcomm);
+
+               if(errflag!=0) {
+                 std::ostringstream errmsg;
+                 errmsg << "Error performing MPI_Allgather! Received error flag: "<<errflag;
+                 utils_error().raise(LOCAL_INFO, errmsg.str());
+               }
+            }
+
+
+            template<typename T>
+            void AllGatherv(std::vector<T> &sendbuf, std::vector<T> &recvbuf, const std::vector<int>& recvcounts)
+            {
+               static const MPI_Datatype datatype = get_mpi_data_type<T>::type();
+
+               // We will automatically calculate the displacements assuming that the incoming 
+               // data should just be stacked in the order of the process ranks
+               std::vector<int> displs(Get_size());
+               displs.push_back(0);
+               for(int i=0; i<(recvcounts.size()-1); i++)
+               {
+                   displs.push_back(i);
+               }
+
+               int sendcount = sendbuf.size();
+               int errflag = MPI_Allgatherv(&sendbuf, sendcount, datatype,
+                                            &recvbuf, &recvcounts, &displs,
+                                            datatype, boundcomm);
+               if(errflag!=0) {
+                 std::ostringstream errmsg;
+                 errmsg << "Error performing MPI_Allgatherv! Received error flag: "<<errflag;
                  utils_error().raise(LOCAL_INFO, errmsg.str());
                }
             }
