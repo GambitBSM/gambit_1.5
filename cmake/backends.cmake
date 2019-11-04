@@ -1307,7 +1307,6 @@ endif()
 #DarkAges
 set(name "darkages")
 set(ver "1.0.0")
-set(lib "DarkAges_for_GAMBIT")
 set(dl "null")
 set(dir "${PROJECT_SOURCE_DIR}/Backends/installed/${name}/${ver}")
 check_ditch_status(${name} ${ver} ${dir})
@@ -1326,7 +1325,6 @@ endif()
 
 set(name "darkages")
 set(ver "1.1.0")
-set(lib "DarkAges_for_GAMBIT")
 set(dl "null")
 set(dir "${PROJECT_SOURCE_DIR}/Backends/installed/${name}/${ver}")
 check_ditch_status(${name} ${ver} ${dir})
@@ -1336,6 +1334,26 @@ if(NOT ditched_${name}_${ver})
     GIT_TAG v1.1.0
     SOURCE_DIR ${dir}
     BUILD_IN_SOURCE 1
+    CONFIGURE_COMMAND ""
+    BUILD_COMMAND ""
+    INSTALL_COMMAND ""
+  )
+  add_extra_targets("backend" ${name} ${ver} ${dir} ${dl} clean)
+endif()
+
+set(name "darkages")
+set(ver "1.2.0")
+set(dl "null")
+set(dir "${PROJECT_SOURCE_DIR}/Backends/installed/${name}/${ver}")
+set(patch "${PROJECT_SOURCE_DIR}/Backends/patches/${name}/${ver}/DarkAges_for_GAMBIT.patch")
+check_ditch_status(${name} ${ver} ${dir})
+if(NOT ditched_${name}_${ver})
+  ExternalProject_Add(${name}_${ver}
+    GIT_REPOSITORY https://github.com/pstoecker/DarkAges.git
+    GIT_TAG v1.2.0
+    SOURCE_DIR ${dir}
+    BUILD_IN_SOURCE 1
+    PATCH_COMMAND patch -p0 < ${patch}
     CONFIGURE_COMMAND ""
     BUILD_COMMAND ""
     INSTALL_COMMAND ""
