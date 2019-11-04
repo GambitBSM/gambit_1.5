@@ -108,9 +108,9 @@ namespace Gambit
     class HDF5DataSetBase
     {
       public:
-          HDF5DataSetBase(const std::string& name, const hid_t hdftype_id);
-          HDF5DataSetBase(const std::string& name);
-          ~HDF5DataSetBase();
+         HDF5DataSetBase(const std::string& name, const hid_t hdftype_id);
+         HDF5DataSetBase(const std::string& name);
+         virtual ~HDF5DataSetBase();
   
          /// Open dataset on disk and obtain HDF5 handles
          void open_dataset(hid_t location_id);
@@ -203,7 +203,7 @@ namespace Gambit
       public:
           HDF5DataSetBasic(const std::string& name);
           void create_dataset(hid_t location_id);
-    };
+     };
 
     /// Class for interfacing to a HDF5 dataset of fixed type
     template<class T>
@@ -594,7 +594,10 @@ namespace Gambit
 
         /// Constructor
         HDF5BufferBase(const std::string& name, const bool sync);
-          
+         
+        /// Destructor
+        virtual ~HDF5BufferBase() {}
+
         /// Report name of dataset for which we are the buffer
         std::string dset_name() const;
 

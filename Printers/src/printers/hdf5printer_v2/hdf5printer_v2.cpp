@@ -1842,6 +1842,9 @@ namespace Gambit
             gather_and_print(buffermaster,sync_buffers,true);
             #endif
 
+            std::cerr<<"Aborting manually!"<<std::endl;
+            abort();
+ 
             // Flush master process RA print buffers
 
             std::ostringstream buffer_nonempty_report;
@@ -2305,13 +2308,32 @@ namespace Gambit
     // Gather buffer data from all processes via MPI and print it on rank 0
     void HDF5Printer2::gather_and_print(HDF5MasterBuffer& out_printbuffer, const std::vector<HDF5MasterBuffer*>& masterbuffers, bool sync)
     {
+        //std::size_t* array = new std::size_t[1000000]; // TODO: debugging heap allocation error!
+
+        std::vector<std::size_t> test(mpiSize*1000);
+        std::vector<std::size_t> test2(mpiSize*2000);
+        std::vector<std::size_t> test3(mpiSize*3000);
+
+        std::cerr<<"mpiSize:"<<mpiSize<<std::endl;
+        std::cerr<<"mpiSize*2:"<<mpiSize*2<<std::endl;
         // First need to gatherv information on buffer sizes to be sent
         std::vector<std::size_t> pointsbuffers(2);
-        std::vector<std::size_t> pointsbuffersperprocess(mpiSize*2); // number of points and buffers to be recv'd for each process
+        //std::size_t* array2 = new std::size_t[1000000]; // TODO: debugging heap allocation error!
+
+        std::vector<std::size_t> test4(mpiSize*2); // number of points and buffers to be recv'd for each process         
+        std::vector<std::size_t> pointsbuffersperprocess; //(2); //mpiSize*2); // number of points and buffers to be recv'd for each process
         std::vector<std::size_t> pointsperprocess(mpiSize);
         std::vector<std::size_t> buffersperprocess(mpiSize);
 
-        // Count points and buffers across all buffer manager objects
+        std::cerr<<"test:"<<test<<std::endl;
+        std::cerr<<"test2:"<<test2<<std::endl;
+        std::cerr<<"test3:"<<test3<<std::endl;
+        std::cerr<<"test4:"<<test4<<std::endl;
+
+        //std::cerr<<"pointsbuffers.at(0):"<<pointsbuffers.at(0)<<std::endl;
+        //std::cerr<<"array[1000000]"<<array[1000000]<<std::endl;
+        //std::cerr<<"array2[1000000]"<<array2[1000000]<<std::endl;
+         // Count points and buffers across all buffer manager objects
         auto it=masterbuffers.begin();
         if(it==masterbuffers.end())
         {
@@ -2333,11 +2355,12 @@ namespace Gambit
 
         if(myRank==0)
         {
+           pointsbuffersperprocess.resize(mpiSize*2);
            myComm.Gather(pointsbuffers, pointsbuffersperprocess, 0);
            for(std::size_t i=0; i<mpiSize; i++)
            {
-               std::size_t j = 2*i;
-               std::size_t k = 2*i+1;
+              std::size_t j = 2*i;
+              std::size_t k = 2*i+1;
               pointsperprocess .push_back(pointsbuffersperprocess.at(j));
               buffersperprocess.push_back(pointsbuffersperprocess.at(k));
            }
@@ -2390,6 +2413,9 @@ namespace Gambit
                 out_printbuffer.flush();
             }
         }
+
+        //std::cerr<<"Aborting manually!"<<std::endl;
+        //abort();
     }
 
     // Gather (via MPI) all HDF5 buffer chunk data from a set of managed buffers
