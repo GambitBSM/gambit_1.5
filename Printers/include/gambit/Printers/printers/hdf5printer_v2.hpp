@@ -51,6 +51,8 @@
 #include "gambit/Printers/printers/hdf5types.hpp"
 #include "gambit/Logs/logger.hpp"
 
+// Activate extra debug logging (warning, LOTS of output)
+//#define HDF5PRINTER2_DEBUG
 
 namespace Gambit
 {
@@ -617,7 +619,7 @@ namespace Gambit
         // As a double.
         virtual std::pair<std::vector<double>,std::vector<int>> flush_to_vector_dbl(const std::vector<PPIDpair>& order) = 0;
         // int version
-        virtual std::pair<std::vector<long long>,std::vector<int>> flush_to_vector_int(const std::vector<PPIDpair>& order) = 0;
+        virtual std::pair<std::vector<long>,std::vector<int>> flush_to_vector_int(const std::vector<PPIDpair>& order) = 0;
  
 #ifdef WITH_MPI
         /// Send buffer contents to another process
@@ -656,6 +658,9 @@ namespace Gambit
 
         /// Set detailing what points are in the buffer
         std::set<PPIDpair> buffer_set; 
+
+        /// Buffer specifying whether the data in the primary buffer is "valid".
+        std::map<PPIDpair,int> buffer_valid;
     };
 
     /// Class to manage buffer for a single output label
@@ -706,7 +711,7 @@ namespace Gambit
             buffer      [ppid] = value;
             buffer_valid[ppid] = 1;
             buffer_set.insert(ppid);
-            //std::cout<<"Added valid data to point "<<ppid<<" in buffer "<<dset_name()<<std::endl;
+            //logger()<<" ***Added valid data "<<value<<" to point "<<ppid<<" in buffer "<<dset_name()<<std::endl;
         }
 
         /// Empty the buffer to disk as block with the specified order into the target position
@@ -762,6 +767,17 @@ namespace Gambit
             }
 
             // Perform dataset writes
+		    #ifdef HDF5PRINTER2_DEBUG 
+            logger()<<LogTags::printers<<LogTags::debug;
+            logger()<<"Writing block of data to disk for dataset "<<dset_name()<<std::endl;
+            logger()<<" Data to write (to target_pos="<<target_pos<<"):"<<std::endl;
+            for(auto it=ordered_buffer.begin(); it!=ordered_buffer.end(); ++it)
+            {
+                logger()<<"   "<<*it<<std::endl;
+            }
+            logger()<<EOM;
+            #endif
+
             std::size_t newsize   = my_dataset      .write_vector(loc_id,ordered_buffer      ,target_pos);
             std::size_t newsize_v = my_dataset_valid.write_vector(loc_id,ordered_buffer_valid,target_pos);
             if(newsize!=newsize_v)
@@ -881,7 +897,7 @@ namespace Gambit
                 // Get name of the dataset this buffer is associated with
                 std::string namebuf = dset_name();
                 // Copy point data and values into MPI send buffer
-                std::vector<unsigned long long int> pointIDs;
+                std::vector<unsigned long> pointIDs;
                 std::vector<unsigned int> ranks; // Will assume all PPIDpairs are valid. I think this is fine to do...
                 std::vector<int> valid; // We have to send the invalid points too, to maintain buffer synchronicity
                 std::vector<T> values;
@@ -895,7 +911,8 @@ namespace Gambit
                     values  .push_back(it->second);
                 }
             
-                // Debug info 
+                // Debug info
+				#ifdef HDF5PRINTER2_DEBUG 
                 logger()<<LogTags::printers<<LogTags::debug<<"Sending points for buffer "<<dset_name()<<std::endl
                                                            <<" (more_buffers: "<<more_buffers<<")"<<std::endl;
                 for(std::size_t i=0; i<buffer.size(); ++i)
@@ -903,6 +920,7 @@ namespace Gambit
                     logger()<<"   Sending point ("<<ranks.at(i)<<", "<<pointIDs.at(i)<<")="<<values.at(i)<<" (valid="<<valid.at(i)<<")"<<std::endl;
                 }
                 logger()<<EOM;
+                #endif
 
                 // Send the buffers
                 std::size_t Npoints = values.size();
@@ -930,7 +948,7 @@ namespace Gambit
         void MPI_recv_from_rank(unsigned int r, std::size_t Npoints)
         {
             /// MPI buffers
-            std::vector<unsigned long long int> pointIDs(Npoints);
+            std::vector<unsigned long> pointIDs(Npoints);
             std::vector<unsigned int> ranks(Npoints);
             std::vector<int> valid(Npoints);
             std::vector<T> values(Npoints);
@@ -942,6 +960,7 @@ namespace Gambit
             myComm.Recv(&valid[0]   , Npoints, r, h5v2_bufdata_valid);
 
             // Pack it into this buffer
+	    	#ifdef HDF5PRINTER2_DEBUG 
             logger()<<LogTags::printers<<LogTags::debug<<"Adding points to buffer "<<dset_name()<<std::endl;
             for(std::size_t i=0; i<Npoints; ++i)
             {
@@ -958,6 +977,7 @@ namespace Gambit
                 }
             }
             logger()<<EOM;
+            #endif
 
             // Debug info:
             //std::cout<<"(rank "<<myComm.Get_rank()<<") Final buffer size: "<<N_items_in_buffer()<<" (Npoints was: "<<Npoints<<"), dset="<<dset_name()<<std::endl;
@@ -966,46 +986,77 @@ namespace Gambit
         void add_float_block(const HDF5bufferchunk& chunk, const std::size_t buf)
         {
             // Pack it into this buffer
+			#ifdef HDF5PRINTER2_DEBUG 
             logger()<<LogTags::printers<<LogTags::debug<<"Adding 'float type' points to buffer "<<dset_name()<<std::endl;
+            #endif
             for(std::size_t i=0; i<chunk.used_size; ++i)
             {
-                // Extra Debug
-                logger()<<"   Adding received point ("<<chunk.ranks[i]<<", "<<chunk.pointIDs[i]<<")="<<chunk.values[buf][i]<<" (valid="<<chunk.valid[buf][i]<<")"<<std::endl;
+                bool valid = chunk.valid[buf][i]; 
                 PPIDpair ppid(chunk.pointIDs[i], chunk.ranks[i]);
-                if(chunk.valid[buf][i])
+                if(valid)
                 {
-                    append(static_cast<T>(chunk.values[buf][i]), ppid); // T might be int or something, so need to cast (the function needs to compile even if we won't use it in this case)
+                    T value = static_cast<T>(chunk.values[buf][i]);
+    				#ifdef HDF5PRINTER2_DEBUG 
+                    logger()<<"   Adding valid point (rank="<<chunk.ranks[i]<<", pointID="<<chunk.pointIDs[i]<<", value="<<value<<")"<<std::endl;
+                    #endif
+                    append(value, ppid);
                 }
                 else
                 {
+    				#ifdef HDF5PRINTER2_DEBUG 
+                    logger()<<"   Updating with invalid point (rank="<<chunk.ranks[i]<<", pointID="<<chunk.pointIDs[i]<<")"<<std::endl;
+                    #endif
                     update(ppid);
                 }
             }
+			#ifdef HDF5PRINTER2_DEBUG 
             logger()<<EOM;
+            #endif
         }
 
         void add_int_block(const HDF5bufferchunk& chunk, const std::size_t buf)
         {
             // Pack it into this buffer
-            logger()<<LogTags::printers<<LogTags::debug<<"Adding 'int type' points to buffer "<<dset_name()<<std::endl;
+			#ifdef HDF5PRINTER2_DEBUG 
+            logger()<<LogTags::printers<<LogTags::debug<<"Adding 'int type' points (from chunk["<<buf<<"] with name ID "<<chunk.name_id[buf]<<") to buffer "<<dset_name()<<std::endl;
+            #endif
             for(std::size_t i=0; i<chunk.used_size; ++i)
             {
-                // Extra Debug
-                logger()<<"   Adding received point ("<<chunk.ranks[i]<<", "<<chunk.pointIDs[i]<<")="<<chunk.values[buf][i]<<" (valid="<<chunk.valid[buf][i]<<")"<<std::endl;
+                bool valid = chunk.valid[buf][i]; 
                 PPIDpair ppid(chunk.pointIDs[i], chunk.ranks[i]);
-                if(chunk.valid[buf][i])
+                if(valid)
                 {
-                    append(static_cast<T>(chunk.values_int[buf][i]), ppid);
+                    T value = static_cast<T>(chunk.values_int[buf][i]);
+    				#ifdef HDF5PRINTER2_DEBUG 
+                    logger()<<"   Adding valid point (rank="<<chunk.ranks[i]<<", pointID="<<chunk.pointIDs[i]<<", value="<<value<<")"<<std::endl;
+                    #endif
+                    append(value, ppid);
                 }
                 else
                 {
+     				#ifdef HDF5PRINTER2_DEBUG 
+                    logger()<<"   Updating with invalid point (rank="<<chunk.ranks[i]<<", pointID="<<chunk.pointIDs[i]<<")"<<std::endl;
+                    #endif
                     update(ppid);
                 }
             }
+			#ifdef HDF5PRINTER2_DEBUG 
             logger()<<EOM;
+            #endif
+
+            // // Super debug; check entire buffer contents
+            // logger()<<LogTags::printers<<LogTags::debug;
+            // logger()<<"Checking buffer contents for dataset "<<dset_name()<<std::endl;
+            // for(auto it=buffer.begin(); it!=buffer.end(); ++it)
+            // {
+            //     logger()<<"   "<<it->first<<", "<<it->second<<std::endl;
+            // }
+            // logger()<<EOM;
+
         }
  
-        // Retrieve buffer data in specified order (leaving it empty!)
+        // Retrieve buffer data in specified order (removing the points specified in 'order' from the buffer)
+        // Points not in the buffer are returned as "invalid"
         // As a double.
         std::pair<std::vector<double>,std::vector<int>> flush_to_vector_dbl(const std::vector<PPIDpair>& order)
         {
@@ -1013,28 +1064,48 @@ namespace Gambit
             std::vector<int> out_valid;
             for(auto it=order.begin(); it!=order.end(); ++it)
             {
-                out_values.push_back((double)buffer.at(*it));
-                out_valid .push_back(buffer_valid.at(*it));
+                if(buffer_set.find(*it)!=buffer_set.end())
+                {
+                    // Add to output vector
+                    out_values.push_back((double)buffer.at(*it));
+                    out_valid .push_back(buffer_valid.at(*it));
+                    // Remove from buffer
+                    buffer_set  .erase(*it);
+                    buffer      .erase(*it);
+                    buffer_valid.erase(*it);
+                }
+                else
+                {
+                    out_values.push_back(0);
+                    out_valid .push_back(0);
+                }
             }
-            buffer      .clear();
-            buffer_valid.clear();
-            buffer_set  .clear();
             return std::make_pair(out_values,out_valid);
         }
 
         // int version
-        std::pair<std::vector<long long>,std::vector<int>> flush_to_vector_int(const std::vector<PPIDpair>& order)
+        std::pair<std::vector<long>,std::vector<int>> flush_to_vector_int(const std::vector<PPIDpair>& order)
         {
-            std::vector<long long> out_values;
+            std::vector<long> out_values;
             std::vector<int> out_valid;
             for(auto it=order.begin(); it!=order.end(); ++it)
             {
-                out_values.push_back((long long)buffer.at(*it));
-                out_valid .push_back(buffer_valid.at(*it));
+                if(buffer_set.find(*it)!=buffer_set.end())
+                {
+                    // Add to output vector
+                    out_values.push_back((long)buffer.at(*it));
+                    out_valid .push_back(buffer_valid.at(*it));
+                    // Remove from buffer
+                    buffer_set  .erase(*it);
+                    buffer      .erase(*it);
+                    buffer_valid.erase(*it);
+                }
+                else
+                {
+                    out_values.push_back(0);
+                    out_valid .push_back(0);
+                }
             }
-            buffer      .clear();
-            buffer_valid.clear();
-            buffer_set  .clear();
             return std::make_pair(out_values,out_valid);
         }
 #endif   
@@ -1052,9 +1123,6 @@ namespace Gambit
 
         /// Buffer containing points to be written to disk upon "flush"
         std::map<PPIDpair,T> buffer;
-
-        /// Buffer specifying whether the data in the primary buffer is "valid".
-        std::map<PPIDpair,int> buffer_valid;
 
 #ifdef WITH_MPI
         // Gambit MPI communicator context for use within the hdf5 printer system
@@ -1270,7 +1338,7 @@ namespace Gambit
         void extend_all_datasets_to(const std::size_t length);
 
         /// Search the existing output and find the highest used pointIDs for each rank
-        std::map<ulong, ulonglong> get_highest_PPIDs(const int mpisize);
+        std::map<ulong, ulong> get_highest_PPIDs(const int mpisize);
  
         /// Open (and lock) output HDF5 file and obtain HDF5 handles
         void lock_and_open_file(const char access_type='w'); // read/write allowed by default
@@ -1299,6 +1367,11 @@ namespace Gambit
         /// Retrieve set containing all points currently known to be in these buffers
         const std::set<PPIDpair>& get_all_points();
 
+        /// Remove points from buffer tracking
+        // (only intended to be used when points have been removed from buffers by e.g. MPI-related
+        // routines like flush_to_vector)
+        void untrack_points(const std::set<PPIDpair>& removed_points); 
+
       private:
 
         /// Map containing pointers to all buffers managed by this object;
@@ -1324,7 +1397,7 @@ namespace Gambit
         template<class T>
         HDF5Buffer<T>& get_buffer(const std::string& label, const std::vector<PPIDpair>& buffered_points);
 
-        /// Add base class point for a buffer to master buffer map  
+        /// Add base class pointer for a buffer to master buffer map  
         void update_buffer_map(const std::string& label, HDF5BufferBase& buff);
       
         /// Inform all buffers that data has been written to certain mpirank/pointID pair
@@ -1366,8 +1439,8 @@ namespace Gambit
         HDF5MasterBufferT<uint     > hdf5_buffers_uint;
         HDF5MasterBufferT<long     > hdf5_buffers_long;
         HDF5MasterBufferT<ulong    > hdf5_buffers_ulong;
-        HDF5MasterBufferT<longlong > hdf5_buffers_longlong;
-        HDF5MasterBufferT<ulonglong> hdf5_buffers_ulonglong;
+        //HDF5MasterBufferT<longlong > hdf5_buffers_longlong;
+        //HDF5MasterBufferT<ulonglong> hdf5_buffers_ulonglong;
         HDF5MasterBufferT<float    > hdf5_buffers_float;
         HDF5MasterBufferT<double   > hdf5_buffers_double;
 
@@ -1383,8 +1456,8 @@ namespace Gambit
     template<> HDF5Buffer<uint     >& HDF5MasterBuffer::get_buffer<uint     >(const std::string& label, const std::vector<PPIDpair>&);
     template<> HDF5Buffer<long     >& HDF5MasterBuffer::get_buffer<long     >(const std::string& label, const std::vector<PPIDpair>&);
     template<> HDF5Buffer<ulong    >& HDF5MasterBuffer::get_buffer<ulong    >(const std::string& label, const std::vector<PPIDpair>&);
-    template<> HDF5Buffer<longlong >& HDF5MasterBuffer::get_buffer<longlong >(const std::string& label, const std::vector<PPIDpair>&);
-    template<> HDF5Buffer<ulonglong>& HDF5MasterBuffer::get_buffer<ulonglong>(const std::string& label, const std::vector<PPIDpair>&);
+    //template<> HDF5Buffer<longlong >& HDF5MasterBuffer::get_buffer<longlong >(const std::string& label, const std::vector<PPIDpair>&);
+    //template<> HDF5Buffer<ulonglong>& HDF5MasterBuffer::get_buffer<ulonglong>(const std::string& label, const std::vector<PPIDpair>&);
     template<> HDF5Buffer<float    >& HDF5MasterBuffer::get_buffer<float    >(const std::string& label, const std::vector<PPIDpair>&);
     template<> HDF5Buffer<double   >& HDF5MasterBuffer::get_buffer<double   >(const std::string& label, const std::vector<PPIDpair>&);
  
@@ -1492,7 +1565,7 @@ namespace Gambit
         std::size_t get_buffer_length(const Options& options);
  
         /// Search the existing output and find the highest used pointIDs for each rank
-        std::map<ulong, ulonglong> get_highest_PPIDs_from_HDF5();
+        std::map<ulong, ulong> get_highest_PPIDs_from_HDF5();
  
         /// Check all datasets in a group for length inconsistencies
         /// and correct them if possible

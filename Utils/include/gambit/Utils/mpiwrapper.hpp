@@ -447,6 +447,16 @@ namespace Gambit
 
                 int sendcount = sendbuf.size();
                 int recvcount = sendbuf.size();
+                //std::cerr<<"rank "<<Get_rank()<<": Gather pars: sendcount="<<sendcount<<std::endl;
+                if(Get_rank()==0)
+                {
+                   if(recvbuf.size()<sendbuf.size()*Get_size())
+                   {
+                       std::ostringstream errmsg;
+                       errmsg << "Error performing Gather! Recv buffer is not big enough to fit the expected data! We expect "<<Get_size()<<" messages of count "<<recvcount<<", (total size="<<recvcount*Get_size()<<") but the recv buffer only has size "<<recvbuf.size()<<"!";
+                       utils_error().raise(LOCAL_INFO, errmsg.str());
+                   }
+                }
                 int errflag = MPI_Gather(&sendbuf[0], sendcount, datatype,
                                          &recvbuf[0], recvcount, datatype, 
                                          root, boundcomm);
@@ -462,15 +472,28 @@ namespace Gambit
             {
                 static const MPI_Datatype datatype = get_mpi_data_type<T>::type();
 
+                //std::cerr<<"rank "<<Get_rank()<<": Gatherv pars: recvcounts="<<recvcounts<<std::endl;
+ 
                 // We will automatically calculate the displacements assuming that the incoming 
                 // data should just be stacked in the order of the process ranks
-                std::vector<int> displs(Get_size());
+                std::vector<int> displs;
                 displs.push_back(0);
-                for(std::size_t i=0; i<(recvcounts.size()-1); i++)
+                std::size_t totalsize = 0;
+                for(auto it=recvcounts.begin(); it!=recvcounts.end(); ++it)
                 {
-                    displs.push_back(i);
+                    if(std::next(it)!=recvcounts.end()) displs.push_back(*it + displs.back());
+                    totalsize += (*it);
                 }
-
+                if(Get_rank()==0)
+                {
+                   if(recvbuf.size()<totalsize)
+                   {
+                       std::ostringstream errmsg;
+                       errmsg << "Error performing Gatherv! Recv buffer is not big enough to fit the expected data! We expect messages with total size "<<totalsize<<" but the recv buffer only has size "<<recvbuf.size()<<"!";
+                       utils_error().raise(LOCAL_INFO, errmsg.str());
+                   }
+                }
+                //std::cerr<<"rank "<<Get_rank()<<": sendbuf.size()="<<sendbuf.size()<<", recvbuf.size()="<<recvbuf.size()<<", "<<"recvcounts="<<recvcounts<<", displs="<<displs<<std::endl;
                 int sendcount = sendbuf.size();
                 int errflag = MPI_Gatherv(&sendbuf[0], sendcount, datatype,
                                           &recvbuf[0], &recvcounts[0], &displs[0],
@@ -489,8 +512,16 @@ namespace Gambit
 
                int sendcount = sendbuf.size();
                int recvcount = sendbuf.size();
-               int errflag = MPI_Allgather(&sendbuf, sendcount, datatype,
-                                           &recvbuf, recvcount, datatype, boundcomm);
+
+               if(recvbuf.size()<sendbuf.size()*Get_size())
+               {
+                   std::ostringstream errmsg;
+                   errmsg << "Error performing AllGather! Recv buffer is not big enough to fit the expected data! We expect "<<Get_size()<<" messages of count "<<recvcount<<", (total size="<<recvcount*Get_size()<<") but the recv buffer only has size "<<recvbuf.size()<<"!";
+                   utils_error().raise(LOCAL_INFO, errmsg.str());
+               }
+
+               int errflag = MPI_Allgather(&sendbuf[0], sendcount, datatype,
+                                           &recvbuf[0], recvcount, datatype, boundcomm);
 
                if(errflag!=0) {
                  std::ostringstream errmsg;
@@ -515,8 +546,8 @@ namespace Gambit
                }
 
                int sendcount = sendbuf.size();
-               int errflag = MPI_Allgatherv(&sendbuf, sendcount, datatype,
-                                            &recvbuf, &recvcounts, &displs,
+               int errflag = MPI_Allgatherv(&sendbuf[0], sendcount, datatype,
+                                            &recvbuf[0], &recvcounts, &displs,
                                             datatype, boundcomm);
                if(errflag!=0) {
                  std::ostringstream errmsg;

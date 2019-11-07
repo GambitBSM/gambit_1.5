@@ -142,6 +142,9 @@ namespace Gambit
         int valid[NBUFFERS][SIZE];
     };
 
+    // Make sure to run this function before using HDF5bufferchunk with MPI!
+    void define_mpiHDF5bufferchunk();
+ 
   } // end namespace Printers
 
   namespace GMPI { 
