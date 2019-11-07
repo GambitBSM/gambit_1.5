@@ -147,6 +147,7 @@ namespace Gambit
  
   } // end namespace Printers
 
+  #ifdef WITH_MPI
   namespace GMPI { 
      template<> 
      struct get_mpi_data_type<Printers::HDF5bufferchunk> 
@@ -154,6 +155,7 @@ namespace Gambit
        static MPI_Datatype type();
      }; 
   }
+  #endif
 
   // DEPRECATED! We no longer actually send this stuff via MPI, 
   // and there were slight issues with non-standards compliance

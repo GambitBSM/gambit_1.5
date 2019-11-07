@@ -982,6 +982,7 @@ namespace Gambit
             // Debug info:
             //std::cout<<"(rank "<<myComm.Get_rank()<<") Final buffer size: "<<N_items_in_buffer()<<" (Npoints was: "<<Npoints<<"), dset="<<dset_name()<<std::endl;
         }
+#endif   
 
         void add_float_block(const HDF5bufferchunk& chunk, const std::size_t buf)
         {
@@ -1108,7 +1109,7 @@ namespace Gambit
             }
             return std::make_pair(out_values,out_valid);
         }
-#endif   
+
         /// Retrieve the integer type ID for the buffered dataset 
         int get_type_id() const
         {
