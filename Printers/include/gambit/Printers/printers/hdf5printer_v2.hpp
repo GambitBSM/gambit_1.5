@@ -1543,7 +1543,7 @@ namespace Gambit
        // Gather (via MPI) all HDF5 buffer chunk data from a set of managed buffers
        std::vector<HDF5bufferchunk> gather_all(GMPI::Comm& comm, const std::vector<HDF5MasterBuffer*>& masterbuffers, const std::map<std::string,int>& buf_ids);
  
-        static constexpr double RAMlimit = 500.; // MB; dump data if buffer size exceeds this
+        static constexpr double RAMlimit = 500; // MB; dump data if buffer size exceeds this
         static constexpr std::size_t MAXrecv = 100; // Maximum number of processes to send buffer data at one time
 
 #endif

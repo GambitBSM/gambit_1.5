@@ -77,6 +77,8 @@ namespace Gambit
          // Create new communicator 
          int errflag = MPI_Comm_create(MPI_COMM_WORLD, new_group, &boundcomm);
 
+         //std::cerr<<"boundcomm="<<boundcomm<<", MPI_COMM_NULL="<<MPI_COMM_NULL<<std::endl;
+
          // Check for error
          if(errflag!=0)
          {
@@ -111,7 +113,7 @@ namespace Gambit
       /// Check for undelivered messages (unless finalize has already been called)
       void Comm::check_for_undelivered_messages()
       {
-        if(not Is_finalized())
+        if(not Is_finalized() and boundcomm!=MPI_COMM_NULL)
         {
           std::ostringstream errmsg;
           // Warn if any unreceived messages exist

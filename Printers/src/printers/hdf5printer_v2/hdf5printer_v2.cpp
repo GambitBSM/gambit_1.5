@@ -2361,14 +2361,19 @@ namespace Gambit
 
             logger()<<LogTags::printers<<LogTags::info;
             logger()<<"Gathering buffer data for processes "<<groups.at(i)<<EOM;
-            std::vector<HDF5bufferchunk> data = gather_all(subComm, masterbuffers, buf_ids);
-
-            // Add the data to the output buffermanager on rank 0
-            if(myRank==0) 
+            
+            // Are we in this group? Communicator is null if not.
+            if(*(subComm.get_boundcomm())!=MPI_COMM_NULL)
             {
-                out_printbuffer.add_to_buffers(data,buf_types);
-                out_printbuffer.resynchronise();
-                out_printbuffer.flush();
+               //std::cerr<<"rank "<<myRank<<" calling gather_all..."<<std::endl;
+               std::vector<HDF5bufferchunk> data = gather_all(subComm, masterbuffers, buf_ids);
+               // Add the data to the output buffermanager on rank 0
+               if(myRank==0) 
+               {
+                   out_printbuffer.add_to_buffers(data,buf_types);
+                   out_printbuffer.resynchronise();
+                   out_printbuffer.flush();
+               }
             }
         }
     }
@@ -2376,6 +2381,13 @@ namespace Gambit
     // Gather (via MPI) all HDF5 buffer chunk data from a set of managed buffers
     std::vector<HDF5bufferchunk> HDF5Printer2::gather_all(GMPI::Comm& comm, const std::vector<HDF5MasterBuffer*>& masterbuffers, const std::map<std::string,int>& buf_ids)
     {
+        if(*(comm.get_boundcomm())==MPI_COMM_NULL)
+        {
+            std::ostringstream errmsg;
+            errmsg<<"Attempted to call gather_all with an invalid communicator! This is a bug, please report it.";
+            printer_error().raise(LOCAL_INFO, errmsg.str());        
+        }
+
         // Build blocks to be transmitted
         std::vector<HDF5bufferchunk> bufchunks;
         std::vector<PPIDpair> sub_order;
@@ -2571,7 +2583,7 @@ namespace Gambit
 
         // Transmit information about number of blocks to transmit
         std::vector<int> nblocks;
-        std::vector<int> all_nblocks(mpiSize);
+        std::vector<int> all_nblocks(comm.Get_size());
         nblocks.push_back(bufchunks.size());
         logger()<<LogTags::printers<<LogTags::info;
         logger()<<"Gathering buffer block size data (number of buffer blocks to transmit from this process: "<<nblocks.at(0)<<")"<<EOM;
@@ -2579,7 +2591,7 @@ namespace Gambit
 
         // Transmit blocks
         std::size_t total_nblocks = 0;
-        if(myRank==0)
+        if(comm.Get_rank()==0)
         {
             logger()<<LogTags::printers<<LogTags::debug; 
             logger()<<"Number of blocks to recv from each process: "<<all_nblocks<<std::endl;
@@ -2596,7 +2608,7 @@ namespace Gambit
         comm.Gatherv(bufchunks, all_bufblocks, all_nblocks, 0); // (sendbuf, recvbuf, recvcounts, root)
 
         #ifdef HDF5PRINTER2_DEBUG 
-        if(myRank==0)
+        if(comm.Get_rank()==0)
         {
             // Check that received data makes sense.
             logger()<<LogTags::printers<<LogTags::debug<<"Checking received data..."<<std::endl;
