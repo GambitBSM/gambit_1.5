@@ -10,7 +10,7 @@
 ///
 ///  \author Patrick Stoecker
 ///          (stoecker@physik.rwth-aachen.de)
-///  \date 2019 Aug
+///  \date 2019 Aug, Nov
 //
 ///  *********************************************
 
@@ -61,7 +61,11 @@ if(*InUse::CAT(plc_loglike_,NAME))                                              
       backend_error().raise(LOCAL_INFO,ErrMssg.c_str());                                 \
     }                                                                                    \
     char* clik_path = (char*)full_path.c_str();                                          \
-    CAT(TYPE,_map)[STRINGIFY(NAME)] = CAT(TYPE,_init) (clik_path, NULL);                 \
+    clik_error* plc_Error = initError();                                                 \
+    auto destructor = []( CAT(TYPE,_object)* clikid){ CAT(TYPE,_cleanup)(&(clikid)); };  \
+    CAT(TYPE,_map)[STRINGIFY(NAME)] =                                                    \
+      std::shared_ptr<CAT(TYPE,_object)>(CAT(TYPE,_init)(clik_path, &plc_Error), destructor);  \
+    cleanupError(&plc_Error);                                                            \
   }
 
 // Definition of "double plc_loglike_NAME(double* cl_and_pars)"
@@ -80,7 +84,7 @@ if(*InUse::CAT(plc_loglike_,NAME))                                              
     }                                                                                    \
     double res;                                                                          \
     clik_error* plc_Error = initError();                                                 \
-    res =  CAT(TYPE,_compute) (CAT(TYPE,_map)[name], cl_and_pars, &plc_Error);           \
+    res =  CAT(TYPE,_compute) (CAT(TYPE,_map)[name].get(), cl_and_pars, &plc_Error);     \
     if (isError(plc_Error))                                                              \
     {                                                                                    \
       std::string ErrMssg = "Calling \"";                                                \
@@ -111,8 +115,8 @@ BE_NAMESPACE
   //  -> Prefix to the plc_3.0 data folder
   static std::string plc3_location;
   //  -> Container for all activated likelihood objects
-  static std::map<std::string, clik_object* > clik_map;
-  static std::map<std::string, clik_lensing_object* > clik_lensing_map;
+  static std::map<std::string, std::shared_ptr<clik_object> > clik_map;
+  static std::map<std::string, std::shared_ptr<clik_lensing_object> > clik_lensing_map;
 
   void set_planck_path_2(std::string& planck_path)
   {

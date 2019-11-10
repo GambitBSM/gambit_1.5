@@ -18,7 +18,7 @@
 ///  \author Patrick Stoecker
 ///          (stoecker@physik.rwth-aachen.de)
 ///  \date 2017 Nov
-///  \date 2019 July, Aug
+///  \date 2019 July, Aug, Nov
 ///
 ///  *********************************************
 
@@ -40,6 +40,8 @@ BE_FUNCTION(clik_init, clik_object*, (char*,clik_error**),"clik_init","clik_init
 BE_FUNCTION(clik_lensing_init, clik_lensing_object*, (char*,clik_error**),"clik_lensing_init","clik_lensing_initialize")
 BE_FUNCTION(clik_compute, double, (clik_object*,double*,clik_error**), "clik_compute","clik_compute_loglike")
 BE_FUNCTION(clik_lensing_compute, double, (clik_lensing_object*,double*,clik_error**), "clik_lensing_compute","clik_lensing_compute_loglike")
+BE_FUNCTION(clik_cleanup, void, (clik_object**), "clik_cleanup","clik_cleanup")
+BE_FUNCTION(clik_lensing_cleanup, void, (clik_lensing_object**), "clik_lensing_cleanup","clik_lensing_cleanup")
 
 // All relevant data and variables will be kept within the fronted.
 // Define convenience functions for the communication with the outside world
