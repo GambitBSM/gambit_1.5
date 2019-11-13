@@ -594,7 +594,7 @@ START_MODULE
     #define FUNCTION calculate_eta0
       START_FUNCTION(double)
       DEPENDENCY(T_cmb, double)
-      ALLOW_MODELS(LCDM)
+      ALLOW_MODELS(LCDM,inf_smashInf_LCDMt,LCDMtensor,inf_SR1quad_LCDMt,inf_1quarInf_LCDMt,inf_1mono32Inf_LCDMt,inf_1linearInf_LCDMt,inf_1naturalInf_LCDMt,inf_1hilltopInf_LCDMt)
     #undef FUNCTION
 
   #undef CAPABILITY
