@@ -1,75 +1,8 @@
-diff --git a/include/primordial.h b/include/primordial.h
-index 44289f6..c40ea47 100755
---- a/include/primordial.h
-+++ b/include/primordial.h
-@@ -13,7 +13,8 @@ enum primordial_spectrum_type {
-   inflation_V,
-   inflation_H,
-   inflation_V_end,
--  external_Pk
-+  external_Pk,
-+  gambit_Pk // ADDED BY S.C.H. FOR GAMBIT 01-2018
- };
- 
- /** enum defining whether the spectrum routine works with linear or logarithmic input/output */
-@@ -28,7 +29,8 @@ enum linear_or_logarithmic {
- enum potential_shape {
-   polynomial,
-   natural,
--  higgs_inflation
-+  higgs_inflation,
-+  smash_inflation
- };
- 
- /** enum defining which quantity plays the role of a target for evolving inflationary equations */
-@@ -84,6 +86,11 @@ struct primordial {
- 
-   //@{
- 
-+//  double *k_gambit   // scalar perturbation power spectrum // ADDED BY S.C.H. FOR GAMBIT 01-2018
-+//  double *pks_gambit // scalar perturbation power spectrum // ADDED BY S.C.H. FOR GAMBIT 01-2018
-+//  double *pkt_gambit // tensor perturbation power spectrum // ADDED BY S.C.H. FOR GAMBIT 01-2018
-+//  int ksteps_gambit  // bin number of  the  power spectrum // ADDED BY S.C.H. FOR GAMBIT 01-2018
-+
-   double k_pivot; /**< pivot scale in \f$ Mpc^{-1} \f$ */
- 
-   enum primordial_spectrum_type primordial_spec_type; /**< type of primordial spectrum (simple analytic from, integration of inflationary perturbations, etc.) */
-@@ -288,6 +295,30 @@ struct primordial {
- 
-   //@}
- 
-+  /** @name - added smash parameters */
-+
-+  //@{
-+
-+  int max_pot_smash; // need to set it properly
-+  //int last_index;
-+
-+  double phi_init0; // need to set it properly
-+
-+  double * rho_array;
-+  double * chi_array;
-+  double * d0V_array;
-+  double * d1V_array;
-+  double * d2V_array;
-+  double * d3V_array;
-+
-+  double * ddd0V_array;
-+  double * ddd1V_array;
-+  double * ddd2V_array;
-+  double * ddd3V_array;
-+
-+	//@}
-+
-+
-   /** @name - technical parameters */
- 
-   //@{
 diff --git a/source/input.c b/source/input.c
-index 43a2fdd..f3e2115 100755
+index 43a2fdd04..106d588dd 100755
 --- a/source/input.c
 +++ b/source/input.c
-@@ -1531,9 +1531,15 @@ int input_read_parameters(
+@@ -1531,12 +1531,59 @@ int input_read_parameters(
        ppm->primordial_spec_type = external_Pk;
        flag2=_TRUE_;
      }
@@ -86,7 +19,51 @@ index 43a2fdd..f3e2115 100755
    }
  
    class_read_double("k_pivot",ppm->k_pivot);
-@@ -1910,6 +1916,36 @@ int input_read_parameters(
++	
++	/* ------------------- SH -------------------- */
++	uintptr_t ul;
++	char addr [_ARGUMENT_LENGTH_MAX_];
++
++	// I take we set the *pointers* in this way here?
++  class_call(parser_read_int(pfc,"k_array_size",&ppm->lnk_size,&flag1,errmsg),
++						 errmsg,
++						 errmsg);
++	
++	class_call(parser_read_int(pfc,"pks_array",addr,&flag1,errmsg),
++						 errmsg,
++						 errmsg);
++	
++	sscanf(addr, "%lu", &ul);
++	double* prt_lnpks = (double*) ul;
++	
++	int index_md;
++	int ic_size;
++	index_md = 0;
++	if ( ppt->has_scalars == _TRUE_ ) index_md++;
++	if ( ppt->has_vectors == _TRUE_ ) index_md++;
++	if ( ppt->has_tensors == _TRUE_ ) index_md++;
++	
++	class_alloc(ic_size,index_md*sizeof(int),errmsg);
++	
++	class_alloc(ppm->lnpk,ppm->lnk_size*ic_size*sizeof(double),errmsg); // allocate space
++	
++	for (int it = 0; it < ppm->lnk_size; it++) { ppm->lnpk[it] = &prt_lnpks[it];}
++
++	class_call(parser_read_int(pfc,"pkt_array",addr,&flag1,errmsg),
++						 errmsg,
++						 errmsg);
++	
++	sscanf(addr, "%lu", &ul);
++	double* prt_lnpkt = (double*) ul;
++	
++	for (int it = 0; it < ppm->lnk_size; it++) { ppm->lnpk[it+ppm->lnk_size] = &prt_lnpkt[it];}
++	
++	/* ------------------------------------------- */
++
+ 
+   if (ppm->primordial_spec_type == two_scales) {
+ 
+@@ -1910,6 +1957,36 @@ int input_read_parameters(
            class_read_double("V_3",ppm->V3);
            class_read_double("V_4",ppm->V4);
  
@@ -123,7 +100,7 @@ index 43a2fdd..f3e2115 100755
          }
        }
      }
-@@ -1970,6 +2006,9 @@ int input_read_parameters(
+@@ -1970,6 +2047,9 @@ int input_read_parameters(
        else if (strcmp(string1,"higgs_inflation") == 0) {
          ppm->potential = higgs_inflation;
        }
@@ -134,7 +111,7 @@ index 43a2fdd..f3e2115 100755
          class_stop(errmsg,"did not recognize input parameter 'potential': should be one of 'polynomial' or 'higgs_inflation'");
        }
 diff --git a/source/primordial.c b/source/primordial.c
-index 4161313..481fa36 100755
+index 416131312..481fa36e7 100755
 --- a/source/primordial.c
 +++ b/source/primordial.c
 @@ -197,6 +197,8 @@ int primordial_init(
@@ -414,3 +391,70 @@ index 4161313..481fa36 100755
  
    return _SUCCESS_;
  }
+diff --git a/include/primordial.h b/include/primordial.h
+index 44289f6ef..c40ea479b 100755
+--- a/include/primordial.h
++++ b/include/primordial.h
+@@ -13,7 +13,8 @@ enum primordial_spectrum_type {
+   inflation_V,
+   inflation_H,
+   inflation_V_end,
+-  external_Pk
++  external_Pk,
++  gambit_Pk // ADDED BY S.C.H. FOR GAMBIT 01-2018
+ };
+ 
+ /** enum defining whether the spectrum routine works with linear or logarithmic input/output */
+@@ -28,7 +29,8 @@ enum linear_or_logarithmic {
+ enum potential_shape {
+   polynomial,
+   natural,
+-  higgs_inflation
++  higgs_inflation,
++  smash_inflation
+ };
+ 
+ /** enum defining which quantity plays the role of a target for evolving inflationary equations */
+@@ -84,6 +86,11 @@ struct primordial {
+ 
+   //@{
+ 
++//  double *k_gambit   // scalar perturbation power spectrum // ADDED BY S.C.H. FOR GAMBIT 01-2018
++//  double *pks_gambit // scalar perturbation power spectrum // ADDED BY S.C.H. FOR GAMBIT 01-2018
++//  double *pkt_gambit // tensor perturbation power spectrum // ADDED BY S.C.H. FOR GAMBIT 01-2018
++//  int ksteps_gambit  // bin number of  the  power spectrum // ADDED BY S.C.H. FOR GAMBIT 01-2018
++
+   double k_pivot; /**< pivot scale in \f$ Mpc^{-1} \f$ */
+ 
+   enum primordial_spectrum_type primordial_spec_type; /**< type of primordial spectrum (simple analytic from, integration of inflationary perturbations, etc.) */
+@@ -288,6 +295,30 @@ struct primordial {
+ 
+   //@}
+ 
++  /** @name - added smash parameters */
++
++  //@{
++
++  int max_pot_smash; // need to set it properly
++  //int last_index;
++
++  double phi_init0; // need to set it properly
++
++  double * rho_array;
++  double * chi_array;
++  double * d0V_array;
++  double * d1V_array;
++  double * d2V_array;
++  double * d3V_array;
++
++  double * ddd0V_array;
++  double * ddd1V_array;
++  double * ddd2V_array;
++  double * ddd3V_array;
++
++	//@}
++
++
+   /** @name - technical parameters */
+ 
+   //@{
