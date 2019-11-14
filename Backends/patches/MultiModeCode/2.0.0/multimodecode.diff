@@ -109,55 +109,65 @@ index 1ad7e4313..3607d3a73 100644
      !
      !     Solve the background equations
      !
-##	diff --git a/modpk_backgrnd.f90 b/modpk_backgrnd.f90
-##	index bcfdf96d0..497d7d0c5 100644
-##	--- a/modpk_backgrnd.f90
-##	+++ b/modpk_backgrnd.f90
-##	@@ -23,7 +23,9 @@ CONTAINS
-##	     use modpk_icsampling, only : save_iso_N, N_iso_ref, phi_iso_N, &
-##	       dphi_iso_N, ic_sampling, ic_flags
-##
-##	-    INTEGER*4 :: i,j, rescl_count
-##	+    INTEGER*4 :: i,j,ii, rescl_count
-##	+
-##	+    real(dp) :: dchidrho, derr
-##
-##	     real(dp) :: phi_init_trial(size(phi_init))
-##	     real(dp) :: alpha_e,dalpha,V_end,dv,dh
-##	@@ -244,10 +246,10 @@ CONTAINS
-##
-##	           end if
-##
-##	-          IF (a_end .GT. a_end_inst) THEN
-##	-             PRINT*,'MODECODE: inflation ends too late with this N_pivot', N_pivot
-##	-             pk_bad = run_outcome%bad_reheat
-##	-             RETURN
-##	+          !IF (a_end .GT. a_end_inst) THEN
-##	+          !   PRINT*,'MODECODE: inflation ends too late with this N_pivot', N_pivot
-##	+          !   pk_bad = run_outcome%bad_reheat
-##	+          !   RETURN
-##	           ENDIF
-##	        END IF
-##
-##	@@ -347,6 +349,9 @@ CONTAINS
-##
-##	       dphi_init0 = y(size(y)/2+1 : (size(y)))
-##
-##	+      if (potential_choice==18) then
-##	+				y(size(y)/2+1 : (size(y))) = 0.0e0_dp
-##	+
-##	     else
-##	
-##	       h_init = getH(phi_init_trial,dphi_init0)
-##	@@ -539,7 +544,7 @@ CONTAINS
-##	        !or to homogeneously rescale all the fields. It is better to work on a case by case basis.
-##	        !
-##
-##	-       IF (size(phi_init) .eq. 1) THEN
-##	+       IF (size(phi_init) .eq. 1) .and. .not. (potential_choice .eq. 18)) THEN
-##	           IF(alpha_e.LT.(N_pivot+20.e0_dp)) THEN
-##	              IF ((potential_choice.eq.6).and.(vparams(1,1)<-2.e0_dp)) THEN
-##	                 phi_init_trial = phi_init*0.9e0_dp
+diff --git a/modpk_backgrnd.f90 b/modpk_backgrnd.f90
+index bcfdf96d0..497d7d0c5 100644
+--- a/modpk_backgrnd.f90
++++ b/modpk_backgrnd.f90
+@@ -23,7 +23,9 @@
+     use modpk_icsampling, only : save_iso_N, N_iso_ref, phi_iso_N, &
+       dphi_iso_N, ic_sampling, ic_flags
+ 
+-    INTEGER*4 :: i,j, rescl_count
++    INTEGER*4 :: i,j,ii, rescl_count
++
++    real(dp) :: dchidrho, derr
+ 
+     real(dp) :: phi_init_trial(size(phi_init))
+     real(dp) :: alpha_e,dalpha,V_end,dv,dh
+@@ -244,11 +246,11 @@
+ 
+           end if
+ 
+-          IF (a_end .GT. a_end_inst) THEN
+-             PRINT*,'MODECODE: inflation ends too late with this N_pivot', N_pivot
+-             pk_bad = run_outcome%bad_reheat
+-             RETURN
+-          ENDIF
++          !IF (a_end .GT. a_end_inst) THEN
++          !   PRINT*,'MODECODE: inflation ends too late with this N_pivot', N_pivot
++          !   pk_bad = run_outcome%bad_reheat
++          !   RETURN
++          !ENDIF
+        END IF
+ 
+        a_pivot = EXP(alpha_pivot)*a_init
+@@ -347,6 +349,9 @@
+ 
+       dphi_init0 = y(size(y)/2+1 : (size(y)))
+ 
++      if (potential_choice==18) then
++				y(size(y)/2+1 : (size(y))) = 0.0e0_dp
++
+     else
+ 
+       h_init = getH(phi_init_trial,dphi_init0)
+@@ -525,6 +530,7 @@
+ 
+        if (out_opt%modpkoutput .and. .not. out_opt%output_reduced) &
+          WRITE(*,array_fmt) ' phi_end =', phi_infl_end
++       end if
+ 
+        IF (instreheat) THEN
+           !Set a plausible pivot (ignoring logarithmic V_k and V_end terms) for
+@@ -539,7 +545,7 @@
+        !or to homogeneously rescale all the fields. It is better to work on a case by case basis.
+        !
+ 
+-       IF (size(phi_init) .eq. 1) THEN
++       IF (size(phi_init) .eq. 1 .and. .not. potential_choice .eq. 18) THEN
+           IF(alpha_e.LT.(N_pivot+20.e0_dp)) THEN
+              IF ((potential_choice.eq.6).and.(vparams(1,1)<-2.e0_dp)) THEN
+                 phi_init_trial = phi_init*0.9e0_dp
 diff --git a/modpk_modules.f90 b/modpk_modules.f90
 index 3226d39fd..9b2419fc1 100644
 --- a/modpk_modules.f90

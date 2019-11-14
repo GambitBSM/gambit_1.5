@@ -1359,7 +1359,8 @@ if(NOT ditched_${name}_${ver})
     DOWNLOAD_COMMAND ${DL_BACKEND} ${dl} ${md5} ${dir}
     SOURCE_DIR ${dir}
     BUILD_IN_SOURCE 1
-    PATCH_COMMAND patch -p1 < ${patch}/multimodecode.diff
+    PATCH_COMMAND  sed -i "s/\r//g" modpk_backgrnd.f90 # Replace the CRLF by LF in that file.
+    COMMAND patch -p1 < ${patch}/multimodecode.diff
     CONFIGURE_COMMAND ""
     BUILD_COMMAND ${CMAKE_MAKE_PROGRAM} F90C=${CMAKE_Fortran_COMPILER} FFLAGS=${multimode_Fortran_FLAGS}
     COMMAND ${CMAKE_COMMAND} -E copy ${driver}/multimodecode_gambit.f90 ${dir}
