@@ -623,10 +623,10 @@ namespace Gambit
 */
     }
 
-    void class_set_parameter_LCDMtensor(Class_container& cosmo)
+    void class_set_parameter_Inflation_tensor(Class_container& cosmo)
     {
-      //std::cout << "Last seen alive in: class_set_parameter_LCDMtensor" << std::endl;
-      using namespace Pipes::class_set_parameter_LCDMtensor;
+      //std::cout << "Last seen alive in: class_set_parameter_Inflation_tensor" << std::endl;
+      using namespace Pipes::class_set_parameter_Inflation_tensor;
 
       int l_max = cosmo.lmax;
 
@@ -668,10 +668,9 @@ namespace Gambit
 */
     }
 
-    void class_set_parameter_inf_SR1quad_LCDMt(Class_container& cosmo)
+    void class_set_parameter_Inflation_SR1quad(Class_container& cosmo)
     {
-      //std::cout << "Last seen alive in: class_set_parameter_inf_SR1quad_LCDMt" << std::endl;
-      using namespace Pipes::class_set_parameter_inf_SR1quad_LCDMt;
+      using namespace Pipes::class_set_parameter_Inflation_SR1quad;
 
       int l_max=cosmo.lmax;
 
@@ -867,10 +866,9 @@ namespace Gambit
       }
     }
 
-    void class_set_parameter_inf_1quarInf_LCDMt(Class_container& cosmo)
+    void class_set_parameter_Inflation_1quar(Class_container& cosmo)
     {
-      //std::cout << "Last seen alive in: class_set_parameter_inf_SR1quad_LCDMt" << std::endl;
-      using namespace Pipes::class_set_parameter_inf_1quarInf_LCDMt;
+      using namespace Pipes::class_set_parameter_Inflation_1quar;
 
       int l_max=cosmo.lmax;
 
@@ -1067,10 +1065,9 @@ namespace Gambit
       }
     }
 
-    void class_set_parameter_inf_1mono32Inf_LCDMt(Class_container& cosmo)
+    void class_set_parameter_Inflation_1mono32Inf(Class_container& cosmo)
     {
-      //std::cout << "Last seen alive in: class_set_parameter_inf_SR1quad_LCDMt" << std::endl;
-      using namespace Pipes::class_set_parameter_inf_1mono32Inf_LCDMt;
+      using namespace Pipes::class_set_parameter_Inflation_1mono32Inf;
 
       int l_max=cosmo.lmax;
 
@@ -1268,10 +1265,9 @@ namespace Gambit
       }
     }
 
-    void class_set_parameter_inf_1linearInf_LCDMt(Class_container& cosmo)
+    void class_set_parameter_Inflation_1linearInf(Class_container& cosmo)
     {
-      //std::cout << "Last seen alive in: class_set_parameter_inf_SR1quad_LCDMt" << std::endl;
-      using namespace Pipes::class_set_parameter_inf_1linearInf_LCDMt;
+      using namespace Pipes::class_set_parameter_Inflation_1linearInf;
 
       int l_max=cosmo.lmax;
 
@@ -1468,10 +1464,9 @@ namespace Gambit
       }
     }
 
-    void class_set_parameter_inf_1naturalInf_LCDMt(Class_container& cosmo)
+    void class_set_parameter_Inflation_1natural(Class_container& cosmo)
     {
-      //std::cout << "Last seen alive in: class_set_parameter_inf_SR1quad_LCDMt" << std::endl;
-      using namespace Pipes::class_set_parameter_inf_1naturalInf_LCDMt;
+      using namespace Pipes::class_set_parameter_Inflation_1natural;
 
       int l_max=cosmo.lmax;
 
@@ -1672,10 +1667,9 @@ namespace Gambit
       }
     }
 
-    void class_set_parameter_inf_1hilltopInf_LCDMt(Class_container& cosmo)
+    void class_set_parameter_Inflation_1hilltopInf(Class_container& cosmo)
     {
-      //std::cout << "Last seen alive in: class_set_parameter_inf_SR1quad_LCDMt" << std::endl;
-      using namespace Pipes::class_set_parameter_inf_1hilltopInf_LCDMt;
+      using namespace Pipes::class_set_parameter_Inflation_1hilltopInf;
 
       int l_max=cosmo.lmax;
 
@@ -1878,10 +1872,10 @@ namespace Gambit
       }
     }
 
-    void class_set_parameter_inf_smashInf_LCDMt(Class_container& cosmo)
+    void class_set_parameter_Inflation_smash(Class_container& cosmo)
     {
-      //std::cout << "Last seen alive in: class_set_parameter_inf_smashInf_LCDMt" << std::endl;
-      using namespace Pipes::class_set_parameter_inf_smashInf_LCDMt;
+      //std::cout << "Last seen alive in: class_set_parameter_Inflation_smash" << std::endl;
+      using namespace Pipes::class_set_parameter_Inflation_smash;
 
       //---------------------------------------------------------------//
       // Below, SMASH inflationary potential is calculated and
@@ -2175,9 +2169,9 @@ namespace Gambit
     }
 
 
-    void model_dependent_classy_parameters_LCDMtensor(pybind11::dict &result)
+    void model_dependent_classy_parameters_Inflation_tensor(pybind11::dict &result)
     { 
-      using namespace Pipes::model_dependent_classy_parameters_LCDMtensor;
+      using namespace Pipes::model_dependent_classy_parameters_Inflation_tensor;
 
       // make sure nothing from previous run is contained
       result.clear();
@@ -2263,12 +2257,12 @@ namespace Gambit
       //---------------------------------------------------------------//
       
       // set parameter 'lambda' for all 
-      if (ModelInUse("inf_SR1quad_LCDMt")){vparams[0] = *Param["m2_inflaton"];}
-      else if (ModelInUse("inf_1quarInf_LCDMt")){vparams[0] = *Param["lambda"];}
-      else if (ModelInUse("inf_1mono32Inf_LCDMt")){vparams[0] = *Param["lambda"];}
-      else if (ModelInUse("inf_1linearInf_LCDMt")){vparams[0] = *Param["lambda"];}
-      else if (ModelInUse("inf_1naturalInf_LCDMt")){vparams[0] = *Param["lambda"]; vparams[1] = *Param["faxion"];}
-      else if (ModelInUse("inf_1hilltopInf_LCDMt")){vparams[0] = *Param["lambda"]; vparams[1] = *Param["mu"];}
+      if (ModelInUse("Inflation_SR1quad")){vparams[0] = *Param["m2_inflaton"];}
+      else if (ModelInUse("Inflation_1quar")){vparams[0] = *Param["lambda"];}
+      else if (ModelInUse("Inflation_1mono32Inf")){vparams[0] = *Param["lambda"];}
+      else if (ModelInUse("Inflation_1linearInf")){vparams[0] = *Param["lambda"];}
+      else if (ModelInUse("Inflation_1natural")){vparams[0] = *Param["lambda"]; vparams[1] = *Param["faxion"];}
+      else if (ModelInUse("Inflation_1hilltopInf")){vparams[0] = *Param["lambda"]; vparams[1] = *Param["mu"];}
 
       //---------------------------------------------------------------//
       //--------------- Sampling N_pivot ------------------------------//

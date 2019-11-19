@@ -199,59 +199,59 @@ START_MODULE
     ALLOW_MODEL_COMBINATION(cosmo,dark)
     #undef FUNCTION
 
-    #define FUNCTION class_set_parameter_LCDMtensor
+    #define FUNCTION class_set_parameter_Inflation_tensor
     START_FUNCTION(CosmoBit::Class_container)
     DEPENDENCY(T_cmb, double)
-    ALLOW_MODELS(LCDMtensor)
+    ALLOW_MODELS(Inflation_tensor)
     #undef FUNCTION
 
-    #define FUNCTION class_set_parameter_inf_SR1quad_LCDMt
+    #define FUNCTION class_set_parameter_Inflation_SR1quad
     START_FUNCTION(CosmoBit::Class_container)
-    ALLOW_MODELS(inf_SR1quad_LCDMt)
-    DEPENDENCY(T_cmb, double)
-    BACKEND_REQ(multimodecode_gambit_driver,(modecode_tag), void, (gambit_inflation_observables*,int& ,int& ,  int& ,  int& ,int& ,  int& ,  int& ,  int& ,  int& ,int& ,double& ,int& ,  int& ,double& ,int& ,double*,double*,  int& ,  int& ,double*,double*,double*,double& ,double& ,double& ,  int& ,int& ,double& ,double*,double*,double*,double*,double& ,double&))
-    #undef FUNCTION
-
-    #define FUNCTION class_set_parameter_inf_1quarInf_LCDMt
-    START_FUNCTION(CosmoBit::Class_container)
-    ALLOW_MODELS(inf_1quarInf_LCDMt)
+    ALLOW_MODELS(Inflation_SR1quad)
     DEPENDENCY(T_cmb, double)
     BACKEND_REQ(multimodecode_gambit_driver,(modecode_tag), void, (gambit_inflation_observables*,int& ,int& ,  int& ,  int& ,int& ,  int& ,  int& ,  int& ,  int& ,int& ,double& ,int& ,  int& ,double& ,int& ,double*,double*,  int& ,  int& ,double*,double*,double*,double& ,double& ,double& ,  int& ,int& ,double& ,double*,double*,double*,double*,double& ,double&))
     #undef FUNCTION
 
-    #define FUNCTION class_set_parameter_inf_1mono32Inf_LCDMt
+    #define FUNCTION class_set_parameter_Inflation_1quar
     START_FUNCTION(CosmoBit::Class_container)
-    ALLOW_MODELS(inf_1mono32Inf_LCDMt)
+    ALLOW_MODELS(Inflation_1quar)
     DEPENDENCY(T_cmb, double)
     BACKEND_REQ(multimodecode_gambit_driver,(modecode_tag), void, (gambit_inflation_observables*,int& ,int& ,  int& ,  int& ,int& ,  int& ,  int& ,  int& ,  int& ,int& ,double& ,int& ,  int& ,double& ,int& ,double*,double*,  int& ,  int& ,double*,double*,double*,double& ,double& ,double& ,  int& ,int& ,double& ,double*,double*,double*,double*,double& ,double&))
     #undef FUNCTION
 
-    #define FUNCTION class_set_parameter_inf_1linearInf_LCDMt
+    #define FUNCTION class_set_parameter_Inflation_1mono32Inf
     START_FUNCTION(CosmoBit::Class_container)
-    ALLOW_MODELS(inf_1linearInf_LCDMt)
+    ALLOW_MODELS(Inflation_1mono32Inf)
     DEPENDENCY(T_cmb, double)
     BACKEND_REQ(multimodecode_gambit_driver,(modecode_tag), void, (gambit_inflation_observables*,int& ,int& ,  int& ,  int& ,int& ,  int& ,  int& ,  int& ,  int& ,int& ,double& ,int& ,  int& ,double& ,int& ,double*,double*,  int& ,  int& ,double*,double*,double*,double& ,double& ,double& ,  int& ,int& ,double& ,double*,double*,double*,double*,double& ,double&))
     #undef FUNCTION
 
-    #define FUNCTION class_set_parameter_inf_1naturalInf_LCDMt
+    #define FUNCTION class_set_parameter_Inflation_1linearInf
     START_FUNCTION(CosmoBit::Class_container)
-    ALLOW_MODELS(inf_1naturalInf_LCDMt)
+    ALLOW_MODELS(Inflation_1linearInf)
     DEPENDENCY(T_cmb, double)
     BACKEND_REQ(multimodecode_gambit_driver,(modecode_tag), void, (gambit_inflation_observables*,int& ,int& ,  int& ,  int& ,int& ,  int& ,  int& ,  int& ,  int& ,int& ,double& ,int& ,  int& ,double& ,int& ,double*,double*,  int& ,  int& ,double*,double*,double*,double& ,double& ,double& ,  int& ,int& ,double& ,double*,double*,double*,double*,double& ,double&))
     #undef FUNCTION
 
-
-    #define FUNCTION class_set_parameter_inf_1hilltopInf_LCDMt
+    #define FUNCTION class_set_parameter_Inflation_1natural
     START_FUNCTION(CosmoBit::Class_container)
-    ALLOW_MODELS(inf_1hilltopInf_LCDMt)
+    ALLOW_MODELS(Inflation_1natural)
     DEPENDENCY(T_cmb, double)
     BACKEND_REQ(multimodecode_gambit_driver,(modecode_tag), void, (gambit_inflation_observables*,int& ,int& ,  int& ,  int& ,int& ,  int& ,  int& ,  int& ,  int& ,int& ,double& ,int& ,  int& ,double& ,int& ,double*,double*,  int& ,  int& ,double*,double*,double*,double& ,double& ,double& ,  int& ,int& ,double& ,double*,double*,double*,double*,double& ,double&))
     #undef FUNCTION
 
 
-    #define FUNCTION class_set_parameter_inf_smashInf_LCDMt
+    #define FUNCTION class_set_parameter_Inflation_1hilltopInf
     START_FUNCTION(CosmoBit::Class_container)
-    ALLOW_MODELS(inf_smashInf_LCDMt)
+    ALLOW_MODELS(Inflation_1hilltopInf)
+    DEPENDENCY(T_cmb, double)
+    BACKEND_REQ(multimodecode_gambit_driver,(modecode_tag), void, (gambit_inflation_observables*,int& ,int& ,  int& ,  int& ,int& ,  int& ,  int& ,  int& ,  int& ,int& ,double& ,int& ,  int& ,double& ,int& ,double*,double*,  int& ,  int& ,double*,double*,double*,double& ,double& ,double& ,  int& ,int& ,double& ,double*,double*,double*,double*,double& ,double&))
+    #undef FUNCTION
+
+
+    #define FUNCTION class_set_parameter_Inflation_smash
+    START_FUNCTION(CosmoBit::Class_container)
+    ALLOW_MODELS(Inflation_smash)
     DEPENDENCY(T_cmb, double)
     BACKEND_REQ(multimodecode_gambit_driver,(modecode_tag), void, (gambit_inflation_observables*,int& ,int& ,  int& ,  int& ,int& ,  int& ,  int& ,  int& ,  int& ,int& ,double& ,int& ,  int& ,double& ,int& ,double*,double*,  int& ,  int& ,double*,double*,double*,double& ,double& ,double& ,  int& ,int& ,double& ,double*,double*,double*,double*,double& ,double&))
     #undef FUNCTION
@@ -594,7 +594,7 @@ START_MODULE
     #define FUNCTION calculate_eta0
       START_FUNCTION(double)
       DEPENDENCY(T_cmb, double)
-      ALLOW_MODELS(LCDM,inf_smashInf_LCDMt,LCDMtensor,inf_SR1quad_LCDMt,inf_1quarInf_LCDMt,inf_1mono32Inf_LCDMt,inf_1linearInf_LCDMt,inf_1naturalInf_LCDMt,inf_1hilltopInf_LCDMt)
+      ALLOW_MODELS(LCDM)
     #undef FUNCTION
 
   #undef CAPABILITY
@@ -850,7 +850,7 @@ START_MODULE
      // conditional model dependencies on 'model_dependent_classy_parameters'  
      #define FUNCTION set_classy_parameters_Inflation
       START_FUNCTION(CosmoBit::ClassyInput)
-         ALLOW_MODELS(LCDMtensor,inf_SR1quad_LCDMt,inf_1quarInf_LCDMt,tinf_1mono32Inf_LCDMt,inf_1linearInf_LCDMt,inf_1hilltopInf_LCDMt,inf_smashInf_LCDMt)
+         ALLOW_MODELS(Inflation_tensor,Inflation_SR1quad,Inflation_1quar,Inflation_1mono32Inf,Inflation_1linearInf,Inflation_1hilltopInf,Inflation_smash,Inflation_1natural)
          DEPENDENCY(T_cmb,             double)
          DEPENDENCY(T_ncdm,            double)
          DEPENDENCY(class_Nur,         double)
@@ -872,21 +872,21 @@ START_MODULE
       DEPENDENCY(energy_injection_efficiency, DarkAges::fz_table)
      #undef FUNCTION
 
-    #define FUNCTION model_dependent_classy_parameters_LCDMtensor
+    #define FUNCTION model_dependent_classy_parameters_Inflation_tensor
       START_FUNCTION(pybind11::dict)
-        ALLOW_MODELS(LCDMtensor)
+        ALLOW_MODELS(Inflation_tensor)
     #undef FUNCTION
   
     #define FUNCTION model_dependent_classy_parameters_inflation_multimode
       START_FUNCTION(pybind11::dict)
-        ALLOW_MODELS(inf_SR1quad_LCDMt,inf_1quarInf_LCDM,tinf_1mono32Inf_LCDMt,inf_1linearInf_LCDMt,inf_1hilltopInf_LCDMt)
+        ALLOW_MODELS(Inflation_SR1quad,inf_1quarInf_LCDM,tInflation_1mono32Inf,Inflation_1linearInf,Inflation_1hilltopInf,Inflation_1natural)
         DEPENDENCY(multimode_results,     gambit_inflation_observables)
         DEPENDENCY(multimode_pk_setting,  int)
     #undef FUNCTION
 
     #define FUNCTION model_dependent_classy_parameters_smashInf
       START_FUNCTION(pybind11::dict)
-        ALLOW_MODELS(inf_smashInf_LCDMt)
+        ALLOW_MODELS(Inflation_smash)
     #undef FUNCTION
 
   #undef CAPABILITY
@@ -896,7 +896,7 @@ START_MODULE
      START_CAPABILITY
      #define FUNCTION get_multimode_results
       START_FUNCTION(gambit_inflation_observables)
-        ALLOW_MODELS(inf_SR1quad_LCDMt,inf_1quarInf_LCDMt,inf_1mono32Inf_LCDMt,inf_1linearInf_LCDMt,inf_1hilltopInf_LCDMt)
+        ALLOW_MODELS(Inflation_SR1quad,Inflation_1quar,Inflation_1mono32Inf,Inflation_1linearInf,Inflation_1hilltopInf,Inflation_1natural)
         DEPENDENCY(multimode_pk_setting,int)
         BACKEND_REQ(multimodecode_gambit_driver,(modecode_tag), void, (gambit_inflation_observables*,int&,int&,int&,int&,int&,int&,int&,int&,int&,int&,double&,int&,int&,double&,int&,double*,double*,int&,int&,double*,double*,double*,double&,double&,double&,int&,int&,double&,double*,double*,double*,double*,double&,double&))
      #undef FUNCTION

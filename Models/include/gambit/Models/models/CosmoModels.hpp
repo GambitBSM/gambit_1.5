@@ -89,21 +89,17 @@
  #undef PARENT
 #undef MODEL
   
-/*
-#define MODEL rLCDM
-START_MODEL
-DEFINEPARS(omega_b,omega_cdm,H0,tau_reio)
-#undef MODEL
 
-#define MODEL rLCDMtensor
-  START_MODEL
-  DEFINEPARS(omega_b,omega_cdm,H0,tau_reio,r_tensor)
-#undef MODEL
-*/
 
-#define MODEL LCDMtensor
+
+
+// inflationary models -- if one of them is in use you have to use the model LCDM_no_primordial 
+// to scan over the four standard cosmological parameters (H0, omega_b, omega_cdm, tau_reio) and
+// the shape of the primordial power spectrum will be determined by the inflation model in use
+
+#define MODEL Inflation_tensor
 START_MODEL
-DEFINEPARS(omega_b,omega_cdm,H0,ln10A_s,n_s,tau_reio,r_tensor)
+DEFINEPARS(ln10A_s,n_s,r_tensor)
 #undef MODEL
 
 /*
@@ -112,54 +108,54 @@ DEFINEPARS(omega_b,omega_cdm,H0,ln10A_s,n_s,tau_reio,r_tensor)
   DEFINEPARS(phi0,dphi0,vparams1,vparams2,vparams3)
 #undef MODEL
 */
-// simplest 6 parameter cosmology+inflation model: 0.5 m^2 phi^2 --- quadratic inflation
+// Inflation model: 0.5 m^2 phi^2 --- quadratic inflation
 // A_s, n_s and r are given by inflationary model
 // parameters: N_piv, m^2.
-#define MODEL inf_SR1quad_LCDMt
+#define MODEL Inflation_SR1quad
   START_MODEL
-  DEFINEPARS(m2_inflaton,N_pivot,omega_b,omega_cdm,H0,tau_reio)
+  DEFINEPARS(m2_inflaton,N_pivot)
 #undef MODEL
 
-//  6 parameter cosmology+inflation model: 0.25 \lambda phi^4  --- quartic inflation
+// Inflation model: 0.25 \lambda phi^4  --- quartic inflation
 // A_s, n_s and r are given by inflationary model
 // parameters: N_piv, lambda.
-#define MODEL inf_1quarInf_LCDMt
+#define MODEL Inflation_1quar
 START_MODEL
-DEFINEPARS(lambda,N_pivot,omega_b,omega_cdm,H0,tau_reio)
+DEFINEPARS(lambda,N_pivot)
 #undef MODEL
 
-//  6 parameter cosmology+inflation model: 2/3 \lambda phi^2/3 --- inflation
+// Inflation model: 2/3 \lambda phi^2/3 --- inflation
 // A_s, n_s and r are given by inflationary model
 // parameters: N_piv, lambda.
-#define MODEL inf_1mono32Inf_LCDMt
+#define MODEL Inflation_1mono32Inf
 START_MODEL
-DEFINEPARS(lambda,N_pivot,omega_b,omega_cdm,H0,tau_reio)
+DEFINEPARS(lambda,N_pivot)
 #undef MODEL
 
-//  6 parameter cosmology+inflation model: m phi --- linear inflation
+// Inflation model: m phi --- linear inflation
 // A_s, n_s and r are given by inflationary model
 // parameters: N_piv, m^2.
-#define MODEL inf_1linearInf_LCDMt
+#define MODEL Inflation_1linearInf
 START_MODEL
-DEFINEPARS(lambda,N_pivot,omega_b,omega_cdm,H0,tau_reio)
+DEFINEPARS(lambda,N_pivot)
 #undef MODEL
 
 // simplest 8 parameter cosmology smash inflation model --- smash inflation
 // A_s, n_s and r are given by inflationary model
 // parameters: xi, m^2.
-#define MODEL inf_smashInf_LCDMt
+#define MODEL Inflation_smash
 START_MODEL
-DEFINEPARS(log10_xi,log10_beta,log10_lambda,N_pivot,omega_b,omega_cdm,H0,tau_reio)
+DEFINEPARS(log10_xi,log10_beta,log10_lambda,N_pivot)
 #undef MODEL
 
-#define MODEL inf_1naturalInf_LCDMt // N-flation (axions)
+#define MODEL Inflation_1natural // N-flation (axions)
 START_MODEL
-DEFINEPARS(lambda,faxion,N_pivot,omega_b,omega_cdm,H0,tau_reio)
+DEFINEPARS(lambda,faxion,N_pivot)
 #undef MODEL
 
-#define MODEL inf_1hilltopInf_LCDMt // Hilltop
+#define MODEL Inflation_1hilltopInf // Hilltop
 START_MODEL
-DEFINEPARS(lambda,mu,N_pivot,omega_b,omega_cdm,H0,tau_reio)
+DEFINEPARS(lambda,mu,N_pivot)
 #undef MODEL
 
 
