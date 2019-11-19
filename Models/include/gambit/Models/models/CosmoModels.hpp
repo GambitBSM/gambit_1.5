@@ -26,11 +26,26 @@
 #ifndef __CosmoModels_hpp__
 #define __CosmoModels_hpp__
 
+// Vanilla ΛCDM.
 #define MODEL LCDM
   START_MODEL
   DEFINEPARS(omega_b,omega_cdm,H0,ln10A_s,n_s,tau_reio)
 #undef MODEL
 
+// ΛCDM parameters without those relating to the primordial power spectrum (A_s, n_s)
+// This model should be scanned alongside an inflationary model able to provide
+// a primordial power spectrum. 
+#define MODEL LCDM_no_primordial
+  START_MODEL
+  DEFINEPARS(omega_b,omega_cdm,H0,ln10A_s,n_s,tau_reio)
+#undef MODEL
+
+/* CMB + BBN */
+
+// η (baryon-to-photon ratio) defined at BBN.
+// r_CMB(BBN): Ratio of temperatures in non-cold DM compared to the SM with 3 massive neutrinos:
+// r_CMB = T_v(BSM)/T_v(SM) at CMB (BBN)
+// dNeff_CMB(_BBN): ΔN_effective defined at CMB(BBN) from additional radiation.
 #define MODEL etaBBN_rBBN_rCMB_dNeffBBN_dNeffCMB
   START_MODEL
   DEFINEPARS(eta_BBN)
@@ -39,6 +54,8 @@
   DEFINEPARS(dNeff_BBN,dNeff_CMB)
 #undef MODEL
 
+// No additional radiation or changes to the neutrino temperature.
+// Just the baryon-to-photon ratio η at BBN.
 #define MODEL etaBBN
  #define PARENT etaBBN_rBBN_rCMB_dNeffBBN_dNeffCMB
   START_MODEL
@@ -47,6 +64,8 @@
  #undef PARENT
 #undef MODEL
 
+// As etaBBN_rBBN_rCMB_dNeffBBN_dNeffCMB, but with the
+// baryon-to-photon ratio η at BBN set equal to η today.
 #define MODEL rBBN_rCMB_dNeffBBN_dNeffCMB
  #define PARENT etaBBN_rBBN_rCMB_dNeffBBN_dNeffCMB
   START_MODEL
@@ -57,6 +76,7 @@
  #undef PARENT
 #undef MODEL
 
+// As above, but with no additional radiation.
 #define MODEL rBBN_rCMB
  #define PARENT rBBN_rCMB_dNeffBBN_dNeffCMB
   START_MODEL
@@ -65,6 +85,7 @@
  #undef PARENT
 #undef MODEL
 
+// As above, but with neutrino temperature at BBN the same as at recombination.
 #define MODEL rCMB
  #define PARENT rBBN_rCMB
   START_MODEL
@@ -73,6 +94,7 @@
  #undef PARENT
 #undef MODEL
 
+// As rBBN_rCMB_dNeffBBN_dNeffCMB, but with no changes to the neutrino temperature.
 #define MODEL dNeffBBN_dNeffCMB
  #define PARENT rBBN_rCMB_dNeffBBN_dNeffCMB
   START_MODEL
@@ -81,6 +103,7 @@
  #undef PARENT
 #undef MODEL
 
+// As above, but with additional radiation the same at BBN as at recombination.
 #define MODEL dNeffCMB
  #define PARENT dNeffBBN_dNeffCMB
   START_MODEL
@@ -90,8 +113,7 @@
 #undef MODEL
   
 
-
-
+/* INFLATION */
 
 // inflationary models -- if one of them is in use you have to use the model LCDM_no_primordial 
 // to scan over the four standard cosmological parameters (H0, omega_b, omega_cdm, tau_reio) and
@@ -108,6 +130,7 @@ DEFINEPARS(ln10A_s,n_s,r_tensor)
   DEFINEPARS(phi0,dphi0,vparams1,vparams2,vparams3)
 #undef MODEL
 */
+
 // Inflation model: 0.5 m^2 phi^2 --- quadratic inflation
 // A_s, n_s and r are given by inflationary model
 // parameters: N_piv, m^2.
@@ -215,6 +238,8 @@ DEFINEPARS(lambda,mu,N_pivot)
   DEFINEPARS(phi0,dphi0,vparams1,vparams2,vparams3)
 #undef MODEL
  */
+
+/* PLANCK NUISANCE PARAMETERS */
 
 #define MODEL plik_dx11dr2_HM_v18_TT
   START_MODEL
