@@ -21,6 +21,11 @@
 ///          (janina.renk@fysik.su.se)
 ///  \date 2018 Oct
 ///  \date 2019 June
+///
+///  \author Sanjay Bloor
+///          (sanjay.bloor12@imperial.ac.uk)
+///   \date 2019 Nov
+///
 ///  *********************************************
 
 #ifndef __CosmoModels_hpp__
@@ -36,8 +41,11 @@
 // This model should be scanned alongside an inflationary model able to provide
 // a primordial power spectrum. 
 #define MODEL LCDM_no_primordial
+  #define PARENT LCDM
   START_MODEL
-  DEFINEPARS(omega_b,omega_cdm,H0,ln10A_s,n_s,tau_reio)
+  DEFINEPARS(omega_b,omega_cdm,H0,tau_reio)
+  INTERPRET_AS_PARENT_FUNCTION(LCDM_to_LCDM_no_primordial)
+  #undef PARENT
 #undef MODEL
 
 /* CMB + BBN */
