@@ -2223,7 +2223,7 @@ namespace Gambit
 
       // Now need to pass the primordial power spectrum
       // TODO check whether A_s from MultiModeCode has the log taken or not.
-      parametrised_ps pps = *Dep::param_ps;
+      parametrised_ps pps = *Dep::parametrised_power_spectrum;
       result.addEntry("n_s", pps.get_ns());
       result.addEntry("ln10^{10}A_s", pps.get_As());
       result.addEntry("r", pps.get_r());
@@ -2306,7 +2306,7 @@ namespace Gambit
 
       // Now need to pass the primordial power spectrum 
       // TODO will not work until CLASS is patched.
-      primordial_ps pps = *Dep::prim_ps;
+      primordial_ps pps = *Dep::primordial_power_spectrum;
       result.addEntry("k", pps.get_k());
       result.addEntry("P_k_s", pps.get_P_s());
       result.addEntry("P_k_t", pps.get_P_t());
@@ -2524,6 +2524,7 @@ namespace Gambit
 
       // TODO: length of array needs to come from MultiModeCode 
       //primordial_ps pps;
+      // int len = observables.k_size;
       result.fill_k(observables.k_array, 100);
       result.fill_P_s(observables.pks_array, 100);
       result.fill_P_t(observables.pkt_array, 100);
@@ -2531,13 +2532,33 @@ namespace Gambit
 
     void get_multimode_parametrised_ps(parametrised_ps &result)
     {
-      using namespace Pipes::get_multimode_primordial_ps;
+      using namespace Pipes::get_multimode_parametrised_ps;
       gambit_inflation_observables observables = *Dep::multimode_results;
 
       parametrised_ps pps;
       pps.set_ns(observables.ns);
       pps.set_As(observables.As);
       pps.set_r(observables.r);
+
+      result = pps;
+    }
+
+    void get_parametrised_ps_LCDM(parametrised_ps &result)
+    {
+      using namespace Pipes::get_parametrised_ps_LCDM;
+
+      // Check not using non-primordial version
+
+      if (ModelInUse("LCDM_no_primordial_ps")) 
+      {
+        CosmoBit_error().raise(LOCAL_INFO, "You cannot use the LCDM_no_primordial_ps model to get"
+                            " a power spectrum!! Try the function get_multimode_parametrised_ps...");
+      }
+
+      parametrised_ps pps;
+      pps.set_ns(*Param["n_s"]);
+      pps.set_As(*Param["ln10A_s"]); // TODO check if we need to exponentiate
+      pps.set_r(0);
 
       result = pps;
     }
@@ -4874,6 +4895,9 @@ namespace Gambit
     /// just passes an empty py dictionary
     void pass_empty_parameter_dict_for_MPLike(pybind11::dict & result)
     {
+      using namespace Pipes::pass_empty_parameter_dict_for_MPLike;
+      pybind11::dict r;
+      result = r;
       // Nothing to do here.
     }
 
@@ -5088,7 +5112,7 @@ namespace Gambit
       logger() << LogTags::debug << "(calc_MP_combined_LogLike):\n\n";
       for (const auto &p : MP_lnLs)
       {
-	logger()  << "name: "  << p.first << "\tvalue: " << p.second << "\n";
+	      logger()  << "name: "  << p.first << "\tvalue: " << p.second << "\n";
         lnL += p.second;
       }
       logger() << EOM;

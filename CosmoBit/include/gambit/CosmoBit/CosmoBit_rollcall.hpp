@@ -868,7 +868,7 @@ START_MODULE
          DEPENDENCY(T_ncdm,            double)
          DEPENDENCY(class_Nur,         double)
          DEPENDENCY(NuMasses_SM,       map_str_dbl)
-         DEPENDENCY(prim_ps,           primordial_ps)
+         DEPENDENCY(primordial_power_spectrum, primordial_ps)
      #undef FUNCTION
 
      // H0, tau_reio, Omega_m, Omega_b plus an external *parametrised* primordial power spectrum
@@ -879,7 +879,7 @@ START_MODULE
          DEPENDENCY(T_ncdm,            double)
          DEPENDENCY(class_Nur,         double)
          DEPENDENCY(NuMasses_SM,       map_str_dbl)
-         DEPENDENCY(param_ps,          parametrised_ps)
+         DEPENDENCY(parametrised_power_spectrum,   parametrised_ps)
      #undef FUNCTION
 
   #undef CAPABILITY
@@ -914,7 +914,7 @@ START_MODULE
 
   #undef CAPABILITY
 
-  /* MultiModeCode */
+  /* MultiModeCode and power spectra */
 
   // pass settings to multimode, run it and return the structure containing the results 
   #define CAPABILITY multimode_results
@@ -927,23 +927,39 @@ START_MODULE
     #undef FUNCTION
   #undef CAPABILITY 
 
-  // pass settings to multimode, run it and return the structure containing the results 
-  #define CAPABILITY multimode_parametrised_ps
+  #define CAPABILITY parametrised_power_spectrum
     START_CAPABILITY
+    
     #define FUNCTION get_multimode_parametrised_ps
       START_FUNCTION(parametrised_ps)
+      ALLOW_MODELS(LCDM_no_primordial) // todo check
       DEPENDENCY(multimode_results, gambit_inflation_observables)
     #undef FUNCTION
+
+    #define FUNCTION get_parametrised_ps_LCDM
+      START_FUNCTION(parametrised_ps)
+      ALLOW_MODELS(LCDM)
+    #undef FUNCTION
+
   #undef CAPABILITY 
 
   // pass settings to multimode, run it and return the structure containing the results 
-  #define CAPABILITY multimode_primordial_ps
+  #define CAPABILITY primordial_power_spectrum
     START_CAPABILITY
+
     #define FUNCTION get_multimode_primordial_ps
       START_FUNCTION(primordial_ps)
       ALLOW_MODELS(Inflation_SR1quad,Inflation_1quar,Inflation_1mono32Inf,Inflation_1linearInf,Inflation_1hilltopInf,Inflation_1natural)
       DEPENDENCY(multimode_results, gambit_inflation_observables)
     #undef FUNCTION
+
+    /*
+    #define FUNCTION get_LCDM_primordial_ps
+    START_FUNCTION(primordial_ps)
+    ALLOW_MODELS(LCDM)
+    #undef FUNCTION
+    */
+
   #undef CAPABILITY  
 
   // read in multimode setting for power spectrum calculation
