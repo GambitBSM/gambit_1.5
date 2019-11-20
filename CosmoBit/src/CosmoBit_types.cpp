@@ -356,5 +356,8 @@ namespace Gambit
       return log_msg.str();
     }
 
+    primordial_ps::primordial_ps(){};
+    parametrised_ps::parametrised_ps(){};
+
   }
 }

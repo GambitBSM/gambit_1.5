@@ -230,6 +230,12 @@ namespace Gambit
         void addEntry(str key, double value) {input_dict[key.c_str()]=value;};
         void addEntry(str key, int    value) {input_dict[key.c_str()]=value;};
         void addEntry(str key, str    value) {input_dict[key.c_str()]=value.c_str();};
+        // TODO needs to be changed once CLASS patch is done
+        void addEntry(str key, std::vector<double> values) 
+        { 
+            pybind11::list entry = pybind11::cast(values);
+            input_dict[key.c_str()] = entry; 
+        };
 
         bool hasKey(str key){return input_dict.contains(key.c_str());};
         //int addEntry(str key,std::ostringstream value){input_dict[key.c_str()]=value.c_str()};
@@ -249,6 +255,69 @@ namespace Gambit
 
       private:
         pybind11::dict input_dict;
+    };
+
+
+    /// Class containing the primordial power spectrum.
+    /// Members:
+    /// - vector of modes k (1/Mpc)
+    /// - scalar power spectrum of these modes P_s(k) (dimensionless)
+    /// - tensor power spectrum of these modes P_t(k) (dimensionless)
+    class primordial_ps
+    {
+        public:
+            primordial_ps();
+
+            // Fill k from an array of doubles
+            void fill_k(double *k_array, int len) 
+            {
+                std::vector<double> K(k_array, k_array+len);
+                k = K;
+            };
+            void fill_P_s(double *P_s_array, int len)
+            {
+                std::vector<double> ps(P_s_array, P_s_array+len);
+                P_s = ps;
+            };
+            void fill_P_t(double *P_t_array, int len)
+            {
+                std::vector<double> pt(P_t_array, P_t_array+len);
+                P_t = pt;
+            };
+
+            std::vector<double> get_k() { return k; }
+            std::vector<double> get_P_s() { return P_s; }
+            std::vector<double> get_P_t() { return P_t; }
+            
+        private:
+            std::vector<double> k;
+            std::vector<double> P_s;
+            std::vector<double> P_t;
+    };
+
+    /// Class containing the *parametrised* primordial power spectrum.
+    /// Members:
+    /// - spectral tilt n_s
+    /// - amplitude of scalar perturbations A_s
+    /// - scalar to tensor ratio r
+    class parametrised_ps
+    {
+        public:
+            parametrised_ps();
+
+            void set_ns(double ns) {n_s = ns;};
+            void set_As(double As) {A_s = As;};
+            void set_r(double R) {r = R;};
+
+            double get_ns() {return n_s;};
+            double get_As() {return A_s;};
+            double get_r() {return r;};
+
+
+        private:
+            double n_s;
+            double A_s;
+            double r;
     };
   }
 }

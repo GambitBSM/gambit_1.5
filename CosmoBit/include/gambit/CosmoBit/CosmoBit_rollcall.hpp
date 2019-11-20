@@ -199,62 +199,63 @@ START_MODULE
     ALLOW_MODEL_COMBINATION(cosmo,dark)
     #undef FUNCTION
 
-    #define FUNCTION class_set_parameter_Inflation_tensor
-    START_FUNCTION(CosmoBit::Class_container)
-    DEPENDENCY(T_cmb, double)
-    ALLOW_MODELS(Inflation_tensor)
-    #undef FUNCTION
+    // S.B.
+    // #define FUNCTION class_set_parameter_Inflation_tensor
+    // START_FUNCTION(CosmoBit::Class_container)
+    // DEPENDENCY(T_cmb, double)
+    // ALLOW_MODELS(Inflation_tensor)
+    // #undef FUNCTION
 
-    #define FUNCTION class_set_parameter_Inflation_SR1quad
-    START_FUNCTION(CosmoBit::Class_container)
-    ALLOW_MODELS(Inflation_SR1quad)
-    DEPENDENCY(T_cmb, double)
-    BACKEND_REQ(multimodecode_gambit_driver,(modecode_tag), void, (gambit_inflation_observables*,int& ,int& ,  int& ,  int& ,int& ,  int& ,  int& ,  int& ,  int& ,int& ,double& ,int& ,  int& ,double& ,int& ,double*,double*,  int& ,  int& ,double*,double*,double*,double& ,double& ,double& ,  int& ,int& ,double& ,double*,double*,double*,double*,double& ,double&))
-    #undef FUNCTION
+    // #define FUNCTION class_set_parameter_Inflation_SR1quad
+    // START_FUNCTION(CosmoBit::Class_container)
+    // ALLOW_MODELS(Inflation_SR1quad)
+    // DEPENDENCY(T_cmb, double)
+    // BACKEND_REQ(multimodecode_gambit_driver,(modecode_tag), void, (gambit_inflation_observables*,int& ,int& ,  int& ,  int& ,int& ,  int& ,  int& ,  int& ,  int& ,int& ,double& ,int& ,  int& ,double& ,int& ,double*,double*,  int& ,  int& ,double*,double*,double*,double& ,double& ,double& ,  int& ,int& ,double& ,double*,double*,double*,double*,double& ,double&))
+    // #undef FUNCTION
 
-    #define FUNCTION class_set_parameter_Inflation_1quar
-    START_FUNCTION(CosmoBit::Class_container)
-    ALLOW_MODELS(Inflation_1quar)
-    DEPENDENCY(T_cmb, double)
-    BACKEND_REQ(multimodecode_gambit_driver,(modecode_tag), void, (gambit_inflation_observables*,int& ,int& ,  int& ,  int& ,int& ,  int& ,  int& ,  int& ,  int& ,int& ,double& ,int& ,  int& ,double& ,int& ,double*,double*,  int& ,  int& ,double*,double*,double*,double& ,double& ,double& ,  int& ,int& ,double& ,double*,double*,double*,double*,double& ,double&))
-    #undef FUNCTION
+    // #define FUNCTION class_set_parameter_Inflation_1quar
+    // START_FUNCTION(CosmoBit::Class_container)
+    // ALLOW_MODELS(Inflation_1quar)
+    // DEPENDENCY(T_cmb, double)
+    // BACKEND_REQ(multimodecode_gambit_driver,(modecode_tag), void, (gambit_inflation_observables*,int& ,int& ,  int& ,  int& ,int& ,  int& ,  int& ,  int& ,  int& ,int& ,double& ,int& ,  int& ,double& ,int& ,double*,double*,  int& ,  int& ,double*,double*,double*,double& ,double& ,double& ,  int& ,int& ,double& ,double*,double*,double*,double*,double& ,double&))
+    // #undef FUNCTION
 
-    #define FUNCTION class_set_parameter_Inflation_1mono32Inf
-    START_FUNCTION(CosmoBit::Class_container)
-    ALLOW_MODELS(Inflation_1mono32Inf)
-    DEPENDENCY(T_cmb, double)
-    BACKEND_REQ(multimodecode_gambit_driver,(modecode_tag), void, (gambit_inflation_observables*,int& ,int& ,  int& ,  int& ,int& ,  int& ,  int& ,  int& ,  int& ,int& ,double& ,int& ,  int& ,double& ,int& ,double*,double*,  int& ,  int& ,double*,double*,double*,double& ,double& ,double& ,  int& ,int& ,double& ,double*,double*,double*,double*,double& ,double&))
-    #undef FUNCTION
+    // #define FUNCTION class_set_parameter_Inflation_1mono32Inf
+    // START_FUNCTION(CosmoBit::Class_container)
+    // ALLOW_MODELS(Inflation_1mono32Inf)
+    // DEPENDENCY(T_cmb, double)
+    // BACKEND_REQ(multimodecode_gambit_driver,(modecode_tag), void, (gambit_inflation_observables*,int& ,int& ,  int& ,  int& ,int& ,  int& ,  int& ,  int& ,  int& ,int& ,double& ,int& ,  int& ,double& ,int& ,double*,double*,  int& ,  int& ,double*,double*,double*,double& ,double& ,double& ,  int& ,int& ,double& ,double*,double*,double*,double*,double& ,double&))
+    // #undef FUNCTION
 
-    #define FUNCTION class_set_parameter_Inflation_1linearInf
-    START_FUNCTION(CosmoBit::Class_container)
-    ALLOW_MODELS(Inflation_1linearInf)
-    DEPENDENCY(T_cmb, double)
-    BACKEND_REQ(multimodecode_gambit_driver,(modecode_tag), void, (gambit_inflation_observables*,int& ,int& ,  int& ,  int& ,int& ,  int& ,  int& ,  int& ,  int& ,int& ,double& ,int& ,  int& ,double& ,int& ,double*,double*,  int& ,  int& ,double*,double*,double*,double& ,double& ,double& ,  int& ,int& ,double& ,double*,double*,double*,double*,double& ,double&))
-    #undef FUNCTION
+    // #define FUNCTION class_set_parameter_Inflation_1linearInf
+    // START_FUNCTION(CosmoBit::Class_container)
+    // ALLOW_MODELS(Inflation_1linearInf)
+    // DEPENDENCY(T_cmb, double)
+    // BACKEND_REQ(multimodecode_gambit_driver,(modecode_tag), void, (gambit_inflation_observables*,int& ,int& ,  int& ,  int& ,int& ,  int& ,  int& ,  int& ,  int& ,int& ,double& ,int& ,  int& ,double& ,int& ,double*,double*,  int& ,  int& ,double*,double*,double*,double& ,double& ,double& ,  int& ,int& ,double& ,double*,double*,double*,double*,double& ,double&))
+    // #undef FUNCTION
 
-    #define FUNCTION class_set_parameter_Inflation_1natural
-    START_FUNCTION(CosmoBit::Class_container)
-    ALLOW_MODELS(Inflation_1natural)
-    DEPENDENCY(T_cmb, double)
-    BACKEND_REQ(multimodecode_gambit_driver,(modecode_tag), void, (gambit_inflation_observables*,int& ,int& ,  int& ,  int& ,int& ,  int& ,  int& ,  int& ,  int& ,int& ,double& ,int& ,  int& ,double& ,int& ,double*,double*,  int& ,  int& ,double*,double*,double*,double& ,double& ,double& ,  int& ,int& ,double& ,double*,double*,double*,double*,double& ,double&))
-    #undef FUNCTION
-
-
-    #define FUNCTION class_set_parameter_Inflation_1hilltopInf
-    START_FUNCTION(CosmoBit::Class_container)
-    ALLOW_MODELS(Inflation_1hilltopInf)
-    DEPENDENCY(T_cmb, double)
-    BACKEND_REQ(multimodecode_gambit_driver,(modecode_tag), void, (gambit_inflation_observables*,int& ,int& ,  int& ,  int& ,int& ,  int& ,  int& ,  int& ,  int& ,int& ,double& ,int& ,  int& ,double& ,int& ,double*,double*,  int& ,  int& ,double*,double*,double*,double& ,double& ,double& ,  int& ,int& ,double& ,double*,double*,double*,double*,double& ,double&))
-    #undef FUNCTION
+    // #define FUNCTION class_set_parameter_Inflation_1natural
+    // START_FUNCTION(CosmoBit::Class_container)
+    // ALLOW_MODELS(Inflation_1natural)
+    // DEPENDENCY(T_cmb, double)
+    // BACKEND_REQ(multimodecode_gambit_driver,(modecode_tag), void, (gambit_inflation_observables*,int& ,int& ,  int& ,  int& ,int& ,  int& ,  int& ,  int& ,  int& ,int& ,double& ,int& ,  int& ,double& ,int& ,double*,double*,  int& ,  int& ,double*,double*,double*,double& ,double& ,double& ,  int& ,int& ,double& ,double*,double*,double*,double*,double& ,double&))
+    // #undef FUNCTION
 
 
-    #define FUNCTION class_set_parameter_Inflation_smash
-    START_FUNCTION(CosmoBit::Class_container)
-    ALLOW_MODELS(Inflation_smash)
-    DEPENDENCY(T_cmb, double)
-    BACKEND_REQ(multimodecode_gambit_driver,(modecode_tag), void, (gambit_inflation_observables*,int& ,int& ,  int& ,  int& ,int& ,  int& ,  int& ,  int& ,  int& ,int& ,double& ,int& ,  int& ,double& ,int& ,double*,double*,  int& ,  int& ,double*,double*,double*,double& ,double& ,double& ,  int& ,int& ,double& ,double*,double*,double*,double*,double& ,double&))
-    #undef FUNCTION
+    // #define FUNCTION class_set_parameter_Inflation_1hilltopInf
+    // START_FUNCTION(CosmoBit::Class_container)
+    // ALLOW_MODELS(Inflation_1hilltopInf)
+    // DEPENDENCY(T_cmb, double)
+    // BACKEND_REQ(multimodecode_gambit_driver,(modecode_tag), void, (gambit_inflation_observables*,int& ,int& ,  int& ,  int& ,int& ,  int& ,  int& ,  int& ,  int& ,int& ,double& ,int& ,  int& ,double& ,int& ,double*,double*,  int& ,  int& ,double*,double*,double*,double& ,double& ,double& ,  int& ,int& ,double& ,double*,double*,double*,double*,double& ,double&))
+    // #undef FUNCTION
+
+
+    // #define FUNCTION class_set_parameter_Inflation_smash
+    // START_FUNCTION(CosmoBit::Class_container)
+    // ALLOW_MODELS(Inflation_smash)
+    // DEPENDENCY(T_cmb, double)
+    // BACKEND_REQ(multimodecode_gambit_driver,(modecode_tag), void, (gambit_inflation_observables*,int& ,int& ,  int& ,  int& ,int& ,  int& ,  int& ,  int& ,  int& ,int& ,double& ,int& ,  int& ,double& ,int& ,double*,double*,  int& ,  int& ,double*,double*,double*,double& ,double& ,double& ,  int& ,int& ,double& ,double*,double*,double*,double*,double& ,double&))
+    // #undef FUNCTION
   #undef CAPABILITY
 
   #define CAPABILITY Cl_TT
@@ -859,6 +860,28 @@ START_MODULE
          DEPENDENCY(model_dependent_classy_parameters, pybind11::dict)
      #undef FUNCTION
 
+     // H0, tau_reio, Omega_m, Omega_b plus an external primordial power spectrum
+     #define FUNCTION set_classy_parameters_primordial_ps
+      START_FUNCTION(CosmoBit::ClassyInput)
+         ALLOW_MODELS(LCDM_no_primordial)
+         DEPENDENCY(T_cmb,             double)
+         DEPENDENCY(T_ncdm,            double)
+         DEPENDENCY(class_Nur,         double)
+         DEPENDENCY(NuMasses_SM,       map_str_dbl)
+         DEPENDENCY(prim_ps,           primordial_ps)
+     #undef FUNCTION
+
+     // H0, tau_reio, Omega_m, Omega_b plus an external *parametrised* primordial power spectrum
+     #define FUNCTION set_classy_parameters_parametrised_ps
+      START_FUNCTION(CosmoBit::ClassyInput)
+         ALLOW_MODELS(LCDM_no_primordial, LCDM)
+         DEPENDENCY(T_cmb,             double)
+         DEPENDENCY(T_ncdm,            double)
+         DEPENDENCY(class_Nur,         double)
+         DEPENDENCY(NuMasses_SM,       map_str_dbl)
+         DEPENDENCY(param_ps,          parametrised_ps)
+     #undef FUNCTION
+
   #undef CAPABILITY
   
   // set extra parameters for CLASS run for non-standard cosmological models
@@ -891,26 +914,49 @@ START_MODULE
 
   #undef CAPABILITY
 
+  /* MultiModeCode */
+
   // pass settings to multimode, run it and return the structure containing the results 
   #define CAPABILITY multimode_results
-     START_CAPABILITY
-     #define FUNCTION get_multimode_results
+    START_CAPABILITY
+    #define FUNCTION get_multimode_results
       START_FUNCTION(gambit_inflation_observables)
-        ALLOW_MODELS(Inflation_SR1quad,Inflation_1quar,Inflation_1mono32Inf,Inflation_1linearInf,Inflation_1hilltopInf,Inflation_1natural)
-        DEPENDENCY(multimode_pk_setting,int)
-        BACKEND_REQ(multimodecode_gambit_driver,(modecode_tag), void, (gambit_inflation_observables*,int&,int&,int&,int&,int&,int&,int&,int&,int&,int&,double&,int&,int&,double&,int&,double*,double*,int&,int&,double*,double*,double*,double&,double&,double&,int&,int&,double&,double*,double*,double*,double*,double&,double&))
-     #undef FUNCTION
+      ALLOW_MODELS(Inflation_SR1quad,Inflation_1quar,Inflation_1mono32Inf,Inflation_1linearInf,Inflation_1hilltopInf,Inflation_1natural)
+      DEPENDENCY(multimode_pk_setting,int)
+      BACKEND_REQ(multimodecode_gambit_driver,(modecode_tag), void, (gambit_inflation_observables*,int&,int&,int&,int&,int&,int&,int&,int&,int&,int&,double&,int&,int&,double&,int&,double*,double*,int&,int&,double*,double*,double*,double&,double&,double&,int&,int&,double&,double*,double*,double*,double*,double&,double&))
+    #undef FUNCTION
+  #undef CAPABILITY 
+
+  // pass settings to multimode, run it and return the structure containing the results 
+  #define CAPABILITY multimode_parametrised_ps
+    START_CAPABILITY
+    #define FUNCTION get_multimode_parametrised_ps
+      START_FUNCTION(parametrised_ps)
+      DEPENDENCY(multimode_results, gambit_inflation_observables)
+    #undef FUNCTION
+  #undef CAPABILITY 
+
+  // pass settings to multimode, run it and return the structure containing the results 
+  #define CAPABILITY multimode_primordial_ps
+    START_CAPABILITY
+    #define FUNCTION get_multimode_primordial_ps
+      START_FUNCTION(primordial_ps)
+      ALLOW_MODELS(Inflation_SR1quad,Inflation_1quar,Inflation_1mono32Inf,Inflation_1linearInf,Inflation_1hilltopInf,Inflation_1natural)
+      DEPENDENCY(multimode_results, gambit_inflation_observables)
+    #undef FUNCTION
   #undef CAPABILITY  
 
   // read in multimode setting for power spectrum calculation
   // -> this needs to be an extra capability or somehow accessible to 
   //    be able to adopt the CLASS input accordingly
   #define CAPABILITY multimode_pk_setting
-     START_CAPABILITY
-     #define FUNCTION set_multimode_pk
+    START_CAPABILITY
+    #define FUNCTION set_multimode_pk
       START_FUNCTION(int)
-      #undef FUNCTION
+    #undef FUNCTION
   #undef CAPABILITY  
+
+  /* MontePython */
   
   /// Calculates lnL for each experiment using the experiment names
   #define CAPABILITY MP_LogLikes
