@@ -2091,7 +2091,7 @@ namespace Gambit
 
       // clear all entries from previous parameter point
       result.clear();
-
+      std::cout << " enter " << __PRETTY_FUNCTION__ << std::endl;
       map_str_dbl NuMasses_SM = *Dep::NuMasses_SM;
       int N_ncdm = (int)NuMasses_SM["N_ncdm"];
 
@@ -2221,6 +2221,9 @@ namespace Gambit
       result.addEntry("tau_reio",     *Param["tau_reio"]);
       result.addEntry("omega_cdm",    *Param["omega_cdm"]);
 
+      std::vector<double> Helium_abundance = *Dep::Helium_abundance;
+      result.addEntry("YHe", Helium_abundance.at(0)); // .at(0): mean, .at(1): uncertainty
+      result.addEntry("modes","s,t");
       // Now need to pass the primordial power spectrum
       // TODO check whether A_s from MultiModeCode has the log taken or not.
       parametrised_ps pps = *Dep::parametrised_power_spectrum;
