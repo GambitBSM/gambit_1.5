@@ -37,6 +37,7 @@
 #include <stdlib.h>     /* malloc, free, rand */
 #include <string>
 #include <valarray>
+#include <memory>  // make_unique pointers
 #include <stdint.h> // safe memory addresses as int
 
 #include <gsl/gsl_blas.h>
@@ -2409,6 +2410,7 @@ namespace Gambit
       {
         idx_tt = ii;
         idx_ee = ii;
+
         if (ii >= 2)
         {
           cl_and_pars_TT[idx_tt] = Cl_TT.at(ii);
@@ -3492,9 +3494,21 @@ namespace Gambit
     {
       using namespace Pipes::compute_BBN_abundances;
 
-      int NNUC = BEreq::get_NNUC();  // global variable of AlterBBN (# computed element abundances)
-      result.init_arr(NNUC);         // init arrays in BBN_container with right length
-      double ratioH [NNUC+1], cov_ratioH [NNUC+1][NNUC+1];
+      // global variable of AlterBBN (# computed element abundances)
+      const int NNUC = BEreq::get_NNUC();  
+      // init arrays in BBN_container with right length
+      result.init_arr(NNUC);         
+
+      // in AlterBBN ratioH and cov_ratioH are arrays of fixed length
+      // with certain compiler versions (gcc 5.4.0) we have seen memory corruption problems
+      // if we initialise these as 
+      // double ratioH[NNUC+1]
+      // since the memory was not allocated properly. Fixed size arrays do not seem to be
+      // properly supported even though there are no errors at compile time. 
+      // using a unique pointer for ratioH and a 2d vector for cov_ratioH avoids 
+      // these problems. 
+      std::unique_ptr<double[]> ratioH = std::make_unique<double[]>(NNUC+1);
+      vector_2D<double> cov_ratioH(NNUC+1, NNUC+1);
 
       static bool first = true;
       const bool use_fudged_correlations = (runOptions->hasKey("correlation_matrix") && runOptions->hasKey("elements"));
@@ -3610,7 +3624,8 @@ namespace Gambit
       }
 
       map_str_dbl AlterBBN_input = *Dep::AlterBBN_setInput; // fill AlterBBN_input map with the parameters for the model in consideration
-      int nucl_err = BEreq::call_nucl_err(AlterBBN_input, &ratioH[0], &(cov_ratioH[0][0]));
+      // int nucl_err = BEreq::call_nucl_err(AlterBBN_input, &ratioH[0], &(cov_ratioH[0][0]));
+      int nucl_err = BEreq::call_nucl_err(AlterBBN_input, &ratioH[0], &cov_ratioH);
 
       // TODO: replace .at() by [] to speed up
       std::vector<double> err_ratio(NNUC+1,0);
@@ -3624,11 +3639,13 @@ namespace Gambit
           }
           else
           {
-            err_ratio.at(ie) = sqrt(cov_ratioH[ie][ie]);
+            err_ratio.at(ie) = sqrt(cov_ratioH(ie,ie));
           }
         }
       }
 
+      std::cout << "\tAbout to fill BBN_abund with ratioH[0]" << std::endl;
+      raise(SIGINT);
       // fill abundances and covariance matrix of BBN_container with results from AlterBBN
       if (nucl_err)
       {
@@ -3640,7 +3657,7 @@ namespace Gambit
             if (use_fudged_correlations)
               result.BBN_covmat.at(ie).at(je) = corr.at(ie).at(je) * err_ratio.at(ie) * err_ratio.at(je);
             else
-              result.BBN_covmat.at(ie).at(je) = cov_ratioH[ie][je];
+              result.BBN_covmat.at(ie).at(je) = cov_ratioH(ie,ie);
           }
         }
       }
@@ -3650,6 +3667,11 @@ namespace Gambit
         err << "AlterBBN calculation for primordial element abundances failed. Invalidating Point.";
         invalid_point().raise(err.str());
       }
+      
+
+      //std::cout <<__PRETTY_FUNCTION__ << std::endl;
+      std::cout<< "_________________________________________________________\n"<<std::endl;
+      raise(SIGINT);
     }
 
 
@@ -3664,6 +3686,7 @@ namespace Gambit
       result.push_back(BBN_res.BBN_abund.at(abund_map["Yp"]));
       result.push_back(sqrt(BBN_res.BBN_covmat.at(abund_map["Yp"]).at(abund_map["Yp"])));
 
+      std::cout << "Helium Abundance from AlterBBN: " << result.at(0) << " +/- " << result.at(1) << std::endl;
       logger() << "Helium Abundance from AlterBBN: " << result.at(0) << " +/- " << result.at(1) << EOM;
     }
 
@@ -3796,7 +3819,11 @@ namespace Gambit
 
       // compute chi2
       for(ie=0;ie<nobs;ie++) for(je=0;je<nobs;je++) chi2+=(prediction[ie]-observed[ie])*gsl_matrix_get(invcov,ie,je)*(prediction[je]-observed[je]);
+      std::cout << "    BBN Like: chi2 = " << chi2 << "  factor " <<  log(pow(2*pi,nobs)*det_cov) << "  det cov = " << det_cov << std::endl; 
       result = -0.5*(chi2 + log(pow(2*pi,nobs)*det_cov));
+
+      std::cout << "    BBN LogLike computed to be: " << result << std::endl;
+      logger() << "BBN LogLike computed to be: " << result << EOM;
 
       gsl_matrix_free(cov);
       gsl_matrix_free(invcov);
