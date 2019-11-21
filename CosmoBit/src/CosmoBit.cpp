@@ -3645,7 +3645,7 @@ namespace Gambit
       }
 
       std::cout << "\tAbout to fill BBN_abund with ratioH[0]" << std::endl;
-      raise(SIGINT);
+      // raise(SIGINT);
       // fill abundances and covariance matrix of BBN_container with results from AlterBBN
       if (nucl_err)
       {
@@ -3671,7 +3671,7 @@ namespace Gambit
 
       //std::cout <<__PRETTY_FUNCTION__ << std::endl;
       std::cout<< "_________________________________________________________\n"<<std::endl;
-      raise(SIGINT);
+      // raise(SIGINT);
     }
 
 
