@@ -2388,6 +2388,10 @@ namespace Gambit
         result["pks_array"] = addr;
         std::cout << "  ---|> memory address of key 'pks_array' is "<< addr << std::endl;
 
+				addr = reinterpret_cast<uintptr_t>(&observs.pks_iso_array[0]);
+				result["pks_iso_array"] = addr;
+				std::cout << "  ---|> memory address of key 'pks_iso_array' is "<< addr << std::endl;
+				
         addr = reinterpret_cast<uintptr_t>(&observs.pkt_array[0]);
         result["pkt_array"] = addr;
         std::cout << "  ---|> memory address of key 'pkt_array' is "<< addr << std::endl;
@@ -2530,6 +2534,7 @@ namespace Gambit
       // int len = observables.k_size;
       result.fill_k(observables.k_array, 100);
       result.fill_P_s(observables.pks_array, 100);
+			result.fill_P_s_iso(observables.pks_iso_array, 100);
       result.fill_P_t(observables.pkt_array, 100);
     }
 
