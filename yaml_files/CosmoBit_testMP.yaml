@@ -211,7 +211,7 @@ Rules:
   - capability: AlterBBN_setInput
     options:
       failsafe: 1
-      err: 0
+      err: 1
 
   - capability: T_cmb
     options:

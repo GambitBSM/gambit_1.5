@@ -3508,7 +3508,8 @@ namespace Gambit
       // using a unique pointer for ratioH and a 2d vector for cov_ratioH avoids 
       // these problems. 
       std::unique_ptr<double[]> ratioH = std::make_unique<double[]>(NNUC+1);
-      vector_2D<double> cov_ratioH(NNUC+1, NNUC+1);
+      std::unique_ptr<double[]> cov_ratioH = std::make_unique<double[]>((NNUC+1)*(NNUC+1));
+      
 
       static bool first = true;
       const bool use_fudged_correlations = (runOptions->hasKey("correlation_matrix") && runOptions->hasKey("elements"));
@@ -3559,7 +3560,7 @@ namespace Gambit
           if (it->size() != nelements)
           {
             std::ostringstream err;
-            err << "The correlation matirx is not a square matrix";
+            err << "The correlation matrix is not a square matrix";
             CosmoBit_error().raise(LOCAL_INFO, err.str());
           }
         }
@@ -3625,7 +3626,7 @@ namespace Gambit
 
       map_str_dbl AlterBBN_input = *Dep::AlterBBN_setInput; // fill AlterBBN_input map with the parameters for the model in consideration
       // int nucl_err = BEreq::call_nucl_err(AlterBBN_input, &ratioH[0], &(cov_ratioH[0][0]));
-      int nucl_err = BEreq::call_nucl_err(AlterBBN_input, &ratioH[0], &cov_ratioH);
+      int nucl_err = BEreq::call_nucl_err(AlterBBN_input, &ratioH[0], &cov_ratioH[0]);
 
       // TODO: replace .at() by [] to speed up
       std::vector<double> err_ratio(NNUC+1,0);
@@ -3639,13 +3640,12 @@ namespace Gambit
           }
           else
           {
-            err_ratio.at(ie) = sqrt(cov_ratioH(ie,ie));
+            // get every diagonal element (row and line 0not filled)
+            err_ratio.at(ie) = sqrt(cov_ratioH[ie*(NNUC+1)+ie]);
           }
         }
       }
 
-      std::cout << "\tAbout to fill BBN_abund with ratioH[0]" << std::endl;
-      // raise(SIGINT);
       // fill abundances and covariance matrix of BBN_container with results from AlterBBN
       if (nucl_err)
       {
@@ -3657,7 +3657,7 @@ namespace Gambit
             if (use_fudged_correlations)
               result.BBN_covmat.at(ie).at(je) = corr.at(ie).at(je) * err_ratio.at(ie) * err_ratio.at(je);
             else
-              result.BBN_covmat.at(ie).at(je) = cov_ratioH(ie,ie);
+              result.BBN_covmat.at(ie).at(je) = cov_ratioH[ie*(NNUC+1)+je];
           }
         }
       }
@@ -3667,13 +3667,7 @@ namespace Gambit
         err << "AlterBBN calculation for primordial element abundances failed. Invalidating Point.";
         invalid_point().raise(err.str());
       }
-      
-
-      //std::cout <<__PRETTY_FUNCTION__ << std::endl;
-      std::cout<< "_________________________________________________________\n"<<std::endl;
-      // raise(SIGINT);
     }
-
 
     void get_Helium_abundance(std::vector<double> &result)
     {
