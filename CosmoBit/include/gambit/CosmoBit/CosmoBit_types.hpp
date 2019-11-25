@@ -279,6 +279,11 @@ namespace Gambit
                 std::vector<double> ps(P_s_array, P_s_array+len);
                 P_s = ps;
             };
+            void fill_P_s_iso(double *P_s_iso_array, int len)
+            {
+                std::vector<double> ps_iso(P_s_iso_array, P_s_iso_array+len);
+                P_s_iso = ps_iso;
+            };
             void fill_P_t(double *P_t_array, int len)
             {
                 std::vector<double> pt(P_t_array, P_t_array+len);
@@ -292,6 +297,7 @@ namespace Gambit
         private:
             std::vector<double> k;
             std::vector<double> P_s;
+            std::vector<double> P_s_iso;
             std::vector<double> P_t;
     };
 
