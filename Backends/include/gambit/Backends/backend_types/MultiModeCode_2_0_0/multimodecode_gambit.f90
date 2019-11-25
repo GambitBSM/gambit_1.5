@@ -46,6 +46,7 @@ MODULE multimodecode_gambit
     real(dp) :: tau_NL
     real(dp) , dimension(100) :: k_array  !<- Added for the FULL POW SPEC
     real(dp) , dimension(100) :: pks_array  !<- Added for the FULL POW SPEC
+    real(dp) , dimension(100) :: pks_iso_array  !<- Added for the FULL POW SPEC
     real(dp) , dimension(100) :: pkt_array  !<- Added for the FULL POW SPEC
     integer :: k_size
   end type gambit_inflation_observables
@@ -827,7 +828,6 @@ contains
             bundle_width=field_bundle%exp_scalar)
         end if
 
-
         !Get full spectrum for adiab and isocurv at equal intvs in lnk
 !		print*,"will call gambit_get_full_pk"
 		!steps = 100
@@ -836,43 +836,14 @@ contains
 
         call gambit_get_full_pk(pk_arr,calc_full_pk,steps,kmin,kmax)
 
-        ! print*,"endof get_full_pk"
-
         if (calc_full_pk) then
 
-          !Make the output arrays
-          ! if (allocated(observs_gambit%k_array)) deallocate(observs_gambit%k_array)
-          ! allocate(observs_gambit%k_array(steps))
-
-          ! if (allocated(observs_gambit%pks_array)) deallocate(observs_gambit%pks_array)
-          ! allocate(observs_gambit%pks_array(steps))
-
-          ! if (allocated(observs_gambit%pkt_array)) deallocate(observs_gambit%pkt_array)
-          ! allocate(observs_gambit%pkt_array(steps))
-
-          ! print*,"this is fine 1!"
-          ! print*,"pk_arr(:,1) = ",pk_arr(:,1)
-          ! print*,"pk_arr(:,2) = ",pk_arr(:,2)
-          ! print*,"pk_arr(:,6) = ",pk_arr(:,6)
-
-!          print*,"observs_gambit%k_array =",observs_gambit%k_array
-
-!          allocate(observs_gambit%k_array(steps))
-!          allocate(observs_gambit%pks_array(steps))
-!          allocate(observs_gambit%pkt_array(steps))
-
-          observs_gambit%k_array   = pk_arr(:steps,1)
-          observs_gambit%pks_array = pk_arr(:steps,2)
-          observs_gambit%pkt_array = pk_arr(:steps,6)
-
-          ! print*,"observs_gambit%k_array =", observs_gambit%k_array
-          ! print*,"observs_gambit%pks_array =", observs_gambit%pks_array
-          ! print*,"observs_gambit%pkt_array =", observs_gambit%pkt_array
-
-          ! print*,"this is fine 2!"
+          observs_gambit%k_array   		 = pk_arr(:steps,1)
+          observs_gambit%pks_array 		 = pk_arr(:steps,2)
+          observs_gambit%pks_iso_array = pk_arr(:steps,3)
+          observs_gambit%pkt_array 		 = pk_arr(:steps,6)
 
         end if
-
 
 
       end if
