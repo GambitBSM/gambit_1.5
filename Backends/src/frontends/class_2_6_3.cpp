@@ -147,13 +147,18 @@ BE_NAMESPACE
        cosmo.k_ar, cosmo.Pk_S, and cosmo.Pk_T are to be filled
        in the early step of setting the parameters. */
 
-      pm.lnk_size = 30;
-      pm.md_size = pt.md_size;
+      // have to pass this somehow consistently to class!, 
+      // added a new parameter "lnk_size" to pass it
+      pm.lnk_size = 30; 
 
       /** - Make room */
+      // done in input.c
       pm.lnk = (double *)malloc(pm.lnk_size*sizeof(double));
       // std::cout << "DEBUG: we pass pm.lnk \n" << std::endl;
 
+      // || all done in primordial_indices (not skiiped anymore )
+      // \/
+      pm.md_size = pt.md_size;
       pm.lnpk = (double **)malloc(pt.md_size*sizeof(double));
       pm.ddlnpk = (double **)malloc(pt.md_size*sizeof(double));
       pm.ic_size = (int *)malloc(pt.md_size*sizeof(int));
@@ -163,29 +168,36 @@ BE_NAMESPACE
       int index_md;
       for (index_md = 0; index_md < pt.md_size; index_md++)
       {
-	pm.ic_size[index_md] = pt.ic_size[index_md];
-	pm.ic_ic_size[index_md] = (pm.ic_size[index_md]*(pm.ic_size[index_md]+1))/2;
+      	pm.ic_size[index_md] = pt.ic_size[index_md];
+      	pm.ic_ic_size[index_md] = (pm.ic_size[index_md]*(pm.ic_size[index_md]+1))/2;
 
-	pm.lnpk[index_md] = (double *)malloc(pm.lnk_size*pm.ic_ic_size[index_md]*sizeof(double));
-	pm.ddlnpk[index_md] = (double *)malloc(pm.lnk_size*pm.ic_ic_size[index_md]*sizeof(double));
-	pm.is_non_zero[index_md] = (short *)malloc(pm.lnk_size*pm.ic_ic_size[index_md]*sizeof(short));
+      	pm.lnpk[index_md] = (double *)malloc(pm.lnk_size*pm.ic_ic_size[index_md]*sizeof(double));
+      	pm.ddlnpk[index_md] = (double *)malloc(pm.lnk_size*pm.ic_ic_size[index_md]*sizeof(double));
+      	pm.is_non_zero[index_md] = (short *)malloc(pm.lnk_size*pm.ic_ic_size[index_md]*sizeof(short));
       }
+
+      // /\
+      // || all done in primordial_indices (not skiiped anymore )
 
       /** - Store values */
       for (int index_k=0; index_k<pm.lnk_size; index_k++)
       {
-	std::cout <<  cosmo.k_ar.at(index_k) << "," << cosmo.Pk_S.at(index_k)<<std::endl;
+	       std::cout <<  cosmo.k_ar.at(index_k) << "," << cosmo.Pk_S.at(index_k)<<std::endl;
 
-	 pm.lnk[index_k] = std::log( cosmo.k_ar.at(index_k) );
-	 pm.lnpk[pt.index_md_scalars][index_k] = std::log( cosmo.Pk_S.at(index_k) );
-	 if (pt.has_tensors == _TRUE_)
-	   pm.lnpk[pt.index_md_tensors][index_k] = std::log( cosmo.Pk_T.at(index_k) );
+         // done in input.c atm
+	       pm.lnk[index_k] = std::log( cosmo.k_ar.at(index_k) );
+	       
+         // done in primordial_init, in else if (ppm->primordial_spec_type == gambit_Pk) 
+         pm.lnpk[pt.index_md_scalars][index_k] = std::log( cosmo.Pk_S.at(index_k) );
+	       if (pt.has_tensors == _TRUE_)
+	         pm.lnpk[pt.index_md_tensors][index_k] = std::log( cosmo.Pk_T.at(index_k) );
       }
 
       /** - Tell CLASS that there are scalar (and tensor) modes */
+      // done in primordial_init, in else if (ppm->primordial_spec_type == gambit_Pk)
       pm.is_non_zero[pt.index_md_scalars][pt.index_ic_ad] = _TRUE_;
       if (pt.has_tensors == _TRUE_)
-	pm.is_non_zero[pt.index_md_tensors][pt.index_ic_ten] = _TRUE_;
+	       pm.is_non_zero[pt.index_md_tensors][pt.index_ic_ten] = _TRUE_;
     }
 
     if (class_primordial_initialize(&pr,&pt,&pm) == _FAILURE_)
