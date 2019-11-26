@@ -1,0 +1,193 @@
+##########################################################################
+## MultiNest version of minimal - CosmosBitDEV application (in YAML)
+##
+## Selim Hotinli <selim.hotinli14@imperial.ac.uk>
+## 2016-17
+## Values taken from base2015.bestfit MontePython.
+##########################################################################
+
+
+#======== Input parameter declarations =======
+# neutrino masses
+#StandardModel_numass_single: !import include/StandardModel_numass_single_scan.yaml
+
+
+Parameters:
+  StandardModel_numass_degenerate: !import include/StandardModel_numass_degenerate_scan.yaml
+  
+  LCDM_no_primordial:
+    omega_b:
+      fixed_value: 2.24052e-02
+    omega_cdm:
+      fixed_value: 1.18078e-01
+    H0:
+      fixed_value: 6.81383e+01
+    tau_reio:
+      fixed_value: 7.25805e-02
+
+  Inflation_1quar:
+    N_pivot: 40
+      #prior_type: flat
+      #range: [40.0,70.0]
+    lambda: -9.9
+      #prior_type: flat
+      #range: [-9.8,-9.10]
+    phi_init0: 10
+     #fixed_value: 10.0
+    
+  #Inflation_SR1quad:
+  #  N_pivot:
+  #    prior_type: flat
+  #    range: [40.0,70.0]
+  #  m2_inflaton:
+  #    prior_type: flat
+  #    range: [-9.8,-9.10]
+  #  phi_init0:
+  #    fixed_value: 10.0
+    
+  #Inflation_1quar:
+  #  N_pivot:
+  #    prior_type: flat
+  #    range: [40.0,70.0]
+  #  lambda:
+  #    prior_type: flat
+  #    range: [-9.8,-9.10]
+  #  phi_init0:
+  #    fixed_value: 10.0
+    
+
+# extension of standard LCDM: allow for a value of dNeff @ CMB release different from today
+# (due to the bug we saw earlier atm you can't scan a simple LCDM model, I'll fix this but if
+# you fix dNeffCMB to 0 you essentially have vanilla LCDM)
+  dNeffCMB:
+    dNeff_CMB: 0.01
+
+#======== Prior setup ========
+Priors:
+
+#======== Output setup ========
+Printer:
+  printer: ascii
+  options:
+    output_file: "results.data"
+    #group: "/CosmoBitDEV_LCDMt_smashInf_multinest"
+    buffer_length: 3
+
+#======== Scanner setup ========
+Scanner:
+  use_scanner: random
+
+  scanners:
+    multinest:
+      plugin: multinest
+      like:  LogLike
+      nlive: 500
+      tol: 0.3
+      aux_printer_txt_options:
+      aux_printer_stats_options:
+      aux_printer_live_options:
+
+    random:
+      plugin: random
+      point_number: 2
+      like:  LogLike
+            
+#======== Observables of interest ========
+ObsLikes:
+  #- purpose:      LogLike
+  #  capability:   compute_smashInf_rLCDMtensor_lowp_TT_loglike
+  #  module:       CosmoBitDEV
+  #  type:         double
+
+  - purpose:      LogLike
+    capability:   MP_Combined_LogLike
+    module:       CosmoBit
+    type:         double
+
+#======== Rule entries ========
+Rules:
+  - capability: multimode_pk_setting
+    options:
+      calc_full_pk: 1
+
+
+  - capability: multimode_results
+    function: get_multimode_results
+    options:
+# Initialization parameters controlling main characteristics.
+      slowroll_infl_end:        1
+      instreheat:               0
+# Control the output of analytic approximations for comparison.
+      use_deltaN_SR:            0
+      use_horiz_cross_approx:   0
+      evaluate_modes:           0
+      get_runningofrunning:     0
+# Parameters to control how the ICs are sampled.
+      ic_sampling:              1
+      numb_samples:             1
+      energy_scale:             0.1
+      save_iso_N:               0
+      N_iso_ref:                55
+# Parameters to be passed to the potential
+      k_pivot:                  0.05
+      dlnk:                     0.4
+# For calculating the full power spectrum P(k).  Samples in uniform increments in log(k).
+      #calc_full_pk: 0
+      steps: 300
+      kmin: 1e-4
+      kmax: 1e6
+      is_not_silent: 1
+
+  - capability: set_classy_parameters
+    function: set_classy_parameters_Inflation
+    
+  - capability: get_classy_cosmo_container
+    function: init_classy_cosmo_container_with_MPLike
+    
+  
+  #- capability: set_classy_parameters
+  #  function: set_classy_parameters_parametrised_ps
+  #  options:
+  #    classy_dict:
+  #      output: 'tCl'   # need to add this since otherwise the input 'modes' is not read => class throws an error
+  #                      # in the future this would ideally be taken care of automatically -> one observable that you HAVE to 
+  #                      # calculate for every inflation model? Then we can add it to the set_classy_function (there probably
+  #                      # is but I just have no idea about inflation ;)) 
+
+  - capability: MP_experiment_names
+    function: set_MP_experiment_names
+    options:
+      # Tested & verified likelihoods: bao, bao_boss,bao_aniso,bao_aniso_gauss_approx, bao_boss_dr12,bao_fs_boss_dr12,
+      #     bao_known_rs, bao_smallz_2014 bicep2, hst,Planck_SZ, Pantheon, sdss_lrgDR4, sdss_lrgDR7, timedelay, WiggleZ, WiggleZ_ba0,
+      # Note: bao_angular won't work since the likelihood is not written in MP conformal way (it does not even work trying
+      #       to call in from MontePython directly.. )
+      #       bicep does not work -> gaussian nuisance param problem in 'add_nuisance_prior'
+      Likelihoods: 
+        #acbar: default
+        bao_smallz_2014: default
+        hst: default
+
+  # error calculation precision settings for AltterBBN
+  # (use 1 and 0 to speed up Helium abundance calculation for testing)
+  - capability: AlterBBN_setInput
+    options:
+      failsafe: 1
+      err: 0
+
+#======== Logging setup ========
+Logger:
+  redirection:
+    [Default]      : "default.log"
+    [CosmoBit]     : "CosmoBit.log"
+    [Scanner]      : "Scanner.log"
+
+#======== Generic Name/Value Section ========
+KeyValues:
+
+  default_output_path: "runs/inflation-test"
+
+  debug: true
+##  rng: ranlux48
+
+  likelihood:
+    model_invalid_for_lnlike_below: -1e6
