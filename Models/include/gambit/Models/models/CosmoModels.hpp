@@ -135,7 +135,7 @@ DEFINEPARS(ln10A_s,n_s,r_tensor)
 /*
 #define MODEL inflation // a minimally defined general inflationary model with 3 sets of parameters.
   START_MODEL
-  DEFINEPARS(phi0,dphi0,vparams1,vparams2,vparams3)
+  DEFINEPARS(phi_init0,dphi_init0,vparams1,vparams2,vparams3)
 #undef MODEL
 */
 
@@ -144,7 +144,7 @@ DEFINEPARS(ln10A_s,n_s,r_tensor)
 // parameters: N_piv, m^2.
 #define MODEL Inflation_SR1quad
   START_MODEL
-  DEFINEPARS(m2_inflaton,N_pivot)
+  DEFINEPARS(m2_inflaton,N_pivot,phi_init0)
 #undef MODEL
 
 // Inflation model: 0.25 \lambda phi^4  --- quartic inflation
@@ -152,7 +152,7 @@ DEFINEPARS(ln10A_s,n_s,r_tensor)
 // parameters: N_piv, lambda.
 #define MODEL Inflation_1quar
 START_MODEL
-DEFINEPARS(lambda,N_pivot)
+DEFINEPARS(lambda,N_pivot,phi_init0)
 #undef MODEL
 
 // Inflation model: 2/3 \lambda phi^2/3 --- inflation
@@ -160,7 +160,7 @@ DEFINEPARS(lambda,N_pivot)
 // parameters: N_piv, lambda.
 #define MODEL Inflation_1mono32Inf
 START_MODEL
-DEFINEPARS(lambda,N_pivot)
+DEFINEPARS(lambda,N_pivot,phi_init0)
 #undef MODEL
 
 // Inflation model: m phi --- linear inflation
@@ -168,7 +168,7 @@ DEFINEPARS(lambda,N_pivot)
 // parameters: N_piv, m^2.
 #define MODEL Inflation_1linearInf
 START_MODEL
-DEFINEPARS(lambda,N_pivot)
+DEFINEPARS(lambda,N_pivot,phi_init0)
 #undef MODEL
 
 // simplest 8 parameter cosmology smash inflation model --- smash inflation
@@ -181,12 +181,7 @@ DEFINEPARS(log10_xi,log10_beta,log10_lambda,N_pivot)
 
 #define MODEL Inflation_1natural // N-flation (axions)
 START_MODEL
-DEFINEPARS(lambda,faxion,N_pivot)
-#undef MODEL
-
-#define MODEL Inflation_1hilltopInf // Hilltop
-START_MODEL
-DEFINEPARS(lambda,mu,N_pivot)
+DEFINEPARS(lambda,faxion,N_pivot,phi_init0)
 #undef MODEL
 
 
@@ -194,56 +189,56 @@ DEFINEPARS(lambda,mu,N_pivot)
 
 #define MODEL inf_diff1 // Lambda^4 - mu*phi^4
   START_MODEL
-  DEFINEPARS(phi0,dphi0,vparams1,vparams2,vparams3)
+  DEFINEPARS(phi_init0,dphi_init0,vparams1,vparams2,vparams3)
 #undef MODEL
 
 #define MODEL inf_exp // Product of exponentials
   START_MODEL
-  DEFINEPARS(phi0,dphi0,vparams1,vparams2,vparams3)
+  DEFINEPARS(phi_init0,dphi_init0,vparams1,vparams2,vparams3)
 #undef MODEL
 
 #define MODEL inf_hybrid // Canonical two-field hybrid
   START_MODEL
-  DEFINEPARS(phi0,dphi0,vparams1,vparams2,vparams3)
+  DEFINEPARS(phi_init0,dphi_init0,vparams1,vparams2,vparams3)
 #undef MODEL
 
 #define MODEL inf_offset // V0 + m_i^2 phi_i^2
   START_MODEL
-  DEFINEPARS(phi0,dphi0,vparams1,vparams2,vparams3)
+  DEFINEPARS(phi_init0,dphi_init0,vparams1,vparams2,vparams3)
 #undef MODEL
 
 // N-quadratic w/one quartic interaction
 // term phi_i^2 + phi_{lightest}^2*phi_i^2
 #define MODEL inf_intrx
   START_MODEL
-  DEFINEPARS(phi0,dphi0,vparams1,vparams2,vparams3)
+  DEFINEPARS(phi_init0,dphi_init0,vparams1,vparams2,vparams3)
 #undef MODEL
 
 // Mass matrix with diagonal terms = m_i^2
 // Off-diagonal terms = \eps
 #define MODEL inf_offdiag
   START_MODEL
-  DEFINEPARS(phi0,dphi0,vparams1,vparams2,vparams3)
+  DEFINEPARS(phi_init0,dphi_init0,vparams1,vparams2,vparams3)
 #undef MODEL
 
 #define MODEL inf_step // Multifield step potential
   START_MODEL
-  DEFINEPARS(phi0,dphi0,vparams1,vparams2,vparams3)
+  DEFINEPARS(phi_init0,dphi_init0,vparams1,vparams2,vparams3)
 #undef MODEL
 
 #define MODEL inf_monomial // (1/p) lambda_i |phi_i|^p --- N-monomial
   START_MODEL
-  DEFINEPARS(phi0,dphi0,vparams1,vparams2,vparams3)
+  DEFINEPARS(phi_init0,dphi_init0,vparams1,vparams2,vparams3)
 #undef MODEL
 
 #define MODEL inf_gaxion // Generalized axions
   START_MODEL
-  DEFINEPARS(phi0,dphi0,vparams1,vparams2,vparams3)
+  DEFINEPARS(phi_init0,dphi_init0,vparams1,vparams2,vparams3)
 #undef MODEL
 
 #define MODEL inf_smash // SMASH potential
   START_MODEL
-  DEFINEPARS(phi0,dphi0,vparams1,vparams2,vparams3)
+  DEFINEPARS(phi_init0,dphi_init0,vparams1,vparams2,vparams3)
 #undef MODEL
  */
 
@@ -282,7 +277,7 @@ DEFINEPARS(lambda,mu,N_pivot)
 
 //#define MODEL inflation
 //START_MODEL
-//DEFINEPARS(num_inflaton, potential_choice, slowroll_infl_end, instreheat, vparam_rows, use_deltaN_SR, evaluate_modes, use_horiz_cross_approx, get_runningofrunning, ic_sampling, energy_scale, numb_samples, save_iso_N, N_iso_ref, param_sampling, vp_prior_min, vp_prior_max, varying_N_pivot, use_first_priorval, phi_init0, dphi_init0, vparams, N_pivot, k_pivot, dlnk, turning_choice  calc_full_pk,  steps,  kmin,  kmax,  phi0_priors_min,  phi0_priors_max,  dphi0_priors_min,  dphi0_priors_max,  N_pivot_prior_min,  N_pivot_prior_max)
+//DEFINEPARS(num_inflaton, potential_choice, slowroll_infl_end, instreheat, vparam_rows, use_deltaN_SR, evaluate_modes, use_horiz_cross_approx, get_runningofrunning, ic_sampling, energy_scale, numb_samples, save_iso_N, N_iso_ref, param_sampling, vp_prior_min, vp_prior_max, varying_N_pivot, use_first_priorval, phi_init0, dphi_init0, vparams, N_pivot, k_pivot, dlnk, turning_choice  calc_full_pk,  steps,  kmin,  kmax,  phi_init0_priors_min,  phi_init0_priors_max,  dphi_init0_priors_min,  dphi_init0_priors_max,  N_pivot_prior_min,  N_pivot_prior_max)
 //#undef MODEL
 
 #endif

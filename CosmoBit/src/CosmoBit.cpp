@@ -2140,8 +2140,8 @@ namespace Gambit
       // each model allowed in this function has a 
       result.addDict(*Dep::model_dependent_classy_parameters);
 
-      //std::vector<double> Helium_abundance = *Dep::Helium_abundance;
-      //result.addEntry("YHe", Helium_abundance.at(0)); // .at(0): mean, .at(1): uncertainty
+      std::vector<double> Helium_abundance = *Dep::Helium_abundance;
+      result.addEntry("YHe", Helium_abundance.at(0)); // .at(0): mean, .at(1): uncertainty
       
 
       // Other Class input direct from the YAML file 
@@ -2178,6 +2178,7 @@ namespace Gambit
     {
       using namespace Pipes::set_classy_parameters_parametrised_ps;
 
+      std::cout << " enter " << __PRETTY_FUNCTION__ << std::endl;
       // clear all entries from previous parameter point
       result.clear();
 
@@ -2264,6 +2265,7 @@ namespace Gambit
     {
       using namespace Pipes::set_classy_parameters_primordial_ps;
 
+      std::cout << " enter " << __PRETTY_FUNCTION__ << std::endl;
       // clear all entries from previous parameter point
       result.clear();
 
@@ -2346,6 +2348,7 @@ namespace Gambit
     { 
       using namespace Pipes::model_dependent_classy_parameters_Inflation_tensor;
 
+      std::cout << " enter " << __PRETTY_FUNCTION__ << std::endl;
       // make sure nothing from previous run is contained
       result.clear();
 
@@ -2358,6 +2361,7 @@ namespace Gambit
     { 
       using namespace Pipes::model_dependent_classy_parameters_inflation_multimode;
 
+      std::cout << " enter " << __PRETTY_FUNCTION__ << std::endl;
       // make sure nothing from previous run is contained
       result.clear();
       gambit_inflation_observables observs = *Dep::multimode_results;
@@ -2432,7 +2436,16 @@ namespace Gambit
       int potential_choice = -1; 
       int vparam_rows = -1;
       
-      // initial values of 
+      // initial vectors to pass initial phi for each field, the respective
+      // derivative  and vparams -- the 
+      // vector holding the model parameters
+      // NOTE: if the flag 'ic_samp_flags' is set to 1 then phi0 is fixed to phi_ini0
+      // and the fields velocities are assumed to be slow roll => no sampling over 
+      // phi_init0 and dphi_init0. Set them as GAMBIT model parameters if you want to 
+      // sample over these as well (and adopt the choice for the sampling flag s.t.
+      // the entries for dphi_init0 are taken into account. You will also need to set
+      // the prior ranges to be equal to the central value to prevent multimode from 
+      // doing some sampling on its own.. )
       std::vector<double> phi_init0, dphi_init0, vparams;
 
       // N_pivot is model parameter in all inflation models
@@ -2441,6 +2454,7 @@ namespace Gambit
       if (ModelInUse("Inflation_SR1quad"))
       {
         vparams.push_back(*Param["m2_inflaton"]);
+        phi_init0.push_back(*Param["phi_init0"]);
         potential_choice = 1; // -> 0.5 m_i^2 phi_i^2 --- N-quadratic
         num_inflaton = 1;
         vparam_rows = 1;
@@ -2449,6 +2463,7 @@ namespace Gambit
       {
         vparams.push_back(*Param["lambda"]); 
         vparams.push_back(*Param["faxion"]); // finv = 1.e0_dp/(10.e0_dp**faxion))
+        phi_init0.push_back(*Param["phi_init0"]);
         potential_choice = 2; // -> lambda**4*(1.e0_dp+cos(finv*phi))
         num_inflaton = 1;
         vparam_rows = 1;
@@ -2456,6 +2471,7 @@ namespace Gambit
       else if (ModelInUse("Inflation_1quar"))
       {
         vparams.push_back(*Param["lambda"]);
+        phi_init0.push_back(*Param["phi_init0"]);
         potential_choice = 3; // -> 0.25 lambda_i phi_i^4 --- N-quartic
         num_inflaton = 1;
         vparam_rows = 1;
@@ -2463,6 +2479,7 @@ namespace Gambit
       else if (ModelInUse("Inflation_1linearInf"))
       {
         vparams.push_back(*Param["lambda"]);
+        phi_init0.push_back(*Param["phi_init0"]);
         potential_choice = 4; // -> lambda_i phi_i --- N-linear
         num_inflaton = 1;
         vparam_rows = 1;
@@ -2470,6 +2487,7 @@ namespace Gambit
       else if (ModelInUse("Inflation_1mono32Inf"))
       {
         vparams.push_back(*Param["lambda"]);
+        phi_init0.push_back(*Param["phi_init0"]);
         potential_choice = 5; // -> 1.5 lambda_i phi_i^(2/3)
         num_inflaton = 1;
         vparam_rows = 1;
@@ -2480,21 +2498,41 @@ namespace Gambit
         // out which one the corresponding one in multimode would be
         vparams.push_back(*Param["lambda"]); 
         vparams.push_back(*Param["mu"]);
+        phi_init0.push_back(*Param["phi_init0"]);
         potential_choice = 5; 
         num_inflaton = 1;
         vparam_rows = 1;
       }
 
-      if (num_inflaton*vparam_rows != vparams.size())
+      // MutliMode segFaults if this is empty
+      dphi_init0.push_back(1.);
+
+
+      static bool first_run = true;
+
+      // do some consistency check for inputs passed to multimode before the first run
+      if(first_run)
       {
-        std::ostringstream err;
-        err << "Error in MultiModecode settings: the number of free parameters in a inflation model";
-        err << " set through the vector 'vparams' has to match (num_inflaton) x (vparam_rows). In this case the ";
-        err << "length is " << vparams.size() << " and the product is "  << num_inflaton*vparam_rows <<  " -- double check the model dependent settings in 'get_multimode_results'";
-        CosmoBit_error().raise(LOCAL_INFO, err.str());
+        if (num_inflaton*vparam_rows != vparams.size())
+        {
+          std::ostringstream err;
+          err << "Error in MultiModecode settings: the number of free parameters in a inflation model";
+          err << " set through the vector 'vparams' has to match (num_inflaton) x (vparam_rows). In this case the ";
+          err << "length is " << vparams.size() << " and the product is "  << num_inflaton*vparam_rows <<  " -- double check the model dependent settings in 'get_multimode_results'";
+          CosmoBit_error().raise(LOCAL_INFO, err.str());
+        }
+        if (potential_choice == -1 || num_inflaton == -1 || vparam_rows == -1)
+        {
+          std::ostringstream err;
+          err << "Error in MultiModecode settings: you did not set one (or more) of the parameters";
+          err << "'potential_choice', 'num_inflaton' or 'vparam_rows' for your inflation model. ";
+          err << "Double check the model dependent settings in 'get_multimode_results'";
+          CosmoBit_error().raise(LOCAL_INFO, err.str());
+        }
+        first_run = false;
       }
 
-      //  move settings we really want to have in the yaml file here
+      //  Read in MultiMode settings from the yaml file
       int slowroll_infl_end = runOptions->getValue<int> ("slowroll_infl_end");
       int instreheat = runOptions->getValue<int> ("instreheat");
 
@@ -2614,7 +2652,7 @@ namespace Gambit
       parametrised_ps pps;
       pps.set_ns(*Param["n_s"]);
       pps.set_As(*Param["ln10A_s"]); // TODO check if we need to exponentiate
-      pps.set_r(0);
+      pps.set_r(0); // (JR) shouldn't we in principle also allow for a model that has r as free parameter?
 
       result = pps;
     }

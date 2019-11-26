@@ -851,16 +851,19 @@ START_MODULE
      // conditional model dependencies on 'model_dependent_classy_parameters'  
      #define FUNCTION set_classy_parameters_Inflation
       START_FUNCTION(CosmoBit::ClassyInput)
-         //ALLOW_MODELS(Inflation_tensor,Inflation_SR1quad,Inflation_1quar,Inflation_1mono32Inf,Inflation_1linearInf,Inflation_1hilltopInf,Inflation_smash,Inflation_1natural)
+         /// only allow a combination of LCDM_no_primordial and and Inflation model
+         /// at least this is how it is supposed to be but it does not work 
+         /// getting a runtime error 'GAMBIT has exited with fatal exception: map::at' when trying to 
+         /// access first model parameter (H0) in this case  (JR) -> ugly temp fix 
          MODEL_GROUP(Inflation,(Inflation_tensor,Inflation_SR1quad,Inflation_1quar,Inflation_1mono32Inf,Inflation_1linearInf,Inflation_1hilltopInf,Inflation_smash,Inflation_1natural))
          MODEL_GROUP(cosmo,(LCDM_no_primordial))
-         // only allow a combination of LCDM_no_primordial and and Inflation model
-         ALLOW_MODEL_COMBINATION(cosmo,Inflation)
+         ALLOW_MODEL_COMBINATION(Inflation,cosmo)
+         ALLOW_MODEL_DEPENDENCE(LCDM_no_primordial)         
          DEPENDENCY(T_cmb,             double)
          DEPENDENCY(T_ncdm,            double)
          DEPENDENCY(class_Nur,         double)
          DEPENDENCY(NuMasses_SM,       map_str_dbl)
-         //DEPENDENCY(Helium_abundance,  std::vector<double>)
+         DEPENDENCY(Helium_abundance,  std::vector<double>)
          DEPENDENCY(model_dependent_classy_parameters, pybind11::dict)
      #undef FUNCTION
 
@@ -908,7 +911,7 @@ START_MODULE
   
     #define FUNCTION model_dependent_classy_parameters_inflation_multimode
       START_FUNCTION(pybind11::dict)
-        ALLOW_MODELS(Inflation_SR1quad,inf_1quarInf_LCDM,tInflation_1mono32Inf,Inflation_1linearInf,Inflation_1hilltopInf,Inflation_1natural)
+        ALLOW_MODELS(Inflation_tensor,Inflation_SR1quad,Inflation_1quar,Inflation_1mono32Inf,Inflation_1linearInf,Inflation_1hilltopInf,Inflation_smash,Inflation_1natural)
         DEPENDENCY(multimode_results,     gambit_inflation_observables)
         DEPENDENCY(multimode_pk_setting,  int)
     #undef FUNCTION
