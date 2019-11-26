@@ -231,8 +231,8 @@ namespace Gambit
         void addEntry(str key, double value) {input_dict[key.c_str()]=value;};
         void addEntry(str key, int    value) {input_dict[key.c_str()]=value;};
         void addEntry(str key, str    value) {input_dict[key.c_str()]=value.c_str();};
-        void addEntry(str key, std::vector<double> values) 
-        { 
+        void addEntry(str key, std::vector<double>& values)
+        {
             // get pointers to arrays holding the information that needs
             // to be passed on to class, convert to uintptr_t (type large enough
             // to store memory address of the used system) and pass to class
@@ -276,28 +276,28 @@ namespace Gambit
             void fill_k(double *k_array, int len) 
             {
                 std::vector<double> K(k_array, k_array+len);
-                k = K;
+                k = std::move(K);
             };
             void fill_P_s(double *P_s_array, int len)
             {
                 std::vector<double> ps(P_s_array, P_s_array+len);
-                P_s = ps;
+                P_s = std::move(ps);
             };
             void fill_P_s_iso(double *P_s_iso_array, int len)
             {
                 std::vector<double> ps_iso(P_s_iso_array, P_s_iso_array+len);
-                P_s_iso = ps_iso;
+                P_s_iso = std::move(ps_iso);
             };
             void fill_P_t(double *P_t_array, int len)
             {
                 std::vector<double> pt(P_t_array, P_t_array+len);
-                P_t = pt;
+                P_t = std::move(pt);
             };
 
-            std::vector<double> get_k() { return k; }
-            std::vector<double> get_P_s() { return P_s; }
-            std::vector<double> get_P_t() { return P_t; }
-            
+            std::vector<double>& get_k() { return k; }
+            std::vector<double>& get_P_s() { return P_s; }
+            std::vector<double>& get_P_t() { return P_t; }
+
         private:
             std::vector<double> k;
             std::vector<double> P_s;
