@@ -36,6 +36,7 @@
 #include "gambit/Backends/backend_types/class.hpp"
 #include "gambit/Backends/backend_types/MontePythonLike.hpp"
 #include <valarray>
+#include <stdint.h>  // save memory address as int
 
 #include <pybind11/stl.h>
 #include <pybind11/stl_bind.h>
@@ -230,11 +231,14 @@ namespace Gambit
         void addEntry(str key, double value) {input_dict[key.c_str()]=value;};
         void addEntry(str key, int    value) {input_dict[key.c_str()]=value;};
         void addEntry(str key, str    value) {input_dict[key.c_str()]=value.c_str();};
-        // TODO needs to be changed once CLASS patch is done
         void addEntry(str key, std::vector<double> values) 
         { 
-            pybind11::list entry = pybind11::cast(values);
-            input_dict[key.c_str()] = entry; 
+            // get pointers to arrays holding the information that needs
+            // to be passed on to class, convert to uintptr_t (type large enough
+            // to store memory address of the used system) and pass to class
+            uintptr_t addr;
+            addr = reinterpret_cast<uintptr_t>(&values[0]);
+            input_dict[key.c_str()] = addr; 
         };
 
         bool hasKey(str key){return input_dict.contains(key.c_str());};

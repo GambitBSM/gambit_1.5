@@ -25,25 +25,25 @@ Parameters:
     tau_reio:
       fixed_value: 7.25805e-02
 
-  Inflation_1quar:
+  #Inflation_1quar:
+  #  N_pivot: 40
+  #    #prior_type: flat
+  #    #range: [40.0,70.0]
+  #  lambda: -9.9
+  #    #prior_type: flat
+  #    #range: [-9.8,-9.10]
+  #  phi_init0: 10
+  #   #fixed_value: 10.0
+    
+  Inflation_SR1quad:
     N_pivot: 40
       #prior_type: flat
       #range: [40.0,70.0]
-    lambda: -9.9
+    m2_inflaton: -9.9
       #prior_type: flat
       #range: [-9.8,-9.10]
-    phi_init0: 10
-     #fixed_value: 10.0
-    
-  #Inflation_SR1quad:
-  #  N_pivot:
-  #    prior_type: flat
-  #    range: [40.0,70.0]
-  #  m2_inflaton:
-  #    prior_type: flat
-  #    range: [-9.8,-9.10]
-  #  phi_init0:
-  #    fixed_value: 10.0
+    phi_init0:
+      fixed_value: 10.0
     
   #Inflation_1quar:
   #  N_pivot:
@@ -116,11 +116,11 @@ Rules:
     options:
 # Initialization parameters controlling main characteristics.
       slowroll_infl_end:        1
-      instreheat:               0
+      instreheat:               1
 # Control the output of analytic approximations for comparison.
-      use_deltaN_SR:            0
+      use_deltaN_SR:            1
       use_horiz_cross_approx:   0
-      evaluate_modes:           0
+      evaluate_modes:           1
       get_runningofrunning:     0
 # Parameters to control how the ICs are sampled.
       ic_sampling:              1
@@ -133,13 +133,13 @@ Rules:
       dlnk:                     0.4
 # For calculating the full power spectrum P(k).  Samples in uniform increments in log(k).
       #calc_full_pk: 0
-      steps: 300
+      steps: 100
       kmin: 1e-4
       kmax: 1e6
-      is_not_silent: 1
+      
 
   - capability: set_classy_parameters
-    function: set_classy_parameters_Inflation
+    function: set_classy_parameters_primordial_ps
     
   - capability: get_classy_cosmo_container
     function: init_classy_cosmo_container_with_MPLike

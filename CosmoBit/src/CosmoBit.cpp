@@ -37,7 +37,7 @@
 #include <stdlib.h>     /* malloc, free, rand */
 #include <string>
 #include <valarray>
-#include <stdint.h> // safe memory addresses as int
+#include <stdint.h> // save memory addresses as int
 
 #include <gsl/gsl_blas.h>
 #include <gsl/gsl_errno.h>
@@ -2135,7 +2135,7 @@ namespace Gambit
       // need to calculate scalar & tensor modes for all inflation models
       result.addEntry("modes","s,t");  // if added but not asked for perturbation there will be an error
       result.addEntry("output","tCl");  // this should not be hard coded like this, change! (JR) todo 
-            
+
       // parameters n_s and A_s (as well as further model dependent parameters) 
       // are set accordingly for the different inflation models with the help of the model specific function 
       // each model allowed in this function has a 
@@ -2313,9 +2313,16 @@ namespace Gambit
       // Now need to pass the primordial power spectrum 
       // TODO will not work until CLASS is patched.
       primordial_ps pps = *Dep::primordial_power_spectrum;
-      result.addEntry("k", pps.get_k());
-      result.addEntry("P_k_s", pps.get_P_s());
-      result.addEntry("P_k_t", pps.get_P_t());
+      result.addEntry("P_k_ini type", "gambit_Pk");
+      result.addEntry("k_array", pps.get_k());
+      result.addEntry("pks_array", pps.get_P_s());
+      result.addEntry("pkt_array", pps.get_P_t());
+      result.addEntry("lnk_size" , 100); // don't hard code but somehow make consistent with multimode todo
+
+      for (int it = 0; it < 100; it++)
+      {
+         printf("              sending k_array at %i with %e at address %p\n", it, pps.get_k()[it],&pps.get_k()[it]);
+      }
 
       // Other Class input direct from the YAML file 
       // check if these are already contained in the input dictionary -- if so throw an error
@@ -2365,15 +2372,17 @@ namespace Gambit
       std::cout << " enter " << __PRETTY_FUNCTION__ << std::endl;
       // make sure nothing from previous run is contained
       result.clear();
-      gambit_inflation_observables observs = *Dep::multimode_results;
+      //gambit_inflation_observables observs = *Dep::multimode_results;
+      static primordial_ps prim_ps = *Dep::primordial_power_spectrum;
       static int calc_full_pk = *Dep::multimode_pk_setting;
 
       // full pk is not requested
       if(calc_full_pk==0)
       {
-        result["n_s"] = observs.ns;
-        result["A_s"] = observs.As;
-        result["r"] = observs.r;
+        std::cout << "What you are trying to do atm does not work.. Did not ask Multimode to compute full pk, and now we need to set A_s, n_s and r_s. Need dependence on parameterised power spectrum" << std::endl;
+        //result["n_s"] = observs.ns;
+        //result["A_s"] = observs.As;
+        //result["r"] = observs.r;
       }
       // if full pk is requested set pointers to arrays with the information 
       // to pass to CLASS
@@ -2383,18 +2392,18 @@ namespace Gambit
 
         for (int it = 0; it < 100; it++)
         {
-           printf("              sending k_array at %i with %e at address %p\n", it, observs.k_array[it],&observs.k_array[it]);
+           printf("              sending k_array at %i with %e at address %p\n", it, prim_ps.get_k()[it],&prim_ps.get_k()[it]);
         }
 
         // get pointers to arrays holding the information that needs
         // to be passed on to class
         uintptr_t addr;
 
-        addr = reinterpret_cast<uintptr_t>(&observs.k_array[0]);
+        addr = reinterpret_cast<uintptr_t>(&prim_ps.get_k()[0]);
         result["k_array"] = addr;
         std::cout << "  ---|> memory address of key 'k_array' is "<< addr << std::endl;
 
-        addr = reinterpret_cast<uintptr_t>(&observs.pks_array[0]);
+        addr = reinterpret_cast<uintptr_t>(&prim_ps.get_P_s()[0]);
         result["pks_array"] = addr;
         std::cout << "  ---|> memory address of key 'pks_array' is "<< addr << std::endl;
 
@@ -2402,7 +2411,7 @@ namespace Gambit
 				//result["pks_iso_array"] = addr;
 				//std::cout << "  ---|> memory address of key 'pks_iso_array' is "<< addr << std::endl;
 				
-        addr = reinterpret_cast<uintptr_t>(&observs.pkt_array[0]);
+        addr = reinterpret_cast<uintptr_t>(&prim_ps.get_P_t()[0]);
         result["pkt_array"] = addr;
         std::cout << "  ---|> memory address of key 'pkt_array' is "<< addr << std::endl;
 
@@ -2580,8 +2589,8 @@ namespace Gambit
       std::vector<double> phi0_priors_max = {10.};
       std::vector<double> dphi0_priors_min = {0.};
       std::vector<double> dphi0_priors_max = {0.};
-      double N_pivot_prior_min = 1.;
-      double N_pivot_prior_max = 1.;
+      double N_pivot_prior_min = *Param["N_pivot"];
+      double N_pivot_prior_max = *Param["N_pivot"];
 
       
       // get setting if full pk or only A_s and n_s are supposed to be calculated from capability

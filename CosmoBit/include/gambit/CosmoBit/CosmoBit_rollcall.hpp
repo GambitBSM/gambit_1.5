@@ -912,8 +912,9 @@ START_MODULE
     #define FUNCTION model_dependent_classy_parameters_inflation_multimode
       START_FUNCTION(pybind11::dict)
         ALLOW_MODELS(Inflation_tensor,Inflation_SR1quad,Inflation_1quar,Inflation_1mono32Inf,Inflation_1linearInf,Inflation_1hilltopInf,Inflation_smash,Inflation_1natural)
-        DEPENDENCY(multimode_results,     gambit_inflation_observables)
+        //DEPENDENCY(multimode_results,     gambit_inflation_observables)
         DEPENDENCY(multimode_pk_setting,  int)
+        DEPENDENCY(primordial_power_spectrum,  primordial_ps)
     #undef FUNCTION
 
     #define FUNCTION model_dependent_classy_parameters_smashInf
