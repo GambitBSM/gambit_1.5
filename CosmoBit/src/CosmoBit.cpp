@@ -2133,8 +2133,9 @@ namespace Gambit
       result.addEntry("omega_cdm",    *Param["omega_cdm"]);
 
       // need to calculate scalar & tensor modes for all inflation models
-      result.addEntry("modes","s,t");
-      
+      result.addEntry("modes","s,t");  // if added but not asked for perturbation there will be an error
+      result.addEntry("output","tCl");  // this should not be hard coded like this, change! (JR) todo 
+            
       // parameters n_s and A_s (as well as further model dependent parameters) 
       // are set accordingly for the different inflation models with the help of the model specific function 
       // each model allowed in this function has a 
@@ -2376,9 +2377,14 @@ namespace Gambit
       }
       // if full pk is requested set pointers to arrays with the information 
       // to pass to CLASS
-      else
+      else if(calc_full_pk==1)
       {
         result["P_k_ini type"] = "gambit_Pk";
+
+        for (int it = 0; it < 100; it++)
+        {
+           printf("              sending k_array at %i with %e at address %p\n", it, observs.k_array[it],&observs.k_array[it]);
+        }
 
         // get pointers to arrays holding the information that needs
         // to be passed on to class
@@ -2404,7 +2410,11 @@ namespace Gambit
         // structure initialises the arrays with size 100. 
         // I'd suggest to change these to double pointers and treat it as vectors? then the length is
         // variable and we can call .size() on one of them here
-        result["k_array_size"] = 100;
+        result["lnk_size"] = 100;
+      }
+      else
+      {
+        std::cout << "Unknown setting for calc_full_pk = " << calc_full_pk << ". Set either to 0 or to 1. The full Pk will be calculated by MultiModecode if you choose 1." << std::endl;
       }
     }
 
@@ -2504,7 +2514,7 @@ namespace Gambit
         vparam_rows = 1;
       }
 
-      // MutliMode segFaults if this is empty
+      // MutliMode segFaults if this is empty have to do this properly though (JR) todo
       dphi_init0.push_back(1.);
 
 
@@ -2607,6 +2617,13 @@ namespace Gambit
                                           steps,                      kmin,                         byVal(&phi0_priors_min[0]),
                                           byVal(&phi0_priors_max[0]), byVal(&dphi0_priors_min[0]),  byVal(&dphi0_priors_max[0]), 
                                           N_pivot_prior_min,          N_pivot_prior_max);
+
+    
+    for (int it = 0; it < 100; it++)
+    {
+       printf("              sending k_array at %i with %e at address %p\n", it, observs.k_array[it],&observs.k_array[it]);
+    }
+
 
     }
 
