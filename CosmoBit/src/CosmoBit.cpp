@@ -2312,7 +2312,8 @@ namespace Gambit
 
       // Now need to pass the primordial power spectrum 
       // TODO will not work until CLASS is patched.
-      primordial_ps pps = *Dep::primordial_power_spectrum;
+      static primordial_ps pps{};
+      pps = *Dep::primordial_power_spectrum;
       result.addEntry("P_k_ini type", "gambit_Pk");
       result.addEntry("k_array", pps.get_k());
       result.addEntry("pks_array", pps.get_P_s());
