@@ -198,64 +198,6 @@ START_MODULE
     MODEL_GROUP(dark,(SingletDM))
     ALLOW_MODEL_COMBINATION(cosmo,dark)
     #undef FUNCTION
-
-    // S.B.
-    // #define FUNCTION class_set_parameter_Inflation_tensor
-    // START_FUNCTION(CosmoBit::Class_container)
-    // DEPENDENCY(T_cmb, double)
-    // ALLOW_MODELS(Inflation_tensor)
-    // #undef FUNCTION
-
-    // #define FUNCTION class_set_parameter_Inflation_SR1quad
-    // START_FUNCTION(CosmoBit::Class_container)
-    // ALLOW_MODELS(Inflation_SR1quad)
-    // DEPENDENCY(T_cmb, double)
-    // BACKEND_REQ(multimodecode_gambit_driver,(modecode_tag), void, (gambit_inflation_observables*,int& ,int& ,  int& ,  int& ,int& ,  int& ,  int& ,  int& ,  int& ,int& ,double& ,int& ,  int& ,double& ,int& ,double*,double*,  int& ,  int& ,double*,double*,double*,double& ,double& ,double& ,  int& ,int& ,double& ,double*,double*,double*,double*,double& ,double&))
-    // #undef FUNCTION
-
-    // #define FUNCTION class_set_parameter_Inflation_1quar
-    // START_FUNCTION(CosmoBit::Class_container)
-    // ALLOW_MODELS(Inflation_1quar)
-    // DEPENDENCY(T_cmb, double)
-    // BACKEND_REQ(multimodecode_gambit_driver,(modecode_tag), void, (gambit_inflation_observables*,int& ,int& ,  int& ,  int& ,int& ,  int& ,  int& ,  int& ,  int& ,int& ,double& ,int& ,  int& ,double& ,int& ,double*,double*,  int& ,  int& ,double*,double*,double*,double& ,double& ,double& ,  int& ,int& ,double& ,double*,double*,double*,double*,double& ,double&))
-    // #undef FUNCTION
-
-    // #define FUNCTION class_set_parameter_Inflation_1mono32Inf
-    // START_FUNCTION(CosmoBit::Class_container)
-    // ALLOW_MODELS(Inflation_1mono32Inf)
-    // DEPENDENCY(T_cmb, double)
-    // BACKEND_REQ(multimodecode_gambit_driver,(modecode_tag), void, (gambit_inflation_observables*,int& ,int& ,  int& ,  int& ,int& ,  int& ,  int& ,  int& ,  int& ,int& ,double& ,int& ,  int& ,double& ,int& ,double*,double*,  int& ,  int& ,double*,double*,double*,double& ,double& ,double& ,  int& ,int& ,double& ,double*,double*,double*,double*,double& ,double&))
-    // #undef FUNCTION
-
-    // #define FUNCTION class_set_parameter_Inflation_1linearInf
-    // START_FUNCTION(CosmoBit::Class_container)
-    // ALLOW_MODELS(Inflation_1linearInf)
-    // DEPENDENCY(T_cmb, double)
-    // BACKEND_REQ(multimodecode_gambit_driver,(modecode_tag), void, (gambit_inflation_observables*,int& ,int& ,  int& ,  int& ,int& ,  int& ,  int& ,  int& ,  int& ,int& ,double& ,int& ,  int& ,double& ,int& ,double*,double*,  int& ,  int& ,double*,double*,double*,double& ,double& ,double& ,  int& ,int& ,double& ,double*,double*,double*,double*,double& ,double&))
-    // #undef FUNCTION
-
-    // #define FUNCTION class_set_parameter_Inflation_1natural
-    // START_FUNCTION(CosmoBit::Class_container)
-    // ALLOW_MODELS(Inflation_1natural)
-    // DEPENDENCY(T_cmb, double)
-    // BACKEND_REQ(multimodecode_gambit_driver,(modecode_tag), void, (gambit_inflation_observables*,int& ,int& ,  int& ,  int& ,int& ,  int& ,  int& ,  int& ,  int& ,int& ,double& ,int& ,  int& ,double& ,int& ,double*,double*,  int& ,  int& ,double*,double*,double*,double& ,double& ,double& ,  int& ,int& ,double& ,double*,double*,double*,double*,double& ,double&))
-    // #undef FUNCTION
-
-
-    // #define FUNCTION class_set_parameter_Inflation_1hilltopInf
-    // START_FUNCTION(CosmoBit::Class_container)
-    // ALLOW_MODELS(Inflation_1hilltopInf)
-    // DEPENDENCY(T_cmb, double)
-    // BACKEND_REQ(multimodecode_gambit_driver,(modecode_tag), void, (gambit_inflation_observables*,int& ,int& ,  int& ,  int& ,int& ,  int& ,  int& ,  int& ,  int& ,int& ,double& ,int& ,  int& ,double& ,int& ,double*,double*,  int& ,  int& ,double*,double*,double*,double& ,double& ,double& ,  int& ,int& ,double& ,double*,double*,double*,double*,double& ,double&))
-    // #undef FUNCTION
-
-
-    // #define FUNCTION class_set_parameter_Inflation_smash
-    // START_FUNCTION(CosmoBit::Class_container)
-    // ALLOW_MODELS(Inflation_smash)
-    // DEPENDENCY(T_cmb, double)
-    // BACKEND_REQ(multimodecode_gambit_driver,(modecode_tag), void, (gambit_inflation_observables*,int& ,int& ,  int& ,  int& ,int& ,  int& ,  int& ,  int& ,  int& ,int& ,double& ,int& ,  int& ,double& ,int& ,double*,double*,  int& ,  int& ,double*,double*,double*,double& ,double& ,double& ,  int& ,int& ,double& ,double*,double*,double*,double*,double& ,double&))
-    // #undef FUNCTION
   #undef CAPABILITY
 
   #define CAPABILITY Cl_TT
@@ -847,26 +789,6 @@ START_MODULE
       //MODEL_CONDITIONAL_DEPENDENCY(energy_injection_efficiency, DarkAges::fz_table, DecayingDM_general)
      #undef FUNCTION
     
-     // .. different inflation models; takes care of different input for different models through the 
-     // conditional model dependencies on 'model_dependent_classy_parameters'  
-     #define FUNCTION set_classy_parameters_Inflation
-      START_FUNCTION(CosmoBit::ClassyInput)
-         /// only allow a combination of LCDM_no_primordial and and Inflation model
-         /// at least this is how it is supposed to be but it does not work 
-         /// getting a runtime error 'GAMBIT has exited with fatal exception: map::at' when trying to 
-         /// access first model parameter (H0) in this case  (JR) -> ugly temp fix 
-         MODEL_GROUP(Inflation,(Inflation_tensor,Inflation_SR1quad,Inflation_1quar,Inflation_1mono32Inf,Inflation_1linearInf,Inflation_1hilltopInf,Inflation_smash,Inflation_1natural))
-         MODEL_GROUP(cosmo,(LCDM_no_primordial))
-         ALLOW_MODEL_COMBINATION(Inflation,cosmo)
-         ALLOW_MODEL_DEPENDENCE(LCDM_no_primordial)         
-         DEPENDENCY(T_cmb,             double)
-         DEPENDENCY(T_ncdm,            double)
-         DEPENDENCY(class_Nur,         double)
-         DEPENDENCY(NuMasses_SM,       map_str_dbl)
-         DEPENDENCY(Helium_abundance,  std::vector<double>)
-         DEPENDENCY(model_dependent_classy_parameters, pybind11::dict)
-     #undef FUNCTION
-
      // H0, tau_reio, Omega_m, Omega_b plus an external primordial power spectrum
      #define FUNCTION set_classy_parameters_primordial_ps
       START_FUNCTION(CosmoBit::ClassyInput)
@@ -903,25 +825,6 @@ START_MODULE
       DEPENDENCY(DM_fraction,                 double)
       DEPENDENCY(energy_injection_efficiency, DarkAges::fz_table)
      #undef FUNCTION
-
-    #define FUNCTION model_dependent_classy_parameters_Inflation_tensor
-      START_FUNCTION(pybind11::dict)
-        ALLOW_MODELS(Inflation_tensor)
-    #undef FUNCTION
-  
-    #define FUNCTION model_dependent_classy_parameters_inflation_multimode
-      START_FUNCTION(pybind11::dict)
-        ALLOW_MODELS(Inflation_tensor,Inflation_SR1quad,Inflation_1quar,Inflation_1mono32Inf,Inflation_1linearInf,Inflation_1hilltopInf,Inflation_smash,Inflation_1natural)
-        //DEPENDENCY(multimode_results,     gambit_inflation_observables)
-        DEPENDENCY(multimode_pk_setting,  int)
-        DEPENDENCY(primordial_power_spectrum,  primordial_ps)
-    #undef FUNCTION
-
-    #define FUNCTION model_dependent_classy_parameters_smashInf
-      START_FUNCTION(pybind11::dict)
-        ALLOW_MODELS(Inflation_smash)
-    #undef FUNCTION
-
   #undef CAPABILITY
 
   /* MultiModeCode and power spectra */
@@ -950,6 +853,11 @@ START_MODULE
       START_FUNCTION(parametrised_ps)
       ALLOW_MODELS(LCDM)
     #undef FUNCTION
+    
+    #define FUNCTION get_parametrised_ps_SMASH
+      START_FUNCTION(parametrised_ps)
+      ALLOW_MODELS(Inflation_smash)
+    #undef FUNCTION
 
   #undef CAPABILITY 
 
@@ -967,6 +875,13 @@ START_MODULE
     #define FUNCTION get_LCDM_primordial_ps
     START_FUNCTION(primordial_ps)
     ALLOW_MODELS(LCDM)
+    #undef FUNCTION
+    */
+
+    /*
+    #define FUNCTION get_SMASH_primordial_ps
+    START_FUNCTION(primordial_ps)
+    ALLOW_MODELS(Inflation_smash)
     #undef FUNCTION
     */
 
