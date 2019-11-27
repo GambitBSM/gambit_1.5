@@ -2304,6 +2304,9 @@ namespace Gambit
       }
       result.addEntry("N_ur",*Dep::class_Nur); // Number of ultra relativistic species
 
+      std::vector<double> Helium_abundance = *Dep::Helium_abundance;
+      result.addEntry("YHe", Helium_abundance.at(0)); // .at(0): mean, .at(1): uncertainty
+
       result.addEntry("H0",           *Param["H0"]);
       result.addEntry("T_cmb",        *Dep::T_cmb);
       result.addEntry("omega_b",      *Param["omega_b"]);
@@ -2314,15 +2317,29 @@ namespace Gambit
       // TODO will not work until CLASS is patched.
       static primordial_ps pps{};
       pps = *Dep::primordial_power_spectrum;
-      result.addEntry("P_k_ini type", "gambit_Pk");
+      result.addEntry("write primordial", "y");
+      result.addEntry("output", "tCl");
+      result.addEntry("modes", "t,s");
+
+      result.addEntry("P_k_ini type", "pointer_to_Pk");
       result.addEntry("k_array", pps.get_k());
       result.addEntry("pks_array", pps.get_P_s());
       result.addEntry("pkt_array", pps.get_P_t());
       result.addEntry("lnk_size" , 100); // don't hard code but somehow make consistent with multimode todo
 
-      for (int it = 0; it < 100; it++)
+      //for (int it = 0; it < 100; it++)
+      //{
+      //   printf("              sending k_array at %i with %e at address %p\n", it, pps.get_k()[it],&pps.get_k()[it]);
+      //}
+      //
+      //for (int it = 0; it < 10; it++)
+      //{
+      //   printf("              sending pks_array at %i with %e at address %p\n", it, pps.get_P_s()[it],&pps.get_P_s()[it]);
+      //}
+      
+      for (int it = 0; it < 10; it++)
       {
-         printf("              sending k_array at %i with %e at address %p\n", it, pps.get_k()[it],&pps.get_k()[it]);
+         printf("              sending pkt_array at %i with %e at address %p\n", it, pps.get_P_t()[it],&pps.get_P_t()[it]);
       }
 
       // Other Class input direct from the YAML file 
@@ -2629,9 +2646,10 @@ namespace Gambit
                                           N_pivot_prior_min,          N_pivot_prior_max);
 
     
-    for (int it = 0; it < 100; it++)
+    for (int it = 0; it < 10; it++)
     {
-       printf("              sending k_array at %i with %e at address %p\n", it, observs.k_array[it],&observs.k_array[it]);
+       //printf("              sending k_array at %i with %e at address %p\n", it, observs.pks_array[it],&observs.pks_array[it]);
+       printf("              sending pkt_array at %i with %e at address %p\n", it, observs.pkt_array[it],&observs.pkt_array[it]);
     }
 
 

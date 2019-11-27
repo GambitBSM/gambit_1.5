@@ -181,6 +181,14 @@ BE_NAMESPACE
     double Neff = cosmo.attr("Neff")().cast<double>();
     return Neff;
   }
+  
+  // print primordial power spectrum for consistency check
+  void print_pps()
+  {
+    
+    std::cout<< "\n\n  --------   Inflation consistency check ------------\n" << "primordial spectrum from classy: "<< std::string(pybind11::str(cosmo.attr("get_primordial")())) << std::endl;
+
+  }
 
 }
 END_BE_NAMESPACE
@@ -246,5 +254,6 @@ BE_INI_FUNCTION
     }
   }
   logger() << LogTags::info << "[classy_2.6.3] \"cosmo.compute\" was successful" << EOM;
+  print_pps();
 }
 END_BE_INI_FUNCTION
