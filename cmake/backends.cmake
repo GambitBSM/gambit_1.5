@@ -1354,7 +1354,7 @@ if(NOT ditched_${name}_${ver})
 endif()
 
 #MultiModeCode
-set(name "MultiModeCode")
+set(name "multimodecode")
 set(ver "2.0.0")
 set(lib "libmodecode")
 set(dl "http://modecode.org/wp-content/uploads/2014/09/MultiModeCode.2.0.0.tar.gz")
