@@ -230,7 +230,7 @@
 +       
 +       ppm->lnpk[ppt->index_md_scalars][index_k] = log(ppm->ptr_pks_array[index_k]);
 +       if (ppt->has_tensors == _TRUE_)
-+         ppm->lnpk[ppt->index_md_tensors][index_k] = log(ppm->ptr_pks_array[index_k]);
++         ppm->lnpk[ppt->index_md_tensors][index_k] = log(ppm->ptr_pkt_array[index_k]);
 +    }
 +
 +    /** - Tell CLASS that there are scalar (and tensor) modes */
