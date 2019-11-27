@@ -118,7 +118,7 @@ Rules:
       slowroll_infl_end:        1
       instreheat:               1
 # Control the output of analytic approximations for comparison.
-      use_deltaN_SR:            1
+      use_deltaN_SR:            0  # => selim said to better keep at 0? should we fix it? investigate..
       use_horiz_cross_approx:   0
       evaluate_modes:           1
       get_runningofrunning:     0
@@ -140,6 +140,11 @@ Rules:
 
   - capability: set_classy_parameters
     function: set_classy_parameters_primordial_ps
+    options:
+      classy_dict: 
+        output: tCl  # heads-up: if you try to run class with passing the pps but do not ask for any output that requires 
+                      # perturbations to be computed (only BG quantities & likelihoods) you will get an error saying that
+                      # class never read the option "modes" : "s,t"  -- not sure how to deal with that?
     
   - capability: get_classy_cosmo_container
     function: init_classy_cosmo_container_with_MPLike

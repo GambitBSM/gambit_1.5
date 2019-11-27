@@ -58,23 +58,23 @@
        ppm->primordial_spec_type = external_Pk;
        flag2=_TRUE_;
      }
-+    if (strcmp(string1,"gambit_Pk") == 0) {
-+      ppm->primordial_spec_type = gambit_Pk;
++    if (strcmp(string1,"pointer_to_Pk") == 0) {
++      ppm->primordial_spec_type = pointer_to_Pk;
 +      flag2=_TRUE_;
 +    }
      class_test(flag2==_FALSE_,
                 errmsg,
 -               "could not identify primordial spectrum type, check that it is one of 'analytic_pk', 'two_scales', 'inflation_V', 'inflation_H', 'external_Pk'...");
-+               "could not identify primordial spectrum type, check that it is one of 'analytic_pk', 'two_scales', 'inflation_V', 'inflation_H', 'external_Pk', 'gambit_Pk'...");
++               "could not identify primordial spectrum type, check that it is one of 'analytic_pk', 'two_scales', 'inflation_V', 'inflation_H', 'external_Pk', 'pointer_to_Pk'...");
    }
  
    class_read_double("k_pivot",ppm->k_pivot);
-@@ -2046,6 +2051,95 @@
+@@ -2046,6 +2051,70 @@
      class_read_double("custom9",ppm->custom9);
      class_read_double("custom10",ppm->custom10);
    }
 +  
-+  else if (ppm->primordial_spec_type == gambit_Pk) {
++  else if (ppm->primordial_spec_type == pointer_to_Pk) {
 +    
 +    // initialise flags & chars here -- flag1-flag3 already defined, patch might be easier to maintain if
 +    // these definitions happen here within the patched part
@@ -88,38 +88,38 @@
 +             errmsg);
 +
 +
-+    // read pointers of other arrays that need to be passed. allocation and filling will 
++    // 2) read pointers of other arrays that need to be passed. allocation and filling will 
 +    // be done later in primordial.c in function => 
 +    class_call(parser_read_string(pfc,"k_array",&addr,&flag4,errmsg),
 +             errmsg,
 +             errmsg);
 +
-+    // 2) Convert string to uintptr_t and then back to memory address;
++    // 3) Convert string to uintptr_t and then back to memory address;
 +    //    initialise a double pointer pointing to it
 +    sscanf(addr, "%lu", &ul);
 +    double* ptr_k_array = (double*) ul;
 +
-+    // 3) allocate memory for lnk_array managed by CLASS
++    // 4) allocate memory for lnk_array managed by CLASS, routine that does that (and step 5)) in 
++    // a normal class run () is by passed in primordial.c
 +    class_alloc(ppm->lnk   , ppm->lnk_size*sizeof(double),ppm->error_message);
 +
-+    // 4) fill lnk_array with values of array that the pointer ptr_k_array is pointing to
++    // 5) fill lnk_array with values of array that the pointer ptr_k_array is pointing to
 +    for (int index_k=0; index_k<ppm->lnk_size; index_k++){
-+      ppm->lnk[index_k] = log(ptr_k_array[index_k]); // (JR) do we have the right log here?? 
++      ppm->lnk[index_k] = log(ptr_k_array[index_k]); 
 +    }
-+
 +
 +    // read pointers of other arrays that need to be passed. allocation and filling will 
 +    // be done later in primordial.c in function => 
-+    class_call(parser_read_string(pfc,"pks_array",&addr,&flag5,errmsg),
-+             errmsg,
-+             errmsg);
-+    sscanf(addr, "%lu", &ul);
-+    // added these pointers to primordial structure so we can 
++    // added pointers ppm->ptr_pks_array and ppm->ptr_pkt_array to primordial structure so we can 
 +    // re-use the primordial_indices function to allocate memory for the arrays
 +    // and don't have to change & by-pass too many parts of the code. 
 +    // However, these pointers may NOT be deleted by CLASS's internal memory management 
 +    // since the deletion is taken care of in gambit => there won't be a free() statement for these
 +    // this is on purpose! 
++    class_call(parser_read_string(pfc,"pks_array",&addr,&flag5,errmsg),
++             errmsg,
++             errmsg);
++    sscanf(addr, "%lu", &ul);
 +    ppm->ptr_pks_array = (double*) ul;
 +
 +    class_call(parser_read_string(pfc,"pkt_array",&addr,&flag6,errmsg),
@@ -128,39 +128,14 @@
 +    sscanf(addr, "%lu", &ul);
 +    ppm->ptr_pkt_array = (double*) ul;
 +
-+    // the memory allocation for these arrays is done in primordial.c in the function
++    // Note: the memory allocation for these arrays is done in primordial.c in the function
 +    // primordial_indices. To not reproduce code unnecessarily we use this as well 
 +    // and fill the arrays after that in primordial.c in the function 
-+    // 
 +
 +    // Check that all values needed for the calculation have been passed. If not throw error
 +    class_test(((flag0 == _FALSE_) || (flag4 == _FALSE_) || (flag5 == _FALSE_) || (flag6 == _FALSE_)),
 +               errmsg,
-+               "You set the parameter 'P_k_ini type' to gambit_Pk, this means you also have to specify the input values for \n- k_array_size (int) \n- k_array (string w. mem address to dbl*)\n- pks_array (string w. mem address to dbl*)\n- pkt_array (string w. mem address to dbl*)\n Check that all of them are passed.");
-+
-+    // just checking if that worked ..
-+    printf("     CLASS internal \n\n\n");          
-+    for (int it = 0; it < ppm->lnk_size; it++)
-+    {
-+       printf("              passed k_array at %i with %e at address %p\n", it, ptr_k_array[it],&ptr_k_array[it]);
-+       printf("              received array at %i with %e \n", it, ppm->lnk[it]);
-+    }
-+
-+    
-+    // 3) allocate new space
-+    //    (since this is the begining of a run and we clean all structures before each new point 
-+    //    the pointers 'pth->annihil_coef_xe'... are not pointing to anything at the moment
-+    //    so we can be sure we want have a 
-+
-+
-+    //all done in primordial_indices. just need to make sure ppt->md_size is set correctly. 
-+    //class_alloc(ppm->lnk   , ppm->lnk_size*sizeof(double),ppm->error_message);
-+    //class_alloc(ppm->lnkpk , ppm->lnkpk_size*sizeof(double),ppm->error_message);
-+    //class_alloc(ppm->ddlnpk  , ppm->ddlnpk_size*sizeof(double),ppm->error_message);
-+    //class_alloc(ppm->ic_size , ppm->ic_size_size*sizeof(int),ppm->error_message);
-+    //class_alloc(ppm->ic_ic_size, ppm->ic_ic_size_size*sizeof(double),ppm->error_message);
-+    //class_alloc(ppm->is_non_zero , ppm->is_non_zero_size*sizeof(double),ppm->error_message);
-+
++               "You set the parameter 'P_k_ini type' to pointer_to_Pk, this means you also have to specify the input values for \n- k_array_size (int) \n- k_array (string w. mem address to dbl*)\n- pks_array (string w. mem address to dbl*)\n- pkt_array (string w. mem address to dbl*)\n Check that all of them are passed.");
 +  }
  
    /* Tests moved from primordial module: */
@@ -171,9 +146,9 @@
               ppr->k_per_decade_primordial);
  
    /** - allocate and fill values of \f$ \ln{k}\f$'s */
-+  // SH: skip if the power spectrum is filled by GAMBIT
-+  // JR: That is probably fine to skip. I would not sky the allocation though
-+  if ( ppm->primordial_spec_type != gambit_Pk) {
++  /// (JR): The array with the values of lnk is already passed in input.c if the 'pointer_to_Pk' 
++  /// input type is selected
++  if ( ppm->primordial_spec_type != pointer_to_Pk) {
 +
 +    // This routine allocates the space for ppm->lnk, fills it and sets the size through 
 +    // ppm->lnk_size. In the first patch I will do this when reading in the pointer to the 
@@ -199,7 +174,7 @@
  
    /** - define indices and allocate tables in primordial structure */
 -
-+  // JR: can use this for the gambit_Pk as long as ppm->lnk_size and ppt->md_size are set correctly! 
++  // JR: can use this for the pointer_to_Pk as long as ppm->lnk_size and ppt->md_size are set correctly! 
 +  // ppm->lnk_size is done in input.c atm, ppt->md_size is taken care of my perturbations
    class_call(primordial_indices(ppt,
                                  ppm),
@@ -216,7 +191,7 @@
  
 +  /** - fill arrays with values of the arrays the external pointers ptr_pks_array point to*/
 +
-+  else if (ppm->primordial_spec_type == gambit_Pk) {
++  else if (ppm->primordial_spec_type == pointer_to_Pk) {
 +
 +    // fill ppm->lnpk array with values stored in the external arrays the 
 +    // pointers ppm->ptr_pks_array & ppm->ptr_pks_array (if tensor modes are asked for) 
@@ -248,7 +223,7 @@
        (not used by the rest of the code, but useful to keep in memory for several types of investigation) */
  
 -  if (ppm->primordial_spec_type != analytic_Pk) {
-+  if (ppm->primordial_spec_type != analytic_Pk && ppm->primordial_spec_type != gambit_Pk) {
++  if (ppm->primordial_spec_type != analytic_Pk && ppm->primordial_spec_type != pointer_to_Pk) {
  
      dlnk = log(10.)/ppr->k_per_decade_primordial;
  
@@ -260,7 +235,7 @@
    inflation_V_end,
 -  external_Pk
 +  external_Pk,
-+  gambit_Pk
++  pointer_to_Pk
  };
  
  /** enum defining whether the spectrum routine works with linear or logarithmic input/output */

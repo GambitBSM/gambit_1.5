@@ -2314,11 +2314,9 @@ namespace Gambit
       result.addEntry("omega_cdm",    *Param["omega_cdm"]);
 
       // Now need to pass the primordial power spectrum 
-      // TODO will not work until CLASS is patched.
+      // TODO will not work until CLASS is patched. --- done =) 
       static primordial_ps pps{};
       pps = *Dep::primordial_power_spectrum;
-      result.addEntry("write primordial", "y");
-      result.addEntry("output", "tCl");
       result.addEntry("modes", "t,s");
 
       result.addEntry("P_k_ini type", "pointer_to_Pk");
@@ -2326,21 +2324,6 @@ namespace Gambit
       result.addEntry("pks_array", pps.get_P_s());
       result.addEntry("pkt_array", pps.get_P_t());
       result.addEntry("lnk_size" , 100); // don't hard code but somehow make consistent with multimode todo
-
-      //for (int it = 0; it < 100; it++)
-      //{
-      //   printf("              sending k_array at %i with %e at address %p\n", it, pps.get_k()[it],&pps.get_k()[it]);
-      //}
-      //
-      //for (int it = 0; it < 10; it++)
-      //{
-      //   printf("              sending pks_array at %i with %e at address %p\n", it, pps.get_P_s()[it],&pps.get_P_s()[it]);
-      //}
-      
-      for (int it = 0; it < 10; it++)
-      {
-         printf("              sending pkt_array at %i with %e at address %p\n", it, pps.get_P_t()[it],&pps.get_P_t()[it]);
-      }
 
       // Other Class input direct from the YAML file 
       // check if these are already contained in the input dictionary -- if so throw an error
@@ -2370,6 +2353,7 @@ namespace Gambit
     }
 
 
+    /// should be redundant 
     void model_dependent_classy_parameters_Inflation_tensor(pybind11::dict &result)
     { 
       using namespace Pipes::model_dependent_classy_parameters_Inflation_tensor;
@@ -2383,6 +2367,7 @@ namespace Gambit
       result["r"] = *Param["r_tensor"];
     }
     
+    /// should be redundant 
     void model_dependent_classy_parameters_inflation_multimode(pybind11::dict &result)
     { 
       using namespace Pipes::model_dependent_classy_parameters_inflation_multimode;
@@ -2644,14 +2629,6 @@ namespace Gambit
                                           steps,                      kmin,                         byVal(&phi0_priors_min[0]),
                                           byVal(&phi0_priors_max[0]), byVal(&dphi0_priors_min[0]),  byVal(&dphi0_priors_max[0]), 
                                           N_pivot_prior_min,          N_pivot_prior_max);
-
-    
-    for (int it = 0; it < 10; it++)
-    {
-       //printf("              sending k_array at %i with %e at address %p\n", it, observs.pks_array[it],&observs.pks_array[it]);
-       printf("              sending pkt_array at %i with %e at address %p\n", it, observs.pkt_array[it],&observs.pkt_array[it]);
-    }
-
 
     }
 

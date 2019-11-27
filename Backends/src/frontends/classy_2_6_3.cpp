@@ -169,7 +169,7 @@ BE_NAMESPACE
   // returns sigma8 at z = 0
   double class_get_sigma8()
   {
-    // in CosmoBit.cpp test if ClassInput contains mPk -> otherwise SegFault when trying to compute sigma9
+    // in CosmoBit.cpp test if ClassInput contains mPk -> otherwise SegFault when trying to compute sigma8
     double sigma8 = cosmo.attr("sigma8")().cast<double>();
     return sigma8;
   }
@@ -177,17 +177,15 @@ BE_NAMESPACE
   // returns Neff
   double class_get_Neff()
   {
-    // in CosmoBit.cpp test if ClassInput contains mPk -> otherwise SegFault when trying to compute sigma9
+    // in CosmoBit.cpp test if ClassInput contains mPk -> otherwise SegFault when trying to compute sigma8
     double Neff = cosmo.attr("Neff")().cast<double>();
     return Neff;
   }
   
-  // print primordial power spectrum for consistency check
+  // print primordial power spectrum for consistency check & debug purposes
   void print_pps()
   {
-    
-    std::cout<< "\n\n  --------   Inflation consistency check ------------\n" << "primordial spectrum from classy: "<< std::string(pybind11::str(cosmo.attr("get_primordial")())) << std::endl;
-
+    std::cout<< "Primordial spectrum from classy: "<< std::string(pybind11::str(cosmo.attr("get_primordial")())) << std::endl;
   }
 
 }
@@ -254,6 +252,6 @@ BE_INI_FUNCTION
     }
   }
   logger() << LogTags::info << "[classy_2.6.3] \"cosmo.compute\" was successful" << EOM;
-  print_pps();
+
 }
 END_BE_INI_FUNCTION
