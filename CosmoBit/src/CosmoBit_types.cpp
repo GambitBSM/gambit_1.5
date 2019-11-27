@@ -351,10 +351,13 @@ namespace Gambit
         pybind11::str key = pybind11::str(item.first);
         pybind11::str value = pybind11::str(item.second);
 
-        log_msg << std::string(key) << " = " << std::string(value) << " \n"; // uncomment if you want class input to be printed in terminal before class call 
+        log_msg << std::string(key) << " = " << std::string(value) << " \n";
       }
       return log_msg.str();
     }
+
+    primordial_ps::primordial_ps(){};
+    parametrised_ps::parametrised_ps(){};
 
   }
 }
