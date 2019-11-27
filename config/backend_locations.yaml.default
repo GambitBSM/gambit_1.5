@@ -116,7 +116,7 @@ plc:
   3.0:         ./Backends/installed/plc/3.0/lib/libclik.so
 
 MultiModeCode:
-  2.0.0:       ./Backends/installed/MultiModeCode/2.0.0/lib/libmodecode.so
+  2.0.0:       ./Backends/installed/multimodecode/2.0.0/lib/libmodecode.so
 
 # Example/debug backends
 
