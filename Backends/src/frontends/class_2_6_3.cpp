@@ -156,7 +156,7 @@ BE_NAMESPACE
       pm.lnk = (double *)malloc(pm.lnk_size*sizeof(double));
       // std::cout << "DEBUG: we pass pm.lnk \n" << std::endl;
 
-      // || all done in primordial_indices (not skiiped anymore )
+      // || all done in primordial_indices (not skipped anymore )
       // \/
       pm.md_size = pt.md_size;
       pm.lnpk = (double **)malloc(pt.md_size*sizeof(double));
@@ -175,9 +175,6 @@ BE_NAMESPACE
       	pm.ddlnpk[index_md] = (double *)malloc(pm.lnk_size*pm.ic_ic_size[index_md]*sizeof(double));
       	pm.is_non_zero[index_md] = (short *)malloc(pm.lnk_size*pm.ic_ic_size[index_md]*sizeof(short));
       }
-
-      // /\
-      // || all done in primordial_indices (not skiiped anymore )
 
       /** - Store values */
       for (int index_k=0; index_k<pm.lnk_size; index_k++)
@@ -378,7 +375,7 @@ BE_NAMESPACE
     //pvecback must be allocated
     pvecback=(double *)malloc(ba.bg_size*sizeof(double));
 
-    for(int ii = 0; ii < z_array.size(); ii++)
+    for(unsigned int ii = 0; ii < z_array.size(); ii++)
     {
       //transform redshift in conformal time
       background_tau_of_z(&ba,z_array[ii],&tau);

@@ -134,7 +134,7 @@ namespace Gambit
       return ns;
     }
 
-    double r_SR(double eps,double eta)
+    double r_SR(double eps)
     {
       double r = 0.0;
 
@@ -315,7 +315,7 @@ namespace Gambit
       int npts = z.size();
       double ftot[npts];
       double red[npts];
-      for (unsigned int i = 0; i < npts; i++)
+      for (int i = 0; i < npts; i++)
       {
 	       ftot[i] = fh.at(i)+fly.at(i)+fhi.at(i)+fhei.at(i)+flo.at(i);
 	       red[i] = z.at(i);
@@ -517,7 +517,7 @@ namespace Gambit
     {
       using namespace Pipes::class_set_parameter_LCDM_family;
 
-      int l_max=cosmo.lmax,ii=1;
+      int l_max=cosmo.lmax;
 
       cosmo.input.clear();
 
@@ -902,10 +902,12 @@ namespace Gambit
 
       static bool first_run = true;
 
+
       // do some consistency check for inputs passed to multimode before the first run
       if(first_run)
       {
-        if (num_inflaton*vparam_rows != vparams.size())
+        int size = vparams.size();
+        if (num_inflaton*vparam_rows != size)
         {
           std::ostringstream err;
           err << "Error in MultiModecode settings: the number of free parameters in a inflation model";
@@ -979,7 +981,8 @@ namespace Gambit
       // The parameters below are only used by multimode if the full Pk is requested. 
       int steps = runOptions->getValue<int> ("steps"); 
       double kmin = runOptions->getValue<double> ("kmin");
-      double kmax = runOptions->getValue<double> ("kmax");
+      // S.B. TODO kmax currently does nothing. Presumably it should, no?
+      //double kmax = runOptions->getValue<double> ("kmax");
 
 
       //-------------------------------------------------------------
@@ -1106,7 +1109,7 @@ namespace Gambit
         int iter = 0, max_iter = 100000;
         const gsl_min_fminimizer_type *T;
         gsl_min_fminimizer *s;
-        double m = tempbw*10.0, m_expected = M_PI; // Correct for.
+        double m = tempbw*10.0; // Correct for.
         double a = 0.0, b = 100.0; // Correct for.
         gsl_function F;
 
@@ -1155,7 +1158,7 @@ namespace Gambit
 
         As_self = As_SR(smash_eps,smash_pot);
         ns_self = ns_SR(smash_eps,smash_eta);
-        r_self  = r_SR(smash_eps,smash_eta);
+        r_self  = r_SR(smash_eps);
 
         //-------------------------------------------------------------
         /* Have calculated the field value at N_pivot
@@ -2681,7 +2684,7 @@ namespace Gambit
         }
 
         // Check if the entries in the correlation matrix are reasonable
-        for (int ie=0; ie<nelements; ie++)
+        for (unsigned int ie=0; ie<nelements; ie++)
         {
           //Check if the diagonal entries are equal to 1.
           if (std::abs(tmp_corr.at(ie).at(ie) - 1.) > 1e-6)
@@ -2690,7 +2693,7 @@ namespace Gambit
             err << "Not all diagonal elements of the correlation matirx are 1.";
             CosmoBit_error().raise(LOCAL_INFO, err.str());
           }
-          for (int je=0; je<=ie; je++)
+          for (unsigned int je=0; je<=ie; je++)
           {
             //Check for symmetry
             if (std::abs(tmp_corr.at(ie).at(je) - tmp_corr.at(je).at(ie)) > 1e-6)
@@ -3666,7 +3669,7 @@ namespace Gambit
 
       static const CosmoBit::MPLike_data_container mplike_cont(data, likelihoods);
 
-      // pass current values of nuisance parameters to data.mcmc_parameters dictionary for likelihood computation in MP
+      // Pass current values of nuisance parameters to data.mcmc_parameters dictionary for likelihood computation in MP
       mplike_cont.data.attr("mcmc_parameters") = *Dep::parameter_dict_for_MPLike;
 
       // Create instance of classy class Class
