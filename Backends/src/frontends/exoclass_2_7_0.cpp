@@ -405,7 +405,7 @@ BE_NAMESPACE
     //pvecback must be allocated
     pvecback=(double *)malloc(ba.bg_size*sizeof(double));
 
-    for(int ii = 0; ii < z_array.size(); ii++)
+    for(unsigned int ii = 0; ii < z_array.size(); ii++)
     {
       //transform redshift in conformal time
       background_tau_of_z(&ba,z_array[ii],&tau);
