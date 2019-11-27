@@ -1185,34 +1185,6 @@ if(NOT ditched_${name}_${ver})
   set_as_default_version("backend" ${name} ${ver})
 endif()
 
-# class
-set(name "class")
-set(ver "2.6.3")
-set(lib "libclass")
-set(patch "${PROJECT_SOURCE_DIR}/Backends/patches/${name}/${ver}")
-set(dl "https://github.com/lesgourg/class_public/archive/v${ver}.tar.gz")
-set(md5 "e6eb0fd721bb1098e642f5d1970501ce")
-set(dir "${PROJECT_SOURCE_DIR}/Backends/installed/${name}/${ver}")
-check_ditch_status(${name} ${ver} ${dir})
-if(NOT ditched_${name}_${ver})
-  ExternalProject_Add(${name}_${ver}
-    DOWNLOAD_COMMAND ${DL_BACKEND} ${dl} ${md5} ${dir}
-    SOURCE_DIR ${dir}
-    BUILD_IN_SOURCE 1
-    PATCH_COMMAND patch -p1 < ${patch}/${name}_${ver}.diff
-    CONFIGURE_COMMAND ""
-    BUILD_COMMAND ${CMAKE_MAKE_PROGRAM} CC=${CMAKE_C_COMPILER} OMPFLAG= OPTFLAG= CCFLAG=${BACKEND_C_FLAGS} LDFLAG=${BACKEND_C_FLAGS} class
-    COMMAND ${CMAKE_COMMAND} -E make_directory lib
-    COMMAND ${CMAKE_COMMAND} -E echo "${CMAKE_C_COMPILER} ${CMAKE_SHARED_LIBRARY_CREATE_C_FLAGS} ${BACKEND_C_FLAGS} -o lib/${lib}.so build/*.o" > make_so.sh
-    COMMAND chmod u+x make_so.sh
-    COMMAND ./make_so.sh
-    INSTALL_COMMAND ""
-  )
-  add_extra_targets("backend" ${name} ${ver} ${dir} ${dl} clean)
-  set_as_default_version("backend" ${name} ${ver})
-endif()
-
-
 # classy
 set(name "classy")
 set(ver "2.6.3")
@@ -1264,36 +1236,6 @@ if(NOT ditched_${name}_${ver})
   )
   add_extra_targets("backend" ${name} ${ver} ${dir} ${dl} clean)
 endif()
-
-# exoclass
-set(name "exoclass")
-set(ver "2.7.0")
-set(lib "libclass")
-set(patch "${PROJECT_SOURCE_DIR}/Backends/patches/${name}/${ver}")
-set(dl "https://github.com/lesgourg/class_public/archive/067b3868f6501eb68df35554cda5e3981129d48c.tar.gz") # The huge number is the commit ID of ExoCLASS_2.7.0
-set(md5 "6f7d59ac552744fadf47214fde2cbeac")
-set(dir "${PROJECT_SOURCE_DIR}/Backends/installed/${name}/${ver}")
-check_ditch_status(${name} ${ver} ${dir})
-if(NOT ditched_${name}_${ver})
-  ExternalProject_Add(${name}_${ver}
-    DOWNLOAD_COMMAND ${DL_BACKEND} ${dl} ${md5} ${dir}
-    SOURCE_DIR ${dir}
-    BUILD_IN_SOURCE 1
-    PATCH_COMMAND patch -p1 < ${patch}/${name}_${ver}.diff
-    COMMAND patch -p1 < ${patch}/${name}_${ver}_decay_fix.diff
-    CONFIGURE_COMMAND ""
-    BUILD_COMMAND ${CMAKE_MAKE_PROGRAM} CC=${CMAKE_C_COMPILER} OMPFLAG= OPTFLAG= CCFLAG=${BACKEND_C_FLAGS} LDFLAG=${BACKEND_C_FLAGS} class
-    COMMAND ${CMAKE_COMMAND} -E make_directory lib
-    COMMAND ${CMAKE_COMMAND} -E echo "${CMAKE_C_COMPILER} ${CMAKE_SHARED_LIBRARY_CREATE_C_FLAGS} ${BACKEND_C_FLAGS} -o lib/${lib}.so build/*.o" > make_so.sh
-    COMMAND chmod u+x make_so.sh
-    COMMAND ./make_so.sh
-    INSTALL_COMMAND ""
-  )
-  add_extra_targets("backend" ${name} ${ver} ${dir} ${dl} clean)
-  set_as_default_version("backend" ${name} ${ver})
-endif()
-
-
 
 #DarkAges
 set(name "darkages")

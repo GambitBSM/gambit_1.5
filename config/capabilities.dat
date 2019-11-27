@@ -4154,102 +4154,8 @@ multimodecode_gambit_driver_test: |
    will be deleted.
 
 #----------------------------
-#  Class
+#  CLASS / classy
 #----------------------------
-
-class_2_6_1_init: |
-   The main initialisation for Class structures (version 2.6.1).
-
-class_2_6_3_init: |
-   The main initialisation for Class structures (version 2.6.3).
-
-class_background_free: |
-   Free all memory space allocated by background_init.
-
-class_background_initialize: |
-   Initialize the background structure, and in particular the background interpolation table.
-
-class_input_initialize: |
-   Initialize each parameter, first to its default values,
-   and then from what can be interpreted from the values passed
-   in the input 'file_content' structure.
-
-class_lensing_free: |
-   This routine frees all the memory space allocated by lensing_init.
-
-class_lensing_initialize: |
-   This routine initializes the lensing structure (in particular,
-   computes table of lensed anisotropy spectra).
-
-class_nonlinear_free: |
-   This routine frees all the memory space allocated by nonlinear_init.
-
-class_nonlinear_initialize: |
-   First deal with the case where non non-linear corrections requested.
-
-class_output_initialize: |
-   This routine writes the output in files.
-
-class_output_total_cl_at_l: |
-   This routines writes the output in files for anisotropy power spectra Cl.
-
-class_parser_initialize: |
-   Contains purely numerical algorithms.
-
-class_perturb_free: |
-   Free all memory space allocated by perturb_init.
-
-class_perturb_initialize: |
-   Initialize the perturbs structure, and in particular the table of source functions.
-
-class_primordial_free: |
-   This routine frees all the memory space allocated by primordial_init.
-
-class_primordial_initialize: |
-   This routine initializes the primordial structure
-   (in particular, it computes table of primordial spectrum values)
-
-class_spectra_free: |
-   This routine frees all the memory space allocated by spectra_init.
-
-class_spectra_initialize: |
-   This routine initializes the spectra structure
-   (in particular, computes table of anisotropy and Fourier spectra).
-
-class_thermodynamics_free: |
-   Free all memory space allocated by thermodynamics_init.
-
-class_thermodynamics_initialize: |
-   Initialize the thermo structure, and in particular the thermodynamics interpolation table.
-
-class_transfer_free: |
-   This routine frees all the memory space allocated by transfer_init.
-
-class_transfer_initialize: |
-   This routine initializes the transfers structure,
-   (in particular, computes table of transfer functions).
-
-class_get_spectra: |
-   Returns a pointer to the CMB-spectra C_xx[l], where
-   xx = [TT, TE, EE, phiphi, ...].
-
-class_run_internal: |
-   This routine runs CLASS (invokes all xxx_init() in the right order.
-
-class_set_parameter_internal: |
-   This routine initializes the input of CLASS.
-
-class_free_internal: |
-   This routine runs through all xxx_free() of all successfully computated levels of the previuos run of Class.
-
-get_ptr_to_class: |
-   Returns a pointer to the Backend internal instance of CosmoBit::Class_container
-
-class_background_at_tau: |
-    Evaluates all background quantities at a given value of conformal time tau by reading the pre-computed background table and interpolating.
-
-class_background_tau_of_z: |
-    Returns tau(z) by interpolation from pre-computed background table.
 
 class_get_Da: |
     Returns angular diameter distance at given z.
@@ -4268,10 +4174,6 @@ class_get_sigma8: |
 
 class_get_Omega_m: |
     Returns Omega0_m (matter energy density today) computed by class. (Mainly for test purposes, you can use gambit internal capability Omega0_m, Omega0_g..).
-
-class_spectra_sigma: |
-    Get spectra from class needed to calculate sigma8.
-
 
 #----------------------------
 #  DarkAges
@@ -4424,9 +4326,6 @@ inf_1hilltopInf_LCDMt_parameters: |
 
 inf_1naturalInf_LCDMt_parameters: |
     7 parameter cosmology and inflation model with axion motivated natural inflation.
-
-class_set_parameter: |
-   Gathers all input parameters to  run Class.
 
 cosmo_nuisance_params_parameters: |
     Cosmological nuisance parameters (besides the ones entering the Planck likelihoods).

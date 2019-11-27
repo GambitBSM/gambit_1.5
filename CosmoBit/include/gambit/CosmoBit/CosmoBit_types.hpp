@@ -33,7 +33,7 @@
 #ifndef __CosmoBit_types_hpp__
 #define __CosmoBit_types_hpp__
 
-#include "gambit/Backends/backend_types/class.hpp"
+#include "gambit/Utils/util_types.hpp"
 #include "gambit/Backends/backend_types/MontePythonLike.hpp"
 #include <valarray>
 #include <stdint.h>  // save memory address as int
@@ -165,50 +165,6 @@ namespace Gambit
     // Forward declaration of warnings and errors
     error& CosmoBit_error();
     warning& CosmoBit_warning();
-
-    // map (dictionary) for name and value of the inputs for Class
-    class ClassInput
-    {
-      public:
-        //classInput();
-        //~classInput();
-        void addEntry(std::string key,std::string val);
-        void addEntry(std::string key,double val);
-        void addEntry(std::string key,int val);
-        void addEntry(std::string key,std::vector<double> val);
-        void addEntry(std::string key,std::vector<int> val);
-        std::string print_entries_to_logger();
-
-        void clear();
-        std::map<std::string,std::string> get_map();
-
-      private:
-        std::map<std::string,std::string> input_list;
-    };
-    
-    // Container for the structs of Class
-    class Class_container
-    {
-      public:
-        Class_container();
-        //~Class_container();
-
-        ClassInput input;
-
-        int lmax;
-        std::vector<double> Cl_TT;
-        std::vector<double> Cl_TE;
-        std::vector<double> Cl_EE;
-        std::vector<double> Cl_BB;
-        std::vector<double> Cl_PhiPhi;
-
-        std::vector<double> Pk_S; // Primordial Scalar Power Spectrum
-        std::vector<double> Pk_T; // Primordial Tensor Power Spectrum
-        std::vector<double> k_ar; // Corresponding wavenumbers.
-
-        std::string backend_in_use;
-    };
-
 
 /*
     ----------  ClassyInput Methods ---------

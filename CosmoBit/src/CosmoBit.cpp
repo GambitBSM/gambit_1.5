@@ -18,7 +18,7 @@
 ///          (stoecker@physik.rwth-aachen.de)
 ///  \date 2017 Nov
 ///  \date 2018 Jan - May
-///  \date 2019 Jan, Feb, June
+///  \date 2019 Jan, Feb, June, Nov
 ///
 ///  \author Janina Renk
 ///          (janina.renk@fysik.su.se)
@@ -496,7 +496,7 @@ namespace Gambit
           {
             std::ostringstream err;
             err << "You are asking for more than three massive neutrino species.\n";
-            err << "Such a case is not implemented here in CosmoBit. But if you know what you are doing just add the respective case in \'class_set_parameter_LCDM_family\' and you are done.";
+            err << "Such a case is not implemented in CosmoBit. If you want to consider this you can add it to the function 'set_NuMasses_SM' of the capability 'NuMasses_SM'.";
             CosmoBit_error().raise(LOCAL_INFO, err.str());
           }
       }
@@ -509,115 +509,6 @@ namespace Gambit
       map_str_dbl NuMasses = *Dep::NuMasses_SM;
       result = NuMasses["mNu_tot_eV"];
     }
-
-    ///
-    ///   || a bunch of class(y)_set_parameters functions -- delete c interface & the unneccesary ones
-    ///   \/
-    void class_set_parameter_LCDM_family(Class_container& cosmo)
-    {
-      using namespace Pipes::class_set_parameter_LCDM_family;
-
-      int l_max=cosmo.lmax;
-
-      cosmo.input.clear();
-
-      map_str_dbl NuMasses_SM = *Dep::NuMasses_SM;
-      int N_ncdm = (int)NuMasses_SM["N_ncdm"];
-
-      if (N_ncdm > 0.)
-      {
-        cosmo.input.addEntry("N_ncdm",N_ncdm);
-        cosmo.input.addEntry("m_ncdm",m_ncdm_classInput(NuMasses_SM));
-
-        std::vector<double> T_ncdm(N_ncdm,*Dep::T_ncdm);
-        cosmo.input.addEntry("T_ncdm", T_ncdm);
-      }
-      else
-      {
-        cosmo.input.addEntry("T_ncdm", *Dep::T_ncdm);
-      }
-
-      cosmo.input.addEntry("N_ur",*Dep::class_Nur);
-
-      cosmo.input.addEntry("output","tCl pCl lCl mPk");
-      cosmo.input.addEntry("l_max_scalars",l_max);
-      cosmo.input.addEntry("lensing","yes");
-      cosmo.input.addEntry("non linear","halofit");
-      cosmo.input.addEntry("P_k_max_h/Mpc",1);
-
-      cosmo.input.addEntry("T_cmb",*Dep::T_cmb);
-      cosmo.input.addEntry("omega_b",*Param["omega_b"]);
-      cosmo.input.addEntry("omega_cdm",*Param["omega_cdm"]);
-      cosmo.input.addEntry("H0",*Param["H0"]);
-      cosmo.input.addEntry("ln10^{10}A_s",*Param["ln10A_s"]);
-      cosmo.input.addEntry("n_s",*Param["n_s"]);
-      cosmo.input.addEntry("tau_reio",*Param["tau_reio"]);
-
-      if (ModelInUse("DecayingDM_general"))  // TODO: need to test if class or exo_class in use! does not work
-      {
-        cosmo.input.addEntry("energy_deposition_function","GAMBIT");
-        cosmo.input.addEntry("tau_dcdm",*Dep::lifetime);
-        cosmo.input.addEntry("decay_fraction",*Dep::DM_fraction);
-      }
-
-      std::vector<double> Helium_abund = *Dep::Helium_abundance; // .at(0): mean, .at(1): uncertainty
-      cosmo.input.addEntry("YHe",Helium_abund.at(0));
-
-      YAML::Node class_dict;
-      if (runOptions->hasKey("class_dict"))
-      {
-        class_dict = runOptions->getValue<YAML::Node>("class_dict");
-        for (auto it=class_dict.begin(); it != class_dict.end(); it++)
-        {
-          std::string name = it->first.as<std::string>();
-          std::string value = it->second.as<std::string>();
-          cosmo.input.addEntry(name,value);
-        }
-      }
-
-      std::string log_msg = cosmo.input.print_entries_to_logger(); // print all parameters and their values that are passed to class in debug.log
-      logger() << LogTags::debug << log_msg << EOM;
-    }
-
-    void class_set_parameter_LCDM_SingletDM(Class_container& cosmo)
-    {
-      using namespace Pipes::class_set_parameter_LCDM_SingletDM;
-
-      int l_max = cosmo.lmax;
-
-      double sigmav = *Dep::sigmav; // in cm^3 s^-1
-      double mass = *Dep::mwimp; // in GeV
-      double feff = runOptions->getValueOrDef<double>(1.,"f_eff");
-      double annihilation = (1.0/1.78e-21)*(sigmav/mass)*feff; // in m^3 s^-1 kg^-1
-
-      cosmo.input.clear();
-
-      cosmo.input.addEntry("output","tCl pCl lCl");
-      cosmo.input.addEntry("l_max_scalars",l_max);
-      cosmo.input.addEntry("lensing","yes");
-
-      cosmo.input.addEntry("T_cmb",*Dep::T_cmb);
-      cosmo.input.addEntry("omega_b",*Param["omega_b"]);
-      cosmo.input.addEntry("omega_cdm",*Param["omega_cdm"]);
-      cosmo.input.addEntry("H0",*Param["H0"]);
-      cosmo.input.addEntry("ln10^{10}A_s",*Param["ln10A_s"]);
-      cosmo.input.addEntry("n_s",*Param["n_s"]);
-      cosmo.input.addEntry("tau_reio",*Param["tau_reio"]);
-      cosmo.input.addEntry("annihilation",annihilation);
-
-      YAML::Node class_dict;
-      if (runOptions->hasKey("class_dict"))
-      {
-        class_dict = runOptions->getValue<YAML::Node>("class_dict");
-        for (auto it=class_dict.begin(); it != class_dict.end(); it++)
-        {
-          std::string name = it->first.as<std::string>();
-          std::string value = it->second.as<std::string>();
-          cosmo.input.addEntry(name,value);
-        }
-      }
-    }
-
 
     /// Set the LCDM_no_primordial_ps in classy. Depends on a parametrised primordial_ps.
     /// Looks at the parameters used in a run,
@@ -2440,16 +2331,6 @@ namespace Gambit
       logger() << "Baryon to photon ratio (eta) today computed to be " << result << EOM;
     }
 
-    void compute_Sigma8(double &result)
-    {
-      using namespace Pipes::compute_Sigma8;
-
-      double sigma8 = BEreq::class_get_sigma8(0.);
-      double Omega0_m = *Dep::Omega0_m;
-
-      result = sigma8*pow(Omega0_m/0.3, 0.5);
-    }
-
     void compute_Omega0_m(double &result)
     {
       using namespace Pipes::compute_Omega0_m;
@@ -2537,15 +2418,6 @@ namespace Gambit
 
       result =  *Dep::eta0; // in SM the baryon to photon ratio does not change between today an CMB release
       logger() << "Baryon to photon ratio (eta) @CMB computed to be " << result << EOM;
-    }
-*/
-/* Is now superceeded by the MAP_TO_CAPABILITY macro within the model definition.
-    void set_etaBBN(double &result)
-    {
-      using namespace Pipes::set_etaBBN;
-
-      result =  *Param["eta_BBN"]; // in SM the baryon to photon ratio does not change between today an CMB release
-      logger() << "Baryon to photon ratio (eta) @BBN set to be " << result << EOM;
     }
 */
 
@@ -3101,7 +2973,7 @@ namespace Gambit
       static bool read_data = false;
       static int nrow;
 
-      sigma8 = BEreq::class_get_sigma8(0.);
+      sigma8 = BEreq::class_get_sigma8();
       Omega0_m = *Dep::Omega0_m;
 
       if(read_data == false)

@@ -172,34 +172,6 @@ START_MODULE
     #undef FUNCTION
   #undef CAPABILITY
 
-  #define CAPABILITY class_set_parameter
-  START_CAPABILITY
-
-    #define FUNCTION class_set_parameter_LCDM_family
-    START_FUNCTION(CosmoBit::Class_container)
-    DEPENDENCY(Helium_abundance,std::vector<double>)
-    DEPENDENCY(T_cmb, double)
-    DEPENDENCY(T_ncdm, double)
-    DEPENDENCY(class_Nur, double)
-    DEPENDENCY(NuMasses_SM, map_str_dbl )
-    ALLOW_MODELS(LCDM,DecayingDM_general)
-    MODEL_CONDITIONAL_DEPENDENCY(lifetime,double,DecayingDM_general)
-    MODEL_CONDITIONAL_DEPENDENCY(DM_fraction,double,DecayingDM_general)
-    #undef FUNCTION
-
-
-    #define FUNCTION class_set_parameter_LCDM_SingletDM
-    START_FUNCTION(CosmoBit::Class_container)
-    DEPENDENCY(T_cmb, double)
-    DEPENDENCY(mwimp,double)
-    DEPENDENCY(sigmav,double)
-    ALLOW_MODEL_DEPENDENCE(LCDM,SingletDM)
-    MODEL_GROUP(cosmo,(LCDM))
-    MODEL_GROUP(dark,(SingletDM))
-    ALLOW_MODEL_COMBINATION(cosmo,dark)
-    #undef FUNCTION
-  #undef CAPABILITY
-
   #define CAPABILITY Cl_TT
   START_CAPABILITY
     #define FUNCTION class_get_Cl_TT
@@ -437,7 +409,7 @@ START_MODULE
 
     #define FUNCTION get_Omega0_m_classy
       START_FUNCTION(double)
-      BACKEND_REQ(class_get_Omega0_m,(classy),double,())
+      BACKEND_REQ(class_get_Omega0_m,(class_tag),double,())
     #undef FUNCTION
 
   #undef CAPABILITY
@@ -474,12 +446,12 @@ START_MODULE
 
     #define FUNCTION get_Omega0_r_classy
       START_FUNCTION(double)
-      BACKEND_REQ(class_get_Omega0_r,(classy),double,())
+      BACKEND_REQ(class_get_Omega0_r,(class_tag),double,())
     #undef FUNCTION
 
   #undef CAPABILITY
 
-  
+
   #define CAPABILITY Omega0_g
     START_CAPABILITY
 
@@ -503,7 +475,7 @@ START_MODULE
   
     #define FUNCTION get_Omega0_ur_classy  
       START_FUNCTION(double)
-      BACKEND_REQ(class_get_Omega0_ur,(classy),double,())
+      BACKEND_REQ(class_get_Omega0_ur,(class_tag),double,())
     #undef FUNCTION
 
   #undef CAPABILITY
@@ -514,7 +486,7 @@ START_MODULE
 
     #define FUNCTION get_Omega0_ncdm_tot_classy 
       START_FUNCTION(double)
-      BACKEND_REQ(class_get_Omega0_ncdm_tot,(classy),double,())
+      BACKEND_REQ(class_get_Omega0_ncdm_tot,(class_tag),double,())
     #undef FUNCTION
 
   #undef CAPABILITY
@@ -547,7 +519,7 @@ START_MODULE
 
     #define FUNCTION get_rs_drag_classy
       START_FUNCTION(double)
-      BACKEND_REQ(class_get_rs,(classy),double,())
+      BACKEND_REQ(class_get_rs,(class_tag),double,())
     #undef FUNCTION
 
   #undef CAPABILITY
@@ -558,7 +530,7 @@ START_MODULE
 
     #define FUNCTION get_Neff_classy
       START_FUNCTION(double)
-      BACKEND_REQ(class_get_Neff,(classy),double,())
+      BACKEND_REQ(class_get_Neff,(class_tag),double,())
     #undef FUNCTION
 
   #undef CAPABILITY
@@ -603,12 +575,6 @@ START_MODULE
   #define CAPABILITY Sigma8
     START_CAPABILITY
 
-    #define FUNCTION compute_Sigma8
-      START_FUNCTION(double)
-      DEPENDENCY(Omega0_m, double)
-      BACKEND_REQ(class_get_sigma8,(class_tag),double,(double))
-    #undef FUNCTION
-  
     #define FUNCTION get_Sigma8_classy
       START_FUNCTION(double)
       DEPENDENCY(Omega0_m, double)
@@ -719,7 +685,7 @@ START_MODULE
     #define FUNCTION compute_sigma8_LogLike
       START_FUNCTION(double)
       DEPENDENCY(Omega0_m, double)
-      BACKEND_REQ(class_get_sigma8,(class_tag),double,(double))
+      BACKEND_REQ(class_get_sigma8,(class_tag),double,())
     #undef FUNCTION
   #undef CAPABILITY
 
@@ -906,7 +872,7 @@ START_MODULE
       START_FUNCTION(map_str_dbl) 
       DEPENDENCY(MP_experiment_names,         map_str_map_str_str)
       DEPENDENCY(parameter_dict_for_MPLike,   pybind11::dict)
-      BACKEND_REQ(get_classy_cosmo_object,               (classy),             pybind11::object,      ())
+      BACKEND_REQ(get_classy_cosmo_object,               (class_tag),             pybind11::object,      ())
       BACKEND_REQ(get_MP_loglike,               (libmontepythonlike), double,           (const CosmoBit::MPLike_data_container&, pybind11::object&, std::string&))
       BACKEND_REQ(create_MP_data_object,        (libmontepythonlike), pybind11::object, (map_str_str&))
       BACKEND_REQ(create_MP_likelihood_objects, (libmontepythonlike), map_str_pyobj,    (pybind11::object&, map_str_str&))
@@ -930,7 +896,7 @@ START_MODULE
       START_FUNCTION(map_str_dbl) 
       DEPENDENCY(MP_experiment_names,         map_str_map_str_str)
       DEPENDENCY(parameter_dict_for_MPLike,   pybind11::dict)
-      BACKEND_REQ(get_classy_cosmo_object,               (classy),             pybind11::object,      ())
+      BACKEND_REQ(get_classy_cosmo_object,               (class_tag),             pybind11::object,      ())
       BACKEND_REQ(get_MP_loglike,               (libmontepythonlike), double,           (const CosmoBit::MPLike_data_container&, pybind11::object&, std::string&))
       BACKEND_REQ(create_MP_data_object,        (libmontepythonlike), pybind11::object, (map_str_str&))
       BACKEND_REQ(create_MP_likelihood_objects, (libmontepythonlike), map_str_pyobj,    (pybind11::object&, map_str_str&))
