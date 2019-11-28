@@ -31,38 +31,16 @@
 ///
 ///  *********************************************
 #include <cmath>
-#include <functional>
 #include <iostream>
-#include <omp.h>
-#include <stdlib.h>     /* malloc, free, rand */
 #include <string>
-#include <valarray>
-#include <memory>  // make_unique pointers
-#include <stdint.h> // save memory addresses as int
 
-#include <gsl/gsl_blas.h>
-#include <gsl/gsl_errno.h>
-#include <gsl/gsl_integration.h>
-#include <gsl/gsl_linalg.h>
-#include <gsl/gsl_math.h>
-#include <gsl/gsl_matrix_double.h>
-#include <gsl/gsl_min.h>
-#include <gsl/gsl_odeiv2.h>
-#include <gsl/gsl_poly.h>
-#include <gsl/gsl_sf_log.h>
-#include <gsl/gsl_spline.h>
-
-#include "gambit/Utils/yaml_options.hpp"
 #include "gambit/Utils/statistics.hpp"
-#include "gambit/Utils/ascii_table_reader.hpp"
 #include "gambit/Utils/ascii_dict_reader.hpp"
 #include "gambit/Utils/numerical_constants.hpp"
 #include "gambit/Elements/gambit_module_headers.hpp"
 #include "gambit/CosmoBit/CosmoBit_rollcall.hpp"
 #include "gambit/CosmoBit/CosmoBit_types.hpp"
 #include "gambit/CosmoBit/CosmoBit_utils.hpp"
-
-
 
 namespace Gambit
 {
