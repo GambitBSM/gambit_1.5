@@ -121,7 +121,7 @@ BE_NAMESPACE
   }
 
   // returns scale_independent_growth_factor for given redshift  TODO: what is different with and without f? think it 
-  // is connected to powerspectra with baryons vs. baryons + cdm 
+  // is connected to power spectra with baryons vs. baryons + cdm 
   double class_get_scale_independent_growth_factor_f(double z)
   {
     double growth_fact_f = cosmo.attr("scale_independent_growth_factor_f")(z).cast<double>();
@@ -163,9 +163,9 @@ BE_NAMESPACE
     return Omega0_ncdm;
   }
 
-/* you *could* also have this function in principle, however since the containts
+/* you *could* also have this function in principle, however since the contains
   the contribution from ALL ncdm components it is not in general true, that Omega_ncdm = Omega_nu
-  so I would not reccomend doing it. 
+  so I would not recommend doing it. 
   // returns Omega nu today
   double class_get_Omega0_nu()
   {
@@ -270,7 +270,7 @@ BE_INI_FUNCTION
     {
       errMssg += "Caught an unspecified error:\n\n";
       errMssg += rawErrMessage;
-      cout << "An unspecified error occured during compute() in classy_2.6.3:\n";
+      cout << "An unspecified error occurred during compute() in classy_2.6.3:\n";
       cout << rawErrMessage;
       cout << "\n(This point gets invalidated) " << endl;
       invalid_point().raise(errMssg);

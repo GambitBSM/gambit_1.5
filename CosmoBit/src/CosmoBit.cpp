@@ -522,6 +522,9 @@ namespace Gambit
       map_str_dbl NuMasses_SM = *Dep::NuMasses_SM;
       int N_ncdm = (int)NuMasses_SM["N_ncdm"];
 
+      // set number of ultra relativistic species
+      result["N_ur"] = NuMasses_SM["N_ur_SMnu"];
+
       // Number of non-cold DM species
       // if non-zero a mass & temperature for each species has to be 
       // passed to class
@@ -571,12 +574,9 @@ namespace Gambit
       // probably better not to clear this one to make sure all yaml file options
       // will be kept for each parameter point
 
-      // add all neutrino & ncdm related parameters to dictionary
+      // add all neutrino & ncdm, ur species related parameters to dictionary
       //pybind11::dict NuMass_input = *Dep::NuMasses_classy_input; 
       merge_pybind_dicts(result, *Dep::NuMasses_classy_input);
-
-      // set number of ultra relativistic species
-      result["N_ur"] = *Dep::class_Nur;
 
       // standard cosmological parameters (common to all CDM -like models)
       result["H0"] =            *Param["H0"];
@@ -2380,9 +2380,11 @@ namespace Gambit
     {
       using namespace Pipes::compute_Omega0_ur;
 
-      // Capability class_Nur takes care of setting N_ur right for considered number of
+      // Capability NuMasses_SM takes care of setting N_ur right for considered number of
       // massive neutrinos & extra model dependent contributions
-      result = (*Dep::class_Nur)*7./8.*pow(4./11.,4./3.)*(*Dep::Omega0_g);
+      map_str_dbl NuMasses_SM = *Dep::NuMasses_SM;
+      double N_ur = NuMasses_SM["N_ur_SMnu"];
+      result = (N_ur)*7./8.*pow(4./11.,4./3.)*(*Dep::Omega0_g);
     }
 
 
@@ -2428,30 +2430,6 @@ namespace Gambit
     }
 */
 
-    void set_class_Nur(double &result)
-    {
-      using namespace Pipes::set_class_Nur;
-
-      map_str_dbl NuMasses_SM = *Dep::NuMasses_SM;
-      // N_ur = (T_ncdm_BSM/T_ncdm_SM)^4 * Nur_SM + dNeff_BSM , to rescale the value for N_ur from non-instantaneous 
-      // decoupling with the standard value of 3.046 to the according contribution for a modified Neutrino temperature
-      // (GeneralCosmoALP model heats CMB photons w.r.t. to neutrinos)
-      // TODO: refer to relevant section in paper!
-
-      // Check if the input for dNeff is negative (unphysical)
-      static bool allow_negative_dNeff = runOptions->getValueOrDef<bool>(false,"allow_negative_delta_neff");
-      double dNeffCMB_rad =  *Param["dNeff_CMB"];
-      if ( (!allow_negative_dNeff) && (dNeffCMB_rad < 0.0) )
-      {
-        std::string err = "A negative value for \"dNeff_CMB\" is unphysical and is not allowed in CosmoBit by default!\n\n";
-        err += "If you want to proceed with megative values, please set the \"allow_negative_delta_neff\"-rule to \"true\" within the yaml-file.";
-        CosmoBit_error().raise(LOCAL_INFO,err.c_str());
-      }
-
-      // If the check is passed, set the result.
-      result = pow((*Param["r_CMB"]),4)*(NuMasses_SM["N_ur_SMnu"]) + dNeffCMB_rad;
-      logger() << "N_ur calculated to be " << result << EOM;
-    }
 
 /// -----------
 /// BBN related functions (call AlterBBN, BBN abundances & Likelihood)
@@ -2459,12 +2437,13 @@ namespace Gambit
 
     void AlterBBN_Input(map_str_dbl &result)
     {
+      using namespace Pipes::AlterBBN_Input;
+
       // add parameters of relicparam structure that should be set to non-default values
       // to the AlterBBN_input map.
       // If you want to modify a parameter which has not been used in CosmoBit before simply
       // add it to the function 'fill_cosmomodel' in 'AlterBBN_<version>.cpp' and to the
       // set of 'known' parameters 'known_relicparam_options'
-      using namespace Pipes::AlterBBN_Input;
 
       // Check if the input for dNeff is negative (unphysical)
       static bool allow_negative_dNeff = runOptions->getValueOrDef<bool>(false,"allow_negative_delta_neff");
@@ -2476,7 +2455,7 @@ namespace Gambit
         CosmoBit_error().raise(LOCAL_INFO,err.c_str());
       }
 
-      //If check is passed, set teh inputs.
+      //If check is passed, set inputs.
       result["eta0"] = *Param["eta_BBN"];    // eta AFTER BBN (variable during)
       result["Nnu"]=3.046*pow((*Param["r_BBN"]),4); // contribution from SM neutrinos
       result["dNnu"]=dNeffBBN_rad;    // dNnu: within AlterBBN scenarios in which the sum Nnu+dNnu is the same are identical
@@ -2484,6 +2463,28 @@ namespace Gambit
       result["err"] = runOptions->getValueOrDef<double>(3,"err");
 
       logger() << "Set AlterBBN with parameters eta = " << result["eta0"] << ", Nnu = " << result["Nnu"] << ", dNeffBBN = " << result["dNnu"] << EOM;
+      logger() << "     and error params: failsafe = " << result["failsafe"] << ", err = " << result["err"] << EOM;
+    }
+    
+    /// AlterBBN input for vanilla LCDM model
+    void AlterBBN_Input_LCDM(map_str_dbl &result)
+    {
+      using namespace Pipes::AlterBBN_Input_LCDM;
+
+      // add parameters of relicparam structure that should be set to non-default values
+      // to the AlterBBN_input map.
+      // If you want to modify a parameter which has not been used in CosmoBit before simply
+      // add it to the function 'fill_cosmomodel' in 'AlterBBN_<version>.cpp' and to the
+      // set of 'known' parameters 'known_relicparam_options'
+
+      // set inputs
+      result["eta0"] = *Dep::eta0;    // eta AFTER BBN equal to eta today calculated from omgea_b
+      result["Nnu"]=3.046; // contribution from SM neutrinos
+      result["dNnu"]=0.;    // no extra ur species in standard LCDM model
+      result["failsafe"] = runOptions->getValueOrDef<double>(3,"failsafe");
+      result["err"] = runOptions->getValueOrDef<double>(3,"err");
+
+      logger() << "Set AlterBBN for LCDM with parameters eta = " << result["eta0"] << ", Nnu = " << result["Nnu"] << ", dNeffBBN = " << result["dNnu"] << EOM;
       logger() << "     and error params: failsafe = " << result["failsafe"] << ", err = " << result["err"] << EOM;
     }
 

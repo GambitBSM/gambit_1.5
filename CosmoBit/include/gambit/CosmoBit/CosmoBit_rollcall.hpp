@@ -181,7 +181,6 @@ START_MODULE
     MODEL_CONDITIONAL_DEPENDENCY(classy_parameters_DecayingDM, pybind11::dict,  DecayingDM_general)
     
     DEPENDENCY(T_cmb,                 double)
-    DEPENDENCY(class_Nur,             double)
     DEPENDENCY(Helium_abundance,      std::vector<double>)
     DEPENDENCY(NuMasses_classy_input, pybind11::dict)
     #undef FUNCTION
@@ -245,16 +244,6 @@ START_MODULE
     DEPENDENCY(NuMasses_SM, map_str_dbl)
     #undef FUNCTION
   #undef CAPABILITY
-
-  #define CAPABILITY class_Nur
-  START_CAPABILITY
-    #define FUNCTION set_class_Nur
-    START_FUNCTION(double)
-    ALLOW_MODELS(etaBBN_rBBN_rCMB_dNeffBBN_dNeffCMB)
-    DEPENDENCY(NuMasses_SM, map_str_dbl)
-    #undef FUNCTION
-  #undef CAPABILITY
- 
 
  /// -----------
 
@@ -633,7 +622,7 @@ START_MODULE
     #define FUNCTION compute_Omega0_ur
       START_FUNCTION(double)
       DEPENDENCY(Omega0_g, double)
-      DEPENDENCY(class_Nur, double)
+      DEPENDENCY(NuMasses_SM, map_str_dbl)
     #undef FUNCTION
   
     #define FUNCTION get_Omega0_ur_classy  
@@ -751,7 +740,15 @@ START_MODULE
     START_CAPABILITY
     #define FUNCTION AlterBBN_Input
       START_FUNCTION(map_str_dbl)
-      ALLOW_MODELS(etaBBN_rBBN_rCMB_dNeffBBN_dNeffCMB)
+      ALLOW_MODEL_DEPENDENCE(etaBBN_rBBN_rCMB_dNeffBBN_dNeffCMB)
+      MODEL_GROUP(non_SM_rad_Nu,(etaBBN_rBBN_rCMB_dNeffBBN_dNeffCMB))
+      MODEL_GROUP(cosmo,(LCDM))
+      ALLOW_MODEL_COMBINATION(cosmo,non_SM_rad_Nu)
+    #undef FUNCTION
+    #define FUNCTION AlterBBN_Input_LCDM
+      START_FUNCTION(map_str_dbl)
+      ALLOW_MODELS(LCDM)
+      DEPENDENCY(eta0, double)
     #undef FUNCTION
   #undef CAPABILITY
 
