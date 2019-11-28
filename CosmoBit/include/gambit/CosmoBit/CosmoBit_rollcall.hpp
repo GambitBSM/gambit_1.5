@@ -127,9 +127,9 @@ START_MODULE
     #undef FUNCTION
   #undef CAPABILITY
 
-  #define CAPABILITY Planck_nuissance_prior_loglike
+  #define CAPABILITY Planck_nuisance_prior_loglike
   START_CAPABILITY
-    #define FUNCTION compute_Planck_nuissance_prior_loglike
+    #define FUNCTION compute_Planck_nuisance_prior_loglike
     START_FUNCTION(double)
     ALLOW_MODELS(Planck_lite,Planck_TT,Planck_TTTEEE)
     #undef FUNCTION
@@ -827,26 +827,6 @@ START_MODULE
     #define FUNCTION compute_H0_LogLike
     START_FUNCTION(double)
     ALLOW_MODELS(LCDM)
-    #undef FUNCTION
-  #undef CAPABILITY
-
-  #define CAPABILITY Pantheon_LogLike
-   START_CAPABILITY
-   #define FUNCTION compute_Pantheon_LogLike
-    START_FUNCTION(double)
-    ALLOW_MODELS(cosmo_nuisance_params_Pantheon)
-    BACKEND_REQ(class_get_Dl,(class_tag),double,(double))
-   #undef FUNCTION
-  #undef CAPABILITY
-
-  #define CAPABILITY BAO_LogLike
-    START_CAPABILITY
-    #define FUNCTION compute_BAO_LogLike
-      START_FUNCTION(double)
-      BACKEND_REQ(class_get_Da,(class_tag),double,(double))
-      BACKEND_REQ(class_get_Hz,(class_tag),double,(double))
-      BACKEND_REQ(class_get_rs,(class_tag),double,())
-      FORCE_SAME_BACKEND(class_tag)
     #undef FUNCTION
   #undef CAPABILITY
 

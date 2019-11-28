@@ -1,8 +1,8 @@
 ##########################################################################
-## Nuissance parameter of "Planck_TTTEEE"
+## Nuisance parameter of "Planck_TTTEEE"
 ##
 ## Gaussian priors on chosen parameters as recommenrded by Planck.
-## Should not be scanned with  "Planck_nuissance_prior_loglike"
+## Should not be scanned with  "Planck_nuisance_prior_loglike"
 ##
 ## Patrick Stoecker <stoecker@physik.rwth-aachen.de>
 ## 2019, Aug
