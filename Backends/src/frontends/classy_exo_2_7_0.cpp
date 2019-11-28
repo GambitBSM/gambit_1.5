@@ -41,6 +41,27 @@ BE_NAMESPACE
   {
 		return cosmo;
   }
+
+  /// routine to check class input for consistency. If a case is not treated here class will 
+  ///  throw an error saying that one input parameter was not read. Checking for some specific cases
+  /// here allows us to give more informative error messages and fix suggestions 
+  void class_input_consistency_checks(pybind11::dict classy_input)
+  {
+
+    std::ostringstream errMssg;
+    // one thing that can go wrong is that the primordial power spectrum is requested but 
+    // not output of requiring the perturbations to be solved is asked for => 
+    // check if "modes" input is set while "output" is not set
+    if(classy_input.contains("modes") and not classy_input.contains("output"))
+    {
+      errMssg << "You are calling class asking for the following modes to be computed : "<< pybind11::repr(classy_input["modes"]);
+      errMssg << "\nHowever, you did not request any output that requires solving the perturbations.\nHence CLASS";
+      errMssg << " will not read the input 'modes' and won't run. Add the CLASS input parameter 'output' requesting";
+      errMssg << " a spectrum to be computed to the yaml file as run option, e.g. \n  - capability: baseline_classy_input\n";
+      errMssg << "    options:\n      classy_dict:\n        output: tCl";
+      backend_error().raise(LOCAL_INFO,errMssg.str());
+    }
+  }
   
   // getter functions to return a bunch of CLASS outputs. This is here in the frontend
   // to make the capabilities inside CosmoBit independent of types that depend on the 
@@ -170,7 +191,7 @@ BE_NAMESPACE
   // returns sigma8 at z = 0
   double class_get_sigma8()
   {
-    // in CosmoBit.cpp test if ClassInput contains mPk -> otherwise SegFault when trying to compute sigma9
+    // in CosmoBit.cpp test if ClassInput contains mPk -> otherwise SegFault when trying to compute sigma8
     double sigma8 = cosmo.attr("sigma8")().cast<double>();
     return sigma8;
   }
@@ -178,9 +199,15 @@ BE_NAMESPACE
   // returns Neff
   double class_get_Neff()
   {
-    // in CosmoBit.cpp test if ClassInput contains mPk -> otherwise SegFault when trying to compute sigma9
+    // in CosmoBit.cpp test if ClassInput contains mPk -> otherwise SegFault when trying to compute sigma8
     double Neff = cosmo.attr("Neff")().cast<double>();
     return Neff;
+  }
+
+  // print primordial power spectrum for consistency check & debug purposes
+  void print_pps()
+  {
+    std::cout<< "Primordial spectrum from classy: "<< std::string(pybind11::str(cosmo.attr("get_primordial")())) << std::endl;
   }
 
 }
@@ -196,6 +223,8 @@ BE_INI_FUNCTION
   {
     cosmo = classy.attr("Class")();
     first_run = false;
+    // check input for consistency
+    class_input_consistency_checks(cosmo_input_dict);
   }
 
   // Clean CLASS (the equivalent of the struct_free() in the `main` of CLASS -- don't want a memory leak, do we
@@ -218,7 +247,7 @@ BE_INI_FUNCTION
   }
   catch (std::exception &e)
   {
-    std::string errMssg = "Could not succesfully execute cosmo.compute() in classy_exo_2.7.0\n";
+    std::string errMssg = "Could not successfully execute cosmo.compute() in classy_exo_2.7.0\n";
     std::string rawErrMessage(e.what());
     // If the error is a CosmoSevereError raise an backend_error ...
     if (rawErrMessage.find("CosmoSevereError") != std::string::npos)
@@ -234,17 +263,18 @@ BE_INI_FUNCTION
       errMssg += rawErrMessage;
       invalid_point().raise(errMssg);
     }
-    // any other error (which shouldn't occur) get's also caught as invalid point.
+    // any other error (which shouldn't occur) gets also caught as invalid point.
     else
     {
       errMssg += "Caught an unspecified error:\n\n";
       errMssg += rawErrMessage;
-      cout << "An unspecified error occured during compute() in classy_exo_2.7.0:\n";
+      cout << "An unspecified error occurred during compute() in classy_exo_2.7.0:\n";
       cout << rawErrMessage;
       cout << "\n(This point gets invalidated) " << endl;
       invalid_point().raise(errMssg);
     }
   }
   logger() << LogTags::info << "[classy_exo_2.7.0] \"cosmo.compute\" was successful" << EOM;
+
 }
 END_BE_INI_FUNCTION
