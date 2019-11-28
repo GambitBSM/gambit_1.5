@@ -104,11 +104,16 @@ Parameters:
      range: [0.004,0.20]  
 
  # extension of standard LCDM: allow for a value of dNeff @ CMB release different from today 
- # (due to the bug we saw earlier atm you can't scan a simple LCDM model, I'll fix this but if 
- # you fix dNeffCMB to 0 you essentially have vanilla LCDM)
- dNeffCMB: 
-  dNeff_CMB: 0.01
-#
+ #dNeffCMB: 
+ # dNeff_CMB: 0.01
+
+ #etaBBN_rBBN_rCMB_dNeffBBN_dNeffCMB:
+ #  eta_BBN: 1e-8
+ #  r_BBN: 1
+ #  r_CMB: 1
+ #  dNeff_CMB: 0.
+ #  dNeff_BBN: 0.
+
  # nuisance parameters for Planck likelihood
  #  => if you don't include the Planck likelihoods into the scan you should get a FATAL Error 
  #     telling you that no function requires any of the model parameters, comment this line out 

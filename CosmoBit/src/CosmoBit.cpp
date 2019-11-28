@@ -2305,13 +2305,26 @@ namespace Gambit
       result = runOptions->getValueOrDef<double>(2.7255,"T_cmb");
     }
 
+    void T_ncdm_SM(double &result)
+    {
+      using namespace Pipes::T_ncdm_SM;
+
+      // set to 0.71611 in units of photon temperature, above the instantaneous decoupling value (4/11)^(1/3)
+      // to recover Sum_i mNu_i/omega = 93.14 eV resulting from studies of active neutrino decoupling (hep-ph/0506164)
+      result = 0.71611;
+      // This standard values enters in many assumption entering class. Therefore changing this value in
+      // the yaml file is disabled at the moment. If you still want to modify it uncomment the line below and
+      // you can set is as a run option (as T_cmb).
+      // result = runOptions->getValueOrDef<double>(0.71611,"T_ncdm");
+    }
+
     void set_T_ncdm_SM(double &result)
     {
       using namespace Pipes::set_T_ncdm_SM;
 
       // set to 0.71611 in units of photon temperature, above the instantaneous decoupling value (4/11)^(1/3)
       // to recover Sum_i mNu_i/omega = 93.14 eV resulting from studies of active neutrino decoupling (hep-ph/0506164)
-      result = 0.71611;
+      result = *Dep::T_ncdm_SM;
       // This standard values enters in many assumption entering class. Therefore changing this value in
       // the yaml file is disabled at the moment. If you still want to modify it uncomment the line below and
       // you can set is as a run option (as T_cmb).
