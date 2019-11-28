@@ -143,6 +143,10 @@ START_MODULE
     #undef FUNCTION
   #undef CAPABILITY
 
+
+  /// capabilities related to setting neutrino masses, 
+  /// temperature, ncdm components & number of ultra-relativistic species Nur
+  /// ----------------------
   #define CAPABILITY NuMasses_SM
   START_CAPABILITY
     #define FUNCTION set_NuMasses_SM_baseline
@@ -162,6 +166,85 @@ START_MODULE
     DEPENDENCY(NuMasses_SM, map_str_dbl)
     #undef FUNCTION
   #undef CAPABILITY
+ /// ------------------------
+    
+
+  /// capabilities related to setting input options for CLASS right 
+  /// cosmo parameters, temperature and number of ultra-relativistic species Nur
+  /// ----------------------
+  #define CAPABILITY baseline_classy_input
+  START_CAPABILITY
+    #define FUNCTION set_baseline_classy_input
+    START_FUNCTION(pybind11::dict)
+    
+    ALLOW_MODELS(LCDM)
+    MODEL_CONDITIONAL_DEPENDENCY(classy_parameters_DecayingDM, pybind11::dict,  DecayingDM_general)
+    
+    DEPENDENCY(T_cmb,                 double)
+    DEPENDENCY(class_Nur,             double)
+    DEPENDENCY(Helium_abundance,      std::vector<double>)
+    DEPENDENCY(NuMasses_classy_input, pybind11::dict)
+    #undef FUNCTION
+  #undef CAPABILITY
+
+    // needed to be able to initialise CLASS either with the runoptions 
+    // asked for by MontePython Likelihoods (t modes, Pk at specific z,..) 
+    // or without if MontePython is not in use
+   #define CAPABILITY get_classy_cosmo_container
+     START_CAPABILITY
+     #define FUNCTION init_classy_cosmo_container_with_MPLike
+      START_FUNCTION(CosmoBit::ClassyInput)
+      DEPENDENCY(cosmo_args_from_MPLike,  pybind11::dict)
+      DEPENDENCY(set_classy_parameters,   CosmoBit::ClassyInput)
+     #undef FUNCTION
+     #define FUNCTION init_classy_cosmo_container
+      START_FUNCTION(CosmoBit::ClassyInput)
+      DEPENDENCY(set_classy_parameters, CosmoBit::ClassyInput)
+     #undef FUNCTION
+  #undef CAPABILITY
+
+    // set CLASS input parameters for ..
+    #define CAPABILITY set_classy_parameters
+     START_CAPABILITY
+    
+     // H0, tau_reio, Omega_m, Omega_b plus an external primordial power spectrum
+     #define FUNCTION set_classy_parameters_primordial_ps
+      START_FUNCTION(CosmoBit::ClassyInput)
+         ALLOW_MODELS(LCDM_no_primordial)
+         DEPENDENCY(baseline_classy_input, pybind11::dict)
+         DEPENDENCY(primordial_power_spectrum, primordial_ps)
+     #undef FUNCTION
+
+     // H0, tau_reio, Omega_m, Omega_b plus an external *parametrised* primordial power spectrum
+     #define FUNCTION set_classy_parameters_parametrised_ps
+      START_FUNCTION(CosmoBit::ClassyInput)
+         ALLOW_MODELS(LCDM_no_primordial, LCDM)
+         DEPENDENCY(baseline_classy_input, pybind11::dict)
+         DEPENDENCY(parametrised_power_spectrum,   parametrised_ps)
+     #undef FUNCTION
+
+  #undef CAPABILITY
+  
+  // set extra parameters for CLASS run for non-standard cosmological models
+  #define CAPABILITY classy_parameters_DecayingDM
+     START_CAPABILITY
+     #define FUNCTION set_classy_parameters_DecayingDM_general
+      START_FUNCTION(pybind11::dict)
+      ALLOW_MODELS(DecayingDM_general)
+      DEPENDENCY(lifetime,                    double)
+      DEPENDENCY(DM_fraction,                 double)
+      DEPENDENCY(energy_injection_efficiency, DarkAges::fz_table)
+     #undef FUNCTION
+  #undef CAPABILITY
+  
+  #define CAPABILITY NuMasses_classy_input
+  START_CAPABILITY
+    #define FUNCTION set_NuMasses_classy_input
+    START_FUNCTION(pybind11::dict)
+    DEPENDENCY(T_ncdm,            double)
+    DEPENDENCY(NuMasses_SM, map_str_dbl)
+    #undef FUNCTION
+  #undef CAPABILITY
 
   #define CAPABILITY class_Nur
   START_CAPABILITY
@@ -171,6 +254,86 @@ START_MODULE
     DEPENDENCY(NuMasses_SM, map_str_dbl)
     #undef FUNCTION
   #undef CAPABILITY
+ 
+
+ /// -----------
+
+ /// primodial power spectrum related capabilities (MultiMode)
+ ///
+  /* MultiModeCode and power spectra */
+
+  // pass settings to multimode, run it and return the structure containing the results 
+  #define CAPABILITY multimode_results
+    START_CAPABILITY
+    #define FUNCTION get_multimode_results
+      START_FUNCTION(gambit_inflation_observables)
+      ALLOW_MODELS(Inflation_SR1quad,Inflation_1quar,Inflation_1mono32Inf,Inflation_1linearInf,Inflation_1hilltopInf,Inflation_1natural,Inflation_smash)
+      DEPENDENCY(multimode_pk_setting,int)
+      BACKEND_REQ(multimodecode_gambit_driver,(modecode_tag), void, (gambit_inflation_observables*,int&,int&,int&,int&,int&,int&,int&,int&,int&,int&,double&,int&,int&,double&,int&,double*,double*,int&,int&,double*,double*,double*,double&,double&,double&,int&,int&,double&,double*,double*,double*,double*,double&,double&))
+    #undef FUNCTION
+  #undef CAPABILITY 
+
+  #define CAPABILITY parametrised_power_spectrum
+    START_CAPABILITY
+    
+    #define FUNCTION get_multimode_parametrised_ps
+      START_FUNCTION(parametrised_ps)
+      ALLOW_MODELS(LCDM_no_primordial) // todo check
+      ALLOW_MODELS(Inflation_SR1quad,Inflation_1quar,Inflation_1mono32Inf,Inflation_1linearInf,Inflation_1hilltopInf,Inflation_1natural,Inflation_smash)
+      DEPENDENCY(multimode_results, gambit_inflation_observables)
+    #undef FUNCTION
+
+    #define FUNCTION get_parametrised_ps_LCDM
+      START_FUNCTION(parametrised_ps)
+      ALLOW_MODELS(LCDM)
+    #undef FUNCTION
+    
+    #define FUNCTION get_parametrised_ps_SMASH
+      START_FUNCTION(parametrised_ps)
+      ALLOW_MODELS(Inflation_smash)
+    #undef FUNCTION
+
+  #undef CAPABILITY 
+
+  // pass settings to multimode, run it and return the structure containing the results 
+  #define CAPABILITY primordial_power_spectrum
+    START_CAPABILITY
+
+    #define FUNCTION get_multimode_primordial_ps
+      START_FUNCTION(primordial_ps)
+      ALLOW_MODELS(LCDM_no_primordial) // todo check
+      ALLOW_MODELS(Inflation_SR1quad,Inflation_1quar,Inflation_1mono32Inf,Inflation_1linearInf,Inflation_1hilltopInf,Inflation_1natural)
+      DEPENDENCY(multimode_results, gambit_inflation_observables)
+    #undef FUNCTION
+
+    /*
+    #define FUNCTION get_LCDM_primordial_ps
+    START_FUNCTION(primordial_ps)
+    ALLOW_MODELS(LCDM)
+    #undef FUNCTION
+    */
+
+    /*
+    #define FUNCTION get_SMASH_primordial_ps
+    START_FUNCTION(primordial_ps)
+    ALLOW_MODELS(Inflation_smash)
+    #undef FUNCTION
+    */
+
+  #undef CAPABILITY  
+
+  // read in multimode setting for power spectrum calculation
+  // -> this needs to be an extra capability or somehow accessible to 
+  //    be able to adopt the CLASS input accordingly
+  #define CAPABILITY multimode_pk_setting
+    START_CAPABILITY
+    #define FUNCTION set_multimode_pk
+      START_FUNCTION(int)
+    #undef FUNCTION
+  #undef CAPABILITY  
+/// --------   
+
+
 
   #define CAPABILITY Cl_TT
   START_CAPABILITY
@@ -723,145 +886,6 @@ START_MODULE
      #undef FUNCTION
   #undef CAPABILITY
 
-    #define CAPABILITY get_classy_cosmo_container
-     START_CAPABILITY
-     #define FUNCTION init_classy_cosmo_container_with_MPLike
-      START_FUNCTION(CosmoBit::ClassyInput)
-      DEPENDENCY(cosmo_args_from_MPLike,  pybind11::dict)
-      DEPENDENCY(set_classy_parameters,   CosmoBit::ClassyInput)
-     #undef FUNCTION
-     #define FUNCTION init_classy_cosmo_container
-      START_FUNCTION(CosmoBit::ClassyInput)
-      DEPENDENCY(set_classy_parameters, CosmoBit::ClassyInput)
-     #undef FUNCTION
-  #undef CAPABILITY
-
-    // set CLASS input parameters for ..
-    #define CAPABILITY set_classy_parameters
-     START_CAPABILITY
-     // .. LCDM family tree; takes care of different input for different models through the 
-     // conditional model dependencies on 'model_dependent_classy_parameters' 
-     #define FUNCTION set_classy_parameters_LCDM
-      START_FUNCTION(CosmoBit::ClassyInput)
-      ALLOW_MODELS(LCDM)
-      DEPENDENCY(NuMasses_SM, map_str_dbl)
-      DEPENDENCY(T_cmb,             double)
-      DEPENDENCY(T_ncdm,            double)
-      DEPENDENCY(class_Nur,         double)
-      DEPENDENCY(Helium_abundance,  std::vector<double>)
-      MODEL_CONDITIONAL_DEPENDENCY(model_dependent_classy_parameters, pybind11::dict,  DecayingDM_general)
-      //MODEL_CONDITIONAL_DEPENDENCY(lifetime,                    double,             DecayingDM_general)
-      //MODEL_CONDITIONAL_DEPENDENCY(DM_fraction,                 double,             DecayingDM_general)
-      //MODEL_CONDITIONAL_DEPENDENCY(energy_injection_efficiency, DarkAges::fz_table, DecayingDM_general)
-     #undef FUNCTION
-    
-     // H0, tau_reio, Omega_m, Omega_b plus an external primordial power spectrum
-     #define FUNCTION set_classy_parameters_primordial_ps
-      START_FUNCTION(CosmoBit::ClassyInput)
-         ALLOW_MODELS(LCDM_no_primordial)
-         DEPENDENCY(T_cmb,             double)
-         DEPENDENCY(T_ncdm,            double)
-         DEPENDENCY(class_Nur,         double)
-         DEPENDENCY(NuMasses_SM,       map_str_dbl)
-         DEPENDENCY(Helium_abundance,std::vector<double>)
-         DEPENDENCY(primordial_power_spectrum, primordial_ps)
-     #undef FUNCTION
-
-     // H0, tau_reio, Omega_m, Omega_b plus an external *parametrised* primordial power spectrum
-     #define FUNCTION set_classy_parameters_parametrised_ps
-      START_FUNCTION(CosmoBit::ClassyInput)
-         ALLOW_MODELS(LCDM_no_primordial, LCDM)
-         DEPENDENCY(T_cmb,             double)
-         DEPENDENCY(T_ncdm,            double)
-         DEPENDENCY(class_Nur,         double)
-         DEPENDENCY(NuMasses_SM,       map_str_dbl)
-         DEPENDENCY(Helium_abundance,std::vector<double>)
-         DEPENDENCY(parametrised_power_spectrum,   parametrised_ps)
-     #undef FUNCTION
-
-  #undef CAPABILITY
-  
-  // set extra parameters for CLASS run for non-standard cosmological models
-  #define CAPABILITY model_dependent_classy_parameters
-     START_CAPABILITY
-     #define FUNCTION model_dep_classy_parameters_DecayingDM_general
-      START_FUNCTION(pybind11::dict)
-      ALLOW_MODELS(DecayingDM_general)
-      DEPENDENCY(lifetime,                    double)
-      DEPENDENCY(DM_fraction,                 double)
-      DEPENDENCY(energy_injection_efficiency, DarkAges::fz_table)
-     #undef FUNCTION
-  #undef CAPABILITY
-
-  /* MultiModeCode and power spectra */
-
-  // pass settings to multimode, run it and return the structure containing the results 
-  #define CAPABILITY multimode_results
-    START_CAPABILITY
-    #define FUNCTION get_multimode_results
-      START_FUNCTION(gambit_inflation_observables)
-      ALLOW_MODELS(Inflation_SR1quad,Inflation_1quar,Inflation_1mono32Inf,Inflation_1linearInf,Inflation_1hilltopInf,Inflation_1natural,Inflation_smash)
-      DEPENDENCY(multimode_pk_setting,int)
-      BACKEND_REQ(multimodecode_gambit_driver,(modecode_tag), void, (gambit_inflation_observables*,int&,int&,int&,int&,int&,int&,int&,int&,int&,int&,double&,int&,int&,double&,int&,double*,double*,int&,int&,double*,double*,double*,double&,double&,double&,int&,int&,double&,double*,double*,double*,double*,double&,double&))
-    #undef FUNCTION
-  #undef CAPABILITY 
-
-  #define CAPABILITY parametrised_power_spectrum
-    START_CAPABILITY
-    
-    #define FUNCTION get_multimode_parametrised_ps
-      START_FUNCTION(parametrised_ps)
-      ALLOW_MODELS(LCDM_no_primordial) // todo check
-      DEPENDENCY(multimode_results, gambit_inflation_observables)
-    #undef FUNCTION
-
-    #define FUNCTION get_parametrised_ps_LCDM
-      START_FUNCTION(parametrised_ps)
-      ALLOW_MODELS(LCDM)
-    #undef FUNCTION
-    
-    #define FUNCTION get_parametrised_ps_SMASH
-      START_FUNCTION(parametrised_ps)
-      ALLOW_MODELS(Inflation_smash)
-    #undef FUNCTION
-
-  #undef CAPABILITY 
-
-  // pass settings to multimode, run it and return the structure containing the results 
-  #define CAPABILITY primordial_power_spectrum
-    START_CAPABILITY
-
-    #define FUNCTION get_multimode_primordial_ps
-      START_FUNCTION(primordial_ps)
-      ALLOW_MODELS(Inflation_SR1quad,Inflation_1quar,Inflation_1mono32Inf,Inflation_1linearInf,Inflation_1hilltopInf,Inflation_1natural)
-      DEPENDENCY(multimode_results, gambit_inflation_observables)
-    #undef FUNCTION
-
-    /*
-    #define FUNCTION get_LCDM_primordial_ps
-    START_FUNCTION(primordial_ps)
-    ALLOW_MODELS(LCDM)
-    #undef FUNCTION
-    */
-
-    /*
-    #define FUNCTION get_SMASH_primordial_ps
-    START_FUNCTION(primordial_ps)
-    ALLOW_MODELS(Inflation_smash)
-    #undef FUNCTION
-    */
-
-  #undef CAPABILITY  
-
-  // read in multimode setting for power spectrum calculation
-  // -> this needs to be an extra capability or somehow accessible to 
-  //    be able to adopt the CLASS input accordingly
-  #define CAPABILITY multimode_pk_setting
-    START_CAPABILITY
-    #define FUNCTION set_multimode_pk
-      START_FUNCTION(int)
-    #undef FUNCTION
-  #undef CAPABILITY  
 
   /* MontePython */
   

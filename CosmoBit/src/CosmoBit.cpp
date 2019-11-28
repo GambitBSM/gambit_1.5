@@ -510,6 +510,126 @@ namespace Gambit
       result = NuMasses["mNu_tot_eV"];
     }
 
+    /// create a python dictionary with the inputs that have to be passed to class 
+    /// setting parameters related to (massive) neutrinos & ncdm components
+    void set_NuMasses_classy_input(pybind11::dict &result)
+    {
+      using namespace Pipes::set_NuMasses_classy_input;
+
+      // make sure dict is empty
+      result.clear();
+
+      map_str_dbl NuMasses_SM = *Dep::NuMasses_SM;
+      int N_ncdm = (int)NuMasses_SM["N_ncdm"];
+
+      // Number of non-cold DM species
+      // if non-zero a mass & temperature for each species has to be 
+      // passed to class
+      if (N_ncdm > 0.)
+      {
+        result["N_ncdm"] = N_ncdm;   
+
+        std::vector<double> m_ncdm = m_ncdm_classInput(NuMasses_SM);
+        // head up: this explicitly assumed that all ncdm components have the same temperature!! todo ? 
+        std::vector<double> T_ncdm(N_ncdm,*Dep::T_ncdm); 
+
+        // create one string with m_ncdm masses and 
+        // T_ncdm temperatures separated by commas (to match the input
+        // format of class)
+        std::ostringstream ss1, ss2;
+        std::string separator;
+        for (auto x : m_ncdm) 
+        {
+          ss1 << separator << x;
+          separator = ",";
+        }
+        separator = "";
+        for (auto x : T_ncdm) 
+        {
+          ss2 << separator << x;
+          separator = ",";
+        }
+        
+        result["m_ncdm"] = ss1.str();
+        result["T_ncdm"] = ss2.str();
+      }
+      else
+      {
+        result["T_ncdm"] = *Dep::T_ncdm;
+      }
+    }
+
+    /// create a python dictionary with the standard inputs that have to be passed
+    /// to class: cosmological parameters (H0,omega_b,tau_reio,omega_cdm) & add 
+    /// model dependent results for N_ur, neutrino masses & helium abundance
+    /// here potential extra input options given in the yaml file are read in
+    void set_baseline_classy_input(pybind11::dict &result)
+    {
+      using namespace Pipes::set_baseline_classy_input;
+
+      std::cout << " enter " << __PRETTY_FUNCTION__ << std::endl;
+      // probably better not to clear this one to make sure all yaml file options
+      // will be kept for each parameter point
+
+      // add all neutrino & ncdm related parameters to dictionary
+      //pybind11::dict NuMass_input = *Dep::NuMasses_classy_input; 
+      merge_pybind_dicts(result, *Dep::NuMasses_classy_input);
+
+      // set number of ultra relativistic species
+      result["N_ur"] = *Dep::class_Nur;
+
+      // standard cosmological parameters (common to all CDM -like models)
+      result["H0"] =            *Param["H0"];
+      result["T_cmb"] =         *Dep::T_cmb;
+      result["omega_b"] =       *Param["omega_b"];
+      result["tau_reio"] =      *Param["tau_reio"];
+      result["omega_cdm"] =     *Param["omega_cdm"];
+
+      // set helium abundance (vector Helium_abundance.at(0): mean, .at(1): uncertainty)
+      std::vector<double> Helium_abundance = *Dep::Helium_abundance;
+      result["YHe"] = Helium_abundance.at(0); 
+
+      // TODO: need to test if class or exo_class in use! does not work -> (JR) should be fixed with classy implementation
+      if (ModelInUse("DecayingDM_general")){merge_pybind_dicts(result,*Dep::classy_parameters_DecayingDM);}
+
+      // Other Class input direct from the YAML file 
+      // check if these are already contained in the input dictionary -- if so throw an error
+      // only do it for the first run though
+      static pybind11::dict yaml_input;
+      static bool first_run = true;
+      if(first_run)
+      {
+        first_run = false;
+        YAML::Node classy_dict;
+        if (runOptions->hasKey("classy_dict"))
+        {
+          classy_dict = runOptions->getValue<YAML::Node>("classy_dict");
+          for (auto it=classy_dict.begin(); it != classy_dict.end(); it++)
+          {
+            std::string name = it->first.as<std::string>();
+            std::string value = it->second.as<std::string>();
+            
+            // Check if the key exists in the dictionary
+            if (not result.contains(name.c_str()))
+            {
+              yaml_input[name.c_str()] = value;
+            }
+            // If it does, throw an error, there's some YAML conflict going on.
+            else
+            { 
+              std::cout << pybind11::repr(result) << std::endl;
+              CosmoBit_error().raise(LOCAL_INFO, "The key '" + name + "' already "
+                "exists in the CLASSY dictionary. You are probably trying to override a model parameter. If you really"
+                "want to do this you should define an extra function to set the class parameters for the model you "
+                "are considering.");
+            }
+          }
+        }
+      }
+      // add yaml options to python dictionary passed to CLASS
+      merge_pybind_dicts(result,yaml_input);
+    }
+
     /// Set the LCDM_no_primordial_ps in classy. Depends on a parametrised primordial_ps.
     /// Looks at the parameters used in a run,
     /// and passes them to classy in the form of a Python dictionary.
@@ -518,85 +638,30 @@ namespace Gambit
       using namespace Pipes::set_classy_parameters_parametrised_ps;
 
       std::cout << " enter " << __PRETTY_FUNCTION__ << std::endl;
-      // clear all entries from previous parameter point
-      result.clear();
 
-      map_str_dbl NuMasses_SM = *Dep::NuMasses_SM;
-      int N_ncdm = (int)NuMasses_SM["N_ncdm"];
-
-      // Number of non-cold DM species
-      if (N_ncdm > 0.)
-      {
-        result.addEntry("N_ncdm", N_ncdm);   
-
-        std::vector<double> m_ncdm = m_ncdm_classInput(NuMasses_SM);
-        std::vector<double> T_ncdm(N_ncdm,*Dep::T_ncdm);
-
-        std::ostringstream ss1, ss2;
-        std::string separator;
-        for (auto x : m_ncdm) 
-        {
-          ss1 << separator << x;
-          separator = ",";
-        }
-        separator = "";
-        for (auto x : T_ncdm) 
-        {
-          ss2 << separator << x;
-          separator = ",";
-        }
-        
-        result.addEntry("m_ncdm", ss1.str());
-        result.addEntry("T_ncdm", ss2.str());
-      }
-      else
-      {
-        result.addEntry("T_ncdm",*Dep::T_ncdm);
-      }
-      result.addEntry("N_ur",*Dep::class_Nur); // Number of ultra relativistic species
-
-      result.addEntry("H0",           *Param["H0"]);
-      result.addEntry("T_cmb",        *Dep::T_cmb);
-      result.addEntry("omega_b",      *Param["omega_b"]);
-      result.addEntry("tau_reio",     *Param["tau_reio"]);
-      result.addEntry("omega_cdm",    *Param["omega_cdm"]);
-
-      std::vector<double> Helium_abundance = *Dep::Helium_abundance;
-      result.addEntry("YHe", Helium_abundance.at(0)); // .at(0): mean, .at(1): uncertainty
-      result.addEntry("modes","s,t");
+      // Add standard cosmo parameters, nu masses, helium abundance &
+      // extra run options for class passed in yaml file to capability
+      // 'baseline_classy_input'
+      result.addDict(*Dep::baseline_classy_input);
+       
       // Now need to pass the primordial power spectrum
       // TODO check whether A_s from MultiModeCode has the log taken or not.
       parametrised_ps pps = *Dep::parametrised_power_spectrum;
       result.addEntry("n_s", pps.get_ns());
       result.addEntry("ln10^{10}A_s", pps.get_As());
-      result.addEntry("r", pps.get_r());
+      
 
-      // Other Class input direct from the YAML file 
-      // check if these are already contained in the input dictionary -- if so throw an error
-      YAML::Node classy_dict;
-      if (runOptions->hasKey("classy_dict"))
+      // if r = 0 only compute scalar modes, else tensor modes as well
+      if(pps.get_r() == 0){result.addEntry("modes","s");}
+      else
       {
-        classy_dict = runOptions->getValue<YAML::Node>("classy_dict");
-        for (auto it=classy_dict.begin(); it != classy_dict.end(); it++)
-        {
-          std::string name = it->first.as<std::string>();
-          std::string value = it->second.as<std::string>();
-          // Check if the key exists in the dictionary
-          if (!result.hasKey(name.c_str()))
-          {
-            result.addEntry(name.c_str(),value);
-          }
-          // If it does, throw an error, there's some YAML conflict going on.
-          else
-          {
-            CosmoBit_error().raise(LOCAL_INFO, "The key " + name + " already "
-              "exists in the CLASSY dictionary. You are probably trying to override a model parameter. If you really"
-              "want to do this you should define an extra function to set the class parameters for the model you "
-              "are considering.");
-          }
-        }
+        // don't set to zero in CLASS dict as it won't be read if no tensor modes are requested
+        result.addEntry("r", pps.get_r()); 
+        result.addEntry("modes","s");
       }
+      
     }
+
     /// Set the LCDM_no_primordial_ps in classy. Depends on a primordial_ps.
     /// Looks at the parameters used in a run,
     /// and passes them to classy in the form of a Python dictionary.
@@ -605,51 +670,11 @@ namespace Gambit
       using namespace Pipes::set_classy_parameters_primordial_ps;
 
       std::cout << " enter " << __PRETTY_FUNCTION__ << std::endl;
-      // clear all entries from previous parameter point
-      result.clear();
-
-      map_str_dbl NuMasses_SM = *Dep::NuMasses_SM;
-      int N_ncdm = (int)NuMasses_SM["N_ncdm"];
-
-      // Number of non-cold DM species
-      if (N_ncdm > 0.)
-      {
-        result.addEntry("N_ncdm", N_ncdm);   
-
-        std::vector<double> m_ncdm = m_ncdm_classInput(NuMasses_SM);
-        std::vector<double> T_ncdm(N_ncdm,*Dep::T_ncdm);
-
-        std::ostringstream ss1, ss2;
-        std::string separator;
-        for (auto x : m_ncdm) 
-        {
-          ss1 << separator << x;
-          separator = ",";
-        }
-        separator = "";
-        for (auto x : T_ncdm) 
-        {
-          ss2 << separator << x;
-          separator = ",";
-        }
-        
-        result.addEntry("m_ncdm", ss1.str());
-        result.addEntry("T_ncdm", ss2.str());
-      }
-      else
-      {
-        result.addEntry("T_ncdm",*Dep::T_ncdm);
-      }
-      result.addEntry("N_ur",*Dep::class_Nur); // Number of ultra relativistic species
-
-      std::vector<double> Helium_abundance = *Dep::Helium_abundance;
-      result.addEntry("YHe", Helium_abundance.at(0)); // .at(0): mean, .at(1): uncertainty
-
-      result.addEntry("H0",           *Param["H0"]);
-      result.addEntry("T_cmb",        *Dep::T_cmb);
-      result.addEntry("omega_b",      *Param["omega_b"]);
-      result.addEntry("tau_reio",     *Param["tau_reio"]);
-      result.addEntry("omega_cdm",    *Param["omega_cdm"]);
+      
+      // Add standard cosmo parameters, nu masses, helium abundance &
+      // extra run options for class passed in yaml file to capability
+      // 'baseline_classy_input'
+      result.addDict(*Dep::baseline_classy_input);
 
       // Now need to pass the primordial power spectrum 
       // TODO will not work until CLASS is patched. --- done =) 
@@ -663,31 +688,6 @@ namespace Gambit
       result.addEntry("pkt_array", pps.get_P_t());
       result.addEntry("lnk_size" , 100); // don't hard code but somehow make consistent with multimode todo
 
-      // Other Class input direct from the YAML file 
-      // check if these are already contained in the input dictionary -- if so throw an error
-      YAML::Node classy_dict;
-      if (runOptions->hasKey("classy_dict"))
-      {
-        classy_dict = runOptions->getValue<YAML::Node>("classy_dict");
-        for (auto it=classy_dict.begin(); it != classy_dict.end(); it++)
-        {
-          std::string name = it->first.as<std::string>();
-          std::string value = it->second.as<std::string>();
-          // Check if the key exists in the dictionary
-          if (!result.hasKey(name.c_str()))
-          {
-            result.addEntry(name.c_str(),value);
-          }
-          // If it does, throw an error, there's some YAML conflict going on.
-          else
-          {
-            CosmoBit_error().raise(LOCAL_INFO, "The key " + name + " already "
-              "exists in the CLASSY dictionary. You are probably trying to override a model parameter. If you really"
-              "want to do this you should define an extra function to set the class parameters for the model you "
-              "are considering.");
-          }
-        }
-      }
     }
 
     /// If we don't want to keep it we need a second function calling multimode, one  
@@ -929,16 +929,23 @@ namespace Gambit
 
       // Check not using non-primordial version
 
-      if (ModelInUse("LCDM_no_primordial_ps")) 
-      {
-        CosmoBit_error().raise(LOCAL_INFO, "You cannot use the LCDM_no_primordial_ps model to get"
-                            " a power spectrum!! Try the function get_multimode_parametrised_ps...");
-      }
+      // (JR) got the error when the lines below were uncommented... todo check what's going on 
+      //Problem with ModelInUse("LCDM_no_primordial").
+      //This model is not known by CosmoBit::get_parametrised_ps_LCDM.
+      //Please make sure that it has been mentioned in some context in the
+      //rollcall header declaration of this function.
+
+
+      //if (ModelInUse("LCDM_no_primordial"))  
+      //{
+      //  CosmoBit_error().raise(LOCAL_INFO, "You cannot use the LCDM_no_primordial_ps model to get"
+      //                      " a power spectrum!! Try the function get_multimode_parametrised_ps...");
+      //}
 
       parametrised_ps pps;
       pps.set_ns(*Param["n_s"]);
-      pps.set_As(*Param["ln10A_s"]); // TODO check if we need to exponentiate
-      pps.set_r(0); // (JR) shouldn't we in principle also allow for a model that has r as free parameter?
+      pps.set_As(*Param["ln10A_s"]);
+      pps.set_r(0); 
 
       result = pps;
     }
@@ -3028,97 +3035,10 @@ namespace Gambit
       result.merge_input_dicts(MP_cosmo_arguments);
     }
 
-    /// Set the LCDM parameters in classy. Looks at the parameters used in a run,
-    /// and passes them to classy in the form of a Python dictionary.
-    void set_classy_parameters_LCDM(CosmoBit::ClassyInput& result)
-    {
-      using namespace Pipes::set_classy_parameters_LCDM;
-      using namespace pybind11::literals;
-
-      // clear all entries from previous parameter point
-      result.clear();
-
-      map_str_dbl NuMasses_SM = *Dep::NuMasses_SM;
-      int N_ncdm = (int)NuMasses_SM["N_ncdm"];
-
-      // Number of non-cold DM species
-      if (N_ncdm > 0.)
-      {
-        result.addEntry("N_ncdm", N_ncdm);
-
-        std::vector<double> m_ncdm = m_ncdm_classInput(NuMasses_SM);
-        std::vector<double> T_ncdm(N_ncdm,*Dep::T_ncdm);
-
-        std::ostringstream ss1, ss2;
-        std::string separator;
-        for (auto x : m_ncdm)
-        {
-          ss1 << separator << x;
-          separator = ",";
-        }
-        separator = "";
-        for (auto x : T_ncdm)
-        {
-          ss2 << separator << x;
-          separator = ",";
-        }
-
-        result.addEntry("m_ncdm", ss1.str());
-        result.addEntry("T_ncdm", ss2.str());
-      }
-      else
-      {
-        result.addEntry("T_ncdm",*Dep::T_ncdm);
-      }
-      result.addEntry("N_ur",*Dep::class_Nur); // Number of ultra relativistic species
-
-      // (JR) we don't need 'output' to default to something in this implementation
-      // if the user does not ask for anything extra than everything MP wants will be included
-      // if more stuff should be computed it will be added at the end of this function
-      // when looping through classy_dict run options
-
-      result.addEntry("H0",           *Param["H0"]);
-      result.addEntry("n_s" ,         *Param["n_s"]);
-      result.addEntry("T_cmb",        *Dep::T_cmb);
-      result.addEntry("omega_b",      *Param["omega_b"]);
-      result.addEntry("tau_reio",     *Param["tau_reio"]);
-      result.addEntry("omega_cdm",    *Param["omega_cdm"]);
-      result.addEntry("ln10^{10}A_s", *Param["ln10A_s"]);
-
-      std::vector<double> Helium_abundance = *Dep::Helium_abundance;
-      result.addEntry("YHe", Helium_abundance.at(0)); // .at(0): mean, .at(1): uncertainty
-
-      // TODO: need to test if class or exo_class in use! does not work -> (JR) should be fixed with classy implementation
-      if (ModelInUse("DecayingDM_general")){result.addDict(*Dep::model_dependent_classy_parameters);}
-
-      // Other CLASS input direct from the YAML file, only read before first CLASS run
-      static bool first_run = true;
-      static pybind11::dict yaml_file_input;
-      if(first_run)
-      {
-        first_run = false;
-        YAML::Node classy_dict;
-        if (runOptions->hasKey("classy_dict"))
-        {
-          classy_dict = runOptions->getValue<YAML::Node>("classy_dict");
-          for (auto it=classy_dict.begin(); it != classy_dict.end(); it++)
-          {
-            std::string name = it->first.as<std::string>();
-            std::string value = it->second.as<std::string>();
-
-            yaml_file_input[name.c_str()] = value;
-          }
-        }
-      }
-      // add input from yaml file to CLASS dictionary
-      // check if these are already contained in the input dictionary -- if so throw an error
-      result.merge_input_dicts(yaml_file_input);
-
-    }
-
-  void model_dep_classy_parameters_DecayingDM_general(pybind11::dict &result)
+    
+  void set_classy_parameters_DecayingDM_general(pybind11::dict &result)
   {
-    using namespace Pipes::model_dep_classy_parameters_DecayingDM_general;
+    using namespace Pipes::set_classy_parameters_DecayingDM_general;
 
     // make sure nothing from previous run is contained
     result.clear();
@@ -3147,10 +3067,10 @@ namespace Gambit
     for (auto it=fz.ptrs_to_member_vecs.begin(); it != fz.ptrs_to_member_vecs.end(); it++) 
     {
       std::string key = it->first;
-
       // convert memory address 'it->second' to int 'addr'
-      uintptr_t addr = reinterpret_cast<uintptr_t>(it->second);
-      result[key.c_str()] = addr;
+      //uintptr_t addr = reinterpret_cast<uintptr_t>(it->second);
+      result[key.c_str()] = memaddress_to_uint(it->second);
+      //result.addEntry(it->first,it->second);
     }
   }
 

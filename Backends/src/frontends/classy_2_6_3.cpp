@@ -42,6 +42,27 @@ BE_NAMESPACE
     return cosmo;
   }
 
+  /// routine to check class input for consistency. If a case is not treated here class will 
+  ///  throw an error saying that one input parameter was not read. Checking for some specific cases
+  /// here allows us to give more informative error messages and fix suggestions 
+  void class_input_consistency_checks(pybind11::dict classy_input)
+  {
+
+    std::ostringstream errMssg;
+    // one thing that can go wrong is that the primordial power spectrum is requested but 
+    // not output of requiring the perturbations to be solved is asked for => 
+    // check if "modes" input is set while "output" is not set
+    if(classy_input.contains("modes") and not classy_input.contains("output"))
+    {
+      errMssg << "You are calling class asking for the following modes to be computed : "<< pybind11::repr(classy_input["modes"]);
+      errMssg << "\nHowever, you did not request any output that requires solving the perturbations.\nHence CLASS";
+      errMssg << " will not read the input 'modes' and won't run. Add the CLASS input parameter 'output' requesting";
+      errMssg << " a spectrum to be computed to the yaml file as run option, e.g. \n  - capability: baseline_classy_input\n";
+      errMssg << "    options:\n      classy_dict:\n        output: tCl";
+      backend_error().raise(LOCAL_INFO,errMssg.str());
+    }
+  }
+
   // getter functions to return a bunch of CLASS outputs. This is here in the frontend
   // to make the capabilities inside CosmoBit independent of types that depend on the 
   // Boltzmann solver in use
@@ -202,6 +223,8 @@ BE_INI_FUNCTION
   {
     cosmo = classy.attr("Class")();
     first_run = false;
+    // check input for consistency
+    class_input_consistency_checks(cosmo_input_dict);
   }
 
   // Clean CLASS (the equivalent of the struct_free() in the `main` of CLASS -- don't want a memory leak, do we
@@ -214,6 +237,8 @@ BE_INI_FUNCTION
   // set cosmological parameters
   logger() << LogTags::debug << "[classy_2.6.3] These are the inputs:\n\n";
   logger() << pybind11::repr(cosmo_input_dict) << EOM;
+
+
   cosmo.attr("set")(cosmo_input_dict);
 
   // Try to run class and catch potential errors
@@ -224,7 +249,7 @@ BE_INI_FUNCTION
   }
   catch (std::exception &e)
   {
-    std::string errMssg = "Could not succesfully execute cosmo.compute() in classy_2.6.3\n";
+    std::string errMssg = "Could not successfully execute cosmo.compute() in classy_2.6.3\n";
     std::string rawErrMessage(e.what());
     // If the error is a CosmoSevereError raise an backend_error ...
     if (rawErrMessage.find("CosmoSevereError") != std::string::npos)
@@ -240,7 +265,7 @@ BE_INI_FUNCTION
       errMssg += rawErrMessage;
       invalid_point().raise(errMssg);
     }
-    // any other error (which shouldn't occur) get's also caught as invalid point.
+    // any other error (which shouldn't occur) gets also caught as invalid point.
     else
     {
       errMssg += "Caught an unspecified error:\n\n";

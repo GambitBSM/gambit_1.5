@@ -15,7 +15,7 @@
 Parameters:
   StandardModel_numass_degenerate: !import include/StandardModel_numass_degenerate_scan.yaml
   
-  LCDM_no_primordial:
+  LCDM:
     omega_b:
       fixed_value: 2.24052e-02
     omega_cdm:
@@ -24,6 +24,18 @@ Parameters:
       fixed_value: 6.81383e+01
     tau_reio:
       fixed_value: 7.25805e-02
+    ln10A_s: 3.0
+    n_s: 1.0
+  
+  #LCDM_no_primordial:
+  #  omega_b:
+  #    fixed_value: 2.24052e-02
+  #  omega_cdm:
+  #    fixed_value: 1.18078e-01
+  #  H0:
+  #    fixed_value: 6.81383e+01
+  #  tau_reio:
+  #    fixed_value: 7.25805e-02
 
   #Inflation_1quar:
   #  N_pivot: 40
@@ -35,15 +47,15 @@ Parameters:
   #  phi_init0: 10
   #   #fixed_value: 10.0
     
-  Inflation_SR1quad:
-    N_pivot: 40
-      #prior_type: flat
-      #range: [40.0,70.0]
-    m2_inflaton: -9.9
-      #prior_type: flat
-      #range: [-9.8,-9.10]
-    phi_init0:
-      fixed_value: 10.0
+  #Inflation_SR1quad:
+  #  N_pivot: 40
+  #    #prior_type: flat
+  #    #range: [40.0,70.0]
+  #  m2_inflaton: -9.9
+  #    #prior_type: flat
+  #    #range: [-9.8,-9.10]
+  #  phi_init0:
+  #    fixed_value: 10.0
     
   #Inflation_1quar:
   #  N_pivot:
@@ -138,17 +150,24 @@ Rules:
       kmax: 1e6
       
 
-  - capability: set_classy_parameters
-    function: set_classy_parameters_primordial_ps
-    options:
-      classy_dict: 
-        output: tCl  # heads-up: if you try to run class with passing the pps but do not ask for any output that requires 
+  #- capability: baseline_classy_input
+    #options:
+    #  classy_dict: 
+    #    output: tCl  # heads-up: if you try to run class with passing the pps but do not ask for any output that requires 
                       # perturbations to be computed (only BG quantities & likelihoods) you will get an error saying that
                       # class never read the option "modes" : "s,t"  -- not sure how to deal with that?
     
   - capability: get_classy_cosmo_container
     function: init_classy_cosmo_container_with_MPLike
-    
+  
+  #- capability: set_classy_parameters
+  #  function: set_classy_parameters_primordial_ps
+  #  module: CosmoBit
+  - capability: baseline_classy_input
+    #function: set_baseline_classy_input
+    options:
+      classy_dict:
+        output: tCl
   
   #- capability: set_classy_parameters
   #  function: set_classy_parameters_parametrised_ps

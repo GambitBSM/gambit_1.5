@@ -35,6 +35,14 @@ namespace Gambit
   namespace CosmoBit
   {
 
+    uintptr_t memaddress_to_uint(double* ptr)
+    {
+      uintptr_t addr;
+      addr = reinterpret_cast<uintptr_t>(ptr);
+      return addr; 
+    }
+    
+
     BBN_container::BBN_container()
     { 
       // maps elements to their position in 'ratioH' array in AlterBBN holding 
@@ -132,7 +140,9 @@ namespace Gambit
     // one entry is contained in both dictionaries
     // returns 1 if adding was successful, -1 if an entries 
     // appeared twice -> need to throw an error since overwriting CLASS input
-    // without realising it can be dangerous
+    // without realising it can be dangerous 
+    // -> todo , better return type string and return duplicated key? might make 
+    // the error message we can throw more informative 
     int ClassyInput::addDict(pybind11::dict extra_dict)
     {
       int success = 1;

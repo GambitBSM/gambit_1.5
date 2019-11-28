@@ -34,6 +34,7 @@
 #define __CosmoBit_types_hpp__
 
 #include "gambit/Utils/util_types.hpp"
+//#include "gambit/CosmoBit/CosmoBit_utils.hpp"
 #include "gambit/Backends/backend_types/MontePythonLike.hpp"
 #include <valarray>
 #include <stdint.h>  // save memory address as int
@@ -47,7 +48,8 @@ namespace Gambit
 
   namespace CosmoBit
   {
-
+    uintptr_t memaddress_to_uint(double* ptr);
+    
     typedef std::map< std::string,std::valarray < double > > map_str_valarray_dbl;
     
     class MPLike_data_container
@@ -192,10 +194,20 @@ namespace Gambit
             // get pointers to arrays holding the information that needs
             // to be passed on to class, convert to uintptr_t (type large enough
             // to store memory address of the used system) and pass to class
-            uintptr_t addr;
-            addr = reinterpret_cast<uintptr_t>(&values[0]);
-            input_dict[key.c_str()] = addr; 
+            //uintptr_t addr;
+            //addr = reinterpret_cast<uintptr_t>(&values[0]);
+            input_dict[key.c_str()] = memaddress_to_uint(&values[0]); 
+
         };
+        //void addEntry(str key, double* ptr)
+        //{
+        //    // get pointers to arrays holding the information that needs
+        //    // to be passed on to class, convert to uintptr_t (type large enough
+        //    // to store memory address of the used system) and pass to class
+        //    uintptr_t addr;
+        //    addr = reinterpret_cast<uintptr_t>(ptr);
+        //    input_dict[key.c_str()] = addr; 
+        //};
 
         bool hasKey(str key){return input_dict.contains(key.c_str());};
         //int addEntry(str key,std::ostringstream value){input_dict[key.c_str()]=value.c_str()};

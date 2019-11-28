@@ -43,7 +43,7 @@ namespace Gambit
     // dict a: 'output' : 'tCl nCl' and 
     // dict b: 'output' : 'tCl mPk' => mPk has
     // to be added to 'output' : 'tCl nCl mPk'
-    void merge_pybind_dicts(pybind11::dict& a, pybind11::dict& b) 
+    void merge_pybind_dicts(pybind11::dict& a, pybind11::dict b) 
     {
       // loop through 2nd dict (better if this is the shorter one)
       static bool first_run = true;
