@@ -44,6 +44,23 @@
  
          int bt_size
 
+--- a/python/setup.py  2019-07-03 12:43:33.138033238 +0100
++++ b/python/setup.py  2019-07-03 12:43:09.645573577 +0100
+@@ -29,12 +29,12 @@
+             break
+ 
+ setup(
+-    name='classy',
++    name='classy'+VERSION,
+     version=VERSION,
+     description='Python interface to the Cosmological Boltzmann code CLASS',
+     url='http://www.class-code.net',
+     cmdclass={'build_ext': build_ext},
+-    ext_modules=[Extension("classy", ["classy.pyx"],
++    ext_modules=[Extension("classy_2_6_3", ["classy.pyx"],
+                            include_dirs=[nm.get_include(), "../include"],
+                            libraries=liblist,
+                            library_dirs=["../", GCCPATH],
 --- a/source/input.c  2017-10-24 23:42:41.000000000 +1000
 +++ b/source/input.c  2019-11-26 14:18:59.251578000 +1000 
 @@ -4,6 +4,7 @@

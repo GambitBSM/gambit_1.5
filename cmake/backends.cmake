@@ -1204,7 +1204,7 @@ if(NOT ditched_${name}_${ver})
     COMMAND sed ${dashi} -e "s#autosetup.py install#autosetup.py build#g" Makefile
     BUILD_COMMAND ${CMAKE_MAKE_PROGRAM} CC=${CMAKE_C_COMPILER} OMPFLAG=-fopenmp OPTFLAG= CCFLAG=${BACKEND_C_FLAGS} LDFLAG=${BACKEND_C_FLAGS} all
     COMMAND ${CMAKE_COMMAND} -E make_directory lib
-    COMMAND find python/ -name "classy.so" | xargs -I {} cp "{}" lib/
+    COMMAND find python/ -name "classy_2_6_3.so" | xargs -I {} cp "{}" lib/
     INSTALL_COMMAND ""
   )
   add_extra_targets("backend" ${name} ${ver} ${dir} ${dl} clean)
@@ -1231,7 +1231,7 @@ if(NOT ditched_${name}_${ver})
     COMMAND sed ${dashi} -e "s#autosetup.py install#autosetup.py build#g" Makefile
     BUILD_COMMAND ${CMAKE_MAKE_PROGRAM} CC=${CMAKE_C_COMPILER} OMPFLAG=-fopenmp OPTFLAG= CCFLAG=${BACKEND_C_FLAGS} LDFLAG=${BACKEND_C_FLAGS} all
     COMMAND ${CMAKE_COMMAND} -E make_directory lib
-    COMMAND find python/ -name "classy.so" | xargs -I {} cp "{}" lib/
+    COMMAND find python/ -name "classy_exo_2_7_0.so" | xargs -I {} cp "{}" lib/
     INSTALL_COMMAND ""
   )
   add_extra_targets("backend" ${name} ${ver} ${dir} ${dl} clean)

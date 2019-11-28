@@ -19,8 +19,8 @@ CaptnGeneral:
   1.0:         ./Backends/installed/capgen/1.0/gencaplib.so
 
 classy:
-  2.6.3:       ./Backends/installed/classy/2.6.3/lib/classy.so
-  exo_2.7.0:   ./Backends/installed/classy/exo_2.7.0/lib/classy.so
+  2.6.3:       ./Backends/installed/classy/2.6.3/lib/classy_2_6_3.so
+  exo_2.7.0:   ./Backends/installed/classy/exo_2.7.0/lib/classy_exo_2_7_0.so
 
 DarkAges:
   1.0.0:       ./Backends/installed/darkages/1.0.0/DarkAges_for_GAMBIT.py

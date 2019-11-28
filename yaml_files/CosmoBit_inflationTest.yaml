@@ -148,21 +148,22 @@ Rules:
       steps: 100
       kmin: 1e-7
       kmax: 1e6
-      
+  
+  #- capability:    get_classy_cosmo_object
+  #    backends:
+  #    - {function: backend: classy, version: 2.6.3}
 
-  #- capability: baseline_classy_input
-    #options:
-    #  classy_dict: 
-    #    output: tCl  # heads-up: if you try to run class with passing the pps but do not ask for any output that requires 
-                      # perturbations to be computed (only BG quantities & likelihoods) you will get an error saying that
-                      # class never read the option "modes" : "s,t"  -- not sure how to deal with that?
-    
+  #- capability: get_classy_cosmo_object
+  #  backends:
+  #    - {capability: get_classy_cosmo_object, backend: classy, version: 2.6.3}
+
   - capability: get_classy_cosmo_container
     function: init_classy_cosmo_container_with_MPLike
   
   - capability: set_classy_parameters
     function: set_classy_parameters_primordial_ps
     module: CosmoBit
+
   - capability: baseline_classy_input
     #function: set_baseline_classy_input
     options:
