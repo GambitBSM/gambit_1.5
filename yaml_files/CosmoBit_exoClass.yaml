@@ -94,7 +94,7 @@ ObsLikes:
     type:         bool
 
   - purpose:      LogLike
-    capability:   Planck_nuissance_prior_loglike
+    capability:   Planck_nuisance_prior_loglike
     module:       CosmoBit
     type:         double
 
