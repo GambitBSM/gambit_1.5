@@ -217,7 +217,7 @@ BE_INI_FUNCTION
 { 
   CosmoBit::ClassyInput input_container= *Dep::get_classy_cosmo_container;
   pybind11::dict cosmo_input_dict = input_container.get_input_dict();
-  
+
   static bool first_run = true;
   if(first_run)
   {
@@ -235,48 +235,47 @@ BE_INI_FUNCTION
   cosmo.attr("empty")();
 
   // set cosmological parameters
-  logger() << LogTags::debug << "[classy_2.6.3] These are the inputs:\n\n";
+  logger() << LogTags::debug << "[classy_"<< STRINGIFY(VERSION) <<"] These are the inputs:\n\n";
   logger() << pybind11::repr(cosmo_input_dict) << EOM;
-
-
   cosmo.attr("set")(cosmo_input_dict);
 
   // Try to run class and catch potential errors
-  logger() << LogTags::info << "[classy_2.6.3] Start to run \"cosmo.compute\"" << EOM;
+  logger() << LogTags::info << "[classy_"<< STRINGIFY(VERSION) <<"] Start to run \"cosmo.compute\"" << EOM;
   try
   {
     cosmo.attr("compute")();
   }
   catch (std::exception &e)
   {
-    std::string errMssg = "Could not successfully execute cosmo.compute() in classy_2.6.3\n";
+    std::ostringstream errMssg;
+    errMssg << "Could not successfully execute cosmo.compute() in classy_"<< STRINGIFY(VERSION)<<"\n";
     std::string rawErrMessage(e.what());
     // If the error is a CosmoSevereError raise an backend_error ...
     if (rawErrMessage.find("CosmoSevereError") != std::string::npos)
     {
-      errMssg += "Caught a \'CosmoSevereError\':\n\n";
-      errMssg += rawErrMessage;
-      backend_error().raise(LOCAL_INFO,errMssg);
+      errMssg << "Caught a \'CosmoSevereError\':\n\n";
+      errMssg << rawErrMessage;
+      backend_error().raise(LOCAL_INFO,errMssg.str());
     }
     // .. but if it is 'only' a CosmoComputationError, just invalidate thew parameter point
     else if (rawErrMessage.find("CosmoComputationError") != std::string::npos)
     {
-      errMssg += "Caught a \'CosmoComputationError\':\n\n";
-      errMssg += rawErrMessage;
-      invalid_point().raise(errMssg);
+      errMssg << "Caught a \'CosmoComputationError\':\n\n";
+      errMssg << rawErrMessage;
+      invalid_point().raise(errMssg.str());
     }
     // any other error (which shouldn't occur) gets also caught as invalid point.
     else
     {
-      errMssg += "Caught an unspecified error:\n\n";
-      errMssg += rawErrMessage;
-      cout << "An unspecified error occurred during compute() in classy_2.6.3:\n";
+      errMssg << "Caught an unspecified error:\n\n";
+      errMssg << rawErrMessage;
+      cout << "An unspecified error occurred during compute() in classy_"<< STRINGIFY(VERSION) <<":\n";
       cout << rawErrMessage;
       cout << "\n(This point gets invalidated) " << endl;
-      invalid_point().raise(errMssg);
+      invalid_point().raise(errMssg.str());
     }
   }
-  logger() << LogTags::info << "[classy_2.6.3] \"cosmo.compute\" was successful" << EOM;
+  logger() << LogTags::info << "[classy_"<< STRINGIFY(VERSION) <<"] \"cosmo.compute\" was successful" << EOM;
 
 }
 END_BE_INI_FUNCTION
