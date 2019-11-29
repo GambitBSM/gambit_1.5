@@ -274,8 +274,12 @@ namespace Gambit
       return log_msg.str();
     }
 
-    primordial_ps::primordial_ps(){};
-    parametrised_ps::parametrised_ps(){};
+    // Default constructor for multimode inputs...
+    multimode_inputs::multimode_inputs() {};
+
+    // Default constructor for primordial and parametrised power spectra
+    primordial_ps::primordial_ps() {};
+    parametrised_ps::parametrised_ps() {};
 
   }
 }

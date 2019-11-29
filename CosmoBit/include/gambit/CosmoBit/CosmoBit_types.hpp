@@ -229,6 +229,47 @@ namespace Gambit
         pybind11::dict input_dict;
     };
 
+    /// Class containing the inputs used for inputs to MultiModeCode 
+    class multimode_inputs
+    {
+        public:
+            multimode_inputs();
+
+            // K array.
+            double k_min;
+            double k_max;
+            int numsteps;
+
+            double N_pivot;
+
+            // Potential parameters
+            std::vector<double> vparams;
+            std::vector<double> phi_init0;
+            std::vector<double> dphi_init0; // TODO probably remove this
+            int num_inflaton = -1;
+            int potential_choice = -1; 
+            int vparam_rows = -1;
+
+            // Initial conditions stuff
+            int slowroll_infl_end;
+            int instreheat;
+            int ic_sampling;
+            double energy_scale;
+            int numb_samples;
+            int save_iso_N;
+            double N_iso_ref;
+
+            // Analytic approximations
+            int use_deltaN_SR;
+            int evaluate_modes;
+            int use_horiz_cross_approx;
+            int get_runningofrunning;
+
+            double k_pivot;
+            double dlnk;
+
+    };
+
 
     /// Class containing the primordial power spectrum.
     /// Members:

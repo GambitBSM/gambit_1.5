@@ -118,13 +118,9 @@ ObsLikes:
 
 #======== Rule entries ========
 Rules:
-  - capability: multimode_pk_setting
-    options:
-      calc_full_pk: 1
 
-
-  - capability: multimode_results
-    function: get_multimode_results
+  - capability: multimode_input_parameters
+    function: set_multimode_inputs
     options:
 # Initialization parameters controlling main characteristics.
       slowroll_infl_end:        1
@@ -161,6 +157,7 @@ Rules:
     function: init_classy_cosmo_container_with_MPLike
   
   - capability: set_classy_parameters
+    #function: set_classy_parameters_parametrised_ps
     function: set_classy_parameters_primordial_ps
     module: CosmoBit
 

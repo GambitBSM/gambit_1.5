@@ -317,8 +317,8 @@ namespace Gambit
       double red[npts];
       for (int i = 0; i < npts; i++)
       {
-	       ftot[i] = fh.at(i)+fly.at(i)+fhi.at(i)+fhei.at(i)+flo.at(i);
-	       red[i] = z.at(i);
+           ftot[i] = fh.at(i)+fly.at(i)+fhi.at(i)+fhei.at(i)+flo.at(i);
+           red[i] = z.at(i);
       }
 
       gsl_interp_accel *gsl_accel_ptr = gsl_interp_accel_alloc();
@@ -579,7 +579,7 @@ namespace Gambit
       {
         // don't set to zero in CLASS dict as it won't be read if no tensor modes are requested
         result.addEntry("r", pps.get_r()); 
-        result.addEntry("modes","s");
+        result.addEntry("modes","t,s");
       }
       
     }
@@ -612,38 +612,17 @@ namespace Gambit
 
     }
 
-    /// If we don't want to keep it we need a second function calling multimode, one  
-    /// call with and one call without full_pk -> then dependency resolution takes care of it
-    void set_multimode_pk(int & result)
+    /// Function to set the generic inputs used for MultiModeCode.
+    void set_multimode_inputs(multimode_inputs &result)
     {
-      using namespace Pipes::set_multimode_pk;
+      using namespace Pipes::set_multimode_inputs;
 
-      // set if you want full pk calculated on yaml file level 
-      // (having to make this an extra capability is certainly not ideal 
-      // but the only easy way I saw atm. There is definitely room for improvement..)
-      // would also be nicer to make this a bool -> have to change the communication 
-      // to multimode for this or translate int to bool..
-      result = runOptions->getValue<int>("calc_full_pk");
-    }
+      // Clear anything from previous run
+      result = multimode_inputs();
 
-    void get_multimode_results(gambit_inflation_observables & observs)
-    { 
-      using namespace Pipes::get_multimode_results;
-
-            
-      // 1) settings for multimode specific to each inflation model 
-      // the definitions are in the MultiModeCode file modpk_potential.f90 
-
-      // number of inflatons, choice of inflation potential and  
-      // consistency check: the dimension of the vector vparams has to be equal to
-      // (poential_choice) x (vparam_rows) in the end => Todo add the check! 
-      int num_inflaton = -1 ; 
-      int potential_choice = -1; 
-      int vparam_rows = -1;
+      // N_pivot is model parameter in all inflation models
+      result.N_pivot = *Param["N_pivot"];
       
-      // initial vectors to pass initial phi for each field, the respective
-      // derivative  and vparams -- the 
-      // vector holding the model parameters
       // NOTE: if the flag 'ic_samp_flags' is set to 1 then phi0 is fixed to phi_ini0
       // and the fields velocities are assumed to be slow roll => no sampling over 
       // phi_init0 and dphi_init0. Set them as GAMBIT model parameters if you want to 
@@ -651,84 +630,83 @@ namespace Gambit
       // the entries for dphi_init0 are taken into account. You will also need to set
       // the prior ranges to be equal to the central value to prevent multimode from 
       // doing some sampling on its own.. )
-      std::vector<double> phi_init0, dphi_init0, vparams;
 
-      // N_pivot is model parameter in all inflation models
-      double N_pivot = *Param["N_pivot"];
- 
+
+      // Go through each allowed inflationary model and set the choice of potential parameters (vparams), 
+      // the number of inflatons, and the initial conditions from the GAMBIT inputs.
+      
+      // N.B. Potential definitions are in the MultiModeCode file modpk_potential.f90, if you wish to 
+      // study a new inflationary potential then implement it there.
       if (ModelInUse("Inflation_SR1quad"))
       {
-        vparams.push_back(*Param["m2_inflaton"]);
-        phi_init0.push_back(*Param["phi_init0"]);
-        potential_choice = 1; // -> 0.5 m_i^2 phi_i^2 --- N-quadratic
-        num_inflaton = 1;
-        vparam_rows = 1;
+        result.vparams.push_back(*Param["m2_inflaton"]);
+        result.phi_init0.push_back(*Param["phi_init0"]);
+        result.potential_choice = 1; // -> 0.5 m_i^2 phi_i^2 --- N-quadratic
+        result.num_inflaton = 1;
+        result.vparam_rows = 1;
       }
       else if (ModelInUse("Inflation_1natural"))
       {
-        vparams.push_back(*Param["lambda"]); 
-        vparams.push_back(*Param["faxion"]); // finv = 1.e0_dp/(10.e0_dp**faxion))
-        phi_init0.push_back(*Param["phi_init0"]);
-        potential_choice = 2; // -> lambda**4*(1.e0_dp+cos(finv*phi))
-        num_inflaton = 1;
-        vparam_rows = 1;
+        result.vparams.push_back(*Param["lambda"]); 
+        result.vparams.push_back(*Param["faxion"]); // finv = 1.e0_dp/(10.e0_dp**faxion))
+        result.phi_init0.push_back(*Param["phi_init0"]);
+        result.potential_choice = 2; // -> lambda**4*(1.e0_dp+cos(finv*phi))
+        result.num_inflaton = 1;
+        result.vparam_rows = 1;
       }
       else if (ModelInUse("Inflation_1quar"))
       {
-        vparams.push_back(*Param["lambda"]);
-        phi_init0.push_back(*Param["phi_init0"]);
-        potential_choice = 3; // -> 0.25 lambda_i phi_i^4 --- N-quartic
-        num_inflaton = 1;
-        vparam_rows = 1;
+        result.vparams.push_back(*Param["lambda"]);
+        result.phi_init0.push_back(*Param["phi_init0"]);
+        result.potential_choice = 3; // -> 0.25 lambda_i phi_i^4 --- N-quartic
+        result.num_inflaton = 1;
+        result.vparam_rows = 1;
       }
       else if (ModelInUse("Inflation_1linearInf"))
       {
-        vparams.push_back(*Param["lambda"]);
-        phi_init0.push_back(*Param["phi_init0"]);
-        potential_choice = 4; // -> lambda_i phi_i --- N-linear
-        num_inflaton = 1;
-        vparam_rows = 1;
+        result.vparams.push_back(*Param["lambda"]);
+        result.phi_init0.push_back(*Param["phi_init0"]);
+        result.potential_choice = 4; // -> lambda_i phi_i --- N-linear
+        result.num_inflaton = 1;
+        result.vparam_rows = 1;
       }
       else if (ModelInUse("Inflation_1mono32Inf"))
       {
-        vparams.push_back(*Param["lambda"]);
-        phi_init0.push_back(*Param["phi_init0"]);
-        potential_choice = 5; // -> 1.5 lambda_i phi_i^(2/3)
-        num_inflaton = 1;
-        vparam_rows = 1;
+        result.vparams.push_back(*Param["lambda"]);
+        result.phi_init0.push_back(*Param["phi_init0"]);
+        result.potential_choice = 5; // -> 1.5 lambda_i phi_i^(2/3)
+        result.num_inflaton = 1;
+        result.vparam_rows = 1;
       }
       else if (ModelInUse("Inflation_1hilltopInf"))
       {
         // @Selim, I don't know the form of the potential so I can't figure 
         // out which one the corresponding one in multimode would be
-        vparams.push_back(*Param["lambda"]); 
-        vparams.push_back(*Param["mu"]);
-        phi_init0.push_back(*Param["phi_init0"]);
-        potential_choice = 5; 
-        num_inflaton = 1;
-        vparam_rows = 1;
+        result.vparams.push_back(*Param["lambda"]); 
+        result.vparams.push_back(*Param["mu"]);
+        result.phi_init0.push_back(*Param["phi_init0"]);
+        result.potential_choice = 5; 
+        result.num_inflaton = 1;
+        result.vparam_rows = 1;
       }
 
-      // MutliMode segFaults if this is empty have to do this properly though (JR) todo
-      dphi_init0.push_back(1.);
-
+      // TODO: MultiMode segFaults if this is empty have to do this properly though (JR)
+      result.dphi_init0.push_back(1.);
 
       static bool first_run = true;
-
-
       // do some consistency check for inputs passed to multimode before the first run
       if(first_run)
       {
-        int size = vparams.size();
-        if (num_inflaton*vparam_rows != size)
+        int size = result.vparams.size();
+        if (result.num_inflaton*result.vparam_rows != size)
         {
           std::ostringstream err;
           err << "Error in MultiModecode settings: the number of free parameters in a inflation model";
           err << " set through the vector 'vparams' has to match (num_inflaton) x (vparam_rows). In this case the ";
-          err << "length is " << vparams.size() << " and the product is "  << num_inflaton*vparam_rows <<  " -- double check the model dependent settings in 'get_multimode_results'";
+          err << "length is " << result.vparams.size() << " and the product is "  << result.num_inflaton*result.vparam_rows <<  " -- double check the model dependent settings in 'get_multimode_results'";
           CosmoBit_error().raise(LOCAL_INFO, err.str());
         }
-        if (potential_choice == -1 || num_inflaton == -1 || vparam_rows == -1)
+        if (result.potential_choice == -1 || result.num_inflaton == -1 || result.vparam_rows == -1)
         {
           std::ostringstream err;
           err << "Error in MultiModecode settings: you did not set one (or more) of the parameters";
@@ -739,9 +717,28 @@ namespace Gambit
         first_run = false;
       }
 
+
+      /// @TODO Separate into cases where we want the full ps and the parametrised ps
+
+      result.k_min = runOptions->getValueOrDef<double>(1e-6,"k_min");
+      result.k_max = runOptions->getValueOrDef<double>(1e+6,"k_min");
+      result.numsteps = runOptions->getValueOrDef<int>(100, "numsteps");
+
+
+
       //  Read in MultiMode settings from the yaml file
-      int slowroll_infl_end = runOptions->getValue<int> ("slowroll_infl_end");
-      int instreheat = runOptions->getValue<int> ("instreheat");
+      // TODO use getValueOrDef as much as possible
+
+      //-------------------------------------------------------------
+      // Parameters to control how the ICs are sampled.
+      //-------------------------------------------------------------
+      result.ic_sampling = runOptions->getValue<int> ("ic_sampling");
+      result.energy_scale = runOptions->getValue<double> ("energy_scale");
+      result.numb_samples = runOptions->getValue<int> ("numb_samples");
+      result.save_iso_N = runOptions->getValue<int> ("save_iso_N");
+      result.N_iso_ref = runOptions->getValue<int> ("N_iso_ref"); //double check this
+      result.slowroll_infl_end = runOptions->getValue<int> ("slowroll_infl_end");
+      result.instreheat = runOptions->getValue<int> ("instreheat");
 
 
       // (JR) @Selim: we should probably double check if we need
@@ -749,25 +746,42 @@ namespace Gambit
       //-------------------------------------------------------------
       // Control the output of analytic approximations for comparison.
       //-------------------------------------------------------------
-      int use_deltaN_SR = runOptions->getValue<int> ("use_deltaN_SR");
-      int evaluate_modes = runOptions->getValue<int> ("evaluate_modes");
-      int use_horiz_cross_approx = runOptions->getValue<int> ("use_horiz_cross_approx");
-      int get_runningofrunning = runOptions->getValue<int> ("get_runningofrunning");
-      //-------------------------------------------------------------
-      // Parameters to control how the ICs are sampled.
-      //-------------------------------------------------------------
-      int ic_sampling = runOptions->getValue<int> ("ic_sampling");
-      double energy_scale = runOptions->getValue<double> ("energy_scale");
-      int numb_samples = runOptions->getValue<int> ("numb_samples");
-      int save_iso_N = runOptions->getValue<int> ("save_iso_N");
-      double N_iso_ref = runOptions->getValue<int> ("N_iso_ref"); //double check this
+      result.use_deltaN_SR = runOptions->getValue<int> ("use_deltaN_SR");
+      result.evaluate_modes = runOptions->getValue<int> ("evaluate_modes");
+      result.use_horiz_cross_approx = runOptions->getValue<int> ("use_horiz_cross_approx");
+      result.get_runningofrunning = runOptions->getValue<int> ("get_runningofrunning");
       
 
+      /// Sampling in k...
+      result.k_min = runOptions->getValueOrDef<double>(1e-6,"k_min");
+      result.k_max = runOptions->getValueOrDef<double>(1e+6,"k_min");
+      result.numsteps = runOptions->getValueOrDef<int>(100, "numsteps");
+
+      // has to be set to be the same as the scale entering class. todo
+      // fix through some capability (probably the same setting the clac_pk_full variable for first version)
+      result.k_pivot = runOptions->getValue<double> ("k_pivot"); 
+      // difference in k-space used when pivot-scale observables from mode equations are evaluated
+      // Samples in uniform increments in log(k).
+      result.dlnk = runOptions->getValue<double> ("dlnk");
+
+    }
+
+    /// Passes the inputs from the MultiModeCode initialisation function 
+    /// and computes the outputs.
+    /// TODO: split this up into primordial_ps and parametrised_ps versions.
+    void get_multimode_primordial_ps(primordial_ps &result)
+    { 
+      using namespace Pipes::get_multimode_primordial_ps;
+
+
+      // Get the inflationary inputs
+      multimode_inputs inputs = *Dep::multimode_input_parameters;
 
       //-------------------------------------------------------------
       // (JR) @Selim Used to be yaml options but probably should not be -- waiting 
       // until they are removed as arguments of multimodecode_gambit_driver
       //-------------------------------------------------------------
+      // TODO remove these from MMC driver & function below...
       std::vector<double> vp_prior_min = {1,1,1};
       std::vector<double> vp_prior_max = {1,1,1};
       int param_sampling = 1; // 1 means vparam is kept constant -> this is what we want in gambit, so fix it!
@@ -777,72 +791,110 @@ namespace Gambit
       std::vector<double> phi0_priors_max = {10.};
       std::vector<double> dphi0_priors_min = {0.};
       std::vector<double> dphi0_priors_max = {0.};
-      double N_pivot_prior_min = *Param["N_pivot"];
-      double N_pivot_prior_max = *Param["N_pivot"];
-
-      
-      // get setting if full pk or only A_s and n_s are supposed to be calculated from capability
-      static int calc_full_pk = *Dep::multimode_pk_setting; 
-      // has to be set to be the same as the scale entering class. todo
-      // fix through some capability (probably the same setting the clac_pk_full variable for first version)
-      double k_pivot = runOptions->getValue<double> ("k_pivot"); 
-      // difference in k-space used when pivot-scale observables from mode equations are evaluated
-      // Samples in uniform increments in log(k).
-      double dlnk = runOptions->getValue<double> ("dlnk");
+      double N_pivot_prior_min = inputs.N_pivot;
+      double N_pivot_prior_max = inputs.N_pivot;
 
 
       // The parameters below are only used by multimode if the full Pk is requested. 
-      int steps = runOptions->getValue<int> ("steps"); 
-      double kmin = runOptions->getValue<double> ("kmin");
-      // S.B. TODO kmax currently does nothing. Presumably it should, no?
-      //double kmax = runOptions->getValue<double> ("kmax");
+      int steps = inputs.numsteps;
+      double kmin = inputs.k_min;
+      double kmax = inputs.k_min;
+      // S.B. TODO kmax currently does nothing
 
+      gambit_inflation_observables observables;
+
+      int calcfullpk = 1;
 
       //-------------------------------------------------------------
       // The function below calls the MultiModeCode backend
       //  for a given choice of inflationary model,
       //  which calculates the observables.
       //-------------------------------------------------------------
-      BEreq::multimodecode_gambit_driver(&observs,                    num_inflaton,                 potential_choice, 
-                                          slowroll_infl_end,          instreheat,                   vparam_rows,
-                                          use_deltaN_SR,              evaluate_modes,               use_horiz_cross_approx, 
-                                          get_runningofrunning,       ic_sampling,                  energy_scale,
-                                          numb_samples,               save_iso_N,                   N_iso_ref,
-                                          param_sampling,             byVal(&vp_prior_min[0]),      byVal(&vp_prior_max[0]),
-                                          varying_N_pivot,            use_first_priorval,           byVal(&phi_init0[0]),
-                                          byVal(&dphi_init0[0]),      byVal(&vparams[0]),           N_pivot,
-                                          k_pivot,                    dlnk,                         calc_full_pk,
-                                          steps,                      kmin,                         byVal(&phi0_priors_min[0]),
-                                          byVal(&phi0_priors_max[0]), byVal(&dphi0_priors_min[0]),  byVal(&dphi0_priors_max[0]), 
-                                          N_pivot_prior_min,          N_pivot_prior_max);
+      BEreq::multimodecode_gambit_driver(&observables,                 inputs.num_inflaton,          inputs.potential_choice, 
+                                         inputs.slowroll_infl_end,     inputs.instreheat,            inputs.vparam_rows,
+                                         inputs.use_deltaN_SR,         inputs.evaluate_modes,        inputs.use_horiz_cross_approx, 
+                                         inputs.get_runningofrunning,  inputs.ic_sampling,           inputs.energy_scale,
+                                         inputs.numb_samples,          inputs.save_iso_N,            inputs.N_iso_ref,
+                                         param_sampling,               byVal(&vp_prior_min[0]),      byVal(&vp_prior_max[0]),
+                                         varying_N_pivot,              use_first_priorval,           byVal(&inputs.phi_init0[0]),
+                                         byVal(&inputs.dphi_init0[0]), byVal(&inputs.vparams[0]),    inputs.N_pivot,
+                                         inputs.k_pivot,               inputs.dlnk,                  calcfullpk,
+                                         steps,                        kmin,                         byVal(&phi0_priors_min[0]),
+                                         byVal(&phi0_priors_max[0]),   byVal(&dphi0_priors_min[0]),  byVal(&dphi0_priors_max[0]), 
+                                         N_pivot_prior_min,            N_pivot_prior_max);
 
-    }
-
-    void get_multimode_primordial_ps(primordial_ps &result)
-    {
-      using namespace Pipes::get_multimode_primordial_ps;
-      gambit_inflation_observables observables = *Dep::multimode_results;
 
       // TODO: length of array needs to come from MultiModeCode 
-      //primordial_ps pps;
       // int len = observables.k_size;
       result.fill_k(observables.k_array, 100);
       result.fill_P_s(observables.pks_array, 100);
-			result.fill_P_s_iso(observables.pks_array_iso, 100);
+      result.fill_P_s_iso(observables.pks_array_iso, 100);
       result.fill_P_t(observables.pkt_array, 100);
     }
 
+    /// Passes the inputs from the MultiModeCode initialisation function 
+    /// and computes the outputs.
+    /// TODO: split this up into primordial_ps and parametrised_ps versions.
     void get_multimode_parametrised_ps(parametrised_ps &result)
-    {
+    { 
       using namespace Pipes::get_multimode_parametrised_ps;
-      gambit_inflation_observables observables = *Dep::multimode_results;
 
-      parametrised_ps pps;
-      pps.set_ns(observables.ns);
-      pps.set_As(observables.As);
-      pps.set_r(observables.r);
 
-      result = pps;
+      // Get the inflationary inputs
+      multimode_inputs inputs = *Dep::multimode_input_parameters;
+
+
+      //-------------------------------------------------------------
+      // (JR) @Selim Used to be yaml options but probably should not be -- waiting 
+      // until they are removed as arguments of multimodecode_gambit_driver
+      //-------------------------------------------------------------
+      // TODO remove these from MMC driver & function below...
+      std::vector<double> vp_prior_min = {1,1,1};
+      std::vector<double> vp_prior_max = {1,1,1};
+      int param_sampling = 1; // 1 means vparam is kept constant -> this is what we want in gambit, so fix it!
+      int varying_N_pivot = 0;
+      int use_first_priorval = 1; // means that first entry of vector is used for all variables
+      std::vector<double> phi0_priors_min = {10.};
+      std::vector<double> phi0_priors_max = {10.};
+      std::vector<double> dphi0_priors_min = {0.};
+      std::vector<double> dphi0_priors_max = {0.};
+      double N_pivot_prior_min = inputs.N_pivot;
+      double N_pivot_prior_max = inputs.N_pivot;
+
+
+      // The parameters below are only used by multimode if the full Pk is requested. 
+      // TODO not needed here
+      int steps = inputs.numsteps;
+      double kmin = inputs.k_min;
+      double kmax = inputs.k_min;
+      // S.B. TODO kmax currently does nothing
+
+      gambit_inflation_observables observables;
+
+      int calcfullpk = 0;
+
+      //-------------------------------------------------------------
+      // The function below calls the MultiModeCode backend
+      //  for a given choice of inflationary model,
+      //  which calculates the observables.
+      //-------------------------------------------------------------
+      BEreq::multimodecode_gambit_driver(&observables,                 inputs.num_inflaton,          inputs.potential_choice, 
+                                         inputs.slowroll_infl_end,     inputs.instreheat,            inputs.vparam_rows,
+                                         inputs.use_deltaN_SR,         inputs.evaluate_modes,        inputs.use_horiz_cross_approx, 
+                                         inputs.get_runningofrunning,  inputs.ic_sampling,           inputs.energy_scale,
+                                         inputs.numb_samples,          inputs.save_iso_N,            inputs.N_iso_ref,
+                                         param_sampling,               byVal(&vp_prior_min[0]),      byVal(&vp_prior_max[0]),
+                                         varying_N_pivot,              use_first_priorval,           byVal(&inputs.phi_init0[0]),
+                                         byVal(&inputs.dphi_init0[0]), byVal(&inputs.vparams[0]),    inputs.N_pivot,
+                                         inputs.k_pivot,               inputs.dlnk,                  calcfullpk,
+                                         steps,                        kmin,                         byVal(&phi0_priors_min[0]),
+                                         byVal(&phi0_priors_max[0]),   byVal(&dphi0_priors_min[0]),  byVal(&dphi0_priors_max[0]), 
+                                         N_pivot_prior_min,            N_pivot_prior_max);
+
+
+      result.set_ns(observables.ns);
+      result.set_As(observables.As);
+      result.set_r(observables.r);
     }
 
     void get_parametrised_ps_LCDM(parametrised_ps &result)
@@ -2201,7 +2253,7 @@ namespace Gambit
       logger() << LogTags::debug << "(calc_MP_combined_LogLike):\n\n";
       for (const auto &p : MP_lnLs)
       {
-	      logger()  << "name: "  << p.first << "\tvalue: " << p.second << "\n";
+          logger()  << "name: "  << p.first << "\tvalue: " << p.second << "\n";
         lnL += p.second;
       }
       logger() << EOM;
