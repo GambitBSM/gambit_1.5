@@ -1188,6 +1188,7 @@ endif()
 # classy
 set(name "classy")
 set(ver "2.6.3")
+set(sfver "2_6_3")
 set(lib "classy")
 set(patch "${PROJECT_SOURCE_DIR}/Backends/patches/${name}/${ver}")
 set(dl "https://github.com/lesgourg/class_public/archive/v${ver}.tar.gz")
@@ -1204,7 +1205,8 @@ if(NOT ditched_${name}_${ver})
     COMMAND sed ${dashi} -e "s#autosetup.py install#autosetup.py build#g" Makefile
     BUILD_COMMAND ${CMAKE_MAKE_PROGRAM} CC=${CMAKE_C_COMPILER} OMPFLAG=-fopenmp OPTFLAG= CCFLAG=${BACKEND_C_FLAGS} LDFLAG=${BACKEND_C_FLAGS} all
     COMMAND ${CMAKE_COMMAND} -E make_directory lib
-    COMMAND find python/ -name "classy_2_6_3.so" | xargs -I {} cp "{}" lib/
+    COMMAND find python/ -name "classy.so" | xargs -I {} cp "{}" lib/
+    COMMAND echo "#This is a trampoline script to import the cythonized python module under a different name\\nfrom ${lib} import *" > lib/${lib}_${sfver}.py
     INSTALL_COMMAND ""
   )
   add_extra_targets("backend" ${name} ${ver} ${dir} ${dl} clean)
@@ -1213,6 +1215,7 @@ endif()
 
 set(name "classy")
 set(ver "exo_2.7.0")
+set(sfver "exo_2_7_0")
 set(lib "classy")
 set(patch "${PROJECT_SOURCE_DIR}/Backends/patches/${name}/${ver}")
 set(dl "https://github.com/lesgourg/class_public/archive/067b3868f6501eb68df35554cda5e3981129d48c.tar.gz") # The huge number is the commit ID of ExoCLASS_2.7.0
@@ -1231,7 +1234,8 @@ if(NOT ditched_${name}_${ver})
     COMMAND sed ${dashi} -e "s#autosetup.py install#autosetup.py build#g" Makefile
     BUILD_COMMAND ${CMAKE_MAKE_PROGRAM} CC=${CMAKE_C_COMPILER} OMPFLAG=-fopenmp OPTFLAG= CCFLAG=${BACKEND_C_FLAGS} LDFLAG=${BACKEND_C_FLAGS} all
     COMMAND ${CMAKE_COMMAND} -E make_directory lib
-    COMMAND find python/ -name "classy_exo_2_7_0.so" | xargs -I {} cp "{}" lib/
+    COMMAND find python/ -name "classy.so" | xargs -I {} cp "{}" lib/
+    COMMAND echo "#This is a trampoline script to import the cythonized python module under a different name\\nfrom ${lib} import *" > lib/${lib}_${sfver}.py
     INSTALL_COMMAND ""
   )
   add_extra_targets("backend" ${name} ${ver} ${dir} ${dl} clean)
