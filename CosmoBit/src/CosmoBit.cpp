@@ -363,8 +363,6 @@ namespace Gambit
       result["N_ncdm"] = 1;
 
       result["mNu_tot_eV"] = 0.06;
-
-      result["N_ur_SMnu"]= 2.0328;  // dNeff= 2.0328 for 1 massive neutrino at CMB release
     }
 
     void set_NuMasses_SM(map_str_dbl &result)
@@ -394,34 +392,6 @@ namespace Gambit
       result["N_ncdm"] = N_ncdm;
 
       result["mNu_tot_eV"] = mNu1 + mNu2 + mNu3;
-
-      switch (N_ncdm)
-      {
-        case 1:
-          result["N_ur_SMnu"]= 2.0328;  // dNeff= 2.0328 for 1 massive neutrino at CMB release
-          break;
-        case 2:
-          result["N_ur_SMnu"]= 1.0196;  // dNeff= 2.0328 for 1 massive neutrino at CMB release
-          break;
-        case 3:
-          result["N_ur_SMnu"]= 0.00641;  // dNeff= 0.00641 for 3 massive neutrinos at CMB release
-          break;
-        case 0:
-          {
-            std::ostringstream err;
-            err << "Warning: All your neutrino masses are zero. The Planck baseline LCDM model assumes at least one massive neutrino.\n";
-            err << "A cosmological model without massive neutrinos is not implemented in CosmoBit. If you want to consider this you can add it to the function 'set_NuMasses_SM' of the capability 'NuMasses_SM' ";
-            CosmoBit_warning().raise(LOCAL_INFO, err.str());
-          }
-          break;
-        default:
-          {
-            std::ostringstream err;
-            err << "You are asking for more than three massive neutrino species.\n";
-            err << "Such a case is not implemented in CosmoBit. If you want to consider this you can add it to the function 'set_NuMasses_SM' of the capability 'NuMasses_SM'.";
-            CosmoBit_error().raise(LOCAL_INFO, err.str());
-          }
-      }
     }
 
     void get_mNu_tot(double& result)
@@ -430,6 +400,64 @@ namespace Gambit
 
       map_str_dbl NuMasses = *Dep::NuMasses_SM;
       result = NuMasses["mNu_tot_eV"];
+    }
+
+    void get_N_ur(double& result)
+    {
+      // Returns the effective number of ultrarelativistic species today
+      using namespace Pipes::get_N_ur;
+
+      map_str_dbl NuMassInfo = *Dep::NuMasses_SM;
+
+      int N_ncdm = static_cast<int>(NuMassInfo["N_ncdm"]);
+      double N_ur{};
+      switch (N_ncdm)
+      {
+        case 1:
+          N_ur = 2.0328;  // dNeff= 2.0328 for 1 massive neutrino at CMB release
+          break;
+        case 2:
+          N_ur= 1.0196;  // dNeff= 2.0328 for 1 massive neutrino at CMB release
+          break;
+        case 3:
+          N_ur = 0.00641;  // dNeff= 0.00641 for 3 massive neutrinos at CMB release
+          break;
+        case 0:
+          {
+            std::ostringstream err;
+            err << "Warning: All your neutrino masses are zero. The Planck baseline LCDM model assumes at least one massive neutrino.\n";
+            err << "A cosmological model without massive neutrinos is not implemented in CosmoBit. If you want to consider this you can add it to the function 'get_N_ur' of the capability 'N_ur' ";
+            CosmoBit_warning().raise(LOCAL_INFO, err.str());
+          }
+          break;
+        default:
+          {
+            std::ostringstream err;
+            err << "You are asking for more than three massive neutrino species.\n";
+            err << "Such a case is not implemented in CosmoBit. If you want to consider this you can add it to the function 'get_N_ur' of the capability 'N_ur'.";
+            CosmoBit_error().raise(LOCAL_INFO, err.str());
+          }
+      }
+
+      result = N_ur;
+      if (ModelInUse("etaBBN_rBBN_rCMB_dNeffBBN_dNeffCMB"))
+      {
+        // Check if the input for dNeff is negative (unphysical)
+        static bool allow_negative_dNeff = runOptions->getValueOrDef<bool>(false,"allow_negative_delta_neff");
+        const ModelParameters& NP_params = *Dep::etaBBN_rBBN_rCMB_dNeffBBN_dNeffCMB_parameters;
+        double dNeffCMB_rad =  NP_params.at("dNeff_CMB");
+        double rCMB =  NP_params.at("r_CMB");
+        if ( (!allow_negative_dNeff) && (dNeffCMB_rad < 0.0) )
+        {
+          std::string err = "A negative value for \"dNeff_CMB\" is unphysical and is not allowed in CosmoBit by default!\n\n";
+          err += "If you want to proceed with megative values, please set the \"allow_negative_delta_neff\"-rule to \"true\" within the yaml-file.";
+          CosmoBit_error().raise(LOCAL_INFO,err.c_str());
+        }
+
+        // If the check is passed, set the result.
+        result = pow(rCMB,4)*(N_ur) + dNeffCMB_rad;
+      }
+      logger() << "N_ur calculated to be " << result << EOM;
     }
 
     /// create a python dictionary with the inputs that have to be passed to class 
@@ -442,10 +470,10 @@ namespace Gambit
       result.clear();
 
       map_str_dbl NuMasses_SM = *Dep::NuMasses_SM;
-      int N_ncdm = (int)NuMasses_SM["N_ncdm"];
+      int N_ncdm = static_cast<int>(NuMasses_SM["N_ncdm"]);
 
       // set number of ultra relativistic species
-      result["N_ur"] = NuMasses_SM["N_ur_SMnu"];
+      result["N_ur"] = *Dep::N_ur;
 
       // Number of non-cold DM species
       // if non-zero a mass & temperature for each species has to be 
@@ -1349,11 +1377,9 @@ namespace Gambit
     {
       using namespace Pipes::compute_Omega0_ur;
 
-      // Capability NuMasses_SM takes care of setting N_ur right for considered number of
-      // massive neutrinos & extra model dependent contributions
-      map_str_dbl NuMasses_SM = *Dep::NuMasses_SM;
-      double N_ur = NuMasses_SM["N_ur_SMnu"];
-      result = (N_ur)*7./8.*pow(4./11.,4./3.)*(*Dep::Omega0_g);
+      double N_ur = *Dep::N_ur;
+      double Omega0_g = *Dep::Omega0_g;
+      result = (N_ur)*7./8.*pow(4./11.,4./3.)* Omega0_g;
     }
 
 
@@ -1362,20 +1388,9 @@ namespace Gambit
     {
       using namespace Pipes::compute_Omega0_ncdm;
 
-      double mNu_tot_eV; // sum of neutrino masses
-      if (ModelInUse("StandardModel_SLHA2"))
-      {
-        // (PS) Heads up! The units in StandardModel_SLHA2 are GeV
-        // Here we are using eV
-        mNu_tot_eV = 1e9*(*Param["mNu1"] + (*Param["mNu2"]) + (*Param["mNu3"]) );
-      }
-
-      else
-      {
-        mNu_tot_eV = 0.06; // default to standard Planck case of 1 massive neutrino with m = 0.06 eV
-      }
-
+      double mNu_tot_eV = *Dep::mNu_tot;
       double h = *Param["H0"]/100;
+
       result = mNu_tot_eV/(93.14*h*h);  // TODO: heads up: explicit assumption of T_ncdm = 0.71611 and T_cmb goes in here. Has to be generalised
     }
 

@@ -166,6 +166,15 @@ START_MODULE
     DEPENDENCY(NuMasses_SM, map_str_dbl)
     #undef FUNCTION
   #undef CAPABILITY
+
+  #define CAPABILITY N_ur
+  START_CAPABILITY
+    #define FUNCTION get_N_ur
+    START_FUNCTION(double)
+    MODEL_CONDITIONAL_DEPENDENCY(etaBBN_rBBN_rCMB_dNeffBBN_dNeffCMB_parameters,ModelParameters,etaBBN_rBBN_rCMB_dNeffBBN_dNeffCMB)
+    DEPENDENCY(NuMasses_SM, map_str_dbl)
+    #undef FUNCTION
+  #undef CAPABILITY
  /// ------------------------
     
 
@@ -235,13 +244,14 @@ START_MODULE
       DEPENDENCY(energy_injection_efficiency, DarkAges::fz_table)
      #undef FUNCTION
   #undef CAPABILITY
-  
+
   #define CAPABILITY NuMasses_classy_input
   START_CAPABILITY
     #define FUNCTION set_NuMasses_classy_input
     START_FUNCTION(pybind11::dict)
     DEPENDENCY(T_ncdm,            double)
     DEPENDENCY(NuMasses_SM, map_str_dbl)
+    DEPENDENCY(N_ur,double)
     #undef FUNCTION
   #undef CAPABILITY
 
@@ -631,7 +641,7 @@ START_MODULE
     #define FUNCTION compute_Omega0_ur
       START_FUNCTION(double)
       DEPENDENCY(Omega0_g, double)
-      DEPENDENCY(NuMasses_SM, map_str_dbl)
+      DEPENDENCY(N_ur, double)
     #undef FUNCTION
   
     #define FUNCTION get_Omega0_ur_classy  
@@ -659,7 +669,7 @@ START_MODULE
     #define FUNCTION compute_Omega0_ncdm
       START_FUNCTION(double)
       DEPENDENCY(T_cmb, double)
-      ALLOW_MODELS(LCDM,StandardModel_SLHA2)
+      DEPENDENCY(mNu_tot,double)
     #undef FUNCTION
 
   #undef CAPABILITY
