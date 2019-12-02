@@ -127,6 +127,8 @@
 // to scan over the four standard cosmological parameters (H0, omega_b, omega_cdm, tau_reio) and
 // the shape of the primordial power spectrum will be determined by the inflation model in use
 
+
+// not used atm -- have to think about if we should keep it or not
 #define MODEL Inflation_tensor
 START_MODEL
 DEFINEPARS(ln10A_s,n_s,r_tensor)
@@ -166,7 +168,7 @@ DEFINEPARS(lambda,N_pivot,phi_init0)
 // Inflation model: m phi --- linear inflation
 // A_s, n_s and r are given by inflationary model
 // parameters: N_piv, m^2.
-#define MODEL Inflation_1linearInf
+#define MODEL Inflation_1linear
 START_MODEL
 DEFINEPARS(lambda,N_pivot,phi_init0)
 #undef MODEL

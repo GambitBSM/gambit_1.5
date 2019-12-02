@@ -662,7 +662,7 @@ namespace Gambit
         result.num_inflaton = 1;
         result.vparam_rows = 1;
       }
-      else if (ModelInUse("Inflation_1linearInf"))
+      else if (ModelInUse("Inflation_1linear"))
       {
         result.vparams.push_back(*Param["lambda"]);
         result.phi_init0.push_back(*Param["phi_init0"]);
@@ -670,7 +670,7 @@ namespace Gambit
         result.num_inflaton = 1;
         result.vparam_rows = 1;
       }
-      else if (ModelInUse("Inflation_1mono32Inf"))
+      else if (ModelInUse("Inflation_1mono32"))
       {
         result.vparams.push_back(*Param["lambda"]);
         result.phi_init0.push_back(*Param["phi_init0"]);
