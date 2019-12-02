@@ -495,44 +495,59 @@ LCDM: |
    n_s                 - parametrises the primordial scale dependence.
    tau_reio            - reionization optical depth
 
-LCDMtensor: |
-   Simplest extension of the Lambda-CDM model with the addition of a tensor degree of freedom. This parameter is set to zero in the LCDM model.
-
-   omega_b             - baryon density parameter
-   omega_cdm           - dark matter density parameter
-   H0                  - Hubble constant
-   ln10A_s             - primordial curvature fluctuation amplitude
-   n_s                 - parametrises the primordial scale dependence.
-   tau_reio            - reionization optical depth
-   r                   - ratio of tensor primordial power to curvature power
-
-
-LCDM_dNeffCMB_dNeffBBN_etaBBN: |
-
-   The standard Lambda-CDM model with three additional free parameters: the number of effective relativistic degrees of freedom today, dNeff, and in the early universe during the epoch of BBN, eta_BBN. as well as the baryon to photon ration at BBN, eta_BBN. Neutrino masses handling see below. 
-
-   omega_b             - baryon density parameter
-   omega_cdm           - dark matter density parameter
-   H0                  - Hubble constant
-   ln10A_s             - primordial curvature fluctuation amplitude
-   n_s                 - parametrises the primordial scale dependence.
-   tau_reio            - reionization optical depth
-   dNeff               - additional relativistic degrees of freedom today (Neff = dNu+dNeff, i.e. sum of contribution from massive neutrinos and extra component).
-   dNeff_BBN           - additional relativistic degrees of freedom in the early universe (Neff = 3.046+dNeff)
-   etaBBN              - baryon to photon ratio at BBN (eta at CMB set by omega_b)
-
    Neutrino masses:
    default: 1 massive neutrino with m_nu = 0.06eV (as in the Planck 2015/2018 'baseline' model)
    if model 'StandardModel_numass_single' is scanned as well: one massive neutrino with m_nu = mNu.
    if model 'StandardModel_numass_degenerate' is scanned as well: three massive neutrinos with m_nu = Smu/3. each. 
 
-LCDM_dNeffCMB_dNeffBBN: |
+LCDM_no_primordial: |
    
-   Child model of LCDM_dNeffCMB_dNeffBBN_etaBBN model. Parameters are as in parent model but the model parameter etaBBN is derived. It is assumed to be equal to the baryon-to-photon ration at CMB with SM model assumptions, i.e. etaBBN = etaCMB = eta0.
+   A Lambda-CDM model without the parameters related to the shape of the primordial power spectrum. Use this model in combination with any model providing either a parameterised or full primordial power spectrum independently, e.g. any of the 'Inflation_' models. 
 
-LCDM_dNeffCMB: |
+   omega_b             - baryon density parameter
+   omega_cdm           - dark matter density parameter
+   H0                  - Hubble constant
+   tau_reio            - reionization optical depth
+
+etaBBN_rBBN_rCMB_dNeffBBN_dNeffCMB: |
+
+   Model to be scanned in addition to LCDM as an extension: allowing for non-standard values of the baryon-to-photon ratio at BBN, non-standard values of the temperature ratio between photon and neutrinos at BBN and CMB release, as well as additional ultra-relativistic species present during BBN or at CMB release.
+   Total value of Neff @BBN: 3.046 x (r_BBN)^4 + dNeffBBN
+   Total value of Neff @CMB: 3.046 x (r_CMB)^4 + dNeffCMB
+   Total value of Neff today: Neff @CMB - N_ur_SMnu x (r_CMB)^4 (value of Neff depending on #massive Nu) assuming that r_CMB = r_0 and dNeffCMB = dNeff0   => this is the value we have to pass to class as `N_ur`
+
+   etaBBN              - baryon-to-photon ratio during BBN (eta at CMB set by omega_b)
+   rBBN                - factor by which the temperature ratio of SM neutrinos and photons deviates 
+                         from the standard value T_ncdm during BBN
+   rCMB                - factor by which the temperature ratio of SM neutrinos and photons deviates 
+                         from the standard value T_ncdm at CMB release  
+   dNeffBBN            - additional ultra-relativistic species during BBN
+   dNeffCMB            - additional ultra-relativistic species at CMB
+
+etaBBN: |
+   Child model of etaBBN_rBBN_rCMB_dNeffBBN_dNeffCMB with only etaBBN as free parameter. Only allows for non-standard baryon-to-photon ratios, Neff as in SM at all times => rBBN = rCMB = 1 and dNeffBBN = dNeffCMB = 0. 
+
+   etaBBN              - baryon-to-photon ratio during BBN (eta at CMB set by omega_b)
+
+rBBN_rCMB_dNeffBBN_dNeffCMB: |
    
-   Child model of LCDM_dNeffCMB_dNeffBBN model. Parameters are as in parent model but the model parameter dNeff_BBN is derived. It is assumed to be equal to the value at CMB release, i.e. dNeffBBN = dNeff.
+   Child model of etaBBN_rBBN_rCMB_dNeffBBN_dNeffCMB. Parameters as in parent but with etaBBN = eta0 (calculated from omega_b from a LCDM model)
+
+dNeffBBN_dNeffCMB: |
+   
+   Child model of rBBN_rCMB_dNeffBBN_dNeffCMB model. Parameters are as in parent model but without allowing for non-standard neutrino temperatures => rBBN = rCMB = 1.
+
+dNeffCMB: |
+   
+   Child model of dNeffBBN_dNeffCMB model. Parameters are as in parent model but the number of extra ultra-relativistic species is assumed to be constant between BBN and CMB, hence dNeffBBN = dNeffCMB.
+
+rBBN_rCMB: |
+   
+   Child model of rBBN_rCMB_dNeffBBN_dNeffCMB model. Parameters are as in parent model but without allowing for additional ultra-relativistic species => dNeffBBN = dNeffCMB = 0.
+
+rCMB: |
+   
+   Child model of rBBN_rCMB model. Parameters are as in parent model but the neutrino to photon temperature ratio between BBN and CMB is assumed to be constant, hence rBBN = rCMB.
 
 LCDM_dNeffCMB: |
    
@@ -546,10 +561,47 @@ LCDM_ExtdNeffCMB_ExtetaBBN: |
    eta_BBN set by capability etaBBN with function valid for this model
    dNeff set by capability ExtdNeffCMB with function valid for this model
 
-cosmo_nuisance_params: |
-   Cosmological nuisance parameters (besides the ones entering the Planck likelihood, these are stored in Planck_XXX). Parameters:
 
-   M_AbsMag_SNe         - absolute magnitude of Type Ia Supernova
+Inflation_tensor: |
+   Parameterisation of the shape of the primordial power spectrum allowing for a non-zero scalr to tensor ratio r.
+
+   ln10A_s             - primordial curvature fluctuation amplitude
+   n_s                 - parametrises the primordial scale dependence.
+   r                   - ratio of tensor primordial power to curvature power
+
+Inflation_SR1quad: |
+   Inflation model with potential: m^2 phi^2 --- quadratic inflation with slow-roll approximation. A_s, n_s and r are computed from inflationary model parameters (under slow-roll approximation): m2_inflaton,N_pivot,phi_init0.
+
+Inflation_1quar: |
+   Quartic inflation model with potential: 0.25 lambda phi^4. A_s, n_s and r are computed from inflationary
+   model parameters: N_piv, lambda, phi_init0.
+
+Inflation_1mono32: |
+   Inflation model with potential: 2/3 lambda phi^2/3. A_s, n_s and r are computed from inflationary model parameters: N_piv, lambda, phi_init0.
+
+Inflation_1linear: |
+   Linear inflation model with potential: m phi. A_s, n_s and r are given computed from inflationary model parameters: lambda,N_pivot,phi_init0.
+
+Inflation_smash: |
+   Inflation model for SMASH. A_s, n_s and r are computed from inflationary model parameters: log10_xi,log10_beta,log10_lambda,N_pivot.
+
+Inflation_1natural: |
+   N-flation models (axions).
+
+cosmo_nuisance_params_Pantheon: |
+   Cosmological nuisance parameters for Pantheon SNe Ia likelihood as implemented in MontePython. 
+
+   M                   - absolute magnitude of Type Ia Supernova
+
+cosmo_nuisance_params_JLA: |
+   Cosmological nuisance parameters for JLA SNe Ia likelihood as implemented in MontePython. 
+
+   M                   - B band peak magnitude of Type Ia Supernova
+   Delta_M             - Error in M (includes contributions from intrinsic dispersion, 
+                         lensing, and redshift uncertainty)
+   alpha               - SALT2 shape parameter
+   beta                - SALT2 colour parameter
+ 
   
 Planck_TTTEEE: |
    Planck likelihood for high-l TT,TE,EE-spectra with 34 nuissance parameter.
@@ -613,34 +665,6 @@ Planck_lite: |
    Planck likelihood for high-l TT-spectrum (marginalized) with 1 nuissance parameter.
 
    A_planck            - the Planck absolute calibration.
-
-inf_SR1quad_LCDMt: |
-   Simplest 7 parameter cosmology+inflation model: m^2 phi^2 --- quadratic inflation with slow-roll approximation. A_s, n_s and r are given by inflationary model parameters (under slow-roll approximation): N_piv, m^2.
-
-inf_1quarInf_LCDMt: |
-   6 parameter cosmology+inflation model: 0.25 lambda phi^4
-   quartic inflation A_s, n_s and r are given by inflationary
-   model parameters: N_piv, lambda.
-
-inf_1mono32Inf_LCDMt: |
-   6 parameter cosmology+inflation model: 2/3
-   lambda phi^2/3 --- inflation, A_s, n_s and r are
-   given by inflationary model parameters: N_piv, lambda.
-
-inf_1linearInf_LCDMt: |
-   6 parameter cosmology+inflation model: m phi
-   linear inflation, A_s, n_s and r are given by
-   inflationary model parameters: N_piv, m^2.
-
-inf_smashInf_LCDMt: |
-   8 parameter cosmology smash inflation model --- smash inflation
-   A_s, n_s and r are given by inflationary model parameters: xi, m^2.
-
-inf_1naturalInf_LCDMt: |
-   7 parameter cosmology+inflation model with axion-like potential.
-
-inf_1hilltopInf_LCDMt: |
-   7 parameter cosmology+inflation model with hilltop potential.
 
 lowl_SMW_70_dx11d_2014_10_03_v5c_Ap: |
 
