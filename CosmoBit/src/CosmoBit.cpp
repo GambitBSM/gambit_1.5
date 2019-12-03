@@ -1922,25 +1922,22 @@ namespace Gambit
     result["energy_deposition_function"] = "GAMBIT";
 
     // Get the results from the DarkAges tables that hold extra information to be passed to the CLASS thermodynamics structure
-    DarkAges::fz_table fz = *Dep::energy_injection_efficiency;
+    static DarkAges::fz_table fz;
+    fz = *Dep::energy_injection_efficiency;
 
     // set the lengths of the input tables (since we are passing pointers to arrays CLASS has to know how long they are)
-    result["annihil_coef_num_lines"] = fz.num_lines;
+    result["annihil_coef_num_lines"] = fz.redshift.size();
 
     // add the pointers to arrays class needs to know about to input dictionary
     // Note:
     //    - memory addresses are passed as strings (python wrapper for CLASS converts every entry to a string internally so
     //      we need to do that for the memory addresses before python casts them to something else)
-    //    - fz.ptrs_to_member_vecs : map from string to double*, where the string contains the name of the CLASS input 
-    //      parameter and the pointer points to the vector holding the values that should be passed 
-    for (auto it=fz.ptrs_to_member_vecs.begin(); it != fz.ptrs_to_member_vecs.end(); it++) 
-    {
-      std::string key = it->first;
-      // convert memory address 'it->second' to int 'addr'
-      //uintptr_t addr = reinterpret_cast<uintptr_t>(it->second);
-      result[key.c_str()] = memaddress_to_uint(it->second);
-      //result.addEntry(it->first,it->second);
-    }
+    result["annihil_coef_xe"] = memaddress_to_uint(fz.redshift.data());
+    result["annihil_coef_heat"] = memaddress_to_uint(fz.f_heat.data());
+    result["annihil_coef_lya"] = memaddress_to_uint(fz.f_lya.data());
+    result["annihil_coef_ionH"] = memaddress_to_uint(fz.f_hion.data());
+    result["annihil_coef_ionHe"] = memaddress_to_uint(fz.f_heion.data());
+    result["annihil_coef_lowE"] = memaddress_to_uint(fz.f_lowe.data());
   }
 
 
