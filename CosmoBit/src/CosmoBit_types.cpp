@@ -277,8 +277,51 @@ namespace Gambit
     // Default constructor for multimode inputs...
     multimode_inputs::multimode_inputs() {};
 
-    // Default constructor for primordial and parametrised power spectra
-    primordial_ps::primordial_ps() {};
+    // // Default constructor for primordial and parametrised power spectra
+    // primordial_ps::primordial_ps() 
+    // {
+    //   std::cout << "Calling primordial_ps constructor..." << std::endl;
+    // };
+
+    void primordial_ps::fill_k(double *k_array, int len)
+    {
+      std::cout << "Filling k " << std::endl;
+      for (int i=0; i<len; ++i)
+      {
+          std::cout << k_array[i] << " ";
+          double currk = k_array[i];
+          k.push_back(currk);
+      }
+      std::cout << std::endl;
+      std::cout << "Going for the vector..." << std::endl;
+      for (std::vector<double>::iterator it = k.begin(); it != k.end(); ++it)
+      {
+          std::cout << *it << std::endl;
+      }
+    }
+
+    void primordial_ps::addDouble(double dub)
+    {
+      k.push_back(dub);
+    }
+
+    void primordial_ps::fill_P_s(double *P_s_array, int len)
+    {
+      std::vector<double> ps(P_s_array, P_s_array+len);
+      P_s = std::move(ps);
+    }    
+    void primordial_ps::fill_P_s_iso(double *P_s_iso_array, int len)
+    {
+      std::vector<double> psi(P_s_iso_array, P_s_iso_array+len);
+      P_s_iso = std::move(psi);
+    }    
+    void primordial_ps::fill_P_t(double *P_t_array, int len)
+    {
+      std::vector<double> pt(P_t_array, P_t_array+len);
+      P_t = std::move(pt);
+    }
+
+
     parametrised_ps::parametrised_ps() {};
 
   }

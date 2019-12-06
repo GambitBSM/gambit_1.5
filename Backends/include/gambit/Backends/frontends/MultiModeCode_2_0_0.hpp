@@ -25,7 +25,7 @@
 // Load it
 LOAD_LIBRARY
 
-BE_FUNCTION(multimodecode_gambit_driver, void, (gambit_inflation_observables*,int& ,int& ,  int& ,  int& ,int& ,  int& ,  int& ,  int& ,  int& ,int& ,double& ,int& ,  int& ,double& ,int& ,double*,double*,  int& ,  int& ,double*,double*,double*,double& ,double& ,double& ,  int& ,int& ,double& ,double*,double*,double*,double*,double& ,double&),"__multimodecode_gambit_MOD_multimodecode_gambit_driver","multimodecode_gambit_driver")
+BE_FUNCTION(multimodecode_gambit_driver, gambit_inflation_observables, (int& ,int& ,  int& ,  int& ,int& ,  int& ,  int& ,  int& ,  int& ,int& ,double& ,int& ,  int& ,double& ,int& ,double*,double*,  int& ,  int& ,double*,double*,double*,double& ,double& ,double& ,  int& ,int&, double&, double& ,double*,double*,double*,double*,double& ,double&),"__multimodecode_gambit_MOD_multimodecode_gambit_driver","multimodecode_gambit_driver")
 
 BE_FUNCTION(multimodecode_gambit_driver_test, void,(gambit_inflation_observables*, int& , int& ,   int& ,  int& ,int& ,  int& ,  int& ,  int& ,   int& ,int& ,double& ,int& ,  int& ,double& ,int& ,  int& ,  int& ,double& ,double& ,double& ,  int& ,int& ,double& ,double& ,double&),"__multimodecode_gambit_MOD_multimodecode_gambit_driver","multimodecode_gambit_driver_test")
 

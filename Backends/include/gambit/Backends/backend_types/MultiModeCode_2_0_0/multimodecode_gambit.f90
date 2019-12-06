@@ -44,10 +44,14 @@ MODULE multimodecode_gambit
     !Non-Gaussianity
     real(dp) :: f_NL
     real(dp) :: tau_NL
-    real(dp) , dimension(:), Allocatable:: k_array  !<- Added for the FULL POW SPEC
+    real(dp) , dimension(:), Allocatable :: k_array  !<- Added for the FULL POW SPEC
     real(dp) , dimension(:), Allocatable :: pks_array  !<- Added for the FULL POW SPEC
     real(dp) , dimension(:), Allocatable :: pks_iso_array  !<- Added for the FULL POW SPEC
-    real(dp) , dimension(:), Allocatable :: pkt_array  !<- Added for the FULL POW SPEC
+    real(dp) , dimension(:), Allocatable :: pkt_array  !<- Added for the FULL POW SPEC    
+    ! real(dp) , dimension(100) :: k_array  !<- Added for the FULL POW SPEC
+    ! real(dp) , dimension(100) :: pks_array  !<- Added for the FULL POW SPEC
+    ! real(dp) , dimension(100) :: pks_iso_array  !<- Added for the FULL POW SPEC
+    ! real(dp) , dimension(100) :: pkt_array  !<- Added for the FULL POW SPEC
     integer :: k_size
   end type gambit_inflation_observables
 
@@ -57,8 +61,7 @@ MODULE multimodecode_gambit
 
 contains
 
-  subroutine multimodecode_gambit_driver(goutput_inflation_observables,&
-                                         ginput_num_inflaton,&
+  function multimodecode_gambit_driver(ginput_num_inflaton,&
                                          ginput_potential_choice,&
                                          ginput_slowroll_infl_end,&
                                          ginput_instreheat,&
@@ -86,15 +89,18 @@ contains
                                          ginput_calc_full_pk, &
                                          ginput_steps, &
                                          ginput_kmin, &
+                                         ginput_kmax, &
                                          ginput_phi0_priors_min, &
                                          ginput_phi0_priors_max, &
                                          ginput_dphi0_priors_min, &
                                          ginput_dphi0_priors_max, &
                                          ginput_N_pivot_prior_min, &
                                          ginput_N_pivot_prior_max &
-                                         )
-    ! Gambit output for MultiModeCode results
-    type(gambit_inflation_observables), intent(inout) :: goutput_inflation_observables
+                                         ) result(gambit_obs)
+
+    type(gambit_inflation_observables) :: gambit_obs ! output
+
+    integer :: i
 
     ! Gambit interface input parameters
     integer, intent(in) :: ginput_num_inflaton
@@ -112,25 +118,18 @@ contains
     logical, intent(in) :: ginput_save_iso_N
     integer, intent(in) :: ginput_N_iso_ref
     integer, intent(in) :: ginput_param_sampling
-    real(dp), dimension(ginput_num_inflaton,&
-					ginput_num_inflaton),&
-                    intent(in) :: ginput_vp_prior_min
-    real(dp), dimension(ginput_num_inflaton,&
-					ginput_num_inflaton),&
-					intent(in) :: ginput_vp_prior_max
+    real(dp), dimension(ginput_num_inflaton, ginput_num_inflaton), intent(in) :: ginput_vp_prior_min
+    real(dp), dimension(ginput_num_inflaton, ginput_num_inflaton), intent(in) :: ginput_vp_prior_max
     logical, intent(in) :: ginput_varying_N_pivot
     logical, intent(in) :: ginput_use_first_priorval
-    real(dp), dimension(ginput_num_inflaton), &
-                    intent(in) :: ginput_phi_init0
-    real(dp), dimension(ginput_num_inflaton), &
-                    intent(in) :: ginput_dphi_init0
-    real(dp), dimension(ginput_vparam_rows, &
-                    ginput_num_inflaton), &
-                    intent(in) :: ginput_vparams
+    real(dp), dimension(ginput_num_inflaton), intent(in) :: ginput_phi_init0
+    real(dp), dimension(ginput_num_inflaton), intent(in) :: ginput_dphi_init0
+    real(dp), dimension(ginput_vparam_rows, ginput_num_inflaton), intent(in) :: ginput_vparams
     real(dp), intent(in) :: ginput_N_pivot
     real(dp), intent(in) :: ginput_k_pivot
     real(dp), intent(in) :: ginput_dlnk
     real(dp), intent(in) :: ginput_kmin
+    real(dp), intent(in) :: ginput_kmax
     integer, intent(in) :: ginput_steps
     logical, intent(in) :: ginput_calc_full_pk
     real(dp), dimension(ginput_num_inflaton), intent(in) :: ginput_phi0_priors_min
@@ -162,9 +161,8 @@ contains
     real(dp) :: energy_scale
     real(dp), dimension(:,:), allocatable :: icpriors_min, icpriors_max
 
-
     !Other sampling params
-    real(dp) :: N_pivot_prior_min, N_pivot_prior_max, k_min
+    real(dp) :: N_pivot_prior_min, N_pivot_prior_max, k_min, k_max
     integer :: num_inflaton_prior_min, num_inflaton_prior_max
     logical :: varying_N_pivot, varying_num_inflaton
     logical :: more_potential_params
@@ -185,11 +183,13 @@ contains
     use_horiz_cross_approx = ginput_use_horiz_cross_approx
     get_runningofrunning = ginput_get_runningofrunning
     k_min = ginput_kmin
+    k_max = ginput_kmax
+    steps = ginput_steps
     calc_full_pk = ginput_calc_full_pk
 
     ! {1=reg_samp, 2=eqen_samp, 3=slowroll_samp, 6=isoN}
     ic_sampling = ginput_ic_sampling
-	  energy_scale = ginput_energy_scale
+    energy_scale = ginput_energy_scale
     numb_samples = ginput_numb_samples
     save_iso_N = ginput_save_iso_N
     N_iso_ref = ginput_N_iso_ref
@@ -197,6 +197,12 @@ contains
     call deallocate_vars()
     !Make some arrays
     call allocate_vars()
+
+    ! Allocatate the array size to the k and P(k)
+    allocate( gambit_obs % k_array(steps) )
+    allocate( gambit_obs % pks_array(steps) )
+    allocate( gambit_obs % pkt_array(steps) )
+    allocate( gambit_obs % pks_iso_array(steps) )
 
     param_sampling = ginput_param_sampling
     vp_prior_min = ginput_vp_prior_min
@@ -224,7 +230,6 @@ contains
     out_opt%spectra = .false.
     out_opt%modes = .false.
 
-	  steps = ginput_steps
 
     !---------------------------------------------------------------
     ! setting up the integrater options at the code-level.
@@ -265,8 +270,8 @@ contains
     call observs_SR%set_zero()
 
 
-	!Set random seed
-	call init_random_seed()
+    !Set random seed
+    call init_random_seed()
 
     call output_initial_data()
 
@@ -274,7 +279,7 @@ contains
 
       call out_opt%open_files(SR=use_deltaN_SR)
 
-	  call calculate_pk_observables(goutput_inflation_observables,observs,observs_SR,k_pivot,dlnk,calc_full_pk,steps,k_min)
+      call calculate_pk_observables(gambit_obs,observs,observs_SR,k_pivot,dlnk,calc_full_pk,steps,k_min,k_max)
 
       call out_opt%close_files(SR=use_deltaN_SR)
 
@@ -297,7 +302,7 @@ contains
         if (out_opt%modpkoutput) write(*,*) &
           "---------------------------------------------"
 
-        call calculate_pk_observables(goutput_inflation_observables,observs,observs_SR,k_pivot,dlnk,calc_full_pk,steps,k_min)
+        call calculate_pk_observables(gambit_obs,observs,observs_SR,k_pivot,dlnk,calc_full_pk,steps,k_min,k_max)
 
       end do
 
@@ -311,43 +316,49 @@ contains
 
     end if
     ! it might make sense instead to put zero's etc. to the values here instead of just returning
-	if (potential_choice == 18) then
+    if (potential_choice == 18) then
       if (.not. observs%is_ic_ok) then
         ! print*, "SMASH: exiting pk_observables "
         RETURN
-	  else
-		! at the moment, smash potential is only calculated by solving the background dynamics
-		! and using slow roll approximation. going beyong would require solving first order 
-		! mode equations in perturbation theory.
-	    goutput_inflation_observables%As = observs_SR%As
-	    goutput_inflation_observables%ns = observs_SR%ns
-	    goutput_inflation_observables%nt = observs_SR%nt
-	    goutput_inflation_observables%r = observs_SR%r
-	    goutput_inflation_observables%f_NL = observs_SR%f_NL
-	    goutput_inflation_observables%tau_NL = observs_SR%tau_NL
-	    goutput_inflation_observables%alpha_s = observs_SR%alpha_s
+      else
+        ! at the moment, smash potential is only calculated by solving the background dynamics
+        ! and using slow roll approximation. going beyong would require solving first order 
+        ! mode equations in perturbation theory.
+        gambit_obs%As = observs_SR%As
+        gambit_obs%ns = observs_SR%ns
+        gambit_obs%nt = observs_SR%nt
+        gambit_obs%r = observs_SR%r
+        gambit_obs%f_NL = observs_SR%f_NL
+        gambit_obs%tau_NL = observs_SR%tau_NL
+        gambit_obs%alpha_s = observs_SR%alpha_s
       end if
     else
       !-------------setting up the observables--------------------
-      goutput_inflation_observables%As = observs%As
-      goutput_inflation_observables%A_iso = observs%A_iso
-      goutput_inflation_observables%A_pnad = observs%A_pnad
-      goutput_inflation_observables%A_ent = observs%A_ent
-      goutput_inflation_observables%A_cross_ad_iso = observs%A_cross_ad_iso
-      goutput_inflation_observables%ns = observs%ns
-      goutput_inflation_observables%nt = observs%nt
-      goutput_inflation_observables%n_iso = observs%n_iso
-      goutput_inflation_observables%n_pnad = observs%n_pnad
-      goutput_inflation_observables%n_ent = observs%n_ent
-      goutput_inflation_observables%r = observs%r
-      goutput_inflation_observables%alpha_s = observs%alpha_s
-      goutput_inflation_observables%runofrun = observs%runofrun
-      goutput_inflation_observables%f_NL = observs%f_NL
-	    goutput_inflation_observables%tau_NL = observs%tau_NL
+      gambit_obs%As = observs%As
+      gambit_obs%A_iso = observs%A_iso
+      gambit_obs%A_pnad = observs%A_pnad
+      gambit_obs%A_ent = observs%A_ent
+      gambit_obs%A_cross_ad_iso = observs%A_cross_ad_iso
+      gambit_obs%ns = observs%ns
+      gambit_obs%nt = observs%nt
+      gambit_obs%n_iso = observs%n_iso
+      gambit_obs%n_pnad = observs%n_pnad
+      gambit_obs%n_ent = observs%n_ent
+      gambit_obs%r = observs%r
+      gambit_obs%alpha_s = observs%alpha_s
+      gambit_obs%runofrun = observs%runofrun
+      gambit_obs%f_NL = observs%f_NL
+      gambit_obs%tau_NL = observs%tau_NL
       !-------------setting up the observables--------------------
 
     end if
 
+    ! do i=1,steps
+    !   print*,"i = ", i
+    !   print*,"gambit_obs.k_input = ", gambit_obs % k_array(i)
+    !   print*,"gambit_obs.pk%adiab = ",gambit_obs % pks_array(i)
+    !   print*,"gambit_obs.pk%tensor = ",gambit_obs % pkt_array(i)
+    ! end do
 
   contains
 
@@ -367,7 +378,7 @@ contains
 
       type(power_spectra) :: pk
 
-	  kmin = ginput_kmin
+      kmin = ginput_kmin
       kmax = ginput_kmax
       steps = ginput_steps
 
@@ -408,17 +419,18 @@ contains
             pk%press_ad, &
             pk%cross_ad_iso /)
 
-          ! print*,"k_input = ",k_input(i)
-          ! print*,"pk%adiab = ",pk%adiab
-          ! print*,"pk%isocurv = ",pk%isocurv
-          ! print*,"pk%entropy = ",pk%entropy
-          ! print*,"pk%pnad = ",pk%pnad
-          ! print*,"pk%tensor = ",pk%tensor
+           !print*,"i = ", i
+           !print*,"k_input = ",k_input(i)
+           !print*,"pk%adiab = ",pk%adiab
+           !print*,"pk%isocurv = ",pk%isocurv
+           !print*,"pk%entropy = ",pk%entropy
+           !print*,"pk%pnad = ",pk%pnad
+           !print*,"pk%tensor = ",pk%tensor
 
-	    end do
+        end do
       end if
 
-	end subroutine gambit_get_full_pk
+    end subroutine gambit_get_full_pk
 
     subroutine allocate_vars()
 !      !Allocate all the necessary arrays that we can with the information given
@@ -475,9 +487,7 @@ contains
     end subroutine deallocate_vars
 !-------------------DEVELOPEMENT-------------------------------
 
-    subroutine output_observables(pk_arr,&
-        calc_full_pk, &
-        observ_modes, observ_SR)
+    subroutine output_observables(pk_arr, calc_full_pk, observ_modes, observ_SR)
       !Write the observables to screen/file at the end of a successful run.
 
       type(observables), intent(in), optional :: observ_modes
@@ -620,11 +630,11 @@ contains
           'P_cross  '/), &
           advance=.true.)
 
-		do i=1,size(pk_arr,1)
-		  call csv_write(out_adiab,&
-					   pk_arr(i,:),&
-					   advance=.true.)
-		end do
+        do i=1,size(pk_arr,1)
+          call csv_write(out_adiab,&
+                       pk_arr(i,:),&
+                       advance=.true.)
+        end do
 
         if (out_opt%modpkoutput)&
           write(*,*) "Full P(k) written to out_pk.csv"
@@ -655,15 +665,14 @@ contains
 
     !Calculate observables, optionally grab a new IC or a new set of parameters
     !each time this routine is called.
-    subroutine calculate_pk_observables(observs_gambit,observs,observs_SR,k_pivot,dlnk,calc_full_pk,steps,kmin)
+    subroutine calculate_pk_observables(observs_gambit,observs,observs_SR,k_pivot,dlnk,calc_full_pk,steps,kmin,kmax)
 
       real(dp), intent(in) :: k_pivot,dlnk
       logical, intent(in) :: calc_full_pk
-      real(dp) :: kmax
       type(observables), intent(inout) :: observs, observs_SR
       type(gambit_inflation_observables), intent(inout) :: observs_gambit
-	  integer, intent(in) :: steps
-      real(dp), intent(in) :: kmin
+      integer, intent(in) :: steps
+      real(dp), intent(in) :: kmin, kmax
 
       real(dp), dimension(:,:), allocatable :: pk_arr
       logical :: leave
@@ -682,7 +691,7 @@ contains
       leave = .false.
 
 !-------------------DEVELOPEMENT-------------------------------
-	  ! print*,"we are inside calculate_pk_observables."
+       !print*,"we are inside calculate_pk_observables."
 !      !Get e-folds after pivot scale leaves horizon
 
 !      !num_inflaton sets many array sizes, have to treat it slightly differently
@@ -690,12 +699,12 @@ contains
 
       !Get vparams
       if (param_sampling == 1) then
-	    call get_vparams()
+        call get_vparams()
       end if
 
       !Get ICs
       if (ic_sampling/=ic_flags%reg_samp) then
-	    ! print*,"we are inside ic_sampling condition"
+        ! print*,"we are inside ic_sampling condition"
         call get_ic(phi_init0, dphi_init0, &
           icpriors_min, icpriors_max, &
           numb_samples,energy_scale)
@@ -716,7 +725,7 @@ contains
       !Initialize potential and calc background
       call potinit(observs)
 
-      ! print*,"outside of potinit"
+      !print*,"outside of potinit"
       ! if (potential_choice == 18) then
       !   if (.not. observs%is_ic_ok) then
       !     print*, "ICs for SMASH potential resulted in too long(or short) inflation."
@@ -779,69 +788,69 @@ contains
         call evolve(k_pivot, pk0)
           call test_bad(pk_bad, observs, leave)
           if (leave) then
-			return
-		  end if
+            return
+          end if
 !DEBUG
 !print*, "Not evaluating second and third evolve routines"
 !stop
-	     ! print*, "second evolve"
-		   ! print*, "k_pivot*exp(-dlnk) = " , k_pivot*exp(-dlnk)
-		   ! print*, "dlnk = ", dlnk
+         !print*, "second evolve"
+            !print*, "k_pivot*exp(-dlnk) = " , k_pivot*exp(-dlnk)
+            !print*, "dlnk = ", dlnk
 
         call evolve(k_pivot*exp(-dlnk), pk1)
           call test_bad(pk_bad, observs, leave)
           if (leave) return
-		  ! print*, "left second evolve"
-		  ! print*, "third evolve"
-		  ! print*, "k_pivot*exp(dlnk) = " , k_pivot*exp(dlnk)
-		  call evolve(k_pivot*exp(dlnk), pk2)
+            !print*, "left second evolve"
+            !print*, "third evolve"
+            !print*, "k_pivot*exp(dlnk) = " , k_pivot*exp(dlnk)
+          call evolve(k_pivot*exp(dlnk), pk2)
           call test_bad(pk_bad, observs, leave)
           if (leave) return
-		  ! print*, "left third evolve"
+            !print*, "left third evolve"
 
         if (get_runningofrunning) then
-			print*, "get_runningofrunning = True"
+            !print*, "get_runningofrunning = True"
             !Alpha_s from 5-pt stencil
             !or running of running
           call evolve(k_pivot*exp(-2.0e0_dp*dlnk), pk3)
-          ! print*, "fourth evolve"
+            !print*, "fourth evolve"
             call test_bad(pk_bad, observs, leave)
             if (leave) return
-		  call evolve(k_pivot*exp(2.0e0_dp*dlnk), pk4)
-		  ! print*, "fifth evolve"
+          call evolve(k_pivot*exp(2.0e0_dp*dlnk), pk4)
+            !print*, "fifth evolve"
             call test_bad(pk_bad, observs, leave)
             if (leave) return
         end if
 
-        ! print*, "pk0%adiab = ", pk0%adiab
+        !print*, "pk0%adiab = ", pk0%adiab
 
           !Construct the observables
         if (get_runningofrunning) then
           call observs%set_finite_diff(dlnk, &
             pk0,pk1,pk2,pk3,pk4, &
             field_bundle%exp_scalar)
-          ! print*,"here we calculate the observables!"
+          !print*,"here we calculate the observables!"
         else
-		  ! print*,"here we calculate the observables!"
+          !print*,"here we calculate the observables!"
           call observs%set_finite_diff(dlnk, &
             pk0,pk1,pk2,&
             bundle_width=field_bundle%exp_scalar)
         end if
 
         !Get full spectrum for adiab and isocurv at equal intvs in lnk
-!		print*,"will call gambit_get_full_pk"
-		!steps = 100
-		kmax = 1e6
+       !print*,"will call gambit_get_full_pk"
+        !steps = 100
+        !kmax = 1e6
         !kmin = 1e-7
 
         call gambit_get_full_pk(pk_arr,calc_full_pk,steps,kmin,kmax)
 
         if (calc_full_pk) then
 
-          observs_gambit%k_array   		 = pk_arr(:steps,1)
-          observs_gambit%pks_array 		 = pk_arr(:steps,2)
+          observs_gambit%k_array         = pk_arr(:steps,1)
+          observs_gambit%pks_array       = pk_arr(:steps,2)
           observs_gambit%pks_iso_array = pk_arr(:steps,3)
-          observs_gambit%pkt_array 		 = pk_arr(:steps,6)
+          observs_gambit%pkt_array       = pk_arr(:steps,6)
 
         end if
 
@@ -850,7 +859,7 @@ contains
 
       !Write output to stdout
       if (out_opt%modpkoutput) then
-        print*,"printing modpkpoutput "
+        !print*,"printing modpkpoutput "
         if (evaluate_modes) then
           call output_observables(pk_arr, &
             calc_full_pk, observs, observs_SR)
@@ -891,7 +900,7 @@ contains
         end if
       end if
 
-   !  print*,"no issue before here!"
+    !print*,"no issue before here!"
 
     end subroutine calculate_pk_observables
 
@@ -899,7 +908,7 @@ contains
     !delta-N formalism in slow-roll
     subroutine calculate_SR_observables(observs_SR)
       use modpk_numerics, only : locate, array_polint, polint
-!	  use modpk_reheat, only : reheater
+!     use modpk_reheat, only : reheater
       type(observables), intent(inout) :: observs_SR
       integer :: j, i
       real(dp) :: ah, alpha_ik, dalpha, N_end, del_N, Npiv_renorm
@@ -958,6 +967,6 @@ contains
 
     end subroutine test_bad
 
-  end subroutine multimodecode_gambit_driver
+  end function multimodecode_gambit_driver
 
 end module multimodecode_gambit

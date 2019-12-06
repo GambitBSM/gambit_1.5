@@ -778,12 +778,6 @@ namespace Gambit
       result.evaluate_modes = runOptions->getValue<int> ("evaluate_modes");
       result.use_horiz_cross_approx = runOptions->getValue<int> ("use_horiz_cross_approx");
       result.get_runningofrunning = runOptions->getValue<int> ("get_runningofrunning");
-      
-
-      /// Sampling in k...
-      result.k_min = runOptions->getValueOrDef<double>(1e-6,"k_min");
-      result.k_max = runOptions->getValueOrDef<double>(1e+6,"k_min");
-      result.numsteps = runOptions->getValueOrDef<int>(100, "numsteps");
 
       // has to be set to be the same as the scale entering class. todo
       // fix through some capability (probably the same setting the clac_pk_full variable for first version)
@@ -801,6 +795,8 @@ namespace Gambit
     { 
       using namespace Pipes::get_multimode_primordial_ps;
 
+      // Clear it all
+      result = primordial_ps();
 
       // Get the inflationary inputs
       multimode_inputs inputs = *Dep::multimode_input_parameters;
@@ -810,15 +806,15 @@ namespace Gambit
       // until they are removed as arguments of multimodecode_gambit_driver
       //-------------------------------------------------------------
       // TODO remove these from MMC driver & function below...
-      std::vector<double> vp_prior_min = {1,1,1};
-      std::vector<double> vp_prior_max = {1,1,1};
+      double vp_prior_min = 1;
+      double vp_prior_max = 1;
       int param_sampling = 1; // 1 means vparam is kept constant -> this is what we want in gambit, so fix it!
       int varying_N_pivot = 0;
       int use_first_priorval = 1; // means that first entry of vector is used for all variables
-      std::vector<double> phi0_priors_min = {10.};
-      std::vector<double> phi0_priors_max = {10.};
-      std::vector<double> dphi0_priors_min = {0.};
-      std::vector<double> dphi0_priors_max = {0.};
+      double phi0_priors_min = 10.;
+      double phi0_priors_max = 10.;
+      double dphi0_priors_min = 0.;
+      double dphi0_priors_max = 0.;
       double N_pivot_prior_min = inputs.N_pivot;
       double N_pivot_prior_max = inputs.N_pivot;
 
@@ -826,38 +822,52 @@ namespace Gambit
       // The parameters below are only used by multimode if the full Pk is requested. 
       int steps = inputs.numsteps;
       double kmin = inputs.k_min;
-      double kmax = inputs.k_min;
-      // S.B. TODO kmax currently does nothing
+      double kmax = inputs.k_max;
 
       gambit_inflation_observables observables;
 
       int calcfullpk = 1;
+
+      std::cout << "Going for MultiModeCode..." << std::endl;
 
       //-------------------------------------------------------------
       // The function below calls the MultiModeCode backend
       //  for a given choice of inflationary model,
       //  which calculates the observables.
       //-------------------------------------------------------------
-      BEreq::multimodecode_gambit_driver(&observables,                 inputs.num_inflaton,          inputs.potential_choice, 
-                                         inputs.slowroll_infl_end,     inputs.instreheat,            inputs.vparam_rows,
-                                         inputs.use_deltaN_SR,         inputs.evaluate_modes,        inputs.use_horiz_cross_approx, 
-                                         inputs.get_runningofrunning,  inputs.ic_sampling,           inputs.energy_scale,
-                                         inputs.numb_samples,          inputs.save_iso_N,            inputs.N_iso_ref,
-                                         param_sampling,               byVal(&vp_prior_min[0]),      byVal(&vp_prior_max[0]),
-                                         varying_N_pivot,              use_first_priorval,           byVal(&inputs.phi_init0[0]),
-                                         byVal(&inputs.dphi_init0[0]), byVal(&inputs.vparams[0]),    inputs.N_pivot,
-                                         inputs.k_pivot,               inputs.dlnk,                  calcfullpk,
-                                         steps,                        kmin,                         byVal(&phi0_priors_min[0]),
-                                         byVal(&phi0_priors_max[0]),   byVal(&dphi0_priors_min[0]),  byVal(&dphi0_priors_max[0]), 
-                                         N_pivot_prior_min,            N_pivot_prior_max);
 
+      // FUNCTION BREAKS HERE ---v---
 
-      // TODO: length of array needs to come from MultiModeCode 
-      // int len = observables.k_size;
-      result.fill_k(observables.k_array, 100);
-      result.fill_P_s(observables.pks_array, 100);
-      result.fill_P_s_iso(observables.pks_array_iso, 100);
-      result.fill_P_t(observables.pkt_array, 100);
+      observables = BEreq::multimodecode_gambit_driver(inputs.num_inflaton,          inputs.potential_choice, 
+                                                       inputs.slowroll_infl_end,     inputs.instreheat,            inputs.vparam_rows,
+                                                       inputs.use_deltaN_SR,         inputs.evaluate_modes,        inputs.use_horiz_cross_approx, 
+                                                       inputs.get_runningofrunning,  inputs.ic_sampling,           inputs.energy_scale,
+                                                       inputs.numb_samples,          inputs.save_iso_N,            inputs.N_iso_ref,
+                                                       param_sampling,               &vp_prior_min,                &vp_prior_max,
+                                                       varying_N_pivot,              use_first_priorval,           byVal(&inputs.phi_init0[0]),
+                                                       byVal(&inputs.dphi_init0[0]), byVal(&inputs.vparams[0]),    inputs.N_pivot,
+                                                       inputs.k_pivot,               inputs.dlnk,                  calcfullpk,
+                                                       steps,                        kmin,                         kmax,
+                                                       &phi0_priors_min,             &phi0_priors_max,             &dphi0_priors_min,  
+                                                       &dphi0_priors_max,            N_pivot_prior_min,            N_pivot_prior_max);
+
+      // Clear it all
+      result = primordial_ps();
+
+      // This is fine
+      std::cout << "Adding a double!" << std::endl;
+      primordial_ps pps;
+      double justak = observables.k_array[0];
+      pps.addDouble(justak);
+
+      std::cout << "Attempting to fill arrays..." << std::endl;
+
+      result.fill_k(observables.k_array, inputs.numsteps);
+      result.fill_P_s(observables.pks_array, inputs.numsteps);
+      result.fill_P_s_iso(observables.pks_array_iso, inputs.numsteps);
+      result.fill_P_t(observables.pkt_array, inputs.numsteps);
+
+      std::cout << "DID I DIE?" << std::endl;
     }
 
     /// Passes the inputs from the MultiModeCode initialisation function 
@@ -877,15 +887,15 @@ namespace Gambit
       // until they are removed as arguments of multimodecode_gambit_driver
       //-------------------------------------------------------------
       // TODO remove these from MMC driver & function below...
-      std::vector<double> vp_prior_min = {1,1,1};
-      std::vector<double> vp_prior_max = {1,1,1};
+      double vp_prior_min = 1;
+      double vp_prior_max = 1;
       int param_sampling = 1; // 1 means vparam is kept constant -> this is what we want in gambit, so fix it!
       int varying_N_pivot = 0;
       int use_first_priorval = 1; // means that first entry of vector is used for all variables
-      std::vector<double> phi0_priors_min = {10.};
-      std::vector<double> phi0_priors_max = {10.};
-      std::vector<double> dphi0_priors_min = {0.};
-      std::vector<double> dphi0_priors_max = {0.};
+      double phi0_priors_min = 10.;
+      double phi0_priors_max = 10.;
+      double dphi0_priors_min = 0.;
+      double dphi0_priors_max = 0.;
       double N_pivot_prior_min = inputs.N_pivot;
       double N_pivot_prior_max = inputs.N_pivot;
 
@@ -894,30 +904,31 @@ namespace Gambit
       // TODO not needed here
       int steps = inputs.numsteps;
       double kmin = inputs.k_min;
-      double kmax = inputs.k_min;
-      // S.B. TODO kmax currently does nothing
+      double kmax = inputs.k_max;
 
       gambit_inflation_observables observables;
 
       int calcfullpk = 0;
+
+      std::cout << "Going for MultiModeCode..." << std::endl;
 
       //-------------------------------------------------------------
       // The function below calls the MultiModeCode backend
       //  for a given choice of inflationary model,
       //  which calculates the observables.
       //-------------------------------------------------------------
-      BEreq::multimodecode_gambit_driver(&observables,                 inputs.num_inflaton,          inputs.potential_choice, 
-                                         inputs.slowroll_infl_end,     inputs.instreheat,            inputs.vparam_rows,
-                                         inputs.use_deltaN_SR,         inputs.evaluate_modes,        inputs.use_horiz_cross_approx, 
-                                         inputs.get_runningofrunning,  inputs.ic_sampling,           inputs.energy_scale,
-                                         inputs.numb_samples,          inputs.save_iso_N,            inputs.N_iso_ref,
-                                         param_sampling,               byVal(&vp_prior_min[0]),      byVal(&vp_prior_max[0]),
-                                         varying_N_pivot,              use_first_priorval,           byVal(&inputs.phi_init0[0]),
-                                         byVal(&inputs.dphi_init0[0]), byVal(&inputs.vparams[0]),    inputs.N_pivot,
-                                         inputs.k_pivot,               inputs.dlnk,                  calcfullpk,
-                                         steps,                        kmin,                         byVal(&phi0_priors_min[0]),
-                                         byVal(&phi0_priors_max[0]),   byVal(&dphi0_priors_min[0]),  byVal(&dphi0_priors_max[0]), 
-                                         N_pivot_prior_min,            N_pivot_prior_max);
+      observables = BEreq::multimodecode_gambit_driver(inputs.num_inflaton,          inputs.potential_choice, 
+                                                       inputs.slowroll_infl_end,     inputs.instreheat,            inputs.vparam_rows,
+                                                       inputs.use_deltaN_SR,         inputs.evaluate_modes,        inputs.use_horiz_cross_approx, 
+                                                       inputs.get_runningofrunning,  inputs.ic_sampling,           inputs.energy_scale,
+                                                       inputs.numb_samples,          inputs.save_iso_N,            inputs.N_iso_ref,
+                                                       param_sampling,               &vp_prior_min,                &vp_prior_max,
+                                                       varying_N_pivot,              use_first_priorval,           byVal(&inputs.phi_init0[0]),
+                                                       byVal(&inputs.dphi_init0[0]), byVal(&inputs.vparams[0]),    inputs.N_pivot,
+                                                       inputs.k_pivot,               inputs.dlnk,                  calcfullpk,
+                                                       steps,                        kmin,                         kmax,
+                                                       &phi0_priors_min,             &phi0_priors_max,             &dphi0_priors_min,  
+                                                       &dphi0_priors_max,            N_pivot_prior_min,            N_pivot_prior_max);
 
 
       result.set_ns(observables.ns);

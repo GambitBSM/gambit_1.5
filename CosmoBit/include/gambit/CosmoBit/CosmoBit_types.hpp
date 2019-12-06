@@ -279,29 +279,16 @@ namespace Gambit
     class primordial_ps
     {
         public:
-            primordial_ps();
+            primordial_ps() {};
+            ~primordial_ps() {};
 
             // Fill k from an array of doubles
-            void fill_k(double *k_array, int len) 
-            {
-                std::vector<double> K(k_array, k_array+len);
-                k = std::move(K);
-            };
-            void fill_P_s(double *P_s_array, int len)
-            {
-                std::vector<double> ps(P_s_array, P_s_array+len);
-                P_s = std::move(ps);
-            };
-            void fill_P_s_iso(double *P_s_iso_array, int len)
-            {
-                std::vector<double> ps_iso(P_s_iso_array, P_s_iso_array+len);
-                P_s_iso = std::move(ps_iso);
-            };
-            void fill_P_t(double *P_t_array, int len)
-            {
-                std::vector<double> pt(P_t_array, P_t_array+len);
-                P_t = std::move(pt);
-            };
+            void fill_k(double*, int);
+            void fill_P_s(double*, int);
+            void fill_P_s_iso(double*, int);
+            void fill_P_t(double*, int);
+
+            void addDouble(double);
 
             std::vector<double>& get_k() { return k; }
             std::vector<double>& get_P_s() { return P_s; }
