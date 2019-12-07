@@ -166,7 +166,10 @@ namespace Gambit
     else if(dlerror() != NULL and symbol_names[0] != "no_symbol")
     {
       std::ostringstream err;
-      err << "None of the library symbols " << symbol_names << " was found."  << std::endl
+      err << "None of the library symbols ("; 
+      for(str smb : symbol_names) { err << smb << ", "; }
+      err.seekp(-2, std::ios_base::end); 
+      err << ") was found." << std::endl
           << "The backend function from this symbol will be disabled (i.e. get status = -2)" << std::endl;
       backend_warning().raise(LOCAL_INFO, err.str());
       be_functor.setStatus(-2);
@@ -273,7 +276,7 @@ namespace Gambit
         #else
           std::ostringstream err;
           err << "Mathematica is not found or it is disabled. " << std::endl
-              << "The backend function for the symbol " << symbol_name << " will be disabled  (i.e. get status = -5)" << endl;
+              << "The backend function for the symbol " << symbol_names[0] << " will be disabled  (i.e. get status = -5)" << endl;
           be_functor.setStatus(-5);
           backend_warning().raise(LOCAL_INFO, err.str());
         #endif
@@ -288,7 +291,7 @@ namespace Gambit
         #else
           std::ostringstream err;
           err << "Pybind11 for interfacing with Python backends is not found or disabled. " << std::endl
-              << "The backend function for the symbol " << symbol_name << " will be disabled  (i.e. get status = -6)" << endl;
+              << "The backend function for the symbol " << symbol_names[0] << " will be disabled  (i.e. get status = -6)" << endl;
           be_functor.setStatus(-6);
           backend_warning().raise(LOCAL_INFO, err.str());
         #endif
@@ -339,7 +342,10 @@ namespace Gambit
         std::ostringstream err;
         Backends::backendInfo().classes_OK[be+ver] = false;
         Backends::backendInfo().constructor_status[be+ver+fixns(barename+args)] = "broken";
-        err << "None of the library symbols " << symbol_names << " was found in " << path << "."
+        err << "None of the library symbols ("; 
+        for(str smb : symbol_names) { err << smb << ", "; }
+        err.seekp(-2, std::ios_base::end); 
+        err << ") was found in " << path << "."
             << std::endl << "The BOSSed type relying on factory " << name << args
             << " will be unavailable." << std::endl;
         backend_warning().raise(LOCAL_INFO, err.str());
