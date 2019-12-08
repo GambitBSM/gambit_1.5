@@ -401,7 +401,6 @@ def addifbefunctormacro(line,be_typeset,type_pack_set,equiv_classes,equiv_ns,ver
                 for arg in re.findall("[^,]*?\(.*?\)[^,]*?\(.*?\).*?,|[^,]*?<.*?>.*?,|[^,]*?\(.*?\).*?,|[^>\)]*?,", args+","):
                     arg = arg[:-1].strip()
                     if arg != "" and not arg.startswith("\"") and not arg.startswith("("):
-                        print(arg)
                         if arg == "etc": arg = "..."
                         arg_list = neatsplit('\s',arg)
                         if arg_list[0] in ("class", "struct", "typename"): arg = arg_list[1]
