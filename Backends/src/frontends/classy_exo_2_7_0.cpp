@@ -276,6 +276,6 @@ BE_INI_FUNCTION
     }
   }
   logger() << LogTags::info << "[classy_"<< STRINGIFY(VERSION) <<"] \"cosmo.compute\" was successful" << EOM;
-
+  print_pps();
 }
 END_BE_INI_FUNCTION

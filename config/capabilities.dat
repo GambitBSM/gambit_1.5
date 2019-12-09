@@ -4005,11 +4005,14 @@ SUSYHD_DeltaMHiggs : |
 plc_2_0_init: |
    initialize the planck likelihood from an cldf file.
 
+plc_3_0_init: |
+   initialize the planck likelihood from an cldf file.
+
 clik_cleanup: |
-   cleanup delete allocated pointers to a planck likelihood object.
+   clean-up delete allocated pointers to a planck likelihood object.
 
 clik_compute_loglike: |
-   compute a log likelyhood value
+   compute a log likelihood value
    cl_and_pars is order this way
    first the powerspectra from l=0 to l=lmax[cli] (included) in the order
    TT EE BB TE TB EB. Only the one where lmax[cli]!=-1 have to be included
@@ -4169,11 +4172,48 @@ class_get_Hz: |
 class_get_rs: |
     Returns comoving sound horizon at baryon drag.
 
-class_get_sigma8: |
-    Returns sigma8 computed by class.
+class_get_scale_independent_growth_factor: |
+    Return the scale invariant growth factor D(a) for CDM perturbations 
+    for a given redshift (exactly, the quantity defined by Class as index_bg_D in the background module)
+    computed by CLASS.
 
-class_get_Omega_m: |
-    Returns Omega0_m (matter energy density today) computed by class. (Mainly for test purposes, you can use gambit internal capability Omega0_m, Omega0_g..).
+class_get_scale_independent_growth_factor_f: |
+    Return the scale invariant growth factor f(z)=d ln D / d ln a for CDM perturbations 
+    for a given redshift (exactly, the quantity defined by Class as index_bg_f in the background module)
+    computed by CLASS.
+
+class_get_sigma8: |
+    Returns sigma8 computed at z = 0 by CLASS.
+
+class_get_Omega0_m: |
+    Returns Omega0_m (matter energy density today) computed by CLASS. (Mainly for test purposes, you can use gambit internal capability Omega0_m, Omega0_g..).
+
+class_get_Omega0_ncdm_tot: |
+    Returns Omega0_ncdm (massive neutrinos and potential extra species) computed by CLASS. 
+
+class_get_Omega0_Lambda: |
+    Returns Omega0_Lambda as passed to/computed by CLASS.
+
+class_get_Omega0_r: |
+    Returns Omega0_r as computed by CLASS. Contains contributions from photons, ultra-relativistic species and dark
+    radiation (if present). 
+
+class_get_Omega0_ur: |
+    Returns Omega0_ur as computed by CLASS. Contains contributions from ultra-relativistic species today.
+
+#----------------------------
+#  MontePythonLike
+#----------------------------
+
+get_MP_availible_likelihoods: |
+    Returns a list with all available likelihoods implemented in MontePython. New likelihoods can simply be added
+    into the MontePython installation folder and GAMBIT will recognize it without the need to recompile. 
+
+get_MP_loglike: |
+    Returns LogLike value of MontePython likelihood specified by passing the name of the likelihood as a string.
+
+create_MP_data_object: |
+    Create a python object storing all information 
 
 #----------------------------
 #  DarkAges
@@ -4249,6 +4289,9 @@ Omega0_b: |
 Sigma8:  |
   Returns sigma8.
 
+rs_drag:  |
+  Returns comoving sound horizon at baryon drag.
+
 DecayingDM_general_parameters: |
    mass, mass of the dark matter candidate [in GeV]
    lifetime, lifetime of said DM candidate [in s]
@@ -4261,6 +4304,13 @@ LCDM_parameters: |
    H0, Hubble constant.
    ln10A_s, primordial curvature fluctuation amplitude.
    n_s, parametrises the primordial scale dependence.
+   tau_reio, reionization optical depth.
+
+LCDM_no_primordial_parameters: |
+   As LCDM_parameters but without the parameters related to the shape of the primordial power spectrum.
+   omega_b, baryon density parameter.
+   omega_cdm, dark matter density parameter.
+   H0, Hubble constant.
    tau_reio, reionization optical depth.
 
 LCDMtensor_parameters: |
@@ -4377,6 +4427,18 @@ injection_spectrum: |
 
 AlterBBN_2_0_init: |
     Initialise AlterBBN.
+
+AlterBBN_2_1_init: |
+    Initialise AlterBBN.
+
+AlterBBN_2_2_init: |
+    Initialise AlterBBN.
+
+AlterBBN_Input: |
+    Set input parameters depending on scanned model & error calculation settings for AlterBBN run.
+
+Init_AlterBBN: |
+    Set the members of the AlterBBN relicparame strucutre to their according values and. Modify this function if you want to pass so far unimplemented options to AlterBBN.
 
 AlterBBN_modelinfo: |
      Holds internal AlterBBN parameters in structure relicparam.
