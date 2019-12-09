@@ -28,7 +28,7 @@
    DarkAges,  /**< f(z) functions computed in the DarkAges modules following the work by Slatyer, introduced in 1211.0283 and updated in 1506.03812 */
 -  function_from_file /**<  File specified by the user with the option "energy deposition function file"*/
 +  function_from_file, /**<  File specified by the user with the option "energy deposition function file"*/
-+  GAMBIT /**< f(z) will be calculated by Gambit. */
++  pointer_to_fz_channel /**< f(z) will be calculated by Gambit. */
  };
  
  /**
@@ -147,7 +147,7 @@
  	flag3=_TRUE_;
        }
 +      // check if exo-class is used with gambit 
-+      if (strcmp(string1,"GAMBIT") == 0) {
++      if (strcmp(string1,"pointer_to_fz_channel") == 0) {
 +      /* NOTE:
 +        This is to read in values stored in a vector/array and pass the entries to a dynamically allocated
 +        array in class. 
@@ -167,7 +167,7 @@
 +          4) Copy the values of the passed vector to the newly allocated space
 +      */
 +         // set CLASS parameters to signal that annihilation coefficients will be filled differently
-+         pth->energy_deposition_function=GAMBIT;
++         pth->energy_deposition_function = pointer_to_fz_channel;
 +         pth->energy_repart_coefficient = no_factorization;
 +         pth->has_on_the_spot = _FALSE_;
 +         flag3=_TRUE_;
@@ -179,44 +179,44 @@
 +         uintptr_t ul;
 +
 +         // read in number of entries each vector has
-+         class_call(parser_read_int(pfc,"annihil_coef_num_lines",&pth->annihil_coef_num_lines,&flag0,errmsg),
++         class_call(parser_read_int(pfc,"energyinj_coef_num_lines",&pth->annihil_coef_num_lines,&flag0,errmsg),
 +             errmsg,
 +             errmsg);
 +
 +         // 1) Read in pointers to vector as string
-+         class_call(parser_read_string(pfc,"annihil_coef_xe",&addr,&flag4,errmsg),
++         class_call(parser_read_string(pfc,"energyinj_coef_z",&addr,&flag4,errmsg),
 +             errmsg,
 +             errmsg);
 +         // 2) Convert string to uintptr_t and then back to memory address;
 +         //    initialise a double pointer pointing to it
 +         sscanf(addr, "%lu", &ul);
-+         double* ptr_xe = (double*) ul;
++         double* ptr_z = (double*) ul;
 +
-+         class_call(parser_read_string(pfc,"annihil_coef_heat",&addr,&flag5,errmsg),
++         class_call(parser_read_string(pfc,"energyinj_coef_heat",&addr,&flag5,errmsg),
 +             errmsg,
 +             errmsg);
 +         sscanf(addr, "%lu", &ul);
 +         double* ptr_heat = (double*) ul;
 +
-+         class_call(parser_read_string(pfc,"annihil_coef_lya",&addr,&flag6,errmsg),
++         class_call(parser_read_string(pfc,"energyinj_coef_lya",&addr,&flag6,errmsg),
 +             errmsg,
 +             errmsg);
 +         sscanf(addr, "%lu", &ul);
 +         double* ptr_lya = (double*) ul;
 +
-+         class_call(parser_read_string(pfc,"annihil_coef_ionH",&addr,&flag7,errmsg),
++         class_call(parser_read_string(pfc,"energyinj_coef_ionH",&addr,&flag7,errmsg),
 +             errmsg,
 +             errmsg);
 +         sscanf(addr, "%lu", &ul);
 +         double* ptr_ionH = (double*) ul;
 +
-+         class_call(parser_read_string(pfc,"annihil_coef_ionHe",&addr,&flag8,errmsg),
++         class_call(parser_read_string(pfc,"energyinj_coef_ionHe",&addr,&flag8,errmsg),
 +             errmsg,
 +             errmsg);
 +         sscanf(addr, "%lu", &ul);
 +         double* ptr_ionHe = (double*) ul;
 +
-+        class_call(parser_read_string(pfc,"annihil_coef_lowE",&addr,&flag9,errmsg),
++        class_call(parser_read_string(pfc,"energyinj_coef_lowE",&addr,&flag9,errmsg),
 +             errmsg,
 +             errmsg);
 +         sscanf(addr, "%lu", &ul);
@@ -225,7 +225,7 @@
 +        // Check that all values needed for the calculation have been passed. If not throw error
 +         class_test(((flag0 == _FALSE_) || (flag4 == _FALSE_) || (flag5 == _FALSE_) || (flag6 == _FALSE_) || (flag7 == _FALSE_) || (flag8 == _FALSE_) || (flag9 == _FALSE_)),
 +                    errmsg,
-+                    "You set the parameter energy_deposition_function to GAMBIT, this means you also haveto specify the input values for \n- annihil_coef_num_lines \n- annihil_coef_xe \n- annihil_coef_heat \n- annihil_coef_lya \n- annihil_coef_ionH\n- annihil_coef_ionHe\n- annihil_coef_lowE\n Check that all of them are passed.");
++                    "You set the parameter energy_deposition_function to \'pointer_to_fz_channel\', this means you also haveto specify the input values for \n- energyinj_coef_num_lines \n- energyinj_coef_z \n- energyinj_coef_heat \n- energyinj_coef_lya \n- energyinj_coef_ionH\n- energyinj_coef_ionHe\n- energyinj_coef_lowE\n Check that all of them are passed.");
 +
 +
 +        // 3) allocate new space
@@ -243,7 +243,7 @@
 +        // 4) Copy the values of the passed vector to the newly allocated space
 +        for (int it = 0; it < pth->annihil_coef_num_lines; it++)
 +        {
-+          pth->annihil_coef_xe[it] = ptr_xe[it];
++          pth->annihil_coef_xe[it] = ptr_z[it];
 +          pth->annihil_coef_heat[it] = ptr_heat[it];
 +          pth->annihil_coef_lya[it] = ptr_lya[it];
 +          pth->annihil_coef_ionH[it] = ptr_ionH[it];
@@ -269,7 +269,7 @@
      class_test(pth->has_on_the_spot == _TRUE_ && pth->f_eff == 0,errmsg,"you have 'on the spot = yes' but you did not give a value to f_eff. Please adjust your param file.")
  
 -     class_test(pth->has_on_the_spot == _FALSE_ && flag2 == _FALSE_,errmsg,"You have one of pth->PBH_fraction>0 ||pth->annihilation > 0 || pth->decay_fraction > 0 and on the spot = no but you have not specified energy_deposition_function. Please choose one of 'Analytical_approximation', 'DarkAges', 'from_file', 'no_deposition'.");
-+     class_test(pth->has_on_the_spot == _FALSE_ && flag2 == _FALSE_,errmsg,"You have one of pth->PBH_fraction>0 ||pth->annihilation > 0 || pth->decay_fraction > 0 and on the spot = no but you have not specified energy_deposition_function. Please choose one of 'Analytical_approximation', 'DarkAges', 'GAMBIT', 'from_file', 'no_deposition'.");
++     class_test(pth->has_on_the_spot == _FALSE_ && flag2 == _FALSE_,errmsg,"You have one of pth->PBH_fraction>0 ||pth->annihilation > 0 || pth->decay_fraction > 0 and on the spot = no but you have not specified energy_deposition_function. Please choose one of 'Analytical_approximation', 'DarkAges', 'pointer_to_fz_channel', 'from_file', 'no_deposition'.");
  
  
  
@@ -457,7 +457,7 @@
  
    */
  
-+if (pth->energy_deposition_function != GAMBIT) {
++if (pth->energy_deposition_function != pointer_to_fz_channel) {
    /* BEGIN: Add switch (1) */
    if (pth->energy_deposition_function == function_from_file || pth->energy_repart_coefficient == GSVI || pth->energy_repart_coefficient == chi_from_file) {
      class_open(fA,ppr->energy_injec_coeff_file, "r",pth->error_message);
@@ -474,7 +474,7 @@
        }
        // // /***********************************************************************************************************************/
 -      else if(preco->energy_deposition_function == DarkAges){
-+      else if(preco->energy_deposition_function == DarkAges || preco->energy_deposition_function == GAMBIT){
++      else if(preco->energy_deposition_function == DarkAges || preco->energy_deposition_function == pointer_to_fz_channel){
  
              class_call(thermodynamics_onthespot_energy_injection(ppr,pba,preco,z,&result,error_message),
                        error_message,
@@ -483,7 +483,7 @@
    }
    // // /***********************************************************************************************************************/
 -  else if(preco->energy_deposition_function == DarkAges){
-+  else if(preco->energy_deposition_function == DarkAges || preco->energy_deposition_function == GAMBIT){
++  else if(preco->energy_deposition_function == DarkAges || preco->energy_deposition_function == pointer_to_fz_channel){
        class_call(thermodynamics_annihilation_coefficients_interpolate(ppr,pba,pth,600),
                       pth->error_message,
                       pth->error_message);
@@ -492,7 +492,7 @@
               hyrec_data.cosmo->inj_params->energy_deposition_treatment = 0;
             }
 -           else if(pth->energy_deposition_function==function_from_file || pth->energy_deposition_function==DarkAges) {
-+           else if(pth->energy_deposition_function==function_from_file || pth->energy_deposition_function==DarkAges || preco->energy_deposition_function == GAMBIT) {
++           else if(pth->energy_deposition_function==function_from_file || pth->energy_deposition_function==DarkAges || preco->energy_deposition_function == pointer_to_fz_channel) {
               hyrec_data.cosmo->inj_params->energy_deposition_treatment = 1;
             }
             if(pth->energy_repart_coefficient==no_factorization) hyrec_data.cosmo->inj_params->energy_repart_coefficient = 0;
