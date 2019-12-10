@@ -1919,7 +1919,7 @@ namespace Gambit
     // we patched exoclass to accept this. An alternative way without patching would be to write the tables to disk &
     // just have CLASS read in the file. To avoid the repeated file writing & deleting we pass pointers to the vector/arrays
     // to CLASS instead
-    result["energy_deposition_function"] = "pointer_to_fz_channel";
+    result["f_eff_type"] = "pointer_to_fz_channel";
 
     // Get the results from the DarkAges tables that hold extra information to be passed to the CLASS thermodynamics structure
     static DarkAges::fz_table fz;
