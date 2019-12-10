@@ -62,7 +62,88 @@ BE_NAMESPACE
       backend_error().raise(LOCAL_INFO,errMssg.str());
     }
   }
-  
+
+  // Routine to use backward compatible input names for energy injection inputs
+  // In the future version of CLASS (v3.0 + ), the inputs will have
+  // slightly modified names.
+  // Our policy is to use the updated names in the code and to provide translations
+  // for the versions prior to 3.0 (which will be outdated eventually)
+  //
+  // The relevant pairs (OLD -> NEW) are:
+  //
+  //  "tau_dcdm"                       --> "DM_decay_tau"
+  //  "decay_fraction"                 --> "DM_decay_fraction"
+  //  "annihilation"                   --> "DM_annihilation_efficiency"
+  //  "annihilation_cross_section"     --> "DM_annihilation_cross_section"
+  //  "DM_mass"                        --> "DM_annihilation_mass"
+  //  "energy_deposition_function"     --> "f_eff_type"
+  //  "energy_repartition_coefficient" --> "chi_type"
+  //
+  // NOTE: Our intention is to revert the inputs (i.e replace NEW with OLD)
+  //
+  void rename_energy_injection_parameters(pybind11::dict& cosmo_input_dict)
+  {
+    static bool first = true;
+    static std::map<std::string,std::string> new_old_names;
+    if (first)
+    {
+      first = false;
+      new_old_names["DM_decay_tau"]                  = "tau_dcdm";
+      new_old_names["DM_decay_fraction"]             = "decay_fraction";
+      new_old_names["DM_annihilation_efficiency"]    = "annihilation";
+      new_old_names["DM_annihilation_cross_section"] = "annihilation_cross_section";
+      new_old_names["DM_annihilation_mass"]          = "DM_mass";
+      new_old_names["f_eff_type"]                    = "energy_deposition_function";
+      new_old_names["chi_type"]                      = "energy_repartition_coefficient";
+      new_old_names["chi_file"]                      = "energy repartition coefficient file";
+    }
+
+    // In the first batch, we will fix the names of the inputs.
+    // We will fix the entries itself, if needed, later.
+    for (const auto& item: new_old_names)
+    {
+      pybind11::str newkey = pybind11::str(item.first);
+      pybind11::str oldkey = pybind11::str(item.second);
+
+      if (cosmo_input_dict.attr("has_key")(newkey).cast<bool>())
+      {
+        cosmo_input_dict[oldkey] = cosmo_input_dict.attr("pop")(newkey);
+      }
+    }
+
+    // For the input "energy_repartition_coefficient" ("chi_type" in new versions),
+    // also the acceptable values have changed.
+    // If we can revert the input properly, we do so. If not, throw an error.
+    //
+    // NOTE: This only affects versions of exoclass >= 2.7.2.
+    //
+    if (cosmo_input_dict.attr("has_key")("energy_repartition_coefficient").cast<bool>())
+    {
+      std::string entry = (cosmo_input_dict["energy_repartition_coefficient"]).cast<std::string>();
+      if (entry.compare("CK_2004") == 0)
+      {
+        cosmo_input_dict["energy_repartition_coefficient"] = "SSCK";
+      }
+      else if (entry.compare("Galli_2013_file") == 0 || entry.compare("Galli_2013_analytic") == 0)
+      {
+        cosmo_input_dict["energy_repartition_coefficient"] = "GSVI";
+      }
+      else if (entry.compare("from_x_file") == 0)
+      {
+        cosmo_input_dict["energy_repartition_coefficient"] = "from_file";
+      }
+      else
+      {
+        std::ostringstream errMssg;
+        errMssg << "The chosen version of classy [classy_" << STRINGIFY(VERSION) << "] ";
+        errMssg << "cannot handle the argument \'" << entry << "\' ";
+        errMssg << "of the iput 'chi_type' (aka. 'energy_repartition_coefficient').\n";
+        errMssg << "Please adjust your input or use a suitable version.";
+        backend_error().raise(LOCAL_INFO,errMssg.str());
+      }
+    }
+  }
+
   // getter functions to return a bunch of CLASS outputs. This is here in the frontend
   // to make the capabilities inside CosmoBit independent of types that depend on the 
   // Boltzmann solver in use
@@ -226,6 +307,8 @@ BE_INI_FUNCTION
     // check input for consistency
     class_input_consistency_checks(cosmo_input_dict);
   }
+
+  rename_energy_injection_parameters(cosmo_input_dict);
 
   // Clean CLASS (the equivalent of the struct_free() in the `main` of CLASS -- don't want a memory leak, do we
   cosmo.attr("struct_cleanup")();

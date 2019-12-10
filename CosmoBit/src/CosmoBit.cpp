@@ -1489,9 +1489,9 @@ namespace Gambit
       // properly supported even though there are no errors at compile time. 
       // using a unique pointer for ratioH and a 2d vector for cov_ratioH avoids 
       // these problems. 
-      std::unique_ptr<double[]> ratioH = std::make_unique<double[]>(NNUC+1);
-      std::unique_ptr<double[]> cov_ratioH = std::make_unique<double[]>((NNUC+1)*(NNUC+1));
-      
+      auto deleter = [&](double* ptr){delete [] ptr;};
+      std::unique_ptr<double[], decltype(deleter)> ratioH(new double[NNUC+1](), deleter);
+      std::unique_ptr<double[], decltype(deleter)> cov_ratioH(new double[(NNUC+1)*(NNUC+1)](), deleter);
 
       static bool first = true;
       const bool use_fudged_correlations = (runOptions->hasKey("correlation_matrix") && runOptions->hasKey("elements"));
@@ -1912,32 +1912,32 @@ namespace Gambit
     // make sure nothing from previous run is contained
     result.clear();
 
-    result["tau_dcdm"] = *Dep::lifetime;
-    result["decay_fraction"] = *Dep::DM_fraction;
+    result["DM_decay_tau"] = *Dep::lifetime;
+    result["DM_decay_fraction"] = *Dep::DM_fraction;
 
     // flag passed to CLASS to signal that the energy_deposition_function is coming from GAMBIT
     // we patched exoclass to accept this. An alternative way without patching would be to write the tables to disk &
-    // just have CLASS read in the file. To avoid the repeated file writing & deleting we pass pointers to the vector/arrays 
+    // just have CLASS read in the file. To avoid the repeated file writing & deleting we pass pointers to the vector/arrays
     // to CLASS instead
-    result["energy_deposition_function"] = "GAMBIT";
+    result["energy_deposition_function"] = "pointer_to_fz_channel";
 
     // Get the results from the DarkAges tables that hold extra information to be passed to the CLASS thermodynamics structure
     static DarkAges::fz_table fz;
     fz = *Dep::energy_injection_efficiency;
 
     // set the lengths of the input tables (since we are passing pointers to arrays CLASS has to know how long they are)
-    result["annihil_coef_num_lines"] = fz.redshift.size();
+    result["energyinj_coef_num_lines"] = fz.redshift.size();
 
     // add the pointers to arrays class needs to know about to input dictionary
     // Note:
     //    - memory addresses are passed as strings (python wrapper for CLASS converts every entry to a string internally so
     //      we need to do that for the memory addresses before python casts them to something else)
-    result["annihil_coef_xe"] = memaddress_to_uint(fz.redshift.data());
-    result["annihil_coef_heat"] = memaddress_to_uint(fz.f_heat.data());
-    result["annihil_coef_lya"] = memaddress_to_uint(fz.f_lya.data());
-    result["annihil_coef_ionH"] = memaddress_to_uint(fz.f_hion.data());
-    result["annihil_coef_ionHe"] = memaddress_to_uint(fz.f_heion.data());
-    result["annihil_coef_lowE"] = memaddress_to_uint(fz.f_lowe.data());
+    result["energyinj_coef_z"] = memaddress_to_uint(fz.redshift.data());
+    result["energyinj_coef_heat"] = memaddress_to_uint(fz.f_heat.data());
+    result["energyinj_coef_lya"] = memaddress_to_uint(fz.f_lya.data());
+    result["energyinj_coef_ionH"] = memaddress_to_uint(fz.f_hion.data());
+    result["energyinj_coef_ionHe"] = memaddress_to_uint(fz.f_heion.data());
+    result["energyinj_coef_lowE"] = memaddress_to_uint(fz.f_lowe.data());
   }
 
 
