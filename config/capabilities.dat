@@ -4244,6 +4244,97 @@ DA_alreadyCalculated: |
    Flag if calculations were already performed for this parameter point.
 
 #----------------------------
+#  CosmoBit Models
+#----------------------------
+
+DecayingDM_general_parameters: |
+   mass, mass of the dark matter candidate [in GeV]
+   lifetime, lifetime of said DM candidate [in s]
+   fraction, fraction of how much the decaying DM component contributes to all DM.
+   BR, the fraction of how much energy will be contributed in e+/e-. (1-BR will be asinged to photons)
+
+LCDM_parameters: |
+   Standard 6-parameters LCDM model. See ./gambit LCDM for more details.
+
+LCDM_no_primordial_parameters: |
+   As LCDM_parameters but without the parameters related to the shape of the primordial power spectrum. See ./gambit LCDM_no_primordial for more details. 
+
+etaBBN_rBBN_rCMB_dNeffBBN_dNeffCMB_parameters: |
+
+   Model to be scanned in addition to LCDM as an extension: allowing for non-standard values of the baryon-to-photon ratio at BBN, non-standard values of the temperature ratio between photon and neutrinos at BBN and CMB release, as well as additional ultra-relativistic species present during BBN or at CMB release. See ./gambit etaBBN_rBBN_rCMB_dNeffBBN_dNeffCMB for more details.
+
+etaBBN_parameters: |
+   Child model of etaBBN_rBBN_rCMB_dNeffBBN_dNeffCMB with only etaBBN as free parameter. See ./gambit etaBBN for more details.
+
+rBBN_rCMB_dNeffBBN_dNeffCMB_parameters: |
+   
+   Child model of etaBBN_rBBN_rCMB_dNeffBBN_dNeffCMB. See ./gambit rBBN_rCMB_dNeffBBN_dNeffCMB for more details.
+
+dNeffBBN_dNeffCMB_parameters: |
+   
+   Child model of rBBN_rCMB_dNeffBBN_dNeffCMB model. See ./gambit dNeffBBN_dNeffCMB for more details.
+
+dNeffCMB_parameters: |
+   
+   Child model of dNeffBBN_dNeffCMB model. See ./gambit dNeffCMB for more details.
+
+rBBN_rCMB_parameters: |
+   
+   Child model of rBBN_rCMB_dNeffBBN_dNeffCMB model. See ./gambit rBBN_rCMB for more details.
+
+rCMB_parameters: |
+   
+   Child model of rBBN_rCMB model. See ./gambit rCMB for more details.
+
+Inflation_tensor_parameters: |
+   Parametrisation of the shape of the primordial power spectrum allowing for a non-zero scalar to tensor ratio r.
+
+Inflation_SR1quad_parameters: |
+   Inflation model with potential: m^2 phi^2. See ./gambit Inflation_SR1quad_parameters for more details.
+
+Inflation_1quar_parameters: |
+  Quartic inflation model with potential: 0.25 lambda phi^4. See ./gambit Inflation_1quar_parameters for more details.
+
+Inflation_1mono32_parameters: |
+  Inflation model with potential: 2/3 lambda phi^2/3. See ./gambit Inflation_1mono32_parameters for more details.
+
+Inflation_1linear_parameters: |
+  Linear inflation model with potential: m phi. See ./gambit Inflation_1linear_parameters for more details.
+
+Inflation_smash_parameters: |
+  Inflation model for SMASH. See ./gambit Inflation_smash_parameters for more details.
+
+Inflation_1natural_parameters: |
+  N-flation models (axions). See ./gambit Inflation_1natural_parameters for more details.
+
+cosmo_nuisance_params_JLA_parameters: |
+   Cosmological nuisance parameters for JLA SNe Ia likelihood. See ./gambit cosmo_nuisance_params_JLA for more details.
+
+cosmo_nuisance_params_Pantheon_parameters: |
+   Cosmological nuisance parameters for Pantheon SNe Ia likelihood. See ./gambit cosmo_nuisance_params_Pantheon for more details.
+
+cosmo_nuisance_params_BK14_parameters: |
+   Cosmological nuisance parameters for Keck Array/BICEP. See ./gambit cosmo_nuisance_params_BK14 for more details.
+
+cosmo_nuisance_params_CFHTLens_correlation_parameters: |
+   Cosmological nuisance parameters for CFHTLenS tomographic weak lensing likelihood. See ./gambit cosmo_nuisance_params_CFHTLens_correlation for more details.
+    
+cosmo_nuisance_params_euclid_lensing_parameters: |
+   Cosmological nuisance parameters for Euclid cosmic shear likelihood. See ./gambit cosmo_nuisance_params_euclid_lensing for more details.
+
+cosmo_nuisance_params_euclid_pk_parameters: |
+   Cosmological nuisance parameters for Euclid cosmic shear likelihood. See ./gambit cosmo_nuisance_params_euclid_pk for more details.
+
+cosmo_nuisance_params_ISW_parameters: |
+   Cosmological nuisance parameters for tomographic ISW likelihood. See ./gambit cosmo_nuisance_params_ISW for more details.
+
+cosmo_nuisance_params_kids450_qe_likelihood_public_parameters: |
+   Cosmological nuisance parameters for KiDS-450 shear power spectrum likelihood. See ./gambit cosmo_nuisance_params_kids450_qe_likelihood_public for more details.
+
+cosmo_nuisance_params_ska_parameters: |
+   Cosmological nuisance parameters for SKA1 21cm intensity mapping, SKA1 & SKA2 cosmic shear, SKA1 & SKA2 galaxy clustering. See ./gambit cosmo_nuisance_params_ska for more details.
+
+#----------------------------
 #  CosmoBit
 #----------------------------
 
@@ -4295,50 +4386,20 @@ Sigma8:  |
 rs_drag:  |
   Returns comoving sound horizon at baryon drag.
 
-DecayingDM_general_parameters: |
-   mass, mass of the dark matter candidate [in GeV]
-   lifetime, lifetime of said DM candidate [in s]
-   fraction, fraction of how much the decaying DM component contributes to all DM.
-   BR, the fraction of how much energy will be contributed in e+/e-. (1-BR will be asinged to photons)
+Cl_TT:  |
+  Capability returning the CMB temperature-temperature anisotropy spectrum in units of muK^2. 
 
-LCDM_parameters: |
-   omega_b, baryon density parameter.
-   omega_cdm, dark matter density parameter.
-   H0, Hubble constant.
-   ln10A_s, primordial curvature fluctuation amplitude.
-   n_s, parametrises the primordial scale dependence.
-   tau_reio, reionization optical depth.
+Cl_EE:  |
+  Capability returning the CMB E-mode spectrum. 
 
-LCDM_no_primordial_parameters: |
-   As LCDM_parameters but without the parameters related to the shape of the primordial power spectrum.
-   omega_b, baryon density parameter.
-   omega_cdm, dark matter density parameter.
-   H0, Hubble constant.
-   tau_reio, reionization optical depth.
+Cl_BB:  |
+  Capability returning the CMB B-mode spectrum. 
 
-LCDMtensor_parameters: |
-   in addition to the above, r_tensor, amplitude of
-   tensor power spectrum over scalar power spectrum.
+Cl_TE:  |
+  Capability returning the CMB TE cross-correlations. 
 
-LCDM_dNeffCMB_parameters: |
-   in addition to LCDM_parameters:
-   dNeff, extra relativistic degrees of freedom (Neff=3.064+dNeff)
-
-LCDM_dNeffCMB_dNeffBBN_parameters: |
-   in addition to LCDM_parameters:
-   dNeff, extra relativistic degrees of freedom @CMB release (Neff=3.064+dNeff)
-   dNeffBBN, extra relativistic degrees of freedom @BBN (Neff=3.064+dNeffBBN)
-
-LCDM_dNeffCMB_dNeffBBN_etaBBN_parameters: |
-   in addition to LCDM_parameters:
-   dNeff, extra relativistic degrees of freedom @CMB release (Neff=3.064+dNeff)
-   dNeffBBN, extra relativistic degrees of freedom @BBN (Neff=3.064+dNeffBBN)
-   etaBBN, baryon to photon ratio at BBN (eta at CMB set by omega_b)
-
-LCDM_ExtdNeffCMB_ExtetaBBN_parameters: |
-   as LCDM_parameters but with two additional 'externally' derived parameters. I.e. the parameters are not free in a cosmological sense but can rather be derived from other sources. E.g. the presence of an extra light particle, like an ALP.
-   dNeff, extra relativistic degrees of freedom @CMB release (Neff=3.064+dNeff), can be called via capability ExtdNeffCMB, derived in external_dNeff_etaBBN for the according considered model.
-   etaBBN, baryon to photon ratio at BBN (eta at CMB set by omega_b), can be called via capability etaBBN computed by a function for the according considered model; derived with dNeff in capability external_dNeff_etaBBN.
+Cl_phiphi:  |
+  Capability returning the CMB lensing potential. 
 
 ExtNeffCMB: |
    Capability to set or compute non-standard values of dNeff at CMB release. E.g. needed for the CosmoALP model.
@@ -4346,42 +4407,45 @@ ExtNeffCMB: |
 external_dNeff_etaBBN: |
    Compute dNeff @CMB and etaBBN for non-standard models. E.g. needed for the CosmoALP model.
 
+MP_Combined_LogLike: |
+    Returns combined LogLike of all MontePython Likelihoods used in the scan. 
 
-inf_SR1quad_LCDMt_parameters: |
-   omega_b, baryon density parameter.
-   omega_cdm, dark matter density parameter.
-   H0, Hubble constant.
-   tau_reio, reionization optical depth.
-   N_pivot, number of efolds before the end of inflation.
-   mass, inflation mass.
+MP_LogLikes: |
+  Calls MontePython to get the likelihood of all experiments used in scan. These are added to the value returned by MP_Combined_LogLike. Results are stored in a map mapping experiment name to LogLike value.
 
-inf_1quarInf_LCDMt_parameters: |
-    6 parameter cosmology+inflation model: 0.25 lambda phi^4
-    quartic inflation A_s, n_s and r are given by inflationary
-    model parameters: N_piv, lambda.
+MP_Observables: |
+  Calls MontePython to get the likelihood of all experiments used as an Observable. These are not added to the value returned by MP_Combined_LogLike, hence they are not driving the scan. Results are stored in a map mapping experiment name to LogLike value.
 
-inf_1mono32Inf_LCDMt_parameters: |
-    6 parameter cosmology+inflation model: 2/3
-    lambda phi^2/3 --- inflation, A_s, n_s and r are
-    given by inflationary model parameters: N_piv, lambda.
+MP_experiment_names: |
+  Set names of all experiments in use for a scan and stores the path to the settings file for the different likelihoods by reading in the runOptions 'Likelihoods' and/or 'Observables' of this capability.
 
-inf_1linearInf_LCDMt_parameters: |
-    6 parameter cosmology+inflation model: m phi
-    linear inflation, A_s, n_s and r are given by
-    inflationary model parameters: N_piv, m^2.
+MontePythonLike_3_1_0_init: |
+  Initialise MontePython backend. 
 
-inf_smashInf_LCDMt_parameters: |
-    8 parameter cosmology smash inflation model --- smash inflation
-    A_s, n_s and r are given by inflationary model parameters: xi, m^2.
+Neff: |
+  Return the value of Neff from CLASS. 
 
-inf_1hilltopInf_LCDMt_parameters: |
-    7 parameter cosmology and inflation model with hilltop inflation.
+NuMasses_SM: |
+  Create a map containing neutrino masses, the corresponding number of non-cold DM components (N_ncdm) today as well as the sum of the neutrino masses. Needed to pass correct parameters to CLASS.
 
-inf_1naturalInf_LCDMt_parameters: |
-    7 parameter cosmology and inflation model with axion motivated natural inflation.
+NuMasses_classy_input: |
+  Set all neutrino related input parameters for CLASS (N_ur, N_ncdm, T_ncdm, m_ncdm) and store it in a python dictionary. 
 
-cosmo_nuisance_params_parameters: |
-    Cosmological nuisance parameters (besides the ones entering the Planck likelihoods).
+
+baseline_classy_input: |
+  Fill python dictionary with some base parameters needed to be set for each CLASS call independent of exact model in use _> H0, T_cmb, omega_b, tau_reio, omega_cdm, calculated YHe from AlterBBN. Further input options for CLASS (precision parameters, more output...) can be set by setting a runOption 'classy_dict' and specifying these parameters. 
+
+class_get_Neff: |
+  Return Neff as calculated by CLASS.
+
+class_get_cl: |
+  Return lensed CLs from class in units of muK^2  @Patrick -> check
+
+classy_2_6_3_init: |
+  Initialise CLASS 2.6.3 run through the classy python wrapper. 
+
+classy_exo_2_7_0_init: |
+  Initialise ExoCLASS 2.7.0 run through the classy python wrapper. 
 
 compute_Planck_lowp_TT_loglike: |
    function computes the planck log-likelihood for a  given
@@ -4451,6 +4515,9 @@ Init_cosmomodel: |
 
 get_NNUC: |
     Return global AlterBBN parameter NNUC (# computed element abundances).
+
+call_nucl_err: |
+    Backend convenience function to set all inputs for call to AlterBBN's nucl_err function to calculation BBN abundances + errors. 
 
 nucl_err: |
     AlterBBN function that computes element abundances and their covariance during BBN.
