@@ -186,8 +186,8 @@ namespace Gambit
         // without realising it can be dangerous // TODO: actually implement the check somewhere.. 
         int addDict(pybind11::dict extra_entries);
 
-        void addEntry(str key, double value) {input_dict[key.c_str()]=value;};
-        void addEntry(str key, int    value) {input_dict[key.c_str()]=value;};
+        void addEntry(str key, double value) {input_dict[key.c_str()]=std::to_string(value).c_str();};
+        void addEntry(str key, int    value) {input_dict[key.c_str()]=std::to_string(value).c_str();};
         void addEntry(str key, str    value) {input_dict[key.c_str()]=value.c_str();};
         void addEntry(str key, std::vector<double>& values)
         {
