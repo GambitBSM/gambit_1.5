@@ -752,6 +752,8 @@ namespace Gambit
       result.k_max = runOptions->getValueOrDef<double>(1e+6,"k_min");
       result.numsteps = runOptions->getValueOrDef<int>(100, "numsteps");
 
+      if (result.numsteps > 1000)
+        CosmoBit_error().raise(LOCAL_INFO, "Currently MultiModeCode supports a maximum k-array size of 1000. Please change your yaml file settings.");
 
 
       //  Read in MultiMode settings from the yaml file
@@ -828,46 +830,19 @@ namespace Gambit
 
       int calcfullpk = 1;
 
-      std::cout << "Going for MultiModeCode..." << std::endl;
-
       //-------------------------------------------------------------
       // The function below calls the MultiModeCode backend
       //  for a given choice of inflationary model,
       //  which calculates the observables.
       //-------------------------------------------------------------
 
-      // FUNCTION BREAKS HERE ---v---
-
-      observables = BEreq::multimodecode_gambit_driver(inputs.num_inflaton,          inputs.potential_choice, 
-                                                       inputs.slowroll_infl_end,     inputs.instreheat,            inputs.vparam_rows,
-                                                       inputs.use_deltaN_SR,         inputs.evaluate_modes,        inputs.use_horiz_cross_approx, 
-                                                       inputs.get_runningofrunning,  inputs.ic_sampling,           inputs.energy_scale,
-                                                       inputs.numb_samples,          inputs.save_iso_N,            inputs.N_iso_ref,
-                                                       param_sampling,               &vp_prior_min,                &vp_prior_max,
-                                                       varying_N_pivot,              use_first_priorval,           byVal(&inputs.phi_init0[0]),
-                                                       byVal(&inputs.dphi_init0[0]), byVal(&inputs.vparams[0]),    inputs.N_pivot,
-                                                       inputs.k_pivot,               inputs.dlnk,                  calcfullpk,
-                                                       steps,                        kmin,                         kmax,
-                                                       &phi0_priors_min,             &phi0_priors_max,             &dphi0_priors_min,  
-                                                       &dphi0_priors_max,            N_pivot_prior_min,            N_pivot_prior_max);
-
-      // Clear it all
-      result = primordial_ps();
+      observables = BEreq::multimodecode_gambit_driver(inputs.num_inflaton,          inputs.potential_choice, inputs.slowroll_infl_end,     inputs.instreheat,            inputs.vparam_rows, inputs.use_deltaN_SR,         inputs.evaluate_modes,        inputs.use_horiz_cross_approx, inputs.get_runningofrunning,  inputs.ic_sampling,           inputs.energy_scale,inputs.numb_samples,          inputs.save_iso_N,            inputs.N_iso_ref,param_sampling,               &vp_prior_min,                &vp_prior_max,varying_N_pivot,              use_first_priorval,           byVal(&inputs.phi_init0[0]),byVal(&inputs.dphi_init0[0]), byVal(&inputs.vparams[0]),    inputs.N_pivot,inputs.k_pivot,               inputs.dlnk,                  calcfullpk, steps,                        kmin,                         kmax,&phi0_priors_min,             &phi0_priors_max,             &dphi0_priors_min,   &dphi0_priors_max,            N_pivot_prior_min,            N_pivot_prior_max);
 
       // This is fine
-      std::cout << "Adding a double!" << std::endl;
-      primordial_ps pps;
-      double justak = observables.k_array[0];
-      pps.addDouble(justak);
-
-      std::cout << "Attempting to fill arrays..." << std::endl;
-
       result.fill_k(observables.k_array, inputs.numsteps);
       result.fill_P_s(observables.pks_array, inputs.numsteps);
       result.fill_P_s_iso(observables.pks_array_iso, inputs.numsteps);
       result.fill_P_t(observables.pkt_array, inputs.numsteps);
-
-      std::cout << "DID I DIE?" << std::endl;
     }
 
     /// Passes the inputs from the MultiModeCode initialisation function 
@@ -910,8 +885,6 @@ namespace Gambit
 
       int calcfullpk = 0;
 
-      std::cout << "Going for MultiModeCode..." << std::endl;
-
       //-------------------------------------------------------------
       // The function below calls the MultiModeCode backend
       //  for a given choice of inflationary model,
@@ -929,7 +902,6 @@ namespace Gambit
                                                        steps,                        kmin,                         kmax,
                                                        &phi0_priors_min,             &phi0_priors_max,             &dphi0_priors_min,  
                                                        &dphi0_priors_max,            N_pivot_prior_min,            N_pivot_prior_max);
-
 
       result.set_ns(observables.ns);
       result.set_As(observables.As);

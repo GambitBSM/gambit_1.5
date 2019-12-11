@@ -288,8 +288,6 @@ namespace Gambit
             void fill_P_s_iso(double*, int);
             void fill_P_t(double*, int);
 
-            void addDouble(double);
-
             std::vector<double>& get_k() { return k; }
             std::vector<double>& get_P_s() { return P_s; }
             std::vector<double>& get_P_t() { return P_t; }

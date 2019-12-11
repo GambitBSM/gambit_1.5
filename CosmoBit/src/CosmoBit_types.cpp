@@ -285,24 +285,8 @@ namespace Gambit
 
     void primordial_ps::fill_k(double *k_array, int len)
     {
-      std::cout << "Filling k " << std::endl;
-      for (int i=0; i<len; ++i)
-      {
-          std::cout << k_array[i] << " ";
-          double currk = k_array[i];
-          k.push_back(currk);
-      }
-      std::cout << std::endl;
-      std::cout << "Going for the vector..." << std::endl;
-      for (std::vector<double>::iterator it = k.begin(); it != k.end(); ++it)
-      {
-          std::cout << *it << std::endl;
-      }
-    }
-
-    void primordial_ps::addDouble(double dub)
-    {
-      k.push_back(dub);
+      std::vector<double> K(k_array, k_array+len);
+      k = std::move(K);
     }
 
     void primordial_ps::fill_P_s(double *P_s_array, int len)

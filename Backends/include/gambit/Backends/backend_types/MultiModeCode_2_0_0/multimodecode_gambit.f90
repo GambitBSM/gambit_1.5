@@ -43,15 +43,11 @@ MODULE multimodecode_gambit
     real(dp) :: runofrun
     !Non-Gaussianity
     real(dp) :: f_NL
-    real(dp) :: tau_NL
-    real(dp) , dimension(:), Allocatable :: k_array  !<- Added for the FULL POW SPEC
-    real(dp) , dimension(:), Allocatable :: pks_array  !<- Added for the FULL POW SPEC
-    real(dp) , dimension(:), Allocatable :: pks_iso_array  !<- Added for the FULL POW SPEC
-    real(dp) , dimension(:), Allocatable :: pkt_array  !<- Added for the FULL POW SPEC    
-    ! real(dp) , dimension(100) :: k_array  !<- Added for the FULL POW SPEC
-    ! real(dp) , dimension(100) :: pks_array  !<- Added for the FULL POW SPEC
-    ! real(dp) , dimension(100) :: pks_iso_array  !<- Added for the FULL POW SPEC
-    ! real(dp) , dimension(100) :: pkt_array  !<- Added for the FULL POW SPEC
+    real(dp) :: tau_NL  
+    real(dp) , dimension(1000) :: k_array
+    real(dp) , dimension(1000) :: pks_array
+    real(dp) , dimension(1000) :: pks_iso_array
+    real(dp) , dimension(1000) :: pkt_array
     integer :: k_size
   end type gambit_inflation_observables
 
@@ -194,15 +190,20 @@ contains
     save_iso_N = ginput_save_iso_N
     N_iso_ref = ginput_N_iso_ref
 
+    ! if (allocated(gambit_obs % k_array)) deallocate(gambit_obs % k_array)
+    ! if (allocated(gambit_obs % pks_array)) deallocate(gambit_obs % pks_array)
+    ! if (allocated(gambit_obs % pks_iso_array)) deallocate(gambit_obs % pks_iso_array)
+    ! if (allocated(gambit_obs % pkt_array)) deallocate(gambit_obs % pkt_array)
+
     call deallocate_vars()
     !Make some arrays
     call allocate_vars()
 
     ! Allocatate the array size to the k and P(k)
-    allocate( gambit_obs % k_array(steps) )
-    allocate( gambit_obs % pks_array(steps) )
-    allocate( gambit_obs % pkt_array(steps) )
-    allocate( gambit_obs % pks_iso_array(steps) )
+    ! allocate( gambit_obs % k_array(steps) )
+    ! allocate( gambit_obs % pks_array(steps) )
+    ! allocate( gambit_obs % pkt_array(steps) )
+    ! allocate( gambit_obs % pks_iso_array(steps) )
 
     param_sampling = ginput_param_sampling
     vp_prior_min = ginput_vp_prior_min
@@ -352,13 +353,6 @@ contains
       !-------------setting up the observables--------------------
 
     end if
-
-    ! do i=1,steps
-    !   print*,"i = ", i
-    !   print*,"gambit_obs.k_input = ", gambit_obs % k_array(i)
-    !   print*,"gambit_obs.pk%adiab = ",gambit_obs % pks_array(i)
-    !   print*,"gambit_obs.pk%tensor = ",gambit_obs % pkt_array(i)
-    ! end do
 
   contains
 
@@ -838,10 +832,7 @@ contains
         end if
 
         !Get full spectrum for adiab and isocurv at equal intvs in lnk
-       !print*,"will call gambit_get_full_pk"
-        !steps = 100
-        !kmax = 1e6
-        !kmin = 1e-7
+        !print*,"will call gambit_get_full_pk"
 
         call gambit_get_full_pk(pk_arr,calc_full_pk,steps,kmin,kmax)
 
@@ -849,7 +840,7 @@ contains
 
           observs_gambit%k_array         = pk_arr(:steps,1)
           observs_gambit%pks_array       = pk_arr(:steps,2)
-          observs_gambit%pks_iso_array = pk_arr(:steps,3)
+          observs_gambit%pks_iso_array   = pk_arr(:steps,3)
           observs_gambit%pkt_array       = pk_arr(:steps,6)
 
         end if
