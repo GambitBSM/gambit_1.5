@@ -580,8 +580,10 @@ LCDM: |
 
    Neutrino masses:
    default: 1 massive neutrino with m_nu = 0.06eV (as in the Planck 2015/2018 'baseline' model)
-   if model 'StandardModel_numass_single' is scanned as well: one massive neutrino with m_nu = mNu.
-   if model 'StandardModel_numass_degenerate' is scanned as well: three massive neutrinos with m_nu = Smu/3. each. 
+   Scan in combination with model ..
+    .. StandardModel_mNudiff_both_scan  for realistic neutrino masses (normal & inverted hierarchy)
+    .. StandardModel_mNudiff_NH_scan  for realistic neutrino masses (normal hierarchy only)
+    .. StandardModel_mNudiff_IH_scan  for realistic neutrino masses (inverted hierarchy only)
 
 LCDM_no_primordial: |
    

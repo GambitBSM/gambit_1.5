@@ -21,18 +21,11 @@ Parameters:
  # --- import model parameters for models to scan over ---
  LCDM: !import include/LCDM_scan.yaml        # base LCDM
 
-  # Everything Neff and eta related
- #etaBBN:                             !import include/etaBBN.yaml
- #rCMB:                               !import include/rCMB.yaml
- #rBBN_rCMB:                          !import include/rBBN_rCMB.yaml
- #dNeffCMB:                           !import include/dNeffCMB.yaml
- #dNeffBBN_dNeffCMB:                  !import include/dNeffBBN_dNeffCMB.yaml
- #rBBN_rCMB_dNeffBBN_dNeffCMB:        !import include/rBBN_rCMB_dNeffBBN_dNeffCMB.yaml
- etaBBN_rBBN_rCMB_dNeffBBN_dNeffCMB: !import include/etaBBN_rBBN_rCMB_dNeffBBN_dNeffCMB.yaml
+ # Everything Neff and eta related
+ etaBBN:                             !import include/etaBBN.yaml
 
  # neutrino masses
- #StandardModel_numass_single: !import include/StandardModel_numass_single_scan.yaml
- StandardModel_numass_degenerate: !import include/StandardModel_numass_degenerate_scan.yaml
+ StandardModel_mNudiff: !import include/StandardModel_mNudiff_both_scan.yaml
 
  # Cosmological nuisance parameters (except for Planck CMB Likelihoods) 
  cosmo_nuisance_params_Pantheon: !import include/cosmo_nuisance_params_Pantheon.yaml
@@ -69,43 +62,6 @@ Scanner:
 #======== Observables of interest ========
 ObsLikes:
  
-#  - purpose:      Obs
-#    capability:   Omega0_m
-#    function:     get_Omega0_m_classy 
-#
-#  - purpose:      Obs
-#    capability:   Omega0_b
-#    function:     get_Omega0_b_classy
-#  
-#  - purpose:      Obs
-#    capability:   Omega0_cdm
-#    function:     get_Omega0_cdm_classy
-#  
-#  - purpose:      Obs
-#    capability:   Omega0_r
-#    function:     get_Omega0_r_classy
-#  
-#  - purpose:      Obs
-#    capability:   Omega0_g
-#    function:     get_Omega0_g_classy
-#  
-#  - purpose:      Obs
-#    capability:   Omega0_ur
-#    function:     get_Omega0_ur_classy
-#
-#  - purpose:      Obs
-#    capability:   Omega0_ncdm
-#    function:     get_Omega0_ncdm_classy  
-
-#  - purpose:      LogLike
-#    capability:   Pantheon_LogLike
-
-#   - purpose:      LogLike
-#     capability:   BAO_LogLike
-
-  #- purpose:      LogLike
-  #  capability:   sigma8_LogLike
-
   # The total lnL from MontePython
   - purpose:      LogLike
     capability:   MP_Combined_LogLike
@@ -125,24 +81,6 @@ ObsLikes:
 
 #======== Rule entries ========
 Rules:
-
-
-  # # class through c interface
-  # - capability: class_set_parameter
-  #   options:
-  #     class_dict: 
-  #      # output: "tCl" # need to add matter power spectrum for sigma8 computation
-  #       k_pivot: 0.05
-  #       output: mPk lCl pCl
-  #       P_k_max_h/Mpc: 1.
-  #
-  # - capability: class_get_Dl
-  #   backends:
-  #     - {backend: class, version: 2.6.3}  
-  #
-  # - capability: Pantheon_LogLike
-  #   backends:
-  #     - {backend: class, version: 2.6.3}
 
 
   # classy (class through python wrapper)
@@ -180,32 +118,6 @@ Rules:
       Observables:
         WiggleZ: default
 
-  # next 3 rules: all to calculate Likelihoods the class way (not the classy way)
-  # verified that BAO, Pantheon & Planck_SZ all give same result the class way & classy way (through MP)
-  # - capability: BAO_LogLike
-  #   backends:
-  #     - {backend: class, version: 2.6.3}
-  #   options:
-  #     DataFile:  BAO_2014.dat
-  #
-  # - capability: sigma8_LogLike
-  #   function: compute_sigma8_LogLike
-  #   dependencies:
-  #     - capability: Omega0_m
-  #       function: compute_Omega0_m
-  #       module: CosmoBit
-  #   options:
-  #     DataFile: "Planck_SZ.dat"
-  #
-  # - capability: Omega0_m
-  #   function: compute_Omega0_m
-  #   dependencies:
-  #     - capability: Omega0_b
-  #       function: compute_Omega0_b
-  #       module: CosmoBit
-  #     - capability: Omega0_cdm
-  #       function: compute_Omega0_cdm
-  #       module: CosmoBit
 
   # to speed up Neff calc for testing
   - capability: AlterBBN_setInput

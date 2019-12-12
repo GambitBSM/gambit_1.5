@@ -81,6 +81,11 @@
 #
 
 Parameters:
+
+ # neutrino masses
+ StandardModel_mNudiff: !import include/StandardModel_mNudiff_both_scan.yaml
+ #StandardModel_mNudiff: !import include/StandardModel_mNudiff_NH_scan.yaml
+ #StandardModel_mNudiff: !import include/StandardModel_mNudiff_IH_scan.yaml
  
  # base-line LCDM model parameters and prior
  LCDM:
@@ -280,6 +285,14 @@ Rules:
     options:
       failsafe: 1
       err: 0
+
+  # correlation matrix for BBN error calculation todo explain what that is!
+  - capability: BBN_abundances
+    options:
+      correlation_matrix: [[1.0,0.2],[0.2,1.0]]
+      relative_errors: [1e-3,1e-2]
+      elements: [Yp,D]
+
 
   # ---- MontePython Likelihoods -----
 

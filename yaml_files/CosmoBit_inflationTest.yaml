@@ -13,7 +13,7 @@
 
 
 Parameters:
-  StandardModel_numass_degenerate: !import include/StandardModel_numass_degenerate_scan.yaml
+  StandardModel_mNudiff: !import include/StandardModel_mNudiff_both_scan.yaml
   
   #LCDM:
   #  omega_b:
