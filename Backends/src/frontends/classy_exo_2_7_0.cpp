@@ -148,8 +148,8 @@ BE_NAMESPACE
   // to make the capabilities inside CosmoBit independent of types that depend on the 
   // Boltzmann solver in use
 
-  // get the CLs as they are needed for the Planck likelihood.
-  std::vector<double> class_get_cl(std::string spectype)
+  // get the lensed Cl.
+  std::vector<double> class_get_lensed_cl(std::string spectype)
   {
     // Get dictionary containing all (lensed) Cl spectra
     pybind11::dict cl_dict = cosmo.attr("lensed_cl")();
@@ -157,24 +157,37 @@ BE_NAMESPACE
     // Get only the relevant Cl as np array and steal the pointer to its data.
     pybind11::object cl_array_obj = cl_dict[pybind11::cast<str>(spectype)];
     pybind11::array_t<double> cl_array = pybind11::cast<pybind11::array_t<double>>(cl_array_obj);
-    double* cltemp = (double*) cl_array.request().ptr;
-    int len = pybind11::cast<int>(cl_array.attr("__len__")());
+    auto cl_ptr = cl_array.data();
+    size_t len = cl_array.size();
 
-    // Class calculates dimensionless spectra.
-    // To compare with observation (e.g. Planck),
-    // TT EE TE BB need to be multiplied by T_CMB^2.
-    double factor = 1.;
-    if (spectype.compare("pp") != 0)
-      factor = pow( 1.e6*(cosmo.attr("T_cmb")()).cast<double>(), 2);
+    // Create the vector to return
+    std::vector<double> result(cl_ptr, (cl_ptr+len));
 
-    std::vector<double> result(len,0.);
-    // Loop through all l from 0 to len
-    for (int l=0; l < len; l++)
-    {
-      // The entries for l=0 and l=1 are zero per defintion
-      if (l < 2){result[l] = 0;}
-      else      {result[l] = factor*cltemp[l];}
-    }
+    // cl = 0 for l = 0,1
+    result.at(0) = 0.;
+    result.at(1) = 0.;
+
+    return result;
+  }
+
+  // get the raw (unlensed) Cl.
+  std::vector<double> class_get_unlensed_cl(std::string spectype)
+  {
+    // Get dictionary containing the raw (unlensed) Cl spectra
+    pybind11::dict cl_dict = cosmo.attr("raw_cl")();
+
+    // Get only the relevant Cl as np array and steal the pointer to its data.
+    pybind11::object cl_array_obj = cl_dict[pybind11::cast<str>(spectype)];
+    pybind11::array_t<double> cl_array = pybind11::cast<pybind11::array_t<double>>(cl_array_obj);
+    auto cl_ptr = cl_array.data();
+    size_t len = cl_array.size();
+
+    // Create the vector to return
+    std::vector<double> result(cl_ptr, (cl_ptr+len));
+
+    // cl = 0 for l = 0,1
+    result.at(0) = 0.;
+    result.at(1) = 0.;
 
     return result;
   }

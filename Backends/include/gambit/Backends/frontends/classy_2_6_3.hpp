@@ -45,7 +45,8 @@ BE_CONV_FUNCTION(class_get_Hz, double, (double), "class_get_Hz")
 
 //BE_CONV_FUNCTION(class_get_Omega0_nu, 		double, (), "class_get_Omega0_nu") // (JR) would not use this, see comment in source file
 
-BE_CONV_FUNCTION(class_get_cl, std::vector<double>, (str), "class_get_cl")
+BE_CONV_FUNCTION(class_get_lensed_cl, std::vector<double>, (str), "class_get_lensed_cl")
+BE_CONV_FUNCTION(class_get_unlensed_cl, std::vector<double>, (str), "class_get_unlensed_cl")
 BE_CONV_FUNCTION(class_get_scale_independent_growth_factor, 	double, (double), "class_get_scale_independent_growth_factor")
 BE_CONV_FUNCTION(class_get_scale_independent_growth_factor_f,	double, (double), "class_get_scale_independent_growth_factor_f")
 

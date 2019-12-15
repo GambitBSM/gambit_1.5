@@ -1104,10 +1104,10 @@ namespace Gambit
 
 // Getter functions for CL spectra from classy
 
-    void class_get_Cl_TT(std::vector<double>& result)
+    void class_get_unlensed_Cl_TT(std::vector<double>& result)
     {
-      using namespace Pipes::class_get_Cl_TT;
-      result = BEreq::class_get_cl("tt");
+      using namespace Pipes::class_get_unlensed_Cl_TT;
+      result = BEreq::class_get_unlensed_cl("tt");
 
       // Loop through the TT spectrum and check if there is a negative value. If so, invalidate.
       for (auto it=result.begin(); it != result.end(); it++)
@@ -1119,16 +1119,16 @@ namespace Gambit
       }
     }
 
-    void class_get_Cl_TE(std::vector<double>& result)
+    void class_get_unlensed_Cl_TE(std::vector<double>& result)
     {
-      using namespace Pipes::class_get_Cl_TE;
-      result = BEreq::class_get_cl("te");
+      using namespace Pipes::class_get_unlensed_Cl_TE;
+      result = BEreq::class_get_unlensed_cl("te");
     }
 
-    void class_get_Cl_EE(std::vector<double>& result)
+    void class_get_unlensed_Cl_EE(std::vector<double>& result)
     {
-      using namespace Pipes::class_get_Cl_EE;
-      result = BEreq::class_get_cl("ee");
+      using namespace Pipes::class_get_unlensed_Cl_EE;
+      result = BEreq::class_get_unlensed_cl("ee");
 
       // Loop through the EE spectrum and check if there is a negative value. If so, invalidate.
       for (auto it=result.begin(); it != result.end(); it++)
@@ -1140,10 +1140,10 @@ namespace Gambit
       }
     }
 
-    void class_get_Cl_BB(std::vector<double>& result)
+    void class_get_unlensed_Cl_BB(std::vector<double>& result)
     {
-      using namespace Pipes::class_get_Cl_BB;
-      result = BEreq::class_get_cl("bb");
+      using namespace Pipes::class_get_unlensed_Cl_BB;
+      result = BEreq::class_get_unlensed_cl("bb");
 
       // Loop through the BB spectrum and check if there is a negative value. If so, invalidate.
       for (auto it=result.begin(); it != result.end(); it++)
@@ -1155,10 +1155,76 @@ namespace Gambit
       }
     }
 
-    void class_get_Cl_PhiPhi(std::vector<double>& result)
+    void class_get_unlensed_Cl_PhiPhi(std::vector<double>& result)
     {
-      using namespace Pipes::class_get_Cl_PhiPhi;
-      result = BEreq::class_get_cl("pp");
+      using namespace Pipes::class_get_unlensed_Cl_PhiPhi;
+      result = BEreq::class_get_unlensed_cl("pp");
+
+      // Loop through the PhiPhi spectrum and check if there is a negative value. If so, invalidate.
+      for (auto it=result.begin(); it != result.end(); it++)
+      {
+        if (*it < 0.0)
+        {
+          invalid_point().raise("Found a negative value in the PhiPhi spectrum.");
+        }
+      }
+    }
+
+    void class_get_lensed_Cl_TT(std::vector<double>& result)
+    {
+      using namespace Pipes::class_get_lensed_Cl_TT;
+      result = BEreq::class_get_lensed_cl("tt");
+
+      // Loop through the TT spectrum and check if there is a negative value. If so, invalidate.
+      for (auto it=result.begin(); it != result.end(); it++)
+      {
+        if (*it < 0.0)
+        {
+          invalid_point().raise("Found a negative value in the TT spectrum.");
+        }
+      }
+    }
+
+    void class_get_lensed_Cl_TE(std::vector<double>& result)
+    {
+      using namespace Pipes::class_get_lensed_Cl_TE;
+      result = BEreq::class_get_lensed_cl("te");
+    }
+
+    void class_get_lensed_Cl_EE(std::vector<double>& result)
+    {
+      using namespace Pipes::class_get_lensed_Cl_EE;
+      result = BEreq::class_get_lensed_cl("ee");
+
+      // Loop through the EE spectrum and check if there is a negative value. If so, invalidate.
+      for (auto it=result.begin(); it != result.end(); it++)
+      {
+        if (*it < 0.0)
+        {
+          invalid_point().raise("Found a negative value in the EE spectrum.");
+        }
+      }
+    }
+
+    void class_get_lensed_Cl_BB(std::vector<double>& result)
+    {
+      using namespace Pipes::class_get_lensed_Cl_BB;
+      result = BEreq::class_get_lensed_cl("bb");
+
+      // Loop through the BB spectrum and check if there is a negative value. If so, invalidate.
+      for (auto it=result.begin(); it != result.end(); it++)
+      {
+        if (*it < 0.0)
+        {
+          invalid_point().raise("Found a negative value in the BB spectrum.");
+        }
+      }
+    }
+
+    void class_get_lensed_Cl_PhiPhi(std::vector<double>& result)
+    {
+      using namespace Pipes::class_get_lensed_Cl_PhiPhi;
+      result = BEreq::class_get_lensed_cl("pp");
 
       // Loop through the PhiPhi spectrum and check if there is a negative value. If so, invalidate.
       for (auto it=result.begin(); it != result.end(); it++)

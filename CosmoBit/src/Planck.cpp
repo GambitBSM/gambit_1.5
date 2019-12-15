@@ -144,7 +144,12 @@ namespace Gambit
       double cl_and_pars[31];
       int idx_tt;
 
-      std::vector<double> Cl_TT = *Dep::Cl_TT;
+      double Tcmb_in_mK = (1e6)*(*Dep::T_cmb);
+      auto scale_func = [Tcmb_in_mK](double& cl){cl *= pow( Tcmb_in_mK, 2);};
+
+      std::vector<double> Cl_TT = *Dep::lensed_Cl_TT;
+
+      std::for_each(Cl_TT.begin(), Cl_TT.end(), scale_func );
 
       // Check if the sizes of the Cl arrays are suitable. If not ask the user to adjust the inputs for CLASS
       if( Cl_TT.size() < 30)
@@ -195,7 +200,12 @@ namespace Gambit
       double cl_and_pars[31];
       int idx_ee;
 
-      std::vector<double> Cl_EE = *Dep::Cl_EE;
+      double Tcmb_in_mK = (1e6)*(*Dep::T_cmb);
+      auto scale_func = [Tcmb_in_mK](double& cl){cl *= pow( Tcmb_in_mK, 2);};
+
+      std::vector<double> Cl_EE = *Dep::lensed_Cl_EE;
+
+      std::for_each(Cl_EE.begin(), Cl_EE.end(), scale_func );
 
       // Check if the sizes of the Cl arrays are suitable. If not ask the user to adjust the inputs for CLASS
       if( Cl_EE.size() < 30)
@@ -254,8 +264,14 @@ namespace Gambit
       double cl_and_pars_EE[31];
       int idx_ee;
 
-      std::vector<double> Cl_TT = *Dep::Cl_TT;
-      std::vector<double> Cl_EE = *Dep::Cl_EE;
+      double Tcmb_in_mK = (1e6)*(*Dep::T_cmb);
+      auto scale_func = [Tcmb_in_mK](double& cl){cl *= pow( Tcmb_in_mK, 2);};
+
+      std::vector<double> Cl_TT = *Dep::lensed_Cl_TT;
+      std::vector<double> Cl_EE = *Dep::lensed_Cl_EE;
+
+      std::for_each(Cl_TT.begin(), Cl_TT.end(), scale_func );
+      std::for_each(Cl_EE.begin(), Cl_EE.end(), scale_func );
 
       // Check if the sizes of the Cl arrays are suitable. If not ask the user to adjust the inputs for CLASS
       if( Cl_TT.size() < 30 || Cl_EE.size() < 30)
@@ -314,7 +330,12 @@ namespace Gambit
 
       int idx_tt;
 
-      std::vector<double> Cl_TT = *Dep::Cl_TT;
+      double Tcmb_in_mK = (1e6)*(*Dep::T_cmb);
+      auto scale_func = [Tcmb_in_mK](double& cl){cl *= pow( Tcmb_in_mK, 2);};
+
+      std::vector<double> Cl_TT = *Dep::lensed_Cl_TT;
+
+      std::for_each(Cl_TT.begin(), Cl_TT.end(), scale_func );
 
       // Check if the sizes of the Cl arrays are suitable. If not ask the user to adjust the inputs for CLASS
       if( Cl_TT.size() < 2509 )
@@ -385,7 +406,12 @@ namespace Gambit
 
       int idx_tt;
 
-      std::vector<double> Cl_TT = *Dep::Cl_TT;
+      double Tcmb_in_mK = (1e6)*(*Dep::T_cmb);
+      auto scale_func = [Tcmb_in_mK](double& cl){cl *= pow( Tcmb_in_mK, 2);};
+
+      std::vector<double> Cl_TT = *Dep::lensed_Cl_TT;
+
+      std::for_each(Cl_TT.begin(), Cl_TT.end(), scale_func );
 
       // Check if the sizes of the Cl arrays are suitable. If not ask the user to adjust the inputs for CLASS
       if ( Cl_TT.size() < 2509 )
@@ -436,9 +462,16 @@ namespace Gambit
       double  cl_and_pars[7574];
       int idx_tt, idx_te, idx_ee;
 
-      std::vector<double> Cl_TT = *Dep::Cl_TT;
-      std::vector<double> Cl_TE = *Dep::Cl_TE;
-      std::vector<double> Cl_EE = *Dep::Cl_EE;
+      double Tcmb_in_mK = (1e6)*(*Dep::T_cmb);
+      auto scale_func = [Tcmb_in_mK](double& cl){cl *= pow( Tcmb_in_mK, 2);};
+
+      std::vector<double> Cl_TT = *Dep::lensed_Cl_TT;
+      std::vector<double> Cl_TE = *Dep::lensed_Cl_TE;
+      std::vector<double> Cl_EE = *Dep::lensed_Cl_EE;
+
+      std::for_each(Cl_TT.begin(), Cl_TT.end(), scale_func );
+      std::for_each(Cl_TE.begin(), Cl_TE.end(), scale_func );
+      std::for_each(Cl_EE.begin(), Cl_EE.end(), scale_func );
 
       // Check if the sizes of the Cl arrays are suitable. If not, ask the user to adjust the inputs for CLASS
       if ( Cl_TT.size() < 2509 || Cl_TE.size() < 2509 || Cl_EE.size() < 2509 )
@@ -531,9 +564,16 @@ namespace Gambit
 
       int idx_tt, idx_te, idx_ee;
 
-      std::vector<double> Cl_TT = *Dep::Cl_TT;
-      std::vector<double> Cl_TE = *Dep::Cl_TE;
-      std::vector<double> Cl_EE = *Dep::Cl_EE;
+      double Tcmb_in_mK = (1e6)*(*Dep::T_cmb);
+      auto scale_func = [Tcmb_in_mK](double& cl){cl *= pow( Tcmb_in_mK, 2);};
+
+      std::vector<double> Cl_TT = *Dep::lensed_Cl_TT;
+      std::vector<double> Cl_TE = *Dep::lensed_Cl_TE;
+      std::vector<double> Cl_EE = *Dep::lensed_Cl_EE;
+
+      std::for_each(Cl_TT.begin(), Cl_TT.end(), scale_func );
+      std::for_each(Cl_TE.begin(), Cl_TE.end(), scale_func );
+      std::for_each(Cl_EE.begin(), Cl_EE.end(), scale_func );
 
       // Check if the sizes of the Cl arrays are suitable. If not, ask the user to adjust the inputs for CLASS
       if ( Cl_TT.size() < 2509 || Cl_TE.size() < 2509 || Cl_EE.size() < 2509 )
@@ -591,10 +631,17 @@ namespace Gambit
 
       int idx_pp, idx_tt, idx_te, idx_ee;
 
-      std::vector<double> Cl_PhiPhi = *Dep::Cl_PhiPhi;
-      std::vector<double> Cl_TT = *Dep::Cl_TT;
-      std::vector<double> Cl_TE = *Dep::Cl_TE;
-      std::vector<double> Cl_EE = *Dep::Cl_EE;
+      double Tcmb_in_mK = (1e6)*(*Dep::T_cmb);
+      auto scale_func = [Tcmb_in_mK](double& cl){cl *= pow( Tcmb_in_mK, 2);};
+
+      std::vector<double> Cl_PhiPhi = *Dep::lensed_Cl_PhiPhi;
+      std::vector<double> Cl_TT = *Dep::lensed_Cl_TT;
+      std::vector<double> Cl_TE = *Dep::lensed_Cl_TE;
+      std::vector<double> Cl_EE = *Dep::lensed_Cl_EE;
+
+      std::for_each(Cl_TT.begin(), Cl_TT.end(), scale_func );
+      std::for_each(Cl_TE.begin(), Cl_TE.end(), scale_func );
+      std::for_each(Cl_EE.begin(), Cl_EE.end(), scale_func );
 
       // Check if the sizes of the Cl arrays are suitable. If not, ask the user to adjust the inputs for CLASS
       if ((Cl_PhiPhi.size() < 2501) || (Cl_TT.size() < 2501) || (Cl_TE.size() < 2501) || (Cl_EE.size() < 2501))
@@ -655,7 +702,7 @@ namespace Gambit
 
       int idx_pp;
 
-      std::vector<double> Cl_PhiPhi = *Dep::Cl_PhiPhi;
+      std::vector<double> Cl_PhiPhi = *Dep::lensed_Cl_PhiPhi;
 
       // Check if the sizes of the Cl arrays are suitable. If not, ask the user to adjust the inputs for CLASS
       if ((Cl_PhiPhi.size() < 2501))
@@ -709,7 +756,12 @@ namespace Gambit
       double cl_and_pars[31];
       int idx_tt;
 
-      std::vector<double> Cl_TT = *Dep::Cl_TT;
+      double Tcmb_in_mK = (1e6)*(*Dep::T_cmb);
+      auto scale_func = [Tcmb_in_mK](double& cl){cl *= pow( Tcmb_in_mK, 2);};
+
+      std::vector<double> Cl_TT = *Dep::lensed_Cl_TT;
+
+      std::for_each(Cl_TT.begin(), Cl_TT.end(), scale_func );
 
       // Check if the sizes of the Cl arrays are suitable. If not ask the user to adjust the inputs for CLASS
       if( Cl_TT.size() < 30)
@@ -761,10 +813,18 @@ namespace Gambit
 
       int idx_tt, idx_te, idx_ee, idx_bb;
 
-      std::vector<double> Cl_TT = *Dep::Cl_TT;
-      std::vector<double> Cl_EE = *Dep::Cl_EE;
-      std::vector<double> Cl_TE = *Dep::Cl_TE;
-      std::vector<double> Cl_BB = *Dep::Cl_BB;
+      double Tcmb_in_mK = (1e6)*(*Dep::T_cmb);
+      auto scale_func = [Tcmb_in_mK](double& cl){cl *= pow( Tcmb_in_mK, 2);};
+
+      std::vector<double> Cl_TT = *Dep::lensed_Cl_TT;
+      std::vector<double> Cl_EE = *Dep::lensed_Cl_EE;
+      std::vector<double> Cl_TE = *Dep::lensed_Cl_TE;
+      std::vector<double> Cl_BB = *Dep::lensed_Cl_BB;
+
+      std::for_each(Cl_TT.begin(), Cl_TT.end(), scale_func );
+      std::for_each(Cl_EE.begin(), Cl_EE.end(), scale_func );
+      std::for_each(Cl_TE.begin(), Cl_TE.end(), scale_func );
+      std::for_each(Cl_BB.begin(), Cl_BB.end(), scale_func );
 
       // Check if the sizes of the Cl arrays are suitable. If not ask the user to adjust the inputs for CLASS
       if( Cl_TT.size() < 30 || Cl_EE.size() < 30 || Cl_TE.size() < 30 || Cl_BB.size() < 30 )
@@ -825,7 +885,12 @@ namespace Gambit
 
       int idx_tt;
 
-      std::vector<double> Cl_TT = *Dep::Cl_TT;
+      double Tcmb_in_mK = (1e6)*(*Dep::T_cmb);
+      auto scale_func = [Tcmb_in_mK](double& cl){cl *= pow( Tcmb_in_mK, 2);};
+
+      std::vector<double> Cl_TT = *Dep::lensed_Cl_TT;
+
+      std::for_each(Cl_TT.begin(), Cl_TT.end(), scale_func );
 
       // Check if the sizes of the Cl arrays are suitable. If not ask the user to adjust the inputs for CLASS
       if( Cl_TT.size() < 2509 )
@@ -894,7 +959,12 @@ namespace Gambit
 
       int idx_tt;
 
-      std::vector<double> Cl_TT = *Dep::Cl_TT;
+      double Tcmb_in_mK = (1e6)*(*Dep::T_cmb);
+      auto scale_func = [Tcmb_in_mK](double& cl){cl *= pow( Tcmb_in_mK, 2);};
+
+      std::vector<double> Cl_TT = *Dep::lensed_Cl_TT;
+
+      std::for_each(Cl_TT.begin(), Cl_TT.end(), scale_func );
 
       // Check if the sizes of the Cl arrays are suitable. If not ask the user to adjust the inputs for CLASS
       if ( Cl_TT.size() < 2509 )
@@ -945,9 +1015,16 @@ namespace Gambit
       double  cl_and_pars[7621];
       int idx_tt, idx_te, idx_ee;
 
-      std::vector<double> Cl_TT = *Dep::Cl_TT;
-      std::vector<double> Cl_TE = *Dep::Cl_TE;
-      std::vector<double> Cl_EE = *Dep::Cl_EE;
+      double Tcmb_in_mK = (1e6)*(*Dep::T_cmb);
+      auto scale_func = [Tcmb_in_mK](double& cl){cl *= pow( Tcmb_in_mK, 2);};
+
+      std::vector<double> Cl_TT = *Dep::lensed_Cl_TT;
+      std::vector<double> Cl_TE = *Dep::lensed_Cl_TE;
+      std::vector<double> Cl_EE = *Dep::lensed_Cl_EE;
+
+      std::for_each(Cl_TT.begin(), Cl_TT.end(), scale_func );
+      std::for_each(Cl_TE.begin(), Cl_TE.end(), scale_func );
+      std::for_each(Cl_EE.begin(), Cl_EE.end(), scale_func );
 
       // Check if the sizes of the Cl arrays are suitable. If not, ask the user to adjust the inputs for CLASS
       if ( Cl_TT.size() < 2509 || Cl_TE.size() < 2509 || Cl_EE.size() < 2509 )
@@ -1040,9 +1117,16 @@ namespace Gambit
 
       int idx_tt, idx_te, idx_ee;
 
-      std::vector<double> Cl_TT = *Dep::Cl_TT;
-      std::vector<double> Cl_TE = *Dep::Cl_TE;
-      std::vector<double> Cl_EE = *Dep::Cl_EE;
+      double Tcmb_in_mK = (1e6)*(*Dep::T_cmb);
+      auto scale_func = [Tcmb_in_mK](double& cl){cl *= pow( Tcmb_in_mK, 2);};
+
+      std::vector<double> Cl_TT = *Dep::lensed_Cl_TT;
+      std::vector<double> Cl_TE = *Dep::lensed_Cl_TE;
+      std::vector<double> Cl_EE = *Dep::lensed_Cl_EE;
+
+      std::for_each(Cl_TT.begin(), Cl_TT.end(), scale_func );
+      std::for_each(Cl_TE.begin(), Cl_TE.end(), scale_func );
+      std::for_each(Cl_EE.begin(), Cl_EE.end(), scale_func );
 
       // Check if the sizes of the Cl arrays are suitable. If not, ask the user to adjust the inputs for CLASS
       if ( Cl_TT.size() < 2509 || Cl_TE.size() < 2509 || Cl_EE.size() < 2509 )
@@ -1100,10 +1184,17 @@ namespace Gambit
 
       int idx_pp, idx_tt, idx_te, idx_ee;
 
-      std::vector<double> Cl_PhiPhi = *Dep::Cl_PhiPhi;
-      std::vector<double> Cl_TT = *Dep::Cl_TT;
-      std::vector<double> Cl_TE = *Dep::Cl_TE;
-      std::vector<double> Cl_EE = *Dep::Cl_EE;
+      double Tcmb_in_mK = (1e6)*(*Dep::T_cmb);
+      auto scale_func = [Tcmb_in_mK](double& cl){cl *= pow( Tcmb_in_mK, 2);};
+
+      std::vector<double> Cl_PhiPhi = *Dep::lensed_Cl_PhiPhi;
+      std::vector<double> Cl_TT = *Dep::lensed_Cl_TT;
+      std::vector<double> Cl_TE = *Dep::lensed_Cl_TE;
+      std::vector<double> Cl_EE = *Dep::lensed_Cl_EE;
+
+      std::for_each(Cl_TT.begin(), Cl_TT.end(), scale_func );
+      std::for_each(Cl_TE.begin(), Cl_TE.end(), scale_func );
+      std::for_each(Cl_EE.begin(), Cl_EE.end(), scale_func );
 
       // Check if the sizes of the Cl arrays are suitable. If not, ask the user to adjust the inputs for CLASS
       if ((Cl_PhiPhi.size() < 2049) || (Cl_TT.size() < 2049) || (Cl_TE.size() < 2049) || (Cl_EE.size() < 2049))
