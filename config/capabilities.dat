@@ -4163,6 +4163,14 @@ multimodecode_gambit_driver_test: |
 #  CLASS / classy
 #----------------------------
 
+class_get_unlensed_cl: |
+    Returns the dimensionless unlensed cl spectra of a given type.
+    The types are "tt", "te", "ee", "bb", and "pp".
+
+class_get_lensed_cl: |
+    Returns the dimensionless lensed cl spectra of a given type.
+    The types are "tt", "te", "ee", "bb", and "pp".
+
 class_get_Da: |
     Returns angular diameter distance at given z.
 
@@ -4386,20 +4394,35 @@ Sigma8:  |
 rs_drag:  |
   Returns comoving sound horizon at baryon drag.
 
-Cl_TT:  |
-  Capability returning the CMB temperature-temperature anisotropy spectrum in units of muK^2. 
+unlensed_Cl_TT:  |
+  Capability returning the unlensed dimensionless CMB temperature-temperature anisotropy spectrum.
 
-Cl_EE:  |
-  Capability returning the CMB E-mode spectrum. 
+unlensed_Cl_EE:  |
+  Capability returning the unlensed dimensionless CMB E-mode spectrum.
 
-Cl_BB:  |
-  Capability returning the CMB B-mode spectrum. 
+unlensed_Cl_BB:  |
+  Capability returning the unlensed dimensionless CMB B-mode spectrum.
 
-Cl_TE:  |
-  Capability returning the CMB TE cross-correlations. 
+unlensed_Cl_TE:  |
+  Capability returning the unlensed dimensionless CMB TE cross-correlations.
 
-Cl_phiphi:  |
-  Capability returning the CMB lensing potential. 
+unlensed_Cl_phiphi:  |
+  Capability returning the unlensed dimensionless CMB lensing potential.
+
+lensed_Cl_TT:  |
+  Capability returning the lensed dimensionless CMB temperature-temperature anisotropy spectrum.
+
+lensed_Cl_EE:  |
+  Capability returning the lensed dimensionless CMB E-mode spectrum.
+
+lensed_Cl_BB:  |
+  Capability returning the lensed dimensionless CMB B-mode spectrum.
+
+lensed_Cl_TE:  |
+  Capability returning the lensed dimensionless CMB TE cross-correlations.
+
+lensed_Cl_phiphi:  |
+  Capability returning the lensed dimensionless CMB lensing potential.
 
 ExtNeffCMB: |
    Capability to set or compute non-standard values of dNeff at CMB release. E.g. needed for the CosmoALP model.
