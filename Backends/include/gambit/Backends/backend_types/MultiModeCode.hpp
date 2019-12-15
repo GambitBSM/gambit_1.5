@@ -21,31 +21,31 @@
 
 namespace Gambit
 {
-	// type definition for the multimodecode output.
-	typedef struct
-	{
-		bool check_ic_ok;
-		double As;
-		double A_iso;
-		double A_pnad;
-		double A_ent;
-		double A_cross_ad_iso;
-		double ns;
-		double nt;
-		double n_iso;
-		double n_pnad;
-		double n_ent;
-		double r;
-		double alpha_s;
-		double runofrun;
-		double f_NL;
-		double tau_NL;
-		double k_array[100];  //<- Added for the FULL POW SPEC
-		double pks_array[100];  //<- Added for the FULL POW SPEC
-		double pks_array_iso[100];  //<- Added for the FULL POW SPEC
-		double pkt_array[100];  //<- Added for the FULL POW SPEC
-		int k_size;
-	} gambit_inflation_observables;
+    // type definition for the multimodecode output.
+    typedef struct
+    {
+        bool check_ic_ok;
+        double As;
+        double A_iso;
+        double A_pnad;
+        double A_ent;
+        double A_cross_ad_iso;
+        double ns;
+        double nt;
+        double n_iso;
+        double n_pnad;
+        double n_ent;
+        double r;
+        double alpha_s;
+        double runofrun;
+        double f_NL;
+        double tau_NL;
+        double k_array[1000];
+        double pks_array[1000];
+        double pks_array_iso[1000];
+        double pkt_array[1000];
+        int k_size;
+    } gambit_inflation_observables;
 
 }
 

@@ -290,7 +290,7 @@ START_MODULE
       //ALLOW_MODELS(LCDM_no_primordial) // todo check models...
       ALLOW_MODELS(Inflation_SR1quad,Inflation_1quar,Inflation_1mono32,Inflation_1linear,Inflation_1natural,Inflation_smash)
       DEPENDENCY(multimode_input_parameters, multimode_inputs)
-      BACKEND_REQ(multimodecode_gambit_driver, (), void, (gambit_inflation_observables*,int&,int&,int&,int&,int&,int&,int&,int&,int&,int&,double&,int&,int&,double&,int&,double*,double*,int&,int&,double*,double*,double*,double&,double&,double&,int&,int&,double&,double*,double*,double*,double*,double&,double&))
+      BACKEND_REQ(multimodecode_gambit_driver, (), gambit_inflation_observables, (int&,int&,int&,int&,int&,int&,int&,int&,int&,int&,double&,int&,int&,double&,int&,double*,double*,int&,int&,double*,double*,double*,double&,double&,double&,int&,int&,double&,double&,double*,double*,double*,double*,double&,double&))
     #undef FUNCTION
 
     #define FUNCTION get_parametrised_ps_LCDM
@@ -314,7 +314,7 @@ START_MODULE
       //ALLOW_MODELS(LCDM_no_primordial) // todo check models...
       ALLOW_MODELS(Inflation_SR1quad,Inflation_1quar,Inflation_1mono32,Inflation_1linear,Inflation_1natural,Inflation_smash)
       DEPENDENCY(multimode_input_parameters, multimode_inputs)
-      BACKEND_REQ(multimodecode_gambit_driver, (), void, (gambit_inflation_observables*,int&,int&,int&,int&,int&,int&,int&,int&,int&,int&,double&,int&,int&,double&,int&,double*,double*,int&,int&,double*,double*,double*,double&,double&,double&,int&,int&,double&,double*,double*,double*,double*,double&,double&))
+      BACKEND_REQ(multimodecode_gambit_driver, (), gambit_inflation_observables, (int&,int&,int&,int&,int&,int&,int&,int&,int&,int&,double&,int&,int&,double&,int&,double*,double*,int&,int&,double*,double*,double*,double&,double&,double&,int&,int&,double&,double&,double*,double*,double*,double*,double&,double&))
     #undef FUNCTION
 
     /*

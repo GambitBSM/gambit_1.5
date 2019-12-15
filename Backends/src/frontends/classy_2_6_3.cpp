@@ -289,6 +289,7 @@ BE_INI_FUNCTION
     }
   }
   logger() << LogTags::info << "[classy_"<< STRINGIFY(VERSION) <<"] \"cosmo.compute\" was successful" << EOM;
-
+  std::cout << "Trying to print power spectrum..." << std::endl;
+  print_pps();
 }
 END_BE_INI_FUNCTION

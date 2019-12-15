@@ -13,7 +13,7 @@
 
 
 Parameters:
-  StandardModel_numass_degenerate: !import include/StandardModel_numass_degenerate_scan.yaml
+  StandardModel_mNudiff: !import include/StandardModel_mNudiff_both_scan.yaml
   
   #LCDM:
   #  omega_b:
@@ -141,7 +141,7 @@ Rules:
       dlnk:                     0.4
 # For calculating the full power spectrum P(k).  Samples in uniform increments in log(k).
       #calc_full_pk: 0
-      steps: 100
+      numsteps: 100
       kmin: 1e-7
       kmax: 1e6
   
@@ -157,8 +157,8 @@ Rules:
     function: init_classy_cosmo_container_with_MPLike
   
   - capability: set_classy_parameters
-    #function: set_classy_parameters_parametrised_ps
-    function: set_classy_parameters_primordial_ps
+    function: set_classy_parameters_parametrised_ps
+    #function: set_classy_parameters_primordial_ps
     module: CosmoBit
 
   - capability: baseline_classy_input

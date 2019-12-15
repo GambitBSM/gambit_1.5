@@ -93,10 +93,6 @@ ObsLikes:
     module:       NeutrinoBit
     type:         bool
 
-  - purpose:      LogLike
-    capability:   Planck_nuisance_prior_loglike
-    module:       CosmoBit
-    type:         double
 
   - purpose:      LogLike
     capability:   Planck_highl_loglike
@@ -113,12 +109,6 @@ ObsLikes:
   - purpose:      Obs
     capability:   Omega0_m
     function:     get_Omega0_m_classy 
-
-  - purpose:      LogLike
-    capability:   Pantheon_LogLike
-
-  - purpose:      LogLike
-    capability:   BAO_LogLike
 
   - purpose:      Observable
     capability:   Omega0_r
@@ -145,8 +135,8 @@ ObsLikes:
 Rules:
 
   # classy (class through python wrapper)
-  - capability: set_classy_parameters
-    function: set_classy_parameters_LCDM
+  - capability: baseline_classy_input
+    function: set_baseline_classy_input
     options:
       classy_dict:
         output: "tCl lCl pCl"   # classy + MP: even when no output specified all spectra etc. the likelihoods need
@@ -185,18 +175,6 @@ Rules:
       # still need to write a proper patch for MPLike backend & test all Likes
       Observables:
         WiggleZ: default
-
-  #- capability: Omega0_r
-  #  function: get_Omega0_ur_classy
-
-  - capability: sigma8_LogLike
-    function: compute_sigma8_LogLike
-    options:
-      DataFile: "Planck_SZ_MontePython.dat"
-
-  - capability: BAO_LogLike
-    options:
-      DataFile:  BAO_2014.dat
 
   - capability: Omega0_m
     function: compute_Omega0_m
