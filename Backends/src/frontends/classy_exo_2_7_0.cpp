@@ -24,6 +24,7 @@
 
 #include "gambit/Backends/frontend_macros.hpp"
 #include "gambit/Backends/frontends/classy_exo_2_7_0.hpp"
+#include "gambit/CosmoBit/CosmoBit_utils.hpp"
 
 #include <pybind11/stl.h>
 #include <pybind11/stl_bind.h>
@@ -311,6 +312,21 @@ BE_INI_FUNCTION
 { 
   CosmoBit::ClassyInput input_container= *Dep::get_classy_cosmo_container;
   pybind11::dict cosmo_input_dict = input_container.get_input_dict();
+
+  // Make sure that the lensing potential is calculated, when "class_get_lensed_cl" is used.
+  // Additionally ensure that the ttemperature Cl and the polaristion Cl are calculated
+  // up to l = 2508 (As need by the Planck-Likelihoods);
+  // (This is a workaround since there is no "requirements"-capability yet, which would
+  // collect the required inputs from MontePython and Planck)
+  if (*InUse::class_get_lensed_cl)
+  {
+    using namespace pybind11::literals;
+
+    pybind11::dict lensed_inputs = pybind11::dict("lensing"_a="yes",
+                                                  "output"_a="lCl pCl tCl",
+                                                  "l_max_scalars"_a="2508");
+    CosmoBit::merge_pybind_dicts(cosmo_input_dict, lensed_inputs);
+  }
 
   static bool first_run = true;
   if(first_run)

@@ -22,7 +22,7 @@ Parameters:
  LCDM: !import include/LCDM_scan.yaml        # base LCDM
 
  # Everything Neff and eta related
- etaBBN:                             !import include/etaBBN.yaml
+ etaBBN: !import include/etaBBN.yaml
 
  # neutrino masses
  StandardModel_mNudiff: !import include/StandardModel_mNudiff_both_scan.yaml
