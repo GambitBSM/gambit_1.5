@@ -39,6 +39,7 @@
 #include <valarray>
 #include <memory>  // make_unique pointers
 #include <stdint.h> // save memory addresses as int
+#include <boost/algorithm/string/trim.hpp>
 
 #include <gsl/gsl_blas.h>
 #include <gsl/gsl_errno.h>
@@ -2226,7 +2227,16 @@ namespace Gambit
         first_run = false;
       }
 
-      result = data.attr("cosmo_arguments");
+      result.clear();
+      pybind11::dict tmp_dict = data.attr("cosmo_arguments");
+      // Stringify all values in the dictionary and strip off leading and trailing whitespaces
+      for (auto it: tmp_dict)
+      {
+        std::string key = (it.first).cast<std::string>();
+        std::string val = (it.second).cast<std::string>();
+        boost::algorithm::trim(val);
+        result[key.c_str()] = val.c_str();
+      }
     }
 
     /// Computes lnL for each experiment initialised in MontePython
