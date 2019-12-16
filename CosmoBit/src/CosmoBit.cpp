@@ -2232,8 +2232,8 @@ namespace Gambit
       // Stringify all values in the dictionary and strip off leading and trailing whitespaces
       for (auto it: tmp_dict)
       {
-        std::string key = (it.first).cast<std::string>();
-        std::string val = (it.second).cast<std::string>();
+        std::string key = (pybind11::repr(it.first)).cast<std::string>();
+        std::string val = (pybind11::repr(it.second)).cast<std::string>();
         boost::algorithm::trim(val);
         result[key.c_str()] = val.c_str();
       }
