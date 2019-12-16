@@ -64,7 +64,8 @@ namespace Gambit
         { 
           
           // python string.find("x") returns -1 if "x" not contained
-          if(key.attr("find")(pybind11::str("output")).cast<int>()!=-1)
+          if(key.attr("find")(pybind11::str("output")).cast<int>()!=-1 ||
+             key.attr("find")(pybind11::str("modes")).cast<int>()!=-1)
           {
             // split string by spaces into list
             pybind11::list list = b[key].attr("split")();

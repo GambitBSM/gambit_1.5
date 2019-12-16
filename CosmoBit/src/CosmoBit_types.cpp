@@ -194,7 +194,8 @@ namespace Gambit
           // e.g. input_dict['output'] = 'A B C'
           //      extra_dict['output'] = 'A B X Y'
           // should result in input_dict['output'] = 'A B C X Y'
-          if(key.attr("find")(pybind11::str("output")).cast<int>()!=-1) // (python string.find("x") returns -1 if "x" not contained)
+          if(key.attr("find")(pybind11::str("output")).cast<int>()!=-1 ||
+             key.attr("find")(pybind11::str("modes")).cast<int>()!=-1) // (python string.find("x") returns -1 if "x" not contained)
           {
             // split string of extra_dict['output'] by spaces into list 
             // (-> in the example above this would give list = ['A', 'B', 'X', 'Y'])
