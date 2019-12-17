@@ -1228,7 +1228,7 @@ if(NOT ditched_${name}_${ver})
     BUILD_COMMAND ${CMAKE_MAKE_PROGRAM} CC=${CMAKE_C_COMPILER} OMPFLAG=-fopenmp OPTFLAG= CCFLAG=${BACKEND_C_FLAGS} LDFLAG=${BACKEND_C_FLAGS} all
     COMMAND ${CMAKE_COMMAND} -E make_directory lib
     COMMAND find python/ -name "classy.so" | xargs -I {} cp "{}" lib/
-    COMMAND echo "#This is a trampoline script to import the cythonized python module under a different name\\nfrom ${lib} import *" > lib/${lib}_${sfver}.py
+    COMMAND echo -e "#This is a trampoline script to import the cythonized python module under a different name\\nfrom ${lib} import *" > lib/${lib}_${sfver}.py
     INSTALL_COMMAND ""
   )
   add_extra_targets("backend" ${name} ${ver} ${dir} ${dl} clean)
@@ -1255,7 +1255,7 @@ if(NOT ditched_${name}_${ver})
     BUILD_COMMAND ${CMAKE_MAKE_PROGRAM} CC=${CMAKE_C_COMPILER} OMPFLAG=-fopenmp OPTFLAG= CCFLAG=${BACKEND_C_FLAGS} LDFLAG=${BACKEND_C_FLAGS} all
     COMMAND ${CMAKE_COMMAND} -E make_directory lib
     COMMAND find python/ -name "classy.so" | xargs -I {} cp "{}" lib/
-    COMMAND echo "#This is a trampoline script to import the cythonized python module under a different name\\nfrom ${lib} import *" > lib/${lib}_${sfver}.py
+    COMMAND echo -e "#This is a trampoline script to import the cythonized python module under a different name\\nfrom ${lib} import *" > lib/${lib}_${sfver}.py
     INSTALL_COMMAND ""
   )
   add_extra_targets("backend" ${name} ${ver} ${dir} ${dl} clean)
