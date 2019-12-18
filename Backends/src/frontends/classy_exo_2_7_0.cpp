@@ -358,7 +358,8 @@ BE_INI_FUNCTION
     {
       errMssg << "Caught a \'CosmoComputationError\':\n\n";
       errMssg << rawErrMessage;
-      invalid_point().raise(errMssg.str());
+      backend_error().raise(LOCAL_INFO,errMssg.str());
+      //invalid_point().raise(errMssg.str());
     }
     // any other error (which shouldn't occur) gets also caught as invalid point.
     else

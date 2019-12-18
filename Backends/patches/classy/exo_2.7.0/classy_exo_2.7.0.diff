@@ -359,26 +359,20 @@
    if ((ppm->primordial_spec_type == inflation_V) || (ppm->primordial_spec_type == inflation_H) || (ppm->primordial_spec_type == inflation_V_end)) {
 --- a/source/primordial.c	2018-09-21 07:00:18.000000000 +0200
 +++ b/source/primordial.c	2019-12-04 16:17:13.279212088 +0100
-@@ -242,16 +242,26 @@
+@@ -241,21 +241,52 @@
+              ppr->k_per_decade_primordial);
  
    /** - allocate and fill values of \f$ \ln{k}\f$'s */
- 
--  class_call(primordial_get_lnk_list(ppm,
--                                     k_min,
--                                     k_max,
--                                     ppr->k_per_decade_primordial
--                                     ),
--             ppm->error_message,
--             ppm->error_message);
-+  /// (JR): The array with the values of lnk is already passed in input.c if the 'pointer_to_Pk'
++  /// (JR): The array with the values of lnk is already passed in input.c if the 'pointer_to_Pk' 
 +  /// input type is selected
 +  if ( ppm->primordial_spec_type != pointer_to_Pk) {
-+    // This routine allocates the space for ppm->lnk, fills it and sets the size through
-+    // ppm->lnk_size. In the first patch I will do this when reading in the pointer to the
++
++    // This routine allocates the space for ppm->lnk, fills it and sets the size through 
++    // ppm->lnk_size. In the first patch I will do this when reading in the pointer to the 
 +    // array ppm->lnk. Not great but good enough for the first version of the implementation
 +    // -- can (& should) probably be improved
 +    // you could ad the if statement in this funciton and fill ppm->lnk with what the read in pointer
-+    // is pointing to. but that would make it neccesary to patch another part of the code..
++    // is pointing to. but that would make it neccesary to patch another part of the code.. 
 +    class_call(primordial_get_lnk_list(ppm,
 +                                       k_min,
 +                                       k_max,
@@ -386,14 +380,47 @@
 +               ppm->error_message,
 +               ppm->error_message);
 +  }
++  /// test if the kmin and kmax passed through the pointer_to_Pk method 
++  /// make sense and are compatible with the CLASS internal ppt->kmin ppt->kmax
++  else {
  
-   /** - define indices and allocate tables in primordial structure */
--
+-  class_call(primordial_get_lnk_list(ppm,
+-                                     k_min,
+-                                     k_max,
+-                                     ppr->k_per_decade_primordial
+-                                     ),
++    double passed_kmin = exp(ppm->lnk[0]);
++    double passed_kmax = exp(ppm->lnk[ppm->lnk_size-1]);
++
++    class_test((passed_kmin <= 0.) || (passed_kmax <= passed_kmin),
+              ppm->error_message,
+-             ppm->error_message);
++             "inconsistent values of kmin=%e, kmax=%e",passed_kmin,passed_kmax);
+ 
+-  /** - define indices and allocate tables in primordial structure */
++    class_test(k_min < passed_kmin,
++             ppm->error_message,
++             "k_min = %e passed through 'pointer_to_Pk' is too large. The CLASS internal minimum is %e. Adopt the ranges of the array you are passing accordingly. ",passed_kmin,k_min);
+ 
++    class_test(passed_kmax < k_max,
++             ppm->error_message,
++             "k_max = %e passed through 'pointer_to_Pk' is too small. The CLASS internal maximum is %e. Adopt the ranges of the array you are passing accordingly. ",passed_kmax,k_max);
++
++  }
++
++
++  /** - define indices and allocate tables in primordial structure */
 +  // JR: can use this for the pointer_to_Pk as long as ppm->lnk_size and ppt->md_size are set correctly! 
 +  // ppm->lnk_size is done in input.c atm, ppt->md_size is taken care of my perturbations
    class_call(primordial_indices(ppt,
                                  ppm),
-              ppm->error_message,
+-             ppm->error_message,
+-             ppm->error_message);
++               ppm->error_message,
++               ppm->error_message);
+ 
+   /** - deal with case of analytic primordial spectra (with amplitudes, tilts, runnings, etc.) */
+ 
 @@ -394,6 +404,31 @@
                        primordial_free(ppm));
    }

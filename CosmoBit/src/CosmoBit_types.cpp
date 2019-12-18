@@ -287,6 +287,13 @@ namespace Gambit
     {
       std::vector<double> K(k_array, k_array+len);
       k = std::move(K);
+      // (JR) the vector gets just filled with copies of kmin # todo
+      // for testing -> atm 
+      for( int i =0; i<len;i++)
+      {
+        std::cout << k[i] << std::endl;
+      }
+
     }
 
     void primordial_ps::fill_P_s(double *P_s_array, int len)

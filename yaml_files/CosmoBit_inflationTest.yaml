@@ -142,12 +142,13 @@ Rules:
 # For calculating the full power spectrum P(k).  Samples in uniform increments in log(k).
       #calc_full_pk: 0
       numsteps: 100
-      kmin: 1e-7
-      kmax: 1e6
+      k_min: 1e-7
+      k_max: 1e6
   
-  #- capability:    get_classy_cosmo_object
-  #    backends:
-  #    - {function: backend: classy, version: 2.6.3}
+  - capability: get_classy_cosmo_object
+    function: get_classy_cosmo_object
+    backends:
+    - {capability: get_classy_cosmo_object, backend: classy, version: 2.6.3}
 
   #- capability: get_classy_cosmo_object
   #  backends:
@@ -157,8 +158,8 @@ Rules:
     function: init_classy_cosmo_container_with_MPLike
   
   - capability: set_classy_parameters
-    function: set_classy_parameters_parametrised_ps
-    #function: set_classy_parameters_primordial_ps
+    #function: set_classy_parameters_parametrised_ps
+    function: set_classy_parameters_primordial_ps
     module: CosmoBit
 
   - capability: baseline_classy_input

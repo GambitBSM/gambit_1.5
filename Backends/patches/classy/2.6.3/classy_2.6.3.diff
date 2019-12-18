@@ -142,7 +142,7 @@
    if ((ppm->primordial_spec_type == inflation_V) || (ppm->primordial_spec_type == inflation_H) || (ppm->primordial_spec_type == inflation_V_end)) {
 --- a/source/primordial.c 2017-10-24 23:42:41.000000000 +1000
 +++ b/source/primordial.c 2019-11-26 14:06:19.051572000 +1000
-@@ -241,21 +241,32 @@
+@@ -241,21 +241,52 @@
               ppr->k_per_decade_primordial);
  
    /** - allocate and fill values of \f$ \ln{k}\f$'s */
@@ -163,17 +163,36 @@
 +               ppm->error_message,
 +               ppm->error_message);
 +  }
++  /// test if the kmin and kmax passed through the pointer_to_Pk method 
++  /// make sense and are compatible with the CLASS internal ppt->kmin ppt->kmax
++  else {
  
 -  class_call(primordial_get_lnk_list(ppm,
 -                                     k_min,
 -                                     k_max,
 -                                     ppr->k_per_decade_primordial
 -                                     ),
--             ppm->error_message,
++    double passed_kmin = exp(ppm->lnk[0]);
++    double passed_kmax = exp(ppm->lnk[ppm->lnk_size-1]);
++
++    class_test((passed_kmin <= 0.) || (passed_kmax <= passed_kmin),
+              ppm->error_message,
 -             ppm->error_message);
++             "inconsistent values of kmin=%e, kmax=%e",passed_kmin,passed_kmax);
  
-   /** - define indices and allocate tables in primordial structure */
--
+-  /** - define indices and allocate tables in primordial structure */
++    class_test(k_min < passed_kmin,
++             ppm->error_message,
++             "k_min = %e passed through 'pointer_to_Pk' is too large. The CLASS internal minimum is %e. Adopt the ranges of the array you are passing accordingly. ",passed_kmin,k_min);
+ 
++    class_test(passed_kmax < k_max,
++             ppm->error_message,
++             "k_max = %e passed through 'pointer_to_Pk' is too small. The CLASS internal maximum is %e. Adopt the ranges of the array you are passing accordingly. ",passed_kmax,k_max);
++
++  }
++
++
++  /** - define indices and allocate tables in primordial structure */
 +  // JR: can use this for the pointer_to_Pk as long as ppm->lnk_size and ppt->md_size are set correctly! 
 +  // ppm->lnk_size is done in input.c atm, ppt->md_size is taken care of my perturbations
    class_call(primordial_indices(ppt,
@@ -185,7 +204,7 @@
  
    /** - deal with case of analytic primordial spectra (with amplitudes, tilts, runnings, etc.) */
  
-@@ -394,6 +405,32 @@
+@@ -394,6 +425,58 @@
                        primordial_free(ppm));
    }
  
@@ -215,10 +234,36 @@
 +
 +  }
 +
++  /** - fill arrays with values of the arrays the external pointers ptr_pks_array point to*/
++
++  else if (ppm->primordial_spec_type == pointer_to_Pk) {
++
++    // fill ppm->lnpk array with values stored in the external arrays the 
++    // pointers ppm->ptr_pks_array & ppm->ptr_pks_array (if tensor modes are asked for) 
++    // point to. 
++    // Heads-up: these two pointers are not integrated into the memory management of CLASS
++    // and won't be deleted after a CLASS run. The deletion has to be taken care of by 
++    // the external program that passes the pointer to CLASS (i.e. GAMBIT in the use case this 
++    // was impelmented for)
++    for (int index_k=0; index_k<ppm->lnk_size; index_k++)
++    {
++       
++       ppm->lnpk[ppt->index_md_scalars][index_k] = log(ppm->ptr_pks_array[index_k]);
++       if (ppt->has_tensors == _TRUE_)
++         ppm->lnpk[ppt->index_md_tensors][index_k] = log(ppm->ptr_pkt_array[index_k]);
++    }
++
++    /** - Tell CLASS that there are scalar (and tensor) modes */
++    ppm->is_non_zero[ppt->index_md_scalars][ppt->index_ic_ad] = _TRUE_;
++    if (ppt->has_tensors == _TRUE_)
++      ppm->is_non_zero[ppt->index_md_tensors][ppt->index_ic_ten] = _TRUE_;
++
++  }
++
    else {
  
      class_test(0==0,
-@@ -421,7 +458,7 @@
+@@ -421,7 +504,7 @@
    /** - derive spectral parameters from numerically computed spectra
        (not used by the rest of the code, but useful to keep in memory for several types of investigation) */
  
@@ -226,7 +271,7 @@
 +  if (ppm->primordial_spec_type != analytic_Pk && ppm->primordial_spec_type != pointer_to_Pk) {
  
      dlnk = log(10.)/ppr->k_per_decade_primordial;
- 
+
 --- a/include/primordial.h    2017-10-24 23:42:41.000000000 +1000
 +++ b/include/primordial.h    2019-11-25 11:01:44.417102000 +1000
 @@ -13,7 +13,8 @@
