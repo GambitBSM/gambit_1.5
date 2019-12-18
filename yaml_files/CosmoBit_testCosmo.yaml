@@ -43,9 +43,6 @@ Parameters:
  # nuisance parameters in Planck likelihood
  Planck_lite: !import include/Planck_2018/Planck_lite_gauss.yaml
 
- # nuisance paramters for other cosmological likelihoods
- cosmo_nuisance_params_Pantheon: !import include/cosmo_nuisance_params_Pantheon.yaml
-
 #======== Prior setup ========
 Priors:
 
@@ -93,22 +90,7 @@ ObsLikes:
     type:         bool
 
   - purpose:      LogLike
-    capability:   BAO_LogLike
-    module:       CosmoBit
-    type:         double
-
-  - purpose:      LogLike
     capability:   BBN_LogLike
-    module:       CosmoBit
-    type:         double
-  
-  - purpose:      Observable
-    capability:   H0_LogLike
-    module:       CosmoBit
-    type:         double
-
-  - purpose:      LogLike
-    capability:   Pantheon_LogLike
     module:       CosmoBit
     type:         double
 
@@ -127,11 +109,6 @@ ObsLikes:
     module:       CosmoBit
     type:         double
 
-#  - purpose:      LogLike
-#    capability:   sigma8_LogLike
-#    module:       CosmoBit
-#    type:         double
-  
   - purpose:      Observable
     capability:   Helium_abundance
     module:       CosmoBit
@@ -208,18 +185,7 @@ Rules:
   - capability: set_classy_parameters
     options:
       classy_dict:
-        output: "tCl lCl pCl mPk"
-        lensing: "yes"
-        l_max_scalars: 2508
-        P_k_max_h/Mpc: 1.
-
-  # class (class through C++ interface --> will become outdated)
-  - capability: set_class_parameters
-    options:
-      classy_dict:
-        output: "tCl lCl pCl mPk"
-        lensing: "yes"
-        l_max_scalars: 2508
+        output: "mPk"
         P_k_max_h/Mpc: 1.
 
 #####
@@ -228,18 +194,10 @@ Rules:
 ##
 ####
 
-  - capability: BAO_LogLike
-    options:
-      DataFile:  BAO_2014.dat
-
   - capability: BBN_LogLike
     options:
       DataFile: PDG_2017.dat # Use both, the Yp and D/H measurement as given in PDG 2017
       #DataFile: PDG_2017_updated.dat # Use the Yp measurement from PDG 2017 and the updated D/H measurement of 1801.08023
-  
-  - capability: H0_LogLike
-    options:
-      DataFile:  SH0ES.dat
 
   - capability: plc_3_0_init
     options:
@@ -259,9 +217,14 @@ Rules:
 
   - capability: BBN_abundances
     options:
-      correlation_matrix: [[1.0,0.2],[0.2,1.0]]
-      relative_errors: [1e-3,1e-2]
-      elements: [Yp,D]
+      elements: [Yp, D, He3, Be7, Li7]
+      correlation_matrix: [[+1.000e00, +1.524e-2, +2.667e-2, +2.303e-2, +2.429e-2],
+                           [+1.524e-2, +1.000e00, -8.160e-1, -3.775e-1, -3.653e-1],
+                           [+2.667e-2, -8.160e-1, +1.000e00, +3.897e-1, +3.780e-1],
+                           [+2.303e-2, -3.775e-1, +3.897e-1, +1.000e00, +9.974e-1],
+                           [+2.429e-2, -3.653e-1, +3.780e-1, +9.974e-1, +1.000e00]]
+      relative_errors: [1.348e-3, 1.596e-2, 1.618e-2, 6.788e-2, 6.579e-2]
+
 
    # Allow for negative values of dNeff_BBN and dNeffBBN_dNeffCMB
    #  -> In this form, the option is set for all CosmoBit function and applies

@@ -27,8 +27,6 @@ Parameters:
  LCDM: !import include/LCDM_scan.yaml
 
  # neutrino masses
- #StandardModel_numass_single: !import include/StandardModel_numass_single_scan.yaml
- #StandardModel_numass_degenerate: !import include/StandardModel_numass_degenerate_scan.yaml
  StandardModel_mNudiff: !import include/StandardModel_mNudiff_both_scan.yaml
  #StandardModel_mNudiff: !import include/StandardModel_mNudiff_NH_scan.yaml
  #StandardModel_mNudiff: !import include/StandardModel_mNudiff_IH_scan.yaml
@@ -101,11 +99,6 @@ ObsLikes:
     type:         bool
 
   - purpose:      LogLike
-    capability:   BAO_LogLike
-    module:       CosmoBit
-    type:         double
-
-  - purpose:      LogLike
     capability:   BBN_LogLike
     module:       CosmoBit
     type:         double
@@ -118,11 +111,6 @@ ObsLikes:
   - purpose:      LogLike
     capability:   lnL_RParameter
     module:       DarkBit
-    type:         double
-
-  - purpose:      LogLike
-    capability:   Pantheon_LogLike
-    module:       CosmoBit
     type:         double
 
   - purpose:      LogLike
@@ -179,35 +167,10 @@ Rules:
   - capability: get_classy_cosmo_container
     function: init_classy_cosmo_container
 
-  # classy (class through python wrapper)
-  - capability: set_classy_parameters
-    options:
-      classy_dict:
-        output: "tCl lCl pCl"
-        lensing: "yes"
-        l_max_scalars: 2508
-
-  # class (class through C++ interface --> will become outdated)
-  - capability: set_class_parameters
-    options:
-      classy_dict:
-        output: "tCl lCl pCl"
-        lensing: "yes"
-        l_max_scalars: 2508
-
-
   - capability: BBN_LogLike
     options:
       #DataFile: PDG_2017.dat # Use both, the Yp and D/H measurement as given in PDG 2017
       DataFile: PDG_2017_updated.dat # Use the Yp measurement from PDG 2017 and the updated D/H measurement of 1801.08023
-
-  - capability: BAO_LogLike
-    options:
-      DataFile:  BAO_2014.dat
-
-  - capability: H0_LogLike
-    options:
-      DataFile:  SH0ES.dat
 
   - capability: AlterBBN_setInput
     options:

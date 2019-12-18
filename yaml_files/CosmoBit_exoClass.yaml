@@ -31,8 +31,6 @@ Parameters:
  etaBBN_rBBN_rCMB_dNeffBBN_dNeffCMB: !import include/etaBBN_rBBN_rCMB_dNeffBBN_dNeffCMB.yaml
 
  # neutrino masses
- #StandardModel_numass_single: !import include/StandardModel_numass_single_scan.yaml
- #StandardModel_numass_degenerate: !import include/StandardModel_numass_degenerate_scan.yaml
  StandardModel_mNudiff: !import include/StandardModel_mNudiff_both_scan.yaml
  #StandardModel_mNudiff: !import include/StandardModel_mNudiff_NH_scan.yaml
  #StandardModel_mNudiff: !import include/StandardModel_mNudiff_IH_scan.yaml
@@ -134,23 +132,6 @@ ObsLikes:
 #======== Rule entries ========
 Rules:
 
-  # classy (class through python wrapper)
-  - capability: baseline_classy_input
-    function: set_baseline_classy_input
-    options:
-      classy_dict:
-        output: "tCl lCl pCl"   # classy + MP: even when no output specified all spectra etc. the likelihoods need
-                      # are calculated since the MP Likelihood initialisation is taking care of this for us! 
-        # /\
-        # ||  (JR) we should not set this by default when using the python wrapper: if only bg needed 
-        #     classy will complain that it did not read the input parameter.
-        #     If we use Planck through MP this should be taken care of by itself anyway
-        #       *edit*: people don't seem to want to use the MP Planck Likelihood so if you use Planck
-        #               you have to set the parameters accordingly here yourself.. 
-        lensing: "yes" # heads-up: changed default to 'no'in function 'set_classy_parameters_LCDM' as well
-                      # since otherwise the automatic output setting will not work
-        l_max_scalars: 2508
-
   # you have to set by hand if you want to set the class parameters with or without setting arguments from MontePython Likelihoods
   # if the montepythonlike backend is installed (if not it should automatically choose the function 'init_Classy_cosmo_container')
   - capability: get_classy_cosmo_container
@@ -191,6 +172,17 @@ Rules:
     options:
       failsafe: 1
       err: 0
+
+  # correlation matrix for BBN error calculation todo explain what that is!
+  - capability: BBN_abundances
+    options:
+      elements: [Yp, D, He3, Be7, Li7]
+      correlation_matrix: [[+1.000e00, +1.524e-2, +2.667e-2, +2.303e-2, +2.429e-2],
+                           [+1.524e-2, +1.000e00, -8.160e-1, -3.775e-1, -3.653e-1],
+                           [+2.667e-2, -8.160e-1, +1.000e00, +3.897e-1, +3.780e-1],
+                           [+2.303e-2, -3.775e-1, +3.897e-1, +1.000e00, +9.974e-1],
+                           [+2.429e-2, -3.653e-1, +3.780e-1, +9.974e-1, +1.000e00]]
+      relative_errors: [1.348e-3, 1.596e-2, 1.618e-2, 6.788e-2, 6.579e-2]
 
   - capability: T_cmb
     options:
