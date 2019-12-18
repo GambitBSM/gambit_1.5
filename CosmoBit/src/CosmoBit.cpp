@@ -522,12 +522,14 @@ namespace Gambit
       using namespace Pipes::set_baseline_classy_input;
 
       std::cout << " enter " << __PRETTY_FUNCTION__ << std::endl;
-      // probably better not to clear this one to make sure all yaml file options
-      // will be kept for each parameter point
 
-      // add all neutrino & ncdm, ur species related parameters to dictionary
-      //pybind11::dict NuMass_input = *Dep::NuMasses_classy_input; 
-      merge_pybind_dicts(result, *Dep::NuMasses_classy_input);
+      // make sure dict is empty
+      result.clear();
+
+      // Get the dictionary with inputs for the neutrino masses and merge it
+      // into the empty results dictionary.
+      pybind11::dict NuMasses_In = *Dep::NuMasses_classy_input;
+      merge_pybind_dicts(result, NuMasses_In);
 
       // standard cosmological parameters (common to all CDM -like models)
       result["H0"] =            *Param["H0"];
@@ -590,6 +592,9 @@ namespace Gambit
 
       std::cout << " enter " << __PRETTY_FUNCTION__ << std::endl;
 
+      // Clean the input container
+      result.clear();
+
       // Add standard cosmo parameters, nu masses, helium abundance &
       // extra run options for class passed in yaml file to capability
       // 'baseline_classy_input'
@@ -621,7 +626,10 @@ namespace Gambit
       using namespace Pipes::set_classy_parameters_primordial_ps;
 
       std::cout << " enter " << __PRETTY_FUNCTION__ << std::endl;
-      
+
+      // Clean the input container
+      result.clear();
+
       // Add standard cosmo parameters, nu masses, helium abundance &
       // extra run options for class passed in yaml file to capability
       // 'baseline_classy_input'
