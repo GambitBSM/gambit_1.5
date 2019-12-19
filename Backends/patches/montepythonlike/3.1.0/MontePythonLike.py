@@ -48,7 +48,7 @@ class Likelihood(object):
             NameSpace containing the command line arguments
 
         """
-        print("         (Internal MP): start to init Likelihood")
+        #print("         (Internal MP): start to init Likelihood")
         self.name = self.__class__.__name__
         self.folder = os.path.abspath(os.path.join(
             data.path['MontePython'], 'likelihoods', self.name))

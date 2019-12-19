@@ -558,9 +558,8 @@ if(NOT ditched_${name}_${ver})
     GIT_TAG 3.1.0
     SOURCE_DIR ${dir}
     BUILD_IN_SOURCE 1
-    CONFIGURE_COMMAND ${CMAKE_COMMAND} -E copy ${patchdir}/MontePythonLike.py ${dir}/montepython/MontePythonLike_${sfver}.py
+    CONFIGURE_COMMAND ${CMAKE_COMMAND} -E copy ${patchdir}/MontePythonLike.py ${dir}/montepython/MontePythonLike.py
     COMMAND ${CMAKE_COMMAND} -E copy ${patchdir}/MPLike_patch_script.py ${dir}/montepython/MPLike_patch_script.py
-    COMMAND sed -i "s#from MontePythonLike import#from MontePythonLike_${sfver} import#g" ${dir}/montepython/MPLike_patch_script.py
     COMMAND ${CMAKE_COMMAND} -E copy ${patchdir}/sdss_lrgDR7_fiducialmodel.dat ${dir}/data/sdss_lrgDR7/sdss_lrgDR7_fiducialmodel.dat
     BUILD_COMMAND ""
     INSTALL_COMMAND python ${dir}/montepython/MPLike_patch_script.py
