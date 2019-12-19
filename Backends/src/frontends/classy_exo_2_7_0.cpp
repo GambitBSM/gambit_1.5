@@ -309,7 +309,10 @@ BE_NAMESPACE
 END_BE_NAMESPACE
 
 BE_INI_FUNCTION
-{ 
+{
+  static int error_counter = 0;
+  static int max_errors = 100;
+
   CosmoBit::ClassyInput input_container= *Dep::get_classy_cosmo_container;
   pybind11::dict cosmo_input_dict = input_container.get_input_dict();
 
@@ -331,6 +334,7 @@ BE_INI_FUNCTION
   static bool first_run = true;
   if(first_run)
   {
+    max_errors = runOptions->getValueOrDef<int>(100,"max_errors");
     cosmo = classy.attr("Class")();
     first_run = false;
     // check input for consistency
@@ -355,7 +359,11 @@ BE_INI_FUNCTION
   logger() << LogTags::info << "[classy_"<< STRINGIFY(VERSION) <<"] Start to run \"cosmo.compute\"" << EOM;
   try
   {
+    // Try to run classy
     cosmo.attr("compute")();
+    // reset counter when no exception is thrown.
+    error_counter = 0;
+    logger() << LogTags::info << "[classy_"<< STRINGIFY(VERSION) <<"] \"cosmo.compute\" was successful" << EOM;
   }
   catch (std::exception &e)
   {
@@ -369,13 +377,26 @@ BE_INI_FUNCTION
       errMssg << rawErrMessage;
       backend_error().raise(LOCAL_INFO,errMssg.str());
     }
-    // .. but if it is 'only' a CosmoComputationError, just invalidate thew parameter point
+    // .. but if it is 'only' a CosmoComputationError, invalidate the parameter point
+    // and raise a backend_warning.
+    // In case this happens "max_errors" times in a row, raise a backend_error
+    // instead, since it probably points to some issue with the inputs
     else if (rawErrMessage.find("CosmoComputationError") != std::string::npos)
     {
+      ++error_counter;
       errMssg << "Caught a \'CosmoComputationError\':\n\n";
       errMssg << rawErrMessage;
-      backend_error().raise(LOCAL_INFO,errMssg.str());
-      //invalid_point().raise(errMssg.str());
+      if ( max_errors < 0 || error_counter <= max_errors )
+      {
+        backend_warning().raise(LOCAL_INFO,errMssg.str());
+        invalid_point().raise(errMssg.str());
+      }
+      else
+      {
+        errMssg << "\nThis happens now for the " << error_counter << "-th time ";
+        errMssg << "in a row. There is probably something wrong with your inputs.";
+        backend_error().raise(LOCAL_INFO,errMssg.str());
+      }
     }
     // any other error (which shouldn't occur) gets also caught as invalid point.
     else
@@ -388,7 +409,7 @@ BE_INI_FUNCTION
       invalid_point().raise(errMssg.str());
     }
   }
-  logger() << LogTags::info << "[classy_"<< STRINGIFY(VERSION) <<"] \"cosmo.compute\" was successful" << EOM;
+  std::cout << "Trying to print power spectrum..." << std::endl;
   print_pps();
 }
 END_BE_INI_FUNCTION
