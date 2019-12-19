@@ -171,7 +171,7 @@ START_MODULE
   START_CAPABILITY
     #define FUNCTION get_N_ur
     START_FUNCTION(double)
-    MODEL_CONDITIONAL_DEPENDENCY(etaBBN_rBBN_rCMB_dNeffBBN_dNeffCMB_parameters,ModelParameters,etaBBN_rBBN_rCMB_dNeffBBN_dNeffCMB)
+    MODEL_CONDITIONAL_DEPENDENCY(etaBBN_rBBN_rCMB_dNurBBN_dNurCMB_parameters,ModelParameters,etaBBN_rBBN_rCMB_dNurBBN_dNurCMB)
     DEPENDENCY(NuMasses_SM, map_str_dbl)
     #undef FUNCTION
   #undef CAPABILITY
@@ -601,7 +601,7 @@ START_MODULE
     START_CAPABILITY
     #define FUNCTION set_T_ncdm
       START_FUNCTION(double)
-      ALLOW_MODELS(etaBBN_rBBN_rCMB_dNeffBBN_dNeffCMB)
+      ALLOW_MODELS(etaBBN_rBBN_rCMB_dNurBBN_dNurCMB)
       DEPENDENCY(T_ncdm_SM,double)
     #undef FUNCTION
     
@@ -781,14 +781,14 @@ START_MODULE
   #undef CAPABILITY
 */
 
-/* This capability lives now in the etaBBN_rBBN_rCMB_dNeffBBN_dNeffCMB model
+/* This capability lives now in the etaBBN_rBBN_rCMB_dNurBBN_dNurCMB model
    by using the MAP_TO_CAPABILITY macro. It might be celaner to have this definition here.
 
    #define CAPABILITY etaBBN
      START_CAPABILITY
      #define FUNCTION set_etaBBN // etaBBN is model parameter
        START_FUNCTION(double)
-       ALLOW_MODELS(etaBBN_rBBN_rCMB_dNeffBBN_dNeffCMB) // To get etaCMB for etaBBN_rBBN_rCMB_dNeffBBN_dNeffCMB
+       ALLOW_MODELS(etaBBN_rBBN_rCMB_dNurBBN_dNurCMB) // To get etaCMB for etaBBN_rBBN_rCMB_dNurBBN_dNurCMB
      #undef FUNCTION
    #undef CAPABILITY
 */
@@ -819,8 +819,8 @@ START_MODULE
     START_CAPABILITY
     #define FUNCTION AlterBBN_Input
       START_FUNCTION(map_str_dbl)
-      ALLOW_MODEL_DEPENDENCE(etaBBN_rBBN_rCMB_dNeffBBN_dNeffCMB)
-      MODEL_GROUP(non_SM_rad_Nu,(etaBBN_rBBN_rCMB_dNeffBBN_dNeffCMB))
+      ALLOW_MODEL_DEPENDENCE(etaBBN_rBBN_rCMB_dNurBBN_dNurCMB)
+      MODEL_GROUP(non_SM_rad_Nu,(etaBBN_rBBN_rCMB_dNurBBN_dNurCMB))
       MODEL_GROUP(cosmo,(LCDM))
       ALLOW_MODEL_COMBINATION(cosmo,non_SM_rad_Nu)
     #undef FUNCTION

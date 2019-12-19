@@ -4267,28 +4267,28 @@ LCDM_parameters: |
 LCDM_no_primordial_parameters: |
    As LCDM_parameters but without the parameters related to the shape of the primordial power spectrum. See ./gambit LCDM_no_primordial for more details. 
 
-etaBBN_rBBN_rCMB_dNeffBBN_dNeffCMB_parameters: |
+etaBBN_rBBN_rCMB_dNurBBN_dNurCMB_parameters: |
 
-   Model to be scanned in addition to LCDM as an extension: allowing for non-standard values of the baryon-to-photon ratio at BBN, non-standard values of the temperature ratio between photon and neutrinos at BBN and CMB release, as well as additional ultra-relativistic species present during BBN or at CMB release. See ./gambit etaBBN_rBBN_rCMB_dNeffBBN_dNeffCMB for more details.
+   Model to be scanned in addition to LCDM as an extension: allowing for non-standard values of the baryon-to-photon ratio at BBN, non-standard values of the temperature ratio between photon and neutrinos at BBN and CMB release, as well as additional ultra-relativistic species present during BBN or at CMB release. See ./gambit etaBBN_rBBN_rCMB_dNurBBN_dNurCMB for more details.
 
 etaBBN_parameters: |
-   Child model of etaBBN_rBBN_rCMB_dNeffBBN_dNeffCMB with only etaBBN as free parameter. See ./gambit etaBBN for more details.
+   Child model of etaBBN_rBBN_rCMB_dNurBBN_dNurCMB with only etaBBN as free parameter. See ./gambit etaBBN for more details.
 
-rBBN_rCMB_dNeffBBN_dNeffCMB_parameters: |
+rBBN_rCMB_dNurBBN_dNurCMB_parameters: |
    
-   Child model of etaBBN_rBBN_rCMB_dNeffBBN_dNeffCMB. See ./gambit rBBN_rCMB_dNeffBBN_dNeffCMB for more details.
+   Child model of etaBBN_rBBN_rCMB_dNurBBN_dNurCMB. See ./gambit rBBN_rCMB_dNurBBN_dNurCMB for more details.
 
-dNeffBBN_dNeffCMB_parameters: |
+dNurBBN_dNurCMB_parameters: |
    
-   Child model of rBBN_rCMB_dNeffBBN_dNeffCMB model. See ./gambit dNeffBBN_dNeffCMB for more details.
+   Child model of rBBN_rCMB_dNurBBN_dNurCMB model. See ./gambit dNurBBN_dNurCMB for more details.
 
-dNeffCMB_parameters: |
+dNurCMB_parameters: |
    
-   Child model of dNeffBBN_dNeffCMB model. See ./gambit dNeffCMB for more details.
+   Child model of dNurBBN_dNurCMB model. See ./gambit dNurCMB for more details.
 
 rBBN_rCMB_parameters: |
    
-   Child model of rBBN_rCMB_dNeffBBN_dNeffCMB model. See ./gambit rBBN_rCMB for more details.
+   Child model of rBBN_rCMB_dNurBBN_dNurCMB model. See ./gambit rBBN_rCMB for more details.
 
 rCMB_parameters: |
    

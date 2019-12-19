@@ -1,13 +1,10 @@
 ###########################################################################
-## Parameter of dNeffBBN_dNeffCMB
+## Parameter of dNurCMB
 ##
 ## Patrick Stoecker <stoecker@physik.rwth-aachen.de>
 ## 2019, July
 ##########################################################################
 
-dNeff_CMB:
-  prior_type: flat
-  range: [0.,2.]
-dNeff_BBN:
+dNur_CMB:
   prior_type: flat
   range: [0.,2.]

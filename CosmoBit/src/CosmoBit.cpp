@@ -415,13 +415,13 @@ namespace Gambit
       switch (N_ncdm)
       {
         case 1:
-          N_ur = 2.0328;  // dNeff= 2.0328 for 1 massive neutrino at CMB release
+          N_ur = 2.0328;  // N_ur (today) = 2.0328 for 1 massive neutrino at CMB release
           break;
         case 2:
-          N_ur= 1.0196;  // dNeff= 2.0328 for 1 massive neutrino at CMB release
+          N_ur= 1.0196;  // N_ur (today) = 1.0196 for 2 massive neutrino at CMB release
           break;
         case 3:
-          N_ur = 0.00641;  // dNeff= 0.00641 for 3 massive neutrinos at CMB release
+          N_ur = 0.00641;  // N_ur (today) = 0.00641 for 3 massive neutrinos at CMB release
           break;
         case 0:
           {
@@ -441,22 +441,22 @@ namespace Gambit
       }
 
       result = N_ur;
-      if (ModelInUse("etaBBN_rBBN_rCMB_dNeffBBN_dNeffCMB"))
+      if (ModelInUse("etaBBN_rBBN_rCMB_dNurBBN_dNurCMB"))
       {
         // Check if the input for dNeff is negative (unphysical)
         static bool allow_negative_dNeff = runOptions->getValueOrDef<bool>(false,"allow_negative_delta_neff");
-        const ModelParameters& NP_params = *Dep::etaBBN_rBBN_rCMB_dNeffBBN_dNeffCMB_parameters;
-        double dNeffCMB_rad =  NP_params.at("dNeff_CMB");
+        const ModelParameters& NP_params = *Dep::etaBBN_rBBN_rCMB_dNurBBN_dNurCMB_parameters;
+        double dNurCMB =  NP_params.at("dNur_CMB");
         double rCMB =  NP_params.at("r_CMB");
-        if ( (!allow_negative_dNeff) && (dNeffCMB_rad < 0.0) )
+        if ( (!allow_negative_dNeff) && (dNurCMB < 0.0) )
         {
-          std::string err = "A negative value for \"dNeff_CMB\" is unphysical and is not allowed in CosmoBit by default!\n\n";
+          std::string err = "A negative value for \"dNur_CMB\" is unphysical and is not allowed in CosmoBit by default!\n\n";
           err += "If you want to proceed with megative values, please set the \"allow_negative_delta_neff\"-rule to \"true\" within the yaml-file.";
           CosmoBit_error().raise(LOCAL_INFO,err.c_str());
         }
 
         // If the check is passed, set the result.
-        result = pow(rCMB,4)*(N_ur) + dNeffCMB_rad;
+        result = pow(rCMB,4)*(N_ur) + dNurCMB;
       }
       logger() << "N_ur calculated to be " << result << EOM;
     }
@@ -1489,10 +1489,10 @@ namespace Gambit
 
       // Check if the input for dNeff is negative (unphysical)
       static bool allow_negative_dNeff = runOptions->getValueOrDef<bool>(false,"allow_negative_delta_neff");
-      double dNeffBBN_rad =  *Param["dNeff_BBN"];
-      if ( (!allow_negative_dNeff) && (dNeffBBN_rad < 0.0) )
+      double dNurBBN =  *Param["dNur_BBN"];
+      if ( (!allow_negative_dNeff) && (dNurBBN < 0.0) )
       {
-        std::string err = "A negative value for \"dNeff_BBN\" is unphysical and is not allowed in CosmoBit by default!\n\n";
+        std::string err = "A negative value for \"dNur_BBN\" is unphysical and is not allowed in CosmoBit by default!\n\n";
         err += "If you want to proceed with megative values, please set the \"allow_negative_delta_neff\"-rule to \"true\" within the yaml-file.";
         CosmoBit_error().raise(LOCAL_INFO,err.c_str());
       }
@@ -1500,11 +1500,11 @@ namespace Gambit
       //If check is passed, set inputs.
       result["eta0"] = *Param["eta_BBN"];    // eta AFTER BBN (variable during)
       result["Nnu"]=3.046*pow((*Param["r_BBN"]),4); // contribution from SM neutrinos
-      result["dNnu"]=dNeffBBN_rad;    // dNnu: within AlterBBN scenarios in which the sum Nnu+dNnu is the same are identical
+      result["dNnu"]=dNurBBN;    // dNnu: within AlterBBN scenarios in which the sum Nnu+dNnu is the same are identical
       result["failsafe"] = runOptions->getValueOrDef<double>(3,"failsafe");
       result["err"] = runOptions->getValueOrDef<double>(3,"err");
 
-      logger() << "Set AlterBBN with parameters eta = " << result["eta0"] << ", Nnu = " << result["Nnu"] << ", dNeffBBN = " << result["dNnu"] << EOM;
+      logger() << "Set AlterBBN with parameters eta = " << result["eta0"] << ", Nnu = " << result["Nnu"] << ", dNnu = " << result["dNnu"] << EOM;
       logger() << "     and error params: failsafe = " << result["failsafe"] << ", err = " << result["err"] << EOM;
     }
     
@@ -1526,7 +1526,7 @@ namespace Gambit
       result["failsafe"] = runOptions->getValueOrDef<double>(3,"failsafe");
       result["err"] = runOptions->getValueOrDef<double>(3,"err");
 
-      logger() << "Set AlterBBN for LCDM with parameters eta = " << result["eta0"] << ", Nnu = " << result["Nnu"] << ", dNeffBBN = " << result["dNnu"] << EOM;
+      logger() << "Set AlterBBN for LCDM with parameters eta = " << result["eta0"] << ", Nnu = " << result["Nnu"] << ", dNnu = " << result["dNnu"] << EOM;
       logger() << "     and error params: failsafe = " << result["failsafe"] << ", err = " << result["err"] << EOM;
     }
 
