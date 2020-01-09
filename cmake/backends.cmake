@@ -1227,8 +1227,9 @@ if(NOT ditched_${name}_${ver})
     COMMAND sed ${dashi} -e "s#autosetup.py install#autosetup.py build#g" Makefile
     BUILD_COMMAND ${CMAKE_MAKE_PROGRAM} CC=${CMAKE_C_COMPILER} OMPFLAG=-fopenmp OPTFLAG= CCFLAG=${BACKEND_C_FLAGS} LDFLAG=${BACKEND_C_FLAGS} all
     COMMAND ${CMAKE_COMMAND} -E make_directory lib
-    COMMAND find python/ -name "classy.so" | xargs -I {} cp "{}" lib/
-    COMMAND echo -e "#This is a trampoline script to import the cythonized python module under a different name\\nfrom ${lib} import *" > lib/${lib}_${sfver}.py
+    COMMAND find python/ -name "classy*.so" | xargs -I {} cp "{}" lib/
+    COMMAND ${CMAKE_COMMAND} -E echo "#This is a trampoline script to import the cythonized python module under a different name" > lib/${lib}_${sfver}.py
+    COMMAND ${CMAKE_COMMAND} -E echo "from ${lib} import *" >> lib/${lib}_${sfver}.py
     INSTALL_COMMAND ""
   )
   add_extra_targets("backend" ${name} ${ver} ${dir} ${dl} clean)
@@ -1254,8 +1255,9 @@ if(NOT ditched_${name}_${ver})
     COMMAND sed ${dashi} -e "s#autosetup.py install#autosetup.py build#g" Makefile
     BUILD_COMMAND ${CMAKE_MAKE_PROGRAM} CC=${CMAKE_C_COMPILER} OMPFLAG=-fopenmp OPTFLAG= CCFLAG=${BACKEND_C_FLAGS} LDFLAG=${BACKEND_C_FLAGS} all
     COMMAND ${CMAKE_COMMAND} -E make_directory lib
-    COMMAND find python/ -name "classy.so" | xargs -I {} cp "{}" lib/
-    COMMAND echo -e "#This is a trampoline script to import the cythonized python module under a different name\\nfrom ${lib} import *" > lib/${lib}_${sfver}.py
+    COMMAND find python/ -name "classy*.so" | xargs -I {} cp "{}" lib/
+    COMMAND ${CMAKE_COMMAND} -E echo "#This is a trampoline script to import the cythonized python module under a different name" > lib/${lib}_${sfver}.py
+    COMMAND ${CMAKE_COMMAND} -E echo "from ${lib} import *" >> lib/${lib}_${sfver}.py
     INSTALL_COMMAND ""
   )
   add_extra_targets("backend" ${name} ${ver} ${dir} ${dl} clean)
