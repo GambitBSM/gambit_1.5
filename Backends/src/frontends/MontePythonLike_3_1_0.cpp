@@ -96,7 +96,7 @@ BE_NAMESPACE
 
 	  // Add the Likelihood path to sys so we can import it in Python
   	pybind11::module sys = pybind11::module::import("sys");
-  	sys.attr("path").attr("append")(like_path);
+    sys.attr("path").attr("insert")(0, like_path);
 
   	map_str_pyobj likelihoods;
 
@@ -119,6 +119,9 @@ BE_NAMESPACE
 		  
       likelihoods[exp_name] = EXP_MODULE;
   	}
+
+    // Remove "like_path" from sys.path (The likelihoods are now loaded)
+    sys.attr("path").attr("remove")(like_path);
 
   	return likelihoods;
   }

@@ -21,7 +21,6 @@ import scipy.integrate
 import scipy.interpolate
 import scipy.misc
 import sys
-sys.path.insert(0, 'montepython/')
 import io_mp
 
 
