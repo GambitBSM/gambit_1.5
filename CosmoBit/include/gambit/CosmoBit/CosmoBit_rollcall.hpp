@@ -46,6 +46,11 @@ START_MODULE
 
   #define CAPABILITY injection_spectrum
   START_CAPABILITY
+    #define FUNCTION injection_spectrum_annihilatingDM
+    START_FUNCTION(DarkAges::injectionSpectrum)
+    ALLOW_MODELS(AnnihilatingDM_general)
+    #undef FUNCTION
+
     #define FUNCTION injection_spectrum_decayingDM
     START_FUNCTION(DarkAges::injectionSpectrum)
     ALLOW_MODELS(DecayingDM_general)
@@ -113,7 +118,7 @@ START_MODULE
   START_CAPABILITY
     #define FUNCTION energy_injection_efficiency_func
     START_FUNCTION(DarkAges::fz_table)
-    ALLOW_MODELS(DecayingDM_general)
+    ALLOW_MODELS(AnnihilatingDM_general,DecayingDM_general)
     BACKEND_REQ(DA_efficiency_function, (DarkAges_tag), DarkAges::fz_table,())
     #undef FUNCTION
   #undef CAPABILITY
@@ -122,7 +127,7 @@ START_MODULE
   START_CAPABILITY
     #define FUNCTION f_effective_func
     START_FUNCTION(double)
-    ALLOW_MODELS(DecayingDM_general)
+    ALLOW_MODELS(AnnihilatingDM_general,DecayingDM_general)
     DEPENDENCY(energy_injection_efficiency,DarkAges::fz_table)
     #undef FUNCTION
   #undef CAPABILITY
@@ -187,8 +192,8 @@ START_MODULE
     START_FUNCTION(pybind11::dict)
     
     ALLOW_MODELS(LCDM)
-    MODEL_CONDITIONAL_DEPENDENCY(classy_parameters_DecayingDM, pybind11::dict,  DecayingDM_general)
-    
+    MODEL_CONDITIONAL_DEPENDENCY(classy_parameters_EnergyInjection, pybind11::dict, AnnihilatingDM_general, DecayingDM_general)
+
     DEPENDENCY(T_cmb,                 double)
     DEPENDENCY(Helium_abundance,      std::vector<double>)
     DEPENDENCY(NuMasses_classy_input, pybind11::dict)
@@ -232,15 +237,19 @@ START_MODULE
      #undef FUNCTION
 
   #undef CAPABILITY
-  
-  // set extra parameters for CLASS run for non-standard cosmological models
-  #define CAPABILITY classy_parameters_DecayingDM
+
+  // set extra parameters for CLASS run for energy injection by non-standard cosmological models
+  #define CAPABILITY classy_parameters_EnergyInjection
      START_CAPABILITY
-     #define FUNCTION set_classy_parameters_DecayingDM_general
+     #define FUNCTION set_classy_parameters_EnergyInjection_AnnihilatingDM
+      START_FUNCTION(pybind11::dict)
+      ALLOW_MODELS(AnnihilatingDM_general)
+      DEPENDENCY(energy_injection_efficiency, DarkAges::fz_table)
+     #undef FUNCTION
+
+     #define FUNCTION set_classy_parameters_EnergyInjection_DecayingDM
       START_FUNCTION(pybind11::dict)
       ALLOW_MODELS(DecayingDM_general)
-      DEPENDENCY(lifetime,                    double)
-      DEPENDENCY(DM_fraction,                 double)
       DEPENDENCY(energy_injection_efficiency, DarkAges::fz_table)
      #undef FUNCTION
   #undef CAPABILITY

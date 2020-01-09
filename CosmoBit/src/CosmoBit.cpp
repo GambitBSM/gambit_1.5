@@ -155,6 +155,23 @@ namespace Gambit
       return As;
     }
 
+    void injection_spectrum_annihilatingDM(DarkAges::injectionSpectrum& spectrum)
+    {
+      using namespace Pipes::injection_spectrum_annihilatingDM;
+
+      double m = *Param["mass"];
+      double BR_el = *Param["BR"];
+      double BR_ph = 1.0 - BR_el;
+
+      spectrum.E.clear();
+      spectrum.spec_el.clear();
+      spectrum.spec_ph.clear();
+
+      spectrum.E.resize(1,m);
+      spectrum.spec_el.resize(1,BR_el*2e9);
+      spectrum.spec_ph.resize(1,BR_ph*2e9);
+    }
+
     void injection_spectrum_decayingDM(DarkAges::injectionSpectrum& spectrum)
     {
       using namespace Pipes::injection_spectrum_decayingDM;
@@ -303,7 +320,15 @@ namespace Gambit
 
       bool silent = runOptions->getValueOrDef<bool>(false,"silent_mode");
       int last_steps = runOptions->getValueOrDef<int>(4,"show_last_steps");
-      double z_eff = runOptions->getValueOrDef<double>(600.,"z_eff");
+      double z_eff = 0.01;
+      if(ModelInUse("DecayingDM_general"))
+      {
+        z_eff = runOptions->getValueOrDef<double>(300.,"z_eff");
+      }
+      else if (ModelInUse("AnnihilatingDM_general"))
+      {
+        z_eff = runOptions->getValueOrDef<double>(600.,"z_eff");
+      }
 
       DarkAges::fz_table fzt = *Dep::energy_injection_efficiency;
       std::vector<double> z = fzt.redshift;
@@ -335,9 +360,15 @@ namespace Gambit
       if (!silent)
       {
         std::cout << "################" << std::endl;
-        std::cout << "tau = " << *Param["lifetime"] << std::endl;
+        if (ModelInUse("DecayingDM_general"))
+        {
+          std::cout << "Scenario: Dark Matter Decay" << std::endl;
+          std::cout << "tau = " << *Param["lifetime"] << std::endl;
+        }
+        else if (ModelInUse("AnnihilatingDM_general"))
+          std::cout << "Scenario: Dark matter (s-wave) annihilation" << std::endl;
         std::cout << "m = " << *Param["mass"] << std::endl;
-        std::cout << "BR (electrom) = " << *Param["BR"] << std::endl;
+        std::cout << "BR (electron) = " << *Param["BR"] << std::endl;
         std::cout << "---------------" << std::endl;
         std::cout << "z\tf_heat\tf_lya\tf_hion\tf_heion\tf_lowe" << std::endl;
         for (unsigned int i = z.size() - last_steps; i < z.size(); i++)
@@ -543,7 +574,10 @@ namespace Gambit
       result["YHe"] = Helium_abundance.at(0); 
 
       // TODO: need to test if class or exo_class in use! does not work -> (JR) should be fixed with classy implementation
-      if (ModelInUse("DecayingDM_general")){merge_pybind_dicts(result,*Dep::classy_parameters_DecayingDM);}
+      if (ModelInUse("DecayingDM_general") || ModelInUse("AnnihilatingDM_general"))
+      {
+        merge_pybind_dicts(result,*Dep::classy_parameters_EnergyInjection);
+      }
 
       // Other Class input direct from the YAML file 
       // check if these are already contained in the input dictionary -- if so throw an error
@@ -1962,26 +1996,36 @@ namespace Gambit
       result.merge_input_dicts(MP_cosmo_arguments);
     }
 
-    
-  void set_classy_parameters_DecayingDM_general(pybind11::dict &result)
+
+  void set_classy_parameters_EnergyInjection_AnnihilatingDM(pybind11::dict &result)
   {
-    using namespace Pipes::set_classy_parameters_DecayingDM_general;
+    using namespace Pipes::set_classy_parameters_EnergyInjection_AnnihilatingDM;
 
     // make sure nothing from previous run is contained
     result.clear();
 
-    result["DM_decay_tau"] = *Dep::lifetime;
-    result["DM_decay_fraction"] = *Dep::DM_fraction;
+    // Set relevant inputs for the scenario of s-wave annihilating DM
+    const ModelParameters& NP_params = *Dep::AnnihilatingDM_general_parameters;
+    result["DM_annihilation_cross_section"] = NP_params.at("sigmav");
+    result["DM_annihilation_mass"] = NP_params.at("mass");
+
+    // Get the results from the DarkAges tables that hold extra information to be passed to the CLASS thermodynamics structure
+    static DarkAges::fz_table fz;
+    fz = *Dep::energy_injection_efficiency;
+    bool f_eff_mode = fz.f_eff_mode;
 
     // flag passed to CLASS to signal that the energy_deposition_function is coming from GAMBIT
     // we patched exoclass to accept this. An alternative way without patching would be to write the tables to disk &
     // just have CLASS read in the file. To avoid the repeated file writing & deleting we pass pointers to the vector/arrays
     // to CLASS instead
-    result["f_eff_type"] = "pointer_to_fz_channel";
-
-    // Get the results from the DarkAges tables that hold extra information to be passed to the CLASS thermodynamics structure
-    static DarkAges::fz_table fz;
-    fz = *Dep::energy_injection_efficiency;
+    if (f_eff_mode)
+    {
+      result["f_eff_type"] = "pointer_to_fz_eff";
+    }
+    else
+    {
+      result["f_eff_type"] = "pointer_to_fz_channel";
+    }
 
     // set the lengths of the input tables (since we are passing pointers to arrays CLASS has to know how long they are)
     result["energyinj_coef_num_lines"] = fz.redshift.size();
@@ -1991,11 +2035,70 @@ namespace Gambit
     //    - memory addresses are passed as strings (python wrapper for CLASS converts every entry to a string internally so
     //      we need to do that for the memory addresses before python casts them to something else)
     result["energyinj_coef_z"] = memaddress_to_uint(fz.redshift.data());
-    result["energyinj_coef_heat"] = memaddress_to_uint(fz.f_heat.data());
-    result["energyinj_coef_lya"] = memaddress_to_uint(fz.f_lya.data());
-    result["energyinj_coef_ionH"] = memaddress_to_uint(fz.f_hion.data());
-    result["energyinj_coef_ionHe"] = memaddress_to_uint(fz.f_heion.data());
-    result["energyinj_coef_lowE"] = memaddress_to_uint(fz.f_lowe.data());
+    if (f_eff_mode)
+    {
+      result["energyinj_coef_tot"] = memaddress_to_uint(fz.f_eff.data());
+    }
+    else
+    {
+      result["energyinj_coef_heat"] = memaddress_to_uint(fz.f_heat.data());
+      result["energyinj_coef_lya"] = memaddress_to_uint(fz.f_lya.data());
+      result["energyinj_coef_ionH"] = memaddress_to_uint(fz.f_hion.data());
+      result["energyinj_coef_ionHe"] = memaddress_to_uint(fz.f_heion.data());
+      result["energyinj_coef_lowE"] = memaddress_to_uint(fz.f_lowe.data());
+    }
+  }
+
+  void set_classy_parameters_EnergyInjection_DecayingDM(pybind11::dict &result)
+  {
+    using namespace Pipes::set_classy_parameters_EnergyInjection_DecayingDM;
+
+    // make sure nothing from previous run is contained
+    result.clear();
+
+    // Set relevant inputs for the scenario of decaying DM
+    const ModelParameters& NP_params = *Dep::DecayingDM_general_parameters;
+    result["DM_decay_tau"] = NP_params.at("lifetime");
+    result["DM_decay_fraction"] = NP_params.at("fraction");
+
+    // Get the results from the DarkAges tables that hold extra information to be passed to the CLASS thermodynamics structure
+    static DarkAges::fz_table fz;
+    fz = *Dep::energy_injection_efficiency;
+    bool f_eff_mode = fz.f_eff_mode;
+
+    // flag passed to CLASS to signal that the energy_deposition_function is coming from GAMBIT
+    // we patched exoclass to accept this. An alternative way without patching would be to write the tables to disk &
+    // just have CLASS read in the file. To avoid the repeated file writing & deleting we pass pointers to the vector/arrays
+    // to CLASS instead
+    if (f_eff_mode)
+    {
+      result["f_eff_type"] = "pointer_to_fz_eff";
+    }
+    else
+    {
+      result["f_eff_type"] = "pointer_to_fz_channel";
+    }
+
+    // set the lengths of the input tables (since we are passing pointers to arrays CLASS has to know how long they are)
+    result["energyinj_coef_num_lines"] = fz.redshift.size();
+
+    // add the pointers to arrays class needs to know about to input dictionary
+    // Note:
+    //    - memory addresses are passed as strings (python wrapper for CLASS converts every entry to a string internally so
+    //      we need to do that for the memory addresses before python casts them to something else)
+    result["energyinj_coef_z"] = memaddress_to_uint(fz.redshift.data());
+    if (f_eff_mode)
+    {
+      result["energyinj_coef_tot"] = memaddress_to_uint(fz.f_eff.data());
+    }
+    else
+    {
+      result["energyinj_coef_heat"] = memaddress_to_uint(fz.f_heat.data());
+      result["energyinj_coef_lya"] = memaddress_to_uint(fz.f_lya.data());
+      result["energyinj_coef_ionH"] = memaddress_to_uint(fz.f_hion.data());
+      result["energyinj_coef_ionHe"] = memaddress_to_uint(fz.f_heion.data());
+      result["energyinj_coef_lowE"] = memaddress_to_uint(fz.f_lowe.data());
+    }
   }
 
 

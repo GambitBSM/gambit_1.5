@@ -484,14 +484,52 @@ ScalarSingletDM_Z2_running: |
 
    The scalar singlet DM model with lambda_S (the scalar self-coupling), lambda_hS (the scalar-SM Higgs interaction strength) and mS (the mass of the new scalar) defined at the scale mZ as free parameters, allowing full calculation of pole masses, renormalisation group running and vacuum stability.
 
+AnnihilatingDM_general: |
+
+  Simple model of promptly annihilating dark matter into e+/e- and/or photons.
+
+  mass   - mass of the dark matter candidate [in GeV]
+  sigmav - thermally averaged cross section [in cm^3 s^-1]
+  BR     - the fraction of how much energy will be contributed in e+/e-. (1-BR will be asinged to photons)
+
+AnnihilatingDM_photon: |
+
+  Special case of AnnihilatingDM_general. (Annihilation only into photons -> BR = 0)
+
+  mass   - mass of the dark matter candidate [in GeV]
+  sigmav - thermally averaged cross section [in cm^3 s^-1]
+
+AnnihilatingDM_electron: |
+
+  Special case of AnnihilatingDM_general. (Annihilation only into e+/e- -> BR = 1)
+
+  mass   - mass of the dark matter candidate [in GeV]
+  sigmav - thermally averaged cross section [in cm^3 s^-1]
+
 DecayingDM_general: |
 
-  Toy model of decaying dark matter.
+  Simple model of promptly decaying dark matter into e+/e- and/or photons.
 
   mass     - mass of the dark matter candidate [in GeV]
   lifetime - lifetime of said DM candidate [in s]
   fraction - fraction of how much the decaying DM component contributes to all DM.
   BR       - the fraction of how much energy will be contributed in e+/e-. (1-BR will be asinged to photons)
+
+DecayingDM_photon: |
+
+  Special case of DecayingDM_general. (Decay only into photons -> BR = 0)
+
+  mass     - mass of the dark matter candidate [in GeV]
+  lifetime - lifetime of said DM candidate [in s]
+  fraction - fraction of how much the decaying DM component contributes to all DM.
+
+DecayingDM_electron: |
+
+  Special case of DecayingDM_general. (Decay only into e+/e- -> BR = 1)
+
+  mass     - mass of the dark matter candidate [in GeV]
+  lifetime - lifetime of said DM candidate [in s]
+  fraction - fraction of how much the decaying DM component contributes to all DM.
 
 MDM: |
 
