@@ -20,9 +20,6 @@
 
 namespace Gambit
 {
-  // Shorthand for map from string to pointer to double (here atm, should probably move into classy or DarkAges types) TODO
-  typedef std::map<std::string,double*> map_str_dblptr;
-  
   namespace DarkAges
   {
     struct injectionSpectrum
@@ -34,16 +31,25 @@ namespace Gambit
 
     struct fz_table
     {
+      // Flag whether DarkAges calculates f_c(z) per injection channel or an
+      // effective f(z) which is multiplied with repartition fucntions
+      // chi_c(x_e,z) later on (in classy)
+      bool f_eff_mode = false;
+
+      // Redshift vector (filled in both modes)
       std::vector<double> redshift;
+
+      // f_c(z) seperated by injection channels
+      // (filled only if f_eff_mode is false)
       std::vector<double> f_heat;
       std::vector<double> f_lya;
       std::vector<double> f_hion;
       std::vector<double> f_heion;
       std::vector<double> f_lowe;
-      // Added for classy interface to exoclass
-      int num_lines;
-      map_str_dblptr ptrs_to_member_vecs; 
-      
+
+      // f_eff(z)
+      // (filled only if f_eff_mode is true)
+      std::vector<double> f_eff;
     };
   }
 }

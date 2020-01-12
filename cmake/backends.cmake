@@ -1266,9 +1266,9 @@ endif()
 # DarkAges
 set(name "darkages")
 set(ver "1.2.0")
+set(sfver "1_2_0")
 set(dl "null")
 set(dir "${PROJECT_SOURCE_DIR}/Backends/installed/${name}/${ver}")
-set(patch "${PROJECT_SOURCE_DIR}/Backends/patches/${name}/${ver}/DarkAges_for_GAMBIT.patch")
 check_ditch_status(${name} ${ver} ${dir})
 if(NOT ditched_${name}_${ver})
   ExternalProject_Add(${name}_${ver}
@@ -1276,8 +1276,7 @@ if(NOT ditched_${name}_${ver})
     GIT_TAG v1.2.0
     SOURCE_DIR ${dir}
     BUILD_IN_SOURCE 1
-    PATCH_COMMAND patch -p0 < ${patch}
-    CONFIGURE_COMMAND ""
+    CONFIGURE_COMMAND ${CMAKE_COMMAND} -E rename DarkAges DarkAges_${sfver}
     BUILD_COMMAND ""
     INSTALL_COMMAND ""
   )

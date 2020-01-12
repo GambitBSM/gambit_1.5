@@ -42,6 +42,71 @@ namespace Gambit
     /// Returns an empty string when the function or variable is not inside a submodule.
     sspair split_qualified_python_name(str, str);
 
+    /// Helper function (translations std::vector <-> numpy array)
+    template<typename T>
+    pybind11::array_t<T> cast_std_to_np(const std::vector<T>& input)
+    {
+      // Get size of input
+      size_t size = input.size();
+
+      // Get pointer to data
+      const T* data = input.data();
+
+      // Create and return new array_t<double> with the data
+      return pybind11::array_t<T>(size, data);
+    }
+
+    template<typename T>
+    std::vector<T> cast_np_to_std(const pybind11::array_t<T>& input)
+    {
+      // Get size of input
+      size_t size = input.size();
+
+      // Get pointer to data
+      const T* data = input.data();
+
+      // Create and return new vector with the data
+      return std::vector<T>(data,(data+size));
+    }
+
+    /// Helper functions to merge / concatenate two numpy arrays
+    template<typename T>
+    pybind11::array_t<T> merge(const pybind11::array_t<T>& a, const pybind11::array_t<T>& b)
+    {
+      // Get size of input "a" and pointer to its data
+      size_t size_a = a.size();
+      auto data_a = a.data();
+
+      // Repeat for input "b"
+      size_t size_b = b.size();
+      auto data_b = b.data();
+
+      // Create pybind11::array_t<double> with the right size (size_a + size_b)
+      // and get the pointer to the data
+      pybind11::array_t<T> output(size_a+size_b);
+      auto output_data = output.mutable_data();
+
+      //
+      std::memcpy(output_data, data_a, size_a*sizeof(T));
+      std::memcpy(output_data+size_a, data_b, size_b*sizeof(T));
+
+      return output;
+    }
+
+    /// Special case of merge (a is a single number)
+    template<typename T>
+    pybind11::array_t<T> merge(const T& a, const pybind11::array_t<T>& b)
+    {
+      return merge(pybind11::array_t<T>(size_t(1),&a), b);
+    }
+
+    /// Special case of merge (b is a single number)
+    template<typename T>
+    pybind11::array_t<T> merge(const pybind11::array_t<T>& a, const T& b)
+    {
+      return merge(a, pybind11::array_t<T>(size_t(1),&b));
+    }
+
   }
 
 }

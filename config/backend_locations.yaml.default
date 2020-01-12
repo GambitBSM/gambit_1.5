@@ -23,7 +23,7 @@ classy:
   exo_2.7.0:   ./Backends/installed/classy/exo_2.7.0/lib/classy_exo_2_7_0.py
 
 DarkAges:
-  1.2.0:       ./Backends/installed/darkages/1.2.0/DarkAges_for_GAMBIT.py
+  1.2.0:       ./Backends/installed/darkages/1.2.0/DarkAges_1_2_0
 
 DarkSUSY:
   5.1.3:       ./Backends/installed/darksusy/5.1.3/lib/libdarksusy.so
