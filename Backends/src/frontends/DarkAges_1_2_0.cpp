@@ -101,14 +101,14 @@ BE_NAMESPACE
       std::string channel = it.first;
       py::object tf = it.second;
       pyArray_dbl f = ((model.attr("calc_f")(tf)).attr("__getitem__")(-1));
-      f = f.attr("__getslice__")(0,z_size-1);
+      //f = f.attr("__getslice__")(0,z_size-1);
       result_map[channel] = repeat_front_and_end(f);
     }
 
     // Get an independent copy of "redshift" to modify
-    // (Stripping the last element and shift by one to get z and not z+1)
+    // (Shift entries by one to get z and not z+1)
     pyArray_dbl z(z_size,redshift.data());
-    z = z.attr("__getslice__")(0,z_size-1);
+    //z = z.attr("__getslice__")(0,z_size-1);
     std::for_each(z.mutable_data(), z.mutable_data()+z.size(), [](double& x){x -= 1;});
     result_map["redshift"] =  repeat_front_and_end(z,0,zmax);
 
