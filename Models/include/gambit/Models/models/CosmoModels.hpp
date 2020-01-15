@@ -157,10 +157,10 @@ START_MODEL
 DEFINEPARS(lambda,N_pivot,phi_init0)
 #undef MODEL
 
-// Inflation model: 2/3 \lambda phi^2/3 --- inflation
+// Inflation model: 3/2 \lambda phi^2/3 --- inflation
 // A_s, n_s and r are given by inflationary model
 // parameters: N_piv, lambda.
-#define MODEL Inflation_1mono32Inf
+#define MODEL Inflation_1mono23
 START_MODEL
 DEFINEPARS(lambda,N_pivot,phi_init0)
 #undef MODEL

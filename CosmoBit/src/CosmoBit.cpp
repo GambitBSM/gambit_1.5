@@ -723,7 +723,7 @@ namespace Gambit
         result.phi_init0.push_back(*Param["phi_init0"]);
         result.potential_choice = 2; // -> lambda**4*(1.e0_dp+cos(finv*phi))
         result.num_inflaton = 1;
-        result.vparam_rows = 1;
+        result.vparam_rows = 2;
       }
       else if (ModelInUse("Inflation_1quar"))
       {
@@ -741,7 +741,7 @@ namespace Gambit
         result.num_inflaton = 1;
         result.vparam_rows = 1;
       }
-      else if (ModelInUse("Inflation_1mono32"))
+      else if (ModelInUse("Inflation_1mono23"))
       {
         result.vparams.push_back(*Param["lambda"]);
         result.phi_init0.push_back(*Param["phi_init0"]);
@@ -758,7 +758,7 @@ namespace Gambit
         result.phi_init0.push_back(*Param["phi_init0"]);
         result.potential_choice = 5; 
         result.num_inflaton = 1;
-        result.vparam_rows = 1;
+        result.vparam_rows = 2;
       }
 
       // TODO: MultiMode segFaults if this is empty have to do this properly though (JR)
