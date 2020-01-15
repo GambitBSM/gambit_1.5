@@ -475,14 +475,14 @@ namespace Gambit
       if (ModelInUse("etaBBN_rBBN_rCMB_dNurBBN_dNurCMB"))
       {
         // Check if the input for dNeff is negative (unphysical)
-        static bool allow_negative_dNeff = runOptions->getValueOrDef<bool>(false,"allow_negative_delta_neff");
+        static bool allow_negative_dNeff = runOptions->getValueOrDef<bool>(false,"allow_negative_delta_N_ur");
         const ModelParameters& NP_params = *Dep::etaBBN_rBBN_rCMB_dNurBBN_dNurCMB_parameters;
         double dNurCMB =  NP_params.at("dNur_CMB");
         double rCMB =  NP_params.at("r_CMB");
         if ( (!allow_negative_dNeff) && (dNurCMB < 0.0) )
         {
           std::string err = "A negative value for \"dNur_CMB\" is unphysical and is not allowed in CosmoBit by default!\n\n";
-          err += "If you want to proceed with megative values, please set the \"allow_negative_delta_neff\"-rule to \"true\" within the yaml-file.";
+          err += "If you want to proceed with megative values, please set the \"allow_negative_delta_N_ur\"-rule to \"true\" within the yaml-file.";
           CosmoBit_error().raise(LOCAL_INFO,err.c_str());
         }
 
@@ -1522,12 +1522,12 @@ namespace Gambit
       // set of 'known' parameters 'known_relicparam_options'
 
       // Check if the input for dNeff is negative (unphysical)
-      static bool allow_negative_dNeff = runOptions->getValueOrDef<bool>(false,"allow_negative_delta_neff");
+      static bool allow_negative_dNeff = runOptions->getValueOrDef<bool>(false,"allow_negative_delta_N_ur");
       double dNurBBN =  *Param["dNur_BBN"];
       if ( (!allow_negative_dNeff) && (dNurBBN < 0.0) )
       {
         std::string err = "A negative value for \"dNur_BBN\" is unphysical and is not allowed in CosmoBit by default!\n\n";
-        err += "If you want to proceed with megative values, please set the \"allow_negative_delta_neff\"-rule to \"true\" within the yaml-file.";
+        err += "If you want to proceed with megative values, please set the \"allow_negative_delta_N_ur\"-rule to \"true\" within the yaml-file.";
         CosmoBit_error().raise(LOCAL_INFO,err.c_str());
       }
 
