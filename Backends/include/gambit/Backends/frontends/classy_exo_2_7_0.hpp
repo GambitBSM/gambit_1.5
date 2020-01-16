@@ -23,7 +23,7 @@
 ///  *********************************************
 
 #define BACKENDNAME classy
-#define BACKENDLANG Python2
+#define BACKENDLANG Python
 #define VERSION exo_2.7.0
 #define SAFE_VERSION exo_2_7_0
 

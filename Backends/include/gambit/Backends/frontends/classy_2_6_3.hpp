@@ -23,7 +23,7 @@
 ///  *********************************************
 
 #define BACKENDNAME classy
-#define BACKENDLANG Python2
+#define BACKENDLANG Python
 #define VERSION 2.6.3
 #define SAFE_VERSION 2_6_3
 
