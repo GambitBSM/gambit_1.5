@@ -1263,6 +1263,33 @@ if(NOT ditched_${name}_${ver})
   add_extra_targets("backend" ${name} ${ver} ${dir} ${dl} clean)
 endif()
 
+set(name "classy")
+set(ver "exo_2.7.2")
+set(sfver "exo_2_7_2")
+set(lib "classy")
+set(patch "${PROJECT_SOURCE_DIR}/Backends/patches/${name}/${ver}")
+set(dl "https://github.com/lesgourg/class_public/archive/42e8f9418e3442d1ea3f26ff84dc9f0e856a0f1d.tar.gz") # The huge number is the commit ID of ExoCLASS_2.7.0
+set(md5 "8f3139eacae4d1cc5bb02bab3ec75073")
+set(dir "${PROJECT_SOURCE_DIR}/Backends/installed/${name}/${ver}")
+check_ditch_status(${name} ${ver} ${dir})
+if(NOT ditched_${name}_${ver})
+  ExternalProject_Add(${name}_${ver}
+    DOWNLOAD_COMMAND ${DL_BACKEND} ${dl} ${md5} ${dir}
+    SOURCE_DIR ${dir}
+    BUILD_IN_SOURCE 1
+    PATCH_COMMAND patch -p1 < ${patch}/${name}_${ver}.diff
+    CONFIGURE_COMMAND ""
+    COMMAND sed ${dashi} -e "s#autosetup.py install#autosetup.py build#g" Makefile
+    BUILD_COMMAND ${CMAKE_MAKE_PROGRAM} CC=${CMAKE_C_COMPILER} OMPFLAG=-fopenmp OPTFLAG= CCFLAG=${BACKEND_C_FLAGS} LDFLAG=${BACKEND_C_FLAGS} PYTHON=${PYTHON_EXECUTABLE} all
+    COMMAND ${CMAKE_COMMAND} -E make_directory lib
+    COMMAND find python/ -name "classy*.so" | xargs -I {} cp "{}" lib/
+    COMMAND ${CMAKE_COMMAND} -E echo "#This is a trampoline script to import the cythonized python module under a different name" > lib/${lib}_${sfver}.py
+    COMMAND ${CMAKE_COMMAND} -E echo "from ${lib} import *" >> lib/${lib}_${sfver}.py
+    INSTALL_COMMAND ""
+  )
+  add_extra_targets("backend" ${name} ${ver} ${dir} ${dl} clean)
+endif()
+
 # DarkAges
 set(name "darkages")
 set(ver "1.2.0")
