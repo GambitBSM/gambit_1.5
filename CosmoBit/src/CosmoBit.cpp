@@ -792,7 +792,7 @@ namespace Gambit
       /// @TODO Separate into cases where we want the full ps and the parametrised ps
 
       result.k_min = runOptions->getValueOrDef<double>(1e-6,"k_min");
-      result.k_max = runOptions->getValueOrDef<double>(1e+6,"k_min");
+      result.k_max = runOptions->getValueOrDef<double>(1e+6,"k_max");
       result.numsteps = runOptions->getValueOrDef<int>(100, "numsteps");
 
       if (result.numsteps > 1000)
