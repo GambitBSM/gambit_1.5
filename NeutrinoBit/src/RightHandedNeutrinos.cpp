@@ -18,6 +18,7 @@
 ///  \date 2017 Oct
 ///  \date 2018
 ///  \date 2019
+///  \date 2020
 ///
 ///  \author Marcin Chrzaszcz
 ///          (mchrzasz@cern.ch)
@@ -50,6 +51,221 @@ namespace Gambit
 {
   namespace NeutrinoBit
   {
+    // Lambda function 
+    double lambda(double a, double b, double c)
+    {
+      return pow(a,2) + pow(b,2) + pow(c,2) - 2*a*b - 2*b*c - 2*c*a;
+    }
+
+    // Decay with of RHNs to charged lepton and pseudoscalar meson
+    // From 0705.1729, 0901.3589, 1805.08567 and 1905.00284
+    double Gamma_RHN2Pplusl(double GF, double mN, double ml, double mP, double fP, double VCKM, double Usq)
+    {
+      double xl = pow(ml/mN,2);
+      double xP = pow(mP/mN,2);
+
+      return ( pow(GF,2) * pow(fP,2) * pow(VCKM,2) * Usq * pow(mN,3) ) / (16*pi) * ( pow(1 - xl,2) - xP*(1 + xl) )*sqrt(lambda(1,xP,xl));
+    }
+
+    // Decay widths of RHNs, for BBN (N -> pi+ l-)
+    void Gamma_RHN2piplusl(std::vector<double>& result)
+    {
+      using namespace Pipes::Gamma_RHN2piplusl;
+      SMInputs sminputs = *Dep::SMINPUTS;
+
+      static double m_pi_plus = meson_masses.pi_plus;
+      static double f_pi_plus = meson_decay_constants.pi_plus;
+      // Take from the model parameters (Wolfenstein) PDG value: 0.97434
+      static double Vud = 1.0 - 0.5*pow(*Param["CKM_lambda"],2);
+      std::vector<double> m_lep(3), M(3);
+      // Since we scan the SLHA2 model, we take masses from it
+      m_lep[0] = *Param["mE"];
+      m_lep[1] = *Param["mMu"];
+      m_lep[2] = *Param["mTau"];
+      M[0] = *Param["M_1"];
+      M[1] = *Param["M_2"];
+      M[2] = *Param["M_3"];
+      Matrix3d Usq = Dep::SeesawI_Theta->cwiseAbs2(); // |\Theta_{ij}|^2
+
+      for (int i=0; i<3; i++)
+      {
+        result[i] = 0;
+        for (int j=0; j<3; j++)
+        {
+          if (M[i] > (m_pi_plus+m_lep[j]))
+          {
+            result[i] +=  Gamma_RHN2Pplusl(sminputs.GF, M[i], m_lep[j], m_pi_plus, f_pi_plus, Vud, Usq(j,i));
+          }
+        }
+      }
+    }
+
+    // Decay widths of RHNs, for BBN (N -> K+ l-)
+    void Gamma_RHN2Kplusl(std::vector<double>& result)
+    {
+      using namespace Pipes::Gamma_RHN2Kplusl;
+      SMInputs sminputs = *Dep::SMINPUTS;
+
+      static double m_K_plus = meson_masses.kaon_plus;
+      static double f_K_plus = meson_decay_constants.K_plus;
+      // Take from the model parameters (Wolfenstein) PDG value: 0.22506
+      static double Vus = *Param["CKM_lambda"];
+      std::vector<double> m_lep(3), M(3);
+       // Since we scan the SLHA2 model, we take masses from it
+      m_lep[0] = *Param["mE"];
+      m_lep[1] = *Param["mMu"];
+      m_lep[2] = *Param["mTau"];
+      M[0] = *Param["M_1"];
+      M[1] = *Param["M_2"];
+      M[2] = *Param["M_3"];
+      Matrix3d Usq = Dep::SeesawI_Theta->cwiseAbs2(); // |\Theta_{ij}|^2
+
+      for (int i=0; i<3; i++)
+      {
+        result[i] = 0;
+        for (int j=0; j<3; j++)
+        {
+          if (M[i] > (m_K_plus+m_lep[j]))
+          {
+            result[i] += Gamma_RHN2Pplusl(sminputs.GF, M[i], m_lep[j], m_K_plus, f_K_plus, Vus, Usq(j,i));
+          }
+        }
+      }
+    }
+
+    // Decay widths of RHNs, for BBN (N -> D+ l-)
+    void Gamma_RHN2Dplusl(std::vector<double>& result)
+    {
+      using namespace Pipes::Gamma_RHN2Dplusl;
+      SMInputs sminputs = *Dep::SMINPUTS;
+
+      static double m_D_plus = meson_masses.D_plus;
+      static double f_D_plus = meson_decay_constants.D_plus;
+      // Take from the model parameters (Wolfenstein) PDG value: 0.22492
+      static double Vcd = -*Param["CKM_lambda"];
+      std::vector<double> m_lep(3), M(3);
+      // Since we scan the SLHA2 model, we take masses from it
+      m_lep[0] = *Param["mE"];
+      m_lep[1] = *Param["mMu"];
+      m_lep[2] = *Param["mTau"];
+      M[0] = *Param["M_1"];
+      M[1] = *Param["M_2"];
+      M[2] = *Param["M_3"];
+      Matrix3d Usq = Dep::SeesawI_Theta->cwiseAbs2(); // |\Theta_{ij}|^2
+
+      for (int i=0; i<3; i++)
+      {
+        result[i] = 0;
+        for (int j=0; j<3; j++)
+        {
+          if (M[i] > (m_D_plus+m_lep[j]))
+          {
+            result[i] += Gamma_RHN2Pplusl(sminputs.GF, M[i], m_lep[j], m_D_plus, f_D_plus, Vcd, Usq(j,i));
+          }
+        }
+      }
+    }
+
+    // Decay widths of RHNs, for BBN (N -> Ds+ l-)
+    void Gamma_RHN2Dsl(std::vector<double>& result)
+    {
+      using namespace Pipes::Gamma_RHN2Dsl;
+      SMInputs sminputs = *Dep::SMINPUTS;
+
+      static double m_D_s = meson_masses.D_s;
+      static double f_D_s = meson_decay_constants.D_s;
+      // Take from the model parameters (Wolfenstein) PDG value: 0.97351
+      static double Vcs = 1 - 0.5*pow(*Param["CKM_lambda"],2);
+      std::vector<double> m_lep(3), M(3);
+      // Since we scan the SLHA2 model, we take masses from it
+      m_lep[0] = *Param["mE"];
+      m_lep[1] = *Param["mMu"];
+      m_lep[2] = *Param["mTau"];
+      M[0] = *Param["M_1"];
+      M[1] = *Param["M_2"];
+      M[2] = *Param["M_3"];
+      Matrix3d Usq = Dep::SeesawI_Theta->cwiseAbs2(); // |\Theta_{ij}|^2
+
+      for (int i=0; i<3; i++)
+      {
+        result[i] = 0;
+        for (int j=0; j<3; j++)
+        {
+          if (M[i] > (m_D_s+m_lep[j]))
+          {
+            result[i] += Gamma_RHN2Pplusl(sminputs.GF, M[i], m_lep[j], m_D_s, f_D_s, Vcs, Usq(j,i));
+          }
+        }
+      }
+    }
+
+    // Decay widths of RHNs, for BBN (N -> B+ l-)
+    void Gamma_RHN2Bplusl(std::vector<double>& result)
+    {
+      using namespace Pipes::Gamma_RHN2Bplusl;
+      SMInputs sminputs = *Dep::SMINPUTS;
+
+      static double m_B_plus = meson_masses.B_plus;
+      static double f_B_plus = meson_decay_constants.B_plus;
+      // Take from the model parameters (Wolfenstein) PDG value: 0.00357 (absolute value)
+      static double Vub = *Param["CKM_A"]*pow(*Param["CKM_lambda"],3)*sqrt(pow(*Param["CKM_rhobar"],2) + pow(*Param["CKM_etabar"],2));
+      std::vector<double> m_lep(3), M(3);
+      // Since we scan the SLHA2 model, we take masses from it
+      m_lep[0] = *Param["mE"];
+      m_lep[1] = *Param["mMu"];
+      m_lep[2] = *Param["mTau"];
+      M[0] = *Param["M_1"];
+      M[1] = *Param["M_2"];
+      M[2] = *Param["M_3"];
+      Matrix3d Usq = Dep::SeesawI_Theta->cwiseAbs2(); // |\Theta_{ij}|^2
+
+      for (int i=0; i<3; i++)
+      {
+        result[i] = 0;
+        for (int j=0; j<3; j++)
+        {
+          if (M[i] > (m_B_plus+m_lep[j]))
+          {
+            result[i] += Gamma_RHN2Pplusl(sminputs.GF, M[i], m_lep[j], m_B_plus, f_B_plus, Vub, Usq(j,i));
+          }
+        }
+      }
+    }
+
+    // Decay widths of RHNs, for BBN (N -> Bc+ l-)
+    void Gamma_RHN2Bcl(std::vector<double>& result)
+    {
+      using namespace Pipes::Gamma_RHN2Bcl;
+      SMInputs sminputs = *Dep::SMINPUTS;
+
+      static double m_B_c = meson_masses.B_c;
+      static double f_B_c = meson_decay_constants.B_c;
+      // Take from the model parameters (Wolfenstein) PDG value: 0.0411
+      static double Vcb = *Param["CKM_A"]*pow(*Param["CKM_lambda"],2);
+      std::vector<double> m_lep(3), M(3);
+      // Since we scan the SLHA2 model, we take masses from it
+      m_lep[0] = *Param["mE"];
+      m_lep[1] = *Param["mMu"];
+      m_lep[2] = *Param["mTau"];
+      M[0] = *Param["M_1"];
+      M[1] = *Param["M_2"];
+      M[2] = *Param["M_3"];
+      Matrix3d Usq = Dep::SeesawI_Theta->cwiseAbs2(); // |\Theta_{ij}|^2
+
+      for (int i=0; i<3; i++)
+      {
+        result[i] = 0;
+        for (int j=0; j<3; j++)
+        {
+          if (M[i] > (m_B_c+m_lep[j]))
+          {
+            result[i] += Gamma_RHN2Pplusl(sminputs.GF, M[i], m_lep[j], m_B_c, f_B_c, Vcb, Usq(j,i));
+          }
+        }
+      }
+    }
+
+
     // Decay widths of RHNs, for BBN (N -> pi0 nu)
     // All formulae for Gamma come from [arXiv:0705:1729], except where mentioned.
     void Gamma_RHN2pi0nu(std::vector<double>& result)
@@ -73,244 +289,6 @@ namespace Gambit
           for (int j=0; j<3; j++)
           {
             gamma[i] += ( (Usq(j,i)*G_F_sq*f_pi_sq*pow(M[i],3))/(32*pi) ) * pow((1 - pow(m_pi_0,2)/pow(M[i],2)),2);
-          }
-        }
-      }
-      result = gamma;
-    }
-
-    // Decay widths of RHNs, for BBN (N -> pi+ l-)
-    void Gamma_RHN2piplusl(std::vector<double>& result)
-    {
-      using namespace Pipes::Gamma_RHN2piplusl;
-      SMInputs sminputs = *Dep::SMINPUTS;
-      static double G_F_sq = pow(sminputs.GF, 2);
-      static double m_pi_plus = meson_masses.pi_plus;
-      static double f_pi_sq = 0.0169;  // GeV^2
-      // Take from the model parameters (Wolfenstein) PDG value: 0.97434
-      static double Vud = 1.0 - 0.5*pow(*Param["CKM_lambda"],2);
-      std::vector<double> m_lep(3), gamma(3), M(3);
-      // Since we scan the SLHA2 model, we take masses from it
-      m_lep[0] = *Param["mE"];
-      m_lep[1] = *Param["mMu"];
-      m_lep[2] = *Param["mTau"];
-      M[0] = *Param["M_1"];
-      M[1] = *Param["M_2"];
-      M[2] = *Param["M_3"];
-      Matrix3d Usq = Dep::SeesawI_Theta->cwiseAbs2(); // |\Theta_{ij}|^2
-
-      for (int i=0; i<3; i++)
-      {
-        gamma[i] = 0;
-        for (int j=0; j<3; j++)
-        {
-          if (M[i] > (m_pi_plus+m_lep[j]))
-          {
-            gamma[i] += ( (Usq(j,i)*G_F_sq*pow(Vud,2)*f_pi_sq*pow(M[i],3))/(16*pi) ) * ( pow((1 - pow(m_lep[j],2)/pow(M[i],2)),2) - ( (pow(m_pi_plus,2)/pow(M[i],2))*(1 + pow(m_lep[j],2)/pow(M[i],2)) ) ) * sqrt( (1 - pow(m_pi_plus-m_lep[j],2)/pow(M[i],2))*(1 - pow(m_pi_plus+m_lep[j],2)/pow(M[i],2)) );
-          }
-        }
-      }
-      result = gamma;
-    }
-
-    // Decay widths of RHNs, for BBN (N -> K+ l-)
-    void Gamma_RHN2Kplusl(std::vector<double>& result)
-    {
-      using namespace Pipes::Gamma_RHN2Kplusl;
-      SMInputs sminputs = *Dep::SMINPUTS;
-      static double G_F_sq = pow(sminputs.GF, 2);
-      static double m_K_plus = meson_masses.kaon_plus;
-      static double f_K_sq = 0.02553604;  // GeV^2
-      // Take from the model parameters (Wolfenstein) PDG value: 0.22506
-      static double Vus = *Param["CKM_lambda"];
-      std::vector<double> m_lep(3), gamma(3), M(3);
-       // Since we scan the SLHA2 model, we take masses from it
-      m_lep[0] = *Param["mE"];
-      m_lep[1] = *Param["mMu"];
-      m_lep[2] = *Param["mTau"];
-      M[0] = *Param["M_1"];
-      M[1] = *Param["M_2"];
-      M[2] = *Param["M_3"];
-      Matrix3d Usq = Dep::SeesawI_Theta->cwiseAbs2(); // |\Theta_{ij}|^2
-
-      for (int i=0; i<3; i++)
-      {
-        gamma[i] = 0;
-        for (int j=0; j<3; j++)
-        {
-          if (M[i] > (m_K_plus+m_lep[j]))
-          {
-            gamma[i] += ( (Usq(j,i)*G_F_sq*pow(Vus,2)*f_K_sq*pow(M[i],3))/(16*pi) ) * ( pow((1 - pow(m_lep[j],2)/pow(M[i],2)),2) - ( (pow(m_K_plus,2)/pow(M[i],2))*(1 + pow(m_lep[j],2)/pow(M[i],2)) ) ) * sqrt( (1 - pow(m_K_plus-m_lep[j],2)/pow(M[i],2))*(1 - pow(m_K_plus+m_lep[j],2)/pow(M[i],2)) );
-          }
-        }
-      }
-      result = gamma;
-    }
-
-    // Decay widths of RHNs, for BBN (N -> D+ l-)
-    void Gamma_RHN2Dplusl(std::vector<double>& result)
-    {
-      using namespace Pipes::Gamma_RHN2Dplusl;
-      SMInputs sminputs = *Dep::SMINPUTS;
-      static double G_F_sq = pow(sminputs.GF, 2);
-      static double m_D_plus = meson_masses.D_plus;
-      static double f_D_sq = 0.04955076;  // GeV^2
-      // Take from the model parameters (Wolfenstein) PDG value: 0.22492
-      static double Vcd = -*Param["CKM_lambda"];
-      std::vector<double> m_lep(3), gamma(3), M(3);
-      // Since we scan the SLHA2 model, we take masses from it
-      m_lep[0] = *Param["mE"];
-      m_lep[1] = *Param["mMu"];
-      m_lep[2] = *Param["mTau"];
-      M[0] = *Param["M_1"];
-      M[1] = *Param["M_2"];
-      M[2] = *Param["M_3"];
-      Matrix3d Usq = Dep::SeesawI_Theta->cwiseAbs2(); // |\Theta_{ij}|^2
-
-      for (int i=0; i<3; i++)
-      {
-        gamma[i] = 0;
-        for (int j=0; j<3; j++)
-        {
-          if (M[i] > (m_D_plus+m_lep[j]))
-          {
-            gamma[i] += ( (Usq(j,i)*G_F_sq*pow(Vcd,2)*f_D_sq*pow(M[i],3))/(16*pi) ) * ( pow((1 - pow(m_lep[j],2)/pow(M[i],2)),2) - ( (pow(m_D_plus,2)/pow(M[i],2))*(1 + pow(m_lep[j],2)/pow(M[i],2)) ) ) * sqrt( (1 - pow(m_D_plus-m_lep[j],2)/pow(M[i],2))*(1 - pow(m_D_plus+m_lep[j],2)/pow(M[i],2)) );
-          }
-        }
-      }
-      result = gamma;
-    }
-
-    // Decay widths of RHNs, for BBN (N -> Ds+ l-)
-    void Gamma_RHN2Dsl(std::vector<double>& result)
-    {
-      using namespace Pipes::Gamma_RHN2Dsl;
-      SMInputs sminputs = *Dep::SMINPUTS;
-      static double G_F_sq = pow(sminputs.GF, 2);
-      static double m_D_s = meson_masses.D_s;
-      static double f_Ds_sq = 0.07845601;  // GeV^2
-      // Take from the model parameters (Wolfenstein) PDG value: 0.97351
-      static double Vcs = 1 - 0.5*pow(*Param["CKM_lambda"],2);
-      std::vector<double> m_lep(3), gamma(3), M(3);
-      // Since we scan the SLHA2 model, we take masses from it
-      m_lep[0] = *Param["mE"];
-      m_lep[1] = *Param["mMu"];
-      m_lep[2] = *Param["mTau"];
-      M[0] = *Param["M_1"];
-      M[1] = *Param["M_2"];
-      M[2] = *Param["M_3"];
-      Matrix3d Usq = Dep::SeesawI_Theta->cwiseAbs2(); // |\Theta_{ij}|^2
-
-      for (int i=0; i<3; i++)
-      {
-        gamma[i] = 0;
-        for (int j=0; j<3; j++)
-        {
-          if (M[i] > (m_D_s+m_lep[j]))
-          {
-            gamma[i] += ( (Usq(j,i)*G_F_sq*pow(Vcs,2)*f_Ds_sq*pow(M[i],3))/(16*pi) ) * ( pow((1 - pow(m_lep[j],2)/pow(M[i],2)),2) - ( (pow(m_D_s,2)/pow(M[i],2))*(1 + pow(m_lep[j],2)/pow(M[i],2)) ) ) * sqrt( (1 - pow(m_D_s-m_lep[j],2)/pow(M[i],2))*(1 - pow(m_D_s+m_lep[j],2)/pow(M[i],2)) );
-          }
-        }
-      }
-      result = gamma;
-    }
-
-    // Decay widths of RHNs, for BBN (N -> B+ l-)
-    void Gamma_RHN2Bplusl(std::vector<double>& result)
-    {
-      using namespace Pipes::Gamma_RHN2Bplusl;
-      SMInputs sminputs = *Dep::SMINPUTS;
-      static double G_F_sq = pow(sminputs.GF, 2);
-      static double m_B_plus = meson_masses.B_plus;
-      static double f_B_sq = 0.0361;  // GeV^2
-      // Take from the model parameters (Wolfenstein) PDG value: 0.00357 (absolute value)
-      static double Vub = *Param["CKM_A"]*pow(*Param["CKM_lambda"],3)*sqrt(pow(*Param["CKM_rhobar"],2) + pow(*Param["CKM_etabar"],2));
-      std::vector<double> m_lep(3), gamma(3), M(3);
-      // Since we scan the SLHA2 model, we take masses from it
-      m_lep[0] = *Param["mE"];
-      m_lep[1] = *Param["mMu"];
-      m_lep[2] = *Param["mTau"];
-      M[0] = *Param["M_1"];
-      M[1] = *Param["M_2"];
-      M[2] = *Param["M_3"];
-      Matrix3d Usq = Dep::SeesawI_Theta->cwiseAbs2(); // |\Theta_{ij}|^2
-
-      for (int i=0; i<3; i++)
-      {
-        gamma[i] = 0;
-        for (int j=0; j<3; j++)
-        {
-          if (M[i] > (m_B_plus+m_lep[j]))
-          {
-            gamma[i] += ( (Usq(j,i)*G_F_sq*pow(Vub,2)*f_B_sq*pow(M[i],3))/(16*pi) ) * ( pow((1 - pow(m_lep[j],2)/pow(M[i],2)),2) - ( (pow(m_B_plus,2)/pow(M[i],2))*(1 + pow(m_lep[j],2)/pow(M[i],2)) ) ) * sqrt( (1 - pow(m_B_plus-m_lep[j],2)/pow(M[i],2))*(1 - pow(m_B_plus+m_lep[j],2)/pow(M[i],2)) );
-          }
-        }
-      }
-      result = gamma;
-    }
-
-    // Decay widths of RHNs, for BBN (N -> Bs+ l-)
-    void Gamma_RHN2Bsl(std::vector<double>& result)
-    {
-      using namespace Pipes::Gamma_RHN2Bsl;
-      SMInputs sminputs = *Dep::SMINPUTS;
-      static double G_F_sq = pow(sminputs.GF, 2);
-      static double m_B_s = meson_masses.B_s;
-      static double f_Bs_sq = 0.0529;  // GeV^2
-      // Take from the model parameters (Wolfenstein) PDG value: 0.22506
-      static double Vus = *Param["CKM_lambda"];
-      std::vector<double> m_lep(3), gamma(3), M(3);
-      // Since we scan the SLHA2 model, we take masses from it
-      m_lep[0] = *Param["mE"];
-      m_lep[1] = *Param["mMu"];
-      m_lep[2] = *Param["mTau"];
-      M[0] = *Param["M_1"];
-      M[1] = *Param["M_2"];
-      M[2] = *Param["M_3"];
-      Matrix3d Usq = Dep::SeesawI_Theta->cwiseAbs2(); // |\Theta_{ij}|^2
-
-      for (int i=0; i<3; i++)
-      {
-        gamma[i] = 0;
-        for (int j=0; j<3; j++)
-        {
-          if (M[i] > (m_B_s+m_lep[j]))
-          {
-            gamma[i] += ( (Usq(j,i)*G_F_sq*pow(Vus,2)*f_Bs_sq*pow(M[i],3))/(16*pi) ) * ( pow((1 - pow(m_lep[j],2)/pow(M[i],2)),2) - ( (pow(m_B_s,2)/pow(M[i],2))*(1 + pow(m_lep[j],2)/pow(M[i],2)) ) ) * sqrt( (1 - pow(m_B_s-m_lep[j],2)/pow(M[i],2))*(1 - pow(m_B_s+m_lep[j],2)/pow(M[i],2)) );
-          }
-        }
-      }
-      result = gamma;
-    }
-
-    // Decay widths of RHNs, for BBN (N -> Bc+ l-)
-    void Gamma_RHN2Bcl(std::vector<double>& result)
-    {
-      using namespace Pipes::Gamma_RHN2Bcl;
-      SMInputs sminputs = *Dep::SMINPUTS;
-      static double G_F_sq = pow(sminputs.GF, 2);
-      static double m_B_c = meson_masses.B_c;
-      static double f_Bc_sq = 0.2304;  // GeV^2
-      // Take from the model parameters (Wolfenstein) PDG value: 0.0411
-      static double Vcb = *Param["CKM_A"]*pow(*Param["CKM_lambda"],2);
-      std::vector<double> m_lep(3), gamma(3), M(3);
-      // Since we scan the SLHA2 model, we take masses from it
-      m_lep[0] = *Param["mE"];
-      m_lep[1] = *Param["mMu"];
-      m_lep[2] = *Param["mTau"];
-      M[0] = *Param["M_1"];
-      M[1] = *Param["M_2"];
-      M[2] = *Param["M_3"];
-      Matrix3d Usq = Dep::SeesawI_Theta->cwiseAbs2(); // |\Theta_{ij}|^2
-
-      for (int i=0; i<3; i++)
-      {
-        gamma[i] = 0;
-        for (int j=0; j<3; j++)
-        {
-          if (M[i] > (m_B_c+m_lep[j]))
-          {
-            gamma[i] += ( (Usq(j,i)*G_F_sq*pow(Vcb,2)*f_Bc_sq*pow(M[i],3))/(16*pi) ) * ( pow((1 - pow(m_lep[j],2)/pow(M[i],2)),2) - ( (pow(m_B_c,2)/pow(M[i],2))*(1 + pow(m_lep[j],2)/pow(M[i],2)) ) ) * sqrt( (1 - pow(m_B_c-m_lep[j],2)/pow(M[i],2))*(1 - pow(m_B_c+m_lep[j],2)/pow(M[i],2)) );
           }
         }
       }
@@ -741,31 +719,63 @@ namespace Gambit
     void Gamma_BBN(std::vector<double>& result)
     {
       using namespace Pipes::Gamma_BBN;
-      std::vector<double> RHN2pi0nu = *Dep::Gamma_RHN2pi0nu;
+
+      // Charged pseudoscalar mesons
       std::vector<double> RHN2piplusl = *Dep::Gamma_RHN2piplusl;
       std::vector<double> RHN2Kplusl = *Dep::Gamma_RHN2Kplusl;
       std::vector<double> RHN2Dplusl = *Dep::Gamma_RHN2Dplusl;
       std::vector<double> RHN2Dsl = *Dep::Gamma_RHN2Dsl;
       std::vector<double> RHN2Bplusl = *Dep::Gamma_RHN2Bplusl;
-      std::vector<double> RHN2Bsl = *Dep::Gamma_RHN2Bsl;
       std::vector<double> RHN2Bcl = *Dep::Gamma_RHN2Bcl;
+
+      // Neutral pseudoscalar mesons
+      std::vector<double> RHN2pi0nu = *Dep::Gamma_RHN2pi0nu;
       std::vector<double> RHN2etanu = *Dep::Gamma_RHN2etanu;
       std::vector<double> RHN2etaprimenu = *Dep::Gamma_RHN2etaprimenu;
+      // TODO: Missing etac
+
+      // Charged vector mesons
       std::vector<double> RHN2rhoplusl = *Dep::Gamma_RHN2rhoplusl;
+      // TODO: Missing a1plus, Dstarplus, Dsstarplus
+
+      // Neutral vector mesons
       std::vector<double> RHN2rho0nu = *Dep::Gamma_RHN2rho0nu;
+      // TODO: Missing a10, omega, phi, Jpsi
+
+      // Fully leptonic decays 
       std::vector<double> RHN23nu = *Dep::Gamma_RHN23nu;
       std::vector<double> RHN2llnu = *Dep::Gamma_RHN2llnu;
       std::vector<double> RHN2null = *Dep::Gamma_RHN2null;
+
+      // Free quarks
       std::vector<double> RHN2nuuubar = *Dep::Gamma_RHN2nuuubar;
       std::vector<double> RHN2nuddbar = *Dep::Gamma_RHN2nuddbar;
       std::vector<double> RHN2ludbar = *Dep::Gamma_RHN2ludbar;
-      std::vector<double> gamma_total(3);
+
+      std::vector<double> M(3);
+      M[0] = *Param["M_1"];
+      M[1] = *Param["M_2"];
+      M[2] = *Param["M_3"];
       
+      // Hadronization scale 
+      static double LQCD = 7.5; // (GeV)
+
+      // factor of 2 in front accounts for Majorana nature
       for (int i=0; i<3; i++)
       {
-        gamma_total[i] = 2*(RHN2pi0nu[i]+RHN2piplusl[i]+RHN2Kplusl[i]+RHN2Dplusl[i]+RHN2Dsl[i]+RHN2Bplusl[i]+RHN2Bsl[i]+RHN2Bcl[i]+RHN2etanu[i]+RHN2etaprimenu[i]+RHN2rhoplusl[i]+RHN2rho0nu[i]+RHN23nu[i]+RHN2llnu[i]+RHN2null[i]+RHN2nuuubar[i]+RHN2nuddbar[i]+RHN2ludbar[i]);  // factor of 2 accounts for Majorana nature
+        // Fully leptonic decays are open above and below LQCD
+        result[i] = 2*(RHN23nu[i] + RHN2llnu[i] + RHN2null[i]);
+
+        // Meson decays only matter below LQCD. Beyond, only decays to free quarks matter
+        if(M[i] < LQCD)
+        {
+          result[i] += 2*(RHN2piplusl[i] + RHN2Kplusl[i] + RHN2Dplusl[i] + RHN2Dsl[i] + RHN2Bplusl[i] + RHN2Bcl[i] + RHN2pi0nu[i] + RHN2etanu[i] + RHN2etaprimenu[i] + RHN2rhoplusl[i] + RHN2rho0nu[i]);
+        }
+        else
+        {
+          result[i] += 2*(RHN2nuuubar[i] + RHN2nuddbar[i] + RHN2ludbar[i]);
+        }
       }
-      result = gamma_total;
     }
 
     // BBN constraint likelihood : lifetime must be less than 0.1s [arXiv:1202.2841]

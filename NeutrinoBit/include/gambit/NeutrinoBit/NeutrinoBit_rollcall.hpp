@@ -350,16 +350,6 @@ START_MODULE
     #undef FUNCTION
   #undef CAPABILITY
 
-  #define CAPABILITY Gamma_RHN2Bsl
-  START_CAPABILITY
-    #define FUNCTION Gamma_RHN2Bsl
-    START_FUNCTION(std::vector<double>)
-    DEPENDENCY(SMINPUTS, SMInputs)
-    DEPENDENCY(SeesawI_Theta, Eigen::Matrix3cd)
-    ALLOW_JOINT_MODEL(RightHandedNeutrinos, StandardModel_SLHA2)
-    #undef FUNCTION
-  #undef CAPABILITY
-
   #define CAPABILITY Gamma_RHN2Bcl
   START_CAPABILITY
     #define FUNCTION Gamma_RHN2Bcl
@@ -480,7 +470,6 @@ START_MODULE
     DEPENDENCY(Gamma_RHN2Dplusl, std::vector<double>)
     DEPENDENCY(Gamma_RHN2Dsl, std::vector<double>)
     DEPENDENCY(Gamma_RHN2Bplusl, std::vector<double>)
-    DEPENDENCY(Gamma_RHN2Bsl, std::vector<double>)
     DEPENDENCY(Gamma_RHN2Bcl, std::vector<double>)
     DEPENDENCY(Gamma_RHN2etanu, std::vector<double>)
     DEPENDENCY(Gamma_RHN2etaprimenu, std::vector<double>)

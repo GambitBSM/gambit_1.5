@@ -17,6 +17,10 @@
 ///          (c.weniger@uva.nl)
 ///  \date   2015 Apr
 ///  \date   2016 Mar
+///
+///  \author Tomas Gonzalo
+///          (tomas.gonzalo@monash.edu)
+///  \date 2020 Jan
 //
 ///  *********************************************
 
@@ -93,7 +97,22 @@ namespace Gambit
 
   static const struct Mesons_decay_constants
   {
-    static constexpr double pi_plus = 0.13041;    // (GeV)
+    // PDG 2018
+    static constexpr double pi_plus = 0.1302;    // (GeV)
+    static constexpr double K_plus = 0.1557; // (GeV)
+    static constexpr double D_plus = 0.2126; // (GeV)
+    static constexpr double D_s = 0.2499; // (GeV)
+    static constexpr double B_plus = 0.190; // (GeV)
+
+    // From 1503.05762
+    static constexpr double B_c = 0.434; // (GeV)
+
+    // Taken from 1805.08567
+    static constexpr double pi_0 = 0.1302; // (GeV)
+    static constexpr double eta = 0.0817; // (GeV)
+    static constexpr double etaprime = -0.0947; // (GeV)
+    static constexpr double eta_c = 0.237; // (GeV)
+
   } meson_decay_constants;
 
 
