@@ -572,7 +572,7 @@ namespace Gambit
     {
       using namespace Pipes::set_baseline_classy_input;
 
-      std::cout << " enter " << __PRETTY_FUNCTION__ << std::endl;
+      //std::cout << " enter " << __PRETTY_FUNCTION__ << std::endl;
 
       // make sure dict is empty
       result.clear();
@@ -644,7 +644,7 @@ namespace Gambit
     {
       using namespace Pipes::set_classy_parameters_parametrised_ps;
 
-      std::cout << " enter " << __PRETTY_FUNCTION__ << std::endl;
+      //std::cout << " enter " << __PRETTY_FUNCTION__ << std::endl;
 
       // Clean the input container
       result.clear();
@@ -679,7 +679,7 @@ namespace Gambit
     {
       using namespace Pipes::set_classy_parameters_primordial_ps;
 
-      std::cout << " enter " << __PRETTY_FUNCTION__ << std::endl;
+      //std::cout << " enter " << __PRETTY_FUNCTION__ << std::endl;
 
       // Clean the input container
       result.clear();
