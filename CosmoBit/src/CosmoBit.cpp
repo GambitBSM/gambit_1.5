@@ -163,11 +163,21 @@ namespace Gambit
       double BR_el = *Param["BR"];
       double BR_ph = 1.0 - BR_el;
 
-      spectrum.E.clear();
+      if (m <= m_electron && BR_el >= std::numeric_limits<double>::epsilon())
+      {
+        std::ostringstream err;
+        err << "The mass of the annihilating dark matter candiate is below the electron mass.";
+        err << " No production of e+/e- is possible.";
+        CosmoBit_error().raise(LOCAL_INFO,err.str());
+      }
+
+      spectrum.E_el.clear();
+      spectrum.E_ph.clear();
       spectrum.spec_el.clear();
       spectrum.spec_ph.clear();
 
-      spectrum.E.resize(1,m);
+      spectrum.E_el.resize(1,std::max(m-m_electron, std::numeric_limits<double>::min()));
+      spectrum.E_ph.resize(1,m);
       spectrum.spec_el.resize(1,BR_el*2e9);
       spectrum.spec_ph.resize(1,BR_ph*2e9);
     }
@@ -180,11 +190,21 @@ namespace Gambit
       double BR_el = *Param["BR"];
       double BR_ph = 1.0 - BR_el;
 
-      spectrum.E.clear();
+      if (m <= 2*m_electron && BR_el >= std::numeric_limits<double>::epsilon())
+      {
+        std::ostringstream err;
+        err << "The mass of the decaying dark matter candiate is below twice the electron mass.";
+        err << " No production of e+/e- is possible.";
+        CosmoBit_error().raise(LOCAL_INFO,err.str());
+      }
+
+      spectrum.E_el.clear();
+      spectrum.E_ph.clear();
       spectrum.spec_el.clear();
       spectrum.spec_ph.clear();
 
-      spectrum.E.resize(1,m*0.5);
+      spectrum.E_el.resize(1,std::max(m*0.5-m_electron, std::numeric_limits<double>::min()));
+      spectrum.E_ph.resize(1,m*0.5);
       spectrum.spec_el.resize(1,BR_el*2e9);
       spectrum.spec_ph.resize(1,BR_ph*2e9);
     }

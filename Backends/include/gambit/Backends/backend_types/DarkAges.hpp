@@ -24,7 +24,8 @@ namespace Gambit
   {
     struct injectionSpectrum
     {
-      std::vector<double> E;
+      std::vector<double> E_el;
+      std::vector<double> E_ph;
       std::vector<double> spec_el;
       std::vector<double> spec_ph;
     };

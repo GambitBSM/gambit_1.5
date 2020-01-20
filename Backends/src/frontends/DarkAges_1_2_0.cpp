@@ -18,6 +18,8 @@
 #include "gambit/Backends/frontend_macros.hpp"
 #include "gambit/Backends/frontends/DarkAges_1_2_0.hpp"
 
+#include "gambit/Utils/numerical_constants.hpp"
+
 #include <algorithm>
 
 // Convenience functions (definitions)
@@ -70,37 +72,57 @@ BE_NAMESPACE
 
     static auto transform_spectrum = [](double& x){x *= 1e-9;};
     static auto transform_energy = [](double& x){x = log10(1e9*x);};
+    static auto isNonZero = [](double& x){return abs(x) > std::numeric_limits<double>::epsilon();};
 
+    std::for_each(spec.E_el.begin(), spec.E_el.end(), transform_energy);
     std::for_each(spec.spec_el.begin(), spec.spec_el.end(), transform_spectrum);
-    std::for_each(spec.spec_ph.begin(), spec.spec_ph.end(), transform_spectrum);
-    std::for_each(spec.E.begin(), spec.E.end(), transform_energy);
-
-    pyArray_dbl logE = cast_std_to_np(spec.E);
+    bool hasElectrons = std::any_of(spec.spec_el.begin(), spec.spec_el.end(), isNonZero);
+    pyArray_dbl logE_el = cast_std_to_np(spec.E_el);
     pyArray_dbl spec_el = cast_std_to_np(spec.spec_el);
+    pyArray_dbl null_el = np.attr("zeros_like")(spec_el);
+
+    std::for_each(spec.E_ph.begin(), spec.E_ph.end(), transform_energy);
+    std::for_each(spec.spec_ph.begin(), spec.spec_ph.end(), transform_spectrum);
+    bool hasPhotons = std::any_of(spec.spec_ph.begin(), spec.spec_ph.end(), isNonZero);
+    pyArray_dbl logE_ph = cast_std_to_np(spec.E_ph);
     pyArray_dbl spec_ph = cast_std_to_np(spec.spec_ph);
-    pyArray_dbl spec_oth = np.attr("zeros_like")(spec_el);
+    pyArray_dbl null_ph = np.attr("zeros_like")(spec_ph);
 
     mass *= 1.e9;
+    const double me_eV = 1.e9 * m_electron;
 
-    static py::object model;
+    static py::object model_el;
+    static py::object model_ph;
     if (hasAnnihilation)
     {
       py::object mod = DA_model.attr("annihilating_model");
-      model = mod(spec_el, spec_ph, spec_oth,
-                  mass, logE, redshift);
+      model_el = mod(spec_el, null_el, null_el,
+                     mass-me_eV, logE_el, redshift,
+                     py::arg("normalize_spectrum_by") = "mass");
+      model_ph = mod(null_ph, spec_ph, null_ph,
+                     mass, logE_ph, redshift,
+                     py::arg("normalize_spectrum_by") = "mass");
     }
     else if (hasDecay)
     {
       py::object mod = DA_model.attr("decaying_model");
-      model = mod(spec_el, spec_ph, spec_oth,
-                  mass, lifetime, logE, redshift);
+      model_el = mod(spec_el, null_el, null_el,
+                     mass-2*me_eV, lifetime, logE_el, redshift,
+                     py::arg("normalize_spectrum_by") = "mass");
+      model_ph = mod(null_ph, spec_ph, null_ph,
+                     mass, lifetime, logE_ph, redshift,
+                     py::arg("normalize_spectrum_by") = "mass");
     }
 
     for (auto const& it : transfer_functions)
     {
       std::string channel = it.first;
       py::object tf = it.second;
-      pyArray_dbl f = ((model.attr("calc_f")(tf)).attr("__getitem__")(-1));
+      pyArray_dbl f = np.attr("zeros_like")(redshift);
+      if (hasElectrons)
+        f = f.attr("__add__")((model_el.attr("calc_f")(tf)).attr("__getitem__")(-1));
+      if (hasPhotons)
+        f = f.attr("__add__")((model_ph.attr("calc_f")(tf)).attr("__getitem__")(-1));
       //f = f.attr("__getslice__")(0,z_size-1);
       result_map[channel] = repeat_front_and_end(f);
     }
