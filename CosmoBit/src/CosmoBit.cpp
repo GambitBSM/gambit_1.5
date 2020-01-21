@@ -1774,7 +1774,7 @@ namespace Gambit
       result.push_back(BBN_res.BBN_abund.at(abund_map["Yp"]));
       result.push_back(sqrt(BBN_res.BBN_covmat.at(abund_map["Yp"]).at(abund_map["Yp"])));
 
-      std::cout << "Helium Abundance from AlterBBN: " << result.at(0) << " +/- " << result.at(1) << std::endl;
+      //std::cout << "Helium Abundance from AlterBBN: " << result.at(0) << " +/- " << result.at(1) << std::endl;
       logger() << "Helium Abundance from AlterBBN: " << result.at(0) << " +/- " << result.at(1) << EOM;
     }
 
@@ -1907,10 +1907,10 @@ namespace Gambit
 
       // compute chi2
       for(ie=0;ie<nobs;ie++) for(je=0;je<nobs;je++) chi2+=(prediction[ie]-observed[ie])*gsl_matrix_get(invcov,ie,je)*(prediction[je]-observed[je]);
-      std::cout << "    BBN Like: chi2 = " << chi2 << "  factor " <<  log(pow(2*pi,nobs)*det_cov) << "  det cov = " << det_cov << std::endl; 
+      //std::cout << "    BBN Like: chi2 = " << chi2 << "  factor " <<  log(pow(2*pi,nobs)*det_cov) << "  det cov = " << det_cov << std::endl; 
       result = -0.5*(chi2 + log(pow(2*pi,nobs)*det_cov));
 
-      std::cout << "    BBN LogLike computed to be: " << result << std::endl;
+      //std::cout << "    BBN LogLike computed to be: " << result << std::endl;
       logger() << "BBN LogLike computed to be: " << result << EOM;
 
       gsl_matrix_free(cov);
