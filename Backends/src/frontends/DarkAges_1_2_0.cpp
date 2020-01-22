@@ -219,7 +219,12 @@ BE_INI_FUNCTION
     f_eff_mode = runOptions->getValueOrDef<bool>(false,"f_eff_mode");
     if (f_eff_mode)
     {
-      transfer_functions["effective"] = DA.attr("transfer_functions_corr");
+      py::object tf_vec = DA.attr("transfer_functions");
+      py::object tf_corr = DA.attr("transfer_functions_corr");
+
+      py::object tf_eff = tf_vec.attr("sum")();
+      tf_eff = tf_eff.attr("__sub__")(tf_corr);
+      transfer_functions["effective"] = tf_eff;
     }
     else
     {

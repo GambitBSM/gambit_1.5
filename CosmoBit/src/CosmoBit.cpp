@@ -351,20 +351,26 @@ namespace Gambit
       }
 
       DarkAges::fz_table fzt = *Dep::energy_injection_efficiency;
+
+      bool f_eff_mode = fzt.f_eff_mode;
       std::vector<double> z = fzt.redshift;
       std::vector<double> fh = fzt.f_heat;
       std::vector<double> fly = fzt.f_lya;
       std::vector<double> fhi = fzt.f_hion;
       std::vector<double> fhei = fzt.f_heion;
       std::vector<double> flo = fzt.f_lowe;
+      std::vector<double> feff = fzt.f_eff;
 
       int npts = z.size();
       double ftot[npts];
       double red[npts];
       for (int i = 0; i < npts; i++)
       {
-           ftot[i] = fh.at(i)+fly.at(i)+fhi.at(i)+fhei.at(i)+flo.at(i);
-           red[i] = z.at(i);
+        if (f_eff_mode)
+          ftot[i] = feff.at(i);
+        else
+          ftot[i] = fh.at(i)+fly.at(i)+fhi.at(i)+fhei.at(i)+flo.at(i);
+        red[i] = z.at(i);
       }
 
       gsl_interp_accel *gsl_accel_ptr = gsl_interp_accel_alloc();
@@ -390,10 +396,16 @@ namespace Gambit
         std::cout << "m = " << *Param["mass"] << std::endl;
         std::cout << "BR (electron) = " << *Param["BR"] << std::endl;
         std::cout << "---------------" << std::endl;
-        std::cout << "z\tf_heat\tf_lya\tf_hion\tf_heion\tf_lowe" << std::endl;
+        if (f_eff_mode)
+          std::cout << "z\tf_eff" << std::endl;
+        else
+          std::cout << "z\tf_heat\tf_lya\tf_hion\tf_heion\tf_lowe" << std::endl;
         for (unsigned int i = z.size() - last_steps; i < z.size(); i++)
         {
-          std::cout << z.at(i) << "\t" << fh.at(i) << "\t" << fly.at(i) << "\t" << fhi.at(i) << "\t" << fhei.at(i) << "\t" << flo.at(i)  << std::endl;
+          if (f_eff_mode)
+            std::cout << z.at(i) << "\t" << feff.at(i) << std::endl;
+          else
+            std::cout << z.at(i) << "\t" << fh.at(i) << "\t" << fly.at(i) << "\t" << fhi.at(i) << "\t" << fhei.at(i) << "\t" << flo.at(i)  << std::endl;
         }
         std::cout << "f_eff (sum of all channels at z = "<< z_eff << ") = " << result << std::endl;
         std::cout << "################\n" << std::endl;

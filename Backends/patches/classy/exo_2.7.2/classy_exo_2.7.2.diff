@@ -23,19 +23,36 @@ index 44289f6e..09d00701 100755
  
    double ** lnpk;  /**< depends on indices index_md, index_ic1, index_ic2, index_k as:
 diff --git a/include/thermodynamics.h b/include/thermodynamics.h
-index 0c982996..c4d79d66 100755
+index 0c982996..b6cc2264 100755
 --- a/include/thermodynamics.h
 +++ b/include/thermodynamics.h
-@@ -64,7 +64,8 @@ enum energy_deposition_function {
+@@ -64,7 +64,15 @@ enum energy_deposition_function {
    No_deposition, /**< No energy deposition is considered. Useful for pedagogic illustration. */
    Analytical_approximation, /**< Analytical energy deposition treatment, introduced in 1209.0247 and corrected in 1612.05644 */
    DarkAges,  /**< f(z) functions computed in the DarkAges modules following the work by Slatyer, introduced in 1211.0283 and updated in 1506.03812 */
 -  function_from_file /**<  File specified by the user with the option "energy deposition function file"*/
 +  function_from_file, /**<  File specified by the user with the option "energy deposition function file"*/
-+  pointer_to_fz_channel /**< f(z) will be calculated by Gambit. */
++  pointer_to_fz_channel, /**< f(z) per channel will be calculated by Gambit. */
++  pointer_to_fz_eff /**< A total f(z) will be calculated by Gambit. */
++};
++
++struct gambit_darkages_results{
++  int num_lines;
++  double * ptr_to_z;
++  double * ptr_to_f_tot;
  };
  
  /**
+@@ -222,6 +230,9 @@ double * reio_inter_xe; /**< discrete \f$ X_e(z)\f$ values */
+   double chi_lowE;
+   int annihil_coef_num_lines;
+ 
++  /* Struct to hold pointers to external energy injection tables */
++  struct gambit_darkages_results gambit_res;
++
+   /**
+   * For DM annihilation & decay.
+   * Note that the DM lifetime is defined in the background module
 diff --git a/python/cclassy.pxd b/python/cclassy.pxd
 index c7593d15..ca9702e4 100644
 --- a/python/cclassy.pxd
@@ -88,7 +105,7 @@ index fae0dd04..a8020991 100644
          return self.ba.Omega0_b * self.ba.h * self.ba.h
  
 diff --git a/source/input.c b/source/input.c
-index d6f41879..b4f365e8 100644
+index d6f41879..f1e55990 100644
 --- a/source/input.c
 +++ b/source/input.c
 @@ -5,6 +5,8 @@
@@ -109,22 +126,22 @@ index d6f41879..b4f365e8 100644
  
    if(flag1 == _TRUE_){
      pth->f_eff = param1;
-@@ -1602,6 +1604,121 @@ int input_read_parameters(
+@@ -1602,6 +1604,178 @@ int input_read_parameters(
        pth->has_on_the_spot = _FALSE_;
        flag3=_TRUE_;
      }
-+    // check if exo-class is used with gambit 
++    // check if exo-class is used with gambit
 +    if (strcmp(string1,"pointer_to_fz_channel") == 0) {
 +    /* NOTE:
 +      This is to read in values stored in a vector/array and pass the entries to a dynamically allocated
-+      array in class. 
++      array in class.
 +      Here: e.g. double* pth->annihil_coef_xe will be set to point to address of newly allocated space which
 +      will be filled with entries of passed vector
 +
 +      Complication: If python wrapper is used all input values are converted to strings, including the pointers
 +      to the vectors/arrays to be passed. Therefore memory addresses are converted to uintptr_t, read in as string
 +      here, converted to uintptr_t and then back to memory addresses. We have to go through uintptr_t since this
-+      type is designed to be long enough to store memory addresses on the current systems. (Int would be too 
++      type is designed to be long enough to store memory addresses on the current systems. (Int would be too
 +      short, hence, we can not use the class parser_read_int but have to read it in as string first.)
 +
 +      What is done in the following is:
@@ -141,7 +158,7 @@ index d6f41879..b4f365e8 100644
 +
 +      // initialise flags & chars here -- flag1-flag3 already defined, patch might be easier to maintain if
 +      // these definitions happen here within the patched part
-+      int flag0,flag4,flag5,flag6,flag7,flag8,flag9; 
++      int flag0,flag4,flag5,flag6,flag7,flag8,flag9;
 +      char addr [_ARGUMENT_LENGTH_MAX_];
 +      uintptr_t ul;
 +
@@ -196,9 +213,9 @@ index d6f41879..b4f365e8 100644
 +
 +
 +      // 3) allocate new space
-+      //    (since this is the begining of a run and we clean all structures before each new point 
++      //    (since this is the begining of a run and we clean all structures before each new point
 +      //    the pointers 'pth->annihil_coef_xe'... are not pointing to anything at the moment
-+      //    so we can be sure we want have a 
++      //    so we can be sure we want have a
 +
 +      class_alloc(pth->annihil_coef_xe   , pth->annihil_coef_num_lines*sizeof(double),pth->error_message);
 +      class_alloc(pth->annihil_coef_heat , pth->annihil_coef_num_lines*sizeof(double),pth->error_message);
@@ -228,10 +245,67 @@ index d6f41879..b4f365e8 100644
 +
 +      flag3=_TRUE_;
 +    }
++    if (strcmp(string1,"pointer_to_fz_eff") == 0) {
++    /* NOTE:
++      This is to read in values stored in a vector/array and pass the entries to a dynamically allocated
++      array in class.
++      Here: e.g. double* pth->annihil_coef_xe will be set to point to address of newly allocated space which
++      will be filled with entries of passed vector
++
++      Complication: If python wrapper is used all input values are converted to strings, including the pointers
++      to the vectors/arrays to be passed. Therefore memory addresses are converted to uintptr_t, read in as string
++      here, converted to uintptr_t and then back to memory addresses. We have to go through uintptr_t since this
++      type is designed to be long enough to store memory addresses on the current systems. (Int would be too
++      short, hence, we can not use the class parser_read_int but have to read it in as string first.)
++
++      What is done in the following is:
++      1) Read in pointers to vectors as strings
++      2) Convert strings to uintptr_t, then to memory address & initialise a double pointer pointing to it
++      */
++      // set CLASS parameters to signal that annihilation coefficients will be filled differently
++      struct gambit_darkages_results * pgr = &(pth->gambit_res);
++
++      pth->energy_deposition_function = pointer_to_fz_eff;
++      pth->has_on_the_spot = _FALSE_;
++      flag3=_TRUE_;
++
++      // initialise flags & chars here -- flag1-flag3 already defined, patch might be easier to maintain if
++      // these definitions happen here within the patched part
++      int flag0,flag4,flag5;
++      char addr [_ARGUMENT_LENGTH_MAX_];
++      uintptr_t ul;
++
++      // read in number of entries each vector has
++      class_call(parser_read_int(pfc,"energyinj_coef_num_lines",&pgr->num_lines,&flag0,errmsg),
++                 errmsg,
++                 errmsg);
++
++      // 1) Read in pointers to vector as string
++      class_call(parser_read_string(pfc,"energyinj_coef_z",&addr,&flag4,errmsg),
++                 errmsg,
++                 errmsg);
++      // 2) Convert string to uintptr_t and then back to memory address;
++      //    initialise a double pointer pointing to it
++      sscanf(addr, "%lu", &ul);
++      pgr->ptr_to_z = (double*) ul;
++
++      class_call(parser_read_string(pfc,"energyinj_coef_tot",&addr,&flag5,errmsg),
++                 errmsg,
++                 errmsg);
++      sscanf(addr, "%lu", &ul);
++      pgr->ptr_to_f_tot = (double*) ul;
++
++      // Check that all values needed for the calculation have been passed. If not throw error
++      class_test(((flag0 == _FALSE_) || (flag4 == _FALSE_) || (flag5 == _FALSE_)),
++                    errmsg,
++                    "You set the parameter energy_deposition_function to \'pointer_to_fz_eff\', this means you also haveto specify the input values for \n- energyinj_coef_num_lines \n- energyinj_coef_z \n- energyinj_coef_tot\n Check that all of them are passed.");
++
++      flag3=_TRUE_;
++    }
      if (strcmp(string1,"from_file") == 0 ) {
        pth->energy_deposition_function=function_from_file;
        class_call(parser_read_string(pfc,"energy deposition function file",&string1,&flag1,errmsg),
-@@ -1622,16 +1739,16 @@ int input_read_parameters(
+@@ -1622,16 +1796,16 @@ int input_read_parameters(
        pth->energy_deposition_function=No_deposition;
        flag3=_TRUE_;
      }
@@ -252,7 +326,7 @@ index d6f41879..b4f365e8 100644
  
    class_call(parser_read_string(pfc,
                                  "reio_stars_and_dark_matter",
-@@ -2182,9 +2299,13 @@ if(pth->PBH_evaporating_mass > 0.){
+@@ -2182,9 +2356,13 @@ if(pth->PBH_evaporating_mass > 0.){
        ppm->primordial_spec_type = external_Pk;
        flag2=_TRUE_;
      }
@@ -267,7 +341,7 @@ index d6f41879..b4f365e8 100644
    }
  
    class_read_double("k_pivot",ppm->k_pivot);
-@@ -2708,6 +2829,68 @@ if(pth->PBH_evaporating_mass > 0.){
+@@ -2708,6 +2886,68 @@ if(pth->PBH_evaporating_mass > 0.){
      class_read_double("custom9",ppm->custom9);
      class_read_double("custom10",ppm->custom10);
    }
@@ -275,7 +349,7 @@ index d6f41879..b4f365e8 100644
 +
 +    // initialise flags & chars here -- flag1-flag3 already defined, patch might be easier to maintain if
 +    // these definitions happen here within the patched part
-+    int flag0,flag4,flag5,flag6; 
++    int flag0,flag4,flag5,flag6;
 +    char addr [_ARGUMENT_LENGTH_MAX_];
 +    uintptr_t ul;
 +
@@ -285,7 +359,7 @@ index d6f41879..b4f365e8 100644
 +             errmsg);
 +
 +    // 2) read pointers of other arrays that need to be passed. allocation and filling will
-+    // be done later in primordial.c in function => 
++    // be done later in primordial.c in function =>
 +    class_call(parser_read_string(pfc,"k_array",&addr,&flag4,errmsg),
 +             errmsg,
 +             errmsg);
@@ -295,23 +369,23 @@ index d6f41879..b4f365e8 100644
 +    sscanf(addr, "%lu", &ul);
 +    double* ptr_k_array = (double*) ul;
 +
-+    // 4) allocate memory for lnk_array managed by CLASS, routine that does that (and step 5)) in 
++    // 4) allocate memory for lnk_array managed by CLASS, routine that does that (and step 5)) in
 +    // a normal class run () is by passed in primordial.c
 +    class_alloc(ppm->lnk   , ppm->lnk_size*sizeof(double),ppm->error_message);
 +
 +    // 5) fill lnk_array with values of array that the pointer ptr_k_array is pointing to
 +    for (int index_k=0; index_k<ppm->lnk_size; index_k++){
-+      ppm->lnk[index_k] = log(ptr_k_array[index_k]); 
++      ppm->lnk[index_k] = log(ptr_k_array[index_k]);
 +    }
 +
-+    // read pointers of other arrays that need to be passed. allocation and filling will 
-+    // be done later in primordial.c in function => 
-+    // added pointers ppm->ptr_pks_array and ppm->ptr_pkt_array to primordial structure so we can 
++    // read pointers of other arrays that need to be passed. allocation and filling will
++    // be done later in primordial.c in function =>
++    // added pointers ppm->ptr_pks_array and ppm->ptr_pkt_array to primordial structure so we can
 +    // re-use the primordial_indices function to allocate memory for the arrays
-+    // and don't have to change & by-pass too many parts of the code. 
-+    // However, these pointers may NOT be deleted by CLASS's internal memory management 
++    // and don't have to change & by-pass too many parts of the code.
++    // However, these pointers may NOT be deleted by CLASS's internal memory management
 +    // since the deletion is taken care of in gambit => there won't be a free() statement for these
-+    // this is on purpose! 
++    // this is on purpose!
 +    class_call(parser_read_string(pfc,"pks_array",&addr,&flag5,errmsg),
 +             errmsg,
 +             errmsg);
@@ -325,8 +399,8 @@ index d6f41879..b4f365e8 100644
 +    ppm->ptr_pkt_array = (double*) ul;
 +
 +    // Note: the memory allocation for these arrays is done in primordial.c in the function
-+    // primordial_indices. To not reproduce code unnecessarily we use this as well 
-+    // and fill the arrays after that in primordial.c in the function 
++    // primordial_indices. To not reproduce code unnecessarily we use this as well
++    // and fill the arrays after that in primordial.c in the function
 +
 +    // Check that all values needed for the calculation have been passed. If not throw error
 +    class_test(((flag0 == _FALSE_) || (flag4 == _FALSE_) || (flag5 == _FALSE_) || (flag6 == _FALSE_)),
@@ -444,10 +518,59 @@ index 41613131..3f87558d 100755
      dlnk = log(10.)/ppr->k_per_decade_primordial;
  
 diff --git a/source/thermodynamics.c b/source/thermodynamics.c
-index deb01201..a1187b51 100755
+index deb01201..c474fbbc 100755
 --- a/source/thermodynamics.c
 +++ b/source/thermodynamics.c
-@@ -362,6 +362,15 @@ int thermodynamics_init(
+@@ -337,15 +337,44 @@ int thermodynamics_init(
+     }
+ 
+     if(pth->has_on_the_spot==_FALSE_ && pth->energy_repart_coefficient!=no_factorization){
+-      class_call(thermodynamics_annihilation_f_eff_init(ppr,pba,pth,preco),
+-                 pth->error_message,
+-                 pth->error_message);
++      if(pth->energy_deposition_function != pointer_to_fz_eff) {
++        class_call(thermodynamics_annihilation_f_eff_init(ppr,pba,pth,preco),
++                  pth->error_message,
++                  pth->error_message);
++      }
++      else {
++        struct gambit_darkages_results * pgr = &(pth->gambit_res);
++
++        preco->annihil_f_eff_num_lines = pgr->num_lines;
++
++        class_alloc(preco->annihil_z,preco->annihil_f_eff_num_lines*sizeof(double),pth->error_message);
++        class_alloc(preco->annihil_f_eff,preco->annihil_f_eff_num_lines*sizeof(double),pth->error_message);
++        class_alloc(preco->annihil_dd_f_eff,preco->annihil_f_eff_num_lines*sizeof(double),pth->error_message);
++
++        int index_z;
++        for (index_z = 0; index_z < preco->annihil_f_eff_num_lines; ++index_z)
++        {
++          preco->annihil_z[index_z] = pgr->ptr_to_z[index_z];
++          preco->annihil_f_eff[index_z] = pgr->ptr_to_f_tot[index_z];
++        }
++
++        class_call(array_spline_table_lines(preco->annihil_z,
++                                            preco->annihil_f_eff_num_lines,
++                                            preco->annihil_f_eff,
++                                            1,
++                                            preco->annihil_dd_f_eff,
++                                            _SPLINE_NATURAL_,
++                                            pth->error_message),
++                   pth->error_message,
++                   pth->error_message);
++      }
+       // If we used DarkAges in the f_eff mode in the function above, there is now no conceptual
+       // difference to the scenario when we just had obtained this table from a file.
+       // To avoid modifying a lot of if()-clasues in the rest of the code, we adjust
+       // pth->energy_deposition_function and preco->energy_deposition_function
+       // as if this table was read from file.
+-      if (pth->energy_deposition_function == DarkAges) {
++      // The same also applies for the patched GAMBIT option "pointer_to_fz_eff"
++      if (pth->energy_deposition_function == DarkAges || pth->energy_deposition_function == pointer_to_fz_eff) {
+         pth->energy_deposition_function = function_from_file;
+       }
+     }
+@@ -362,6 +391,15 @@ int thermodynamics_init(
  	     "annihilation parameter suspiciously large (%e, while typical bounds are in the range of 1e-7 to 1e-6)",
  	     pth->annihilation);
  
@@ -463,7 +586,7 @@ index deb01201..a1187b51 100755
    class_test(pth->PBH_evaporating_mass > 0 && pth->PBH_evaporating_mass < 1e15 && pth->PBH_fraction > 1e-4,pth->error_message,
  	     "The value of 'pth->PBH_fraction' that you enter is suspicious given the mass you chose. You are several orders of magnitude above the limit. The code doesn't handle well too high energy injection. Please choose  'pth->PBH_fraction < 1e-4'. ")
  
-@@ -1314,6 +1323,7 @@ int thermodynamics_annihilation_coefficients_init(
+@@ -1314,6 +1352,7 @@ int thermodynamics_annihilation_coefficients_init(
  
    */
  
@@ -471,7 +594,7 @@ index deb01201..a1187b51 100755
    /* BEGIN: Add switch (1) */
    if (pth->energy_deposition_function == function_from_file || pth->energy_repart_coefficient == GSVI || pth->energy_repart_coefficient == chi_from_file) {
      class_open(fA,ppr->energy_injec_coeff_file, "r",pth->error_message);
-@@ -1409,6 +1419,7 @@ int thermodynamics_annihilation_coefficients_init(
+@@ -1409,6 +1448,7 @@ int thermodynamics_annihilation_coefficients_init(
      class_test(status != 0., pth->error_message, "The attempt to launch the external command was not successful. Maybe the output of the external command is not in the right format.");
    }
    /* END */
@@ -479,7 +602,7 @@ index deb01201..a1187b51 100755
  
    /* spline in one dimension */
    class_call(array_spline_table_lines(pth->annihil_coef_xe,
-@@ -2313,7 +2324,7 @@ int thermodynamics_energy_injection(
+@@ -2313,7 +2353,7 @@ int thermodynamics_energy_injection(
              // fprintf(stdout, "energy_rate %e preco->f_eff %e\n", result,preco->f_eff);
        }
        // // /***********************************************************************************************************************/
@@ -488,7 +611,7 @@ index deb01201..a1187b51 100755
  
              class_call(thermodynamics_onthespot_energy_injection(ppr,pba,preco,z,&result,error_message),
                        error_message,
-@@ -3989,7 +4000,7 @@ int thermodynamics_recombination_with_cosmorec(
+@@ -3989,7 +4029,7 @@ int thermodynamics_recombination_with_cosmorec(
          }
    }
    // // /***********************************************************************************************************************/
@@ -497,7 +620,7 @@ index deb01201..a1187b51 100755
        class_call(thermodynamics_annihilation_coefficients_interpolate(ppr,pba,pth,600),
                       pth->error_message,
                       pth->error_message);
-@@ -4284,7 +4295,7 @@ class_stop(pth->error_message,
+@@ -4284,7 +4324,7 @@ class_stop(pth->error_message,
             if(pth->energy_deposition_function==Analytical_approximation) {
               hyrec_data.cosmo->inj_params->energy_deposition_treatment = 0;
             }
