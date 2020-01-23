@@ -1225,6 +1225,7 @@ if(NOT ditched_${name}_${ver})
     PATCH_COMMAND patch -p1 < ${patch}/${name}_${ver}.diff
     CONFIGURE_COMMAND ""
     COMMAND sed ${dashi} -e "s#autosetup.py install#autosetup.py build#g" Makefile
+    COMMAND sed ${dashi} -e "s#\".\"#\"${dir}\"#g" include/common.h
     BUILD_COMMAND ${CMAKE_MAKE_PROGRAM} CC=${CMAKE_C_COMPILER} OMPFLAG=-fopenmp OPTFLAG= CCFLAG=${BACKEND_C_FLAGS} LDFLAG=${BACKEND_C_FLAGS} PYTHON=${PYTHON_EXECUTABLE} all
     COMMAND ${CMAKE_COMMAND} -E make_directory lib
     COMMAND find python/ -name "classy*.so" | xargs -I {} cp "{}" lib/
@@ -1253,6 +1254,7 @@ if(NOT ditched_${name}_${ver})
     PATCH_COMMAND patch -p1 < ${patch}/${name}_${ver}.diff
     CONFIGURE_COMMAND ""
     COMMAND sed ${dashi} -e "s#autosetup.py install#autosetup.py build#g" Makefile
+    COMMAND sed ${dashi} -e "s#\".\"#\"${dir}\"#g" include/common.h
     BUILD_COMMAND ${CMAKE_MAKE_PROGRAM} CC=${CMAKE_C_COMPILER} OMPFLAG=-fopenmp OPTFLAG= CCFLAG=${BACKEND_C_FLAGS} LDFLAG=${BACKEND_C_FLAGS} PYTHON=${PYTHON_EXECUTABLE} all
     COMMAND ${CMAKE_COMMAND} -E make_directory lib
     COMMAND find python/ -name "classy*.so" | xargs -I {} cp "{}" lib/
@@ -1280,6 +1282,7 @@ if(NOT ditched_${name}_${ver})
     PATCH_COMMAND patch -p1 < ${patch}/${name}_${ver}.diff
     CONFIGURE_COMMAND ""
     COMMAND sed ${dashi} -e "s#autosetup.py install#autosetup.py build#g" Makefile
+    COMMAND sed ${dashi} -e "s#\".\"#\"${dir}\"#g" include/common.h
     BUILD_COMMAND ${CMAKE_MAKE_PROGRAM} CC=${CMAKE_C_COMPILER} OMPFLAG=-fopenmp OPTFLAG= CCFLAG=${BACKEND_C_FLAGS} LDFLAG=${BACKEND_C_FLAGS} PYTHON=${PYTHON_EXECUTABLE} all
     COMMAND ${CMAKE_COMMAND} -E make_directory lib
     COMMAND find python/ -name "classy*.so" | xargs -I {} cp "{}" lib/
