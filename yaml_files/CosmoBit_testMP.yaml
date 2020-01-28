@@ -23,9 +23,9 @@ Parameters:
 
  # Everything Neff and eta related
  #etaBBN: !import include/etaBBN.yaml
- rBBN_rCMB_dNeffBBN_dNeffCMB:
-  dNeff_BBN: 0.698708
-  dNeff_CMB: 0.388434
+ rBBN_rCMB_dNurBBN_dNurCMB:
+  dNur_BBN: 0.698708
+  dNur_CMB: 0.388434
   r_BBN: 1.08566
   r_CMB: 0.947919
 
