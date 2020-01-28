@@ -4255,11 +4255,29 @@ DA_alreadyCalculated: |
 #  CosmoBit Models
 #----------------------------
 
+AnnihilatingDM_general_parameters: |
+   Model of (s-wave) annihilating dark matter into prompt pairs of e+/e- and/or photons.
+   See ./gambit AnnihilatingDM_general for more details.
+
+AnnihilatingDM_photon_parameters: |
+   Model of (s-wave) annihilating matter into a prompt pair of photons.
+   See ./gambit AnnihilatingDM_photon and ./gambit AnnihilatingDM_general for more details.
+
+AnnihilatingDM_electron_parameters: |
+   Model of (s-wave) annihilating matter into a prompt pair of e+/e-.
+   See ./gambit AnnihilatingDM_electron and ./gambit AnnihilatingDM_general for more details.
+
 DecayingDM_general_parameters: |
-   mass, mass of the dark matter candidate [in GeV]
-   lifetime, lifetime of said DM candidate [in s]
-   fraction, fraction of how much the decaying DM component contributes to all DM.
-   BR, the fraction of how much energy will be contributed in e+/e-. (1-BR will be asinged to photons)
+   Model of decaying dark matter into prompt pairs of e+/e- and/or photons.
+   See ./gambit DecayingDM_general for more details.
+
+DecayingDM_photon_parameters: |
+   Model of decaying dark matter into a prompt pair of photons.
+   See ./gambit DecayingDM_photon and ./gambit DecayingDM_general for more details.
+
+DecayingDM_electron_parameters: |
+   Model of decaying dark matter into a prompt pair of e+/e-.
+   See ./gambit DecayingDM_electron and ./gambit DecayingDM_general for more details.
 
 LCDM_parameters: |
    Standard 6-parameters LCDM model. See ./gambit LCDM for more details.
@@ -4267,28 +4285,28 @@ LCDM_parameters: |
 LCDM_no_primordial_parameters: |
    As LCDM_parameters but without the parameters related to the shape of the primordial power spectrum. See ./gambit LCDM_no_primordial for more details. 
 
-etaBBN_rBBN_rCMB_dNeffBBN_dNeffCMB_parameters: |
+etaBBN_rBBN_rCMB_dNurBBN_dNurCMB_parameters: |
 
-   Model to be scanned in addition to LCDM as an extension: allowing for non-standard values of the baryon-to-photon ratio at BBN, non-standard values of the temperature ratio between photon and neutrinos at BBN and CMB release, as well as additional ultra-relativistic species present during BBN or at CMB release. See ./gambit etaBBN_rBBN_rCMB_dNeffBBN_dNeffCMB for more details.
+   Model to be scanned in addition to LCDM as an extension: allowing for non-standard values of the baryon-to-photon ratio at BBN, non-standard values of the temperature ratio between photon and neutrinos at BBN and CMB release, as well as additional ultra-relativistic species present during BBN or at CMB release. See ./gambit etaBBN_rBBN_rCMB_dNurBBN_dNurCMB for more details.
 
 etaBBN_parameters: |
-   Child model of etaBBN_rBBN_rCMB_dNeffBBN_dNeffCMB with only etaBBN as free parameter. See ./gambit etaBBN for more details.
+   Child model of etaBBN_rBBN_rCMB_dNurBBN_dNurCMB with only etaBBN as free parameter. See ./gambit etaBBN for more details.
 
-rBBN_rCMB_dNeffBBN_dNeffCMB_parameters: |
+rBBN_rCMB_dNurBBN_dNurCMB_parameters: |
    
-   Child model of etaBBN_rBBN_rCMB_dNeffBBN_dNeffCMB. See ./gambit rBBN_rCMB_dNeffBBN_dNeffCMB for more details.
+   Child model of etaBBN_rBBN_rCMB_dNurBBN_dNurCMB. See ./gambit rBBN_rCMB_dNurBBN_dNurCMB for more details.
 
-dNeffBBN_dNeffCMB_parameters: |
+dNurBBN_dNurCMB_parameters: |
    
-   Child model of rBBN_rCMB_dNeffBBN_dNeffCMB model. See ./gambit dNeffBBN_dNeffCMB for more details.
+   Child model of rBBN_rCMB_dNurBBN_dNurCMB model. See ./gambit dNurBBN_dNurCMB for more details.
 
-dNeffCMB_parameters: |
+dNurCMB_parameters: |
    
-   Child model of dNeffBBN_dNeffCMB model. See ./gambit dNeffCMB for more details.
+   Child model of dNurBBN_dNurCMB model. See ./gambit dNurCMB for more details.
 
 rBBN_rCMB_parameters: |
    
-   Child model of rBBN_rCMB_dNeffBBN_dNeffCMB model. See ./gambit rBBN_rCMB for more details.
+   Child model of rBBN_rCMB_dNurBBN_dNurCMB model. See ./gambit rBBN_rCMB for more details.
 
 rCMB_parameters: |
    
@@ -4468,7 +4486,10 @@ classy_2_6_3_init: |
   Initialise CLASS 2.6.3 run through the classy python wrapper. 
 
 classy_exo_2_7_0_init: |
-  Initialise ExoCLASS 2.7.0 run through the classy python wrapper. 
+  Initialise ExoCLASS 2.7.0 run through the classy python wrapper.
+
+classy_exo_2_7_2_init: |
+  Initialise ExoCLASS 2.7.2 run through the classy python wrapper.
 
 compute_Planck_lowp_TT_loglike: |
    function computes the planck log-likelihood for a  given
@@ -4493,27 +4514,20 @@ f_effective: |
 DM_mass: |
     Dark matter mass (in GeV).
 
-    --> DUMMY for the use with DecayingDM_general <--
-
 DM_fraction: |
     fraction of the abundance of the dark matter candidate in question
     (mostly a decaying component) contributing to the total DM abundance.
 
-    --> DUMMY for the use with DecayingDM_general <--
-
 lifetime: |
     lifetime of the decaying dark matter component (in s).
 
-    --> DUMMY for the use with DecayingDM_general <--
-
 injection_spectrum: |
     Spectrum of electrons/positrons and photons injected by
-    the decay of a DM particle with certain mass.
-    An dirac-like injection (at an energy of m/2) is assumed.
+    the decay or annihilation of a DM particle with a certain mass.
+    An dirac-like injection (at an energy of m/2 for decaying DM and
+    m for annihilating DM) is assumed.
     The relative contribution of the electron and photon channel is
     given by the branching ratio (BR).
-
-    --> DUMMY for the use with DecayingDM_general <--
 
 AlterBBN_2_0_init: |
     Initialise AlterBBN.

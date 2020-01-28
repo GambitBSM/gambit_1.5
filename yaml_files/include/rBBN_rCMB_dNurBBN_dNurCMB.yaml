@@ -1,5 +1,5 @@
 ###########################################################################
-## Parameter of rBBN_rCMB_dNeffBBN_dNeffCMB
+## Parameter of rBBN_rCMB_dNurBBN_dNurCMB
 ##
 ## Patrick Stoecker <stoecker@physik.rwth-aachen.de>
 ## 2019, July
@@ -13,9 +13,9 @@ r_BBN:
   prior_type: flat
   range: [0.75,1.15]
 
-dNeff_CMB:
+dNur_CMB:
   prior_type: flat
   range: [0.,2.]
-dNeff_BBN:
+dNur_BBN:
   prior_type: flat
   range: [0.,2.]

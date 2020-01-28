@@ -53,43 +53,43 @@
 // η (baryon-to-photon ratio) defined at BBN.
 // r_CMB(BBN): Ratio of temperatures in non-cold DM compared to the SM with 3 massive neutrinos:
 // r_CMB = T_v(BSM)/T_v(SM) at CMB (BBN)
-// dNeff_CMB(_BBN): ΔN_effective defined at CMB(BBN) from additional radiation.
-#define MODEL etaBBN_rBBN_rCMB_dNeffBBN_dNeffCMB
+// dNurCMB(_BBN): ΔN_effective defined at CMB(BBN) from additional radiation.
+#define MODEL etaBBN_rBBN_rCMB_dNurBBN_dNurCMB
   START_MODEL
   DEFINEPARS(eta_BBN)
   MAP_TO_CAPABILITY(eta_BBN, etaBBN)
   DEFINEPARS(r_BBN,r_CMB)
-  DEFINEPARS(dNeff_BBN,dNeff_CMB)
+  DEFINEPARS(dNur_BBN,dNur_CMB)
 #undef MODEL
 
 // No additional radiation or changes to the neutrino temperature.
 // Just the baryon-to-photon ratio η at BBN.
 #define MODEL etaBBN
- #define PARENT etaBBN_rBBN_rCMB_dNeffBBN_dNeffCMB
+ #define PARENT etaBBN_rBBN_rCMB_dNurBBN_dNurCMB
   START_MODEL
   DEFINEPARS(eta_BBN)
-  INTERPRET_AS_PARENT_FUNCTION(etaBBN_to_etaBBN_rBBN_rCMB_dNeffBBN_dNeffCMB)
+  INTERPRET_AS_PARENT_FUNCTION(etaBBN_to_etaBBN_rBBN_rCMB_dNurBBN_dNurCMB)
  #undef PARENT
 #undef MODEL
 
-// As etaBBN_rBBN_rCMB_dNeffBBN_dNeffCMB, but with the
+// As etaBBN_rBBN_rCMB_dNurBBN_dNurCMB, but with the
 // baryon-to-photon ratio η at BBN set equal to η today.
-#define MODEL rBBN_rCMB_dNeffBBN_dNeffCMB
- #define PARENT etaBBN_rBBN_rCMB_dNeffBBN_dNeffCMB
+#define MODEL rBBN_rCMB_dNurBBN_dNurCMB
+ #define PARENT etaBBN_rBBN_rCMB_dNurBBN_dNurCMB
   START_MODEL
   DEFINEPARS(r_BBN,r_CMB)
-  DEFINEPARS(dNeff_BBN,dNeff_CMB)
-  INTERPRET_AS_PARENT_FUNCTION(rBBN_rCMB_dNeffBBN_dNeffCMB_to_etaBBN_rBBN_rCMB_dNeffBBN_dNeffCMB)
+  DEFINEPARS(dNur_BBN,dNur_CMB)
+  INTERPRET_AS_PARENT_FUNCTION(rBBN_rCMB_dNurBBN_dNurCMB_to_etaBBN_rBBN_rCMB_dNurBBN_dNurCMB)
   INTERPRET_AS_PARENT_DEPENDENCY(eta0, double)
  #undef PARENT
 #undef MODEL
 
 // As above, but with no additional radiation.
 #define MODEL rBBN_rCMB
- #define PARENT rBBN_rCMB_dNeffBBN_dNeffCMB
+ #define PARENT rBBN_rCMB_dNurBBN_dNurCMB
   START_MODEL
   DEFINEPARS(r_BBN,r_CMB)
-  INTERPRET_AS_PARENT_FUNCTION(rBBN_rCMB_to_rBBN_rCMB_dNeffBBN_dNeffCMB)
+  INTERPRET_AS_PARENT_FUNCTION(rBBN_rCMB_to_rBBN_rCMB_dNurBBN_dNurCMB)
  #undef PARENT
 #undef MODEL
 
@@ -102,21 +102,21 @@
  #undef PARENT
 #undef MODEL
 
-// As rBBN_rCMB_dNeffBBN_dNeffCMB, but with no changes to the neutrino temperature.
-#define MODEL dNeffBBN_dNeffCMB
- #define PARENT rBBN_rCMB_dNeffBBN_dNeffCMB
+// As rBBN_rCMB_dNurBBN_dNurCMB, but with no changes to the neutrino temperature.
+#define MODEL dNurBBN_dNurCMB
+ #define PARENT rBBN_rCMB_dNurBBN_dNurCMB
   START_MODEL
-  DEFINEPARS(dNeff_BBN,dNeff_CMB)
-  INTERPRET_AS_PARENT_FUNCTION(dNeffBBN_dNeffCMB_to_rBBN_rCMB_dNeffBBN_dNeffCMB)
+  DEFINEPARS(dNur_BBN,dNur_CMB)
+  INTERPRET_AS_PARENT_FUNCTION(dNurBBN_dNurCMB_to_rBBN_rCMB_dNurBBN_dNurCMB)
  #undef PARENT
 #undef MODEL
 
 // As above, but with additional radiation the same at BBN as at recombination.
-#define MODEL dNeffCMB
- #define PARENT dNeffBBN_dNeffCMB
+#define MODEL dNurCMB
+ #define PARENT dNurBBN_dNurCMB
   START_MODEL
-  DEFINEPARS(dNeff_CMB)
-  INTERPRET_AS_PARENT_FUNCTION(dNeffCMB_to_dNeffBBN_dNeffCMB)
+  DEFINEPARS(dNur_CMB)
+  INTERPRET_AS_PARENT_FUNCTION(dNurCMB_to_dNurBBN_dNurCMB)
  #undef PARENT
 #undef MODEL
   
@@ -157,10 +157,10 @@ START_MODEL
 DEFINEPARS(lambda,N_pivot,phi_init0)
 #undef MODEL
 
-// Inflation model: 2/3 \lambda phi^2/3 --- inflation
+// Inflation model: 3/2 \lambda phi^2/3 --- inflation
 // A_s, n_s and r are given by inflationary model
 // parameters: N_piv, lambda.
-#define MODEL Inflation_1mono32Inf
+#define MODEL Inflation_1mono23
 START_MODEL
 DEFINEPARS(lambda,N_pivot,phi_init0)
 #undef MODEL

@@ -68,12 +68,6 @@ Parameters:
   #    fixed_value: 10.0
     
 
-# extension of standard LCDM: allow for a value of dNeff @ CMB release different from today
-# (due to the bug we saw earlier atm you can't scan a simple LCDM model, I'll fix this but if
-# you fix dNeffCMB to 0 you essentially have vanilla LCDM)
-  dNeffCMB:
-    dNeff_CMB: 0.01
-
 #======== Prior setup ========
 Priors:
 

@@ -19,11 +19,12 @@
 ///  \author Patrick Stoecker
 ///          (stoecker@physik.rwth-aachen.de)
 ///  \date 2019 July
+///  \date 2020 January
 ///
 ///  *********************************************
 
 #include "gambit/Backends/frontend_macros.hpp"
-#include "gambit/Backends/frontends/classy_exo_2_7_0.hpp"
+#include "gambit/Backends/frontends/classy_exo_2_7_2.hpp"
 #include "gambit/CosmoBit/CosmoBit_utils.hpp"
 
 #include <pybind11/stl.h>
@@ -409,7 +410,5 @@ BE_INI_FUNCTION
       invalid_point().raise(errMssg.str());
     }
   }
-  std::cout << "Trying to print power spectrum..." << std::endl;
-  print_pps();
 }
 END_BE_INI_FUNCTION

@@ -25,10 +25,10 @@ Parameters:
  #etaBBN:                             !import include/etaBBN.yaml
  #rCMB:                               !import include/rCMB.yaml
  #rBBN_rCMB:                          !import include/rBBN_rCMB.yaml
- #dNeffCMB:                           !import include/dNeffCMB.yaml
- #dNeffBBN_dNeffCMB:                  !import include/dNeffBBN_dNeffCMB.yaml
- #rBBN_rCMB_dNeffBBN_dNeffCMB:        !import include/rBBN_rCMB_dNeffBBN_dNeffCMB.yaml
- etaBBN_rBBN_rCMB_dNeffBBN_dNeffCMB: !import include/etaBBN_rBBN_rCMB_dNeffBBN_dNeffCMB.yaml
+ #dNurCMB:                           !import include/dNurCMB.yaml
+ #dNurBBN_dNurCMB:                  !import include/dNurBBN_dNurCMB.yaml
+ #rBBN_rCMB_dNurBBN_dNurCMB:        !import include/rBBN_rCMB_dNurBBN_dNurCMB.yaml
+ etaBBN_rBBN_rCMB_dNurBBN_dNurCMB: !import include/etaBBN_rBBN_rCMB_dNurBBN_dNurCMB.yaml
 
  # neutrino masses
  StandardModel_mNudiff: !import include/StandardModel_mNudiff_both_scan.yaml
@@ -43,6 +43,7 @@ Parameters:
  #Planck_lite: !import include/Planck_2018/Planck_lite_gauss.yaml
 
  # model parameters for "DecayingDM_general"
+ #AnnihilatingDM_general: !import include/AnnihilatingDM_general_scan.yaml
  DecayingDM_general: !import include/DecayingDM_general_scan.yaml
 
 #======== Prior setup ========

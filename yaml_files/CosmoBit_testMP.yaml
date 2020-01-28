@@ -162,14 +162,14 @@ Rules:
     options:
       T_cmb: 2.7255
 
-   # Allow for negative values of dNeff_BBN and dNeffBBN_dNeffCMB
+   # Allow for negative values of dNur_BBN and dNur_CMB
    #  -> In this form, the option is set for all CosmoBit function and applies
    #     for both parameters at once.
-   #     If this should only apply for dNeffBBN or dNeffCMB eclusively,
+   #     If this should only apply for dNur_BBN or dNur_CMB eclusively,
    #     consider to make this as a rule of the respective capability / function.
   - module: CosmoBit
     options:
-      allow_negative_delta_neff: false
+      allow_negative_delta_N_ur: false
 
 #======== Logging setup ========
 Logger:

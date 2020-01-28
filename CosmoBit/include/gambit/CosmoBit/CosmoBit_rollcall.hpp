@@ -46,6 +46,11 @@ START_MODULE
 
   #define CAPABILITY injection_spectrum
   START_CAPABILITY
+    #define FUNCTION injection_spectrum_annihilatingDM
+    START_FUNCTION(DarkAges::injectionSpectrum)
+    ALLOW_MODELS(AnnihilatingDM_general)
+    #undef FUNCTION
+
     #define FUNCTION injection_spectrum_decayingDM
     START_FUNCTION(DarkAges::injectionSpectrum)
     ALLOW_MODELS(DecayingDM_general)
@@ -113,7 +118,7 @@ START_MODULE
   START_CAPABILITY
     #define FUNCTION energy_injection_efficiency_func
     START_FUNCTION(DarkAges::fz_table)
-    ALLOW_MODELS(DecayingDM_general)
+    ALLOW_MODELS(AnnihilatingDM_general,DecayingDM_general)
     BACKEND_REQ(DA_efficiency_function, (DarkAges_tag), DarkAges::fz_table,())
     #undef FUNCTION
   #undef CAPABILITY
@@ -122,7 +127,7 @@ START_MODULE
   START_CAPABILITY
     #define FUNCTION f_effective_func
     START_FUNCTION(double)
-    ALLOW_MODELS(DecayingDM_general)
+    ALLOW_MODELS(AnnihilatingDM_general,DecayingDM_general)
     DEPENDENCY(energy_injection_efficiency,DarkAges::fz_table)
     #undef FUNCTION
   #undef CAPABILITY
@@ -171,7 +176,7 @@ START_MODULE
   START_CAPABILITY
     #define FUNCTION get_N_ur
     START_FUNCTION(double)
-    MODEL_CONDITIONAL_DEPENDENCY(etaBBN_rBBN_rCMB_dNeffBBN_dNeffCMB_parameters,ModelParameters,etaBBN_rBBN_rCMB_dNeffBBN_dNeffCMB)
+    MODEL_CONDITIONAL_DEPENDENCY(etaBBN_rBBN_rCMB_dNurBBN_dNurCMB_parameters,ModelParameters,etaBBN_rBBN_rCMB_dNurBBN_dNurCMB)
     DEPENDENCY(NuMasses_SM, map_str_dbl)
     #undef FUNCTION
   #undef CAPABILITY
@@ -187,8 +192,8 @@ START_MODULE
     START_FUNCTION(pybind11::dict)
     
     ALLOW_MODELS(LCDM)
-    MODEL_CONDITIONAL_DEPENDENCY(classy_parameters_DecayingDM, pybind11::dict,  DecayingDM_general)
-    
+    MODEL_CONDITIONAL_DEPENDENCY(classy_parameters_EnergyInjection, pybind11::dict, AnnihilatingDM_general, DecayingDM_general)
+
     DEPENDENCY(T_cmb,                 double)
     DEPENDENCY(Helium_abundance,      std::vector<double>)
     DEPENDENCY(NuMasses_classy_input, pybind11::dict)
@@ -232,15 +237,19 @@ START_MODULE
      #undef FUNCTION
 
   #undef CAPABILITY
-  
-  // set extra parameters for CLASS run for non-standard cosmological models
-  #define CAPABILITY classy_parameters_DecayingDM
+
+  // set extra parameters for CLASS run for energy injection by non-standard cosmological models
+  #define CAPABILITY classy_parameters_EnergyInjection
      START_CAPABILITY
-     #define FUNCTION set_classy_parameters_DecayingDM_general
+     #define FUNCTION set_classy_parameters_EnergyInjection_AnnihilatingDM
+      START_FUNCTION(pybind11::dict)
+      ALLOW_MODELS(AnnihilatingDM_general)
+      DEPENDENCY(energy_injection_efficiency, DarkAges::fz_table)
+     #undef FUNCTION
+
+     #define FUNCTION set_classy_parameters_EnergyInjection_DecayingDM
       START_FUNCTION(pybind11::dict)
       ALLOW_MODELS(DecayingDM_general)
-      DEPENDENCY(lifetime,                    double)
-      DEPENDENCY(DM_fraction,                 double)
       DEPENDENCY(energy_injection_efficiency, DarkAges::fz_table)
      #undef FUNCTION
   #undef CAPABILITY
@@ -266,7 +275,7 @@ START_MODULE
     START_CAPABILITY
     #define FUNCTION set_multimode_inputs
       START_FUNCTION(multimode_inputs)
-      ALLOW_MODELS(Inflation_SR1quad,Inflation_1quar,Inflation_1mono32,Inflation_1linear,Inflation_1natural,Inflation_smash)
+      ALLOW_MODELS(Inflation_SR1quad,Inflation_1quar,Inflation_1mono23,Inflation_1linear,Inflation_1natural,Inflation_smash)
     #undef FUNCTION
   #undef CAPABILITY
 
@@ -275,7 +284,7 @@ START_MODULE
   //   START_CAPABILITY
   //   #define FUNCTION get_multimode_results
   //     START_FUNCTION(gambit_inflation_observables)
-  //     ALLOW_MODELS(Inflation_SR1quad,Inflation_1quar,Inflation_1mono32,Inflation_1linear,Inflation_1natural,Inflation_smash)
+  //     ALLOW_MODELS(Inflation_SR1quad,Inflation_1quar,Inflation_1mono23,Inflation_1linear,Inflation_1natural,Inflation_smash)
   //     DEPENDENCY(multimode_pk_setting,int)
   //     DEPENDENCY(inf_inputs, multimode_inputs)
   //     BACKEND_REQ(multimodecode_gambit_driver,(modecode_tag), void, (gambit_inflation_observables*,int&,int&,int&,int&,int&,int&,int&,int&,int&,int&,double&,int&,int&,double&,int&,double*,double*,int&,int&,double*,double*,double*,double&,double&,double&,int&,int&,double&,double*,double*,double*,double*,double&,double&))
@@ -288,7 +297,7 @@ START_MODULE
     #define FUNCTION get_multimode_parametrised_ps
       START_FUNCTION(parametrised_ps)
       //ALLOW_MODELS(LCDM_no_primordial) // todo check models...
-      ALLOW_MODELS(Inflation_SR1quad,Inflation_1quar,Inflation_1mono32,Inflation_1linear,Inflation_1natural,Inflation_smash)
+      ALLOW_MODELS(Inflation_SR1quad,Inflation_1quar,Inflation_1mono23,Inflation_1linear,Inflation_1natural,Inflation_smash)
       DEPENDENCY(multimode_input_parameters, multimode_inputs)
       BACKEND_REQ(multimodecode_gambit_driver, (), gambit_inflation_observables, (int&,int&,int&,int&,int&,int&,int&,int&,int&,int&,double&,int&,int&,double&,int&,double*,double*,int&,int&,double*,double*,double*,double&,double&,double&,int&,int&,double&,double&,double*,double*,double*,double*,double&,double&))
     #undef FUNCTION
@@ -312,7 +321,7 @@ START_MODULE
     #define FUNCTION get_multimode_primordial_ps
       START_FUNCTION(primordial_ps)
       //ALLOW_MODELS(LCDM_no_primordial) // todo check models...
-      ALLOW_MODELS(Inflation_SR1quad,Inflation_1quar,Inflation_1mono32,Inflation_1linear,Inflation_1natural,Inflation_smash)
+      ALLOW_MODELS(Inflation_SR1quad,Inflation_1quar,Inflation_1mono23,Inflation_1linear,Inflation_1natural,Inflation_smash)
       DEPENDENCY(multimode_input_parameters, multimode_inputs)
       BACKEND_REQ(multimodecode_gambit_driver, (), gambit_inflation_observables, (int&,int&,int&,int&,int&,int&,int&,int&,int&,int&,double&,int&,int&,double&,int&,double*,double*,int&,int&,double*,double*,double*,double&,double&,double&,int&,int&,double&,double&,double*,double*,double*,double*,double&,double&))
     #undef FUNCTION
@@ -601,7 +610,7 @@ START_MODULE
     START_CAPABILITY
     #define FUNCTION set_T_ncdm
       START_FUNCTION(double)
-      ALLOW_MODELS(etaBBN_rBBN_rCMB_dNeffBBN_dNeffCMB)
+      ALLOW_MODELS(etaBBN_rBBN_rCMB_dNurBBN_dNurCMB)
       DEPENDENCY(T_ncdm_SM,double)
     #undef FUNCTION
     
@@ -781,14 +790,14 @@ START_MODULE
   #undef CAPABILITY
 */
 
-/* This capability lives now in the etaBBN_rBBN_rCMB_dNeffBBN_dNeffCMB model
+/* This capability lives now in the etaBBN_rBBN_rCMB_dNurBBN_dNurCMB model
    by using the MAP_TO_CAPABILITY macro. It might be celaner to have this definition here.
 
    #define CAPABILITY etaBBN
      START_CAPABILITY
      #define FUNCTION set_etaBBN // etaBBN is model parameter
        START_FUNCTION(double)
-       ALLOW_MODELS(etaBBN_rBBN_rCMB_dNeffBBN_dNeffCMB) // To get etaCMB for etaBBN_rBBN_rCMB_dNeffBBN_dNeffCMB
+       ALLOW_MODELS(etaBBN_rBBN_rCMB_dNurBBN_dNurCMB) // To get etaCMB for etaBBN_rBBN_rCMB_dNurBBN_dNurCMB
      #undef FUNCTION
    #undef CAPABILITY
 */
@@ -819,8 +828,8 @@ START_MODULE
     START_CAPABILITY
     #define FUNCTION AlterBBN_Input
       START_FUNCTION(map_str_dbl)
-      ALLOW_MODEL_DEPENDENCE(etaBBN_rBBN_rCMB_dNeffBBN_dNeffCMB)
-      MODEL_GROUP(non_SM_rad_Nu,(etaBBN_rBBN_rCMB_dNeffBBN_dNeffCMB))
+      ALLOW_MODEL_DEPENDENCE(etaBBN_rBBN_rCMB_dNurBBN_dNurCMB)
+      MODEL_GROUP(non_SM_rad_Nu,(etaBBN_rBBN_rCMB_dNurBBN_dNurCMB))
       MODEL_GROUP(cosmo,(LCDM))
       ALLOW_MODEL_COMBINATION(cosmo,non_SM_rad_Nu)
     #undef FUNCTION

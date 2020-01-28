@@ -558,8 +558,9 @@ if(NOT ditched_${name}_${ver})
     GIT_TAG 3.1.0
     SOURCE_DIR ${dir}
     BUILD_IN_SOURCE 1
-    CONFIGURE_COMMAND ${CMAKE_COMMAND} -E copy ${patchdir}/MontePythonLike.py ${dir}/montepython/MontePythonLike.py
+    CONFIGURE_COMMAND ${CMAKE_COMMAND} -E copy ${patchdir}/MontePythonLike.py ${dir}/montepython/MontePythonLike_${sfver}.py
     COMMAND ${CMAKE_COMMAND} -E copy ${patchdir}/MPLike_patch_script.py ${dir}/montepython/MPLike_patch_script.py
+    COMMAND sed ${dashi} -e "s#from MontePythonLike import#from MontePythonLike_${sfver} import#g" ${dir}/montepython/MPLike_patch_script.py
     COMMAND ${CMAKE_COMMAND} -E copy ${patchdir}/sdss_lrgDR7_fiducialmodel.dat ${dir}/data/sdss_lrgDR7/sdss_lrgDR7_fiducialmodel.dat
     BUILD_COMMAND ""
     INSTALL_COMMAND python ${dir}/montepython/MPLike_patch_script.py
@@ -1224,10 +1225,12 @@ if(NOT ditched_${name}_${ver})
     PATCH_COMMAND patch -p1 < ${patch}/${name}_${ver}.diff
     CONFIGURE_COMMAND ""
     COMMAND sed ${dashi} -e "s#autosetup.py install#autosetup.py build#g" Makefile
-    BUILD_COMMAND ${CMAKE_MAKE_PROGRAM} CC=${CMAKE_C_COMPILER} OMPFLAG=-fopenmp OPTFLAG= CCFLAG=${BACKEND_C_FLAGS} LDFLAG=${BACKEND_C_FLAGS} all
+    COMMAND sed ${dashi} -e "s#\".\"#\"${dir}\"#g" include/common.h
+    BUILD_COMMAND ${CMAKE_MAKE_PROGRAM} CC=${CMAKE_C_COMPILER} OMPFLAG=-fopenmp OPTFLAG= CCFLAG=${BACKEND_C_FLAGS} LDFLAG=${BACKEND_C_FLAGS} PYTHON=${PYTHON_EXECUTABLE} all
     COMMAND ${CMAKE_COMMAND} -E make_directory lib
-    COMMAND find python/ -name "classy.so" | xargs -I {} cp "{}" lib/
-    COMMAND echo -e "#This is a trampoline script to import the cythonized python module under a different name\\nfrom ${lib} import *" > lib/${lib}_${sfver}.py
+    COMMAND find python/ -name "classy*.so" | xargs -I {} cp "{}" lib/
+    COMMAND ${CMAKE_COMMAND} -E echo "#This is a trampoline script to import the cythonized python module under a different name" > lib/${lib}_${sfver}.py
+    COMMAND ${CMAKE_COMMAND} -E echo "from ${lib} import *" >> lib/${lib}_${sfver}.py
     INSTALL_COMMAND ""
   )
   add_extra_targets("backend" ${name} ${ver} ${dir} ${dl} clean)
@@ -1251,57 +1254,51 @@ if(NOT ditched_${name}_${ver})
     PATCH_COMMAND patch -p1 < ${patch}/${name}_${ver}.diff
     CONFIGURE_COMMAND ""
     COMMAND sed ${dashi} -e "s#autosetup.py install#autosetup.py build#g" Makefile
-    BUILD_COMMAND ${CMAKE_MAKE_PROGRAM} CC=${CMAKE_C_COMPILER} OMPFLAG=-fopenmp OPTFLAG= CCFLAG=${BACKEND_C_FLAGS} LDFLAG=${BACKEND_C_FLAGS} all
+    COMMAND sed ${dashi} -e "s#\".\"#\"${dir}\"#g" include/common.h
+    BUILD_COMMAND ${CMAKE_MAKE_PROGRAM} CC=${CMAKE_C_COMPILER} OMPFLAG=-fopenmp OPTFLAG= CCFLAG=${BACKEND_C_FLAGS} LDFLAG=${BACKEND_C_FLAGS} PYTHON=${PYTHON_EXECUTABLE} all
     COMMAND ${CMAKE_COMMAND} -E make_directory lib
-    COMMAND find python/ -name "classy.so" | xargs -I {} cp "{}" lib/
-    COMMAND echo -e "#This is a trampoline script to import the cythonized python module under a different name\\nfrom ${lib} import *" > lib/${lib}_${sfver}.py
+    COMMAND find python/ -name "classy*.so" | xargs -I {} cp "{}" lib/
+    COMMAND ${CMAKE_COMMAND} -E echo "#This is a trampoline script to import the cythonized python module under a different name" > lib/${lib}_${sfver}.py
+    COMMAND ${CMAKE_COMMAND} -E echo "from ${lib} import *" >> lib/${lib}_${sfver}.py
     INSTALL_COMMAND ""
   )
   add_extra_targets("backend" ${name} ${ver} ${dir} ${dl} clean)
 endif()
 
-#DarkAges
-set(name "darkages")
-set(ver "1.0.0")
-set(dl "null")
+set(name "classy")
+set(ver "exo_2.7.2")
+set(sfver "exo_2_7_2")
+set(lib "classy")
+set(patch "${PROJECT_SOURCE_DIR}/Backends/patches/${name}/${ver}")
+set(dl "https://github.com/lesgourg/class_public/archive/42e8f9418e3442d1ea3f26ff84dc9f0e856a0f1d.tar.gz") # The huge number is the commit ID of ExoCLASS_2.7.0
+set(md5 "8f3139eacae4d1cc5bb02bab3ec75073")
 set(dir "${PROJECT_SOURCE_DIR}/Backends/installed/${name}/${ver}")
 check_ditch_status(${name} ${ver} ${dir})
 if(NOT ditched_${name}_${ver})
   ExternalProject_Add(${name}_${ver}
-    GIT_REPOSITORY https://github.com/pstoecker/DarkAges.git
-    GIT_TAG v1.0.0
+    DOWNLOAD_COMMAND ${DL_BACKEND} ${dl} ${md5} ${dir}
     SOURCE_DIR ${dir}
     BUILD_IN_SOURCE 1
+    PATCH_COMMAND patch -p1 < ${patch}/${name}_${ver}.diff
     CONFIGURE_COMMAND ""
-    BUILD_COMMAND ""
+    COMMAND sed ${dashi} -e "s#autosetup.py install#autosetup.py build#g" Makefile
+    COMMAND sed ${dashi} -e "s#\".\"#\"${dir}\"#g" include/common.h
+    BUILD_COMMAND ${CMAKE_MAKE_PROGRAM} CC=${CMAKE_C_COMPILER} OMPFLAG=-fopenmp OPTFLAG= CCFLAG=${BACKEND_C_FLAGS} LDFLAG=${BACKEND_C_FLAGS} PYTHON=${PYTHON_EXECUTABLE} all
+    COMMAND ${CMAKE_COMMAND} -E make_directory lib
+    COMMAND find python/ -name "classy*.so" | xargs -I {} cp "{}" lib/
+    COMMAND ${CMAKE_COMMAND} -E echo "#This is a trampoline script to import the cythonized python module under a different name" > lib/${lib}_${sfver}.py
+    COMMAND ${CMAKE_COMMAND} -E echo "from ${lib} import *" >> lib/${lib}_${sfver}.py
     INSTALL_COMMAND ""
   )
   add_extra_targets("backend" ${name} ${ver} ${dir} ${dl} clean)
 endif()
 
-set(name "darkages")
-set(ver "1.1.0")
-set(dl "null")
-set(dir "${PROJECT_SOURCE_DIR}/Backends/installed/${name}/${ver}")
-check_ditch_status(${name} ${ver} ${dir})
-if(NOT ditched_${name}_${ver})
-  ExternalProject_Add(${name}_${ver}
-    GIT_REPOSITORY https://github.com/pstoecker/DarkAges.git
-    GIT_TAG v1.1.0
-    SOURCE_DIR ${dir}
-    BUILD_IN_SOURCE 1
-    CONFIGURE_COMMAND ""
-    BUILD_COMMAND ""
-    INSTALL_COMMAND ""
-  )
-  add_extra_targets("backend" ${name} ${ver} ${dir} ${dl} clean)
-endif()
-
+# DarkAges
 set(name "darkages")
 set(ver "1.2.0")
+set(sfver "1_2_0")
 set(dl "null")
 set(dir "${PROJECT_SOURCE_DIR}/Backends/installed/${name}/${ver}")
-set(patch "${PROJECT_SOURCE_DIR}/Backends/patches/${name}/${ver}/DarkAges_for_GAMBIT.patch")
 check_ditch_status(${name} ${ver} ${dir})
 if(NOT ditched_${name}_${ver})
   ExternalProject_Add(${name}_${ver}
@@ -1309,8 +1306,7 @@ if(NOT ditched_${name}_${ver})
     GIT_TAG v1.2.0
     SOURCE_DIR ${dir}
     BUILD_IN_SOURCE 1
-    PATCH_COMMAND patch -p0 < ${patch}
-    CONFIGURE_COMMAND ""
+    CONFIGURE_COMMAND ${CMAKE_COMMAND} -E rename DarkAges DarkAges_${sfver}
     BUILD_COMMAND ""
     INSTALL_COMMAND ""
   )
@@ -1342,7 +1338,7 @@ if(NOT ditched_${name}_${ver})
     DOWNLOAD_COMMAND ${DL_BACKEND} ${dl} ${md5} ${dir}
     SOURCE_DIR ${dir}
     BUILD_IN_SOURCE 1
-    PATCH_COMMAND  sed -i "s/\r//g" modpk_backgrnd.f90 # Replace the CRLF by LF in that file.
+    PATCH_COMMAND  sed ${dashi} -e "s/\r//g" modpk_backgrnd.f90 # Replace the CRLF by LF in that file.
     COMMAND patch -p1 < ${patch}/multimodecode.diff
     CONFIGURE_COMMAND ""
     BUILD_COMMAND ${CMAKE_MAKE_PROGRAM} F90C=${CMAKE_Fortran_COMPILER} FFLAGS=${multimode_Fortran_FLAGS}

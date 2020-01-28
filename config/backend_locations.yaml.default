@@ -20,12 +20,12 @@ CaptnGeneral:
 
 classy:
   2.6.3:       ./Backends/installed/classy/2.6.3/lib/classy_2_6_3.py
+
   exo_2.7.0:   ./Backends/installed/classy/exo_2.7.0/lib/classy_exo_2_7_0.py
+  exo_2.7.2:   ./Backends/installed/classy/exo_2.7.2/lib/classy_exo_2_7_2.py
 
 DarkAges:
-  1.0.0:       ./Backends/installed/darkages/1.0.0/DarkAges_for_GAMBIT.py
-  1.1.0:       ./Backends/installed/darkages/1.1.0/DarkAges_for_GAMBIT.py
-  1.2.0:       ./Backends/installed/darkages/1.2.0/DarkAges_for_GAMBIT.py
+  1.2.0:       ./Backends/installed/darkages/1.2.0/DarkAges_1_2_0
 
 DarkSUSY:
   5.1.3:       ./Backends/installed/darksusy/5.1.3/lib/libdarksusy.so
@@ -64,7 +64,7 @@ gm2calc:
   1.3.0:       ./Backends/installed/gm2calc/1.3.0/src/libgm2calc.so
 
 MontePythonLike:
-  3.1.0:       ./Backends/installed/montepythonlike/3.1.0/montepython/MontePythonLike.py
+  3.1.0:       ./Backends/installed/montepythonlike/3.1.0/montepython/MontePythonLike_3_1_0.py
 
 MicrOmegas_MSSM:
   3.6.9.2:     ./Backends/installed/micromegas/3.6.9.2/MSSM/libmicromegas.so

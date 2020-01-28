@@ -108,16 +108,16 @@ Parameters:
      prior_type: flat
      range: [0.004,0.20]  
 
- # extension of standard LCDM: allow for a value of dNeff @ CMB release different from today 
- #dNeffCMB: 
- # dNeff_CMB: 0.01
+ # extension of standard LCDM: allow for a value of dNeff @ CMB release different from today
+ #dNurCMB:
+ # dNur_CMB: 0.01
 
- #etaBBN_rBBN_rCMB_dNeffBBN_dNeffCMB:
+ #etaBBN_rBBN_rCMB_dNurBBN_dNurCMB:
  #  eta_BBN: 1e-8
  #  r_BBN: 1
  #  r_CMB: 1
- #  dNeff_CMB: 0.
- #  dNeff_BBN: 0.
+ #  dNur_CMB: 0.
+ #  dNur_BBN: 0.
 
  # nuisance parameters for Planck likelihood
  #  => if you don't include the Planck likelihoods into the scan you should get a FATAL Error 

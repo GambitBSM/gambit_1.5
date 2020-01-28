@@ -37,10 +37,10 @@
   INTERPRET_AS_X_DEPENDENCY(DecayingDM_photon,lifetime,double)
   INTERPRET_AS_X_DEPENDENCY(DecayingDM_photon,DM_fraction,double)
   
-  // Friendship with "etaBBN_rBBN_rCMB_dNeffBBN_dNeffCMB" (Mapping is defined in Axions.cpp)
-  INTERPRET_AS_X_FUNCTION(etaBBN_rBBN_rCMB_dNeffBBN_dNeffCMB,GeneralCosmoALP_to_etaBBN_rBBN_rCMB_dNeffBBN_dNeffCMB)
-  INTERPRET_AS_X_DEPENDENCY(etaBBN_rBBN_rCMB_dNeffBBN_dNeffCMB,external_dNeff_etaBBN,map_str_dbl)
-  INTERPRET_AS_X_DEPENDENCY(etaBBN_rBBN_rCMB_dNeffBBN_dNeffCMB,eta0,double)
+  // Friendship with "etaBBN_rBBN_rCMB_dNurBBN_dNurCMB" (Mapping is defined in Axions.cpp)
+  INTERPRET_AS_X_FUNCTION(etaBBN_rBBN_rCMB_dNurBBN_dNurCMB,GeneralCosmoALP_to_etaBBN_rBBN_rCMB_dNurBBN_dNurCMB)
+  INTERPRET_AS_X_DEPENDENCY(etaBBN_rBBN_rCMB_dNurBBN_dNurCMB,external_dNeff_etaBBN,map_str_dbl)
+  INTERPRET_AS_X_DEPENDENCY(etaBBN_rBBN_rCMB_dNurBBN_dNurCMB,eta0,double)
 #undef MODEL
 
 // Simplified general axion model with parametric temperature-independent mass and cosmological applications.

@@ -155,6 +155,33 @@ namespace Gambit
       return As;
     }
 
+    void injection_spectrum_annihilatingDM(DarkAges::injectionSpectrum& spectrum)
+    {
+      using namespace Pipes::injection_spectrum_annihilatingDM;
+
+      double m = *Param["mass"];
+      double BR_el = *Param["BR"];
+      double BR_ph = 1.0 - BR_el;
+
+      if (m <= m_electron && BR_el >= std::numeric_limits<double>::epsilon())
+      {
+        std::ostringstream err;
+        err << "The mass of the annihilating dark matter candiate is below the electron mass.";
+        err << " No production of e+/e- is possible.";
+        CosmoBit_error().raise(LOCAL_INFO,err.str());
+      }
+
+      spectrum.E_el.clear();
+      spectrum.E_ph.clear();
+      spectrum.spec_el.clear();
+      spectrum.spec_ph.clear();
+
+      spectrum.E_el.resize(1,std::max(m-m_electron, std::numeric_limits<double>::min()));
+      spectrum.E_ph.resize(1,m);
+      spectrum.spec_el.resize(1,BR_el*2e9);
+      spectrum.spec_ph.resize(1,BR_ph*2e9);
+    }
+
     void injection_spectrum_decayingDM(DarkAges::injectionSpectrum& spectrum)
     {
       using namespace Pipes::injection_spectrum_decayingDM;
@@ -163,11 +190,21 @@ namespace Gambit
       double BR_el = *Param["BR"];
       double BR_ph = 1.0 - BR_el;
 
-      spectrum.E.clear();
+      if (m <= 2*m_electron && BR_el >= std::numeric_limits<double>::epsilon())
+      {
+        std::ostringstream err;
+        err << "The mass of the decaying dark matter candiate is below twice the electron mass.";
+        err << " No production of e+/e- is possible.";
+        CosmoBit_error().raise(LOCAL_INFO,err.str());
+      }
+
+      spectrum.E_el.clear();
+      spectrum.E_ph.clear();
       spectrum.spec_el.clear();
       spectrum.spec_ph.clear();
 
-      spectrum.E.resize(1,m*0.5);
+      spectrum.E_el.resize(1,std::max(m*0.5-m_electron, std::numeric_limits<double>::min()));
+      spectrum.E_ph.resize(1,m*0.5);
       spectrum.spec_el.resize(1,BR_el*2e9);
       spectrum.spec_ph.resize(1,BR_ph*2e9);
     }
@@ -303,23 +340,37 @@ namespace Gambit
 
       bool silent = runOptions->getValueOrDef<bool>(false,"silent_mode");
       int last_steps = runOptions->getValueOrDef<int>(4,"show_last_steps");
-      double z_eff = runOptions->getValueOrDef<double>(600.,"z_eff");
+      double z_eff = 0.01;
+      if(ModelInUse("DecayingDM_general"))
+      {
+        z_eff = runOptions->getValueOrDef<double>(300.,"z_eff");
+      }
+      else if (ModelInUse("AnnihilatingDM_general"))
+      {
+        z_eff = runOptions->getValueOrDef<double>(600.,"z_eff");
+      }
 
       DarkAges::fz_table fzt = *Dep::energy_injection_efficiency;
+
+      bool f_eff_mode = fzt.f_eff_mode;
       std::vector<double> z = fzt.redshift;
       std::vector<double> fh = fzt.f_heat;
       std::vector<double> fly = fzt.f_lya;
       std::vector<double> fhi = fzt.f_hion;
       std::vector<double> fhei = fzt.f_heion;
       std::vector<double> flo = fzt.f_lowe;
+      std::vector<double> feff = fzt.f_eff;
 
       int npts = z.size();
       double ftot[npts];
       double red[npts];
       for (int i = 0; i < npts; i++)
       {
-           ftot[i] = fh.at(i)+fly.at(i)+fhi.at(i)+fhei.at(i)+flo.at(i);
-           red[i] = z.at(i);
+        if (f_eff_mode)
+          ftot[i] = feff.at(i);
+        else
+          ftot[i] = fh.at(i)+fly.at(i)+fhi.at(i)+fhei.at(i)+flo.at(i);
+        red[i] = z.at(i);
       }
 
       gsl_interp_accel *gsl_accel_ptr = gsl_interp_accel_alloc();
@@ -335,14 +386,26 @@ namespace Gambit
       if (!silent)
       {
         std::cout << "################" << std::endl;
-        std::cout << "tau = " << *Param["lifetime"] << std::endl;
+        if (ModelInUse("DecayingDM_general"))
+        {
+          std::cout << "Scenario: Dark Matter Decay" << std::endl;
+          std::cout << "tau = " << *Param["lifetime"] << std::endl;
+        }
+        else if (ModelInUse("AnnihilatingDM_general"))
+          std::cout << "Scenario: Dark matter (s-wave) annihilation" << std::endl;
         std::cout << "m = " << *Param["mass"] << std::endl;
-        std::cout << "BR (electrom) = " << *Param["BR"] << std::endl;
+        std::cout << "BR (electron) = " << *Param["BR"] << std::endl;
         std::cout << "---------------" << std::endl;
-        std::cout << "z\tf_heat\tf_lya\tf_hion\tf_heion\tf_lowe" << std::endl;
+        if (f_eff_mode)
+          std::cout << "z\tf_eff" << std::endl;
+        else
+          std::cout << "z\tf_heat\tf_lya\tf_hion\tf_heion\tf_lowe" << std::endl;
         for (unsigned int i = z.size() - last_steps; i < z.size(); i++)
         {
-          std::cout << z.at(i) << "\t" << fh.at(i) << "\t" << fly.at(i) << "\t" << fhi.at(i) << "\t" << fhei.at(i) << "\t" << flo.at(i)  << std::endl;
+          if (f_eff_mode)
+            std::cout << z.at(i) << "\t" << feff.at(i) << std::endl;
+          else
+            std::cout << z.at(i) << "\t" << fh.at(i) << "\t" << fly.at(i) << "\t" << fhi.at(i) << "\t" << fhei.at(i) << "\t" << flo.at(i)  << std::endl;
         }
         std::cout << "f_eff (sum of all channels at z = "<< z_eff << ") = " << result << std::endl;
         std::cout << "################\n" << std::endl;
@@ -415,13 +478,13 @@ namespace Gambit
       switch (N_ncdm)
       {
         case 1:
-          N_ur = 2.0328;  // dNeff= 2.0328 for 1 massive neutrino at CMB release
+          N_ur = 2.0328;  // N_ur (today) = 2.0328 for 1 massive neutrino at CMB release
           break;
         case 2:
-          N_ur= 1.0196;  // dNeff= 2.0328 for 1 massive neutrino at CMB release
+          N_ur= 1.0196;  // N_ur (today) = 1.0196 for 2 massive neutrino at CMB release
           break;
         case 3:
-          N_ur = 0.00641;  // dNeff= 0.00641 for 3 massive neutrinos at CMB release
+          N_ur = 0.00641;  // N_ur (today) = 0.00641 for 3 massive neutrinos at CMB release
           break;
         case 0:
           {
@@ -441,22 +504,22 @@ namespace Gambit
       }
 
       result = N_ur;
-      if (ModelInUse("etaBBN_rBBN_rCMB_dNeffBBN_dNeffCMB"))
+      if (ModelInUse("etaBBN_rBBN_rCMB_dNurBBN_dNurCMB"))
       {
         // Check if the input for dNeff is negative (unphysical)
-        static bool allow_negative_dNeff = runOptions->getValueOrDef<bool>(false,"allow_negative_delta_neff");
-        const ModelParameters& NP_params = *Dep::etaBBN_rBBN_rCMB_dNeffBBN_dNeffCMB_parameters;
-        double dNeffCMB_rad =  NP_params.at("dNeff_CMB");
+        static bool allow_negative_dNeff = runOptions->getValueOrDef<bool>(false,"allow_negative_delta_N_ur");
+        const ModelParameters& NP_params = *Dep::etaBBN_rBBN_rCMB_dNurBBN_dNurCMB_parameters;
+        double dNurCMB =  NP_params.at("dNur_CMB");
         double rCMB =  NP_params.at("r_CMB");
-        if ( (!allow_negative_dNeff) && (dNeffCMB_rad < 0.0) )
+        if ( (!allow_negative_dNeff) && (dNurCMB < 0.0) )
         {
-          std::string err = "A negative value for \"dNeff_CMB\" is unphysical and is not allowed in CosmoBit by default!\n\n";
-          err += "If you want to proceed with megative values, please set the \"allow_negative_delta_neff\"-rule to \"true\" within the yaml-file.";
+          std::string err = "A negative value for \"dNur_CMB\" is unphysical and is not allowed in CosmoBit by default!\n\n";
+          err += "If you want to proceed with megative values, please set the \"allow_negative_delta_N_ur\"-rule to \"true\" within the yaml-file.";
           CosmoBit_error().raise(LOCAL_INFO,err.c_str());
         }
 
         // If the check is passed, set the result.
-        result = pow(rCMB,4)*(N_ur) + dNeffCMB_rad;
+        result = pow(rCMB,4)*(N_ur) + dNurCMB;
       }
       logger() << "N_ur calculated to be " << result << EOM;
     }
@@ -521,7 +584,7 @@ namespace Gambit
     {
       using namespace Pipes::set_baseline_classy_input;
 
-      std::cout << " enter " << __PRETTY_FUNCTION__ << std::endl;
+      //std::cout << " enter " << __PRETTY_FUNCTION__ << std::endl;
 
       // make sure dict is empty
       result.clear();
@@ -543,7 +606,10 @@ namespace Gambit
       result["YHe"] = Helium_abundance.at(0); 
 
       // TODO: need to test if class or exo_class in use! does not work -> (JR) should be fixed with classy implementation
-      if (ModelInUse("DecayingDM_general")){merge_pybind_dicts(result,*Dep::classy_parameters_DecayingDM);}
+      if (ModelInUse("DecayingDM_general") || ModelInUse("AnnihilatingDM_general"))
+      {
+        merge_pybind_dicts(result,*Dep::classy_parameters_EnergyInjection);
+      }
 
       // Other Class input direct from the YAML file 
       // check if these are already contained in the input dictionary -- if so throw an error
@@ -590,7 +656,7 @@ namespace Gambit
     {
       using namespace Pipes::set_classy_parameters_parametrised_ps;
 
-      std::cout << " enter " << __PRETTY_FUNCTION__ << std::endl;
+      //std::cout << " enter " << __PRETTY_FUNCTION__ << std::endl;
 
       // Clean the input container
       result.clear();
@@ -625,7 +691,7 @@ namespace Gambit
     {
       using namespace Pipes::set_classy_parameters_primordial_ps;
 
-      std::cout << " enter " << __PRETTY_FUNCTION__ << std::endl;
+      //std::cout << " enter " << __PRETTY_FUNCTION__ << std::endl;
 
       // Clean the input container
       result.clear();
@@ -689,7 +755,7 @@ namespace Gambit
         result.phi_init0.push_back(*Param["phi_init0"]);
         result.potential_choice = 2; // -> lambda**4*(1.e0_dp+cos(finv*phi))
         result.num_inflaton = 1;
-        result.vparam_rows = 1;
+        result.vparam_rows = 2;
       }
       else if (ModelInUse("Inflation_1quar"))
       {
@@ -707,7 +773,7 @@ namespace Gambit
         result.num_inflaton = 1;
         result.vparam_rows = 1;
       }
-      else if (ModelInUse("Inflation_1mono32"))
+      else if (ModelInUse("Inflation_1mono23"))
       {
         result.vparams.push_back(*Param["lambda"]);
         result.phi_init0.push_back(*Param["phi_init0"]);
@@ -724,7 +790,7 @@ namespace Gambit
         result.phi_init0.push_back(*Param["phi_init0"]);
         result.potential_choice = 5; 
         result.num_inflaton = 1;
-        result.vparam_rows = 1;
+        result.vparam_rows = 2;
       }
 
       // TODO: MultiMode segFaults if this is empty have to do this properly though (JR)
@@ -758,7 +824,7 @@ namespace Gambit
       /// @TODO Separate into cases where we want the full ps and the parametrised ps
 
       result.k_min = runOptions->getValueOrDef<double>(1e-6,"k_min");
-      result.k_max = runOptions->getValueOrDef<double>(1e+6,"k_min");
+      result.k_max = runOptions->getValueOrDef<double>(1e+6,"k_max");
       result.numsteps = runOptions->getValueOrDef<int>(100, "numsteps");
 
       if (result.numsteps > 1000)
@@ -1488,23 +1554,23 @@ namespace Gambit
       // set of 'known' parameters 'known_relicparam_options'
 
       // Check if the input for dNeff is negative (unphysical)
-      static bool allow_negative_dNeff = runOptions->getValueOrDef<bool>(false,"allow_negative_delta_neff");
-      double dNeffBBN_rad =  *Param["dNeff_BBN"];
-      if ( (!allow_negative_dNeff) && (dNeffBBN_rad < 0.0) )
+      static bool allow_negative_dNeff = runOptions->getValueOrDef<bool>(false,"allow_negative_delta_N_ur");
+      double dNurBBN =  *Param["dNur_BBN"];
+      if ( (!allow_negative_dNeff) && (dNurBBN < 0.0) )
       {
-        std::string err = "A negative value for \"dNeff_BBN\" is unphysical and is not allowed in CosmoBit by default!\n\n";
-        err += "If you want to proceed with megative values, please set the \"allow_negative_delta_neff\"-rule to \"true\" within the yaml-file.";
+        std::string err = "A negative value for \"dNur_BBN\" is unphysical and is not allowed in CosmoBit by default!\n\n";
+        err += "If you want to proceed with megative values, please set the \"allow_negative_delta_N_ur\"-rule to \"true\" within the yaml-file.";
         CosmoBit_error().raise(LOCAL_INFO,err.c_str());
       }
 
       //If check is passed, set inputs.
       result["eta0"] = *Param["eta_BBN"];    // eta AFTER BBN (variable during)
       result["Nnu"]=3.046*pow((*Param["r_BBN"]),4); // contribution from SM neutrinos
-      result["dNnu"]=dNeffBBN_rad;    // dNnu: within AlterBBN scenarios in which the sum Nnu+dNnu is the same are identical
+      result["dNnu"]=dNurBBN;    // dNnu: within AlterBBN scenarios in which the sum Nnu+dNnu is the same are identical
       result["failsafe"] = runOptions->getValueOrDef<double>(3,"failsafe");
       result["err"] = runOptions->getValueOrDef<double>(3,"err");
 
-      logger() << "Set AlterBBN with parameters eta = " << result["eta0"] << ", Nnu = " << result["Nnu"] << ", dNeffBBN = " << result["dNnu"] << EOM;
+      logger() << "Set AlterBBN with parameters eta = " << result["eta0"] << ", Nnu = " << result["Nnu"] << ", dNnu = " << result["dNnu"] << EOM;
       logger() << "     and error params: failsafe = " << result["failsafe"] << ", err = " << result["err"] << EOM;
     }
     
@@ -1526,7 +1592,7 @@ namespace Gambit
       result["failsafe"] = runOptions->getValueOrDef<double>(3,"failsafe");
       result["err"] = runOptions->getValueOrDef<double>(3,"err");
 
-      logger() << "Set AlterBBN for LCDM with parameters eta = " << result["eta0"] << ", Nnu = " << result["Nnu"] << ", dNeffBBN = " << result["dNnu"] << EOM;
+      logger() << "Set AlterBBN for LCDM with parameters eta = " << result["eta0"] << ", Nnu = " << result["Nnu"] << ", dNnu = " << result["dNnu"] << EOM;
       logger() << "     and error params: failsafe = " << result["failsafe"] << ", err = " << result["err"] << EOM;
     }
 
@@ -1720,7 +1786,7 @@ namespace Gambit
       result.push_back(BBN_res.BBN_abund.at(abund_map["Yp"]));
       result.push_back(sqrt(BBN_res.BBN_covmat.at(abund_map["Yp"]).at(abund_map["Yp"])));
 
-      std::cout << "Helium Abundance from AlterBBN: " << result.at(0) << " +/- " << result.at(1) << std::endl;
+      //std::cout << "Helium Abundance from AlterBBN: " << result.at(0) << " +/- " << result.at(1) << std::endl;
       logger() << "Helium Abundance from AlterBBN: " << result.at(0) << " +/- " << result.at(1) << EOM;
     }
 
@@ -1853,10 +1919,10 @@ namespace Gambit
 
       // compute chi2
       for(ie=0;ie<nobs;ie++) for(je=0;je<nobs;je++) chi2+=(prediction[ie]-observed[ie])*gsl_matrix_get(invcov,ie,je)*(prediction[je]-observed[je]);
-      std::cout << "    BBN Like: chi2 = " << chi2 << "  factor " <<  log(pow(2*pi,nobs)*det_cov) << "  det cov = " << det_cov << std::endl; 
+      //std::cout << "    BBN Like: chi2 = " << chi2 << "  factor " <<  log(pow(2*pi,nobs)*det_cov) << "  det cov = " << det_cov << std::endl; 
       result = -0.5*(chi2 + log(pow(2*pi,nobs)*det_cov));
 
-      std::cout << "    BBN LogLike computed to be: " << result << std::endl;
+      //std::cout << "    BBN LogLike computed to be: " << result << std::endl;
       logger() << "BBN LogLike computed to be: " << result << EOM;
 
       gsl_matrix_free(cov);
@@ -1962,26 +2028,36 @@ namespace Gambit
       result.merge_input_dicts(MP_cosmo_arguments);
     }
 
-    
-  void set_classy_parameters_DecayingDM_general(pybind11::dict &result)
+
+  void set_classy_parameters_EnergyInjection_AnnihilatingDM(pybind11::dict &result)
   {
-    using namespace Pipes::set_classy_parameters_DecayingDM_general;
+    using namespace Pipes::set_classy_parameters_EnergyInjection_AnnihilatingDM;
 
     // make sure nothing from previous run is contained
     result.clear();
 
-    result["DM_decay_tau"] = *Dep::lifetime;
-    result["DM_decay_fraction"] = *Dep::DM_fraction;
+    // Set relevant inputs for the scenario of s-wave annihilating DM
+    const ModelParameters& NP_params = *Dep::AnnihilatingDM_general_parameters;
+    result["DM_annihilation_cross_section"] = NP_params.at("sigmav");
+    result["DM_annihilation_mass"] = NP_params.at("mass");
+
+    // Get the results from the DarkAges tables that hold extra information to be passed to the CLASS thermodynamics structure
+    static DarkAges::fz_table fz;
+    fz = *Dep::energy_injection_efficiency;
+    bool f_eff_mode = fz.f_eff_mode;
 
     // flag passed to CLASS to signal that the energy_deposition_function is coming from GAMBIT
     // we patched exoclass to accept this. An alternative way without patching would be to write the tables to disk &
     // just have CLASS read in the file. To avoid the repeated file writing & deleting we pass pointers to the vector/arrays
     // to CLASS instead
-    result["f_eff_type"] = "pointer_to_fz_channel";
-
-    // Get the results from the DarkAges tables that hold extra information to be passed to the CLASS thermodynamics structure
-    static DarkAges::fz_table fz;
-    fz = *Dep::energy_injection_efficiency;
+    if (f_eff_mode)
+    {
+      result["f_eff_type"] = "pointer_to_fz_eff";
+    }
+    else
+    {
+      result["f_eff_type"] = "pointer_to_fz_channel";
+    }
 
     // set the lengths of the input tables (since we are passing pointers to arrays CLASS has to know how long they are)
     result["energyinj_coef_num_lines"] = fz.redshift.size();
@@ -1991,11 +2067,70 @@ namespace Gambit
     //    - memory addresses are passed as strings (python wrapper for CLASS converts every entry to a string internally so
     //      we need to do that for the memory addresses before python casts them to something else)
     result["energyinj_coef_z"] = memaddress_to_uint(fz.redshift.data());
-    result["energyinj_coef_heat"] = memaddress_to_uint(fz.f_heat.data());
-    result["energyinj_coef_lya"] = memaddress_to_uint(fz.f_lya.data());
-    result["energyinj_coef_ionH"] = memaddress_to_uint(fz.f_hion.data());
-    result["energyinj_coef_ionHe"] = memaddress_to_uint(fz.f_heion.data());
-    result["energyinj_coef_lowE"] = memaddress_to_uint(fz.f_lowe.data());
+    if (f_eff_mode)
+    {
+      result["energyinj_coef_tot"] = memaddress_to_uint(fz.f_eff.data());
+    }
+    else
+    {
+      result["energyinj_coef_heat"] = memaddress_to_uint(fz.f_heat.data());
+      result["energyinj_coef_lya"] = memaddress_to_uint(fz.f_lya.data());
+      result["energyinj_coef_ionH"] = memaddress_to_uint(fz.f_hion.data());
+      result["energyinj_coef_ionHe"] = memaddress_to_uint(fz.f_heion.data());
+      result["energyinj_coef_lowE"] = memaddress_to_uint(fz.f_lowe.data());
+    }
+  }
+
+  void set_classy_parameters_EnergyInjection_DecayingDM(pybind11::dict &result)
+  {
+    using namespace Pipes::set_classy_parameters_EnergyInjection_DecayingDM;
+
+    // make sure nothing from previous run is contained
+    result.clear();
+
+    // Set relevant inputs for the scenario of decaying DM
+    const ModelParameters& NP_params = *Dep::DecayingDM_general_parameters;
+    result["DM_decay_tau"] = NP_params.at("lifetime");
+    result["DM_decay_fraction"] = NP_params.at("fraction");
+
+    // Get the results from the DarkAges tables that hold extra information to be passed to the CLASS thermodynamics structure
+    static DarkAges::fz_table fz;
+    fz = *Dep::energy_injection_efficiency;
+    bool f_eff_mode = fz.f_eff_mode;
+
+    // flag passed to CLASS to signal that the energy_deposition_function is coming from GAMBIT
+    // we patched exoclass to accept this. An alternative way without patching would be to write the tables to disk &
+    // just have CLASS read in the file. To avoid the repeated file writing & deleting we pass pointers to the vector/arrays
+    // to CLASS instead
+    if (f_eff_mode)
+    {
+      result["f_eff_type"] = "pointer_to_fz_eff";
+    }
+    else
+    {
+      result["f_eff_type"] = "pointer_to_fz_channel";
+    }
+
+    // set the lengths of the input tables (since we are passing pointers to arrays CLASS has to know how long they are)
+    result["energyinj_coef_num_lines"] = fz.redshift.size();
+
+    // add the pointers to arrays class needs to know about to input dictionary
+    // Note:
+    //    - memory addresses are passed as strings (python wrapper for CLASS converts every entry to a string internally so
+    //      we need to do that for the memory addresses before python casts them to something else)
+    result["energyinj_coef_z"] = memaddress_to_uint(fz.redshift.data());
+    if (f_eff_mode)
+    {
+      result["energyinj_coef_tot"] = memaddress_to_uint(fz.f_eff.data());
+    }
+    else
+    {
+      result["energyinj_coef_heat"] = memaddress_to_uint(fz.f_heat.data());
+      result["energyinj_coef_lya"] = memaddress_to_uint(fz.f_lya.data());
+      result["energyinj_coef_ionH"] = memaddress_to_uint(fz.f_hion.data());
+      result["energyinj_coef_ionHe"] = memaddress_to_uint(fz.f_heion.data());
+      result["energyinj_coef_lowE"] = memaddress_to_uint(fz.f_lowe.data());
+    }
   }
 
 

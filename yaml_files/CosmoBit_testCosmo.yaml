@@ -30,10 +30,10 @@ Parameters:
  #etaBBN:                             !import include/etaBBN.yaml
  #rCMB:                               !import include/rCMB.yaml
  #rBBN_rCMB:                          !import include/rBBN_rCMB.yaml
- #dNeffCMB:                           !import include/dNeffCMB.yaml
- #dNeffBBN_dNeffCMB:                  !import include/dNeffBBN_dNeffCMB.yaml
- #rBBN_rCMB_dNeffBBN_dNeffCMB:        !import include/rBBN_rCMB_dNeffBBN_dNeffCMB.yaml
- etaBBN_rBBN_rCMB_dNeffBBN_dNeffCMB: !import include/etaBBN_rBBN_rCMB_dNeffBBN_dNeffCMB.yaml
+ #dNurCMB:                           !import include/dNurCMB.yaml
+ #dNurBBN_dNurCMB:                  !import include/dNurBBN_dNurCMB.yaml
+ #rBBN_rCMB_dNurBBN_dNurCMB:        !import include/rBBN_rCMB_dNurBBN_dNurCMB.yaml
+ etaBBN_rBBN_rCMB_dNurBBN_dNurCMB: !import include/etaBBN_rBBN_rCMB_dNurBBN_dNurCMB.yaml
 
  # neutrino masses
  StandardModel_mNudiff: !import include/StandardModel_mNudiff_both_scan.yaml
@@ -226,14 +226,14 @@ Rules:
       relative_errors: [1.348e-3, 1.596e-2, 1.618e-2, 6.788e-2, 6.579e-2]
 
 
-   # Allow for negative values of dNeff_BBN and dNeffBBN_dNeffCMB
+   # Allow for negative values of dNur_BBN and dNur_CMB
    #  -> In this form, the option is set for all CosmoBit function and applies
    #     for both parameters at once.
-   #     If this should only apply for dNeffBBN or dNeffCMB eclusively,
+   #     If this should only apply for dNur_BBN or dNur_CMB eclusively,
    #     consider to make this as a rule of the respective capability / function.
   - module: CosmoBit
     options:
-      allow_negative_delta_neff: false
+      allow_negative_delta_N_ur: false
 
 #======== Logging setup ========
 Logger:

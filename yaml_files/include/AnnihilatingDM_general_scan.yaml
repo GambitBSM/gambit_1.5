@@ -1,0 +1,20 @@
+##########################################################################
+## AnnihilatingDM_general parameter
+##
+## Patrick Stoecker <stoecker@physik.rwth-aachen.de>
+## 2020, Jan
+##########################################################################
+
+# mass in GeV
+mass:
+  range: [1e-2, 1e4]
+  prior_type: log
+
+# BR of decay int e+ e- (1 -BR is decay into photons)
+BR:
+  range: [0.0, 1.0]
+
+# < sigma v > in cm^3 s^-1
+sigmav:
+  range: [1e-28, 1e-24]
+  prior_type: log

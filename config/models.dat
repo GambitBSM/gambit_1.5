@@ -484,14 +484,52 @@ ScalarSingletDM_Z2_running: |
 
    The scalar singlet DM model with lambda_S (the scalar self-coupling), lambda_hS (the scalar-SM Higgs interaction strength) and mS (the mass of the new scalar) defined at the scale mZ as free parameters, allowing full calculation of pole masses, renormalisation group running and vacuum stability.
 
+AnnihilatingDM_general: |
+
+  Simple model of promptly annihilating dark matter into e+/e- and/or photons.
+
+  mass   - mass of the dark matter candidate [in GeV]
+  sigmav - thermally averaged cross section [in cm^3 s^-1]
+  BR     - the fraction of how much energy will be contributed in e+/e-. (1-BR will be asinged to photons)
+
+AnnihilatingDM_photon: |
+
+  Special case of AnnihilatingDM_general. (Annihilation only into photons -> BR = 0)
+
+  mass   - mass of the dark matter candidate [in GeV]
+  sigmav - thermally averaged cross section [in cm^3 s^-1]
+
+AnnihilatingDM_electron: |
+
+  Special case of AnnihilatingDM_general. (Annihilation only into e+/e- -> BR = 1)
+
+  mass   - mass of the dark matter candidate [in GeV]
+  sigmav - thermally averaged cross section [in cm^3 s^-1]
+
 DecayingDM_general: |
 
-  Toy model of decaying dark matter.
+  Simple model of promptly decaying dark matter into e+/e- and/or photons.
 
   mass     - mass of the dark matter candidate [in GeV]
   lifetime - lifetime of said DM candidate [in s]
   fraction - fraction of how much the decaying DM component contributes to all DM.
   BR       - the fraction of how much energy will be contributed in e+/e-. (1-BR will be asinged to photons)
+
+DecayingDM_photon: |
+
+  Special case of DecayingDM_general. (Decay only into photons -> BR = 0)
+
+  mass     - mass of the dark matter candidate [in GeV]
+  lifetime - lifetime of said DM candidate [in s]
+  fraction - fraction of how much the decaying DM component contributes to all DM.
+
+DecayingDM_electron: |
+
+  Special case of DecayingDM_general. (Decay only into e+/e- -> BR = 1)
+
+  mass     - mass of the dark matter candidate [in GeV]
+  lifetime - lifetime of said DM candidate [in s]
+  fraction - fraction of how much the decaying DM component contributes to all DM.
 
 MDM: |
 
@@ -594,45 +632,45 @@ LCDM_no_primordial: |
    H0                  - Hubble constant
    tau_reio            - reionization optical depth
 
-etaBBN_rBBN_rCMB_dNeffBBN_dNeffCMB: |
+etaBBN_rBBN_rCMB_dNurBBN_dNurCMB: |
 
    Model to be scanned in addition to LCDM as an extension: allowing for non-standard values of the baryon-to-photon ratio at BBN, non-standard values of the temperature ratio between photon and neutrinos at BBN and CMB release, as well as additional ultra-relativistic species present during BBN or at CMB release.
-   Total value of Neff @BBN: 3.046 x (r_BBN)^4 + dNeffBBN
-   Total value of Neff @CMB: 3.046 x (r_CMB)^4 + dNeffCMB
-   Total value of Neff today: Neff @CMB - N_ur_SMnu x (r_CMB)^4 (value of Neff depending on #massive Nu) assuming that r_CMB = r_0 and dNeffCMB = dNeff0   => this is the value we have to pass to class as `N_ur`
+   Total value of Neff @BBN: 3.046 x (r_BBN)^4 + dNur_BBN
+   Total value of Neff @CMB: 3.046 x (r_CMB)^4 + dNur_CMB
+   Total value of Neff today: Neff @CMB - N_ur_SMnu x (r_CMB)^4 (value of Neff depending on #massive Nu) assuming that r_CMB = r_0 and dNur_CMB = dNur_0   => this is the value we have to pass to class as `N_ur`
 
-   etaBBN              - baryon-to-photon ratio during BBN (eta at CMB set by omega_b)
-   rBBN                - factor by which the temperature ratio of SM neutrinos and photons deviates 
+   eta_BBN             - baryon-to-photon ratio during BBN (eta at CMB set by omega_b)
+   r_BBN               - factor by which the temperature ratio of SM neutrinos and photons deviates
                          from the standard value T_ncdm during BBN
-   rCMB                - factor by which the temperature ratio of SM neutrinos and photons deviates 
-                         from the standard value T_ncdm at CMB release  
-   dNeffBBN            - additional ultra-relativistic species during BBN
-   dNeffCMB            - additional ultra-relativistic species at CMB
+   r_CMB               - factor by which the temperature ratio of SM neutrinos and photons deviates
+                         from the standard value T_ncdm at CMB release
+   dNur_BBN            - additional ultra-relativistic species during BBN
+   dNur_CMB            - additional ultra-relativistic species at CMB
 
 etaBBN: |
-   Child model of etaBBN_rBBN_rCMB_dNeffBBN_dNeffCMB with only etaBBN as free parameter. Only allows for non-standard baryon-to-photon ratios, Neff as in SM at all times => rBBN = rCMB = 1 and dNeffBBN = dNeffCMB = 0. 
+   Child model of etaBBN_rBBN_rCMB_dNurBBN_dNurCMB with only etaBBN as free parameter. Only allows for non-standard baryon-to-photon ratios, Neff as in SM at all times => r_BBN = r_CMB = 1 and dNur_BBN = dNur_CMB = 0. 
 
-   etaBBN              - baryon-to-photon ratio during BBN (eta at CMB set by omega_b)
+   eta_BBN             - baryon-to-photon ratio during BBN (eta at CMB set by omega_b)
 
-rBBN_rCMB_dNeffBBN_dNeffCMB: |
-   
-   Child model of etaBBN_rBBN_rCMB_dNeffBBN_dNeffCMB. Parameters as in parent but with etaBBN = eta0 (calculated from omega_b from a LCDM model)
+rBBN_rCMB_dNurBBN_dNurCMB: |
 
-dNeffBBN_dNeffCMB: |
-   
-   Child model of rBBN_rCMB_dNeffBBN_dNeffCMB model. Parameters are as in parent model but without allowing for non-standard neutrino temperatures => rBBN = rCMB = 1.
+   Child model of etaBBN_rBBN_rCMB_dNurBBN_dNurCMB. Parameters as in parent but with etaBBN = eta0 (calculated from omega_b from a LCDM model)
 
-dNeffCMB: |
-   
-   Child model of dNeffBBN_dNeffCMB model. Parameters are as in parent model but the number of extra ultra-relativistic species is assumed to be constant between BBN and CMB, hence dNeffBBN = dNeffCMB.
+dNurBBN_dNurCMB: |
+
+   Child model of rBBN_rCMB_dNurBBN_dNurCMB model. Parameters are as in parent model but without allowing for non-standard neutrino temperatures => r_BBN = r_CMB = 1.
+
+dNurCMB: |
+
+   Child model of dNurBBN_dNurCMB model. Parameters are as in parent model but the number of extra ultra-relativistic species is assumed to be constant between BBN and CMB, hence dNur_BBN = dNur_CMB.
 
 rBBN_rCMB: |
-   
-   Child model of rBBN_rCMB_dNeffBBN_dNeffCMB model. Parameters are as in parent model but without allowing for additional ultra-relativistic species => dNeffBBN = dNeffCMB = 0.
+
+   Child model of rBBN_rCMB_dNurBBN_dNurCMB model. Parameters are as in parent model but without allowing for additional ultra-relativistic species => dNur_BBN = dNur_CMB = 0.
 
 rCMB: |
-   
-   Child model of rBBN_rCMB model. Parameters are as in parent model but the neutrino to photon temperature ratio between BBN and CMB is assumed to be constant, hence rBBN = rCMB.
+
+   Child model of rBBN_rCMB model. Parameters are as in parent model but the neutrino to photon temperature ratio between BBN and CMB is assumed to be constant, hence r_BBN = r_CMB.
 
 Inflation_tensor: |
    Parameterisation of the shape of the primordial power spectrum allowing for a non-zero scalr to tensor ratio r.
