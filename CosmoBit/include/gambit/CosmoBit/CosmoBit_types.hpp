@@ -179,12 +179,10 @@ namespace Gambit
     class ClassyInput
     {
       public:
-        // add all entries from extra_entries to input_dict, will throw an error if 
-        // one entry is contained in both dictionaries
-        // returns 1 if adding was successful, -1 if an entries 
-        // appeared twice -> need to throw an error since overwriting CLASS input
-        // without realising it can be dangerous // TODO: actually implement the check somewhere.. 
-        int addDict(pybind11::dict extra_entries);
+        // add all entries from extra_entries to input_dict, will store all 
+        // entries contained in both dictionaries in the string duplicated_keys
+        // if the string is not empty -> need to throw an error since overwriting CLASS input
+        std::string addDict(pybind11::dict extra_entries);
 
         void addEntry(str key, double value) {input_dict[key.c_str()]=std::to_string(value).c_str();};
         void addEntry(str key, int    value) {input_dict[key.c_str()]=std::to_string(value).c_str();};
@@ -312,16 +310,22 @@ namespace Gambit
             void set_ns(double ns) {n_s = ns;};
             void set_As(double As) {A_s = As;};
             void set_r(double R) {r = R;};
+            void set_kpivot(double k) {k_pivot = k;};
+            void set_Npivot(double N) {N_pivot = N;};
 
             double get_ns() {return n_s;};
             double get_As() {return A_s;};
             double get_r() {return r;};
+            double get_kpivot() {return k_pivot;};
+            double get_Npivot() {return N_pivot;};
 
 
         private:
             double n_s;
             double A_s;
             double r;
+            double k_pivot = -1;
+            double N_pivot = -1; // called N_star in CLASS
     };
   }
 }

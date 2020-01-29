@@ -409,6 +409,7 @@ BE_INI_FUNCTION
       invalid_point().raise(errMssg.str());
     }
   }
+  
   std::cout << "Trying to print power spectrum..." << std::endl;
   print_pps();
 }

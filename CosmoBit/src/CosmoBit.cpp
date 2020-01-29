@@ -661,10 +661,6 @@ namespace Gambit
       // Clean the input container
       result.clear();
 
-      // Add standard cosmo parameters, nu masses, helium abundance &
-      // extra run options for class passed in yaml file to capability
-      // 'baseline_classy_input'
-      result.addDict(*Dep::baseline_classy_input);
        
       // Now need to pass the primordial power spectrum
       // TODO check whether A_s from MultiModeCode has the log taken or not.
@@ -682,6 +678,21 @@ namespace Gambit
         result.addEntry("modes","t,s");
       }
       
+      // Add standard cosmo parameters, nu masses, helium abundance &
+      // extra run options for class passed in yaml file to capability
+      // 'baseline_classy_input'
+      std::string duplicated_keys = result.addDict(*Dep::baseline_classy_input);
+
+      if(duplicated_keys != "")
+      {
+        CosmoBit_error().raise(LOCAL_INFO, "The key(s) '" + duplicated_keys + "' already "
+                "exists in the CLASSY dictionary. You are probably trying to override a CLASS setting. Check that none "
+                "of the parameters you pass through your yaml file through RunOptions for the capability 'baseline_classy_input' "
+                "is in contradiction with any settings made via the dependency resolution by CosmoBit in the function '"+__func__+"'.");
+      }
+
+
+
     }
 
     /// Set the LCDM_no_primordial_ps in classy. Depends on a primordial_ps.
@@ -696,13 +707,7 @@ namespace Gambit
       // Clean the input container
       result.clear();
 
-      // Add standard cosmo parameters, nu masses, helium abundance &
-      // extra run options for class passed in yaml file to capability
-      // 'baseline_classy_input'
-      result.addDict(*Dep::baseline_classy_input);
-
       // Now need to pass the primordial power spectrum 
-      // TODO will not work until CLASS is patched. --- done =) 
       static primordial_ps pps{};
       pps = *Dep::primordial_power_spectrum;
       result.addEntry("modes", "t,s");
@@ -711,8 +716,21 @@ namespace Gambit
       result.addEntry("k_array", pps.get_k());
       result.addEntry("pks_array", pps.get_P_s());
       result.addEntry("pkt_array", pps.get_P_t());
-      result.addEntry("lnk_size" , 100); // don't hard code but somehow make consistent with multimode todo
+      result.addEntry("lnk_size" , 100); // don't hard code but somehow make consistent with multimode @TODO
 
+
+      // Add standard cosmo parameters, nu masses, helium abundance &
+      // extra run options for class passed in yaml file to capability
+      // 'baseline_classy_input'
+      std::string duplicated_keys = result.addDict(*Dep::baseline_classy_input);
+
+      if(duplicated_keys != "")
+      {
+        CosmoBit_error().raise(LOCAL_INFO, "The key(s) '" + duplicated_keys + "' already "
+                "exists in the CLASSY dictionary. You are probably trying to override a CLASS setting. Check that none "
+                "of the parameters you pass through your yaml file through RunOptions for the capability 'baseline_classy_input' "
+                "is in contradiction with any settings made via the dependency resolution by CosmoBit in the function '"+__func__+"'.");
+      }
     }
 
     /// Function to set the generic inputs used for MultiModeCode.
@@ -946,8 +964,8 @@ namespace Gambit
       double phi0_priors_max = 10.;
       double dphi0_priors_min = 0.;
       double dphi0_priors_max = 0.;
-      double N_pivot_prior_min = inputs.N_pivot;
-      double N_pivot_prior_max = inputs.N_pivot;
+      double N_pivot_prior_min = inputs.N_pivot; // (JR) can these two be removed here since we probably don't
+      double N_pivot_prior_max = inputs.N_pivot; // vary Npivot when using the parameterised ps? 
 
 
       // The parameters below are only used by multimode if the full Pk is requested. 
@@ -981,6 +999,8 @@ namespace Gambit
       result.set_ns(observables.ns);
       result.set_As(observables.As);
       result.set_r(observables.r);
+      result.set_kpivot(inputs.k_pivot);
+      result.set_Npivot(inputs.N_pivot);
     }
 
     void get_parametrised_ps_LCDM(parametrised_ps &result)
@@ -1007,12 +1027,20 @@ namespace Gambit
       pps.set_As(*Param["ln10A_s"]);
       pps.set_r(0); 
 
+      // The functions set_kpivot and set_Npivot are not called here, the values
+      // are by default initialised to -1. In ' ', where the input parameters for CLASS
+      // are set there is a check -> 
+      // if k_pivot == N_pivot == -1 :  use CLASS defaults (k_pivot = 0.05, N_pivot = 50, P_k_ini type = analytic_Pk)
+      //                or what is specified for k_pivot and/or N_pivot (N_star in CLASS naming convention) in the yaml file
+      // else:          check that P_k_ini type is not equal to analytic_Pk -> otherwise CLASS would use the analytic Pk with 
+      //                the default values for k_pivot & N_pivot (N_star) even though this is not what you want to do. 
+
       result = pps;
     }
 
 
 
-    // still needs to be rewritten and dived into two funcitons. Also 
+    // still needs to be rewritten and dived into two functions. Also 
     // should fill the new 
     void get_parametrised_ps_SMASH(parametrised_ps &result)
     {

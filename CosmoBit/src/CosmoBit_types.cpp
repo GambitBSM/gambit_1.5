@@ -136,16 +136,15 @@ namespace Gambit
 */
 
 
-    // add all entries from extra_dict to input_dict, will throw an error if 
-    // one entry is contained in both dictionaries
-    // returns 1 if adding was successful, -1 if an entries 
-    // appeared twice -> need to throw an error since overwriting CLASS input
-    // without realising it can be dangerous 
-    // -> todo , better return type string and return duplicated key? might make 
-    // the error message we can throw more informative 
-    int ClassyInput::addDict(pybind11::dict extra_dict)
+    // add all entries from extra_dict to input_dict, will return a string 
+    // with all entries contained in both dictionaries -> check if that is 
+    // the case whenever you use this function to avoid involuntarily overwriting
+    // CLASS inputs 
+    std::string ClassyInput::addDict(pybind11::dict extra_dict)
     {
-      int success = 1;
+      // string to be returned -- stays empty if no duplicated dict entries are found
+      std::string duplicated_keys ("");
+
       for (auto item : extra_dict)
       {
         pybind11::str key = pybind11::str(item.first);
@@ -158,11 +157,12 @@ namespace Gambit
         }
         else
         {
-          success = -1;
-          break;
+          // add duplicated strings 
+          duplicated_keys = duplicated_keys + " " + key.cast<std::string>();
+          //std::cout << "Found duplicated key = " << std::string(pybind11::str(item.first)) << ", "<< "value=" << std::string(pybind11::str(item.second)) << std::endl;
         }
       }
-      return success;
+      return duplicated_keys;
     }
 
     // function to merge python dictionary extra_dict into input_dict. If both dictionaries have the same key
@@ -194,8 +194,9 @@ namespace Gambit
           // e.g. input_dict['output'] = 'A B C'
           //      extra_dict['output'] = 'A B X Y'
           // should result in input_dict['output'] = 'A B C X Y'
+          // (python string.find("x") returns -1 if "x" not contained)
           if(key.attr("find")(pybind11::str("output")).cast<int>()!=-1 ||
-             key.attr("find")(pybind11::str("modes")).cast<int>()!=-1) // (python string.find("x") returns -1 if "x" not contained)
+             key.attr("find")(pybind11::str("modes")).cast<int>()!=-1) 
           {
             // split string of extra_dict['output'] by spaces into list 
             // (-> in the example above this would give list = ['A', 'B', 'X', 'Y'])
@@ -232,7 +233,7 @@ namespace Gambit
             int lmax_input_dict = std::stoi(std::string(pybind11::str(input_dict[key])));
             int lmax_extra_dict = std::stoi(std::string(pybind11::str(extra_dict[key])));
 
-            // if lmax_extra_dict is higher than the entry in the input_dict, replace is
+            // if lmax_extra_dict is higher than the entry in the input_dict replace it
             if (lmax_input_dict < lmax_extra_dict){input_dict[key] = lmax_extra_dict;}
             // if not 'input_dict'already contains the higher value and there is nothing to do here. 
           }
@@ -290,11 +291,9 @@ namespace Gambit
       k = std::move(K);
       // (JR) the vector gets just filled with copies of kmin # todo
       // for testing -> atm 
-      for( int i =0; i<len;i++)
-      {
-        std::cout << k[i] << std::endl;
-      }
-
+      // issue fixed -- thanks to whoever did it :) let's leave the debug print
+      // a while longer though, you never know .. 
+      //for( int i =0; i<len;i++) {std::cout << k[i] << std::endl;};
     }
 
     void primordial_ps::fill_P_s(double *P_s_array, int len)

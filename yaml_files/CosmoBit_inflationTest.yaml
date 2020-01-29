@@ -161,6 +161,7 @@ Rules:
     options:
       classy_dict:
         output: tCl
+        #P_k_ini type : analytic_Pk
   
   #- capability: set_classy_parameters
   #  function: set_classy_parameters_parametrised_ps
