@@ -823,20 +823,13 @@ START_MODULE
 
   #undef CAPABILITY
 
-// AlterBBN related functions & capabilities
+  // AlterBBN related functions & capabilities
   #define CAPABILITY AlterBBN_setInput
     START_CAPABILITY
     #define FUNCTION AlterBBN_Input
       START_FUNCTION(map_str_dbl)
-      ALLOW_MODEL_DEPENDENCE(etaBBN_rBBN_rCMB_dNurBBN_dNurCMB)
-      MODEL_GROUP(non_SM_rad_Nu,(etaBBN_rBBN_rCMB_dNurBBN_dNurCMB))
-      MODEL_GROUP(cosmo,(LCDM))
-      ALLOW_MODEL_COMBINATION(cosmo,non_SM_rad_Nu)
-    #undef FUNCTION
-    #define FUNCTION AlterBBN_Input_LCDM
-      START_FUNCTION(map_str_dbl)
-      ALLOW_MODELS(LCDM)
       DEPENDENCY(eta0, double)
+      MODEL_CONDITIONAL_DEPENDENCY(etaBBN_rBBN_rCMB_dNurBBN_dNurCMB_parameters,ModelParameters,etaBBN_rBBN_rCMB_dNurBBN_dNurCMB)
     #undef FUNCTION
   #undef CAPABILITY
 

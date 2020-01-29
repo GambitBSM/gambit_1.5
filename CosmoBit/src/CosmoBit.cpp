@@ -1581,46 +1581,41 @@ namespace Gambit
       // add it to the function 'fill_cosmomodel' in 'AlterBBN_<version>.cpp' and to the
       // set of 'known' parameters 'known_relicparam_options'
 
-      // Check if the input for dNeff is negative (unphysical)
-      static bool allow_negative_dNeff = runOptions->getValueOrDef<bool>(false,"allow_negative_delta_N_ur");
-      double dNurBBN =  *Param["dNur_BBN"];
-      if ( (!allow_negative_dNeff) && (dNurBBN < 0.0) )
+      // If we are using some of the "non-standard energy content" models, set the
+      // inputs for the AlterBBN_input map according to the parameters of that model.
+      // In case we are not using one of these models, we use the default values
+      // (i.e. eta inferred from LCDM, Nnu = 3.046 and dNnu = 0)
+      if (ModelInUse("etaBBN_rBBN_rCMB_dNurBBN_dNurCMB"))
       {
-        std::string err = "A negative value for \"dNur_BBN\" is unphysical and is not allowed in CosmoBit by default!\n\n";
-        err += "If you want to proceed with megative values, please set the \"allow_negative_delta_N_ur\"-rule to \"true\" within the yaml-file.";
-        CosmoBit_error().raise(LOCAL_INFO,err.c_str());
+        const ModelParameters& NP_params = *Dep::etaBBN_rBBN_rCMB_dNurBBN_dNurCMB_parameters;
+
+        double dNurBBN =  NP_params.at("dNur_BBN");
+
+        // Check if the input for dNeff is negative (unphysical)
+        static bool allow_negative_dNeff = runOptions->getValueOrDef<bool>(false,"allow_negative_delta_N_ur");
+        if ( (!allow_negative_dNeff) && (dNurBBN < 0.0) )
+        {
+          std::string err = "A negative value for \"dNur_BBN\" is unphysical and is not allowed in CosmoBit by default!\n\n";
+          err += "If you want to proceed with megative values, please set the \"allow_negative_delta_N_ur\"-rule to \"true\" within the yaml-file.";
+          CosmoBit_error().raise(LOCAL_INFO,err.c_str());
+        }
+
+        //If check is passed, set inputs.
+        result["eta0"] = NP_params.at("eta_BBN");    // eta AFTER BBN (variable during)
+        result["Nnu"]=3.046*pow(NP_params.at("r_BBN"),4); // contribution from SM neutrinos
+        result["dNnu"]=dNurBBN;    // dNnu: within AlterBBN scenarios in which the sum Nnu+dNnu is the same are identical
+      }
+      else
+      {
+        result["eta0"] = *Dep::eta0;    // eta AFTER BBN equal to eta today calculated from omgea_b
+        result["Nnu"]=3.046; // contribution from SM neutrinos
+        result["dNnu"]=0.;    // no extra ur species in standard LCDM model
       }
 
-      //If check is passed, set inputs.
-      result["eta0"] = *Param["eta_BBN"];    // eta AFTER BBN (variable during)
-      result["Nnu"]=3.046*pow((*Param["r_BBN"]),4); // contribution from SM neutrinos
-      result["dNnu"]=dNurBBN;    // dNnu: within AlterBBN scenarios in which the sum Nnu+dNnu is the same are identical
       result["failsafe"] = runOptions->getValueOrDef<double>(3,"failsafe");
       result["err"] = runOptions->getValueOrDef<double>(3,"err");
 
       logger() << "Set AlterBBN with parameters eta = " << result["eta0"] << ", Nnu = " << result["Nnu"] << ", dNnu = " << result["dNnu"] << EOM;
-      logger() << "     and error params: failsafe = " << result["failsafe"] << ", err = " << result["err"] << EOM;
-    }
-    
-    /// AlterBBN input for vanilla LCDM model
-    void AlterBBN_Input_LCDM(map_str_dbl &result)
-    {
-      using namespace Pipes::AlterBBN_Input_LCDM;
-
-      // add parameters of relicparam structure that should be set to non-default values
-      // to the AlterBBN_input map.
-      // If you want to modify a parameter which has not been used in CosmoBit before simply
-      // add it to the function 'fill_cosmomodel' in 'AlterBBN_<version>.cpp' and to the
-      // set of 'known' parameters 'known_relicparam_options'
-
-      // set inputs
-      result["eta0"] = *Dep::eta0;    // eta AFTER BBN equal to eta today calculated from omgea_b
-      result["Nnu"]=3.046; // contribution from SM neutrinos
-      result["dNnu"]=0.;    // no extra ur species in standard LCDM model
-      result["failsafe"] = runOptions->getValueOrDef<double>(3,"failsafe");
-      result["err"] = runOptions->getValueOrDef<double>(3,"err");
-
-      logger() << "Set AlterBBN for LCDM with parameters eta = " << result["eta0"] << ", Nnu = " << result["Nnu"] << ", dNnu = " << result["dNnu"] << EOM;
       logger() << "     and error params: failsafe = " << result["failsafe"] << ", err = " << result["err"] << EOM;
     }
 
