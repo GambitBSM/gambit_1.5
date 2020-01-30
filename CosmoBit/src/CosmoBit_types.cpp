@@ -35,6 +35,10 @@ namespace Gambit
   namespace CosmoBit
   {
 
+    /// helper to convert the memory address a double pointer points to
+    /// to an integer (-> uintptr_t, size of type depends on system & ensures 
+    /// it is big enough to store memory addresses of the underlying setup)
+    /// (implemented to pass contents of arrays to CLASS) 
     uintptr_t memaddress_to_uint(double* ptr)
     {
       uintptr_t addr;
@@ -136,14 +140,16 @@ namespace Gambit
 */
 
 
-    // add all entries from extra_dict to input_dict, will return a string 
-    // with all entries contained in both dictionaries -> check if that is 
-    // the case whenever you use this function to avoid involuntarily overwriting
-    // CLASS inputs 
+    /// add all entries from extra_entries to input_dict, concatenates and returns all 
+    /// keys that are contained in both dictionaries:
+    /// -> no keys in common: returns empty string ("")
+    /// -> else: returns sting containing all duplicated keys
+    /// need to check after use of this function if returned string was empty to avoid overwriting of 
+    /// input values & inconsistencies. 
     std::string ClassyInput::addDict(pybind11::dict extra_dict)
     {
       // string to be returned -- stays empty if no duplicated dict entries are found
-      std::string duplicated_keys ("");
+      std::string common_keys ("");
 
       for (auto item : extra_dict)
       {
@@ -158,11 +164,11 @@ namespace Gambit
         else
         {
           // add duplicated strings 
-          duplicated_keys = duplicated_keys + " " + key.cast<std::string>();
+          common_keys = common_keys + " " + key.cast<std::string>();
           //std::cout << "Found duplicated key = " << std::string(pybind11::str(item.first)) << ", "<< "value=" << std::string(pybind11::str(item.second)) << std::endl;
         }
       }
-      return duplicated_keys;
+      return common_keys;
     }
 
     // function to merge python dictionary extra_dict into input_dict. If both dictionaries have the same key
@@ -289,6 +295,7 @@ namespace Gambit
     {
       std::vector<double> K(k_array, k_array+len);
       k = std::move(K);
+      vec_size = len;
       // (JR) the vector gets just filled with copies of kmin # todo
       // for testing -> atm 
       // issue fixed -- thanks to whoever did it :) let's leave the debug print

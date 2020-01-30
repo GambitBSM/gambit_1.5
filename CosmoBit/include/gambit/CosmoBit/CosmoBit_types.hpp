@@ -48,6 +48,11 @@ namespace Gambit
 
   namespace CosmoBit
   {
+
+    /// helper to convert the memory address a double pointer points to
+    /// to an integer (-> uintptr_t, size of type depends on system & ensures 
+    /// it is big enough to store memory addresses of the underlying setup)
+    /// (implemented to pass contents of arrays to CLASS) 
     uintptr_t memaddress_to_uint(double* ptr);
     
     typedef std::map< std::string,std::valarray < double > > map_str_valarray_dbl;
@@ -179,9 +184,13 @@ namespace Gambit
     class ClassyInput
     {
       public:
-        // add all entries from extra_entries to input_dict, will store all 
-        // entries contained in both dictionaries in the string duplicated_keys
-        // if the string is not empty -> need to throw an error since overwriting CLASS input
+
+        /// add all entries from extra_entries to input_dict, concatenates and returns all 
+        /// keys that are contained in both dictionaries:
+        /// -> no keys in common: returns empty string ("")
+        /// -> else: returns sting containing all duplicated keys
+        /// need to check after use of this function if returned string was empty to avoid overwriting of 
+        /// input values & inconsistencies. 
         std::string addDict(pybind11::dict extra_entries);
 
         void addEntry(str key, double value) {input_dict[key.c_str()]=std::to_string(value).c_str();};
@@ -285,16 +294,30 @@ namespace Gambit
             void fill_P_s(double*, int);
             void fill_P_s_iso(double*, int);
             void fill_P_t(double*, int);
+            void set_kpivot(double k) {k_pivot = k;};
+            void set_Npivot(double N) {N_pivot = N;};
+
 
             std::vector<double>& get_k() { return k; }
             std::vector<double>& get_P_s() { return P_s; }
             std::vector<double>& get_P_t() { return P_t; }
+            int get_vec_size() { return vec_size; }
+            double get_kpivot() {return k_pivot;};
+            double get_Npivot() {return N_pivot;};
 
         private:
             std::vector<double> k;
             std::vector<double> P_s;
             std::vector<double> P_s_iso;
             std::vector<double> P_t;
+            // needed to pass vector length to CLASS,
+            // set in 'fill_k' method
+            int vec_size;
+            // k_pivot used by CLASS in spectra module,
+            // independent of primordial module, therefore
+            // need to pass it consistently 
+            double k_pivot;
+            double N_pivot; // called N_star in CLASS
     };
 
     /// Class containing the *parametrised* primordial power spectrum.
@@ -324,8 +347,8 @@ namespace Gambit
             double n_s;
             double A_s;
             double r;
-            double k_pivot = -1;
-            double N_pivot = -1; // called N_star in CLASS
+            double k_pivot;
+            double N_pivot; // called N_star in CLASS
     };
   }
 }
