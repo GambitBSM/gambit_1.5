@@ -929,7 +929,21 @@ namespace Gambit
       //  which calculates the observables.
       //-------------------------------------------------------------
 
-      observables = BEreq::multimodecode_gambit_driver(inputs.num_inflaton,          inputs.potential_choice, inputs.slowroll_infl_end,     inputs.instreheat,            inputs.vparam_rows, inputs.use_deltaN_SR,         inputs.evaluate_modes,        inputs.use_horiz_cross_approx, inputs.get_runningofrunning,  inputs.ic_sampling,           inputs.energy_scale,inputs.numb_samples,          inputs.save_iso_N,            inputs.N_iso_ref,param_sampling,               &vp_prior_min,                &vp_prior_max,varying_N_pivot,              use_first_priorval,           byVal(&inputs.phi_init0[0]),byVal(&inputs.dphi_init0[0]), byVal(&inputs.vparams[0]),    inputs.N_pivot,inputs.k_pivot,               inputs.dlnk,                  calcfullpk, steps,                        kmin,                         kmax,&phi0_priors_min,             &phi0_priors_max,             &dphi0_priors_min,   &dphi0_priors_max,            N_pivot_prior_min,            N_pivot_prior_max);
+			observables = BEreq::multimodecode_gambit_driver(inputs.num_inflaton,
+																											 inputs.potential_choice,
+																											 inputs.evaluate_modes,
+																											 inputs.get_runningofrunning,
+																											 byVal(&inputs.phi_init0[0]),
+																											 byVal(&inputs.dphi_init0[0]),
+																											 byVal(&inputs.vparams[0]),
+																											 inputs.N_pivot,
+																											 inputs.k_pivot,
+																											 inputs.dlnk,
+																											 steps,
+																											 kmin,
+																											 kmax,
+																											 inputs.vparam_rows,
+																											 calcfullpk);
 
       // This is fine
       result.fill_k(observables.k_array, inputs.numsteps);
@@ -983,18 +997,21 @@ namespace Gambit
       //  for a given choice of inflationary model,
       //  which calculates the observables.
       //-------------------------------------------------------------
-      observables = BEreq::multimodecode_gambit_driver(inputs.num_inflaton,          inputs.potential_choice, 
-                                                       inputs.slowroll_infl_end,     inputs.instreheat,            inputs.vparam_rows,
-                                                       inputs.use_deltaN_SR,         inputs.evaluate_modes,        inputs.use_horiz_cross_approx, 
-                                                       inputs.get_runningofrunning,  inputs.ic_sampling,           inputs.energy_scale,
-                                                       inputs.numb_samples,          inputs.save_iso_N,            inputs.N_iso_ref,
-                                                       param_sampling,               &vp_prior_min,                &vp_prior_max,
-                                                       varying_N_pivot,              use_first_priorval,           byVal(&inputs.phi_init0[0]),
-                                                       byVal(&inputs.dphi_init0[0]), byVal(&inputs.vparams[0]),    inputs.N_pivot,
-                                                       inputs.k_pivot,               inputs.dlnk,                  calcfullpk,
-                                                       steps,                        kmin,                         kmax,
-                                                       &phi0_priors_min,             &phi0_priors_max,             &dphi0_priors_min,  
-                                                       &dphi0_priors_max,            N_pivot_prior_min,            N_pivot_prior_max);
+			observables = BEreq::multimodecode_gambit_driver(inputs.num_inflaton,
+																											 inputs.potential_choice,
+																											 inputs.evaluate_modes,
+																											 inputs.get_runningofrunning,
+																											 byVal(&inputs.phi_init0[0]),
+																											 byVal(&inputs.dphi_init0[0]),
+																											 byVal(&inputs.vparams[0]),
+																											 inputs.N_pivot,
+																											 inputs.k_pivot,
+																											 inputs.dlnk,
+																											 steps,
+																											 kmin,
+																											 kmax,
+																											 inputs.vparam_rows,
+																											 calcfullpk);
 
       result.set_ns(observables.ns);
       result.set_As(observables.As);
