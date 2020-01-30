@@ -59,39 +59,19 @@ contains
 
   function multimodecode_gambit_driver(ginput_num_inflaton,&
                                          ginput_potential_choice,&
-                                         ginput_slowroll_infl_end,&
-                                         ginput_instreheat,&
-                                         ginput_vparam_rows,&
-                                         ginput_use_deltaN_SR,&
                                          ginput_evaluate_modes,&
-                                         ginput_use_horiz_cross_approx,&
                                          ginput_get_runningofrunning,&
-                                         ginput_ic_sampling,&
-                                         ginput_energy_scale,&
-                                         ginput_numb_samples,&
-                                         ginput_save_iso_N,&
-                                         ginput_N_iso_ref,&
-                                         ginput_param_sampling,&
-                                         ginput_vp_prior_min,&
-                                         ginput_vp_prior_max,&
-                                         ginput_varying_N_pivot,&
-                                         ginput_use_first_priorval,&
                                          ginput_phi_init0,&
                                          ginput_dphi_init0,&
                                          ginput_vparams,&
                                          ginput_N_pivot,&
                                          ginput_k_pivot,&
                                          ginput_dlnk, &
-                                         ginput_calc_full_pk, &
                                          ginput_steps, &
                                          ginput_kmin, &
                                          ginput_kmax, &
-                                         ginput_phi0_priors_min, &
-                                         ginput_phi0_priors_max, &
-                                         ginput_dphi0_priors_min, &
-                                         ginput_dphi0_priors_max, &
-                                         ginput_N_pivot_prior_min, &
-                                         ginput_N_pivot_prior_max &
+                                         ginput_vparam_rows,&
+                                         ginput_calc_full_pk &
                                          ) result(gambit_obs)
 
     type(gambit_inflation_observables) :: gambit_obs ! output
@@ -101,39 +81,19 @@ contains
     ! Gambit interface input parameters
     integer, intent(in) :: ginput_num_inflaton
     integer, intent(in) :: ginput_potential_choice
-    logical, intent(in) :: ginput_slowroll_infl_end
-    logical, intent(in) :: ginput_instreheat
-    integer, intent(in) :: ginput_vparam_rows
-    logical, intent(in) :: ginput_use_deltaN_SR
-    logical, intent(in) :: ginput_evaluate_modes
-    logical, intent(in) :: ginput_use_horiz_cross_approx
-    logical, intent(in) :: ginput_get_runningofrunning
-    integer, intent(in) :: ginput_ic_sampling
-    real(dp), intent(in) :: ginput_energy_scale
-    integer, intent(in) :: ginput_numb_samples
-    logical, intent(in) :: ginput_save_iso_N
-    integer, intent(in) :: ginput_N_iso_ref
-    integer, intent(in) :: ginput_param_sampling
-    real(dp), dimension(ginput_num_inflaton, ginput_num_inflaton), intent(in) :: ginput_vp_prior_min
-    real(dp), dimension(ginput_num_inflaton, ginput_num_inflaton), intent(in) :: ginput_vp_prior_max
-    logical, intent(in) :: ginput_varying_N_pivot
-    logical, intent(in) :: ginput_use_first_priorval
+    logical, optional :: ginput_evaluate_modes
+    logical, optional :: ginput_get_runningofrunning
     real(dp), dimension(ginput_num_inflaton), intent(in) :: ginput_phi_init0
     real(dp), dimension(ginput_num_inflaton), intent(in) :: ginput_dphi_init0
     real(dp), dimension(ginput_vparam_rows, ginput_num_inflaton), intent(in) :: ginput_vparams
     real(dp), intent(in) :: ginput_N_pivot
     real(dp), intent(in) :: ginput_k_pivot
     real(dp), intent(in) :: ginput_dlnk
+    integer, intent(in) :: ginput_steps
     real(dp), intent(in) :: ginput_kmin
     real(dp), intent(in) :: ginput_kmax
-    integer, intent(in) :: ginput_steps
-    logical, intent(in) :: ginput_calc_full_pk
-    real(dp), dimension(ginput_num_inflaton), intent(in) :: ginput_phi0_priors_min
-    real(dp), dimension(ginput_num_inflaton), intent(in) :: ginput_phi0_priors_max
-    real(dp), dimension(ginput_num_inflaton), intent(in) :: ginput_dphi0_priors_min
-    real(dp), dimension(ginput_num_inflaton), intent(in) :: ginput_dphi0_priors_max
-    real(dp), intent(in) :: ginput_N_pivot_prior_min
-    real(dp), intent(in) :: ginput_N_pivot_prior_max
+    integer, intent(in) :: ginput_vparam_rows
+    logical, optional, intent(in) :: ginput_calc_full_pk
 
     !---------------------------------------------------------------
     !At the moment, the options related to the reheating stuff from the code are
@@ -143,7 +103,8 @@ contains
     type(observables) :: observs, observs_SR
 
     !Run-specific input params
-    integer :: sample_looper, vparam_rows
+    integer :: sample_looper
+    integer :: vparam_rows
 
     !Parallel variables
     integer :: numtasks, rank
@@ -167,28 +128,36 @@ contains
     logical :: calc_full_pk
     integer :: pfile
 
+    slowroll_infl_end = .true.
+    instreheat = .true.
+    use_deltaN_SR = .false.
+    use_horiz_cross_approx = .false.
+    ic_sampling = 1
+    energy_scale = 0.1
+    numb_samples = 1
+    save_iso_N = .false.
+    N_iso_ref = 55
+    param_sampling = 1
+    varying_N_pivot = .false. ! --
+    use_first_priorval = .false. ! --
+
     ! Gambit interface giving the values
     ! to the MultiModeCode IC parameters
     num_inflaton = ginput_num_inflaton
     potential_choice = ginput_potential_choice
-    slowroll_infl_end = ginput_slowroll_infl_end
-    instreheat = ginput_instreheat
     vparam_rows = ginput_vparam_rows
-    use_deltaN_SR = ginput_use_deltaN_SR
     evaluate_modes = ginput_evaluate_modes
-    use_horiz_cross_approx = ginput_use_horiz_cross_approx
     get_runningofrunning = ginput_get_runningofrunning
     k_min = ginput_kmin
     k_max = ginput_kmax
     steps = ginput_steps
     calc_full_pk = ginput_calc_full_pk
-
-    ! {1=reg_samp, 2=eqen_samp, 3=slowroll_samp, 6=isoN}
-    ic_sampling = ginput_ic_sampling
-    energy_scale = ginput_energy_scale
-    numb_samples = ginput_numb_samples
-    save_iso_N = ginput_save_iso_N
-    N_iso_ref = ginput_N_iso_ref
+    phi_init0 = ginput_phi_init0
+    dphi_init0 = ginput_dphi_init0
+    vparams = ginput_vparams
+    N_pivot = ginput_N_pivot
+    k_pivot = ginput_k_pivot
+    dlnk = ginput_dlnk
 
     ! if (allocated(gambit_obs % k_array)) deallocate(gambit_obs % k_array)
     ! if (allocated(gambit_obs % pks_array)) deallocate(gambit_obs % pks_array)
@@ -204,18 +173,6 @@ contains
     ! allocate( gambit_obs % pks_array(steps) )
     ! allocate( gambit_obs % pkt_array(steps) )
     ! allocate( gambit_obs % pks_iso_array(steps) )
-
-    param_sampling = ginput_param_sampling
-    vp_prior_min = ginput_vp_prior_min
-    vp_prior_max = ginput_vp_prior_max
-    varying_N_pivot = ginput_varying_N_pivot
-    use_first_priorval = ginput_use_first_priorval
-    phi_init0 = ginput_phi_init0
-    dphi_init0 = ginput_dphi_init0
-    vparams = ginput_vparams
-    N_pivot = ginput_N_pivot
-    k_pivot = ginput_k_pivot
-    dlnk = ginput_dlnk
 
     !---------------------------------------------------------------
     ! setting up the printer options at the code-level.
@@ -274,49 +231,9 @@ contains
     !Set random seed
     call init_random_seed()
 
-    call output_initial_data()
+		call calculate_pk_observables(gambit_obs,observs,observs_SR,k_pivot,dlnk,calc_full_pk,steps,k_min,k_max)
 
-    if (ic_sampling==ic_flags%reg_samp) then
-
-      call out_opt%open_files(SR=use_deltaN_SR)
-
-      call calculate_pk_observables(gambit_obs,observs,observs_SR,k_pivot,dlnk,calc_full_pk,steps,k_min,k_max)
-
-      call out_opt%close_files(SR=use_deltaN_SR)
-
-  else if &
-    !Eqen sampling
-    (ic_sampling == ic_flags%eqen_samp .or. &
-    !Set vels in SR and fields on iso-N surface for N-quad
-    ic_sampling == ic_flags%iso_N .or.&
-    !Set vels in SR
-    ic_sampling == ic_flags%slowroll_samp) then
-
-    call out_opt%open_files(ICs=.true., SR=use_deltaN_SR)
-
-      do sample_looper=1,numb_samples
-
-        if (out_opt%modpkoutput) write(*,*) &
-          "---------------------------------------------"
-        if (out_opt%modpkoutput) write(*,*) &
-          "Sample numb", sample_looper, "of", numb_samples
-        if (out_opt%modpkoutput) write(*,*) &
-          "---------------------------------------------"
-
-        call calculate_pk_observables(gambit_obs,observs,observs_SR,k_pivot,dlnk,calc_full_pk,steps,k_min,k_max)
-
-      end do
-
-      call out_opt%close_files(ICs=.true., SR=use_deltaN_SR)
-
-    else
-      print*, "MODECODE: sampling technique = ",ic_sampling
-      call raise%fatal_code(&
-        "This sampling technique is not implemented.",&
-        __FILE__, __LINE__)
-
-    end if
-    ! it might make sense instead to put zero's etc. to the values here instead of just returning
+		! it might make sense instead to put zero's etc. to the values here instead of just returning
     if (potential_choice == 18) then
       if (.not. observs%is_ic_ok) then
         ! print*, "SMASH: exiting pk_observables "
@@ -413,13 +330,13 @@ contains
             pk%press_ad, &
             pk%cross_ad_iso /)
 
-           !print*,"i = ", i
-           !print*,"k_input = ",k_input(i)
-           !print*,"pk%adiab = ",pk%adiab
-           !print*,"pk%isocurv = ",pk%isocurv
-           !print*,"pk%entropy = ",pk%entropy
-           !print*,"pk%pnad = ",pk%pnad
-           !print*,"pk%tensor = ",pk%tensor
+!           print*,"i = ", i
+!           print*,"k_input = ",k_input(i)
+!           print*,"pk%adiab = ",pk%adiab
+!           print*,"pk%isocurv = ",pk%isocurv
+!           print*,"pk%entropy = ",pk%entropy
+!           print*,"pk%pnad = ",pk%pnad
+!           print*,"pk%tensor = ",pk%tensor
 
         end do
       end if
@@ -479,183 +396,6 @@ contains
       if (allocated(dphi_init)) deallocate(dphi_init)
 
     end subroutine deallocate_vars
-!-------------------DEVELOPEMENT-------------------------------
-
-    subroutine output_observables(pk_arr, calc_full_pk, observ_modes, observ_SR)
-      !Write the observables to screen/file at the end of a successful run.
-
-      type(observables), intent(in), optional :: observ_modes
-      type(observables), intent(in), optional :: observ_SR
-      real(dp), dimension(:,:), intent(in) :: pk_arr
-
-      type(observables) :: SR_pred
-
-      logical :: calc_full_pk
-
-      integer :: i
-
-      if (present(observ_SR)) then
-        SR_pred = observ_SR
-      else
-        call SR_pred%set_zero()
-      end if
-
-      !Background stats
-
-      if (.not. out_opt%output_reduced) then
-        do i=1,size(vparams,1)
-          print*, "vparams =", vparams(i,:)
-        end do
-      end if
-
-      write(*, out_opt%i_fmt) &
-        "Number of Inflaton =", num_inflaton
-      write(*, out_opt%i_fmt) &
-        "Potential Choice =", potential_choice
-      write(*, out_opt%e_fmt) &
-        "N_pivot =", N_pivot
-      if (potential_choice==1) then
-        write(*, out_opt%e2_fmt)&
-          "N_tot =", N_tot,'(', &
-          0.25e0_dp*sum(phi_init0**2) , ')'
-      else
-        write(*, out_opt%e2_fmt)&
-          "N_tot =", N_tot
-      end if
-
-
-      !Mode stats
-
-      if (.not. evaluate_modes) then
-        write(*, out_opt%e2_fmt)&
-          "Ps =", SR_pred%As
-        if (potential_choice==1) then
-          write(*, out_opt%e2_fmt)&
-            "r = Pt/Ps =", SR_pred%r, '(', 8.0/N_pivot, ')'
-        else if (potential_choice==16) then
-          write(*, out_opt%e2_fmt)&
-            "r = Pt/Ps =", SR_pred%r, '(', 4.0*vparams(2,1)/N_pivot, ')'
-        else
-          write(*, out_opt%e2_fmt)&
-            "r =", SR_pred%r
-        end if
-        write(*, out_opt%e2_fmt)&
-          "n_s =", SR_pred%ns
-        write(*, out_opt%e2_fmt)&
-          "n_t =", SR_pred%nt
-        write(*, out_opt%e2_fmt)&
-          "r/n_t =", -(8.0-SR_pred%r/2.0)
-        write(*, out_opt%e2_fmt)&
-          "alpha_s =", SR_pred%alpha_s
-        write(*, out_opt%e2_fmt)&
-          "f_NL =", SR_pred%f_NL
-        write(*, out_opt%e2_fmt)&
-          "tau_NL =", SR_pred%tau_NL, &
-          '(>', ((6.0/5.0)*SR_pred%f_NL)**2, ')'
-
-        return
-      end if
-
-      write(*, out_opt%e2_fmt)&
-        "Ps =", observ_modes%As, '(', SR_pred%As , ')'
-      write(*, out_opt%e2_fmt),&
-        "Isocurvature P =", observ_modes%A_iso
-      write(*, out_opt%e2_fmt),&
-        "Pnad P =", observ_modes%A_pnad
-      write(*, out_opt%e2_fmt),&
-        "Entropy P =", observ_modes%A_ent
-      write(*, out_opt%e2_fmt),&
-        "Cross Ad-Iso P =", observ_modes%A_cross_ad_iso
-      write(*, out_opt%e2_fmt),&
-        "Bundle Width =", field_bundle%exp_scalar
-      write(*, out_opt%e2_fmt)&
-        "r = Pt/Ps =", observ_modes%r, '(', SR_pred%r, ')'
-
-      if (potential_choice==1 .or. potential_choice==15) then
-        write(*, out_opt%e2_fmt)&
-          "r (m^2 phi^2) =", observ_modes%r, '(', 8.0/N_pivot, ')'
-      end if
-
-      write(*, out_opt%e2_fmt)&
-        "n_s =", observ_modes%ns, '(', SR_pred%ns,')'
-      if (num_inflaton>1) then
-        write(*, out_opt%e2_fmt)&
-          "n_iso =",  observ_modes%n_iso
-        write(*, out_opt%e2_fmt)&
-          "n_pnad =", observ_modes%n_pnad
-        write(*, out_opt%e2_fmt)&
-          "n_ent =",  observ_modes%n_ent
-      end if
-      write(*, out_opt%e2_fmt)&
-        "n_t =", observ_modes%nt, '(', SR_pred%nt , ')'
-      write(*, out_opt%e2_fmt)&
-        "r/n_t =", observ_modes%r/observ_modes%nt, '(', -(8.0-observ_modes%r/2.0) , ')'
-      write(*, out_opt%e2_fmt)&
-        "alpha_s =", observ_modes%alpha_s, '(', SR_pred%alpha_s , ')'
-      if (get_runningofrunning) then
-        write(*, out_opt%e2_fmt)&
-          "d^2n_s/dlnk^2 =", observ_modes%runofrun
-      end if
-      write(*, out_opt%e2_fmt)&
-        "Slow-roll f_NL =", observ_modes%f_NL
-      write(*, out_opt%e2_fmt)&
-        "Slow-roll tau_NL =", observ_modes%tau_NL, &
-        '(>', ((6.0/5.0)*observ_modes%f_NL)**2, ')'
-
-
-      if (calc_full_pk .and. evaluate_modes) then
-
-        !Open output files
-        open(newunit=out_adiab,file="out_pk.csv")
-
-        !Write the column header
-        call csv_write(&
-          out_adiab,&
-          (/&
-          !Strings have to be same length for gfortran
-          'k        ', &
-          'P_ad     ', &
-          'P_iso    ', &
-          'P_ent    ', &
-          'P_nad    ', &
-          'P_tens   ', &
-          'P_press  ', &
-          'P_pressad', &
-          'P_cross  '/), &
-          advance=.true.)
-
-        do i=1,size(pk_arr,1)
-          call csv_write(out_adiab,&
-                       pk_arr(i,:),&
-                       advance=.true.)
-        end do
-
-        if (out_opt%modpkoutput)&
-          write(*,*) "Full P(k) written to out_pk.csv"
-
-        !Close output files
-        close(out_adiab)
-
-
-      end if
-
-    end subroutine output_observables
-
-    subroutine output_initial_data()
-      !Write the initial data to screen.
-
-      integer :: i
-
-      call out_opt%formatting(num_inflaton)
-
-      do i=1, size(vparams,1)
-        if (out_opt%modpkoutput .and. .not. out_opt%output_reduced) &
-          write(*, '(A8,I1,A5,100E12.3)'),&
-          "vparams(",i,",:) =", vparams(i,:)
-      end do
-
-    end subroutine output_initial_data
-
 
     !Calculate observables, optionally grab a new IC or a new set of parameters
     !each time this routine is called.
@@ -696,14 +436,6 @@ contains
         call get_vparams()
       end if
 
-      !Get ICs
-      if (ic_sampling/=ic_flags%reg_samp) then
-        ! print*,"we are inside ic_sampling condition"
-        call get_ic(phi_init0, dphi_init0, &
-          icpriors_min, icpriors_max, &
-          numb_samples,energy_scale)
-      end if
-
       !Load ics
       allocate(observs%ic(2*num_inflaton))
       observs%ic(1:num_inflaton)=phi_init0
@@ -727,40 +459,6 @@ contains
       !   end if
       ! end if
 
-
-      !For outputting field values at horiz crossing
-      if (out_opt%fields_horiz) then
-
-        if (out_opt%first_fields_h_out) then
-
-          !First column
-          call csv_write(out_opt%fields_h_out,&
-            'k',&
-            advance=.false.)
-
-          !Next num_inflaton columns
-          do ii=1,num_inflaton
-            write(cname, "(A3,I4.4)") "phi_piv", ii
-            if (ii==num_inflaton) then
-              call csv_write(&
-                out_opt%fields_h_out,&
-                trim(cname), &
-                advance=.true.)
-            else
-              call csv_write(&
-                out_opt%fields_h_out,&
-                trim(cname), &
-                advance=.false.)
-            end if
-          end do
-
-          out_opt%first_fields_h_out = .false.
-        end if
-
-        call csv_write(out_opt%fields_h_out,&
-          (/k, phi_pivot/),&
-          advance=.true.)
-      end if
 
       call test_bad(pk_bad, observs, leave)
       if (leave) return
@@ -787,31 +485,24 @@ contains
 !DEBUG
 !print*, "Not evaluating second and third evolve routines"
 !stop
-         !print*, "second evolve"
-            !print*, "k_pivot*exp(-dlnk) = " , k_pivot*exp(-dlnk)
-            !print*, "dlnk = ", dlnk
 
         call evolve(k_pivot*exp(-dlnk), pk1)
           call test_bad(pk_bad, observs, leave)
           if (leave) return
-            !print*, "left second evolve"
-            !print*, "third evolve"
-            !print*, "k_pivot*exp(dlnk) = " , k_pivot*exp(dlnk)
+
           call evolve(k_pivot*exp(dlnk), pk2)
           call test_bad(pk_bad, observs, leave)
           if (leave) return
-            !print*, "left third evolve"
 
         if (get_runningofrunning) then
-            !print*, "get_runningofrunning = True"
             !Alpha_s from 5-pt stencil
             !or running of running
           call evolve(k_pivot*exp(-2.0e0_dp*dlnk), pk3)
-            !print*, "fourth evolve"
+
             call test_bad(pk_bad, observs, leave)
             if (leave) return
           call evolve(k_pivot*exp(2.0e0_dp*dlnk), pk4)
-            !print*, "fifth evolve"
+
             call test_bad(pk_bad, observs, leave)
             if (leave) return
         end if
@@ -845,53 +536,7 @@ contains
 
         end if
 
-
       end if
-
-      !Write output to stdout
-      if (out_opt%modpkoutput) then
-        !print*,"printing modpkpoutput "
-        if (evaluate_modes) then
-          call output_observables(pk_arr, &
-            calc_full_pk, observs, observs_SR)
-        else
-          call output_observables(pk_arr, &
-            calc_full_pk, observ_SR = observs_SR)
-        end if
-      end if
-
-      ! print*,"save_iso_N=",save_iso_N
-
-      if (save_iso_N) then
-        observs%ic(1:num_inflaton) = phi_iso_N
-        observs%ic(num_inflaton+1:2*num_inflaton) = dphi_iso_N
-        if (use_deltaN_SR) &
-          observs_SR%ic(1:num_inflaton) = phi_iso_N
-        if (use_deltaN_SR) &
-          observs_SR%ic(num_inflaton+1:2*num_inflaton) = dphi_iso_N
-
-        if (out_opt%output_badic .or. pk_bad==run_outcome%success) then
-
-          if (evaluate_modes) then
-            if (out_opt%first_outsamp_N_iso) then
-              call observs%print_header(out_opt%outsamp_N_iso)
-              out_opt%first_outsamp_N_iso=.false.
-            end if
-            call observs%printout(out_opt%outsamp_N_iso)
-          end if
-
-          if (use_deltaN_SR) then
-            if (out_opt%first_outsamp_N_iso_SR) then
-              call observs%print_header(out_opt%outsamp_N_iso_SR)
-              out_opt%first_outsamp_N_iso_SR=.false.
-            end if
-            call observs_SR%printout(out_opt%outsamp_N_iso_SR)
-          end if
-
-        end if
-      end if
-
-    !print*,"no issue before here!"
 
     end subroutine calculate_pk_observables
 
