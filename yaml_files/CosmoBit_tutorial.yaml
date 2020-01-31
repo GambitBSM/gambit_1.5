@@ -247,9 +247,9 @@ Rules:
   # the .ini file here 
   - capability: baseline_classy_input
     function: set_baseline_classy_input
-    options:
-      classy_dict:
-        output: "tCl lCl pCl"   # classy + MP: even when no output specified all spectra etc. the likelihoods need
+    #options:
+      #classy_dict:
+        #output: "tCl lCl pCl"   # classy + MP: even when no output specified all spectra etc. the likelihoods need
                                 # are calculated since the MP Likelihood initialisation is taking care of this for us! 
         # /\
         # ||  (JR) we should not set this by default when using the python wrapper: if only bg needed 
@@ -257,10 +257,10 @@ Rules:
         #     If we use Planck through MP this should be taken care of by itself anyway
         #       *edit*: people don't seem to want to use the MP Planck Likelihood so if you use Planck
         #               you have to set the parameters accordingly here yourself.. Should come up with a better 
-        #               solution => conditional model dependency on Planck nuisance parameters could take care of this TODO
-        lensing: "yes" # heads-up: changed default to 'no' in function 'set_classy_parameters_LCDM' as well
+        #               solution => conditional model dependency on Planck nuisance parameters could take care of this TODO -- done!! 
+        #lensing: "yes" # heads-up: changed default to 'no' in function 'set_classy_parameters_LCDM' as well
                       # since otherwise the automatic output setting will not work
-        l_max_scalars: 2508  # have to set this as well by hand to match the max l needed for Planck likelihood
+        #l_max_scalars: 2508  # have to set this as well by hand to match the max l needed for Planck likelihood
 
   # you have to set by hand if you want to set the class parameters with or without setting arguments from MontePython Likelihoods
   # if the montepythonlike backend is installed (if not it should automatically choose the function 'init_Classy_cosmo_container')

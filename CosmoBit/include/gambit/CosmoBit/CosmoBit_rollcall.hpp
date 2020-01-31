@@ -194,6 +194,7 @@ START_MODULE
     ALLOW_MODELS(LCDM,LCDM_no_primordial)
     //ALLOW_MODELS(LCDM)
     MODEL_CONDITIONAL_DEPENDENCY(classy_parameters_EnergyInjection, pybind11::dict, AnnihilatingDM_general, DecayingDM_general)
+    MODEL_CONDITIONAL_DEPENDENCY(classy_parameters_PlanckLike, pybind11::dict, Planck_lite,Planck_TTTEEE,Planck_TT,plik_dx11dr2_HM_v18_TT)
 
     DEPENDENCY(T_cmb,                 double)
     DEPENDENCY(Helium_abundance,      std::vector<double>)
@@ -252,6 +253,15 @@ START_MODULE
       START_FUNCTION(pybind11::dict)
       ALLOW_MODELS(DecayingDM_general)
       DEPENDENCY(energy_injection_efficiency, DarkAges::fz_table)
+     #undef FUNCTION
+  #undef CAPABILITY
+
+  // set extra parameters for CLASS run if Planck CMB likelihoods are included
+  #define CAPABILITY classy_parameters_PlanckLike
+     START_CAPABILITY
+     #define FUNCTION set_classy_parameters_PlanckLike
+      START_FUNCTION(pybind11::dict)
+      ALLOW_MODELS(Planck_lite,Planck_TTTEEE,Planck_TT,plik_dx11dr2_HM_v18_TT)
      #undef FUNCTION
   #undef CAPABILITY
 

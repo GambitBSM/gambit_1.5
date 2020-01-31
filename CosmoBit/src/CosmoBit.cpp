@@ -611,6 +611,7 @@ namespace Gambit
       {
         merge_pybind_dicts(result,*Dep::classy_parameters_EnergyInjection);
       }
+      
 
       // Other Class input direct from the YAML file 
       // check if these are already contained in the input dictionary -- if so throw an error
@@ -685,6 +686,19 @@ namespace Gambit
 
       // add yaml options to python dictionary passed to CLASS
       merge_pybind_dicts(result,yaml_input);
+      
+
+      // At last: if the Planck likelihood is used add all relevant input parameters to the CLASS dictionary:
+      // output: 'lCl, pCl, tCl', lensing: yes, non linear: halofit , l_max_scalar: 2508
+      // Note: this has to be done *after* the yaml options are read it since it would trigger an error of duplicated 
+      //   keys in case the user specifies one of the options themselves. The 'merge_pybind_dicts' routine will properly
+      //   with concatennating the output values and choosing the maximum passed value for l_max_scalars. Contradictions 
+      //   in the lensing or non linear choice will rightfully trigger an error.  
+      if (ModelInUse("Planck_lite") || ModelInUse("Planck_TTTEEE")|| ModelInUse("Planck_TT") || ModelInUse("plik_dx11dr2_HM_v18_TT"))
+      {
+        merge_pybind_dicts(result,*Dep::classy_parameters_PlanckLike);
+      }
+
     }
 
     /// Set the LCDM_no_primordial_ps in classy. Depends on a parametrised primordial_ps.
@@ -707,7 +721,11 @@ namespace Gambit
       
 
       // if r = 0 only compute scalar modes, else tensor modes as well
-      if(pps.get_r() == 0){result.addEntry("modes","s");}
+      //
+      // => don't explicitly set "modes" to 's' since it defaults to it. If you set it here anyways
+      // you won't be able to run CLASS when only requesting background quantities (e.g. for BAO & SNe likelihoods)
+      // as the perturbations module won't run and therefore the entry "modes" won't be read. 
+      if(pps.get_r() == 0){} 
       else
       {
         // don't set to zero in CLASS dict as it won't be read if no tensor modes are requested
@@ -2124,7 +2142,7 @@ namespace Gambit
 
       // add the arguments from Mp_cosmo_arguments which are not yet in cosmo_input_dict to it
       // also takes care of merging the "output" key values
-      result.merge_input_dicts(MP_cosmo_arguments);
+      result.merge_input_dicts(MP_cosmo_arguments); // TODO (JR) use merge_pybind_dict routine instead -> don't need to duplicate code
     }
 
 
@@ -2230,6 +2248,23 @@ namespace Gambit
       result["energyinj_coef_ionHe"] = memaddress_to_uint(fz.f_heion.data());
       result["energyinj_coef_lowE"] = memaddress_to_uint(fz.f_lowe.data());
     }
+  }
+
+  /// add all inputs for CLASS needed to produce the correct output to be 
+  /// able to compute the Planck CMB likelihoods
+  void set_classy_parameters_PlanckLike(pybind11::dict &result)
+  {
+    using namespace Pipes::set_classy_parameters_PlanckLike;
+
+    // make sure nothing from previous run is contained
+    result.clear();
+
+    // @ Patrick: if we only use TT we probably don't need the tCls , right? 
+    //   would you check that and add the model dependencies for the different likelihoods?
+    result["output"] = "tCl, lCl, pCl";
+    result["lensing"] = "yes";
+    result["non linear"] = "halofit";
+    result["l_max_scalars"] = "2508";
   }
 
 
