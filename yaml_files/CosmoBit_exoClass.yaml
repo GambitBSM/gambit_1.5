@@ -36,7 +36,7 @@ Parameters:
  #StandardModel_mNudiff: !import include/StandardModel_mNudiff_IH_scan.yaml
 
  # Cosmological nuisance parameters (except for Planck CMB Likelihoods) 
- cosmo_nuisance_params_Pantheon: !import include/cosmo_nuisance_params_Pantheon.yaml
+ cosmo_nuisance_Pantheon: !import include/cosmo_nuisance_Pantheon.yaml
 
  # nuisance parameters in Planck likelihood
  Planck_lite: !import include/Planck_2018/Planck_lite_flat.yaml

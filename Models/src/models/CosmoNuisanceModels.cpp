@@ -33,13 +33,13 @@
 /////////////// translation functions for cosmological nuisance parameter models ///////////////////////////
 
 
-#define MODEL cosmo_nuisance_params_Pantheon
-  #define PARENT cosmo_nuisance_params_JLA
+#define MODEL cosmo_nuisance_Pantheon
+  #define PARENT cosmo_nuisance_JLA
     // Translation function definition
-    void MODEL_NAMESPACE::cosmo_nuisance_params_Pantheon_to_cosmo_nuisance_params_JLA (const ModelParameters &myP, ModelParameters &targetP)
+    void MODEL_NAMESPACE::cosmo_nuisance_Pantheon_to_cosmo_nuisance_JLA (const ModelParameters &myP, ModelParameters &targetP)
     {
       USE_MODEL_PIPE(PARENT) // get pipe for "interpret as PARENT" function
-      logger()<<"Running interpret_as_parent calculations for cosmo_nuisance_params_Pantheon --> cosmo_nuisance_params_JLA ..."<<LogTags::info<<EOM;
+      logger()<<"Running interpret_as_parent calculations for cosmo_nuisance_Pantheon --> cosmo_nuisance_JLA ..."<<LogTags::info<<EOM;
     
       targetP.setValue("M", myP.getValue("M"));
       // the rest (alpha, beta & Delta_M) automatically defaults to 0

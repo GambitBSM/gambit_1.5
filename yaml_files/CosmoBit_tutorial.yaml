@@ -132,7 +132,7 @@ Parameters:
  #         >> GAMBIT has exited with fatal exception: KeyError: ('M',)
  #  (MP is looking for the nuisance parameter M (absoulute magnitude of SNeIa) but can't
  #  find it in the passed parameter dictionary). I do have to fix this, it is on the list.. sorry for that!
- cosmo_nuisance_params_Pantheon: !import include/cosmo_nuisance_params_Pantheon.yaml
+ cosmo_nuisance_Pantheon: !import include/cosmo_nuisance_Pantheon.yaml
 
 
  

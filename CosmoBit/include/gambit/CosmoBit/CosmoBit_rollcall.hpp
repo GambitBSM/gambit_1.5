@@ -931,12 +931,12 @@ START_MODULE
      START_CAPABILITY
      #define FUNCTION set_parameter_dict_for_MPLike
       START_FUNCTION(pybind11::dict)
-      ALLOW_MODELS(cosmo_nuisance_params_JLA,cosmo_nuisance_params_BK14,cosmo_nuisance_params_CFHTLens_correlation)
-      ALLOW_MODELS(cosmo_nuisance_params_euclid_lensing,cosmo_nuisance_params_euclid_pk,cosmo_nuisance_params_ISW)
-      ALLOW_MODELS(cosmo_nuisance_params_kids450_qe_likelihood_public,cosmo_nuisance_params_ska,cosmo_nuisance_params_wmap)
+      ALLOW_MODELS(cosmo_nuisance_JLA,cosmo_nuisance_BK14,cosmo_nuisance_CFHTLens_correlation)
+      ALLOW_MODELS(cosmo_nuisance_euclid_lensing,cosmo_nuisance_euclid_pk,cosmo_nuisance_ISW)
+      ALLOW_MODELS(cosmo_nuisance_kids450_qe_likelihood_public,cosmo_nuisance_ska,cosmo_nuisance_wmap)
       // if you implement new MontePython likelihoods with new nuisance parameters add the name of your new
       // nuisance parameter model (to be defined in Models/include/gambit/Models/models/CosmoNuisanceModels.hpp)
-      //ALLOW_MODELS(cosmo_nuisance_params_FOR_YOUR_NEW_LIKE) 
+      //ALLOW_MODELS(cosmo_nuisance_FOR_YOUR_NEW_LIKE) 
      #undef FUNCTION
      #define FUNCTION pass_empty_parameter_dict_for_MPLike
        START_FUNCTION(pybind11::dict)

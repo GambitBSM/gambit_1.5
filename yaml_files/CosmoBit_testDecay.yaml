@@ -47,7 +47,7 @@ Parameters:
  DecayingDM_general: !import include/DecayingDM_general_scan.yaml
 
  # nuisance paramters for other cosmological likelihoods
- cosmo_nuisance_params_Pantheon: !import include/cosmo_nuisance_params_Pantheon.yaml
+ cosmo_nuisance_Pantheon: !import include/cosmo_nuisance_Pantheon.yaml
 
 #======== Prior setup ========
 Priors:

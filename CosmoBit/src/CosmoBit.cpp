@@ -2363,7 +2363,7 @@ namespace Gambit
 
         // b) get the "^" characters back into the parameter names
         //   -> beta_x<experiment> has to be beta_x^<experiment> where x = 0 or 1 and <experiment> = Euclid, SKA1 or SKA2
-        //if(ModelInUse("cosmo_nuisance_params_euclid_pk") or ModelInUse("cosmo_nuisance_params_ska"))
+        //if(ModelInUse("cosmo_nuisance_euclid_pk") or ModelInUse("cosmo_nuisance_ska"))
         else if (name.find("beta_")!= std::string::npos){name = name.insert(6,"^");}
 
         result[name.c_str()] = pybind11::dict("current"_a=value,"scale"_a=1.); // scale always 1 in GAMBIT
