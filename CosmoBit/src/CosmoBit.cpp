@@ -2498,8 +2498,11 @@ namespace Gambit
           }
         }
 
-        logger() << LogTags::info << "(init_cosmo_args_from_MPLike) List of expeeriments: " << experiments << EOM;
+        logger() << LogTags::info << "(init_cosmo_args_from_MPLike) List of experiments: " << experiments << EOM;
         data = BEreq::create_MP_data_object(experiments);
+        // add current parameters to data object to enable check if all nuisance parameters are 
+        // scanned upon initialisation of likelihood objects
+        data.attr("mcmc_parameters") = *Dep::parameter_dict_for_MPLike;
         map_str_pyobj likelihoods = BEreq::create_MP_likelihood_objects(data, experiments);
         first_run = false;
       }
@@ -2560,6 +2563,9 @@ namespace Gambit
       if(first_run)
       {
         data = BEreq::create_MP_data_object(experiments);
+        // add current parameters to data object to enable check if all nuisance parameters are 
+        // scanned upon initialisation of likelihood objects
+        data.attr("mcmc_parameters") = *Dep::parameter_dict_for_MPLike;
         likelihoods = BEreq::create_MP_likelihood_objects(data, experiments);
         first_run = false;
       }
@@ -2657,6 +2663,9 @@ namespace Gambit
       if(first_run)
       {
         data = BEreq::create_MP_data_object(experiments);
+        // add current parameters to data object to enable check if all nuisance parameters are 
+        // scanned upon initialisation of likelihood objects
+        data.attr("mcmc_parameters") = *Dep::parameter_dict_for_MPLike;
         likelihoods = BEreq::create_MP_likelihood_objects(data, experiments);
         first_run = false;
       }

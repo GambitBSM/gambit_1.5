@@ -47,7 +47,7 @@ Parameters:
  StandardModel_mNudiff: !import include/StandardModel_mNudiff_both_scan.yaml
 
  # Cosmological nuisance parameters (except for Planck CMB Likelihoods) 
- #cosmo_nuisance_params_Pantheon: !import include/cosmo_nuisance_params_Pantheon.yaml
+ cosmo_nuisance_params_Pantheon: !import include/cosmo_nuisance_params_Pantheon.yaml
 
 #======== Prior setup ========
 Priors:
@@ -133,7 +133,8 @@ Rules:
       #Likelihoods: ["bao","Pantheon","Planck_SZ",]  
       Likelihoods: 
         bao_smallz_2014: default
-        #Pantheon: default #,"Planck_SZ"]  
+        Pantheon: default 
+        #,"Planck_SZ"]  
       # should eventually be possible to choose any MP like, atm only bao, Pantheon, Planck_SZ (& kids after 
       # downloading data and when commenting out line 'parser_mp.existing_file(fname)', will include that into 
       # build step soon) safe to use;
