@@ -169,7 +169,7 @@ Rules:
         module: CosmoBit
 
   # to speed up Neff calc for testing
-  - capability: AlterBBN_setInput
+  - capability: AlterBBN_Input
     options:
       failsafe: 1
       err: 0

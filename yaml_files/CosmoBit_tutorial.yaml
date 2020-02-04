@@ -282,7 +282,7 @@ Rules:
   # error calculation precision settings for AltterBBN
   # (use 1 and 0 to speed up Helium abundance calculation for testing)
   # (For more precise calculations, use 3 or 7)
-  - capability: AlterBBN_setInput
+  - capability: AlterBBN_Input
     options:
       failsafe: 3
       err: 0

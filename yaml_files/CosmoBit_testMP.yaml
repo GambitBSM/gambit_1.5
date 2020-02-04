@@ -144,7 +144,7 @@ Rules:
 
 
   # to speed up Neff calc for testing
-  - capability: AlterBBN_setInput
+  - capability: AlterBBN_Input
     options:
       failsafe: 3
       err: 1
