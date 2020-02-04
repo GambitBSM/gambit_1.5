@@ -128,6 +128,10 @@ contains
     logical :: calc_full_pk
     integer :: pfile
 
+		call deallocate_vars()
+
+    print*,'we are inside mm driver'
+
     slowroll_infl_end = .true.
     instreheat = .true.
     use_deltaN_SR = .false.
@@ -146,6 +150,10 @@ contains
     num_inflaton = ginput_num_inflaton
     potential_choice = ginput_potential_choice
     vparam_rows = ginput_vparam_rows
+
+    !Make some arrays
+    call allocate_vars()
+
     evaluate_modes = ginput_evaluate_modes
     get_runningofrunning = ginput_get_runningofrunning
     k_min = ginput_kmin
@@ -159,14 +167,14 @@ contains
     k_pivot = ginput_k_pivot
     dlnk = ginput_dlnk
 
+		print*,'phi_init0=',phi_init0
+		print*,'dphi_init0=',dphi_init0
+
     ! if (allocated(gambit_obs % k_array)) deallocate(gambit_obs % k_array)
     ! if (allocated(gambit_obs % pks_array)) deallocate(gambit_obs % pks_array)
     ! if (allocated(gambit_obs % pks_iso_array)) deallocate(gambit_obs % pks_iso_array)
     ! if (allocated(gambit_obs % pkt_array)) deallocate(gambit_obs % pkt_array)
 
-    call deallocate_vars()
-    !Make some arrays
-    call allocate_vars()
 
     ! Allocatate the array size to the k and P(k)
     ! allocate( gambit_obs % k_array(steps) )
@@ -230,6 +238,8 @@ contains
 
     !Set random seed
     call init_random_seed()
+
+    print*,'we are getting in calculate_pk_observables'
 
 		call calculate_pk_observables(gambit_obs,observs,observs_SR,k_pivot,dlnk,calc_full_pk,steps,k_min,k_max)
 
@@ -446,7 +456,7 @@ contains
         observs_SR%ic = observs%ic
       end if
 
-      ! print*,"N_pivot = ", N_pivot
+       print*,"N_pivot = ", N_pivot
 
       !Initialize potential and calc background
       call potinit(observs)
@@ -458,7 +468,6 @@ contains
       !     RETURN
       !   end if
       ! end if
-
 
       call test_bad(pk_bad, observs, leave)
       if (leave) return
@@ -594,9 +603,11 @@ contains
 
       if (pk_bad /= run_outcome%success) then
 
+        print*,'we print run outcome:'
         call run_outcome%print_outcome(pk_bad)
+				print*,'we set obs to zero.'
         call observ%set_zero()
-
+				print*,'we set leave to true.'
         !Flag for voiding calculation
         leave = .true.
       end if
