@@ -210,7 +210,7 @@ Rules:
 ##
 ####
 
-  - capability: AlterBBN_setInput
+  - capability: AlterBBN_Input
     options:
       failsafe: 3
       err: 0

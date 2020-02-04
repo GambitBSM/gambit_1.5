@@ -735,12 +735,12 @@ Inflation_1natural: |
    phi_init0     - the value of the inflaton field at the start of their inflationary trajectory.
 
 
-cosmo_nuisance_params_Pantheon: |
+cosmo_nuisance_Pantheon: |
    Cosmological nuisance parameters for Pantheon SNe Ia likelihood from Scolnic et al. (https://arxiv.org/abs/1710.00845). 
 
    M                   - absolute magnitude of Type Ia Supernova
 
-cosmo_nuisance_params_JLA: |
+cosmo_nuisance_JLA: |
    Cosmological nuisance parameters for JLA SNe Ia likelihood from JLA likelihood from Betoule et al. 2014 (https://arxiv.org/abs/1401.4064).
 
    M                   - B band peak magnitude of Type Ia Supernova
@@ -749,7 +749,7 @@ cosmo_nuisance_params_JLA: |
    alpha               - SALT2 shape parameter
    beta                - SALT2 colour parameter
 
-cosmo_nuisance_params_BK14: |
+cosmo_nuisance_BK14: |
    Cosmological nuisance parameters for BK14 likelihood, from http://arxiv.org/pdf/1510.09217.pdf, http://bicepkeck.org/bk14_2015_release.html. Descriptions taken from BK14_cosmomc/batch2/BK14.ini
 
    BBTdust             - dust blackbody temperature [K] -- fixed to 19.6 / very insensitive to this
@@ -763,19 +763,19 @@ cosmo_nuisance_params_BK14: |
    EEtoBB_dust         - EE/BB ratios -- recommended to fix to 2 / only used if E-modes are turned on
    EEtoBB_sync         - EE/BB ratios -- recommended to fix to 2 / only used if E-modes are turned on
  
-cosmo_nuisance_params_CFHTLens_correlation: |
+cosmo_nuisance_CFHTLens_correlation: |
    Cosmological nuisance parameters for CFHTLenS tomographic weak lensing likelihood from Heymans et al. (https://arxiv.org/abs/1303.1808 ). 
 
    epsilon_CFHT        - nuisance parameter for theoretical error calculation on non-linear matter power spectrum P_nl_th.
 
-cosmo_nuisance_params_euclid_lensing: |
+cosmo_nuisance_euclid_lensing: |
    Cosmological nuisance parameters for euclid cosmic shear likelihood from Sprenger et al. (https://arxiv.org/abs/1801.08331). This likelihood is based on an earlier Euclid P(k) likelihood by Audren & Lesgourgues described in Audren et al. (https://arxiv.org/1210.2194).
 
    epsilon_euclid        - nuisance parameter accounting for a global uncorrelated
                            theoretical error in e.g. (non-)linear power spectrum, scale dependent bias, 
                            errors in redshift-space distortions.. for details see appendix A.4 of Audren et al. (https://arxiv.org/abs/1210.2194)
 
-cosmo_nuisance_params_euclid_pk: |
+cosmo_nuisance_euclid_pk: |
    Cosmological nuisance parameters for euclid galaxy clustering likelihood from Sprenger et al. (https://arxiv.org/abs/1801.08331). This likelihood is based on an earlier Euclid P(k) likelihood by Audren & Lesgourgues described in Audren et al. (https://arxiv.org/1210.2194).
 
    epsilon_euclid       - nuisance parameter accounting for a global uncorrelated
@@ -787,7 +787,7 @@ cosmo_nuisance_params_euclid_pk: |
    beta_1Euclid         - nuisance parameter parametrising uncertainty in redshift dependence of galaxy bias, mean value 1.
                           => b(z) =  beta_0Euclid (1 + z)^(0.5 x beta_1Euclid)  (eq. 2.15 in Sprenger et al.)
 
-cosmo_nuisance_params_ISW: |
+cosmo_nuisance_ISW: |
    Cosmological nuisance parameters for tomographic ISW effect from Stölzner et al. (https://arxiv.org/abs/1710.03238). Used cross-correlation between CMB TT spectrum and 5 galaxy surveys: 2MPZ, Wise x SuperCOSMOS, SDSS DR12 photometric, SDSS DR6 QSO, and NVSS.
 
    A_ISW             - ISW amplitude
@@ -797,7 +797,7 @@ cosmo_nuisance_params_ISW: |
    bX_wisc           - linear bias for redshift bin X of WISE × SuperCOSMOS
    bX_nvss           - linear bias for redshift bin X of the NRAO VLA Sky Survey
 
-cosmo_nuisance_params_kids450_qe_likelihood_public: |
+cosmo_nuisance_kids450_qe_likelihood_public: |
    Cosmological nuisance parameters for KiDS-450 shear power spectrum likelihood from Koehlinger et al. (https://arxiv.org/abs/1706.02892).  
 
    A_IA              - dimensionless amplitude to rescale normalisation entering the computation of the 
@@ -810,7 +810,7 @@ cosmo_nuisance_params_kids450_qe_likelihood_public: |
                        if 0 redshift-scaling is turned off
    m_corr            - nuisance parameters for m-correction
 
-cosmo_nuisance_params_ska: |
+cosmo_nuisance_ska: |
    Cosmological nuisance parameters for SKA1 21cm intensity mapping, SKA1 & SKA2 cosmic shear, SKA1 & SKA2 galaxy clustering from Sprenger et al. (https://arxiv.org/abs/11801.08331). These likelihoods are based on an earlier Euclid P(k) likelihood by Audren & Lesgourgues described in Audren et al. (https://arxiv.org/abs/1210.2194).
 
    21 cm intensity mapping:

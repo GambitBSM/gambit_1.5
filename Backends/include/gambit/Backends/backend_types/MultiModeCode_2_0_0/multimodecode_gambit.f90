@@ -81,6 +81,7 @@ contains
     ! Gambit interface input parameters
     integer, intent(in) :: ginput_num_inflaton
     integer, intent(in) :: ginput_potential_choice
+    integer, intent(in) :: ginput_vparam_rows
     logical, optional :: ginput_evaluate_modes
     logical, optional :: ginput_get_runningofrunning
     real(dp), dimension(ginput_num_inflaton), intent(in) :: ginput_phi_init0
@@ -92,7 +93,6 @@ contains
     integer, intent(in) :: ginput_steps
     real(dp), intent(in) :: ginput_kmin
     real(dp), intent(in) :: ginput_kmax
-    integer, intent(in) :: ginput_vparam_rows
     logical, optional, intent(in) :: ginput_calc_full_pk
 
     !---------------------------------------------------------------

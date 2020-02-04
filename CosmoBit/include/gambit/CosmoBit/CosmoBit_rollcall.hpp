@@ -191,8 +191,10 @@ START_MODULE
     #define FUNCTION set_baseline_classy_input
     START_FUNCTION(pybind11::dict)
     
-    ALLOW_MODELS(LCDM)
+    ALLOW_MODELS(LCDM,LCDM_no_primordial)
+    //ALLOW_MODELS(LCDM)
     MODEL_CONDITIONAL_DEPENDENCY(classy_parameters_EnergyInjection, pybind11::dict, AnnihilatingDM_general, DecayingDM_general)
+    MODEL_CONDITIONAL_DEPENDENCY(classy_parameters_PlanckLike, pybind11::dict, Planck_lite,Planck_TTTEEE,Planck_TT,plik_dx11dr2_HM_v18_TT)
 
     DEPENDENCY(T_cmb,                 double)
     DEPENDENCY(Helium_abundance,      std::vector<double>)
@@ -254,6 +256,15 @@ START_MODULE
      #undef FUNCTION
   #undef CAPABILITY
 
+  // set extra parameters for CLASS run if Planck CMB likelihoods are included
+  #define CAPABILITY classy_parameters_PlanckLike
+     START_CAPABILITY
+     #define FUNCTION set_classy_parameters_PlanckLike
+      START_FUNCTION(pybind11::dict)
+      ALLOW_MODELS(Planck_lite,Planck_TTTEEE,Planck_TT,plik_dx11dr2_HM_v18_TT)
+     #undef FUNCTION
+  #undef CAPABILITY
+
   #define CAPABILITY NuMasses_classy_input
   START_CAPABILITY
     #define FUNCTION set_NuMasses_classy_input
@@ -296,8 +307,10 @@ START_MODULE
     
     #define FUNCTION get_multimode_parametrised_ps
       START_FUNCTION(parametrised_ps)
-      //ALLOW_MODELS(LCDM_no_primordial) // todo check models...
       ALLOW_MODELS(Inflation_SR1quad,Inflation_1quar,Inflation_1mono23,Inflation_1linear,Inflation_1natural,Inflation_smash)
+      //MODEL_GROUP(inflation,(Inflation_SR1quad,Inflation_1quar,Inflation_1mono23,Inflation_1linear,Inflation_1natural))
+      //MODEL_GROUP(cosmo,(LCDM_no_primordial))
+      //ALLOW_MODEL_COMBINATION(cosmo,inflation)
       DEPENDENCY(multimode_input_parameters, multimode_inputs)
       BACKEND_REQ(multimodecode_gambit_driver, (), gambit_inflation_observables, (int&  ,int& ,  int& , int& , double* , double* ,
 																																					      	double* , double&, double&, double& , int& ,
@@ -828,7 +841,7 @@ START_MODULE
   #undef CAPABILITY
 
   // AlterBBN related functions & capabilities
-  #define CAPABILITY AlterBBN_setInput
+  #define CAPABILITY AlterBBN_Input
     START_CAPABILITY
     #define FUNCTION AlterBBN_Input
       START_FUNCTION(map_str_dbl)
@@ -881,7 +894,7 @@ START_MODULE
   START_CAPABILITY
     #define FUNCTION compute_BBN_abundances
       START_FUNCTION(CosmoBit::BBN_container)
-      DEPENDENCY(AlterBBN_setInput, map_str_dbl)
+      DEPENDENCY(AlterBBN_Input, map_str_dbl)
       BACKEND_REQ(call_nucl_err, (libbbn), int, (map_str_dbl&,double*,double*))
       BACKEND_REQ(get_NNUC, (libbbn), int, ())
       BACKEND_OPTION( (AlterBBN), (libbbn) )
@@ -893,7 +906,6 @@ START_MODULE
       #define FUNCTION compute_BBN_LogLike
       START_FUNCTION(double)
       DEPENDENCY(BBN_abundances, CosmoBit::BBN_container)
-      DEPENDENCY(AlterBBN_setInput, map_str_dbl)
     #undef FUNCTION
   #undef CAPABILITY
 
@@ -918,12 +930,12 @@ START_MODULE
      START_CAPABILITY
      #define FUNCTION set_parameter_dict_for_MPLike
       START_FUNCTION(pybind11::dict)
-      ALLOW_MODELS(cosmo_nuisance_params_JLA,cosmo_nuisance_params_BK14,cosmo_nuisance_params_CFHTLens_correlation)
-      ALLOW_MODELS(cosmo_nuisance_params_euclid_lensing,cosmo_nuisance_params_euclid_pk,cosmo_nuisance_params_ISW)
-      ALLOW_MODELS(cosmo_nuisance_params_kids450_qe_likelihood_public,cosmo_nuisance_params_ska,cosmo_nuisance_params_wmap)
+      ALLOW_MODELS(cosmo_nuisance_JLA,cosmo_nuisance_BK14,cosmo_nuisance_CFHTLens_correlation)
+      ALLOW_MODELS(cosmo_nuisance_euclid_lensing,cosmo_nuisance_euclid_pk,cosmo_nuisance_ISW)
+      ALLOW_MODELS(cosmo_nuisance_kids450_qe_likelihood_public,cosmo_nuisance_ska,cosmo_nuisance_wmap)
       // if you implement new MontePython likelihoods with new nuisance parameters add the name of your new
       // nuisance parameter model (to be defined in Models/include/gambit/Models/models/CosmoNuisanceModels.hpp)
-      //ALLOW_MODELS(cosmo_nuisance_params_FOR_YOUR_NEW_LIKE) 
+      //ALLOW_MODELS(cosmo_nuisance_FOR_YOUR_NEW_LIKE) 
      #undef FUNCTION
      #define FUNCTION pass_empty_parameter_dict_for_MPLike
        START_FUNCTION(pybind11::dict)
@@ -943,6 +955,7 @@ START_MODULE
      #define FUNCTION init_cosmo_args_from_MPLike
       START_FUNCTION(pybind11::dict)
       DEPENDENCY(MP_experiment_names, map_str_map_str_str)
+      DEPENDENCY(parameter_dict_for_MPLike,   pybind11::dict)
       BACKEND_REQ(create_MP_likelihood_objects, (libmontepythonlike), map_str_pyobj,    (pybind11::object&, map_str_str&))
       BACKEND_REQ(create_MP_data_object,        (libmontepythonlike), pybind11::object, (map_str_str&))
      #undef FUNCTION

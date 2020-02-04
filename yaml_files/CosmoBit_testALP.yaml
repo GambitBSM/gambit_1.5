@@ -35,7 +35,7 @@ Parameters:
  Planck_lite: !import include/Planck_2018/Planck_lite_gauss.yaml
 
  # Cosmological nuisance parameters (except for Planck CMB Likelihoods)
- cosmo_nuisance_params_Pantheon: !import include/cosmo_nuisance_params_Pantheon.yaml
+ cosmo_nuisance_Pantheon: !import include/cosmo_nuisance_Pantheon.yaml
 
  # Model Parameters of CosmoALP
  CosmoALP:
@@ -172,7 +172,7 @@ Rules:
       #DataFile: PDG_2017.dat # Use both, the Yp and D/H measurement as given in PDG 2017
       DataFile: PDG_2017_updated.dat # Use the Yp measurement from PDG 2017 and the updated D/H measurement of 1801.08023
 
-  - capability: AlterBBN_setInput
+  - capability: AlterBBN_Input
     options:
       failsafe: 3
       err: 0

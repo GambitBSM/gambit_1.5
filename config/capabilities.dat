@@ -4333,32 +4333,32 @@ Inflation_smash_parameters: |
 Inflation_1natural_parameters: |
   N-flation models (axions). See ./gambit Inflation_1natural_parameters for more details.
 
-cosmo_nuisance_params_JLA_parameters: |
-   Cosmological nuisance parameters for JLA SNe Ia likelihood. See ./gambit cosmo_nuisance_params_JLA for more details.
+cosmo_nuisance_JLA_parameters: |
+   Cosmological nuisance parameters for JLA SNe Ia likelihood. See ./gambit cosmo_nuisance_JLA for more details.
 
-cosmo_nuisance_params_Pantheon_parameters: |
-   Cosmological nuisance parameters for Pantheon SNe Ia likelihood. See ./gambit cosmo_nuisance_params_Pantheon for more details.
+cosmo_nuisance_Pantheon_parameters: |
+   Cosmological nuisance parameters for Pantheon SNe Ia likelihood. See ./gambit cosmo_nuisance_Pantheon for more details.
 
-cosmo_nuisance_params_BK14_parameters: |
-   Cosmological nuisance parameters for Keck Array/BICEP. See ./gambit cosmo_nuisance_params_BK14 for more details.
+cosmo_nuisance_BK14_parameters: |
+   Cosmological nuisance parameters for Keck Array/BICEP. See ./gambit cosmo_nuisance_BK14 for more details.
 
-cosmo_nuisance_params_CFHTLens_correlation_parameters: |
-   Cosmological nuisance parameters for CFHTLenS tomographic weak lensing likelihood. See ./gambit cosmo_nuisance_params_CFHTLens_correlation for more details.
+cosmo_nuisance_CFHTLens_correlation_parameters: |
+   Cosmological nuisance parameters for CFHTLenS tomographic weak lensing likelihood. See ./gambit cosmo_nuisance_CFHTLens_correlation for more details.
     
-cosmo_nuisance_params_euclid_lensing_parameters: |
-   Cosmological nuisance parameters for Euclid cosmic shear likelihood. See ./gambit cosmo_nuisance_params_euclid_lensing for more details.
+cosmo_nuisance_euclid_lensing_parameters: |
+   Cosmological nuisance parameters for Euclid cosmic shear likelihood. See ./gambit cosmo_nuisance_euclid_lensing for more details.
 
-cosmo_nuisance_params_euclid_pk_parameters: |
-   Cosmological nuisance parameters for Euclid cosmic shear likelihood. See ./gambit cosmo_nuisance_params_euclid_pk for more details.
+cosmo_nuisance_euclid_pk_parameters: |
+   Cosmological nuisance parameters for Euclid cosmic shear likelihood. See ./gambit cosmo_nuisance_euclid_pk for more details.
 
-cosmo_nuisance_params_ISW_parameters: |
-   Cosmological nuisance parameters for tomographic ISW likelihood. See ./gambit cosmo_nuisance_params_ISW for more details.
+cosmo_nuisance_ISW_parameters: |
+   Cosmological nuisance parameters for tomographic ISW likelihood. See ./gambit cosmo_nuisance_ISW for more details.
 
-cosmo_nuisance_params_kids450_qe_likelihood_public_parameters: |
-   Cosmological nuisance parameters for KiDS-450 shear power spectrum likelihood. See ./gambit cosmo_nuisance_params_kids450_qe_likelihood_public for more details.
+cosmo_nuisance_kids450_qe_likelihood_public_parameters: |
+   Cosmological nuisance parameters for KiDS-450 shear power spectrum likelihood. See ./gambit cosmo_nuisance_kids450_qe_likelihood_public for more details.
 
-cosmo_nuisance_params_ska_parameters: |
-   Cosmological nuisance parameters for SKA1 21cm intensity mapping, SKA1 & SKA2 cosmic shear, SKA1 & SKA2 galaxy clustering. See ./gambit cosmo_nuisance_params_ska for more details.
+cosmo_nuisance_ska_parameters: |
+   Cosmological nuisance parameters for SKA1 21cm intensity mapping, SKA1 & SKA2 cosmic shear, SKA1 & SKA2 galaxy clustering. See ./gambit cosmo_nuisance_ska for more details.
 
 #----------------------------
 #  CosmoBit

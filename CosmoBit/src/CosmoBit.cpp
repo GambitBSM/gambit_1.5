@@ -606,10 +606,12 @@ namespace Gambit
       result["YHe"] = Helium_abundance.at(0); 
 
       // TODO: need to test if class or exo_class in use! does not work -> (JR) should be fixed with classy implementation
+      // -> (JR again) not sure if that is actually true.. need to test.  
       if (ModelInUse("DecayingDM_general") || ModelInUse("AnnihilatingDM_general"))
       {
         merge_pybind_dicts(result,*Dep::classy_parameters_EnergyInjection);
       }
+      
 
       // Other Class input direct from the YAML file 
       // check if these are already contained in the input dictionary -- if so throw an error
@@ -645,8 +647,58 @@ namespace Gambit
           }
         }
       }
+
+      // If the model LCDM_no_primordial is used the primordial power spectrum is computed independent of CLASS. In that 
+      // case options related to the primordial ps specified in the yaml file will not be read by CLASS and the python
+      // wrapper will throw an error. Since it might be hard to figure out what is going wrong from simply the 'Class did 
+      // not read k_pivot' error message, test if some contradicting settings were passed & give a more informative error message
+      if (ModelInUse("LCDM_no_primordial"))
+      {
+        if (yaml_input.contains("k_pivot") || yaml_input.contains("N_star") || yaml_input.contains("P_k_ini type"))
+        {
+          CosmoBit_error().raise(LOCAL_INFO, "You are using the model 'LCDM_no_primordial' which means the (shape of the) primordial "
+                "power spectrum is set by an additional inflation model. Therefore the computation of the pps happens "
+                "independent of CLASS.\n"
+                "However, you have specified at least one of the CLASS input parameters \n  - P_k_ini type\n  "
+                "- k_pivot\n  - N_star\nSince the primordial module of CLASS won't compute the pps when it is passed by "
+                "an external source like GAMBIT these parameters won't be read by CLASS. Please remove them as yaml file option, or if "
+                "you want to fix 'k_pivot' and/or 'N_star' to specific values use the model 'LCDM' "
+                "without scanning an inflation model in parallel.");
+        }
+      }
+      else
+      {
+        // (JR) set k_pivot by default to 0.05; A_s & N_star are only used if the analytic PK is used, however
+        // the pivot scale is used regardless of the P_k_ini type in spectra.c, therefore
+        // k_pivot has to be passed correctly for LCDM and LCDM_no_primordial
+        // -> set to the default value of CLASS in case it is not specified via the yaml file
+        // for a LCDM model. (not strictly necessary since CLASS will default it 
+        // to set value if nothing is passed, but it makes the assumption more explicit.) 
+        std::string k_pivot;
+        if (yaml_input.contains("k_pivot")) {k_pivot = std::string(pybind11::str(yaml_input["k_pivot"]));}
+        else                                {k_pivot = "0.05";}
+        result["k_pivot"] = k_pivot;
+      
+        // The according value for the LCDM_no_primordial value will 
+        // be set in 'set_classy_parameters_parametrised_ps' or 'set_classy_parameters_primordial_ps'
+        // depending on the choice of the user (parametrised or full pk)
+      }
+
       // add yaml options to python dictionary passed to CLASS
       merge_pybind_dicts(result,yaml_input);
+      
+
+      // At last: if the Planck likelihood is used add all relevant input parameters to the CLASS dictionary:
+      // output: 'lCl, pCl, tCl', lensing: yes, non linear: halofit , l_max_scalar: 2508
+      // Note: this has to be done *after* the yaml options are read it since it would trigger an error of duplicated 
+      //   keys in case the user specifies one of the options themselves. The 'merge_pybind_dicts' routine will properly
+      //   with concatennating the output values and choosing the maximum passed value for l_max_scalars. Contradictions 
+      //   in the lensing or non linear choice will rightfully trigger an error.  
+      if (ModelInUse("Planck_lite") || ModelInUse("Planck_TTTEEE")|| ModelInUse("Planck_TT") || ModelInUse("plik_dx11dr2_HM_v18_TT"))
+      {
+        merge_pybind_dicts(result,*Dep::classy_parameters_PlanckLike);
+      }
+
     }
 
     /// Set the LCDM_no_primordial_ps in classy. Depends on a parametrised primordial_ps.
@@ -661,7 +713,6 @@ namespace Gambit
       // Clean the input container
       result.clear();
 
-       
       // Now need to pass the primordial power spectrum
       // TODO check whether A_s from MultiModeCode has the log taken or not.
       parametrised_ps pps = *Dep::parametrised_power_spectrum;
@@ -670,29 +721,41 @@ namespace Gambit
       
 
       // if r = 0 only compute scalar modes, else tensor modes as well
-      if(pps.get_r() == 0){result.addEntry("modes","s");}
+      //
+      // => don't explicitly set "modes" to 's' since it defaults to it. If you set it here anyways
+      // you won't be able to run CLASS when only requesting background quantities (e.g. for BAO & SNe likelihoods)
+      // as the perturbations module won't run and therefore the entry "modes" won't be read. 
+      if(pps.get_r() == 0){} 
       else
       {
         // don't set to zero in CLASS dict as it won't be read if no tensor modes are requested
         result.addEntry("r", pps.get_r()); 
         result.addEntry("modes","t,s");
       }
-      
-      // Add standard cosmo parameters, nu masses, helium abundance &
+
+      // Add the externally calculated/fixed pivot scale for LCDM_no_primordial models. 
+      // If the normal 'LCDM' model is used the pps is calculated by CLASS internally s.t. 
+      // k_pivot is an input parameter the user can freely choose. This setting is done via the yaml file,
+      // i.e. runOption for capability 'baseline_classy_input', classy_dict (see CosmoBit_tutorial.yaml). 
+      // If no value for 'k_pivot' is passed GAMBIT will use 0.05, the same default value as CLASS.
+      if (ModelInUse("LCDM_no_primordial")){result.addEntry("k_pivot", pps.get_kpivot());}
+
+      // Get standard cosmo parameters, nu masses, helium abundance &
       // extra run options for class passed in yaml file to capability
       // 'baseline_classy_input'
-      std::string duplicated_keys = result.addDict(*Dep::baseline_classy_input);
-
-      if(duplicated_keys != "")
+      // Note: this should only contain a value for 'k_pivot' if the model 'LCDM'
+      //    is in use.
+      pybind11::dict classy_base_dict = *Dep::baseline_classy_input;
+      
+      // Add classy_base_dict entries to the result dictionary of the type ClassyInput
+      std::string common_keys = result.addDict(classy_base_dict);
+      if(common_keys != "")
       {
-        CosmoBit_error().raise(LOCAL_INFO, "The key(s) '" + duplicated_keys + "' already "
+        CosmoBit_error().raise(LOCAL_INFO, "The key(s) '" + common_keys + "' already "
                 "exists in the CLASSY dictionary. You are probably trying to override a CLASS setting. Check that none "
                 "of the parameters you pass through your yaml file through RunOptions for the capability 'baseline_classy_input' "
                 "is in contradiction with any settings made via the dependency resolution by CosmoBit in the function '"+__func__+"'.");
       }
-
-
-
     }
 
     /// Set the LCDM_no_primordial_ps in classy. Depends on a primordial_ps.
@@ -716,17 +779,28 @@ namespace Gambit
       result.addEntry("k_array", pps.get_k());
       result.addEntry("pks_array", pps.get_P_s());
       result.addEntry("pkt_array", pps.get_P_t());
-      result.addEntry("lnk_size" , 100); // don't hard code but somehow make consistent with multimode @TODO
-
-
-      // Add standard cosmo parameters, nu masses, helium abundance &
+      result.addEntry("lnk_size" , pps.get_vec_size()); // don't hard code but somehow make consistent with multimode @TODO -> test
+      // pass pivot scale of external spectrum to CLASS
+      result.addEntry("k_pivot", pps.get_kpivot());
+      
+      // Get standard cosmo parameters, nu masses, helium abundance &
       // extra run options for class passed in yaml file to capability
       // 'baseline_classy_input'
-      std::string duplicated_keys = result.addDict(*Dep::baseline_classy_input);
+      // Note: this should only contain a value for 'k_pivot' if the model 'LCDM'
+      //    is in use, which is not allowed in this function as the full pk
+      //    is provided by an external model scanned in combination with 'LCDM_no_primordial'
+      pybind11::dict classy_base_dict = *Dep::baseline_classy_input;
 
-      if(duplicated_keys != "")
+      // Add classy_base_dict entries to the result dictionary of the type ClassyInput
+      // The string common_keys will be empty if the two dictionaries 'result'
+      // and 'classy_base_dict' have no keys in common. If so 'common_keys'
+      // will be a concatenation of the duplicated entries.
+      std::string common_keys = result.addDict(classy_base_dict);
+
+      // No check if something went wrong and some parameters were defined twice
+      if(common_keys != "")
       {
-        CosmoBit_error().raise(LOCAL_INFO, "The key(s) '" + duplicated_keys + "' already "
+        CosmoBit_error().raise(LOCAL_INFO, "The key(s) '" + common_keys + "' already "
                 "exists in the CLASSY dictionary. You are probably trying to override a CLASS setting. Check that none "
                 "of the parameters you pass through your yaml file through RunOptions for the capability 'baseline_classy_input' "
                 "is in contradiction with any settings made via the dependency resolution by CosmoBit in the function '"+__func__+"'.");
@@ -811,7 +885,7 @@ namespace Gambit
         result.vparam_rows = 2;
       }
 
-      // TODO: MultiMode segFaults if this is empty have to do this properly though (JR)
+      // (JR) TODO: MultiMode segFaults if this is empty have to do this properly though 
       result.dphi_init0.push_back(1.);
 
       static bool first_run = true;
@@ -950,6 +1024,13 @@ namespace Gambit
       result.fill_P_s(observables.pks_array, inputs.numsteps);
       result.fill_P_s_iso(observables.pks_array_iso, inputs.numsteps);
       result.fill_P_t(observables.pkt_array, inputs.numsteps);
+
+      // k_pivot needs to be stored to be passed correctly
+      // to the spectra module of CLASS
+      // (not using N_pivot/N_star further atm, but can't harm to 
+      // make it available for further use as well)
+      result.set_kpivot(inputs.k_pivot);
+      result.set_Npivot(inputs.N_pivot);
     }
 
     /// Passes the inputs from the MultiModeCode initialisation function 
@@ -1016,6 +1097,10 @@ namespace Gambit
       result.set_ns(observables.ns);
       result.set_As(observables.As);
       result.set_r(observables.r);
+      // k_pivot needs to be stored to be passed correctly
+      // to the spectra module of CLASS
+      // (not using N_pivot/N_star further atm, but can't harm to 
+      // make it available for further use as well)
       result.set_kpivot(inputs.k_pivot);
       result.set_Npivot(inputs.N_pivot);
     }
@@ -1043,14 +1128,6 @@ namespace Gambit
       pps.set_ns(*Param["n_s"]);
       pps.set_As(*Param["ln10A_s"]);
       pps.set_r(0); 
-
-      // The functions set_kpivot and set_Npivot are not called here, the values
-      // are by default initialised to -1. In ' ', where the input parameters for CLASS
-      // are set there is a check -> 
-      // if k_pivot == N_pivot == -1 :  use CLASS defaults (k_pivot = 0.05, N_pivot = 50, P_k_ini type = analytic_Pk)
-      //                or what is specified for k_pivot and/or N_pivot (N_star in CLASS naming convention) in the yaml file
-      // else:          check that P_k_ini type is not equal to analytic_Pk -> otherwise CLASS would use the analytic Pk with 
-      //                the default values for k_pivot & N_pivot (N_star) even though this is not what you want to do. 
 
       result = pps;
     }
@@ -1588,15 +1665,15 @@ namespace Gambit
 /// BBN related functions (call AlterBBN, BBN abundances & Likelihood)
 /// -----------
 
+    /// add parameters of relicparam structure that should be set to non-default values
+    /// to the AlterBBN_input map.
+    /// If you want to modify a parameter which has not been used in CosmoBit before simply
+    /// add it to the function 'fill_cosmomodel' in 'AlterBBN_<version>.cpp' and to the
+    /// set of 'known' parameters 'known_relicparam_options'
     void AlterBBN_Input(map_str_dbl &result)
     {
       using namespace Pipes::AlterBBN_Input;
 
-      // add parameters of relicparam structure that should be set to non-default values
-      // to the AlterBBN_input map.
-      // If you want to modify a parameter which has not been used in CosmoBit before simply
-      // add it to the function 'fill_cosmomodel' in 'AlterBBN_<version>.cpp' and to the
-      // set of 'known' parameters 'known_relicparam_options'
 
       // If we are using some of the "non-standard energy content" models, set the
       // inputs for the AlterBBN_input map according to the parameters of that model.
@@ -1770,8 +1847,12 @@ namespace Gambit
         first = false;
       }
 
-      map_str_dbl AlterBBN_input = *Dep::AlterBBN_setInput; // fill AlterBBN_input map with the parameters for the model in consideration
-      // int nucl_err = BEreq::call_nucl_err(AlterBBN_input, &ratioH[0], &(cov_ratioH[0][0]));
+      // fill AlterBBN_input map with the parameters for the model in consideration
+      map_str_dbl AlterBBN_input = *Dep::AlterBBN_Input; 
+
+      // call AlterBBN routine to calculate element abundances (& errors -- depending 
+      // on error calculation settings made with parameters 'err' and failsafe set in 
+      // 'AlterBBN_Input')
       int nucl_err = BEreq::call_nucl_err(AlterBBN_input, &ratioH[0], &cov_ratioH[0]);
 
       // TODO: replace .at() by [] to speed up
@@ -2065,7 +2146,7 @@ namespace Gambit
 
       // add the arguments from Mp_cosmo_arguments which are not yet in cosmo_input_dict to it
       // also takes care of merging the "output" key values
-      result.merge_input_dicts(MP_cosmo_arguments);
+      result.merge_input_dicts(MP_cosmo_arguments); // TODO (JR) use merge_pybind_dict routine instead -> don't need to duplicate code
     }
 
 
@@ -2173,6 +2254,23 @@ namespace Gambit
     }
   }
 
+  /// add all inputs for CLASS needed to produce the correct output to be 
+  /// able to compute the Planck CMB likelihoods
+  void set_classy_parameters_PlanckLike(pybind11::dict &result)
+  {
+    using namespace Pipes::set_classy_parameters_PlanckLike;
+
+    // make sure nothing from previous run is contained
+    result.clear();
+
+    // @ Patrick: if we only use TT we probably don't need the tCls , right? 
+    //   would you check that and add the model dependencies for the different likelihoods?
+    result["output"] = "tCl, lCl, pCl";
+    result["lensing"] = "yes";
+    result["non linear"] = "halofit";
+    result["l_max_scalars"] = "2508";
+  }
+
 
 
     /* Classy getter functions */
@@ -2269,7 +2367,7 @@ namespace Gambit
 
         // b) get the "^" characters back into the parameter names
         //   -> beta_x<experiment> has to be beta_x^<experiment> where x = 0 or 1 and <experiment> = Euclid, SKA1 or SKA2
-        //if(ModelInUse("cosmo_nuisance_params_euclid_pk") or ModelInUse("cosmo_nuisance_params_ska"))
+        //if(ModelInUse("cosmo_nuisance_euclid_pk") or ModelInUse("cosmo_nuisance_ska"))
         else if (name.find("beta_")!= std::string::npos){name = name.insert(6,"^");}
 
         result[name.c_str()] = pybind11::dict("current"_a=value,"scale"_a=1.); // scale always 1 in GAMBIT
@@ -2404,8 +2502,11 @@ namespace Gambit
           }
         }
 
-        logger() << LogTags::info << "(init_cosmo_args_from_MPLike) List of expeeriments: " << experiments << EOM;
+        logger() << LogTags::info << "(init_cosmo_args_from_MPLike) List of experiments: " << experiments << EOM;
         data = BEreq::create_MP_data_object(experiments);
+        // add current parameters to data object to enable check if all nuisance parameters are 
+        // scanned upon initialisation of likelihood objects
+        data.attr("mcmc_parameters") = *Dep::parameter_dict_for_MPLike;
         map_str_pyobj likelihoods = BEreq::create_MP_likelihood_objects(data, experiments);
         first_run = false;
       }
@@ -2466,6 +2567,9 @@ namespace Gambit
       if(first_run)
       {
         data = BEreq::create_MP_data_object(experiments);
+        // add current parameters to data object to enable check if all nuisance parameters are 
+        // scanned upon initialisation of likelihood objects
+        data.attr("mcmc_parameters") = *Dep::parameter_dict_for_MPLike;
         likelihoods = BEreq::create_MP_likelihood_objects(data, experiments);
         first_run = false;
       }
@@ -2563,6 +2667,9 @@ namespace Gambit
       if(first_run)
       {
         data = BEreq::create_MP_data_object(experiments);
+        // add current parameters to data object to enable check if all nuisance parameters are 
+        // scanned upon initialisation of likelihood objects
+        data.attr("mcmc_parameters") = *Dep::parameter_dict_for_MPLike;
         likelihoods = BEreq::create_MP_likelihood_objects(data, experiments);
         first_run = false;
       }

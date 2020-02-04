@@ -15,19 +15,8 @@
 Parameters:
   StandardModel_mNudiff: !import include/StandardModel_mNudiff_both_scan.yaml
   
-  #LCDM:
-  #  omega_b:
-  #    fixed_value: 2.24052e-02
-  #  omega_cdm:
-  #    fixed_value: 1.18078e-01
-  #  H0:
-  #    fixed_value: 6.81383e+01
-  #  tau_reio:
-  #    fixed_value: 7.25805e-02
-  #  ln10A_s: 3.0
-  #  n_s: 1.0
-  
   LCDM_no_primordial:
+  #LCDM:
     omega_b:
       fixed_value: 2.24052e-02
     omega_cdm:
@@ -36,26 +25,37 @@ Parameters:
       fixed_value: 6.81383e+01
     tau_reio:
       fixed_value: 7.25805e-02
+  #  ln10A_s: 3.0
+  #  n_s: 1.0
+  
+  #  omega_b:
+  #    fixed_value: 2.24052e-02
+  #  omega_cdm:
+  #    fixed_value: 1.18078e-01
+  #  H0:
+  #    fixed_value: 6.81383e+01
+  #  tau_reio:
+  #    fixed_value: 7.25805e-02
 
-  #Inflation_1quar:
-  #  N_pivot: 40
-  #    #prior_type: flat
-  #    #range: [40.0,70.0]
-  #  lambda: -9.9
-  #    #prior_type: flat
-  #    #range: [-9.8,-9.10]
-  #  phi_init0: 10
-  #   #fixed_value: 10.0
-    
-  Inflation_SR1quad:
+  Inflation_1quar:
     N_pivot: 40
       #prior_type: flat
       #range: [40.0,70.0]
-    m2_inflaton: -9.9
+    lambda: -9.9
       #prior_type: flat
       #range: [-9.8,-9.10]
-    phi_init0:
-      fixed_value: 10.0
+    phi_init0: 10
+     #fixed_value: 10.0
+    
+  #Inflation_SR1quad:
+  #  N_pivot: 40
+  #    #prior_type: flat
+  #    #range: [40.0,70.0]
+  #  m2_inflaton: -9.9
+  #    #prior_type: flat
+  #    #range: [-9.8,-9.10]
+  #  phi_init0:
+  #    fixed_value: 10.0
     
   #Inflation_1quar:
   #  N_pivot:
@@ -131,11 +131,11 @@ Rules:
       save_iso_N:               0
       N_iso_ref:                55
 # Parameters to be passed to the potential
-      k_pivot:                  0.05
+      k_pivot:                  0.01
       dlnk:                     0.4
 # For calculating the full power spectrum P(k).  Samples in uniform increments in log(k).
       #calc_full_pk: 0
-      numsteps: 100
+      numsteps: 500
       k_min: 1e-7
       k_max: 1e6
   
@@ -152,15 +152,16 @@ Rules:
     function: init_classy_cosmo_container_with_MPLike
   
   - capability: set_classy_parameters
-    #function: set_classy_parameters_parametrised_ps
-    function: set_classy_parameters_primordial_ps
-    module: CosmoBit
+    function: set_classy_parameters_parametrised_ps
+    #function: set_classy_parameters_primordial_ps
+  #  module: CosmoBit
 
   - capability: baseline_classy_input
     #function: set_baseline_classy_input
     options:
       classy_dict:
         output: tCl
+        #k_pivot: 0.03
         #P_k_ini type : analytic_Pk
   
   #- capability: set_classy_parameters
@@ -187,7 +188,7 @@ Rules:
 
   # error calculation precision settings for AltterBBN
   # (use 1 and 0 to speed up Helium abundance calculation for testing)
-  - capability: AlterBBN_setInput
+  - capability: AlterBBN_Input
     options:
       failsafe: 1
       err: 0

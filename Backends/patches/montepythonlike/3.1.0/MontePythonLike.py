@@ -1,8 +1,9 @@
 """
-.. module:: likelihood_class
+.. module:: likelihood_class for use of MontePython likelihoods with gambit (or any external sampler)
    :synopsis: Definition of the major likelihoods
-.. moduleauthor:: Julien Lesgourgues <lesgourg@cern.ch>
-.. moduleauthor:: Benjamin Audren <benjamin.audren@epfl.ch>
+.. original moduleauthor:: Julien Lesgourgues <lesgourg@cern.ch>
+.. original moduleauthor:: Benjamin Audren <benjamin.audren@epfl.ch>
+.. adopted to use with gambit:: Janina Renk <janina.renk@fysik.su.se>
 
 Contains the definition of the base likelihood class :class:`Likelihood`, with
 basic functions, as well as more specific likelihood classes that may be reused
@@ -80,19 +81,22 @@ class Likelihood(object):
         # Default state
         self.need_update = True
 
-        # Check if the nuisance parameters are defined
-        error_flag = False
-        #try:
-        #    for nuisance in self.use_nuisance:
-        #        if nuisance not in data.get_mcmc_parameters(['nuisance']):
-        #            error_flag = True
-        #            warnings.warn(
-        #                nuisance + " must be defined, either fixed or " +
-        #                "varying, for %s likelihood" % self.name)
-        #    self.nuisance = self.use_nuisance
-        #except AttributeError:
-        #    self.use_nuisance = []
-        #    self.nuisance = []
+        # Check if the nuisance parameters are included
+        # in model parameters passed from GAMBIT
+        try:
+            if self.use_nuisance == []:
+                self.nuisance = []
+        except:
+            self.use_nuisance = []
+            self.nuisance = []
+        for nuisance in self.use_nuisance:
+            if nuisance not in data.mcmc_parameters:
+                print("Trying to raise error")
+                raise io_mp.LikelihoodError("The nuisance parameter %s must be defined, either fixed or varying, "
+                    "for the %s likelihood. It seems you are using MontePython with GAMBIT. "
+                    "Try adding the model cosmo_nuisance_%s to the 'Parameters' section "
+                    "in your yaml file." % (nuisance, self.name, self.name) )
+
         
     def loglkl(self, cosmo, data):
         """

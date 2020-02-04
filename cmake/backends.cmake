@@ -1294,6 +1294,12 @@ if(NOT ditched_${name}_${ver})
 endif()
 
 # DarkAges
+# - Add correct symlink flags for OSX
+if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
+  set(DarkAges_SYMLINK_FLAGS "-hfs")
+else()
+  set(DarkAges_SYMLINK_FLAGS "-s")
+endif()
 set(name "darkages")
 set(ver "1.2.0")
 set(sfver "1_2_0")
@@ -1306,7 +1312,7 @@ if(NOT ditched_${name}_${ver})
     GIT_TAG v1.2.0
     SOURCE_DIR ${dir}
     BUILD_IN_SOURCE 1
-    CONFIGURE_COMMAND ${CMAKE_COMMAND} -E rename DarkAges DarkAges_${sfver}
+    CONFIGURE_COMMAND ln ${DarkAges_SYMLINK_FLAGS} DarkAges DarkAges_${sfver}
     BUILD_COMMAND ""
     INSTALL_COMMAND ""
   )
