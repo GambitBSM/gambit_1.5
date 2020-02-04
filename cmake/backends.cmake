@@ -1306,7 +1306,7 @@ if(NOT ditched_${name}_${ver})
     GIT_TAG v1.2.0
     SOURCE_DIR ${dir}
     BUILD_IN_SOURCE 1
-    CONFIGURE_COMMAND mv DarkAges DarkAges_${sfver}
+    CONFIGURE_COMMAND ln -shf DarkAges DarkAges_${sfver}
     BUILD_COMMAND ""
     INSTALL_COMMAND ""
   )
