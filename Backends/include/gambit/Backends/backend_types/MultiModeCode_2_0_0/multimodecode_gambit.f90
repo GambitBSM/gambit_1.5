@@ -130,8 +130,6 @@ contains
 
 		call deallocate_vars()
 
-    print*,'we are inside mm driver'
-
     slowroll_infl_end = .true.
     instreheat = .true.
     use_deltaN_SR = .false.
@@ -166,9 +164,6 @@ contains
     N_pivot = ginput_N_pivot
     k_pivot = ginput_k_pivot
     dlnk = ginput_dlnk
-
-		print*,'phi_init0=',phi_init0
-		print*,'dphi_init0=',dphi_init0
 
     ! if (allocated(gambit_obs % k_array)) deallocate(gambit_obs % k_array)
     ! if (allocated(gambit_obs % pks_array)) deallocate(gambit_obs % pks_array)
@@ -238,8 +233,6 @@ contains
 
     !Set random seed
     call init_random_seed()
-
-    print*,'we are getting in calculate_pk_observables'
 
 		call calculate_pk_observables(gambit_obs,observs,observs_SR,k_pivot,dlnk,calc_full_pk,steps,k_min,k_max)
 
@@ -456,8 +449,6 @@ contains
         observs_SR%ic = observs%ic
       end if
 
-       print*,"N_pivot = ", N_pivot
-
       !Initialize potential and calc background
       call potinit(observs)
 
@@ -603,11 +594,8 @@ contains
 
       if (pk_bad /= run_outcome%success) then
 
-        print*,'we print run outcome:'
         call run_outcome%print_outcome(pk_bad)
-				print*,'we set obs to zero.'
         call observ%set_zero()
-				print*,'we set leave to true.'
         !Flag for voiding calculation
         leave = .true.
       end if
