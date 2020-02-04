@@ -841,7 +841,7 @@ START_MODULE
   #undef CAPABILITY
 
   // AlterBBN related functions & capabilities
-  #define CAPABILITY AlterBBN_setInput
+  #define CAPABILITY AlterBBN_Input
     START_CAPABILITY
     #define FUNCTION AlterBBN_Input
       START_FUNCTION(map_str_dbl)
@@ -894,7 +894,7 @@ START_MODULE
   START_CAPABILITY
     #define FUNCTION compute_BBN_abundances
       START_FUNCTION(CosmoBit::BBN_container)
-      DEPENDENCY(AlterBBN_setInput, map_str_dbl)
+      DEPENDENCY(AlterBBN_Input, map_str_dbl)
       BACKEND_REQ(call_nucl_err, (libbbn), int, (map_str_dbl&,double*,double*))
       BACKEND_REQ(get_NNUC, (libbbn), int, ())
       BACKEND_OPTION( (AlterBBN), (libbbn) )
@@ -906,7 +906,6 @@ START_MODULE
       #define FUNCTION compute_BBN_LogLike
       START_FUNCTION(double)
       DEPENDENCY(BBN_abundances, CosmoBit::BBN_container)
-      DEPENDENCY(AlterBBN_setInput, map_str_dbl)
     #undef FUNCTION
   #undef CAPABILITY
 

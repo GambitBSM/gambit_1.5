@@ -885,7 +885,7 @@ namespace Gambit
         result.vparam_rows = 2;
       }
 
-      // TODO: MultiMode segFaults if this is empty have to do this properly though (JR)
+      // (JR) TODO: MultiMode segFaults if this is empty have to do this properly though 
       result.dphi_init0.push_back(1.);
 
       static bool first_run = true;
@@ -1665,15 +1665,15 @@ namespace Gambit
 /// BBN related functions (call AlterBBN, BBN abundances & Likelihood)
 /// -----------
 
+    /// add parameters of relicparam structure that should be set to non-default values
+    /// to the AlterBBN_input map.
+    /// If you want to modify a parameter which has not been used in CosmoBit before simply
+    /// add it to the function 'fill_cosmomodel' in 'AlterBBN_<version>.cpp' and to the
+    /// set of 'known' parameters 'known_relicparam_options'
     void AlterBBN_Input(map_str_dbl &result)
     {
       using namespace Pipes::AlterBBN_Input;
 
-      // add parameters of relicparam structure that should be set to non-default values
-      // to the AlterBBN_input map.
-      // If you want to modify a parameter which has not been used in CosmoBit before simply
-      // add it to the function 'fill_cosmomodel' in 'AlterBBN_<version>.cpp' and to the
-      // set of 'known' parameters 'known_relicparam_options'
 
       // If we are using some of the "non-standard energy content" models, set the
       // inputs for the AlterBBN_input map according to the parameters of that model.
@@ -1847,8 +1847,12 @@ namespace Gambit
         first = false;
       }
 
-      map_str_dbl AlterBBN_input = *Dep::AlterBBN_setInput; // fill AlterBBN_input map with the parameters for the model in consideration
-      // int nucl_err = BEreq::call_nucl_err(AlterBBN_input, &ratioH[0], &(cov_ratioH[0][0]));
+      // fill AlterBBN_input map with the parameters for the model in consideration
+      map_str_dbl AlterBBN_input = *Dep::AlterBBN_Input; 
+
+      // call AlterBBN routine to calculate element abundances (& errors -- depending 
+      // on error calculation settings made with parameters 'err' and failsafe set in 
+      // 'AlterBBN_Input')
       int nucl_err = BEreq::call_nucl_err(AlterBBN_input, &ratioH[0], &cov_ratioH[0]);
 
       // TODO: replace .at() by [] to speed up
