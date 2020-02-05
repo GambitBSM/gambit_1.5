@@ -114,7 +114,7 @@ namespace Gambit
       m["upper"] = value.upper;
       _print(m, label, vID, mpirank, pointID);
     }
-    
+
     void asciiPrinter::_print(map_intpair_dbl const& value, const std::string& label, const int IDcode, const uint thread, const ulong pointID)
     {
       std::vector<std::string> channels;
@@ -157,6 +157,17 @@ namespace Gambit
         m["S7_"+bins.str()] = value.S7;
         m["S8_"+bins.str()] = value.S8;
         m["S9_"+bins.str()] = value.S9;
+        _print(m, label, vID, mpirank, pointID);
+      }
+
+      void asciiPrinter::_print(CosmoBit::parametrised_ps const& value, const std::string& label, const int vID, const unsigned int mpirank, const unsigned long pointID)
+      {
+        std::map<std::string, double> m;
+        m["n_s"] = value.get_ns();
+        m["r"] = value.get_r();
+        m["A_s"] = value.get_As();
+        m["k_pivot"] = value.get_kpivot();
+        m["N_pivot"] = value.get_Npivot();
         _print(m, label, vID, mpirank, pointID);
       }
 

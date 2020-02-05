@@ -66,7 +66,7 @@ namespace Gambit
       {
         std::stringstream ss;
         ss<<label<<"["<<i<<"]";
-        _print(value.at(i), ss.str(), vID, mpirank, pointID);  
+        _print(value.at(i), ss.str(), vID, mpirank, pointID);
       }
     }
 
@@ -78,7 +78,7 @@ namespace Gambit
       m["upper"] = value.upper;
       _print(m, label, vID, mpirank, pointID);
     }
-    
+
     void SQLitePrinter::_print(map_intpair_dbl const& map, const std::string& label, const int vID, const unsigned int mpirank, const unsigned long pointID)
     {
       for (auto it = map.begin(); it != map.end(); it++)
@@ -116,6 +116,18 @@ namespace Gambit
       m["S9_"+bins.str()] = value.S9;
       _print(m, label, vID, mpirank, pointID);
     }
+
+    void SQLitePrinter::_print(CosmoBit::parametrised_ps const& value, const std::string& label, const int vID, const unsigned int mpirank, const unsigned long pointID)
+    {
+      std::map<std::string, double> m;
+      m["n_s"] = value.get_ns();
+      m["r"] = value.get_r();
+      m["A_s"] = value.get_As();
+      m["k_pivot"] = value.get_kpivot();
+      m["N_pivot"] = value.get_Npivot();
+      _print(m, label, vID, mpirank, pointID);
+    }
+
     #endif
 
     /// @}

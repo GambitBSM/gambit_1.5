@@ -30,5 +30,6 @@
 #define ASCII_MODULE_BACKEND_TYPES          \
   (DM_nucleon_couplings)                    \
   (Flav_KstarMuMu_obs)                      \
+  (CosmoBit::parametrised_ps)                         \
 
 #endif
