@@ -1,17 +1,36 @@
-#pragma once
 //   GAMBIT: Global and Modular BSM Inference Tool
 //   *********************************************
 ///  \file
 ///
-///  The SignalRegionData and AnalysisData structs.
+///  AnalysisData and SignalRegion structures.
+///
+///  *********************************************
+///
+///  Authors (add name and date if you modify):
+///
+///  \author Abram Krislock
+///          (a.m.b.krislock@fys.uio.no)
+///
+///  \author Andy Buckley
+///          (mostlikelytobefound@facebook.com)
+///
+///  \author Anders Kvellestad
+///          (anders.kvellestad@fys.uio.no)
+///  \date often
+///
+///  \author Pat Scott
+///          (p.scott@imperial.ac.uk)
+///  \date 2019 Feb
+///
+///  *********************************************
 
-#include "gambit/ColliderBit/ColliderBit_macros.hpp"
-//#include "gambit/ColliderBit/Utils.hpp" //< avoid passing this to the _types/_rollcall
+#pragma once
 
 #include "Eigen/Core"
 
 #include <string>
 #include <map>
+#include <iostream>
 #include <sstream>
 #include <vector>
 #include <cmath>
@@ -60,6 +79,7 @@ namespace Gambit {
         /// @todo Add SR consistency checks
         return consistent;
       }
+
 
       /// @name Signal region specification
       //@{
@@ -168,8 +188,8 @@ namespace Gambit {
       /// Is there non-null correlation data?
       bool hasCorrs() const
       {
-        // check();
-        return srcov.rows() == 0;
+        // check(); // bjf> This was wrong! Needs to be !=, not ==
+        return srcov.rows() != 0;
       }
 
       /// @brief Add a SignalRegionData
@@ -207,6 +227,9 @@ namespace Gambit {
         return true;
       }
 
+      /// bjf> Experimental! But already useful for helping me convert the key
+      /// numbers from these analyses to Python for the p-value calculuations.
+      void pythonize_me() const;
 
       /// Analysis name
       std::string analysis_name;

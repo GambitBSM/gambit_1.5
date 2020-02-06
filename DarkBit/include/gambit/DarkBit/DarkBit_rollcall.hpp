@@ -127,8 +127,8 @@ START_MODULE
       BACKEND_REQ(DS5particle_code, (), int, (const str&))
     #undef FUNCTION
     #define FUNCTION RD_spectrum_from_ProcessCatalog
-      START_FUNCTION(DarkBit::RD_spectrum_type)
-      DEPENDENCY(TH_ProcessCatalog, DarkBit::TH_ProcessCatalog)
+      START_FUNCTION(RD_spectrum_type)
+      DEPENDENCY(TH_ProcessCatalog, TH_ProcessCatalog)
       DEPENDENCY(DarkMatter_ID, std::string)
       ALLOW_MODELS(ScalarSingletDM_Z2, ScalarSingletDM_Z2_running,
                    ScalarSingletDM_Z3, ScalarSingletDM_Z3_running,
@@ -139,8 +139,8 @@ START_MODULE
   #define CAPABILITY RD_spectrum_ordered
   START_CAPABILITY
     #define FUNCTION RD_spectrum_ordered_func
-      START_FUNCTION(DarkBit::RD_spectrum_type)
-      DEPENDENCY(RD_spectrum, DarkBit::RD_spectrum_type)
+      START_FUNCTION(RD_spectrum_type)
+      DEPENDENCY(RD_spectrum, RD_spectrum_type)
     #undef FUNCTION
   #undef CAPABILITY
 
@@ -148,7 +148,7 @@ START_MODULE
   START_CAPABILITY
     #define FUNCTION RD_annrate_DSprep_MSSM_func
       START_FUNCTION(int)
-      DEPENDENCY(RD_spectrum, DarkBit::RD_spectrum_type)
+      DEPENDENCY(RD_spectrum, RD_spectrum_type)
       BACKEND_REQ(rdmgev, (), DS_RDMGEV)
     #undef FUNCTION
     #define FUNCTION RD_annrate_DS6prep_MSSM_func
@@ -169,7 +169,7 @@ START_MODULE
     #undef FUNCTION
     #define FUNCTION RD_eff_annrate_from_ProcessCatalog
       START_FUNCTION(fptr_dd)
-      DEPENDENCY(TH_ProcessCatalog, DarkBit::TH_ProcessCatalog)
+      DEPENDENCY(TH_ProcessCatalog, TH_ProcessCatalog)
       DEPENDENCY(DarkMatter_ID, std::string)
       ALLOW_MODELS(ScalarSingletDM_Z2, ScalarSingletDM_Z2_running,
                    DiracSingletDM_Z2, MajoranaSingletDM_Z2, VectorSingletDM_Z2)
@@ -196,7 +196,7 @@ START_MODULE
 
     #define FUNCTION RD_oh2_DS5_general
       START_FUNCTION(double)
-      DEPENDENCY(RD_spectrum_ordered, DarkBit::RD_spectrum_type)
+      DEPENDENCY(RD_spectrum_ordered, RD_spectrum_type)
       DEPENDENCY(RD_eff_annrate, fptr_dd)
       #ifdef DARKBIT_RD_DEBUG
         DEPENDENCY(MSSM_spectrum, Spectrum)
@@ -323,9 +323,9 @@ START_MODULE
   #define CAPABILITY cascadeMC_DecayTable
   START_CAPABILITY
     #define FUNCTION cascadeMC_DecayTable
-      START_FUNCTION(DarkBit::DecayChain::DecayTable)
-      DEPENDENCY(TH_ProcessCatalog, DarkBit::TH_ProcessCatalog)
-      DEPENDENCY(SimYieldTable, DarkBit::SimYieldTable)
+      START_FUNCTION(DecayChain::DecayTable)
+      DEPENDENCY(TH_ProcessCatalog, TH_ProcessCatalog)
+      DEPENDENCY(SimYieldTable, SimYieldTable)
     #undef FUNCTION
   #undef CAPABILITY
 
@@ -344,7 +344,7 @@ START_MODULE
     #define FUNCTION cascadeMC_InitialState
       START_FUNCTION(std::string)
       DEPENDENCY(GA_missingFinalStates, std::vector<std::string>)
-      NEEDS_MANAGER_WITH_CAPABILITY(cascadeMC_LoopManagement)
+      NEEDS_MANAGER(cascadeMC_LoopManagement)
     #undef FUNCTION
   #undef CAPABILITY
 
@@ -352,9 +352,9 @@ START_MODULE
   #define CAPABILITY cascadeMC_EventCount
   START_CAPABILITY
     #define FUNCTION cascadeMC_EventCount
-      START_FUNCTION(DarkBit::stringIntMap)
+      START_FUNCTION(stringIntMap)
       DEPENDENCY(cascadeMC_InitialState, std::string)
-      NEEDS_MANAGER_WITH_CAPABILITY(cascadeMC_LoopManagement)
+      NEEDS_MANAGER(cascadeMC_LoopManagement)
     #undef FUNCTION
   #undef CAPABILITY
 
@@ -362,10 +362,10 @@ START_MODULE
   #define CAPABILITY cascadeMC_ChainEvent
   START_CAPABILITY
     #define FUNCTION cascadeMC_GenerateChain
-      START_FUNCTION(DarkBit::DecayChain::ChainContainer)
+      START_FUNCTION(DecayChain::ChainContainer)
       DEPENDENCY(cascadeMC_InitialState, std::string)
-      DEPENDENCY(cascadeMC_DecayTable, DarkBit::DecayChain::DecayTable)
-      NEEDS_MANAGER_WITH_CAPABILITY(cascadeMC_LoopManagement)
+      DEPENDENCY(cascadeMC_DecayTable, DecayChain::DecayTable)
+      NEEDS_MANAGER(cascadeMC_LoopManagement)
     #undef FUNCTION
   #undef CAPABILITY
 
@@ -373,13 +373,13 @@ START_MODULE
   #define CAPABILITY cascadeMC_Histograms
   START_CAPABILITY
     #define FUNCTION cascadeMC_Histograms
-      START_FUNCTION(DarkBit::simpleHistContainter)
+      START_FUNCTION(simpleHistContainter)
       DEPENDENCY(cascadeMC_InitialState, std::string)
-      DEPENDENCY(cascadeMC_ChainEvent, DarkBit::DecayChain::ChainContainer)
-      DEPENDENCY(TH_ProcessCatalog, DarkBit::TH_ProcessCatalog)
-      DEPENDENCY(SimYieldTable, DarkBit::SimYieldTable)
+      DEPENDENCY(cascadeMC_ChainEvent, DecayChain::ChainContainer)
+      DEPENDENCY(TH_ProcessCatalog, TH_ProcessCatalog)
+      DEPENDENCY(SimYieldTable, SimYieldTable)
       DEPENDENCY(cascadeMC_FinalStates,std::vector<std::string>)
-      NEEDS_MANAGER_WITH_CAPABILITY(cascadeMC_LoopManagement)
+      NEEDS_MANAGER(cascadeMC_LoopManagement)
     #undef FUNCTION
   #undef CAPABILITY
 
@@ -387,11 +387,11 @@ START_MODULE
   #define CAPABILITY cascadeMC_gammaSpectra
   START_CAPABILITY
     #define FUNCTION cascadeMC_gammaSpectra
-      START_FUNCTION(DarkBit::stringFunkMap)
+      START_FUNCTION(stringFunkMap)
       DEPENDENCY(GA_missingFinalStates, std::vector<std::string>)
       DEPENDENCY(cascadeMC_FinalStates,std::vector<std::string>)
-      DEPENDENCY(cascadeMC_Histograms, DarkBit::simpleHistContainter)
-      DEPENDENCY(cascadeMC_EventCount, DarkBit::stringIntMap)
+      DEPENDENCY(cascadeMC_Histograms, simpleHistContainter)
+      DEPENDENCY(cascadeMC_EventCount, stringIntMap)
     #undef FUNCTION
   #undef CAPABILITY
 
@@ -401,8 +401,8 @@ START_MODULE
   START_CAPABILITY
     #define FUNCTION cascadeMC_PrintResult
       START_FUNCTION(bool)
-      DEPENDENCY(cascadeMC_Histograms, DarkBit::simpleHistContainter)
-      DEPENDENCY(cascadeMC_EventCount, DarkBit::stringIntMap)
+      DEPENDENCY(cascadeMC_Histograms, simpleHistContainter)
+      DEPENDENCY(cascadeMC_EventCount, stringIntMap)
     #undef FUNCTION
   #undef CAPABILITY
   */
@@ -412,7 +412,7 @@ START_MODULE
   #define CAPABILITY cascadeMC_test_TH_ProcessCatalog
   START_CAPABILITY
     #define FUNCTION cascadeMC_test_TH_ProcessCatalog
-      START_FUNCTION(DarkBit::TH_ProcessCatalog)
+      START_FUNCTION(TH_ProcessCatalog)
     #undef FUNCTION
   #undef CAPABILITY
 
@@ -421,8 +421,8 @@ START_MODULE
   START_CAPABILITY
     #define FUNCTION cascadeMC_UnitTest
       START_FUNCTION(bool)
-      DEPENDENCY(cascadeMC_test_TH_ProcessCatalog, DarkBit::TH_ProcessCatalog)
-      DEPENDENCY(SimYieldTable, DarkBit::SimYieldTable)
+      DEPENDENCY(cascadeMC_test_TH_ProcessCatalog, TH_ProcessCatalog)
+      DEPENDENCY(SimYieldTable, SimYieldTable)
     #undef FUNCTION
   #undef CAPABILITY
   */
@@ -433,8 +433,8 @@ START_MODULE
   START_CAPABILITY
     #define FUNCTION GA_missingFinalStates
       START_FUNCTION(std::vector<std::string>)
-      DEPENDENCY(TH_ProcessCatalog, DarkBit::TH_ProcessCatalog)
-      DEPENDENCY(SimYieldTable, DarkBit::SimYieldTable)
+      DEPENDENCY(TH_ProcessCatalog, TH_ProcessCatalog)
+      DEPENDENCY(SimYieldTable, SimYieldTable)
       DEPENDENCY(DarkMatter_ID, std::string)
     #undef FUNCTION
   #undef CAPABILITY
@@ -443,15 +443,15 @@ START_MODULE
   START_CAPABILITY
     #define FUNCTION GA_AnnYield_General
       START_FUNCTION(daFunk::Funk)
-      DEPENDENCY(TH_ProcessCatalog, DarkBit::TH_ProcessCatalog)
-      DEPENDENCY(SimYieldTable, DarkBit::SimYieldTable)
-      DEPENDENCY(cascadeMC_gammaSpectra, DarkBit::stringFunkMap)
+      DEPENDENCY(TH_ProcessCatalog, TH_ProcessCatalog)
+      DEPENDENCY(SimYieldTable, SimYieldTable)
+      DEPENDENCY(cascadeMC_gammaSpectra, stringFunkMap)
       DEPENDENCY(DarkMatter_ID, std::string)
     #undef FUNCTION
   /*
     #define FUNCTION GA_AnnYield_DarkSUSY
       START_FUNCTION(daFunk::Funk)
-      DEPENDENCY(TH_ProcessCatalog, DarkBit::TH_ProcessCatalog)
+      DEPENDENCY(TH_ProcessCatalog, TH_ProcessCatalog)
       DEPENDENCY(DarkMatter_ID, std::string)
       BACKEND_REQ(dshayield, (), double, (double&,double&,int&,int&,int&))
     #undef FUNCTION
@@ -489,13 +489,13 @@ START_MODULE
       BACKEND_REQ(IBintvars, (), DS_IBINTVARS)
     #undef FUNCTION
     #define FUNCTION TH_ProcessCatalog_ScalarSingletDM_Z2
-      START_FUNCTION(DarkBit::TH_ProcessCatalog)
+      START_FUNCTION(TH_ProcessCatalog)
       DEPENDENCY(decay_rates, DecayTable)
       DEPENDENCY(ScalarSingletDM_Z2_spectrum, Spectrum)
       ALLOW_MODELS(ScalarSingletDM_Z2,ScalarSingletDM_Z2_running)
     #undef FUNCTION
     #define FUNCTION TH_ProcessCatalog_ScalarSingletDM_Z3
-      START_FUNCTION(DarkBit::TH_ProcessCatalog)
+      START_FUNCTION(TH_ProcessCatalog)
       DEPENDENCY(decay_rates, DecayTable)
       DEPENDENCY(ScalarSingletDM_Z3_spectrum, Spectrum)
       BACKEND_REQ(calcSpectrum, (gimmemicro) , double,  (int, double*, double*, double*, double*, double*, double*, int*))
@@ -504,19 +504,19 @@ START_MODULE
       ALLOW_MODELS(ScalarSingletDM_Z3,ScalarSingletDM_Z3_running)
     #undef FUNCTION
     #define FUNCTION TH_ProcessCatalog_VectorSingletDM_Z2
-      START_FUNCTION(DarkBit::TH_ProcessCatalog)
+      START_FUNCTION(TH_ProcessCatalog)
       DEPENDENCY(VectorSingletDM_Z2_spectrum, Spectrum)
       DEPENDENCY(decay_rates, DecayTable)
       ALLOW_MODELS(VectorSingletDM_Z2)
     #undef FUNCTION
     #define FUNCTION TH_ProcessCatalog_MajoranaSingletDM_Z2
-      START_FUNCTION(DarkBit::TH_ProcessCatalog)
+      START_FUNCTION(TH_ProcessCatalog)
       DEPENDENCY(MajoranaSingletDM_Z2_spectrum, Spectrum)
       DEPENDENCY(decay_rates, DecayTable)
       ALLOW_MODELS(MajoranaSingletDM_Z2)
     #undef FUNCTION
     #define FUNCTION TH_ProcessCatalog_DiracSingletDM_Z2
-      START_FUNCTION(DarkBit::TH_ProcessCatalog)
+      START_FUNCTION(TH_ProcessCatalog)
       DEPENDENCY(decay_rates, DecayTable)
       DEPENDENCY(DiracSingletDM_Z2_spectrum, Spectrum)
       ALLOW_MODELS(DiracSingletDM_Z2)
@@ -633,11 +633,11 @@ START_MODULE
 
   // Retrieve the DM mass in GeV for generic models
   QUICK_FUNCTION(DarkBit, mwimp, NEW_CAPABILITY, mwimp_generic, double, (),
-      (TH_ProcessCatalog, DarkBit::TH_ProcessCatalog), (DarkMatter_ID, std::string))
+      (TH_ProcessCatalog, TH_ProcessCatalog), (DarkMatter_ID, std::string))
 
   // Retrieve the total thermally-averaged annihilation cross-section for indirect detection (cm^3 / s)
   QUICK_FUNCTION(DarkBit, sigmav, NEW_CAPABILITY, sigmav_late_universe, double, (),
-      (TH_ProcessCatalog, DarkBit::TH_ProcessCatalog), (DarkMatter_ID, std::string))
+      (TH_ProcessCatalog, TH_ProcessCatalog), (DarkMatter_ID, std::string))
 
 
   // DIRECT DETECTION ==================================================
@@ -943,7 +943,7 @@ START_MODULE
   START_CAPABILITY
     #define FUNCTION equilibration_time_Sun
       START_FUNCTION(double)
-      DEPENDENCY(TH_ProcessCatalog, DarkBit::TH_ProcessCatalog)
+      DEPENDENCY(TH_ProcessCatalog, TH_ProcessCatalog)
       DEPENDENCY(mwimp, double)
       DEPENDENCY(DarkMatter_ID, std::string)
       DEPENDENCY(capture_rate_Sun, double)
@@ -965,7 +965,7 @@ START_MODULE
   START_CAPABILITY
     #define FUNCTION nuyield_from_DS
     START_FUNCTION(nuyield_info)
-    DEPENDENCY(TH_ProcessCatalog, DarkBit::TH_ProcessCatalog)
+    DEPENDENCY(TH_ProcessCatalog, TH_ProcessCatalog)
     DEPENDENCY(mwimp, double)
     DEPENDENCY(sigmav, double)
     DEPENDENCY(DarkMatter_ID, std::string)
@@ -1268,7 +1268,7 @@ START_MODULE
     DEPENDENCY(DD_couplings, DM_nucleon_couplings)
     DEPENDENCY(RD_oh2, double)
     DEPENDENCY(GA_AnnYield, daFunk::Funk)
-    DEPENDENCY(TH_ProcessCatalog, DarkBit::TH_ProcessCatalog)
+    DEPENDENCY(TH_ProcessCatalog, TH_ProcessCatalog)
     DEPENDENCY(DarkMatter_ID, std::string)
     #undef FUNCTION
   #undef CAPABILITY
@@ -1284,11 +1284,11 @@ START_MODULE
     BACKEND_REQ(dshayield, (), double, (double&,double&,int&,int&,int&))
     #undef FUNCTION
     #define FUNCTION SimYieldTable_MicrOmegas
-    START_FUNCTION(DarkBit::SimYieldTable)
+    START_FUNCTION(SimYieldTable)
     BACKEND_REQ(dNdE, (), double, (double,double,int,int))
     #undef FUNCTION
     #define FUNCTION SimYieldTable_PPPC
-    START_FUNCTION(DarkBit::SimYieldTable)
+    START_FUNCTION(SimYieldTable)
     #undef FUNCTION
   #undef CAPABILITY
 

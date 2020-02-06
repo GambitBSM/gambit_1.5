@@ -29,6 +29,7 @@
 #include <cmath>
 
 #include "gambit/Utils/util_types.hpp"
+#include "gambit/cmake/cmake_variables.hpp"
 
 #include <boost/algorithm/string/split.hpp>
 #include <boost/algorithm/string/classification.hpp>
@@ -69,12 +70,21 @@ namespace Gambit
   namespace Utils
   {
 
+    /// Return the path to the build-time scratch directory
+    const str buildtime_scratch = GAMBIT_DIR "/scratch/build_time/";
+
+    /// Return the path the the run-specific scratch directory
+    EXPORT_SYMBOLS const str& runtime_scratch();
+
     /// Split a string into a vector of strings, using a delimiter,
     /// and removing any whitespace around the delimiter.
     EXPORT_SYMBOLS std::vector<str> delimiterSplit(str s, str delim);
 
     /// Strips namespace from the start of a string, or after "const".
     EXPORT_SYMBOLS str strip_leading_namespace(str s, str ns);
+
+    /// Replaces a namespace at the start of a string, or after "const".
+    EXPORT_SYMBOLS str replace_leading_namespace(str s, str ns, str ns_new);
 
     /// Strip all whitespace except that following "const",
     /// in which case the whitespace is replaced by a single space.
@@ -98,6 +108,9 @@ namespace Gambit
     /// Perform a (possibly) case-insensitive string comparison
     EXPORT_SYMBOLS bool iequals(const std::string& a, const std::string& b, bool case_sensitive=false);
 
+    /// Split string into vector of strings, using a delimiter string
+    EXPORT_SYMBOLS std::vector<std::string> split(const std::string& input, const std::string& delimiter);
+    
     /************************************************************************/
     /* Comparator for case-insensitive comparison in STL assos. containers  */
     /************************************************************************/
@@ -119,7 +132,7 @@ namespace Gambit
       }
     };
 
-    
+
     /// Get pointers to beginning and end of array.
     // Useful for initialising vectors with arrays, e.g.
     //   int vv[] = { 12,43 };
