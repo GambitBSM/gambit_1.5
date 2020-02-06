@@ -126,7 +126,7 @@ set(md5 "448f72e9bfafbb086bf4526a2094a189")
 set(dir "${PROJECT_SOURCE_DIR}/Backends/installed/${name}/${ver}")
 set(patch "${PROJECT_SOURCE_DIR}/Backends/patches/${name}/${ver}/patch_${name}_${ver}.dif")
 set(DS_Fortran_FLAGS "${BACKEND_Fortran_FLAGS}")  # Workaround to avoid the debug flag (-g) being ignored.
-check_ditch_status(${name} ${ver})
+check_ditch_status(${name} ${ver} ${dir})
 if(NOT ditched_${name}_${ver})
   ExternalProject_Add(${name}_${ver}
     DOWNLOAD_COMMAND ${DL_BACKEND} ${dl} ${md5} ${dir} ${name} ${ver}
@@ -153,7 +153,7 @@ endif()
 # DarkSUSY MSSM module
 set(model "MSSM")
 #set(patch "${PROJECT_SOURCE_DIR}/Backends/patches/${name}/${ver}/patch_${name}_${ver}_${model}")
-check_ditch_status(${name}_${model} ${ver})
+check_ditch_status(${name}_${model} ${ver} ${dir})
 if(NOT ditched_${name}_${model}_${ver})
   ExternalProject_Add(${name}_${model}_${ver}
     DOWNLOAD_COMMAND ""
@@ -171,7 +171,7 @@ endif()
 # DarkSUSY generic_decayingDM module
 set(model "generic_decayingDM")
 #set(patch "${PROJECT_SOURCE_DIR}/Backends/patches/${name}/${ver}/patch_${name}_${ver}_${model}")
-check_ditch_status(${name}_${model} ${ver})
+check_ditch_status(${name}_${model} ${ver} ${dir})
 if(NOT ditched_${name}_${model}_${ver})
   ExternalProject_Add(${name}_${model}_${ver}
     DOWNLOAD_COMMAND ""
@@ -189,7 +189,7 @@ endif()
 # DarkSUSY generic_wimp module
 set(model "generic_wimp")
 #set(patch "${PROJECT_SOURCE_DIR}/Backends/patches/${name}/${ver}/patch_${name}_${ver}_${model}")
-check_ditch_status(${name}_${model} ${ver})
+check_ditch_status(${name}_${model} ${ver} ${dir})
 if(NOT ditched_${name}_${model}_${ver})
   ExternalProject_Add(${name}_${model}_${ver}
     DOWNLOAD_COMMAND ""
@@ -207,7 +207,7 @@ endif()
 # DarkSUSY silveira_zee module
 set(model "silveira_zee")
 #set(patch "${PROJECT_SOURCE_DIR}/Backends/patches/${name}/${ver}/patch_${name}_${ver}_${model}")
-check_ditch_status(${name}_${model} ${ver})
+check_ditch_status(${name}_${model} ${ver} ${dir})
 if(NOT ditched_${name}_${model}_${ver})
   ExternalProject_Add(${name}_${model}_${ver}
     DOWNLOAD_COMMAND ""
@@ -225,7 +225,7 @@ endif()
 # DarkSUSY vdSIDM module
 set(model "vdSIDM")
 #set(patch "${PROJECT_SOURCE_DIR}/Backends/patches/${name}/${ver}/patch_${name}_${ver}_${model}")
-check_ditch_status(${name}_${model} ${ver})
+check_ditch_status(${name}_${model} ${ver} ${dir})
 if(NOT ditched_${name}_${model}_${ver})
   ExternalProject_Add(${name}_${model}_${ver}
     DOWNLOAD_COMMAND ""
