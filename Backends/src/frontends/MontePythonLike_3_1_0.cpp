@@ -29,11 +29,11 @@ BE_NAMESPACE
 {
   using namespace pybind11::literals; // to bring in the `_a` literal to initialise python dictionarys with pybind11
 
-  /// calls the function "get_availible_likelihoods" in the patched MontePythonLike.py file of MontePython backend. 
-  /// This returns a list containing strings with the names of all likelihoods availible in the MontePythonLike backend 
-  std::vector<str> get_MP_availible_likelihoods()
+  /// calls the function "get_available_likelihoods" in the patched MontePythonLike.py file of MontePython backend. 
+  /// This returns a list containing strings with the names of all likelihoods available in the MontePythonLike backend 
+  std::vector<str> get_MP_available_likelihoods()
   {
-    pybind11::list avail_likes = MontePythonLike.attr("get_availible_likelihoods")(backendDir);
+    pybind11::list avail_likes = MontePythonLike.attr("get_available_likelihoods")(backendDir);
     return avail_likes.cast<std::vector<str>>();
   }
     

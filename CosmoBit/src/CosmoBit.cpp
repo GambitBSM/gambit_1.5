@@ -589,10 +589,16 @@ namespace Gambit
       // make sure dict is empty
       result.clear();
 
+      // keep track if it is the first run -- if so 
+      // some extra consistency checks to make sure no contradicting
+      // values are in the classy python input dictionary
+      static bool first_run = true;
+
       // Get the dictionary with inputs for the neutrino masses and merge it
       // into the empty results dictionary.
       pybind11::dict NuMasses_In = *Dep::NuMasses_classy_input;
-      merge_pybind_dicts(result, NuMasses_In);
+      merge_pybind_dicts(result, NuMasses_In, first_run);
+      first_run = false;
 
       // standard cosmological parameters (common to all CDM -like models)
       result["H0"] =            *Param["H0"];
@@ -609,7 +615,8 @@ namespace Gambit
       // -> (JR again) not sure if that is actually true.. need to test.  
       if (ModelInUse("DecayingDM_general") || ModelInUse("AnnihilatingDM_general"))
       {
-        merge_pybind_dicts(result,*Dep::classy_parameters_EnergyInjection);
+        merge_pybind_dicts(result,*Dep::classy_parameters_EnergyInjection, first_run);
+        first_run = false;
       }
       
 
@@ -617,10 +624,8 @@ namespace Gambit
       // check if these are already contained in the input dictionary -- if so throw an error
       // only do it for the first run though
       static pybind11::dict yaml_input;
-      static bool first_run = true;
       if(first_run)
       {
-        first_run = false;
         YAML::Node classy_dict;
         if (runOptions->hasKey("classy_dict"))
         {
@@ -634,6 +639,7 @@ namespace Gambit
             if (not result.contains(name.c_str()))
             {
               yaml_input[name.c_str()] = value;
+              std::cout << " ----------- REad yaml option " << name.c_str() << std::endl;
             }
             // If it does, throw an error, there's some YAML conflict going on.
             else
@@ -685,7 +691,7 @@ namespace Gambit
       }
 
       // add yaml options to python dictionary passed to CLASS
-      merge_pybind_dicts(result,yaml_input);
+      merge_pybind_dicts(result,yaml_input, first_run);
       
 
       // At last: if the Planck likelihood is used add all relevant input parameters to the CLASS dictionary:
@@ -696,9 +702,10 @@ namespace Gambit
       //   in the lensing or non linear choice will rightfully trigger an error.  
       if (ModelInUse("Planck_lite") || ModelInUse("Planck_TTTEEE")|| ModelInUse("Planck_TT") || ModelInUse("plik_dx11dr2_HM_v18_TT"))
       {
-        merge_pybind_dicts(result,*Dep::classy_parameters_PlanckLike);
+        merge_pybind_dicts(result,*Dep::classy_parameters_PlanckLike, first_run);
       }
 
+      first_run = false;
     }
 
     /// Set the LCDM_no_primordial_ps in classy. Depends on a parametrised primordial_ps.
@@ -2147,6 +2154,7 @@ namespace Gambit
       // add the arguments from Mp_cosmo_arguments which are not yet in cosmo_input_dict to it
       // also takes care of merging the "output" key values
       result.merge_input_dicts(MP_cosmo_arguments); // TODO (JR) use merge_pybind_dict routine instead -> don't need to duplicate code
+      //merge_pybind_dicts(result, MP_cosmo_arguments);
     }
 
 
@@ -2395,7 +2403,7 @@ namespace Gambit
       if (first)
       {
         // get list of likelihoods implemented in MP
-        std::vector<str> avail_likes = BEreq::get_MP_availible_likelihoods();
+        std::vector<str> avail_likes = BEreq::get_MP_available_likelihoods();
 
         // read in requested likelihoods
         YAML::Node MP_Likelihoods;
@@ -2524,7 +2532,7 @@ namespace Gambit
     }
 
     /// Computes lnL for each experiment initialised in MontePython
-    void calc_MP_LogLikes(map_str_dbl & result)
+    void calc_MP_LogLikes(CosmoBit::MPLike_result_container & result)
     {
       using namespace Pipes::calc_MP_LogLikes;
       using namespace pybind11::literals;
@@ -2585,16 +2593,39 @@ namespace Gambit
       // Loop through the list of experiments, and query the lnL from the
       // MontePython backend
       // Only if the experiment is requested as a Likelihood.
-      // Separate function below for observables.
+      // Separate loop below for observables.
       if (experiment_names.find("Likelihoods") != experiment_names.end())
       {
+        logger() << LogTags::debug << "(calc_MP_LogLikes): Likelihoods\n\n";
         for (auto const& it : experiment_names.at("Likelihoods"))
         {
           // likelihood names are keys of experiment map (str, str map mapping likelihood name to .data file)
           std::string like_name = it.first;
-          result[like_name] = BEreq::get_MP_loglike(mplike_cont, cosmo, like_name);
+          double logLike = BEreq::get_MP_loglike(mplike_cont, cosmo, like_name);
+          result.add_logLike(like_name, logLike);
+          logger() << "name: " << it.first << "\tvalue: " << logLike << "\n";
+          //std::cout << "name: " << it.first << "\tvalue: " << logLike << std::endl;
         }
       }
+
+      // Loop through the list of experiments, and query the lnL from the
+      // MontePython backend.
+      // ONLY if the experiment is requested as an observable.
+      if (experiment_names.find("Observables") != experiment_names.end())
+      {
+        logger() << LogTags::debug << "(calc_MP_LogLikes): Observables\n\n";
+        for (auto const& it : experiment_names.at("Observables"))
+        {
+          // likelihood names are keys of experiment map (str, str map mapping likelihood name to .data file)
+          std::string like_name = it.first;
+          double logLike = BEreq::get_MP_loglike(mplike_cont, cosmo, like_name);
+          result.add_obs(like_name, logLike);
+          logger() << "name: " << it.first << "\tvalue: " << logLike << "\n";
+          //std::cout << "name: " << it.first << "\tvalue: " << logLike << std::endl;
+        }
+        logger() << EOM;
+      }
+
     }
 
     /// Computes the combined lnL from the set of experiments
@@ -2603,7 +2634,11 @@ namespace Gambit
     {
       using namespace Pipes::calc_MP_combined_LogLike;
 
-      map_str_dbl MP_lnLs = *Dep::MP_LogLikes;
+      // get string double map from MPlike result container mapping
+      // experiment name to LogLike value for Likelihoods included 
+      // into the scan
+      CosmoBit::MPLike_result_container MPLike_results = *Dep::calc_MP_LogLikes;
+      map_str_dbl MP_lnLs = MPLike_results.get_logLike_results();
 
       // Iterate through map of doubles and return one big fat double.
       double lnL = 0.;
@@ -2618,22 +2653,44 @@ namespace Gambit
 
       result = lnL;
     }
+    /// Computes lnL for each experiment initialised in MontePython
+    /// but DOES NOT add it to the compound lnL in GAMBIT.
+    /// This should be used when one wishes to grab a Likelihood from
+    /// MontePython but does not want it to steer the scans
+    /// (e.g. for forecasting; conflicting likelihoods; etc.) -- use with caution!
+    void get_MP_LogLikes(map_str_dbl & result)
+    {
+      using namespace Pipes::get_MP_LogLikes;
+      using namespace pybind11::literals;
+
+      // get string double map from MPlike result container mapping
+      // experiment name to LogLike value for Observables included 
+      // into the scan
+      CosmoBit::MPLike_result_container MPLike_results = *Dep::calc_MP_LogLikes;
+      result = MPLike_results.get_logLike_results();
+    }
 
     /// Computes lnL for each experiment initialised in MontePython
     /// but DOES NOT add it to the compound lnL in GAMBIT.
     /// This should be used when one wishes to grab a Likelihood from
     /// MontePython but does not want it to steer the scans
     /// (e.g. for forecasting; conflicting likelihoods; etc.) -- use with caution!
-    void calc_MP_observables(map_str_dbl & result)
+    void get_MP_Observables(map_str_dbl & result)
     {
-      using namespace Pipes::calc_MP_LogLikes;
+      using namespace Pipes::get_MP_Observables;
       using namespace pybind11::literals;
+
+      // get string double map from MPlike result container mapping
+      // experiment name to LogLike value for Observables included 
+      // into the scan
+      CosmoBit::MPLike_result_container MPLike_results = *Dep::calc_MP_LogLikes;
+      result = MPLike_results.get_obs_results();
 
       // A list of the experiments initialised in the YAML file
       // This is a map with the following structure:
       // { Likelihoods: {likelihood1: mode, likelihood2: mode...}
       //   Observables: {observable1: mode, observable2: mode...} }
-      map_str_map_str_str experiment_names = *Dep::MP_experiment_names;
+      /*map_str_map_str_str experiment_names = *Dep::MP_experiment_names;
       
       // We need to pull the names of all Likelihoods AND observables
       // to initialise the data structures in MontePython
@@ -2696,7 +2753,7 @@ namespace Gambit
           logger() << "name: " << it.first << "\tvalue: " << result.at(like_name) << "\n";
         }
         logger() << EOM;
-      }
+      }*/
     }
   }
 }

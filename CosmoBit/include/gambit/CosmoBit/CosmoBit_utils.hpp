@@ -42,8 +42,9 @@ namespace Gambit
   {
 
     
-
-    void merge_pybind_dicts(pybind11::dict& a, pybind11::dict b);
+    /// Merge two dictionaries containing input parameters for CLASS
+    /// (specific rules are applied in case of key duplication)
+    void merge_pybind_dicts(pybind11::dict& a, pybind11::dict b, bool first_run);
 
     // fast interpolation for grids defined on equally-spaced log space
     class fast_interpolation {

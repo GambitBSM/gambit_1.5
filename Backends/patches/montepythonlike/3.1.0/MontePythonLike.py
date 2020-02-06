@@ -3684,7 +3684,7 @@ class Data(object):
         ctx.add('data', self)
 
 
-def get_availible_likelihoods(backendDir):
+def get_available_likelihoods(backendDir):
     ''' Function that reads and returns a list of all folder names in the MontePython/montepython/likelihoods folder.
         The output is used in GAMBIT to check if the user requested to use a likelihood which is actually not availible
         in the installed version of MontePython. 

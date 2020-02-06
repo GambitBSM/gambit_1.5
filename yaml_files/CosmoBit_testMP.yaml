@@ -110,17 +110,10 @@ Rules:
   - capability: baseline_classy_input
     function: set_baseline_classy_input
     options:
-      #l_max: 1000
-      # /\
-      # ||  (JR) we should not set this by default when using the python wrapper: if only bg needed 
-      #     classy will complain that it did not read the input parameter.
-      #     If we use Planck through MP this should be taken care of by itself anyway
-      #output: " "   # classy + MP: even when no output specified all spectra etc. the likelihoods need
-                    # are calculated since the MP Likelihood initialisation is taking care of this for us! 
-      #lensing: "no" # heads-up: changed default to 'no'in function 'set_classy_parameters_LCDM' as well
-                    # since otherwise the automatic output setting will not work
-      #energy_deposition_function : "GAMBIT"
-
+      classy_dict:
+         P_k_max_h/Mpc: 3
+         m_ncdm: 2
+      
   # you have to set by hand if you want to set the class parameters with or without setting arguments from MontePython Likelihoods
   # if the montepythonlike backend is installed (if not it should automatically choose the function 'init_Classy_cosmo_container')
   - capability: get_classy_cosmo_container
@@ -134,7 +127,7 @@ Rules:
       Likelihoods: 
         bao_smallz_2014: default
         Pantheon: default 
-        #,"Planck_SZ"]  
+        Planck_SZ: default  
       # should eventually be possible to choose any MP like, atm only bao, Pantheon, Planck_SZ (& kids after 
       # downloading data and when commenting out line 'parser_mp.existing_file(fname)', will include that into 
       # build step soon) safe to use;
