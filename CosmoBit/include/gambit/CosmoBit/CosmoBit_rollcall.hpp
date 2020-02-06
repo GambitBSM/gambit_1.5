@@ -947,7 +947,7 @@ START_MODULE
      START_CAPABILITY
      #define FUNCTION set_MP_experiment_names
       START_FUNCTION(map_str_map_str_str)
-      BACKEND_REQ(get_MP_availible_likelihoods, (libmontepythonlike), std::vector<str>, ())
+      BACKEND_REQ(get_MP_available_likelihoods, (libmontepythonlike), std::vector<str>, ())
      #undef FUNCTION
   #undef CAPABILITY
 
@@ -966,13 +966,13 @@ START_MODULE
   /* MontePython */
   
   /// Calculates lnL for each experiment using the experiment names
-  #define CAPABILITY MP_LogLikes
+  #define CAPABILITY calc_MP_LogLikes
     START_CAPABILITY
     #define FUNCTION calc_MP_LogLikes
-      START_FUNCTION(map_str_dbl) 
+      START_FUNCTION(CosmoBit::MPLike_result_container) 
       DEPENDENCY(MP_experiment_names,         map_str_map_str_str)
       DEPENDENCY(parameter_dict_for_MPLike,   pybind11::dict)
-      BACKEND_REQ(get_classy_cosmo_object,               (class_tag),             pybind11::object,      ())
+      BACKEND_REQ(get_classy_cosmo_object,      (class_tag),             pybind11::object,      ())
       BACKEND_REQ(get_MP_loglike,               (libmontepythonlike), double,           (const CosmoBit::MPLike_data_container&, pybind11::object&, std::string&))
       BACKEND_REQ(create_MP_data_object,        (libmontepythonlike), pybind11::object, (map_str_str&))
       BACKEND_REQ(create_MP_likelihood_objects, (libmontepythonlike), map_str_pyobj,    (pybind11::object&, map_str_str&))
@@ -980,26 +980,33 @@ START_MODULE
   #undef CAPABILITY
       
   /// Calculates the total lnL from MontePython 
+  /// -> added to total LogLike, used to drive scan
   #define CAPABILITY MP_Combined_LogLike
     START_CAPABILITY
     #define FUNCTION calc_MP_combined_LogLike
       START_FUNCTION(double)
-      DEPENDENCY(MP_LogLikes, map_str_dbl)
+      DEPENDENCY(calc_MP_LogLikes, CosmoBit::MPLike_result_container)
     #undef FUNCTION
   #undef CAPABILITY
 
-  /// Calculates lnL for each experiment using the experiment names
+  /// Get lnL for each experiment tagged with Likelihood in map from 
+  /// experiment name (str) to double -> for printing
+  #define CAPABILITY MP_LogLikes
+    START_CAPABILITY
+    #define FUNCTION get_MP_LogLikes
+      START_FUNCTION(map_str_dbl) 
+      DEPENDENCY(calc_MP_LogLikes, CosmoBit::MPLike_result_container)
+    #undef FUNCTION
+  #undef CAPABILITY
+
+  /// Get lnL for each experiment tagged with Observable in map from 
+  /// experiment name (str) to double -> for printing
   /// but DOES NOT add them to the lnL used to steer GAMBIT scans!
   #define CAPABILITY MP_Observables
     START_CAPABILITY
-    #define FUNCTION calc_MP_observables
+    #define FUNCTION get_MP_Observables
       START_FUNCTION(map_str_dbl) 
-      DEPENDENCY(MP_experiment_names,         map_str_map_str_str)
-      DEPENDENCY(parameter_dict_for_MPLike,   pybind11::dict)
-      BACKEND_REQ(get_classy_cosmo_object,               (class_tag),             pybind11::object,      ())
-      BACKEND_REQ(get_MP_loglike,               (libmontepythonlike), double,           (const CosmoBit::MPLike_data_container&, pybind11::object&, std::string&))
-      BACKEND_REQ(create_MP_data_object,        (libmontepythonlike), pybind11::object, (map_str_str&))
-      BACKEND_REQ(create_MP_likelihood_objects, (libmontepythonlike), map_str_pyobj,    (pybind11::object&, map_str_str&))
+      DEPENDENCY(calc_MP_LogLikes, CosmoBit::MPLike_result_container)
     #undef FUNCTION
   #undef CAPABILITY
 

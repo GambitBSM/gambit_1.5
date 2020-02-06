@@ -34,7 +34,7 @@
 #define __CosmoBit_types_hpp__
 
 #include "gambit/Utils/util_types.hpp"
-//#include "gambit/CosmoBit/CosmoBit_utils.hpp"
+#include "gambit/CosmoBit/CosmoBit_utils.hpp"
 #include "gambit/Backends/backend_types/MontePythonLike.hpp"
 #include <valarray>
 #include <stdint.h>  // save memory address as int
@@ -56,6 +56,33 @@ namespace Gambit
     uintptr_t memaddress_to_uint(double* ptr);
 
     typedef std::map< std::string,std::valarray < double > > map_str_valarray_dbl;
+
+    /// type to store likelihood calculation results from MontePython
+    /// has two members: logLike_results & obs_results, both string to double map
+    /// mapping the MontePython experiment/likelihood name to the calculated LogLike
+    ///     - logLike_results:  contains results from all experiment names tagged with 'Likelihood',
+    ///         i.e. the likelihoods being added to total LogLike to drive scan
+    ///     - obs_results:  contains results from all experiment names tagged with 'Observable',
+    ///         i.e. the likelihoods NOT added to total LogLike to drive scan
+    class MPLike_result_container
+    {
+    public:
+
+        MPLike_result_container(){};
+
+        // add map entry to likelihood/observables map
+        void add_logLike(std::string experiment_name, double logLike) {logLike_results[experiment_name] = logLike;}
+        void add_obs(std::string experiment_name, double obs) {obs_results[experiment_name] = obs;}
+
+        // return likelihood/observable result mpas
+        map_str_dbl get_logLike_results () {return logLike_results;}
+        map_str_dbl get_obs_results     () {return obs_results;}
+
+    private:
+        map_str_dbl logLike_results;
+        map_str_dbl obs_results;
+
+    };
 
     class MPLike_data_container
     {

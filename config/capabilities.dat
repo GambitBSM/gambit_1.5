@@ -4200,7 +4200,7 @@ class_get_Omega0_ur: |
 #  MontePythonLike
 #----------------------------
 
-get_MP_availible_likelihoods: |
+get_MP_available_likelihoods: |
     Returns a list with all available likelihoods implemented in MontePython. New likelihoods can simply be added
     into the MontePython installation folder and GAMBIT will recognize it without the need to recompile. 
 
@@ -4432,14 +4432,17 @@ ExtNeffCMB: |
 external_dNeff_etaBBN: |
    Compute dNeff @CMB and etaBBN for non-standard models. E.g. needed for the CosmoALP model.
 
+calc_MP_LogLikes: |
+    Calls MontePython to get the likelihood of all experiments (tagged with 'Likelihood' and 'Observable'). The results are stored as map from experiment name to LogLike result in the type MPLike_result_container.
+
 MP_Combined_LogLike: |
     Returns combined LogLike of all MontePython Likelihoods used in the scan. 
 
 MP_LogLikes: |
-  Calls MontePython to get the likelihood of all experiments used in scan. These are added to the value returned by MP_Combined_LogLike. Results are stored in a map mapping experiment name to LogLike value.
+    Returns a map from experiment name to LogLike value containing the likelihood of all experiments used as an Observable. All LogLike values contained here are added up an count to the total LogLike that drives the scan. 
 
 MP_Observables: |
-  Calls MontePython to get the likelihood of all experiments used as an Observable. These are not added to the value returned by MP_Combined_LogLike, hence they are not driving the scan. Results are stored in a map mapping experiment name to LogLike value.
+    Returns a map from experiment name to LogLike value containing the likelihood of all experiments used as an Observable. These are not added to the value returned by MP_Combined_LogLike, hence they are not driving the scan. 
 
 MP_experiment_names: |
   Set names of all experiments in use for a scan and stores the path to the settings file for the different likelihoods by reading in the runOptions 'Likelihoods' and/or 'Observables' of this capability.
