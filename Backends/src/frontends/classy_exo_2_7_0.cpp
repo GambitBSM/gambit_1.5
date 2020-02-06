@@ -36,11 +36,27 @@ BE_NAMESPACE
 {
 
   pybind11::object static cosmo;
+  // save input dictionary from CLASS run from 
+  // previously computed point
+  pybind11::dict static prev_input_dict;
 
   // return cosmo object. Need to pass this to MontePython for Likelihoods calculations
   pybind11::object get_classy_cosmo_object()
   {
-		return cosmo;
+    return cosmo;
+  }
+
+  /// test if two dictionaries contain exactly the same values for all keys
+  /// return true if so, false if there is at least one different value
+  bool compare_dicts(pybind11::dict classy_input, pybind11::dict prev_input_dict)
+  {
+    for (auto it : classy_input)
+    {
+      // return false if unequal values are found
+      if (classy_input[it.first].cast<std::string>() != prev_input_dict[it.first].cast<std::string>()){return false;}
+    }
+    // all key values are identical --> no need to run class again, yay!  
+    return true;
   }
 
   /// routine to check class input for consistency. If a case is not treated here class will 
@@ -313,6 +329,7 @@ BE_INI_FUNCTION
   static int error_counter = 0;
   static int max_errors = 100;
 
+  // get input for CLASS run set by CosmoBit 
   CosmoBit::ClassyInput input_container= *Dep::get_classy_cosmo_container;
   pybind11::dict cosmo_input_dict = input_container.get_input_dict();
 
@@ -320,85 +337,105 @@ BE_INI_FUNCTION
   rename_energy_injection_parameters(cosmo_input_dict);
 
   static bool first_run = true;
+  
   if(first_run)
   {
     max_errors = runOptions->getValueOrDef<int>(100,"max_errors");
     cosmo = classy.attr("Class")();
-    first_run = false;
     // check input for consistency
     class_input_consistency_checks(cosmo_input_dict);
+
+    // create deep copy of cosmo_input_dict
+    prev_input_dict = cosmo_input_dict.attr("copy")();
   }
 
-  rename_energy_injection_parameters(cosmo_input_dict);
+  // test if input arguments for CLASS are exactly the same as in previous run ...
+  bool equal = compare_dicts(prev_input_dict, cosmo_input_dict);
 
-  // Clean CLASS (the equivalent of the struct_free() in the `main` of CLASS -- don't want a memory leak, do we
-  cosmo.attr("struct_cleanup")();
-
-  // Actually only strictly necessary when cosmology is changed completely between two different runs
-  // but just to make sure nothing's going wrong do it anyways..
-  cosmo.attr("empty")();
-
-  // set cosmological parameters
-  logger() << LogTags::debug << "[classy_"<< STRINGIFY(VERSION) <<"] These are the inputs:\n\n";
-  logger() << pybind11::repr(cosmo_input_dict) << EOM;
-  cosmo.attr("set")(cosmo_input_dict);
-
-  // Try to run class and catch potential errors
-  logger() << LogTags::info << "[classy_"<< STRINGIFY(VERSION) <<"] Start to run \"cosmo.compute\"" << EOM;
-  try
+  // .. if so there is no need to recompute the results. If not, clean structure, re-fill input & re-compute
+  if(not equal or first_run)
   {
-    // Try to run classy
-    cosmo.attr("compute")();
-    // reset counter when no exception is thrown.
-    error_counter = 0;
-    logger() << LogTags::info << "[classy_"<< STRINGIFY(VERSION) <<"] \"cosmo.compute\" was successful" << EOM;
-  }
-  catch (std::exception &e)
-  {
-    std::ostringstream errMssg;
-    errMssg << "Could not successfully execute cosmo.compute() in classy_"<< STRINGIFY(VERSION)<<"\n";
-    std::string rawErrMessage(e.what());
-    // If the error is a CosmoSevereError raise an backend_error ...
-    if (rawErrMessage.find("CosmoSevereError") != std::string::npos)
+    // Clean CLASS (the equivalent of the struct_free() in the `main` of CLASS -- don't want a memory leak, do we
+    cosmo.attr("struct_cleanup")();
+
+    // Actually only strictly necessary when cosmology is changed completely between two different runs
+    // but just to make sure nothing's going wrong do it anyways..
+    cosmo.attr("empty")();
+
+    // set cosmological parameters
+    logger() << LogTags::debug << "[classy_"<< STRINGIFY(VERSION) <<"] These are the inputs:\n\n";
+    logger() << pybind11::repr(cosmo_input_dict) << EOM;
+    cosmo.attr("set")(cosmo_input_dict);
+
+    // Try to run class and catch potential errors
+    logger() << LogTags::info << "[classy_"<< STRINGIFY(VERSION) <<"] Start to run \"cosmo.compute\"" << EOM;
+    try
     {
-      errMssg << "Caught a \'CosmoSevereError\':\n\n";
-      errMssg << rawErrMessage;
-      backend_error().raise(LOCAL_INFO,errMssg.str());
+      // Try to run classy
+      cosmo.attr("compute")();
+      // reset counter when no exception is thrown.
+      error_counter = 0;
+      logger() << LogTags::info << "[classy_"<< STRINGIFY(VERSION) <<"] \"cosmo.compute\" was successful" << EOM;
     }
-    // .. but if it is 'only' a CosmoComputationError, invalidate the parameter point
-    // and raise a backend_warning.
-    // In case this happens "max_errors" times in a row, raise a backend_error
-    // instead, since it probably points to some issue with the inputs
-    else if (rawErrMessage.find("CosmoComputationError") != std::string::npos)
+    catch (std::exception &e)
     {
-      ++error_counter;
-      errMssg << "Caught a \'CosmoComputationError\':\n\n";
-      errMssg << rawErrMessage;
-      if ( max_errors < 0 || error_counter <= max_errors )
+      std::ostringstream errMssg;
+      errMssg << "Could not successfully execute cosmo.compute() in classy_"<< STRINGIFY(VERSION)<<"\n";
+      std::string rawErrMessage(e.what());
+      // If the error is a CosmoSevereError raise an backend_error ...
+      if (rawErrMessage.find("CosmoSevereError") != std::string::npos)
       {
-        backend_warning().raise(LOCAL_INFO,errMssg.str());
-        invalid_point().raise(errMssg.str());
-      }
-      else
-      {
-        errMssg << "\nThis happens now for the " << error_counter << "-th time ";
-        errMssg << "in a row. There is probably something wrong with your inputs.";
+        errMssg << "Caught a \'CosmoSevereError\':\n\n";
+        errMssg << rawErrMessage;
         backend_error().raise(LOCAL_INFO,errMssg.str());
       }
+      // .. but if it is 'only' a CosmoComputationError, invalidate the parameter point
+      // and raise a backend_warning.
+      // In case this happens "max_errors" times in a row, raise a backend_error
+      // instead, since it probably points to some issue with the inputs
+      else if (rawErrMessage.find("CosmoComputationError") != std::string::npos)
+      {
+        ++error_counter;
+        errMssg << "Caught a \'CosmoComputationError\':\n\n";
+        errMssg << rawErrMessage;
+        if ( max_errors < 0 || error_counter <= max_errors )
+        {
+          backend_warning().raise(LOCAL_INFO,errMssg.str());
+          invalid_point().raise(errMssg.str());
+        }
+        else
+        {
+          errMssg << "\nThis happens now for the " << error_counter << "-th time ";
+          errMssg << "in a row. There is probably something wrong with your inputs.";
+          backend_error().raise(LOCAL_INFO,errMssg.str());
+        }
+      }
+      // any other error (which shouldn't occur) gets also caught as invalid point.
+      else
+      {
+        errMssg << "Caught an unspecified error:\n\n";
+        errMssg << rawErrMessage;
+        cout << "An unspecified error occurred during compute() in classy_"<< STRINGIFY(VERSION) <<":\n";
+        cout << rawErrMessage;
+        cout << "\n(This point gets invalidated) " << endl;
+        invalid_point().raise(errMssg.str());
+      }
     }
-    // any other error (which shouldn't occur) gets also caught as invalid point.
-    else
-    {
-      errMssg << "Caught an unspecified error:\n\n";
-      errMssg << rawErrMessage;
-      cout << "An unspecified error occurred during compute() in classy_"<< STRINGIFY(VERSION) <<":\n";
-      cout << rawErrMessage;
-      cout << "\n(This point gets invalidated) " << endl;
-      invalid_point().raise(errMssg.str());
-    }
+    //std::cout << "Trying to print power spectrum..." << std::endl;
+    //print_pps();
+
   }
-  
-  std::cout << "Trying to print power spectrum..." << std::endl;
-  print_pps();
+  // identical CLASS input -- skip compute step & save time! 
+  else
+  {
+    logger() << LogTags::info << "[classy_"<< STRINGIFY(VERSION) <<"] \"cosmo.compute\" was skipped, input was identical to previously computed point" << EOM;
+  }
+
+  first_run = false;
+  // save input arguments from this run to dictionary prev_input_dict
+  // (clear entries before copying, hope there are non memory leaks?)
+  prev_input_dict.attr("clear")();
+  prev_input_dict = cosmo_input_dict.attr("copy")();
+
 }
 END_BE_INI_FUNCTION
