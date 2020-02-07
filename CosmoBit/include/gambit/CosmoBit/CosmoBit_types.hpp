@@ -107,21 +107,6 @@ namespace Gambit
 
     };
 
-
-    class Classy_cosmo_container
-    {
-    /* Class holding python object cosmo which is an instance of the class Class() from classy (Python wrapper for CLASS)
-        This needs to be passed around between the classy frontend, CosmoBit & the MPLike frontend. 
-    */
-    public:
-        Classy_cosmo_container(){}
-        pybind11::object cosmo;
-        pybind11::dict cosmo_input_dict;
-        pybind11::dict cosmo_prec_dict;
-
-        void set_input_dict(pybind11::dict input_dict);
-    };
-
     class BBN_container
     {
       public:

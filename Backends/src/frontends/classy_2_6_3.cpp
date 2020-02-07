@@ -248,7 +248,7 @@ BE_INI_FUNCTION
   static int max_errors = 100;
 
   // get input for CLASS run set by CosmoBit 
-  CosmoBit::ClassyInput input_container= *Dep::get_classy_cosmo_container;
+  CosmoBit::ClassyInput input_container = *Dep::get_classy_cosmo_container;
   pybind11::dict cosmo_input_dict = input_container.get_input_dict();
 
   static bool first_run = true;
