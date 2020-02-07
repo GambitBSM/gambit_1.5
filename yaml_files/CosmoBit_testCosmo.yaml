@@ -41,7 +41,7 @@ Parameters:
  #StandardModel_mNudiff: !import include/StandardModel_mNudiff_IH_scan.yaml
 
  # nuisance parameters in Planck likelihood
- Planck_lite: !import include/Planck_2018/Planck_lite_gauss.yaml
+ cosmo_nuisance_Planck_lite: !import include/Planck_2018/cosmo_nuisance_Planck_lite_gauss.yaml
 
 #======== Prior setup ========
 Priors:
@@ -154,7 +154,7 @@ Rules:
     function:     get_Sigma8_classy
 
 #####
-##  Since the "Planck_lite" model fits to be used by 
+##  Since the "cosmo_nuisance_Planck_lite" model fits to be used by 
 ##  the marginalized (lite) versions of both, the TT
 ##  and the TTTEEE, likelihoods, we need to resolve
 ##  this ambiguity manually.

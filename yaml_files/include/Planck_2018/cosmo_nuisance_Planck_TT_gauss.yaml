@@ -1,5 +1,5 @@
 ##########################################################################
-## Nuisance parameter of "Planck_TT"
+## Nuisance parameter of "cosmo_nuisance_Planck_TT"
 ##
 ## Gaussian priors on chosen parameters as recommenrded by Planck.
 ## Should not be scanned with  "Planck_nuisance_prior_loglike"

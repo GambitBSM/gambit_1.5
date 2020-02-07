@@ -78,11 +78,11 @@ namespace Gambit
         logger() << LogTags::info << tmp << EOM;
 
         int modelcode = -1;
-        if (ModelInUse("Planck_lite"))
+        if (ModelInUse("cosmo_nuisance_Planck_lite"))
           modelcode = 1;
-        else if (ModelInUse("Planck_TT"))
+        else if (ModelInUse("cosmo_nuisance_Planck_TT"))
           modelcode = 3;
-        else if (ModelInUse("Planck_TTTEEE"))
+        else if (ModelInUse("cosmo_nuisance_Planck_TTTEEE"))
           modelcode = 7;
 
         data.empty();

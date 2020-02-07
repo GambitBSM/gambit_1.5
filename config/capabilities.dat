@@ -4109,13 +4109,13 @@ lowl_SMW_70_dx11d_2014_10_03_v5c_Ap_parameters: |
 plik_dx11dr2_HM_v18_TT_parameters: |
   See model parameters in config/models.dat
 
-Planck_TTTEEE_parameters: |
+cosmo_nuisance_Planck_TTTEEE_parameters: |
   See model parameters in config/models.dat
 
-Planck_TT_parameters: |
+cosmo_nuisance_Planck_TT_parameters: |
   See model parameters in config/models.dat
 
-Planck_lite_parameters: |
+cosmo_nuisance_Planck_lite_parameters: |
   See model parameters in config/models.dat
 
 return_lowp_TT: |

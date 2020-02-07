@@ -39,8 +39,8 @@ Parameters:
  cosmo_nuisance_Pantheon: !import include/cosmo_nuisance_Pantheon.yaml
 
  # nuisance parameters in Planck likelihood
- Planck_lite: !import include/Planck_2018/Planck_lite_flat.yaml
- #Planck_lite: !import include/Planck_2018/Planck_lite_gauss.yaml
+ cosmo_nuisance_Planck_lite: !import include/Planck_2018/cosmo_nuisance_Planck_lite_flat.yaml
+ #cosmo_nuisance_Planck_lite: !import include/Planck_2018/cosmo_nuisance_Planck_lite_gauss.yaml
 
  # model parameters for "DecayingDM_general"
  #AnnihilatingDM_general: !import include/AnnihilatingDM_general_scan.yaml

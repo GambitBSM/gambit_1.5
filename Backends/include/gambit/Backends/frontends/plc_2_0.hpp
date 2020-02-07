@@ -45,13 +45,13 @@ BE_FUNCTION(clik_lensing_cleanup, void, (clik_lensing_object**), "clik_lensing_c
 
 // All relevant data and variables will be kept within the fronted.
 // Define convenience functions for the communication with the outside world
-BE_CONV_FUNCTION(plc_loglike_highl_TTTEEE_2015,double,(double*),"plc_loglike_highl_TTTEEE_2015",(Planck_TTTEEE))
-BE_CONV_FUNCTION(plc_loglike_highl_TT_2015,double,(double*),"plc_loglike_highl_TT_2015",(Planck_TT))
-BE_CONV_FUNCTION(plc_loglike_highl_TTTEEE_lite_2015,double,(double*),"plc_loglike_highl_TTTEEE_lite_2015",(Planck_lite))
-BE_CONV_FUNCTION(plc_loglike_highl_TT_lite_2015,double,(double*),"plc_loglike_highl_TT_lite_2015",(Planck_lite))
-BE_CONV_FUNCTION(plc_loglike_lowl_TEB_2015,double,(double*),"plc_loglike_lowl_TEB_2015",(Planck_TTTEEE, Planck_TT,Planck_lite))
-BE_CONV_FUNCTION(plc_loglike_lowl_TT_2015,double,(double*),"plc_loglike_lowl_TT_2015",(Planck_TTTEEE, Planck_TT,Planck_lite))
-BE_CONV_FUNCTION(plc_loglike_lensing_2015,double,(double*),"plc_loglike_lensing_2015",(Planck_TTTEEE, Planck_TT, Planck_lite))
+BE_CONV_FUNCTION(plc_loglike_highl_TTTEEE_2015,double,(double*),"plc_loglike_highl_TTTEEE_2015",(cosmo_nuisance_Planck_TTTEEE))
+BE_CONV_FUNCTION(plc_loglike_highl_TT_2015,double,(double*),"plc_loglike_highl_TT_2015",(cosmo_nuisance_Planck_TT))
+BE_CONV_FUNCTION(plc_loglike_highl_TTTEEE_lite_2015,double,(double*),"plc_loglike_highl_TTTEEE_lite_2015",(cosmo_nuisance_Planck_lite))
+BE_CONV_FUNCTION(plc_loglike_highl_TT_lite_2015,double,(double*),"plc_loglike_highl_TT_lite_2015",(cosmo_nuisance_Planck_lite))
+BE_CONV_FUNCTION(plc_loglike_lowl_TEB_2015,double,(double*),"plc_loglike_lowl_TEB_2015",(cosmo_nuisance_Planck_TTTEEE, cosmo_nuisance_Planck_TT,cosmo_nuisance_Planck_lite))
+BE_CONV_FUNCTION(plc_loglike_lowl_TT_2015,double,(double*),"plc_loglike_lowl_TT_2015",(cosmo_nuisance_Planck_TTTEEE, cosmo_nuisance_Planck_TT,cosmo_nuisance_Planck_lite))
+BE_CONV_FUNCTION(plc_loglike_lensing_2015,double,(double*),"plc_loglike_lensing_2015",(cosmo_nuisance_Planck_TTTEEE, cosmo_nuisance_Planck_TT, cosmo_nuisance_Planck_lite))
 
 // Undefine macros to avoid conflict with other backends
 #include "gambit/Backends/backend_undefs.hpp"

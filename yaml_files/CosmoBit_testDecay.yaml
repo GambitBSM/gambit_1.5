@@ -41,7 +41,7 @@ Parameters:
  #StandardModel_mNudiff: !import include/StandardModel_mNudiff_IH_scan.yaml
 
  # nuisance parameters in Planck likelihood
- Planck_lite: !import include/Planck_2018/Planck_lite_gauss.yaml
+ cosmo_nuisance_Planck_lite: !import include/Planck_2018/cosmo_nuisance_Planck_lite_gauss.yaml
 
  # model parameters for "DecayingDM_general"
  DecayingDM_general: !import include/DecayingDM_general_scan.yaml

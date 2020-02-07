@@ -1,11 +1,10 @@
 ##########################################################################
-## Nuisance parameter of "Planck_TT"
+## Nuisance parameter of "cosmo_nuisance_Planck_TT"
 ##
 ## Flat prior on all parameters. Should be scanned with
 ## "Planck_nuisance_prior_loglike"
 ##
 ## Patrick Stoecker <stoecker@physik.rwth-aachen.de>
-## 2018, Jan
 ## 2019, Aug
 ##########################################################################
 
