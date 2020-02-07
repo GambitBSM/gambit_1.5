@@ -261,6 +261,7 @@ START_MODULE
      START_CAPABILITY
      #define FUNCTION set_classy_parameters_PlanckLike
       START_FUNCTION(pybind11::dict)
+      BACKEND_REQ(plc_required_Cl,(plc_tag),void,(int&,bool&,bool&))
       ALLOW_MODELS(Planck_lite,Planck_TTTEEE,Planck_TT,plik_dx11dr2_HM_v18_TT)
      #undef FUNCTION
   #undef CAPABILITY

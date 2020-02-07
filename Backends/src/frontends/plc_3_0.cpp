@@ -11,6 +11,7 @@
 ///  \author Patrick Stoecker
 ///          (stoecker@physik.rwth-aachen.de)
 ///  \date 2019 Aug, Nov
+///  \date 2020 Feb
 //
 ///  *********************************************
 
@@ -117,6 +118,9 @@ BE_NAMESPACE
   //  -> Container for all activated likelihood objects
   static std::map<std::string, std::shared_ptr<clik_object> > clik_map;
   static std::map<std::string, std::shared_ptr<clik_lensing_object> > clik_lensing_map;
+  //  -> Array containing the required lmax.
+  //     The order is [phiphi TT EE BB TE TB EB]
+  static std::array<int,7> lmax_array{-1,-1,-1,-1,-1,-1,-1};
 
   void set_planck_path_2(std::string& planck_path)
   {
@@ -195,6 +199,21 @@ BE_NAMESPACE
   PLC_CLIK_LOGLIKE(lowl_EE_2018,clik)
   PLC_CLIK_LOGLIKE(lensing_2018,clik_lensing)
   PLC_CLIK_LOGLIKE(lensing_marged_2018,clik_lensing)
+
+  void plc_required_Cl(int& lmax, bool& needs_tCl, bool& needs_pCl)
+  {
+    lmax = -1;
+    for (const auto& it: lmax_array)
+    {
+      lmax = std::max(lmax, it);
+    }
+
+    needs_tCl = (lmax_array[1] > -1);
+
+    auto begin = lmax_array.begin() + 2;
+    auto end = lmax_array.end();
+    needs_pCl = std::any_of(begin,end,[](int& i){return i > -1;});
+  }
 }
 END_BE_NAMESPACE
 
@@ -242,6 +261,30 @@ BE_INI_FUNCTION
     CHECK_AND_ACTIVATE(lowl_EE_2018,3)
     CHECK_AND_ACTIVATE(lensing_2018,3)
     CHECK_AND_ACTIVATE(lensing_marged_2018,3)
+
+    for (const auto& it: clik_map)
+    {
+      std::array<int,7> tmp{};
+
+      clik_get_lmax(it.second.get(), tmp.data()+1, NULL);
+
+      for (size_t i = 1; i < 7; ++i)
+      {
+        lmax_array[i] = std::max(lmax_array[i],tmp[i]);
+      }
+    }
+
+    for (const auto& it: clik_lensing_map)
+    {
+      std::array<int,7> tmp{};
+
+      clik_lensing_get_lmaxs(it.second.get(), tmp.data(), NULL);
+
+      for (size_t i = 0; i < 7; ++i)
+      {
+        lmax_array[i] = std::max(lmax_array[i],tmp[i]);
+      }
+    }
   }
   scan_level = false;
 }

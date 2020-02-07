@@ -2219,12 +2219,38 @@ namespace Gambit
     // make sure nothing from previous run is contained
     result.clear();
 
-    // @ Patrick: if we only use TT we probably don't need the tCls , right? 
-    //   would you check that and add the model dependencies for the different likelihoods?
-    result["output"] = "tCl, lCl, pCl";
+    static std::ostringstream output;
+    static std::ostringstream l_max_scalars;
+
+    static bool first = true;
+    if(first)
+    {
+      int lmax = -1;
+      bool needs_tCl = false;
+      bool needs_pCl = false;
+
+      // Get requirements of the loaded likelihoods in the plc backend
+      BEreq::plc_required_Cl(lmax,needs_tCl,needs_pCl);
+
+      // Prepare the classy input for "output"
+      // -- The likelihoods need the lensed Cl such that lensing is required everytime
+      output << "lCl";
+      // -- Are additional Cl, other to Cl_phiphi, required?
+      if (needs_tCl)
+        output << ", tCl";
+      if (needs_pCl)
+        output << ", pCl";
+
+      // Prepare the classy input for "l_max_scalars"
+      l_max_scalars << lmax;
+
+      first = false;
+    }
+
     result["lensing"] = "yes";
     result["non linear"] = "halofit";
-    result["l_max_scalars"] = "2508";
+    result["output"] = output.str();
+    result["l_max_scalars"] = l_max_scalars.str();
   }
 
 
