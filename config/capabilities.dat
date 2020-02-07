@@ -4096,10 +4096,10 @@ initialize_lowp_TT: |
 cosmo_nuisance_Planck_TTTEEE_parameters: |
   See model parameters in config/models.dat
 
-Planck_TT_parameters: |
+cosmo_nuisance_Planck_TT_parameters: |
   See model parameters in config/models.dat
 
-Planck_lite_parameters: |
+cosmo_nuisance_Planck_lite_parameters: |
   See model parameters in config/models.dat
 
 return_lowp_TT: |

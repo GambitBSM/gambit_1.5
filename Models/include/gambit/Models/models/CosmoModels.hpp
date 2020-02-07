@@ -251,15 +251,15 @@ DEFINEPARS(lambda,faxion,N_pivot,phi_init0)
     DEFINEPARS(A_cib_217,cib_index,xi_sz_cib,A_sz,ps_A_100_100,ps_A_143_143,ps_A_143_217,ps_A_217_217,ksz_norm,gal545_A_100,gal545_A_143,gal545_A_143_217,gal545_A_217,galf_EE_A_100,galf_EE_A_100_143,galf_EE_A_100_217,galf_EE_A_143,galf_EE_A_143_217,galf_EE_A_217,galf_EE_index,galf_TE_A_100,galf_TE_A_100_143,galf_TE_A_100_217,galf_TE_A_143,galf_TE_A_143_217,galf_TE_A_217,galf_TE_index,calib_100T,calib_217T,calib_100P,calib_143P,calib_217P,A_pol,A_planck)
 #undef MODEL
 
-#define MODEL Planck_TT
-  //#define PARENT Planck_TTTEEE
+#define MODEL cosmo_nuisance_Planck_TT
+  //#define PARENT cosmo_nuisance_Planck_TTTEEE
     START_MODEL
     DEFINEPARS(A_cib_217,cib_index,xi_sz_cib,A_sz,ps_A_100_100,ps_A_143_143,ps_A_143_217,ps_A_217_217,ksz_norm,gal545_A_100,gal545_A_143,gal545_A_143_217,gal545_A_217,calib_100T,calib_217T,A_planck)
   //#undef PARENT
 #undef MODEL
 
-#define MODEL Planck_lite
-  //#define PARENT Planck_TT
+#define MODEL cosmo_nuisance_Planck_lite
+  //#define PARENT cosmo_nuisance_Planck_TT
     START_MODEL
     DEFINEPARS(A_planck)
   //#undef PARENT

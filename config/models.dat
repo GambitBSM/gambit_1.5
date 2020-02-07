@@ -833,7 +833,7 @@ cosmo_nuisance_ska: |
                        dependence for SKA 1 & 2 respectively
                      => b(z) = c4 beta_0SKA/2 exp(c5 beta_SKA1/2 z)  (eq. 2.20)
 
-Planck_TTTEEE: |
+cosmo_nuisance_Planck_TTTEEE: |
    Planck likelihood for high-l TT,TE,EE-spectra with 34 nuissance parameter.
 
    A_cib_217           - the CIB contamination at ℓ=3000 in the 217-GHz Planck map
@@ -871,7 +871,7 @@ Planck_TTTEEE: |
    A_pol               - the calibration of the polarization relative to the temperature, which should be set to 1
    A_planck            - the Planck absolute calibration.
 
-Planck_TT: |
+cosmo_nuisance_Planck_TT: |
    Planck likelihood for high-l TT-spectrum with 16 nuissance parameter.
 
    A_cib_217           - the CIB contamination at l=3000 in the 217-GHz Planck map
@@ -891,7 +891,7 @@ Planck_TT: |
    calib_217T          - the relative calibration between the 217 and 143 spectra
    A_planck            - the Planck absolute calibration.
 
-Planck_lite: |
+cosmo_nuisance_Planck_lite: |
    Planck likelihood for high-l TT-spectrum (marginalized) with 1 nuissance parameter.
 
    A_planck            - the Planck absolute calibration.

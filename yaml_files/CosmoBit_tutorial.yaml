@@ -124,7 +124,7 @@ Parameters:
  #     telling you that no function requires any of the model parameters, comment this line out 
  #     to fix it
  # (try to comment this line or the Planck likelihoods then you can see the different error messages)
- Planck_lite: !import include/Planck_2018/Planck_lite_flat.yaml
+ cosmo_nuisance_Planck_lite: !import include/Planck_2018/cosmo_nuisance_Planck_lite_flat.yaml
 
  # Include this if you use the Pantheon SNe likelihood into your scan
  # IMPORTANT Note: since this is a MontePython likelihood GAMBIT won't complain if you forgot to include 

@@ -1,5 +1,5 @@
 ##########################################################################
-## Nuisance parameter of "Planck_TTTEEE"
+## Nuisance parameter of "cosmo_nuisance_Planck_TTTEEE"
 ##
 ## Flat prior on all parameters. Should be scanned with
 ## "Planck_nuisance_prior_loglike"

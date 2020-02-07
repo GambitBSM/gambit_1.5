@@ -598,7 +598,6 @@ namespace Gambit
       // into the empty results dictionary.
       pybind11::dict NuMasses_In = *Dep::NuMasses_classy_input;
       merge_pybind_dicts(result, NuMasses_In, first_run);
-      first_run = false;
 
       // standard cosmological parameters (common to all CDM -like models)
       result["H0"] =            *Param["H0"];
@@ -615,8 +614,8 @@ namespace Gambit
       // -> (JR again) not sure if that is actually true.. need to test.  
       if (ModelInUse("DecayingDM_general") || ModelInUse("AnnihilatingDM_general"))
       {
+        // add Decaying/annihilating DM specific options to python dictionary passed to CLASS, consistency checks only executed in first run
         merge_pybind_dicts(result,*Dep::classy_parameters_EnergyInjection, first_run);
-        first_run = false;
       }
       
 
@@ -639,7 +638,6 @@ namespace Gambit
             if (not result.contains(name.c_str()))
             {
               yaml_input[name.c_str()] = value;
-              std::cout << " ----------- REad yaml option " << name.c_str() << std::endl;
             }
             // If it does, throw an error, there's some YAML conflict going on.
             else
@@ -690,7 +688,7 @@ namespace Gambit
         // depending on the choice of the user (parametrised or full pk)
       }
 
-      // add yaml options to python dictionary passed to CLASS
+      // add yaml options to python dictionary passed to CLASS, consistency checks only executed in first run
       merge_pybind_dicts(result,yaml_input, first_run);
       
 
@@ -702,6 +700,7 @@ namespace Gambit
       //   in the lensing or non linear choice will rightfully trigger an error.
       if (ModelInUse("cosmo_nuisance_Planck_lite") || ModelInUse("cosmo_nuisance_Planck_TTTEEE")|| ModelInUse("cosmo_nuisance_Planck_TT"))
       {
+        // add Planck like specific options to python dictionary passed to CLASS, consistency checks only executed in first run
         merge_pybind_dicts(result,*Dep::classy_parameters_PlanckLike, first_run);
       }
 
