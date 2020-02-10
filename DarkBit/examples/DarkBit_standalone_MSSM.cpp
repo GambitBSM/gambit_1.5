@@ -130,7 +130,7 @@ int main(int argc, char* argv[])
     if (not Backends::backendInfo().works["DarkSUSY5.1.3"]) backend_error().raise(LOCAL_INFO, "DarkSUSY 5.1.3 is missing!");
     if (not Backends::backendInfo().works["DarkSUSY_MSSM6.1.1"]) backend_error().raise(LOCAL_INFO, "DarkSUSY MSSM 6.1.1 is missing!");
     if (not Backends::backendInfo().works["MicrOmegas_MSSM3.6.9.2"]) backend_error().raise(LOCAL_INFO, "MicrOmegas 3.6.9.2 for MSSM is missing!");
-    if (not Backends::backendInfo().works["gamLike1.0.0"]) backend_error().raise(LOCAL_INFO, "gamLike 1.0.0 is missing!");
+    if (not Backends::backendInfo().works["gamLike1.0.1"]) backend_error().raise(LOCAL_INFO, "gamLike 1.0.1 is missing!");
     if (not Backends::backendInfo().works["DDCalc2.0.0"]) backend_error().raise(LOCAL_INFO, "DDCalc 2.0.0 is missing!");
     if (not Backends::backendInfo().works["nulike1.0.7"]) backend_error().raise(LOCAL_INFO, "nulike 1.0.7 is missing!");
 
@@ -199,7 +199,7 @@ int main(int argc, char* argv[])
     nulike_1_0_7_init.reset_and_calculate();
 
     // Initialize gamLike backend
-    gamLike_1_0_0_init.reset_and_calculate();
+    gamLike_1_0_1_init.reset_and_calculate();
 
     // Initialize MicrOmegas backend
     MicrOmegas_MSSM_3_6_9_2_init.notifyOfModel("MSSM30atQ");
@@ -505,7 +505,7 @@ int main(int argc, char* argv[])
     // Calculate Fermi LAT dwarf likelihood
     lnL_FermiLATdwarfs_gamLike.resolveDependency(&GA_AnnYield_General);
     lnL_FermiLATdwarfs_gamLike.resolveDependency(&RD_fraction_one);
-    lnL_FermiLATdwarfs_gamLike.resolveBackendReq(&Backends::gamLike_1_0_0::Functown::lnL);
+    lnL_FermiLATdwarfs_gamLike.resolveBackendReq(&Backends::gamLike_1_0_1::Functown::lnL);
     lnL_FermiLATdwarfs_gamLike.reset_and_calculate();
     double lnLFermi_DS5 = lnL_FermiLATdwarfs_gamLike(0);
 
@@ -735,7 +735,7 @@ int main(int argc, char* argv[])
     // Calculate Fermi LAT dwarf likelihood
     lnL_FermiLATdwarfs_gamLike.resolveDependency(&GA_AnnYield_General);
     lnL_FermiLATdwarfs_gamLike.resolveDependency(&RD_fraction_one);
-    lnL_FermiLATdwarfs_gamLike.resolveBackendReq(&Backends::gamLike_1_0_0::Functown::lnL);
+    lnL_FermiLATdwarfs_gamLike.resolveBackendReq(&Backends::gamLike_1_0_1::Functown::lnL);
     lnL_FermiLATdwarfs_gamLike.reset_and_calculate();
     double lnLFermi_DS6 = lnL_FermiLATdwarfs_gamLike(0);
 
