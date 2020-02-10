@@ -128,11 +128,10 @@ int main(int argc, char* argv[])
     // ---- Check that required backends are present ----
 
     if (not Backends::backendInfo().works["DarkSUSY5.1.3"]) backend_error().raise(LOCAL_INFO, "DarkSUSY 5.1.3 is missing!");
-    if (not Backends::backendInfo().works["DarkSUSY_MSSM6.1.1"]) backend_error().raise(LOCAL_INFO, "DarkSUSY MSSM 6.1.1 is missing!");
     if (not Backends::backendInfo().works["MicrOmegas_MSSM3.6.9.2"]) backend_error().raise(LOCAL_INFO, "MicrOmegas 3.6.9.2 for MSSM is missing!");
     if (not Backends::backendInfo().works["gamLike1.0.1"]) backend_error().raise(LOCAL_INFO, "gamLike 1.0.1 is missing!");
     if (not Backends::backendInfo().works["DDCalc2.0.0"]) backend_error().raise(LOCAL_INFO, "DDCalc 2.0.0 is missing!");
-    if (not Backends::backendInfo().works["nulike1.0.8"]) backend_error().raise(LOCAL_INFO, "nulike 1.0.7 is missing!");
+    if (not Backends::backendInfo().works["nulike1.0.8"]) backend_error().raise(LOCAL_INFO, "nulike 1.0.8 is missing!");
 
 
     // ---- Initialize models ----
@@ -242,6 +241,10 @@ int main(int argc, char* argv[])
     else DarkSUSY_MSSM_6_1_1_init.setOption<bool>("use_dsSLHAread", true);
     DarkSUSY_MSSM_6_1_1_init.reset_and_calculate();
 
+    // Assume for direct and indirect detection likelihoods that dark matter
+    // density is always the measured one (regardless of relic density results)
+    RD_fraction_one.reset_and_calculate();
+
     // Initialize DarkSUSY 6 Local Halo Model
     DarkSUSY6_PointInit_LocalHalo_func.resolveDependency(&ExtractLocalMaxwellianHalo);
     DarkSUSY6_PointInit_LocalHalo_func.resolveDependency(&RD_fraction_one);
@@ -251,26 +254,16 @@ int main(int argc, char* argv[])
     DarkSUSY6_PointInit_LocalHalo_func.resolveBackendReq(&Backends::DarkSUSY_MSSM_6_1_1::Functown::dshmnoclue);
     DarkSUSY6_PointInit_LocalHalo_func.reset_and_calculate();
 
-    // Assume for direct and indirect detection likelihoods that dark matter
-    // density is always the measured one (regardless of relic density results)
-    RD_fraction_one.reset_and_calculate();
+
+    // 
+    // All the DarkSUSY 5 calculations
+    // 
+
+    // _Anders
 
 
-    // ---- Relic density ----
 
-    // Relic density calculation with MicrOmegas
-    RD_oh2_Xf_MicrOmegas.notifyOfModel("MSSM30atQ");
-    RD_oh2_Xf_MicrOmegas.resolveBackendReq(&Backends::MicrOmegas_MSSM_3_6_9_2::Functown::darkOmega);
-    RD_oh2_Xf_MicrOmegas.setOption<int>("fast", 1);  // 0: accurate; 1: fast
-    RD_oh2_Xf_MicrOmegas.setOption<double>("Beps", 1e-5); // Beps=1e-5 recommended, Beps=1 switches coannihilation off
-    RD_oh2_Xf_MicrOmegas.reset_and_calculate();
-    RD_oh2_MicrOmegas.resolveDependency(&RD_oh2_Xf_MicrOmegas);
-    RD_oh2_MicrOmegas.reset_and_calculate();
 
-    // Calculate relic density using RD_oh2_DarkSUSY (for checks only)
-    //RD_oh2_DarkSUSY.resolveDependency(&DarkSUSY_5_1_3_init);
-    //RD_oh2_DarkSUSY.setOption<int>("fast", 1);  // 0: normal; 1: fast; 2: dirty
-    //RD_oh2_DarkSUSY.reset_and_calculate();
 
     // Relic density calculation with GAMBIT routines and DarkSUSY 5:
     RD_spectrum_SUSY_DS5.resolveBackendReq(&Backends::DarkSUSY_5_1_3::Functown::mspctm);
@@ -352,16 +345,6 @@ int main(int argc, char* argv[])
 
     // ---- Direct detection -----
 
-    // Calculate DD couplings with Micromegas
-    DD_couplings_MicrOmegas.notifyOfModel("MSSM30atQ");
-    DD_couplings_MicrOmegas.notifyOfModel("nuclear_params_fnq");
-    DD_couplings_MicrOmegas.resolveDependency(&Models::nuclear_params_fnq::Functown::primary_parameters);
-    DD_couplings_MicrOmegas.resolveBackendReq(&Backends::MicrOmegas_MSSM_3_6_9_2::Functown::nucleonAmplitudes);
-    DD_couplings_MicrOmegas.resolveBackendReq(&Backends::MicrOmegas_MSSM_3_6_9_2::Functown::FeScLoop);
-    DD_couplings_MicrOmegas.resolveBackendReq(&Backends::MicrOmegas_MSSM_3_6_9_2::Functown::mocommon_);
-    // The below includes neutralino-gluon scattering via a box diagram
-    DD_couplings_MicrOmegas.setOption<bool>("box", true);
-    DD_couplings_MicrOmegas.reset_and_calculate();
 
     // Calculate DD couplings with DarkSUSY
     DD_couplings_DarkSUSY.notifyOfModel("nuclear_params_fnq");
@@ -384,8 +367,6 @@ int main(int argc, char* argv[])
     DDCalc_2_0_0_init.resolveDependency(&ExtractLocalMaxwellianHalo);
     DDCalc_2_0_0_init.resolveDependency(&RD_fraction_one);
     DDCalc_2_0_0_init.resolveDependency(&mwimp_generic);
-    //Choose between the two backends
-    //DDCalc_2_0_0_init.resolveDependency(&DD_couplings_MicrOmegas);
     DDCalc_2_0_0_init.resolveDependency(&DD_couplings_DarkSUSY);
     DDCalc_2_0_0_init.reset_and_calculate();
 
@@ -402,28 +383,15 @@ int main(int argc, char* argv[])
     double lnLUX_DS5 = LUX_2016_GetLogLikelihood(0);
 
     // Set generic scattering cross-section for later use
-    double sigma_SI_p_DS, sigma_SI_p_MO;
-
     sigma_SI_p_simple.resolveDependency(&mwimp_generic);
-    sigma_SI_p_simple.resolveDependency(&DD_couplings_MicrOmegas);
-    sigma_SI_p_simple.reset_and_calculate();
-    sigma_SI_p_MO = sigma_SI_p_simple(0);
-
     sigma_SI_p_simple.resolveDependency(&DD_couplings_DarkSUSY);
     sigma_SI_p_simple.reset_and_calculate();
-    sigma_SI_p_DS = sigma_SI_p_simple(0);
-
-    // Set generic scattering cross-section for later use
-    double sigma_SD_p_DS, sigma_SD_p_MO;
+    double sigma_SI_p_DS5 = sigma_SI_p_simple(0);
 
     sigma_SD_p_simple.resolveDependency(&mwimp_generic);
-    sigma_SD_p_simple.resolveDependency(&DD_couplings_MicrOmegas);
-    sigma_SD_p_simple.reset_and_calculate();
-    sigma_SD_p_MO = sigma_SD_p_simple(0);
-
     sigma_SD_p_simple.resolveDependency(&DD_couplings_DarkSUSY);
     sigma_SD_p_simple.reset_and_calculate();
-    sigma_SD_p_DS = sigma_SD_p_simple(0);
+    double sigma_SD_p_DS5 = sigma_SD_p_simple(0);
 
 
     // ---- Gamma-ray yields ----
@@ -593,167 +561,33 @@ int main(int argc, char* argv[])
     UnitTest_DarkBit.reset_and_calculate();
 
 
-    // --------------------------------------------------------------
-    // -------------- Now do the same for DarkSUSY 6 ----------------
-    // --------------------------------------------------------------
-    
-    // Relic density calculation with GAMBIT routines and DarkSUSY 6:
-    RD_spectrum_MSSM.resolveDependency(&createDecays);
-    RD_spectrum_MSSM.resolveDependency(&createSpectrum);
-    RD_spectrum_MSSM.resolveDependency(&DarkMatter_ID_MSSM);
-    // Below true if charginos and neutralinos are included in coannihilations:
-    RD_spectrum_MSSM.setOption<bool>("CoannCharginosNeutralinos", true);
-    // Below true if sfermions are included in coannihilations:
-    RD_spectrum_MSSM.setOption<bool>("CoannSfermions", true);
-    // Maximum sparticle mass to be icluded in coannihilations, in units of DM mass:
-    RD_spectrum_MSSM.setOption<double>("CoannMaxMass", 1.6);
-    RD_spectrum_MSSM.reset_and_calculate();
 
-    RD_spectrum_ordered_func.resolveDependency(&RD_spectrum_MSSM);
-    RD_spectrum_ordered_func.reset_and_calculate();
 
-    RD_annrate_DS6prep_MSSM_func.resolveDependency(&RD_spectrum_ordered_func);
-    RD_annrate_DS6prep_MSSM_func.resolveBackendReq(&Backends::DarkSUSY_MSSM_6_1_1::Functown::dsancoann);
-    RD_annrate_DS6prep_MSSM_func.resolveBackendReq(&Backends::DarkSUSY_MSSM_6_1_1::Functown::DSparticle_code);
-    RD_annrate_DS6prep_MSSM_func.reset_and_calculate();
+    //
+    // All the MO calculations
+    //
 
-    RD_eff_annrate_DS.notifyOfModel("MSSM30atQ");
-    RD_eff_annrate_DS.resolveDependency(&RD_annrate_DS6prep_MSSM_func);
-    RD_eff_annrate_DS.resolveBackendReq(&Backends::DarkSUSY_MSSM_6_1_1::Functown::dsanwx);
-    RD_eff_annrate_DS.reset_and_calculate();
+    // Relic density calculation with MicrOmegas
+    RD_oh2_Xf_MicrOmegas.notifyOfModel("MSSM30atQ");
+    RD_oh2_Xf_MicrOmegas.resolveBackendReq(&Backends::MicrOmegas_MSSM_3_6_9_2::Functown::darkOmega);
+    RD_oh2_Xf_MicrOmegas.setOption<int>("fast", 1);  // 0: accurate; 1: fast
+    RD_oh2_Xf_MicrOmegas.setOption<double>("Beps", 1e-5); // Beps=1e-5 recommended, Beps=1 switches coannihilation off
+    RD_oh2_Xf_MicrOmegas.reset_and_calculate();
+    RD_oh2_MicrOmegas.resolveDependency(&RD_oh2_Xf_MicrOmegas);
+    RD_oh2_MicrOmegas.reset_and_calculate();
 
-    RD_oh2_DS_general.resolveDependency(&RD_spectrum_ordered_func);
-    RD_oh2_DS_general.resolveDependency(&RD_eff_annrate_DS);
-    RD_oh2_DS_general.resolveBackendReq(&Backends::DarkSUSY_MSSM_6_1_1::Functown::rdpars);
-    RD_oh2_DS_general.resolveBackendReq(&Backends::DarkSUSY_MSSM_6_1_1::Functown::rdtime);
-    RD_oh2_DS_general.resolveBackendReq(&Backends::DarkSUSY_MSSM_6_1_1::Functown::dsrdcom);
-    RD_oh2_DS_general.resolveBackendReq(&Backends::DarkSUSY_MSSM_6_1_1::Functown::dsrdstart);
-    RD_oh2_DS_general.resolveBackendReq(&Backends::DarkSUSY_MSSM_6_1_1::Functown::dsrdens);
-    RD_oh2_DS_general.setOption<int>("fast", 1);  // 0: normal; 1: fast; 2: dirty
-    RD_oh2_DS_general.reset_and_calculate();
-    double oh2_DS6 = RD_oh2_DS_general(0);
+    // Direct detection calculations with Micromegas
 
-    lnL_oh2_Simple.resolveDependency(&RD_oh2_DS_general);
-    lnL_oh2_Simple.reset_and_calculate();
-    double lnoh2_DS6 = lnL_oh2_Simple(0);
-
-    
-    // Set up process catalog based on DarkSUSY annihilation rates
-    TH_ProcessCatalog_DS6_MSSM.resolveDependency(&createSpectrum);
-    TH_ProcessCatalog_DS6_MSSM.resolveDependency(&createDecays);
-    TH_ProcessCatalog_DS6_MSSM.resolveDependency(&DarkMatter_ID_MSSM);
-    TH_ProcessCatalog_DS6_MSSM.resolveBackendReq(&Backends::DarkSUSY_MSSM_6_1_1::Functown::dssigmav0);
-    TH_ProcessCatalog_DS6_MSSM.resolveBackendReq(&Backends::DarkSUSY_MSSM_6_1_1::Functown::dssigmav0tot);
-    TH_ProcessCatalog_DS6_MSSM.resolveBackendReq(&Backends::DarkSUSY_MSSM_6_1_1::Functown::dsIBffdxdy);
-    TH_ProcessCatalog_DS6_MSSM.resolveBackendReq(&Backends::DarkSUSY_MSSM_6_1_1::Functown::dsIBhhdxdy);
-    TH_ProcessCatalog_DS6_MSSM.resolveBackendReq(&Backends::DarkSUSY_MSSM_6_1_1::Functown::dsIBwhdxdy);
-    TH_ProcessCatalog_DS6_MSSM.resolveBackendReq(&Backends::DarkSUSY_MSSM_6_1_1::Functown::dsIBwwdxdy);
-    TH_ProcessCatalog_DS6_MSSM.resolveBackendReq(&Backends::DarkSUSY_MSSM_6_1_1::Functown::IBintvars);
-    TH_ProcessCatalog_DS6_MSSM.reset_and_calculate();
-
-    // Set generic WIMP mass object
-    mwimp_generic.resolveDependency(&TH_ProcessCatalog_MSSM);
-    mwimp_generic.resolveDependency(&DarkMatter_ID_MSSM);
-    mwimp_generic.reset_and_calculate();
-
-    // Set generic annihilation rate in late universe (v->0 limit)
-    sigmav_late_universe.resolveDependency(&TH_ProcessCatalog_DS6_MSSM);
-    sigmav_late_universe.resolveDependency(&DarkMatter_ID_MSSM);
-    sigmav_late_universe.reset_and_calculate();
-    double sv0_DS6 = sigmav_late_universe(0);
-
-    // ---- Gamma-ray yields ----
-
-    // Initialize tabulated gamma-ray yields
-    SimYieldTable_DarkSUSY6.resolveBackendReq(&Backends::DarkSUSY_MSSM_6_1_1::Functown::dsanyield_sim);
-    SimYieldTable_DarkSUSY6.reset_and_calculate();
-
-    // Collect missing final states for simulation in cascade MC
-    GA_missingFinalStates.resolveDependency(&TH_ProcessCatalog_DS6_MSSM);
-    GA_missingFinalStates.resolveDependency(&SimYieldTable_DarkSUSY6);
-    GA_missingFinalStates.resolveDependency(&DarkMatter_ID_MSSM);
-    GA_missingFinalStates.reset_and_calculate();
-
-    // Infer for which type of final states particles MC should be performed
-    cascadeMC_FinalStates.setOption<std::vector<std::string>>("cMC_finalStates", daFunk::vec<std::string>("gamma"));
-    cascadeMC_FinalStates.reset_and_calculate();
-
-    // Collect decay information for cascade MC
-    cascadeMC_DecayTable.resolveDependency(&TH_ProcessCatalog_DS6_MSSM);
-    cascadeMC_DecayTable.resolveDependency(&SimYieldTable_DarkSUSY6);
-    cascadeMC_DecayTable.reset_and_calculate();
-
-    // Set up MC loop manager for cascade MC
-    cascadeMC_LoopManager.resolveDependency(&GA_missingFinalStates);
-    nested_functions = initVector<functor*>(
-            &cascadeMC_InitialState, &cascadeMC_GenerateChain, &cascadeMC_Histograms, &cascadeMC_EventCount);
-    cascadeMC_LoopManager.setNestedList(nested_functions);
-
-    // Set up initial state for cascade MC step
-    cascadeMC_InitialState.resolveDependency(&GA_missingFinalStates);
-    cascadeMC_InitialState.resolveLoopManager(&cascadeMC_LoopManager);
-
-    // Perform MC step for cascade MC
-    cascadeMC_GenerateChain.resolveDependency(&cascadeMC_InitialState);
-    cascadeMC_GenerateChain.resolveDependency(&cascadeMC_DecayTable);
-    cascadeMC_GenerateChain.resolveLoopManager(&cascadeMC_LoopManager);
-
-    // Generate histogram for cascade MC
-    cascadeMC_Histograms.resolveDependency(&cascadeMC_InitialState);
-    cascadeMC_Histograms.resolveDependency(&cascadeMC_GenerateChain);
-    cascadeMC_Histograms.resolveDependency(&TH_ProcessCatalog_DS6_MSSM);
-    cascadeMC_Histograms.resolveDependency(&SimYieldTable_DarkSUSY6);
-    cascadeMC_Histograms.resolveDependency(&cascadeMC_FinalStates);
-    cascadeMC_Histograms.resolveLoopManager(&cascadeMC_LoopManager);
-
-    // Check convergence of cascade MC
-    cascadeMC_EventCount.resolveDependency(&cascadeMC_InitialState);
-    cascadeMC_EventCount.resolveLoopManager(&cascadeMC_LoopManager);
-
-    // Start cascade MC loop
-    cascadeMC_LoopManager.reset_and_calculate();
-
-    // Infer gamma-ray spectra for recorded MC results
-    cascadeMC_gammaSpectra.resolveDependency(&GA_missingFinalStates);
-    cascadeMC_gammaSpectra.resolveDependency(&cascadeMC_FinalStates);
-    cascadeMC_gammaSpectra.resolveDependency(&cascadeMC_Histograms);
-    cascadeMC_gammaSpectra.resolveDependency(&cascadeMC_EventCount);
-    cascadeMC_gammaSpectra.reset_and_calculate();
-
-    // Calculate total gamma-ray yield (cascade MC + tabulated results)
-    GA_AnnYield_General.resolveDependency(&TH_ProcessCatalog_DS6_MSSM);
-    GA_AnnYield_General.resolveDependency(&SimYieldTable_DarkSUSY6);
-    GA_AnnYield_General.resolveDependency(&DarkMatter_ID_MSSM);
-    GA_AnnYield_General.resolveDependency(&cascadeMC_gammaSpectra);
-    GA_AnnYield_General.reset_and_calculate();
-
-    // Dump spectrum into file
-    dump_GammaSpectrum.resolveDependency(&GA_AnnYield_General);
-    dump_GammaSpectrum.setOption<std::string>("filename", outname);
-    dump_GammaSpectrum.reset_and_calculate();
-
-    // Calculate Fermi LAT dwarf likelihood
-    lnL_FermiLATdwarfs_gamLike.resolveDependency(&GA_AnnYield_General);
-    lnL_FermiLATdwarfs_gamLike.resolveDependency(&RD_fraction_one);
-    lnL_FermiLATdwarfs_gamLike.resolveBackendReq(&Backends::gamLike_1_0_1::Functown::lnL);
-    lnL_FermiLATdwarfs_gamLike.reset_and_calculate();
-    double lnLFermi_DS6 = lnL_FermiLATdwarfs_gamLike(0);
-
-   // ---- Direct detection and IceCube limits ----
-
-    // Calculate DD couplings with DarkSUSY
-    DD_couplings_MSSM_DS6.notifyOfModel("nuclear_params_fnq");
-    DD_couplings_MSSM_DS6.resolveDependency(&Models::nuclear_params_fnq::Functown::primary_parameters);
-    DD_couplings_MSSM_DS6.resolveBackendReq(&Backends::DarkSUSY_MSSM_6_1_1::Functown::DD_couplings);
-    DD_couplings_MSSM_DS6.resolveBackendReq(&Backends::DarkSUSY_MSSM_6_1_1::Functown::ddcomlegacy);
-    DD_couplings_MSSM_DS6.resolveBackendReq(&Backends::DarkSUSY_MSSM_6_1_1::Functown::ddmssmcom);
-    // The below calculates the DD couplings using the full 1 loop calculation of
-    // Drees Nojiri Phys.Rev. D48 (1993) 3483
-    DD_couplings_MSSM_DS6.setOption<bool>("loop", true);
-    // When the calculation is done at tree level (loop = false), setting the below to false
-    // approximates the squark propagator as 1/m_sq^2 to avoid poles.
-    // DD_couplings_DarkSUSY.setOption<bool>("pole", false);
-    DD_couplings_MSSM_DS6.reset_and_calculate();
+    // Calculate DD couplings with Micromegas
+    DD_couplings_MicrOmegas.notifyOfModel("MSSM30atQ");
+    DD_couplings_MicrOmegas.notifyOfModel("nuclear_params_fnq");
+    DD_couplings_MicrOmegas.resolveDependency(&Models::nuclear_params_fnq::Functown::primary_parameters);
+    DD_couplings_MicrOmegas.resolveBackendReq(&Backends::MicrOmegas_MSSM_3_6_9_2::Functown::nucleonAmplitudes);
+    DD_couplings_MicrOmegas.resolveBackendReq(&Backends::MicrOmegas_MSSM_3_6_9_2::Functown::FeScLoop);
+    DD_couplings_MicrOmegas.resolveBackendReq(&Backends::MicrOmegas_MSSM_3_6_9_2::Functown::mocommon_);
+    // The below includes neutralino-gluon scattering via a box diagram
+    DD_couplings_MicrOmegas.setOption<bool>("box", true);
+    DD_couplings_MicrOmegas.reset_and_calculate();
 
     // Initialize DDCalc backend
     Backends::DDCalc_2_0_0::Functown::DDCalc_CalcRates_simple.setStatus(2);
@@ -762,102 +596,24 @@ int main(int argc, char* argv[])
     DDCalc_2_0_0_init.resolveDependency(&ExtractLocalMaxwellianHalo);
     DDCalc_2_0_0_init.resolveDependency(&RD_fraction_one);
     DDCalc_2_0_0_init.resolveDependency(&mwimp_generic);
-    DDCalc_2_0_0_init.resolveDependency(&DD_couplings_MSSM_DS6);
+    DDCalc_2_0_0_init.resolveDependency(&DD_couplings_MicrOmegas);
     DDCalc_2_0_0_init.reset_and_calculate();
 
-    // Calculate direct detection rates for LUX 2016
-    LUX_2016_Calc.resolveBackendReq(&Backends::DDCalc_2_0_0::Functown::DDCalc_Experiment);
-    LUX_2016_Calc.resolveBackendReq(&Backends::DDCalc_2_0_0::Functown::DDCalc_CalcRates_simple);
-    LUX_2016_Calc.reset_and_calculate();
+    // Set generic scattering cross-section for later use
+    double sigma_SI_p_MO;
 
-    // Calculate direct detection likelihood for LUX 2016
-    LUX_2016_GetLogLikelihood.resolveDependency(&LUX_2016_Calc);
-    LUX_2016_GetLogLikelihood.resolveBackendReq(&Backends::DDCalc_2_0_0::Functown::DDCalc_Experiment);
-    LUX_2016_GetLogLikelihood.resolveBackendReq(&Backends::DDCalc_2_0_0::Functown::DDCalc_LogLikelihood);
-    LUX_2016_GetLogLikelihood.reset_and_calculate();
-    double lnLUX_DS6 = LUX_2016_GetLogLikelihood(0);
+    sigma_SI_p_simple.resolveDependency(&mwimp_generic);
+    sigma_SI_p_simple.resolveDependency(&DD_couplings_MicrOmegas);
+    sigma_SI_p_simple.reset_and_calculate();
+    sigma_SI_p_MO = sigma_SI_p_simple(0);
 
     // Set generic scattering cross-section for later use
-    sigma_SI_p_simple.resolveDependency(&DD_couplings_MSSM_DS6);
-    sigma_SI_p_simple.reset_and_calculate();
-    double sigma_SI_p_DS6 = sigma_SI_p_simple(0);
+    double sigma_SD_p_MO;
 
-    sigma_SD_p_simple.resolveDependency(&DD_couplings_MSSM_DS6);
+    sigma_SD_p_simple.resolveDependency(&mwimp_generic);
+    sigma_SD_p_simple.resolveDependency(&DD_couplings_MicrOmegas);
     sigma_SD_p_simple.reset_and_calculate();
-    double sigma_SD_p_DS6 = sigma_SD_p_simple(0);
-
-
-    // Infer WIMP capture rate in Sun
-    capture_rate_Sun_const_xsec_DS6.resolveDependency(&mwimp_generic);
-    capture_rate_Sun_const_xsec_DS6.resolveDependency(&sigma_SI_p_simple);
-    capture_rate_Sun_const_xsec_DS6.resolveDependency(&sigma_SD_p_simple);
-    capture_rate_Sun_const_xsec_DS6.resolveDependency(&RD_fraction_one);
-    capture_rate_Sun_const_xsec_DS6.resolveBackendReq(&Backends::DarkSUSY_MSSM_6_1_1::Functown::dssenu_capsuntab);
-    capture_rate_Sun_const_xsec_DS6.resolveDependency(&ExtractLocalMaxwellianHalo);
-    capture_rate_Sun_const_xsec_DS6.resolveDependency(&DarkSUSY6_PointInit_LocalHalo_func);
-    capture_rate_Sun_const_xsec_DS6.reset_and_calculate();
-
-    // Infer WIMP equilibration time in Sun
-    equilibration_time_Sun.resolveDependency(&TH_ProcessCatalog_DS6_MSSM);
-    equilibration_time_Sun.resolveDependency(&DarkMatter_ID_MSSM);
-    equilibration_time_Sun.resolveDependency(&mwimp_generic);
-    equilibration_time_Sun.resolveDependency(&capture_rate_Sun_const_xsec_DS6);
-    equilibration_time_Sun.reset_and_calculate();
-
-    // Infer WIMP annihilation rate in Sun
-    annihilation_rate_Sun.resolveDependency(&equilibration_time_Sun);
-    annihilation_rate_Sun.resolveDependency(&capture_rate_Sun_const_xsec_DS6);
-    annihilation_rate_Sun.reset_and_calculate();
-
-    // Infer neutrino yield from Sun
-    nuyield_from_DS.resolveDependency(&TH_ProcessCatalog_DS6_MSSM);
-    nuyield_from_DS.resolveDependency(&mwimp_generic);
-    nuyield_from_DS.resolveDependency(&sigmav_late_universe);
-    nuyield_from_DS.resolveDependency(&DarkMatter_ID_MSSM);
-    nuyield_from_DS.resolveBackendReq(&Backends::DarkSUSY_MSSM_6_1_1::Functown::dsgenericwimp_nusetup);
-    nuyield_from_DS.resolveBackendReq(&Backends::DarkSUSY_MSSM_6_1_1::Functown::neutrino_yield);
-    nuyield_from_DS.resolveBackendReq(&Backends::DarkSUSY_MSSM_6_1_1::Functown::DS_neutral_h_decay_channels);
-    nuyield_from_DS.resolveBackendReq(&Backends::DarkSUSY_MSSM_6_1_1::Functown::DS_charged_h_decay_channels);
-    nuyield_from_DS.reset_and_calculate();
-
-    // Calculate number of events at IceCube
-    IC79WH_full.resolveDependency(&mwimp_generic);
-    IC79WH_full.resolveDependency(&annihilation_rate_Sun);
-    IC79WH_full.resolveDependency(&nuyield_from_DS);
-    IC79WH_full.resolveBackendReq(&Backends::nulike_1_0_8::Functown::nulike_bounds);
-    IC79WH_full.reset_and_calculate();
-    IC79WL_full.resolveDependency(&mwimp_generic);
-    IC79WL_full.resolveDependency(&annihilation_rate_Sun);
-    IC79WL_full.resolveDependency(&nuyield_from_DS);
-    IC79WL_full.resolveBackendReq(&Backends::nulike_1_0_8::Functown::nulike_bounds);
-    IC79WL_full.reset_and_calculate();
-    IC79SL_full.resolveDependency(&mwimp_generic);
-    IC79SL_full.resolveDependency(&annihilation_rate_Sun);
-    IC79SL_full.resolveDependency(&nuyield_from_DS);
-    IC79SL_full.resolveBackendReq(&Backends::nulike_1_0_8::Functown::nulike_bounds);
-    IC79SL_full.reset_and_calculate();
-
-    // Calculate IceCube likelihood
-    IC79WH_bgloglike.resolveDependency(&IC79WH_full);
-    IC79WH_bgloglike.reset_and_calculate();
-    IC79WH_loglike.resolveDependency(&IC79WH_full);
-    IC79WH_loglike.reset_and_calculate();
-    IC79WL_bgloglike.resolveDependency(&IC79WL_full);
-    IC79WL_bgloglike.reset_and_calculate();
-    IC79WL_loglike.resolveDependency(&IC79WL_full);
-    IC79WL_loglike.reset_and_calculate();
-    IC79SL_bgloglike.resolveDependency(&IC79SL_full);
-    IC79SL_bgloglike.reset_and_calculate();
-    IC79SL_loglike.resolveDependency(&IC79SL_full);
-    IC79SL_loglike.reset_and_calculate();
-    IC79_loglike.resolveDependency(&IC79WH_bgloglike);
-    IC79_loglike.resolveDependency(&IC79WH_loglike);
-    IC79_loglike.resolveDependency(&IC79WL_bgloglike);
-    IC79_loglike.resolveDependency(&IC79WL_loglike);
-    IC79_loglike.resolveDependency(&IC79SL_bgloglike);
-    IC79_loglike.resolveDependency(&IC79SL_loglike);
-    IC79_loglike.reset_and_calculate();
-    double IC79_DS6 = IC79_loglike(0);
+    sigma_SD_p_MO = sigma_SD_p_simple(0);
 
 
 
@@ -869,37 +625,31 @@ int main(int argc, char* argv[])
     cout << "Omega h^2 (lnL) from MicrOmegas: " << RD_oh2_MicrOmegas(0) << endl;
     // Retrieve and print DarkSUSY result
     cout << "Omega h^2 (lnL) from RD_oh2_DS5_general routine: " << oh2_DS5 << " (" << lnoh2_DS5 << ") " << endl;
-    cout << "Omega h^2 (lnL) from RD_oh2_DS_general routine (DarkSUSY 6): " << oh2_DS6 << " (" << lnoh2_DS6 << ") " << endl;
+    // cout << "Omega h^2 (lnL) from RD_oh2_DS_general routine (DarkSUSY 6): " << oh2_DS6 << " (" << lnoh2_DS6 << ") " << endl;
     cout << endl;  
 
     // Print scattering cross section for DS and MO:
     cout << " sigma_SI_p [cm^2] -- " << endl;
     cout << "    MO: " << sigma_SI_p_MO << endl;
-    cout << "    DS5: " << sigma_SI_p_DS << endl;
-    cout << "    DS6: " << sigma_SI_p_DS6 << endl;
+    cout << "    DS5: " << sigma_SI_p_DS5 << endl;
     cout << " sigma_SD_p [cm^2] -- " << endl;
     cout << "    MO: " << sigma_SD_p_MO << endl;
-    cout << "    DS5: " << sigma_SD_p_DS << endl;
-    cout << "    DS6: " << sigma_SD_p_DS6 << endl;
+    cout << "    DS5: " << sigma_SD_p_DS5 << endl;
 
     cout << "LUX 2016 lnL -- " << endl;
     cout << "    DS5: " <<  lnLUX_DS5 << endl;
-    cout << "    DS6: " <<  lnLUX_DS6 << endl;
     cout << endl;  
 
     cout << "IceCube 79 lnL -- " << endl;
     cout << "    DS5: " <<  IC79_DS5 << endl;
-    cout << "    DS6: " <<  IC79_DS6 << endl;
     cout << endl;  
 
     cout << "<sigma v> [cm^3/s] -- "<< endl;
     cout << "    DS5: " <<  sv0_DS5  << endl;
-    cout << "    DS6: " <<  sv0_DS6  << endl;
     cout << endl;  
 
     cout << "Fermi LAT dwarf spheroidal lnL -- " << endl;
     cout << "    DS5: " <<  lnLFermi_DS5 << endl;
-    cout << "    DS6: " <<  lnLFermi_DS6 << endl;
     cout << endl;  
 
 
@@ -911,17 +661,16 @@ int main(int argc, char* argv[])
     file << "Omega h^2:"<< endl;
     file << "  MO: " << RD_oh2_MicrOmegas(0) << endl;
     file << "  DS5: " << oh2_DS5 << endl;
-    file << "  DS6: " << oh2_DS6 << endl;
 
     file << "WMAP lnL: " << lnL_oh2_Simple(0) << endl;
     file << endl;
 
     file << " sigma_SI_p [cm^2]: " << endl;
     file << "    MO: " << sigma_SI_p_MO << endl;
-    file << "    DS5: " << sigma_SI_p_DS << endl;
+    file << "    DS5: " << sigma_SI_p_DS5 << endl;
     file << " sigma_SD_p [cm^2]: " << endl;
     file << "    MO: " << sigma_SD_p_MO << endl;
-    file << "    DS5: " << sigma_SD_p_DS << endl;
+    file << "    DS5: " << sigma_SD_p_DS5 << endl;
 
     file << "LUX 2016 lnL: " << LUX_2016_GetLogLikelihood(0) << endl;
     file << "IceCube 79 lnL: " << IC79_loglike(0) << endl;

@@ -224,6 +224,10 @@ int main(int argc, char* argv[])
     else DarkSUSY_MSSM_6_1_1_init.setOption<bool>("use_dsSLHAread", true);
     DarkSUSY_MSSM_6_1_1_init.reset_and_calculate();
 
+    // Assume for direct and indirect detection likelihoods that dark matter
+    // density is always the measured one (regardless of relic density results)
+    RD_fraction_one.reset_and_calculate();
+
     // Initialize DarkSUSY 6 Local Halo Model
     DarkSUSY6_PointInit_LocalHalo_func.resolveDependency(&ExtractLocalMaxwellianHalo);
     DarkSUSY6_PointInit_LocalHalo_func.resolveDependency(&RD_fraction_one);
@@ -233,9 +237,6 @@ int main(int argc, char* argv[])
     DarkSUSY6_PointInit_LocalHalo_func.resolveBackendReq(&Backends::DarkSUSY_MSSM_6_1_1::Functown::dshmnoclue);
     DarkSUSY6_PointInit_LocalHalo_func.reset_and_calculate();
 
-    // Assume for direct and indirect detection likelihoods that dark matter
-    // density is always the measured one (regardless of relic density results)
-    RD_fraction_one.reset_and_calculate();
 
 
 
@@ -297,8 +298,6 @@ int main(int argc, char* argv[])
     TH_ProcessCatalog_DS6_MSSM.reset_and_calculate();
 
     // Set generic WIMP mass object
-    // _Anders
-    // mwimp_generic.resolveDependency(&TH_ProcessCatalog_MSSM);
     mwimp_generic.resolveDependency(&TH_ProcessCatalog_DS6_MSSM);
     mwimp_generic.resolveDependency(&DarkMatter_ID_MSSM);
     mwimp_generic.reset_and_calculate();
