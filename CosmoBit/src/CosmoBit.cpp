@@ -526,9 +526,9 @@ namespace Gambit
 
     /// create a python dictionary with the inputs that have to be passed to class 
     /// setting parameters related to (massive) neutrinos & ncdm components
-    void set_NuMasses_classy_input(pybind11::dict &result)
+    void set_classy_NuMasses_Nur_input(pybind11::dict &result)
     {
-      using namespace Pipes::set_NuMasses_classy_input;
+      using namespace Pipes::set_classy_NuMasses_Nur_input;
 
       // make sure dict is empty
       result.clear();
@@ -580,9 +580,9 @@ namespace Gambit
     /// to class: cosmological parameters (H0,omega_b,tau_reio,omega_cdm) & add 
     /// model dependent results for N_ur, neutrino masses & helium abundance
     /// here potential extra input options given in the yaml file are read in
-    void set_baseline_classy_input(pybind11::dict &result)
+    void set_classy_baseline_params(pybind11::dict &result)
     {
-      using namespace Pipes::set_baseline_classy_input;
+      using namespace Pipes::set_classy_baseline_params;
 
       //std::cout << " enter " << __PRETTY_FUNCTION__ << std::endl;
 
@@ -596,7 +596,7 @@ namespace Gambit
 
       // Get the dictionary with inputs for the neutrino masses and merge it
       // into the empty results dictionary.
-      pybind11::dict NuMasses_In = *Dep::NuMasses_classy_input;
+      pybind11::dict NuMasses_In = *Dep::classy_NuMasses_Nur_input;
       merge_pybind_dicts(result, NuMasses_In, first_run);
 
       // standard cosmological parameters (common to all CDM -like models)
@@ -701,7 +701,7 @@ namespace Gambit
       if (ModelInUse("cosmo_nuisance_Planck_lite") || ModelInUse("cosmo_nuisance_Planck_TTTEEE")|| ModelInUse("cosmo_nuisance_Planck_TT"))
       {
         // add Planck like specific options to python dictionary passed to CLASS, consistency checks only executed in first run
-        merge_pybind_dicts(result,*Dep::classy_parameters_PlanckLike, first_run);
+        merge_pybind_dicts(result,*Dep::classy_PlanckLike_input, first_run);
       }
 
       first_run = false;
@@ -742,16 +742,16 @@ namespace Gambit
       // Add the externally calculated/fixed pivot scale for LCDM_no_primordial models. 
       // If the normal 'LCDM' model is used the pps is calculated by CLASS internally s.t. 
       // k_pivot is an input parameter the user can freely choose. This setting is done via the yaml file,
-      // i.e. runOption for capability 'baseline_classy_input', classy_dict (see CosmoBit_tutorial.yaml). 
+      // i.e. runOption for capability 'classy_baseline_params', classy_dict (see CosmoBit_tutorial.yaml). 
       // If no value for 'k_pivot' is passed GAMBIT will use 0.05, the same default value as CLASS.
       if (ModelInUse("LCDM_no_primordial")){result.addEntry("k_pivot", pps.get_kpivot());}
 
       // Get standard cosmo parameters, nu masses, helium abundance &
       // extra run options for class passed in yaml file to capability
-      // 'baseline_classy_input'
+      // 'classy_baseline_params'
       // Note: this should only contain a value for 'k_pivot' if the model 'LCDM'
       //    is in use.
-      pybind11::dict classy_base_dict = *Dep::baseline_classy_input;
+      pybind11::dict classy_base_dict = *Dep::classy_baseline_params;
       
       // Add classy_base_dict entries to the result dictionary of the type ClassyInput
       std::string common_keys = result.addDict(classy_base_dict);
@@ -759,7 +759,7 @@ namespace Gambit
       {
         CosmoBit_error().raise(LOCAL_INFO, "The key(s) '" + common_keys + "' already "
                 "exists in the CLASSY dictionary. You are probably trying to override a CLASS setting. Check that none "
-                "of the parameters you pass through your yaml file through RunOptions for the capability 'baseline_classy_input' "
+                "of the parameters you pass through your yaml file through RunOptions for the capability 'classy_baseline_params' "
                 "is in contradiction with any settings made via the dependency resolution by CosmoBit in the function '"+__func__+"'.");
       }
     }
@@ -791,11 +791,11 @@ namespace Gambit
       
       // Get standard cosmo parameters, nu masses, helium abundance &
       // extra run options for class passed in yaml file to capability
-      // 'baseline_classy_input'
+      // 'classy_baseline_params'
       // Note: this should only contain a value for 'k_pivot' if the model 'LCDM'
       //    is in use, which is not allowed in this function as the full pk
       //    is provided by an external model scanned in combination with 'LCDM_no_primordial'
-      pybind11::dict classy_base_dict = *Dep::baseline_classy_input;
+      pybind11::dict classy_base_dict = *Dep::classy_baseline_params;
 
       // Add classy_base_dict entries to the result dictionary of the type ClassyInput
       // The string common_keys will be empty if the two dictionaries 'result'
@@ -808,7 +808,7 @@ namespace Gambit
       {
         CosmoBit_error().raise(LOCAL_INFO, "The key(s) '" + common_keys + "' already "
                 "exists in the CLASSY dictionary. You are probably trying to override a CLASS setting. Check that none "
-                "of the parameters you pass through your yaml file through RunOptions for the capability 'baseline_classy_input' "
+                "of the parameters you pass through your yaml file through RunOptions for the capability 'classy_baseline_params' "
                 "is in contradiction with any settings made via the dependency resolution by CosmoBit in the function '"+__func__+"'.");
       }
     }
@@ -2075,19 +2075,19 @@ namespace Gambit
     /// an instance of the classy class Class() (Yep, I know...)
     /// which can be handed over to MontePython, or just used to compute
     /// some observables.
-    void init_classy_cosmo_container(CosmoBit::ClassyInput& result)
+    void set_classy_input(CosmoBit::ClassyInput& result)
     {
-      using namespace Pipes::init_classy_cosmo_container;
+      using namespace Pipes::set_classy_input;
 
-      result = *Dep::set_classy_parameters;
+      result = *Dep::classy_primordial_parameters;
     }
 
     /// Initialises the container within CosmoBit from classy, but designed specifically
     /// to be used when MontePython is in use. This will ensure additional outputs are
     /// computed by classy CLASS to be passed to MontePython.
-    void init_classy_cosmo_container_with_MPLike(CosmoBit::ClassyInput& result)
+    void set_classy_input_with_MPLike(CosmoBit::ClassyInput& result)
     {
-      using namespace Pipes::init_classy_cosmo_container_with_MPLike;
+      using namespace Pipes::set_classy_input_with_MPLike;
 
       // get extra cosmo_arguments from MP (gives a dictionary with output values that need
       // to be set for the class run)
@@ -2095,7 +2095,7 @@ namespace Gambit
       logger() << LogTags::debug << "Extra cosmo_arguments needed from MP Likelihoods: ";
       logger() << pybind11::repr(MP_cosmo_arguments) << EOM;
 
-      result = *Dep::set_classy_parameters;
+      result = *Dep::classy_primordial_parameters;
 
       // add the arguments from Mp_cosmo_arguments which are not yet in cosmo_input_dict to it
       // also takes care of merging the "output" key values
@@ -2210,9 +2210,9 @@ namespace Gambit
 
   /// add all inputs for CLASS needed to produce the correct output to be 
   /// able to compute the Planck CMB likelihoods
-  void set_classy_parameters_PlanckLike(pybind11::dict &result)
+  void set_classy_PlanckLike_input(pybind11::dict &result)
   {
-    using namespace Pipes::set_classy_parameters_PlanckLike;
+    using namespace Pipes::set_classy_PlanckLike_input;
 
     // make sure nothing from previous run is contained
     result.clear();

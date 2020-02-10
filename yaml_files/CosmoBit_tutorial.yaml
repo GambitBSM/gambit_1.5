@@ -245,8 +245,8 @@ Rules:
 
   # specify any CLASS input parameters (despite the model parameters) that usually go into
   # the .ini file here 
-  - capability: baseline_classy_input
-    function: set_baseline_classy_input
+  - capability: classy_baseline_params
+    function: set_classy_baseline_params
     #options:
       #classy_dict:
         #output: "tCl lCl pCl"   # classy + MP: even when no output specified all spectra etc. the likelihoods need
@@ -264,8 +264,8 @@ Rules:
 
   # you have to set by hand if you want to set the class parameters with or without setting arguments from MontePython Likelihoods
   # if the montepythonlike backend is installed (if not it should automatically choose the function 'init_Classy_cosmo_container')
-  - capability: get_classy_cosmo_container
-    function: init_classy_cosmo_container_with_MPLike
+  - capability: classy_final_input
+    function: set_classy_input_with_MPLike
     module: CosmoBit
 
 

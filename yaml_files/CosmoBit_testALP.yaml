@@ -164,8 +164,8 @@ Rules:
   - capability: Planck_lensing_loglike
     function: function_Planck_lensing_2018_loglike
 
-  - capability: get_classy_cosmo_container
-    function: init_classy_cosmo_container
+  - capability: classy_final_input
+    function: set_classy_input
 
   - capability: BBN_LogLike
     options:

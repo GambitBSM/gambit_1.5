@@ -107,8 +107,8 @@ Rules:
 
 
   # classy (class through python wrapper)
-  - capability: baseline_classy_input
-    function: set_baseline_classy_input
+  - capability: classy_baseline_params
+    function: set_classy_baseline_params
     options:
       classy_dict:
          P_k_max_h/Mpc: 3
@@ -116,8 +116,8 @@ Rules:
       
   # you have to set by hand if you want to set the class parameters with or without setting arguments from MontePython Likelihoods
   # if the montepythonlike backend is installed (if not it should automatically choose the function 'init_Classy_cosmo_container')
-  - capability: get_classy_cosmo_container
-    function: init_classy_cosmo_container_with_MPLike
+  - capability: classy_final_input
+    function: set_classy_input_with_MPLike
     module: CosmoBit
 
   - capability: MP_experiment_names
