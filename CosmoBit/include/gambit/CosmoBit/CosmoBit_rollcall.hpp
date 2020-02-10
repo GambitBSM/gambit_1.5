@@ -183,46 +183,46 @@ START_MODULE
   /// capabilities related to setting input options for CLASS right 
   /// cosmo parameters, temperature and number of ultra-relativistic species Nur
   /// ----------------------
-  #define CAPABILITY baseline_classy_input
+  #define CAPABILITY classy_baseline_params
   START_CAPABILITY
-    #define FUNCTION set_baseline_classy_input
+    #define FUNCTION set_classy_baseline_params
     START_FUNCTION(pybind11::dict)
     
     ALLOW_MODELS(LCDM,LCDM_no_primordial)
     //ALLOW_MODELS(LCDM)
     MODEL_CONDITIONAL_DEPENDENCY(classy_parameters_EnergyInjection, pybind11::dict, AnnihilatingDM_general, DecayingDM_general)
-    MODEL_CONDITIONAL_DEPENDENCY(classy_parameters_PlanckLike, pybind11::dict, cosmo_nuisance_Planck_lite,cosmo_nuisance_Planck_TTTEEE,cosmo_nuisance_Planck_TT,plik_dx11dr2_HM_v18_TT)
+    MODEL_CONDITIONAL_DEPENDENCY(classy_PlanckLike_input, pybind11::dict, cosmo_nuisance_Planck_lite,cosmo_nuisance_Planck_TTTEEE,cosmo_nuisance_Planck_TT,plik_dx11dr2_HM_v18_TT)
 
     DEPENDENCY(Helium_abundance,      std::vector<double>)
-    DEPENDENCY(NuMasses_classy_input, pybind11::dict)
+    DEPENDENCY(classy_NuMasses_Nur_input, pybind11::dict)
     #undef FUNCTION
   #undef CAPABILITY
 
     // needed to be able to initialise CLASS either with the runoptions 
     // asked for by MontePython Likelihoods (t modes, Pk at specific z,..) 
     // or without if MontePython is not in use
-   #define CAPABILITY get_classy_cosmo_container
+   #define CAPABILITY classy_final_input
      START_CAPABILITY
-     #define FUNCTION init_classy_cosmo_container_with_MPLike
+     #define FUNCTION set_classy_input_with_MPLike
       START_FUNCTION(CosmoBit::ClassyInput)
       DEPENDENCY(cosmo_args_from_MPLike,  pybind11::dict)
-      DEPENDENCY(set_classy_parameters,   CosmoBit::ClassyInput)
+      DEPENDENCY(classy_primordial_parameters,   CosmoBit::ClassyInput)
      #undef FUNCTION
-     #define FUNCTION init_classy_cosmo_container
+     #define FUNCTION set_classy_input
       START_FUNCTION(CosmoBit::ClassyInput)
-      DEPENDENCY(set_classy_parameters, CosmoBit::ClassyInput)
+      DEPENDENCY(classy_primordial_parameters, CosmoBit::ClassyInput)
      #undef FUNCTION
   #undef CAPABILITY
 
     // set CLASS input parameters for ..
-    #define CAPABILITY set_classy_parameters
+    #define CAPABILITY classy_primordial_parameters
      START_CAPABILITY
     
      // H0, tau_reio, Omega_m, Omega_b plus an external primordial power spectrum
      #define FUNCTION set_classy_parameters_primordial_ps
       START_FUNCTION(CosmoBit::ClassyInput)
          ALLOW_MODELS(LCDM_no_primordial)
-         DEPENDENCY(baseline_classy_input, pybind11::dict)
+         DEPENDENCY(classy_baseline_params, pybind11::dict)
          DEPENDENCY(primordial_power_spectrum, primordial_ps)
      #undef FUNCTION
 
@@ -230,7 +230,7 @@ START_MODULE
      #define FUNCTION set_classy_parameters_parametrised_ps
       START_FUNCTION(CosmoBit::ClassyInput)
          ALLOW_MODELS(LCDM_no_primordial, LCDM)
-         DEPENDENCY(baseline_classy_input, pybind11::dict)
+         DEPENDENCY(classy_baseline_params, pybind11::dict)
          DEPENDENCY(parametrised_power_spectrum,   parametrised_ps)
      #undef FUNCTION
 
@@ -253,17 +253,17 @@ START_MODULE
   #undef CAPABILITY
 
   // set extra parameters for CLASS run if Planck CMB likelihoods are included
-  #define CAPABILITY classy_parameters_PlanckLike
+  #define CAPABILITY classy_PlanckLike_input
      START_CAPABILITY
-     #define FUNCTION set_classy_parameters_PlanckLike
+     #define FUNCTION set_classy_PlanckLike_input
       START_FUNCTION(pybind11::dict)
       ALLOW_MODELS(cosmo_nuisance_Planck_lite,cosmo_nuisance_Planck_TTTEEE,cosmo_nuisance_Planck_TT,plik_dx11dr2_HM_v18_TT)
      #undef FUNCTION
   #undef CAPABILITY
 
-  #define CAPABILITY NuMasses_classy_input
+  #define CAPABILITY classy_NuMasses_Nur_input
   START_CAPABILITY
-    #define FUNCTION set_NuMasses_classy_input
+    #define FUNCTION set_classy_NuMasses_Nur_input
     START_FUNCTION(pybind11::dict)
     DEPENDENCY(T_ncdm,            double)
     DEPENDENCY(NuMasses_SM, map_str_dbl)

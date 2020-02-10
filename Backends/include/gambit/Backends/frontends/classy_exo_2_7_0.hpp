@@ -50,7 +50,7 @@ BE_CONV_FUNCTION(class_get_unlensed_cl, std::vector<double>, (str), "class_get_u
 BE_CONV_FUNCTION(class_get_scale_independent_growth_factor, 	double, (double), "class_get_scale_independent_growth_factor")
 BE_CONV_FUNCTION(class_get_scale_independent_growth_factor_f, 	double, (double), "class_get_scale_independent_growth_factor_f")
 
-BE_INI_DEPENDENCY(get_classy_cosmo_container,CosmoBit::ClassyInput)
+BE_INI_DEPENDENCY(classy_final_input,CosmoBit::ClassyInput)
 
 // Undefine macros to avoid conflict with other backends
 #include "gambit/Backends/backend_undefs.hpp"

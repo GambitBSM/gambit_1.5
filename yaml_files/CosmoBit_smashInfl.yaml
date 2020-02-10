@@ -138,8 +138,8 @@ Rules:
       is_not_silent: 1
       vparams:      [-11.1835, -11.1835, -11.1835, -11.1835]
 
-  - capability: get_classy_cosmo_container
-    function: init_classy_cosmo_container_with_MPLike
+  - capability: classy_final_input
+    function: set_classy_input_with_MPLike
     module: CosmoBit
   
   - capability: set_classy_parameters

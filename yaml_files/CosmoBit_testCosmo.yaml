@@ -178,8 +178,8 @@ Rules:
 ##
 ####
 
-  - capability: get_classy_cosmo_container
-    function: init_classy_cosmo_container
+  - capability: classy_final_input
+    function: set_classy_input
 
   # classy (class through python wrapper)
   - capability: set_classy_parameters

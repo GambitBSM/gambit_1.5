@@ -148,16 +148,16 @@ Rules:
   #  backends:
   #    - {capability: get_classy_cosmo_object, backend: classy, version: 2.6.3}
 
-  - capability: get_classy_cosmo_container
-    function: init_classy_cosmo_container_with_MPLike
+  - capability: classy_final_input
+    function: set_classy_input_with_MPLike
   
   - capability: set_classy_parameters
     function: set_classy_parameters_parametrised_ps
     #function: set_classy_parameters_primordial_ps
   #  module: CosmoBit
 
-  - capability: baseline_classy_input
-    #function: set_baseline_classy_input
+  - capability: classy_baseline_params
+    #function: set_classy_baseline_params
     options:
       classy_dict:
         output: tCl
