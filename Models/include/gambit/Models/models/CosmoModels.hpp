@@ -34,7 +34,7 @@
 // Vanilla ΛCDM.
 #define MODEL LCDM
   START_MODEL
-  DEFINEPARS(omega_b,omega_cdm,H0,ln10A_s,n_s,tau_reio)
+  DEFINEPARS(T_cmb,omega_b,omega_cdm,H0,ln10A_s,n_s,tau_reio)
 #undef MODEL
 
 // ΛCDM parameters without those relating to the primordial power spectrum (A_s, n_s)
@@ -43,7 +43,7 @@
 #define MODEL LCDM_no_primordial
   #define PARENT LCDM
   START_MODEL
-  DEFINEPARS(omega_b,omega_cdm,H0,tau_reio)
+  DEFINEPARS(T_cmb,omega_b,omega_cdm,H0,tau_reio)
   INTERPRET_AS_PARENT_FUNCTION(LCDM_to_LCDM_no_primordial)
   #undef PARENT
 #undef MODEL
