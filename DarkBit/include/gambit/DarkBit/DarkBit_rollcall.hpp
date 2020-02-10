@@ -113,13 +113,13 @@ START_MODULE
   #define CAPABILITY RD_spectrum
   START_CAPABILITY
     #define FUNCTION RD_spectrum_MSSM
-      START_FUNCTION(DarkBit::RD_spectrum_type)
+      START_FUNCTION(RD_spectrum_type)
       DEPENDENCY(MSSM_spectrum, Spectrum)
       DEPENDENCY(DarkMatter_ID, std::string)
       DEPENDENCY(decay_rates,DecayTable)
     #undef FUNCTION
     #define FUNCTION RD_spectrum_SUSY_DS5
-      START_FUNCTION(DarkBit::RD_spectrum_type)
+      START_FUNCTION(RD_spectrum_type)
       BACKEND_REQ(mspctm, (), DS_MSPCTM)
       BACKEND_REQ(widths, (), DS_WIDTHS)
       BACKEND_REQ(intdof, (), DS_INTDOF)
@@ -153,7 +153,7 @@ START_MODULE
     #undef FUNCTION
     #define FUNCTION RD_annrate_DS6prep_MSSM_func
       START_FUNCTION(int)
-      DEPENDENCY(RD_spectrum_ordered, DarkBit::RD_spectrum_type)
+      DEPENDENCY(RD_spectrum_ordered, RD_spectrum_type)
       BACKEND_REQ(dsancoann, (), DS_DSANCOANN)
       BACKEND_REQ(DS6particle_code, (), int, (const str&))
     #undef FUNCTION
@@ -182,7 +182,7 @@ START_MODULE
 // General Boltzmann solver from DarkSUSY, using arbitrary Weff
     #define FUNCTION RD_oh2_DS_general
       START_FUNCTION(double)
-      DEPENDENCY(RD_spectrum_ordered, DarkBit::RD_spectrum_type)
+      DEPENDENCY(RD_spectrum_ordered, RD_spectrum_type)
       DEPENDENCY(RD_eff_annrate, fptr_dd)
       #ifdef DARKBIT_RD_DEBUG
         DEPENDENCY(MSSM_spectrum, Spectrum)
@@ -462,7 +462,7 @@ START_MODULE
   START_CAPABILITY
     // only for DarkSUSY5:
     #define FUNCTION TH_ProcessCatalog_MSSM 
-      START_FUNCTION(DarkBit::TH_ProcessCatalog)
+      START_FUNCTION(TH_ProcessCatalog)
       //ALLOW_MODELS(MSSM63atQ)
       DEPENDENCY(MSSM_spectrum, Spectrum)
       DEPENDENCY(DarkMatter_ID, std::string)
@@ -476,7 +476,7 @@ START_MODULE
       BACKEND_REQ(IBintvars, (), DS_IBINTVARS)
     #undef FUNCTION
     #define FUNCTION TH_ProcessCatalog_DS6_MSSM 
-      START_FUNCTION(DarkBit::TH_ProcessCatalog)
+      START_FUNCTION(TH_ProcessCatalog)
       DEPENDENCY(MSSM_spectrum, Spectrum)
       DEPENDENCY(DarkMatter_ID, std::string)
       DEPENDENCY(decay_rates,DecayTable)
@@ -1276,11 +1276,11 @@ START_MODULE
   #define CAPABILITY SimYieldTable
   START_CAPABILITY
     #define FUNCTION SimYieldTable_DarkSUSY6
-    START_FUNCTION(DarkBit::SimYieldTable)
+    START_FUNCTION(SimYieldTable)
   BACKEND_REQ(dsanyield_sim, (), double, (double&,double&,int&,char*,int&,int&,int&)) 
     #undef FUNCTION
     #define FUNCTION SimYieldTable_DarkSUSY // DS5 only
-    START_FUNCTION(DarkBit::SimYieldTable)
+    START_FUNCTION(SimYieldTable)
     BACKEND_REQ(dshayield, (), double, (double&,double&,int&,int&,int&))
     #undef FUNCTION
     #define FUNCTION SimYieldTable_MicrOmegas
