@@ -46,6 +46,7 @@ void MODEL_NAMESPACE::LCDM_to_LCDM_no_primordial(const ModelParameters &myP, Mod
   logger()<<"Running interpret_as_parent calculations for LCDM --> LCDM_no_primordial ..." << LogTags::info << EOM;
 
   // Same non-primordial parameters as vanilla ΛCDM.
+  targetP.setValue("T_cmb",     myP.getValue("T_cmb"));
   targetP.setValue("H0",        myP.getValue("H0"));
   targetP.setValue("omega_b",   myP.getValue("omega_b"));
   targetP.setValue("omega_cdm", myP.getValue("omega_cdm"));

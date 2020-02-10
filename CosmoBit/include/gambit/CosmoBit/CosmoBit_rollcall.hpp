@@ -61,7 +61,6 @@ START_MODULE
   START_CAPABILITY
     #define FUNCTION DM_fraction_ALP
     START_FUNCTION(double)
-    DEPENDENCY(T_cmb, double)
     DEPENDENCY(minimum_fraction,double)
     DEPENDENCY(lifetime,double)
     DEPENDENCY(RD_oh2, double)
@@ -76,7 +75,6 @@ START_MODULE
   START_CAPABILITY
     #define FUNCTION total_DM_abundance_ALP
     START_FUNCTION(double)
-    DEPENDENCY(T_cmb, double)
     DEPENDENCY(DM_fraction,double)
     ALLOW_MODEL_DEPENDENCE(GeneralCosmoALP,LCDM)
     MODEL_GROUP(alp,(GeneralCosmoALP))
@@ -105,7 +103,6 @@ START_MODULE
   START_CAPABILITY
     #define FUNCTION minimum_fraction_ALP
     START_FUNCTION(double)
-    DEPENDENCY(T_cmb, double)
     DEPENDENCY(minimum_abundance,double)
     ALLOW_MODEL_DEPENDENCE(GeneralCosmoALP,LCDM)
     MODEL_GROUP(alp,(GeneralCosmoALP))
@@ -196,7 +193,6 @@ START_MODULE
     MODEL_CONDITIONAL_DEPENDENCY(classy_parameters_EnergyInjection, pybind11::dict, AnnihilatingDM_general, DecayingDM_general)
     MODEL_CONDITIONAL_DEPENDENCY(classy_parameters_PlanckLike, pybind11::dict, cosmo_nuisance_Planck_lite,cosmo_nuisance_Planck_TTTEEE,cosmo_nuisance_Planck_TT,plik_dx11dr2_HM_v18_TT)
 
-    DEPENDENCY(T_cmb,                 double)
     DEPENDENCY(Helium_abundance,      std::vector<double>)
     DEPENDENCY(NuMasses_classy_input, pybind11::dict)
     #undef FUNCTION
@@ -455,7 +451,7 @@ START_MODULE
     #define FUNCTION function_Planck_lowl_TT_2015_loglike
     START_FUNCTION(double)
     DEPENDENCY(lensed_Cl_TT,std::vector<double>)
-    DEPENDENCY(T_cmb,double)
+    ALLOW_MODELS(LCDM)
     ALLOW_MODELS(cosmo_nuisance_Planck_TTTEEE,cosmo_nuisance_Planck_TT,cosmo_nuisance_Planck_lite)
     BACKEND_REQ(plc_loglike_lowl_TT_2015,(),double,(double*))
     #undef FUNCTION
@@ -466,7 +462,7 @@ START_MODULE
     DEPENDENCY(lensed_Cl_TE,std::vector<double>)
     DEPENDENCY(lensed_Cl_EE,std::vector<double>)
     DEPENDENCY(lensed_Cl_BB,std::vector<double>)
-    DEPENDENCY(T_cmb,double)
+    ALLOW_MODELS(LCDM)
     ALLOW_MODELS(cosmo_nuisance_Planck_TTTEEE,cosmo_nuisance_Planck_TT,cosmo_nuisance_Planck_lite)
     BACKEND_REQ(plc_loglike_lowl_TEB_2015,(),double,(double*))
     #undef FUNCTION
@@ -474,7 +470,7 @@ START_MODULE
     #define FUNCTION function_Planck_lowl_TT_2018_loglike
     START_FUNCTION(double)
     DEPENDENCY(lensed_Cl_TT,std::vector<double>)
-    DEPENDENCY(T_cmb,double)
+    ALLOW_MODELS(LCDM)
     ALLOW_MODELS(cosmo_nuisance_Planck_TTTEEE,cosmo_nuisance_Planck_TT,cosmo_nuisance_Planck_lite)
     BACKEND_REQ(plc_loglike_lowl_TT_2018,(),double,(double*))
     #undef FUNCTION
@@ -482,7 +478,7 @@ START_MODULE
     #define FUNCTION function_Planck_lowl_EE_2018_loglike
     START_FUNCTION(double)
     DEPENDENCY(lensed_Cl_EE,std::vector<double>)
-    DEPENDENCY(T_cmb,double)
+    ALLOW_MODELS(LCDM)
     ALLOW_MODELS(cosmo_nuisance_Planck_TTTEEE,cosmo_nuisance_Planck_TT,cosmo_nuisance_Planck_lite)
     BACKEND_REQ(plc_loglike_lowl_EE_2018,(),double,(double*))
     #undef FUNCTION
@@ -491,7 +487,7 @@ START_MODULE
     START_FUNCTION(double)
     DEPENDENCY(lensed_Cl_TT,std::vector<double>)
     DEPENDENCY(lensed_Cl_EE,std::vector<double>)
-    DEPENDENCY(T_cmb,double)
+    ALLOW_MODELS(LCDM)
     ALLOW_MODELS(cosmo_nuisance_Planck_TTTEEE,cosmo_nuisance_Planck_TT,cosmo_nuisance_Planck_lite)
     BACKEND_REQ(plc_loglike_lowl_TT_2018,(plc_tag),double,(double*))
     BACKEND_REQ(plc_loglike_lowl_EE_2018,(plc_tag),double,(double*))
@@ -504,7 +500,7 @@ START_MODULE
     #define FUNCTION function_Planck_highl_TT_2015_loglike
     START_FUNCTION(double)
     DEPENDENCY(lensed_Cl_TT,std::vector<double>)
-    DEPENDENCY(T_cmb,double)
+    ALLOW_MODELS(LCDM)
     ALLOW_MODELS(cosmo_nuisance_Planck_TT)
     BACKEND_REQ(plc_loglike_highl_TT_2015,(),double,(double*))
     #undef FUNCTION
@@ -512,7 +508,7 @@ START_MODULE
     #define FUNCTION function_Planck_highl_TT_lite_2015_loglike
     START_FUNCTION(double)
     DEPENDENCY(lensed_Cl_TT,std::vector<double>)
-    DEPENDENCY(T_cmb,double)
+    ALLOW_MODELS(LCDM)
     ALLOW_MODELS(cosmo_nuisance_Planck_lite)
     BACKEND_REQ(plc_loglike_highl_TT_lite_2015,(),double,(double*))
     #undef FUNCTION
@@ -522,7 +518,7 @@ START_MODULE
     DEPENDENCY(lensed_Cl_TT,std::vector<double>)
     DEPENDENCY(lensed_Cl_TE,std::vector<double>)
     DEPENDENCY(lensed_Cl_EE,std::vector<double>)
-    DEPENDENCY(T_cmb,double)
+    ALLOW_MODELS(LCDM)
     ALLOW_MODELS(cosmo_nuisance_Planck_TTTEEE)
     BACKEND_REQ(plc_loglike_highl_TTTEEE_2015,(),double,(double*))
     #undef FUNCTION
@@ -532,7 +528,7 @@ START_MODULE
     DEPENDENCY(lensed_Cl_TT,std::vector<double>)
     DEPENDENCY(lensed_Cl_TE,std::vector<double>)
     DEPENDENCY(lensed_Cl_EE,std::vector<double>)
-    DEPENDENCY(T_cmb,double)
+    ALLOW_MODELS(LCDM)
     ALLOW_MODELS(cosmo_nuisance_Planck_lite)
     BACKEND_REQ(plc_loglike_highl_TTTEEE_lite_2015,(),double,(double*))
     #undef FUNCTION
@@ -540,7 +536,7 @@ START_MODULE
     #define FUNCTION function_Planck_highl_TT_2018_loglike
     START_FUNCTION(double)
     DEPENDENCY(lensed_Cl_TT,std::vector<double>)
-    DEPENDENCY(T_cmb,double)
+    ALLOW_MODELS(LCDM)
     ALLOW_MODELS(cosmo_nuisance_Planck_TT)
     BACKEND_REQ(plc_loglike_highl_TT_2018,(),double,(double*))
     #undef FUNCTION
@@ -548,7 +544,7 @@ START_MODULE
     #define FUNCTION function_Planck_highl_TT_lite_2018_loglike
     START_FUNCTION(double)
     DEPENDENCY(lensed_Cl_TT,std::vector<double>)
-    DEPENDENCY(T_cmb,double)
+    ALLOW_MODELS(LCDM)
     ALLOW_MODELS(cosmo_nuisance_Planck_lite)
     BACKEND_REQ(plc_loglike_highl_TT_lite_2018,(),double,(double*))
     #undef FUNCTION
@@ -558,7 +554,7 @@ START_MODULE
     DEPENDENCY(lensed_Cl_TT,std::vector<double>)
     DEPENDENCY(lensed_Cl_TE,std::vector<double>)
     DEPENDENCY(lensed_Cl_EE,std::vector<double>)
-    DEPENDENCY(T_cmb,double)
+    ALLOW_MODELS(LCDM)
     ALLOW_MODELS(cosmo_nuisance_Planck_TTTEEE)
     BACKEND_REQ(plc_loglike_highl_TTTEEE_2018,(),double,(double*))
     #undef FUNCTION
@@ -568,7 +564,7 @@ START_MODULE
     DEPENDENCY(lensed_Cl_TT,std::vector<double>)
     DEPENDENCY(lensed_Cl_TE,std::vector<double>)
     DEPENDENCY(lensed_Cl_EE,std::vector<double>)
-    DEPENDENCY(T_cmb,double)
+    ALLOW_MODELS(LCDM)
     ALLOW_MODELS(cosmo_nuisance_Planck_lite)
     BACKEND_REQ(plc_loglike_highl_TTTEEE_lite_2018,(),double,(double*))
     #undef FUNCTION
@@ -582,7 +578,7 @@ START_MODULE
     DEPENDENCY(lensed_Cl_TE,std::vector<double>)
     DEPENDENCY(lensed_Cl_EE,std::vector<double>)
     DEPENDENCY(lensed_Cl_PhiPhi,std::vector<double>)
-    DEPENDENCY(T_cmb,double)
+    ALLOW_MODELS(LCDM)
     ALLOW_MODELS(cosmo_nuisance_Planck_TTTEEE,cosmo_nuisance_Planck_TT,cosmo_nuisance_Planck_lite)
     BACKEND_REQ(plc_loglike_lensing_2015,(),double,(double*))
     #undef FUNCTION
@@ -593,7 +589,7 @@ START_MODULE
     DEPENDENCY(lensed_Cl_TE,std::vector<double>)
     DEPENDENCY(lensed_Cl_EE,std::vector<double>)
     DEPENDENCY(lensed_Cl_PhiPhi,std::vector<double>)
-    DEPENDENCY(T_cmb,double)
+    ALLOW_MODELS(LCDM)
     ALLOW_MODELS(cosmo_nuisance_Planck_TTTEEE,cosmo_nuisance_Planck_TT,cosmo_nuisance_Planck_lite)
     BACKEND_REQ(plc_loglike_lensing_2018,(),double,(double*))
     #undef FUNCTION
@@ -603,14 +599,6 @@ START_MODULE
     DEPENDENCY(lensed_Cl_PhiPhi,std::vector<double>)
     ALLOW_MODELS(cosmo_nuisance_Planck_TTTEEE,cosmo_nuisance_Planck_TT,cosmo_nuisance_Planck_lite)
     BACKEND_REQ(plc_loglike_lensing_marged_2018,(),double,(double*))
-    #undef FUNCTION
-  #undef CAPABILITY
-
-
-  #define CAPABILITY T_cmb
-    START_CAPABILITY
-    #define FUNCTION set_T_cmb
-      START_FUNCTION(double)
     #undef FUNCTION
   #undef CAPABILITY
   
@@ -645,7 +633,6 @@ START_MODULE
 
     #define FUNCTION compute_n0_g
       START_FUNCTION(double)
-      DEPENDENCY(T_cmb, double)
     #undef FUNCTION
 
     // #define FUNCTION get_n0_g_classy
@@ -715,7 +702,6 @@ START_MODULE
 
     #define FUNCTION compute_Omega0_g
       START_FUNCTION(double)
-      DEPENDENCY(T_cmb, double)
       ALLOW_MODELS(LCDM)
     #undef FUNCTION
 
@@ -755,7 +741,7 @@ START_MODULE
 
     #define FUNCTION compute_Omega0_ncdm
       START_FUNCTION(double)
-      DEPENDENCY(T_cmb, double)
+      ALLOW_MODELS(LCDM)
       DEPENDENCY(mNu_tot,double)
     #undef FUNCTION
 
@@ -766,7 +752,6 @@ START_MODULE
 
     #define FUNCTION calculate_eta0
       START_FUNCTION(double)
-      DEPENDENCY(T_cmb, double)
       ALLOW_MODELS(LCDM)
     #undef FUNCTION
 

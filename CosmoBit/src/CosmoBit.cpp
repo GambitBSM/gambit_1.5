@@ -261,7 +261,7 @@ namespace Gambit
       const double rho0_crit_by_h2 = 3.*pow(m_planck_red*1e9,2) * pow((1e5*1e9*hbar/_Mpc_SI_),2); // rho0_crit/(h^2)
 
       double ma0 = *Param["ma0"];                    // non-thermal ALP mass in eV
-      double T = *Dep::T_cmb;                        // CMB temperature in K
+      double T = *Param["T_cmb"];                        // CMB temperature in K
       double omega_cdm = *Param["omega_cdm"];        // omega_cdm = Omega_cdm * h^2
 
       // Consistency check: if the ALP abundance from all thermal processes is less than that expected just from Primakoff processes, invalidate this point.
@@ -321,7 +321,7 @@ namespace Gambit
       double rho0_ALP = omega_cdm * fraction* rho0_crit_by_h2; // rho0_cdm = Omega_cdm * rho0_crit
 
       double ma0 = *Param["ma0"];
-      double TCMB = *Dep::T_cmb;
+      double TCMB = *Param["T_cmb"];
       double ssm0 = entropy_density_SM(TCMB);
 
       result = rho0_ALP / (ma0 * ssm0);
@@ -601,7 +601,7 @@ namespace Gambit
 
       // standard cosmological parameters (common to all CDM -like models)
       result["H0"] =            *Param["H0"];
-      result["T_cmb"] =         *Dep::T_cmb;
+      result["T_cmb"] =         *Param["T_cmb"];
       result["omega_b"] =       *Param["omega_b"];
       result["tau_reio"] =      *Param["tau_reio"];
       result["omega_cdm"] =     *Param["omega_cdm"];
@@ -1488,15 +1488,6 @@ namespace Gambit
 /// Capabilities for general cosmological quantities
 /// -----------
 
-
-    void set_T_cmb(double &result)
-    {
-      using namespace Pipes::set_T_cmb;
-
-      // use COBE/FIRAS (0911.1955) mes. if not specified otherwise
-      result = runOptions->getValueOrDef<double>(2.7255,"T_cmb");
-    }
-
     void T_ncdm_SM(double &result)
     {
       using namespace Pipes::T_ncdm_SM;
@@ -1536,7 +1527,7 @@ namespace Gambit
       using namespace Pipes::calculate_eta0;
 
       double ngamma, nb;
-      ngamma = 16*pi*zeta3*pow(*Dep::T_cmb*_kB_eV_over_K_/_hc_eVcm_,3); // photon number density today
+      ngamma = 16*pi*zeta3*pow(*Param["T_cmb"]*_kB_eV_over_K_/_hc_eVcm_,3); // photon number density today
       nb = *Param["omega_b"]*3*100*1e3*100*1e3/_Mpc_SI_/_Mpc_SI_/(8*pi*_GN_cgs_* m_proton*1e9*eV2g); // baryon number density today
 
       result =  nb/ngamma;
@@ -1571,14 +1562,14 @@ namespace Gambit
       using namespace Pipes::compute_Omega0_g;
 
       double h = *Param["H0"]/100.;
-      result = (4.*_sigmaB_SI_/_c_SI_*pow(*Dep::T_cmb,4.)) / (3.*_c_SI_*_c_SI_*1.e10*h*h/_Mpc_SI_/_Mpc_SI_/8./pi/_GN_SI_);
+      result = (4.*_sigmaB_SI_/_c_SI_*pow(*Param["T_cmb"],4.)) / (3.*_c_SI_*_c_SI_*1.e10*h*h/_Mpc_SI_/_Mpc_SI_/8./pi/_GN_SI_);
     }
 
     void compute_n0_g(double &result)
     {
       using namespace Pipes::compute_n0_g;
 
-      result = 2./pi/pi*zeta3 *pow(*Dep::T_cmb*_kB_eV_over_K_,3.)/pow(_hP_eVs_*_c_SI_/2./pi,3)/100/100/100; // result per cm^3
+      result = 2./pi/pi*zeta3 *pow(*Param["T_cmb"]*_kB_eV_over_K_,3.)/pow(_hP_eVs_*_c_SI_/2./pi,3)/100/100/100; // result per cm^3
     }
 
     void compute_Omega0_ur(double &result)
