@@ -734,6 +734,12 @@ Inflation_1natural: |
    faxion        - decay rate of the axion field
    phi_init0     - the value of the inflaton field at the start of their inflationary trajectory.
 
+cosmo_nuisance_dummy: |
+   Dummy model for cosmological nuisance parameters that can be used by new MontePython likelihoods. This model has 10 parameters, more can be added anytime to Models/include/gambit/Models/models/CosmoNuisanceModels.hpp.
+   Note: if you want to use this model for nuisance parameters in MP make sure that the 
+         name of the nuisance parameters matches the variable name in GAMBIT -> 'nuisance_param_X'.
+         You can fix all not needed parameters to a constant value in the yaml file before starting a scan.   
+
 
 cosmo_nuisance_Pantheon: |
    Cosmological nuisance parameters for Pantheon SNe Ia likelihood from Scolnic et al. (https://arxiv.org/abs/1710.00845). 

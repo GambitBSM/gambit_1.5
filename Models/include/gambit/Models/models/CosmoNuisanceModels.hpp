@@ -79,7 +79,7 @@
     START_MODEL
     DEFINEPARS(m_corr,A_IA,exp_IA,A_bary,A_noise_z1,A_noise_z2,A_noise_z3)
     // D_z1,D_z2,D_z3 params were not used in public analysis, don't think they are taken into account in the public 
-    // likelihood calulation either
+    // likelihood calculation either
 #undef MODEL
 
 // contains nuisance params from all ska likelihoods implemented in MontePython-- make sure to check which ones are needed by the specific 
@@ -93,11 +93,12 @@
     DEFINEPARS(sigma_NL_ska,beta_0IM,beta_1IM,Omega_HI0,alpha_HI,beta_0SKA1,beta_1SKA1,beta_0SKA2,beta_1SKA2,epsilon_ska)
 #undef MODEL
 
-/*  // todo consistent tag for comments with new features for others
-#define MODEL cosmo_nuisance_FOR_YOUR_NEW_LIKE 
+// add new model holding cosmological nuisance parameters 
+#define MODEL cosmo_nuisance_dummy
     START_MODEL
-    DEFINEPARS(your_param1,your_param2,your_param3) 
+    DEFINEPARS(nuisance_param_1,nuisance_param_2,nuisance_param_3,nuisance_param_4,nuisance_param_5) 
+    DEFINEPARS(nuisance_param_6,nuisance_param_7,nuisance_param_8,nuisance_param_9,nuisance_param_10) 
 #undef MODEL
-*/
+
 
 #endif
