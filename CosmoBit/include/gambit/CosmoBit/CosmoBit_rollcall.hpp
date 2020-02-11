@@ -921,7 +921,7 @@ START_MODULE
       ALLOW_MODELS(cosmo_nuisance_kids450_qe_likelihood_public,cosmo_nuisance_ska,cosmo_nuisance_wmap)
       // if you implement new MontePython likelihoods with new nuisance parameters add the name of your new
       // nuisance parameter model (to be defined in Models/include/gambit/Models/models/CosmoNuisanceModels.hpp)
-      //ALLOW_MODELS(cosmo_nuisance_FOR_YOUR_NEW_LIKE) 
+      ALLOW_MODELS(cosmo_nuisance_dummy) 
      #undef FUNCTION
      #define FUNCTION pass_empty_parameter_dict_for_MPLike
        START_FUNCTION(pybind11::dict)
