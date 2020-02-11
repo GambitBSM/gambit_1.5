@@ -106,7 +106,8 @@ Parameters:
      range: [0.9,1.10]
    tau_reio:
      prior_type: flat
-     range: [0.004,0.20]  
+     range: [0.004,0.20]
+   T_cmb: 2.72548  
 
  # extension of standard LCDM: allow for a value of dNeff @ CMB release different from today
  #dNurCMB:
@@ -133,9 +134,8 @@ Parameters:
  #  (MP is looking for the nuisance parameter M (absoulute magnitude of SNeIa) but can't
  #  find it in the passed parameter dictionary). I do have to fix this, it is on the list.. sorry for that!
  cosmo_nuisance_Pantheon: !import include/cosmo_nuisance_Pantheon.yaml
-
-
  
+  
 #======== Prior setup ========
 # you can also have an extra section specifying priors. Or just do it as above
 # for details check chapter 6.3 of the GAMBIT code paper (https://arxiv.org/abs/1705.07908) 
