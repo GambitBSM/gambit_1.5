@@ -64,7 +64,7 @@ BE_CONV_FUNCTION(dsgenericwimp_nusetup, void, (const double(&)[29], const double
 BE_CONV_FUNCTION(init_diskless, int, (const SLHAstruct&, const DecayTable&), "initFromSLHAeaAndDecayTable")
 // Functions used by convenience functions
 BE_FUNCTION(dsseyield_sim_ls, double, (const double&, const double&, const double&, const int&, const int&, const int&, const int&, const int&, const int&, const char*, const int&, const int&, const int&), "dsseyield_sim_ls_", "raw_nuyield_sim")
-BE_FUNCTION(dsseyield_ch, double, (const double&, const double&, const double&, const int&, const int&, const char*, const int&, const int&, const int&), "dsseyield_ch_", "raw_nuyield_casc")
+BE_FUNCTION(dsseyield_ch, double, (const double&, const double&, const double&, const int&, const int&, const char*, const int&, const int&, const int&), "dsseyield_ch_", "raw_nuyield_casc") // Is this really used?
 BE_FUNCTION(dsddgpgn, void, (Farray<Fcomplex8,1,27,1,2>&, int&), "dsddgpgn_", "dsddgpgn")
 
 
