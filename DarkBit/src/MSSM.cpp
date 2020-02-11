@@ -646,7 +646,7 @@ namespace Gambit
       SETUP_DS6_PROCESS(bbbar,      5, - 5, d_3,    dbar_3,   1   )
       SETUP_DS6_PROCESS(gluglu,    21,  21, g,      g,      1   )
       SETUP_DS6_PROCESS(gammagamma,22,  22, gamma,  gamma,  1   )
-      //        SETUP_DS6_PROCESS(Z0gamma,   22,  23, Z0,     gamma,  1   )
+      SETUP_DS6_PROCESS(Z0gamma,   23,  22, Z0,     gamma,  1   )
       // Undef the macro so it doesn't propagate through GAMBIT
 #undef SETUP_DS6_PROCESS
 
@@ -751,6 +751,7 @@ namespace Gambit
       // Exclude also ttbar final states
       auto excludeDecays = daFunk::vec<std::string>("Z0", "W+", "W-", "u_3", "ubar_3", "e+_2", "e-_2", "e+_3", "e-_3");
 
+
       // Import relevant decays
       using DarkBit_utils::ImportDecays;
       if(annFinalStates.count("H+") == 1)
@@ -764,6 +765,7 @@ namespace Gambit
       if(annFinalStates.count("A0") == 1)
         ImportDecays("A0", catalog, importedDecays, tbl, minBranching, excludeDecays);
 
+      
       // Add process to process list
       catalog.processList.push_back(process);
 
