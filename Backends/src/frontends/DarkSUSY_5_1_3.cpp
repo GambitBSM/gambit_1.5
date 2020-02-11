@@ -91,8 +91,7 @@ BE_INI_FUNCTION
   
 // Initialization function for a given MSSM point
 // (previous capaility DarkSUSY_PointInit)
-// FIXME This breaks the backend for every model that is not the MSSM!
-  bool result = false;
+  bool mssm_result = false;
 
   // If the user provides a file list, just read in SLHA files for debugging
   // and ignore the MSSM_spectrum dependency.
@@ -113,7 +112,7 @@ BE_INI_FUNCTION
 
     counter++;
     if (counter >= filenames.size()) counter = 0;
-    result = true;
+    mssm_result = true;
   }
 
   // CMSSM with DS-internal ISASUGRA (should be avoided, only for
@@ -139,25 +138,25 @@ BE_INI_FUNCTION
     dsgive_model_isasugra(am0, amhf, aa0, asgnmu, atanbe);
     int unphys, hwarning;
     dssusy_isasugra(unphys, hwarning);
-    //result = (unphys == 0) && (hwarning == 0);
+    //mssm_result = (unphys == 0) && (hwarning == 0);
     if (unphys < 0) {
       backend_warning().raise(LOCAL_INFO,
           "Model point is theoretically inconsistent (DarkSUSY).");
   invalid_point().raise(
           "Model point is theoretically inconsistent (DarkSUSY).");
-      result = false;
+      mssm_result = false;
     } else if (unphys > 0) {
       backend_warning().raise(LOCAL_INFO,
           "Neutralino is not the LSP (DarkSUSY).");
       invalid_point().raise("Neutralino is not the LSP (DarkSUSY).");
-      result = false;
+      mssm_result = false;
     } else if (hwarning != 0) {
       backend_warning().raise(LOCAL_INFO,
           "Radiative corrections in Higgs sector "
           "outside range of validity (DarkSUSY).");
-      result = true;
+      mssm_result = true;
     } else {
-      result = true;
+      mssm_result = true;
     }
   }
 
@@ -214,24 +213,26 @@ BE_INI_FUNCTION
       //The following used to be a separate capability dsprep up to DS5
       //(as also specified in the manual)
       dsprep();
-      result = true;
+      mssm_result = true;
     }
     // Do pure diskless SLHA initialisation, including (s)particle widths from GAMBIT.
     else
     {
-          if (init_diskless(mySLHA, *Dep::decay_rates) == 0 )
-          {
-            logger() << LogTags::debug << "Using diskless SLHA interface to DarkSUSY." << EOM;
-            dsprep();
-            result = true;
-          }
-        }
+      if (init_diskless(mySLHA, *Dep::decay_rates) == 0 )
+      {
+        logger() << LogTags::debug << "Using diskless SLHA interface to DarkSUSY." << EOM;
+        dsprep();
+        mssm_result = true;
       }
-      if (!result) {
-        backend_warning().raise(LOCAL_INFO,
-            "DarkSUSY point initialization failed.");
-        invalid_point().raise("DarkSUSY point initialization failed.");
-      }
+    }
+  }
+
+  if ( (ModelInUse("MSSM63atQ") || ModelInUse("CMSSM")) && !mssm_result )
+  {
+    backend_warning().raise(LOCAL_INFO,
+        "DarkSUSY point initialization failed.");
+    invalid_point().raise("DarkSUSY point initialization failed.");
+  }
     
 }
 END_BE_INI_FUNCTION
