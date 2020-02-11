@@ -26,6 +26,6 @@ tau_reio:
   range: [0.004,0.20]
 T_cmb: 2.72548
   # measurement 2.72548 \pm 0.00057
-  # -> vary in 3 sigma range
+  # -> vary within error range
   #prior_type: gaussian
-  #range: [2.72377,2.72719]
+  #range: [2.72491,2.72605]
