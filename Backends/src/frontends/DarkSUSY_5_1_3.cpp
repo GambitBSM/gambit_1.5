@@ -268,6 +268,7 @@ BE_NAMESPACE
     for (int i=1; i<=29; i++)
     {
       wabranch->wabr(i) = annihilation_bf[i-1];
+      // cout << "DDD: " << i << " " << annihilation_bf[i-1] << endl ; // JE TMP
     }
 
     // Transfer Higgs decay branching fractions (not widths) to Higgs decay common blocks.

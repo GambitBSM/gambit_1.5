@@ -326,63 +326,63 @@ BE_NAMESPACE
     DSanpdg2.clear();
     DSanpdg1.push_back(10000); // not used, as I keep the same numbering as for Fortran
     DSanpdg2.push_back(10000);  
-    DSanpdg1.push_back(25);  // h h
+    DSanpdg1.push_back(35);  // H H, channel 1
+    DSanpdg2.push_back(35);
+    DSanpdg1.push_back(25);  // h H, channel 2
+    DSanpdg2.push_back(35);
+    DSanpdg1.push_back(25);  // h h, channel 3
     DSanpdg2.push_back(25);
-    DSanpdg1.push_back(25);  // h H
-    DSanpdg2.push_back(35);
-    DSanpdg1.push_back(35);  // H H
-    DSanpdg2.push_back(35);
-    DSanpdg1.push_back(36);  // A A
+    DSanpdg1.push_back(36);  // A A, channel 4
     DSanpdg2.push_back(36);
-    DSanpdg1.push_back(25);  // h A
+    DSanpdg1.push_back(35);  // H A, channel 5
     DSanpdg2.push_back(36);
-    DSanpdg1.push_back(35);  // H A
+    DSanpdg1.push_back(25);  // h A, channel 6
     DSanpdg2.push_back(36);
-    DSanpdg1.push_back(37);  // H+ H-
+    DSanpdg1.push_back(37);  // H+ H-, channel 7
     DSanpdg2.push_back(-37);
-    DSanpdg1.push_back(23);  // Z h
+    DSanpdg1.push_back(23);  // Z H, channel 8
+    DSanpdg2.push_back(35);
+    DSanpdg1.push_back(23);  // Z h, channel 9
     DSanpdg2.push_back(25);
-    DSanpdg1.push_back(23);  // Z H
-    DSanpdg2.push_back(35);
-    DSanpdg1.push_back(23);  // Z A
+    DSanpdg1.push_back(23);  // Z A, channel 10
     DSanpdg2.push_back(36);
-    DSanpdg1.push_back(24);  // W+ H-
+    DSanpdg1.push_back(24);  // W+ H-, channel 11
     DSanpdg2.push_back(-37);
-    DSanpdg1.push_back(23);  // Z Z
+    DSanpdg1.push_back(23);  // Z Z, channel 12
     DSanpdg2.push_back(23);
-    DSanpdg1.push_back(24);  // W+ W-
+    DSanpdg1.push_back(24);  // W+ W-, channel 13
     DSanpdg2.push_back(-24);
-    DSanpdg1.push_back(12);  // nue nuebar
+    DSanpdg1.push_back(12);  // nue nuebar, channel 14
     DSanpdg2.push_back(-12);
-    DSanpdg1.push_back(11);  // e- e+
+    DSanpdg1.push_back(11);  // e- e+, channel 15
     DSanpdg2.push_back(-11);
-    DSanpdg1.push_back(14);  // numu numubar
+    DSanpdg1.push_back(14);  // numu numubar, channel 16
     DSanpdg2.push_back(-14);
-    DSanpdg1.push_back(13);  // mu- mu+
+    DSanpdg1.push_back(13);  // mu- mu+, channel 17
     DSanpdg2.push_back(-13);
-    DSanpdg1.push_back(16);  // nutau nutaubar
+    DSanpdg1.push_back(16);  // nutau nutaubar, channel 18
     DSanpdg2.push_back(-16);
-    DSanpdg1.push_back(15);  // tau- tau+
+    DSanpdg1.push_back(15);  // tau- tau+, channel 19
     DSanpdg2.push_back(-15);
-    DSanpdg1.push_back(2);   // u ubar
+    DSanpdg1.push_back(2);   // u ubar, channel 20
     DSanpdg2.push_back(-2);
-    DSanpdg1.push_back(1);   // d dbar
+    DSanpdg1.push_back(1);   // d dbar, channel 21
     DSanpdg2.push_back(-1);
-    DSanpdg1.push_back(4);   // c cbar
+    DSanpdg1.push_back(4);   // c cbar, channel 22
     DSanpdg2.push_back(-4);
-    DSanpdg1.push_back(3);   // s sbar
+    DSanpdg1.push_back(3);   // s sbar, channel 23
     DSanpdg2.push_back(-3);
-    DSanpdg1.push_back(6);   // t tbar
+    DSanpdg1.push_back(6);   // t tbar, channel 24
     DSanpdg2.push_back(-6);
-    DSanpdg1.push_back(5);   // b bbar
+    DSanpdg1.push_back(5);   // b bbar, channel 25
     DSanpdg2.push_back(-5);
-    DSanpdg1.push_back(21);   // gluon gluon
+    DSanpdg1.push_back(21);   // gluon gluon, channel 26
     DSanpdg2.push_back(21);
     DSanpdg1.push_back(10000);   // (not used)
     DSanpdg2.push_back(10000);
-    DSanpdg1.push_back(22);   // gamma gamma
+    DSanpdg1.push_back(22);   // gamma gamma, channel 28
     DSanpdg2.push_back(22);
-    DSanpdg1.push_back(22);   // gamma Z
+    DSanpdg1.push_back(22);   // gamma Z, channel 29
     DSanpdg2.push_back(23); 
 
     // Transfer Higgs decay branching fractions (not widths) to Higgs decay common blocks.
@@ -437,6 +437,7 @@ BE_NAMESPACE
     
     for (int i=1; i<=29; i++)
     {
+      // cout << "DDD: " << i << " " << DSanbr[i] << " " << DSanpdg1[i] << " " << DSanpdg2[i] << endl; // JE TMP
       if (DSanbr[i]>0) {
 	if (i==13) { // W+ W-
 	  twos=2;
@@ -462,6 +463,7 @@ BE_NAMESPACE
 	if ((ptype == 2) or (ptype == 3)) { // anti-particles
 	  tmp=dsseyield_sim_ls(anmwimp,pow(10.0,log10E),10.0,DSanpdg1[i],DSanpdg2[i],twoj,cp,twos,twol,object,3,t2,iistat);
 	    if ((iistat bitand 8) == 8) { // not simulated channel
+	      // cout << "CCC: " << i << " " << DSanpdg1[i] << " " << DSanpdg2[i] << endl; // JE TMP
 
           tmp=dsseyield_ch(anmwimp,pow(10.0,log10E),10.0,DSanpdg1[i],DSanpdg2[i],object,3,t2,iistat);
 	    }
