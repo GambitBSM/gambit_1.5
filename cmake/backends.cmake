@@ -94,7 +94,7 @@ endif()
 # DarkSUSY
 set(name "darksusy5")
 set(ver "5.1.3")
-set(dl "https://darksusy.hepforge.org/tars/${name}-${ver}.tar.gz")
+set(dl "https://darksusy.hepforge.org/tars/darksusy-5.1.3.tar.gz")
 set(md5 "ca95ffa083941a469469710fab2f3c97")
 set(dir "${PROJECT_SOURCE_DIR}/Backends/installed/${name}/${ver}")
 set(patch "${PROJECT_SOURCE_DIR}/Backends/patches/${name}/${ver}/patch_${name}_${ver}.dif")
