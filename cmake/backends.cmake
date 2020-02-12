@@ -92,7 +92,7 @@ endif()
 
 
 # DarkSUSY
-set(name "darksusy")
+set(name "darksusy5")
 set(ver "5.1.3")
 set(dl "https://darksusy.hepforge.org/tars/${name}-${ver}.tar.gz")
 set(md5 "ca95ffa083941a469469710fab2f3c97")
@@ -114,7 +114,7 @@ if(NOT ditched_${name}_${ver})
     INSTALL_COMMAND ""
   )
   add_extra_targets("backend" ${name} ${ver} ${dir} ${dl} clean)
-  # set_as_default_version("backend" ${name} ${ver})
+  set_as_default_version("backend" ${name} ${ver})
 endif()
 
 # DarkSUSY base (for all models)
@@ -133,7 +133,6 @@ if(NOT ditched_${name}_${ver})
     SOURCE_DIR ${dir}
     BUILD_IN_SOURCE 1
     # PATCH_COMMAND patch -p1 < ${patch}
-    # FIXME parallel relic density routines don't work yet.
     #COMMAND patch -b -p2 -d src < ${patch}/patchDS_OMP_src.dif
     #COMMAND patch -b -p2 -d include < ${patch}/patchDS_OMP_include.dif
     # FIXME DarkSUSY segfaults with -O2 setting
@@ -168,24 +167,6 @@ if(NOT ditched_${name}_${model}_${ver})
   set_as_default_version("backend model" ${name}_${model} ${ver})
 endif()
 
-# DarkSUSY generic_decayingDM module
-set(model "generic_decayingDM")
-#set(patch "${PROJECT_SOURCE_DIR}/Backends/patches/${name}/${ver}/patch_${name}_${ver}_${model}")
-check_ditch_status(${name}_${model} ${ver} ${dir})
-if(NOT ditched_${name}_${model}_${ver})
-  ExternalProject_Add(${name}_${model}_${ver}
-    DOWNLOAD_COMMAND ""
-    SOURCE_DIR ${dir}
-#    PATCH_COMMAND patch -p1 < ${patch}
-    BUILD_IN_SOURCE 1
-    CONFIGURE_COMMAND ""
-    BUILD_COMMAND ${CMAKE_MAKE_PROGRAM} ds_generic_decayingDM_shared
-    INSTALL_COMMAND ""
-  )
-  add_extra_targets("backend model" ${name} ${ver} ${dir}/${model} ${model} "yes | clean")
-  set_as_default_version("backend model" ${name}_${model} ${ver})
-endif()
-
 # DarkSUSY generic_wimp module
 set(model "generic_wimp")
 #set(patch "${PROJECT_SOURCE_DIR}/Backends/patches/${name}/${ver}/patch_${name}_${ver}_${model}")
@@ -203,43 +184,6 @@ if(NOT ditched_${name}_${model}_${ver})
   add_extra_targets("backend model" ${name} ${ver} ${dir}/${model} ${model} "yes | clean")
   set_as_default_version("backend model" ${name}_${model} ${ver})
 endif()
-
-# DarkSUSY silveira_zee module
-set(model "silveira_zee")
-#set(patch "${PROJECT_SOURCE_DIR}/Backends/patches/${name}/${ver}/patch_${name}_${ver}_${model}")
-check_ditch_status(${name}_${model} ${ver} ${dir})
-if(NOT ditched_${name}_${model}_${ver})
-  ExternalProject_Add(${name}_${model}_${ver}
-    DOWNLOAD_COMMAND ""
-    SOURCE_DIR ${dir}
-#    PATCH_COMMAND patch -p1 < ${patch}
-    BUILD_IN_SOURCE 1
-    CONFIGURE_COMMAND ""
-    BUILD_COMMAND ${CMAKE_MAKE_PROGRAM} ds_silveira_zee_shared
-    INSTALL_COMMAND ""
-  )
-  add_extra_targets("backend model" ${name} ${ver} ${dir}/${model} ${model} "yes | clean")
-  set_as_default_version("backend model" ${name}_${model} ${ver})
-endif()
-
-# DarkSUSY vdSIDM module
-set(model "vdSIDM")
-#set(patch "${PROJECT_SOURCE_DIR}/Backends/patches/${name}/${ver}/patch_${name}_${ver}_${model}")
-check_ditch_status(${name}_${model} ${ver} ${dir})
-if(NOT ditched_${name}_${model}_${ver})
-  ExternalProject_Add(${name}_${model}_${ver}
-    DOWNLOAD_COMMAND ""
-    SOURCE_DIR ${dir}
-#    PATCH_COMMAND patch -p1 < ${patch}
-    BUILD_IN_SOURCE 1
-    CONFIGURE_COMMAND ""
-    BUILD_COMMAND ${CMAKE_MAKE_PROGRAM} ds_vdSIDM_shared
-    INSTALL_COMMAND ""
-  )
-  add_extra_targets("backend model" ${name} ${ver} ${dir}/${model} ${model} "yes | clean")
-  set_as_default_version("backend model" ${name}_${model} ${ver})
-endif()
-
 
 
 # SuperIso
