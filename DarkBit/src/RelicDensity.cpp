@@ -283,7 +283,7 @@ namespace Gambit
           2*result.coannihilatingParticles[0].mass);
       int thrlist[] = {BEreq::DS5particle_code("W+"),
                        BEreq::DS5particle_code("Z0"),
-                       BEreq::DS5particle_code("t")};
+                       BEreq::DS5particle_code("u_3")};
       int thrmax=sizeof(thrlist) / sizeof(thrlist[0]);
       for (int i=0; i<thrmax; i++)
         if (mymspctm->mass(thrlist[i])>result.coannihilatingParticles[0].mass)
