@@ -110,9 +110,9 @@ START_MODULE
       BACKEND_REQ(dshmisodf,(be_req_tag),DS_HMISODF)
       BACKEND_REQ(dshmframevelcom,(be_req_tag),DS_HMFRAMEVELCOM)
       BACKEND_REQ(dshmnoclue,(be_req_tag),DS_HMNOCLUE)
-      BACKEND_OPTION((DarkSUSY_MSSM, 6.1.1), (be_req_tag))
-      BACKEND_OPTION((DarkSUSY_generic_wimp, 6.1.1), (be_req_tag))
-      BACKEND_OPTION((DarkSUSY_silveira_zee, 6.1.1), (be_req_tag))
+      BACKEND_OPTION((DarkSUSY_MSSM, 6.1.1, 6.2.2), (be_req_tag))
+      BACKEND_OPTION((DarkSUSY_generic_wimp, 6.1.1, 6.2.2), (be_req_tag))
+      BACKEND_OPTION((DarkSUSY_silveira_zee, 6.1.1, 6.2.2), (be_req_tag))
       FORCE_SAME_BACKEND(be_req_tag)  // Shouldn't matter, but let's make sure we get all the BACKEND_REQs from the same DS6 backend library
     #undef FUNCTION
   #undef CAPABILITY
@@ -167,7 +167,7 @@ START_MODULE
       DEPENDENCY(RD_spectrum_ordered, RD_spectrum_type)
       BACKEND_REQ(dsancoann, (), DS_DSANCOANN)
       BACKEND_REQ(DS6particle_code, (), int, (const str&))
-      BACKEND_OPTION((DarkSUSY_MSSM, 6.1.1), (dummy_tag))
+      BACKEND_OPTION((DarkSUSY_MSSM, 6.1.1, 6.2.2), (dummy_tag))
     #undef FUNCTION
   #undef CAPABILITY
 
@@ -502,8 +502,7 @@ START_MODULE
       BACKEND_REQ(dsIBwhdxdy, (), double, (int&, double&, double&))
       BACKEND_REQ(dsIBwwdxdy, (), double, (int&, double&, double&))
       BACKEND_REQ(IBintvars, (), DS_IBINTVARS)
-      // _Anders
-      BACKEND_OPTION((DarkSUSY_MSSM, 6.1.1), (dummy_tag))  // Only for DarkSUSY6 MSSM
+      BACKEND_OPTION((DarkSUSY_MSSM, 6.1.1, 6.2.2), (dummy_tag))  // Only for DarkSUSY6 MSSM
     #undef FUNCTION
     #define FUNCTION TH_ProcessCatalog_ScalarSingletDM_Z2
       START_FUNCTION(TH_ProcessCatalog)
@@ -677,7 +676,7 @@ START_MODULE
       BACKEND_REQ(get_DD_couplings, (), std::vector<double>, ())
       BACKEND_REQ(ddcomlegacy, (), DS_DDCOMLEGACY)
       BACKEND_REQ(ddmssmcom, (), DS_DDMSSMCOM)
-      BACKEND_OPTION((DarkSUSY_MSSM, 6.1.1), (dummy_tag))  // Only for DarkSUSY6 MSSM
+      BACKEND_OPTION((DarkSUSY_MSSM, 6.1.1, 6.2.2), (dummy_tag))  // Only for DarkSUSY6 MSSM
       ALLOW_JOINT_MODEL(nuclear_params_fnq,MSSM63atQ)
     #undef FUNCTION
 
@@ -930,9 +929,9 @@ START_MODULE
       DEPENDENCY(RD_fraction, double)
       DEPENDENCY(LocalHalo, LocalMaxwellianHalo)
       DEPENDENCY(DarkSUSY6_PointInit_LocalHalo, bool)
-      BACKEND_OPTION((DarkSUSY_MSSM, 6.1.1), (dummy_tag))
-      BACKEND_OPTION((DarkSUSY_generic_wimp, 6.1.1), (dummy_tag))
-      BACKEND_OPTION((DarkSUSY_silveira_zee, 6.1.1), (dummy_tag))
+      BACKEND_OPTION((DarkSUSY_MSSM, 6.1.1, 6.2.2), (dummy_tag))
+      BACKEND_OPTION((DarkSUSY_generic_wimp, 6.1.1, 6.2.2), (dummy_tag))
+      BACKEND_OPTION((DarkSUSY_silveira_zee, 6.1.1, 6.2.2), (dummy_tag))
 //TB DEBUG / PLEASE CHECK: I don't think this is needed / wanted
 //        #define CONDITIONAL_DEPENDENCY DarkSUSY6_PointInit_LocalHalo
 //        START_CONDITIONAL_DEPENDENCY(bool)

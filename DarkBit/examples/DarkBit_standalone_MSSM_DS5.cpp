@@ -251,11 +251,6 @@ int main(int argc, char* argv[])
     // All the DarkSUSY 5 calculations
     // 
 
-    // _Anders
-
-
-
-
 
     // Relic density calculation with GAMBIT routines and DarkSUSY 5:
     RD_spectrum_SUSY_DS5.resolveBackendReq(&Backends::DarkSUSY_5_1_3::Functown::mspctm);
