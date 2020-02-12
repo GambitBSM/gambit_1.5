@@ -6,23 +6,28 @@ TODO
   -> running ?
    NLOoption = off: <sigma v> [cm^3/s] --   DS6: 6.17142e-28
    NLOoption = default: <sigma v> [cm^3/s] --  DS6: 6.53436e-28
-
+  -> JE/TB: add option NLOoption = 'DS5! -> DS 6.2.3.
 
 * DS5 standalone: neutrino routines sometimes hang...
   -> mail to Pat: nulike ?
 
 * [Jonathan] IC, sv, DSphs from mO ?
 
-* [Jonathan] Silveira-Zee standalone
+* [Jonathan] Silveira-Zee standalone + yaml file
 
-* .yaml files:
-  - CMSSM.yaml, Silveira-Zee
-
-
-* rename _DS6 -> standard; standard -> _DS5
+* [Anders] CMSSM.yaml
+ 
+* [Torsten] rename _DS6 -> standard; standard -> _DS5
    (as well as darksusy -> darksusy5)
 
 * update to 6.2.2
+   - [Torsten] update frontend MSSM: grep FIXME! (also in DarkSUSY.hpp)
+   - test DarkBit_standalone_MSSM_all_backends
+   - generic_WIMP   
+
+* get rid of prelim. standalones
+
+* add new relic density feature (maybe after merging to trunk !)
 
 --------
 [done]

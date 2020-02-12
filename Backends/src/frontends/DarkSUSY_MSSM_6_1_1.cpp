@@ -655,7 +655,7 @@ BE_NAMESPACE
   {
     using SLHAea::to;
     const std::complex<double> imagi(0.0, 1.0);
-    DS_PACODES_MSSM *DSpart = &(*pacodes_mssm);
+    DS_PACODES_MSSM61 *DSpart = &(*pacodes_mssm);
 
     // Define required blocks and raise an error if a block is missing
     required_block("SMINPUTS", mySLHA);

@@ -90,24 +90,38 @@ namespace Gambit
 
 // this one only exists in DS 5
   struct DS_PACODES
-  {
+   {
       Farray<Finteger,1,2> kse,ksmu,kstau,ksu,ksd,ksc,kss,kst,ksb;
       Farray<Finteger,1,4> kn;
       Farray<Finteger,1,2> kcha;
       Farray<Finteger,1,3> knu,kl,kqu,kqd;
       Farray<Finteger,1,6> ksnu,ksl,ksqu,ksqd;
 //      character*8 pname(0:numpartspecies)
-  };
+   };
 
 // this one only exists in DS 6+
   struct DS_PACODES_MSSM
-  {
+   {
+      Farray<Finteger,1,3> knu,kl,kqu,kqd;
+      Farray<Finteger,1,6> ksnu,ksl,ksqu,ksqd;
+      Farray<Finteger,1,4> kn;
+      Farray<Finteger,1,2> kcha;
+      Farray<Finteger,1,3> ksnu_flav;
+//TB FIXME: this would be the actual implementation, but does not work!?
+//      Farray<Finteger,1,3,1,1> ksnu_flav;
+      Farray<Finteger,1,3,1,2> ksl_flav,ksqu_flav,ksqd_flav;
+    };
+
+// this one only exists in DS 6.1
+  struct DS_PACODES_MSSM61
+    {
       Farray<Finteger,1,3> knu,kl,kqu,kqd;
       Farray<Finteger,1,2> kse,ksmu,kstau,ksu,ksd,ksc,kss,kst,ksb;
       Farray<Finteger,1,4> kn;
       Farray<Finteger,1,2> kcha;
       Farray<Finteger,1,6> ksnu,ksl,ksqu,ksqd;
-  };
+    };
+
 
     struct DS_MSSMIUSEFUL
     {
@@ -146,7 +160,27 @@ namespace Gambit
         Fdouble s2wmz;
         Fdouble swmz;
         Fdouble cwmz;
+        Fdouble g2weak;
+        Fdouble g2wmz;
+        Fdouble g3stro;
+        Fdouble gyweak;
+        Fdouble gywmz;
     };
+
+//this one existet only in DS 6.1
+    struct DS_SMCOUPLING61
+    {
+        Fdouble alph3mz;
+        Fdouble gfermi;
+        Fdouble alphem;
+        Fdouble s2thw;
+        Fdouble sinthw;
+        Fdouble costhw;
+        Fdouble s2wmz;
+        Fdouble swmz;
+        Fdouble cwmz;
+    };
+
 
 // this one only exists in DS 5
     struct DS_SMCUSEFUL
@@ -165,8 +199,14 @@ namespace Gambit
         Fdouble g2wmz;
         Fdouble gywmz;
     };
-// this one only exists in DS 6
+// this one only exists in DS 6.1
     struct DS6_COUPLINGCONSTANTS
+    {
+        Fdouble alph3;
+        Farray< Fdouble,1,12 > yukawa;
+    };
+// this one only exists in DS 6
+    struct DS6_COUPLINGCONSTANTS61
     {
         Fdouble g2weak;
         Fdouble gyweak;
@@ -183,6 +223,16 @@ namespace Gambit
         Fdouble ckms13;
         Fdouble ckmdelta;
     };
+
+    struct DS6_SCKM
+    {
+        Farray< Fdouble_complex,1,3,1,3 > ckm;
+        Fdouble ckms12;
+        Fdouble ckms23;
+        Fdouble ckms13;
+        Fdouble ckmdelta;
+    };
+
     struct DS_MIXING
     {
         Farray< Fdouble_complex,1,3,1,3 > ckm;
