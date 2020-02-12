@@ -35,7 +35,7 @@
 BE_NAMESPACE
 {
   const double min_DS_rwidth = 5.e-3; // 0.5%  to avoid numerical problems
-  const std::vector<str> IBfinalstate = initVector<str>("e-","mu-","tau-","u","d","c","s","t","b","W+","H+");
+  // const std::vector<str> IBfinalstate = Initvector<str>("e-","mu-","tau-","u","d","c","s","t","b","W+","H+");
   std::vector<double> DSparticle_mass;
   std::vector<double> GAMBITparticle_mass;
   std::vector<double> DSanbr; // to have BR available to neutrino_yield
@@ -429,9 +429,9 @@ BE_NAMESPACE
     const char*object =  (char *)"su";
 
     double tmp=0;
-    int twoj=0.0;
-    int twos=0.0;
-    int twol=0.0;
+    int twoj=0;
+    int twos=0;
+    int twol=0;
     int cp=-1;
     double result=0.0;
     
@@ -498,6 +498,7 @@ BE_NAMESPACE
       err << "Error from DarkSUSY::dsseyield functions in neutrino flux calculation.  istat = " << istat;
       piped_errors.request(LOCAL_INFO, err.str());
     }
+    // cout << "AAA: nuyield DS6: " << result << endl; // JE TMP
     return result;
   }
 
@@ -539,27 +540,27 @@ BE_NAMESPACE
     int kpart;
     if (particleID=="nu_e" or particleID=="nubar_e"){
      kpart=1;
-    }else if (particleID=="e-" or particleID=="e+"){
+    }else if (particleID=="e-_1" or particleID=="e+_1"){
      kpart=2;
     }else if (particleID=="nu_mu" or particleID=="nubar_mu"){
      kpart=3;
-    }else if (particleID=="mu-" or particleID=="mu+"){
+    }else if (particleID=="e-_2" or particleID=="e+_2"){
      kpart=4;
     }else if (particleID=="nu_tau" or particleID=="nubar_tau"){
      kpart=5;
-    }else if (particleID=="tau-" or particleID=="tau+"){
+    }else if (particleID=="e-_3" or particleID=="e+_3"){
      kpart=6;
-    }else if (particleID=="u" or particleID=="ubar"){
+    }else if (particleID=="u_1" or particleID=="ubar_1"){
      kpart=7;
-    }else if (particleID=="d" or particleID=="dbar"){
+    }else if (particleID=="d_1" or particleID=="dbar_1"){
      kpart=8;
-    }else if (particleID=="c" or particleID=="cbar"){
+    }else if (particleID=="u_2" or particleID=="ubar_2"){
      kpart=9;
-    }else if (particleID=="s" or particleID=="sbar"){
+    }else if (particleID=="d_2" or particleID=="dbar_2"){
      kpart=10;
-    }else if (particleID=="t" or particleID=="tbar"){
+    }else if (particleID=="u_3" or particleID=="ubar_3"){
      kpart=11;
-    }else if (particleID=="b" or particleID=="bbar"){
+    }else if (particleID=="d_3" or particleID=="dbar_3"){
      kpart=12;
     }else if (particleID=="gamma"){
      kpart=13;
@@ -1017,9 +1018,9 @@ BE_NAMESPACE
     }
 
     // Set up SM fermion widths
-    pwidths->width(DSparticle_code("t"))    = myDecays.at(std::pair<int,int>(6,1)).width_in_GeV;
-    pwidths->width(DSparticle_code("mu-"))  = myDecays.at(std::pair<int,int>(13,1)).width_in_GeV;
-    pwidths->width(DSparticle_code("tau-")) = myDecays.at(std::pair<int,int>(15,1)).width_in_GeV;
+    pwidths->width(DSparticle_code("u_3"))    = myDecays.at(std::pair<int,int>(6,1)).width_in_GeV;
+    pwidths->width(DSparticle_code("e-_2"))  = myDecays.at(std::pair<int,int>(13,1)).width_in_GeV;
+    pwidths->width(DSparticle_code("e-_3")) = myDecays.at(std::pair<int,int>(15,1)).width_in_GeV;
 
     // Set up SM gauge boson widths
     pwidths->width(DSparticle_code("W+")) = myDecays.at(std::pair<int,int>(24,0)).width_in_GeV;
@@ -1122,7 +1123,7 @@ BE_NAMESPACE
       initVector<str>("d_3", "dbar_3"),
       initVector<str>("g", "g"),
       // actually qqg (not implemented in DS though)
-      initVector<str>("b", "bbar", "g"),
+      initVector<str>("d_3", "dbar_3", "g"),
       initVector<str>("gamma", "gamma"),
       initVector<str>("Z0", "gamma")
      );
@@ -1132,18 +1133,18 @@ BE_NAMESPACE
   std::vector< std::vector<str> > DS_charged_h_decay_channels()
   {
     return initVector< std::vector<str> >
-     (initVector<str>("u", "dbar"),
-      initVector<str>("u", "sbar"),
-      initVector<str>("u", "bbar"),
-      initVector<str>("c", "dbar"),
-      initVector<str>("c", "sbar"),
-      initVector<str>("c", "bbar"),
-      initVector<str>("t", "dbar"),
-      initVector<str>("t", "sbar"),
-      initVector<str>("t", "bbar"),
-      initVector<str>("e+", "nu_e"),
-      initVector<str>("mu+", "nu_mu"),
-      initVector<str>("tau+", "nu_tau"),
+     (initVector<str>("u_1", "dbar_1"),
+      initVector<str>("u_1", "dbar_2"),
+      initVector<str>("u_1", "dbar_3"),
+      initVector<str>("u_2", "dbar_1"),
+      initVector<str>("u_2", "dbar_2"),
+      initVector<str>("u_2", "dbar_3"),
+      initVector<str>("u_3", "dbar_1"),
+      initVector<str>("u_3", "dbar_2"),
+      initVector<str>("u_3", "dbar_3"),
+      initVector<str>("e+_1", "nu_e"),
+      initVector<str>("e+_2", "nu_mu"),
+      initVector<str>("e+_3", "nu_tau"),
       initVector<str>("W+", "h0_2"),
       initVector<str>("W+", "h0_1"),
       initVector<str>("W+", "A0")
