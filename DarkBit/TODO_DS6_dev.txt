@@ -1,0 +1,37 @@
+TODO
+=====
+
+* large difference DS5/DS6 for funnel models
+  -> sv to quarks
+  -> running ?
+   NLOoption = off: <sigma v> [cm^3/s] --   DS6: 6.17142e-28
+   NLOoption = default: <sigma v> [cm^3/s] --  DS6: 6.53436e-28
+
+
+* DS5 standalone: neutrino routines sometimes hang...
+  -> mail to Pat: nulike ?
+
+* [Jonathan] IC, sv, DSphs from mO ?
+
+* [Jonathan] Silveira-Zee standalone
+
+* .yaml files:
+  - CMSSM.yaml, Silveira-Zee
+
+
+* rename _DS6 -> standard; standard -> _DS5
+   (as well as darksusy -> darksusy5)
+
+* update to 6.2.2
+
+--------
+[done]
+-------
+
+[*] neutrinos completely wrong !?
+
+[*] DS6 WIMP standalone !
+
+[*] tidy up cmake etc: we *only* want DS6 MSSM + generic WIMP!
+  - different make target darksusy_MSSM vs darksusy_MSSM_6.1.1 ?
+
