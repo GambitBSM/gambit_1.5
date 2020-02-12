@@ -21,6 +21,7 @@ add_standalone(ColliderBit_standalone SOURCES ColliderBit/examples/ColliderBit_s
 add_standalone(DarkBit_standalone_MSSM SOURCES DarkBit/examples/DarkBit_standalone_MSSM.cpp MODULES DarkBit)
 add_standalone(DarkBit_standalone_MSSM_DS5 SOURCES DarkBit/examples/DarkBit_standalone_MSSM_DS5.cpp MODULES DarkBit)
 add_standalone(DarkBit_standalone_MSSM_DS6 SOURCES DarkBit/examples/DarkBit_standalone_MSSM_DS6.cpp MODULES DarkBit)
+add_standalone(DarkBit_standalone_MSSM_all_backends SOURCES DarkBit/examples/DarkBit_standalone_MSSM_all_backends.cpp MODULES DarkBit)
 add_standalone(DarkBit_standalone_ScalarSingletDM_Z2 SOURCES DarkBit/examples/DarkBit_standalone_ScalarSingletDM_Z2.cpp MODULES DarkBit)
 add_standalone(DarkBit_standalone_WIMP SOURCES DarkBit/examples/DarkBit_standalone_WIMP.cpp MODULES DarkBit)
 add_standalone(DarkBit_standalone_WIMP_DS6 SOURCES DarkBit/examples/DarkBit_standalone_WIMP_DS6.cpp MODULES DarkBit)

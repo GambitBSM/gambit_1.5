@@ -233,14 +233,6 @@ int main(int argc, char* argv[])
     DarkSUSY5_PointInit_LocalHalo_func.resolveBackendReq(&Backends::DarkSUSY_5_1_3::Functown::dshmnoclue);
     DarkSUSY5_PointInit_LocalHalo_func.reset_and_calculate();
 
-    // Initialize DarkSUSY 6 MSSM backend
-    DarkSUSY_MSSM_6_1_1_init.notifyOfModel("MSSM30atQ");
-    DarkSUSY_MSSM_6_1_1_init.resolveDependency(&createSpectrum);
-    DarkSUSY_MSSM_6_1_1_init.resolveDependency(&createDecays);
-    if (decays) DarkSUSY_MSSM_6_1_1_init.setOption<bool>("use_dsSLHAread", false);
-    else DarkSUSY_MSSM_6_1_1_init.setOption<bool>("use_dsSLHAread", true);
-    DarkSUSY_MSSM_6_1_1_init.reset_and_calculate();
-
     // Assume for direct and indirect detection likelihoods that dark matter
     // density is always the measured one (regardless of relic density results)
     RD_fraction_one.reset_and_calculate();
