@@ -1666,6 +1666,10 @@ namespace Gambit
       logger() << "     and error params: failsafe = " << result["failsafe"] << ", err = " << result["err"] << EOM;
     }
 
+
+    /// (JR) this function is huge (200 lines..) -- considering that it is acually only there to call 
+    /// a BE function from AlterBBN, can we split that up somehow or define utility functions
+    /// to do some of the checks and error calculation things so it is not totally blown up? TODO
     void compute_BBN_abundances(CosmoBit::BBN_container &result)
     {
       using namespace Pipes::compute_BBN_abundances;
