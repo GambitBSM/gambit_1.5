@@ -652,9 +652,21 @@ START_MODULE
       (TH_ProcessCatalog, TH_ProcessCatalog), (DarkMatter_ID, std::string))
 
   // Retrieve the total thermally-averaged annihilation cross-section for indirect detection (cm^3 / s)
-  QUICK_FUNCTION(DarkBit, sigmav, NEW_CAPABILITY, sigmav_late_universe, double, (),
-      (TH_ProcessCatalog, TH_ProcessCatalog), (DarkMatter_ID, std::string))
+  #define CAPABILITY sigmav
+  START_CAPABILITY
 
+    #define FUNCTION sigmav_late_universe
+      START_FUNCTION(double)
+      DEPENDENCY(TH_ProcessCatalog, TH_ProcessCatalog)
+      DEPENDENCY(DarkMatter_ID, std::string)
+    #undef FUNCTION
+
+    #define FUNCTION sigmav_late_universe_MicrOmegas
+      START_FUNCTION(double)
+      BACKEND_REQ(calcSpectrum, () , double,  (int, double*, double*, double*, double*, double*, double*, int*))
+    #undef FUNCTION
+
+  #undef CAPABILITY
 
   // DIRECT DETECTION ==================================================
 
