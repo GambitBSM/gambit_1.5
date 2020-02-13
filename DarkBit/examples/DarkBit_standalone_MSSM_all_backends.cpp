@@ -1238,6 +1238,11 @@ int main(int argc, char* argv[])
       // Save the result
       results["oh2_lnL"][current_backend] = lnL_oh2_Simple(0);
 
+      // <sigma v> (v->0 limit) self-annihilation calculation with MicrOmegas:
+      sigmav_late_universe_MicrOmegas.notifyOfModel("MSSM30atQ");
+      sigmav_late_universe_MicrOmegas.resolveBackendReq(&Backends::MicrOmegas_MSSM_3_6_9_2::Functown::calcSpectrum);
+      sigmav_late_universe_MicrOmegas.reset_and_calculate();
+      results["sigmav0"][current_backend] = sigmav_late_universe_MicrOmegas(0);
 
       // Direct detection calculations with Micromegas
 
