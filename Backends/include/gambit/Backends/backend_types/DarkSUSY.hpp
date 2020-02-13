@@ -106,9 +106,9 @@ namespace Gambit
       Farray<Finteger,1,6> ksnu,ksl,ksqu,ksqd;
       Farray<Finteger,1,4> kn;
       Farray<Finteger,1,2> kcha;
-      Farray<Finteger,1,3> ksnu_flav;
+      // Farray<Finteger,1,3> ksnu_flav;
 //TB FIXME: this would be the actual implementation, but does not work!?
-//      Farray<Finteger,1,3,1,1> ksnu_flav;
+      Farray<Finteger,1,3,1,1> ksnu_flav;
       Farray<Finteger,1,3,1,2> ksl_flav,ksqu_flav,ksqd_flav;
     };
 
