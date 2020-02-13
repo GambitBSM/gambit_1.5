@@ -764,7 +764,9 @@ BE_NAMESPACE
     mssmpar->ma = pmasses->mass(DSparticle_code("A0"));
 
     // Now set up some defaults (part of it will be overwritten later)
-    dssuconst();
+    dssuconst_yukawa();
+    dssuconst_higgs();
+    
     mssmiuseful->lsp = DSpart->kn(1);
     mssmiuseful->kln = 1;
     // To match the DS SLHAreader, you would then need to call
