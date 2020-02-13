@@ -133,8 +133,6 @@ if(NOT ditched_${name}_${ver})
     SOURCE_DIR ${dir}
     BUILD_IN_SOURCE 1
     # PATCH_COMMAND patch -p1 < ${patch}
-    #COMMAND patch -b -p2 -d src < ${patch}/patchDS_OMP_src.dif
-    #COMMAND patch -b -p2 -d include < ${patch}/patchDS_OMP_include.dif
     # FIXME DarkSUSY segfaults with -O2 setting
     #CONFIGURE_COMMAND ./configure FC=${CMAKE_Fortran_COMPILER} FCFLAGS=${GAMBIT_Fortran_FLAGS} FFLAGS=${GAMBIT_Fortran_FLAGS} CC=${CMAKE_C_COMPILER} CFLAGS=${GAMBIT_C_FLAGS} CXX=${CMAKE_CXX_COMPILER} CXXFLAGS=${GAMBIT_CXX_FLAGS}
     CONFIGURE_COMMAND ./configure FC=${CMAKE_Fortran_COMPILER} FCFLAGS=${DS_Fortran_FLAGS} FFLAGS=${DS_Fortran_FLAGS} CC=${CMAKE_C_COMPILER} CFLAGS=${CMAKE_C_FLAGS} CXX=${CMAKE_CXX_COMPILER} CXXFLAGS=${CMAKE_CXX_FLAGS}
@@ -200,9 +198,7 @@ if(NOT ditched_${name}_${ver})
     DOWNLOAD_COMMAND ${DL_BACKEND} ${dl} ${md5} ${dir} ${name} ${ver}
     SOURCE_DIR ${dir}
     BUILD_IN_SOURCE 1
-    # PATCH_COMMAND patch -p1 < ${patch}
-    #COMMAND patch -b -p2 -d src < ${patch}/patchDS_OMP_src.dif
-    #COMMAND patch -b -p2 -d include < ${patch}/patchDS_OMP_include.dif
+    PATCH_COMMAND patch -p1 < ${patch}
     # FIXME DarkSUSY segfaults with -O2 setting
     #CONFIGURE_COMMAND ./configure FC=${CMAKE_Fortran_COMPILER} FCFLAGS=${GAMBIT_Fortran_FLAGS} FFLAGS=${GAMBIT_Fortran_FLAGS} CC=${CMAKE_C_COMPILER} CFLAGS=${GAMBIT_C_FLAGS} CXX=${CMAKE_CXX_COMPILER} CXXFLAGS=${GAMBIT_CXX_FLAGS}
     CONFIGURE_COMMAND ./configure FC=${CMAKE_Fortran_COMPILER} FCFLAGS=${DS_Fortran_FLAGS} FFLAGS=${DS_Fortran_FLAGS} CC=${CMAKE_C_COMPILER} CFLAGS=${CMAKE_C_FLAGS} CXX=${CMAKE_CXX_COMPILER} CXXFLAGS=${CMAKE_CXX_FLAGS}
