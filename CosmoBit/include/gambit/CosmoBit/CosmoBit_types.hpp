@@ -107,14 +107,21 @@ namespace Gambit
 
     };
 
+
+    /// Class to store all results from an AlterBBN run
+    /// -> element abundances stored in BBN_nuc (length NNUC+1), 
+    /// -> covariance matrix in BBN_covmat ( dim NNUC+1 x NNUC+1)
+    /// -> abund_map maps name of element to position in BBN_abundance vector
+    ///    see constructor of BBN_container
     class BBN_container
     {
       public:
         BBN_container();
 
+        /// TODO make these private and check that it does not break anything.. (I think it does -> add setter and getter functions)
         std::vector<double> BBN_abund;
         std::vector< std::vector<double> > BBN_covmat;
-        std::map<std::string, int> abund_map;
+        std::map<std::string, int> abund_map; // TODO make map return a BE convinience function (just in case something chances in AlterBBN)
 
         void init_arr(int nnuc);
         int get_NNUC(){return NNUC;}; // global parameter in AlterBBN, holds number of computed element abundances

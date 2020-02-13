@@ -683,8 +683,10 @@ Inflation_SR1quad: |
 
    Inflation model with potential: m^2 phi^2 --- quadratic inflation with slow-roll approximation. Primordial power-spectra is computed from inflationary model parameters (under slow-roll approximation): m2_inflaton,N_pivot,phi_init0.
 
-   m2_inflation        - the mass of the inflaton field (the potential is the the square of this term times the square of the field value )
-   N_pivot             - determines the number of e-foldings prior to the end of inflation when the observables calculated. used as a proxy to parametrise duration of reheating ephoch after inflation.
+   m2_inflation        - the mass of the inflaton field (the potential is the the square of this term
+                         times the square of the field value )
+   N_pivot             - determines the number of e-foldings prior to the end of inflation when the observables calculated. 
+                         used as a proxy to parametrise duration of reheating ephoch after inflation.
    phi_init0           - the value of the inflaton field at the start of their inflationary trajectory.
 
 
@@ -694,7 +696,8 @@ Inflation_1quar: |
    model parameters: N_piv, lambda, phi_init0.
 
    lambda        - the amplitude of the quartic term in the potential
-   N_pivot       - determines the number of e-foldings prior to the end of inflation when the observables calculated. used as a proxy to parametrise duration of reheating ephoch after inflation.
+   N_pivot       - determines the number of e-foldings prior to the end of inflation when the observables calculated. 
+                   used as a proxy to parametrise duration of reheating ephoch after inflation.
    phi_init0     - the value of the inflaton field at the start of their inflationary trajectory.
 
 
@@ -703,7 +706,8 @@ Inflation_1mono32: |
    Inflation model with potential: 2/3 lambda phi^2/3. Primordial power-spectra is computed from inflationary model parameters: N_piv, lambda, phi_init0.
 
    lambda        - the amplitude of the cubic term in the potential
-   N_pivot       - determines the number of e-foldings prior to the end of inflation when the observables calculated. used as a proxy to parametrise duration of reheating ephoch after inflation.
+   N_pivot       - determines the number of e-foldings prior to the end of inflation when the observables calculated. 
+                   used as a proxy to parametrise duration of reheating ephoch after inflation.
    phi_init0     - the value of the inflaton field at the start of their inflationary trajectory.
 
 
@@ -712,7 +716,8 @@ Inflation_1linear: |
    Linear inflation model with potential: m phi. Primordial power-spectra is given computed from inflationary model parameters: lambda,N_pivot,phi_init0.
 
    m             - the amplitude of the linear term in the potential
-   N_pivot       - determines the number of e-foldings prior to the end of inflation when the observables calculated. used as a proxy to parametrise duration of reheating ephoch after inflation.
+   N_pivot       - determines the number of e-foldings prior to the end of inflation when the observables calculated. 
+                    used as a proxy to parametrise duration of reheating ephoch after inflation.
    phi_init0     - the value of the inflaton field at the start of their inflationary trajectory.
 
 
