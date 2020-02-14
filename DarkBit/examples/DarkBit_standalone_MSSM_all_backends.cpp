@@ -212,6 +212,18 @@ int main(int argc, char* argv[])
     nuclear_params_fnq->setValue("deltau", 0.74);
     nuclear_params_fnq->setValue("deltas", -0.12);
 
+    // Resolve other dependencies related directly to the GAMBIT Models
+    DD_couplings_DarkSUSY.notifyOfModel("nuclear_params_fnq");
+    DD_couplings_DarkSUSY.resolveDependency(&Models::nuclear_params_fnq::Functown::primary_parameters);
+
+    DD_couplings_MSSM_DS6.notifyOfModel("nuclear_params_fnq");
+    DD_couplings_MSSM_DS6.resolveDependency(&Models::nuclear_params_fnq::Functown::primary_parameters);
+
+    DD_couplings_MicrOmegas.notifyOfModel("MSSM30atQ");
+    DD_couplings_MicrOmegas.notifyOfModel("nuclear_params_fnq");
+    DD_couplings_MicrOmegas.resolveDependency(&Models::nuclear_params_fnq::Functown::primary_parameters);
+
+
     // ---- Initialize spectrum and decays from SLHA file ----
     createSpectrum.setOption<std::string>("filename", filename);
     createSpectrum.reset_and_calculate();
@@ -363,8 +375,8 @@ int main(int argc, char* argv[])
       // ---- Direct detection -----
 
       // Calculate DD couplings with DarkSUSY
-      DD_couplings_DarkSUSY.notifyOfModel("nuclear_params_fnq");
-      DD_couplings_DarkSUSY.resolveDependency(&Models::nuclear_params_fnq::Functown::primary_parameters);
+      // DD_couplings_DarkSUSY.notifyOfModel("nuclear_params_fnq");
+      // DD_couplings_DarkSUSY.resolveDependency(&Models::nuclear_params_fnq::Functown::primary_parameters);
       DD_couplings_DarkSUSY.resolveBackendReq(&Backends::DarkSUSY_5_1_3::Functown::DD_couplings);
       DD_couplings_DarkSUSY.resolveBackendReq(&Backends::DarkSUSY_5_1_3::Functown::mspctm);
       DD_couplings_DarkSUSY.resolveBackendReq(&Backends::DarkSUSY_5_1_3::Functown::ddcom);
@@ -756,8 +768,6 @@ int main(int argc, char* argv[])
      // ---- Direct detection and IceCube limits ----
 
       // Calculate DD couplings with DarkSUSY
-      DD_couplings_MSSM_DS6.notifyOfModel("nuclear_params_fnq");
-      DD_couplings_MSSM_DS6.resolveDependency(&Models::nuclear_params_fnq::Functown::primary_parameters);
       DD_couplings_MSSM_DS6.resolveBackendReq(&Backends::DarkSUSY_MSSM_6_1_1::Functown::DD_couplings);
       DD_couplings_MSSM_DS6.resolveBackendReq(&Backends::DarkSUSY_MSSM_6_1_1::Functown::ddcomlegacy);
       DD_couplings_MSSM_DS6.resolveBackendReq(&Backends::DarkSUSY_MSSM_6_1_1::Functown::ddmssmcom);
@@ -1065,8 +1075,6 @@ int main(int argc, char* argv[])
      // ---- Direct detection and IceCube limits ----
 
       // Calculate DD couplings with DarkSUSY
-      DD_couplings_MSSM_DS6.notifyOfModel("nuclear_params_fnq");
-      DD_couplings_MSSM_DS6.resolveDependency(&Models::nuclear_params_fnq::Functown::primary_parameters);
       DD_couplings_MSSM_DS6.resolveBackendReq(&Backends::DarkSUSY_MSSM_6_2_2::Functown::DD_couplings);
       DD_couplings_MSSM_DS6.resolveBackendReq(&Backends::DarkSUSY_MSSM_6_2_2::Functown::ddcomlegacy);
       DD_couplings_MSSM_DS6.resolveBackendReq(&Backends::DarkSUSY_MSSM_6_2_2::Functown::ddmssmcom);
@@ -1247,9 +1255,9 @@ int main(int argc, char* argv[])
       // Direct detection calculations with Micromegas
 
       // Calculate DD couplings with Micromegas
-      DD_couplings_MicrOmegas.notifyOfModel("MSSM30atQ");
-      DD_couplings_MicrOmegas.notifyOfModel("nuclear_params_fnq");
-      DD_couplings_MicrOmegas.resolveDependency(&Models::nuclear_params_fnq::Functown::primary_parameters);
+      // DD_couplings_MicrOmegas.notifyOfModel("MSSM30atQ");
+      // DD_couplings_MicrOmegas.notifyOfModel("nuclear_params_fnq");
+      // DD_couplings_MicrOmegas.resolveDependency(&Models::nuclear_params_fnq::Functown::primary_parameters);
       DD_couplings_MicrOmegas.resolveBackendReq(&Backends::MicrOmegas_MSSM_3_6_9_2::Functown::nucleonAmplitudes);
       DD_couplings_MicrOmegas.resolveBackendReq(&Backends::MicrOmegas_MSSM_3_6_9_2::Functown::FeScLoop);
       DD_couplings_MicrOmegas.resolveBackendReq(&Backends::MicrOmegas_MSSM_3_6_9_2::Functown::mocommon_);

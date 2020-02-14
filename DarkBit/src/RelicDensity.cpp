@@ -611,8 +611,8 @@ namespace Gambit
       int fast = runOptions->getValueOrDef<int>(1, "fast");
 
       /// Option timeout<double>: Maximum core time to allow for relic density
-      /// calculation, in seconds (default: 30s)
-      BEreq::rdtime->rdt_max = runOptions->getValueOrDef<double>(30, "timeout");
+      /// calculation, in seconds (default: 600s)
+      BEreq::rdtime->rdt_max = runOptions->getValueOrDef<double>(600, "timeout");
 
       switch (fast)
       {
@@ -727,8 +727,8 @@ namespace Gambit
       #endif
 
       /// Option timeout<double>: Maximum core time to allow for relic density
-      /// calculation, in seconds (default: 30s)
-      BEreq::rdtime->rdt_max = runOptions->getValueOrDef<double>(30, "timeout");
+      /// calculation, in seconds (default: 600s)
+      BEreq::rdtime->rdt_max = runOptions->getValueOrDef<double>(600, "timeout");
 
       // What follows below is the standard accurate calculation of oh2 in DS, in one of the
       // following modes:
@@ -1005,8 +1005,8 @@ namespace Gambit
       /// Option fast<int>: 0 standard, 1 fast, 2 dirty (default 0)
       fast = runOptions->getValueOrDef<int>(0, "fast");
       /// Option timeout<double>: Maximum core time to allow for relic density
-      /// calculation, in seconds (default: 30s)
-      BEreq::rdtime->rdt_max = runOptions->getValueOrDef<double>(30, "timeout");
+      /// calculation, in seconds (default: 600s)
+      BEreq::rdtime->rdt_max = runOptions->getValueOrDef<double>(600, "timeout");
 
       // Output
       double xf;  // freeze-out temperature
