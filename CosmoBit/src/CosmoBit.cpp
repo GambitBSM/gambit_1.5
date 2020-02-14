@@ -970,23 +970,8 @@ namespace Gambit
       // Get the inflationary inputs
       multimode_inputs inputs = *Dep::multimode_input_parameters;
 
-      //-------------------------------------------------------------
-      // (JR) @Selim Used to be yaml options but probably should not be -- waiting 
-      // until they are removed as arguments of multimodecode_gambit_driver
-      //-------------------------------------------------------------
-      // TODO remove these from MMC driver & function below...
-      double vp_prior_min = 1;
-      double vp_prior_max = 1;
-      int param_sampling = 1; // 1 means vparam is kept constant -> this is what we want in gambit, so fix it!
-      int varying_N_pivot = 0;
-      int use_first_priorval = 1; // means that first entry of vector is used for all variables
-      double phi0_priors_min = 10.;
-      double phi0_priors_max = 10.;
-      double dphi0_priors_min = 0.;
-      double dphi0_priors_max = 0.;
       double N_pivot_prior_min = inputs.N_pivot;
       double N_pivot_prior_max = inputs.N_pivot;
-
 
       // The parameters below are only used by multimode if the full Pk is requested. 
       int steps = inputs.numsteps;
@@ -995,15 +980,13 @@ namespace Gambit
 
       gambit_inflation_observables observables;
 
-      int calcfullpk = 1;
-
       //-------------------------------------------------------------
       // The function below calls the MultiModeCode backend
       //  for a given choice of inflationary model,
       //  which calculates the observables.
       //-------------------------------------------------------------
 
-			observables = BEreq::multimodecode_gambit_driver(inputs.num_inflaton,
+			observables = BEreq::multimodecode_primordial_ps(inputs.num_inflaton,
 																											 inputs.potential_choice,
 																											 inputs.evaluate_modes,
 																											 inputs.get_runningofrunning,
@@ -1016,8 +999,7 @@ namespace Gambit
 																											 steps,
 																											 kmin,
 																											 kmax,
-																											 inputs.vparam_rows,
-																											 calcfullpk);
+																											 inputs.vparam_rows);
 
       // This is fine
       result.fill_k(observables.k_array, inputs.numsteps);
@@ -1035,50 +1017,26 @@ namespace Gambit
 
     /// Passes the inputs from the MultiModeCode initialisation function 
     /// and computes the outputs.
-    /// TODO: split this up into primordial_ps and parametrised_ps versions.
+    /// SCH: had a go at it->TODO: split this up into primordial_ps and parametrised_ps versions.
     void get_multimode_parametrised_ps(parametrised_ps &result)
     { 
       using namespace Pipes::get_multimode_parametrised_ps;
 
-
       // Get the inflationary inputs
       multimode_inputs inputs = *Dep::multimode_input_parameters;
 
-
-      //-------------------------------------------------------------
-      // (JR) @Selim Used to be yaml options but probably should not be -- waiting 
-      // until they are removed as arguments of multimodecode_gambit_driver
-      //-------------------------------------------------------------
-      // TODO remove these from MMC driver & function below...
-      double vp_prior_min = 1;
-      double vp_prior_max = 1;
-      int param_sampling = 1; // 1 means vparam is kept constant -> this is what we want in gambit, so fix it!
-      int varying_N_pivot = 0;
-      int use_first_priorval = 1; // means that first entry of vector is used for all variables
-      double phi0_priors_min = 10.;
-      double phi0_priors_max = 10.;
-      double dphi0_priors_min = 0.;
-      double dphi0_priors_max = 0.;
       double N_pivot_prior_min = inputs.N_pivot; // (JR) can these two be removed here since we probably don't
       double N_pivot_prior_max = inputs.N_pivot; // vary Npivot when using the parameterised ps? 
 
 
-      // The parameters below are only used by multimode if the full Pk is requested. 
-      // TODO not needed here
-      int steps = inputs.numsteps;
-      double kmin = inputs.k_min;
-      double kmax = inputs.k_max;
-
       gambit_inflation_observables observables;
-
-      int calcfullpk = 0;
 
       //-------------------------------------------------------------
       // The function below calls the MultiModeCode backend
       //  for a given choice of inflationary model,
       //  which calculates the observables.
       //-------------------------------------------------------------
-			observables = BEreq::multimodecode_gambit_driver(inputs.num_inflaton,
+			observables = BEreq::multimodecode_parametrised_ps(inputs.num_inflaton,
 																											 inputs.potential_choice,
 																											 inputs.evaluate_modes,
 																											 inputs.get_runningofrunning,
@@ -1088,11 +1046,7 @@ namespace Gambit
 																											 inputs.N_pivot,
 																											 inputs.k_pivot,
 																											 inputs.dlnk,
-																											 steps,
-																											 kmin,
-																											 kmax,
-																											 inputs.vparam_rows,
-																											 calcfullpk);
+																											 inputs.vparam_rows);
 
       result.set_ns(observables.ns);
       result.set_As(observables.As);
@@ -1104,6 +1058,8 @@ namespace Gambit
       result.set_kpivot(inputs.k_pivot);
       result.set_Npivot(inputs.N_pivot);
     }
+		
+		
 
     void get_parametrised_ps_LCDM(parametrised_ps &result)
     {

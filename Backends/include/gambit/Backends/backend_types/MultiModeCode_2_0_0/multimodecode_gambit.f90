@@ -70,9 +70,8 @@ contains
                                          ginput_steps, &
                                          ginput_kmin, &
                                          ginput_kmax, &
-                                         ginput_vparam_rows,&
-                                         ginput_calc_full_pk &
-                                         ) result(gambit_obs)
+                                         ginput_vparam_rows &
+																				 ) result(gambit_obs)
 
     type(gambit_inflation_observables) :: gambit_obs ! output
 
@@ -93,7 +92,6 @@ contains
     integer, intent(in) :: ginput_steps
     real(dp), intent(in) :: ginput_kmin
     real(dp), intent(in) :: ginput_kmax
-    logical, optional, intent(in) :: ginput_calc_full_pk
 
     !---------------------------------------------------------------
     !At the moment, the options related to the reheating stuff from the code are
@@ -279,18 +277,11 @@ contains
       kmax = ginput_kmax
       steps = ginput_steps
 
-      ! print*,"ModeCode DEBUG: we are inside gambit_get_full_pk"
-
-      ! print*,"calc_full_pk = ",calc_full_pk
       !If don't want full spectrum, return
       if (calc_full_pk) then
 
-        ! print*,"ModeCode DEBUG: we are pass the checkpoint"
-
         !Make the output arrays
         if (allocated(pk_arr)) deallocate(pk_arr)
-
-       !  print*,"ModeCode DEBUG: steps (inside) = ",steps
 
         allocate(pk_arr(steps, 9))
 
