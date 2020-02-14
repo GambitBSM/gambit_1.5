@@ -118,17 +118,28 @@ namespace Gambit
       public:
         BBN_container();
 
-        /// TODO make these private and check that it does not break anything.. (I think it does -> add setter and getter functions)
-        std::vector<double> BBN_abund;
-        std::vector< std::vector<double> > BBN_covmat;
-        std::map<std::string, int> abund_map; // TODO make map return a BE convinience function (just in case something chances in AlterBBN)
+        // initialize sizes of vectors (get NNUC from AlterBBN, number of computed element abundances)
+        // and get a translation map from element name to position in abundance vector
+        void init_arr_size(int nnuc);
+        void set_abund_map(map_str_int map_in){abund_map = map_in;}
 
-        void init_arr(int nnuc);
-        int get_NNUC(){return NNUC;}; // global parameter in AlterBBN, holds number of computed element abundances
-        std::map<std::string,int> get_map(){return abund_map;};
+        // setter functions for abundance vector and cov mat
+        void set_BBN_abund(int pos, double val) {BBN_abund[pos] = val;}
+        void set_BBN_covmat(int row, int col, double val) {BBN_covmat[row][col] = val;}
+
+        // global parameter in AlterBBN, holds number of computed element abundances
+        int get_NNUC(){return NNUC;}; 
+        std::map<std::string,int> get_abund_map(){return abund_map;};
+
+        // getter functions for abundance vector and cov mat
+        double get_BBN_abund(int pos) {return BBN_abund[pos];}
+        double get_BBN_covmat(int row, int col) {return BBN_covmat[row][col];}
 
       private:
         int NNUC;
+        std::vector<double> BBN_abund;
+        std::vector< std::vector<double> > BBN_covmat;
+        std::map<std::string, int> abund_map; 
     };
 
     class SM_time_evo

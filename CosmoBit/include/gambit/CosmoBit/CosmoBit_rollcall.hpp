@@ -883,6 +883,7 @@ START_MODULE
       DEPENDENCY(AlterBBN_Input, map_str_dbl)
       BACKEND_REQ(call_nucl_err, (libbbn), int, (map_str_dbl&,double*,double*))
       BACKEND_REQ(get_NNUC, (libbbn), int, ())
+      BACKEND_REQ(get_abund_map_AlterBBN, (libbbn), map_str_int, ())
       BACKEND_OPTION( (AlterBBN), (libbbn) )
     #undef FUNCTION
   #undef CAPABILITY

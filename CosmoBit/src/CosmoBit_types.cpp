@@ -64,7 +64,7 @@ namespace Gambit
       abund_map["Li8"] = 10;
     }
 
-    void BBN_container::init_arr(int nnuc)
+    void BBN_container::init_arr_size(int nnuc)
     {
       NNUC = nnuc;
       BBN_abund.resize(NNUC+1, 0.);

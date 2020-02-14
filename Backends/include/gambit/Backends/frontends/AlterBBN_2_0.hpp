@@ -31,6 +31,7 @@ BE_FUNCTION(nucl_err, int, (AlterBBN::AlterBBN_2_0::relicparam*, double* , doubl
 //BE_FUNCTION(sgStar, double, (double, relicparam*), "sgStar", "sgStar")
 
 BE_CONV_FUNCTION(get_NNUC, int, (), "get_NNUC")
+BE_CONV_FUNCTION(get_abund_map_AlterBBN, map_str_int, (), "get_abund_map_AlterBBN")
 BE_CONV_FUNCTION(fill_cosmomodel, void, (AlterBBN::AlterBBN_2_0::relicparam*, map_str_dbl &), "Init_AlterBBN")
 BE_CONV_FUNCTION(call_nucl_err, int, (map_str_dbl &, double* , double* ), "call_nucl_err")
 
