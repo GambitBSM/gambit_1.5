@@ -339,7 +339,7 @@ int main(int argc, char* argv[])
       RD_oh2_DS5_general.reset_and_calculate();
       results["oh2"][current_backend] = RD_oh2_DS5_general(0);
 
-      lnL_oh2_Simple.resolveDependency(&RD_oh2_DS_general);
+      lnL_oh2_Simple.resolveDependency(&RD_oh2_DS5_general);
       lnL_oh2_Simple.reset_and_calculate();
       // Save the result
       results["oh2_lnL"][current_backend] = lnL_oh2_Simple(0);

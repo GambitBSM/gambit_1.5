@@ -520,10 +520,10 @@ BE_NAMESPACE
     std::vector<double> couplings;
     couplings.clear();
     //TB FIXME: correct type conversion!?
-    couplings.push_back(gg(1,1).re); // gps
-    couplings.push_back(gg(1,2).re); // gns
-    couplings.push_back(gg(4,1).re); // gpa
-    couplings.push_back(gg(4,2).re); // gna
+    couplings.push_back((double)gg(1,1).re); // gps
+    couplings.push_back((double)gg(1,2).re); // gns
+    couplings.push_back((double)gg(4,1).re); // gpa
+    couplings.push_back((double)gg(4,2).re); // gna
     
     
     return couplings;

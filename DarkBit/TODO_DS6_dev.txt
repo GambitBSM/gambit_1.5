@@ -21,9 +21,7 @@ TODO
    (as well as darksusy -> darksusy5)
 
 * update to 6.2.2
-   - [Torsten] update frontend MSSM: grep FIXME! (also in DarkSUSY.hpp)
-   - test DarkBit_standalone_MSSM_all_backends
-   - generic_WIMP   
+   - [Torsten] grep FIXME in MSSM frontend! (also in DarkSUSY.hpp)
 
 * get rid of prelim. standalones
 
@@ -40,3 +38,8 @@ TODO
 [*] tidy up cmake etc: we *only* want DS6 MSSM + generic WIMP!
   - different make target darksusy_MSSM vs darksusy_MSSM_6.1.1 ?
 
+[*] MSSM frontend 6.2.2
+
+[*] DarkBit_standalone_MSSM_all_backends
+
+[*] backended generic_WIMP6.2.2 + updated standalone   
