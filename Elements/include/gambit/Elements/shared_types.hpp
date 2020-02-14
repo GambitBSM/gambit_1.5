@@ -35,6 +35,10 @@
 ///          (sebastian.wild@ph.tum.de)
 ///  \date 2016 Aug
 ///
+///  \author Sebastian Hoof
+///          (hoof@uni-goettingen.de)
+///  \date 2020 Jan
+///
 ///  *********************************************
 
 #ifndef __shared_types_hpp__
@@ -50,6 +54,8 @@
 #include "gambit/Elements/higgs_couplings_table.hpp"   // Higgs couplings table class (carries couplings info for entire Higgs sector)
 #include "gambit/Elements/slhaea_helpers.hpp"          // Contains SLHAea reader/writer class alias
 #include "gambit/Elements/halo_types.hpp"              // data types for DM halo properties
+
+#include "gambit/CosmoBit/CosmoBit_types.hpp"          // Access to the parameterised CMB spectrum type
 
 #include "gambit/Backends/default_bossed_versions.hpp" // Default versions of backends to use when employing BOSSed types
 #include "gambit/Backends/mathematica_variable.hpp"    // Wrapper type for Mathematica global variables
@@ -71,5 +77,3 @@ namespace Gambit
 
 
 #endif //__shared_types_hpp__
-
-
