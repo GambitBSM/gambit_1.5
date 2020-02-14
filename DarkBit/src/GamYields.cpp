@@ -420,9 +420,9 @@ namespace Gambit {
 
 
     /// SimYieldTable based on DarkSUSY5 tabulated results. (DS6 below)
-    void SimYieldTable_DarkSUSY(SimYieldTable& result)
+    void SimYieldTable_DS5(SimYieldTable& result)
     {
-      using namespace Pipes::SimYieldTable_DarkSUSY;
+      using namespace Pipes::SimYieldTable_DS5;
 
       static bool initialized = false;
       if ( not initialized )
@@ -587,9 +587,9 @@ namespace Gambit {
     }
 
     /// SimYieldTable based on DarkSUSY6 tabulated results.
-    void SimYieldTable_DarkSUSY6(SimYieldTable& result)
+    void SimYieldTable_DarkSUSY(SimYieldTable& result)
     {
-      using namespace Pipes::SimYieldTable_DarkSUSY6;
+      using namespace Pipes::SimYieldTable_DarkSUSY;
 
       static bool initialized = false;
       if ( not initialized )

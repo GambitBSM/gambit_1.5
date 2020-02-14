@@ -45,11 +45,11 @@ namespace Gambit
      *         or q-dependent cross-sections) (s^-1).
      */
     // DS 5
-    void capture_rate_Sun_const_xsec(double &result)
+    void capture_rate_Sun_const_xsec_DS5(double &result)
     {
-      using namespace Pipes::capture_rate_Sun_const_xsec;
+      using namespace Pipes::capture_rate_Sun_const_xsec_DS5;
 
-      if (BEreq::cap_Sun_v0q0_isoscalar.origin()=="DarkSUSY")
+      if (BEreq::cap_Sun_v0q0_isoscalar_DS5.origin()=="DarkSUSY")
         if(!(*Dep::DarkSUSY5_PointInit_LocalHalo))
           DarkBit_error().raise(LOCAL_INFO,"DarkSUSY halo model not initialized!");
 
@@ -57,20 +57,20 @@ namespace Gambit
       // proton and neutron scattering cross-sections are the same; we
       // assume that whichever backend has been hooked up here does so too.
 
-      result = BEreq::cap_Sun_v0q0_isoscalar(*Dep::mwimp, *Dep::sigma_SI_p, *Dep::sigma_SD_p);
+      result = BEreq::cap_Sun_v0q0_isoscalar_DS5(*Dep::mwimp, *Dep::sigma_SI_p, *Dep::sigma_SD_p);
 
       //cout << "mwimp" << *Dep::mwimp << "sigma_SI_p: " << *Dep::sigma_SI_p << " sigma_SD_p: " << *Dep::sigma_SD_p << "result: " << result << "\n";
-      //cout << "capture rate via capture_rate_Sun_const_xsec = " << result << "\n";
+      //cout << "capture rate via capture_rate_Sun_const_xsec_DS5 = " << result << "\n";
 
     }
 
     // DS 6
-    void capture_rate_Sun_const_xsec_DS6(double &result)
+    void capture_rate_Sun_const_xsec(double &result)
     {
-      using namespace Pipes::capture_rate_Sun_const_xsec_DS6;
+      using namespace Pipes::capture_rate_Sun_const_xsec;
 
-      if (BEreq::cap_Sun_v0q0_isoscalar_DS6.origin()=="DarkSUSY")
-        if(!(*Dep::DarkSUSY6_PointInit_LocalHalo))
+      if (BEreq::cap_Sun_v0q0_isoscalar_DS.origin()=="DarkSUSY")
+        if(!(*Dep::DarkSUSY_PointInit_LocalHalo))
           DarkBit_error().raise(LOCAL_INFO,"DarkSUSY halo model not initialized!");
 
       // Why doesn't the following work. JE FIX
@@ -84,7 +84,7 @@ namespace Gambit
       //double rho0=0.3; // JE FIX, want to use above, how?
       //double rho0_eff=0.3;  // JE FIX, want to use above, how?
 
-      result = BEreq::cap_Sun_v0q0_isoscalar_DS6(*Dep::mwimp, rho0_eff, *Dep::sigma_SI_p, *Dep::sigma_SD_p);
+      result = BEreq::cap_Sun_v0q0_isoscalar_DS(*Dep::mwimp, rho0_eff, *Dep::sigma_SI_p, *Dep::sigma_SD_p);
 
       //cout << "mwimp" << *Dep::mwimp << "sigma_SI_p: " << *Dep::sigma_SI_p << " sigma_SD_p: " << *Dep::sigma_SD_p << "result: " << result << "\n";
       //cout << "capture rate via capture_rate_Sun_const_xsec = " << result << "\n";
@@ -755,9 +755,9 @@ namespace Gambit
     }
 
     /// Function to set Local Halo Parameters in DarkSUSY (DS 6)
-    void DarkSUSY6_PointInit_LocalHalo_func(bool &result)
+    void DarkSUSY_PointInit_LocalHalo_func(bool &result)
     {
-        using namespace Pipes::DarkSUSY6_PointInit_LocalHalo_func;
+        using namespace Pipes::DarkSUSY_PointInit_LocalHalo_func;
 
           LocalMaxwellianHalo LocalHaloParameters = *Dep::LocalHalo;
 

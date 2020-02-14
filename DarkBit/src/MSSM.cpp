@@ -12,7 +12,7 @@
 ///          (torsten.bringmann@desy.de)
 ///  \date 2013 Jun
 ///  \date 2014 Mar - 2015 May
-///  \date 2019 May (removed DarkSUSY_PointInit_MSSM, added TH_ProcessCatalog_DS6_MSSM)
+///  \date 2019 May (removed DarkSUSY_PointInit_MSSM, added TH_ProcessCatalog_DS_MSSM)
 ///
 ///  \author Christoph Weniger
 ///          (c.weniger@uva.nl)
@@ -97,9 +97,9 @@ namespace Gambit
     /*! \brief Initialization of Process Catalog based on DarkSUSY 5 
      *         calculations.
      */
-    void TH_ProcessCatalog_MSSM(DarkBit::TH_ProcessCatalog &result)
+    void TH_ProcessCatalog_DS5_MSSM(DarkBit::TH_ProcessCatalog &result)
     {
-      using namespace Pipes::TH_ProcessCatalog_MSSM;
+      using namespace Pipes::TH_ProcessCatalog_DS5_MSSM;
       using std::vector;
       using std::string;
 
@@ -107,7 +107,7 @@ namespace Gambit
       if ( DMid != "~chi0_1" )
       {
         invalid_point().raise(
-            "TH_ProcessCatalog_MSSM requires DMid to be ~chi0_1.");
+            "TH_ProcessCatalog_DS5_MSSM requires DMid to be ~chi0_1.");
       }
 
       // Instantiate new empty ProcessCatalog
@@ -432,9 +432,9 @@ namespace Gambit
     /*! \brief Initialization of Process Catalog based on DarkSUSY 6 
      *         calculations.
      */
-    void TH_ProcessCatalog_DS6_MSSM(DarkBit::TH_ProcessCatalog &result)
+    void TH_ProcessCatalog_DS_MSSM(DarkBit::TH_ProcessCatalog &result)
     {
-      using namespace Pipes::TH_ProcessCatalog_DS6_MSSM;
+      using namespace Pipes::TH_ProcessCatalog_DS_MSSM;
       using std::vector;
       using std::string;
 
@@ -442,7 +442,7 @@ namespace Gambit
       if ( DMid != "~chi0_1" )
       {
         invalid_point().raise(
-            "TH_ProcessCatalog_MSSM requires DMid to be ~chi0_1.");
+            "TH_ProcessCatalog_DS_MSSM requires DMid to be ~chi0_1.");
       }
 
       // Instantiate new empty ProcessCatalog
@@ -774,7 +774,7 @@ namespace Gambit
 
       // Return the finished process catalog
       result = catalog;
-    } //TH_ProcessCatalog_DS6_MSSM
+    } //TH_ProcessCatalog_DS_MSSM
 
 
 

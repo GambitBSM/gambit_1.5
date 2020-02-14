@@ -405,9 +405,9 @@ namespace Gambit
     /*! \brief Some helper function to prepare evaluation of Weff from
      *         DarkSUSY 5.
      */
-    void RD_annrate_DSprep_MSSM_func(int &result)
+    void RD_annrate_DS5prep_MSSM_func(int &result)
     {
-      using namespace Pipes::RD_annrate_DSprep_MSSM_func;
+      using namespace Pipes::RD_annrate_DS5prep_MSSM_func;
 
       // Read out coannihilating particles from RDspectrum.
       RD_spectrum_type specres = *Dep::RD_spectrum;
@@ -415,7 +415,7 @@ namespace Gambit
       if ( specres.particle_index_type != "DarkSUSY" )
       {
         invalid_point().raise(
-            "RD_annrate_DSprep_MSSM_func is only optimized for use with DarkSUSY5 and requires internal particle IDs. Try RD_annrate_DS6prep_MSSM_func instead!");
+            "RD_annrate_DS5prep_MSSM_func is only optimized for use with DarkSUSY5 and requires internal particle IDs. Try RD_annrate_DSprep_MSSM_func instead!");
       }
 
       //write model-dependent info about coannihilating particles to DS common blocks
@@ -458,15 +458,15 @@ namespace Gambit
 
       result=1; // everything OK
 
-    } // function RD_eff_annrate_DSprep_MSSM_func
+    } // function RD_annrate_DS5prep_MSSM_func
 
 
     /*! \brief Some helper function to prepare evaluation of Weff from
      *         DarkSUSY 6.
      */
-    void RD_annrate_DS6prep_MSSM_func(int &result)
+    void RD_annrate_DSprep_MSSM_func(int &result)
     {
-      using namespace Pipes::RD_annrate_DS6prep_MSSM_func;
+      using namespace Pipes::RD_annrate_DSprep_MSSM_func;
 
       // Read out coannihilating particles from RDspectrum_ordered.
       RD_spectrum_type specres = *Dep::RD_spectrum_ordered;
@@ -474,7 +474,7 @@ namespace Gambit
       if (specres.particle_index_type != "DarkSUSY" && specres.particle_index_type != "PDG")
       {
         invalid_point().raise(
-            "RD_annrate_DS6prep_MSSM_func requires PDG or internal DS codes!");
+            "RD_annrate_DSprep_MSSM_func requires PDG or internal DS codes!");
       }
 
       //write model-dependent info about coannihilating particles to DS common blocks
@@ -490,7 +490,7 @@ namespace Gambit
         partID = specres.coannihilatingParticles[i-1].index;
         mydsancoann.kco(i) = partID;
         if (specres.particle_index_type == "PDG"){
-           mydsancoann.kco(i) = BEreq::DS6particle_code(Models::ParticleDB().long_name(partID,ContInt));
+           mydsancoann.kco(i) = BEreq::DSparticle_code(Models::ParticleDB().long_name(partID,ContInt));
         };
       #ifdef DARKBIT_RD_DEBUG
         std::cout << "DS6prep_MSSM - co : "<< partID << " " << mydsancoann.kco(i) << " " <<
@@ -500,7 +500,7 @@ namespace Gambit
       }
 
 
-      //TB not needed: RD_eff_annrate_DS6prep_MSSM_func depends on RD_spectrum*_ordered*
+      //TB not needed: RD_eff_annrate_DSprep_MSSM_func depends on RD_spectrum*_ordered*
       //double tmp; int itmp;
       //for (int i=1; i<=mydsancoann.nco-1; i++) {
       //  for (int j=i+1; j<=mydsancoann.nco; j++) {
@@ -522,23 +522,23 @@ namespace Gambit
 
       result=1; // everything OK
 
-    } // function RD_eff_annrate_DS6prep_MSSM_func
+    } // function RD_eff_annrate_DSprep_MSSM_func
 
 
     /*! \brief Get Weff directly from initialized DarkSUSY.
      * Note that this function does not (and should not) correct Weff for
      * non-self-conjugate dark matter.
     */
-    void RD_eff_annrate_DS(double(*&result)(double&))
+    void RD_eff_annrate_DS_MSSM(double(*&result)(double&))
     {
-      using namespace Pipes::RD_eff_annrate_DS;
+      using namespace Pipes::RD_eff_annrate_DS_MSSM;
 
       if ((BEreq::dsanwx.origin() == "DarkSUSY") || (BEreq::dsanwx.origin() == "DarkSUSY_MSSM"))
       {
         result=BEreq::dsanwx.pointer();
       }
       else DarkBit_error().raise(LOCAL_INFO, "Wrong DarkSUSY backend initialized?");
-    } // function RD_eff_annrate_DS
+    } // function RD_eff_annrate_DS_MSSM
 
 
     /*! \brief Infer Weff from process catalog.

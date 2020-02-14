@@ -100,9 +100,9 @@ START_MODULE
     #undef FUNCTION
   #undef CAPABILITY
 
-  #define CAPABILITY DarkSUSY6_PointInit_LocalHalo
+  #define CAPABILITY DarkSUSY_PointInit_LocalHalo
   START_CAPABILITY
-    #define FUNCTION DarkSUSY6_PointInit_LocalHalo_func
+    #define FUNCTION DarkSUSY_PointInit_LocalHalo_func
       START_FUNCTION(bool)
       DEPENDENCY(RD_fraction, double)
       DEPENDENCY(LocalHalo, LocalMaxwellianHalo)
@@ -121,7 +121,7 @@ START_MODULE
 
   #define CAPABILITY RD_spectrum
   START_CAPABILITY
-    #define FUNCTION RD_spectrum_MSSM
+    #define FUNCTION RD_spectrum_MSSM  // No longer DS specific!
       START_FUNCTION(RD_spectrum_type)
       DEPENDENCY(MSSM_spectrum, Spectrum)
       DEPENDENCY(DarkMatter_ID, std::string)
@@ -156,24 +156,24 @@ START_MODULE
 
   #define CAPABILITY RD_eff_annrate_DSprep_MSSM
   START_CAPABILITY
-    #define FUNCTION RD_annrate_DSprep_MSSM_func
+    #define FUNCTION RD_annrate_DS5prep_MSSM_func
       START_FUNCTION(int)
       DEPENDENCY(RD_spectrum, RD_spectrum_type)
       BACKEND_REQ(rdmgev, (), DS5_RDMGEV)
       BACKEND_OPTION((DarkSUSY, 5.1.3), (dummy_tag))
     #undef FUNCTION
-    #define FUNCTION RD_annrate_DS6prep_MSSM_func
+    #define FUNCTION RD_annrate_DSprep_MSSM_func
       START_FUNCTION(int)
       DEPENDENCY(RD_spectrum_ordered, RD_spectrum_type)
       BACKEND_REQ(dsancoann, (), DS_DSANCOANN)
-      BACKEND_REQ(DS6particle_code, (), int, (const str&))
+      BACKEND_REQ(DSparticle_code, (), int, (const str&))
       BACKEND_OPTION((DarkSUSY_MSSM, 6.1.1, 6.2.2), (dummy_tag))
     #undef FUNCTION
   #undef CAPABILITY
 
   #define CAPABILITY RD_eff_annrate
   START_CAPABILITY
-    #define FUNCTION RD_eff_annrate_DS
+    #define FUNCTION RD_eff_annrate_DS_MSSM
       START_FUNCTION(fptr_dd)
       ALLOW_MODELS(MSSM63atQ)
       MODEL_CONDITIONAL_DEPENDENCY(RD_eff_annrate_DSprep_MSSM, int, MSSM63atQ)
@@ -474,7 +474,7 @@ START_MODULE
   #define CAPABILITY TH_ProcessCatalog
   START_CAPABILITY
     // For DarkSUSY5:
-    #define FUNCTION TH_ProcessCatalog_MSSM 
+    #define FUNCTION TH_ProcessCatalog_DS5_MSSM
       START_FUNCTION(TH_ProcessCatalog)
       //ALLOW_MODELS(MSSM63atQ)
       DEPENDENCY(MSSM_spectrum, Spectrum)
@@ -490,7 +490,7 @@ START_MODULE
       BACKEND_OPTION((DarkSUSY, 5.1.3), (dummy_tag))  // Only for DarkSUSY5
     #undef FUNCTION
     // For DarkSUSY6 MSSM:
-    #define FUNCTION TH_ProcessCatalog_DS6_MSSM 
+    #define FUNCTION TH_ProcessCatalog_DS_MSSM
       START_FUNCTION(TH_ProcessCatalog)
       DEPENDENCY(MSSM_spectrum, Spectrum)
       DEPENDENCY(DarkMatter_ID, std::string)
@@ -674,7 +674,7 @@ START_MODULE
   #define CAPABILITY DD_couplings
   START_CAPABILITY
 
-    #define FUNCTION DD_couplings_DarkSUSY
+    #define FUNCTION DD_couplings_DarkSUSY_DS5
       START_FUNCTION(DM_nucleon_couplings)
       BACKEND_REQ(get_DD_couplings, (), std::vector<double>, ())
       BACKEND_REQ(mspctm, (), DS5_MSPCTM)
@@ -683,7 +683,7 @@ START_MODULE
       ALLOW_JOINT_MODEL(nuclear_params_fnq,MSSM63atQ)
     #undef FUNCTION
 
-    #define FUNCTION DD_couplings_MSSM_DS6
+    #define FUNCTION DD_couplings_DarkSUSY_MSSM
       START_FUNCTION(DM_nucleon_couplings)
       BACKEND_REQ(get_DD_couplings, (), std::vector<double>, ())
       BACKEND_REQ(ddcomlegacy, (), DS_DDCOMLEGACY)
@@ -919,35 +919,35 @@ START_MODULE
   /// Capture rate of regular dark matter in the Sun (no v-dependent or q-dependent cross-sections) (s^-1).
   #define CAPABILITY capture_rate_Sun 
   START_CAPABILITY
-    #define FUNCTION capture_rate_Sun_const_xsec // DS 5
+    #define FUNCTION capture_rate_Sun_const_xsec_DS5 // DS 5
       START_FUNCTION(double)
-      BACKEND_REQ(cap_Sun_v0q0_isoscalar, (), double, (const double&, const double&, const double&))
+      BACKEND_REQ(cap_Sun_v0q0_isoscalar_DS5, (), double, (const double&, const double&, const double&))
       DEPENDENCY(mwimp, double)
       DEPENDENCY(sigma_SI_p, double)
       DEPENDENCY(sigma_SD_p, double)
         #define CONDITIONAL_DEPENDENCY DarkSUSY5_PointInit_LocalHalo
         START_CONDITIONAL_DEPENDENCY(bool)
-        ACTIVATE_FOR_BACKEND(cap_Sun_v0q0_isoscalar, DarkSUSY)
+        ACTIVATE_FOR_BACKEND(cap_Sun_v0q0_isoscalar_DS5, DarkSUSY)
         #undef CONDITIONAL_DEPENDENCY
       BACKEND_OPTION((DarkSUSY, 5.1.3), (dummy_tag))  // Only for DarkSUSY5
     #undef FUNCTION
   
-    #define FUNCTION capture_rate_Sun_const_xsec_DS6 // DS 6
+    #define FUNCTION capture_rate_Sun_const_xsec // DS 6
       START_FUNCTION(double)
-      BACKEND_REQ(cap_Sun_v0q0_isoscalar_DS6, (), double, (const double&, const double&, const double&, const double&))
+      BACKEND_REQ(cap_Sun_v0q0_isoscalar_DS, (), double, (const double&, const double&, const double&, const double&))
       DEPENDENCY(mwimp, double)
       DEPENDENCY(sigma_SI_p, double)
       DEPENDENCY(sigma_SD_p, double)
       DEPENDENCY(RD_fraction, double)
       DEPENDENCY(LocalHalo, LocalMaxwellianHalo)
-      DEPENDENCY(DarkSUSY6_PointInit_LocalHalo, bool)
+      DEPENDENCY(DarkSUSY_PointInit_LocalHalo, bool)
       BACKEND_OPTION((DarkSUSY_MSSM, 6.1.1, 6.2.2), (dummy_tag))
       BACKEND_OPTION((DarkSUSY_generic_wimp, 6.1.1, 6.2.2), (dummy_tag))
       BACKEND_OPTION((DarkSUSY_silveira_zee, 6.1.1, 6.2.2), (dummy_tag))
-//TB DEBUG / PLEASE CHECK: I don't think this is needed / wanted
-//        #define CONDITIONAL_DEPENDENCY DarkSUSY6_PointInit_LocalHalo
+//JE FIXME / PLEASE CHECK: I don't think this is needed / wanted
+//        #define CONDITIONAL_DEPENDENCY DarkSUSY_PointInit_LocalHalo
 //        START_CONDITIONAL_DEPENDENCY(bool)
-//        ACTIVATE_FOR_BACKEND(cap_Sun_v0q0_isoscalar_DS6, DarkSUSY_MSSM)
+//        ACTIVATE_FOR_BACKEND(cap_Sun_v0q0_isoscalar_DS, DarkSUSY_MSSM)
 //        #undef CONDITIONAL_DEPENDENCY
     #undef FUNCTION
 
@@ -1309,11 +1309,11 @@ START_MODULE
 
   #define CAPABILITY SimYieldTable
   START_CAPABILITY
-    #define FUNCTION SimYieldTable_DarkSUSY6
+    #define FUNCTION SimYieldTable_DarkSUSY
     START_FUNCTION(SimYieldTable)
   BACKEND_REQ(dsanyield_sim, (), double, (double&,double&,int&,char*,int&,int&,int&)) 
     #undef FUNCTION
-    #define FUNCTION SimYieldTable_DarkSUSY // DS5 only
+    #define FUNCTION SimYieldTable_DS5 // DS5 only
     START_FUNCTION(SimYieldTable)
     BACKEND_REQ(dshayield, (), double, (double&,double&,int&,int&,int&))
     BACKEND_OPTION((DarkSUSY, 5.1.3), (dummy_tag))  // Only for DarkSUSY5

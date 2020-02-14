@@ -71,7 +71,7 @@ void dumpSpectrum(std::string filename, double mWIMP, double sv, std::vector<dou
     TH_ProcessCatalog_WIMP.setOption<double>("mPhi", mPhi);
   TH_ProcessCatalog_WIMP.reset_and_calculate();
   RD_fraction_one.reset_and_calculate();
-  SimYieldTable_DarkSUSY6.reset_and_calculate();
+  SimYieldTable_DarkSUSY.reset_and_calculate();
   SimYieldTable_MicrOmegas.reset_and_calculate();
   GA_missingFinalStates.reset_and_calculate();
   cascadeMC_FinalStates.reset_and_calculate();
@@ -330,14 +330,14 @@ int main(int argc, char* argv[])
     // ---- Gamma-ray yields ----
 
     // Initialize tabulated gamma-ray yields
-    SimYieldTable_DarkSUSY6.resolveBackendReq(&Backends::DarkSUSY_generic_wimp_6_2_2::Functown::dsanyield_sim);
+    SimYieldTable_DarkSUSY.resolveBackendReq(&Backends::DarkSUSY_generic_wimp_6_2_2::Functown::dsanyield_sim);
     SimYieldTable_MicrOmegas.resolveBackendReq(&Backends::MicrOmegas_MSSM_3_6_9_2::Functown::dNdE);
-    SimYieldTable_DarkSUSY6.setOption<bool>("allow_yield_extrapolation", true);
+    SimYieldTable_DarkSUSY.setOption<bool>("allow_yield_extrapolation", true);
     SimYieldTable_MicrOmegas.setOption<bool>("allow_yield_extrapolation", true);
 
     // Select SimYieldTable
     //auto SimYieldTablePointer = &SimYieldTable_MicrOmegas;
-    auto SimYieldTablePointer = &SimYieldTable_DarkSUSY6;
+    auto SimYieldTablePointer = &SimYieldTable_DarkSUSY;
 
     // Collect missing final states for simulation in cascade MC
     GA_missingFinalStates.resolveDependency(&TH_ProcessCatalog_WIMP);
@@ -556,7 +556,7 @@ int main(int argc, char* argv[])
           DarkMatter_ID_WIMP.reset_and_calculate();
           TH_ProcessCatalog_WIMP.reset_and_calculate();
           RD_fraction_one.reset_and_calculate();
-          SimYieldTable_DarkSUSY6.reset_and_calculate();
+          SimYieldTable_DarkSUSY.reset_and_calculate();
           SimYieldTable_MicrOmegas.reset_and_calculate();
           GA_missingFinalStates.reset_and_calculate();
           cascadeMC_FinalStates.reset_and_calculate();
@@ -605,7 +605,7 @@ int main(int argc, char* argv[])
           DarkMatter_ID_WIMP.reset_and_calculate();
           TH_ProcessCatalog_WIMP.reset_and_calculate();
           RD_fraction_one.reset_and_calculate();
-          SimYieldTable_DarkSUSY6.reset_and_calculate();
+          SimYieldTable_DarkSUSY.reset_and_calculate();
           SimYieldTable_MicrOmegas.reset_and_calculate();
           GA_missingFinalStates.reset_and_calculate();
           cascadeMC_FinalStates.reset_and_calculate();

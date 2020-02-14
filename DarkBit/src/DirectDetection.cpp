@@ -56,9 +56,9 @@ namespace Gambit
 
     /*! \brief Get direct detection couplings from initialized DarkSUSY 5.
     */
-    void DD_couplings_DarkSUSY(DM_nucleon_couplings &result)
+    void DD_couplings_DarkSUSY_DS5(DM_nucleon_couplings &result)
     {
-      using namespace Pipes::DD_couplings_DarkSUSY;
+      using namespace Pipes::DD_couplings_DarkSUSY_DS5;
 
       double fG;
 
@@ -141,9 +141,9 @@ namespace Gambit
 
     /*! \brief Get direct detection couplings from DarkSUSY 6 initialized with MSSM module.
     */
-    void DD_couplings_MSSM_DS6(DM_nucleon_couplings &result)
+    void DD_couplings_DarkSUSY_MSSM(DM_nucleon_couplings &result)
     {
-      using namespace Pipes::DD_couplings_MSSM_DS6;
+      using namespace Pipes::DD_couplings_DarkSUSY_MSSM;
 
       double fG;
 

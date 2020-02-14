@@ -344,12 +344,12 @@ int main()
     // ---- Gamma-ray yields ----
 
     // Initialize tabulated gamma-ray yields
-    SimYieldTable_DarkSUSY.resolveBackendReq(&Backends::DarkSUSY_5_1_3::Functown::dshayield);
-    SimYieldTable_DarkSUSY.reset_and_calculate();
+    SimYieldTable_DS5.resolveBackendReq(&Backends::DarkSUSY_5_1_3::Functown::dshayield);
+    SimYieldTable_DS5.reset_and_calculate();
 
     // Collect missing final states for simulation in cascade MC
     GA_missingFinalStates.resolveDependency(&TH_ProcessCatalog_ScalarSingletDM_Z2);
-    GA_missingFinalStates.resolveDependency(&SimYieldTable_DarkSUSY);
+    GA_missingFinalStates.resolveDependency(&SimYieldTable_DS5);
     GA_missingFinalStates.resolveDependency(&DarkMatter_ID_ScalarSingletDM);
     GA_missingFinalStates.reset_and_calculate();
 
@@ -359,7 +359,7 @@ int main()
 
     // Collect decay information for cascade MC
     cascadeMC_DecayTable.resolveDependency(&TH_ProcessCatalog_ScalarSingletDM_Z2);
-    cascadeMC_DecayTable.resolveDependency(&SimYieldTable_DarkSUSY);
+    cascadeMC_DecayTable.resolveDependency(&SimYieldTable_DS5);
     cascadeMC_DecayTable.reset_and_calculate();
 
     // Set up MC loop manager for cascade MC
@@ -381,7 +381,7 @@ int main()
     cascadeMC_Histograms.resolveDependency(&cascadeMC_InitialState);
     cascadeMC_Histograms.resolveDependency(&cascadeMC_GenerateChain);
     cascadeMC_Histograms.resolveDependency(&TH_ProcessCatalog_ScalarSingletDM_Z2);
-    cascadeMC_Histograms.resolveDependency(&SimYieldTable_DarkSUSY);
+    cascadeMC_Histograms.resolveDependency(&SimYieldTable_DS5);
     cascadeMC_Histograms.resolveDependency(&cascadeMC_FinalStates);
     cascadeMC_Histograms.resolveLoopManager(&cascadeMC_LoopManager);
 
@@ -401,7 +401,7 @@ int main()
 
     // Calculate total gamma-ray yield (cascade MC + tabulated results)
     GA_AnnYield_General.resolveDependency(&TH_ProcessCatalog_ScalarSingletDM_Z2);
-    GA_AnnYield_General.resolveDependency(&SimYieldTable_DarkSUSY);
+    GA_AnnYield_General.resolveDependency(&SimYieldTable_DS5);
     GA_AnnYield_General.resolveDependency(&DarkMatter_ID_ScalarSingletDM);
     GA_AnnYield_General.resolveDependency(&cascadeMC_gammaSpectra);
     GA_AnnYield_General.reset_and_calculate();
@@ -417,24 +417,24 @@ int main()
     // ---- IceCube limits ----
 
     // Infer WIMP capture rate in Sun
-    capture_rate_Sun_const_xsec.resolveDependency(&mwimp_generic);
-    capture_rate_Sun_const_xsec.resolveDependency(&sigma_SI_p_simple);
-    capture_rate_Sun_const_xsec.resolveDependency(&sigma_SD_p_simple);
-    capture_rate_Sun_const_xsec.resolveBackendReq(&Backends::DarkSUSY_5_1_3::Functown::dsntcapsuntab);
-    capture_rate_Sun_const_xsec.resolveDependency(&DarkSUSY_PointInit_LocalHalo_func);
-    capture_rate_Sun_const_xsec.reset_and_calculate();
+    capture_rate_Sun_const_xsec_DS5.resolveDependency(&mwimp_generic);
+    capture_rate_Sun_const_xsec_DS5.resolveDependency(&sigma_SI_p_simple);
+    capture_rate_Sun_const_xsec_DS5.resolveDependency(&sigma_SD_p_simple);
+    capture_rate_Sun_const_xsec_DS5.resolveBackendReq(&Backends::DarkSUSY_5_1_3::Functown::dsntcapsuntab);
+    capture_rate_Sun_const_xsec_DS5.resolveDependency(&DarkSUSY_PointInit_LocalHalo_func);
+    capture_rate_Sun_const_xsec_DS5.reset_and_calculate();
 
 
     // Infer WIMP equilibration time in Sun
     equilibration_time_Sun.resolveDependency(&TH_ProcessCatalog_ScalarSingletDM_Z2);
     equilibration_time_Sun.resolveDependency(&DarkMatter_ID_ScalarSingletDM);
     equilibration_time_Sun.resolveDependency(&mwimp_generic);
-    equilibration_time_Sun.resolveDependency(&capture_rate_Sun_const_xsec);
+    equilibration_time_Sun.resolveDependency(&capture_rate_Sun_const_xsec_DS5);
     equilibration_time_Sun.reset_and_calculate();
 
     // Infer WIMP annihilation rate in Sun
     annihilation_rate_Sun.resolveDependency(&equilibration_time_Sun);
-    annihilation_rate_Sun.resolveDependency(&capture_rate_Sun_const_xsec);
+    annihilation_rate_Sun.resolveDependency(&capture_rate_Sun_const_xsec_DS5);
     annihilation_rate_Sun.reset_and_calculate();
 
     // Infer neutrino yield from Sun

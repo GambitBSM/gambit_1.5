@@ -19,13 +19,15 @@ TODO
  
 * [Torsten] rename _DS6 -> standard; standard -> _DS5
    (as well as darksusy -> darksusy5)
+  [mostly done, still to be tested on *all* standalones]
+
 
 * update to 6.2.2
    - [Torsten] grep FIXME in MSSM frontend! (also in DarkSUSY.hpp)
 
 * get rid of prelim. standalones
 
-* add new relic density feature (maybe after merging to trunk !)
+* add new relic density feature (maybe only after merging to trunk !)
 
 --------
 [done]

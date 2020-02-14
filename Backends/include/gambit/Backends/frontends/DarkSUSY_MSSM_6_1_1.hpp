@@ -56,7 +56,7 @@ BE_INI_CONDITIONAL_DEPENDENCY(decay_rates, DecayTable, MSSM63atQ, CMSSM)
 
 // Convenience functions (registration)
 BE_CONV_FUNCTION(DD_couplings, std::vector<double>, (), "get_DD_couplings")
-BE_CONV_FUNCTION(DSparticle_code, int, (const str&), "DS6particle_code")
+BE_CONV_FUNCTION(DSparticle_code, int, (const str&), "DSparticle_code")
 BE_CONV_FUNCTION(DS_neutral_h_decay_channels, std::vector<std::vector<str>>, (), "get_DS_neutral_h_decay_channels")
 BE_CONV_FUNCTION(DS_charged_h_decay_channels, std::vector<std::vector<str>>, (), "get_DS_charged_h_decay_channels")
 BE_CONV_FUNCTION(neutrino_yield, double, (const double&, const int&, void*&), "nuyield")
@@ -90,7 +90,7 @@ BE_FUNCTION(dsrdens, void, (double(*)(double&),double&,double&,int&,int&,int&), 
 BE_FUNCTION(dsanyield_sim, double, (double&,double&,int&,char*,int&,int&,int&), "dsanyield_sim_", "dsanyield_sim")
 
 // Functions used in SunNeutrinos.cpp
-BE_FUNCTION(dssenu_capsuntab, double, (const double&, const double&, const double&, const double&), "dssenu_capsuntab_", "cap_Sun_v0q0_isoscalar_DS6")
+BE_FUNCTION(dssenu_capsuntab, double, (const double&, const double&, const double&, const double&), "dssenu_capsuntab_", "cap_Sun_v0q0_isoscalar_DS")
 
 // Halo model common blocks
 BE_VARIABLE(dshmcom, DS_HMCOM, "dshmcom_", "dshmcom")
