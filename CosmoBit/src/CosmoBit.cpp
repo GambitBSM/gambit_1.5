@@ -1720,8 +1720,9 @@ namespace Gambit
 
       // global variable of AlterBBN (# computed element abundances)
       const int NNUC = BEreq::get_NNUC();  
+      result.set_abund_map(BEreq::get_abund_map_AlterBBN());
       // init arrays in BBN_container with right length
-      result.init_arr(NNUC);         
+      result.init_arr_size(NNUC);         
 
       // in AlterBBN ratioH and cov_ratioH are arrays of fixed length
       // with certain compiler versions (gcc 5.4.0) we have seen memory corruption problems
@@ -1819,7 +1820,7 @@ namespace Gambit
         }
 
         // Check if the elements which are passed via runOptions are actually known.
-        std::map<std::string, int> abund_map = result.get_map();
+        std::map<std::string, int> abund_map = result.get_abund_map();
         for (std::vector<str>::iterator it = elements.begin(); it != elements.end(); it++)
         {
           if (abund_map.count(*it) == 0)
@@ -1879,13 +1880,13 @@ namespace Gambit
       {
         for(int ie=1;ie<=NNUC;ie++)
         {
-          result.BBN_abund.at(ie) = ratioH[ie];
+          result.set_BBN_abund(ie, ratioH[ie]);
           for(int je=1;je<=NNUC;je++)
           {
             if (use_fudged_correlations)
-              result.BBN_covmat.at(ie).at(je) = corr.at(ie).at(je) * err_ratio.at(ie) * err_ratio.at(je);
+              result.set_BBN_covmat(ie, je, corr.at(ie).at(je) * err_ratio.at(ie) * err_ratio.at(je));
             else
-              result.BBN_covmat.at(ie).at(je) = cov_ratioH[ie*(NNUC+1)+je];
+              result.set_BBN_covmat(ie, je, cov_ratioH[ie*(NNUC+1)+je]);
           }
         }
       }
@@ -1902,11 +1903,11 @@ namespace Gambit
       using namespace Pipes::get_Helium_abundance;
 
       CosmoBit::BBN_container BBN_res = *Dep::BBN_abundances;
-      std::map<std::string, int> abund_map = BBN_res.get_map();
+      std::map<std::string, int> abund_map = BBN_res.get_abund_map();
 
       result.clear();
-      result.push_back(BBN_res.BBN_abund.at(abund_map["Yp"]));
-      result.push_back(sqrt(BBN_res.BBN_covmat.at(abund_map["Yp"]).at(abund_map["Yp"])));
+      result.push_back(BBN_res.get_BBN_abund(abund_map["Yp"]));
+      result.push_back(sqrt(BBN_res.get_BBN_covmat(abund_map["Yp"], abund_map["Yp"])));
 
       //std::cout << "Helium Abundance from AlterBBN: " << result.at(0) << " +/- " << result.at(1) << std::endl;
       logger() << "Helium Abundance from AlterBBN: " << result.at(0) << " +/- " << result.at(1) << EOM;
@@ -1917,11 +1918,11 @@ namespace Gambit
       using namespace Pipes::get_Helium3_abundance;
 
       CosmoBit::BBN_container BBN_res = *Dep::BBN_abundances;
-      std::map<std::string, int> abund_map = BBN_res.get_map();
+      std::map<std::string, int> abund_map = BBN_res.get_abund_map();
 
       result.clear();
-      result.push_back(BBN_res.BBN_abund.at(abund_map["He3"]));
-      result.push_back(sqrt(BBN_res.BBN_covmat.at(abund_map["He3"]).at(abund_map["He3"])));
+      result.push_back(BBN_res.get_BBN_abund(abund_map["He3"]));
+      result.push_back(sqrt(BBN_res.get_BBN_covmat(abund_map["He3"], abund_map["He3"])));
 
       logger() << "Helium 3 Abundance from AlterBBN: " << result.at(0) << " +/- " << result.at(1) << EOM;
     }
@@ -1931,11 +1932,11 @@ namespace Gambit
       using namespace Pipes::get_Deuterium_abundance;
 
       CosmoBit::BBN_container BBN_res = *Dep::BBN_abundances;
-      std::map<std::string, int> abund_map = BBN_res.get_map();
+      std::map<std::string, int> abund_map = BBN_res.get_abund_map();
 
       result.clear();
-      result.push_back(BBN_res.BBN_abund.at(abund_map["D"]));
-      result.push_back(sqrt(BBN_res.BBN_covmat.at(abund_map["D"]).at(abund_map["D"])));
+      result.push_back(BBN_res.get_BBN_abund(abund_map["D"]));
+      result.push_back(sqrt(BBN_res.get_BBN_covmat(abund_map["D"], abund_map["D"])));
 
       logger() << "Deuterium Abundance from AlterBBN: " << result.at(0) << " +/- " << result.at(1) << EOM;
     }
@@ -1945,11 +1946,11 @@ namespace Gambit
       using namespace Pipes::get_Lithium7_abundance;
 
       CosmoBit::BBN_container BBN_res = *Dep::BBN_abundances;
-      std::map<std::string, int> abund_map = BBN_res.get_map();
+      std::map<std::string, int> abund_map = BBN_res.get_abund_map();
 
       result.clear();
-      result.push_back(BBN_res.BBN_abund.at(abund_map["Li7"]));
-      result.push_back(sqrt(BBN_res.BBN_covmat.at(abund_map["Li7"]).at(abund_map["Li7"])));
+      result.push_back(BBN_res.get_BBN_abund(abund_map["Li7"]));
+      result.push_back(sqrt(BBN_res.get_BBN_covmat(abund_map["Li7"], abund_map["Li7"])));
 
       logger() << "Lithium Abundance from AlterBBN: " << result.at(0) << " +/- " << result.at(1) << EOM;
     }
@@ -1959,11 +1960,11 @@ namespace Gambit
       using namespace Pipes::get_Beryllium7_abundance;
 
       CosmoBit::BBN_container BBN_res = *Dep::BBN_abundances;
-      std::map<std::string, int> abund_map = BBN_res.get_map();
+      std::map<std::string, int> abund_map = BBN_res.get_abund_map();
 
       result.clear();
-      result.push_back(BBN_res.BBN_abund.at(abund_map["Be7"]));
-      result.push_back(sqrt(BBN_res.BBN_covmat.at(abund_map["Be7"]).at(abund_map["Be7"])));
+      result.push_back(BBN_res.get_BBN_abund(abund_map["Be7"]));
+      result.push_back(sqrt(BBN_res.get_BBN_covmat(abund_map["Be7"], abund_map["Be7"])));
 
       logger() << "Beryllium Abundance from AlterBBN: " << result.at(0) << " +/- " << result.at(1) << EOM;
     }
@@ -1977,7 +1978,7 @@ namespace Gambit
       int ie,je,s;
 
       CosmoBit::BBN_container BBN_res = *Dep::BBN_abundances; // fill BBN_container with abundance results from AlterBBN
-      std::map<std::string, int> abund_map = BBN_res.get_map();
+      std::map<std::string, int> abund_map = BBN_res.get_abund_map();
 
       const str filename = runOptions->getValue<std::string>("DataFile"); // read in BBN data file
       const str path_to_file = GAMBIT_DIR "/CosmoBit/data/BBN/" + runOptions->getValue<std::string>("DataFile");
@@ -2025,12 +2026,12 @@ namespace Gambit
         translate[ii]=abund_map[key]; // to order observed and predicted abundances consistently
         observed[ii]=iter->second[0];
         sigmaobs[ii]=iter->second[1];
-        prediction[ii]= BBN_res.BBN_abund.at(abund_map[key]);
+        prediction[ii]= BBN_res.get_BBN_abund(abund_map[key]);
         ii++;
       }
 
       // fill covmat
-      for(ie=0;ie<nobs;ie++) {for(je=0;je<nobs;je++) gsl_matrix_set(cov, ie, je,pow(sigmaobs[ie],2.)*(ie==je)+BBN_res.BBN_covmat.at(translate[ie]).at(translate[je]));}
+      for(ie=0;ie<nobs;ie++) {for(je=0;je<nobs;je++) gsl_matrix_set(cov, ie, je,pow(sigmaobs[ie],2.)*(ie==je)+BBN_res.get_BBN_covmat(translate[ie], translate[je]));}
 
       // Compute the LU decomposition and inverse of cov mat
       gsl_linalg_LU_decomp(cov,p,&s);

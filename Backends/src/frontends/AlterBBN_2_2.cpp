@@ -103,5 +103,32 @@ BE_NAMESPACE
   /// starts filling @ position 1)
   int get_NNUC(){return NNUC;}
 
+
+  /// create a map that translates element name to position of element in ratioH vector 
+  /// (holding the computed element abundances)
+  /// BE convinience function just in case it changes with a different version of AlterBBN
+  map_str_int get_abund_map_AlterBBN()
+  {
+
+    map_str_int abund_map;
+
+    // maps elements to their position in 'ratioH' array in AlterBBN holding 
+    // primordial element abundances relative to H abundance
+    abund_map["H2"] = 3;
+    abund_map["D"] = 3;
+    abund_map["H3"] = 4;
+    abund_map["He3"] = 5;
+    abund_map["He4"] = 6;   
+    abund_map["Yp"] = 6;
+    abund_map["Li6"] = 7;
+    abund_map["Li7"] = 8;
+    abund_map["Be7"] = 9;
+    abund_map["Li8"] = 10;
+
+    return abund_map;
+
+  }
+
+
 }
 END_BE_NAMESPACE
