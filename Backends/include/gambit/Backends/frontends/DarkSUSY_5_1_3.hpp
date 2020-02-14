@@ -91,16 +91,16 @@ BE_FUNCTION(dsspectrum, void, (int&, int&), "dsspectrum_", "dsspectrum")
 BE_FUNCTION(dsgf2s2thw, double, (const double&, const double&, const double&, const double&, const int&), "dsgf2s2thw_", "dsgf2s2thw")
 
 // Variables
-BE_VARIABLE(pacodes, DS_PACODES, "pacodes_", "pacodes")
+BE_VARIABLE(pacodes, DS5_PACODES, "pacodes_", "pacodes")
 BE_VARIABLE(mssmiuseful, DS_MSSMIUSEFUL, "mssmiuseful_", "mssmiuseful")
-BE_VARIABLE(mspctm, DS_MSPCTM, "mspctm_", "mspctm")
-BE_VARIABLE(widths, DS_WIDTHS, "widths_", "widths")
+BE_VARIABLE(mspctm, DS5_MSPCTM, "mspctm_", "mspctm")
+BE_VARIABLE(widths, DS5_WIDTHS, "widths_", "widths")
 BE_VARIABLE(intdof, DS_INTDOF, "intdof_", "intdof")
 BE_VARIABLE(vrtxs, DS_VRTXS, "vrtxs_", "vrtxs")
-BE_VARIABLE(smruseful, DS_SMRUSEFUL, "smruseful_", "smruseful")
-BE_VARIABLE(smcuseful, DS_SMCUSEFUL, "smcuseful_", "smcuseful")
-BE_VARIABLE(couplingconstants, DS_COUPLINGCONSTANTS, "couplingconstants_", "couplingconstants")
-BE_VARIABLE(sckm, DS_SCKM, "sckm_", "sckm")
+BE_VARIABLE(smruseful, DS5_SMRUSEFUL, "smruseful_", "smruseful")
+BE_VARIABLE(smcuseful, DS5_SMCUSEFUL, "smcuseful_", "smcuseful")
+BE_VARIABLE(couplingconstants, DS5_COUPLINGCONSTANTS, "couplingconstants_", "couplingconstants")
+BE_VARIABLE(sckm, DS5_SCKM, "sckm_", "sckm")
 BE_VARIABLE(mixing, DS_MIXING, "mixing_", "mixing")
 BE_VARIABLE(mssmtype, DS_MSSMTYPE, "mssmtype_", "mssmtype")
 BE_VARIABLE(mssmpar, DS_MSSMPAR, "mssmpar_", "mssmpar")
@@ -109,7 +109,7 @@ BE_VARIABLE(sfermionmass, DS_SFERMIONMASS, "sfermionmass_", "sfermionmass")
 BE_VARIABLE(mssmwidths, DS_MSSMWIDTHS, "mssmwidths_", "mssmwidths")
 BE_VARIABLE(mssmmixing, DS_MSSMMIXING, "mssmmixing_", "mssmmixing")
 // Used in RD_eff_annrate_SUSY_DSprep_func, RD_oh2_general and RD_thresholds_resonances_SingletDM
-BE_VARIABLE(rdmgev, DS_RDMGEV,     "rdmgev_",    "rdmgev")    // Contains information about coannihilation
+BE_VARIABLE(rdmgev, DS5_RDMGEV,     "rdmgev_",    "rdmgev")    // Contains information about coannihilation
 // Appears only in RD_oh2_general
 BE_VARIABLE(rdpth, DS_RDPTH,       "rdpth_",     "rdpth")     // gRD thresholds
 BE_VARIABLE(rddof, DS_RDDOF,       "rddof_",     "rddof")     // gRD dofs
@@ -122,11 +122,11 @@ BE_VARIABLE(rdtime, DS_RDTIME,     "rdtime_",    "rdtime")    // gRD timeout
 // IB stuff
 BE_VARIABLE(IBintvars, DS_IBINTVARS,"ibintvars_", "IBintvars")
 // Direct detection
-BE_VARIABLE(ddcom, DS_DDCOM, "ddcom_",    "ddcom")
+BE_VARIABLE(ddcom, DS5_DDCOM, "ddcom_",    "ddcom")
 // Neutrino detection
-BE_VARIABLE(wabranch, DS_NUCOM, "wabranch_", "nu_common_block")
+BE_VARIABLE(wabranch, DS5_NUCOM, "wabranch_", "nu_common_block")
 // Halo model common blocks
-BE_VARIABLE(dshmcom, DS_HMCOM, "dshmcom_", "dshmcom")
+BE_VARIABLE(dshmcom, DS5_HMCOM, "dshmcom_", "dshmcom")
 BE_VARIABLE(dshmframevelcom, DS_HMFRAMEVELCOM, "dshmframevelcom_", "dshmframevelcom")
 BE_VARIABLE(dshmisodf, DS_HMISODF, "dshmisodf_", "dshmisodf")
 BE_VARIABLE(dshmnoclue, DS_HMNOCLUE, "dshmnoclue_", "dshmnoclue")

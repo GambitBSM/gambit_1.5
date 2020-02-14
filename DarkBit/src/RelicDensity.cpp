@@ -218,8 +218,8 @@ namespace Gambit
           "CoannMaxMass");
 
       // introduce pointers to DS mass spectrum and relevant particle info
-      DS_PACODES *DSpart = BEreq::pacodes.pointer();
-      DS_MSPCTM *mymspctm= BEreq::mspctm.pointer();
+      DS5_PACODES *DSpart = BEreq::pacodes.pointer();
+      DS5_MSPCTM *mymspctm= BEreq::mspctm.pointer();
       DS_INTDOF *myintdof= BEreq::intdof.pointer();
 
       // first add neutralino=WIMP=least massive 'coannihilating particle'
@@ -419,7 +419,7 @@ namespace Gambit
       }
 
       //write model-dependent info about coannihilating particles to DS common blocks
-      DS_RDMGEV myrdmgev;
+      DS5_RDMGEV myrdmgev;
       myrdmgev.nco = specres.coannihilatingParticles.size();
       for (int i=1; i<=myrdmgev.nco; i++) {
         myrdmgev.mco(i)=fabs(specres.coannihilatingParticles[i-1].mass);
@@ -793,7 +793,7 @@ namespace Gambit
 
 
       // write mass and dof of DM & coannihilating particle to DS common blocks
-      DS_RDMGEV *myrdmgev = BEreq::rdmgev.pointer();
+      DS5_RDMGEV *myrdmgev = BEreq::rdmgev.pointer();
 
       myrdmgev->nco=myRDspec.coannihilatingParticles.size();
       for (std::size_t i=1; i<=((unsigned int)myrdmgev->nco); i++)

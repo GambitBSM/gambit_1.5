@@ -92,7 +92,7 @@ START_MODULE
       START_FUNCTION(bool)
       DEPENDENCY(RD_fraction, double)
       DEPENDENCY(LocalHalo, LocalMaxwellianHalo)
-      BACKEND_REQ(dshmcom,(),DS_HMCOM)
+      BACKEND_REQ(dshmcom,(),DS5_HMCOM)
       BACKEND_REQ(dshmisodf,(),DS_HMISODF)
       BACKEND_REQ(dshmframevelcom,(),DS_HMFRAMEVELCOM)
       BACKEND_REQ(dshmnoclue,(),DS_HMNOCLUE)
@@ -106,7 +106,7 @@ START_MODULE
       START_FUNCTION(bool)
       DEPENDENCY(RD_fraction, double)
       DEPENDENCY(LocalHalo, LocalMaxwellianHalo)
-      BACKEND_REQ(dshmcom,(be_req_tag),DS6_HMCOM)
+      BACKEND_REQ(dshmcom,(be_req_tag),DS_HMCOM)
       BACKEND_REQ(dshmisodf,(be_req_tag),DS_HMISODF)
       BACKEND_REQ(dshmframevelcom,(be_req_tag),DS_HMFRAMEVELCOM)
       BACKEND_REQ(dshmnoclue,(be_req_tag),DS_HMNOCLUE)
@@ -129,10 +129,10 @@ START_MODULE
     #undef FUNCTION
     #define FUNCTION RD_spectrum_SUSY_DS5
       START_FUNCTION(RD_spectrum_type)
-      BACKEND_REQ(mspctm, (), DS_MSPCTM)
-      BACKEND_REQ(widths, (), DS_WIDTHS)
+      BACKEND_REQ(mspctm, (), DS5_MSPCTM)
+      BACKEND_REQ(widths, (), DS5_WIDTHS)
       BACKEND_REQ(intdof, (), DS_INTDOF)
-      BACKEND_REQ(pacodes, (), DS_PACODES)
+      BACKEND_REQ(pacodes, (), DS5_PACODES)
       BACKEND_REQ(DS5particle_code, (), int, (const str&))
       BACKEND_OPTION((DarkSUSY, 5.1.3), (dummy_tag))  // Only for DarkSUSY5
     #undef FUNCTION
@@ -159,7 +159,7 @@ START_MODULE
     #define FUNCTION RD_annrate_DSprep_MSSM_func
       START_FUNCTION(int)
       DEPENDENCY(RD_spectrum, RD_spectrum_type)
-      BACKEND_REQ(rdmgev, (), DS_RDMGEV)
+      BACKEND_REQ(rdmgev, (), DS5_RDMGEV)
       BACKEND_OPTION((DarkSUSY, 5.1.3), (dummy_tag))
     #undef FUNCTION
     #define FUNCTION RD_annrate_DS6prep_MSSM_func
@@ -218,8 +218,8 @@ START_MODULE
       BACKEND_REQ(dsrdeqn, (), void, (double(*)(double&),double&,double&,double&,double&,int&))
       BACKEND_REQ(dsrdwintp, (), double, (double&))
       BACKEND_REQ(DS5particle_code, (), int, (const str&))
-      BACKEND_REQ(widths, (), DS_WIDTHS)
-      BACKEND_REQ(rdmgev, (), DS_RDMGEV)
+      BACKEND_REQ(widths, (), DS5_WIDTHS)
+      BACKEND_REQ(rdmgev, (), DS5_RDMGEV)
       BACKEND_REQ(rdpth, (), DS_RDPTH)
       BACKEND_REQ(rdpars, (), DS_RDPARS)
       BACKEND_REQ(rdswitch, (), DS_RDSWITCH)
@@ -480,7 +480,7 @@ START_MODULE
       DEPENDENCY(MSSM_spectrum, Spectrum)
       DEPENDENCY(DarkMatter_ID, std::string)
       DEPENDENCY(decay_rates,DecayTable)
-      //BACKEND_REQ(mspctm, (), DS_MSPCTM)
+      //BACKEND_REQ(mspctm, (), DS5_MSPCTM)
       BACKEND_REQ(dssigmav, (), double, (int&))
       BACKEND_REQ(dsIBffdxdy, (), double, (int&, double&, double&))
       BACKEND_REQ(dsIBhhdxdy, (), double, (int&, double&, double&))
@@ -677,8 +677,8 @@ START_MODULE
     #define FUNCTION DD_couplings_DarkSUSY
       START_FUNCTION(DM_nucleon_couplings)
       BACKEND_REQ(get_DD_couplings, (), std::vector<double>, ())
-      BACKEND_REQ(mspctm, (), DS_MSPCTM)
-      BACKEND_REQ(ddcom, (), DS_DDCOM)
+      BACKEND_REQ(mspctm, (), DS5_MSPCTM)
+      BACKEND_REQ(ddcom, (), DS5_DDCOM)
       BACKEND_OPTION((DarkSUSY, 5.1.3), (dummy_tag))  // Only for DarkSUSY5
       ALLOW_JOINT_MODEL(nuclear_params_fnq,MSSM63atQ)
     #undef FUNCTION

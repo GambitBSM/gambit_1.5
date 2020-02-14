@@ -453,7 +453,7 @@ BE_NAMESPACE
   int init_diskless(const SLHAstruct &mySLHA, const DecayTable &myDecays)
   {
     using SLHAea::to;
-    DS_PACODES *DSpart = &(*pacodes);
+    DS5_PACODES *DSpart = &(*pacodes);
 
     // Define required blocks and raise an error if a block is missing
     required_block("SMINPUTS", mySLHA);

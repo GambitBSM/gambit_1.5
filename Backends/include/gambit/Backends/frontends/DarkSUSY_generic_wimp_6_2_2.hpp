@@ -45,7 +45,7 @@ BE_FUNCTION(dsanyield_sim, double, (double&,double&,int&,char*,int&,int&,int&), 
 BE_FUNCTION(dssenu_capsuntab, double, (const double&, const double&, const double&, const double&), "dssenu_capsuntab_", "cap_Sun_v0q0_isoscalar_DS6")
 
 // Halo model common blocks
-BE_VARIABLE(dshmcom, DS6_HMCOM, "dshmcom_", "dshmcom")
+BE_VARIABLE(dshmcom, DS_HMCOM, "dshmcom_", "dshmcom")
 BE_VARIABLE(dshmframevelcom, DS_HMFRAMEVELCOM, "dshmframevelcom_", "dshmframevelcom")
 BE_VARIABLE(dshmisodf, DS_HMISODF, "dshmisodf_", "dshmisodf")
 BE_VARIABLE(dshmnoclue, DS_HMNOCLUE, "dshmnoclue_", "dshmnoclue")

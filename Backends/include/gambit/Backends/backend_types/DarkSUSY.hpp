@@ -46,7 +46,7 @@ namespace Gambit
   };
 
 // this one only exists in DS 5
-  struct DS_MSPCTM
+  struct DS5_MSPCTM
   {
       Farray<Fdouble,0,50> mass, runnmann;
       Fdouble mu2gev,md2gev,ms2gev,mcmc,mbmb,mtmt;
@@ -64,9 +64,8 @@ namespace Gambit
       Farray<Fdouble,0,255> mass;
   };
 
-
 // this one only exists in DS 5
-  struct DS_WIDTHS
+  struct DS5_WIDTHS
   {
       Farray<Fdouble,0,50> width;
   };
@@ -89,7 +88,7 @@ namespace Gambit
   };
 
 // this one only exists in DS 5
-  struct DS_PACODES
+  struct DS5_PACODES
    {
       Farray<Finteger,1,2> kse,ksmu,kstau,ksu,ksd,ksc,kss,kst,ksb;
       Farray<Finteger,1,4> kn;
@@ -106,8 +105,6 @@ namespace Gambit
       Farray<Finteger,1,6> ksnu,ksl,ksqu,ksqd;
       Farray<Finteger,1,4> kn;
       Farray<Finteger,1,2> kcha;
-      // Farray<Finteger,1,3> ksnu_flav;
-//TB FIXME: this would be the actual implementation, but does not work!?
       Farray<Finteger,1,3,1,1> ksnu_flav;
       Farray<Finteger,1,3,1,2> ksl_flav,ksqu_flav,ksqd_flav;
     };
@@ -136,7 +133,7 @@ namespace Gambit
     };
 
 // this one only exists in DS 5
-    struct DS_SMRUSEFUL
+    struct DS5_SMRUSEFUL
     {
         Fdouble s2thw;
         Fdouble sinthw;
@@ -183,12 +180,12 @@ namespace Gambit
 
 
 // this one only exists in DS 5
-    struct DS_SMCUSEFUL
+    struct DS5_SMCUSEFUL
     {
         Fstring<5> roption;
     };
 // this one only exists in DS 5
-    struct DS_COUPLINGCONSTANTS
+    struct DS5_COUPLINGCONSTANTS
     {
         Fdouble g2weak;
         Fdouble gyweak;
@@ -200,13 +197,13 @@ namespace Gambit
         Fdouble gywmz;
     };
 // this one only exists in DS 6.1
-    struct DS6_COUPLINGCONSTANTS
+    struct DS_COUPLINGCONSTANTS
     {
         Fdouble alph3;
         Farray< Fdouble,1,12 > yukawa;
     };
 // this one only exists in DS 6
-    struct DS6_COUPLINGCONSTANTS61
+    struct DS_COUPLINGCONSTANTS61
     {
         Fdouble g2weak;
         Fdouble gyweak;
@@ -216,7 +213,7 @@ namespace Gambit
         Fdouble g2wmz;
         Fdouble gywmz;
     };
-    struct DS_SCKM
+    struct DS5_SCKM
     {
         Fdouble ckms12;
         Fdouble ckms23;
@@ -224,7 +221,7 @@ namespace Gambit
         Fdouble ckmdelta;
     };
 
-    struct DS6_SCKM
+    struct DS_SCKM
     {
         Farray< Fdouble_complex,1,3,1,3 > ckm;
         Fdouble ckms12;
@@ -303,7 +300,7 @@ namespace Gambit
     };
 
 // only in DarkSUSY 5
-  struct DS_RDMGEV
+  struct DS5_RDMGEV
   {
       Farray<Fdouble,1,1000> mco, mdof, rgev, rwid;
       Finteger nco, nres;
@@ -364,7 +361,7 @@ namespace Gambit
   };
 
 // this one only exists in DS5
-  struct DS_DDCOM
+  struct DS5_DDCOM
   {
       Farray<Fdouble, 7, 12> ftp;
       Farray<Fdouble, 7, 12> ftn;
@@ -377,7 +374,8 @@ namespace Gambit
       Fstring<10> ddfsd;
   };
 
-  struct DS_NUCOM
+  // this one only exists in DS5
+  struct DS5_NUCOM
   {
       Farray<Fdouble, 1, 29> wabr;
       Farray<Fdouble, 1, 29, 1, 3> was0br;
@@ -391,7 +389,7 @@ namespace Gambit
       Flogical dswasetupcalled;
   };
 
-  struct DS6_NUCOM
+  struct DS_NUCOM
   {
       Farray<Fdouble, 1, 29, 1, 3> ans0br;
       Farray<Fdouble, 1, 15> anscbr;
@@ -401,7 +399,7 @@ namespace Gambit
       Farray<Finteger, 1, 29, 1, 2> yieldchannels_line;
   };
 
-  struct DS_HMCOM // Only DS 5
+  struct DS5_HMCOM // Only DS 5
   {
       Fdouble rho0;      // non-rescaled local density
       Fdouble rhox;      // rescaled local density
@@ -411,7 +409,7 @@ namespace Gambit
       Finteger hclumpy;  // 1=smooth 2=clumpy
   };
 
-  struct DS6_HMCOM // DS 6
+  struct DS_HMCOM // DS 6
   {
       Fdouble rho0;      // non-rescaled local density
       Fdouble v_sun;     // circular speed at the Sun
@@ -420,7 +418,7 @@ namespace Gambit
       Finteger hclumpy;  // 1=smooth 2=clumpy
   };
 
-// this one only exists in DS6
+// this one only exists in DS 6
   struct DS_DDCOMLEGACY
   {
       Farray<Fdouble, 7, 12> ftp;
@@ -430,7 +428,7 @@ namespace Gambit
       Fdouble dels;
   };
 
-// this one only exists in DS6
+// this one only exists in DS 6
   struct DS_DDMSSMCOM
   {
       Finteger ddpole;

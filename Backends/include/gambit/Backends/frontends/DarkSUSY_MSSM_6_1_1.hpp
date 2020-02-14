@@ -93,7 +93,7 @@ BE_FUNCTION(dsanyield_sim, double, (double&,double&,int&,char*,int&,int&,int&), 
 BE_FUNCTION(dssenu_capsuntab, double, (const double&, const double&, const double&, const double&), "dssenu_capsuntab_", "cap_Sun_v0q0_isoscalar_DS6")
 
 // Halo model common blocks
-BE_VARIABLE(dshmcom, DS6_HMCOM, "dshmcom_", "dshmcom")
+BE_VARIABLE(dshmcom, DS_HMCOM, "dshmcom_", "dshmcom")
 BE_VARIABLE(dshmframevelcom, DS_HMFRAMEVELCOM, "dshmframevelcom_", "dshmframevelcom")
 BE_VARIABLE(dshmisodf, DS_HMISODF, "dshmisodf_", "dshmisodf")
 BE_VARIABLE(dshmnoclue, DS_HMNOCLUE, "dshmnoclue_", "dshmnoclue")
@@ -112,14 +112,14 @@ BE_VARIABLE(smcoupling, DS_SMCOUPLING61, "smcoupling_", "smcoupling")
 // only here starts the part that is really MSSM-specific (and not SM/generic)
 BE_VARIABLE(pacodes_mssm, DS_PACODES_MSSM61, "pacodes_mssm_", "pacodes_mssm")
 BE_VARIABLE(mssmiuseful, DS_MSSMIUSEFUL, "mssmiuseful_", "mssmiuseful")
-BE_VARIABLE(couplingconstants, DS6_COUPLINGCONSTANTS61, "couplingconstants_", "couplingconstants")
+BE_VARIABLE(couplingconstants, DS_COUPLINGCONSTANTS61, "couplingconstants_", "couplingconstants")
 BE_VARIABLE(mixing, DS_MIXING, "mixing_", "mixing")
 BE_VARIABLE(mssmtype, DS_MSSMTYPE, "mssmtype_", "mssmtype")
 BE_VARIABLE(mssmpar, DS_MSSMPAR, "mssmpar_", "mssmpar")
 BE_VARIABLE(mssmwidths, DS_MSSMWIDTHS, "mssmwidths_", "mssmwidths")
 BE_VARIABLE(mssmmixing, DS_MSSMMIXING, "mssmmixing_", "mssmmixing")
 BE_VARIABLE(IBintvars, DS_IBINTVARS,"ibintvars_", "IBintvars")
-BE_VARIABLE(anbranch,DS6_NUCOM, "anbranch_", "nu_common_block") // BRs
+BE_VARIABLE(anbranch,DS_NUCOM, "anbranch_", "nu_common_block") // BRs
 BE_VARIABLE(ddmssmcom, DS_DDMSSMCOM, "ddmssmcom_", "ddmssmcom") //DD
 BE_VARIABLE(dsancoann, DS_DSANCOANN, "dsancoann_", "dsancoann") // RD
 
