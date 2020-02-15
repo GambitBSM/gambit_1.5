@@ -16,16 +16,15 @@ TODO
 * [Jonathan] Silveira-Zee standalone + yaml file
 
 * [Anders] CMSSM.yaml
- 
-* [Torsten] rename _DS6 -> standard; standard -> _DS5
-   (as well as darksusy -> darksusy5)
-  [mostly done, still to be tested on *all* standalones]
-
 
 * update to 6.2.2
    - [Torsten] grep FIXME in MSSM frontend! (also in DarkSUSY.hpp)
 
 * get rid of prelim. standalones
+  (DarkBit_standalone_MSSM_DS5, DarkBit_standalone_MSSM_DS6, 
+   DarkBit_standalone_MSSM,DarkBit_standalone_WIMP),
+  then rename remaining ones
+
 
 * add new relic density feature (maybe only after merging to trunk !)
 
@@ -45,3 +44,9 @@ TODO
 [*] DarkBit_standalone_MSSM_all_backends
 
 [*] backended generic_WIMP6.2.2 + updated standalone   
+
+[*]] rename _DS6 -> standard; standard -> _DS5
+   (as well as darksusy -> darksusy5)
+
+
+

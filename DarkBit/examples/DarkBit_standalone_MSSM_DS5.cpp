@@ -298,24 +298,24 @@ int main(int argc, char* argv[])
     // ---- Set up basic internal structures for direct & indirect detection ----
 
     // Set up process catalog based on DarkSUSY annihilation rates
-    TH_ProcessCatalog_DS_MSSM.resolveDependency(&createSpectrum);
-    TH_ProcessCatalog_DS_MSSM.resolveDependency(&createDecays);
-    TH_ProcessCatalog_DS_MSSM.resolveDependency(&DarkMatter_ID_MSSM);
-    TH_ProcessCatalog_DS_MSSM.resolveBackendReq(&Backends::DarkSUSY_5_1_3::Functown::dssigmav);
-    TH_ProcessCatalog_DS_MSSM.resolveBackendReq(&Backends::DarkSUSY_5_1_3::Functown::dsIBffdxdy);
-    TH_ProcessCatalog_DS_MSSM.resolveBackendReq(&Backends::DarkSUSY_5_1_3::Functown::dsIBhhdxdy);
-    TH_ProcessCatalog_DS_MSSM.resolveBackendReq(&Backends::DarkSUSY_5_1_3::Functown::dsIBwhdxdy);
-    TH_ProcessCatalog_DS_MSSM.resolveBackendReq(&Backends::DarkSUSY_5_1_3::Functown::dsIBwwdxdy);
-    TH_ProcessCatalog_DS_MSSM.resolveBackendReq(&Backends::DarkSUSY_5_1_3::Functown::IBintvars);
-    TH_ProcessCatalog_DS_MSSM.reset_and_calculate();
+    TH_ProcessCatalog_DS5_MSSM.resolveDependency(&createSpectrum);
+    TH_ProcessCatalog_DS5_MSSM.resolveDependency(&createDecays);
+    TH_ProcessCatalog_DS5_MSSM.resolveDependency(&DarkMatter_ID_MSSM);
+    TH_ProcessCatalog_DS5_MSSM.resolveBackendReq(&Backends::DarkSUSY_5_1_3::Functown::dssigmav);
+    TH_ProcessCatalog_DS5_MSSM.resolveBackendReq(&Backends::DarkSUSY_5_1_3::Functown::dsIBffdxdy);
+    TH_ProcessCatalog_DS5_MSSM.resolveBackendReq(&Backends::DarkSUSY_5_1_3::Functown::dsIBhhdxdy);
+    TH_ProcessCatalog_DS5_MSSM.resolveBackendReq(&Backends::DarkSUSY_5_1_3::Functown::dsIBwhdxdy);
+    TH_ProcessCatalog_DS5_MSSM.resolveBackendReq(&Backends::DarkSUSY_5_1_3::Functown::dsIBwwdxdy);
+    TH_ProcessCatalog_DS5_MSSM.resolveBackendReq(&Backends::DarkSUSY_5_1_3::Functown::IBintvars);
+    TH_ProcessCatalog_DS5_MSSM.reset_and_calculate();
 
     // Set generic WIMP mass object
-    mwimp_generic.resolveDependency(&TH_ProcessCatalog_DS_MSSM);
+    mwimp_generic.resolveDependency(&TH_ProcessCatalog_DS5_MSSM);
     mwimp_generic.resolveDependency(&DarkMatter_ID_MSSM);
     mwimp_generic.reset_and_calculate();
 
     // Set generic annihilation rate in late universe (v->0 limit)
-    sigmav_late_universe.resolveDependency(&TH_ProcessCatalog_DS_MSSM);
+    sigmav_late_universe.resolveDependency(&TH_ProcessCatalog_DS5_MSSM);
     sigmav_late_universe.resolveDependency(&DarkMatter_ID_MSSM);
     sigmav_late_universe.reset_and_calculate();
     double sv0_DS5 = sigmav_late_universe(0);
@@ -378,7 +378,7 @@ int main(int argc, char* argv[])
     SimYieldTable_DS5.reset_and_calculate();
 
     // Collect missing final states for simulation in cascade MC
-    GA_missingFinalStates.resolveDependency(&TH_ProcessCatalog_DS_MSSM);
+    GA_missingFinalStates.resolveDependency(&TH_ProcessCatalog_DS5_MSSM);
     GA_missingFinalStates.resolveDependency(&SimYieldTable_DS5);
     GA_missingFinalStates.resolveDependency(&DarkMatter_ID_MSSM);
     GA_missingFinalStates.reset_and_calculate();
@@ -388,7 +388,7 @@ int main(int argc, char* argv[])
     cascadeMC_FinalStates.reset_and_calculate();
 
     // Collect decay information for cascade MC
-    cascadeMC_DecayTable.resolveDependency(&TH_ProcessCatalog_DS_MSSM);
+    cascadeMC_DecayTable.resolveDependency(&TH_ProcessCatalog_DS5_MSSM);
     cascadeMC_DecayTable.resolveDependency(&SimYieldTable_DS5);
     cascadeMC_DecayTable.reset_and_calculate();
 
@@ -416,7 +416,7 @@ int main(int argc, char* argv[])
     // Generate histogram for cascade MC
     cascadeMC_Histograms.resolveDependency(&cascadeMC_InitialState);
     cascadeMC_Histograms.resolveDependency(&cascadeMC_GenerateChain);
-    cascadeMC_Histograms.resolveDependency(&TH_ProcessCatalog_DS_MSSM);
+    cascadeMC_Histograms.resolveDependency(&TH_ProcessCatalog_DS5_MSSM);
     cascadeMC_Histograms.resolveDependency(&SimYieldTable_DS5);
     cascadeMC_Histograms.resolveDependency(&cascadeMC_FinalStates);
     cascadeMC_Histograms.resolveLoopManager(&cascadeMC_LoopManager);
@@ -436,7 +436,7 @@ int main(int argc, char* argv[])
     cascadeMC_gammaSpectra.reset_and_calculate();
 
     // Calculate total gamma-ray yield (cascade MC + tabulated results)
-    GA_AnnYield_General.resolveDependency(&TH_ProcessCatalog_DS_MSSM);
+    GA_AnnYield_General.resolveDependency(&TH_ProcessCatalog_DS5_MSSM);
     GA_AnnYield_General.resolveDependency(&SimYieldTable_DS5);
     GA_AnnYield_General.resolveDependency(&DarkMatter_ID_MSSM);
     GA_AnnYield_General.resolveDependency(&cascadeMC_gammaSpectra);
@@ -466,7 +466,7 @@ int main(int argc, char* argv[])
     capture_rate_Sun_const_xsec_DS5.reset_and_calculate();
 
     // Infer WIMP equilibration time in Sun
-    equilibration_time_Sun.resolveDependency(&TH_ProcessCatalog_DS_MSSM);
+    equilibration_time_Sun.resolveDependency(&TH_ProcessCatalog_DS5_MSSM);
     equilibration_time_Sun.resolveDependency(&DarkMatter_ID_MSSM);
     equilibration_time_Sun.resolveDependency(&mwimp_generic);
     equilibration_time_Sun.resolveDependency(&capture_rate_Sun_const_xsec_DS5);
@@ -478,7 +478,7 @@ int main(int argc, char* argv[])
     annihilation_rate_Sun.reset_and_calculate();
 
     // Infer neutrino yield from Sun
-    nuyield_from_DS.resolveDependency(&TH_ProcessCatalog_DS_MSSM);
+    nuyield_from_DS.resolveDependency(&TH_ProcessCatalog_DS5_MSSM);
     nuyield_from_DS.resolveDependency(&mwimp_generic);
     nuyield_from_DS.resolveDependency(&sigmav_late_universe);
     nuyield_from_DS.resolveDependency(&DarkMatter_ID_MSSM);
@@ -532,7 +532,7 @@ int main(int argc, char* argv[])
     UnitTest_DarkBit.setOption<std::string>("filename", filename_dump);
     UnitTest_DarkBit.resolveDependency(&RD_oh2_DarkSUSY);
     UnitTest_DarkBit.resolveDependency(&GA_AnnYield_General);
-    UnitTest_DarkBit.resolveDependency(&TH_ProcessCatalog_DS_MSSM);
+    UnitTest_DarkBit.resolveDependency(&TH_ProcessCatalog_DS5_MSSM);
     UnitTest_DarkBit.resolveDependency(&DarkMatter_ID_MSSM);
     UnitTest_DarkBit.resolveDependency(&DD_couplings_DarkSUSY_DS5);
     UnitTest_DarkBit.reset_and_calculate();
