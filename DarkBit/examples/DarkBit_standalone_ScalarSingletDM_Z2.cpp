@@ -239,33 +239,33 @@ int main()
     RD_spectrum_ordered_func.resolveDependency(&RD_spectrum_from_ProcessCatalog);
     RD_spectrum_ordered_func.reset_and_calculate();
 
-    RD_oh2_general.resolveDependency(&RD_spectrum_ordered_func);
-    RD_oh2_general.resolveDependency(&RD_eff_annrate_from_ProcessCatalog);
-    RD_oh2_general.resolveBackendReq(&Backends::DarkSUSY_5_1_3::Functown::dsrdthlim);
-    RD_oh2_general.resolveBackendReq(&Backends::DarkSUSY_5_1_3::Functown::dsrdtab);
-    RD_oh2_general.resolveBackendReq(&Backends::DarkSUSY_5_1_3::Functown::dsrdeqn);
-    RD_oh2_general.resolveBackendReq(&Backends::DarkSUSY_5_1_3::Functown::dsrdwintp);
-    RD_oh2_general.resolveBackendReq(&Backends::DarkSUSY_5_1_3::Functown::DSparticle_code);
-    RD_oh2_general.resolveBackendReq(&Backends::DarkSUSY_5_1_3::Functown::widths);
-    RD_oh2_general.resolveBackendReq(&Backends::DarkSUSY_5_1_3::Functown::rdmgev);
-    RD_oh2_general.resolveBackendReq(&Backends::DarkSUSY_5_1_3::Functown::rdpth);
-    RD_oh2_general.resolveBackendReq(&Backends::DarkSUSY_5_1_3::Functown::rdpars);
-    RD_oh2_general.resolveBackendReq(&Backends::DarkSUSY_5_1_3::Functown::rdswitch);
-    RD_oh2_general.resolveBackendReq(&Backends::DarkSUSY_5_1_3::Functown::rdlun);
-    RD_oh2_general.resolveBackendReq(&Backends::DarkSUSY_5_1_3::Functown::rdpadd);
-    RD_oh2_general.resolveBackendReq(&Backends::DarkSUSY_5_1_3::Functown::rddof);
-    RD_oh2_general.resolveBackendReq(&Backends::DarkSUSY_5_1_3::Functown::rderrors);
-    RD_oh2_general.resolveBackendReq(&Backends::DarkSUSY_5_1_3::Functown::rdtime);
-    RD_oh2_general.setOption<int>("fast", 1);  // 0: normal; 1: fast; 2: dirty
-    RD_oh2_general.reset_and_calculate();
+    RD_oh2_DS5_general.resolveDependency(&RD_spectrum_ordered_func);
+    RD_oh2_DS5_general.resolveDependency(&RD_eff_annrate_from_ProcessCatalog);
+    RD_oh2_DS5_general.resolveBackendReq(&Backends::DarkSUSY_5_1_3::Functown::dsrdthlim);
+    RD_oh2_DS5_general.resolveBackendReq(&Backends::DarkSUSY_5_1_3::Functown::dsrdtab);
+    RD_oh2_DS5_general.resolveBackendReq(&Backends::DarkSUSY_5_1_3::Functown::dsrdeqn);
+    RD_oh2_DS5_general.resolveBackendReq(&Backends::DarkSUSY_5_1_3::Functown::dsrdwintp);
+    RD_oh2_DS5_general.resolveBackendReq(&Backends::DarkSUSY_5_1_3::Functown::DSparticle_code);
+    RD_oh2_DS5_general.resolveBackendReq(&Backends::DarkSUSY_5_1_3::Functown::widths);
+    RD_oh2_DS5_general.resolveBackendReq(&Backends::DarkSUSY_5_1_3::Functown::rdmgev);
+    RD_oh2_DS5_general.resolveBackendReq(&Backends::DarkSUSY_5_1_3::Functown::rdpth);
+    RD_oh2_DS5_general.resolveBackendReq(&Backends::DarkSUSY_5_1_3::Functown::rdpars);
+    RD_oh2_DS5_general.resolveBackendReq(&Backends::DarkSUSY_5_1_3::Functown::rdswitch);
+    RD_oh2_DS5_general.resolveBackendReq(&Backends::DarkSUSY_5_1_3::Functown::rdlun);
+    RD_oh2_DS5_general.resolveBackendReq(&Backends::DarkSUSY_5_1_3::Functown::rdpadd);
+    RD_oh2_DS5_general.resolveBackendReq(&Backends::DarkSUSY_5_1_3::Functown::rddof);
+    RD_oh2_DS5_general.resolveBackendReq(&Backends::DarkSUSY_5_1_3::Functown::rderrors);
+    RD_oh2_DS5_general.resolveBackendReq(&Backends::DarkSUSY_5_1_3::Functown::rdtime);
+    RD_oh2_DS5_general.setOption<int>("fast", 1);  // 0: normal; 1: fast; 2: dirty
+    RD_oh2_DS5_general.reset_and_calculate();
 
     // Retrieve and print GAMBIT result
-    logger() << "Omega h^2 from GAMBIT: " << RD_oh2_general(0) << LogTags::info << EOM;
+    logger() << "Omega h^2 from GAMBIT: " << RD_oh2_DS5_general(0) << LogTags::info << EOM;
 
     // Calculate WMAP likelihoods
     // Uncomment one of the following two line to choose which Omega h^2 value to use
     //lnL_oh2_Simple.resolveDependency(&RD_oh2_MicrOmegas);
-    lnL_oh2_Simple.resolveDependency(&RD_oh2_general);
+    lnL_oh2_Simple.resolveDependency(&RD_oh2_DS5_general);
     lnL_oh2_Simple.reset_and_calculate();
 
     logger() << "Relic density lnL: " << lnL_oh2_Simple((0)) << LogTags::info << EOM;
@@ -492,7 +492,7 @@ int main()
 
     cout << endl;
     cout << "Omega h^2 from MicrOmegas: " << RD_oh2_MicrOmegas(0) << endl;
-    cout << "Omega h^2 from GAMBIT: " << RD_oh2_general(0) << endl;
+    cout << "Omega h^2 from GAMBIT: " << RD_oh2_DS5_general(0) << endl;
     cout << "Relic density lnL: " << lnL_oh2_Simple(0) << endl;
     cout << "sigma_SI,p with MicrOmegas: " << sigma_SI_p_MO << endl;
     cout << "sigma_SI,p with GAMBIT: " << sigma_SI_p_GB << endl;
