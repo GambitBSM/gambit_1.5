@@ -4058,20 +4058,10 @@ clik_lensing_initialize: |
 clik_initialize_error: |
    initialize the error object.
 
-data_cleanup: |
-   free objects plik_dx11dr2_HM_v18_TT and
-   lowl_SMW_70_dx11d_2014 by means of calling
-   backend function clik_cleanup
-
 set_planck_path: |
    Set the absolute path to the location of the
    Planck likelihoods.
    (Path to the 'plc_2.0'-folder)
-
-data_initialize: |
-   initalize objects plik_dx11dr2_HM_v18_TT and
-   lowl_SMW_70_dx11d_2014 by means of calling
-   backend function clik_init
 
 initialize_high_TTTEEE: |
    Load the TT,TE,EE-likelihood for high-l.
@@ -4103,13 +4093,7 @@ initialize_lowp_TT: |
    Will be executed by plc_2_0_init when this
    likelihood is wanted.
 
-lowl_SMW_70_dx11d_2014_10_03_v5c_Ap_parameters: |
-   See model parameters in config/models.dat
-
-plik_dx11dr2_HM_v18_TT_parameters: |
-  See model parameters in config/models.dat
-
-Planck_TTTEEE_parameters: |
+cosmo_nuisance_Planck_TTTEEE_parameters: |
   See model parameters in config/models.dat
 
 Planck_TT_parameters: |

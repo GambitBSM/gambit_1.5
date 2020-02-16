@@ -692,9 +692,9 @@ namespace Gambit
       // output: 'lCl, pCl, tCl', lensing: yes, non linear: halofit , l_max_scalar: 2508
       // Note: this has to be done *after* the yaml options are read it since it would trigger an error of duplicated 
       //   keys in case the user specifies one of the options themselves. The 'merge_pybind_dicts' routine will properly
-      //   with concatennating the output values and choosing the maximum passed value for l_max_scalars. Contradictions 
-      //   in the lensing or non linear choice will rightfully trigger an error.  
-      if (ModelInUse("Planck_lite") || ModelInUse("Planck_TTTEEE")|| ModelInUse("Planck_TT") || ModelInUse("plik_dx11dr2_HM_v18_TT"))
+      //   with concatennating the output values and choosing the maximum passed value for l_max_scalars. Contradictions
+      //   in the lensing or non linear choice will rightfully trigger an error.
+      if (ModelInUse("cosmo_nuisance_Planck_lite") || ModelInUse("cosmo_nuisance_Planck_TTTEEE")|| ModelInUse("cosmo_nuisance_Planck_TT"))
       {
         merge_pybind_dicts(result,*Dep::classy_parameters_PlanckLike);
       }
