@@ -155,7 +155,6 @@ contains
     k_min = ginput_kmin
     k_max = ginput_kmax
     steps = ginput_steps
-    calc_full_pk = ginput_calc_full_pk
     phi_init0 = ginput_phi_init0
     dphi_init0 = ginput_dphi_init0
     vparams = ginput_vparams
