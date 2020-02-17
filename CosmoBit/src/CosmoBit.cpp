@@ -710,7 +710,7 @@ namespace Gambit
     /// Set the LCDM_no_primordial_ps in classy. Depends on a parametrised primordial_ps.
     /// Looks at the parameters used in a run,
     /// and passes them to classy in the form of a Python dictionary.
-    void set_classy_parameters_parametrised_ps(CosmoBit::ClassyInput& result)
+    void set_classy_parameters_parametrised_ps(CosmoBit::Classy_input& result)
     {
       using namespace Pipes::set_classy_parameters_parametrised_ps;
 
@@ -721,9 +721,9 @@ namespace Gambit
 
       // Now need to pass the primordial power spectrum
       // TODO check whether A_s from MultiModeCode has the log taken or not.
-      parametrised_ps pps = *Dep::parametrised_power_spectrum;
-      result.addEntry("n_s", pps.get_n_s());
-      result.addEntry("ln10^{10}A_s", pps.get_A_s());
+      Parametrised_ps pps = *Dep::parametrised_power_spectrum;
+      result.add_entry("n_s", pps.get_n_s());
+      result.add_entry("ln10^{10}A_s", pps.get_A_s());
       
 
       // if r = 0 only compute scalar modes, else tensor modes as well
@@ -735,8 +735,8 @@ namespace Gambit
       else
       {
         // don't set to zero in CLASS dict as it won't be read if no tensor modes are requested
-        result.addEntry("r", pps.get_r()); 
-        result.addEntry("modes","t,s");
+        result.add_entry("r", pps.get_r()); 
+        result.add_entry("modes","t,s");
       }
 
       // Add the externally calculated/fixed pivot scale for LCDM_no_primordial models. 
@@ -744,7 +744,7 @@ namespace Gambit
       // k_pivot is an input parameter the user can freely choose. This setting is done via the yaml file,
       // i.e. runOption for capability 'classy_baseline_params', classy_dict (see CosmoBit_tutorial.yaml). 
       // If no value for 'k_pivot' is passed GAMBIT will use 0.05, the same default value as CLASS.
-      if (ModelInUse("LCDM_no_primordial")){result.addEntry("k_pivot", pps.get_k_pivot());}
+      if (ModelInUse("LCDM_no_primordial")){result.add_entry("k_pivot", pps.get_k_pivot());}
 
       // Get standard cosmo parameters, nu masses, helium abundance &
       // extra run options for class passed in yaml file to capability
@@ -753,8 +753,8 @@ namespace Gambit
       //    is in use.
       pybind11::dict classy_base_dict = *Dep::classy_baseline_params;
       
-      // Add classy_base_dict entries to the result dictionary of the type ClassyInput
-      std::string common_keys = result.addDict(classy_base_dict);
+      // Add classy_base_dict entries to the result dictionary of the type Classy_input
+      std::string common_keys = result.add_dict(classy_base_dict);
       if(common_keys != "")
       {
         CosmoBit_error().raise(LOCAL_INFO, "The key(s) '" + common_keys + "' already "
@@ -767,7 +767,7 @@ namespace Gambit
     /// Set the LCDM_no_primordial_ps in classy. Depends on a primordial_ps.
     /// Looks at the parameters used in a run,
     /// and passes them to classy in the form of a Python dictionary.
-    void set_classy_parameters_primordial_ps(CosmoBit::ClassyInput& result)
+    void set_classy_parameters_primordial_ps(CosmoBit::Classy_input& result)
     {
       using namespace Pipes::set_classy_parameters_primordial_ps;
 
@@ -777,17 +777,17 @@ namespace Gambit
       result.clear();
 
       // Now need to pass the primordial power spectrum 
-      static primordial_ps pps{};
+      static Primordial_ps pps{};
       pps = *Dep::primordial_power_spectrum;
-      result.addEntry("modes", "t,s");
+      result.add_entry("modes", "t,s");
 
-      result.addEntry("P_k_ini type", "pointer_to_Pk");
-      result.addEntry("k_array", pps.get_k());
-      result.addEntry("pks_array", pps.get_P_s());
-      result.addEntry("pkt_array", pps.get_P_t());
-      result.addEntry("lnk_size" , pps.get_vec_size()); // don't hard code but somehow make consistent with multimode @TODO -> test
+      result.add_entry("P_k_ini type", "pointer_to_Pk");
+      result.add_entry("k_array", pps.get_k());
+      result.add_entry("pks_array", pps.get_P_s());
+      result.add_entry("pkt_array", pps.get_P_t());
+      result.add_entry("lnk_size" , pps.get_vec_size()); // don't hard code but somehow make consistent with multimode @TODO -> test
       // pass pivot scale of external spectrum to CLASS
-      result.addEntry("k_pivot", pps.get_k_pivot());
+      result.add_entry("k_pivot", pps.get_k_pivot());
       
       // Get standard cosmo parameters, nu masses, helium abundance &
       // extra run options for class passed in yaml file to capability
@@ -797,11 +797,11 @@ namespace Gambit
       //    is provided by an external model scanned in combination with 'LCDM_no_primordial'
       pybind11::dict classy_base_dict = *Dep::classy_baseline_params;
 
-      // Add classy_base_dict entries to the result dictionary of the type ClassyInput
+      // Add classy_base_dict entries to the result dictionary of the type Classy_input
       // The string common_keys will be empty if the two dictionaries 'result'
       // and 'classy_base_dict' have no keys in common. If so 'common_keys'
       // will be a concatenation of the duplicated entries.
-      std::string common_keys = result.addDict(classy_base_dict);
+      std::string common_keys = result.add_dict(classy_base_dict);
 
       // No check if something went wrong and some parameters were defined twice
       if(common_keys != "")
@@ -814,12 +814,12 @@ namespace Gambit
     }
 
     /// Function to set the generic inputs used for MultiModeCode.
-    void set_multimode_inputs(multimode_inputs &result)
+    void set_multimode_inputs(Multimode_inputs &result)
     {
       using namespace Pipes::set_multimode_inputs;
 
       // Clear anything from previous run
-      result = multimode_inputs();
+      result = Multimode_inputs();
 
       // N_pivot is model parameter in all inflation models
       result.N_pivot = *Param["N_pivot"];
@@ -966,15 +966,15 @@ namespace Gambit
     /// Passes the inputs from the MultiModeCode initialisation function 
     /// and computes the outputs.
     /// TODO: split this up into primordial_ps and parametrised_ps versions.
-    void get_multimode_primordial_ps(primordial_ps &result)
+    void get_multimode_primordial_ps(Primordial_ps &result)
     { 
       using namespace Pipes::get_multimode_primordial_ps;
 
       // Clear it all
-      result = primordial_ps();
+      result = Primordial_ps();
 
       // Get the inflationary inputs
-      multimode_inputs inputs = *Dep::multimode_input_parameters;
+      Multimode_inputs inputs = *Dep::multimode_input_parameters;
 
       //-------------------------------------------------------------
       // (JR) @Selim Used to be yaml options but probably should not be -- waiting 
@@ -1042,13 +1042,13 @@ namespace Gambit
     /// Passes the inputs from the MultiModeCode initialisation function 
     /// and computes the outputs.
     /// TODO: split this up into primordial_ps and parametrised_ps versions.
-    void get_multimode_parametrised_ps(parametrised_ps &result)
+    void get_multimode_parametrised_ps(Parametrised_ps &result)
     { 
       using namespace Pipes::get_multimode_parametrised_ps;
 
 
       // Get the inflationary inputs
-      multimode_inputs inputs = *Dep::multimode_input_parameters;
+      Multimode_inputs inputs = *Dep::multimode_input_parameters;
 
 
       //-------------------------------------------------------------
@@ -1111,7 +1111,7 @@ namespace Gambit
       result.set_N_pivot(inputs.N_pivot);
     }
 
-    void get_parametrised_ps_LCDM(parametrised_ps &result)
+    void get_parametrised_ps_LCDM(Parametrised_ps &result)
     {
       using namespace Pipes::get_parametrised_ps_LCDM;
 
@@ -1130,7 +1130,7 @@ namespace Gambit
       //                      " a power spectrum!! Try the function get_multimode_parametrised_ps...");
       //}
 
-      parametrised_ps pps;
+      Parametrised_ps pps;
       pps.set_n_s(*Param["n_s"]);
       pps.set_A_s(*Param["ln10A_s"]);
       pps.set_r(0); 
@@ -1142,7 +1142,7 @@ namespace Gambit
 
     // still needs to be rewritten and dived into two functions. Also 
     // should fill the new 
-    void get_parametrised_ps_SMASH(parametrised_ps &result)
+    void get_parametrised_ps_SMASH(Parametrised_ps &result)
     {
       using namespace Pipes::get_parametrised_ps_SMASH;
 
@@ -1253,7 +1253,7 @@ namespace Gambit
          value will be satisfactory for initial conditions.
          */
         //-------------------------------------------------------------
-        parametrised_ps pps;
+        Parametrised_ps pps;
         pps.set_n_s(ns_self);
         pps.set_A_s(As_self); // TODO check if we need to exponentiate
         pps.set_r(r_self); 
@@ -1266,7 +1266,7 @@ namespace Gambit
     /// have to think about how tho to that without causing a cricle in dep resolution
     //  -- need to pass the options below to class and 
     /// then class can return the vectors with the k, Pks and Pkt. todo
-    void get_primordial_ps_SMASH(primordial_ps &result)
+    void get_primordial_ps_SMASH(Primordial_ps &result)
     {
       using namespace Pipes::get_primordial_ps_SMASH;
       
@@ -2124,7 +2124,7 @@ namespace Gambit
     /// an instance of the classy class Class() (Yep, I know...)
     /// which can be handed over to MontePython, or just used to compute
     /// some observables.
-    void set_classy_input(CosmoBit::ClassyInput& result)
+    void set_classy_input(CosmoBit::Classy_input& result)
     {
       using namespace Pipes::set_classy_input;
 
@@ -2134,7 +2134,7 @@ namespace Gambit
     /// Initialises the container within CosmoBit from classy, but designed specifically
     /// to be used when MontePython is in use. This will ensure additional outputs are
     /// computed by classy CLASS to be passed to MontePython.
-    void set_classy_input_with_MPLike(CosmoBit::ClassyInput& result)
+    void set_classy_input_with_MPLike(CosmoBit::Classy_input& result)
     {
       using namespace Pipes::set_classy_input_with_MPLike;
 

@@ -204,13 +204,13 @@ START_MODULE
    #define CAPABILITY classy_final_input
      START_CAPABILITY
      #define FUNCTION set_classy_input_with_MPLike
-      START_FUNCTION(CosmoBit::ClassyInput)
+      START_FUNCTION(CosmoBit::Classy_input)
       DEPENDENCY(cosmo_args_from_MPLike,  pybind11::dict)
-      DEPENDENCY(classy_primordial_parameters,   CosmoBit::ClassyInput)
+      DEPENDENCY(classy_primordial_parameters,   CosmoBit::Classy_input)
      #undef FUNCTION
      #define FUNCTION set_classy_input
-      START_FUNCTION(CosmoBit::ClassyInput)
-      DEPENDENCY(classy_primordial_parameters, CosmoBit::ClassyInput)
+      START_FUNCTION(CosmoBit::Classy_input)
+      DEPENDENCY(classy_primordial_parameters, CosmoBit::Classy_input)
      #undef FUNCTION
   #undef CAPABILITY
 
@@ -220,18 +220,18 @@ START_MODULE
     
      // H0, tau_reio, Omega_m, Omega_b plus an external primordial power spectrum
      #define FUNCTION set_classy_parameters_primordial_ps
-      START_FUNCTION(CosmoBit::ClassyInput)
+      START_FUNCTION(CosmoBit::Classy_input)
          ALLOW_MODELS(LCDM_no_primordial)
          DEPENDENCY(classy_baseline_params, pybind11::dict)
-         DEPENDENCY(primordial_power_spectrum, primordial_ps)
+         DEPENDENCY(primordial_power_spectrum, Primordial_ps)
      #undef FUNCTION
 
      // H0, tau_reio, Omega_m, Omega_b plus an external *parametrised* primordial power spectrum
      #define FUNCTION set_classy_parameters_parametrised_ps
-      START_FUNCTION(CosmoBit::ClassyInput)
+      START_FUNCTION(CosmoBit::Classy_input)
          ALLOW_MODELS(LCDM_no_primordial, LCDM)
          DEPENDENCY(classy_baseline_params, pybind11::dict)
-         DEPENDENCY(parametrised_power_spectrum,   parametrised_ps)
+         DEPENDENCY(parametrised_power_spectrum,   Parametrised_ps)
      #undef FUNCTION
 
   #undef CAPABILITY
@@ -281,7 +281,7 @@ START_MODULE
   #define CAPABILITY multimode_input_parameters
     START_CAPABILITY
     #define FUNCTION set_multimode_inputs
-      START_FUNCTION(multimode_inputs)
+      START_FUNCTION(Multimode_inputs)
       ALLOW_MODELS(Inflation_SR1quad,Inflation_1quar,Inflation_1mono23,Inflation_1linear,Inflation_1natural,Inflation_smash)
     #undef FUNCTION
   #undef CAPABILITY
@@ -293,7 +293,7 @@ START_MODULE
   //     START_FUNCTION(gambit_inflation_observables)
   //     ALLOW_MODELS(Inflation_SR1quad,Inflation_1quar,Inflation_1mono23,Inflation_1linear,Inflation_1natural,Inflation_smash)
   //     DEPENDENCY(multimode_pk_setting,int)
-  //     DEPENDENCY(inf_inputs, multimode_inputs)
+  //     DEPENDENCY(inf_inputs, Multimode_inputs)
   //     BACKEND_REQ(multimodecode_gambit_driver,(modecode_tag), void, (gambit_inflation_observables*,int&,int&,int&,int&,int&,int&,int&,int&,int&,int&,double&,int&,int&,double&,int&,double*,double*,int&,int&,double*,double*,double*,double&,double&,double&,int&,int&,double&,double*,double*,double*,double*,double&,double&))
   //   #undef FUNCTION
   // #undef CAPABILITY 
@@ -302,24 +302,24 @@ START_MODULE
     START_CAPABILITY
     
     #define FUNCTION get_multimode_parametrised_ps
-      START_FUNCTION(parametrised_ps)
+      START_FUNCTION(Parametrised_ps)
       ALLOW_MODELS(Inflation_SR1quad,Inflation_1quar,Inflation_1mono23,Inflation_1linear,Inflation_1natural,Inflation_smash)
       //MODEL_GROUP(inflation,(Inflation_SR1quad,Inflation_1quar,Inflation_1mono23,Inflation_1linear,Inflation_1natural))
       //MODEL_GROUP(cosmo,(LCDM_no_primordial))
       //ALLOW_MODEL_COMBINATION(cosmo,inflation)
-      DEPENDENCY(multimode_input_parameters, multimode_inputs)
+      DEPENDENCY(multimode_input_parameters, Multimode_inputs)
       BACKEND_REQ(multimodecode_gambit_driver, (), gambit_inflation_observables, (int&  ,int& ,  int& , int& , double* , double* ,
 																																					      	double* , double&, double&, double& , int& ,
 																																				      		double& , double& , int& , int& ))
     #undef FUNCTION
 
     #define FUNCTION get_parametrised_ps_LCDM
-      START_FUNCTION(parametrised_ps)
+      START_FUNCTION(Parametrised_ps)
       ALLOW_MODELS(LCDM)
     #undef FUNCTION
     
     #define FUNCTION get_parametrised_ps_SMASH
-      START_FUNCTION(parametrised_ps)
+      START_FUNCTION(Parametrised_ps)
       ALLOW_MODELS(Inflation_smash)
     #undef FUNCTION
 
@@ -330,10 +330,10 @@ START_MODULE
     START_CAPABILITY
 
     #define FUNCTION get_multimode_primordial_ps
-      START_FUNCTION(primordial_ps)
+      START_FUNCTION(Primordial_ps)
       //ALLOW_MODELS(LCDM_no_primordial) // todo check models...
       ALLOW_MODELS(Inflation_SR1quad,Inflation_1quar,Inflation_1mono23,Inflation_1linear,Inflation_1natural,Inflation_smash)
-      DEPENDENCY(multimode_input_parameters, multimode_inputs)
+      DEPENDENCY(multimode_input_parameters, Multimode_inputs)
       BACKEND_REQ(multimodecode_gambit_driver, (), gambit_inflation_observables,(int&  ,int& ,  int& , int& , double* , double* ,
 																																								 double* , double&, double&, double& , int& ,
 																																								 double& , double& , int& , int& ))
@@ -341,14 +341,14 @@ START_MODULE
 
     /*
     #define FUNCTION get_LCDM_primordial_ps
-    START_FUNCTION(primordial_ps)
+    START_FUNCTION(Primordial_ps)
     ALLOW_MODELS(LCDM)
     #undef FUNCTION
     */
 
     /*
     #define FUNCTION get_SMASH_primordial_ps
-    START_FUNCTION(primordial_ps)
+    START_FUNCTION(Primordial_ps)
     ALLOW_MODELS(Inflation_smash)
     #undef FUNCTION
     */

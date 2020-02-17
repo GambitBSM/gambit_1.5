@@ -211,7 +211,7 @@ namespace Gambit
 
 */
     // Class that manages the input dictionary for classy
-    class ClassyInput
+    class Classy_input
     {
       public:
 
@@ -221,12 +221,12 @@ namespace Gambit
         /// -> else: returns sting containing all duplicated keys
         /// need to check after use of this function if returned string was empty to avoid overwriting of
         /// input values & inconsistencies.
-        std::string addDict(pybind11::dict extra_entries);
+        std::string add_dict(pybind11::dict extra_entries);
 
-        void addEntry(str key, double value) {input_dict[key.c_str()]=std::to_string(value).c_str();};
-        void addEntry(str key, int    value) {input_dict[key.c_str()]=std::to_string(value).c_str();};
-        void addEntry(str key, str    value) {input_dict[key.c_str()]=value.c_str();};
-        void addEntry(str key, std::vector<double>& values)
+        void add_entry(str key, double value) {input_dict[key.c_str()]=std::to_string(value).c_str();};
+        void add_entry(str key, int    value) {input_dict[key.c_str()]=std::to_string(value).c_str();};
+        void add_entry(str key, str    value) {input_dict[key.c_str()]=value.c_str();};
+        void add_entry(str key, std::vector<double>& values)
         {
             // get pointers to arrays holding the information that needs
             // to be passed on to class, convert to uintptr_t (type large enough
@@ -246,7 +246,7 @@ namespace Gambit
         //    input_dict[key.c_str()] = addr;
         //};
 
-        bool hasKey(str key){return input_dict.contains(key.c_str());};
+        bool has_key(str key){return input_dict.contains(key.c_str());};
         //int addEntry(str key,std::ostringstream value){input_dict[key.c_str()]=value.c_str()};
 
         // merge dictionaries with overwriting/combining rules that only
@@ -267,10 +267,10 @@ namespace Gambit
     };
 
     /// Class containing the inputs used for inputs to MultiModeCode
-    class multimode_inputs
+    class Multimode_inputs
     {
         public:
-            multimode_inputs();
+            Multimode_inputs();
 
             // K array.
             double k_min;
@@ -313,11 +313,11 @@ namespace Gambit
     /// - vector of modes k (1/Mpc)
     /// - scalar power spectrum of these modes P_s(k) (dimensionless)
     /// - tensor power spectrum of these modes P_t(k) (dimensionless)
-    class primordial_ps
+    class Primordial_ps
     {
         public:
-            primordial_ps() {};
-            ~primordial_ps() {};
+            Primordial_ps() {};
+            ~Primordial_ps() {};
 
             // Fill k from an array of doubles
             void fill_k(double*, int);
@@ -355,10 +355,10 @@ namespace Gambit
     /// - spectral tilt n_s
     /// - amplitude of scalar perturbations A_s
     /// - scalar to tensor ratio r
-    class parametrised_ps
+    class Parametrised_ps
     {
         public:
-            parametrised_ps();
+            Parametrised_ps();
 
             void set_n_s(double ns) {n_s = ns;};
             void set_A_s(double As) {A_s = As;};
