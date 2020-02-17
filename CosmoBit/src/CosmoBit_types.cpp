@@ -131,9 +131,9 @@ namespace Gambit
     }
 
 /*
-    ----------  ClassyInput Methods ---------
-    In the following the methods of the Class 'ClassyInput' are implemented. 
-    ClassyInput has the attribute 'input_dict' which is a python dictionary 
+    ----------  Classy_input Methods ---------
+    In the following the methods of the Class 'Classy_input' are implemented. 
+    Classy_input has the attribute 'input_dict' which is a python dictionary 
     containing the input parameters for CLASS
 
 */
@@ -145,7 +145,7 @@ namespace Gambit
     /// -> else: returns sting containing all duplicated keys
     /// need to check after use of this function if returned string was empty to avoid overwriting of 
     /// input values & inconsistencies. 
-    std::string ClassyInput::addDict(pybind11::dict extra_dict)
+    std::string Classy_input::add_dict(pybind11::dict extra_dict)
     {
       // string to be returned -- stays empty if no duplicated dict entries are found
       std::string common_keys ("");
@@ -170,8 +170,8 @@ namespace Gambit
       return common_keys;
     }
 
-    // function to merge python dictionary extra_dict into input_dict (member of ClassyInput). 
-    void ClassyInput::merge_input_dicts(pybind11::dict extra_dict) 
+    // function to merge python dictionary extra_dict into input_dict (member of Classy_input). 
+    void Classy_input::merge_input_dicts(pybind11::dict extra_dict) 
     {
       static bool first_run = true;
       // call function to merge classy pybind dicts defined in CosmoBit_utils.cpp
@@ -185,7 +185,7 @@ namespace Gambit
 
     // return stringstream to print current entries of 
     // input_dict (can be send to logger)
-    std::string ClassyInput::print_entries_to_logger()
+    std::string Classy_input::print_entries_to_logger()
     {
       using namespace LogTags;
       std::ostringstream log_msg;
@@ -201,15 +201,15 @@ namespace Gambit
     }
 
     // Default constructor for multimode inputs...
-    multimode_inputs::multimode_inputs() {};
+    Multimode_inputs::Multimode_inputs() {};
 
     // // Default constructor for primordial and parametrised power spectra
-    // primordial_ps::primordial_ps() 
+    // Primordial_ps::primordial_ps() 
     // {
     //   std::cout << "Calling primordial_ps constructor..." << std::endl;
     // };
 
-    void primordial_ps::fill_k(double *k_array, int len)
+    void Primordial_ps::fill_k(double *k_array, int len)
     {
       std::vector<double> K(k_array, k_array+len);
       k = std::move(K);
@@ -221,24 +221,24 @@ namespace Gambit
       //for( int i =0; i<len;i++) {std::cout << k[i] << std::endl;};
     }
 
-    void primordial_ps::fill_P_s(double *P_s_array, int len)
+    void Primordial_ps::fill_P_s(double *P_s_array, int len)
     {
       std::vector<double> ps(P_s_array, P_s_array+len);
       P_s = std::move(ps);
     }    
-    void primordial_ps::fill_P_s_iso(double *P_s_iso_array, int len)
+    void Primordial_ps::fill_P_s_iso(double *P_s_iso_array, int len)
     {
       std::vector<double> psi(P_s_iso_array, P_s_iso_array+len);
       P_s_iso = std::move(psi);
     }    
-    void primordial_ps::fill_P_t(double *P_t_array, int len)
+    void Primordial_ps::fill_P_t(double *P_t_array, int len)
     {
       std::vector<double> pt(P_t_array, P_t_array+len);
       P_t = std::move(pt);
     }
 
 
-    parametrised_ps::parametrised_ps() {};
+    Parametrised_ps::Parametrised_ps() {};
 
   }
 }

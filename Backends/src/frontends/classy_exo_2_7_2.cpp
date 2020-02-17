@@ -60,7 +60,7 @@ BE_NAMESPACE
       // (as soon there is a real fast-slow scanner implemented this sould probably be changed)
       if(it.first.cast<std::string>().find("array") != std::string::npos){return false;}
       if(it.first.cast<std::string>().find("pointer_to") != std::string::npos){return false;}
-      
+
       // return false if unequal values are found
       if (classy_input[it.first].cast<std::string>() != prev_input_dict[it.first].cast<std::string>()){return false;}
     }
@@ -339,7 +339,7 @@ BE_INI_FUNCTION
   static int max_errors = 100;
 
   // get input for CLASS run set by CosmoBit 
-  CosmoBit::ClassyInput input_container= *Dep::classy_final_input;
+  CosmoBit::Classy_input input_container= *Dep::classy_final_input;
   pybind11::dict cosmo_input_dict = input_container.get_input_dict();
 
   // Translate inputs related to energy injection back into the old convention
