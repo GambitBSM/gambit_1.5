@@ -60,9 +60,9 @@ namespace Gambit
     /// type to store likelihood calculation results from MontePython
     /// has two members: logLike_results & obs_results, both string to double map
     /// mapping the MontePython experiment/likelihood name to the calculated LogLike
-    ///     - logLike_results:  contains results from all experiment names tagged with 'Likelihood',
+    ///     - logLike_results:  contains results from all experiment names tagged with 'Likelihood', 
     ///         i.e. the likelihoods being added to total LogLike to drive scan
-    ///     - obs_results:  contains results from all experiment names tagged with 'Observable',
+    ///     - obs_results:  contains results from all experiment names tagged with 'Observable', 
     ///         i.e. the likelihoods NOT added to total LogLike to drive scan
     class MPLike_result_container
     {

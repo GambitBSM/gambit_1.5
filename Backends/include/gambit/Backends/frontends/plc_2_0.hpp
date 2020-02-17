@@ -57,6 +57,5 @@ BE_CONV_FUNCTION(plc_loglike_lowl_TEB_2015,double,(double*),"plc_loglike_lowl_TE
 BE_CONV_FUNCTION(plc_loglike_lowl_TT_2015,double,(double*),"plc_loglike_lowl_TT_2015",(cosmo_nuisance_Planck_TTTEEE, cosmo_nuisance_Planck_TT,cosmo_nuisance_Planck_lite))
 BE_CONV_FUNCTION(plc_loglike_lensing_2015,double,(double*),"plc_loglike_lensing_2015",(cosmo_nuisance_Planck_TTTEEE, cosmo_nuisance_Planck_TT, cosmo_nuisance_Planck_lite))
 
-
 // Undefine macros to avoid conflict with other backends
 #include "gambit/Backends/backend_undefs.hpp"
