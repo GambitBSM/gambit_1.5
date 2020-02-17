@@ -19,7 +19,7 @@
 Parameters:
  
  # --- import model parameters for models to scan over ---
- LCDM: !import include/LCDM_scan.yaml        # base LCDM
+ LCDM: !import include/LCDM_fixed.yaml        # base LCDM
 
  # Everything Neff and eta related
  #etaBBN: !import include/etaBBN.yaml
@@ -44,7 +44,7 @@ Parameters:
   
 
  # neutrino masses
- StandardModel_mNudiff: !import include/StandardModel_mNudiff_both_scan.yaml
+ #StandardModel_mNudiff: !import include/StandardModel_mNudiff_both_scan.yaml
 
  # Cosmological nuisance parameters (except for Planck CMB Likelihoods) 
  cosmo_nuisance_Pantheon: !import include/cosmo_nuisance_Pantheon.yaml
@@ -111,8 +111,8 @@ Rules:
     function: set_classy_baseline_params
     options:
       classy_dict:
-         P_k_max_h/Mpc: 3
-         m_ncdm: 2
+         #P_k_max_h/Mpc: 3
+         #m_ncdm: 2
       
   # you have to set by hand if you want to set the class parameters with or without setting arguments from MontePython Likelihoods
   # if the montepythonlike backend is installed (if not it should automatically choose the function 'init_Classy_cosmo_container')

@@ -52,6 +52,14 @@ BE_NAMESPACE
   {
     for (auto it : classy_input)
     {
+      // test if any pointer is being passed to CLASS -- if so you'd need to compare the contents
+      // of the vectors, so just recompute by default in that case (atm the options that pass pointser
+      // can be identified by searching for 'array' or 'pointer_to' in the CLASS input dict. If more of 
+      // these cases are implemented the checks have to be added here.)
+      // (as soon there is a real fast-slow scanner implemented this sould probably be changed)
+      if(it.first.cast<std::string>().find("array") != std::string::npos){return false;}
+      if(it.first.cast<std::string>().find("pointer_to") != std::string::npos){return false;}
+      
       // return false if unequal values are found
       if (classy_input[it.first].cast<std::string>() != prev_input_dict[it.first].cast<std::string>()){return false;}
     }
