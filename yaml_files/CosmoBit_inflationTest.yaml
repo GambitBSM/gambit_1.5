@@ -25,6 +25,7 @@ Parameters:
       fixed_value: 6.81383e+01
     tau_reio:
       fixed_value: 7.25805e-02
+    T_cmb: 2.72548
   #  ln10A_s: 3.0
   #  n_s: 1.0
   
@@ -163,6 +164,11 @@ Rules:
         output: tCl
         #k_pivot: 0.03
         #P_k_ini type : analytic_Pk
+
+  - capability: classy_primordial_parameters
+    function: set_classy_parameters_primordial_ps
+    module: CosmoBit
+
   
   #- capability: set_classy_parameters
   #  function: set_classy_parameters_parametrised_ps

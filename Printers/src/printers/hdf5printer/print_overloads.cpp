@@ -181,11 +181,11 @@ namespace Gambit
     void HDF5Printer::_print(CosmoBit::parametrised_ps const& value, const std::string& label, const int vID, const unsigned int mpirank, const unsigned long pointID)
     {
       std::map<std::string, double> m;
-      m["n_s"] = value.get_ns();
+      m["n_s"] = value.get_n_s();
       m["r"] = value.get_r();
-      m["A_s"] = value.get_As();
-      m["k_pivot"] = value.get_kpivot();
-      m["N_pivot"] = value.get_Npivot();
+      m["A_s"] = value.get_A_s();
+      m["k_pivot"] = value.get_k_pivot();
+      m["N_pivot"] = value.get_N_pivot();
       _print(m, label, vID, mpirank, pointID);
     }
 

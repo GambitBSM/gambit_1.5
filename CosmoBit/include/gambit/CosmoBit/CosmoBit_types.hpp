@@ -325,16 +325,16 @@ namespace Gambit
             void fill_P_s(double*, int);
             void fill_P_s_iso(double*, int);
             void fill_P_t(double*, int);
-            void set_kpivot(double k) {k_pivot = k;};
-            void set_Npivot(double N) {N_pivot = N;};
+            void set_k_pivot(double k) {k_pivot = k;};
+            void set_N_pivot(double N) {N_pivot = N;};
 
 
             std::vector<double>& get_k() { return k; }
             std::vector<double>& get_P_s() { return P_s; }
             std::vector<double>& get_P_t() { return P_t; }
             int get_vec_size() { return vec_size; }
-            double get_kpivot() {return k_pivot;};
-            double get_Npivot() {return N_pivot;};
+            double get_k_pivot() {return k_pivot;};
+            double get_N_pivot() {return N_pivot;};
 
         private:
             std::vector<double> k;
@@ -361,17 +361,17 @@ namespace Gambit
         public:
             parametrised_ps();
 
-            void set_ns(double ns) {n_s = ns;};
-            void set_As(double As) {A_s = As;};
+            void set_n_s(double ns) {n_s = ns;};
+            void set_A_s(double As) {A_s = As;};
             void set_r(double R) {r = R;};
-            void set_kpivot(double k) {k_pivot = k;};
-            void set_Npivot(double N) {N_pivot = N;};
+            void set_k_pivot(double k) {k_pivot = k;};
+            void set_N_pivot(double N) {N_pivot = N;};
 
-            double get_ns() const {return n_s;};
-            double get_As() const {return A_s;};
+            double get_n_s() const {return n_s;};
+            double get_A_s() const {return A_s;};
             double get_r() const {return r;};
-            double get_kpivot() const {return k_pivot;};
-            double get_Npivot() const {return N_pivot;};
+            double get_k_pivot() const {return k_pivot;};
+            double get_N_pivot() const {return N_pivot;};
 
 
         private:

@@ -722,8 +722,8 @@ namespace Gambit
       // Now need to pass the primordial power spectrum
       // TODO check whether A_s from MultiModeCode has the log taken or not.
       parametrised_ps pps = *Dep::parametrised_power_spectrum;
-      result.addEntry("n_s", pps.get_ns());
-      result.addEntry("ln10^{10}A_s", pps.get_As());
+      result.addEntry("n_s", pps.get_n_s());
+      result.addEntry("ln10^{10}A_s", pps.get_A_s());
       
 
       // if r = 0 only compute scalar modes, else tensor modes as well
@@ -744,7 +744,7 @@ namespace Gambit
       // k_pivot is an input parameter the user can freely choose. This setting is done via the yaml file,
       // i.e. runOption for capability 'classy_baseline_params', classy_dict (see CosmoBit_tutorial.yaml). 
       // If no value for 'k_pivot' is passed GAMBIT will use 0.05, the same default value as CLASS.
-      if (ModelInUse("LCDM_no_primordial")){result.addEntry("k_pivot", pps.get_kpivot());}
+      if (ModelInUse("LCDM_no_primordial")){result.addEntry("k_pivot", pps.get_k_pivot());}
 
       // Get standard cosmo parameters, nu masses, helium abundance &
       // extra run options for class passed in yaml file to capability
@@ -787,7 +787,7 @@ namespace Gambit
       result.addEntry("pkt_array", pps.get_P_t());
       result.addEntry("lnk_size" , pps.get_vec_size()); // don't hard code but somehow make consistent with multimode @TODO -> test
       // pass pivot scale of external spectrum to CLASS
-      result.addEntry("k_pivot", pps.get_kpivot());
+      result.addEntry("k_pivot", pps.get_k_pivot());
       
       // Get standard cosmo parameters, nu masses, helium abundance &
       // extra run options for class passed in yaml file to capability
@@ -1017,8 +1017,8 @@ namespace Gambit
       // to the spectra module of CLASS
       // (not using N_pivot/N_star further atm, but can't harm to 
       // make it available for further use as well)
-      result.set_kpivot(inputs.k_pivot);
-      result.set_Npivot(inputs.N_pivot);
+      result.set_k_pivot(inputs.k_pivot);
+      result.set_N_pivot(inputs.N_pivot);
     }
 
     /// Passes the inputs from the MultiModeCode initialisation function 
@@ -1054,15 +1054,15 @@ namespace Gambit
 																											 inputs.dlnk,
 																											 inputs.vparam_rows);
 
-      result.set_ns(observables.ns);
-      result.set_As(observables.As);
+      result.set_n_s(observables.ns);
+      result.set_A_s(observables.As);
       result.set_r(observables.r);
       // k_pivot needs to be stored to be passed correctly
       // to the spectra module of CLASS
       // (not using N_pivot/N_star further atm, but can't harm to 
       // make it available for further use as well)
-      result.set_kpivot(inputs.k_pivot);
-      result.set_Npivot(inputs.N_pivot);
+      result.set_k_pivot(inputs.k_pivot);
+      result.set_N_pivot(inputs.N_pivot);
     }
 		
 		
@@ -1087,8 +1087,8 @@ namespace Gambit
       //}
 
       parametrised_ps pps;
-      pps.set_ns(*Param["n_s"]);
-      pps.set_As(*Param["ln10A_s"]);
+      pps.set_n_s(*Param["n_s"]);
+      pps.set_A_s(*Param["ln10A_s"]);
       pps.set_r(0); 
 
       result = pps;
@@ -1210,8 +1210,8 @@ namespace Gambit
          */
         //-------------------------------------------------------------
         parametrised_ps pps;
-        pps.set_ns(ns_self);
-        pps.set_As(As_self); // TODO check if we need to exponentiate
+        pps.set_n_s(ns_self);
+        pps.set_A_s(As_self); // TODO check if we need to exponentiate
         pps.set_r(r_self); 
 
         result = pps;
