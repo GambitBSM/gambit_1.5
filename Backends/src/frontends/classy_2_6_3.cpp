@@ -81,7 +81,7 @@ BE_NAMESPACE
       errMssg << "You are calling class asking for the following modes to be computed : "<< pybind11::repr(classy_input["modes"]);
       errMssg << "\nHowever, you did not request any output that requires solving the perturbations.\nHence CLASS";
       errMssg << " will not read the input 'modes' and won't run. Add the CLASS input parameter 'output' requesting";
-      errMssg << " a spectrum to be computed to the yaml file as run option, e.g. \n  - capability: baseline_classy_input\n";
+      errMssg << " a spectrum to be computed to the yaml file as run option, e.g. \n  - capability: classy_baseline_params\n";
       errMssg << "    options:\n      classy_dict:\n        output: tCl";
       backend_error().raise(LOCAL_INFO,errMssg.str());
     }
