@@ -128,6 +128,7 @@ contains
 
 		call deallocate_vars()
 
+    calc_full_pk = .true.
     slowroll_infl_end = .true.
     instreheat = .true.
     use_deltaN_SR = .false.
