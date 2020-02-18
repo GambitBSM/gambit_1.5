@@ -50,26 +50,39 @@ else()
 endif()
 
 if(CYTHON_EXECUTABLE)
-  set(CYTHON_version_command ${CYTHON_EXECUTABLE} --version)
+#  set(CYTHON_version_command ${CYTHON_EXECUTABLE} --version)
 
-  execute_process(COMMAND ${CYTHON_version_command}
-                  OUTPUT_VARIABLE CYTHON_version_output
-                  ERROR_VARIABLE CYTHON_version_error
-                  RESULT_VARIABLE CYTHON_version_result
-                  OUTPUT_STRIP_TRAILING_WHITESPACE)
+#   execute_process(COMMAND ${CYTHON_version_command}
+#                   OUTPUT_VARIABLE CYTHON_version_output
+#                   ERROR_VARIABLE CYTHON_version_error
+#                   RESULT_VARIABLE CYTHON_version_result
+#                   OUTPUT_STRIP_TRAILING_WHITESPACE)
 
-  if(NOT ${CYTHON_version_result} EQUAL 0)
-    set(_error_msg "Command \"${CYTHON_version_command}\" failed with")
-    set(_error_msg "${_error_msg} output:\n${CYTHON_version_error}")
-    message(SEND_ERROR "${_error_msg}")
+#  message("${PYTHON_EXECUTABLE} -m cython --version")
+  execute_process(COMMAND ${PYTHON_EXECUTABLE} -m cython --version
+                  RESULT_VARIABLE cython_result
+                  ERROR_VARIABLE cython_output)
+  
+  if(cython_result EQUAL 0)
+    string(REGEX REPLACE "^Cython version ([0-9]+\\.[0-9]+).*" "\\1" CYTHON_VERSION "${cython_output}")
   else()
-    if("${CYTHON_version_output}" MATCHES "^[Cc]ython version ([^,]+)")
-      set(CYTHON_VERSION "${CMAKE_MATCH_1}")
-    endif()
+    message("Could not find cython${PYTHON_VERSION}: ${cython_output}")
   endif()
+
+#   if(NOT ${CYTHON_version_result} EQUAL 0)
+#     set(_error_msg "Command \"${CYTHON_version_command}\" failed with")
+#     set(_error_msg "${_error_msg} output:\n${CYTHON_version_error}")
+#     message(SEND_ERROR "${_error_msg}")
+#   else()
+#     if("${CYTHON_version_output}" MATCHES "^[Cc]ython version ([^,]+)")
+#       set(CYTHON_VERSION "${CMAKE_MATCH_1}")
+#     endif()
+#   endif()
+
 endif()
 
 include(FindPackageHandleStandardArgs)
-FIND_PACKAGE_HANDLE_STANDARD_ARGS(Cython REQUIRED_VARS CYTHON_EXECUTABLE)
+# FIND_PACKAGE_HANDLE_STANDARD_ARGS(Cython REQUIRED_VARS CYTHON_EXECUTABLE)
+find_package_handle_standard_args(Cython${PYTHON_VERSION} DEFAULT_MSG CYTHON_VERSION)
 
 mark_as_advanced(CYTHON_EXECUTABLE)
