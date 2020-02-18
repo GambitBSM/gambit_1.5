@@ -976,8 +976,9 @@ namespace Gambit
       // Get the inflationary inputs
       Multimode_inputs inputs = *Dep::multimode_input_parameters;
 
-      double N_pivot_prior_min = inputs.N_pivot;
-      double N_pivot_prior_max = inputs.N_pivot;
+      // TODO S.B shouldn't need these...
+      // double N_pivot_prior_min = inputs.N_pivot;
+      // double N_pivot_prior_max = inputs.N_pivot;
 
       // The parameters below are only used by multimode if the full Pk is requested. 
       int steps = inputs.numsteps;
@@ -1031,9 +1032,9 @@ namespace Gambit
       // Get the inflationary inputs
       Multimode_inputs inputs = *Dep::multimode_input_parameters;
 
-      double N_pivot_prior_min = inputs.N_pivot; // (JR) can these two be removed here since we probably don't
-      double N_pivot_prior_max = inputs.N_pivot; // vary Npivot when using the parameterised ps? 
-
+      // TODO S.B shouldn't need these...
+      // double N_pivot_prior_min = inputs.N_pivot;
+      // double N_pivot_prior_max = inputs.N_pivot;
 
       gambit_inflation_observables observables;
 

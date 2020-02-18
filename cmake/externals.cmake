@@ -131,6 +131,10 @@ function(check_ditch_status name version dir)
   # Check first for optional argument for Mathematica backends
   if ((ARGN STREQUAL "Mathematica" OR ARGN STREQUAL "mathematica") AND NOT HAVE_MATHEMATICA)
     set (itch "${itch}" "${name}_${version}")
+  endif()  
+  # Check first for optional argument for Python2 specific backends
+  if ((ARGN STREQUAL "Python2" OR ARGN STREQUAL "python2"))
+    set (itch "${itch}" "${name}_${version}")
   endif()
   foreach(ditch_command ${itch})
     execute_process(COMMAND ${PYTHON_EXECUTABLE} -c "print(\"${name}_${version}\".startswith(\"${ditch_command}\"))"
