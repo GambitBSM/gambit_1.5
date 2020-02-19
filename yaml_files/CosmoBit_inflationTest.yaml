@@ -26,58 +26,23 @@ Parameters:
     tau_reio:
       fixed_value: 7.25805e-02
     T_cmb: 2.72548
-  #  ln10A_s: 3.0
-  #  n_s: 1.0
+    # ln10A_s: 3.0
+    # n_s: 1.0
   
-  #  omega_b:
-  #    fixed_value: 2.24052e-02
-  #  omega_cdm:
-  #    fixed_value: 1.18078e-01
-  #  H0:
-  #    fixed_value: 6.81383e+01
-  #  tau_reio:
-  #    fixed_value: 7.25805e-02
-
   Inflation_1quar:
-    N_pivot: 40
-      #prior_type: flat
-      #range: [40.0,70.0]
+    N_pivot: 100
     lambda: -9.9
-      #prior_type: flat
-      #range: [-9.8,-9.10]
     phi_init0: 10
-     #fixed_value: 10.0
-    
-  #Inflation_SR1quad:
-  #  N_pivot: 40
-  #    #prior_type: flat
-  #    #range: [40.0,70.0]
-  #  m2_inflaton: -9.9
-  #    #prior_type: flat
-  #    #range: [-9.8,-9.10]
-  #  phi_init0:
-  #    fixed_value: 10.0
-    
-  #Inflation_1quar:
-  #  N_pivot:
-  #    prior_type: flat
-  #    range: [40.0,70.0]
-  #  lambda:
-  #    prior_type: flat
-  #    range: [-9.8,-9.10]
-  #  phi_init0:
-  #    fixed_value: 10.0
-    
+       
 
 #======== Prior setup ========
 Priors:
 
 #======== Output setup ========
 Printer:
-  printer: ascii
+  printer: cout
   options:
     output_file: "results.data"
-    #group: "/CosmoBitDEV_LCDMt_smashInf_multinest"
     buffer_length: 3
 
 #======== Scanner setup ========
@@ -96,15 +61,11 @@ Scanner:
 
     random:
       plugin: random
-      point_number: 2
+      point_number: 10
       like:  LogLike
             
 #======== Observables of interest ========
 ObsLikes:
-  #- purpose:      LogLike
-  #  capability:   compute_smashInf_rLCDMtensor_lowp_TT_loglike
-  #  module:       CosmoBitDEV
-  #  type:         double
 
   - purpose:      LogLike
     capability:   MP_Combined_LogLike
@@ -135,7 +96,6 @@ Rules:
       k_pivot:                  0.01
       dlnk:                     0.4
 # For calculating the full power spectrum P(k).  Samples in uniform increments in log(k).
-      #calc_full_pk: 0
       numsteps: 500
       k_min: 1e-7
       k_max: 1e6
@@ -145,17 +105,15 @@ Rules:
     backends:
     - {capability: get_classy_cosmo_object, backend: classy, version: 2.6.3}
 
-  #- capability: get_classy_cosmo_object
-  #  backends:
-  #    - {capability: get_classy_cosmo_object, backend: classy, version: 2.6.3}
-
   - capability: classy_final_input
     function: set_classy_input_with_MPLike
   
-  - capability: set_classy_parameters
+  - capability: classy_primordial_parameters
     function: set_classy_parameters_parametrised_ps
-    #function: set_classy_parameters_primordial_ps
-  #  module: CosmoBit
+
+  - capability: parametrised_power_spectrum
+    function: get_multimode_parametrised_ps
+    module: CosmoBit
 
   - capability: classy_baseline_params
     #function: set_classy_baseline_params
@@ -164,20 +122,6 @@ Rules:
         output: tCl
         #k_pivot: 0.03
         #P_k_ini type : analytic_Pk
-
-  - capability: classy_primordial_parameters
-    function: set_classy_parameters_primordial_ps
-    module: CosmoBit
-
-  
-  #- capability: set_classy_parameters
-  #  function: set_classy_parameters_parametrised_ps
-  #  options:
-  #    classy_dict:
-  #      output: 'tCl'   # need to add this since otherwise the input 'modes' is not read => class throws an error
-  #                      # in the future this would ideally be taken care of automatically -> one observable that you HAVE to 
-  #                      # calculate for every inflation model? Then we can add it to the set_classy_function (there probably
-  #                      # is but I just have no idea about inflation ;)) 
 
   - capability: MP_experiment_names
     function: set_MP_experiment_names
@@ -189,7 +133,7 @@ Rules:
       #       bicep does not work -> gaussian nuisance param problem in 'add_nuisance_prior'
       Likelihoods: 
         #acbar: default
-        bao_smallz_2014: default
+        #bao_smallz_2014: default
         hst: default
 
   # error calculation precision settings for AltterBBN
@@ -212,7 +156,8 @@ KeyValues:
   default_output_path: "runs/inflation-test"
 
   debug: true
-##  rng: ranlux48
+
+  print_timing_data: true
 
   likelihood:
     model_invalid_for_lnlike_below: -1e6

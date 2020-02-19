@@ -49,6 +49,8 @@ MODULE multimodecode_gambit
     real(dp) , dimension(1000) :: pks_iso_array
     real(dp) , dimension(1000) :: pkt_array
     integer :: k_size
+    !Error checking
+    integer :: err
   end type gambit_inflation_observables
 
 
@@ -57,21 +59,21 @@ MODULE multimodecode_gambit
 
 contains
 
-  function multimodecode_gambit_driver(ginput_num_inflaton,&
-                                         ginput_potential_choice,&
-                                         ginput_evaluate_modes,&
-                                         ginput_get_runningofrunning,&
-                                         ginput_phi_init0,&
-                                         ginput_dphi_init0,&
-                                         ginput_vparams,&
-                                         ginput_N_pivot,&
-                                         ginput_k_pivot,&
-                                         ginput_dlnk, &
-                                         ginput_steps, &
-                                         ginput_kmin, &
-                                         ginput_kmax, &
-                                         ginput_vparam_rows &
-																				 ) result(gambit_obs)
+  function multimodecode_gambit_driver(ginput_num_inflaton, &
+                                       ginput_potential_choice, &
+                                       ginput_evaluate_modes, &
+                                       ginput_get_runningofrunning, &
+                                       ginput_phi_init0, &
+                                       ginput_dphi_init0, &
+                                       ginput_vparams, &
+                                       ginput_N_pivot, &
+                                       ginput_k_pivot, &
+                                       ginput_dlnk, &
+                                       ginput_steps, &
+                                       ginput_kmin, &
+                                       ginput_kmax, &
+                                       ginput_vparam_rows &
+																		 ) result(gambit_obs)
 
     type(gambit_inflation_observables) :: gambit_obs ! output
 
@@ -126,7 +128,7 @@ contains
     logical :: calc_full_pk
     integer :: pfile
 
-		call deallocate_vars()
+    call deallocate_vars()
 
     calc_full_pk = .true.
     slowroll_infl_end = .true.
@@ -212,15 +214,19 @@ contains
     call observs%set_zero()
     call observs_SR%set_zero()
 
+    !Set error code to 0
+    gambit_obs%err = 0
 
     !Set random seed
     call init_random_seed()
 
-		call calculate_pk_observables(gambit_obs,observs,observs_SR,k_pivot,dlnk,calc_full_pk,steps,k_min,k_max)
+    call calculate_pk_observables(gambit_obs,observs,observs_SR,k_pivot,dlnk,calc_full_pk,steps,k_min,k_max)
 
-		! it might make sense instead to put zero's etc. to the values here instead of just returning
+    ! SMASH potential.
     if (potential_choice == 18) then
+      ! it might make sense instead to put zero's etc. to the values here instead of just returning
       if (.not. observs%is_ic_ok) then
+        gambit_obs%err = 999 ! TODO choose error messages
         RETURN
       else
         ! at the moment, smash potential is only calculated by solving the background dynamics
@@ -251,6 +257,7 @@ contains
       gambit_obs%runofrun = observs%runofrun
       gambit_obs%f_NL = observs%f_NL
       gambit_obs%tau_NL = observs%tau_NL
+
       !-------------setting up the observables--------------------
 
     end if
@@ -297,7 +304,7 @@ contains
         do i=1,steps
           call evolve(k_input(i), pk)
 
-          pk_arr(i,:)=(/k_input(i),&
+          pk_arr(i,:)=(/k_input(i), &
             pk%adiab, &
             pk%isocurv, &
             pk%entropy, &
@@ -390,7 +397,7 @@ contains
       call observs%set_zero()
       call observs_SR%set_zero()
 
-      pk_bad = run_outcome%success
+      observs_gambit%err = run_outcome%success
       leave = .false.
 
       !Get vparams
@@ -417,7 +424,7 @@ contains
       !   end if
       ! end if
 
-      call test_bad(pk_bad, observs, leave)
+      call test_bad(observs_gambit%err, observs, leave)
       if (leave) return
 
       !Calculate SR approximation for sum-separable potentials
@@ -433,7 +440,7 @@ contains
       if (evaluate_modes) then
 
         call evolve(k_pivot, pk0)
-          call test_bad(pk_bad, observs, leave)
+          call test_bad(observs_gambit%err, observs, leave)
           if (leave) then
             return
           end if
@@ -442,11 +449,11 @@ contains
 !stop
 
         call evolve(k_pivot*exp(-dlnk), pk1)
-          call test_bad(pk_bad, observs, leave)
+          call test_bad(observs_gambit%err, observs, leave)
           if (leave) return
 
           call evolve(k_pivot*exp(dlnk), pk2)
-          call test_bad(pk_bad, observs, leave)
+          call test_bad(observs_gambit%err, observs, leave)
           if (leave) return
 
         if (get_runningofrunning) then
@@ -454,11 +461,11 @@ contains
             !or running of running
           call evolve(k_pivot*exp(-2.0e0_dp*dlnk), pk3)
 
-            call test_bad(pk_bad, observs, leave)
+            call test_bad(observs_gambit%err, observs, leave)
             if (leave) return
           call evolve(k_pivot*exp(2.0e0_dp*dlnk), pk4)
 
-            call test_bad(pk_bad, observs, leave)
+            call test_bad(observs_gambit%err, observs, leave)
             if (leave) return
         end if
 
@@ -467,9 +474,9 @@ contains
           call observs%set_finite_diff(dlnk, &
             pk0,pk1,pk2,pk3,pk4, &
             field_bundle%exp_scalar)
-          !print*,"here we calculate the observables!"
+          !print*,"here we calculate the observables! (476)"
         else
-          !print*,"here we calculate the observables!"
+          !print*,"here we calculate the observables! (478)"
           call observs%set_finite_diff(dlnk, &
             pk0,pk1,pk2,&
             bundle_width=field_bundle%exp_scalar)
@@ -546,6 +553,7 @@ contains
       if (pk_bad /= run_outcome%success) then
 
         call run_outcome%print_outcome(pk_bad)
+
         call observ%set_zero()
         !Flag for voiding calculation
         leave = .true.
@@ -617,7 +625,7 @@ contains
     logical :: calc_full_pk
     integer :: pfile
 
-		call deallocate_vars()
+    call deallocate_vars()
 
     calc_full_pk = .false.
     slowroll_infl_end = .true.
@@ -696,11 +704,17 @@ contains
     !Set random seed
     call init_random_seed()
 
-		call calculate_pk_observables(gambit_obs,observs,observs_SR,k_pivot,dlnk)
+    print*, "calling calculate_pk_observables"
 
-		! it might make sense instead to put zero's etc. to the values here instead of just returning
+    call calculate_pk_observables(gambit_obs,observs,observs_SR,k_pivot,dlnk)
+
+    print*, "already left"
+
+    !print*,"Observables calculated! (708)"
+
     if (potential_choice == 18) then
       if (.not. observs%is_ic_ok) then
+        ! it might make sense instead to put zero's etc. to the values here instead of just returning
         ! print*, "SMASH: exiting pk_observables "
         RETURN
       else
@@ -732,6 +746,12 @@ contains
       gambit_obs%runofrun = observs%runofrun
       gambit_obs%f_NL = observs%f_NL
       gambit_obs%tau_NL = observs%tau_NL
+
+
+      !print*, gambit_obs%As
+      !print*, gambit_obs%ns
+      !print*, gambit_obs%r
+      !print*, gambit_obs%err
       !-------------setting up the observables--------------------
 
     end if
@@ -813,7 +833,7 @@ contains
       call observs%set_zero()
       call observs_SR%set_zero()
 
-      pk_bad = run_outcome%success
+      observs_gambit%err = run_outcome%success
       leave = .false.
 
       !Get vparams
@@ -833,7 +853,7 @@ contains
       !Initialize potential and calc background
       call potinit(observs)
 
-      call test_bad(pk_bad, observs, leave)
+      call test_bad(observs_gambit%err, observs, leave)
       if (leave) return
 
       !Calculate SR approximation for sum-separable potentials
@@ -849,7 +869,7 @@ contains
       if (evaluate_modes) then
 
         call evolve(k_pivot, pk0)
-          call test_bad(pk_bad, observs, leave)
+          call test_bad(gambit_obs%err, observs, leave)
           if (leave) then
             return
           end if
@@ -883,9 +903,9 @@ contains
           call observs%set_finite_diff(dlnk, &
             pk0,pk1,pk2,pk3,pk4, &
             field_bundle%exp_scalar)
-          !print*,"here we calculate the observables!"
+          !print*,"here we calculate the observables! (893)"
         else
-          !print*,"here we calculate the observables!"
+          !print*,"here we calculate the observables! (895)"
           call observs%set_finite_diff(dlnk, &
             pk0,pk1,pk2,&
             bundle_width=field_bundle%exp_scalar)
@@ -947,6 +967,8 @@ contains
       integer,  intent(in)     :: pk_bad
       logical,  intent(inout)  :: leave
       type(observables) :: observ
+
+      print*, pk_bad
 
       if (pk_bad /= run_outcome%success) then
 
