@@ -8,10 +8,6 @@
 
 
 #======== Input parameter declarations =======
-# neutrino masses
-#StandardModel_numass_single: !import include/StandardModel_numass_single_scan.yaml
-
-
 Parameters:
   StandardModel_mNudiff: !import include/StandardModel_mNudiff_both_scan.yaml
   
@@ -57,7 +53,7 @@ Parameters:
   #    #range: [-9.8,-9.10]
   #  phi_init0:
   #    fixed_value: 10.0
-    
+
   #Inflation_1quar:
   #  N_pivot:
   #    prior_type: flat
@@ -77,7 +73,6 @@ Printer:
   printer: ascii
   options:
     output_file: "results.data"
-    #group: "/CosmoBitDEV_LCDMt_smashInf_multinest"
     buffer_length: 3
 
 #======== Scanner setup ========
@@ -101,10 +96,6 @@ Scanner:
             
 #======== Observables of interest ========
 ObsLikes:
-  #- purpose:      LogLike
-  #  capability:   compute_smashInf_rLCDMtensor_lowp_TT_loglike
-  #  module:       CosmoBitDEV
-  #  type:         double
 
   - purpose:      LogLike
     capability:   MP_Combined_LogLike
@@ -212,7 +203,6 @@ KeyValues:
   default_output_path: "runs/inflation-test"
 
   debug: true
-##  rng: ranlux48
 
   likelihood:
     model_invalid_for_lnlike_below: -1e6

@@ -8,10 +8,6 @@
 
 
 #======== Input parameter declarations =======
-# neutrino masses
-#StandardModel_numass_single: !import include/StandardModel_numass_single_scan.yaml
-
-
 Parameters:
   StandardModel_numass_degenerate: !import include/StandardModel_numass_degenerate_scan.yaml
   
@@ -46,7 +42,6 @@ Printer:
   printer: ascii
   options:
     output_file: "results.data"
-    #group: "/CosmoBitDEV_LCDMt_smashInf_multinest"
     buffer_length: 3
 
 #======== Scanner setup ========
@@ -70,11 +65,6 @@ Scanner:
             
 #======== Observables of interest ========
 ObsLikes:
-  #- purpose:      LogLike
-  #  capability:   compute_smashInf_rLCDMtensor_lowp_TT_loglike
-  #  module:       CosmoBitDEV
-  #  type:         double
-
   - purpose:      LogLike
     capability:   MP_Combined_LogLike
     module:       CosmoBit
@@ -182,8 +172,6 @@ Logger:
 KeyValues:
 
   default_output_path: "runs/smashInf_rLCDMtensor"
-
-##  rng: ranlux48
 
   likelihood:
     model_invalid_for_lnlike_below: -1e6
