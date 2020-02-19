@@ -993,20 +993,20 @@ namespace Gambit
       //  which calculates the observables.
       //-------------------------------------------------------------
 
-			observables = BEreq::multimodecode_primordial_ps(inputs.num_inflaton,
-																											 inputs.potential_choice,
-																											 inputs.evaluate_modes,
-																											 inputs.get_runningofrunning,
-																											 byVal(&inputs.phi_init0[0]),
-																											 byVal(&inputs.dphi_init0[0]),
-																											 byVal(&inputs.vparams[0]),
-																											 inputs.N_pivot,
-																											 inputs.k_pivot,
-																											 inputs.dlnk,
-																											 steps,
-																											 kmin,
-																											 kmax,
-																											 inputs.vparam_rows);
+      observables = BEreq::multimodecode_primordial_ps(inputs.num_inflaton,
+                                                       inputs.potential_choice,
+                                                       inputs.evaluate_modes,
+                                                       inputs.get_runningofrunning,
+                                                       byVal(&inputs.phi_init0[0]),
+                                                       byVal(&inputs.dphi_init0[0]),
+                                                       byVal(&inputs.vparams[0]),
+                                                       inputs.N_pivot,
+                                                       inputs.k_pivot,
+                                                       inputs.dlnk,
+                                                       steps,
+                                                       kmin,
+                                                       kmax,
+                                                       inputs.vparam_rows);
 
       // This is fine
       result.fill_k(observables.k_array, inputs.numsteps);
@@ -1043,17 +1043,17 @@ namespace Gambit
       //  for a given choice of inflationary model,
       //  which calculates the observables.
       //-------------------------------------------------------------
-			observables = BEreq::multimodecode_parametrised_ps(inputs.num_inflaton,
-																											 inputs.potential_choice,
-																											 inputs.evaluate_modes,
-																											 inputs.get_runningofrunning,
-																											 byVal(&inputs.phi_init0[0]),
-																											 byVal(&inputs.dphi_init0[0]),
-																											 byVal(&inputs.vparams[0]),
-																											 inputs.N_pivot,
-																											 inputs.k_pivot,
-																											 inputs.dlnk,
-																											 inputs.vparam_rows);
+      observables = BEreq::multimodecode_parametrised_ps(inputs.num_inflaton,
+                                                         inputs.potential_choice,
+                                                         inputs.evaluate_modes,
+                                                         inputs.get_runningofrunning,
+                                                         byVal(&inputs.phi_init0[0]),
+                                                         byVal(&inputs.dphi_init0[0]),
+                                                         byVal(&inputs.vparams[0]),
+                                                         inputs.N_pivot,
+                                                         inputs.k_pivot,
+                                                         inputs.dlnk,
+                                                         inputs.vparam_rows);
 
       result.set_n_s(observables.ns);
       result.set_A_s(observables.As);
@@ -1065,8 +1065,6 @@ namespace Gambit
       result.set_k_pivot(inputs.k_pivot);
       result.set_N_pivot(inputs.N_pivot);
     }
-		
-		
 
     void get_parametrised_ps_LCDM(Parametrised_ps &result)
     {
