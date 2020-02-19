@@ -764,8 +764,7 @@ namespace Gambit
     }
 
     // Decay widths of RHNs, for BBN (N -> nu u ubar)
-    // Formula is from [arXiv:1208.4607v2]
-    // New version from 1805.08567
+    // Formula is from 1805.08567
     void Gamma_RHN2nuuubar(std::vector<double>& result)
     {
       using namespace Pipes::Gamma_RHN2nuuubar;
@@ -784,11 +783,6 @@ namespace Gambit
       M[1] = *Param["M_2"];
       M[2] = *Param["M_3"];
       Matrix3d Usq = Dep::SeesawI_Theta->cwiseAbs2(); // |\Theta_{ij}|^2
-
-      /*auto f_u = [&](double x)
-      {
-        return (0.25 - ((2/9)*C1) - ((3.5-((20/9)*C1))*pow(x,2)) - ((0.5+(4*C1))*pow(x,4)) - ((3-(8*C1))*pow(x,6)));
-      };*/
 
       // Helper function; formula is in 0705.1729 and 1805.08567
       // This function varies wrt the paper to include the x^4 factor up front and a cutoff for small x
@@ -810,7 +804,6 @@ namespace Gambit
             {
               double x = m_uquark[k]/M[i];
               // Colour factor 3
-              //gamma[i] += 3*( (pow(sminputs.GF,2)*pow(M[i],5)) / (192*pow(pi,3)) ) * Usq(j,i) * ( (f_u(x_q)*S(x_q,x_q)) + ( pow(x_q,4) * (3 - ((16/3)*C1*pow(x_q,2)) + ((3-(8*C1))*pow(x_q,4))) * log( (1-(4*pow(x_q,2))+(2*pow(x_q,4))+(S(x_q,x_q)*(1-(2*pow(x_q,2))))) / (2*pow(x_q,4)))) );
               // x^4 factor included in L function
               gamma[i] += 3*( (pow(sminputs.GF,2)*pow(M[i],5)) / (192*pow(pi,3)) ) * Usq(j,i) * (C1 * ( (1. - 14*pow(x,2) - 2*pow(x,4) -12*pow(x,6))*sqrt(1. - 4*pow(x,2)) + 12*(pow(x,4) - 1.)*L(x) ) + 4*C2 * (pow(x,2)*(2. +  10*pow(x,2) - 12*pow(x,4))*sqrt(1. - 4*pow(x,2)) + 6*(1. - 2*pow(x,2) + 2*pow(x,4))*L(x)) );
             }
@@ -821,7 +814,7 @@ namespace Gambit
     }
 
     // Decay widths of RHNs, for BBN (N -> nu d dbar)
-    // Formula is from [arXiv:1208.4607v2]
+    // Formula is from 1805.08567
     void Gamma_RHN2nuddbar(std::vector<double>& result)
     {
       using namespace Pipes::Gamma_RHN2nuddbar;
@@ -840,11 +833,6 @@ namespace Gambit
       M[1] = *Param["M_2"];
       M[2] = *Param["M_3"];
       Matrix3d Usq = Dep::SeesawI_Theta->cwiseAbs2(); // |\Theta_{ij}|^2
-
-      /*auto f_d = [&](double x)
-      {
-        return (0.25 - ((1/9)*C2) - (((2/7)-((10/9)*C2))*pow(x,2)) - ((0.5+(2*C2))*pow(x,4)) - ((3-(4*C2))*pow(x,6)));
-      };*/
 
       // Helper function; formula is in 0705.1729 and 1805.08567
       // This function varies wrt the paper to include the x^4 factor up front and a cutoff for small x
@@ -866,7 +854,6 @@ namespace Gambit
             {
               double x = m_dquark[k]/M[i];
               // Colour factor 3
-              //gamma[i] += 3*( (pow(sminputs.GF,2)*pow(M[i],5)) / (192*pow(pi,3)) ) * Usq(j,i) * ( (f_d(x_q)*S(x_q,x_q)) + ( pow(x_q,4) * (3 - ((8/3)*C2*pow(x_q,2)) + ((1-((4/3)*C2))*pow(x_q,4))) * log( (1-(4*pow(x_q,2))+(2*pow(x_q,4))+(S(x_q,x_q)*(1-(2*pow(x_q,2))))) / (2*pow(x_q,4)))) );
               // x^4 factor included in L function
               gamma[i] += 3*( (pow(sminputs.GF,2)*pow(M[i],5)) / (192*pow(pi,3)) ) * Usq(j,i) * (C1 * ( (1. - 14*pow(x,2) - 2*pow(x,4) -12*pow(x,6))*sqrt(1. - 4*pow(x,2)) + 12*(pow(x,4) - 1.)*L(x) ) + 4*C2 * (pow(x,2)*(2. +  10*pow(x,2) - 12*pow(x,4))*sqrt(1. - 4*pow(x,2)) + 6*(1. - 2*pow(x,2) + 2*pow(x,4))*L(x)) );
  
@@ -877,32 +864,8 @@ namespace Gambit
       result = gamma;
     }
 
-    // Helper function to find two heavier decay products
-    /*std::vector<double> two_heaviest_sort(std::vector<double> decay_prod)
-    {
-      std::vector<double> result(2);
-      double temp;
-      result[0] = decay_prod[0];
-      result[1] = decay_prod[1];
-      if (result[0]<result[1])
-      {
-        temp = result[0];
-        result[0] = result[1];
-        result[1] = temp;
-      }
-      if (decay_prod[2]>result[0])
-      {
-        result[1] = result[0];
-        result[0] = decay_prod[2];
-      }
-      else if (decay_prod[2]>result[1])
-        result[1] = decay_prod[2];
-      return result;
-    }*/
-
     // Decay widths of RHNs, for BBN (N -> l u dbar)
-    // Formula is from [arXiv:1208.4607v2]
-    // New version from 1805.08567
+    // Formula is from 1805.08567
     void Gamma_RHN2ludbar(std::vector<double>& result)
     {
       using namespace Pipes::Gamma_RHN2ludbar;
@@ -960,13 +923,12 @@ namespace Gambit
                 double xl = m_lep[j]/M[i];
                 double xu = m_uquark[k]/M[i];
                 double xd = m_dquark[l]/M[i];
-                // Colour factor 3
-                //gamma[i] += 3*( (pow(sminputs.GF,2)*pow(M[i],5)) / (192*pow(pi,3)) ) * Usq(j,i) * pow(V[k][l],2) * ((S(x,y)*g(x,y)) - (x < 1E-2 ? -12*pow(x,4) : 12*pow(x,4)*log( (1 - (S(x,y)*(1+pow(x,2)-pow(y,2))) - (2*pow(y,2)) + pow((pow(x,2)-pow(y,2)),2)) / (2*pow(x,2)) ) ) - (y < 1E-2 ? -12*pow(y,4) : 12*pow(y,4)*log( (1 - (S(x,y)*(1-pow(x,2)+pow(y,2))) - (2*pow(x,2)) + pow((pow(x,2)-pow(y,2)),2)) / (2*pow(y,2)) ) ) + (x < 1E-2 or y < 1E-2 ? -12*pow(x,4)*pow(y,4) : 12*pow(x,4)*pow(y,4)*log( (1 - (S(x,y)*(1-pow(x,2)-pow(y,2))) - (2*pow(x,2)) - (2*pow(y,2)) + pow(x,4) + pow(y,4)) / (2*pow(x,2)*pow(y,2)) ) ) );
                 std::function<double(double)> I = [&xu,&xd,&xl](double x)
                 {
                   return 12*(x - pow(xl,2) - pow(xd,2))*(1 + pow(xu,2) - x)/x*sqrt(lambda(x,pow(xl,2),pow(xd,2))*lambda(1,x,pow(xu,2)));
                 };
 
+                // Colour factor 3
                 gamma[i] += 3*( (pow(sminputs.GF,2)*pow(M[i],5)) / (192*pow(pi,3)) ) * Usq(j,i) * pow(V[k][l],2) * Utils::integrate_cquad(I, pow(xd+xl,2), pow(1-xu,2), 0, 1e-2);
               }
             }
