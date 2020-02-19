@@ -116,7 +116,7 @@ namespace Gambit {
         add_result(results_SR2);
 
         // Hard-code the a covariance matrix  between these (representing the bkg sys values above, rotated by 30 deg)
-        set_covariance({{71.6875, 32.1512},{32.1512, 34.5625}});
+        set_covariance(Eigen::MatrixXd({{71.6875, 32.1512},{32.1512, 34.5625}}));
 
       }
 
