@@ -704,11 +704,7 @@ contains
     !Set random seed
     call init_random_seed()
 
-    print*, "calling calculate_pk_observables"
-
     call calculate_pk_observables(gambit_obs,observs,observs_SR,k_pivot,dlnk)
-
-    print*, "already left"
 
     !print*,"Observables calculated! (708)"
 
@@ -967,8 +963,6 @@ contains
       integer,  intent(in)     :: pk_bad
       logical,  intent(inout)  :: leave
       type(observables) :: observ
-
-      print*, pk_bad
 
       if (pk_bad /= run_outcome%success) then
 
