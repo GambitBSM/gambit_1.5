@@ -63,7 +63,45 @@
 #include "gambit/CosmoBit/CosmoBit_types.hpp"
 #include "gambit/CosmoBit/CosmoBit_utils.hpp"
 
+/// Helper function for diagnosing MultiModeCode errors
+std::string multimode_error_handling(int& err)
+{
 
+  std::string message = "MultiModeCode error: ";
+  switch(err)
+  {
+
+    /// > 0 = "failure; not fatal"
+    case 1:
+      message = "Inflation did not start.";
+    case 2:
+      message = "The pivot scale didn't leave the horizon.";
+    case 3:
+      message = "A modes' IC couldn't be consistently set.";
+    case 4:
+      message = "Too many e-folds; can't initialize the scale factor.";
+    case 5:
+      message = "Trying to save the field values at some reference N, but got less evolution than that.";
+    case 6:
+      message = "Didn't satisfy reheating bounds.";
+
+
+    /// < 0 = "fatal"
+    case -1: 
+      message = "Numerical underflow error in odeint.";
+
+
+    // Specifically added for SMASH
+    case 999:
+      message = "ICs for SMASH potential resulted in too long(or short) inflation.";
+
+
+    // Otherwise -- who knows.
+    default: 
+      message = "GAMBIT caught an error in MultiMode. Check the MultiModeCode output for more info.";
+  }
+  return message;
+}
 
 namespace Gambit
 {
@@ -1008,7 +1046,15 @@ namespace Gambit
                                                        kmax,
                                                        inputs.vparam_rows);
 
-      // This is fine
+      // If there's an error -> pass it to the helper function and invalidate the point
+      if(observables.err != 0)
+      {
+        std::string message = multimode_error_handling(observables.err);
+        logger() << message << EOM;
+        invalid_point().raise(message);
+      }
+
+      // Fill up the GAMBIT prim. PS if we're good.
       result.fill_k(observables.k_array, inputs.numsteps);
       result.fill_P_s(observables.pks_array, inputs.numsteps);
       result.fill_P_s_iso(observables.pks_array_iso, inputs.numsteps);
@@ -1054,6 +1100,14 @@ namespace Gambit
                                                          inputs.k_pivot,
                                                          inputs.dlnk,
                                                          inputs.vparam_rows);
+
+      // If there's an error -> pass it to the helper function and invalidate the point
+      if(observables.err != 0)
+      {
+        std::string message = multimode_error_handling(observables.err);
+        logger() << message << EOM;
+        invalid_point().raise(message);
+      }
 
       result.set_n_s(observables.ns);
       result.set_A_s(observables.As);
@@ -2661,75 +2715,6 @@ namespace Gambit
       // into the scan
       CosmoBit::MPLike_result_container MPLike_results = *Dep::calc_MP_LogLikes;
       result = MPLike_results.get_obs_results();
-
-      // A list of the experiments initialised in the YAML file
-      // This is a map with the following structure:
-      // { Likelihoods: {likelihood1: mode, likelihood2: mode...}
-      //   Observables: {observable1: mode, observable2: mode...} }
-      /*map_str_map_str_str experiment_names = *Dep::MP_experiment_names;
-      
-      // We need to pull the names of all Likelihoods AND observables
-      // to initialise the data structures in MontePython
-      map_str_str experiments;
-
-      if (experiment_names.find("Likelihoods") != experiment_names.end())
-      {
-        for (auto it = experiment_names.at("Likelihoods").begin();
-                  it != experiment_names.at("Likelihoods").end(); ++it)
-        {
-          // Add each experiment : datafile pair to the map_str_str.
-          experiments[it->first] = it->second;
-        }
-      }
-      if (experiment_names.find("Observables") != experiment_names.end())
-      {
-        for (auto it = experiment_names.at("Observables").begin();
-                  it != experiment_names.at("Observables").end(); ++it)
-        {
-          // Add each experiment : datafile pair to the map_str_str.
-          experiments[it->first] = it->second;
-        }
-      }
-
-      // CosmoBit::MPLike_data_container should only be created once when calculating the first point.
-      // After that is has to be kept alive since it contains a vector with the initialised MPLike 
-      // Likelihood objects.
-      pybind11::object data;
-      map_str_pyobj likelihoods;
-      static bool first_run = true;
-      if(first_run)
-      {
-        data = BEreq::create_MP_data_object(experiments);
-        // add current parameters to data object to enable check if all nuisance parameters are 
-        // scanned upon initialisation of likelihood objects
-        data.attr("mcmc_parameters") = *Dep::parameter_dict_for_MPLike;
-        likelihoods = BEreq::create_MP_likelihood_objects(data, experiments);
-        first_run = false;
-      }
-
-      static const CosmoBit::MPLike_data_container mplike_cont(data, likelihoods);
-
-      // Pass current values of nuisance parameters to data.mcmc_parameters dictionary for likelihood computation in MP
-      mplike_cont.data.attr("mcmc_parameters") = *Dep::parameter_dict_for_MPLike;
-
-      // Create instance of classy class Class
-      pybind11::object cosmo = BEreq::get_classy_cosmo_object();
-
-      // Loop through the list of experiments, and query the lnL from the
-      // MontePython backend.
-      // ONLY if the experiment is requested as an observable.
-      if (experiment_names.find("Observables") != experiment_names.end())
-      {
-        logger() << LogTags::debug << "(calc_MP_Observables):\n\n";
-        for (auto const& it : experiment_names.at("Observables"))
-        {
-          // likelihood names are keys of experiment map (str, str map mapping likelihood name to .data file)
-          std::string like_name = it.first;
-          result[like_name] = BEreq::get_MP_loglike(mplike_cont, cosmo, like_name);
-          logger() << "name: " << it.first << "\tvalue: " << result.at(like_name) << "\n";
-        }
-        logger() << EOM;
-      }*/
     }
   }
 }

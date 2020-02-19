@@ -45,6 +45,7 @@ namespace Gambit
         double pks_array_iso[1000];
         double pkt_array[1000];
         int k_size;
+        int err = 0;
     } gambit_inflation_observables;
 
 }
