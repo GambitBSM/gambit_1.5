@@ -74,26 +74,34 @@ std::string multimode_error_handling(int& err)
     /// > 0 = "failure; not fatal"
     case 1:
       message = "Inflation did not start.";
+      break;
     case 2:
       message = "The pivot scale didn't leave the horizon.";
+      break;
     case 3:
       message = "A modes' IC couldn't be consistently set.";
+      break;
     case 4:
       message = "Too many e-folds; can't initialize the scale factor.";
+      break;
     case 5:
       message = "Trying to save the field values at some reference N, but got less evolution than that.";
+      break;
     case 6:
       message = "Didn't satisfy reheating bounds.";
+      break;
 
 
     /// < 0 = "fatal"
     case -1: 
       message = "Numerical underflow error in odeint.";
+      break;
 
 
     // Specifically added for SMASH
     case 999:
       message = "ICs for SMASH potential resulted in too long(or short) inflation.";
+      break;
 
 
     // Otherwise -- who knows.
