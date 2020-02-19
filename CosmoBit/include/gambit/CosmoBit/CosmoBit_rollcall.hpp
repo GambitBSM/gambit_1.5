@@ -340,7 +340,8 @@ START_MODULE
       MODEL_GROUP(cosmo,(LCDM_no_primordial))
       ALLOW_MODEL_COMBINATION(cosmo,inflation)
       DEPENDENCY(multimode_input_parameters, Multimode_inputs)
-      BACKEND_REQ(multimodecode_parametrised_ps, (), gambit_inflation_observables, (int&  ,int& ,  int& , int& , double* , double* ,double* , double&, double&, double&, int&  ))
+      BACKEND_REQ(multimodecode_parametrised_ps, (), gambit_inflation_observables,
+                  (int&,int&,int&,int&,double*,double*,double*,double&,double&,double&,int&))
     #undef FUNCTION
 
     #define FUNCTION get_parametrised_ps_LCDM
@@ -372,9 +373,8 @@ START_MODULE
       //ALLOW_MODELS(LCDM_no_primordial) // todo check models...
       ALLOW_MODELS(Inflation_SR1quad,Inflation_1quar,Inflation_1mono23,Inflation_1linear,Inflation_1natural,Inflation_smash)
       DEPENDENCY(multimode_input_parameters, Multimode_inputs)
-      BACKEND_REQ(multimodecode_primordial_ps, (), gambit_inflation_observables,(int&  ,int& ,  int& , int& , double* , double* ,
-																																								 double* , double&, double&, double& , int& ,
-																																								 double& , double& , int&  ))
+      BACKEND_REQ(multimodecode_primordial_ps, (), gambit_inflation_observables,
+                  (int&,int&,int&,int&,double*,double*,double*,double&,double&,double&,int&,double&,double&,int&))
     #undef FUNCTION
 
     /*

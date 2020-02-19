@@ -26,15 +26,12 @@
 LOAD_LIBRARY
 
 BE_FUNCTION(multimodecode_primordial_ps, gambit_inflation_observables,
-						(int&  ,int& ,  int& , int& , double* , double* ,double* ,
-						 double&, double&, double& , int& , double& ,
-						 double& , int& ),
-						"__multimodecode_gambit_MOD_multimodecode_gambit_driver", "multimodecode_gambit_driver")
+            (int&,int&,int&,int&,double*,double*,double*,double&,double&,double&,int&,double&,double&,int&),
+            "__multimodecode_gambit_MOD_multimodecode_gambit_driver", "multimodecode_primordial_ps")
 
 BE_FUNCTION(multimodecode_parametrised_ps, gambit_inflation_observables,
-						(int&  ,int& ,  int& , int& , double* , double* ,double* ,
-						 double&, double&, double&, int& ),
-						"__multimodecode_gambit_MOD_multimodecode_parametrised_ps", "multimodecode_parametrised_ps")
+            (int&,int&,int&,int&,double*,double*,double*,double&,double&,double&,int&),
+            "__multimodecode_gambit_MOD_multimodecode_parametrised_ps", "multimodecode_parametrised_ps")
 
 BE_INI_FUNCTION{}
 END_BE_INI_FUNCTION

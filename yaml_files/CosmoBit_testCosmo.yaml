@@ -143,10 +143,6 @@ ObsLikes:
 #======== Rule entries ========
 Rules:
 
-  - capability: T_cmb
-    options:
-      T_cmb: 2.7255
-
   - capability:   Omega0_m
     function:     get_Omega0_m_classy
 
@@ -180,13 +176,6 @@ Rules:
 
   - capability: classy_final_input
     function: set_classy_input
-
-  # classy (class through python wrapper)
-  - capability: set_classy_parameters
-    options:
-      classy_dict:
-        output: "mPk"
-        P_k_max_h/Mpc: 1.
 
 #####
 ##
