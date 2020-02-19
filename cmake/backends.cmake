@@ -1343,8 +1343,6 @@ set(dl "http://modecode.org/wp-content/uploads/2014/09/MultiModeCode.2.0.0.tar.g
 set(md5 "03f99f02c572ea34383a0888fb0658d6")
 set(dir "${PROJECT_SOURCE_DIR}/Backends/installed/${name}/${ver}")
 set(patch "${PROJECT_SOURCE_DIR}/Backends/patches/${name}/${ver}")
-set(driver "${PROJECT_SOURCE_DIR}/Backends/include/gambit/Backends/backend_types/MultiModeCode_2_0_0")
-
 if("${CMAKE_Fortran_COMPILER_ID}" STREQUAL "Intel")
   set(multimode_Fortran_FLAGS "${BACKEND_Fortran_FLAGS} -r8")
 elseif("${CMAKE_Fortran_COMPILER_ID}" STREQUAL "GNU")
@@ -1352,7 +1350,6 @@ elseif("${CMAKE_Fortran_COMPILER_ID}" STREQUAL "GNU")
 else()
   set(multimode_Fortran_FLAGS "${BACKEND_Fortran_FLAGS}")
 endif()
-
 check_ditch_status(${name} ${ver} ${dir})
 if(NOT ditched_${name}_${ver})
   ExternalProject_Add(${name}_${ver}
@@ -1363,7 +1360,7 @@ if(NOT ditched_${name}_${ver})
     COMMAND patch -p1 < ${patch}/multimodecode.diff
     CONFIGURE_COMMAND ""
     BUILD_COMMAND ${CMAKE_MAKE_PROGRAM} F90C=${CMAKE_Fortran_COMPILER} FFLAGS=${multimode_Fortran_FLAGS}
-    COMMAND ${CMAKE_COMMAND} -E copy ${driver}/multimodecode_gambit.f90 ${dir}
+    COMMAND ${CMAKE_COMMAND} -E copy ${patch}/multimodecode_gambit.f90 ${dir}
     COMMAND ${CMAKE_COMMAND} -E echo "${CMAKE_Fortran_COMPILER} ${multimode_Fortran_FLAGS} -c ${dir}/multimodecode_gambit.f90" > make_so1.sh
     COMMAND chmod u+x make_so1.sh
     COMMAND ./make_so1.sh
