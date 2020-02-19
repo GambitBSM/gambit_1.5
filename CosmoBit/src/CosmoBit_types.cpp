@@ -203,11 +203,19 @@ namespace Gambit
     // Default constructor for multimode inputs...
     Multimode_inputs::Multimode_inputs() {};
 
-    // // Default constructor for primordial and parametrised power spectra
-    // Primordial_ps::primordial_ps() 
-    // {
-    //   std::cout << "Calling primordial_ps constructor..." << std::endl;
-    // };
+    // return Parametrised_ps members A_s, n_s and r as str to double map for printing
+    map_str_dbl Parametrised_ps::get_parametrised_ps_map() 
+    {
+      map_str_dbl result;
+      result["A_s"] = A_s;
+      result["n_s"] = n_s;
+      result["r"] = r;
+
+      //std::cout <<" A_s, n_s, r " << A_s << n_s << r << std::endl;
+
+      return result;
+
+    };
 
     void Primordial_ps::fill_k(double *k_array, int len)
     {

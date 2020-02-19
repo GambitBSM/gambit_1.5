@@ -413,6 +413,40 @@ namespace Gambit
     }
 
 
+    /// If no value for N_star (number of e folds before inflation ends) is specified in the yaml
+    /// file AND no inflation model is scanned fall back to default value of CLASS; otherwise 
+    /// it is a model parameter of the 
+    /// (heads-up: name in CLASS is N_star, not N_pivot)
+    void set_N_pivot(double &result)
+    {
+
+      using namespace Pipes::set_N_pivot;
+
+      // if N_pivot is not in Parameter map either read in yaml file Rule if it exists or 
+      // fall back to default value in CLASS
+      if( Param.find("N_pivot") == Param.end())
+      {
+        result = runOptions->getValueOrDef<double>(60, "N_pivot");
+      }
+      // else "N_pivot" is contained in parameter map return the parameter value
+      else
+      {
+        result = *Param["N_pivot"];
+      }
+
+    }
+    
+    /// capability to set k_pivot for consistent use within cosmobit 
+    /// (to make sure it is consistent between CLASS and multimodecode)
+    void set_k_pivot(double &result)
+    {
+
+      using namespace Pipes::set_k_pivot;
+
+      result = runOptions->getValueOrDef<double>(0.05, "k_pivot");
+
+    }
+
 
     void set_NuMasses_SM_baseline(map_str_dbl &result)
     {
@@ -652,40 +686,36 @@ namespace Gambit
         }
       }
 
-      // If the model LCDM_no_primordial is used the primordial power spectrum is computed independent of CLASS. In that 
-      // case options related to the primordial ps specified in the yaml file will not be read by CLASS and the python
-      // wrapper will throw an error. Since it might be hard to figure out what is going wrong from simply the 'Class did 
-      // not read k_pivot' error message, test if some contradicting settings were passed & give a more informative error message
+      /// check that user did not try to pass k_pivot or N_star through class dictionary -- these are 
+      /// fixed by capabilities to ensure consistent use throughout the code
+      if (yaml_input.contains("k_pivot") || yaml_input.contains("N_star"))
+      {
+
+        CosmoBit_error().raise(LOCAL_INFO, "You tried to pass (one of) the parameters - k_pivot\n  - N_star\n"
+              "to CLASS. If an inflationary model is in use these have to be consistent throughout the code."
+              "Hence, the values have to be set via a capability. Add "
+              "  - capability: k_pivot\n    function: set_k_pivot\n    options:\n"
+              "      k_pivot: 0.02\n"
+              "or\n"
+              "  - capability: N_pivot\n    function: set_N_pivot\n    options:\n"
+              "      N_pivot: 40\n"
+              "to the Rules section of your yaml file. If you are not scanning an inflation model "
+              "in combination with LCDM_no_primordial the rule for N_pivot will be ignored as it is an "
+              "inflationary model parameter. It will therefore be set to the according value.");
+
+      }
+      // If the model LCDM_no_primordial is used the primordial power spectrum is computed independent of CLASS. Therefore
+      // this option should not be passed by the user
       if (ModelInUse("LCDM_no_primordial"))
       {
-        if (yaml_input.contains("k_pivot") || yaml_input.contains("N_star") || yaml_input.contains("P_k_ini type"))
+        if (yaml_input.contains("P_k_ini type"))
         {
           CosmoBit_error().raise(LOCAL_INFO, "You are using the model 'LCDM_no_primordial' which means the (shape of the) primordial "
                 "power spectrum is set by an additional inflation model. Therefore the computation of the pps happens "
                 "independent of CLASS.\n"
-                "However, you have specified at least one of the CLASS input parameters \n  - P_k_ini type\n  "
-                "- k_pivot\n  - N_star\nSince the primordial module of CLASS won't compute the pps when it is passed by "
-                "an external source like GAMBIT these parameters won't be read by CLASS. Please remove them as yaml file option, or if "
-                "you want to fix 'k_pivot' and/or 'N_star' to specific values use the model 'LCDM' "
-                "without scanning an inflation model in parallel.");
+                "GAMBIT will take care of setting all CLASS inputs regarding that consistently. Please remove the option "
+                "'P_k_ini type' for the capability 'classy_baseline_params'");
         }
-      }
-      else
-      {
-        // (JR) set k_pivot by default to 0.05; A_s & N_star are only used if the analytic PK is used, however
-        // the pivot scale is used regardless of the P_k_ini type in spectra.c, therefore
-        // k_pivot has to be passed correctly for LCDM and LCDM_no_primordial
-        // -> set to the default value of CLASS in case it is not specified via the yaml file
-        // for a LCDM model. (not strictly necessary since CLASS will default it 
-        // to set value if nothing is passed, but it makes the assumption more explicit.) 
-        std::string k_pivot;
-        if (yaml_input.contains("k_pivot")) {k_pivot = std::string(pybind11::str(yaml_input["k_pivot"]));}
-        else                                {k_pivot = "0.05";}
-        result["k_pivot"] = k_pivot;
-      
-        // The according value for the LCDM_no_primordial value will 
-        // be set in 'set_classy_parameters_parametrised_ps' or 'set_classy_parameters_primordial_ps'
-        // depending on the choice of the user (parametrised or full pk)
       }
 
       // add yaml options to python dictionary passed to CLASS, consistency checks only executed in first run
@@ -724,6 +754,10 @@ namespace Gambit
       Parametrised_ps pps = *Dep::parametrised_power_spectrum;
       result.add_entry("n_s", pps.get_n_s());
       result.add_entry("ln10^{10}A_s", pps.get_A_s());
+
+      // add k_pivot and N_pivot entries
+      result.add_entry("P_k_ini type", "analytic_Pk");
+      result.add_entry("k_pivot", *Dep::k_pivot);
       
 
       // if r = 0 only compute scalar modes, else tensor modes as well
@@ -738,13 +772,6 @@ namespace Gambit
         result.add_entry("r", pps.get_r()); 
         result.add_entry("modes","t,s");
       }
-
-      // Add the externally calculated/fixed pivot scale for LCDM_no_primordial models. 
-      // If the normal 'LCDM' model is used the pps is calculated by CLASS internally s.t. 
-      // k_pivot is an input parameter the user can freely choose. This setting is done via the yaml file,
-      // i.e. runOption for capability 'classy_baseline_params', classy_dict (see CosmoBit_tutorial.yaml). 
-      // If no value for 'k_pivot' is passed GAMBIT will use 0.05, the same default value as CLASS.
-      if (ModelInUse("LCDM_no_primordial")){result.add_entry("k_pivot", pps.get_k_pivot());}
 
       // Get standard cosmo parameters, nu masses, helium abundance &
       // extra run options for class passed in yaml file to capability
@@ -787,7 +814,8 @@ namespace Gambit
       result.add_entry("pkt_array", pps.get_P_t());
       result.add_entry("lnk_size" , pps.get_vec_size()); // don't hard code but somehow make consistent with multimode @TODO -> test
       // pass pivot scale of external spectrum to CLASS
-      result.add_entry("k_pivot", pps.get_k_pivot());
+      result.add_entry("k_pivot", *Dep::k_pivot);
+      result.add_entry("N_star",  *Dep::N_pivot);
       
       // Get standard cosmo parameters, nu masses, helium abundance &
       // extra run options for class passed in yaml file to capability
@@ -956,7 +984,7 @@ namespace Gambit
 
       // has to be set to be the same as the scale entering class. todo
       // fix through some capability (probably the same setting the clac_pk_full variable for first version)
-      result.k_pivot = runOptions->getValue<double> ("k_pivot"); 
+      result.k_pivot = *Dep::k_pivot; 
       // difference in k-space used when pivot-scale observables from mode equations are evaluated
       // Samples in uniform increments in log(k).
       result.dlnk = runOptions->getValue<double> ("dlnk");
@@ -973,6 +1001,7 @@ namespace Gambit
       // Clear it all
       result = Primordial_ps();
 
+      
       // Get the inflationary inputs
       Multimode_inputs inputs = *Dep::multimode_input_parameters;
 
@@ -1014,12 +1043,6 @@ namespace Gambit
       result.fill_P_s_iso(observables.pks_array_iso, inputs.numsteps);
       result.fill_P_t(observables.pkt_array, inputs.numsteps);
 
-      // k_pivot needs to be stored to be passed correctly
-      // to the spectra module of CLASS
-      // (not using N_pivot/N_star further atm, but can't harm to 
-      // make it available for further use as well)
-      result.set_k_pivot(inputs.k_pivot);
-      result.set_N_pivot(inputs.N_pivot);
     }
 
     /// Passes the inputs from the MultiModeCode initialisation function 
@@ -1058,12 +1081,7 @@ namespace Gambit
       result.set_n_s(observables.ns);
       result.set_A_s(observables.As);
       result.set_r(observables.r);
-      // k_pivot needs to be stored to be passed correctly
-      // to the spectra module of CLASS
-      // (not using N_pivot/N_star further atm, but can't harm to 
-      // make it available for further use as well)
-      result.set_k_pivot(inputs.k_pivot);
-      result.set_N_pivot(inputs.N_pivot);
+ 
     }
 		
 		
@@ -1095,7 +1113,13 @@ namespace Gambit
       result = pps;
     }
 
+    void print_parametrised_ps(map_str_dbl &result)
+    {
+      using namespace Pipes::print_parametrised_ps;
 
+      Parametrised_ps pps  = *Dep::parametrised_power_spectrum;
+      result = pps.get_parametrised_ps_map();
+    }
 
     // still needs to be rewritten and dived into two functions. Also 
     // should fill the new 

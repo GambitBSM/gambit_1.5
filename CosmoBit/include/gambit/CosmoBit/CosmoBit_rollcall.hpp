@@ -177,8 +177,31 @@ START_MODULE
     DEPENDENCY(NuMasses_SM, map_str_dbl)
     #undef FUNCTION
   #undef CAPABILITY
- /// ------------------------
-    
+
+  /// ------------------------
+  
+
+  #define CAPABILITY k_pivot
+  START_CAPABILITY
+    #define FUNCTION set_k_pivot
+    START_FUNCTION(double)
+    #undef FUNCTION
+  #undef CAPABILITY  
+  
+
+  /// capability providing N_pivot, number of e-fold before the end of inflation. 
+  /// If no inflation model is in use this can be set by a yaml file Rule. Otherwise
+  /// it is a model parameter
+  #define CAPABILITY N_pivot
+  START_CAPABILITY
+
+    #define FUNCTION set_N_pivot
+    START_FUNCTION(double)
+    ALLOW_MODELS(LCDM)
+    ALLOW_MODELS(Inflation_SR1quad,Inflation_1quar,Inflation_1mono23,Inflation_1linear,Inflation_1natural,Inflation_smash)
+    #undef FUNCTION
+
+  #undef CAPABILITY  
 
   /// capabilities related to setting input options for CLASS right 
   /// cosmo parameters, temperature and number of ultra-relativistic species Nur
@@ -221,17 +244,24 @@ START_MODULE
      // H0, tau_reio, Omega_m, Omega_b plus an external primordial power spectrum
      #define FUNCTION set_classy_parameters_primordial_ps
       START_FUNCTION(CosmoBit::Classy_input)
-         ALLOW_MODELS(LCDM_no_primordial)
+         //ALLOW_MODELS(LCDM_no_primordial)
+         MODEL_GROUP(inflation,(Inflation_SR1quad,Inflation_1quar,Inflation_1mono23,Inflation_1linear,Inflation_1natural))
+         MODEL_GROUP(cosmo,(LCDM_no_primordial))
+         ALLOW_MODEL_COMBINATION(cosmo,inflation)
          DEPENDENCY(classy_baseline_params, pybind11::dict)
          DEPENDENCY(primordial_power_spectrum, Primordial_ps)
+         DEPENDENCY(k_pivot, double)
+         DEPENDENCY(N_pivot, double)
      #undef FUNCTION
 
      // H0, tau_reio, Omega_m, Omega_b plus an external *parametrised* primordial power spectrum
      #define FUNCTION set_classy_parameters_parametrised_ps
       START_FUNCTION(CosmoBit::Classy_input)
-         ALLOW_MODELS(LCDM_no_primordial, LCDM)
+         //ALLOW_MODELS(LCDM_no_primordial, LCDM)
          DEPENDENCY(classy_baseline_params, pybind11::dict)
          DEPENDENCY(parametrised_power_spectrum,   Parametrised_ps)
+         DEPENDENCY(k_pivot, double)
+         DEPENDENCY(N_pivot, double)
      #undef FUNCTION
 
   #undef CAPABILITY
@@ -283,6 +313,7 @@ START_MODULE
     START_CAPABILITY
     #define FUNCTION set_multimode_inputs
       START_FUNCTION(Multimode_inputs)
+      DEPENDENCY(k_pivot, double)
       ALLOW_MODELS(Inflation_SR1quad,Inflation_1quar,Inflation_1mono23,Inflation_1linear,Inflation_1natural,Inflation_smash)
     #undef FUNCTION
   #undef CAPABILITY
@@ -304,13 +335,12 @@ START_MODULE
     
     #define FUNCTION get_multimode_parametrised_ps
       START_FUNCTION(Parametrised_ps)
-      ALLOW_MODELS(Inflation_SR1quad,Inflation_1quar,Inflation_1mono23,Inflation_1linear,Inflation_1natural,Inflation_smash)
-      //MODEL_GROUP(inflation,(Inflation_SR1quad,Inflation_1quar,Inflation_1mono23,Inflation_1linear,Inflation_1natural))
-      //MODEL_GROUP(cosmo,(LCDM_no_primordial))
-      //ALLOW_MODEL_COMBINATION(cosmo,inflation)
+      //ALLOW_MODELS(Inflation_SR1quad,Inflation_1quar,Inflation_1mono23,Inflation_1linear,Inflation_1natural,Inflation_smash)
+      MODEL_GROUP(inflation,(Inflation_SR1quad,Inflation_1quar,Inflation_1mono23,Inflation_1linear,Inflation_1natural))
+      MODEL_GROUP(cosmo,(LCDM_no_primordial))
+      ALLOW_MODEL_COMBINATION(cosmo,inflation)
       DEPENDENCY(multimode_input_parameters, Multimode_inputs)
-      BACKEND_REQ(multimodecode_parametrised_ps, (), gambit_inflation_observables, (int&  ,int& ,  int& , int& , double* , double* ,
-																																						double* , double&, double&, double&, int&  ))
+      BACKEND_REQ(multimodecode_parametrised_ps, (), gambit_inflation_observables, (int&  ,int& ,  int& , int& , double* , double* ,double* , double&, double&, double&, int&  ))
     #undef FUNCTION
 
     #define FUNCTION get_parametrised_ps_LCDM
@@ -323,6 +353,14 @@ START_MODULE
       ALLOW_MODELS(Inflation_smash)
     #undef FUNCTION
 
+  #undef CAPABILITY 
+
+  #define CAPABILITY print_parametrised_ps
+    START_CAPABILITY
+    #define FUNCTION print_parametrised_ps
+      START_FUNCTION(map_str_dbl)
+      DEPENDENCY(parametrised_power_spectrum,   Parametrised_ps)
+    #undef FUNCTION
   #undef CAPABILITY 
 
   // pass settings to multimode, run it and return the structure containing the results 
