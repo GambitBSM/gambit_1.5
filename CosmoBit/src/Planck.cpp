@@ -144,7 +144,7 @@ namespace Gambit
       double cl_and_pars[31];
       int idx_tt;
 
-      double Tcmb_in_mK = (1e6)*(*Param["T_cmb"]);
+      double Tcmb_in_mK = (1e6)*(*Dep::T_cmb);
       auto scale_func = [Tcmb_in_mK](double& cl){cl *= pow( Tcmb_in_mK, 2);};
 
       std::vector<double> Cl_TT = *Dep::lensed_Cl_TT;
@@ -200,7 +200,7 @@ namespace Gambit
       double cl_and_pars[31];
       int idx_ee;
 
-      double Tcmb_in_mK = (1e6)*(*Param["T_cmb"]);
+      double Tcmb_in_mK = (1e6)*(*Dep::T_cmb);
       auto scale_func = [Tcmb_in_mK](double& cl){cl *= pow( Tcmb_in_mK, 2);};
 
       std::vector<double> Cl_EE = *Dep::lensed_Cl_EE;
@@ -264,7 +264,7 @@ namespace Gambit
       double cl_and_pars_EE[31];
       int idx_ee;
 
-      double Tcmb_in_mK = (1e6)*(*Param["T_cmb"]);
+      double Tcmb_in_mK = (1e6)*(*Dep::T_cmb);
       auto scale_func = [Tcmb_in_mK](double& cl){cl *= pow( Tcmb_in_mK, 2);};
 
       std::vector<double> Cl_TT = *Dep::lensed_Cl_TT;
@@ -330,7 +330,7 @@ namespace Gambit
 
       int idx_tt;
 
-      double Tcmb_in_mK = (1e6)*(*Param["T_cmb"]);
+      double Tcmb_in_mK = (1e6)*(*Dep::T_cmb);
       auto scale_func = [Tcmb_in_mK](double& cl){cl *= pow( Tcmb_in_mK, 2);};
 
       std::vector<double> Cl_TT = *Dep::lensed_Cl_TT;
@@ -406,7 +406,7 @@ namespace Gambit
 
       int idx_tt;
 
-      double Tcmb_in_mK = (1e6)*(*Param["T_cmb"]);
+      double Tcmb_in_mK = (1e6)*(*Dep::T_cmb);
       auto scale_func = [Tcmb_in_mK](double& cl){cl *= pow( Tcmb_in_mK, 2);};
 
       std::vector<double> Cl_TT = *Dep::lensed_Cl_TT;
@@ -462,7 +462,7 @@ namespace Gambit
       double  cl_and_pars[7574];
       int idx_tt, idx_te, idx_ee;
 
-      double Tcmb_in_mK = (1e6)*(*Param["T_cmb"]);
+      double Tcmb_in_mK = (1e6)*(*Dep::T_cmb);
       auto scale_func = [Tcmb_in_mK](double& cl){cl *= pow( Tcmb_in_mK, 2);};
 
       std::vector<double> Cl_TT = *Dep::lensed_Cl_TT;
@@ -564,7 +564,7 @@ namespace Gambit
 
       int idx_tt, idx_te, idx_ee;
 
-      double Tcmb_in_mK = (1e6)*(*Param["T_cmb"]);
+      double Tcmb_in_mK = (1e6)*(*Dep::T_cmb);
       auto scale_func = [Tcmb_in_mK](double& cl){cl *= pow( Tcmb_in_mK, 2);};
 
       std::vector<double> Cl_TT = *Dep::lensed_Cl_TT;
@@ -631,7 +631,7 @@ namespace Gambit
 
       int idx_pp, idx_tt, idx_te, idx_ee;
 
-      double Tcmb_in_mK = (1e6)*(*Param["T_cmb"]);
+      double Tcmb_in_mK = (1e6)*(*Dep::T_cmb);
       auto scale_func = [Tcmb_in_mK](double& cl){cl *= pow( Tcmb_in_mK, 2);};
 
       std::vector<double> Cl_PhiPhi = *Dep::lensed_Cl_PhiPhi;
@@ -756,7 +756,7 @@ namespace Gambit
       double cl_and_pars[31];
       int idx_tt;
 
-      double Tcmb_in_mK = (1e6)*(*Param["T_cmb"]);
+      double Tcmb_in_mK = (1e6)*(*Dep::T_cmb);
       auto scale_func = [Tcmb_in_mK](double& cl){cl *= pow( Tcmb_in_mK, 2);};
 
       std::vector<double> Cl_TT = *Dep::lensed_Cl_TT;
@@ -813,7 +813,7 @@ namespace Gambit
 
       int idx_tt, idx_te, idx_ee, idx_bb;
 
-      double Tcmb_in_mK = (1e6)*(*Param["T_cmb"]);
+      double Tcmb_in_mK = (1e6)*(*Dep::T_cmb);
       auto scale_func = [Tcmb_in_mK](double& cl){cl *= pow( Tcmb_in_mK, 2);};
 
       std::vector<double> Cl_TT = *Dep::lensed_Cl_TT;
@@ -885,7 +885,7 @@ namespace Gambit
 
       int idx_tt;
 
-      double Tcmb_in_mK = (1e6)*(*Param["T_cmb"]);
+      double Tcmb_in_mK = (1e6)*(*Dep::T_cmb);
       auto scale_func = [Tcmb_in_mK](double& cl){cl *= pow( Tcmb_in_mK, 2);};
 
       std::vector<double> Cl_TT = *Dep::lensed_Cl_TT;
@@ -959,7 +959,7 @@ namespace Gambit
 
       int idx_tt;
 
-      double Tcmb_in_mK = (1e6)*(*Param["T_cmb"]);
+      double Tcmb_in_mK = (1e6)*(*Dep::T_cmb);
       auto scale_func = [Tcmb_in_mK](double& cl){cl *= pow( Tcmb_in_mK, 2);};
 
       std::vector<double> Cl_TT = *Dep::lensed_Cl_TT;
@@ -1015,7 +1015,7 @@ namespace Gambit
       double  cl_and_pars[7621];
       int idx_tt, idx_te, idx_ee;
 
-      double Tcmb_in_mK = (1e6)*(*Param["T_cmb"]);
+      double Tcmb_in_mK = (1e6)*(*Dep::T_cmb);
       auto scale_func = [Tcmb_in_mK](double& cl){cl *= pow( Tcmb_in_mK, 2);};
 
       std::vector<double> Cl_TT = *Dep::lensed_Cl_TT;
@@ -1117,7 +1117,7 @@ namespace Gambit
 
       int idx_tt, idx_te, idx_ee;
 
-      double Tcmb_in_mK = (1e6)*(*Param["T_cmb"]);
+      double Tcmb_in_mK = (1e6)*(*Dep::T_cmb);
       auto scale_func = [Tcmb_in_mK](double& cl){cl *= pow( Tcmb_in_mK, 2);};
 
       std::vector<double> Cl_TT = *Dep::lensed_Cl_TT;
@@ -1184,7 +1184,7 @@ namespace Gambit
 
       int idx_pp, idx_tt, idx_te, idx_ee;
 
-      double Tcmb_in_mK = (1e6)*(*Param["T_cmb"]);
+      double Tcmb_in_mK = (1e6)*(*Dep::T_cmb);
       auto scale_func = [Tcmb_in_mK](double& cl){cl *= pow( Tcmb_in_mK, 2);};
 
       std::vector<double> Cl_PhiPhi = *Dep::lensed_Cl_PhiPhi;
