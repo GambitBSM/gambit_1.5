@@ -35,6 +35,7 @@
 #define MODEL LCDM
   START_MODEL
   DEFINEPARS(T_cmb,omega_b,omega_cdm,H0,ln10A_s,n_s,tau_reio)
+  MAP_TO_CAPABILITY(T_cmb,T_cmb)
 #undef MODEL
 
 // ΛCDM parameters without those relating to the primordial power spectrum (A_s, n_s)
