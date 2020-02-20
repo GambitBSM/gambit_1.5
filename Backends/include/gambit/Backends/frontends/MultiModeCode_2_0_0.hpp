@@ -15,6 +15,10 @@
 ///          (selim.hotinli14@pimperial.ac.uk)
 ///  \date 2017 Jul
 ///
+///  \author Tomas Gonzalo
+///          (tomas.gonzalo@monash.edu)
+///  \date 2020 Feb
+///
 ///  *********************************************
 
 #define BACKENDNAME MultiModeCode
@@ -32,6 +36,8 @@ BE_FUNCTION(multimodecode_primordial_ps, gambit_inflation_observables,
 BE_FUNCTION(multimodecode_parametrised_ps, gambit_inflation_observables,
             (int&,int&,int&,int&,double*,double*,double*,double&,double&,double&,int&),
             "__multimodecode_gambit_MOD_multimodecode_parametrised_ps", "multimodecode_parametrised_ps")
+
+BE_CONV_FUNCTION(ErrorHandling, void, (const int&), "multimode_internal")
 
 BE_INI_FUNCTION{}
 END_BE_INI_FUNCTION

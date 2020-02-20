@@ -1,0 +1,83 @@
+--- a/modpk_errorhandling.f90	2015-04-21 01:36:02.000000000 +1000
++++ b/modpk_errorhandling.f90	2020-02-20 17:22:38.316677871 +1100
+@@ -2,8 +2,23 @@ module modpk_errorhandling
+   !Module for handling exceptions and warnings.
+   !More info is sometimes printed to screen where these occur.
+   use modpk_io, only : out_opt
++  use, Intrinsic :: iso_c_binding  ! Added by GAMBIT
+   implicit none
+ 
++  ! GAMBIT addition start
++  Type(c_funptr) :: ErrorHandler_cptr
++
++  ! Define interface of call-back routine.
++
++  Abstract Interface
++    Subroutine callback ()
++      Use, Intrinsic :: iso_c_binding
++    End Subroutine callback
++  End Interface
++
++  Logical :: SilenceOutput = .False.
++  ! GAMBIT addition end
++
+   private
+   public :: raise, run_outcome, assert
+ 
+@@ -75,11 +90,14 @@ module modpk_errorhandling
+     end subroutine raise_warning
+ 
+     subroutine raise_exception_code(self, msg, fname, line)
++      use, Intrinsic :: iso_c_binding
++
+       class(error) :: self
+       character(*), intent(in) :: msg
+       character(*), intent(in), optional :: fname
+       integer, intent(in), optional :: line
+ 
++      Procedure(callback), Pointer :: ErrorHandler_fptr
+ 
+       !Print out even if asking for no output (modpkoutput=.false.)
+       print*, "**********************************************"
+@@ -93,17 +111,27 @@ module modpk_errorhandling
+ 
+       print*, "MODECODE: ", trim(msg)
+ 
++      ! Convert C to Fortran procedure pointer.
++      Call c_f_procpointer(ErrorHandler_cptr, ErrorHandler_fptr)
++
++      ! Call the ErrorHandler
++      Call ErrorHandler_fptr()
++
++      ! This should never happen
+       stop
+ 
+     end subroutine raise_exception_code
+ 
+ 
+     subroutine raise_exception_cosmo(self, msg, fname, line)
++      use, Intrinsic :: iso_c_binding
++
+       class(error) :: self
+       character(*), intent(in) :: msg
+       character(*), intent(in), optional :: fname
+       integer, intent(in), optional :: line
+ 
++      Procedure(callback), Pointer :: ErrorHandler_fptr
+ 
+       !Print out even if asking for no output (modpkoutput=.false.)
+       print*, "**********************************************"
+@@ -117,6 +145,13 @@ module modpk_errorhandling
+ 
+       print*, "MODECODE: ", trim(msg)
+ 
++      ! Convert C to Fortran procedure pointer.
++      Call c_f_procpointer(ErrorHandler_cptr, ErrorHandler_fptr)
++
++      ! Call the ErrorHandler
++      Call ErrorHandler_fptr()
++
++      ! This should never happen
+       stop
+ 
+     end subroutine raise_exception_cosmo
