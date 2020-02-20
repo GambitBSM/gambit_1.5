@@ -1068,7 +1068,9 @@ namespace Gambit
       //  which calculates the observables.
       //-------------------------------------------------------------
 
-      observables = BEreq::multimodecode_primordial_ps(inputs.num_inflaton,
+      try
+      { 
+        observables = BEreq::multimodecode_primordial_ps(inputs.num_inflaton,
                                                        inputs.potential_choice,
                                                        inputs.evaluate_modes,
                                                        inputs.get_runningofrunning,
@@ -1082,6 +1084,12 @@ namespace Gambit
                                                        kmin,
                                                        kmax,
                                                        inputs.vparam_rows);
+      }
+      catch(std::runtime_error &e)
+      {
+        logger() << e.what() << EOM;
+        invalid_point().raise(e.what());
+      }
 
       // If there's an error -> pass it to the helper function and invalidate the point
       if(observables.err != 0)
@@ -1120,7 +1128,9 @@ namespace Gambit
       //  for a given choice of inflationary model,
       //  which calculates the observables.
       //-------------------------------------------------------------
-      observables = BEreq::multimodecode_parametrised_ps(inputs.num_inflaton,
+      try
+      {
+        observables = BEreq::multimodecode_parametrised_ps(inputs.num_inflaton,
                                                          inputs.potential_choice,
                                                          inputs.evaluate_modes,
                                                          inputs.get_runningofrunning,
@@ -1131,7 +1141,12 @@ namespace Gambit
                                                          inputs.k_pivot,
                                                          inputs.dlnk,
                                                          inputs.vparam_rows);
-
+      }
+      catch(std::runtime_error &e)
+      {
+        logger() << e.what() << EOM;
+	invalid_point().raise(e.what());
+      }
       // If there's an error -> pass it to the helper function and invalidate the point
       if(observables.err != 0)
       {
