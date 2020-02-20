@@ -26,6 +26,7 @@
 #include <map>
 #include <sstream>
 #include <iomanip>  // For debugging only
+#include <algorithm>
 
 #include "gambit/ScannerBit/scanner_plugin.hpp"
 #include "gambit/ScannerBit/scanners/polychord/polychord.hpp"
@@ -91,11 +92,37 @@ scanner_plugin(polychord, version(1, 15))
       // Offset the minimum interesting likelihood by the offset
       gl0 = gl0 + offset;
 
-      // PolyChord algorithm options.
+      // Initialise polychord settings
       Settings settings(ma, 2);
-      settings.nlive = get_inifile_value<int>("nlive", settings.nDims*25);                  // number of live points
-      settings.num_repeats = get_inifile_value<int>("num_repeats", settings.nDims*5);       // length of slice sampling chain
-      settings.nprior = get_inifile_value<int>("nprior", settings.nlive*10);                // number of prior samples to begin algorithm with
+
+      // Create the object that interfaces to the PolyChord LogLike callback function
+      Gambit::PolyChord::LogLikeWrapper loglwrapper(LogLike, get_printer());
+      Gambit::PolyChord::global_loglike_object = &loglwrapper;
+
+      // Compute an ordering for fast and slow parameters
+      std::vector<std::string> fast_params = get_inifile_value<std::vector<std::string>>("fast_params", {});
+      std::vector<std::string> param_names = LogLike->getParameters();
+      settings.grade_dims.clear();
+      int i = 0;
+      for (auto param : param_names) 
+          if (std::find(fast_params.begin(), fast_params.end(),param) == fast_params.end())
+              Gambit::PolyChord::global_loglike_object->param_location[param] = (i++); // Slow parameters first
+      settings.grade_dims.push_back(i);
+      int nslow = i;
+
+      for (auto param : param_names) 
+          if (std::find(fast_params.begin(), fast_params.end(),param) != fast_params.end())
+              Gambit::PolyChord::global_loglike_object->param_location[param] = (i++); // Then fast
+      if (i>settings.grade_dims[0]){ // We're operating in fast-slow mode
+          settings.grade_dims.push_back(i);
+          double frac_slow = get_inifile_value<double>("frac_slow",0.75); 
+          settings.grade_frac = std::vector<double>({frac_slow, 1-frac_slow});
+      }
+
+      // PolyChord algorithm options.
+      settings.nlive = get_inifile_value<int>("nlive", settings.nDims*25);         // number of live points
+      settings.num_repeats = get_inifile_value<int>("num_repeats", nslow*2);       // length of slice sampling chain
+      settings.nprior = get_inifile_value<int>("nprior", settings.nlive*10);       // number of prior samples to begin algorithm with
       settings.do_clustering = get_inifile_value<bool>("do_clustering", true);     // Whether or not to perform clustering
       settings.feedback = get_inifile_value<int>("fb", 1);                         // Feedback level
       settings.precision_criterion = get_inifile_value<double>("tol", 0.5);        // Stopping criterion (consistent with multinest)
@@ -117,9 +144,12 @@ scanner_plugin(polychord, version(1, 15))
       settings.base_dir = get_inifile_value<std::string>("default_output_path")+"PolyChord";
       settings.file_root = get_inifile_value<std::string>("root", "native");
       settings.seed = get_inifile_value<int>("seed",-1);
+      settings.maximise = get_inifile_value<int>("pc_maximise",false);
 
       Gambit::Utils::ensure_path_exists(settings.base_dir);
       Gambit::Utils::ensure_path_exists(settings.base_dir + "/clusters/");
+
+
 
 
       if(resume_mode==1 and outfile==0)
@@ -154,10 +184,6 @@ scanner_plugin(polychord, version(1, 15))
 
       // Ensure that MPI processes have the same IDs for auxiliary print streams;
       Gambit::Scanner::assign_aux_numbers("Posterior","LastLive");
-
-      // Create the object that interfaces to the PolyChord LogLike callback function
-      Gambit::PolyChord::LogLikeWrapper loglwrapper(LogLike, get_printer());
-      Gambit::PolyChord::global_loglike_object = &loglwrapper;
 
       //Run PolyChord, passing callback functions for the loglike and dumper.
       if(myrank == 0) std::cout << "Starting PolyChord run..." << std::endl;
@@ -209,18 +235,21 @@ namespace Gambit {
       /// loglike callback routine
       ///
       /// Input arguments
-      /// ndim       = dimensionality (total number of free parameters) of the problem
-      /// nderived   = total number of derived parameters
-      /// Cube[ndim] = ndim parameters 
+      /// ndim          = dimensionality (total number of free parameters) of the problem
+      /// nderived      = total number of derived parameters
+      /// Cube[ndim]    = ndim parameters 
       ///
       /// Output arguments
-      /// phi[ndim] = nderived devired parameters
-      /// lnew      = loglikelihood
+      /// phi[nderived] = nderived devired parameters
+      /// lnew          = loglikelihood
       ///
       double LogLikeWrapper::LogLike(double *Cube, int ndim, double* phi, int nderived)
       {
-         //convert C style array to C++ vector class
-         std::vector<double> unitpars(Cube, Cube + ndim);
+         //convert C style array to C++ vector class, reordering parameters slow->fast
+         std::vector<std::string> param_names = boundLogLike->getParameters();
+         std::vector<double> unitpars(ndim);
+         for (auto i=0; i<ndim; i++) 
+             unitpars[i] = Cube[param_location[param_names[i]]];
          std::vector<double> derived(phi, phi + nderived);
 
          double lnew = boundLogLike(unitpars);
