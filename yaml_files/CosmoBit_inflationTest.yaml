@@ -120,10 +120,9 @@ Rules:
         #P_k_ini type : analytic_Pk
 
   - capability: classy_primordial_parameters
-    function: set_classy_parameters_primordial_ps
+    function: set_classy_parameters_parametrised_ps
     module: CosmoBit
 
-  
   #- capability: set_classy_parameters
   #  function: set_classy_parameters_parametrised_ps
   #  options:
