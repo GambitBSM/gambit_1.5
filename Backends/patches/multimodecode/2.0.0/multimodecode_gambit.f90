@@ -19,6 +19,8 @@ MODULE multimodecode_gambit
 
   implicit none
 
+  Logical :: SilenceOutput = .False.
+
   public :: multimodecode_gambit_driver
 
 ! The structure of the output gambit reads.

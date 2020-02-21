@@ -1,0 +1,12 @@
+--- a/Makefile_main_modpk	2015-04-21 01:36:02.000000000 +1000
++++ b/Makefile_main_modpk	2020-02-21 14:08:21.823863988 +1100
+@@ -41,7 +41,8 @@ powspec : $(MODPKOBJ) $(PKDRIVER)
+ %.o %.mod: %.f90
+ 	$(F90C) $(F90FLAGS) -c $*.f90
+ 
+-clean: cleanoutput
++#clean: cleanoutput
++clean:
+ 	-rm -f *.o *.mod
+ 	-rm powspec
+ 

@@ -448,7 +448,7 @@ index 3ba54a28c..d8e972e52 100644
        if (out_opt%fields_horiz) then
 --- a/modpk_errorhandling.f90	2015-04-21 01:36:02.000000000 +1000
 +++ b/modpk_errorhandling.f90	2020-02-20 17:22:38.316677871 +1100
-@@ -2,8 +2,23 @@ module modpk_errorhandling
+@@ -2,8 +2,22 @@ module modpk_errorhandling
    !Module for handling exceptions and warnings.
    !More info is sometimes printed to screen where these occur.
    use modpk_io, only : out_opt
@@ -466,7 +466,6 @@ index 3ba54a28c..d8e972e52 100644
 +    End Subroutine callback
 +  End Interface
 +
-+  Logical :: SilenceOutput = .False.
 +  ! GAMBIT addition end
 +
    private
@@ -529,3 +528,15 @@ index 3ba54a28c..d8e972e52 100644
        stop
  
      end subroutine raise_exception_cosmo
+--- a/Makefile_main_modpk	2015-04-21 01:36:02.000000000 +1000
++++ b/Makefile_main_modpk	2020-02-21 14:15:22.563525873 +1100
+@@ -41,7 +41,8 @@ powspec : $(MODPKOBJ) $(PKDRIVER)
+ %.o %.mod: %.f90
+ 	$(F90C) $(F90FLAGS) -c $*.f90
+ 
+-clean: cleanoutput
++#clean: cleanoutput
++clean:
+ 	-rm -f *.o *.mod
+ 	-rm powspec
+ 
