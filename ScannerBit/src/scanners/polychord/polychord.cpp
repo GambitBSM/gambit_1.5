@@ -2,7 +2,7 @@
 //  *********************************************
 ///  \file
 ///
-///  ScannerBit interface to PolyChord 1.14
+///  ScannerBit interface to PolyChord 1.16
 ///
 ///  *********************************************
 ///
@@ -51,7 +51,7 @@ typedef Gambit::Scanner::like_ptr scanPtr;
 /// Interface to ScannerBit
 /// =================================================
 
-scanner_plugin(polychord, version(1, 15))
+scanner_plugin(polychord, version(1, 16))
 {
    // An error is thrown if any of the following entries are not present in the inifile (none absolutely required for PolyChord).
    reqd_inifile_entries();
@@ -127,7 +127,8 @@ scanner_plugin(polychord, version(1, 15))
       settings.feedback = get_inifile_value<int>("fb", 1);                         // Feedback level
       settings.precision_criterion = get_inifile_value<double>("tol", 0.5);        // Stopping criterion (consistent with multinest)
       settings.logzero = get_inifile_value<double>("logZero",gl0);
-      settings.max_ndead = get_inifile_value<double>("maxiter", 0);                  // Max no. of iterations, a non-positive value means infinity (consistent with multinest).
+      settings.max_ndead = get_inifile_value<double>("maxiter", -1);               // Max no. of iterations, a negative value means infinity (different in comparison with multinest).
+      settings.maximise = get_inifile_value<bool>("polychord_maximise", false);    // Whether to run a maximisation algorithm once the run is finished
       settings.boost_posterior = 0; // Increase the number of posterior samples produced
       bool outfile (get_inifile_value<bool>("outfile", true));                // write output files?
       settings.posteriors = outfile;
