@@ -147,9 +147,9 @@ scanner_plugin(polychord, version(1, 16))
       settings.do_clustering = get_inifile_value<bool>("do_clustering", true);     // Whether or not to perform clustering
       settings.feedback = get_inifile_value<int>("fb", 1);                         // Feedback level
       settings.precision_criterion = get_inifile_value<double>("tol", 0.5);        // Stopping criterion (consistent with multinest)
-      settings.logzero = get_inifile_value<double>("logZero",gl0);
+      settings.logzero = get_inifile_value<double>("logzero",gl0);
       settings.max_ndead = get_inifile_value<double>("maxiter", -1);               // Max no. of iterations, a negative value means infinity (different in comparison with multinest).
-      settings.maximise = get_inifile_value<bool>("polychord_maximise", false);    // Whether to run a maximisation algorithm once the run is finished
+      settings.maximise = get_inifile_value<bool>("maximise", false);    // Whether to run a maximisation algorithm once the run is finished
       settings.boost_posterior = 0; // Increase the number of posterior samples produced
       bool outfile (get_inifile_value<bool>("outfile", true));                // write output files?
       settings.posteriors = outfile;
@@ -166,7 +166,6 @@ scanner_plugin(polychord, version(1, 16))
       settings.base_dir = get_inifile_value<std::string>("default_output_path")+"PolyChord";
       settings.file_root = get_inifile_value<std::string>("root", "native");
       settings.seed = get_inifile_value<int>("seed",-1);
-      settings.maximise = get_inifile_value<int>("pc_maximise",false);
 
       Gambit::Utils::ensure_path_exists(settings.base_dir);
       Gambit::Utils::ensure_path_exists(settings.base_dir + "/clusters/");
