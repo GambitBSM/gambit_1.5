@@ -34,6 +34,7 @@ struct Settings
     int nlive;
     int num_repeats;
     int nprior;
+    int nfail;
     bool do_clustering;
     int feedback;
     double precision_criterion;
@@ -50,6 +51,7 @@ struct Settings
     bool write_live;
     bool write_dead;
     bool write_prior;
+    bool maximise;
     double compression_factor;
     std::string base_dir;
     std::string file_root;
