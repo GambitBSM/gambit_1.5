@@ -12,6 +12,11 @@
 ///          selim.hotinli14@imperial.ac.uk
 ///  \date 2017 June
 ///  \date 2017 Oct
+///
+///  \author Tomas Gonzalo
+///          (tomas.gonzalo@monash.edu)
+///  \date 2020 Feb
+///
 ///  *************************
 
 #include "gambit/Utils/util_types.hpp"
@@ -21,6 +26,9 @@
 
 namespace Gambit
 {
+    // Typedef for function pointer to a void() function
+    typedef void (*type_fptr_multimodecode_ErrorHandler)();
+
     // type definition for the multimodecode output.
     typedef struct
     {
