@@ -33,6 +33,3 @@ END_BE_NAMESPACE
 
 BE_INI_FUNCTION{}
 END_BE_INI_FUNCTION
-
-~                                                                                                                                                                                                           
-~                                                            

@@ -41,8 +41,5 @@ BE_FUNCTION(multimodecode_parametrised_ps, gambit_inflation_observables,
 BE_VARIABLE(ErrorHandler_cptr, type_fptr_multimodecode_ErrorHandler, "__modpk_errorhandling_MOD_errorhandler_cptr", "multimode_internal")
 BE_CONV_FUNCTION(ErrorHandling, void, (const int&), "multimode_internal")
 
-BE_INI_FUNCTION{}
-END_BE_INI_FUNCTION
-
 // Undefine macros to avoid conflict with other backends
 #include "gambit/Backends/backend_undefs.hpp"
