@@ -128,6 +128,12 @@ contains
     logical :: calc_full_pk
     integer :: pfile
 
+    if (SilenceOutput) Then
+      close(unit=6)
+    else
+      open(unit=6, file="/dev/stdout")
+    endif
+
     call deallocate_vars()
 
     calc_full_pk = .true.
@@ -624,6 +630,12 @@ contains
     logical :: use_horiz_cross_approx
     logical :: calc_full_pk
     integer :: pfile
+
+    if (SilenceOutput) Then
+      close(unit=6)
+    else
+      open(unit=6, file="/dev/stdout")
+    endif
 
     call deallocate_vars()
 

@@ -33,5 +33,16 @@ END_BE_NAMESPACE
 
 BE_INI_FUNCTION
 {
+  // Scan-level initialisation
+  static bool scan_level = true;
+  if (scan_level)
+  {
+    // Set the function pointer in MultiModeCode to our ErrorHandler callback function
+    *ErrorHandler_cptr = & CAT_4(BACKENDNAME,_,SAFE_VERSION,_ErrorHandler);
+
+    // Set the SilenceOutput variable
+    *SilenceOutput = runOptions->getValueOrDef<bool>(true, "SilenceOutput");
+  }
+
 }
 END_BE_INI_FUNCTION
