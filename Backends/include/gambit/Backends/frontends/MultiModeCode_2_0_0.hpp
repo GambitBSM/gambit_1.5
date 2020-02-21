@@ -31,14 +31,18 @@ LOAD_LIBRARY
 
 BE_FUNCTION(multimodecode_primordial_ps, gambit_inflation_observables,
             (int&,int&,int&,int&,double*,double*,double*,double&,double&,double&,int&,double&,double&,int&),
-            "__multimodecode_gambit_MOD_multimodecode_gambit_driver", "multimodecode_primordial_ps")
+            ("__multimodecode_gambit_MOD_multimodecode_gambit_driver","multimodecode_gambit_mp_multimodecode_gambit_driver_"), "multimodecode_primordial_ps")
 
 BE_FUNCTION(multimodecode_parametrised_ps, gambit_inflation_observables,
             (int&,int&,int&,int&,double*,double*,double*,double&,double&,double&,int&),
-            "__multimodecode_gambit_MOD_multimodecode_parametrised_ps", "multimodecode_parametrised_ps")
+            ("__multimodecode_gambit_MOD_multimodecode_parametrised_ps","multimodecode_gambit_mp_multimodecode_parametrised_ps_"), "multimodecode_parametrised_ps")
 
 // Fortran error handling issue
-BE_VARIABLE(ErrorHandler_cptr, type_fptr_multimodecode_ErrorHandler, "__modpk_errorhandling_MOD_errorhandler_cptr", "multimode_internal")
+BE_VARIABLE(ErrorHandler_cptr, type_fptr_multimodecode_ErrorHandler, 
+            ("__modpk_errorhandling_MOD_errorhandler_cptr","modpk_errorhandling_mp_errorhandler_cptr_"), "multimode_internal")
+
+// Variable to silence MultiModeCode output
+BE_VARIABLE(SilenceOutput, Flogical, ("__modpk_errorhandling_MOD_silenceoutput", "modpk_errorhandling_mp_silenceoutput_"), "mutlimode_internal")
 
 // Undefine macros to avoid conflict with other backends
 #include "gambit/Backends/backend_undefs.hpp"
