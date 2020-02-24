@@ -923,7 +923,6 @@ namespace Gambit
       static double Vtb = 1;
       static std::vector<std::vector<double> > V = { {Vud, Vus, Vub}, {Vcd, Vcs, Vcb}, {Vtd, Vts, Vtb} };
 
-      double x, y;
       std::vector<double> m_lep(3), m_uquark(3), m_dquark(3), gamma(3), M(3), decay_prod(3), two_heaviest(2);
       // Since we scan the SLHA2 model, we take masses from it
       m_lep[0] = *Param["mE"];
@@ -1022,7 +1021,7 @@ namespace Gambit
       M[2] = *Param["M_3"];
       
       // Hadronization scale 
-      static double LQCD = 7.5; // (GeV)
+      static double LQCD = 1; // (GeV)
 
       // factor of 2 in front accounts for Majorana nature
       for (int i=0; i<3; i++)
