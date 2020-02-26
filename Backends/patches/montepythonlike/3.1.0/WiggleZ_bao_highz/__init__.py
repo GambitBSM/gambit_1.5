@@ -26,6 +26,4 @@ class WiggleZ_bao_highz(Likelihood):
 
         chi2 = (difference / self.high_z_sigma)**2
         lkl = - 0.5 *chi2
-        print chi2
-        print lkl
         return lkl
