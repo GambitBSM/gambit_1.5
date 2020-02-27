@@ -448,7 +448,7 @@ index 3ba54a28c..d8e972e52 100644
        if (out_opt%fields_horiz) then
 --- a/modpk_errorhandling.f90	2015-04-21 01:36:02.000000000 +1000
 +++ b/modpk_errorhandling.f90	2020-02-20 17:22:38.316677871 +1100
-@@ -2,8 +2,22 @@ module modpk_errorhandling
+@@ -2,10 +2,24 @@ module modpk_errorhandling
    !Module for handling exceptions and warnings.
    !More info is sometimes printed to screen where these occur.
    use modpk_io, only : out_opt
@@ -469,9 +469,12 @@ index 3ba54a28c..d8e972e52 100644
 +  ! GAMBIT addition end
 +
    private
-   public :: raise, run_outcome, assert
+-  public :: raise, run_outcome, assert
++  public :: raise, run_outcome, assert, ErrorHandler_cptr ! Modified by GAMBIT
  
-@@ -75,11 +90,14 @@ module modpk_errorhandling
+   !General class for errors
+   type :: error
+@@ -75,11 +89,14 @@ module modpk_errorhandling
      end subroutine raise_warning
  
      subroutine raise_exception_code(self, msg, fname, line)
@@ -486,7 +489,7 @@ index 3ba54a28c..d8e972e52 100644
  
        !Print out even if asking for no output (modpkoutput=.false.)
        print*, "**********************************************"
-@@ -93,17 +111,27 @@ module modpk_errorhandling
+@@ -93,17 +110,27 @@ module modpk_errorhandling
  
        print*, "MODECODE: ", trim(msg)
  
@@ -514,7 +517,7 @@ index 3ba54a28c..d8e972e52 100644
  
        !Print out even if asking for no output (modpkoutput=.false.)
        print*, "**********************************************"
-@@ -117,6 +145,13 @@ module modpk_errorhandling
+@@ -117,6 +144,13 @@ module modpk_errorhandling
  
        print*, "MODECODE: ", trim(msg)
  
