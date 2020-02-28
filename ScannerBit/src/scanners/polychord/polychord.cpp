@@ -99,46 +99,57 @@ scanner_plugin(polychord, version(1, 16))
       Gambit::PolyChord::LogLikeWrapper loglwrapper(LogLike, get_printer());
       Gambit::PolyChord::global_loglike_object = &loglwrapper;
 
-      // Compute an ordering for fast and slow parameters
+      // ---------- Compute an ordering for fast and slow parameters
+      // Read list of fast parameters from file
       std::vector<std::string> fast_params = get_inifile_value<std::vector<std::string>>("fast_params", {});
-      std::vector<std::string> params = LogLike->getParameters();
+      // Get list of parameters used from loglikelihood
+      std::vector<std::string> all_params = LogLike->getParameters();
 
-      std::set<std::string> set_fast_params(fast_params.begin(), fast_params.end()),
-                            set_params(params.begin(), params.end()),
-                            diff; 
-
+      // Compute the set difference between fast_params and all_params to check if there are any fast_params not included in all_params
+      std::set<std::string> set_fast_params(fast_params.begin(), fast_params.end()), set_params(all_params.begin(), all_params.end()), diff; 
       std::set_difference(set_fast_params.begin(), set_fast_params.end(), set_params.begin(), set_params.end(),std::inserter(diff,diff.begin()));
       if (diff.size())
       {
+          // Raise an error if any specified fast_params are not actually being sampled over.
           std::string error_message = "You have specified:\n";
           for (auto param : diff) error_message += param + "\n" ;
           error_message += "as fast param(s), but the list of params is:\n";
-          for (auto param : params) error_message += param + "\n";
+          for (auto param : all_params) error_message += param + "\n";
           scan_error().raise(LOCAL_INFO,error_message);
       }
 
+      // Compute the locations in PolyChord's unit hypercube, ordering from slow to fast
+      // This defaults to nDims if there are no fast parameters, or if all parameters are fast.
       int nslow = settings.nDims;
       if (fast_params.size() != 0 and fast_params.size() != settings.nDims)
       {
+
+          // grade_dims is a vector of integers that indicates the number of slow and fast parameters
           settings.grade_dims.clear();
           int i = 0;
-          for (auto param : params) 
-          {
+          // Run through all the parameters, and if they're slow parameters
+          // give them an index i, then increment i
+          for (auto param : all_params) 
               if (std::find(fast_params.begin(), fast_params.end(),param) == fast_params.end())
-                  Gambit::PolyChord::global_loglike_object->param_location[param] = (i++); // Slow parameters first
-          }
+                  Gambit::PolyChord::global_loglike_object->index_map[param] = (i++);
           settings.grade_dims.push_back(i);
           nslow = i;
 
-          for (auto param : params) 
+          // Do the same for the fast parameters
+          for (auto param : all_params) 
               if (std::find(fast_params.begin(), fast_params.end(),param) != fast_params.end())
-                  Gambit::PolyChord::global_loglike_object->param_location[param] = (i++); // Then fast
-          if (i>settings.grade_dims[0]){ // We're operating in fast-slow mode
+                  Gambit::PolyChord::global_loglike_object->index_map[param] = (i++);
+
+          // If there are any fast parameters...
+          if (i>settings.grade_dims[0]){ 
+              // ... tell this to PolyChord via an extra entry into the grade_dims vector
               settings.grade_dims.push_back(i);
+              // Specify the fraction of time to spend in the slow parameters.
               double frac_slow = get_inifile_value<double>("frac_slow",0.75); 
               settings.grade_frac = std::vector<double>({frac_slow, 1-frac_slow});
           }
       }
+      // ---------- End computation of ordering for fast and slow parameters
 
       // PolyChord algorithm options.
       settings.nlive = get_inifile_value<int>("nlive", settings.nDims*25);         // number of live points
@@ -149,7 +160,7 @@ scanner_plugin(polychord, version(1, 16))
       settings.precision_criterion = get_inifile_value<double>("tol", 0.5);        // Stopping criterion (consistent with multinest)
       settings.logzero = get_inifile_value<double>("logzero",gl0);
       settings.max_ndead = get_inifile_value<double>("maxiter", -1);               // Max no. of iterations, a negative value means infinity (different in comparison with multinest).
-      settings.maximise = get_inifile_value<bool>("maximise", false);    // Whether to run a maximisation algorithm once the run is finished
+      settings.maximise = get_inifile_value<bool>("maximise", false);              // Whether to run a maximisation algorithm once the run is finished
       settings.boost_posterior = 0; // Increase the number of posterior samples produced
       bool outfile (get_inifile_value<bool>("outfile", true));                // write output files?
       settings.posteriors = outfile;
@@ -169,8 +180,6 @@ scanner_plugin(polychord, version(1, 16))
 
       Gambit::Utils::ensure_path_exists(settings.base_dir);
       Gambit::Utils::ensure_path_exists(settings.base_dir + "/clusters/");
-
-
 
 
       if(resume_mode==1 and outfile==0)
@@ -270,7 +279,7 @@ namespace Gambit {
          std::vector<std::string> params = boundLogLike->getParameters();
          std::vector<double> unitpars(ndim);
          for (auto i=0; i<ndim; i++) 
-             unitpars[i] = Cube[param_location[params[i]]];
+             unitpars[i] = Cube[index_map[params[i]]];
          std::vector<double> derived(phi, phi + nderived);
 
          double lnew = boundLogLike(unitpars);
