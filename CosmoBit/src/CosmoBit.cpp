@@ -1601,25 +1601,22 @@ namespace Gambit
       // result = runOptions->getValueOrDef<double>(0.71611,"T_ncdm");
     }
 
-    void set_T_ncdm_SM(double &result)
+    void T_ncdm(double &result)
     {
-      using namespace Pipes::set_T_ncdm_SM;
+      using namespace Pipes::T_ncdm;
 
-      // set to 0.71611 in units of photon temperature, above the instantaneous decoupling value (4/11)^(1/3)
-      // to recover Sum_i mNu_i/omega = 93.14 eV resulting from studies of active neutrino decoupling (hep-ph/0506164)
-      result = *Dep::T_ncdm_SM;
-      // This standard values enters in many assumption entering class. Therefore changing this value in
-      // the yaml file is disabled at the moment. If you still want to modify it uncomment the line below and
-      // you can set is as a run option (as T_cmb).
-      // result = runOptions->getValueOrDef<double>(0.71611,"T_ncdm");
-    }
+      double rCMB = 1.0; // Default value if no energy injection is assumed.
 
-    void set_T_ncdm(double &result)
-    {
-      using namespace Pipes::set_T_ncdm;
+      // If the "etaBBN_rBBN_rCMB_dNurBBN_dNurCMB" model is included in the scan,
+      // we use rCMB of this model.
+      if (ModelInUse("etaBBN_rBBN_rCMB_dNurBBN_dNurCMB"))
+      {
+        const ModelParameters& NP_params = *Dep::etaBBN_rBBN_rCMB_dNurBBN_dNurCMB_parameters;
+        rCMB = NP_params.at("r_CMB");
+      }
 
-      // Take the SM value of T_ncdm (T_nu) and multiply it with the value of r_CMB; 
-      result = (*Param["r_CMB"])*(*Dep::T_ncdm_SM);
+      // Take the SM value of T_ncdm (T_nu) and multiply it with the value of rCMB
+      result = rCMB*(*Dep::T_ncdm_SM);
     }
 
     void calculate_eta0(double &result)
