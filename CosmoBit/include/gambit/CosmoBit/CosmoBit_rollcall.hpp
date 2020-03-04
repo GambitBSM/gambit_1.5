@@ -941,7 +941,7 @@ START_MODULE
    START_CAPABILITY
     #define FUNCTION compute_H0_LogLike
     START_FUNCTION(double)
-    ALLOW_MODELS(LCDM, LCDM_theta)
+    DEPENDENCY(H0,double)
     #undef FUNCTION
   #undef CAPABILITY
 

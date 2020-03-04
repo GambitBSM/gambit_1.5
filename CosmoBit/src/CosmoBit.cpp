@@ -2149,7 +2149,7 @@ namespace Gambit
         }
         read_data = true;
       }
-      result = -0.5 * pow(*Param["H0"] - data["mean"][0],2)/ pow(data["sigma"][0],2);
+      result = -0.5 * pow(*Dep::H0 - data["mean"][0],2)/ pow(data["sigma"][0],2);
     }
 
     void compute_sigma8_LogLike(double &result)
