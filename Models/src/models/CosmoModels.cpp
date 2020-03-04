@@ -59,6 +59,28 @@ void MODEL_NAMESPACE::LCDM_to_LCDM_no_primordial(const ModelParameters &myP, Mod
 }
 #undef MODEL
 
+// ΛCDM_theta parameters without those relating to the primordial power spectrum (A_s, n_s)
+// This model should be scanned alongside an inflationary model able to provide
+// a primordial power spectrum. 
+#define MODEL LCDM_theta_no_primordial
+void MODEL_NAMESPACE::LCDM_theta_to_LCDM_theta_no_primordial(const ModelParameters &myP, ModelParameters &targetP)
+{
+  logger()<<"Running interpret_as_parent calculations for LCDM_theta --> LCDM_theta_no_primordial ..." << LogTags::info << EOM;
+
+  // Same non-primordial parameters as vanilla ΛCDM.
+  targetP.setValue("T_cmb",     myP.getValue("T_cmb"));
+  targetP.setValue("100theta_s",myP.getValue("100theta_s"));
+  targetP.setValue("omega_b",   myP.getValue("omega_b"));
+  targetP.setValue("omega_cdm", myP.getValue("omega_cdm"));
+  targetP.setValue("tau_reio",  myP.getValue("tau_reio"));
+
+  // Don't take any of the model parameters
+  targetP.setValue("n_s", 0.);
+  targetP.setValue("ln10A_s", 0.); 
+  // *Technically* log of 0 is undefined but I think this is okay for the translation functions...
+}
+#undef MODEL
+
 #define MODEL etaBBN
 void MODEL_NAMESPACE::etaBBN_to_etaBBN_rBBN_rCMB_dNurBBN_dNurCMB (const ModelParameters &myP, ModelParameters &targetP)
 {

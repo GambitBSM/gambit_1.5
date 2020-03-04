@@ -239,6 +239,13 @@ BE_NAMESPACE
     double Neff = cosmo.attr("Neff")().cast<double>();
     return Neff;
   }
+
+  // Returns Hubble parameter today
+  double class_get_H0()
+  {
+    double H0 = cosmo.attr("Hubble")(0).cast<double>();
+    return H0;
+  }
   
   // print primordial power spectrum for consistency check & debug purposes
   void print_pps()
