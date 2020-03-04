@@ -343,7 +343,7 @@ index 3226d39..9b2419f 100644
        procedure, public :: printout => ic_print_observables
        procedure, public :: print_header => ic_print_headers
 diff --git a/modpk_potential.f90 b/modpk_potential.f90
-index 630ec5b..090b413 100644
+index 630ec5b..7812598 100644
 --- a/modpk_potential.f90
 +++ b/modpk_potential.f90
 @@ -48,7 +48,7 @@ contains
@@ -355,7 +355,7 @@ index 630ec5b..090b413 100644
      real(dp), dimension(size(phi),size(phi)) :: m2_matrix
      integer :: i,j, temp_choice
  
-@@ -284,6 +284,10 @@ contains
+@@ -284,6 +284,22 @@ contains
            cos(2.0e0_dp*pi*phi(ii) - 2.0e0_dp*pi*phi(jj))
        end do; end do
  
@@ -363,10 +363,22 @@ index 630ec5b..090b413 100644
 +      ! SMASH potential - see deriv. expressions in modpk_backgrnd
 +      ii = locate(chiHarray,phi(1))
 +      call polint(chiHarray(ii:ii+4), potHarray(ii:ii+4), phi(1), V_potential, derr)
++
++    case(19)
++      ! Starobinsky 
++      ! R + R^2/(6M^2)
++      ! or
++      ! Lambda^4 (1 - exp(-sqrt(2/3)phi/Mpl))^2
++
++      call assert%check(size(vparams,1)>=1,__FILE__,__LINE__)
++      call assert%check(num_inflaton==1,__FILE__,__LINE__)
++      Lambda4 = vparams(1,:)
++      V_potential = Lambda4(1) * (1 - exp(-sqrt(2.0e0_dp/3.0e0_dp)*phi(1)))**2
++ 
  
  
      case default
-@@ -334,7 +338,7 @@ contains
+@@ -334,7 +350,7 @@ contains
      real(dp) :: p_exp
      integer :: ii
  
@@ -375,7 +387,7 @@ index 630ec5b..090b413 100644
      real(dp), dimension(size(phi)) :: A_i
      real(dp), dimension(size(phi),size(phi)) :: B_ij
      integer :: alpha, beta
-@@ -501,6 +505,10 @@ contains
+@@ -501,6 +517,18 @@ contains
             end do
           end do
  
@@ -383,10 +395,18 @@ index 630ec5b..090b413 100644
 +       ! SMASH potential - see deriv. expressions in modpk_backgrnd
 +         ii = locate(chiHarray,phi(1))
 +         call polint(chiHarray(ii:ii+4), dpotHarray(ii:ii+4), phi(1), first_deriv(1), derr(1))
++
++       case(19)
++       ! Starobinsky
++         lambda4 = vparams(1,:)
++         first_deriv = lambda4 * 2.0e0_dp * sqrt(2.0e0_dp/3.0e0_dp) * &
++                       (-exp(-2.0e0_dp * sqrt(2.0e0_dp/3.0e0_dp)*phi(1)) &
++                       + exp(-sqrt(2.0e0_dp/3.0e0_dp)*phi(1)))
++ 
  
         !END MULTIFIELD
         case default
-@@ -542,7 +550,7 @@ contains
+@@ -542,7 +570,7 @@ contains
      real(dp), dimension(size(phi),size(phi)) :: m2_matrix
  
      real(dp), dimension(size(phi)) :: location_phi, step_size, step_slope
@@ -395,7 +415,7 @@ index 630ec5b..090b413 100644
      real(dp), dimension(:,:), allocatable :: numderiv
      real(dp), dimension(:), allocatable :: numderiv1
  
-@@ -771,6 +779,10 @@ contains
+@@ -771,6 +799,18 @@ contains
             end do
           end do
  
@@ -403,16 +423,25 @@ index 630ec5b..090b413 100644
 +       ! SMASH potential - see deriv. expressions in modpk_backgrnd
 +         ii = locate(chiHarray,phi(1))
 +         call polint(chiHarray(ii:ii+4), d2potHarray(ii:ii+4), phi(1), second_deriv(1,1), derr(1))
++
++       case(19)
++       ! Starobinsky
++         lambda4 = vparams(1,:)
++         second_deriv = lambda4(1)**4 * 4.0e0_dp/3.0e0_dp * &
++             (2.0e0_dp * exp(-2.0e0_dp * sqrt(2.0e0_dp/3.0e0_dp)*phi(1)) &
++             - exp(-sqrt(2.0e0_dp/3.0e0_dp)*phi(1)))
++
  
         case default
  
-@@ -794,13 +806,13 @@ contains
+@@ -794,13 +834,13 @@ contains
    !of the scalar running, alpha_s
    function d3Vdphi3(phi) result(third_deriv)
      real(dp), intent(in) :: phi(:)
 -    real(dp) :: third_deriv(size(phi),size(phi),size(phi))
+-    real(dp) :: m2_V(size(phi))
 +    real(dp) :: third_deriv(size(phi),size(phi),size(phi))!,lambda(size(phi))
-     real(dp) :: m2_V(size(phi))
++    real(dp) :: m2_V(size(phi)), lambda4(size(phi))
      integer :: ii
  
      real(dp) :: p_exp
@@ -422,7 +451,7 @@ index 630ec5b..090b413 100644
  
      third_deriv = 0e0_dp
  
-@@ -808,6 +820,16 @@ contains
+@@ -808,6 +848,16 @@ contains
      case(1)
        m2_V = 10.e0_dp**(vparams(1,:))
        third_deriv=0e0_dp
@@ -439,7 +468,7 @@ index 630ec5b..090b413 100644
      case(14)
  
        !Multifield step potential
-@@ -852,6 +874,13 @@ contains
+@@ -852,6 +902,22 @@ contains
            m2_V(ii)*abs(phi(ii))**(p_exp-3.0e0_dp)
        end do
  
@@ -450,10 +479,19 @@ index 630ec5b..090b413 100644
 +                         phi(1), third_deriv(1,1,1), derr(1))
 +       ! print*,"third_deriv(1,1,1) = ", third_deriv(1,1,1), "derr(1)" , derr(1)
 +
++     case(19)
++     ! Starobinsky
++       lambda4 = vparams(1,:)
++       third_deriv = lambda4(1)**4 * 4.0e0_dp/3.0e0_dp * sqrt(2.0e0_dp/3.0e0_dp) &
++           * (-4.0e0_dp * exp(-2.0e0_dp * sqrt(2.0e0_dp/3.0e0_dp)*phi(1))    &
++           + exp(-sqrt(2.0e0_dp/3.0e0_dp)*phi(1)))
++
++
++
      case default
  
        print*, "MODECODE: potential_choice =", potential_choice
-@@ -923,9 +952,17 @@ contains
+@@ -923,9 +989,17 @@ contains
      !
      real(dp) :: getEps
      real(dp), INTENT(IN) :: phi(:), dphi(:)

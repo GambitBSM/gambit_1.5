@@ -964,6 +964,14 @@ namespace Gambit
         result.num_inflaton = 1;
         result.vparam_rows = 2;
       }
+      else if (ModelInUse("Inflation_1starobinsky"))
+      {
+        result.vparams.push_back(*Param["lambda4"]); 
+        result.phi_init0.push_back(*Param["phi_init0"]);
+        result.potential_choice = 19; 
+        result.num_inflaton = 1;
+        result.vparam_rows = 1;
+      }
 
       // (JR) TODO: MultiMode segFaults if this is empty have to do this properly though 
       result.dphi_init0.push_back(1.);

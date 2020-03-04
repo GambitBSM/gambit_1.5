@@ -32,6 +32,10 @@
 ///          (sanjay.bloor12@imperial.ac.uk)
 ///  \date 2019 June, Nov
 ///
+///  \author Will Handley
+///          (wh260@cam.ac.uk)
+///  \date 2020 Mar
+///
 ///  *********************************************
 
 #ifndef __CosmoBit_rollcall_hpp__
@@ -198,7 +202,7 @@ START_MODULE
     #define FUNCTION set_N_pivot
     START_FUNCTION(double)
     ALLOW_MODELS(LCDM)
-    ALLOW_MODELS(Inflation_SR1quad,Inflation_1quar,Inflation_1mono23,Inflation_1linear,Inflation_1natural,Inflation_smash)
+    ALLOW_MODELS(Inflation_SR1quad,Inflation_1quar,Inflation_1mono23,Inflation_1linear,Inflation_1natural,Inflation_smash,Inflation_1starobinsky)
     #undef FUNCTION
 
   #undef CAPABILITY  
@@ -245,7 +249,7 @@ START_MODULE
      #define FUNCTION set_classy_parameters_primordial_ps
       START_FUNCTION(CosmoBit::Classy_input)
          //ALLOW_MODELS(LCDM_no_primordial)
-         MODEL_GROUP(inflation,(Inflation_SR1quad,Inflation_1quar,Inflation_1mono23,Inflation_1linear,Inflation_1natural))
+         MODEL_GROUP(inflation,(Inflation_SR1quad,Inflation_1quar,Inflation_1mono23,Inflation_1linear,Inflation_1natural,Inflation_1starobinsky))
          MODEL_GROUP(cosmo,(LCDM_no_primordial))
          ALLOW_MODEL_COMBINATION(cosmo,inflation)
          DEPENDENCY(classy_baseline_params, pybind11::dict)
@@ -314,7 +318,7 @@ START_MODULE
     #define FUNCTION set_multimode_inputs
       START_FUNCTION(Multimode_inputs)
       DEPENDENCY(k_pivot, double)
-      ALLOW_MODELS(Inflation_SR1quad,Inflation_1quar,Inflation_1mono23,Inflation_1linear,Inflation_1natural,Inflation_smash)
+      ALLOW_MODELS(Inflation_SR1quad,Inflation_1quar,Inflation_1mono23,Inflation_1linear,Inflation_1natural,Inflation_smash,Inflation_1starobinsky)
     #undef FUNCTION
   #undef CAPABILITY
 
@@ -323,7 +327,7 @@ START_MODULE
   //   START_CAPABILITY
   //   #define FUNCTION get_multimode_results
   //     START_FUNCTION(gambit_inflation_observables)
-  //     ALLOW_MODELS(Inflation_SR1quad,Inflation_1quar,Inflation_1mono23,Inflation_1linear,Inflation_1natural,Inflation_smash)
+  //     ALLOW_MODELS(Inflation_SR1quad,Inflation_1quar,Inflation_1mono23,Inflation_1linear,Inflation_1natural,Inflation_smash,Inflation_1starobinsky)
   //     DEPENDENCY(multimode_pk_setting,int)
   //     DEPENDENCY(inf_inputs, Multimode_inputs)
   //     BACKEND_REQ(multimodecode_gambit_driver,(modecode_tag), void, (gambit_inflation_observables*,int&,int&,int&,int&,int&,int&,int&,int&,int&,int&,double&,int&,int&,double&,int&,double*,double*,int&,int&,double*,double*,double*,double&,double&,double&,int&,int&,double&,double*,double*,double*,double*,double&,double&))
@@ -335,8 +339,8 @@ START_MODULE
     
     #define FUNCTION get_multimode_parametrised_ps
       START_FUNCTION(Parametrised_ps)
-      //ALLOW_MODELS(Inflation_SR1quad,Inflation_1quar,Inflation_1mono23,Inflation_1linear,Inflation_1natural,Inflation_smash)
-      MODEL_GROUP(inflation,(Inflation_SR1quad,Inflation_1quar,Inflation_1mono23,Inflation_1linear,Inflation_1natural))
+      //ALLOW_MODELS(Inflation_SR1quad,Inflation_1quar,Inflation_1mono23,Inflation_1linear,Inflation_1natural,Inflation_smash,Inflation_1starobinsky)
+      MODEL_GROUP(inflation,(Inflation_SR1quad,Inflation_1quar,Inflation_1mono23,Inflation_1linear,Inflation_1natural,Inflation_1starobinsky))
       MODEL_GROUP(cosmo,(LCDM_no_primordial))
       ALLOW_MODEL_COMBINATION(cosmo,inflation)
       DEPENDENCY(multimode_input_parameters, Multimode_inputs)
@@ -371,7 +375,7 @@ START_MODULE
     #define FUNCTION get_multimode_primordial_ps
       START_FUNCTION(Primordial_ps)
       //ALLOW_MODELS(LCDM_no_primordial) // todo check models...
-      ALLOW_MODELS(Inflation_SR1quad,Inflation_1quar,Inflation_1mono23,Inflation_1linear,Inflation_1natural,Inflation_smash)
+      ALLOW_MODELS(Inflation_SR1quad,Inflation_1quar,Inflation_1mono23,Inflation_1linear,Inflation_1natural,Inflation_smash,Inflation_1starobinsky)
       DEPENDENCY(multimode_input_parameters, Multimode_inputs)
       BACKEND_REQ(multimodecode_primordial_ps, (), gambit_inflation_observables,
                   (int&,int&,int&,int&,double*,double*,double*,double&,double&,double&,int&,double&,double&,int&))
