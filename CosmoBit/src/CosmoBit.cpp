@@ -657,7 +657,7 @@ namespace Gambit
     }
 
     /// create a python dictionary with the standard inputs that have to be passed
-    /// to class: cosmological parameters (H0,omega_b,tau_reio,omega_cdm) & add 
+    /// to class: cosmological parameters ([H0/100*theta_s],omega_b,tau_reio,omega_cdm) & add 
     /// model dependent results for N_ur, neutrino masses & helium abundance
     /// here potential extra input options given in the yaml file are read in
     void set_classy_baseline_params(pybind11::dict &result)
@@ -665,6 +665,12 @@ namespace Gambit
       using namespace Pipes::set_classy_baseline_params;
 
       //std::cout << " enter " << __PRETTY_FUNCTION__ << std::endl;
+
+      if (ModelInUse("LCDM") and ModelInUse("LCDM_theta"))
+      {
+        CosmoBit_error().raise(LOCAL_INFO, "You have requested to scan both LCDM and LCDM_theta.\n"
+                                           "This is not allowed. Please select one in your YAML file.");
+      }
 
       // make sure dict is empty
       result.clear();
@@ -680,11 +686,20 @@ namespace Gambit
       merge_pybind_dicts(result, NuMasses_In, first_run);
 
       // standard cosmological parameters (common to all CDM -like models)
-      result["H0"] =            *Param["H0"];
       result["T_cmb"] =         *Param["T_cmb"];
       result["omega_b"] =       *Param["omega_b"];
       result["tau_reio"] =      *Param["tau_reio"];
       result["omega_cdm"] =     *Param["omega_cdm"];
+
+      // Depending on parametrisation, pass either Hubble or the acoustic scale
+      if (ModelInUse("LCDM"))
+      {
+        result["H0"] =  *Param["H0"];
+      }
+      else if (ModelInUse("LCDM_theta"))
+      {
+        result["100*theta_s"] = *Param["100theta_s"];
+      }
 
       // set helium abundance (vector Helium_abundance.at(0): mean, .at(1): uncertainty)
       std::vector<double> Helium_abundance = *Dep::Helium_abundance;
@@ -752,7 +767,7 @@ namespace Gambit
       }
       // If the model LCDM_no_primordial is used the primordial power spectrum is computed independent of CLASS. Therefore
       // this option should not be passed by the user
-      if (ModelInUse("LCDM_no_primordial"))
+      if (ModelInUse("LCDM_no_primordial") || ModelInUse("LCDM_theta_no_primordial"))
       {
         if (yaml_input.contains("P_k_ini type"))
         {
@@ -1023,8 +1038,9 @@ namespace Gambit
       result.save_iso_N = runOptions->getValue<int> ("save_iso_N");
       result.N_iso_ref = runOptions->getValue<int> ("N_iso_ref"); //double check this
       result.slowroll_infl_end = runOptions->getValue<int> ("slowroll_infl_end");
-      result.instreheat = runOptions->getValue<int> ("instreheat");
 
+      // SB. move this into the "ModelInUse"?
+      result.instreheat = runOptions->getValue<int> ("instreheat");
 
       // (JR) @Selim: we should probably double check if we need
       // to set these parameters or if we can/should fix them as well. 
@@ -1650,7 +1666,7 @@ namespace Gambit
     {
       using namespace Pipes::compute_Omega0_b;
 
-      double h = *Param["H0"]/100;
+      double h = *Dep::H0/100.;
       result =*Param["omega_b"]/h/h;
     }
 
@@ -1658,7 +1674,7 @@ namespace Gambit
     {
       using namespace Pipes::compute_Omega0_cdm;
 
-      double h = *Param["H0"]/100;
+      double h = *Dep::H0/100.;
       result =*Param["omega_cdm"]/h/h;
     }
 
@@ -1666,7 +1682,7 @@ namespace Gambit
     {
       using namespace Pipes::compute_Omega0_g;
 
-      double h = *Param["H0"]/100.;
+      double h = *Dep::H0/100.;
       result = (4.*_sigmaB_SI_/_c_SI_*pow(*Param["T_cmb"],4.)) / (3.*_c_SI_*_c_SI_*1.e10*h*h/_Mpc_SI_/_Mpc_SI_/8./pi/_GN_SI_);
     }
 
@@ -1693,7 +1709,7 @@ namespace Gambit
       using namespace Pipes::compute_Omega0_ncdm;
 
       double mNu_tot_eV = *Dep::mNu_tot;
-      double h = *Param["H0"]/100;
+      double h = *Dep::H0/100.;
 
       result = mNu_tot_eV/(93.14*h*h);  // TODO: heads up: explicit assumption of T_ncdm = 0.71611 and T_cmb goes in here. Has to be generalised
     }
@@ -2364,6 +2380,15 @@ namespace Gambit
 
 
     /* Classy getter functions */
+
+    /// Hubble
+    void get_H0_classy(double &result)
+    {
+      using namespace Pipes::get_H0_classy;
+
+      // Rescale by c [km/s] 
+      result = _c_SI_*BEreq::class_get_H0()/1000;
+    }
 
     /// Energy densities *today* (Omega0)
 

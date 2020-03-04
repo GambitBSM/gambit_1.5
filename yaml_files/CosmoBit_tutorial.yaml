@@ -107,7 +107,29 @@ Parameters:
    tau_reio:
      prior_type: flat
      range: [0.004,0.20]
-   T_cmb: 2.72548  
+   T_cmb: 2.72548   
+
+ # # LCDM_theta...
+ # LCDM_theta:
+ #   omega_b: 
+ #     prior_type: flat
+ #     range: [0.020,0.024]
+ #   omega_cdm:
+ #     prior_type: flat
+ #     range: [0.10,0.13]
+ #   100theta_s:
+ #     prior_type: flat
+ #     range: [1.03955,1.04265]
+ #   ln10A_s:
+ #     prior_type: flat
+ #     range: [2.9,3.2]
+ #   n_s:
+ #     prior_type: flat
+ #     range: [0.9,1.10]
+ #   tau_reio:
+ #     prior_type: flat
+ #     range: [0.004,0.20]
+ #   T_cmb: 2.72548  
 
  # extension of standard LCDM: allow for a value of dNeff @ CMB release different from today
  #dNurCMB:
@@ -144,7 +166,7 @@ Priors:
 #======== Output setup ========
 # different output formats, for details check chapter 6.6 of the GAMBIT code paper (https://arxiv.org/abs/1705.07908) 
 Printer:
-  printer: ascii
+  printer: cout
   options:
     output_file: "gambit_output.data"
     buffer_length: 100
@@ -224,6 +246,10 @@ ObsLikes:
     capability:   MP_LogLikes
     type:         map_str_dbl
 
+  # Print out the Hubble parameter today
+  - purpose:      Observable
+    capability:   H0
+    type:         double
 
 #======== Rule entries ========
 Rules:
@@ -235,7 +261,7 @@ Rules:
   #  
   - capability: plc_3_0_init
     options:
-      plc_prefix: /home/janina/code/PlanckLike # modify here! => path
+      plc_prefix: /home/janina/code/PlanckLike/ # modify here! => path
       #plc_prefix: /path/to/your/PlanckLike # modify here! => path
       # || don't use this syntax, there is a bug when you only specify the path to one version.. 
       # \/
@@ -268,7 +294,10 @@ Rules:
     function: set_classy_input_with_MPLike
     module: CosmoBit
 
-
+  - capability: T_cmb 
+    function: T_cmb
+    module: LCDM
+    #module: LCDM_theta
 
   # ---- BBN -----
 

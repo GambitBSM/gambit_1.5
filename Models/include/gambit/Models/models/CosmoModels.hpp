@@ -36,6 +36,7 @@
   START_MODEL
   DEFINEPARS(T_cmb,omega_b,omega_cdm,H0,ln10A_s,n_s,tau_reio)
   MAP_TO_CAPABILITY(T_cmb,T_cmb)
+  MAP_TO_CAPABILITY(H0, H0)
 #undef MODEL
 
 // ΛCDM parameters without those relating to the primordial power spectrum (A_s, n_s)
@@ -48,6 +49,26 @@
   INTERPRET_AS_PARENT_FUNCTION(LCDM_to_LCDM_no_primordial)
   #undef PARENT
 #undef MODEL
+
+// Vanilla ΛCDM.
+#define MODEL LCDM_theta
+  START_MODEL
+  DEFINEPARS(T_cmb,omega_b,omega_cdm,100theta_s,ln10A_s,n_s,tau_reio)
+  MAP_TO_CAPABILITY(T_cmb,T_cmb)
+#undef MODEL
+
+// ΛCDM parameters without those relating to the primordial power spectrum (A_s, n_s)
+// This model should be scanned alongside an inflationary model able to provide
+// a primordial power spectrum. 
+#define MODEL LCDM_theta_no_primordial
+  #define PARENT LCDM_theta
+  START_MODEL
+  DEFINEPARS(T_cmb,omega_b,omega_cdm,100theta_s,tau_reio)
+  INTERPRET_AS_PARENT_FUNCTION(LCDM_theta_to_LCDM_theta_no_primordial)
+  #undef PARENT
+#undef MODEL
+
+
 
 /* CMB + BBN */
 

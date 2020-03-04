@@ -201,7 +201,7 @@ START_MODULE
 
     #define FUNCTION set_N_pivot
     START_FUNCTION(double)
-    ALLOW_MODELS(LCDM)
+    ALLOW_MODELS(LCDM, LCDM_theta)
     ALLOW_MODELS(Inflation_SR1quad,Inflation_1quar,Inflation_1mono23,Inflation_1linear,Inflation_1natural,Inflation_smash,Inflation_1starobinsky)
     #undef FUNCTION
 
@@ -215,7 +215,7 @@ START_MODULE
     #define FUNCTION set_classy_baseline_params
     START_FUNCTION(pybind11::dict)
     
-    ALLOW_MODELS(LCDM,LCDM_no_primordial)
+    ALLOW_MODELS(LCDM,LCDM_no_primordial,LCDM_theta,LCDM_theta_no_primordial)
     //ALLOW_MODELS(LCDM)
     MODEL_CONDITIONAL_DEPENDENCY(classy_parameters_EnergyInjection, pybind11::dict, AnnihilatingDM_general, DecayingDM_general)
     MODEL_CONDITIONAL_DEPENDENCY(classy_PlanckLike_input, pybind11::dict, cosmo_nuisance_Planck_lite,cosmo_nuisance_Planck_TTTEEE,cosmo_nuisance_Planck_TT,plik_dx11dr2_HM_v18_TT)
@@ -350,7 +350,7 @@ START_MODULE
 
     #define FUNCTION get_parametrised_ps_LCDM
       START_FUNCTION(Parametrised_ps)
-      ALLOW_MODELS(LCDM)
+      ALLOW_MODELS(LCDM,LCDM_theta)
     #undef FUNCTION
     
     #define FUNCTION get_parametrised_ps_SMASH
@@ -649,7 +649,7 @@ START_MODULE
     START_CAPABILITY
     #define FUNCTION T_ncdm_SM
       START_FUNCTION(double)
-      ALLOW_MODELS(LCDM)
+      ALLOW_MODELS(LCDM,LCDM_theta)
     #undef FUNCTION
   #undef CAPABILITY
 
@@ -659,6 +659,17 @@ START_MODULE
       START_FUNCTION(double)
       MODEL_CONDITIONAL_DEPENDENCY(etaBBN_rBBN_rCMB_dNurBBN_dNurCMB_parameters,ModelParameters,etaBBN_rBBN_rCMB_dNurBBN_dNurCMB)
       DEPENDENCY(T_ncdm_SM,double)
+    #undef FUNCTION
+  #undef CAPABILITY
+
+  /// Extract H0 from a classy run if it is not a fundamental parameter
+  /// (i.e. for LCDM_theta), as it now becomes derived
+  #define CAPABILITY H0
+    START_CAPABILITY
+    #define FUNCTION get_H0_classy
+      START_FUNCTION(double)
+      ALLOW_MODELS(LCDM_theta)
+      BACKEND_REQ(class_get_H0,(class_tag),double,())
     #undef FUNCTION
   #undef CAPABILITY
 
@@ -698,7 +709,7 @@ START_MODULE
 
     #define FUNCTION compute_Omega0_b
       START_FUNCTION(double)
-      ALLOW_MODELS(LCDM)
+      DEPENDENCY(H0, double)
     #undef FUNCTION
 
   #undef CAPABILITY
@@ -709,7 +720,7 @@ START_MODULE
 
     #define FUNCTION compute_Omega0_cdm
       START_FUNCTION(double)
-      ALLOW_MODELS(LCDM)
+      DEPENDENCY(H0, double)
     #undef FUNCTION
 
   #undef CAPABILITY
@@ -736,7 +747,7 @@ START_MODULE
 
     #define FUNCTION compute_Omega0_g
       START_FUNCTION(double)
-      ALLOW_MODELS(LCDM)
+      DEPENDENCY(H0, double)
     #undef FUNCTION
 
   #undef CAPABILITY
@@ -775,7 +786,7 @@ START_MODULE
 
     #define FUNCTION compute_Omega0_ncdm
       START_FUNCTION(double)
-      ALLOW_MODELS(LCDM)
+      DEPENDENCY(H0, double)
       DEPENDENCY(mNu_tot,double)
     #undef FUNCTION
 
@@ -786,7 +797,7 @@ START_MODULE
 
     #define FUNCTION calculate_eta0
       START_FUNCTION(double)
-      ALLOW_MODELS(LCDM)
+      ALLOW_MODELS(LCDM, LCDM_theta)
     #undef FUNCTION
 
   #undef CAPABILITY
@@ -934,7 +945,7 @@ START_MODULE
    START_CAPABILITY
     #define FUNCTION compute_H0_LogLike
     START_FUNCTION(double)
-    ALLOW_MODELS(LCDM)
+    ALLOW_MODELS(LCDM, LCDM_theta)
     #undef FUNCTION
   #undef CAPABILITY
 
