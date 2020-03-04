@@ -651,17 +651,10 @@ START_MODULE
 
   #define CAPABILITY T_ncdm
     START_CAPABILITY
-    #define FUNCTION set_T_ncdm
+    #define FUNCTION T_ncdm
       START_FUNCTION(double)
-      ALLOW_MODELS(etaBBN_rBBN_rCMB_dNurBBN_dNurCMB)
+      MODEL_CONDITIONAL_DEPENDENCY(etaBBN_rBBN_rCMB_dNurBBN_dNurCMB_parameters,ModelParameters,etaBBN_rBBN_rCMB_dNurBBN_dNurCMB)
       DEPENDENCY(T_ncdm_SM,double)
-    #undef FUNCTION
-    
-    // needed again here otherwise dependency resolution won't work
-    // for SM and dependencies on T_ncdm
-    #define FUNCTION set_T_ncdm_SM
-      START_FUNCTION(double)
-      DEPENDENCY(T_ncdm_SM, double)
     #undef FUNCTION
   #undef CAPABILITY
 

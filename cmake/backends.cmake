@@ -73,6 +73,10 @@
 #          (stoecker@physik.rwth-aachen.de)
 #  \date 2019 Aug
 #
+#  \author Will Handley
+#          (wh260@cam.ac.uk)
+#  \date 2020 Mar
+#
 #************************************************
 
 # AlterBBN
@@ -309,6 +313,46 @@ set(ver "2.0.0")
 set(lib "libDDCalc")
 set(dl "https://${name}.hepforge.org/downloads/${name}-${ver}.tar.gz")
 set(md5 "504cb95a298fa62d11097793dc318549")
+set(dir "${PROJECT_SOURCE_DIR}/Backends/installed/${name}/${ver}/")
+set(ddcalc_flags "${BACKEND_Fortran_FLAGS} -${FMODULE} ${dir}/build")
+check_ditch_status(${name} ${ver} ${dir})
+if(NOT ditched_${name}_${ver})
+  ExternalProject_Add(${name}_${ver}
+    DOWNLOAD_COMMAND ${DL_BACKEND} ${dl} ${md5} ${dir} ${name} ${ver}
+    SOURCE_DIR ${dir}
+    BUILD_IN_SOURCE 1
+    CONFIGURE_COMMAND ""
+    BUILD_COMMAND ${CMAKE_MAKE_PROGRAM} ${lib}.so FC=${CMAKE_Fortran_COMPILER} FOPT=${ddcalc_flags} DDCALC_DIR=${dir} OUTPUT_PIPE=>/dev/null
+    INSTALL_COMMAND ""
+  )
+  add_extra_targets("backend" ${name} ${ver} ${dir} ${dl} clean)
+endif()
+
+set(name "ddcalc")
+set(ver "2.1.0")
+set(lib "libDDCalc")
+set(dl "https://${name}.hepforge.org/downloads/${name}-${ver}.tar.gz")
+set(md5 "2c9dbe2aea267e12d0fcb79abb64237b")
+set(dir "${PROJECT_SOURCE_DIR}/Backends/installed/${name}/${ver}/")
+set(ddcalc_flags "${BACKEND_Fortran_FLAGS} -${FMODULE} ${dir}/build")
+check_ditch_status(${name} ${ver} ${dir})
+if(NOT ditched_${name}_${ver})
+  ExternalProject_Add(${name}_${ver}
+    DOWNLOAD_COMMAND ${DL_BACKEND} ${dl} ${md5} ${dir} ${name} ${ver}
+    SOURCE_DIR ${dir}
+    BUILD_IN_SOURCE 1
+    CONFIGURE_COMMAND ""
+    BUILD_COMMAND ${CMAKE_MAKE_PROGRAM} ${lib}.so FC=${CMAKE_Fortran_COMPILER} FOPT=${ddcalc_flags} DDCALC_DIR=${dir} OUTPUT_PIPE=>/dev/null
+    INSTALL_COMMAND ""
+  )
+  add_extra_targets("backend" ${name} ${ver} ${dir} ${dl} clean)
+endif()
+
+set(name "ddcalc")
+set(ver "2.2.0")
+set(lib "libDDCalc")
+set(dl "https://${name}.hepforge.org/downloads/${name}-${ver}.tar.gz")
+set(md5 "36a29b2c95d619b2676d5d1e47b86ab4")
 set(dir "${PROJECT_SOURCE_DIR}/Backends/installed/${name}/${ver}/")
 set(ddcalc_flags "${BACKEND_Fortran_FLAGS} -${FMODULE} ${dir}/build")
 check_ditch_status(${name} ${ver} ${dir})
@@ -1172,7 +1216,12 @@ set(cfitsio_ver "3.390")
 set(cfitsio_dir "${PROJECT_SOURCE_DIR}/Backends/installed/${cfitsio_name}/${cfitsio_ver}")
 if(NOT ${FOUND_MKL} EQUAL -1)
   if(DEFINED ENV{MKLROOT})
-    set(mkl_libs_option "--lapack_mkl=$ENV{MKLROOT}")
+  string(STRIP $ENV{MKLROOT} STRIPPED_MKLROOT)
+    if(NOT "${STRIPPED_MKLROOT}" STREQUAL "")
+      set(mkl_libs_option "--lapack_mkl=${STRIPPED_MKLROOT}")
+    else()
+      set(mkl_libs_option "")
+    endif()
   endif()
 endif()
 check_ditch_status(${name} ${ver} ${dir})
@@ -1200,7 +1249,12 @@ set(cfitsio_ver "3.390")
 set(cfitsio_dir "${PROJECT_SOURCE_DIR}/Backends/installed/${cfitsio_name}/${cfitsio_ver}")
 if(NOT ${FOUND_MKL} EQUAL -1)
   if(DEFINED ENV{MKLROOT})
-    set(mkl_libs_option "--lapack_mkl=$ENV{MKLROOT}")
+  string(STRIP $ENV{MKLROOT} STRIPPED_MKLROOT)
+    if(NOT "${STRIPPED_MKLROOT}" STREQUAL "")
+      set(mkl_libs_option "--lapack_mkl=${STRIPPED_MKLROOT}")
+    else()
+      set(mkl_libs_option "")
+    endif()
   endif()
 endif()
 check_ditch_status(${name} ${ver} ${dir})
@@ -1357,18 +1411,9 @@ if(NOT ditched_${name}_${ver})
     DOWNLOAD_COMMAND ${DL_BACKEND} ${dl} ${md5} ${dir}
     SOURCE_DIR ${dir}
     BUILD_IN_SOURCE 1
-    PATCH_COMMAND  sed ${dashi} -e "s/\r//g" modpk_backgrnd.f90 # Replace the CRLF by LF in that file.
-    COMMAND patch -p1 < ${patch}/multimodecode.diff
+    PATCH_COMMAND patch -p1 < ${patch}/multimodecode.diff
     CONFIGURE_COMMAND ""
     BUILD_COMMAND ${CMAKE_MAKE_PROGRAM} F90C=${CMAKE_Fortran_COMPILER} FFLAGS=${multimode_Fortran_FLAGS}
-    COMMAND ${CMAKE_COMMAND} -E copy ${patch}/multimodecode_gambit.f90 ${dir}
-    COMMAND ${CMAKE_COMMAND} -E echo "${CMAKE_Fortran_COMPILER} ${multimode_Fortran_FLAGS} -c ${dir}/multimodecode_gambit.f90" > make_so1.sh
-    COMMAND chmod u+x make_so1.sh
-    COMMAND ./make_so1.sh
-    COMMAND ${CMAKE_COMMAND} -E make_directory lib
-    COMMAND ${CMAKE_COMMAND} -E echo "${CMAKE_Fortran_COMPILER} ${multimode_Fortran_FLAGS} ${CMAKE_SHARED_LIBRARY_CREATE_C_FLAGS} -o lib/${lib}.so *.o" > make_so2.sh
-    COMMAND chmod u+x make_so2.sh
-    COMMAND ./make_so2.sh
     INSTALL_COMMAND ""
   )
   add_extra_targets("backend" ${name} ${ver} ${dir} ${dl} clean)
