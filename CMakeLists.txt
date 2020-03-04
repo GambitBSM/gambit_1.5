@@ -55,6 +55,7 @@ foreach(p
   CMP0054 # CMake 3.1
   CMP0063 # CMake 3.3.2
   CMP0068 # CMake 3.9.1
+  CMP0074 # CMake 3.12
   )
   if(POLICY ${p})
     cmake_policy(SET ${p} NEW)
@@ -161,8 +162,8 @@ if(NOT PYTHONLIBS_FOUND)
   message("${BoldRed}   Ditching CosmoBit as pybind11 has not been found.")
   set(itch "${itch};CosmoBit")
 else()
-  set(MIN_pybind11_VERSION "2.3.0")
-  set(PREFERRED_pybind11_VERSION "2.3.0")
+  set(MIN_pybind11_VERSION "2.4.3")
+  set(PREFERRED_pybind11_VERSION "2.4.3")
   set(pybind11_CONTRIB_DIR "${PROJECT_SOURCE_DIR}/contrib/pybind11")
   find_package(pybind11 QUIET)
   if(NOT pybind11_FOUND AND EXISTS "${pybind11_CONTRIB_DIR}")
