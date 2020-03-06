@@ -294,11 +294,6 @@ Rules:
     function: set_classy_input_with_MPLike
     module: CosmoBit
 
-  - capability: T_cmb 
-    function: T_cmb
-    module: LCDM
-    #module: LCDM_theta
-
   # ---- BBN -----
 
   # Set path to file containing measured values of light element abundances to use for 
