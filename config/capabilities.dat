@@ -373,7 +373,6 @@ SPheno_internal: |
 #  ColliderBit capabilities
 #-------------------------------------
 
-
 DummyColliderObservable: |
    Dummy observable that creates a dependency on TestModel1D, which is used
    to satisfy the normal GAMBIT model requrements in a minimal way. Used
@@ -382,6 +381,9 @@ DummyColliderObservable: |
 RunMC: |
    Controls the parallelization and execution of the entire
    event loop of the collider simulation.
+
+CrossSection: |
+   Total cross-section used to scale Pythia event numbers.
 
 LHCEventLoopInfo: |
    Info about the event loop.
