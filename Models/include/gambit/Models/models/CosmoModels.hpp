@@ -26,6 +26,10 @@
 ///          (sanjay.bloor12@imperial.ac.uk)
 ///   \date 2019 Nov
 ///
+///  \author Sebastian Hoof
+///          (hoof@uni-goettingen.de)
+///   \date 2020 Mar
+///
 ///  *********************************************
 
 #ifndef __CosmoModels_hpp__
@@ -41,7 +45,7 @@
 
 // ΛCDM parameters without those relating to the primordial power spectrum (A_s, n_s)
 // This model should be scanned alongside an inflationary model able to provide
-// a primordial power spectrum. 
+// a primordial power spectrum.
 #define MODEL LCDM_no_primordial
   #define PARENT LCDM
   START_MODEL
@@ -59,7 +63,7 @@
 
 // ΛCDM parameters without those relating to the primordial power spectrum (A_s, n_s)
 // This model should be scanned alongside an inflationary model able to provide
-// a primordial power spectrum. 
+// a primordial power spectrum.
 #define MODEL LCDM_theta_no_primordial
   #define PARENT LCDM_theta
   START_MODEL
@@ -141,73 +145,64 @@
   INTERPRET_AS_PARENT_FUNCTION(dNurCMB_to_dNurBBN_dNurCMB)
  #undef PARENT
 #undef MODEL
-  
+
 
 /* INFLATION */
 
-// inflationary models -- if one of them is in use you have to use the model LCDM_no_primordial 
-// to scan over the four standard cosmological parameters (H0, omega_b, omega_cdm, tau_reio) and
-// the shape of the primordial power spectrum will be determined by the inflation model in use
+// Inflationary models -- if one of them is in use you have to use the model LCDM_theta_no_primordial
+// to scan over the four standard cosmological parameters (H0 or theta, omega_b, omega_cdm, tau_reio).
+// The shape of the (either parameterised or full) primordial power spectrum will be determined by
+// the inflation model in use.
 
-
-// not used atm -- have to think about if we should keep it or not
-#define MODEL Inflation_tensor
-START_MODEL
-DEFINEPARS(ln10A_s,n_s,r_tensor)
-#undef MODEL
-
-/*
-#define MODEL inflation // a minimally defined general inflationary model with 3 sets of parameters.
+// Single field, monomic inflation with exponent 2/3 (assuming instant reheating)
+// Potential: V(phi) = 1.5 lambda phi^(2/3)
+#define MODEL Inflation_InstReh_1mono23
   START_MODEL
-  DEFINEPARS(phi_init0,dphi_init0,vparams1,vparams2,vparams3)
+  DEFINEPARS(lambda)
 #undef MODEL
-*/
 
-// Inflation model: 0.5 m^2 phi^2 --- quadratic inflation
-// A_s, n_s and r are given by inflationary model
-// parameters: N_piv, m^2.
-#define MODEL Inflation_SR1quad
+// Single field, quadratic inflation (assuming instant reheating)
+// Potential: V(phi) = lambda phi
+#define MODEL Inflation_InstReh_1linear
   START_MODEL
-  DEFINEPARS(m2_inflaton,N_pivot,phi_init0)
+  DEFINEPARS(lambda)
 #undef MODEL
 
-// Inflation model: 0.25 \lambda phi^4  --- quartic inflation
-// A_s, n_s and r are given by inflationary model
-// parameters: N_piv, lambda.
-#define MODEL Inflation_1quar
-START_MODEL
-DEFINEPARS(lambda,N_pivot,phi_init0)
+// Single field, quadratic inflation (assuming instant reheating)
+// Potential: V(phi) = 0.5 m^2 phi^2
+#define MODEL Inflation_InstReh_1quadratic
+  START_MODEL
+  DEFINEPARS(m_phi)
 #undef MODEL
 
-// Inflation model: 3/2 \lambda phi^2/3 --- inflation
-// A_s, n_s and r are given by inflationary model
-// parameters: N_piv, lambda.
-#define MODEL Inflation_1mono23
-START_MODEL
-DEFINEPARS(lambda,N_pivot,phi_init0)
+// Single field, quartic inflation (assuming instant reheating)
+// Potential: V(phi) = 0.25 lambda phi^4
+#define MODEL Inflation_InstReh_1quartic
+  START_MODEL
+  DEFINEPARS(lambda)
 #undef MODEL
 
-// Inflation model: m phi --- linear inflation
-// A_s, n_s and r are given by inflationary model
-// parameters: N_piv, m^2.
-#define MODEL Inflation_1linear
-START_MODEL
-DEFINEPARS(lambda,N_pivot,phi_init0)
+// Single field, natural inflation (assuming instant reheating)
+// Potential: V(phi) = Lambda^4 [1 + cos(phi/f)]
+#define MODEL Inflation_InstReh_1natural
+  START_MODEL
+  DEFINEPARS(Lambda, f_phi)
+#undef MODEL
+
+// Single field, Starobinsky - aka R^2 - inflation (assuming instant reheating)
+// Potential: V(phi) = ...
+#define MODEL Inflation_InstReh_1Starobinsky
+  START_MODEL
+  DEFINEPARS(Lambda)
 #undef MODEL
 
 // simplest 8 parameter cosmology smash inflation model --- smash inflation
 // A_s, n_s and r are given by inflationary model
 // parameters: xi, m^2.
 #define MODEL Inflation_smash
-START_MODEL
-DEFINEPARS(log10_xi,log10_beta,log10_lambda,N_pivot)
+  START_MODEL
+  DEFINEPARS(log10_xi,log10_beta,log10_lambda,N_pivot)
 #undef MODEL
-
-#define MODEL Inflation_1natural // N-flation (axions)
-START_MODEL
-DEFINEPARS(lambda,faxion,N_pivot,phi_init0)
-#undef MODEL
-
 
 /*
 

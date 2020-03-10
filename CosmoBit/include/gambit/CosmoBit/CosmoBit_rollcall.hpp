@@ -36,6 +36,10 @@
 ///          (wh260@cam.ac.uk)
 ///  \date 2020 Mar
 ///
+///  \author Sebastian Hoof
+///          (hoof@uni-goettingen.de)
+///  \date 2020 Mar
+///
 ///  *********************************************
 
 #ifndef __CosmoBit_rollcall_hpp__
@@ -123,7 +127,7 @@ START_MODULE
     BACKEND_REQ(DA_efficiency_function, (DarkAges_tag), DarkAges::fz_table,())
     #undef FUNCTION
   #undef CAPABILITY
-  
+
   #define CAPABILITY f_effective
   START_CAPABILITY
     #define FUNCTION f_effective_func
@@ -150,7 +154,7 @@ START_MODULE
   #undef CAPABILITY
 
 
-  /// capabilities related to setting neutrino masses, 
+  /// capabilities related to setting neutrino masses,
   /// temperature, ncdm components & number of ultra-relativistic species Nur
   /// ----------------------
   #define CAPABILITY NuMasses_SM
@@ -183,38 +187,38 @@ START_MODULE
   #undef CAPABILITY
 
   /// ------------------------
-  
+
 
   #define CAPABILITY k_pivot
   START_CAPABILITY
     #define FUNCTION set_k_pivot
     START_FUNCTION(double)
     #undef FUNCTION
-  #undef CAPABILITY  
-  
+  #undef CAPABILITY
 
-  /// capability providing N_pivot, number of e-fold before the end of inflation. 
-  /// If no inflation model is in use this can be set by a yaml file Rule. Otherwise
-  /// it is a model parameter
+
+  /// capability providing N_pivot, number of e-fold before the end of inflation.
+  /// If no inflation model is in use this can be set by a yaml file rule. Otherwise,
+  /// it is obtained from the model of inflation.
   #define CAPABILITY N_pivot
   START_CAPABILITY
 
     #define FUNCTION set_N_pivot
     START_FUNCTION(double)
     ALLOW_MODELS(LCDM, LCDM_theta)
-    ALLOW_MODELS(Inflation_SR1quad,Inflation_1quar,Inflation_1mono23,Inflation_1linear,Inflation_1natural,Inflation_smash,Inflation_1starobinsky)
+    ALLOW_MODELS(Inflation_InstReh_1mono23, Inflation_InstReh_1linear, Inflation_InstReh_1quadratic, Inflation_InstReh_1quartic, Inflation_InstReh_1natural, Inflation_InstReh_1Starobinsky)
     #undef FUNCTION
 
-  #undef CAPABILITY  
+  #undef CAPABILITY
 
-  /// capabilities related to setting input options for CLASS right 
+  /// capabilities related to setting input options for CLASS right
   /// cosmo parameters, temperature and number of ultra-relativistic species Nur
   /// ----------------------
   #define CAPABILITY classy_baseline_params
   START_CAPABILITY
     #define FUNCTION set_classy_baseline_params
     START_FUNCTION(pybind11::dict)
-    
+
     ALLOW_MODELS(LCDM,LCDM_no_primordial,LCDM_theta,LCDM_theta_no_primordial)
     //ALLOW_MODELS(LCDM)
     MODEL_CONDITIONAL_DEPENDENCY(classy_parameters_EnergyInjection, pybind11::dict, AnnihilatingDM_general, DecayingDM_general)
@@ -225,8 +229,8 @@ START_MODULE
     #undef FUNCTION
   #undef CAPABILITY
 
-    // needed to be able to initialise CLASS either with the runoptions 
-    // asked for by MontePython Likelihoods (t modes, Pk at specific z,..) 
+    // needed to be able to initialise CLASS either with the runoptions
+    // asked for by MontePython Likelihoods (t modes, Pk at specific z,..)
     // or without if MontePython is not in use
    #define CAPABILITY classy_final_input
      START_CAPABILITY
@@ -244,12 +248,12 @@ START_MODULE
     // set CLASS input parameters for ..
     #define CAPABILITY classy_primordial_parameters
      START_CAPABILITY
-    
+
      // H0, tau_reio, Omega_m, Omega_b plus an external primordial power spectrum
      #define FUNCTION set_classy_parameters_primordial_ps
       START_FUNCTION(CosmoBit::Classy_input)
          //ALLOW_MODELS(LCDM_no_primordial)
-         MODEL_GROUP(inflation,(Inflation_SR1quad,Inflation_1quar,Inflation_1mono23,Inflation_1linear,Inflation_1natural,Inflation_1starobinsky))
+         MODEL_GROUP(inflation,(Inflation_InstReh_1mono23, Inflation_InstReh_1linear, Inflation_InstReh_1quadratic, Inflation_InstReh_1quartic, Inflation_InstReh_1natural, Inflation_InstReh_1Starobinsky))
          MODEL_GROUP(cosmo,(LCDM_no_primordial))
          ALLOW_MODEL_COMBINATION(cosmo,inflation)
          DEPENDENCY(classy_baseline_params, pybind11::dict)
@@ -318,11 +322,11 @@ START_MODULE
     #define FUNCTION set_multimode_inputs
       START_FUNCTION(Multimode_inputs)
       DEPENDENCY(k_pivot, double)
-      ALLOW_MODELS(Inflation_SR1quad,Inflation_1quar,Inflation_1mono23,Inflation_1linear,Inflation_1natural,Inflation_smash,Inflation_1starobinsky)
+      ALLOW_MODELS(Inflation_InstReh_1mono23, Inflation_InstReh_1linear, Inflation_InstReh_1quadratic, Inflation_InstReh_1quartic, Inflation_InstReh_1natural, Inflation_InstReh_1Starobinsky)
     #undef FUNCTION
   #undef CAPABILITY
 
-  // // pass settings to multimode, run it and return the structure containing the results 
+  // // pass settings to multimode, run it and return the structure containing the results
   // #define CAPABILITY multimode_results
   //   START_CAPABILITY
   //   #define FUNCTION get_multimode_results
@@ -332,15 +336,14 @@ START_MODULE
   //     DEPENDENCY(inf_inputs, Multimode_inputs)
   //     BACKEND_REQ(multimodecode_gambit_driver,(modecode_tag), void, (gambit_inflation_observables*,int&,int&,int&,int&,int&,int&,int&,int&,int&,int&,double&,int&,int&,double&,int&,double*,double*,int&,int&,double*,double*,double*,double&,double&,double&,int&,int&,double&,double*,double*,double*,double*,double&,double&))
   //   #undef FUNCTION
-  // #undef CAPABILITY 
+  // #undef CAPABILITY
 
   #define CAPABILITY parametrised_power_spectrum
     START_CAPABILITY
-    
+
     #define FUNCTION get_multimode_parametrised_ps
       START_FUNCTION(Parametrised_ps)
-      //ALLOW_MODELS(Inflation_SR1quad,Inflation_1quar,Inflation_1mono23,Inflation_1linear,Inflation_1natural,Inflation_smash,Inflation_1starobinsky)
-      MODEL_GROUP(inflation,(Inflation_SR1quad,Inflation_1quar,Inflation_1mono23,Inflation_1linear,Inflation_1natural,Inflation_1starobinsky))
+      MODEL_GROUP(inflation,(Inflation_InstReh_1mono23, Inflation_InstReh_1linear, Inflation_InstReh_1quadratic, Inflation_InstReh_1quartic, Inflation_InstReh_1natural, Inflation_InstReh_1Starobinsky))
       MODEL_GROUP(cosmo,(LCDM_no_primordial))
       ALLOW_MODEL_COMBINATION(cosmo,inflation)
       DEPENDENCY(multimode_input_parameters, Multimode_inputs)
@@ -352,30 +355,29 @@ START_MODULE
       START_FUNCTION(Parametrised_ps)
       ALLOW_MODELS(LCDM,LCDM_theta)
     #undef FUNCTION
-    
+
     #define FUNCTION get_parametrised_ps_SMASH
       START_FUNCTION(Parametrised_ps)
       ALLOW_MODELS(Inflation_smash)
     #undef FUNCTION
 
-  #undef CAPABILITY 
+  #undef CAPABILITY
 
   #define CAPABILITY print_parametrised_ps
     START_CAPABILITY
     #define FUNCTION print_parametrised_ps
       START_FUNCTION(map_str_dbl)
-      DEPENDENCY(parametrised_power_spectrum,   Parametrised_ps)
+      DEPENDENCY(parametrised_power_spectrum, Parametrised_ps)
     #undef FUNCTION
-  #undef CAPABILITY 
+  #undef CAPABILITY
 
-  // pass settings to multimode, run it and return the structure containing the results 
+  // pass settings to multimode, run it and return the structure containing the results
   #define CAPABILITY primordial_power_spectrum
     START_CAPABILITY
 
     #define FUNCTION get_multimode_primordial_ps
       START_FUNCTION(Primordial_ps)
-      //ALLOW_MODELS(LCDM_no_primordial) // todo check models...
-      ALLOW_MODELS(Inflation_SR1quad,Inflation_1quar,Inflation_1mono23,Inflation_1linear,Inflation_1natural,Inflation_smash,Inflation_1starobinsky)
+      ALLOW_MODELS(Inflation_InstReh_1mono23, Inflation_InstReh_1linear, Inflation_InstReh_1quadratic, Inflation_InstReh_1quartic, Inflation_InstReh_1natural, Inflation_InstReh_1Starobinsky)
       DEPENDENCY(multimode_input_parameters, Multimode_inputs)
       BACKEND_REQ(multimodecode_primordial_ps, (), gambit_inflation_observables,
                   (int&,int&,int&,int&,double*,double*,double*,double&,double&,double&,int&,double&,double&,int&))
@@ -642,10 +644,10 @@ START_MODULE
     BACKEND_REQ(plc_loglike_lensing_marged_2018,(),double,(double*))
     #undef FUNCTION
   #undef CAPABILITY
-  
-  // needed in addition to T_ncdm since T_ncdm of non-SM models 
-  // assume a fiducial value to base calculation on 
-  #define CAPABILITY T_ncdm_SM 
+
+  // needed in addition to T_ncdm since T_ncdm of non-SM models
+  // assume a fiducial value to base calculation on
+  #define CAPABILITY T_ncdm_SM
     START_CAPABILITY
     #define FUNCTION T_ncdm_SM
       START_FUNCTION(double)
@@ -686,7 +688,7 @@ START_MODULE
     // #undef FUNCTION
 
   #undef CAPABILITY
-  
+
   #define CAPABILITY Omega0_m
     START_CAPABILITY
 
@@ -714,7 +716,7 @@ START_MODULE
 
   #undef CAPABILITY
 
-  
+
   #define CAPABILITY Omega0_cdm
     START_CAPABILITY
 
@@ -751,7 +753,7 @@ START_MODULE
     #undef FUNCTION
 
   #undef CAPABILITY
-  
+
 
   #define CAPABILITY Omega0_ur
     START_CAPABILITY
@@ -761,8 +763,8 @@ START_MODULE
       DEPENDENCY(Omega0_g, double)
       DEPENDENCY(N_ur, double)
     #undef FUNCTION
-  
-    #define FUNCTION get_Omega0_ur_classy  
+
+    #define FUNCTION get_Omega0_ur_classy
       START_FUNCTION(double)
       BACKEND_REQ(class_get_Omega0_ur,(class_tag),double,())
     #undef FUNCTION
@@ -773,13 +775,13 @@ START_MODULE
   #define CAPABILITY Omega0_ncdm_tot
     START_CAPABILITY
 
-    #define FUNCTION get_Omega0_ncdm_tot_classy 
+    #define FUNCTION get_Omega0_ncdm_tot_classy
       START_FUNCTION(double)
       BACKEND_REQ(class_get_Omega0_ncdm_tot,(class_tag),double,())
     #undef FUNCTION
 
   #undef CAPABILITY
-  
+
 
   #define CAPABILITY Omega0_ncdm
     START_CAPABILITY
@@ -967,7 +969,7 @@ START_MODULE
       ALLOW_MODELS(cosmo_nuisance_kids450_qe_likelihood_public,cosmo_nuisance_ska,cosmo_nuisance_wmap)
       // if you implement new MontePython likelihoods with new nuisance parameters add the name of your new
       // nuisance parameter model (to be defined in Models/include/gambit/Models/models/CosmoNuisanceModels.hpp)
-      ALLOW_MODELS(cosmo_nuisance_dummy) 
+      ALLOW_MODELS(cosmo_nuisance_dummy)
      #undef FUNCTION
      #define FUNCTION pass_empty_parameter_dict_for_MPLike
        START_FUNCTION(pybind11::dict)
@@ -995,12 +997,12 @@ START_MODULE
 
 
   /* MontePython */
-  
+
   /// Calculates lnL for each experiment using the experiment names
   #define CAPABILITY calc_MP_LogLikes
     START_CAPABILITY
     #define FUNCTION calc_MP_LogLikes
-      START_FUNCTION(CosmoBit::MPLike_result_container) 
+      START_FUNCTION(CosmoBit::MPLike_result_container)
       DEPENDENCY(MP_experiment_names,         map_str_map_str_str)
       DEPENDENCY(parameter_dict_for_MPLike,   pybind11::dict)
       BACKEND_REQ(get_classy_cosmo_object,      (class_tag),             pybind11::object,      ())
@@ -1009,8 +1011,8 @@ START_MODULE
       BACKEND_REQ(create_MP_likelihood_objects, (libmontepythonlike), map_str_pyobj,    (pybind11::object&, map_str_str&))
     #undef FUNCTION
   #undef CAPABILITY
-      
-  /// Calculates the total lnL from MontePython 
+
+  /// Calculates the total lnL from MontePython
   /// -> added to total LogLike, used to drive scan
   #define CAPABILITY MP_Combined_LogLike
     START_CAPABILITY
@@ -1020,23 +1022,23 @@ START_MODULE
     #undef FUNCTION
   #undef CAPABILITY
 
-  /// Get lnL for each experiment tagged with Likelihood in map from 
+  /// Get lnL for each experiment tagged with Likelihood in map from
   /// experiment name (str) to double -> for printing
   #define CAPABILITY MP_LogLikes
     START_CAPABILITY
     #define FUNCTION get_MP_LogLikes
-      START_FUNCTION(map_str_dbl) 
+      START_FUNCTION(map_str_dbl)
       DEPENDENCY(calc_MP_LogLikes, CosmoBit::MPLike_result_container)
     #undef FUNCTION
   #undef CAPABILITY
 
-  /// Get lnL for each experiment tagged with Observable in map from 
+  /// Get lnL for each experiment tagged with Observable in map from
   /// experiment name (str) to double -> for printing
   /// but DOES NOT add them to the lnL used to steer GAMBIT scans!
   #define CAPABILITY MP_Observables
     START_CAPABILITY
     #define FUNCTION get_MP_Observables
-      START_FUNCTION(map_str_dbl) 
+      START_FUNCTION(map_str_dbl)
       DEPENDENCY(calc_MP_LogLikes, CosmoBit::MPLike_result_container)
     #undef FUNCTION
   #undef CAPABILITY
