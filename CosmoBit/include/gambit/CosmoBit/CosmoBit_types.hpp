@@ -27,6 +27,10 @@
 ///  \date 2018 Oct
 ///  \date 2019 Mar
 ///
+///  \author Sebastian Hoof
+///          (hoof@uni-goettingen.de)
+///  \date 2020 Mar
+///
 ///  *********************************************
 
 
@@ -60,9 +64,9 @@ namespace Gambit
     /// type to store likelihood calculation results from MontePython
     /// has two members: logLike_results & obs_results, both string to double map
     /// mapping the MontePython experiment/likelihood name to the calculated LogLike
-    ///     - logLike_results:  contains results from all experiment names tagged with 'Likelihood', 
+    ///     - logLike_results:  contains results from all experiment names tagged with 'Likelihood',
     ///         i.e. the likelihoods being added to total LogLike to drive scan
-    ///     - obs_results:  contains results from all experiment names tagged with 'Observable', 
+    ///     - obs_results:  contains results from all experiment names tagged with 'Observable',
     ///         i.e. the likelihoods NOT added to total LogLike to drive scan
     class MPLike_result_container
     {
@@ -109,7 +113,7 @@ namespace Gambit
 
 
     /// Class to store all results from an AlterBBN run
-    /// -> element abundances stored in BBN_nuc (length NNUC+1), 
+    /// -> element abundances stored in BBN_nuc (length NNUC+1),
     /// -> covariance matrix in BBN_covmat ( dim NNUC+1 x NNUC+1)
     /// -> abund_map maps name of element to position in BBN_abundance vector
     ///    see constructor of BBN_container
@@ -128,7 +132,7 @@ namespace Gambit
         void set_BBN_covmat(int row, int col, double val) {BBN_covmat[row][col] = val;}
 
         // global parameter in AlterBBN, holds number of computed element abundances
-        int get_NNUC(){return NNUC;}; 
+        int get_NNUC(){return NNUC;};
         std::map<std::string,int> get_abund_map(){return abund_map;};
 
         // getter functions for abundance vector and cov mat
@@ -139,7 +143,7 @@ namespace Gambit
         int NNUC;
         std::vector<double> BBN_abund;
         std::vector< std::vector<double> > BBN_covmat;
-        std::map<std::string, int> abund_map; 
+        std::map<std::string, int> abund_map;
     };
 
     class SM_time_evo
@@ -321,17 +325,20 @@ namespace Gambit
             ~Primordial_ps() {};
 
             // Fill k from an array of doubles
+            void set_N_pivot(double npiv) { N_pivot = npiv; }
             void fill_k(double*, int);
             void fill_P_s(double*, int);
             void fill_P_s_iso(double*, int);
             void fill_P_t(double*, int);
 
+            double get_N_pivot() { return N_pivot; }
             std::vector<double>& get_k() { return k; }
             std::vector<double>& get_P_s() { return P_s; }
             std::vector<double>& get_P_t() { return P_t; }
             int get_vec_size() { return vec_size; }
-            
+
         private:
+            double N_pivot;
             std::vector<double> k;
             std::vector<double> P_s;
             std::vector<double> P_s_iso;
@@ -349,21 +356,25 @@ namespace Gambit
     class Parametrised_ps
     {
         public:
-            Parametrised_ps();
+            Parametrised_ps() {};
+            ~Parametrised_ps() {};
 
-            void set_n_s(double ns) {n_s = ns;};
-            void set_A_s(double As) {A_s = As;};
-            void set_r(double R) {r = R;};
+            void set_N_pivot(double npiv) { N_pivot = npiv; }
+            void set_n_s(double ns) { n_s = ns; }
+            void set_A_s(double As) { A_s = As; }
+            void set_r(double rr) { r = rr; }
 
-            double get_n_s() const {return n_s;};
-            double get_A_s() const {return A_s;};
-            double get_r() const {return r;};
+            double get_N_pivot() { return N_pivot; }
+            double get_n_s() { return n_s; }
+            double get_A_s() { return A_s; }
+            double get_r() { return r; }
 
             // return members as str to double map for printing
             map_str_dbl get_parametrised_ps_map();
 
 
         private:
+            double N_pivot;
             double n_s;
             double A_s;
             double r;

@@ -43,6 +43,7 @@ namespace Gambit
         double n_iso;
         double n_pnad;
         double n_ent;
+        double N_pivot;
         double r;
         double alpha_s;
         double runofrun;

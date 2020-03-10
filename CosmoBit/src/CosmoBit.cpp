@@ -83,7 +83,7 @@ std::string multimode_error_handling(int& err)
       message = "The pivot scale didn't leave the horizon.";
       break;
     case 3:
-      message = "A modes' IC couldn't be consistently set.";
+      message = "A modes' initial conditions couldn't be set consistently.";
       break;
     case 4:
       message = "Too many e-folds; can't initialize the scale factor.";
@@ -104,7 +104,7 @@ std::string multimode_error_handling(int& err)
 
     // Specifically added for SMASH
     case 999:
-      message = "ICs for SMASH potential resulted in too long(or short) inflation.";
+      message = "Initial conditions for SMASH potential resulted in too long(or short) inflation.";
       break;
 
 
@@ -950,7 +950,6 @@ namespace Gambit
       {
         result.vparams.push_back(log10(*Param["lambda"])); // MultiModeCode uses log10 of this parameter
         result.potential_choice = 5; // V(phi) = 1.5 lambda phi^(2/3)
-        result.num_inflaton = 1;
         result.vparam_rows = 1;
         if (inst_reh_flag != 1) { raise_inst_reh_error(); };
       }
@@ -958,7 +957,6 @@ namespace Gambit
       {
         result.vparams.push_back(log10(*Param["lambda"])); // MultiModeCode uses log10 of this parameter
         result.potential_choice = 4; // V(phi) = lambda phi
-        result.num_inflaton = 1;
         result.vparam_rows = 1;
         if (inst_reh_flag != 1) { raise_inst_reh_error(); };
       }
@@ -966,7 +964,6 @@ namespace Gambit
       {
         result.vparams.push_back(2.0*log10(*Param["m_phi"])); // MultiModeCode uses log10 of m_phi^2
         result.potential_choice = 1; // V(phi) = 0.5 m^2 phi^2
-        result.num_inflaton = 1;
         result.vparam_rows = 1;
         if (inst_reh_flag != 1) { raise_inst_reh_error(); };
       }
@@ -974,7 +971,6 @@ namespace Gambit
       {
         result.vparams.push_back(log10(*Param["lambda"])); // MultiModeCode uses log10 of this parameter
         result.potential_choice = 3; // V(phi) = 0.25 lambda phi^4
-        result.num_inflaton = 1;
         result.vparam_rows = 1;
         if (inst_reh_flag != 1) { raise_inst_reh_error(); };
       }
@@ -984,7 +980,6 @@ namespace Gambit
         result.vparams.push_back(log10(*Param["Lambda"]));
         result.vparams.push_back(log10(*Param["f_phi"]));
         result.potential_choice = 2; // V(phi) = Lambda^4 [1 + cos(phi/f)]
-        result.num_inflaton = 1;
         result.vparam_rows = 2;
         if (inst_reh_flag != 1) { raise_inst_reh_error(); };
       }
@@ -992,7 +987,6 @@ namespace Gambit
       {
         result.vparams.push_back(*Param["Lambda"]);
         result.potential_choice = 19; // V(phi) = ...
-        result.num_inflaton = 1;
         result.vparam_rows = 1;
         if (inst_reh_flag != 1) { raise_inst_reh_error(); };
       }
@@ -1126,6 +1120,7 @@ namespace Gambit
       }
 
       // Fill up the GAMBIT prim. PS if we're good.
+      result.set_N_pivot(observables.N_pivot);
       result.fill_k(observables.k_array, inputs.numsteps);
       result.fill_P_s(observables.pks_array, inputs.numsteps);
       result.fill_P_s_iso(observables.pks_array_iso, inputs.numsteps);
@@ -1177,6 +1172,7 @@ namespace Gambit
         invalid_point().raise(message);
       }
 
+      result.set_N_pivot(observables.N_pivot);
       result.set_n_s(observables.ns);
       result.set_A_s(observables.As);
       result.set_r(observables.r);
@@ -1203,6 +1199,7 @@ namespace Gambit
       //}
 
       Parametrised_ps pps;
+      pps.set_N_pivot(55);
       pps.set_n_s(*Param["n_s"]);
       pps.set_A_s(*Param["ln10A_s"]);
       pps.set_r(0);

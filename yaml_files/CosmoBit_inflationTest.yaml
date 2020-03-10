@@ -23,7 +23,7 @@ Parameters:
       fixed_value: 7.25805e-02
     T_cmb: 2.72548
 
-  Inflation_1quar:
+  Inflation_InstReh_1quartic:
     lambda: 1.0e-10
 
 
@@ -63,6 +63,10 @@ ObsLikes:
     capability:   MP_Combined_LogLike
     module:       CosmoBit
     type:         double
+
+  - purpose:      Observable
+    capability:   print_parametrised_ps
+    type:         map_str_dbl
 
 #======== Rule entries ========
 Rules:
@@ -114,10 +118,6 @@ Rules:
         output: tCl
         #k_pivot: 0.03
         #P_k_ini type : analytic_Pk
-
-  - capability: classy_primordial_parameters
-    function: set_classy_parameters_parametrised_ps
-    module: CosmoBit
 
   #- capability: set_classy_parameters
   #  function: set_classy_parameters_parametrised_ps

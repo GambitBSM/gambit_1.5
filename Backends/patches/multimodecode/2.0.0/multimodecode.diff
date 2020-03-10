@@ -616,13 +616,13 @@ index 3ba54a2..d8e972e 100644
        if (out_opt%fields_horiz) then
 diff --git a/multimodecode_gambit.f90 b/multimodecode_gambit.f90
 new file mode 100644
-index 0000000..2b1e4c5
+index 0000000..97bb754
 --- /dev/null
 +++ b/multimodecode_gambit.f90
-@@ -0,0 +1,994 @@
+@@ -0,0 +1,998 @@
 +MODULE multimodecode_gambit
-+!Module that includes the function that mimicks the driver in multimodecode 
-+!so that the inflationary solvers can be called from a gambit source file 
++!Module that includes the function that mimicks the driver in multimodecode
++!so that the inflationary solvers can be called from a gambit source file
 +!in the cosmobit (gambit) module.
 +  use modpkparams
 +  use potential
@@ -660,6 +660,8 @@ index 0000000..2b1e4c5
 +    real(dp) :: n_iso
 +    real(dp) :: n_pnad
 +    real(dp) :: n_ent
++    !Number of e-folds at pivot scale
++    real(dp) :: N_pivot
 +    !Tensor-to-scalar
 +    real(dp) :: r
 +    !Running, etc
@@ -667,7 +669,7 @@ index 0000000..2b1e4c5
 +    real(dp) :: runofrun
 +    !Non-Gaussianity
 +    real(dp) :: f_NL
-+    real(dp) :: tau_NL  
++    real(dp) :: tau_NL
 +    real(dp) , dimension(1000) :: k_array
 +    real(dp) , dimension(1000) :: pks_array
 +    real(dp) , dimension(1000) :: pks_iso_array
@@ -797,11 +799,11 @@ index 0000000..2b1e4c5
 +
 +    !---------------------------------------------------------------
 +    ! setting up the printer options at the code-level.
-+    ! TODO: make this from GAMBIT yaml file. 
++    ! TODO: make this from GAMBIT yaml file.
 +    ! NB: this may not be interesting or necessary.
 +    out_opt%modpkoutput = .false.
 +    out_opt%output_reduced = .true.
-+    out_opt%output_badic =.false.
++    out_opt%output_badic = .false.
 +
 +    out_opt%save_traj = .false.
 +    out_opt%fields_horiz = .false.
@@ -860,7 +862,7 @@ index 0000000..2b1e4c5
 +        RETURN
 +      else
 +        ! at the moment, smash potential is only calculated by solving the background dynamics
-+        ! and using slow roll approximation. going beyong would require solving first order 
++        ! and using slow roll approximation. going beyong would require solving first order
 +        ! mode equations in perturbation theory.
 +        gambit_obs%As = observs_SR%As
 +        gambit_obs%ns = observs_SR%ns
@@ -882,6 +884,7 @@ index 0000000..2b1e4c5
 +      gambit_obs%n_iso = observs%n_iso
 +      gambit_obs%n_pnad = observs%n_pnad
 +      gambit_obs%n_ent = observs%n_ent
++      gambit_obs%N_pivot = N_pivot
 +      gambit_obs%r = observs%r
 +      gambit_obs%alpha_s = observs%alpha_s
 +      gambit_obs%runofrun = observs%runofrun
@@ -1373,6 +1376,7 @@ index 0000000..2b1e4c5
 +      gambit_obs%n_iso = observs%n_iso
 +      gambit_obs%n_pnad = observs%n_pnad
 +      gambit_obs%n_ent = observs%n_ent
++      gambit_obs%N_pivot = N_pivot
 +      gambit_obs%r = observs%r
 +      gambit_obs%alpha_s = observs%alpha_s
 +      gambit_obs%runofrun = observs%runofrun
