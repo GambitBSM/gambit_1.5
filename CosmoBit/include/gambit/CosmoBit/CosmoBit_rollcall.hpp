@@ -326,18 +326,6 @@ START_MODULE
     #undef FUNCTION
   #undef CAPABILITY
 
-  // // pass settings to multimode, run it and return the structure containing the results
-  // #define CAPABILITY multimode_results
-  //   START_CAPABILITY
-  //   #define FUNCTION get_multimode_results
-  //     START_FUNCTION(gambit_inflation_observables)
-  //     ALLOW_MODELS(Inflation_SR1quad,Inflation_1quar,Inflation_1mono23,Inflation_1linear,Inflation_1natural,Inflation_smash,Inflation_1starobinsky)
-  //     DEPENDENCY(multimode_pk_setting,int)
-  //     DEPENDENCY(inf_inputs, Multimode_inputs)
-  //     BACKEND_REQ(multimodecode_gambit_driver,(modecode_tag), void, (gambit_inflation_observables*,int&,int&,int&,int&,int&,int&,int&,int&,int&,int&,double&,int&,int&,double&,int&,double*,double*,int&,int&,double*,double*,double*,double&,double&,double&,int&,int&,double&,double*,double*,double*,double*,double&,double&))
-  //   #undef FUNCTION
-  // #undef CAPABILITY
-
   #define CAPABILITY parametrised_power_spectrum
     START_CAPABILITY
 
@@ -354,11 +342,6 @@ START_MODULE
     #define FUNCTION get_parametrised_ps_LCDM
       START_FUNCTION(Parametrised_ps)
       ALLOW_MODELS(LCDM,LCDM_theta)
-    #undef FUNCTION
-
-    #define FUNCTION get_parametrised_ps_SMASH
-      START_FUNCTION(Parametrised_ps)
-      ALLOW_MODELS(Inflation_smash)
     #undef FUNCTION
 
   #undef CAPABILITY
@@ -387,13 +370,6 @@ START_MODULE
     #define FUNCTION get_LCDM_primordial_ps
     START_FUNCTION(Primordial_ps)
     ALLOW_MODELS(LCDM)
-    #undef FUNCTION
-    */
-
-    /*
-    #define FUNCTION get_SMASH_primordial_ps
-    START_FUNCTION(Primordial_ps)
-    ALLOW_MODELS(Inflation_smash)
     #undef FUNCTION
     */
 
