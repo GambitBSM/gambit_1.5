@@ -10,7 +10,7 @@
 #======== Input parameter declarations =======
 Parameters:
   StandardModel_mNudiff: !import include/StandardModel_mNudiff_both_scan.yaml
-  
+
   LCDM_no_primordial:
   #LCDM:
     omega_b:
@@ -22,13 +22,9 @@ Parameters:
     tau_reio:
       fixed_value: 7.25805e-02
     T_cmb: 2.72548
-    # ln10A_s: 3.0
-    # n_s: 1.0
 
   Inflation_1quar:
-    N_pivot: 100
-    lambda: -9.9
-    phi_init0: 10
+    lambda: 1.0e-10
 
 
 #======== Prior setup ========
@@ -59,7 +55,7 @@ Scanner:
       plugin: random
       point_number: 10
       like:  LogLike
-            
+
 #======== Observables of interest ========
 ObsLikes:
 
@@ -128,9 +124,9 @@ Rules:
   #  options:
   #    classy_dict:
   #      output: 'tCl'   # need to add this since otherwise the input 'modes' is not read => class throws an error
-  #                      # in the future this would ideally be taken care of automatically -> one observable that you HAVE to 
+  #                      # in the future this would ideally be taken care of automatically -> one observable that you HAVE to
   #                      # calculate for every inflation model? Then we can add it to the set_classy_function (there probably
-  #                      # is but I just have no idea about inflation ;)) 
+  #                      # is but I just have no idea about inflation ;))
 
   - capability: MP_experiment_names
     function: set_MP_experiment_names

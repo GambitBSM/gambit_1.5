@@ -29,6 +29,10 @@
 ///          (sanjay.bloor12@imperial.ac.uk)
 ///  \date 2019 June, Nov
 ///
+///  \author Sebastian Hoof
+///          (hoof@uni-goettingen.de)
+///  \date 2020 Mar
+///
 ///  *********************************************
 #include <cmath>
 #include <functional>
@@ -93,7 +97,7 @@ std::string multimode_error_handling(int& err)
 
 
     /// < 0 = "fatal"
-    case -1: 
+    case -1:
       message = "Numerical underflow error in odeint.";
       break;
 
@@ -105,7 +109,7 @@ std::string multimode_error_handling(int& err)
 
 
     // Otherwise -- who knows.
-    default: 
+    default:
       message = "GAMBIT caught an error in MultiMode. Check the MultiModeCode output for more info.";
   }
   return message;
@@ -460,15 +464,15 @@ namespace Gambit
 
 
     /// If no value for N_star (number of e folds before inflation ends) is specified in the yaml
-    /// file AND no inflation model is scanned fall back to default value of CLASS; otherwise 
-    /// it is a model parameter of the 
+    /// file AND no inflation model is scanned fall back to default value of CLASS; otherwise
+    /// it is a model parameter of the
     /// (heads-up: name in CLASS is N_star, not N_pivot)
     void set_N_pivot(double &result)
     {
 
       using namespace Pipes::set_N_pivot;
 
-      // if N_pivot is not in Parameter map either read in yaml file Rule if it exists or 
+      // if N_pivot is not in Parameter map either read in yaml file Rule if it exists or
       // fall back to default value in CLASS
       if( Param.find("N_pivot") == Param.end())
       {
@@ -481,8 +485,8 @@ namespace Gambit
       }
 
     }
-    
-    /// capability to set k_pivot for consistent use within cosmobit 
+
+    /// capability to set k_pivot for consistent use within cosmobit
     /// (to make sure it is consistent between CLASS and multimodecode)
     void set_k_pivot(double &result)
     {
@@ -604,7 +608,7 @@ namespace Gambit
       logger() << "N_ur calculated to be " << result << EOM;
     }
 
-    /// create a python dictionary with the inputs that have to be passed to class 
+    /// create a python dictionary with the inputs that have to be passed to class
     /// setting parameters related to (massive) neutrinos & ncdm components
     void set_classy_NuMasses_Nur_input(pybind11::dict &result)
     {
@@ -620,33 +624,33 @@ namespace Gambit
       result["N_ur"] = *Dep::N_ur;
 
       // Number of non-cold DM species
-      // if non-zero a mass & temperature for each species has to be 
+      // if non-zero a mass & temperature for each species has to be
       // passed to class
       if (N_ncdm > 0.)
       {
-        result["N_ncdm"] = N_ncdm;   
+        result["N_ncdm"] = N_ncdm;
 
         std::vector<double> m_ncdm = m_ncdm_classInput(NuMasses_SM);
-        // head up: this explicitly assumed that all ncdm components have the same temperature!! todo ? 
-        std::vector<double> T_ncdm(N_ncdm,*Dep::T_ncdm); 
+        // head up: this explicitly assumed that all ncdm components have the same temperature!! todo ?
+        std::vector<double> T_ncdm(N_ncdm,*Dep::T_ncdm);
 
-        // create one string with m_ncdm masses and 
+        // create one string with m_ncdm masses and
         // T_ncdm temperatures separated by commas (to match the input
         // format of class)
         std::ostringstream ss1, ss2;
         std::string separator;
-        for (auto x : m_ncdm) 
+        for (auto x : m_ncdm)
         {
           ss1 << separator << x;
           separator = ",";
         }
         separator = "";
-        for (auto x : T_ncdm) 
+        for (auto x : T_ncdm)
         {
           ss2 << separator << x;
           separator = ",";
         }
-        
+
         result["m_ncdm"] = ss1.str();
         result["T_ncdm"] = ss2.str();
       }
@@ -657,7 +661,7 @@ namespace Gambit
     }
 
     /// create a python dictionary with the standard inputs that have to be passed
-    /// to class: cosmological parameters ([H0/100*theta_s],omega_b,tau_reio,omega_cdm) & add 
+    /// to class: cosmological parameters ([H0/100*theta_s],omega_b,tau_reio,omega_cdm) & add
     /// model dependent results for N_ur, neutrino masses & helium abundance
     /// here potential extra input options given in the yaml file are read in
     void set_classy_baseline_params(pybind11::dict &result)
@@ -675,7 +679,7 @@ namespace Gambit
       // make sure dict is empty
       result.clear();
 
-      // keep track if it is the first run -- if so 
+      // keep track if it is the first run -- if so
       // some extra consistency checks to make sure no contradicting
       // values are in the classy python input dictionary
       static bool first_run = true;
@@ -703,18 +707,18 @@ namespace Gambit
 
       // set helium abundance (vector Helium_abundance.at(0): mean, .at(1): uncertainty)
       std::vector<double> Helium_abundance = *Dep::Helium_abundance;
-      result["YHe"] = Helium_abundance.at(0); 
+      result["YHe"] = Helium_abundance.at(0);
 
       // TODO: need to test if class or exo_class in use! does not work -> (JR) should be fixed with classy implementation
-      // -> (JR again) not sure if that is actually true.. need to test.  
+      // -> (JR again) not sure if that is actually true.. need to test.
       if (ModelInUse("DecayingDM_general") || ModelInUse("AnnihilatingDM_general"))
       {
         // add Decaying/annihilating DM specific options to python dictionary passed to CLASS, consistency checks only executed in first run
         merge_pybind_dicts(result,*Dep::classy_parameters_EnergyInjection, first_run);
       }
-      
 
-      // Other Class input direct from the YAML file 
+
+      // Other Class input direct from the YAML file
       // check if these are already contained in the input dictionary -- if so throw an error
       // only do it for the first run though
       static pybind11::dict yaml_input;
@@ -728,7 +732,7 @@ namespace Gambit
           {
             std::string name = it->first.as<std::string>();
             std::string value = it->second.as<std::string>();
-            
+
             // Check if the key exists in the dictionary
             if (not result.contains(name.c_str()))
             {
@@ -736,7 +740,7 @@ namespace Gambit
             }
             // If it does, throw an error, there's some YAML conflict going on.
             else
-            { 
+            {
               std::cout << pybind11::repr(result) << std::endl;
               CosmoBit_error().raise(LOCAL_INFO, "The key '" + name + "' already "
                 "exists in the CLASSY dictionary. You are probably trying to override a model parameter. If you really"
@@ -747,7 +751,7 @@ namespace Gambit
         }
       }
 
-      /// check that user did not try to pass k_pivot or N_star through class dictionary -- these are 
+      /// check that user did not try to pass k_pivot or N_star through class dictionary -- these are
       /// fixed by capabilities to ensure consistent use throughout the code
       if (yaml_input.contains("k_pivot") || yaml_input.contains("N_star"))
       {
@@ -781,11 +785,11 @@ namespace Gambit
 
       // add yaml options to python dictionary passed to CLASS, consistency checks only executed in first run
       merge_pybind_dicts(result,yaml_input, first_run);
-      
+
 
       // At last: if the Planck likelihood is used add all relevant input parameters to the CLASS dictionary:
       // output: 'lCl, pCl, tCl', lensing: yes, non linear: halofit , l_max_scalar: 2508
-      // Note: this has to be done *after* the yaml options are read it since it would trigger an error of duplicated 
+      // Note: this has to be done *after* the yaml options are read it since it would trigger an error of duplicated
       //   keys in case the user specifies one of the options themselves. The 'merge_pybind_dicts' routine will properly
       //   with concatennating the output values and choosing the maximum passed value for l_max_scalars. Contradictions
       //   in the lensing or non linear choice will rightfully trigger an error.
@@ -816,21 +820,21 @@ namespace Gambit
       result.add_entry("n_s", pps.get_n_s());
       result.add_entry("ln10^{10}A_s", pps.get_A_s());
 
-      // add k_pivot and N_pivot entries
+      // add k_pivot entry
       result.add_entry("P_k_ini type", "analytic_Pk");
       result.add_entry("k_pivot", *Dep::k_pivot);
-      
+
 
       // if r = 0 only compute scalar modes, else tensor modes as well
       //
       // => don't explicitly set "modes" to 's' since it defaults to it. If you set it here anyways
       // you won't be able to run CLASS when only requesting background quantities (e.g. for BAO & SNe likelihoods)
-      // as the perturbations module won't run and therefore the entry "modes" won't be read. 
-      if(pps.get_r() == 0){} 
+      // as the perturbations module won't run and therefore the entry "modes" won't be read.
+      if(pps.get_r() == 0){}
       else
       {
         // don't set to zero in CLASS dict as it won't be read if no tensor modes are requested
-        result.add_entry("r", pps.get_r()); 
+        result.add_entry("r", pps.get_r());
         result.add_entry("modes","t,s");
       }
 
@@ -840,7 +844,7 @@ namespace Gambit
       // Note: this should only contain a value for 'k_pivot' if the model 'LCDM'
       //    is in use.
       pybind11::dict classy_base_dict = *Dep::classy_baseline_params;
-      
+
       // Add classy_base_dict entries to the result dictionary of the type Classy_input
       std::string common_keys = result.add_dict(classy_base_dict);
       if(common_keys != "")
@@ -864,7 +868,7 @@ namespace Gambit
       // Clean the input container
       result.clear();
 
-      // Now need to pass the primordial power spectrum 
+      // Now need to pass the primordial power spectrum
       static Primordial_ps pps{};
       pps = *Dep::primordial_power_spectrum;
       result.add_entry("modes", "t,s");
@@ -876,8 +880,9 @@ namespace Gambit
       result.add_entry("lnk_size" , pps.get_vec_size()); // don't hard code but somehow make consistent with multimode @TODO -> test
       // pass pivot scale of external spectrum to CLASS
       result.add_entry("k_pivot", *Dep::k_pivot);
-      result.add_entry("N_star",  *Dep::N_pivot);
-      
+      // N.B. We don't need to pass this parameter as it is only used in class to get the shape of the primordial power spectrum
+      //result.add_entry("N_star",  *Dep::N_pivot);
+
       // Get standard cosmo parameters, nu masses, helium abundance &
       // extra run options for class passed in yaml file to capability
       // 'classy_baseline_params'
@@ -902,6 +907,14 @@ namespace Gambit
       }
     }
 
+    void raise_inst_reh_error()
+    {
+      std::ostringstream err;
+      err << "ERROR! You set the MulitModeCode parameter 'instreheat' to 0 but want to use an inflation model that assumes instant reheating.";
+      err << " Set 'instreheat' to 1 (or omit it) or choose a different inflation model.";
+      CosmoBit_error().raise(LOCAL_INFO, err.str());
+    }
+
     /// Function to set the generic inputs used for MultiModeCode.
     void set_multimode_inputs(Multimode_inputs &result)
     {
@@ -910,86 +923,85 @@ namespace Gambit
       // Clear anything from previous run
       result = Multimode_inputs();
 
-      // N_pivot is model parameter in all inflation models
-      result.N_pivot = *Param["N_pivot"];
-      
+      // TODO. Set this to 55 now in order to not break the code. May need to be replaced by a proper capability.
+      //result.N_pivot = *Param["N_pivot"];
+      result.N_pivot = 55;
+
       // NOTE: if the flag 'ic_samp_flags' is set to 1 then phi0 is fixed to phi_ini0
-      // and the fields velocities are assumed to be slow roll => no sampling over 
-      // phi_init0 and dphi_init0. Set them as GAMBIT model parameters if you want to 
+      // and the fields velocities are assumed to be slow roll => no sampling over
+      // phi_init0 and dphi_init0. Set them as GAMBIT model parameters if you want to
       // sample over these as well (and adopt the choice for the sampling flag s.t.
       // the entries for dphi_init0 are taken into account. You will also need to set
-      // the prior ranges to be equal to the central value to prevent multimode from 
+      // the prior ranges to be equal to the central value to prevent multimode from
       // doing some sampling on its own.. )
 
+      // Should we use the instant reheating approximation?
+      // This makes N_pivot a derived parameter; it is therefore only possible to use models compatible with that choice.
+      int inst_reh_flag = runOptions->getValueOrDef<int> (1, "instreheat");
+      result.instreheat = inst_reh_flag;
 
-      // Go through each allowed inflationary model and set the choice of potential parameters (vparams), 
-      // the number of inflatons, and the initial conditions from the GAMBIT inputs.
-      
-      // N.B. Potential definitions are in the MultiModeCode file modpk_potential.f90, if you wish to 
-      // study a new inflationary potential then implement it there.
-      if (ModelInUse("Inflation_SR1quad"))
+      // Go through each inflation model known to GAMBIT, set the number of inflaton field, the parameters
+      // for the inflation potential parameters (vparams), and initial conditions.
+
+      // N.B. Available inflation potentials are defined in the MultiModeCode file modpk_potential.f90.
+      //      If you want to study an inflation model of inflation that is not listed below, check if
+      //      the model is available in modpk_potential.f90 or add it to that file before adding it here.
+      if (ModelInUse("Inflation_InstReh_1mono23"))
       {
-        result.vparams.push_back(*Param["m2_inflaton"]);
-        result.phi_init0.push_back(*Param["phi_init0"]);
-        result.potential_choice = 1; // -> 0.5 m_i^2 phi_i^2 --- N-quadratic
+        result.vparams.push_back(log10(*Param["lambda"])); // MultiModeCode uses log10 of this parameter
+        result.potential_choice = 5; // V(phi) = 1.5 lambda phi^(2/3)
         result.num_inflaton = 1;
         result.vparam_rows = 1;
+        if (inst_reh_flag != 1) { raise_inst_reh_error(); };
       }
-      else if (ModelInUse("Inflation_1natural"))
+      else if (ModelInUse("Inflation_InstReh_1linear"))
       {
-        result.vparams.push_back(*Param["lambda"]); 
-        result.vparams.push_back(*Param["faxion"]); // finv = 1.e0_dp/(10.e0_dp**faxion))
-        result.phi_init0.push_back(*Param["phi_init0"]);
-        result.potential_choice = 2; // -> lambda**4*(1.e0_dp+cos(finv*phi))
+        result.vparams.push_back(log10(*Param["lambda"])); // MultiModeCode uses log10 of this parameter
+        result.potential_choice = 4; // V(phi) = lambda phi
+        result.num_inflaton = 1;
+        result.vparam_rows = 1;
+        if (inst_reh_flag != 1) { raise_inst_reh_error(); };
+      }
+      else if (ModelInUse("Inflation_InstReh_1quadratic"))
+      {
+        result.vparams.push_back(2.0*log10(*Param["m_phi"])); // MultiModeCode uses log10 of m_phi^2
+        result.potential_choice = 1; // V(phi) = 0.5 m^2 phi^2
+        result.num_inflaton = 1;
+        result.vparam_rows = 1;
+        if (inst_reh_flag != 1) { raise_inst_reh_error(); };
+      }
+      else if (ModelInUse("Inflation_InstReh_1quartic"))
+      {
+        result.vparams.push_back(log10(*Param["lambda"])); // MultiModeCode uses log10 of this parameter
+        result.potential_choice = 3; // V(phi) = 0.25 lambda phi^4
+        result.num_inflaton = 1;
+        result.vparam_rows = 1;
+        if (inst_reh_flag != 1) { raise_inst_reh_error(); };
+      }
+      else if (ModelInUse("Inflation_InstReh_1natural"))
+      {
+        // MultiModeCode uses log10 of both parameters below
+        result.vparams.push_back(log10(*Param["Lambda"]));
+        result.vparams.push_back(log10(*Param["f_phi"]));
+        result.potential_choice = 2; // V(phi) = Lambda^4 [1 + cos(phi/f)]
         result.num_inflaton = 1;
         result.vparam_rows = 2;
+        if (inst_reh_flag != 1) { raise_inst_reh_error(); };
       }
-      else if (ModelInUse("Inflation_1quar"))
+      else if (ModelInUse("Inflation_InstReh_1Starobinsky"))
       {
-        result.vparams.push_back(*Param["lambda"]);
-        result.phi_init0.push_back(*Param["phi_init0"]);
-        result.potential_choice = 3; // -> 0.25 lambda_i phi_i^4 --- N-quartic
+        result.vparams.push_back(*Param["Lambda"]);
+        result.potential_choice = 19; // V(phi) = ...
         result.num_inflaton = 1;
         result.vparam_rows = 1;
-      }
-      else if (ModelInUse("Inflation_1linear"))
-      {
-        result.vparams.push_back(*Param["lambda"]);
-        result.phi_init0.push_back(*Param["phi_init0"]);
-        result.potential_choice = 4; // -> lambda_i phi_i --- N-linear
-        result.num_inflaton = 1;
-        result.vparam_rows = 1;
-      }
-      else if (ModelInUse("Inflation_1mono23"))
-      {
-        result.vparams.push_back(*Param["lambda"]);
-        result.phi_init0.push_back(*Param["phi_init0"]);
-        result.potential_choice = 5; // -> 1.5 lambda_i phi_i^(2/3)
-        result.num_inflaton = 1;
-        result.vparam_rows = 1;
-      }
-      else if (ModelInUse("Inflation_1hilltopInf"))
-      {
-        // @Selim, I don't know the form of the potential so I can't figure 
-        // out which one the corresponding one in multimode would be
-        result.vparams.push_back(*Param["lambda"]); 
-        result.vparams.push_back(*Param["mu"]);
-        result.phi_init0.push_back(*Param["phi_init0"]);
-        result.potential_choice = 5; 
-        result.num_inflaton = 1;
-        result.vparam_rows = 2;
-      }
-      else if (ModelInUse("Inflation_1starobinsky"))
-      {
-        result.vparams.push_back(*Param["lambda4"]); 
-        result.phi_init0.push_back(*Param["phi_init0"]);
-        result.potential_choice = 19; 
-        result.num_inflaton = 1;
-        result.vparam_rows = 1;
+        if (inst_reh_flag != 1) { raise_inst_reh_error(); };
       }
 
-      // (JR) TODO: MultiMode segFaults if this is empty have to do this properly though 
-      result.dphi_init0.push_back(1.);
+      // Set the initial conditions for the inflation field(s).
+      // (JR) TODO: MultiMode segFaults if this is empty have to do this properly though
+      // (Seb H): MultiMode should determine the parameters below self-consistenly for single field inflation; dummy entries should be okay in this case.
+      result.phi_init0.push_back(10.0);
+      result.dphi_init0.push_back(1.0);
 
       static bool first_run = true;
       // do some consistency check for inputs passed to multimode before the first run
@@ -1017,17 +1029,16 @@ namespace Gambit
 
 
       /// @TODO Separate into cases where we want the full ps and the parametrised ps
+      // (Seb H) @TODO: Shouldn't this be defined globally for CosmoBit?
 
       result.k_min = runOptions->getValueOrDef<double>(1e-6,"k_min");
       result.k_max = runOptions->getValueOrDef<double>(1e+6,"k_max");
-      result.numsteps = runOptions->getValueOrDef<int>(100, "numsteps");
+      result.numsteps = runOptions->getValueOrDef<int>(100,"numsteps");
 
       if (result.numsteps > 1000)
         CosmoBit_error().raise(LOCAL_INFO, "Currently MultiModeCode supports a maximum k-array size of 1000. Please change your yaml file settings.");
 
-
-      //  Read in MultiMode settings from the yaml file
-      // TODO use getValueOrDef as much as possible
+      // TODO Replace with getValueOrDef if possible; (Seb H) we shouldn't need most for single field inflation and inst. reheating
 
       //-------------------------------------------------------------
       // Parameters to control how the ICs are sampled.
@@ -1039,11 +1050,8 @@ namespace Gambit
       result.N_iso_ref = runOptions->getValue<int> ("N_iso_ref"); //double check this
       result.slowroll_infl_end = runOptions->getValue<int> ("slowroll_infl_end");
 
-      // SB. move this into the "ModelInUse"?
-      result.instreheat = runOptions->getValue<int> ("instreheat");
-
       // (JR) @Selim: we should probably double check if we need
-      // to set these parameters or if we can/should fix them as well. 
+      // to set these parameters or if we can/should fix them as well.
       //-------------------------------------------------------------
       // Control the output of analytic approximations for comparison.
       //-------------------------------------------------------------
@@ -1053,33 +1061,27 @@ namespace Gambit
       result.get_runningofrunning = runOptions->getValue<int> ("get_runningofrunning");
 
       // has to be set to be the same as the scale entering class. todo
+      // (Seb H) @TODO Has this been done, now? Looks like it
       // fix through some capability (probably the same setting the clac_pk_full variable for first version)
-      result.k_pivot = *Dep::k_pivot; 
+      result.k_pivot = *Dep::k_pivot;
       // difference in k-space used when pivot-scale observables from mode equations are evaluated
       // Samples in uniform increments in log(k).
       result.dlnk = runOptions->getValue<double> ("dlnk");
 
     }
 
-    /// Passes the inputs from the MultiModeCode initialisation function 
-    /// and computes the outputs.
-    /// TODO: split this up into primordial_ps and parametrised_ps versions.
+    /// Uses the inputs from the MultiModeCode initialisation function to computes inflationary observables.
     void get_multimode_primordial_ps(Primordial_ps &result)
-    { 
+    {
       using namespace Pipes::get_multimode_primordial_ps;
 
       // Clear it all
       result = Primordial_ps();
 
-      
       // Get the inflationary inputs
       Multimode_inputs inputs = *Dep::multimode_input_parameters;
 
-      // TODO S.B shouldn't need these...
-      // double N_pivot_prior_min = inputs.N_pivot;
-      // double N_pivot_prior_max = inputs.N_pivot;
-
-      // The parameters below are only used by multimode if the full Pk is requested. 
+      // The parameters below are only used by multimode if the full Pk is requested.
       int steps = inputs.numsteps;
       double kmin = inputs.k_min;
       double kmax = inputs.k_max;
@@ -1093,7 +1095,7 @@ namespace Gambit
       //-------------------------------------------------------------
 
       try
-      { 
+      {
         observables = BEreq::multimodecode_primordial_ps(inputs.num_inflaton,
                                                        inputs.potential_choice,
                                                        inputs.evaluate_modes,
@@ -1131,19 +1133,15 @@ namespace Gambit
 
     }
 
-    /// Passes the inputs from the MultiModeCode initialisation function 
+    /// Passes the inputs from the MultiModeCode initialisation function
     /// and computes the outputs.
     /// TODO: split this up into primordial_ps and parametrised_ps versions.
     void get_multimode_parametrised_ps(Parametrised_ps &result)
-    { 
+    {
       using namespace Pipes::get_multimode_parametrised_ps;
 
       // Get the inflationary inputs
       Multimode_inputs inputs = *Dep::multimode_input_parameters;
-
-      // TODO S.B shouldn't need these...
-      // double N_pivot_prior_min = inputs.N_pivot;
-      // double N_pivot_prior_max = inputs.N_pivot;
 
       gambit_inflation_observables observables;
 
@@ -1169,7 +1167,7 @@ namespace Gambit
       catch(std::runtime_error &e)
       {
         logger() << e.what() << EOM;
-	invalid_point().raise(e.what());
+        invalid_point().raise(e.what());
       }
       // If there's an error -> pass it to the helper function and invalidate the point
       if(observables.err != 0)
@@ -1182,7 +1180,7 @@ namespace Gambit
       result.set_n_s(observables.ns);
       result.set_A_s(observables.As);
       result.set_r(observables.r);
- 
+
     }
 
     void get_parametrised_ps_LCDM(Parametrised_ps &result)
@@ -1191,14 +1189,14 @@ namespace Gambit
 
       // Check not using non-primordial version
 
-      // (JR) got the error when the lines below were uncommented... todo check what's going on 
+      // (JR) got the error when the lines below were uncommented... todo check what's going on
       //Problem with ModelInUse("LCDM_no_primordial").
-      //This model is not known by CosmoBit::get_parametrised_ps_LCDM.  
+      //This model is not known by CosmoBit::get_parametrised_ps_LCDM.
       //Please make sure that it has been mentioned in some context in the
       //rollcall header declaration of this function.
 
 
-      //if (ModelInUse("LCDM_no_primordial"))  
+      //if (ModelInUse("LCDM_no_primordial"))
       //{
       //  CosmoBit_error().raise(LOCAL_INFO, "You cannot use the LCDM_no_primordial_ps model to get"
       //                      " a power spectrum!! Try the function get_multimode_parametrised_ps...");
@@ -1207,7 +1205,7 @@ namespace Gambit
       Parametrised_ps pps;
       pps.set_n_s(*Param["n_s"]);
       pps.set_A_s(*Param["ln10A_s"]);
-      pps.set_r(0); 
+      pps.set_r(0);
 
       result = pps;
     }
@@ -1220,8 +1218,7 @@ namespace Gambit
       result = pps.get_parametrised_ps_map();
     }
 
-    // still needs to be rewritten and dived into two functions. Also 
-    // should fill the new 
+    // still needs to be rewritten and divided into two functions. Also should fill the new
     void get_parametrised_ps_SMASH(Parametrised_ps &result)
     {
       using namespace Pipes::get_parametrised_ps_SMASH;
@@ -1336,7 +1333,7 @@ namespace Gambit
         Parametrised_ps pps;
         pps.set_n_s(ns_self);
         pps.set_A_s(As_self); // TODO check if we need to exponentiate
-        pps.set_r(r_self); 
+        pps.set_r(r_self);
 
         result = pps;
     }
@@ -1344,12 +1341,12 @@ namespace Gambit
 
     /*
     /// have to think about how tho to that without causing a cricle in dep resolution
-    //  -- need to pass the options below to class and 
+    //  -- need to pass the options below to class and
     /// then class can return the vectors with the k, Pks and Pkt. todo
     void get_primordial_ps_SMASH(Primordial_ps &result)
     {
       using namespace Pipes::get_primordial_ps_SMASH;
-      
+
       pybind11::dict classy_input;
       //-------------------------------------------------------------
       // Having CLASS primordial.h module calculate inflationary predictions of the SMASH potential.
@@ -1360,13 +1357,13 @@ namespace Gambit
       classy_input["V_1"] = *Param["log10_beta"];
       classy_input["V_3"] = *Param["log10_lambda"];
       classy_input["V_2"] = -100.; //Hard coding \chi inflaton potential boundaries
-      
-      // this does not do anything but and also does not work but I couldn't introduce a 
-      // new compiler warning after Sanjay just removed all of them... 
-      std::vector<double> k = result.get_k(); 
+
+      // this does not do anything but and also does not work but I couldn't introduce a
+      // new compiler warning after Sanjay just removed all of them...
+      std::vector<double> k = result.get_k();
     }*/
 
-    
+
 
 // Getter functions for CL spectra from classy
 
@@ -1724,7 +1721,7 @@ namespace Gambit
 
 /*
     (PS: Not sure if we really need this step in between. For all our casess so far we directly could map from eta0 to eta_BBN (up to constnat factors in front))
- * 
+ *
     void calculate_etaCMB_SM(double &result)
     {
       using namespace Pipes::calculate_etaCMB_SM;
@@ -1788,7 +1785,7 @@ namespace Gambit
     }
 
 
-    /// (JR) this function is huge (200 lines..) -- considering that it is acually only there to call 
+    /// (JR) this function is huge (200 lines..) -- considering that it is acually only there to call
     /// a BE function from AlterBBN, can we split that up somehow or define utility functions
     /// to do some of the checks and error calculation things so it is not totally blown up? TODO
     void compute_BBN_abundances(CosmoBit::BBN_container &result)
@@ -1796,19 +1793,19 @@ namespace Gambit
       using namespace Pipes::compute_BBN_abundances;
 
       // global variable of AlterBBN (# computed element abundances)
-      const int NNUC = BEreq::get_NNUC();  
+      const int NNUC = BEreq::get_NNUC();
       result.set_abund_map(BEreq::get_abund_map_AlterBBN());
       // init arrays in BBN_container with right length
-      result.init_arr_size(NNUC);         
+      result.init_arr_size(NNUC);
 
       // in AlterBBN ratioH and cov_ratioH are arrays of fixed length
       // with certain compiler versions (gcc 5.4.0) we have seen memory corruption problems
-      // if we initialise these as 
+      // if we initialise these as
       // double ratioH[NNUC+1]
       // since the memory was not allocated properly. Fixed size arrays do not seem to be
-      // properly supported even though there are no errors at compile time. 
-      // using a unique pointer for ratioH and a 2d vector for cov_ratioH avoids 
-      // these problems. 
+      // properly supported even though there are no errors at compile time.
+      // using a unique pointer for ratioH and a 2d vector for cov_ratioH avoids
+      // these problems.
       auto deleter = [&](double* ptr){delete [] ptr;};
       std::unique_ptr<double[], decltype(deleter)> ratioH(new double[NNUC+1](), deleter);
       std::unique_ptr<double[], decltype(deleter)> cov_ratioH(new double[(NNUC+1)*(NNUC+1)](), deleter);
@@ -1927,10 +1924,10 @@ namespace Gambit
       }
 
       // fill AlterBBN_input map with the parameters for the model in consideration
-      map_str_dbl AlterBBN_input = *Dep::AlterBBN_Input; 
+      map_str_dbl AlterBBN_input = *Dep::AlterBBN_Input;
 
-      // call AlterBBN routine to calculate element abundances (& errors -- depending 
-      // on error calculation settings made with parameters 'err' and failsafe set in 
+      // call AlterBBN routine to calculate element abundances (& errors -- depending
+      // on error calculation settings made with parameters 'err' and failsafe set in
       // 'AlterBBN_Input')
       int nucl_err = BEreq::call_nucl_err(AlterBBN_input, &ratioH[0], &cov_ratioH[0]);
 
@@ -2119,7 +2116,7 @@ namespace Gambit
 
       // compute chi2
       for(ie=0;ie<nobs;ie++) for(je=0;je<nobs;je++) chi2+=(prediction[ie]-observed[ie])*gsl_matrix_get(invcov,ie,je)*(prediction[je]-observed[je]);
-      //std::cout << "    BBN Like: chi2 = " << chi2 << "  factor " <<  log(pow(2*pi,nobs)*det_cov) << "  det cov = " << det_cov << std::endl; 
+      //std::cout << "    BBN Like: chi2 = " << chi2 << "  factor " <<  log(pow(2*pi,nobs)*det_cov) << "  det cov = " << det_cov << std::endl;
       result = -0.5*(chi2 + log(pow(2*pi,nobs)*det_cov));
 
       //std::cout << "    BBN LogLike computed to be: " << result << std::endl;
@@ -2334,7 +2331,7 @@ namespace Gambit
     }
   }
 
-  /// add all inputs for CLASS needed to produce the correct output to be 
+  /// add all inputs for CLASS needed to produce the correct output to be
   /// able to compute the Planck CMB likelihoods
   void set_classy_PlanckLike_input(pybind11::dict &result)
   {
@@ -2386,7 +2383,7 @@ namespace Gambit
     {
       using namespace Pipes::get_H0_classy;
 
-      // Rescale by c [km/s] 
+      // Rescale by c [km/s]
       result = _c_SI_*BEreq::class_get_H0()/1000;
     }
 
@@ -2457,20 +2454,20 @@ namespace Gambit
 /* MontePython */
 /***************/
 
-    /// function to fill the mcmc_parameters dictionary of MontePython's Data object with current 
+    /// function to fill the mcmc_parameters dictionary of MontePython's Data object with current
     /// values of nuisance parameters
     void set_parameter_dict_for_MPLike(pybind11::dict & result)
     {
       using namespace Pipes::set_parameter_dict_for_MPLike;
       using namespace pybind11::literals;
 
-      // The loop has to be executed for every parameter point. It takes about 0.00023 s -> ~4 minutes for 1e6 points 
+      // The loop has to be executed for every parameter point. It takes about 0.00023 s -> ~4 minutes for 1e6 points
       for (auto it=Param.begin(); it != Param.end(); it++)
       {
         std::string name = it->first;
         double value = *Param[name];
 
-        // check if any models are scanned for which we had to rename the nuisance parameters due to 
+        // check if any models are scanned for which we had to rename the nuisance parameters due to
         //    a) parameters having the same name  -> e.g. 'epsilon' and 'sigma_NL'
         //    b) parameter names containing symbols that can't be used in macros -> e.g. "^" in 'beta_0^Euclid'
 
@@ -2489,7 +2486,7 @@ namespace Gambit
       }
     }
 
-    /// function to fill the mcmc_parameters dictionary of MontePython's Data object with current 
+    /// function to fill the mcmc_parameters dictionary of MontePython's Data object with current
     /// This version of the capability 'parameter_dict_for_MPLike' is used when no Likelihood with nuisance parameters is in use
     /// just passes an empty py dictionary
     void pass_empty_parameter_dict_for_MPLike(pybind11::dict & result)
@@ -2529,7 +2526,7 @@ namespace Gambit
           if (std::find(avail_likes.begin(), avail_likes.end(), likelihood) == avail_likes.end())
           {
 
-            str errmsg = "Likelihood '" + likelihood + "' is not implemented in MontePython. Check for typos or implement it.\nLikelihoods currently available are:\n"; 
+            str errmsg = "Likelihood '" + likelihood + "' is not implemented in MontePython. Check for typos or implement it.\nLikelihoods currently available are:\n";
             for(auto const& value: avail_likes)
             {
               errmsg += ("\t"+value+"\n");
@@ -2557,7 +2554,7 @@ namespace Gambit
           if (std::find(avail_likes.begin(), avail_likes.end(), obs) == avail_likes.end())
           {
 
-            str errmsg = "Likelihood '" + obs + "' is not implemented in MontePython. Check for typos or implement it.\nLikelihoods currently available are:\n"; 
+            str errmsg = "Likelihood '" + obs + "' is not implemented in MontePython. Check for typos or implement it.\nLikelihoods currently available are:\n";
             for(auto const& value: avail_likes)
             {
               errmsg += ("\t"+value+"\n");
@@ -2576,14 +2573,14 @@ namespace Gambit
 
     /// When initialising the MontePython Likelihood objects they add the output that needs to be computed by class
     /// to the input dictionary. We need to get these before starting the class run
-    /// e.g. for Planck_SZ likelihood the entries {'output': ' mPk ', 'P_k_max_h/Mpc': '1.'} need to be added 
+    /// e.g. for Planck_SZ likelihood the entries {'output': ' mPk ', 'P_k_max_h/Mpc': '1.'} need to be added
     /// to compute all needed observables
     void init_cosmo_args_from_MPLike(pybind11::dict &result)
     {
       using namespace Pipes::init_cosmo_args_from_MPLike;
 
       // CosmoBit::MPLike_data_container should only be created once when calculating the first point.
-      // After that is has to be kept alive since it contains a vector with the initialised MPLike 
+      // After that is has to be kept alive since it contains a vector with the initialised MPLike
       // Likelihood objects.
       static bool first_run = true;
       static pybind11::object data;
@@ -2619,7 +2616,7 @@ namespace Gambit
 
         logger() << LogTags::info << "(init_cosmo_args_from_MPLike) List of experiments: " << experiments << EOM;
         data = BEreq::create_MP_data_object(experiments);
-        // add current parameters to data object to enable check if all nuisance parameters are 
+        // add current parameters to data object to enable check if all nuisance parameters are
         // scanned upon initialisation of likelihood objects
         data.attr("mcmc_parameters") = *Dep::parameter_dict_for_MPLike;
         map_str_pyobj likelihoods = BEreq::create_MP_likelihood_objects(data, experiments);
@@ -2672,9 +2669,9 @@ namespace Gambit
           experiments[it->first] = it->second;
         }
       }
- 
+
       // CosmoBit::MPLike_data_container should only be created once when calculating the first point.
-      // After that is has to be kept alive since it contains a vector with the initialised MPLike 
+      // After that is has to be kept alive since it contains a vector with the initialised MPLike
       // Likelihood objects.
       pybind11::object data;
       map_str_pyobj likelihoods;
@@ -2682,7 +2679,7 @@ namespace Gambit
       if(first_run)
       {
         data = BEreq::create_MP_data_object(experiments);
-        // add current parameters to data object to enable check if all nuisance parameters are 
+        // add current parameters to data object to enable check if all nuisance parameters are
         // scanned upon initialisation of likelihood objects
         data.attr("mcmc_parameters") = *Dep::parameter_dict_for_MPLike;
         likelihoods = BEreq::create_MP_likelihood_objects(data, experiments);
@@ -2742,7 +2739,7 @@ namespace Gambit
       using namespace Pipes::calc_MP_combined_LogLike;
 
       // get string double map from MPlike result container mapping
-      // experiment name to LogLike value for Likelihoods included 
+      // experiment name to LogLike value for Likelihoods included
       // into the scan
       CosmoBit::MPLike_result_container MPLike_results = *Dep::calc_MP_LogLikes;
       map_str_dbl MP_lnLs = MPLike_results.get_logLike_results();
@@ -2771,7 +2768,7 @@ namespace Gambit
       using namespace pybind11::literals;
 
       // get string double map from MPlike result container mapping
-      // experiment name to LogLike value for Observables included 
+      // experiment name to LogLike value for Observables included
       // into the scan
       CosmoBit::MPLike_result_container MPLike_results = *Dep::calc_MP_LogLikes;
       result = MPLike_results.get_logLike_results();
@@ -2788,7 +2785,7 @@ namespace Gambit
       using namespace pybind11::literals;
 
       // get string double map from MPlike result container mapping
-      // experiment name to LogLike value for Observables included 
+      // experiment name to LogLike value for Observables included
       // into the scan
       CosmoBit::MPLike_result_container MPLike_results = *Dep::calc_MP_LogLikes;
       result = MPLike_results.get_obs_results();
