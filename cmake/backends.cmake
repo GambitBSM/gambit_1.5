@@ -1206,39 +1206,6 @@ endif()
 
 # plc
 set(name "plc")
-set(ver "2.0")
-set(lib "libclik")
-set(dl "http://pla.esac.esa.int/pla/aio/product-action?COSMOLOGY.FILE_ID=COM_Likelihood_Code-v2.0_R2.00.tar.bz2")
-set(md5 "1d732465a5cc8833cec72a414676c655")
-set(dir "${PROJECT_SOURCE_DIR}/Backends/installed/${name}/${ver}")
-set(cfitsio_name "cfitsio")
-set(cfitsio_ver "3.390")
-set(cfitsio_dir "${PROJECT_SOURCE_DIR}/Backends/installed/${cfitsio_name}/${cfitsio_ver}")
-if(NOT ${FOUND_MKL} EQUAL -1)
-  if(DEFINED ENV{MKLROOT})
-  string(STRIP $ENV{MKLROOT} STRIPPED_MKLROOT)
-    if(NOT "${STRIPPED_MKLROOT}" STREQUAL "")
-      set(mkl_libs_option "--lapack_mkl=${STRIPPED_MKLROOT}")
-    else()
-      set(mkl_libs_option "")
-    endif()
-  endif()
-endif()
-check_ditch_status(${name} ${ver} ${dir})
-if(NOT ditched_${name}_${ver})
-  ExternalProject_Add(${name}_${ver}
-    DEPENDS ${cfitsio_name}_${cfitsio_ver}
-    DOWNLOAD_COMMAND ${DL_BACKEND} ${dl} ${md5} ${dir}
-    SOURCE_DIR ${dir}
-    BUILD_IN_SOURCE 1
-    CONFIGURE_COMMAND ${PYTHON_EXECUTABLE} ${dir}/waf configure --cfitsio_include=${cfitsio_dir}/include --cfitsio_lib=${cfitsio_dir}/lib ${mkl_libs_option}
-    BUILD_COMMAND ""
-    INSTALL_COMMAND ${dir}/waf install
-  )
-  add_extra_targets("backend" ${name} ${ver} ${dir} ${dl} clean)
-endif()
-
-set(name "plc")
 set(ver "3.0")
 set(lib "libclik")
 set(dl "http://pla.esac.esa.int/pla/aio/product-action?COSMOLOGY.FILE_ID=COM_Likelihood_Code-v3.0_R3.00.tar.gz")
