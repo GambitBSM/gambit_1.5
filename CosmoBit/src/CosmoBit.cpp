@@ -907,15 +907,10 @@ namespace Gambit
       }
     }
 
-    void raise_inst_reh_error()
-    {
-      std::ostringstream err;
-      err << "ERROR! You set the MulitModeCode parameter 'instreheat' to 0 but want to use an inflation model that assumes instant reheating.";
-      err << " Set 'instreheat' to 1 (or omit it) or choose a different inflation model.";
-      CosmoBit_error().raise(LOCAL_INFO, err.str());
-    }
-
-    /// Function to set the generic inputs used for MultiModeCode.
+    // Function to set the generic inputs used for MultiModeCode (MMC).
+    // N.B. Most of the available MMC parameters are already set by the default constructor of Multimode_inputs. These default
+    //      values generally relate to the case of a single inflation field with instant reheating. In general, at least some of the
+    //      parameters need to be adjusted for other models.
     void set_multimode_inputs(Multimode_inputs &result)
     {
       using namespace Pipes::set_multimode_inputs;
@@ -923,22 +918,13 @@ namespace Gambit
       // Clear anything from previous run
       result = Multimode_inputs();
 
-      // TODO. Set this to 55 now in order to not break the code. May need to be replaced by a proper capability.
-      //result.N_pivot = *Param["N_pivot"];
-      result.N_pivot = 55;
-
-      // NOTE: if the flag 'ic_samp_flags' is set to 1 then phi0 is fixed to phi_ini0
-      // and the fields velocities are assumed to be slow roll => no sampling over
-      // phi_init0 and dphi_init0. Set them as GAMBIT model parameters if you want to
-      // sample over these as well (and adopt the choice for the sampling flag s.t.
-      // the entries for dphi_init0 are taken into account. You will also need to set
-      // the prior ranges to be equal to the central value to prevent multimode from
-      // doing some sampling on its own.. )
-
-      // Should we use the instant reheating approximation?
-      // This makes N_pivot a derived parameter; it is therefore only possible to use models compatible with that choice.
-      int inst_reh_flag = runOptions->getValueOrDef<int> (1, "instreheat");
-      result.instreheat = inst_reh_flag;
+      // @TODO The pivot scale has to be set to be the same as the scale entering class.
+      // Fix through some capability (probably the same setting the clac_pk_full variable for first version)
+      // (Seb H) @TODO Has this been done, now? Looks like it
+      result.k_pivot = *Dep::k_pivot;
+      // difference in k-space used when pivot-scale observables from mode equations are evaluated
+      // Samples in uniform increments in log(k).
+      result.dlnk = runOptions->getValue<double> ("dlnk");
 
       // Go through each inflation model known to GAMBIT, set the number of inflaton field, the parameters
       // for the inflation potential parameters (vparams), and initial conditions.
@@ -951,28 +937,24 @@ namespace Gambit
         result.vparams.push_back(log10(*Param["lambda"])); // MultiModeCode uses log10 of this parameter
         result.potential_choice = 5; // V(phi) = 1.5 lambda phi^(2/3)
         result.vparam_rows = 1;
-        if (inst_reh_flag != 1) { raise_inst_reh_error(); };
       }
       else if (ModelInUse("Inflation_InstReh_1linear"))
       {
         result.vparams.push_back(log10(*Param["lambda"])); // MultiModeCode uses log10 of this parameter
         result.potential_choice = 4; // V(phi) = lambda phi
         result.vparam_rows = 1;
-        if (inst_reh_flag != 1) { raise_inst_reh_error(); };
       }
       else if (ModelInUse("Inflation_InstReh_1quadratic"))
       {
         result.vparams.push_back(2.0*log10(*Param["m_phi"])); // MultiModeCode uses log10 of m_phi^2
         result.potential_choice = 1; // V(phi) = 0.5 m^2 phi^2
         result.vparam_rows = 1;
-        if (inst_reh_flag != 1) { raise_inst_reh_error(); };
       }
       else if (ModelInUse("Inflation_InstReh_1quartic"))
       {
         result.vparams.push_back(log10(*Param["lambda"])); // MultiModeCode uses log10 of this parameter
         result.potential_choice = 3; // V(phi) = 0.25 lambda phi^4
         result.vparam_rows = 1;
-        if (inst_reh_flag != 1) { raise_inst_reh_error(); };
       }
       else if (ModelInUse("Inflation_InstReh_1natural"))
       {
@@ -981,14 +963,12 @@ namespace Gambit
         result.vparams.push_back(log10(*Param["f_phi"]));
         result.potential_choice = 2; // V(phi) = Lambda^4 [1 + cos(phi/f)]
         result.vparam_rows = 2;
-        if (inst_reh_flag != 1) { raise_inst_reh_error(); };
       }
       else if (ModelInUse("Inflation_InstReh_1Starobinsky"))
       {
         result.vparams.push_back(*Param["Lambda"]);
         result.potential_choice = 19; // V(phi) = ...
         result.vparam_rows = 1;
-        if (inst_reh_flag != 1) { raise_inst_reh_error(); };
       }
 
       // Set the initial conditions for the inflation field(s).
@@ -1031,37 +1011,6 @@ namespace Gambit
 
       if (result.numsteps > 1000)
         CosmoBit_error().raise(LOCAL_INFO, "Currently MultiModeCode supports a maximum k-array size of 1000. Please change your yaml file settings.");
-
-      // TODO Replace with getValueOrDef if possible; (Seb H) we shouldn't need most for single field inflation and inst. reheating
-
-      //-------------------------------------------------------------
-      // Parameters to control how the ICs are sampled.
-      //-------------------------------------------------------------
-      result.ic_sampling = runOptions->getValue<int> ("ic_sampling");
-      result.energy_scale = runOptions->getValue<double> ("energy_scale");
-      result.numb_samples = runOptions->getValue<int> ("numb_samples");
-      result.save_iso_N = runOptions->getValue<int> ("save_iso_N");
-      result.N_iso_ref = runOptions->getValue<int> ("N_iso_ref"); //double check this
-      result.slowroll_infl_end = runOptions->getValue<int> ("slowroll_infl_end");
-
-      // (JR) @Selim: we should probably double check if we need
-      // to set these parameters or if we can/should fix them as well.
-      //-------------------------------------------------------------
-      // Control the output of analytic approximations for comparison.
-      //-------------------------------------------------------------
-      result.use_deltaN_SR = runOptions->getValue<int> ("use_deltaN_SR");
-      result.evaluate_modes = runOptions->getValue<int> ("evaluate_modes");
-      result.use_horiz_cross_approx = runOptions->getValue<int> ("use_horiz_cross_approx");
-      result.get_runningofrunning = runOptions->getValue<int> ("get_runningofrunning");
-
-      // has to be set to be the same as the scale entering class. todo
-      // (Seb H) @TODO Has this been done, now? Looks like it
-      // fix through some capability (probably the same setting the clac_pk_full variable for first version)
-      result.k_pivot = *Dep::k_pivot;
-      // difference in k-space used when pivot-scale observables from mode equations are evaluated
-      // Samples in uniform increments in log(k).
-      result.dlnk = runOptions->getValue<double> ("dlnk");
-
     }
 
     /// Uses the inputs from the MultiModeCode initialisation function to computes inflationary observables.

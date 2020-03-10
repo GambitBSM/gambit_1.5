@@ -207,10 +207,27 @@ namespace Gambit
 
     // Default constructor for multimode inputs
     // N.B. The constructor is set up to support single field inflation models with instant reheating but allow the inclusion
-    //      of more complex models. Some default MultiModeCode inputs below might have to be adjusted to facilitate this.
+    //      of more complex models. Some default MultiModeCode (MMC) inputs below might have to be adjusted to facilitate this.
     Multimode_inputs::Multimode_inputs()
     {
-      num_inflaton = 1; // Single field inflation
+      num_inflaton = 1; // Assume single field inflation
+      instreheat = 1; // Use the instant reheating approximation
+      // Using the instant reheating approximation makes N_pivot a derived parameter and the input N_pivot has no effect
+      // We fix it to the dummy value below
+      N_pivot = 50;
+      // CAVE Changing the default value of 'slowroll_infl_end' requires defining a custom condition for the end of inflation in MMC!
+      slowroll_infl_end = 1; // = true, i.e. stop inflation when slow roll parameters = 1
+      // Parameters that control/turn off internal sampling of the initial conditions in MMC
+      ic_sampling = 1; // Sampling method for initial condition in MMC (1 = regular, 2 = equal-energy, 3 = slowroll, 6 = iso-N sampling)
+      numb_samples = 1; // Number of samples to obtain
+      energy_scale = 0.1; // Energy scale used in equal-energy sampling (if ic_sampling = 2) in units of Planck mass
+      save_iso_N = 0; // = false, i.e. do not save the for equal-energy sampling (if ic_sampling = 2)
+      N_iso_ref = 55; // Reference value for the iso-N sampling method (if ic_sampling = 6)
+      // Control the output of analytic approximations for comparison. We do not use these.
+      use_deltaN_SR = 0; // = false, i.e. MMC will not calculate deltaN observables (assumes slow roll & sum-separable potentials) at the pivot scale
+      use_horiz_cross_approx = 0; // = false, i.e. do not ignore the horizon-crossing-approximation for the above
+      evaluate_modes = 1; // = true, i.e. evalute modes and do not just rely on background evolution
+      get_runningofrunning = 0; // = false, i.e. do not compute the dervative of the spectral index w.r.t. ln(k)
     };
 
     // return Parametrised_ps members A_s, n_s, r, and N_pivot as str to double map for printing

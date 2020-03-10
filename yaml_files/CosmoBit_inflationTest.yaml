@@ -1,10 +1,12 @@
-##########################################################################
-## MultiNest version of minimal - CosmosBitDEV application (in YAML)
-##
-## Selim Hotinli <selim.hotinli14@imperial.ac.uk>
-## 2016-17
-## Values taken from base2015.bestfit MontePython.
-##########################################################################
+#######################################################
+##  Minimal test of inflation models in CosmosBit    ##
+##                                                   ##
+##  Selim Hotinli <selim.hotinli14@imperial.ac.uk>   ##
+##    2016-17                                        ##
+##  Sebastian Hoof <hoof@uni-goettingen.de>          ##
+##    2020                                           ##
+##  Values taken from base2015.bestfit MontePython.  ##
+#######################################################
 
 
 #======== Input parameter declarations =======
@@ -12,7 +14,6 @@ Parameters:
   StandardModel_mNudiff: !import include/StandardModel_mNudiff_both_scan.yaml
 
   LCDM_no_primordial:
-  #LCDM:
     omega_b:
       fixed_value: 2.24052e-02
     omega_cdm:
@@ -74,20 +75,6 @@ Rules:
   - capability: multimode_input_parameters
     function: set_multimode_inputs
     options:
-# Initialization parameters controlling main characteristics.
-      slowroll_infl_end:        1
-      instreheat:               1
-# Control the output of analytic approximations for comparison.
-      use_deltaN_SR:            0  # => selim said to better keep at 0? should we fix it? investigate..
-      use_horiz_cross_approx:   0
-      evaluate_modes:           1
-      get_runningofrunning:     0
-# Parameters to control how the ICs are sampled.
-      ic_sampling:              1
-      numb_samples:             1
-      energy_scale:             0.1
-      save_iso_N:               0
-      N_iso_ref:                55
 # Parameters to be passed to the potential
       k_pivot:                  0.01
       dlnk:                     0.4
@@ -109,7 +96,6 @@ Rules:
 
   - capability: parametrised_power_spectrum
     function: get_multimode_parametrised_ps
-    module: CosmoBit
 
   - capability: classy_baseline_params
     #function: set_classy_baseline_params
@@ -153,16 +139,11 @@ Logger:
   redirection:
     [Default]      : "default.log"
     [CosmoBit]     : "CosmoBit.log"
-    [Scanner]      : "Scanner.log"
 
 #======== Generic Name/Value Section ========
 KeyValues:
-
   default_output_path: "runs/inflation-test"
-
   debug: true
-
   print_timing_data: true
-
   likelihood:
     model_invalid_for_lnlike_below: -1e6
