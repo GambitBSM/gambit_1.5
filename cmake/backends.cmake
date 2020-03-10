@@ -1204,6 +1204,7 @@ if(NOT ditched_${name}_${ver})
   set_as_default_version("backend" ${name} ${ver})
 endif()
 
+# plc
 set(name "plc")
 set(ver "3.0")
 set(lib "libclik")

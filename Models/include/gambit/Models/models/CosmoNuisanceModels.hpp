@@ -19,6 +19,24 @@
 #ifndef __CosmoNuisanceModels_hpp__
 #define __CosmoNuisanceModels_hpp__
 
+/* PLANCK NUISANCE PARAMETERS */
+// Planck - Full set of nuisance parameter for the high-l TTTEEE likelihood
+#define MODEL cosmo_nuisance_Planck_TTTEEE
+  START_MODEL
+    DEFINEPARS(A_cib_217,cib_index,xi_sz_cib,A_sz,ps_A_100_100,ps_A_143_143,ps_A_143_217,ps_A_217_217,ksz_norm,gal545_A_100,gal545_A_143,gal545_A_143_217,gal545_A_217,galf_EE_A_100,galf_EE_A_100_143,galf_EE_A_100_217,galf_EE_A_143,galf_EE_A_143_217,galf_EE_A_217,galf_EE_index,galf_TE_A_100,galf_TE_A_100_143,galf_TE_A_100_217,galf_TE_A_143,galf_TE_A_143_217,galf_TE_A_217,galf_TE_index,calib_100T,calib_217T,calib_100P,calib_143P,calib_217P,A_pol,A_planck)
+#undef MODEL
+
+// Planck - Full set of nuisance parameter for the high-l TT likelihood
+#define MODEL cosmo_nuisance_Planck_TT
+    START_MODEL
+    DEFINEPARS(A_cib_217,cib_index,xi_sz_cib,A_sz,ps_A_100_100,ps_A_143_143,ps_A_143_217,ps_A_217_217,ksz_norm,gal545_A_100,gal545_A_143,gal545_A_143_217,gal545_A_217,calib_100T,calib_217T,A_planck)
+#undef MODEL
+
+// Planck - Lite version of the likelihoods
+#define MODEL cosmo_nuisance_Planck_lite
+    START_MODEL
+    DEFINEPARS(A_planck)
+#undef MODEL
 
 // Supernovae -- JLA 
 #define MODEL cosmo_nuisance_JLA

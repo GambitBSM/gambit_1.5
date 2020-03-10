@@ -4005,9 +4005,6 @@ SUSYHD_DeltaMHiggs : |
 #  plc
 #----------------------------
 
-plc_2_0_init: |
-   initialize the planck likelihood from an cldf file.
-
 plc_3_0_init: |
    initialize the planck likelihood from an cldf file.
 
@@ -4046,9 +4043,6 @@ clik_get_lmax: |
    for example for a likelihood acting ont TT EE TE with same lmax 2000
    lmax = 2000 2000 -1 2000 -1 -1 -1
 
-clik_get_version: |
-   get the version.
-
 clik_initialize: |
    initialize the planck likelihood from an cldf file.
 
@@ -4057,11 +4051,6 @@ clik_lensing_initialize: |
 
 clik_initialize_error: |
    initialize the error object.
-
-set_planck_path: |
-   Set the absolute path to the location of the
-   Planck likelihoods.
-   (Path to the 'plc_2.0'-folder)
 
 initialize_high_TTTEEE: |
    Load the TT,TE,EE-likelihood for high-l.
