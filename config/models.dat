@@ -624,8 +624,8 @@ LCDM: |
     .. StandardModel_mNudiff_IH_scan  for realistic neutrino masses (inverted hierarchy only)
 
 LCDM_no_primordial: |
-   
-   A Lambda-CDM model without the parameters related to the shape of the primordial power spectrum. Use this model in combination with any model providing either a parameterised or full primordial power spectrum independently, e.g. any of the 'Inflation_' models. 
+
+   A Lambda-CDM model without the parameters related to the shape of the primordial power spectrum. Use this model in combination with any model providing either a parameterised or full primordial power spectrum independently, e.g. any of the 'Inflation_' models.
 
    omega_b             - baryon density parameter
    omega_cdm           - dark matter density parameter
@@ -648,7 +648,7 @@ etaBBN_rBBN_rCMB_dNurBBN_dNurCMB: |
    dNur_CMB            - additional ultra-relativistic species at CMB
 
 etaBBN: |
-   Child model of etaBBN_rBBN_rCMB_dNurBBN_dNurCMB with only etaBBN as free parameter. Only allows for non-standard baryon-to-photon ratios, Neff as in SM at all times => r_BBN = r_CMB = 1 and dNur_BBN = dNur_CMB = 0. 
+   Child model of etaBBN_rBBN_rCMB_dNurBBN_dNurCMB with only etaBBN as free parameter. Only allows for non-standard baryon-to-photon ratios, Neff as in SM at all times => r_BBN = r_CMB = 1 and dNur_BBN = dNur_CMB = 0.
 
    eta_BBN             - baryon-to-photon ratio during BBN (eta at CMB set by omega_b)
 
@@ -672,82 +672,50 @@ rCMB: |
 
    Child model of rBBN_rCMB model. Parameters are as in parent model but the neutrino to photon temperature ratio between BBN and CMB is assumed to be constant, hence r_BBN = r_CMB.
 
-Inflation_tensor: |
-   Parameterisation of the shape of the primordial power spectrum allowing for a non-zero scalr to tensor ratio r.
+Inflation_InstReh_1mono23: |
 
-   ln10A_s             - primordial curvature fluctuation amplitude
-   n_s                 - parametrises the primordial scale dependence.
-   r                   - ratio of tensor primordial power to curvature power
+   Inflation model with potential V(phi) = 1.5 lambda phi^(2/3), assuming instant reheating.
 
-Inflation_SR1quad: |
-
-   Inflation model with potential: m^2 phi^2 --- quadratic inflation with slow-roll approximation. Primordial power-spectra is computed from inflationary model parameters (under slow-roll approximation): m2_inflaton,N_pivot,phi_init0.
-
-   m2_inflation        - the mass of the inflaton field (the potential is the the square of this term
-                         times the square of the field value )
-   N_pivot             - determines the number of e-foldings prior to the end of inflation when the observables calculated. 
-                         used as a proxy to parametrise duration of reheating ephoch after inflation.
-   phi_init0           - the value of the inflaton field at the start of their inflationary trajectory.
+   lambda        - the amplitude of the coupling term in the potential
 
 
-Inflation_1quar: |
+Inflation_InstReh_1linear: |
 
-   Quartic inflation model with potential: 0.25 lambda phi^4. Primordial power-spectra is computed from inflationary
-   model parameters: N_piv, lambda, phi_init0.
+   Inflation model with potential V(phi) = lambda phi, assuming instant reheating.
 
-   lambda        - the amplitude of the quartic term in the potential
-   N_pivot       - determines the number of e-foldings prior to the end of inflation when the observables calculated. 
-                   used as a proxy to parametrise duration of reheating ephoch after inflation.
-   phi_init0     - the value of the inflaton field at the start of their inflationary trajectory.
+   lambda        - the amplitude of the coupling term in the potential
 
 
-Inflation_1mono32: |
+Inflation_InstReh_1quadratic: |
 
-   Inflation model with potential: 2/3 lambda phi^2/3. Primordial power-spectra is computed from inflationary model parameters: N_piv, lambda, phi_init0.
+   Inflation model with potential V(phi) = lambda phi, assuming instant reheating.
 
-   lambda        - the amplitude of the cubic term in the potential
-   N_pivot       - determines the number of e-foldings prior to the end of inflation when the observables calculated. 
-                   used as a proxy to parametrise duration of reheating ephoch after inflation.
-   phi_init0     - the value of the inflaton field at the start of their inflationary trajectory.
+   m_phi         - the mass of the inflaton field (in units of mpl)
 
 
-Inflation_1linear: |
+Inflation_InstReh_1quartic: |
 
-   Linear inflation model with potential: m phi. Primordial power-spectra is given computed from inflationary model parameters: lambda,N_pivot,phi_init0.
+  Inflation model with potential V(phi) = 0.25 lambda phi^4, assuming instant reheating.
 
-   m             - the amplitude of the linear term in the potential
-   N_pivot       - determines the number of e-foldings prior to the end of inflation when the observables calculated. 
-                    used as a proxy to parametrise duration of reheating ephoch after inflation.
-   phi_init0     - the value of the inflaton field at the start of their inflationary trajectory.
+  lambda        - the amplitude of the coupling term in the potential
 
 
-Inflation_smash: |
+Inflation_InstReh_1natural: |
 
-Inflation model for SMASH. A_s, n_s and r are computed from inflationary model parameters: log10_xi,log10_beta,log10_lambda,N_pivot. From 1610.01639
+   Natural inflation model (axion-like particles) with potential V(phi) = Lambda^4 [1 + cos(phi/f)], assuming instant reheating.
 
-   log10_xi        - the non-minimal coupling parameter of the smash potential
-   log10_beta      - parametrises the angle between the inflation and the hidden scalar field in the potential
-   log10_lambda    - the value of the quartic coupling
-   N_pivot         - determines the number of e-foldings prior to the end of inflation when the observables calculated. used as a proxy to parametrise duration of reheating ephoch after inflation.
-
-
-Inflation_1natural: |
-
-   N-flation models (axions). Primordial power-spectra is given computed from inflationary model parameters: lambda,faxion,phi_init0.
-
-   lambda        - overall amplitude of the axion potential
-   faxion        - decay rate of the axion field
-   phi_init0     - the value of the inflaton field at the start of their inflationary trajectory.
+   Lambda       - overall energy scale of the potential
+   f_phi        - decay constant of the inflaton
 
 cosmo_nuisance_dummy: |
    Dummy model for cosmological nuisance parameters that can be used by new MontePython likelihoods. This model has 10 parameters, more can be added anytime to Models/include/gambit/Models/models/CosmoNuisanceModels.hpp.
-   Note: if you want to use this model for nuisance parameters in MP make sure that the 
+   Note: if you want to use this model for nuisance parameters in MP make sure that the
          name of the nuisance parameters matches the variable name in GAMBIT -> 'nuisance_param_X'.
-         You can fix all not needed parameters to a constant value in the yaml file before starting a scan.   
+         You can fix all not needed parameters to a constant value in the yaml file before starting a scan.
 
 
 cosmo_nuisance_Pantheon: |
-   Cosmological nuisance parameters for Pantheon SNe Ia likelihood from Scolnic et al. (https://arxiv.org/abs/1710.00845). 
+   Cosmological nuisance parameters for Pantheon SNe Ia likelihood from Scolnic et al. (https://arxiv.org/abs/1710.00845).
 
    M                   - absolute magnitude of Type Ia Supernova
 
@@ -755,7 +723,7 @@ cosmo_nuisance_JLA: |
    Cosmological nuisance parameters for JLA SNe Ia likelihood from JLA likelihood from Betoule et al. 2014 (https://arxiv.org/abs/1401.4064).
 
    M                   - B band peak magnitude of Type Ia Supernova
-   Delta_M             - Error in M (includes contributions from intrinsic dispersion, 
+   Delta_M             - Error in M (includes contributions from intrinsic dispersion,
                          lensing, and redshift uncertainty)
    alpha               - SALT2 shape parameter
    beta                - SALT2 colour parameter
@@ -773,9 +741,9 @@ cosmo_nuisance_BK14: |
    BBsync              - sync power at ell=80, nu=23 GHz [uK^2]
    EEtoBB_dust         - EE/BB ratios -- recommended to fix to 2 / only used if E-modes are turned on
    EEtoBB_sync         - EE/BB ratios -- recommended to fix to 2 / only used if E-modes are turned on
- 
+
 cosmo_nuisance_CFHTLens_correlation: |
-   Cosmological nuisance parameters for CFHTLenS tomographic weak lensing likelihood from Heymans et al. (https://arxiv.org/abs/1303.1808 ). 
+   Cosmological nuisance parameters for CFHTLenS tomographic weak lensing likelihood from Heymans et al. (https://arxiv.org/abs/1303.1808 ).
 
    epsilon_CFHT        - nuisance parameter for theoretical error calculation on non-linear matter power spectrum P_nl_th.
 
@@ -783,16 +751,16 @@ cosmo_nuisance_euclid_lensing: |
    Cosmological nuisance parameters for euclid cosmic shear likelihood from Sprenger et al. (https://arxiv.org/abs/1801.08331). This likelihood is based on an earlier Euclid P(k) likelihood by Audren & Lesgourgues described in Audren et al. (https://arxiv.org/1210.2194).
 
    epsilon_euclid        - nuisance parameter accounting for a global uncorrelated
-                           theoretical error in e.g. (non-)linear power spectrum, scale dependent bias, 
+                           theoretical error in e.g. (non-)linear power spectrum, scale dependent bias,
                            errors in redshift-space distortions.. for details see appendix A.4 of Audren et al. (https://arxiv.org/abs/1210.2194)
 
 cosmo_nuisance_euclid_pk: |
    Cosmological nuisance parameters for euclid galaxy clustering likelihood from Sprenger et al. (https://arxiv.org/abs/1801.08331). This likelihood is based on an earlier Euclid P(k) likelihood by Audren & Lesgourgues described in Audren et al. (https://arxiv.org/1210.2194).
 
    epsilon_euclid       - nuisance parameter accounting for a global uncorrelated
-                          theoretical error in e.g. (non-)linear power spectrum, scale dependent bias, 
+                          theoretical error in e.g. (non-)linear power spectrum, scale dependent bias,
                           errors in redshift-space distortions.. for details see appendix A.4 of Audren et al. (https://arxiv.org/abs/1210.2194)
-   sigma_NL             - nuisance parameter parametrising uncertainty in the galaxy power spectrum, 
+   sigma_NL             - nuisance parameter parametrising uncertainty in the galaxy power spectrum,
                           details and definition (eq. 5.15) can be found in Sprenger et al.
    beta_0Euclid         - nuisance parameter parametrising uncertainty in redshift dependence of galaxy bias, mean value 1.
    beta_1Euclid         - nuisance parameter parametrising uncertainty in redshift dependence of galaxy bias, mean value 1.
@@ -809,11 +777,11 @@ cosmo_nuisance_ISW: |
    bX_nvss           - linear bias for redshift bin X of the NRAO VLA Sky Survey
 
 cosmo_nuisance_kids450_qe_likelihood_public: |
-   Cosmological nuisance parameters for KiDS-450 shear power spectrum likelihood from Koehlinger et al. (https://arxiv.org/abs/1706.02892).  
+   Cosmological nuisance parameters for KiDS-450 shear power spectrum likelihood from Koehlinger et al. (https://arxiv.org/abs/1706.02892).
 
-   A_IA              - dimensionless amplitude to rescale normalisation entering the computation of the 
-                       cross-correlation of  intrinsic ellipticities of foreground galaxies and the 
-                       gravitational shear of background galaxies Cl_GI, defined in eq. (23) 
+   A_IA              - dimensionless amplitude to rescale normalisation entering the computation of the
+                       cross-correlation of  intrinsic ellipticities of foreground galaxies and the
+                       gravitational shear of background galaxies Cl_GI, defined in eq. (23)
    A_bary            - amplitude in fitting formula for baryon feedback when determining scale dependent galaxy bias,
                        defined in eq. (19)
    A_noise_zX        - nuisance parameters for residual noise power, independent for each z bin X
@@ -833,14 +801,14 @@ cosmo_nuisance_ska: |
                        => bHI(z) = beta_0IM [0.904 + 0.135(1 + z)^(1.696 beta_1IM)]  (eq. 4.7)
    cosmic shear:
    epsilon_ska       - nuisance parameter accounting for a global uncorrelated
-                       theoretical error in e.g. (non-)linear power spectrum, scale dependent bias, 
+                       theoretical error in e.g. (non-)linear power spectrum, scale dependent bias,
                        errors in redshift-space distortions.. for details see appendix A.4 of Audren et al. (https://arxiv.org/abs/1210.2194)
 
    galaxy clustering:
    sigma_NL_ska      - non-linear dispersion scale of RSDs from Bull et al. (https://arxiv.org/abs/1405.1452).
-   beta_0SKAX        - nuisance parameter modelling the inaccuracy of the theoretical galaxy bias redshift 
+   beta_0SKAX        - nuisance parameter modelling the inaccuracy of the theoretical galaxy bias redshift
                        dependence for SKA 1 & 2 respectively
-   beta_1SKAX        - nuisance parameter modelling the inaccuracy of the theoretical galaxy bias redshift 
+   beta_1SKAX        - nuisance parameter modelling the inaccuracy of the theoretical galaxy bias redshift
                        dependence for SKA 1 & 2 respectively
                      => b(z) = c4 beta_0SKA/2 exp(c5 beta_SKA1/2 z)  (eq. 2.20)
 

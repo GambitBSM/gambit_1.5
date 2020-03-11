@@ -4157,12 +4157,12 @@ class_get_rs: |
     Returns comoving sound horizon at baryon drag.
 
 class_get_scale_independent_growth_factor: |
-    Return the scale invariant growth factor D(a) for CDM perturbations 
+    Return the scale invariant growth factor D(a) for CDM perturbations
     for a given redshift (exactly, the quantity defined by Class as index_bg_D in the background module)
     computed by CLASS.
 
 class_get_scale_independent_growth_factor_f: |
-    Return the scale invariant growth factor f(z)=d ln D / d ln a for CDM perturbations 
+    Return the scale invariant growth factor f(z)=d ln D / d ln a for CDM perturbations
     for a given redshift (exactly, the quantity defined by Class as index_bg_f in the background module)
     computed by CLASS.
 
@@ -4173,14 +4173,14 @@ class_get_Omega0_m: |
     Returns Omega0_m (matter energy density today) computed by CLASS. (Mainly for test purposes, you can use gambit internal capability Omega0_m, Omega0_g..).
 
 class_get_Omega0_ncdm_tot: |
-    Returns Omega0_ncdm (massive neutrinos and potential extra species) computed by CLASS. 
+    Returns Omega0_ncdm (massive neutrinos and potential extra species) computed by CLASS.
 
 class_get_Omega0_Lambda: |
     Returns Omega0_Lambda as passed to/computed by CLASS.
 
 class_get_Omega0_r: |
     Returns Omega0_r as computed by CLASS. Contains contributions from photons, ultra-relativistic species and dark
-    radiation (if present). 
+    radiation (if present).
 
 class_get_Omega0_ur: |
     Returns Omega0_ur as computed by CLASS. Contains contributions from ultra-relativistic species today.
@@ -4191,13 +4191,13 @@ class_get_Omega0_ur: |
 
 get_MP_available_likelihoods: |
     Returns a list with all available likelihoods implemented in MontePython. New likelihoods can simply be added
-    into the MontePython installation folder and GAMBIT will recognize it without the need to recompile. 
+    into the MontePython installation folder and GAMBIT will recognize it without the need to recompile.
 
 get_MP_loglike: |
     Returns LogLike value of MontePython likelihood specified by passing the name of the likelihood as a string.
 
 create_MP_data_object: |
-    Create a python object storing all information 
+    Create a python object storing all information
 
 #----------------------------
 #  DarkAges
@@ -4256,7 +4256,7 @@ LCDM_parameters: |
    Standard 6-parameters LCDM model. See ./gambit LCDM for more details.
 
 LCDM_no_primordial_parameters: |
-   As LCDM_parameters but without the parameters related to the shape of the primordial power spectrum. See ./gambit LCDM_no_primordial for more details. 
+   As LCDM_parameters but without the parameters related to the shape of the primordial power spectrum. See ./gambit LCDM_no_primordial for more details.
 
 etaBBN_rBBN_rCMB_dNurBBN_dNurCMB_parameters: |
 
@@ -4266,45 +4266,44 @@ etaBBN_parameters: |
    Child model of etaBBN_rBBN_rCMB_dNurBBN_dNurCMB with only etaBBN as free parameter. See ./gambit etaBBN for more details.
 
 rBBN_rCMB_dNurBBN_dNurCMB_parameters: |
-   
+
    Child model of etaBBN_rBBN_rCMB_dNurBBN_dNurCMB. See ./gambit rBBN_rCMB_dNurBBN_dNurCMB for more details.
 
 dNurBBN_dNurCMB_parameters: |
-   
+
    Child model of rBBN_rCMB_dNurBBN_dNurCMB model. See ./gambit dNurBBN_dNurCMB for more details.
 
 dNurCMB_parameters: |
-   
+
    Child model of dNurBBN_dNurCMB model. See ./gambit dNurCMB for more details.
 
 rBBN_rCMB_parameters: |
-   
+
    Child model of rBBN_rCMB_dNurBBN_dNurCMB model. See ./gambit rBBN_rCMB for more details.
 
 rCMB_parameters: |
-   
+
    Child model of rBBN_rCMB model. See ./gambit rCMB for more details.
 
-Inflation_tensor_parameters: |
-   Parametrisation of the shape of the primordial power spectrum allowing for a non-zero scalar to tensor ratio r.
+Inflation_InstReh_1mono23_parameters: |
 
-Inflation_SR1quad_parameters: |
-   Inflation model with potential: m^2 phi^2. See ./gambit Inflation_SR1quad_parameters for more details.
+      Inflation model with potential V(phi) = 1.5 lambda phi^(2/3), assuming instant reheating. See ./gambit Inflation_InstReh_1mono23 for more details.
 
-Inflation_1quar_parameters: |
-  Quartic inflation model with potential: 0.25 lambda phi^4. See ./gambit Inflation_1quar_parameters for more details.
+Inflation_InstReh_1linear_parameters: |
 
-Inflation_1mono32_parameters: |
-  Inflation model with potential: 2/3 lambda phi^2/3. See ./gambit Inflation_1mono32_parameters for more details.
+      Inflation model with potential V(phi) = lambda phi, assuming instant reheating. See ./gambit Inflation_InstReh_1linear for more details.
 
-Inflation_1linear_parameters: |
-  Linear inflation model with potential: m phi. See ./gambit Inflation_1linear_parameters for more details.
+Inflation_InstReh_1quadratic_parameters: |
 
-Inflation_smash_parameters: |
-  Inflation model for SMASH. See ./gambit Inflation_smash_parameters for more details.
+      Inflation model with potential V(phi) = lambda phi, assuming instant reheating. See ./gambit Inflation_InstReh_1quadratic for more details.
 
-Inflation_1natural_parameters: |
-  N-flation models (axions). See ./gambit Inflation_1natural_parameters for more details.
+Inflation_InstReh_1quartic_parameters: |
+
+     Inflation model with potential V(phi) = 0.25 lambda phi^4, assuming instant reheating. See ./gambit Inflation_InstReh_1quartic for more details.
+
+Inflation_InstReh_1natural_parameters: |
+
+      Natural inflation model (axion-like particles) with potential V(phi) = Lambda^4 [1 + cos(phi/f)], assuming instant reheating. See ./gambit Inflation_InstReh_1natural for more details.
 
 cosmo_nuisance_JLA_parameters: |
    Cosmological nuisance parameters for JLA SNe Ia likelihood. See ./gambit cosmo_nuisance_JLA for more details.
@@ -4317,7 +4316,7 @@ cosmo_nuisance_BK14_parameters: |
 
 cosmo_nuisance_CFHTLens_correlation_parameters: |
    Cosmological nuisance parameters for CFHTLenS tomographic weak lensing likelihood. See ./gambit cosmo_nuisance_CFHTLens_correlation for more details.
-    
+
 cosmo_nuisance_euclid_lensing_parameters: |
    Cosmological nuisance parameters for Euclid cosmic shear likelihood. See ./gambit cosmo_nuisance_euclid_lensing for more details.
 
@@ -4425,32 +4424,32 @@ calc_MP_LogLikes: |
     Calls MontePython to get the likelihood of all experiments (tagged with 'Likelihood' and 'Observable'). The results are stored as map from experiment name to LogLike result in the type MPLike_result_container.
 
 MP_Combined_LogLike: |
-    Returns combined LogLike of all MontePython Likelihoods used in the scan. 
+    Returns combined LogLike of all MontePython Likelihoods used in the scan.
 
 MP_LogLikes: |
-    Returns a map from experiment name to LogLike value containing the likelihood of all experiments used as an Observable. All LogLike values contained here are added up an count to the total LogLike that drives the scan. 
+    Returns a map from experiment name to LogLike value containing the likelihood of all experiments used as an Observable. All LogLike values contained here are added up an count to the total LogLike that drives the scan.
 
 MP_Observables: |
-    Returns a map from experiment name to LogLike value containing the likelihood of all experiments used as an Observable. These are not added to the value returned by MP_Combined_LogLike, hence they are not driving the scan. 
+    Returns a map from experiment name to LogLike value containing the likelihood of all experiments used as an Observable. These are not added to the value returned by MP_Combined_LogLike, hence they are not driving the scan.
 
 MP_experiment_names: |
   Set names of all experiments in use for a scan and stores the path to the settings file for the different likelihoods by reading in the runOptions 'Likelihoods' and/or 'Observables' of this capability.
 
 MontePythonLike_3_1_0_init: |
-  Initialise MontePython backend. 
+  Initialise MontePython backend.
 
 Neff: |
-  Return the value of Neff from CLASS. 
+  Return the value of Neff from CLASS.
 
 NuMasses_SM: |
   Create a map containing neutrino masses, the corresponding number of non-cold DM components (N_ncdm) today as well as the sum of the neutrino masses. Needed to pass correct parameters to CLASS.
 
 NuMasses_classy_input: |
-  Set all neutrino related input parameters for CLASS (N_ur, N_ncdm, T_ncdm, m_ncdm) and store it in a python dictionary. 
+  Set all neutrino related input parameters for CLASS (N_ur, N_ncdm, T_ncdm, m_ncdm) and store it in a python dictionary.
 
 
 baseline_classy_input: |
-  Fill python dictionary with some base parameters needed to be set for each CLASS call independent of exact model in use _> H0, T_cmb, omega_b, tau_reio, omega_cdm, calculated YHe from AlterBBN. Further input options for CLASS (precision parameters, more output...) can be set by setting a runOption 'classy_dict' and specifying these parameters. 
+  Fill python dictionary with some base parameters needed to be set for each CLASS call independent of exact model in use _> H0, T_cmb, omega_b, tau_reio, omega_cdm, calculated YHe from AlterBBN. Further input options for CLASS (precision parameters, more output...) can be set by setting a runOption 'classy_dict' and specifying these parameters.
 
 class_get_Neff: |
   Return Neff as calculated by CLASS.
@@ -4459,7 +4458,7 @@ class_get_cl: |
   Return lensed CLs from class in units of muK^2  @Patrick -> check
 
 classy_2_6_3_init: |
-  Initialise CLASS 2.6.3 run through the classy python wrapper. 
+  Initialise CLASS 2.6.3 run through the classy python wrapper.
 
 classy_exo_2_7_0_init: |
   Initialise ExoCLASS 2.7.0 run through the classy python wrapper.
@@ -4530,7 +4529,7 @@ get_NNUC: |
     Return global AlterBBN parameter NNUC (# computed element abundances).
 
 call_nucl_err: |
-    Backend convenience function to set all inputs for call to AlterBBN's nucl_err function to calculation BBN abundances + errors. 
+    Backend convenience function to set all inputs for call to AlterBBN's nucl_err function to calculation BBN abundances + errors.
 
 nucl_err: |
     AlterBBN function that computes element abundances and their covariance during BBN.
