@@ -104,7 +104,7 @@ std::string multimode_error_handling(int& err)
 
     // Otherwise -- who knows.
     default:
-      message = "GAMBIT caught an error in MultiMode. Check the MultiModeCode output for more info.";
+      message = "GAMBIT caught an unknown error in MultiMode. Check MultiModeCode output and error messages for more info (set the 'debug' switch in 'set_multimode_inputs' to '1' if you have set it to '0').";
   }
   return message;
 }
@@ -829,13 +829,20 @@ namespace Gambit
       // Clear anything from previous run
       result = Multimode_inputs();
 
-      // @TODO The pivot scale has to be set to be the same as the scale entering class.
-      // Fix through some capability (probably the same setting the clac_pk_full variable for first version)
-      // (Seb H) @TODO Has this been done, now? Looks like it
+      // Silence uncaught error messages from MMC ('0' = output, '1' = no output).
+      result.silence_output = runOptions->getValueOrDef<int>(0,"silence_output");
+
+      // Set pivot scale consistently with the rest of CosmoBit via capability
       result.k_pivot = *Dep::k_pivot;
-      // difference in k-space used when pivot-scale observables from mode equations are evaluated
-      // Samples in uniform increments in log(k).
-      result.dlnk = runOptions->getValue<double> ("dlnk");
+      // Difference in k-space used when pivot-scale observables from mode equations are evaluated
+      result.dlnk = runOptions->getValueOrDef<double>(0.4,"dlnk");
+
+      // Set k-range and number of k-values (in log space) where the full power spectrum (PS) is evaluated
+      // N.B. Not used if only the parameterised PS has been requested in a scan
+      result.k_min = runOptions->getValueOrDef<double>(1e-6,"k_min");
+      result.k_max = runOptions->getValueOrDef<double>(1e+6,"k_max");
+      result.numsteps = runOptions->getValueOrDef<int>(100,"numsteps");
+      if (result.numsteps > 1000) { CosmoBit_error().raise(LOCAL_INFO, "Currently MultiModeCode supports a maximum k-array size of 1000. Please change your yaml file settings."); };
 
       // Go through each inflation model known to GAMBIT, set the number of inflaton field, the parameters
       // for the inflation potential parameters (vparams), and initial conditions.
@@ -882,12 +889,6 @@ namespace Gambit
         result.vparam_rows = 1;
       }
 
-      // Set the initial conditions for the inflation field(s).
-      // (JR) TODO: MultiMode segFaults if this is empty have to do this properly though
-      // (Seb H): MultiMode should determine the parameters below self-consistenly for single field inflation; dummy entries should be okay in this case.
-      result.phi_init0.push_back(10.0);
-      result.dphi_init0.push_back(1.0);
-
       static bool first_run = true;
       // do some consistency check for inputs passed to multimode before the first run
       if(first_run)
@@ -911,17 +912,6 @@ namespace Gambit
         }
         first_run = false;
       }
-
-
-      /// @TODO Separate into cases where we want the full ps and the parametrised ps
-      // (Seb H) @TODO: Shouldn't this be defined globally for CosmoBit?
-
-      result.k_min = runOptions->getValueOrDef<double>(1e-6,"k_min");
-      result.k_max = runOptions->getValueOrDef<double>(1e+6,"k_max");
-      result.numsteps = runOptions->getValueOrDef<int>(100,"numsteps");
-
-      if (result.numsteps > 1000)
-        CosmoBit_error().raise(LOCAL_INFO, "Currently MultiModeCode supports a maximum k-array size of 1000. Please change your yaml file settings.");
     }
 
     /// Uses the inputs from the MultiModeCode initialisation function to computes inflationary observables.
