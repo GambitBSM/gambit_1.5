@@ -593,6 +593,12 @@ endif()
 # Add the executables
 include(cmake/executables.cmake)
 
+# Add python library path to the final link line 
+if(PYTHON_LIBRARY)
+    get_filename_component(PYTHON_LIBRARY_PATH ${PYTHON_LIBRARY} DIRECTORY)
+    target_link_libraries(gambit PRIVATE -L${PYTHON_LIBRARY_PATH})
+endif()
+
 # Finish setting the link commands and rpath variables for ScannerBit
 if(EXISTS "${PROJECT_SOURCE_DIR}/ScannerBit/")
   include(${PROJECT_BINARY_DIR}/linkedout.cmake)
