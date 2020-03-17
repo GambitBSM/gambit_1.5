@@ -56,7 +56,7 @@
 #  \date 2016 Aug
 #
 #  \author Ankit Beniwal
-#  	   (ankit.beniwal@adelaide.edu.au)
+#      (ankit.beniwal@adelaide.edu.au)
 #  \date 2016 Aug
 #  \date 2017 Jun
 #  \date 2018 Aug
@@ -98,6 +98,7 @@ set(md5 "00441dde718ba00d3acbb2196a8a5439")
 set(dir "${PROJECT_SOURCE_DIR}/Backends/installed/${name}/${ver}")
 check_ditch_status(${name} ${ver} ${dir})
 if(NOT ditched_${name}_${ver})
+  set(AlterBBN_BACKEND_C_FLAGS "${BACKEND_C_FLAGS} -std=c99")
   ExternalProject_Add(${name}_${ver}
     DOWNLOAD_COMMAND ${DL_BACKEND} ${dl} ${md5} ${dir} ${name} ${ver}
     SOURCE_DIR ${dir}
@@ -106,7 +107,7 @@ if(NOT ditched_${name}_${ver})
     #BUILD_COMMAND sed ${dashi} -e "s#CC = gcc#CC = ${CMAKE_C_COMPILER}#g" Makefile
     BUILD_COMMAND sed ${dashi} -e "s#CC = gcc#CC = ${CMAKE_C_COMPILER}#g" Makefile
           COMMAND sed ${dashi} -e "s#rcsU#rcs#g" Makefile
-          COMMAND sed ${dashi} -e "s/CFLAGS= -O3 -std=c99 -pipe -fomit-frame-pointer/CFLAGS= ${BACKEND_C_FLAGS}/g" Makefile
+          COMMAND sed ${dashi} -e "s/CFLAGS= -O3 -std=c99 -pipe -fomit-frame-pointer/CFLAGS= ${AlterBBN_BACKEND_C_FLAGS}/g" Makefile
           COMMAND sed ${dashi} -e "s/CFLAGS_MP= -fopenmp/CFLAGS_MP= ${OpenMP_C_FLAGS}/g" Makefile
           COMMAND ${CMAKE_MAKE_PROGRAM}
           COMMAND ar x src/libbbn.a
@@ -1243,7 +1244,7 @@ if(NOT ditched_${name}_${ver})
     BUILD_IN_SOURCE 1
     # Since someone put a tarball into a tarball, we need to extract again
     PATCH_COMMAND tar -C ${dir}/ -xf ${dir}/code/plc_3.0/plc-3.0.tar.bz2 --strip-components=1
-    CONFIGURE_COMMAND ${PYTHON_EXECUTABLE} ${dir}/waf configure --cfitsio_include=${cfitsio_dir}/include --cfitsio_lib=${cfitsio_dir}/lib ${mkl_libs_option} 
+    CONFIGURE_COMMAND ${PYTHON_EXECUTABLE} ${dir}/waf configure --cfitsio_include=${cfitsio_dir}/include --cfitsio_lib=${cfitsio_dir}/lib ${mkl_libs_option}
     BUILD_COMMAND ""
     INSTALL_COMMAND ${PYTHON_EXECUTABLE} ${dir}/waf install
   )
