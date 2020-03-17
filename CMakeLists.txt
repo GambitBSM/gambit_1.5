@@ -150,7 +150,7 @@ endif()
 
 # Check for pybind11 if PythonLibs were found
 if(NOT PYTHONLIBS_FOUND)
-  message("${BoldRed}   PythonLibs NOT found, so pybind11 cannot be used. Ditching support for Python backends.${ColourReset}\n"
+  message("${BoldRed}   PythonLibs NOT found, so pybind11 cannot be used. Ditching support for CosmoBit and Python backends.${ColourReset}\n"
           "   If you *do* have the Python libraries installed, you should first try setting/unsetting\n"
           "   FORCE_PYTHON2 or FORCE_PYTHON3 when invoking cmake (make sure to clean out your build\n"
           "   directory in between any such changes).  If that does not work, you can manually set the\n"
@@ -159,7 +159,6 @@ if(NOT PYTHONLIBS_FOUND)
           "     PYTHON_INCLUDE_DIR\n"
           "     PYTHON_INCLUDE_DIR2 (you might be able to get away without setting this one)\n"
           "     PYTHON_EXECUTABLE   (you might be able to get away without setting this one)")
-  message("${BoldRed}   Ditching CosmoBit as pybind11 has not been found.")
   set(itch "${itch};CosmoBit")
 else()
   set(MIN_pybind11_VERSION "2.4.3")
@@ -177,10 +176,6 @@ else()
       message("${BoldYellow}   Found pybind11 ${pybind11_VERSION} at ${pybind11_DIR}.${ColourReset}")
       include_directories("${PYTHON_INCLUDE_DIRS};${PYBIND11_INCLUDE_DIR}")
     endif()
-  else()
-    message("${BoldRed}   The pybind11 library is not properly installed.${ColourReset}")
-    message("${BoldRed}   Ditching CosmoBit as pybind11 has not been found.")
-    set(itch "${itch};CosmoBit")
   endif()
   if(NOT pybind11_FOUND AND NOT EXISTS "${pybind11_CONTRIB_DIR}")
     message("${BoldRed}   CMake will now download and install pybind11 v${PREFERRED_pybind11_VERSION}.${ColourReset}")
