@@ -79,15 +79,16 @@
 #
 #************************************************
 
-# Define macro for using c99 (necessary for CosmoBit backends)
-# MJW experimental for now (and commented out)
-#macro(use_c99)
-#   if (CMAKE_C_COMPILER STREQUAL "cc")
-#      set (BACKEND_C_FLAGS "-std=c99 ${BACKEND_C_FLAGS}")
-#   endif ()
-#endmacro(use_c99)
-
-#use_c99()
+# AlterBBN
+if("${CMAKE_C_COMPILER_ID}" STREQUAL "Intel")
+  set(AlterBBN_C_FLAGS "${BACKEND_C99_FLAGS} -fast")
+elseif("${CMAKE_C_COMPILER_ID}" STREQUAL "GNU" OR "${CMAKE_C_COMPILER_ID}" STREQUAL "Clang" OR "${CMAKE_C_COMPILER_ID}" STREQUAL "AppleClang")
+  # Include all flags from -ffast-math, except -ffinite-math-only (which has proved to cause incorrect results), and -fno-rounding-math -fno-signaling-nans (which don't exist in Clang and are defaults anyway for gcc).
+  set(AlterBBN_C_FLAGS "${BACKEND_C99_FLAGS} -fno-math-errno -funsafe-math-optimizations")
+  if("${CMAKE_C_COMPILER_ID}" STREQUAL "GNU")
+    set(AlterBBN_C_FLAGS "${AlterBBN_C_FLAGS} -fcx-limited-range") # Clang doesn't have this one.
+  endif()
+endif()
 
 # AlterBBN
 set(name "alterbbn")
@@ -98,16 +99,14 @@ set(md5 "00441dde718ba00d3acbb2196a8a5439")
 set(dir "${PROJECT_SOURCE_DIR}/Backends/installed/${name}/${ver}")
 check_ditch_status(${name} ${ver} ${dir})
 if(NOT ditched_${name}_${ver})
-  set(AlterBBN_BACKEND_C_FLAGS "${BACKEND_C_FLAGS} -std=c99")
   ExternalProject_Add(${name}_${ver}
     DOWNLOAD_COMMAND ${DL_BACKEND} ${dl} ${md5} ${dir} ${name} ${ver}
     SOURCE_DIR ${dir}
     BUILD_IN_SOURCE 1
     CONFIGURE_COMMAND ""
-    #BUILD_COMMAND sed ${dashi} -e "s#CC = gcc#CC = ${CMAKE_C_COMPILER}#g" Makefile
     BUILD_COMMAND sed ${dashi} -e "s#CC = gcc#CC = ${CMAKE_C_COMPILER}#g" Makefile
           COMMAND sed ${dashi} -e "s#rcsU#rcs#g" Makefile
-          COMMAND sed ${dashi} -e "s/CFLAGS= -O3 -std=c99 -pipe -fomit-frame-pointer/CFLAGS= ${AlterBBN_BACKEND_C_FLAGS}/g" Makefile
+          COMMAND sed ${dashi} -e "s/CFLAGS= -O3 -pipe -fomit-frame-pointer -mtune=native -ffast-math -fno-finite-math-only/CFLAGS= ${AlterBBN_C_FLAGS}/g" Makefile
           COMMAND sed ${dashi} -e "s/CFLAGS_MP= -fopenmp/CFLAGS_MP= ${OpenMP_C_FLAGS}/g" Makefile
           COMMAND ${CMAKE_MAKE_PROGRAM}
           COMMAND ar x src/libbbn.a
@@ -140,7 +139,7 @@ if(NOT ditched_${name}_${ver})
     #BUILD_COMMAND sed ${dashi} -e "s#CC = gcc#CC = ${CMAKE_C_COMPILER}#g" Makefile
     BUILD_COMMAND sed ${dashi} -e "s#CC = gcc#CC = ${CMAKE_C_COMPILER}#g" Makefile
           COMMAND sed ${dashi} -e "s#rcsU#rcs#g" Makefile
-          COMMAND sed ${dashi} -e "s/CFLAGS= -O3 -pipe -fomit-frame-pointer/CFLAGS= ${BACKEND_C_FLAGS}/g" Makefile
+          COMMAND sed ${dashi} -e "s/CFLAGS= -O3 -pipe -fomit-frame-pointer -mtune=native -ffast-math -fno-finite-math-only/CFLAGS= ${AlterBBN_C_FLAGS}/g" Makefile
           COMMAND sed ${dashi} -e "s/CFLAGS_MP= -fopenmp/CFLAGS_MP= ${OpenMP_C_FLAGS}/g" Makefile
           COMMAND ${CMAKE_MAKE_PROGRAM}
           COMMAND ar x src/libbbn.a
@@ -169,7 +168,7 @@ if(NOT ditched_${name}_${ver})
     #BUILD_COMMAND sed ${dashi} -e "s#CC = gcc#CC = ${CMAKE_C_COMPILER}#g" Makefile
     BUILD_COMMAND sed ${dashi} -e "s#CC = gcc#CC = ${CMAKE_C_COMPILER}#g" Makefile
           COMMAND sed ${dashi} -e "s#rcsU#rcs#g" Makefile
-          COMMAND sed ${dashi} -e "s/CFLAGS= -O3 -pipe -fomit-frame-pointer/CFLAGS= ${BACKEND_C_FLAGS}/g" Makefile
+          COMMAND sed ${dashi} -e "s/CFLAGS= -O3 -pipe -fomit-frame-pointer -mtune=native -ffast-math -fno-finite-math-only/CFLAGS= ${AlterBBN_C_FLAGS}/g" Makefile
           COMMAND sed ${dashi} -e "s/CFLAGS_MP= -fopenmp/CFLAGS_MP= ${OpenMP_C_FLAGS}/g" Makefile
           COMMAND ${CMAKE_MAKE_PROGRAM}
           COMMAND ar x src/libbbn.a

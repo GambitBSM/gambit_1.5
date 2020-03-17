@@ -426,6 +426,9 @@ else()
   set(BACKEND_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
   set(BACKEND_Fortran_FLAGS "${CMAKE_Fortran_FLAGS}")
 endif()
+set(BACKEND_C18_FLAGS "${BACKEND_C_FLAGS} -std=c18")
+set(BACKEND_C11_FLAGS "${BACKEND_C_FLAGS} -std=c11")
+set(BACKEND_C99_FLAGS "${BACKEND_C_FLAGS} -std=c99")
 
 # Make symbols hidden by default when compiling GAMBIT source files only
 if(${CMAKE_MAJOR_VERSION} MATCHES "2")
