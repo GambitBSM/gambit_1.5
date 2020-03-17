@@ -141,7 +141,7 @@ if(PYTHONLIBS_FOUND)
             "   1. invoke cmake as cmake -DFORCE_PYTHON2=True .. (or similar)\n"
             "   2. invoke cmake as cmake -DFORCE_PYTHON3=True .. (or similar)\n"
             "   3. set the following variables when invoking cmake:\n"
-            "     PYTHON_LIBRARY\n"
+            "     PYTHON_LIBRARIES\n"
             "     PYTHON_INCLUDE_DIR\n"
             "     PYTHON_INCLUDE_DIR2 (you might be able to get away without setting this one)\n"
             "     PYTHON_EXECUTABLE   (you might be able to get away without setting this one)\n")
@@ -155,7 +155,7 @@ if(NOT PYTHONLIBS_FOUND)
           "   FORCE_PYTHON2 or FORCE_PYTHON3 when invoking cmake (make sure to clean out your build\n"
           "   directory in between any such changes).  If that does not work, you can manually set the\n"
           "   following variables when invoking cmake (also making sure to clean out your build dir):\n"
-          "     PYTHON_LIBRARY\n"
+          "     PYTHON_LIBRARIES\n"
           "     PYTHON_INCLUDE_DIR\n"
           "     PYTHON_INCLUDE_DIR2 (you might be able to get away without setting this one)\n"
           "     PYTHON_EXECUTABLE   (you might be able to get away without setting this one)")
@@ -592,12 +592,6 @@ endif()
 
 # Add the executables
 include(cmake/executables.cmake)
-
-# Add python library path to the final link line 
-if(PYTHON_LIBRARY)
-    get_filename_component(PYTHON_LIBRARY_PATH ${PYTHON_LIBRARY} DIRECTORY)
-    target_link_libraries(gambit PRIVATE -L${PYTHON_LIBRARY_PATH})
-endif()
 
 # Finish setting the link commands and rpath variables for ScannerBit
 if(EXISTS "${PROJECT_SOURCE_DIR}/ScannerBit/")
