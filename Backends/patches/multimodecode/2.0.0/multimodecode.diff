@@ -616,12 +616,12 @@ index 3ba54a2..d8e972e 100644
        if (out_opt%fields_horiz) then
 diff --git a/multimodecode_gambit.f90 b/multimodecode_gambit.f90
 new file mode 100644
-index 0000000..3be33c9
+index 0000000..2e6ac3c
 --- /dev/null
 +++ b/multimodecode_gambit.f90
-@@ -0,0 +1,996 @@
-+MODULE multimodecode_gambit
+@@ -0,0 +1,1013 @@
 +! Module that contains the interface for MultiModeCode to CosmoBit in GAMBIT
++MODULE multimodecode_gambit
 +  use modpkparams
 +  use potential
 +  use background_evolution
@@ -639,7 +639,7 @@ index 0000000..3be33c9
 +
 +  implicit none
 +
-+  Logical :: SilenceOutput = .False.
++  logical :: SilenceOutput = .false.
 +
 +  public :: multimodecode_gambit_driver
 +
@@ -760,16 +760,20 @@ index 0000000..3be33c9
 +
 +    call deallocate_vars()
 +
-+    calc_full_pk = .true.
-+    slowroll_infl_end = .true.
-+    instreheat = .true.
-+    use_deltaN_SR = .false.
-+    use_horiz_cross_approx = .false.
++    ! Fix some parameters that we don't need in GAMBIT
++    ! The following parameters control the internal sampling of MMC
++    ! We don't need them because ScannerBit in GAMBIT handles all the sampling; set them to dummy values
++    ! Sampling method for initial condition in MMC (1 = regular, 2 = equal-energy, 3 = slowroll, 6 = iso-N sampling)
 +    ic_sampling = 1
-+    energy_scale = 0.1
++    ! Number of samples to obtain
 +    numb_samples = 1
++    ! Energy scale used in equal-energy sampling (if ic_sampling = 2) in units of Planck mass
++    energy_scale = 0.1
++    ! Save the N values obatined from equal-energy sampling (if ic_sampling = 2)
 +    save_iso_N = .false.
++    ! Reference value for the iso-N sampling method (if ic_sampling = 6)
 +    N_iso_ref = 55
++
 +    param_sampling = 1
 +    varying_N_pivot = .false.
 +    use_first_priorval = .false.
@@ -780,7 +784,7 @@ index 0000000..3be33c9
 +    potential_choice = ginput_potential_choice
 +    vparam_rows = ginput_vparam_rows
 +
-+    !Make some arrays
++    ! Allocate memory for arrays
 +    call allocate_vars()
 +
 +    evaluate_modes = ginput_evaluate_modes
@@ -794,11 +798,13 @@ index 0000000..3be33c9
 +    N_pivot = ginput_N_pivot
 +    k_pivot = ginput_k_pivot
 +    dlnk = ginput_dlnk
++    calc_full_pk = .true.
++    slowroll_infl_end = .true.
++    instreheat = .true.
++    use_deltaN_SR = .false.
++    use_horiz_cross_approx = .false.
 +
-+    !---------------------------------------------------------------
-+    ! setting up the printer options at the code-level.
-+    ! TODO: make this from GAMBIT yaml file.
-+    ! NB: this may not be interesting or necessary.
++    ! Set up printer options at the code-level.
 +    out_opt%modpkoutput = .false.
 +    out_opt%output_reduced = .true.
 +    out_opt%output_badic = .false.
@@ -811,8 +817,8 @@ index 0000000..3be33c9
 +
 +
 +    !---------------------------------------------------------------
-+    ! setting up the integrater options at the code-level.
-+    ! TODO: make this from GAMBIT yaml file.
++    ! setting up the integrator options at the code-level.
++    ! TODO. make this from GAMBIT yaml file (if necessary)
 +    assert%use_assertions = .true.
 +
 +    tech_opt%accuracy_setting = 1
@@ -1264,16 +1270,21 @@ index 0000000..3be33c9
 +
 +    call deallocate_vars()
 +
-+    calc_full_pk = .false.
-+    slowroll_infl_end = .true.
-+    instreheat = .true.
-+    use_deltaN_SR = .false.
-+    use_horiz_cross_approx = .false.
++
++    ! Fix some parameters that we don't need in GAMBIT
++    ! The following parameters control the internal sampling of MMC
++    ! We don't need them because ScannerBit in GAMBIT handles all the sampling; set them to dummy values
++    ! Sampling method for initial condition in MMC (1 = regular, 2 = equal-energy, 3 = slowroll, 6 = iso-N sampling)
 +    ic_sampling = 1
-+    energy_scale = 0.1
++    ! Number of samples to obtain
 +    numb_samples = 1
++    ! Energy scale used in equal-energy sampling (if ic_sampling = 2) in units of Planck mass
++    energy_scale = 0.1
++    ! Save the N values obatined from equal-energy sampling (if ic_sampling = 2)
 +    save_iso_N = .false.
++    ! Reference value for the iso-N sampling method (if ic_sampling = 6)
 +    N_iso_ref = 55
++
 +    param_sampling = 1
 +    varying_N_pivot = .false.
 +    use_first_priorval = .false.
@@ -1284,17 +1295,23 @@ index 0000000..3be33c9
 +    potential_choice = ginput_potential_choice
 +    vparam_rows = ginput_vparam_rows
 +
-+    !Make some arrays
++    ! Allocate memory for arrays
 +    call allocate_vars()
 +
 +    evaluate_modes = ginput_evaluate_modes
 +    get_runningofrunning = ginput_get_runningofrunning
++    ! We don't need to set k_min = ginput_kmin, k_max = ginput_kmax, and steps = ginput_steps here
 +    phi_init0 = ginput_phi_init0
 +    dphi_init0 = ginput_dphi_init0
 +    vparams = ginput_vparams
 +    N_pivot = ginput_N_pivot
 +    k_pivot = ginput_k_pivot
 +    dlnk = ginput_dlnk
++    calc_full_pk = .true.
++    slowroll_infl_end = .true.
++    instreheat = .true.
++    use_deltaN_SR = .false.
++    use_horiz_cross_approx = .false.
 +
 +    out_opt%modpkoutput = .false.
 +    out_opt%output_reduced = .true.

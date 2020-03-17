@@ -275,41 +275,33 @@ namespace Gambit
     class Multimode_inputs
     {
         public:
+            // Constructor
             Multimode_inputs();
-
-            // K array.
+            // Debugging options
+            int silence_output;
+            // k values where to evaluate the power spectrum
             double k_min;
             double k_max;
             int numsteps;
-
+            // Parameters realted to the pivot scale
+            double k_pivot;
             double N_pivot;
-
-            // Potential parameters
-            std::vector<double> vparams;
-            std::vector<double> phi_init0;
-            std::vector<double> dphi_init0; // TODO probably remove this
+            double dlnk;
+            // Parameters related to the potential and initial condidtions
             int num_inflaton = -1;
             int potential_choice = -1;
             int vparam_rows = -1;
-
-            // Initial conditions stuff
+            std::vector<double> vparams;
+            std::vector<double> phi_init0;
+            std::vector<double> dphi_init0;
+            // Parameters realted to the scenario for initial conditions
             int slowroll_infl_end;
             int instreheat;
-            int ic_sampling;
-            double energy_scale;
-            int numb_samples;
-            int save_iso_N;
-            double N_iso_ref;
-
-            // Analytic approximations
+            // Parameters related to approximations and observables
             int use_deltaN_SR;
             int evaluate_modes;
             int use_horiz_cross_approx;
             int get_runningofrunning;
-
-            double k_pivot;
-            double dlnk;
-
     };
 
 

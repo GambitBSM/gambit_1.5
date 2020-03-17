@@ -687,17 +687,18 @@ START_MODULE
 
     #define FUNCTION compute_Omega0_b
       START_FUNCTION(double)
+      ALLOW_MODELS(LCDM, LCDM_theta)
       DEPENDENCY(H0, double)
     #undef FUNCTION
 
   #undef CAPABILITY
-
 
   #define CAPABILITY Omega0_cdm
     START_CAPABILITY
 
     #define FUNCTION compute_Omega0_cdm
       START_FUNCTION(double)
+      ALLOW_MODELS(LCDM, LCDM_theta)
       DEPENDENCY(H0, double)
     #undef FUNCTION
 
