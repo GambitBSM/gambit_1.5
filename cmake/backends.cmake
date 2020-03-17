@@ -79,6 +79,16 @@
 #
 #************************************************
 
+# Define macro for using c99 (necessary for CosmoBit backends)
+# MJW experimental for now (and commented out)
+#macro(use_c99)
+#   if (CMAKE_C_COMPILER STREQUAL "cc")
+#      set (BACKEND_C_FLAGS "-std=c99 ${BACKEND_C_FLAGS}")
+#   endif ()
+#endmacro(use_c99)
+
+#use_c99()
+
 # AlterBBN
 set(name "alterbbn")
 set(ver "2.2")
@@ -96,7 +106,7 @@ if(NOT ditched_${name}_${ver})
     #BUILD_COMMAND sed ${dashi} -e "s#CC = gcc#CC = ${CMAKE_C_COMPILER}#g" Makefile
     BUILD_COMMAND sed ${dashi} -e "s#CC = gcc#CC = ${CMAKE_C_COMPILER}#g" Makefile
           COMMAND sed ${dashi} -e "s#rcsU#rcs#g" Makefile
-          COMMAND sed ${dashi} -e "s/CFLAGS= -O3 -pipe -fomit-frame-pointer/CFLAGS= ${BACKEND_C_FLAGS}/g" Makefile
+          COMMAND sed ${dashi} -e "s/CFLAGS= -O3 -std=c99 -pipe -fomit-frame-pointer/CFLAGS= ${BACKEND_C_FLAGS}/g" Makefile
           COMMAND sed ${dashi} -e "s/CFLAGS_MP= -fopenmp/CFLAGS_MP= ${OpenMP_C_FLAGS}/g" Makefile
           COMMAND ${CMAKE_MAKE_PROGRAM}
           COMMAND ar x src/libbbn.a
@@ -1233,9 +1243,9 @@ if(NOT ditched_${name}_${ver})
     BUILD_IN_SOURCE 1
     # Since someone put a tarball into a tarball, we need to extract again
     PATCH_COMMAND tar -C ${dir}/ -xf ${dir}/code/plc_3.0/plc-3.0.tar.bz2 --strip-components=1
-    CONFIGURE_COMMAND ${PYTHON_EXECUTABLE} ${dir}/waf configure --cfitsio_include=${cfitsio_dir}/include --cfitsio_lib=${cfitsio_dir}/lib ${mkl_libs_option}
+    CONFIGURE_COMMAND ${PYTHON_EXECUTABLE} ${dir}/waf configure --cfitsio_include=${cfitsio_dir}/include --cfitsio_lib=${cfitsio_dir}/lib ${mkl_libs_option} 
     BUILD_COMMAND ""
-    INSTALL_COMMAND ${dir}/waf install
+    INSTALL_COMMAND ${PYTHON_EXECUTABLE} ${dir}/waf install
   )
   add_extra_targets("backend" ${name} ${ver} ${dir} ${dl} clean)
   set_as_default_version("backend" ${name} ${ver})
