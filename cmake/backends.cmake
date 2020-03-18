@@ -1224,18 +1224,6 @@ set(dir "${PROJECT_SOURCE_DIR}/Backends/installed/${name}/${ver}")
 set(cfitsio_name "cfitsio")
 set(cfitsio_ver "3.390")
 set(cfitsio_dir "${PROJECT_SOURCE_DIR}/Backends/installed/${cfitsio_name}/${cfitsio_ver}")
-if("${CMAKE_C_COMPILER_ID}" STREQUAL "Intel")
-  set(PLC_C_COMPILER "--icc")
-elseif("${CMAKE_C_COMPILER_ID}" STREQUAL "GNU")
-  set(PLC_C_COMPILER "--gcc")
-elseif("${CMAKE_C_COMPILER_ID}" STREQUAL "Clang" OR "${CMAKE_C_COMPILER_ID}" STREQUAL "AppleClang")
-  set(PLC_C_COMPILER "--clang")
-endif()
-if("${CMAKE_Fortran_COMPILER_ID}" STREQUAL "Intel")
-  set(PLC_Fortran_COMPILER "--ifort")
-else()
-  set(PLC_Fortran_COMPILER "--gfortran")
-endif()
 if(NOT ${FOUND_MKL} EQUAL -1)
   if(DEFINED ENV{MKLROOT})
   string(STRIP $ENV{MKLROOT} STRIPPED_MKLROOT)
@@ -1255,7 +1243,7 @@ if(NOT ditched_${name}_${ver})
     BUILD_IN_SOURCE 1
     # Since someone put a tarball into a tarball, we need to extract again
     PATCH_COMMAND tar -C ${dir}/ -xf ${dir}/code/plc_3.0/plc-3.0.tar.bz2 --strip-components=1
-    CONFIGURE_COMMAND ${PYTHON_EXECUTABLE} ${dir}/waf configure ${PLC_C_COMPILER} ${PLC_Fortran_COMPILER} --cfitsio_include=${cfitsio_dir}/include --cfitsio_lib=${cfitsio_dir}/lib ${mkl_libs_option}
+    CONFIGURE_COMMAND ${PYTHON_EXECUTABLE} ${dir}/waf configure --cfitsio_include=${cfitsio_dir}/include --cfitsio_lib=${cfitsio_dir}/lib ${mkl_libs_option}
     BUILD_COMMAND ""
     INSTALL_COMMAND C_INCLUDE_PATH=$(C_INCLUDE_PATH):${PYTHON_INCLUDE_DIR} ${PYTHON_EXECUTABLE} ${dir}/waf install
   )
