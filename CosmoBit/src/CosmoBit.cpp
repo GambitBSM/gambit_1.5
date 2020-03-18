@@ -1507,9 +1507,14 @@ namespace Gambit
       // properly supported even though there are no errors at compile time.
       // using a unique pointer for ratioH and a 2d vector for cov_ratioH avoids
       // these problems.
-      auto deleter = [&](double* ptr){delete [] ptr;};
-      std::unique_ptr<double[], decltype(deleter)> ratioH(new double[NNUC+1](), deleter);
-      std::unique_ptr<double[], decltype(deleter)> cov_ratioH(new double[(NNUC+1)*(NNUC+1)](), deleter);
+      // auto deleter = [&](double* ptr){delete [] ptr;};
+      // std::unique_ptr<double[], decltype(deleter)> ratioH(new double[NNUC+1](), deleter);
+      // std::unique_ptr<double[], decltype(deleter)> cov_ratioH(new double[(NNUC+1)*(NNUC+1)](), deleter);
+
+      std::vector<double> ratioHvec(NNUC+1);
+      std::vector<double> cov_ratioHvec((NNUC+1)*(NNUC+1));
+      auto ratioH = ratioHvec.data();
+      auto cov_ratioH = cov_ratioHvec.data();
 
       static bool first = true;
       const bool use_fudged_correlations = (runOptions->hasKey("correlation_matrix") && runOptions->hasKey("elements"));
