@@ -1271,7 +1271,7 @@ if(NOT ditched_${name}_${ver})
     CONFIGURE_COMMAND ""
     COMMAND sed ${dashi} -e "s#autosetup.py install#autosetup.py build#g" Makefile
     COMMAND sed ${dashi} -e "s#\".\"#\"${dir}\"#g" include/common.h
-    BUILD_COMMAND ${CMAKE_MAKE_PROGRAM} CC=${CMAKE_C_COMPILER} OMPFLAG=-fopenmp OPTFLAG= CCFLAG=${BACKEND_C_FLAGS} LDFLAG=${BACKEND_C_FLAGS} PYTHON=${PYTHON_EXECUTABLE} all
+    BUILD_COMMAND ${CMAKE_MAKE_PROGRAM} CC=${CMAKE_C_COMPILER} OMPFLAG=${OpenMP_C_FLAGS} OPTFLAG= CCFLAG=${BACKEND_GNU99_FLAGS} LDFLAG=${BACKEND_GNU99_FLAGS} PYTHON=${PYTHON_EXECUTABLE} all
     COMMAND ${CMAKE_COMMAND} -E make_directory lib
     COMMAND find python/ -name "classy*.so" | xargs -I {} cp "{}" lib/
     COMMAND ${CMAKE_COMMAND} -E echo "#This is a trampoline script to import the cythonized python module under a different name" > lib/${lib}_${sfver}.py
@@ -1301,7 +1301,7 @@ if(NOT ditched_${name}_${ver})
     CONFIGURE_COMMAND ""
     COMMAND sed ${dashi} -e "s#autosetup.py install#autosetup.py build#g" Makefile
     COMMAND sed ${dashi} -e "s#\".\"#\"${dir}\"#g" include/common.h
-    BUILD_COMMAND ${CMAKE_MAKE_PROGRAM} CC=${CMAKE_C_COMPILER} OMPFLAG=-fopenmp OPTFLAG= CCFLAG=${BACKEND_C_FLAGS} LDFLAG=${BACKEND_C_FLAGS} PYTHON=${PYTHON_EXECUTABLE} all
+    BUILD_COMMAND ${CMAKE_MAKE_PROGRAM} CC=${CMAKE_C_COMPILER} OMPFLAG=${OpenMP_C_FLAGS} OPTFLAG= CCFLAG=${BACKEND_GNU99_FLAGS} LDFLAG=${BACKEND_GNU99_FLAGS} PYTHON=${PYTHON_EXECUTABLE} all
     COMMAND ${CMAKE_COMMAND} -E make_directory lib
     COMMAND find python/ -name "classy*.so" | xargs -I {} cp "{}" lib/
     COMMAND ${CMAKE_COMMAND} -E echo "#This is a trampoline script to import the cythonized python module under a different name" > lib/${lib}_${sfver}.py
@@ -1329,7 +1329,7 @@ if(NOT ditched_${name}_${ver})
     CONFIGURE_COMMAND ""
     COMMAND sed ${dashi} -e "s#autosetup.py install#autosetup.py build#g" Makefile
     COMMAND sed ${dashi} -e "s#\".\"#\"${dir}\"#g" include/common.h
-    BUILD_COMMAND ${CMAKE_MAKE_PROGRAM} CC=${CMAKE_C_COMPILER} OMPFLAG=-fopenmp OPTFLAG= CCFLAG=${BACKEND_C_FLAGS} LDFLAG=${BACKEND_C_FLAGS} PYTHON=${PYTHON_EXECUTABLE} all
+    BUILD_COMMAND ${CMAKE_MAKE_PROGRAM} CC=${CMAKE_C_COMPILER} OMPFLAG=${OpenMP_C_FLAGS} OPTFLAG= CCFLAG=${BACKEND_GNU99_FLAGS} LDFLAG=${BACKEND_GNU99_FLAGS} PYTHON=${PYTHON_EXECUTABLE} all
     COMMAND ${CMAKE_COMMAND} -E make_directory lib
     COMMAND find python/ -name "classy*.so" | xargs -I {} cp "{}" lib/
     COMMAND ${CMAKE_COMMAND} -E echo "#This is a trampoline script to import the cythonized python module under a different name" > lib/${lib}_${sfver}.py

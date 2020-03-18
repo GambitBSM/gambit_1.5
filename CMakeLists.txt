@@ -429,6 +429,7 @@ endif()
 set(BACKEND_C18_FLAGS "${BACKEND_C_FLAGS} -std=c18")
 set(BACKEND_C11_FLAGS "${BACKEND_C_FLAGS} -std=c11")
 set(BACKEND_C99_FLAGS "${BACKEND_C_FLAGS} -std=c99")
+set(BACKEND_GNU99_FLAGS "${BACKEND_C_FLAGS} -std=gnu99")
 
 # Make symbols hidden by default when compiling GAMBIT source files only
 if(${CMAKE_MAJOR_VERSION} MATCHES "2")
