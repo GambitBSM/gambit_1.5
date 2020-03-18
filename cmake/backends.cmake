@@ -1224,6 +1224,9 @@ set(dir "${PROJECT_SOURCE_DIR}/Backends/installed/${name}/${ver}")
 set(cfitsio_name "cfitsio")
 set(cfitsio_ver "3.390")
 set(cfitsio_dir "${PROJECT_SOURCE_DIR}/Backends/installed/${cfitsio_name}/${cfitsio_ver}")
+if("${CMAKE_Fortran_COMPILER_ID}" STREQUAL "Intel")
+  set(plc_compilers "--icc --ifort")
+endif()
 if(NOT ${FOUND_MKL} EQUAL -1)
   if(DEFINED ENV{MKLROOT})
   string(STRIP $ENV{MKLROOT} STRIPPED_MKLROOT)
@@ -1243,7 +1246,7 @@ if(NOT ditched_${name}_${ver})
     BUILD_IN_SOURCE 1
     # Since someone put a tarball into a tarball, we need to extract again
     PATCH_COMMAND tar -C ${dir}/ -xf ${dir}/code/plc_3.0/plc-3.0.tar.bz2 --strip-components=1
-    CONFIGURE_COMMAND ${PYTHON_EXECUTABLE} ${dir}/waf configure --cfitsio_include=${cfitsio_dir}/include --cfitsio_lib=${cfitsio_dir}/lib ${mkl_libs_option}
+    CONFIGURE_COMMAND ${PYTHON_EXECUTABLE} ${dir}/waf configure ${plc_compilers} --cfitsio_include=${cfitsio_dir}/include --cfitsio_lib=${cfitsio_dir}/lib ${mkl_libs_option}
     BUILD_COMMAND ""
     INSTALL_COMMAND ${PYTHON_EXECUTABLE} ${dir}/waf install
   )
