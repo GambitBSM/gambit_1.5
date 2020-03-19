@@ -30,11 +30,11 @@
 LOAD_LIBRARY
 
 BE_FUNCTION(multimodecode_primordial_ps, gambit_inflation_observables,
-            (int&,int&,int&,int&,double*,double*,double*,double&,double&,double&,int&,double&,double&,int&),
+            (int&,int&,int&,int&,double*,double*,double*,double&,double&,double&,int&,double&,double&,int&,int&,int&,int&,int&),
             ("__multimodecode_gambit_MOD_multimodecode_gambit_driver","multimodecode_gambit_mp_multimodecode_gambit_driver_"), "multimodecode_primordial_ps")
 
 BE_FUNCTION(multimodecode_parametrised_ps, gambit_inflation_observables,
-            (int&,int&,int&,int&,double*,double*,double*,double&,double&,double&,int&),
+            (int&,int&,int&,int&,double*,double*,double*,double&,double&,double&,int&,int&,int&,int&,int&),
             ("__multimodecode_gambit_MOD_multimodecode_parametrised_ps","multimodecode_gambit_mp_multimodecode_parametrised_ps_"), "multimodecode_parametrised_ps")
 
 // Fortran error handling issue

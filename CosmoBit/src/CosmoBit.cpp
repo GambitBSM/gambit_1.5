@@ -921,7 +921,11 @@ namespace Gambit
                                                        steps,
                                                        kmin,
                                                        kmax,
-                                                       inputs.vparam_rows);
+                                                       inputs.vparam_rows,
+                                                       inputs.slowroll_infl_end,
+                                                       inputs.instreheat,
+                                                       inputs.use_deltaN_SR,
+                                                       inputs.use_horiz_cross_approx);
       }
       catch(std::runtime_error &e)
       {
@@ -975,7 +979,11 @@ namespace Gambit
                                                          inputs.N_pivot,
                                                          inputs.k_pivot,
                                                          inputs.dlnk,
-                                                         inputs.vparam_rows);
+                                                         inputs.vparam_rows,
+                                                         inputs.slowroll_infl_end,
+                                                         inputs.instreheat,
+                                                         inputs.use_deltaN_SR,
+                                                         inputs.use_horiz_cross_approx);
       }
       catch(std::runtime_error &e)
       {

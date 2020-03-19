@@ -611,7 +611,7 @@ check_ditch_status(${name} ${ver} ${dir} ${ditch_if_absent})
 if(NOT ditched_${name}_${ver})
   ExternalProject_Add(${name}_${ver}
     GIT_REPOSITORY https://github.com/brinckmann/montepython_public.git
-    GIT_TAG 3.1.0
+    GIT_TAG ${ver}
     SOURCE_DIR ${dir}
     BUILD_IN_SOURCE 1
     CONFIGURE_COMMAND ${CMAKE_COMMAND} -E copy ${patchdir}/MontePythonLike.py ${dir}/montepython/MontePythonLike_${sfver}.py
@@ -1221,9 +1221,22 @@ set(lib "libclik")
 set(dl "http://pla.esac.esa.int/pla/aio/product-action?COSMOLOGY.FILE_ID=COM_Likelihood_Code-v3.0_R3.00.tar.gz")
 set(md5 "23a7d80cffe3156b33575becbee7ac15")
 set(dir "${PROJECT_SOURCE_DIR}/Backends/installed/${name}/${ver}")
+set(patch "${PROJECT_SOURCE_DIR}/Backends/patches/${name}/${ver}")
 set(cfitsio_name "cfitsio")
 set(cfitsio_ver "3.390")
 set(cfitsio_dir "${PROJECT_SOURCE_DIR}/Backends/installed/${cfitsio_name}/${cfitsio_ver}")
+if("${CMAKE_C_COMPILER_ID}" STREQUAL "Intel")
+  set(PLC_C_COMPILER "--icc")
+elseif("${CMAKE_C_COMPILER_ID}" STREQUAL "GNU")
+  set(PLC_C_COMPILER "--gcc")
+elseif("${CMAKE_C_COMPILER_ID}" STREQUAL "Clang" OR "${CMAKE_C_COMPILER_ID}" STREQUAL "AppleClang")
+  set(PLC_C_COMPILER "--clang")
+endif()
+if("${CMAKE_Fortran_COMPILER_ID}" STREQUAL "Intel")
+  set(PLC_Fortran_COMPILER "--ifort")
+else()
+  set(PLC_Fortran_COMPILER "--gfortran")
+endif()
 if(NOT ${FOUND_MKL} EQUAL -1)
   if(DEFINED ENV{MKLROOT})
   string(STRIP $ENV{MKLROOT} STRIPPED_MKLROOT)
@@ -1243,9 +1256,10 @@ if(NOT ditched_${name}_${ver})
     BUILD_IN_SOURCE 1
     # Since someone put a tarball into a tarball, we need to extract again
     PATCH_COMMAND tar -C ${dir}/ -xf ${dir}/code/plc_3.0/plc-3.0.tar.bz2 --strip-components=1
-    CONFIGURE_COMMAND ${PYTHON_EXECUTABLE} ${dir}/waf configure --cfitsio_include=${cfitsio_dir}/include --cfitsio_lib=${cfitsio_dir}/lib ${mkl_libs_option}
+    COMMAND patch -p1 < ${patch}/${name}_${ver}.diff
+    CONFIGURE_COMMAND ${PYTHON_EXECUTABLE} ${dir}/waf configure ${PLC_C_COMPILER} ${PLC_Fortran_COMPILER} --cfitsio_include=${cfitsio_dir}/include --cfitsio_lib=${cfitsio_dir}/lib ${mkl_libs_option}
     BUILD_COMMAND ""
-    INSTALL_COMMAND ${PYTHON_EXECUTABLE} ${dir}/waf install
+    INSTALL_COMMAND C_INCLUDE_PATH=$(C_INCLUDE_PATH):${PYTHON_INCLUDE_DIR} ${PYTHON_EXECUTABLE} ${dir}/waf install
   )
   add_extra_targets("backend" ${name} ${ver} ${dir} ${dl} clean)
   set_as_default_version("backend" ${name} ${ver})
@@ -1271,7 +1285,7 @@ if(NOT ditched_${name}_${ver})
     CONFIGURE_COMMAND ""
     COMMAND sed ${dashi} -e "s#autosetup.py install#autosetup.py build#g" Makefile
     COMMAND sed ${dashi} -e "s#\".\"#\"${dir}\"#g" include/common.h
-    BUILD_COMMAND ${CMAKE_MAKE_PROGRAM} CC=${CMAKE_C_COMPILER} OMPFLAG=-fopenmp OPTFLAG= CCFLAG=${BACKEND_C_FLAGS} LDFLAG=${BACKEND_C_FLAGS} PYTHON=${PYTHON_EXECUTABLE} all
+    BUILD_COMMAND ${CMAKE_MAKE_PROGRAM} CC=${CMAKE_C_COMPILER} OMPFLAG=${OpenMP_C_FLAGS} OPTFLAG= CCFLAG=${BACKEND_GNU99_FLAGS} LDFLAG=${BACKEND_GNU99_FLAGS} PYTHON=${PYTHON_EXECUTABLE} all
     COMMAND ${CMAKE_COMMAND} -E make_directory lib
     COMMAND find python/ -name "classy*.so" | xargs -I {} cp "{}" lib/
     COMMAND ${CMAKE_COMMAND} -E echo "#This is a trampoline script to import the cythonized python module under a different name" > lib/${lib}_${sfver}.py
@@ -1301,7 +1315,7 @@ if(NOT ditched_${name}_${ver})
     CONFIGURE_COMMAND ""
     COMMAND sed ${dashi} -e "s#autosetup.py install#autosetup.py build#g" Makefile
     COMMAND sed ${dashi} -e "s#\".\"#\"${dir}\"#g" include/common.h
-    BUILD_COMMAND ${CMAKE_MAKE_PROGRAM} CC=${CMAKE_C_COMPILER} OMPFLAG=-fopenmp OPTFLAG= CCFLAG=${BACKEND_C_FLAGS} LDFLAG=${BACKEND_C_FLAGS} PYTHON=${PYTHON_EXECUTABLE} all
+    BUILD_COMMAND ${CMAKE_MAKE_PROGRAM} CC=${CMAKE_C_COMPILER} OMPFLAG=${OpenMP_C_FLAGS} OPTFLAG= CCFLAG=${BACKEND_GNU99_FLAGS} LDFLAG=${BACKEND_GNU99_FLAGS} PYTHON=${PYTHON_EXECUTABLE} all
     COMMAND ${CMAKE_COMMAND} -E make_directory lib
     COMMAND find python/ -name "classy*.so" | xargs -I {} cp "{}" lib/
     COMMAND ${CMAKE_COMMAND} -E echo "#This is a trampoline script to import the cythonized python module under a different name" > lib/${lib}_${sfver}.py
@@ -1329,7 +1343,7 @@ if(NOT ditched_${name}_${ver})
     CONFIGURE_COMMAND ""
     COMMAND sed ${dashi} -e "s#autosetup.py install#autosetup.py build#g" Makefile
     COMMAND sed ${dashi} -e "s#\".\"#\"${dir}\"#g" include/common.h
-    BUILD_COMMAND ${CMAKE_MAKE_PROGRAM} CC=${CMAKE_C_COMPILER} OMPFLAG=-fopenmp OPTFLAG= CCFLAG=${BACKEND_C_FLAGS} LDFLAG=${BACKEND_C_FLAGS} PYTHON=${PYTHON_EXECUTABLE} all
+    BUILD_COMMAND ${CMAKE_MAKE_PROGRAM} CC=${CMAKE_C_COMPILER} OMPFLAG=${OpenMP_C_FLAGS} OPTFLAG= CCFLAG=${BACKEND_GNU99_FLAGS} LDFLAG=${BACKEND_GNU99_FLAGS} PYTHON=${PYTHON_EXECUTABLE} all
     COMMAND ${CMAKE_COMMAND} -E make_directory lib
     COMMAND find python/ -name "classy*.so" | xargs -I {} cp "{}" lib/
     COMMAND ${CMAKE_COMMAND} -E echo "#This is a trampoline script to import the cythonized python module under a different name" > lib/${lib}_${sfver}.py
@@ -1340,11 +1354,11 @@ if(NOT ditched_${name}_${ver})
 endif()
 
 # DarkAges
-# - Add correct symlink flags for OSX
+# Add correct symlink flags for OSX
 if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
   set(DarkAges_SYMLINK_FLAGS "-hfs")
 else()
-  set(DarkAges_SYMLINK_FLAGS "-s")
+  set(DarkAges_SYMLINK_FLAGS "-fs")
 endif()
 set(name "darkages")
 set(ver "1.2.0")
@@ -1356,7 +1370,7 @@ check_ditch_status(${name} ${ver} ${dir} ${ditch_if_absent})
 if(NOT ditched_${name}_${ver})
   ExternalProject_Add(${name}_${ver}
     GIT_REPOSITORY https://github.com/pstoecker/DarkAges.git
-    GIT_TAG v1.2.0
+    GIT_TAG v${ver}
     SOURCE_DIR ${dir}
     BUILD_IN_SOURCE 1
     CONFIGURE_COMMAND ln ${DarkAges_SYMLINK_FLAGS} DarkAges DarkAges_${sfver}

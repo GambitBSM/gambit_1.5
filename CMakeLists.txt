@@ -110,7 +110,7 @@ set(Python_ADDITIONAL_VERSIONS 3.4 3.5 3.6 3.7)
 if (FORCE_PYTHON2)
   message("${BoldYellow}   Python 2 requested; searching for Python 2.7${ColourReset}")
   find_package(PythonInterp 2.7 REQUIRED)
-  find_package(PythonLibs ${PYTHON_VERSION_STRING} EXACT)
+  find_package(PythonLibs ${PYTHON_VERSION_STRING} REQUIRED)
 elseif (FORCE_PYTHON3)
   message("${BoldYellow}   Python 3 requested; searching for Python 3.x${ColourReset}")
   find_package(PythonInterp 3 REQUIRED)
@@ -124,7 +124,7 @@ else()
     find_package(PythonInterp 2 REQUIRED)
     if (PYTHON_VERSION_MINOR LESS 7)
       message(FATAL_ERROR "\nGAMBIT requires Python 2.7.  \nIf you need to set the path to the Python interpreter manually, "
-                          "please use -DPYTHON_EXECUTABLE:FILEPATH=path/to/preferred/python.")
+                          "please use -D PYTHON_EXECUTABLE=path/to/preferred/python.")
     endif()
     find_package(PythonLibs 2)
   endif()
@@ -143,8 +143,7 @@ if(PYTHONLIBS_FOUND)
             "   3. set the following variables when invoking cmake:\n"
             "     PYTHON_LIBRARY\n"
             "     PYTHON_INCLUDE_DIR\n"
-            "     PYTHON_INCLUDE_DIR2 (you might be able to get away without setting this one)\n"
-            "     PYTHON_EXECUTABLE   (you might be able to get away without setting this one)\n")
+            "     PYTHON_EXECUTABLE\n")
   endif()
 endif()
 
@@ -157,8 +156,7 @@ if(NOT PYTHONLIBS_FOUND)
           "   following variables when invoking cmake (also making sure to clean out your build dir):\n"
           "     PYTHON_LIBRARY\n"
           "     PYTHON_INCLUDE_DIR\n"
-          "     PYTHON_INCLUDE_DIR2 (you might be able to get away without setting this one)\n"
-          "     PYTHON_EXECUTABLE   (you might be able to get away without setting this one)")
+          "     PYTHON_EXECUTABLE")
   set(itch "${itch};CosmoBit")
 else()
   set(MIN_pybind11_VERSION "2.4.3")
@@ -429,6 +427,7 @@ endif()
 set(BACKEND_C18_FLAGS "${BACKEND_C_FLAGS} -std=c18")
 set(BACKEND_C11_FLAGS "${BACKEND_C_FLAGS} -std=c11")
 set(BACKEND_C99_FLAGS "${BACKEND_C_FLAGS} -std=c99")
+set(BACKEND_GNU99_FLAGS "${BACKEND_C_FLAGS} -std=gnu99")
 
 # Make symbols hidden by default when compiling GAMBIT source files only
 if(${CMAKE_MAJOR_VERSION} MATCHES "2")
