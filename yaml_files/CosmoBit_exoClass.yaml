@@ -45,9 +45,9 @@ Parameters:
  # nuisance parameters in Planck likelihood
  cosmo_nuisance_Planck_lite: !import include/Planck_2018/cosmo_nuisance_Planck_lite_gauss.yaml
 
- # model parameters for "DecayingDM_general"
- #AnnihilatingDM_general: !import include/AnnihilatingDM_general_scan.yaml
- DecayingDM_general: !import include/DecayingDM_general_scan.yaml
+ # model parameters for "AnnihilatingDM_mixture" / "DecayingDM_mixture"
+ #AnnihilatingDM_mixture: !import include/AnnihilatingDM_mixture_scan.yaml
+ DecayingDM_mixture: !import include/DecayingDM_mixture_scan.yaml
 
 #======== Prior setup ========
 Priors:

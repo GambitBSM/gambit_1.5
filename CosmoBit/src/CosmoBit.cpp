@@ -116,9 +116,9 @@ namespace Gambit
   {
     using namespace LogTags;
 
-    void injection_spectrum_annihilatingDM(DarkAges::injectionSpectrum& spectrum)
+    void injection_spectrum_AnnihilatingDM_mixture(DarkAges::injectionSpectrum& spectrum)
     {
-      using namespace Pipes::injection_spectrum_annihilatingDM;
+      using namespace Pipes::injection_spectrum_AnnihilatingDM_mixture;
 
       double m = *Param["mass"];
       double BR_el = *Param["BR"];
@@ -143,9 +143,9 @@ namespace Gambit
       spectrum.spec_ph.resize(1,BR_ph*2e9);
     }
 
-    void injection_spectrum_decayingDM(DarkAges::injectionSpectrum& spectrum)
+    void injection_spectrum_DecayingDM_mixture(DarkAges::injectionSpectrum& spectrum)
     {
-      using namespace Pipes::injection_spectrum_decayingDM;
+      using namespace Pipes::injection_spectrum_DecayingDM_mixture;
 
       double m = *Param["mass"];
       double BR_el = *Param["BR"];

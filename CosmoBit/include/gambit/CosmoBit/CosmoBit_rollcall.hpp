@@ -54,14 +54,14 @@ START_MODULE
 
   #define CAPABILITY injection_spectrum
   START_CAPABILITY
-    #define FUNCTION injection_spectrum_annihilatingDM
+    #define FUNCTION injection_spectrum_AnnihilatingDM_mixture
     START_FUNCTION(DarkAges::injectionSpectrum)
-    ALLOW_MODELS(AnnihilatingDM_general)
+    ALLOW_MODELS(AnnihilatingDM_mixture)
     #undef FUNCTION
 
-    #define FUNCTION injection_spectrum_decayingDM
+    #define FUNCTION injection_spectrum_DecayingDM_mixture
     START_FUNCTION(DarkAges::injectionSpectrum)
-    ALLOW_MODELS(DecayingDM_general)
+    ALLOW_MODELS(DecayingDM_mixture)
     #undef FUNCTION
   #undef CAPABILITY
 

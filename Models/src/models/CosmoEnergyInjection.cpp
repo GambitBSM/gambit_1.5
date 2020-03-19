@@ -28,11 +28,22 @@
 
 #include "gambit/Models/models/CosmoEnergyInjection.hpp"
 
-#define MODEL AnnihilatingDM_photon
-void MODEL_NAMESPACE::AnnihilatingDM_photon_to_AnnihilatingDM_general (const ModelParameters &myP, ModelParameters &targetP)
+#define MODEL AnnihilatingDM_mixture
+void MODEL_NAMESPACE::AnnihilatingDM_mixture_to_AnnihilatingDM_general (const ModelParameters &myP, ModelParameters &targetP)
 {
   USE_MODEL_PIPE(AnnihilatingDM_general)
-  logger()<<"Running interpret_as_parent calculations for AnnihilatingDM_photon --> AnnihilatingDM_general ..."<<LogTags::info<<EOM;
+  logger()<<"Running interpret_as_parent calculations for AnnihilatingDM_mixture --> AnnihilatingDM_general ..."<<LogTags::info<<EOM;
+
+  targetP.setValue("mass", myP.getValue("mass"));
+  targetP.setValue("sigmav", myP.getValue("sigmav"));
+}
+#undef MODEL
+
+#define MODEL AnnihilatingDM_photon
+void MODEL_NAMESPACE::AnnihilatingDM_photon_to_AnnihilatingDM_mixture (const ModelParameters &myP, ModelParameters &targetP)
+{
+  USE_MODEL_PIPE(AnnihilatingDM_mixture)
+  logger()<<"Running interpret_as_parent calculations for AnnihilatingDM_photon --> AnnihilatingDM_mixture ..."<<LogTags::info<<EOM;
 
   targetP.setValue("mass", myP.getValue("mass"));
   targetP.setValue("sigmav", myP.getValue("sigmav"));
@@ -43,10 +54,10 @@ void MODEL_NAMESPACE::AnnihilatingDM_photon_to_AnnihilatingDM_general (const Mod
 #undef MODEL
 
 #define MODEL AnnihilatingDM_electron
-void MODEL_NAMESPACE::AnnihilatingDM_electron_to_AnnihilatingDM_general (const ModelParameters &myP, ModelParameters &targetP)
+void MODEL_NAMESPACE::AnnihilatingDM_electron_to_AnnihilatingDM_mixture (const ModelParameters &myP, ModelParameters &targetP)
 {
-  USE_MODEL_PIPE(AnnihilatingDM_general)
-  logger()<<"Running interpret_as_parent calculations for AnnihilatingDM_electron --> AnnihilatingDM_general ..."<<LogTags::info<<EOM;
+  USE_MODEL_PIPE(AnnihilatingDM_mixture)
+  logger()<<"Running interpret_as_parent calculations for AnnihilatingDM_electron --> AnnihilatingDM_mixture ..."<<LogTags::info<<EOM;
 
   targetP.setValue("mass", myP.getValue("mass"));
   targetP.setValue("sigmav", myP.getValue("sigmav"));
@@ -56,11 +67,23 @@ void MODEL_NAMESPACE::AnnihilatingDM_electron_to_AnnihilatingDM_general (const M
 }
 #undef MODEL
 
-#define MODEL DecayingDM_photon
-void MODEL_NAMESPACE::DecayingDM_photon_to_DecayingDM_general (const ModelParameters &myP, ModelParameters &targetP)
+#define MODEL DecayingDM_mixture
+void MODEL_NAMESPACE::DecayingDM_mixture_to_DecayingDM_general (const ModelParameters &myP, ModelParameters &targetP)
 {
   USE_MODEL_PIPE(DecayingDM_general)
-  logger()<<"Running interpret_as_parent calculations for DecayingDM_photon --> DecayingDM_general ..."<<LogTags::info<<EOM;
+  logger()<<"Running interpret_as_parent calculations for DecayingDM_mixture --> DecayingDM_general ..."<<LogTags::info<<EOM;
+
+  targetP.setValue("mass", myP.getValue("mass"));
+  targetP.setValue("lifetime", myP.getValue("lifetime"));
+  targetP.setValue("fraction", myP.getValue("fraction"));
+}
+#undef MODEL
+
+#define MODEL DecayingDM_photon
+void MODEL_NAMESPACE::DecayingDM_photon_to_DecayingDM_mixture (const ModelParameters &myP, ModelParameters &targetP)
+{
+  USE_MODEL_PIPE(DecayingDM_mixture)
+  logger()<<"Running interpret_as_parent calculations for DecayingDM_photon --> DecayingDM_mixture ..."<<LogTags::info<<EOM;
 
   targetP.setValue("mass", myP.getValue("mass"));
   targetP.setValue("lifetime", myP.getValue("lifetime"));
@@ -72,10 +95,10 @@ void MODEL_NAMESPACE::DecayingDM_photon_to_DecayingDM_general (const ModelParame
 #undef MODEL
 
 #define MODEL DecayingDM_electron
-void MODEL_NAMESPACE::DecayingDM_electron_to_DecayingDM_general (const ModelParameters &myP, ModelParameters &targetP)
+void MODEL_NAMESPACE::DecayingDM_electron_to_DecayingDM_mixture (const ModelParameters &myP, ModelParameters &targetP)
 {
-  USE_MODEL_PIPE(DecayingDM_general)
-  logger()<<"Running interpret_as_parent calculations for DecayingDM_electron --> DecayingDM_general ..."<<LogTags::info<<EOM;
+  USE_MODEL_PIPE(DecayingDM_mixture)
+  logger()<<"Running interpret_as_parent calculations for DecayingDM_electron --> DecayingDM_mixture ..."<<LogTags::info<<EOM;
 
   targetP.setValue("mass", myP.getValue("mass"));
   targetP.setValue("lifetime", myP.getValue("lifetime"));
