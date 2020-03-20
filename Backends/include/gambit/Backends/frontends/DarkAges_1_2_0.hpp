@@ -43,14 +43,14 @@ BE_ALLOW_MODELS(AnnihilatingDM_general, DecayingDM_general)
  * to calculate f(z)
  * */
 
-BE_INI_DEPENDENCY(injection_spectrum,DarkAges::injectionSpectrum)
+BE_INI_DEPENDENCY(energy_injection_spectrum, DarkAges::Energy_injection_spectrum)
 
 /* Now register any convenience functions and wrap them in functors.
  *
  * Syntax for BE_CONV_FUNCTION:
  * BE_CONV_FUNCTION([function name], type, (arguments), "[choose capability name]") */
 
-BE_CONV_FUNCTION(gather_results, DarkAges::fz_table, (), "DA_efficiency_function")
+BE_CONV_FUNCTION(get_energy_injection_efficiency_table, DarkAges::Energy_injection_efficiency_table, (), "get_energy_injection_efficiency_table")
 
 // Undefine macros to avoid conflict with other backends
 #include "gambit/Backends/backend_undefs.hpp"

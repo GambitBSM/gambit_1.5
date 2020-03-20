@@ -116,9 +116,9 @@ namespace Gambit
   {
     using namespace LogTags;
 
-    void injection_spectrum_AnnihilatingDM_mixture(DarkAges::injectionSpectrum& spectrum)
+    void energy_injection_spectrum_AnnihilatingDM_mixture(DarkAges::Energy_injection_spectrum& spectrum)
     {
-      using namespace Pipes::injection_spectrum_AnnihilatingDM_mixture;
+      using namespace Pipes::energy_injection_spectrum_AnnihilatingDM_mixture;
 
       double m = *Param["mass"];
       double BR_el = *Param["BR"];
@@ -143,9 +143,9 @@ namespace Gambit
       spectrum.spec_ph.resize(1,BR_ph*2e9);
     }
 
-    void injection_spectrum_DecayingDM_mixture(DarkAges::injectionSpectrum& spectrum)
+    void energy_injection_spectrum_DecayingDM_mixture(DarkAges::Energy_injection_spectrum& spectrum)
     {
-      using namespace Pipes::injection_spectrum_DecayingDM_mixture;
+      using namespace Pipes::energy_injection_spectrum_DecayingDM_mixture;
 
       double m = *Param["mass"];
       double BR_el = *Param["BR"];
@@ -288,12 +288,11 @@ namespace Gambit
       result = rho0_ALP / (ma0 * ssm0);
     }
 
-    void energy_injection_efficiency_func(DarkAges::fz_table& result)
+    void energy_injection_efficiency_func(DarkAges::Energy_injection_efficiency_table& result)
     {
       using namespace Pipes::energy_injection_efficiency_func;
-      result = BEreq::DA_efficiency_function();
+      result = BEreq::get_energy_injection_efficiency_table();
     }
-
 
     void f_effective_func(double& result)
     {
@@ -309,7 +308,7 @@ namespace Gambit
         z_eff = runOptions->getValueOrDef<double>(600.,"z_eff");
       }
 
-      DarkAges::fz_table fzt = *Dep::energy_injection_efficiency;
+      DarkAges::Energy_injection_efficiency_table fzt = *Dep::energy_injection_efficiency;
 
       bool f_eff_mode = fzt.f_eff_mode;
       std::vector<double> z = fzt.redshift;
@@ -1922,7 +1921,7 @@ namespace Gambit
     result["DM_annihilation_mass"] = NP_params.at("mass");
 
     // Get the results from the DarkAges tables that hold extra information to be passed to the CLASS thermodynamics structure
-    static DarkAges::fz_table fz;
+    static DarkAges::Energy_injection_efficiency_table fz;
     fz = *Dep::energy_injection_efficiency;
     bool f_eff_mode = fz.f_eff_mode;
 
@@ -1974,7 +1973,7 @@ namespace Gambit
     result["DM_decay_fraction"] = NP_params.at("fraction");
 
     // Get the results from the DarkAges tables that hold extra information to be passed to the CLASS thermodynamics structure
-    static DarkAges::fz_table fz;
+    static DarkAges::Energy_injection_efficiency_table fz;
     fz = *Dep::energy_injection_efficiency;
     bool f_eff_mode = fz.f_eff_mode;
 

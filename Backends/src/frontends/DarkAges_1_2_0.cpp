@@ -63,7 +63,7 @@ BE_NAMESPACE
     return repeat_front_and_end(input,front,back);
   }
 
-  void calc_f(DarkAges::injectionSpectrum spec, double mass, double lifetime)
+  void calc_f(DarkAges::Energy_injection_spectrum spec, double mass, double lifetime)
   {
     if (alreadyCalculated)
       return;
@@ -139,9 +139,9 @@ BE_NAMESPACE
     return;
   }
 
-  DarkAges::fz_table gather_results()
+  DarkAges::Energy_injection_efficiency_table get_energy_injection_efficiency_table()
   {
-    DarkAges::fz_table result{};
+    DarkAges::Energy_injection_efficiency_table result{};
     logger().send("Message from 'gather_results' backend convenience function in DarkAges v1.0.0 wrapper (Start)",LogTags::info);
 
     auto safe_retrieve = [](const str& key) -> std::vector<double>
@@ -249,7 +249,7 @@ BE_INI_FUNCTION
   // Reset the 'alreadyCalculated' flag
   alreadyCalculated = false;
   logger().send("Message from \'DarkAges_1.2.0_ini\'. Retrieving the injection spectrum",LogTags::info);
-  DarkAges::injectionSpectrum spec = *Dep::injection_spectrum;
+  DarkAges::Energy_injection_spectrum spec = *Dep::energy_injection_spectrum;
   double mass{};
   double lifetime{};
   if (hasDecay)

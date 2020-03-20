@@ -22,7 +22,7 @@ namespace Gambit
 {
   namespace DarkAges
   {
-    struct injectionSpectrum
+    struct Energy_injection_spectrum
     {
       std::vector<double> E_el;
       std::vector<double> E_ph;
@@ -30,7 +30,7 @@ namespace Gambit
       std::vector<double> spec_ph;
     };
 
-    struct fz_table
+    struct Energy_injection_efficiency_table
     {
       // Flag whether DarkAges calculates f_c(z) per injection channel or an
       // effective f(z) which is multiplied with repartition fucntions

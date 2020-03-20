@@ -4453,7 +4453,7 @@ DM_fraction: |
 lifetime: |
     lifetime of the decaying dark matter component (in s).
 
-injection_spectrum: |
+energy_injection_spectrum: |
     Spectrum of electrons/positrons and photons injected by
     the decay or annihilation of a DM particle with a certain mass.
     An dirac-like injection (at an energy of m/2 for decaying DM and
