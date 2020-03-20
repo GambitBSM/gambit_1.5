@@ -616,10 +616,10 @@ index 3ba54a2..d8e972e 100644
        if (out_opt%fields_horiz) then
 diff --git a/multimodecode_gambit.f90 b/multimodecode_gambit.f90
 new file mode 100644
-index 0000000..2e6ac3c
+index 0000000..cf777a6
 --- /dev/null
 +++ b/multimodecode_gambit.f90
-@@ -0,0 +1,1013 @@
+@@ -0,0 +1,1029 @@
 +! Module that contains the interface for MultiModeCode to CosmoBit in GAMBIT
 +MODULE multimodecode_gambit
 +  use modpkparams
@@ -696,7 +696,11 @@ index 0000000..2e6ac3c
 +                                       ginput_steps, &
 +                                       ginput_kmin, &
 +                                       ginput_kmax, &
-+                                       ginput_vparam_rows &
++                                       ginput_vparam_rows, &
++                                       ginput_slowroll_infl_end,&
++                                       ginput_instreheat,&
++                                       ginput_use_deltaN_SR,&
++                                       ginput_use_horiz_cross_approx &
 +																		 ) result(gambit_obs)
 +
 +    type(gambit_inflation_observables) :: gambit_obs ! output
@@ -718,6 +722,10 @@ index 0000000..2e6ac3c
 +    integer, intent(in) :: ginput_steps
 +    real(dp), intent(in) :: ginput_kmin
 +    real(dp), intent(in) :: ginput_kmax
++    logical, intent(in) :: ginput_slowroll_infl_end
++    logical, intent(in) :: ginput_instreheat
++    logical, intent(in) :: ginput_use_deltaN_SR
++    logical, intent(in) :: ginput_use_horiz_cross_approx
 +
 +    !---------------------------------------------------------------
 +    !At the moment, the options related to the reheating stuff from the code are
@@ -799,10 +807,10 @@ index 0000000..2e6ac3c
 +    k_pivot = ginput_k_pivot
 +    dlnk = ginput_dlnk
 +    calc_full_pk = .true.
-+    slowroll_infl_end = .true.
-+    instreheat = .true.
-+    use_deltaN_SR = .false.
-+    use_horiz_cross_approx = .false.
++    slowroll_infl_end = ginput_slowroll_infl_end
++    instreheat = ginput_instreheat
++    use_deltaN_SR = ginput_use_deltaN_SR
++    use_horiz_cross_approx = ginput_use_horiz_cross_approx
 +
 +    ! Set up printer options at the code-level.
 +    out_opt%modpkoutput = .false.
@@ -1209,9 +1217,13 @@ index 0000000..2e6ac3c
 +                                         ginput_vparams,&
 +                                         ginput_N_pivot,&
 +                                         ginput_k_pivot,&
-+                                         ginput_dlnk, &
-+                                         ginput_vparam_rows &
-+                                         ) result(gambit_obs)
++                                         ginput_dlnk,&
++                                         ginput_vparam_rows,&
++                                         ginput_slowroll_infl_end,&
++                                         ginput_instreheat,&
++                                         ginput_use_deltaN_SR,&
++                                         ginput_use_horiz_cross_approx &
++                                                            ) result(gambit_obs)
 +
 +    type(gambit_inflation_observables) :: gambit_obs ! output
 +
@@ -1229,6 +1241,10 @@ index 0000000..2e6ac3c
 +    real(dp), intent(in) :: ginput_N_pivot
 +    real(dp), intent(in) :: ginput_k_pivot
 +    real(dp), intent(in) :: ginput_dlnk
++    logical, intent(in) :: ginput_slowroll_infl_end
++    logical, intent(in) :: ginput_instreheat
++    logical, intent(in) :: ginput_use_deltaN_SR
++    logical, intent(in) :: ginput_use_horiz_cross_approx
 +
 +    !---------------------------------------------------------------
 +    !At the moment, the options related to the reheating stuff from the code are
@@ -1308,10 +1324,10 @@ index 0000000..2e6ac3c
 +    k_pivot = ginput_k_pivot
 +    dlnk = ginput_dlnk
 +    calc_full_pk = .true.
-+    slowroll_infl_end = .true.
-+    instreheat = .true.
-+    use_deltaN_SR = .false.
-+    use_horiz_cross_approx = .false.
++    slowroll_infl_end = ginput_slowroll_infl_end
++    instreheat = ginput_instreheat
++    use_deltaN_SR = ginput_use_deltaN_SR
++    use_horiz_cross_approx = ginput_use_horiz_cross_approx
 +
 +    out_opt%modpkoutput = .false.
 +    out_opt%output_reduced = .true.
