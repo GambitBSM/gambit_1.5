@@ -193,6 +193,13 @@ namespace Gambit
       return "none";
     }
 
+    /// Getter for revealing the required type of the wrapped function's loop manager
+    str functor::loopManagerType()
+    {
+      utils_error().raise(LOCAL_INFO,"The loopManagerType method has not been defined in this class.");
+      return "none";
+    }
+
     /// Getter for revealing the name of the wrapped function's assigned loop manager
     str functor::loopManagerName()
     {
@@ -306,7 +313,7 @@ namespace Gambit
       utils_error().raise(LOCAL_INFO,"The resolveDependency method has not been defined in this class.");
     }
 
-    // Set this functor's loop manager (if it has one)
+    /// Set this functor's loop manager (if it has one)
     void functor::resolveLoopManager (functor*)
     {
       utils_error().raise(LOCAL_INFO,"The resolveLoopManager method has not been defined in this class.");
@@ -370,7 +377,7 @@ namespace Gambit
       bool allowed = false;
       /// DEBUG! See what models are allowed for this functor
       // std::cout << "Checking allowedModels set for functor "<<myLabel<<std::endl;
-      // for(std::set<str>::iterator it = allowedModels.begin(); it != allowedModels.end(); ++it) 
+      // for(std::set<str>::iterator it = allowedModels.begin(); it != allowedModels.end(); ++it)
       // {
       //    std::cout << "  "<< *it << std::endl;
       // }
@@ -600,6 +607,7 @@ namespace Gambit
       iCanManageLoops          (false),
       iRunNested               (false),
       myLoopManagerCapability  ("none"),
+      myLoopManagerType        ("none"),
       myLoopManager            (NULL),
       myCurrentIteration       (NULL),
       globlMaxThreads          (omp_get_max_threads()),
@@ -845,10 +853,17 @@ namespace Gambit
     /// Getter for revealing whether this is permitted to be a manager functor
     bool module_functor_common::canBeLoopManager() { return iCanManageLoops; }
 
-    /// Setter for specifying the capability required of a manager functor, if it is to run this functor nested in a loop.
-    void module_functor_common::setLoopManagerCapability (str cap) { iRunNested = true; myLoopManagerCapability = cap; }
+    /// Setter for specifying the capability and type required of a manager functor, if it is to run this functor nested in a loop.
+    void module_functor_common::setLoopManagerCapType (str cap, str t)
+    {
+      iRunNested = true;
+      myLoopManagerCapability = cap;
+      myLoopManagerType = t;
+    }
     /// Getter for revealing the required capability of the wrapped function's loop manager
     str module_functor_common::loopManagerCapability() { return myLoopManagerCapability; }
+    /// Getter for revealing the required type of the wrapped function's loop manager
+    str module_functor_common::loopManagerType() { return myLoopManagerType; }
     /// Getter for revealing the name of the wrapped function's assigned loop manager
     str module_functor_common::loopManagerName() { return (myLoopManager == NULL ? "none" : myLoopManager->name()); }
     /// Getter for revealing the module of the wrapped function's assigned loop manager
@@ -1114,6 +1129,9 @@ namespace Gambit
       // Remove the entry from the resolvable backend reqs list...
       myResolvableBackendReqs.erase(key);
 
+      // Remove the entry from the grouped backend reqs list...
+      myGroupedBackendReqs.at(backendreq_groups.at(key)).erase(key);
+
       // Check that the model is not already in the conditional backend reqs list, then add it
       if (myModelConditionalBackendReqs.find(model) == myModelConditionalBackendReqs.end())
       {
@@ -1311,11 +1329,20 @@ namespace Gambit
     {
       if (dep_functor->capability() != myLoopManagerCapability or not dep_functor->canBeLoopManager())
       {
-        sspair key (dep_functor->quantity());
-        str errmsg = "Cannot set loop manager for nested functor:";
-        errmsg +=  "\nFunction " + myName + " in " + myOrigin + " does not need a loop manager with"
-                   "\ncapability " + key.first + ".";
-        utils_error().raise(LOCAL_INFO,errmsg);
+        utils_error().raise(LOCAL_INFO, "Cannot set loop manager for nested functor:\n"
+         "Function " + myName + " in " + myOrigin + " does not need a loop manager with\n"
+         "capability " + dep_functor->capability() + ".");
+      }
+      // Do type checking only if the need for a manger was declared with a specific type
+      if (myLoopManagerType != "any")
+      {
+        if (dep_functor->type() != myLoopManagerType)
+        {
+          utils_error().raise(LOCAL_INFO, "Cannot set loop manager for nested functor:\n"
+           "Function " + myName + " in " + myOrigin + " requires a manager with\n"
+           "type " + dep_functor->type() + ".");
+        }
+        resolveDependency(dep_functor);
       }
       myLoopManager = dep_functor;
     }
@@ -1483,12 +1510,11 @@ namespace Gambit
       }
       // If this model fits any conditional backend requirements (or descended from one that can be interpreted as one that fits any), then activate them.
       std::set<sspair> backend_reqs_to_activate = model_conditional_backend_reqs(model);
-      if (verbose) cout << "model: " << model << endl;
       for (std::set<sspair>::iterator it = backend_reqs_to_activate.begin() ; it != backend_reqs_to_activate.end(); ++it)
       {
         if (verbose) cout << "req: " << it->first << " " << it->second << endl;
         myResolvableBackendReqs.insert(*it);
-        myGroupedBackendReqs[backendreq_groups[*it]].insert(*it);
+        myGroupedBackendReqs.at(backendreq_groups.at(*it)).insert(*it);
       }
     }
 

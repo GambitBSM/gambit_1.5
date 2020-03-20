@@ -30,6 +30,14 @@
 ///          (anders.kvellestad@nordita.org)
 ///  \date 2016 Feb
 ///
+///  \author Ankit Beniwal
+///          (ankit.beniwal@adelaide.edu.au)
+///  \date 2016 Oct
+///
+///  \author Tomas Gonzalo
+///          (t.e.gonzalo@fys.uio.no)
+///  \date 2018 Jan
+///
 ///  *********************************************
 
 
@@ -102,12 +110,17 @@ START_MODULE
   #undef CAPABILITY
 
   // Basic mass extractors for different types of spectra, for use with precision likelihoods and other things not needing a whole spectrum object.
-  QUICK_FUNCTION(PrecisionBit, mw, NEW_CAPABILITY, mw_from_SM_spectrum,   triplet<double>, (), (SM_spectrum, Spectrum))
-  QUICK_FUNCTION(PrecisionBit, mw, OLD_CAPABILITY, mw_from_SS_spectrum,   triplet<double>, (SingletDM, SingletDMZ3), (SingletDM_spectrum, Spectrum))
-  QUICK_FUNCTION(PrecisionBit, mw, OLD_CAPABILITY, mw_from_MSSM_spectrum, triplet<double>, (MSSM63atQ, MSSM63atMGUT), (MSSM_spectrum, Spectrum))
-  QUICK_FUNCTION(PrecisionBit, mh, NEW_CAPABILITY, mh_from_SM_spectrum,   triplet<double>, (), (SM_spectrum, Spectrum))
-  QUICK_FUNCTION(PrecisionBit, mh, OLD_CAPABILITY, mh_from_SS_spectrum,   triplet<double>, (SingletDM, SingletDMZ3), (SingletDM_spectrum, Spectrum))
-  QUICK_FUNCTION(PrecisionBit, mh, OLD_CAPABILITY, mh_from_MSSM_spectrum, triplet<double>, (MSSM63atQ, MSSM63atMGUT), (MSSM_spectrum, Spectrum))
+  QUICK_FUNCTION(PrecisionBit, mw, NEW_CAPABILITY, mw_from_SM_spectrum,                   triplet<double>, (),                                              (SM_spectrum, Spectrum))
+  QUICK_FUNCTION(PrecisionBit, mw, OLD_CAPABILITY, mw_from_ScalarSingletDM_Z2_spectrum,   triplet<double>, (ScalarSingletDM_Z2,ScalarSingletDM_Z2_running), (ScalarSingletDM_Z2_spectrum, Spectrum))
+  QUICK_FUNCTION(PrecisionBit, mw, OLD_CAPABILITY, mw_from_ScalarSingletDM_Z3_spectrum,   triplet<double>, (ScalarSingletDM_Z3,ScalarSingletDM_Z3_running), (ScalarSingletDM_Z3_spectrum, Spectrum))
+  QUICK_FUNCTION(PrecisionBit, mw, OLD_CAPABILITY, mw_from_VectorSingletDM_Z2_spectrum,   triplet<double>, (VectorSingletDM_Z2),                            (VectorSingletDM_Z2_spectrum, Spectrum))
+  QUICK_FUNCTION(PrecisionBit, mw, OLD_CAPABILITY, mw_from_DiracSingletDM_Z2_spectrum,    triplet<double>, (DiracSingletDM_Z2),                             (DiracSingletDM_Z2_spectrum, Spectrum))
+  QUICK_FUNCTION(PrecisionBit, mw, OLD_CAPABILITY, mw_from_MajoranaSingletDM_Z2_spectrum, triplet<double>, (MajoranaSingletDM_Z2),                          (MajoranaSingletDM_Z2_spectrum, Spectrum))
+  QUICK_FUNCTION(PrecisionBit, mw, OLD_CAPABILITY, mw_from_MSSM_spectrum,                 triplet<double>, (MSSM63atQ, MSSM63atMGUT),                       (MSSM_spectrum, Spectrum))
+  QUICK_FUNCTION(PrecisionBit, mh, NEW_CAPABILITY, mh_from_SM_spectrum,                   triplet<double>, (),                                              (SM_spectrum, Spectrum))
+  QUICK_FUNCTION(PrecisionBit, mh, OLD_CAPABILITY, mh_from_ScalarSingletDM_Z2_spectrum,   triplet<double>, (ScalarSingletDM_Z2,ScalarSingletDM_Z2_running), (ScalarSingletDM_Z2_spectrum, Spectrum))
+  QUICK_FUNCTION(PrecisionBit, mh, OLD_CAPABILITY, mh_from_ScalarSingletDM_Z3_spectrum,   triplet<double>, (ScalarSingletDM_Z3,ScalarSingletDM_Z3_running), (ScalarSingletDM_Z3_spectrum, Spectrum))
+  QUICK_FUNCTION(PrecisionBit, mh, OLD_CAPABILITY, mh_from_MSSM_spectrum,                 triplet<double>, (MSSM63atQ, MSSM63atMGUT),                       (MSSM_spectrum, Spectrum))
 
   // SM nuisance likelihoods
   QUICK_FUNCTION(PrecisionBit, lnL_Z_mass,   NEW_CAPABILITY, lnL_Z_mass_chi2,   double, (), (SMINPUTS, SMInputs))
@@ -118,8 +131,7 @@ START_MODULE
   QUICK_FUNCTION(PrecisionBit, lnL_alpha_s,  NEW_CAPABILITY, lnL_alpha_s_chi2,  double, (), (SMINPUTS, SMInputs))
   QUICK_FUNCTION(PrecisionBit, lnL_GF,       NEW_CAPABILITY, lnL_GF_chi2,       double, (), (SMINPUTS, SMInputs))
 
-  QUICK_FUNCTION(PrecisionBit, lnL_light_quark_masses, NEW_CAPABILITY, lnL_light_quark_masses_chi2, double, (),
-          (SMINPUTS, SMInputs))
+  QUICK_FUNCTION(PrecisionBit, lnL_light_quark_masses, NEW_CAPABILITY, lnL_light_quark_masses_chi2, double, (), (SMINPUTS, SMInputs))
 
 
   // Electroweak precision likelihoods: W mass
@@ -199,15 +211,14 @@ START_MODULE
     START_FUNCTION(triplet<double>)
     NEEDS_CLASSES_FROM(gm2calc, default)
     DEPENDENCY(MSSM_spectrum, Spectrum)
-    BACKEND_REQ(calculate_amu_1loop, (libgm2calc), double, (const gm2calc::MSSMNoFV_onshell&))
-    BACKEND_REQ(calculate_amu_2loop, (libgm2calc), double, (const gm2calc::MSSMNoFV_onshell&))
-    BACKEND_REQ(calculate_uncertainty_amu_2loop, (libgm2calc), double, (const gm2calc::MSSMNoFV_onshell&))
+    BACKEND_REQ(calculate_amu_1loop, (libgm2calc), double, (const gm2calc_default::gm2calc::MSSMNoFV_onshell&))
+    BACKEND_REQ(calculate_amu_2loop, (libgm2calc), double, (const gm2calc_default::gm2calc::MSSMNoFV_onshell&))
+    BACKEND_REQ(calculate_uncertainty_amu_2loop, (libgm2calc), double, (const gm2calc_default::gm2calc::MSSMNoFV_onshell&))
     BACKEND_OPTION( (gm2calc), (libgm2calc) )
     ALLOW_MODELS(MSSM30atQ, MSSM30atQ_mA, MSSM30atMGUT, MSSM30atMGUT_mA, NUHM2)
     #undef FUNCTION
 
   #undef CAPABILITY
-
 
   // Observable: SM contribution to (g-2)_mu
   #define CAPABILITY muon_gm2_SM
@@ -222,6 +233,24 @@ START_MODULE
     START_FUNCTION(triplet<double>)
     #undef FUNCTION
 
+  #undef CAPABILITY
+
+  // EWPO corrections from heavy neutrinos
+  #define CAPABILITY prec_sinW2_eff
+    #define FUNCTION RHN_sinW2_eff
+    START_FUNCTION(triplet<double>)
+    DEPENDENCY(SeesawI_Theta, Eigen::Matrix3cd)
+    ALLOW_MODEL(RightHandedNeutrinos)
+    #undef FUNCTION
+  #undef CAPABILITY
+
+  #define CAPABILITY mw
+    #define FUNCTION RHN_mw
+    START_FUNCTION(triplet<double>)
+    DEPENDENCY(prec_sinW2_eff, triplet<double>)
+    DEPENDENCY(SeesawI_Theta, Eigen::Matrix3cd)
+    ALLOW_MODEL(RightHandedNeutrinos)
+    #undef FUNCTION
   #undef CAPABILITY
 
 #undef MODULE

@@ -15,6 +15,23 @@
 ///  \author Chris Rogan
 ///          (crogan@cern.ch)
 ///  \date 2014 Aug
+///  \date 2018 June
+///
+///  \author Tomas Gonzalo
+///          (t.e.gonzalo@fys.uio.no)
+///  \date 2018 Jan
+///
+///  \author Marcin Chrzaszcz
+///          (mchrzasz@cern.ch)
+///  \date 2018
+///
+///  \author Chrisotph Weniger
+///          (c.weniger@uva.nl)
+///  \date 2018 Jun
+///
+///  \author Ankit Beniwal
+///         (ankit.beniwal@adelaide.edu.au)
+///  \date 2016 Oct
 ///
 ///  *********************************************
 
@@ -633,11 +650,43 @@ namespace Gambit
       result.upper = result.central * LE.get(Par::Pole_Mass_1srd_high, "W+");
       result.lower = result.central * LE.get(Par::Pole_Mass_1srd_low, "W+");
     }
-    void mw_from_SS_spectrum(triplet<double> &result)
+    void mw_from_ScalarSingletDM_Z2_spectrum(triplet<double> &result)
     {
-      using namespace Pipes::mw_from_SS_spectrum;
-      const SubSpectrum& LE = Dep::SingletDM_spectrum->get_LE();
+      using namespace Pipes::mw_from_ScalarSingletDM_Z2_spectrum;
+      const SubSpectrum& LE = Dep::ScalarSingletDM_Z2_spectrum->get_LE();
       result.central = LE.get(Par::Pole_Mass, "W+");;
+      result.upper = result.central * LE.get(Par::Pole_Mass_1srd_high, "W+");
+      result.lower = result.central * LE.get(Par::Pole_Mass_1srd_low, "W+");
+    }
+    void mw_from_ScalarSingletDM_Z3_spectrum(triplet<double> &result)
+    {
+      using namespace Pipes::mw_from_ScalarSingletDM_Z3_spectrum;
+      const SubSpectrum& LE = Dep::ScalarSingletDM_Z3_spectrum->get_LE();
+      result.central = LE.get(Par::Pole_Mass, "W+");;
+      result.upper = result.central * LE.get(Par::Pole_Mass_1srd_high, "W+");
+      result.lower = result.central * LE.get(Par::Pole_Mass_1srd_low, "W+");
+    }
+    void mw_from_VectorSingletDM_Z2_spectrum(triplet<double> &result)
+    {
+      using namespace Pipes::mw_from_VectorSingletDM_Z2_spectrum;
+      const SubSpectrum& LE = Dep::VectorSingletDM_Z2_spectrum->get_LE();
+      result.central = LE.get(Par::Pole_Mass, "W+");
+      result.upper = result.central * LE.get(Par::Pole_Mass_1srd_high, "W+");
+      result.lower = result.central * LE.get(Par::Pole_Mass_1srd_low, "W+");
+    }
+    void mw_from_MajoranaSingletDM_Z2_spectrum(triplet<double> &result)
+    {
+      using namespace Pipes::mw_from_MajoranaSingletDM_Z2_spectrum;
+      const SubSpectrum& LE = Dep::MajoranaSingletDM_Z2_spectrum->get_LE();
+      result.central = LE.get(Par::Pole_Mass, "W+");
+      result.upper = result.central * LE.get(Par::Pole_Mass_1srd_high, "W+");
+      result.lower = result.central * LE.get(Par::Pole_Mass_1srd_low, "W+");
+    }
+      void mw_from_DiracSingletDM_Z2_spectrum(triplet<double> &result)
+    {
+      using namespace Pipes::mw_from_DiracSingletDM_Z2_spectrum;
+      const SubSpectrum& LE = Dep::DiracSingletDM_Z2_spectrum->get_LE();
+      result.central = LE.get(Par::Pole_Mass, "W+");
       result.upper = result.central * LE.get(Par::Pole_Mass_1srd_high, "W+");
       result.lower = result.central * LE.get(Par::Pole_Mass_1srd_low, "W+");
     }
@@ -657,10 +706,18 @@ namespace Gambit
       result.upper = result.central * HE.get(Par::Pole_Mass_1srd_high, 25, 0);
       result.lower = result.central * HE.get(Par::Pole_Mass_1srd_low, 25, 0);
     }
-    void mh_from_SS_spectrum(triplet<double> &result)
+    void mh_from_ScalarSingletDM_Z2_spectrum(triplet<double> &result)
     {
-      using namespace Pipes::mh_from_SS_spectrum;
-      const SubSpectrum& HE = Dep::SingletDM_spectrum->get_HE();
+      using namespace Pipes::mh_from_ScalarSingletDM_Z2_spectrum;
+      const SubSpectrum& HE = Dep::ScalarSingletDM_Z2_spectrum->get_HE();
+      result.central = HE.get(Par::Pole_Mass, 25, 0);
+      result.upper = result.central * HE.get(Par::Pole_Mass_1srd_high, 25, 0);
+      result.lower = result.central * HE.get(Par::Pole_Mass_1srd_low, 25, 0);
+    }
+    void mh_from_ScalarSingletDM_Z3_spectrum(triplet<double> &result)
+    {
+      using namespace Pipes::mh_from_ScalarSingletDM_Z3_spectrum;
+      const SubSpectrum& HE = Dep::ScalarSingletDM_Z3_spectrum->get_HE();
       result.central = HE.get(Par::Pole_Mass, 25, 0);
       result.upper = result.central * HE.get(Par::Pole_Mass_1srd_high, 25, 0);
       result.lower = result.central * HE.get(Par::Pole_Mass_1srd_low, 25, 0);
@@ -700,7 +757,7 @@ namespace Gambit
 
     /// b quark mass likelihood
     /// m_b (mb)^MSbar = 4.18 +/- 0.03 GeV (1 sigma), Gaussian.
-   /// Reference: http://pdg.lbl.gov/2016/reviews/rpp2016-rev-qcd.pdf = C. Patrignani et al. (Particle Data Group), Chin. Phys. C, 40, 100001 (2016).
+    /// Reference: http://pdg.lbl.gov/2016/reviews/rpp2016-rev-qcd.pdf = C. Patrignani et al. (Particle Data Group), Chin. Phys. C, 40, 100001 (2016).
     void lnL_mbmb_chi2(double &result)
     {
       using namespace Pipes::lnL_mbmb_chi2;
@@ -710,8 +767,8 @@ namespace Gambit
     }
 
     /// c quark mass likelihood
-    /// m_c (mc)^MSbar = 1.275 +/- 0.025 GeV (1 sigma), Gaussian.
-     ///  Reference: http://pdg.lbl.gov/2016/reviews/rpp2016-rev-qcd.pdf = C. Patrignani et al. (Particle Data Group), Chin. Phys. C, 40, 100001 (2016).
+    /// m_c (mc)^MSbar = 1.28 +/- 0.03 GeV (1 sigma), Gaussian.
+    ///  Reference: http://pdg.lbl.gov/2016/reviews/rpp2016-rev-qcd.pdf = C. Patrignani et al. (Particle Data Group), Chin. Phys. C, 40, 100001 (2016).
     void lnL_mcmc_chi2(double &result)
     {
       using namespace Pipes::lnL_mcmc_chi2;
@@ -748,7 +805,7 @@ namespace Gambit
     }
 
     /// alpha^{-1}(mZ)^MSbar likelihood
-    /// alpha^{-1}(mZ)^MSbar = 127.940 +/- 0.014 (1 sigma), Gaussian.  (PDG global SM fit)
+    /// alpha^{-1}(mZ)^MSbar = 127.950 +/- 0.017 (1 sigma), Gaussian.  (PDG global SM fit)
     /// Reference: http://pdg.lbl.gov/2016/reviews/rpp2016-rev-standard-model.pdf = C. Patrignani et al. (Particle Data Group), Chin. Phys. C, 40, 100001 (2016).
     void lnL_alpha_em_chi2(double &result)
     {
@@ -792,7 +849,7 @@ namespace Gambit
 
     /// Simple, naive h boson mass likelihood
     /// Reference: D. Aad et al arxiv:1503.07589, Phys.Rev.Lett. 114 (2015) 191803 (ATLAS + CMS combination)
-   /// Also used dierctly in http://pdg.lbl.gov/2016/tables/rpp2016-sum-gauge-higgs-bosons.pdf = C. Patrignani et al. (Particle Data Group), Chin. Phys. C, 40, 100001 (2016).
+    /// Also used dierctly in http://pdg.lbl.gov/2016/tables/rpp2016-sum-gauge-higgs-bosons.pdf = C. Patrignani et al. (Particle Data Group), Chin. Phys. C, 40, 100001 (2016).
     void lnL_h_mass_chi2(double &result)
     {
       using namespace Pipes::lnL_h_mass_chi2;
@@ -869,7 +926,7 @@ namespace Gambit
       using namespace Pipes::GM2C_SUSY;
       const SubSpectrum& mssm = Dep::MSSM_spectrum->get_HE();
 
-      gm2calc::MSSMNoFV_onshell model;
+      gm2calc_default::gm2calc::MSSMNoFV_onshell model;
 
       try
       {
@@ -947,18 +1004,20 @@ namespace Gambit
         model.get_physical().MFu =smin.mU; //MSbar
         model.get_physical().MFc =smin.mCmC; // MSbar
 
-        /// Use hardcoded values as reccommended by GM2Calc authours
-        /// unless the user really wants to change these
-        double alpha_MZ = runOptions->getValueOrDef
-        <double>(0.00729735, "GM2Calc_extra_alpha_e_MZ");
-        double alpha_thompson = runOptions->getValueOrDef
-        <double>(0.00775531, "GM2Calc_extra_alpha_e_thompson_limit");
+        /// alpha_MZ := alpha(0) (1 - \Delta^{OS}(M_Z) ) where
+        /// \Delta^{OS}(M_Z) = quark and lepton contributions to
+        // on-shell renormalized photon vacuum polarization
+        // default value recommended by GM2calc from arxiv:1105.3149
+        const double alpha_MZ = runOptions->getValueOrDef
+        <double>(alpha_e_OS_MZ, "GM2Calc_extra_alpha_e_MZ");
+        const double alpha_thomson = runOptions->getValueOrDef
+        <double>(alpha_e_OS_thomson_limit, "GM2Calc_extra_alpha_e_thomson_limit");
 
         if (alpha_MZ > std::numeric_limits<double>::epsilon())
           model.set_alpha_MZ(alpha_MZ);
 
-        if (alpha_thompson > std::numeric_limits<double>::epsilon())
-          model.set_alpha_thompson(alpha_thompson);
+        if (alpha_thomson > std::numeric_limits<double>::epsilon())
+          model.set_alpha_thompson(alpha_thomson);
 
         model.set_scale(mssm.GetScale());                   // 2L
 
@@ -984,25 +1043,18 @@ namespace Gambit
         }
 
       }
-      catch (const gm2calc_1_2_0::gm2calc::Abstract_Error& e)
+      catch (const gm2calc_default::gm2calc::Error& e)
       {
         std::ostringstream err;
-        err << "gm2calc 1.2.0 routine convert_to_onshell raised error: "
-        << e.what() << ".";
-        invalid_point().raise(err.str());
-      }
-      catch (const gm2calc_1_3_0::gm2calc::Abstract_Error& e)
-      {
-        std::ostringstream err;
-        err << "gm2calc 1.3.0 routine convert_to_onshell raised error: "
+        err << "gm2calc routine convert_to_onshell raised error: "
         << e.what() << ".";
         invalid_point().raise(err.str());
       }
 
-      double error = BEreq::calculate_uncertainty_amu_2loop(model);
+      const double error = BEreq::calculate_uncertainty_amu_2loop(model);
 
-      double amumssm = BEreq::calculate_amu_1loop(model)
-                       + BEreq::calculate_amu_2loop(model);
+      const double amumssm = BEreq::calculate_amu_1loop(model)
+         + BEreq::calculate_amu_2loop(model);
 
       // Convert from a_mu to g-2
       result.central = 2.0*amumssm;
@@ -1066,6 +1118,43 @@ namespace Gambit
       result = 0.1;
       return;
 
+    }
+
+    // EWPO corrections from heavy neutrinos, from 1407.6607 and 1502.00477
+
+    // Weak mixing angle sinW2, calculation from 1211.1864
+    void RHN_sinW2_eff(triplet<double> &result)
+    {
+      using namespace Pipes::RHN_sinW2_eff;
+      Eigen::Matrix3cd Theta = *Dep::SeesawI_Theta;
+      Eigen::Matrix3d ThetaNorm = (Theta * Theta.adjoint()).real();
+
+      double sinW2_SM = 0.23152; // taken from 1211.1864
+      double sinW2_SM_err = 0.00010;
+
+      result.central = 0.5 - 0.5*sqrt(1.0 - 4*sinW2_SM*(1.0 - sinW2_SM)*sqrt(1.0 - ThetaNorm(0,0) - ThetaNorm(1,1)) ); 
+      result.upper = (1.0 - 2*sinW2_SM) / (1.0 - 2*result.central) * sqrt(1.0 - ThetaNorm(0,0) - ThetaNorm(1,1)) * sinW2_SM_err;
+      result.lower = result.upper;
+    }
+
+    // Mass of W boson, calculation from 1502.00477
+    void RHN_mw(triplet<double> &result)
+    {
+      using namespace Pipes::RHN_mw;
+      Eigen::Matrix3cd Theta = *Dep::SeesawI_Theta;
+      triplet<double> sinW2 = *Dep::prec_sinW2_eff;
+      Eigen::Matrix3d ThetaNorm = (Theta * Theta.adjoint()).real();
+
+      // SM precision calculation, from 1211.1864
+      double sinW2_SM = 0.23152;
+      double sinW2_SM_err = 0.00010;
+      double mW_SM = 80.361;
+      double mW_SM_err = 0.010;
+
+      // Radiative corrections, form Marco's paper
+      result.central = sqrt( pow(mW_SM,2) * sinW2_SM / sinW2.central * sqrt(1.0 - ThetaNorm(0,0) - ThetaNorm(1,1))  );
+      result.upper = 0.5*result.central*sqrt( pow(2*mW_SM_err/mW_SM,2) + pow(sinW2_SM_err/sinW2_SM,2) + pow(sinW2.upper/sinW2.central,2)  );
+      result.lower = result.upper;
     }
 
   }

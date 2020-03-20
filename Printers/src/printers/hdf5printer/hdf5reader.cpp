@@ -19,6 +19,7 @@
 
 #include "gambit/Printers/printers/hdf5reader.hpp"
 #include "gambit/Printers/printers/hdf5printer.hpp"
+#include "gambit/Printers/printers/hdf5printer/hdf5tools.hpp"
 #include "gambit/Utils/util_functions.hpp"
 #include "gambit/Logs/logger.hpp"
 
@@ -34,7 +35,7 @@ namespace Gambit
 
      hid_t openfile_read(std::string file)
      {
-        hid_t file_id = H5Fopen(file.c_str(), H5F_ACC_RDONLY, H5P_DEFAULT);
+        hid_t file_id = HDF5::openFile(file);
         if(file_id<0)
         {
             std::ostringstream errmsg;
@@ -57,16 +58,26 @@ namespace Gambit
         return ls_out;
      }
 
+     HDF5File::HDF5File(const std::string& file, const std::string& group)
+      : file_id(openfile_read(file))
+      , location_id(HDF5::openGroup(file_id, group, true))
+     {}
+
+     HDF5File::~HDF5File()
+     {
+        HDF5::closeGroup(location_id);
+        HDF5::closeFile(file_id);
+     }
+
      HDF5Reader::HDF5Reader(const Options& options)
       : file( options.getValue<std::string>("file"))
       , group( options.getValue<std::string>("group") )
-      , file_id(openfile_read(file))
-      , location_id(HDF5::openGroup(file_id, group, true))
-      , all_datasets(lsGroup_process(location_id))
-      , pointIDs        (location_id, "pointID", true, 'r')
-      , pointIDs_isvalid(location_id, "pointID_isvalid", true, 'r')
-      , mpiranks        (location_id, "MPIrank", true, 'r')
-      , mpiranks_isvalid(location_id, "MPIrank_isvalid", true, 'r')
+      , H5file(file,group)
+      , all_datasets(lsGroup_process(H5file.location_id))
+      , pointIDs        (H5file.location_id, "pointID", true, 'r')
+      , pointIDs_isvalid(H5file.location_id, "pointID_isvalid", true, 'r')
+      , mpiranks        (H5file.location_id, "MPIrank", true, 'r')
+      , mpiranks_isvalid(H5file.location_id, "MPIrank_isvalid", true, 'r')
       , current_dataset_index(0)
       , current_point(nullpoint)
      {
@@ -94,12 +105,17 @@ namespace Gambit
          errmsg << "This most likely indicates corruption of the datasets (possibly due to unsafe shutdown).";
          printer_error().raise(LOCAL_INFO, errmsg.str());
        }
+       //std::cout<<"Created HDF5 reader object for file "<<file<<std::endl;
      }
 
      HDF5Reader::~HDF5Reader()
      {
-        HDF5::closeFile(file_id);
-        HDF5::closeGroup(location_id);
+        // Need to close the datasets that aren't managed by a buffermanager object
+        pointIDs.closeDataSet();
+        mpiranks.closeDataSet();
+        pointIDs_isvalid.closeDataSet();
+        mpiranks_isvalid.closeDataSet();
+        //std::cout<<"Deleted HDF5 reader object for file "<<file<<std::endl;
      }
 
      /// @{ Base class virtual interface functions
@@ -120,40 +136,15 @@ namespace Gambit
      /// Get next rank/ptID pair in data file
      PPIDpair HDF5Reader::get_next_point()
      {
-        // UPDATE: Don't want any of that! Need to be able to keep track of which iteration we are up to.
-        //if(current_point!=nullpoint)
-        //{
-        //   ++current_dataset_index;
-        //}
-        //bool stop_loop = false;
-        //while(not stop_loop)
-        //{
-        //   if(eoi())
-        //   {
-        //     current_point = nullpoint;
-        //     stop_loop = true;
-        //   }
-        //   else
-        //   {
-        //     bool pvalid = pointIDs_isvalid.get_entry(current_dataset_index);
-        //     bool mvalid = mpiranks_isvalid.get_entry(current_dataset_index);
-        //     if(pvalid and mvalid)
-        //     {
-        //       unsigned long pid = pointIDs.get_entry(current_dataset_index);
-        //       int mpirank       = mpiranks.get_entry(current_dataset_index);
-        //       current_point = PPIDpair(pid,mpirank);
-        //       stop_loop = true;
-        //     }
-        //     else
-        //     {
-        //       // Point didn't contain valid data, try next one.
-        //       ++current_dataset_index;
-        //     }
-        //   }
-        //}
-
-        // New method
+        // New method; just move dataset index and then try to retrieve the point
         ++current_dataset_index;
+        current_point = get_current_point();
+        return current_point;
+     }
+
+     /// Get current rank/ptID pair in data file
+     PPIDpair HDF5Reader::get_current_point()
+     {
         if(eoi())
         {
           // End of data, return nullpoint;
@@ -178,12 +169,6 @@ namespace Gambit
         return current_point;
      }
 
-     /// Get current rank/ptID pair in data file
-     PPIDpair HDF5Reader::get_current_point()
-     {
-        return current_point;
-     }
-
      // Get a linear index which corresponds to the current rank/ptID pair in the iterative sense
      ulong HDF5Reader::get_current_index()
      {
@@ -202,7 +187,7 @@ namespace Gambit
      /// retrieved as, not what it is necessarily literally stored as in the output.
      std::size_t HDF5Reader::get_type(const std::string& label)
      {
-        hid_t datatype_id = HDF5::getH5DatasetType(location_id, label);
+        hid_t datatype_id = HDF5::getH5DatasetType(H5file.location_id, label);
         // Need to match HDF5 datatype to a printer type ID code.
         // In principle we may like to retrieve a certain type of data in a fancy way,
         // as with ModelParameters or vectors, however we can't really do that in an
@@ -222,14 +207,14 @@ namespace Gambit
 
         // Matching of HDF5 datatypes to Printer type IDs
         // Need to use H5Tequal to check if the HDF5 type IDs are equal
-        std::size_t typeID;
-        #define GET_TYPE_CASES(r,data,elem) \
+        std::size_t typeID=0;
+        #define GET_TYPE_CASES(r,data,elem)                          \
         if( H5Tequal(datatype_id, get_hdf5_data_type<elem>::type()) )\
-        { \
-            typeID = getTypeID<elem>(); \
-        } \
+        {                                                            \
+            typeID = getTypeID<elem>();                              \
+        }                                                            \
         else
-        BOOST_PP_SEQ_FOR_EACH(GET_TYPE_CASES, _, H5_OUTPUT_TYPES)
+        BOOST_PP_SEQ_FOR_EACH(GET_TYPE_CASES, , H5_OUTPUT_TYPES)
         #undef GET_TYPE_CASES
         {
           std::ostringstream err;
@@ -261,7 +246,7 @@ namespace Gambit
      /// Search for the PPID supplied in the input data and return the index of the first match
      ulong HDF5Reader::get_index_from_PPID(const PPIDpair ppid)
      {
-        ulong out_index;
+        ulong out_index=0;
         if(ppid == current_point)
         {
            // Matches current point; send it out

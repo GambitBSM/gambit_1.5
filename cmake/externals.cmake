@@ -26,10 +26,12 @@
 #  \date 2014 Nov, Dec
 #  \date 2015 May
 #
+#  \author Ben Farmer
+#          (b.farmer@imperial.ac.uk)
+#  \date 2018 Oct
+#
 #************************************************
 
-
-include(ExternalProject)
 
 # Specify the location of unreleased codes in the gambit_internal repository.
 set(GAMBIT_INTERNAL "${PROJECT_SOURCE_DIR}/../gambit_internal/unreleased")
@@ -54,10 +56,6 @@ set(scanner_download "${PROJECT_SOURCE_DIR}/ScannerBit/downloaded")
 # Safer download function than what is in cmake (avoid buggy libcurl vs https issue)
 set(DL_BACKEND "${PROJECT_SOURCE_DIR}/cmake/scripts/safe_dl.sh" "${backend_download}" "${CMAKE_COMMAND}")
 set(DL_SCANNER "${PROJECT_SOURCE_DIR}/cmake/scripts/safe_dl.sh" "${scanner_download}" "${CMAKE_COMMAND}")
-
-# Define the newline strings to use for OSX-safe substitution.
-set(nl "___totally_unlikely_to_occur_naturally___")
-set(true_nl \"\\n\")
 
 # Define the module location switch differently depending on compiler
 if("${CMAKE_Fortran_COMPILER_ID}" STREQUAL "Intel")
@@ -129,9 +127,13 @@ macro(add_extra_targets type package ver dir dl target)
 endmacro()
 
 # Function to check whether or not a given scanner or backend has been ditched
-function(check_ditch_status name version)
+function(check_ditch_status name version dir)
+  # Check first for optional argument for Mathematica backends
+  if ((ARGN STREQUAL "Mathematica" OR ARGN STREQUAL "mathematica") AND NOT HAVE_MATHEMATICA)
+    set (itch "${itch}" "${name}_${version}")
+  endif()
   foreach(ditch_command ${itch})
-    execute_process(COMMAND ${PYTHON_EXECUTABLE} -c "print \"${name}_${version}\".startswith(\"${ditch_command}\")"
+    execute_process(COMMAND ${PYTHON_EXECUTABLE} -c "print(\"${name}_${version}\".startswith(\"${ditch_command}\"))"
                     WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
                     RESULT_VARIABLE result
                     OUTPUT_VARIABLE output)
@@ -141,6 +143,9 @@ function(check_ditch_status name version)
         set(ditched_${name}_${version} TRUE PARENT_SCOPE)
         message("${BoldCyan} X Excluding ${name} ${version} from GAMBIT configuration.${ColourReset}")
       endif()
+      # Remove the build and source dirs to prevent errors when building after later re-cmaking without ditching this component
+      execute_process(COMMAND ${CMAKE_COMMAND} -E remove_directory ${name}_${version}-prefix)
+      execute_process(COMMAND ${CMAKE_COMMAND} -E remove_directory ${dir})
     endif()
   endforeach()
 endfunction()

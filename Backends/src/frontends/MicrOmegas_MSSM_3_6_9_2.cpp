@@ -80,7 +80,7 @@ BE_INI_FUNCTION
         {
             ofs << endl;
             const DecayTable& myDecays = *Dep::decay_rates;
-            SLHAstruct decayBlock = myDecays.getSLHAea(true);
+            SLHAstruct decayBlock = myDecays.getSLHAea(1,true,*Dep::SLHA_pseudonyms);
             ofs << decayBlock;
         }
         ofs.close();

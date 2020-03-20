@@ -37,10 +37,11 @@ set(clean_files ${clean_files} "${PROJECT_SOURCE_DIR}/Printers/CMakeLists.txt")
 set(clean_files ${clean_files} "${PROJECT_SOURCE_DIR}/Models/CMakeLists.txt")
 
 # Make sure clean removes the scratch files indicating that the harvesters have been run.
-set(clean_files ${clean_files} "${PROJECT_SOURCE_DIR}/scratch/models_harvested")
-set(clean_files ${clean_files} "${PROJECT_SOURCE_DIR}/scratch/backends_harvested")
-set(clean_files ${clean_files} "${PROJECT_SOURCE_DIR}/scratch/modules_harvested")
-set(clean_files ${clean_files} "${PROJECT_SOURCE_DIR}/scratch/printers_harvested")
+set(clean_files ${clean_files} "${PROJECT_SOURCE_DIR}/scratch/build_time/modules_harvested")
+set(clean_files ${clean_files} "${PROJECT_SOURCE_DIR}/scratch/build_time/backends_harvested")
+set(clean_files ${clean_files} "${PROJECT_SOURCE_DIR}/scratch/build_time/models_harvested")
+set(clean_files ${clean_files} "${PROJECT_SOURCE_DIR}/scratch/build_time/printers_harvested")
+set(clean_files ${clean_files} "${PROJECT_SOURCE_DIR}/scratch/build_time/colliders_harvested")
 
 # Arrange for removal of all generated headers upon "make clean".
 set(clean_files ${clean_files} "${PROJECT_SOURCE_DIR}/Models/include/gambit/Models/model_rollcall.hpp")
@@ -55,8 +56,11 @@ set(clean_files ${clean_files} "${PROJECT_SOURCE_DIR}/Printers/include/gambit/Pr
 set(clean_files ${clean_files} "${PROJECT_SOURCE_DIR}/cmake/include/gambit/cmake/cmake_variables.hpp")
 set(clean_files ${clean_files} "${PROJECT_SOURCE_DIR}/ScannerBit/include/gambit/ScannerBit/priors_rollcall.hpp")
 set(clean_files ${clean_files} "${PROJECT_SOURCE_DIR}/ScannerBit/include/gambit/ScannerBit/test_function_rollcall.hpp")
+set(clean_files ${clean_files} "${PROJECT_SOURCE_DIR}/ColliderBit/include/gambit/ColliderBit/ColliderBit_models_rollcall.hpp")
+set(clean_files ${clean_files} "${PROJECT_SOURCE_DIR}/ColliderBit/include/gambit/ColliderBit/colliders/ColliderPythia_typedef.hpp")
 
 # Arrange for the removal of generated source files with "make clean"
+set(clean_files ${clean_files} "${PROJECT_SOURCE_DIR}/Models/src/particle_database.cpp")
 foreach(bit ${ALL_GAMBIT_BITS})
   set(clean_files ${clean_files} "${PROJECT_SOURCE_DIR}/${bit}/examples/standalone_functors.cpp")
 endforeach()
@@ -64,8 +68,8 @@ endforeach()
 #Arrange for removal of other scanner-related generated files upon "make clean".
 if(EXISTS "${PROJECT_SOURCE_DIR}/ScannerBit/")
   set(clean_files ${clean_files} "${PROJECT_BINARY_DIR}/linkedout.cmake")
-  set(clean_files ${clean_files} "${PROJECT_SOURCE_DIR}/scratch/scanbit_reqd_entries.yaml")
-  set(clean_files ${clean_files} "${PROJECT_SOURCE_DIR}/scratch/scanbit_flags.yaml")
+  set(clean_files ${clean_files} "${PROJECT_SOURCE_DIR}/scratch/build_time/scanbit_reqd_entries.yaml")
+  set(clean_files ${clean_files} "${PROJECT_SOURCE_DIR}/scratch/build_time/scanbit_flags.yaml")
 endif()
 
 # Add all the clean files
@@ -116,6 +120,7 @@ add_custom_target(clean-backend-download COMMAND ${CMAKE_COMMAND} -E remove_dire
 add_custom_target(clean-backend-install COMMAND ${CMAKE_COMMAND} -E remove_directory Backends/installed WORKING_DIRECTORY ${PROJECT_SOURCE_DIR})
 add_custom_target(clean-scanner-download COMMAND ${CMAKE_COMMAND} -E remove_directory ScannerBit/downloaded WORKING_DIRECTORY ${PROJECT_SOURCE_DIR})
 add_custom_target(clean-scanner-install COMMAND ${CMAKE_COMMAND} -E remove_directory ScannerBit/installed WORKING_DIRECTORY ${PROJECT_SOURCE_DIR})
+add_custom_target(nuke-contrib)
 add_custom_target(nuke-backends DEPENDS clean-backend-download clean-backend-install)
 add_custom_target(nuke-scanners DEPENDS clean-scanner-download clean-scanner-install)
-add_custom_target(nuke-all DEPENDS distclean nuke-backends nuke-scanners)
+add_custom_target(nuke-all DEPENDS distclean nuke-contrib nuke-backends nuke-scanners)

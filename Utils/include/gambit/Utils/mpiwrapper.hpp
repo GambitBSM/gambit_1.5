@@ -55,6 +55,7 @@
 
 #include "gambit/Utils/standalone_error_handlers.hpp"
 #include "gambit/Utils/local_info.hpp"
+#include "gambit/Utils/util_macros.hpp"
 
 // I wanted to keep the GAMBIT logger separate from this code so that it
 // would be more streamlined for using elsewhere. But the logger is very
@@ -161,7 +162,7 @@ namespace Gambit
       /// @}
 
       /// Main "Communicator" class
-      class Comm
+      class EXPORT_SYMBOLS Comm
       {
          public:
             /// Default Constructor; attaches to MPI_COMM_WORLD
@@ -170,8 +171,15 @@ namespace Gambit
             /// Constructor which copies existing communicator into boundcomm
             Comm(const MPI_Comm& comm, const std::string& name);
 
+            /// Constructor which creates a communicator gruop from WORLD containing
+            /// only the specified processes
+            Comm(std::vector<int> processes, const std::string& name);
+
             /// Destructor
             ~Comm();
+
+            /// Create a new communicator group for the specified processes
+            Comm spawn_new(const std::vector<int>& processes, const std::string& name);
 
             /// As name
             void check_for_undelivered_messages();
@@ -267,6 +275,25 @@ namespace Gambit
                #endif
             }
 
+            /// Blocking synchronous send (will not return until matching Recv is posted)
+            void Ssend(void *buf, int count, MPI_Datatype datatype,
+                                  int destination, int tag)
+            {
+               #ifdef MPI_MSG_DEBUG
+               std::cout<<"rank "<<Get_rank()<<": Ssend() called (count="<<count<<", destination="<<destination<<", tag="<<tag<<")"<<std::endl;
+               #endif
+               int errflag;
+               errflag = MPI_Ssend(buf, count, datatype, destination, tag, boundcomm);
+               if(errflag!=0) {
+                 std::ostringstream errmsg;
+                 errmsg << "Error performing MPI_Ssend! Received error flag: "<<errflag;
+                 utils_error().raise(LOCAL_INFO, errmsg.str());
+               }
+               #ifdef MPI_MSG_DEBUG
+               std::cout<<"rank "<<Get_rank()<<": Ssend() finished"<<std::endl;
+               #endif
+            }
+
             /// Templated blocking send
             template<class T>
             void Send(T *buf, int count,
@@ -276,6 +303,14 @@ namespace Gambit
                Send(buf, count, datatype, destination, tag);
             }
 
+            /// Templated blocking synchronous send
+            template<class T>
+            void Ssend(T *buf, int count,
+                      int destination, int tag)
+            {
+               static const MPI_Datatype datatype = get_mpi_data_type<T>::type();
+               Ssend(buf, count, datatype, destination, tag);
+            }
 
             /// Non-blocking send
             void Isend(void *buf, int count, MPI_Datatype datatype,
@@ -305,12 +340,18 @@ namespace Gambit
             }
 
             /// Blocking wait for e.g. Isend to complete
-            //void Wait(MPI_Request *request, MPI_Status *status)
-            //{
-            //   MPI_Wait(MPI_Request *request, MPI_Status *status)
-            // }
+            void Wait(MPI_Request *request)
+            {
+               MPI_Status status;
+               int errflag = MPI_Wait(request, &status);
+               if(errflag!=0) {
+                 std::ostringstream errmsg;
+                 errmsg << "Error performing MPI_Wait! Received error flag: "<<errflag;
+                 utils_error().raise(LOCAL_INFO, errmsg.str());
+               }
+            }
 
-            // Probe for messages waiting to be delivered
+            // Non-blocking probe for messages waiting to be delivered
             bool Iprobe(int source, int tag, MPI_Status* in_status=NULL /*out*/)
             {
               //#ifdef MPI_MSG_DEBUG
@@ -325,7 +366,7 @@ namespace Gambit
                } else {
                  status = &def_status;
                }
-               MPI_Iprobe(source, 1, boundcomm, &you_have_mail, status);
+               //MPI_Iprobe(source, 1, boundcomm, &you_have_mail, status);
                errflag = MPI_Iprobe(source, tag, boundcomm, &you_have_mail, status);
                if(errflag!=0) {
                  std::ostringstream errmsg;
@@ -338,6 +379,20 @@ namespace Gambit
                }
                #endif
                return (you_have_mail != 0);
+            }
+
+            // Blocking probe for a message. Doesn't return until matching message found.
+            // No point having default NULL status this time, because the only reason to
+            // use this function is to inspect the message status.
+            void Probe(int source, int tag, MPI_Status* status)
+            {
+               int errflag;
+               errflag = MPI_Probe(source, tag, boundcomm, status);
+               if(errflag!=0) {
+                 std::ostringstream errmsg;
+                 errmsg << "Error performing MPI_Probe! Received error flag: "<<errflag;
+                 utils_error().raise(LOCAL_INFO, errmsg.str());
+               }
             }
 
             // Perform an Isend to all other processes
@@ -358,6 +413,146 @@ namespace Gambit
                for(int i=0; i<size; i++)
                {
                   if(i!=rank) Isend(buf, count, i, tag, req);
+               }
+            }
+
+            template <typename T>
+            void Bcast (std::vector<T>& buffer, int count, int root)
+            {
+                static const MPI_Datatype datatype = get_mpi_data_type<T>::type();
+
+                MPI_Bcast (&buffer[0], count, datatype, root, boundcomm);
+            }
+
+            template<typename T>
+            void Scatter (std::vector<T> &sendbuf, T &recvbuf, int root)
+            {
+                static const MPI_Datatype datatype = get_mpi_data_type<T>::type();
+
+                MPI_Scatter (&sendbuf[0], 1, datatype, &recvbuf, 1, datatype, root, boundcomm);
+            }
+
+            template<typename T>
+            void Allreduce (T &sendbuf, T &recvbuf, MPI_Op op)
+            {
+                static const MPI_Datatype datatype = get_mpi_data_type<T>::type();
+
+                MPI_Allreduce (&sendbuf, &recvbuf, 1, datatype, op, boundcomm);
+            }
+
+            template<typename T>
+            void Gather(std::vector<T> &sendbuf, std::vector<T> &recvbuf, int root)
+            {
+                static const MPI_Datatype datatype = get_mpi_data_type<T>::type();
+
+                int sendcount = sendbuf.size();
+                int recvcount = sendbuf.size();
+                //std::cerr<<"rank "<<Get_rank()<<": Gather pars: sendcount="<<sendcount<<std::endl;
+                if(Get_rank()==0)
+                {
+                   if(recvbuf.size()<sendbuf.size()*Get_size())
+                   {
+                       std::ostringstream errmsg;
+                       errmsg << "Error performing Gather! Recv buffer is not big enough to fit the expected data! We expect "<<Get_size()<<" messages of count "<<recvcount<<", (total size="<<recvcount*Get_size()<<") but the recv buffer only has size "<<recvbuf.size()<<"!";
+                       utils_error().raise(LOCAL_INFO, errmsg.str());
+                   }
+                }
+                int errflag = MPI_Gather(&sendbuf[0], sendcount, datatype,
+                                         &recvbuf[0], recvcount, datatype,
+                                         root, boundcomm);
+                if(errflag!=0) {
+                   std::ostringstream errmsg;
+                   errmsg << "Error performing Gather! Received error flag: "<<errflag;
+                   utils_error().raise(LOCAL_INFO, errmsg.str());
+                }
+            }
+
+            template<typename T>
+            void Gatherv(std::vector<T> &sendbuf, std::vector<T> &recvbuf, std::vector<int> recvcounts, int root)
+            {
+                static const MPI_Datatype datatype = get_mpi_data_type<T>::type();
+
+                //std::cerr<<"rank "<<Get_rank()<<": Gatherv pars: recvcounts="<<recvcounts<<std::endl;
+
+                // We will automatically calculate the displacements assuming that the incoming
+                // data should just be stacked in the order of the process ranks
+                std::vector<int> displs;
+                displs.push_back(0);
+                std::size_t totalsize = 0;
+                for(auto it=recvcounts.begin(); it!=recvcounts.end(); ++it)
+                {
+                    if(std::next(it)!=recvcounts.end()) displs.push_back(*it + displs.back());
+                    totalsize += (*it);
+                }
+                if(Get_rank()==0)
+                {
+                   if(recvbuf.size()<totalsize)
+                   {
+                       std::ostringstream errmsg;
+                       errmsg << "Error performing Gatherv! Recv buffer is not big enough to fit the expected data! We expect messages with total size "<<totalsize<<" but the recv buffer only has size "<<recvbuf.size()<<"!";
+                       utils_error().raise(LOCAL_INFO, errmsg.str());
+                   }
+                }
+                //std::cerr<<"rank "<<Get_rank()<<": sendbuf.size()="<<sendbuf.size()<<", recvbuf.size()="<<recvbuf.size()<<", "<<"recvcounts="<<recvcounts<<", displs="<<displs<<std::endl;
+                int sendcount = sendbuf.size();
+                int errflag = MPI_Gatherv(&sendbuf[0], sendcount, datatype,
+                                          &recvbuf[0], &recvcounts[0], &displs[0],
+                                          datatype, root, boundcomm);
+                if(errflag!=0) {
+                 std::ostringstream errmsg;
+                 errmsg << "Error performing MPI_Gatherv! Received error flag: "<<errflag;
+                 utils_error().raise(LOCAL_INFO, errmsg.str());
+               }
+            }
+
+            template<typename T>
+            void AllGather(std::vector<T> &sendbuf, std::vector<T> &recvbuf)
+            {
+               static const MPI_Datatype datatype = get_mpi_data_type<T>::type();
+
+               int sendcount = sendbuf.size();
+               int recvcount = sendbuf.size();
+
+               if(recvbuf.size()<sendbuf.size()*Get_size())
+               {
+                   std::ostringstream errmsg;
+                   errmsg << "Error performing AllGather! Recv buffer is not big enough to fit the expected data! We expect "<<Get_size()<<" messages of count "<<recvcount<<", (total size="<<recvcount*Get_size()<<") but the recv buffer only has size "<<recvbuf.size()<<"!";
+                   utils_error().raise(LOCAL_INFO, errmsg.str());
+               }
+
+               int errflag = MPI_Allgather(&sendbuf[0], sendcount, datatype,
+                                           &recvbuf[0], recvcount, datatype, boundcomm);
+
+               if(errflag!=0) {
+                 std::ostringstream errmsg;
+                 errmsg << "Error performing MPI_Allgather! Received error flag: "<<errflag;
+                 utils_error().raise(LOCAL_INFO, errmsg.str());
+               }
+            }
+
+
+            template<typename T>
+            void AllGatherv(std::vector<T> &sendbuf, std::vector<T> &recvbuf, std::vector<int> recvcounts)
+            {
+               static const MPI_Datatype datatype = get_mpi_data_type<T>::type();
+
+               // We will automatically calculate the displacements assuming that the incoming
+               // data should just be stacked in the order of the process ranks
+               std::vector<int> displs(Get_size());
+               displs.push_back(0);
+               for(int i=0; i<(recvcounts.size()-1); i++)
+               {
+                   displs.push_back(i);
+               }
+
+               int sendcount = sendbuf.size();
+               int errflag = MPI_Allgatherv(&sendbuf[0], sendcount, datatype,
+                                            &recvbuf[0], &recvcounts, &displs,
+                                            datatype, boundcomm);
+               if(errflag!=0) {
+                 std::ostringstream errmsg;
+                 errmsg << "Error performing MPI_Allgatherv! Received error flag: "<<errflag;
+                 utils_error().raise(LOCAL_INFO, errmsg.str());
                }
             }
 
@@ -394,6 +589,11 @@ namespace Gambit
             bool BarrierWithCommonTimeout(std::chrono::duration<double> timeout,
                                           const int tag_entered,
                                           const int tag_timeleft);
+
+            /// This routine exists for MPI debugging purposes, to help make sure that
+            /// all MPI messages are received before MPI_Finalize is called.
+            /// It doesn't fix any problems, it just lets us notice if they exist.
+            void check_for_unreceived_messages(int timeout);
 
             /// Receive any waiting messages with a given tag from a given source (possibly MPI_ANY_SOURCE)
             /// Need to know what the messages are in order to provide an appropriate Recv buffer (and size)
@@ -434,6 +634,12 @@ namespace Gambit
             /// Get pointer to raw bound communicator
             MPI_Comm* get_boundcomm() { return &boundcomm; }
 
+            /// Get the process ID of the master process (rank 0)
+            long int MasterPID();
+
+            /// Set the process ID of the master process (rank 0)
+            void set_MasterPID(long int p);
+
          private:
 
             // The MPI communicator to which the current object "talks".
@@ -441,22 +647,25 @@ namespace Gambit
 
             // A name to identify the communicator group to which this object is bound
             std::string myname;
+
+            // The process ID of the master process (rank 0)
+            static long int pid;
       };
 
       /// Check if MPI_Init has been called (it is an error to call it twice)
-      bool Is_initialized();
+      EXPORT_SYMBOLS bool Is_initialized();
 
       /// Initialise MPI
-      void Init();
+      EXPORT_SYMBOLS void Init();
 
       /// Check if MPI_Finalize has been called (it is an error to do anything else after this)
-      bool Is_finalized();
+      EXPORT_SYMBOLS bool Is_finalized();
 
       /// Finalize MPI
-      void Finalize();
+      EXPORT_SYMBOLS void Finalize();
 
       /// Prepare for calling MPI_Finalize, but call MPI_abort and exit function if timeout is exceeded.
-      bool PrepareForFinalizeWithTimeout(bool use_mpi_abort);
+      EXPORT_SYMBOLS bool PrepareForFinalizeWithTimeout(bool use_mpi_abort);
 
       /// Nice wrapper for getting the message size from an MPI_status struct.
       /// Provide the type whose MPI_Datatype you want to retrieve as the
@@ -479,7 +688,8 @@ namespace Gambit
       /// @{ Helpers for registration of compound datatypes
 
       /// Structure to hold an MPI startup function plus metadata
-      class MpiIniFunc {
+      class MpiIniFunc
+      {
         private:
           std::string location;
           std::string name;

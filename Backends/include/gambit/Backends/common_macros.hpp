@@ -8,7 +8,7 @@
 ///  *********************************************
 ///
 ///  Authors (add name and date if you modify):
-///   
+///
 ///  \author Pat Scott
 ///          (patscott@physics.mcgill.ca)
 ///  \date 2015 May
@@ -65,20 +65,26 @@ namespace Gambit                                                            \
     namespace CAT_3(BACKENDNAME,_,SAFE_VERSION)                             \
 
 /// Closer for initialisation function definitional boilerplate.
-#define END_BE_INI_FUNCTION }}}    
+#define END_BE_INI_FUNCTION }}}
 
 /// Closer for convenience function definitional boilerplate.
 #define END_BE_NAMESPACE }}
 
 /// \name Variadic redirection macro for BE_VARIABLE(NAME, TYPE, SYMBOLNAME, CAPABILITY, [(ALLOWED_MODELS)])
-#define BE_VARIABLE_5(_1, _2, _3, _4, _5)      BE_VARIABLE_I(_1, _2, _3, _4, _5)  
-#define BE_VARIABLE_4(_1, _2, _3, _4)          BE_VARIABLE_I(_1, _2, _3, _4, ()) 
+#define BE_VARIABLE_5(_1, _2, _3, _4, _5)      BE_VARIABLE_I(_1, _2, _3, _4, _5)
+#define BE_VARIABLE_4(_1, _2, _3, _4)          BE_VARIABLE_I(_1, _2, _3, _4, ())
 #define BE_VARIABLE(...)                       VARARG(BE_VARIABLE, __VA_ARGS__)
 
-
 /// \name Variadic redirection macro for BE_CONV_FUNCTION(NAME, TYPE, ARGSLIST, CAPABILITY, [(ALLOWED_MODELS)])
-#define BE_CONV_FUNCTION_5(_1, _2, _3, _4, _5) BE_CONV_FUNCTION_FULL(_1, _2, _3, _4, _5)  
-#define BE_CONV_FUNCTION_4(_1, _2, _3, _4)     BE_CONV_FUNCTION_FULL(_1, _2, _3, _4, ()) 
+#define BE_CONV_FUNCTION_5(_1, _2, _3, _4, _5) BE_CONV_FUNCTION_FULL(_1, _2, _3, _4, _5)
+#define BE_CONV_FUNCTION_4(_1, _2, _3, _4)     BE_CONV_FUNCTION_FULL(_1, _2, _3, _4, ())
 #define BE_CONV_FUNCTION(...)                  VARARG(BE_CONV_FUNCTION, __VA_ARGS__)
+
+/// Evaluates to ARG if and only if we have pybind11 and USING_PYTHON is true
+#ifdef HAVE_PYBIND11
+  #define IF_USING_PYBIND11(ARG) BOOST_PP_IF(USING_PYTHON, ARG, )
+#else
+  #define IF_USING_PYBIND11(ARG)
+#endif
 
 #endif // __COMMON_MACROS_HPP__

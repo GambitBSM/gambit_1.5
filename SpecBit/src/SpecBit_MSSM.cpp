@@ -89,7 +89,7 @@ namespace Gambit
         ( const typename MI::InputParameters& input
         , const SMInputs& sminputs
         , const Options& runOptions
-        , const std::map<str, safe_ptr<double> >& input_Param
+        , const std::map<str, safe_ptr<const double> >& input_Param
         )
     {
       // SoftSUSY object used to set quark and lepton masses and gauge
@@ -137,7 +137,13 @@ namespace Gambit
       settings.set(Spectrum_generator_settings::higgs_2loop_correction_ab_as, runOptions.getValueOrDef<int>(1,"higgs_2loop_correction_ab_as"));
       settings.set(Spectrum_generator_settings::higgs_2loop_correction_at_at, runOptions.getValueOrDef<int>(1,"higgs_2loop_correction_at_at"));
       settings.set(Spectrum_generator_settings::higgs_2loop_correction_atau_atau, runOptions.getValueOrDef<int>(1,"higgs_2loop_correction_atau_atau"));
-            
+      settings.set(Spectrum_generator_settings::top_pole_qcd_corrections, runOptions.getValueOrDef<int>(1,"top_pole_qcd_corrections"));
+      settings.set(Spectrum_generator_settings::beta_zero_threshold, runOptions.getValueOrDef<double>(1.000000000e-14,"beta_zero_threshold"));
+      settings.set(Spectrum_generator_settings::eft_matching_loop_order_up, runOptions.getValueOrDef<int>(1,"eft_matching_loop_order_up"));
+      settings.set(Spectrum_generator_settings::eft_matching_loop_order_down, runOptions.getValueOrDef<int>(1,"eft_matching_loop_order_down"));
+      settings.set(Spectrum_generator_settings::threshold_corrections, runOptions.getValueOrDef<int>(123111321,"threshold_corrections"));
+
+
       spectrum_generator.set_settings(settings);
 
       // Generate spectrum
@@ -171,6 +177,19 @@ namespace Gambit
       mssmspec.set_override(Par::mass1,spectrum_generator.get_high_scale(),"high_scale",true);
       mssmspec.set_override(Par::mass1,spectrum_generator.get_susy_scale(),"susy_scale",true);
       mssmspec.set_override(Par::mass1,spectrum_generator.get_low_scale(), "low_scale", true);
+
+
+      // Has the user chosen to override any pole mass values?
+      // This will typically break consistency, but may be useful in some special cases
+      if (runOptions.hasKey("override_FS_pole_masses"))
+      {
+        std::vector<str> particle_names = runOptions.getNames("override_FS_pole_masses");
+        for (auto& name : particle_names)
+        {
+          double mass = runOptions.getValue<double>("override_FS_pole_masses", name);
+          mssmspec.set_override(Par::Pole_Mass, mass, name);
+        }
+      }
 
       // Add theory errors
       static const MSSM_strs ms;
@@ -282,13 +301,13 @@ namespace Gambit
     }
 
   //Version for 1.5.1 commented out because we should make it possible to support FS versions in parallel.
-  
+
   // template <class MI>
   //   Spectrum run_FS1_5_1_spectrum_generator
   //       ( const typename MI::InputParameters& input
   //       , const SMInputs& sminputs
   //       , const Options& runOptions
-  //       , const std::map<str, safe_ptr<double> >& input_Param
+  //       , const std::map<str, safe_ptr<const double> >& input_Param
   //       )
   //   {
   //     // SoftSUSY object used to set quark and lepton masses and gauge
@@ -489,7 +508,7 @@ namespace Gambit
 
     /// Helper function for setting 3x3 matrix-valued parameters
     //  Names must conform to convention "<parname>_ij"
-    Eigen::Matrix<double,3,3> fill_3x3_parameter_matrix(const std::string& rootname, const std::map<str, safe_ptr<double> >& Param)
+    Eigen::Matrix<double,3,3> fill_3x3_parameter_matrix(const std::string& rootname, const std::map<str, safe_ptr<const double> >& Param)
     {
        Eigen::Matrix<double,3,3> output;
        for(int i=0; i<3; ++i) for(int j=0; j<3; ++j)
@@ -500,7 +519,7 @@ namespace Gambit
     }
 
     /// As above, but for symmetric input (i.e. 6 entries, assumed to be the upper triangle)
-    Eigen::Matrix<double,3,3> fill_3x3_symmetric_parameter_matrix(const std::string& rootname, const std::map<str, safe_ptr<double> >& Param)
+    Eigen::Matrix<double,3,3> fill_3x3_symmetric_parameter_matrix(const std::string& rootname, const std::map<str, safe_ptr<const double> >& Param)
     {
        Eigen::Matrix<double,3,3> output;
        for(int i=0; i<3; ++i) for(int j=0; j<3; ++j)
@@ -514,7 +533,7 @@ namespace Gambit
     /// Helper function for filling MSSM63-compatible input parameter objects
     /// Leaves out mHu2, mHd2, SignMu, (mA, mu) because we use two different parameterisations of these
     template <class T>
-    void fill_MSSM63_input(T& input, const std::map<str, safe_ptr<double> >& Param )
+    void fill_MSSM63_input(T& input, const std::map<str, safe_ptr<const double> >& Param )
     {
       //double valued parameters
       input.TanBeta     = *Param.at("TanBeta");
@@ -545,9 +564,6 @@ namespace Gambit
         #define ostr std::cout
         #define oend std::endl
         ostr << "TanBeta = " << INPUT(TanBeta) << ", " << oend ;
-        //ostr << "SignMu = " << INPUT(SignMu) << ", " << oend;
-        //ostr << "mHd2IN = " << INPUT(mHd2IN) << ", " << oend;
-        //ostr << "mHu2IN = " << INPUT(mHu2IN) << ", " << oend;
         ostr << "mq2Input = " << oend << INPUT(mq2Input) << ", " << oend;
         ostr << "ml2Input = " << oend << INPUT(ml2Input) << ", " << oend;
         ostr << "md2Input = " << oend << INPUT(md2Input) << ", " << oend;
@@ -564,6 +580,62 @@ namespace Gambit
         #undef oend
       #endif
     }
+
+
+  // Similar to above, except this is for MSSMEFTHiggs spectrum
+  // generator and a few others where different names for inputs for many
+  // parameters are used. This should be standardised.
+
+    template <class T>
+    void fill_MSSM63_input_altnames(T& input, const std::map<str, safe_ptr<const double> >& Param )
+    {
+      //double valued parameters
+      input.TanBeta     = *Param.at("TanBeta");
+      input.M1Input  = *Param.at("M1");
+      input.M2Input = *Param.at("M2");
+      input.M3Input  = *Param.at("M3");
+
+      // Sanity checks
+      if(input.TanBeta<0)
+      {
+         std::ostringstream msg;
+         msg << "Tried to set TanBeta parameter to a negative value ("<<input.TanBeta<<")! This parameter must be positive. Please check your inifile and try again.";
+         SpecBit_error().raise(LOCAL_INFO,msg.str());
+      }
+
+      //3x3 matrices; filled with the help of a convenience function
+      input.mq2Input = fill_3x3_symmetric_parameter_matrix("mq2", Param);
+      input.ml2Input = fill_3x3_symmetric_parameter_matrix("ml2", Param);
+      input.md2Input = fill_3x3_symmetric_parameter_matrix("md2", Param);
+      input.mu2Input = fill_3x3_symmetric_parameter_matrix("mu2", Param);
+      input.me2Input = fill_3x3_symmetric_parameter_matrix("me2", Param);
+      input.AeInput = fill_3x3_parameter_matrix("Ae", Param);
+      input.AdInput= fill_3x3_parameter_matrix("Ad", Param);
+      input.AuInput = fill_3x3_parameter_matrix("Au", Param);
+
+      #ifdef SPECBIT_DEBUG
+        #define INPUT(p) input.p
+        #define ostr std::cout
+        #define oend std::endl
+        ostr << "TanBeta = " << INPUT(TanBeta) << ", " << oend ;
+        ostr << "mq2Input = " << oend << INPUT(mq2Input) << ", " << oend;
+        ostr << "ml2Input = " << oend << INPUT(ml2Input) << ", " << oend;
+        ostr << "md2Input = " << oend << INPUT(md2Input) << ", " << oend;
+        ostr << "mu2Input = " << oend << INPUT(mu2Input) << ", " << oend;
+        ostr << "me2Input = " << oend << INPUT(me2Input) << ", " << oend;
+        ostr << "M1Input = " << INPUT(M1Input) << ", " << oend;
+        ostr << "M2Input = " << INPUT(M2Input) << ", " << oend;
+        ostr << "M3Input = " << INPUT(M3Input) << ", " << oend;
+        ostr << "AeInput = " << oend << INPUT(AeInput) << ", " << oend;
+        ostr << "AdInput = " << oend << INPUT(AdInput) << ", " << oend;
+        ostr << "AuInput = " << oend << INPUT(AuInput) << ", " << oend;
+        #undef INPUT
+        #undef ostr
+        #undef oend
+      #endif
+
+    }
+
 
     /// Check that the spectrum has a neutralino LSP.
     bool has_neutralino_LSP(const Spectrum& result)
@@ -598,13 +670,10 @@ namespace Gambit
     //  These are wrapped up in Gambit functor objects according to the
     //  instructions in the rollcall header
 
-    // Functions to changes the capability associated with a Spectrum object to
-    // "SM_spectrum"
-    //TODO: "temporarily" removed
-    //void convert_MSSM_to_SM   (/*TAG*/ Spectrum &result) {result = *Pipes::convert_MSSM_to_SM::Dep::unimproved_MSSM_spectrum;}
-
-    //void convert_NMSSM_to_SM  (Spectrum* &result) {result = *Pipes::convert_NMSSM_to_SM::Dep::NMSSM_spectrum;}
-    //void convert_E6MSSM_to_SM (Spectrum* &result) {result = *Pipes::convert_E6MSSM_to_SM::Dep::E6MSSM_spectrum;}
+    // Functions to change the capability associated with a Spectrum object to "SM_spectrum"
+    void convert_MSSM_to_SM   (Spectrum &result) {result = *Pipes::convert_MSSM_to_SM::Dep::MSSM_spectrum;}
+    void convert_NMSSM_to_SM  (Spectrum &result) {result = *Pipes::convert_NMSSM_to_SM::Dep::NMSSM_spectrum;}
+    void convert_E6MSSM_to_SM (Spectrum &result) {result = *Pipes::convert_E6MSSM_to_SM::Dep::E6MSSM_spectrum;}
 
     void get_MSSM_spectrum_SPheno (Spectrum& spectrum)
     {
@@ -632,11 +701,110 @@ namespace Gambit
 
     }
 
+  // Runs FlexibleSUSY MSSMEFTHiggs model spectrum generator with SUSY
+  // scale boundary conditions, ie accepts MSSM parameters at MSUSY,
+  // and has DRbar mA and mu as an input and mHu2 and mHd2 as EWSB
+  // outputs, so it is for the MSSMatMSUSY_mA model.
+  #if(FS_MODEL_MSSMatMSUSYEFTHiggs_mAmu_IS_BUILT)
+  void get_MSSMatMSUSY_mA_spectrum_FlexibleEFTHiggs (Spectrum& result)
+  {
+     // Access the pipes for this function to get model and parameter information
+     namespace myPipe = Pipes::get_MSSMatMSUSY_mA_spectrum_FlexibleEFTHiggs;
+
+     // Get SLHA2 SMINPUTS values
+     const SMInputs& sminputs = *myPipe::Dep::SMINPUTS;
+
+     // Get input parameters (from flexiblesusy namespace)
+     MSSMatMSUSYEFTHiggs_mAmu_input_parameters input;
+     input.MuInput  = *myPipe::Param.at("mu");
+     // This FS spectrum generator has mA as the parameter
+     input.mAInput = *myPipe::Param.at("mA");
+     fill_MSSM63_input_altnames(input,myPipe::Param); // Fill the rest
+     result = run_FS_spectrum_generator<MSSMatMSUSYEFTHiggs_mAmu_interface<ALGORITHM1>>(input,sminputs,*myPipe::runOptions,myPipe::Param);
+
+      // Only allow neutralino LSPs.
+      if (not has_neutralino_LSP(result)) invalid_point().raise("Neutralino is not LSP.");
+
+      // Drop SLHA files if requested
+      result.drop_SLHAs_if_requested(myPipe::runOptions, "GAMBIT_unimproved_spectrum");
+
+  }
+  #endif
+
+  // Runs FlexibleSUSY MSSMEFTHiggs model spectrum generator
+  // and has m3^2 and mu as EWSB outputs, so it is for the
+  // MSSMatQ_model.
+  #if(FS_MODEL_MSSMEFTHiggs_IS_BUILT)
+  void get_MSSMatQ_spectrum_FlexibleEFTHiggs (Spectrum& result)
+  {
+     // Access the pipes for this function to get model and parameter information
+     namespace myPipe = Pipes::get_MSSMatQ_spectrum_FlexibleEFTHiggs;
+
+     // Get SLHA2 SMINPUTS values
+     const SMInputs& sminputs = *myPipe::Dep::SMINPUTS;
+
+     // Get input parameters (from flexiblesusy namespace)
+     MSSMEFTHiggs_input_parameters input;
+     // MSSMatQ also requires input scale to be supplied with name MSUSY
+     input.MSUSY  = *myPipe::Param.at("Qin");
+     input.mHu2IN = *myPipe::Param.at("mHu2");
+     input.mHd2IN = *myPipe::Param.at("mHd2");
+     input.SignMu = *myPipe::Param.at("SignMu");
+     fill_MSSM63_input_altnames(input,myPipe::Param); // Fill the rest
+     result = run_FS_spectrum_generator<MSSMEFTHiggs_interface<ALGORITHM1>>(input,sminputs,*myPipe::runOptions,myPipe::Param);
+
+      // Only allow neutralino LSPs.
+      if (not has_neutralino_LSP(result)) invalid_point().raise("Neutralino is not LSP.");
+
+      // Drop SLHA files if requested
+      result.drop_SLHAs_if_requested(myPipe::runOptions, "GAMBIT_unimproved_spectrum");
+
+   }
+   #endif
+
+   // Runs FlexibleSUSY MSSMEFTHiggs_mAmu spectrum generator with
+   // boundary conditions at a user specified scale, ie accepts MSSM
+   // parameters at Q, and has DRbar mA and mu as an input and mHu2
+   // and mHd2 as EWSB outputs, so it is for the MSSMatMSUSY_mA model.
+   #if(FS_MODEL_MSSMEFTHiggs_mAmu_IS_BUILT)
+   void get_MSSMatQ_mA_spectrum_FlexibleEFTHiggs (Spectrum& result)
+   {
+     // Access the pipes for this function to get model and parameter information
+     namespace myPipe = Pipes::get_MSSMatQ_mA_spectrum_FlexibleEFTHiggs;
+
+     // Get SLHA2 SMINPUTS values
+     const SMInputs& sminputs = *myPipe::Dep::SMINPUTS;
+
+     // Get input parameters (from flexiblesusy namespace)
+     MSSMEFTHiggs_mAmu_input_parameters input;
+     input.MuInput  = *myPipe::Param.at("mu");
+     // This FS spectrum generator has mA as the parameter
+     input.mAInput = *myPipe::Param.at("mA");
+     // Note: Qin has been named MSUSY inside the spectrum generator
+     // but it is a user-input scale in this case.
+     input.MSUSY = *myPipe::Param.at("Qin");
+     // Fill the rest.
+     // Note: This particular spectrum generator has been created with
+     // different names for parameter inputs.  We should standardise this
+     fill_MSSM63_input_altnames(input,myPipe::Param);
+     result = run_FS_spectrum_generator<MSSMEFTHiggs_mAmu_interface<ALGORITHM1>>(input,sminputs,*myPipe::runOptions,myPipe::Param);
+
+      // Only allow neutralino LSPs.
+      if (not has_neutralino_LSP(result)) invalid_point().raise("Neutralino is not LSP.");
+
+      // Drop SLHA files if requested
+      result.drop_SLHAs_if_requested(myPipe::runOptions, "GAMBIT_unimproved_spectrum");
+
+   }
+   #endif
+
+
 
     // Runs FlexibleSUSY MSSM spectrum generator with CMSSM (GUT scale) boundary conditions
-    // In principle an identical spectrum can be obtained from the function 
+    // In principle an identical spectrum can be obtained from the function
     // get_MSSMatGUT_spectrum_FS
     // by setting the input parameters to match the CMSSM assumptions
+    #if(FS_MODEL_CMSSM_IS_BUILT)
     void get_CMSSM_spectrum_FS (Spectrum& result)
     {
 
@@ -679,8 +847,10 @@ namespace Gambit
       result.drop_SLHAs_if_requested(myPipe::runOptions, "GAMBIT_unimproved_spectrum");
 
     }
+    #endif
 
     // Runs FlexibleSUSY MSSM spectrum generator with EWSB scale input (boundary conditions)
+    #if(FS_MODEL_MSSM_IS_BUILT)
     void get_MSSMatQ_spectrum_FS (Spectrum& result)
     {
       using namespace softsusy;
@@ -702,9 +872,11 @@ namespace Gambit
       if (not has_neutralino_LSP(result)) invalid_point().raise("Neutralino is not LSP.");
       result.drop_SLHAs_if_requested(myPipe::runOptions, "GAMBIT_unimproved_spectrum");
     }
+    #endif
 
     // Runs FlexibleSUSY MSSM spectrum generator with EWSB scale input (boundary conditions)
     // but with mA and mu as parameters instead of mHu2 and mHd2
+    #if(FS_MODEL_MSSM_mAmu_IS_BUILT)
     void get_MSSMatQ_mA_spectrum_FS (Spectrum& result)
     {
       using namespace softsusy;
@@ -713,16 +885,20 @@ namespace Gambit
       MSSM_mAmu_input_parameters input;
       input.Qin      = *myPipe::Param.at("Qin"); // MSSMatQ also requires input scale to be supplied
       input.MuInput  = *myPipe::Param.at("mu");
-      double mA = *myPipe::Param.at("mA"); // Peter, did you make this mA rather than mA^2 on purpose?
-      input.mA2Input = mA*mA;              // Oh well we will just square it for now.
+      // Note this spectrum generator mA2 is the parameter.
+      // However this freedom is not used in GAMBIT
+      // and not needed as mA is a DRbar mass eigenstate for a scalar
+      double mA = *myPipe::Param.at("mA");
+      input.mA2Input = mA*mA;
       fill_MSSM63_input(input,myPipe::Param); // Fill the rest
       result = run_FS_spectrum_generator<MSSM_mAmu_interface<ALGORITHM1>>(input,sminputs,*myPipe::runOptions,myPipe::Param);
       if (not has_neutralino_LSP(result)) invalid_point().raise("Neutralino is not LSP.");
       result.drop_SLHAs_if_requested(myPipe::runOptions, "GAMBIT_unimproved_spectrum");
     }
-
+    #endif
 
     // Runs FlexibleSUSY MSSM spectrum generator with GUT scale input (boundary conditions)
+    #if(FS_MODEL_MSSMatMGUT_IS_BUILT)
     void get_MSSMatMGUT_spectrum_FS (Spectrum& result)
     {
       using namespace softsusy;
@@ -743,9 +919,48 @@ namespace Gambit
       if (not has_neutralino_LSP(result)) invalid_point().raise("Neutralino is not LSP.");
       result.drop_SLHAs_if_requested(myPipe::runOptions, "GAMBIT_unimproved_spectrum");
     }
+    #endif
+
+  // Runs FlexibleSUSY MSSMatMGUTEFTHiggs model spectrum generator
+  // and has m3^2 and mu as EWSB outputs, so it is for the
+  // MSSMatMGUT_model.
+  #if(FS_MODEL_MSSMatMGUTEFTHiggs_IS_BUILT)
+  void get_MSSMatMGUT_spectrum_FlexibleEFTHiggs (Spectrum& result)
+  {
+     // Access the pipes for this function to get model and parameter information
+     namespace myPipe = Pipes::get_MSSMatMGUT_spectrum_FlexibleEFTHiggs;
+
+     // Get SLHA2 SMINPUTS values
+     const SMInputs& sminputs = *myPipe::Dep::SMINPUTS;
+
+     // Get input parameters (from flexiblesusy namespace)
+     MSSMatMGUTEFTHiggs_input_parameters input;
+     input.mHu2IN = *myPipe::Param.at("mHu2");
+     input.mHd2IN = *myPipe::Param.at("mHd2");
+     input.SignMu = *myPipe::Param.at("SignMu");
+     if(input.SignMu!=-1 and input.SignMu!=1)
+      {
+         std::ostringstream msg;
+         msg << "Tried to set SignMu parameter to a value that is not a sign! ("<<input.SignMu<<")! This parameter must be set to either 1 or -1. Please check your inifile and try again.";
+         SpecBit_error().raise(LOCAL_INFO,msg.str());
+      }
+
+     fill_MSSM63_input(input,myPipe::Param); // Fill the rest
+     result = run_FS_spectrum_generator<MSSMatMGUTEFTHiggs_interface<ALGORITHM1>>(input,sminputs,*myPipe::runOptions,myPipe::Param);
+
+      // Only allow neutralino LSPs.
+      if (not has_neutralino_LSP(result)) invalid_point().raise("Neutralino is not LSP.");
+
+      // Drop SLHA files if requested
+      result.drop_SLHAs_if_requested(myPipe::runOptions, "GAMBIT_unimproved_spectrum");
+
+   }
+   #endif
+
 
     // Runs FlexibleSUSY MSSM spectrum generator with GUT scale input (boundary conditions)
     // but with mA and mu as parameters instead of mHu2 and mHd2
+    #if(FS_MODEL_MSSMatMGUT_mAmu_IS_BUILT)
     void get_MSSMatMGUT_mA_spectrum_FS (Spectrum& result)
     {
       using namespace softsusy;
@@ -753,16 +968,55 @@ namespace Gambit
       const SMInputs& sminputs = *myPipe::Dep::SMINPUTS;
       MSSMatMGUT_mAmu_input_parameters input;
       input.MuInput  = *myPipe::Param.at("mu");
-      double mA = *myPipe::Param.at("mA"); // Peter, did you make this mA rather than mA^2 on purpose?
-      input.mA2Input = mA*mA;              // Oh well we will just square it for now.
+      // Note this spectrum generator mA2 is the parameter.
+      // However this freedom is not used in GAMBIT
+      // and not needed as mA is a DRbar mass eigenstate for a scalar
+      double mA = *myPipe::Param.at("mA");
+      input.mA2Input = mA*mA;
       fill_MSSM63_input(input,myPipe::Param); // Fill the rest
       result = run_FS_spectrum_generator<MSSMatMGUT_mAmu_interface<ALGORITHM1>>(input,sminputs,*myPipe::runOptions,myPipe::Param);
       if (not has_neutralino_LSP(result)) invalid_point().raise("Neutralino is not LSP.");
       result.drop_SLHAs_if_requested(myPipe::runOptions, "GAMBIT_unimproved_spectrum");
     }
+    #endif
+
+  // Runs FlexibleSUSY MSSMatMGUTEFTHiggs model spectrum generator
+  // and has m3^2 and mu as EWSB outputs, so it is for the
+  // MSSMatMGUT_model.
+  #if(FS_MODEL_MSSMatMGUTEFTHiggs_mAmu_IS_BUILT)
+  void get_MSSMatMGUT_mA_spectrum_FlexibleEFTHiggs (Spectrum& result)
+  {
+     // Access the pipes for this function to get model and parameter information
+     namespace myPipe = Pipes::get_MSSMatMGUT_mA_spectrum_FlexibleEFTHiggs;
+
+     // Get SLHA2 SMINPUTS values
+     const SMInputs& sminputs = *myPipe::Dep::SMINPUTS;
+
+     // Get input parameters (from flexiblesusy namespace)
+     MSSMatMGUTEFTHiggs_mAmu_input_parameters input;
+     input.MuInput  = *myPipe::Param.at("mu");
+     // Note this spectrum generator mA2 is the parameter.
+     // However this freedom is not used in GAMBIT
+     // and not needed as mA is a DRbar mass eigenstate for a scalar
+     double mA = *myPipe::Param.at("mA");
+     input.mA2Input = mA*mA;
+
+     fill_MSSM63_input(input,myPipe::Param); // Fill the rest
+     result = run_FS_spectrum_generator<MSSMatMGUTEFTHiggs_mAmu_interface<ALGORITHM1>>(input,sminputs,*myPipe::runOptions,myPipe::Param);
+
+      // Only allow neutralino LSPs.
+      if (not has_neutralino_LSP(result)) invalid_point().raise("Neutralino is not LSP.");
+
+      // Drop SLHA files if requested
+      result.drop_SLHAs_if_requested(myPipe::runOptions, "GAMBIT_unimproved_spectrum");
+
+   }
+   #endif
+
 
     // Runs FlexibleSUSY MSSM spectrum generator with SUSY scale input (boundary conditions)
     // but with mA and mu as parameters instead of mHu2 and mHd2
+    #if(FS_MODEL_MSSMatMSUSY_mAmu_IS_BUILT)
     void get_MSSMatMSUSY_mA_spectrum_FS (Spectrum& result)
     {
       using namespace softsusy;
@@ -770,13 +1024,17 @@ namespace Gambit
       const SMInputs& sminputs = *myPipe::Dep::SMINPUTS;
       MSSMatMSUSY_mAmu_input_parameters input;
       input.MuInput  = *myPipe::Param.at("mu");
-      double mA = *myPipe::Param.at("mA"); // Peter, did you make this mA rather than mA^2 on purpose?
-      input.mA2Input = mA*mA;              // Oh well we will just square it for now.
+      // Note this spectrum generator mA2 is the parameter.
+      // However this freedom is not used in GAMBIT
+      // and not needed as mA is a DRbar mass eigenstate for a scalar
+      double mA = *myPipe::Param.at("mA");
+      input.mA2Input = mA*mA;    // FS has mA^2 as the parameter
       fill_MSSM63_input(input,myPipe::Param); // Fill the rest
       result = run_FS_spectrum_generator<MSSMatMSUSY_mAmu_interface<ALGORITHM1>>(input,sminputs,*myPipe::runOptions,myPipe::Param);
       if (not has_neutralino_LSP(result)) invalid_point().raise("Neutralino is not LSP.");
       result.drop_SLHAs_if_requested(myPipe::runOptions, "GAMBIT_unimproved_spectrum");
     }
+    #endif
 
     void get_GUTMSSMB_spectrum (Spectrum &/*result*/)
     {
@@ -857,6 +1115,13 @@ namespace Gambit
 
       // Create Spectrum object from the slhaea object
       result = spectrum_from_SLHAea<MSSMSimpleSpec, SLHAstruct>(input_slha, input_slha, mass_cut, mass_ratio_cut);
+
+      // Add getter for susy scale if option set for this
+      bool add_susy_scale = myPipe::runOptions->getValueOrDef<bool>(false,"assume_Q_is_MSUSY");
+      if(add_susy_scale)
+      {
+         result.get_HE().set_override(Par::mass1,result.get_HE().GetScale(),"susy_scale",true);
+      }
 
       // No sneaking in charged LSPs via SLHA, jävlar.
       if (not has_neutralino_LSP(result)) invalid_point().raise("Neutralino is not LSP.");
@@ -1389,28 +1654,81 @@ namespace Gambit
     void add_extra_MSSM_parameter_combinations(std::map<std::string,double>& specmap, const SubSpectrum& mssm)
     {
       double At = 0;
-      double Yt = mssm.get(Par::dimensionless, "Yu", 3, 3);
+      double Ab = 0;
+      const double Yt = mssm.get(Par::dimensionless, "Yu", 3, 3);
+      const double Yb = mssm.get(Par::dimensionless, "Yd", 3, 3);
       if(std::abs(Yt) > 1e-12)
       {
         At = mssm.get(Par::mass1, "TYu", 3, 3) / Yt;
       }
-      double MuSUSY = mssm.get(Par::mass1, "Mu");
-      double tb = mssm.get(Par::dimensionless, "tanbeta");
+      if(std::abs(Yb) > 1e-12)
+      {
+        Ab = mssm.get(Par::mass1, "TYd", 3, 3) / Yb;
+      }
+
+      const double MuSUSY = mssm.get(Par::mass1, "Mu");
+      const double tb = mssm.get(Par::dimensionless, "tanbeta");
+
       specmap["Xt"] = At - MuSUSY / tb;
+      specmap["Xb"] = Ab - MuSUSY * tb;
       /// Determine which states are the third gens then add them for printing
       str msf1, msf2;
-      /// Since this is for printing we only want to invalidate the point if this is completely wrong.  We can also plot the mixing if we are suspicious.
+      /// Since this is for printing we only want to invalidate the point
+      /// if this is completely wrong.
+      /// We can also plot the mixing if we are suspicious.
       const static double tol = 0.5;
       const static bool pt_error = true;
-      slhahelp::family_state_mix_matrix("~u", 3, msf1, msf2, mssm, tol, LOCAL_INFO, pt_error);
+      slhahelp::family_state_mix_matrix("~u", 3, msf1, msf2, mssm, tol,
+                                        LOCAL_INFO, pt_error);
       specmap["mstop1"] =  mssm.get(Par::Pole_Mass, msf1);
       specmap["mstop2"] =  mssm.get(Par::Pole_Mass, msf2);
-      slhahelp::family_state_mix_matrix("~d", 3, msf1, msf2, mssm, tol, LOCAL_INFO, pt_error);
+      slhahelp::family_state_mix_matrix("~d", 3, msf1, msf2, mssm, tol,
+                                        LOCAL_INFO, pt_error);
       specmap["msbottom1"] =  mssm.get(Par::Pole_Mass, msf1);
       specmap["msbottom2"] =  mssm.get(Par::Pole_Mass, msf2);
-      slhahelp::family_state_mix_matrix("~e-", 3, msf1, msf2, mssm, tol, LOCAL_INFO, pt_error);
+      slhahelp::family_state_mix_matrix("~e-", 3, msf1, msf2, mssm, tol,
+                                        LOCAL_INFO, pt_error);
       specmap["mstau1"] =  mssm.get(Par::Pole_Mass, msf1);
       specmap["mstau2"] =  mssm.get(Par::Pole_Mass, msf2);
+      /// return mass eigenstate strings that best represent required gauge
+      /// eigenstate
+      const str gs_suL = slhahelp::mass_es_from_gauge_es("~u_L", mssm, tol,
+                                                         LOCAL_INFO, pt_error);
+      specmap["msupL"] = mssm.get(Par::Pole_Mass,gs_suL);
+      const str gs_scL = slhahelp::mass_es_from_gauge_es("~c_L", mssm, tol,
+                                                         LOCAL_INFO, pt_error);
+      specmap["mscharmL"] = mssm.get(Par::Pole_Mass,gs_scL);
+      const str gs_sdL = slhahelp::mass_es_from_gauge_es("~d_L", mssm, tol,
+                                                         LOCAL_INFO, pt_error);
+      specmap["msdownL"] = mssm.get(Par::Pole_Mass,gs_sdL);
+      const str gs_ssL = slhahelp::mass_es_from_gauge_es("~s_L", mssm, tol,
+                                                         LOCAL_INFO, pt_error);
+      specmap["msstrangeL"] = mssm.get(Par::Pole_Mass,gs_ssL);
+      const str gs_suR = slhahelp::mass_es_from_gauge_es("~u_R", mssm, tol,
+                                                         LOCAL_INFO, pt_error);
+      specmap["msupR"] = mssm.get(Par::Pole_Mass,gs_suR);
+      const str gs_scR = slhahelp::mass_es_from_gauge_es("~c_R", mssm, tol,
+                                                         LOCAL_INFO, pt_error);
+      specmap["mscharmR"] = mssm.get(Par::Pole_Mass,gs_scR);
+      const str gs_sdR = slhahelp::mass_es_from_gauge_es("~d_R", mssm, tol,
+                                                         LOCAL_INFO, pt_error);
+      specmap["msdownR"] = mssm.get(Par::Pole_Mass,gs_sdR);
+      const str gs_ssR = slhahelp::mass_es_from_gauge_es("~s_R", mssm, tol,
+                                                         LOCAL_INFO, pt_error);
+      specmap["msstrangeR"] = mssm.get(Par::Pole_Mass,gs_ssR);
+      const str gs_seL = slhahelp::mass_es_from_gauge_es("~e_L", mssm, tol,
+                                                         LOCAL_INFO, pt_error);
+      specmap["mselectronL"] = mssm.get(Par::Pole_Mass,gs_seL);
+      const str gs_sMuL = slhahelp::mass_es_from_gauge_es("~mu_L", mssm, tol,
+                                                         LOCAL_INFO, pt_error);
+      specmap["msmuonL"] = mssm.get(Par::Pole_Mass,gs_sMuL);
+      const str gs_seR = slhahelp::mass_es_from_gauge_es("~e_R", mssm, tol,
+                                                         LOCAL_INFO, pt_error);
+      specmap["mselectronR"] = mssm.get(Par::Pole_Mass,gs_seR);
+      const str gs_sMuR = slhahelp::mass_es_from_gauge_es("~mu_R", mssm, tol,
+                                                         LOCAL_INFO, pt_error);
+      specmap["msmuonR"] = mssm.get(Par::Pole_Mass,gs_sMuR);
+
     }
 
     void get_MSSM_spectrum_as_map (std::map<std::string,double>& specmap)
@@ -1518,7 +1836,7 @@ namespace Gambit
     {
       using namespace Pipes::FH_HiggsMass;
       //FH indices: 0=h0_1, 1=h0_2
-      int i;
+      int i = 0;
       const SubSpectrum& spec = Dep::unimproved_MSSM_spectrum->get_HE();
       int higgs = SMlike_higgs_PDG_code(spec);
       if (higgs == 25) i = 0;
@@ -1533,7 +1851,7 @@ namespace Gambit
     {
       using namespace Pipes::FH_HeavyHiggsMasses;
       const int neutrals[2] = {25, 35};
-      int i;
+      int i = -1;
       const SubSpectrum& spec = Dep::unimproved_MSSM_spectrum->get_HE();
       int higgs = SMlike_higgs_PDG_code(spec);
       if (higgs == neutrals[0]) i = 1;

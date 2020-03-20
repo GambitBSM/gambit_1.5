@@ -3,14 +3,14 @@
 ///  \file
 ///
 ///  Macros for making things from frontend headers
-///  accessible from within source files that 
-///  define backend convenience and initialisation 
+///  accessible from within source files that
+///  define backend convenience and initialisation
 ///  functions.
 ///
 ///  *********************************************
 ///
 ///  Authors (add name and date if you modify):
-///   
+///
 ///  \author Pat Scott
 ///          (patscott@physics.mcgill.ca)
 ///  \date 2015 May
@@ -26,7 +26,7 @@
 
 #include "gambit/Elements/module_macros_inmodule.hpp"
 #include "gambit/Backends/common_macros.hpp"
-#include "gambit/Backends/mathematica_macros.hpp"
+#include "gambit/Backends/interoperability.hpp"
 #include "gambit/Backends/backend_singleton.hpp"
 
 
@@ -41,9 +41,9 @@
 
 /// Macro for assigning a single allowed model to an entire backend.
 #define BE_ALLOW_MODEL(MODEL) MODULE_ALLOWED_MODEL(BackendIniBit,           \
- CAT_4(BACKENDNAME,_,SAFE_VERSION,_init), MODEL)                            \
+ CAT_4(BACKENDNAME,_,SAFE_VERSION,_init), MODEL, NOT_MODEL)                 \
 
-/// Make the inUse pipe for a given backend functor.                        
+/// Make the inUse pipe for a given backend functor.
 #define MAKE_INUSE_POINTER(NAME)                                            \
   namespace BackendIniBit                                                   \
   {                                                                         \
@@ -70,6 +70,9 @@ namespace Gambit                                                            \
       extern std::vector<str> allowed_models;                               \
       /* Make backend path easily available to convenience functions. */    \
       extern const str backendDir;                                          \
+      /* Make an easy reference to the actual backend module if it is a */  \
+      /* Python backend. */                                                 \
+      IF_USING_PYBIND11(extern pybind11::module& BACKENDNAME;)              \
     }                                                                       \
   }                                                                         \
 }                                                                           \
@@ -78,7 +81,7 @@ namespace Gambit                                                            \
 MODULE_START_CAPABILITY(BackendIniBit)                                      \
 MODULE_DECLARE_FUNCTION(BackendIniBit,                                      \
  CAT_4(BACKENDNAME,_,SAFE_VERSION,_init),                                   \
- void,2)                                                                    \
+ void,2,NOT_MODEL)                                                          \
 
 /// Main actual backend variable macro
 #define BE_VARIABLE_I(NAME, TYPE, SYMBOLNAME, CAPABILITY, MODELS)             \
@@ -104,18 +107,18 @@ namespace Gambit                                                              \
 /// \name Wrapping macros for backend-defined functions
 ///
 /// BE_FUNCTION(NAME, TYPE, ARGSLIST, SYMBOLNAME, CAPABILITY, [(MODELS)]) is the
-/// macro used for constructing pointers to library functions and 
+/// macro used for constructing pointers to library functions and
 /// wrapping function pointers in backend functors.
 ///
 /// The sixth argument (MODELS) is optional, and contains a list of models that you want this function to be able
-/// to be used with.  
+/// to be used with.
 /// @{
-  
+
 #define BE_FUNCTION_5(NAME, TYPE, ARGSLIST, SYMBOLNAME, CAPABILITY)                             \
   BE_FUNCTION_I(NAME, TYPE, ARGSLIST, SYMBOLNAME, CAPABILITY, ())
 
 #define BE_FUNCTION_6(NAME, TYPE, ARGSLIST, SYMBOLNAME, CAPABILITY, MODELS)                     \
-  BE_FUNCTION_I(NAME, TYPE, ARGSLIST, SYMBOLNAME, CAPABILITY, MODELS)                             
+  BE_FUNCTION_I(NAME, TYPE, ARGSLIST, SYMBOLNAME, CAPABILITY, MODELS)
 
 #define BE_FUNCTION(...) VARARG(BE_FUNCTION, __VA_ARGS__)
 
@@ -142,7 +145,7 @@ namespace Gambit                                                                
 
 
 /// \name Main wrapping macro for convenience functions
-/// BE_CONV_FUNCTION(NAME, TYPE, ARGSLIST, CAPABILITY, [(MODELS)]) is the macro used 
+/// BE_CONV_FUNCTION(NAME, TYPE, ARGSLIST, CAPABILITY, [(MODELS)]) is the macro used
 /// for wrapping convenience functions in backend functors.
 #define BE_CONV_FUNCTION_FULL(NAME, TYPE, ARGSLIST, CAPABILITY, MODELS)                         \
 namespace Gambit                                                                                \

@@ -11,16 +11,21 @@
 #  Authors (add name and date if you modify):
 #
 #  \author Ben Farmer
-#          (ben.farmer@gmail.com)
+#          (b.farmer@imperial.ac.uk)
 #    \date 2013 Sep
 #          2014 Jan
 #          2015 Jul
+#          2018 Oct
 #
 #  \author Pat Scott
 #          (patscott@physics.mcgill.ca)
 #    \date 2013 Oct, Nov
 #    \date 2014 Jan, Nov
 #    \date 2015 Feb
+#
+#  \author Tomas Gonzalo
+#          (tomas.gonzalo@monash.edu)
+#    \date 2018 Oct
 #
 #*********************************************
 import os
@@ -29,6 +34,15 @@ import datetime
 import sys
 import getopt
 import itertools
+import shutil
+import ctypes
+
+# Python 2/3 compatibility
+# izip_longest renamed to zip_longest in Python 3
+try:
+    from itertools import izip_longest as zip_longest
+except ImportError:
+    from itertools import zip_longest
 
 default_bossed_versions = "./Backends/include/gambit/Backends/default_bossed_versions.hpp"
 equiv_config = "./config/resolution_type_equivalency_classes.yaml"
@@ -51,23 +65,35 @@ def get_default_boss_namespaces():
 # Just use regex rather than pyYAML, as the latter chokes on :: in scalar entries >:-/
 def get_type_equivalencies(nses):
     from collections import defaultdict
-    result = defaultdict(set)
+    result = defaultdict(list)
     # Load the equivalencies yaml file
     with open(equiv_config) as f:
         for newline in readlines_nocomments(f):
             newline = newline.strip()
             if newline == "" or newline.startswith("#"): continue
             newline = re.sub("^\[\s*|\s*\]", "", newline)
-            equivalency_class = set()
+            equivalency_class = list()
             for member in re.findall("[^,]*?\(.*?\)[^,]*?\(.*?\).*?,|[^,]*?<.*?>.*?,|[^,]*?\(.*?\).*?,|[^>\)]*?,", newline+","):
               member = re.sub("\"","",member[:-1].strip())
-              # Strip off the leading BOSSed namespace from all type equivalencies pertaining to the default version
+              # Convert the leading BOSSed namespace for the default version to the explicit namespace of the actual version
               for key in nses:
-                ns = key+"_"+nses[key]+"::"
-                if member.startswith(ns): member = member[len(ns):]
-                member = re.sub("\s"+ns," ",member)
-                equivalency_class.add(member)
-            for member in equivalency_class: result[member] = list(equivalency_class)
+                ns_default = key+"_default"+"::"
+                ns_true = key+"_"+nses[key]+"::"
+                if member.startswith(ns_default): member = ns_true+member[len(ns_default):]
+                member = re.sub("\s"+ns_default," "+ns_true,member)
+
+              # If the type is an alias of a native int then add int to the equivalency class
+              if re.match("int[0-9]+_t", member):
+                if ( ctypes.sizeof(ctypes.c_int) == 4 and re.search("32", member) ) or ( ctypes.sizeof(ctypes.c_int) == 2 and re.search("16", member) ) :
+                  if 'int' not in equivalency_class:
+                    equivalency_class+=['int']
+              if member not in equivalency_class:
+                equivalency_class += [member]
+            for member in equivalency_class: result[member] = equivalency_class
+
+    # Debug output
+    # print('Type equivalencies:')
+    # print(result)
     return result
 
 # Remove C/C++ comments from 'text' (From http://stackoverflow.com/questions/241327/python-snippet-to-remove-c-and-c-comments)
@@ -109,7 +135,8 @@ def sorted_nicely( l ):
 # Parse a string to see if it has a class, struct or typedef declaration
 def check_for_declaration(input_snippet,module,all_modules,local_namespace,candidate_type):
     splitline = neatsplit('\s|\(|\)|\*|\&|\;',input_snippet)
-    candidate_parts = neatsplit('::',candidate_type)
+    candidate_type = re.sub("^\s*|\s*$", "", candidate_type)
+    candidate_parts = neatsplit('::',re.sub("^.*\s", "", re.sub("<.*>", "", candidate_type)))
     namespace_parts = neatsplit('::',local_namespace)
     right_class = False
     # Work out if we are in the module namespace, and if any sub-namespace matches the candidate type.
@@ -127,9 +154,10 @@ def check_for_declaration(input_snippet,module,all_modules,local_namespace,candi
     if len(splitline) > 1 and (not local_namespace or namespace_parts[0] not in all_modules or in_module_and_namespace_matches):
         # Look for class/struct declarations
         if splitline[0] in ["class", "struct"]:
-            if candidate_type in (splitline[1], splitline[1]+"*"):
+            allowed_matches = (splitline[1], splitline[1]+"*")
+            if candidate_type in allowed_matches or candidate_parts[0] in allowed_matches:
                 right_class = True
-            elif len(candidate_parts) > 1 and candidate_parts[-1] in (splitline[1], splitline[1]+"*"):
+            elif len(candidate_parts) > 1 and candidate_parts[-1] in allowed_matches:
                 if (candidate_parts[:-1] == namespace_parts[1-len(candidate_parts):]): right_class = True
         # Look for typedefs
         if len(splitline)>2 and splitline[0]=="typedef":
@@ -138,7 +166,17 @@ def check_for_declaration(input_snippet,module,all_modules,local_namespace,candi
             elif len(candidate_parts) > 1 and candidate_parts[-1] in splitline[2:]:
                 if (candidate_parts[:-1] == namespace_parts[1-len(candidate_parts):]): right_class = True
         # The class declared at this line matches the candidate class
-        if right_class and local_namespace and local_namespace != "Gambit": candidate_type = local_namespace+"::"+candidate_parts[-1]
+        if right_class and local_namespace and local_namespace != "Gambit":
+          main_class = candidate_parts[-1]
+          template_args = re.findall("<.*>\*?", candidate_type)
+          if template_args == []:
+            template_args = ""
+          else:
+            template_args = template_args[0]
+            main_class = re.sub("\*$", "", candidate_parts[-1])
+          qualifiers = re.findall("^.*\s", re.sub("<.*>\*?", "", candidate_type))
+          qualifiers = "" if qualifiers == [] else qualifiers[0]
+          candidate_type = qualifiers + local_namespace + "::" + main_class + template_args
     return (right_class, candidate_type)
 
 # Parse a string to see if it has a namespace declaration
@@ -167,7 +205,7 @@ def addifheader(line,headerset,exclude_set,verbose=False):
         split3 = neatsplit('/',split2[0])
         if split2[0] not in exclude_set and split3[-1] not in exclude_set:
             headerset.add(split2[0])
-            if verbose: print "  Added header '{0}' to set".format(split2[0])
+            if verbose: print("  Added header '{0}' to set".format(split2[0]))
 
 # Harvest module names from rollcall headers
 def update_module(line,module):
@@ -186,11 +224,12 @@ def first_simple_type_equivalent(candidate_in, equivs, nses, existing):
     if candidate_in in existing: return candidate_in
     candidate = candidate_in
     candidate.strip()
-    # Strip off the leading BOSSed namespace if it's from the default version
+    # Convert the leading BOSSed namespace for the default version to the explicit namespace of the actual version
     for key in nses:
-      ns = key+"_"+nses[key]+"::"
-      candidate = re.sub("\s"+ns," ",candidate)
-      if candidate.startswith(ns): candidate = cadidate[len(ns):]
+      ns_default = key+"_default"+"::"
+      ns_true = key+"_"+nses[key]+"::"
+      if candidate.startswith(ns_default): candidate = ns_true+candidate[len(ns_default):]
+      candidate = re.sub("\s"+ns_default," "+ns_true,candidate)
     # Exists in the equivalency classes
     if candidate in equivs:
         candidate_suffix = ""
@@ -207,11 +246,11 @@ def first_simple_type_equivalent(candidate_in, equivs, nses, existing):
       for index in range(len(equivalency_class)):
         equivalent = equivalency_class[index]
         if "," not in equivalent: return equivalent+candidate_suffix
-      print "Error: all equivalent types found have commas in them!  Please typedef one without a comma."
-      print "Types are: ", equivalency_class
+      print( "Error: all equivalent types found have commas in them!  Please typedef one without a comma." )
+      print( "Types are: ", equivalency_class )
       sys.exit(1)
     if len(common_elements) != 1:
-        print "Error: existing types and equivalency class have more than one element in common!"
+        print( "Error: existing types and equivalency class have more than one element in common!" )
         sys.exit(1)
     return common_elements.pop()+candidate_suffix
 
@@ -272,7 +311,7 @@ def addiffunctormacro(line,module,all_modules,typedict,typeheaders,intrinsic_typ
                 "Gambit::"+module+"::"+candidate_type in typeset): continue
             #If the type is not an intrinsic, check if it is declared in any of the module type headers
             if (candidate_type not in intrinsic_types):
-                if verbose: print "    {0} located, searching for declaration of {1}...".format(line.strip(),candidate_type)
+                if verbose: print( "    {0} located, searching for declaration of {1}...".format(line.strip(),candidate_type) )
                 for header in typeheaders:
                     local_namespace = ""
                     found_declaration = False
@@ -310,7 +349,8 @@ def addifbefunctormacro(line,be_typeset,type_pack_set,equiv_classes,equiv_ns,ver
     command_index = {"BE_VARIABLE":2,
                      "BE_FUNCTION":2,
                      "BE_CONV_FUNCTION":2,
-                     "BACKEND_REQ":0}
+                     "BACKEND_REQ":0,
+                     "BACKEND_REQ_FROM_GROUP":0}
 
     line = re.sub(";", "", line)
     splitline = neatsplit('\(|\)|,|\s',line)
@@ -320,8 +360,8 @@ def addifbefunctormacro(line,be_typeset,type_pack_set,equiv_classes,equiv_ns,ver
     if len(splitline)>1 and splitline[0] in command_index.keys():
         #This line defines a backend functor and one or more of the arguments defines a candidate type
 
-        if splitline[0] == "BACKEND_REQ":
-            args = re.sub("\s*BACKEND_REQ\s*\(.*?,\s*\(.*?\)\s*,\s*", "", re.sub("\s*\)\s*$", "", line) )
+        if splitline[0].startswith("BACKEND_REQ"):
+            args = re.sub("\s*BACKEND_REQ(_FROM_GROUP)?\s*\(.*?,\s*\(.*?\)\s*,\s*", "", re.sub("\s*\)\s*$", "", line) )
             args = args.strip()
             if re.search("\)\s*\)\s*$", line):
                 #This is a backend function requirement
@@ -360,7 +400,7 @@ def addifbefunctormacro(line,be_typeset,type_pack_set,equiv_classes,equiv_ns,ver
                     args = re.sub("\)\s*,[^\)]*?\)\s*$", "", args)
                 for arg in re.findall("[^,]*?\(.*?\)[^,]*?\(.*?\).*?,|[^,]*?<.*?>.*?,|[^,]*?\(.*?\).*?,|[^>\)]*?,", args+","):
                     arg = arg[:-1].strip()
-                    if arg != "":
+                    if arg != "" and not arg.startswith("\"") and not arg.startswith("("):
                         if arg == "etc": arg = "..."
                         arg_list = neatsplit('\s',arg)
                         if arg_list[0] in ("class", "struct", "typename"): arg = arg_list[1]
@@ -399,7 +439,7 @@ def addifbefunctormacro(line,be_typeset,type_pack_set,equiv_classes,equiv_ns,ver
 def get_headers(path,header_set,exclude_set,verbose=False):
     """Parse the file at 'path' and add any headers that are "include"ed therin to the set 'header_set'"""
     with open(path) as f:
-        #print "  Parsing header '{0}' for further includes...".format(path)
+        #print( "  Parsing header '{0}' for further includes...".format(path) )
         for line in readlines_nocomments(f):
             addifheader(line,header_set,exclude_set,verbose=verbose)
 
@@ -421,7 +461,7 @@ def find_and_harvest_headers(header_set,fullheadlist,exclude_set,dir_exclude_set
        for name in files:
           for header in header_set:
                 if os.path.join(root,name).endswith(header):
-                    if verbose: print "  Located header '{0}' at path '{1}'".format(name,os.path.join(root,name))
+                    if verbose: print( "  Located header '{0}' at path '{1}'".format(name,os.path.join(root,name)) )
                     full_header_paths+=[os.path.join(root,name)]
 
     # Add newly found paths to output list
@@ -441,9 +481,9 @@ def find_and_harvest_headers(header_set,fullheadlist,exclude_set,dir_exclude_set
 
     # Do this again for all the headers we just found, if we found any
     if len(new_headers) > 0:
-        if verbose: print "  Harvested the following new headers:"
+        if verbose: print( "  Harvested the following new headers:" )
         for header in new_headers:
-            if verbose: print "    "+header
+            if verbose: print( "    "+header )
         find_and_harvest_headers(new_headers,fullheadlist,new_exclude_set,dir_exclude_set,verbose=verbose)
 
 #Search the source tree to determine which modules are present, and write a module_rollcall header if the GAMBIT Core exists.
@@ -463,7 +503,7 @@ def retrieve_rollcall_headers(verbose,install_dir,excludes):
                 for x in excludes:
                     if name.startswith(x): exclude = True
                 if (not exclude):
-                    if verbose: print "  Located module rollcall header '{0}' at path '{1}'".format(name,os.path.join(root,name))
+                    if verbose: print( "  Located module rollcall header '{0}' at path '{1}'".format(name,os.path.join(root,name)) )
                     rel_name = re.sub(".*?/include/", "", os.path.relpath(os.path.join(root,name),install_dir))
                     rollcall_headers+=[rel_name]
     if core_exists: make_module_rollcall(rollcall_headers,verbose)
@@ -484,7 +524,7 @@ def retrieve_module_type_headers(verbose,install_dir,excludes):
                 for x in excludes:
                     if bare_name.startswith(x): exclude = True
                 if (not exclude):
-                    if verbose: print "  Located module type header '{0}' at path '{1}'".format(name,os.path.join(root,name))
+                    if verbose: print( "  Located module type header '{0}' at path '{1}'".format(name,os.path.join(root,name)) )
                     rel_name = re.sub(".*?/include/", "", os.path.relpath(os.path.join(root,name),install_dir))
                     type_headers+=[rel_name]
     return type_headers
@@ -496,7 +536,7 @@ def get_all_files_with_ext(verbose,starting_dir,ext_set,kind):
         for name in files:
             for ext in ext_set:
                 if name.endswith(ext):
-                    if verbose: print "  Located "+kind+" file '{0}' at path '{1}'".format(name,os.path.join(root,name))
+                    if verbose: print( "  Located "+kind+" file '{0}' at path '{1}'".format(name,os.path.join(root,name)) )
                     results+=[os.path.join(root, name)]
     return results
 
@@ -510,7 +550,7 @@ def retrieve_generic_headers(verbose,starting_dir,kind,excludes,exclude_list=[])
                 if name.startswith(x): exclude = True
             if kind == "BOSSed type" and not name.startswith("loaded_types"): exclude = True
             if not exclude and (name.endswith(".hpp") or name.endswith(".h") or name.endswith(".hh")):
-                if verbose: print "  Located "+kind+" header '{0}' at path '{1}'".format(name,os.path.join(root,name))
+                if verbose: print( "  Located "+kind+" header '{0}' at path '{1}'".format(name,os.path.join(root,name)) )
                 rel_name = re.sub(".*?/include/", "", os.path.relpath(os.path.join(root,name),starting_dir))
                 headers+=[rel_name]
         if kind != "BOSSed type": break
@@ -520,7 +560,7 @@ def retrieve_generic_headers(verbose,starting_dir,kind,excludes,exclude_list=[])
 def same(f1,f2):
     file1 = open(f1,"r")
     file2 = open(f2,"r")
-    for l1,l2 in itertools.izip_longest(file1,file2,fillvalue=''):
+    for l1,l2 in zip_longest(file1,file2,fillvalue=''):
         if l1 != l2:
               l1nospace = ''.join(l1.split()).lower() #remove spaces and make lowercase
               #print l1
@@ -540,14 +580,14 @@ def same(f1,f2):
 # Compare a candidate file to an existing file, replacing only if they differ.
 def update_only_if_different(existing, candidate):
     if not os.path.isfile(existing):
-         os.rename(candidate,existing)
-         print "\033[1;33m   Created "+re.sub("\\.\\/","",existing)+"\033[0m"
+         shutil.move(candidate,existing)
+         print( "\033[1;33m   Created "+re.sub("\\.\\/","",existing)+"\033[0m" )
     elif same(existing, candidate):
          os.remove(candidate)
-         print "\033[1;33m   Existing "+re.sub("\\.\\/","",existing)+" is identical to candidate; leaving it untouched\033[0m"
+         print( "\033[1;33m   Existing "+re.sub("\\.\\/","",existing)+" is identical to candidate; leaving it untouched\033[0m" )
     else:
-         os.rename(candidate,existing)
-         print "\033[1;33m   Updated "+re.sub("\\.\\/","",existing)+"\033[0m"
+         shutil.move(candidate,existing)
+         print( "\033[1;33m   Updated "+re.sub("\\.\\/","",existing)+"\033[0m" )
 
 #Create the module_rollcall header in the Core directory
 def make_module_rollcall(rollcall_headers,verbose):
@@ -592,6 +632,6 @@ def make_module_rollcall(rollcall_headers,verbose):
     with open("./Core/include/gambit/Core/module_rollcall.hpp","w") as f:
         f.write(towrite)
 
-    if verbose: print "Found GAMBIT Core.  Generated module_rollcall.hpp.\n"
+    if verbose: print( "Found GAMBIT Core.  Generated module_rollcall.hpp.\n" )
 
 

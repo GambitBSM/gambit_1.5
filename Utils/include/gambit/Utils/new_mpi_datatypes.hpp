@@ -22,15 +22,23 @@
 #ifndef __new_mpi_datatypes_hpp__
 #define __new_mpi_datatypes_hpp__
 
-// MPI bindings
-#include "gambit/Utils/mpiwrapper.hpp"
+#include "gambit/Utils/mpiwrapper.hpp" // MPI bindings
+#include "gambit/Utils/export_symbols.hpp" // EXPORT_SYMBOLS macro (controls symbol visibility)
 #include <ostream>
 
 // Code!
 namespace Gambit
 {
-  namespace Printers 
-  {
+   //namespace GMPI
+   //{
+   //   // Forward declare MPI type getter template function
+   //   template<typename T, typename Enable=void>
+   //   struct get_mpi_data_type;
+   //}
+
+  
+   namespace Printers 
+   {
     /// vertexID / sub-print index pair
     /// Identifies individual buffers (I call them VertexBuffer, but actually there can be more than one per vertex) 
     //typedef std::pair<int,unsigned int> VBIDpair;
@@ -79,34 +87,37 @@ namespace Gambit
     /// pointID / process number pair
     /// Used to identify a single parameter space point
     //typedef std::pair<unsigned long int, unsigned int> PPIDpair;
-    struct PPIDpair
+    struct EXPORT_SYMBOLS PPIDpair
     {
-      long int pointID;
+      unsigned long long int pointID;
       unsigned int rank;
+      unsigned int valid; // Set to 0 to flag pair as uninitialised
       PPIDpair() 
-        : pointID(-1)
+        : pointID(0)
         , rank(0)
+        , valid(0)
       {}
-      PPIDpair(const long int p, const int r)
+      PPIDpair(const unsigned long long int p, const int r)
         : pointID(p)
         , rank(r)
+        , valid(1)
       {}
       friend std::ostream& operator<<(std::ostream&, const PPIDpair&);
     };
 
     // Needed by std::map for comparison of keys of type VBIDpair
-    bool operator<(const PPIDpair& l, const PPIDpair& r);
-    bool operator==(const PPIDpair& l, const PPIDpair& r);
-    bool operator!=(const PPIDpair& l, const PPIDpair& r);
+    EXPORT_SYMBOLS bool operator<(const PPIDpair& l, const PPIDpair& r);
+    EXPORT_SYMBOLS bool operator==(const PPIDpair& l, const PPIDpair& r);
+    EXPORT_SYMBOLS bool operator!=(const PPIDpair& l, const PPIDpair& r);
 
     // To use PPIDpairs in std::unordered_map/set, need to provide hashing and equality functions
-    struct PPIDHash{ 
-      size_t operator()(const PPIDpair &key) const { 
-        return std::hash<long int>()(key.pointID) ^ std::hash<unsigned int>()(key.rank);
-      }
+    struct EXPORT_SYMBOLS PPIDHash{ 
+      size_t operator()(const PPIDpair &key) const 
+      { 
+        return std::hash<unsigned long long int>()(key.pointID) ^ std::hash<unsigned int>()(key.rank) ^ std::hash<unsigned int>()(key.valid);      }
     };
 
-    struct PPIDEqual{
+    struct EXPORT_SYMBOLS PPIDEqual{
       bool operator()(const PPIDpair &lhs, const PPIDpair &rhs) const {
         return lhs == rhs; // use the operator we already defined (why doesn't the STL do this?)
       }
@@ -114,9 +125,37 @@ namespace Gambit
 
     // stream overloads (for easy std::out)
     // Null pointID object, use for unassigned pointIDs
-    const PPIDpair nullpoint;
+    EXPORT_SYMBOLS extern const PPIDpair nullpoint;
 
+    // A chunk of points for a buffer from HDF5Printer2 (i.e. for a single dataset)
+    struct EXPORT_SYMBOLS HDF5bufferchunk
+    {
+        static const std::size_t SIZE=10; // Number of points in this chunk. Kept small since people tend to use small buffers with large MPI sizes
+        static const std::size_t NBUFFERS=10; // Number of buffers combined into this chunk
+        std::size_t used_size;
+        std::size_t used_nbuffers;
+        int name_id[NBUFFERS]; // IDs for buffers. Types will be pre-associated with the name in a separate step
+        unsigned long long pointIDs[SIZE];
+        unsigned int ranks[SIZE];
+        double values[NBUFFERS][SIZE];
+        long long values_int[NBUFFERS][SIZE]; // Sometimes need to transmit ints. Could do separately, but try this for now.
+        int valid[NBUFFERS][SIZE];
+    };
+
+    // Make sure to run this function before using HDF5bufferchunk with MPI!
+    void define_mpiHDF5bufferchunk();
+ 
   } // end namespace Printers
+
+  #ifdef WITH_MPI
+  namespace GMPI { 
+     template<> 
+     struct get_mpi_data_type<Printers::HDF5bufferchunk> 
+     { 
+       static MPI_Datatype type();
+     }; 
+  }
+  #endif
 
   // DEPRECATED! We no longer actually send this stuff via MPI, 
   // and there were slight issues with non-standards compliance

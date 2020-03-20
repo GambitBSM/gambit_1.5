@@ -7,8 +7,8 @@
 ///  *********************************************
 ///
 ///  Authors (add name and date if you modify):
-///   
-///  \author Pat Scott  
+///
+///  \author Pat Scott
 ///          (patscott@physics.mcgill.ca)
 ///  \date 2013 Apr, July, Aug, Sep
 ///  \date 2014 Mar
@@ -19,10 +19,11 @@
 ///
 ///  *********************************************
 
-/// Standard libraries  
+/// Standard libraries
 #include <cstring>
 #include <chrono>  // chrono::system_clock
 #include <ctime>   // localtime
+#include <cctype>  // ::tolower function
 #include <sstream> // stringstream
 #include <string>  // string
 
@@ -32,32 +33,50 @@
 #include <sys/stat.h>
 #include <dirent.h>
 #include <libgen.h>
+#include <unistd.h>
 
 /// Gambit
 #include "gambit/Utils/util_functions.hpp"
+#include "gambit/cmake/cmake_variables.hpp"
+#include "gambit/Utils/mpiwrapper.hpp"
 
+/// Boost
+#include <boost/algorithm/string/iter_find.hpp>
+#include <boost/algorithm/string/finder.hpp>
 
 namespace Gambit
 {
-  
+
   namespace Utils
   {
-  
+
     const char* whitespaces[] = {" ", "\t", "\n", "\f", "\r"};
-  
+
+    /// Return the path to the run-specific scratch directory
+    const str& runtime_scratch()
+    {
+      #ifdef WITH_MPI
+        static const str master_procID = std::to_string(GMPI::Comm().MasterPID());
+      #else
+        static const str master_procID = std::to_string(getpid());
+      #endif
+      static const str path = ensure_path_exists(GAMBIT_DIR "/scratch/run_time/machine_" + std::to_string(gethostid()) + "/master_process_" + master_procID + "/");
+      return path;
+    }
+
     /// Split a string into a vector of strings using a delimiter,
     /// and remove any whitespace around the delimiters.
     std::vector<str> delimiterSplit(str s, str delim)
     {
       std::vector<str> vec;
       // Get rid of any whitespace around the delimiters
-      #if GAMBIT_CONFIG_FLAG_use_regex     // Using regex :D 
+      #if GAMBIT_CONFIG_FLAG_use_regex     // Using regex :D
         regex rgx1("\\s+"+delim), rgx2(delim+"\\s+");
         s = regex_replace(s, rgx1, delim);
         s = regex_replace(s, rgx2, delim);
       #else                                // Using lame-o methods >:(
         str previous = s+".";
-        while (s != previous) 
+        while (s != previous)
         {
           previous = s;
           for (int i = 0; i != 5; i++)
@@ -72,7 +91,7 @@ namespace Gambit
       boost::split(vec, s, boost::is_any_of(delim), boost::token_compress_on);
       return vec;
     }
-  
+
     /// Strips namespace from the start of a string, or after "const".
     str strip_leading_namespace(str s, str ns)
     {
@@ -94,7 +113,29 @@ namespace Gambit
       #endif
       return s;
     }
-  
+
+    /// Replaces a namespace at the start of a string, or after "const".
+    str replace_leading_namespace(str s, str ns, str ns_new)
+    {
+      #if GAMBIT_CONFIG_FLAG_use_regex     // Using regex :D
+        regex expression("(^|[\\s\\*\\&\\(\\,\\[])"+ns+"::");
+        s = regex_replace(s, expression, str("\\1")+ns_new+"::");
+      #else                                // Using lame-o methods >:(
+        int len = ns.length() + 2;
+        if (s.substr(0,len) == ns+str("::")) s.replace(0,len,ns_new+"::");
+        boost::replace_all(s, str(",")+ns+"::", str(",")+ns_new+"::");
+        boost::replace_all(s, str("*")+ns+"::", str("*")+ns_new+"::");
+        boost::replace_all(s, str("&")+ns+"::", str("&")+ns_new+"::");
+        boost::replace_all(s, str("(")+ns+"::", str("(")+ns_new+"::");
+        boost::replace_all(s, str("[")+ns+"::", str("[")+ns_new+"::");
+        for (int i = 0; i != 5; i++)
+        {
+          boost::replace_all(s, whitespaces[i]+ns+"::", whitespaces[i]+ns_new+"::");
+        }
+      #endif
+      return s;
+    }
+
     /// Strips all whitespaces from a string, but re-inserts a single regular space after "const".
     void strip_whitespace_except_after_const(str &s)
     {
@@ -103,10 +144,10 @@ namespace Gambit
         regex constdec1("const\\s+"), temp(tempstr), whitespace("\\s+");
         s = regex_replace(s, constdec1, tempstr);
         s = regex_replace(s, whitespace, empty);
-        s = regex_replace(s, temp, constdec2); 
+        s = regex_replace(s, temp, constdec2);
       #else                                // Using lame-o methods >:(
         str previous = s+".";
-        while (s != previous) 
+        while (s != previous)
         {
           previous = s;
           for (int i = 0; i != 5; i++)
@@ -118,7 +159,7 @@ namespace Gambit
         boost::replace_all(s, tempstr, constdec2);
       #endif
     }
-  
+
     /// Strips leading and/or trailing parentheses from a string.
     void strip_parentheses(str &s)
     {
@@ -140,16 +181,16 @@ namespace Gambit
       }
       return s;
     }
-   
+
     /// Check if a string represents an integer
     /// From: http://stackoverflow.com/a/2845275/1447953
     bool isInteger(const std::string & s)
     {
        if(s.empty() || ((!isdigit(s[0])) && (s[0] != '-') && (s[0] != '+'))) return false ;
-    
+
        char * p ;
        strtol(s.c_str(), &p, 10) ;
-    
+
        return (*p == 0) ;
     }
 
@@ -161,21 +202,47 @@ namespace Gambit
       arr[len-1] = ' ';
     }
 
+    /// Perform a simple case-insensitive string comparison
+    /// From: https://stackoverflow.com/a/4119881/1447953
+    bool iequals(const std::string& a, const std::string& b, bool case_sensitive)
+    {
+        if(case_sensitive)
+            return a==b;
+        unsigned int sz = a.size();
+        if (b.size() != sz)
+            return false;
+        for (unsigned int i = 0; i < sz; ++i)
+            if (tolower(a[i]) != tolower(b[i]))
+                return false;
+        return true;
+    }
+
+    /// Split string into vector of strings, using a delimiter string
+    std::vector<std::string> split(const std::string& input, const std::string& delimiter)
+    {
+        std::vector<std::string> result;
+        boost::iter_split(result, input, boost::algorithm::first_finder(delimiter));
+        return result;
+    }
+
 
     /// Ensure that a path exists (and then return the path, for chaining purposes)
     const std::string& ensure_path_exists(const std::string& path)
-    { 
+    {
        // Split off potential filename
        // If only path is provided, it must end in a slash!!!
        size_t found = path.find_last_of("/\\");
-       std::string prefix = path.substr(0,found);
-       recursive_mkdir( prefix.c_str() );
+       if (found != std::string::npos)
+       {
+         std::string prefix = path.substr(0,found);
+         recursive_mkdir( prefix.c_str() );
+       }
        return path;
     }
 
     /// Check if a file exists
     bool file_exists(const std::string& filename)
-    { 
+    {
         //std::ifstream file(filename);
         //return not file.fail();
         struct stat buffer;
@@ -184,11 +251,11 @@ namespace Gambit
 
     /// Return a vector of strings listing the contents of a directory (POSIX)
     /// Based on http://www.gnu.org/software/libtool/manual/libc/Simple-Directory-Lister.html
-    std::vector<std::string> ls_dir(const std::string& dir) 
-    { 
+    std::vector<std::string> ls_dir(const std::string& dir)
+    {
       std::vector<std::string> dir_contents;
       DIR *dp;
-      struct dirent *ep;     
+      struct dirent *ep;
       dp = opendir(dir.c_str());
 
       if( dp != NULL )
@@ -215,7 +282,7 @@ namespace Gambit
        path.copy(buffer, path.size()); //TODO: error if path.size()>1000
        buffer[path.size()] = '\0';
        std::string result = dirname(&buffer[0]); // should use the C function...
-       return result;  
+       return result;
     }
 
     /// Get file name from full path+filename (POSIX)
@@ -225,7 +292,7 @@ namespace Gambit
        path.copy(buffer, path.size()); //TODO: error if path.size()>1000
        buffer[path.size()] = '\0';
        std::string result = basename(&buffer[0]); // should use the C function...
-       return result;  
+       return result;
     }
 
     /// Delete all files in a directory (does not act recursively)
@@ -250,7 +317,7 @@ namespace Gambit
         // Delete the contents
         if ( strcmp(pDirent->d_name, ".") and strcmp(pDirent->d_name, "..") )
         {
-          std::ostringstream ss; 
+          std::ostringstream ss;
           ss << dirname << pDirent->d_name;
           cout << "Deleting " << ss.str() << endl;
           remove(ss.str().c_str());
@@ -328,10 +395,10 @@ namespace Gambit
     {
       return a * a;
     }
- 
+
     /// Checks whether `str' ends with `suffix'
     // credit: http://stackoverflow.com/a/41041484/1447953
-    bool endsWith(const std::string& str, const std::string& suffix) 
+    bool endsWith(const std::string& str, const std::string& suffix)
     {
       if (&suffix == &str) return true; // str and suffix are the same string
       if (suffix.length() > str.length()) return false;
@@ -340,20 +407,27 @@ namespace Gambit
           if (suffix[i] != str[delta + i]) return false;
       }
       return true;
-    }     
-   
+    }
+
     // Inspired by the above. Checks whether 'str' begins with 'prefix'
-    bool startsWith(const std::string& str, const std::string& prefix) 
+    bool startsWith(const std::string& str, const std::string& prefix, bool case_sensitive)
     {
       if (&prefix == &str) return true; // str and prefix are the same string
       if (prefix.length() > str.length()) return false;
       for (size_t i = 0; i < prefix.length(); ++i) {
-          if (prefix[i] != str[i]) return false;
+          if(case_sensitive)
+          {
+             if (prefix[i] != str[i]) return false;
+          }
+          else
+          {
+             if (tolower(prefix[i]) != tolower(str[i])) return false;
+          }
       }
       return true;
-    }     
-   
-    
+    }
+
+
   }
 
 }

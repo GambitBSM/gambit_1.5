@@ -205,13 +205,14 @@ namespace Gambit
     void SMLikeHiggs_ModelParameters(hb_ModelParameters &result)
     {
       using namespace Pipes::SMLikeHiggs_ModelParameters;
-      dep_bucket<Spectrum>* spectrum_dependency;
-      if (ModelInUse("SingletDM") or ModelInUse("SingletDMZ3")) spectrum_dependency = &Dep::SingletDM_spectrum;
-      else ColliderBit_error().raise(LOCAL_INFO, "No valid model for SingleHiggs_ModelParameters.");
+      dep_bucket<Spectrum>* spectrum_dependency = nullptr;
+      if (ModelInUse("ScalarSingletDM_Z2") or ModelInUse("ScalarSingletDM_Z2_running")) spectrum_dependency = &Dep::ScalarSingletDM_Z2_spectrum;
+      else if (ModelInUse("ScalarSingletDM_Z3") or ModelInUse("ScalarSingletDM_Z3_running")) spectrum_dependency = &Dep::ScalarSingletDM_Z3_spectrum;
+      else ColliderBit_error().raise(LOCAL_INFO, "No valid model for SMLikeHiggs_ModelParameters.");
       const SubSpectrum& spec = (*spectrum_dependency)->get_HE();
       set_SMLikeHiggs_ModelParameters(spec, *Dep::Higgs_Couplings, result);
     }
-    
+
     /// MSSM Higgs model parameters
     void MSSMHiggs_ModelParameters(hb_ModelParameters &result)
     {
@@ -347,8 +348,14 @@ namespace Gambit
       double theor_unc = 1.5; // theory uncertainty
       BEreq::HB_calc_stats(theor_unc,chisq_withouttheory,chisq_withtheory,chan2);
 
-      result = -0.5*chisq_withouttheory;
+      // Catch HiggsBound's error value, chisq = -999
+      if( fabs(chisq_withouttheory - (-999.)) < 1e-6)
+      {
+        ColliderBit_warning().raise(LOCAL_INFO, "Got chisq=-999 from HB_calc_stats in HiggsBounds, indicating a cross-section outside tabulated range. Will use chisq=0.");
+        chisq_withouttheory = 0.0;
+      }
 
+      result = -0.5*chisq_withouttheory;
     }
 
     /// Get an LHC chisq from HiggsSignals

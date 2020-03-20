@@ -21,12 +21,15 @@
 #  \author Ben Farmer
 #          (benjamin.farmer@fysik.su.se)
 #    \date 2015
+#          2018 Oct
 #
 #*********************************************
 import os
 import sys
 import getopt
-execfile("./Utils/scripts/harvesting_tools.py")
+
+toolsfile="./Utils/scripts/harvesting_tools.py"
+exec(compile(open(toolsfile, "rb").read(), toolsfile, 'exec')) # Python 2/3 compatible version of 'execfile'
 
 def main(argv):
 
@@ -40,15 +43,15 @@ def main(argv):
     try:
        opts, args = getopt.gnu_getopt(argv,"vx:",["verbose","exclude-printers="])
     except getopt.GetoptError:
-        print 'Usage: printer_harvestor.py [flags]'
-        print ' flags:'
-        print '        -v                       : More verbose output'
-        print '        -x printer1,printer2,... : Exclude printer1, printer2, etc.'
+        print('Usage: printer_harvestor.py [flags]')
+        print(' flags:')
+        print('        -v                       : More verbose output')
+        print('        -x printer1,printer2,... : Exclude printer1, printer2, etc.')
         sys.exit(2)
     for opt, arg in opts:
       if opt in ('-v','--verbose'):
         verbose = True
-        print 'printer_harvester.py: verbose=True'
+        print('printer_harvester.py: verbose=True')
       elif opt in ('-x','--exclude-printers'):
         exclude_printers.update(neatsplit(",",arg))
 
@@ -92,12 +95,12 @@ def main(argv):
 
     # Don't touch any existing file unless it is actually different from what we will create
     header = "./Printers/include/gambit/Printers/printer_rollcall.hpp"
-    candidate = "./scratch/printer_rollcall.hpp.candidate"
+    candidate = "./scratch/build_time/printer_rollcall.hpp.candidate"
     with open(candidate,"w") as f: f.write(towrite)
     update_only_if_different(header, candidate)
 
     if verbose:
-        print "\nGenerated printer_rollcall.hpp."
+        print("\nGenerated printer_rollcall.hpp.")
 
 # Handle command line arguments (verbosity)
 if __name__ == "__main__":

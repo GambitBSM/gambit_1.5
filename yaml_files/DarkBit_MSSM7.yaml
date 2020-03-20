@@ -197,10 +197,7 @@ ObsLikes:
     - capability: PICO_2L_LogLikelihood
       purpose:    LogLike
 
-    - capability: PICO_60_F_LogLikelihood
-      purpose:    LogLike
-
-    - capability: PICO_60_2017_LogLikelihood
+    - capability: PICO_60_LogLikelihood
       purpose:    LogLike
 
     # Calculate all IceCube likelihoods (including 22 string)
@@ -276,6 +273,10 @@ Rules:
        CoannSfermions: true # Are sfermions included in coannihilations?
        CoannMaxMass: 1.6 # Maximum sparticle mass to include in coannihilations in units of DM mass
 
+  # Choose to use DarkSUSY rather than Capt'n General for calculating the capture rate of DM in the Sun
+  - capability: capture_rate_Sun
+    function: capture_rate_Sun_const_xsec
+
   # Choose to implement the relic density likelihood as an upper bound, not a detection
   - capability: lnL_oh2
     function: lnL_oh2_upperlimit
@@ -313,11 +314,11 @@ Rules:
   # values from the GAMBIT decay table (internal_decays=false).
   - function: MicrOmegas_MSSM_3_6_9_2_init
     options:
-       internal_decays: true
+       internal_decays: false
        VZdecay: 1 # 0 - no 3 body final states, 1 - virtual Z in annihilations, 2 - virtual Z in coannihilations
        VWdecay: 1 # 0 - no 3 body final states, 1 - virtual W in annihilations, 2 - virtual W in coannihilations
 
-  # Use DarkSUSY, MicrOmegas or the DarkBit native calculator (not recommended) for the relic density?
+  # Use DarkSUSY (not recommended), MicrOmegas or the DarkBit native calculator for the relic density?
   # Consult the DarkBit manual for the required options in each case
   - capability: RD_oh2
     function: RD_oh2_general
@@ -372,18 +373,18 @@ Rules:
   # Use DarkSUSY or MicrOmegas for calculating direct detection couplings
   - capability: DD_couplings
     function: DD_couplings_DarkSUSY
-    options: 
-      # If the below is true, 1 loop effects as discuseed in 
-      # Drees Nojiri Phys.Rev. D48 (1993) 3483 are included
-      loop: true 
-      # If the below is false, the squark propagator is approximated as 1/m_sq^2
-      # (automatically set to true if loop = true)
-      # pole: false
-    function: DD_couplings_MicrOmegas
     options:
-      # If the below is true, the box diagram for gluon-neutralino scattering as 
-      # discussed in arXiv:0803.2360 is included in the calculation
-      loop: box
+      # If the below is true, 1 loop effects as discuseed in Drees Nojiri
+      # Phys.Rev. D48 (1993) 3483 are included (default: true)
+      loop: true
+      # If the below is false, the squark propagator is approximated as 1/m_sq^2
+      # (default: false)
+      # pole: false
+    #function: DD_couplings_MicrOmegas
+    #options:
+    #  # If the below is true, the box diagram for gluon-neutralino scattering as
+    #  # discussed in arXiv:0803.2360 is included in the calculation
+    #  loop: box
 
   # Nuclear SI Parameter Likelihoods (All values in MeV)
   - capability: lnL_SI_nuclear_parameters

@@ -34,6 +34,7 @@
 #include <cmath>
 #include <functional>
 #include <omp.h>
+#include <time.h> // For nanosleep (posix only)
 
 #include "gambit/Elements/gambit_module_headers.hpp"
 #include "gambit/ExampleBit_A/ExampleBit_A_rollcall.hpp"
@@ -126,7 +127,7 @@ namespace Gambit
       logger() << "Is CMSSM being scanned? " << ModelInUse("CMSSM") << endl;
       logger() << "Is NUHM1 being scanned? " << ModelInUse("NUHM1") << endl;
       logger() << "Is NormalDist being scanned? " << ModelInUse("NormalDist") << endl;;
-      logger() << "Is SingletDM being scanned? "  << ModelInUse("SingletDM");;
+      logger() << "Is ScalarSingletDM_Z2 being scanned? "  << ModelInUse("ScalarSingletDM_Z2");;
       logger() << info << EOM;
       std::cout << "  Printing parameter values:" << std::endl;
       std::cout << "mu: " << *Param["mu"] << std::endl;
@@ -140,6 +141,7 @@ namespace Gambit
 
     /// Likelihood function for fitting the population parameters of a
     /// normal distribution (with hard-coded "observations")
+    /// Mainly used for testing scanning algorthims
     void lnL_gaussian (double &result)
     {
       using namespace Pipes::lnL_gaussian;
@@ -192,6 +194,19 @@ namespace Gambit
       if (Random::draw() < x)
       {
         invalid_point().raise("I don't like this point.");
+      }
+
+      // Artificially slow down likelihood evaluations
+      // Important for debugging new scanner plugins.
+      double eval_time = runOptions->getValueOrDef<double>(-1, "eval_time"); // Measured in seconds
+      //std::cout << "eval_time:" << eval_time <<std::endl;
+      if(eval_time>0)
+      {
+         struct timespec sleeptime;
+         sleeptime.tv_sec = floor(eval_time);
+         sleeptime.tv_nsec = floor((eval_time-floor(eval_time))*1e9); // Allow user to choose fractions of second
+         //std::cout << "Sleeping for "<<sleeptime.tv_sec<<" seconds and "<<sleeptime.tv_nsec<<" nanoseconds" <<std::endl;
+         nanosleep(&sleeptime,NULL);
       }
 
       result = loglTotal;
@@ -342,9 +357,9 @@ namespace Gambit
       using namespace Pipes::do_Farray_stuff;
       using std::cout;
       using std::endl;
-      libFarrayTest_CB_type  *commonBlock  = &(*BEreq::libFarrayTestCommonBlock);
-      libFarrayTest_CB2_type *commonBlock2 = &(*BEreq::libFarrayTestCommonBlock2);
-      libFarrayTest_CB3_type *commonBlock3 = &(*BEreq::libFarrayTestCommonBlock3);
+      libFarrayTest_CB_type  *commonBlock  = BEreq::libFarrayTestCommonBlock.pointer();
+      libFarrayTest_CB2_type *commonBlock2 = BEreq::libFarrayTestCommonBlock2.pointer();
+      libFarrayTest_CB3_type *commonBlock3 = BEreq::libFarrayTestCommonBlock3.pointer();
 
       cout << "do_Farray_stuff has been summoned!" << endl;
       cout << "Ph'nglui mglw'nafh Cthulhu R'lyeh wgah'nagl fhtagn" << endl;
@@ -425,6 +440,17 @@ namespace Gambit
 
     /// @}
 
+    /// Scale test for various aspects of the printer buffer system
+    /// Creates 1000 items to be printed per point
+    void large_print(std::map<std::string,double>& result)
+    {
+        for(int i=0; i<1000; i++)
+        {
+            std::stringstream ss;
+            ss<<i;
+            result[ss.str()] = i;
+        }
+    }
 
     /// Test inline marginalisation of a Poisson likelihood over a log-normally or Gaussianly-distributed nuisance parameter.
     void marg_poisson_test(double &result)
@@ -459,11 +485,11 @@ namespace Gambit
       cout << "Testing Pythia backend" << endl;
       cout << "======================" << endl;
 
-      static str default_doc_path = GAMBIT_DIR "/Backends/installed/Pythia/" + 
-                                    Backends::backendInfo().default_version("Pythia") + 
+      static str default_doc_path = GAMBIT_DIR "/Backends/installed/Pythia/" +
+                                    Backends::backendInfo().default_version("Pythia") +
                                     "/share/Pythia8/xmldoc/";
 
-      Pythia8::Pythia pythia(default_doc_path, false);
+      Pythia_default::Pythia8::Pythia pythia(default_doc_path, false);
 
       pythia.readString("Beams:eCM = 8000.");
       pythia.readString("HardQCD:all = on");
@@ -475,7 +501,7 @@ namespace Gambit
 
       pythia.init();
 
-      Pythia8::Hist mult("charged multiplicity", 2, -0.5, 799.5);
+      Pythia_default::Pythia8::Hist mult("charged multiplicity", 2, -0.5, 799.5);
       // Begin event loop. Generate event. Skip if error. List first one.
       for (int iEvent = 0; iEvent < 2; ++iEvent) {
         if (!pythia.next()) continue;

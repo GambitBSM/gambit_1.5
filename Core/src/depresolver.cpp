@@ -18,7 +18,8 @@
 ///  \author Pat Scott
 ///          (patscott@physics.mcgill.ca)
 ///  \date 2013 May, Jul, Aug, Nov
-///  \date 2014 Jan, Mar, Apr, Dec
+///        2014 Jan, Mar, Apr, Dec
+///        2018 Sep, Nov
 ///
 ///  \author Ben Farmer
 ///          (benjamin.farmer@monash.edu)
@@ -27,6 +28,7 @@
 ///  \author Tomas Gonzalo
 ///          (t.e.gonzalo@fys.uio.no)
 ///  \date 2017 June
+///        2019 May
 ///
 ///  *********************************************
 
@@ -194,10 +196,8 @@ namespace Gambit
     // Graphviz output for edges/dependencies
     class edgeWriter
     {
-      private:
-        const DRes::MasterGraphType * myGraph;
       public:
-        edgeWriter(const DRes::MasterGraphType * masterGraph) : myGraph(masterGraph) {};
+        edgeWriter(const DRes::MasterGraphType*) {};
         void operator()(std::ostream&, const EdgeID&) const
         {
           //out << "[style=\"dotted\"]";
@@ -247,25 +247,29 @@ namespace Gambit
     }
 
     // Check whether s1 (wildcard + regex allowed) matches s2
-    bool stringComp(const str & s1, const str & s2, bool with_regex)
+    bool stringComp(const str & s1, const str & s2, bool
+                   #ifdef HAVE_REGEX_H
+                     with_regex
+                   #endif
+                   )
     {
       if ( s1 == s2 ) return true;
       if ( s1 == "" ) return true;
       if ( s1 == "*" ) return true;
-#ifdef HAVE_REGEX_H
-      try
-      {
-        if (with_regex) if (std::regex_match(s2, std::regex(s1))) return true;
-      }
-      catch (std::regex_error & err)
-      {
-        std::ostringstream errmsg;
-        errmsg << "ERROR during regex string comparison." << std::endl;
-        errmsg << "  Comparing regular expression: " << s1 << std::endl;
-        errmsg << "  with test string: " << s2 << std::endl;
-        dependency_resolver_error().raise(LOCAL_INFO,errmsg.str());
-      }
-#endif
+      #ifdef HAVE_REGEX_H
+        try
+        {
+          if (with_regex) if (std::regex_match(s2, std::regex(s1))) return true;
+        }
+        catch (std::regex_error & err)
+        {
+          std::ostringstream errmsg;
+          errmsg << "ERROR during regex string comparison." << std::endl;
+          errmsg << "  Comparing regular expression: " << s1 << std::endl;
+          errmsg << "  with test string: " << s2 << std::endl;
+          dependency_resolver_error().raise(LOCAL_INFO,errmsg.str());
+        }
+      #endif
       return false;
     }
 
@@ -273,11 +277,11 @@ namespace Gambit
     bool typeComp(str s1, str s2, const Utils::type_equivalency & eq, bool with_regex)
     {
       bool match1, match2;
-      // Loop over all the default versions of BOSSed backends and strip off any corresponding leading namespace.
+      // Loop over all the default versions of BOSSed backends and replace any corresponding *_default leading namespace with the explicit version.
       for (auto it = Backends::backendInfo().default_safe_versions.begin(); it != Backends::backendInfo().default_safe_versions.end(); ++it)
       {
-        s1 = Utils::strip_leading_namespace(s1, it->first+"_"+it->second);
-        s2 = Utils::strip_leading_namespace(s2, it->first+"_"+it->second);
+        s1 = Utils::replace_leading_namespace(s1, it->first+"_default", it->first+"_"+it->second);
+        s2 = Utils::replace_leading_namespace(s2, it->first+"_default", it->first+"_"+it->second);
       }
       // Does it just match?
       if (stringComp(s1, s2, with_regex)) return true;
@@ -312,7 +316,7 @@ namespace Gambit
        boundTEs(&equiv_classes),
        boundPrinter(&printer),
        index(get(vertex_index,masterGraph)),
-       activeFunctorGraphFile(GAMBIT_DIR "/scratch/GAMBIT_active_functor_graph.gv")
+       activeFunctorGraphFile(Utils::runtime_scratch()+"GAMBIT_active_functor_graph.gv")
     {
       addFunctors();
       logger() << LogTags::dependency_resolver << endl;
@@ -622,11 +626,8 @@ namespace Gambit
     }
 
     // Evaluates ObsLike vertex, and everything it depends on, and prints results
-    void DependencyResolver::calcObsLike(VertexID vertex, const int pointID)
+    void DependencyResolver::calcObsLike(VertexID vertex)
     {
-      // pointID is supplied by the scanner, and is used to tell the printer which model
-      // point the results should be associated with.
-
       if (SortedParentVertices.find(vertex) == SortedParentVertices.end())
         core_error().raise(LOCAL_INFO, "Tried to calculate a function not in or not at top of dependency graph.");
       std::vector<VertexID> order = SortedParentVertices.at(vertex);
@@ -646,6 +647,27 @@ namespace Gambit
         }
         invalid_point_exception* e = masterGraph[*it]->retrieve_invalid_point_exception();
         if (e != NULL) throw(*e);
+      }
+      // Reset the cout output precision, in case any backends have messed with it during the ObsLike evaluation.
+      cout << std::setprecision(boundCore->get_outprec());
+    }
+
+    // Prints the results of an ObsLike vertex
+    void DependencyResolver::printObsLike(VertexID vertex, const int pointID)
+    {
+      // pointID is supplied by the scanner, and is used to tell the printer which model
+      // point the results should be associated with.
+
+      if (SortedParentVertices.find(vertex) == SortedParentVertices.end())
+        core_error().raise(LOCAL_INFO, "Tried to calculate a function not in or not at top of dependency graph.");
+      std::vector<VertexID> order = SortedParentVertices.at(vertex);
+
+      for (std::vector<VertexID>::iterator it = order.begin(); it != order.end(); ++it)
+      {
+        std::ostringstream ss;
+        ss << "Printing " << masterGraph[*it]->name() << " from " << masterGraph[*it]->origin() << "...";
+        logger() << LogTags::dependency_resolver << LogTags::info << LogTags::debug << ss.str() << EOM;
+
         if (not typeComp(masterGraph[*it]->type(),  "void", *boundTEs, false))
         {
           // Note that this prints from thread index 0 only, i.e. results created by
@@ -658,8 +680,6 @@ namespace Gambit
           masterGraph[*it]->print(boundPrinter,pointID);
         }
       }
-      // Reset the cout output precision, in case any backends have messed with it during the ObsLike evaluation.
-      cout << std::setprecision(boundCore->get_outprec());
     }
 
     /// Getter for print_timing flag (used by LikelihoodContainer)
@@ -1010,10 +1030,10 @@ namespace Gambit
       for (tie(vi, vi_end) = vertices(masterGraph); vi != vi_end; ++vi)
       {
         // Match capabilities and types (no type comparison when no types are
-        // given; this can only apply to output nodes).
+        // given; this can only apply to output nodes or loop managers).
         if ( stringComp(masterGraph[*vi]->capability(), quantity.first) and
              *vi != toVertex and // No self-resolution
-             ( quantity.second == "" or quantity.second == "*" or
+             ( quantity.second == "" or quantity.second == "*" or quantity.second == "any" or
                typeComp(masterGraph[*vi]->type(), quantity.second, *boundTEs, false) ) )
         {
           // Add vertex to appropriate candidate list
@@ -1195,8 +1215,7 @@ namespace Gambit
             true, "dependency_resolution", "prefer_model_specific_functions")
           and filteredVertexCandidates.size() > 1)
       {
-        filteredVertexCandidates =
-          closestCandidateForModel(filteredVertexCandidates);
+        filteredVertexCandidates = closestCandidateForModel(filteredVertexCandidates);
         logger() << "A subset of vertex candidates is tailor-made for the scanned model." << endl;
         logger() << "This is used as additional constraint since the YAML rules alone" << endl;
         logger() << "are not constraining enough. These vertices are:" << endl;
@@ -1217,7 +1236,7 @@ namespace Gambit
       if ( filteredVertexCandidates.size() == 1 )
         return filteredVertexCandidates[0];  // And done!
 
-      str errmsg = "Unfortuantely, the dependency resolution for";
+      str errmsg = "Unfortunately, the dependency resolution for";
       errmsg += "\n" + printQuantityToBeResolved(quantity, toVertex);
       errmsg += "\nis still ambiguous.\n";
       errmsg += "\nThe candidate vertices are:\n";
@@ -1331,8 +1350,7 @@ namespace Gambit
       // that are accessible via INTERPRET_AS_X links, as these are all considered to be equally 'far'
       // from the model being scanned, with the 'distance' being one step further than the most distant
       // ancestor.
-      if ( vertexCandidates.size() > 1 and not ( boundIniFile->hasKey("dependency_resolution", "prefer_model_specific_functions") and not
-           boundIniFile->getValue<bool>("dependency_resolution", "prefer_model_specific_functions") ) )
+      if ( vertexCandidates.size() > 1 and boundIniFile->getValueOrDef<bool>(true, "dependency_resolution", "prefer_model_specific_functions") )
       {
         // Work up the model ancestry one step at a time, and stop as soon as one or more valid model-specific functors is
         // found at a given level in the hierarchy.
@@ -1372,9 +1390,8 @@ namespace Gambit
                 + "\nneeded by " + depEntry->module + "::" + depEntry->function
                 +  "\nCheck your inifile for typos, your modules for consistency, etc.";
         }
-        if ( boundIniFile->hasKey("dependency_resolution", "prefer_model_specific_functions") and not
-        boundIniFile->getValue<bool>("dependency_resolution", "prefer_model_specific_functions") )
-        errmsg += "\nAlso consider turning on prefer_model_specific_functions in your inifile.";
+        if (not boundIniFile->getValueOrDef<bool>(true, "dependency_resolution", "prefer_model_specific_functions"))
+         errmsg += "\nAlso consider turning on prefer_model_specific_functions in your inifile.";
         errmsg += "\nCandidate module functions are:";
         for (std::vector<DRes::VertexID>::iterator it = vertexCandidates.begin(); it != vertexCandidates.end(); ++it)
         {
@@ -1421,7 +1438,8 @@ namespace Gambit
       // Main loop: repeat until dependency queue is empty
       //
 
-      while (not parQueue.empty()) {
+      while (not parQueue.empty())
+      {
 
         // Retrieve capability, type and vertex ID of dependency of interest
         quantity = parQueue.front().first;  // (capability, type) pair
@@ -1475,10 +1493,9 @@ namespace Gambit
             // Check whether fromVertex is allowed to manage loops
             if (not masterGraph[fromVertex]->canBeLoopManager())
             {
-              str errmsg = "Trying to resolve dependency on loop manager with";
-              errmsg += "\nmodule function that is not declared as loop manager.\n";
-              errmsg += printGenericFunctorList(
-                    initVector<functor*>(masterGraph[fromVertex]));
+              str errmsg = "Trying to resolve dependency on loop manager with\n"
+               "module function that is not declared as loop manager.\n"
+               + printGenericFunctorList(initVector<functor*>(masterGraph[fromVertex]));
               dependency_resolver_error().raise(LOCAL_INFO,errmsg);
             }
             std::set<DRes::VertexID> v;
@@ -1514,16 +1531,21 @@ namespace Gambit
 
           // In the case that toVertex is a nested function, add fromVertex to
           // the edges of toVertex's loop manager.
-          str cap = (*masterGraph[toVertex]).loopManagerCapability();
-          if (cap != "none")
+          str to_lmcap = (*masterGraph[toVertex]).loopManagerCapability();
+          str to_lmtype = (*masterGraph[toVertex]).loopManagerType();
+          str from_lmcap = (*masterGraph[fromVertex]).loopManagerCapability();
+          str from_lmtype = (*masterGraph[fromVertex]).loopManagerType();
+          if (to_lmcap != "none")
           {
             // This function runs nested.  Check if its loop manager has been resolved yet.
             if ((*masterGraph[toVertex]).loopManagerName() == "none")
             {
               // toVertex's loop manager has not yet been determined.
               // Add the edge to the list to deal with when the loop manager dependency is resolved,
-              // as long as toVertex and fromVertex don't share the same management requirements.
-              if (cap != (*masterGraph[fromVertex]).loopManagerCapability())
+              // as long as toVertex and fromVertex cannot end up inside the same loop.
+              if (to_lmcap != from_lmcap or
+                  (to_lmtype != "any" and from_lmtype != "any" and to_lmtype != from_lmtype)
+                 )
               {
                 if (edges_to_force_on_manager.find(toVertex) == edges_to_force_on_manager.end())
                  edges_to_force_on_manager[toVertex] = std::set<DRes::VertexID>();
@@ -1534,14 +1556,17 @@ namespace Gambit
             {
               // toVertex's loop manager has already been resolved.
               // If fromVertex is not the manager itself, and is not
-              // itself a nested function with the same management
-              // requirements as toVertex, then add fromVertex as an edge
-              // of the manager.
+              // itself a nested function that has the possibility to
+              // end up in the same loop as toVertex, then add
+              // fromVertex as an edge of the manager.
               str name = (*masterGraph[toVertex]).loopManagerName();
               str origin = (*masterGraph[toVertex]).loopManagerOrigin();
-              if (name   != (*masterGraph[fromVertex]).name() and
+              if (name != (*masterGraph[fromVertex]).name() and
                   origin != (*masterGraph[fromVertex]).origin() and
-                  cap    != (*masterGraph[fromVertex]).loopManagerCapability())
+                  (to_lmcap != from_lmcap or
+                   (to_lmtype != "any" and from_lmtype != "any" and to_lmtype != from_lmtype)
+                  )
+                 )
               {
                 // Hunt through the edges of toVertex and find the one that corresponds to its loop manager.
                 graph_traits<DRes::MasterGraphType>::in_edge_iterator ibegin, iend;
@@ -1615,28 +1640,43 @@ namespace Gambit
       }
     }
 
-    /// Push module function dependencies on parameter queue
+    /// Push module function dependencies onto the parameter queue
     void DependencyResolver::fillParQueue( std::queue<QueueEntry> *parQueue,
             DRes::VertexID vertex)
     {
-      bool printme_default = false; // for parQueue constructor
-      std::set<sspair> s = (*masterGraph[vertex]).dependencies();
+      // Set the default printing flag for functors to pass to the parQueue constructor.
+      bool printme_default = false;
+
+      // Tell the logger what the following messages are about.
       logger() << LogTags::dependency_resolver;
+
+      // Digest capability of loop manager (if defined)
+      str lmcap = (*masterGraph[vertex]).loopManagerCapability();
+      str lmtype = (*masterGraph[vertex]).loopManagerType();
+      if (lmcap != "none")
+      {
+        logger() << "Adding module function loop manager to resolution queue:" << endl;
+        logger() << lmcap << " ()" << endl;
+        parQueue->push(QueueEntry(sspair(lmcap, lmtype), vertex, LOOP_MANAGER_DEPENDENCY, printme_default));
+      }
+
+      // Digest regular dependencies
+      std::set<sspair> s = (*masterGraph[vertex]).dependencies();
       if (s.size() > 0) logger() << "Add dependencies of new module function to queue" << endl;
       for (std::set<sspair>::iterator it = s.begin(); it != s.end(); ++it)
       {
-        logger() << (*it).first << " (" << (*it).second << ")" << endl;
-        (*parQueue).push(QueueEntry (*it, vertex, NORMAL_DEPENDENCY, printme_default));
+        // If the loop manager requirement exists and is type-specific, it is a true depencency,
+        // and thus appears in the output of functor.dependencies(). So, we need to take care
+        // not to double-count it for entry into the parQueue.
+        if (lmcap == "none" or lmtype == "any" or lmcap != it->first or lmtype != it->second)
+        {
+          logger() << it->first << " (" << it->second << ")" << endl;
+          parQueue->push(QueueEntry(*it, vertex, NORMAL_DEPENDENCY, printme_default));
+        }
       }
-      // Digest capability of loop manager (if defined)
-      str loopManagerCapability = (*masterGraph[vertex]).loopManagerCapability();
-      if (loopManagerCapability != "none")
-      {
-        logger() << "Adding module function loop manager to resolution queue:" << endl;
-        logger() << loopManagerCapability << " ()" << endl;
-        (*parQueue).push(QueueEntry (sspair
-                  (loopManagerCapability, ""), vertex, LOOP_MANAGER_DEPENDENCY, printme_default));
-      }
+
+      // Tell the logger we're done here.
+      logger() << EOM;
     }
 
     /// Boost lib topological sort
@@ -1648,8 +1688,8 @@ namespace Gambit
     }
 
     /// Find rules entry that matches vertex
-    const IniParser::ObservableType * DependencyResolver::findIniEntry(
-            DRes::VertexID toVertex, const IniParser::ObservablesType &entries, const str & errtag)
+    const IniParser::ObservableType * DependencyResolver::findIniEntry(DRes::VertexID toVertex,
+     const IniParser::ObservablesType &entries, const str & errtag)
     {
       std::vector<const IniParser::ObservableType*> auxEntryCandidates;
       for (IniParser::ObservablesType::const_iterator it =
@@ -1800,7 +1840,7 @@ namespace Gambit
           remaining_groups.clear();
         }
 
-    }
+      }
 
     }
 
@@ -1809,9 +1849,9 @@ namespace Gambit
      const IniParser::ObservableType * auxEntry, VertexID vertex, std::vector<functor*> previous_successes,
      bool allow_deferral, str group)
     {
-      std::vector<functor *> vertexCandidates;
-      std::vector<functor *> vertexCandidatesWithIniEntry;
-      std::vector<functor *> disabledVertexCandidates;
+      std::vector<functor*> vertexCandidates;
+      std::vector<functor*> vertexCandidatesWithIniEntry;
+      std::vector<functor*> disabledVertexCandidates;
 
       // Loop over all existing backend vertices, and make a list of
       // functors that are available and fulfill the backend requirement
@@ -1827,10 +1867,22 @@ namespace Gambit
         if ( auxEntry != NULL ) reqEntry = findIniEntry((*itf)->quantity(), (*auxEntry).backends, "backend");
         if ( reqEntry != NULL) entryExists = true;
 
-        // Without inifile entry, just match any capability-type pair exactly.
-        if ( std::find(reqs.begin(), reqs.end(), (*itf)->quantity()) != reqs.end()
-        // With inifile entry, we also check capability, type, function name and backend name.
-        and ( entryExists ? backendFuncMatchesIniEntry(*itf, *reqEntry, *boundTEs) : true ) )
+        // Look for a match to at least one backend requirement, taking into account type equivalency classes.
+        bool simple_match = false;
+        for (std::set<sspair>::const_iterator
+             itr  = reqs.begin();
+             itr != reqs.end();
+             ++itr)
+        {
+          if ((*itf)->capability() == itr->first and typeComp((*itf)->type(), itr->second, *boundTEs))
+          {
+            simple_match = true;
+            break;
+          }
+        }
+
+        // If there is a relevant inifile entry, we also check for a match to the capability, type, function name and backend name in that entry.
+        if ( simple_match and ( entryExists ? backendFuncMatchesIniEntry(*itf, *reqEntry, *boundTEs) : true ) )
         {
 
           // Has the backend vertex already been disabled by the backend system?
@@ -1860,6 +1912,7 @@ namespace Gambit
           else
           {
             // otherwise, add it to disabled vertex candidate list
+            if (not disabled) (*itf)->setStatus(1);
             disabledVertexCandidates.push_back(*itf);
           }
         }
@@ -1949,12 +2002,16 @@ namespace Gambit
       // Replace the previous list of candidates with the survivors.
       vertexCandidates = survivingVertexCandidates;
 
-      // Only print the status flag -5 if any of the disabled vertex has it
+      // Only print the status flags -5 or -6 if any of the disabled vertices has it
       bool printMathematicaStatus = false;
       for(unsigned int j=0; j < disabledVertexCandidates.size(); j++)
         if(disabledVertexCandidates[j]->status() == -5)
           printMathematicaStatus = true;
- 
+      bool printPythonStatus = false;
+      for(unsigned int j=0; j < disabledVertexCandidates.size(); j++)
+        if(disabledVertexCandidates[j]->status() == -6)
+          printPythonStatus = true;
+
       // No candidates? Death.
       if (vertexCandidates.size() == 0)
       {
@@ -1969,12 +2026,14 @@ namespace Gambit
                  <<     printGenericFunctorList(disabledVertexCandidates)
                  << endl
                  << "Status flags:" << endl
-                 << " 1: This function is available, but the backend version does not match your request." << endl
+                 << " 1: This function is available, but the backend version is not compatible with all your requests." << endl
                  << " 0: This function is not compatible with any model you are scanning." << endl
                  << "-1: The backend that provides this function is missing." << endl
                  << "-2: The backend is present, but function is absent or broken." << endl;
          if(printMathematicaStatus)
             errmsg << "-5: The backend requires Mathematica, but Mathematica is absent." << endl;
+         if(printPythonStatus)
+            errmsg << "-6: The backend requires Python, but pybind11 is absent." << endl;
           errmsg << endl
                  << "Make sure to check your YAML file, especially the rules" << endl
                  << "pertaining to backends."  << endl
@@ -2022,7 +2081,36 @@ namespace Gambit
         {
           return NULL;
         }
-        else  // If not, the game is up.
+
+        // If not, we have just one more trick up our sleeves... use the models scanned to narrow things down.
+        if (boundIniFile->getValueOrDef<bool>(true, "dependency_resolution", "prefer_model_specific_functions"))
+        {
+          // Prefer backend functors that are more specifically tailored for the model being scanned. Do not
+          // consider backend functors that are accessible via INTERPRET_AS_X links, as these are all considered
+          // to be equally 'far' from the model being scanned, with the 'distance' being one step further than
+          // the most distant ancestor.
+          std::vector<functor*> newCandidates;
+          std::set<str> s = boundClaw->get_activemodels();
+          std::vector<str> parentModelList(s.begin(), s.end());
+          while (newCandidates.size() == 0 and not parentModelList.empty())
+          {
+            for (std::vector<str>::iterator mit = parentModelList.begin(); mit != parentModelList.end(); ++mit)
+            {
+              // Test each vertex candidate to see if it has been explicitly set up to work with the model *mit
+              for (std::vector<functor*>::iterator it = vertexCandidates.begin(); it != vertexCandidates.end(); ++it)
+              {
+                if ( (*it)->modelExplicitlyAllowed(*mit) ) newCandidates.push_back(*it);
+              }
+              // Step up a level in the model hierarchy for this model.
+              *mit = boundClaw->get_parent(*mit);
+            }
+            parentModelList.erase(std::remove(parentModelList.begin(), parentModelList.end(), "none"), parentModelList.end());
+          }
+          if (newCandidates.size() != 0) vertexCandidates = newCandidates;
+        }
+
+        // Still more than one candidate, so the game is up.
+        if (vertexCandidates.size() > 1)
         {
           str errmsg = "Found too many candidates for backend requirement ";
           if (reqs.size() == 1) errmsg += reqs.begin()->first + " (" + reqs.begin()->second + ")";

@@ -2,7 +2,7 @@
 //   *********************************************
 ///  \file
 ///
-///  Rollcall header for ColliderBit module.
+///  Rollcall header for ColliderBit module Higgs functions.
 ///
 ///  *********************************************
 ///
@@ -23,9 +23,9 @@
 ///
 ///  *********************************************
 
-#ifndef __ColliderBit_Higgs_rollcall_hpp__
-#define __ColliderBit_Higgs_rollcall_hpp__
+#pragma once
 
+#define MODULE ColliderBit
 
   // HiggsBounds input model parameters
   #define CAPABILITY HB_ModelParameters
@@ -41,7 +41,8 @@
     // SM-like Higgs model parameters, for BSM models with only one Higgs.
     #define FUNCTION SMLikeHiggs_ModelParameters
     START_FUNCTION(hb_ModelParameters)
-    MODEL_CONDITIONAL_DEPENDENCY(SingletDM_spectrum, Spectrum, SingletDM, SingletDMZ3)
+    MODEL_CONDITIONAL_DEPENDENCY(ScalarSingletDM_Z2_spectrum, Spectrum, ScalarSingletDM_Z2, ScalarSingletDM_Z2_running)
+    MODEL_CONDITIONAL_DEPENDENCY(ScalarSingletDM_Z3_spectrum, Spectrum, ScalarSingletDM_Z3, ScalarSingletDM_Z3_running)
     DEPENDENCY(Higgs_Couplings, HiggsCouplingsTable)
     #undef FUNCTION
 
@@ -120,4 +121,4 @@
   #undef CAPABILITY
 
 
-#endif /* defined __ColliderBit_Higgs_rollcall_hpp__ */
+#undef MODULE

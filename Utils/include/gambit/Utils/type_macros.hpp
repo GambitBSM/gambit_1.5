@@ -2,15 +2,15 @@
 //   *********************************************
 ///  \file
 ///
-///  Macros for declaring different types for 
+///  Macros for declaring different types for
 ///  GAMBIT.  Version to be included in main
 ///  compilation unit.
 ///
 ///  *********************************************
 ///
 ///  Authors (add name and date if you modify):
-///   
-///  \author Pat Scott  
+///
+///  \author Pat Scott
 ///          (p.scott@imperial.ac.uk)
 ///  \date 2014 Sep
 ///
@@ -75,7 +75,8 @@
                BOOST_PP_SEQ_FOR_EACH_I(TRAILING_NSQUALIFIER, ,                        \
                BOOST_PP_SEQ_SUBSEQ(elem,0,BOOST_PP_SUB(BOOST_PP_SEQ_SIZE(elem),1)))   \
                BOOST_PP_SEQ_ELEM(BOOST_PP_SUB(BOOST_PP_SEQ_SIZE(elem),1),elem)),      \
-              STRINGIFY(BOOST_PP_SEQ_FOR_EACH_I(TRAILING_NSQUALIFIER, ,               \
+              STRINGIFY(BOOST_PP_SEQ_ELEM(2,data)_default::                           \
+               BOOST_PP_SEQ_FOR_EACH_I(TRAILING_NSQUALIFIER, ,                        \
                BOOST_PP_SEQ_SUBSEQ(elem,0,BOOST_PP_SUB(BOOST_PP_SEQ_SIZE(elem),1)))   \
                BOOST_PP_SEQ_ELEM(BOOST_PP_SUB(BOOST_PP_SEQ_SIZE(elem),1),elem))       \
              );                                                                       \
@@ -86,17 +87,20 @@
                                                                                       \
       }                                                                               \
                                                                                       \
-      BOOST_PP_SEQ_FOR_EACH_I(START_NAMESPACE, ,                                      \
-       BOOST_PP_SEQ_SUBSEQ(elem,0,BOOST_PP_SUB(BOOST_PP_SEQ_SIZE(elem),1)))           \
-      typedef BOOST_PP_SEQ_ELEM(1,data)::BOOST_PP_SEQ_FOR_EACH_I(TRAILING_NSQUALIFIER,\
-       , BOOST_PP_SEQ_SUBSEQ(elem,0,BOOST_PP_SUB(BOOST_PP_SEQ_SIZE(elem),1)))         \
-       BOOST_PP_SEQ_ELEM(BOOST_PP_SUB(BOOST_PP_SEQ_SIZE(elem),1),elem)                \
-       BOOST_PP_SEQ_ELEM(BOOST_PP_SUB(BOOST_PP_SEQ_SIZE(elem),1),elem);               \
-      BOOST_PP_REPEAT(BOOST_PP_SUB(BOOST_PP_SEQ_SIZE(elem),1),END_NAMESPACE, )        \
-                                                                                      \
+      namespace CAT(BOOST_PP_SEQ_ELEM(2,data),_default)                               \
+      {                                                                               \
+        BOOST_PP_SEQ_FOR_EACH_I(START_NAMESPACE, ,                                    \
+         BOOST_PP_SEQ_SUBSEQ(elem,0,BOOST_PP_SUB(BOOST_PP_SEQ_SIZE(elem),1)))         \
+        typedef BOOST_PP_SEQ_ELEM(1,data)::                                           \
+         BOOST_PP_SEQ_FOR_EACH_I(TRAILING_NSQUALIFIER, ,                              \
+         BOOST_PP_SEQ_SUBSEQ(elem,0,BOOST_PP_SUB(BOOST_PP_SEQ_SIZE(elem),1)))         \
+         BOOST_PP_SEQ_ELEM(BOOST_PP_SUB(BOOST_PP_SEQ_SIZE(elem),1),elem)              \
+         BOOST_PP_SEQ_ELEM(BOOST_PP_SUB(BOOST_PP_SEQ_SIZE(elem),1),elem);             \
+        BOOST_PP_REPEAT(BOOST_PP_SUB(BOOST_PP_SEQ_SIZE(elem),1),END_NAMESPACE, )      \
+      }                                                                               \
   }                                                                                   \
 
-#else 
+#else
 
   /// Helper macro to register the default version of a classloading backend to use
   #define REGISTER_DEFAULT(BE, VER, DEFAULT)  DUMMYARG(BE, VER, DEFAULT)              \
@@ -105,13 +109,17 @@
   #define TYPEDEFAULT(r,data,elem)                                                    \
     namespace Gambit                                                                  \
     {                                                                                 \
-      BOOST_PP_SEQ_FOR_EACH_I(START_NAMESPACE, ,                                      \
-       BOOST_PP_SEQ_SUBSEQ(elem,0,BOOST_PP_SUB(BOOST_PP_SEQ_SIZE(elem),1)))           \
-      typedef BOOST_PP_SEQ_ELEM(1,data)::BOOST_PP_SEQ_FOR_EACH_I(TRAILING_NSQUALIFIER,\
-       , BOOST_PP_SEQ_SUBSEQ(elem,0,BOOST_PP_SUB(BOOST_PP_SEQ_SIZE(elem),1)))         \
-       BOOST_PP_SEQ_ELEM(BOOST_PP_SUB(BOOST_PP_SEQ_SIZE(elem),1),elem)                \
-       BOOST_PP_SEQ_ELEM(BOOST_PP_SUB(BOOST_PP_SEQ_SIZE(elem),1),elem);               \
-      BOOST_PP_REPEAT(BOOST_PP_SUB(BOOST_PP_SEQ_SIZE(elem),1),END_NAMESPACE, )        \
+      namespace CAT(BOOST_PP_SEQ_ELEM(2,data),_default)                               \
+      {                                                                               \
+        BOOST_PP_SEQ_FOR_EACH_I(START_NAMESPACE, ,                                    \
+         BOOST_PP_SEQ_SUBSEQ(elem,0,BOOST_PP_SUB(BOOST_PP_SEQ_SIZE(elem),1)))         \
+        typedef BOOST_PP_SEQ_ELEM(1,data)::                                           \
+         BOOST_PP_SEQ_FOR_EACH_I(TRAILING_NSQUALIFIER, ,                              \
+         BOOST_PP_SEQ_SUBSEQ(elem,0,BOOST_PP_SUB(BOOST_PP_SEQ_SIZE(elem),1)))         \
+         BOOST_PP_SEQ_ELEM(BOOST_PP_SUB(BOOST_PP_SEQ_SIZE(elem),1),elem)              \
+         BOOST_PP_SEQ_ELEM(BOOST_PP_SUB(BOOST_PP_SEQ_SIZE(elem),1),elem);             \
+        BOOST_PP_REPEAT(BOOST_PP_SUB(BOOST_PP_SEQ_SIZE(elem),1),END_NAMESPACE, )      \
+      }                                                                               \
     }
 
 #endif //__gambit_main_hpp__
@@ -123,11 +131,11 @@
 /// Set default backend version for BOSSed types.
 #define SET_DEFAULT_VERSION_FOR_LOADING_TYPES(BE, VER, DEFAULT)                       \
 REGISTER_DEFAULT(BE, VER, DEFAULT)                                                    \
-BOOST_PP_SEQ_FOR_EACH(PRE_TYPEDEFAULT, (CAT_3(BE,_,VER))(CAT_3(BE,_,DEFAULT)),        \
- CAT_5(BE,_,DEFAULT,_,all_data) )       
+BOOST_PP_SEQ_FOR_EACH(PRE_TYPEDEFAULT, (CAT_3(BE,_,VER))(CAT_3(BE,_,DEFAULT))(BE),    \
+ CAT_5(BE,_,DEFAULT,_,all_data) )
 
-/// Open a namespace 
-#define START_NAMESPACE(r,data,i,elem) namespace elem { 
+/// Open a namespace
+#define START_NAMESPACE(r,data,i,elem) namespace elem {
 
 /// Close a namespace.
 #define END_NAMESPACE(z,n,data) }

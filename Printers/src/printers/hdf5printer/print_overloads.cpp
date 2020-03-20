@@ -40,12 +40,18 @@ namespace Gambit
     void HDF5Printer::PRINT(uint     )
     void HDF5Printer::PRINT(long     )
     void HDF5Printer::PRINT(ulong    )
-    void HDF5Printer::PRINT(longlong )
-    void HDF5Printer::PRINT(ulonglong)
+    //void HDF5Printer::PRINT(longlong )
+    //void HDF5Printer::PRINT(ulonglong)
     void HDF5Printer::PRINT(float    )
     void HDF5Printer::PRINT(double   )
     #undef PRINT
 
+    #define PRINTAS(INTYPE,OUTTYPE) _print(INTYPE const& value, const std::string& label, const int vID, const uint rank, const ulong pID) \
+    { template_print((OUTTYPE)value,label,vID,rank,pID); }
+    void HDF5Printer::PRINTAS(longlong, long)
+    void HDF5Printer::PRINTAS(ulonglong, ulong)
+    #undef PRINTAS
+ 
     /// Bools can't quite use the template print function directly, since there
     /// are some issues with bools and MPI/HDF5 types. Easier to just convert
     /// the bool to an int first.
@@ -139,6 +145,37 @@ namespace Gambit
       m["lower"] = value.lower;
       m["upper"] = value.upper;
       _print(m, label, vID, mpirank, pointID);
+    }
+    
+    void HDF5Printer::_print(map_intpair_dbl const& map, const std::string& label, const int vID, const unsigned int mpirank, const unsigned long pointID)
+    {
+      // Retrieve the buffer manager for buffers with this type
+      auto& buffer_manager = get_mybuffermanager<double>(pointID,mpirank);
+  
+      unsigned int i=0; // index for each buffer
+      for (std::map<std::pair<int,int>, double>::const_iterator it = map.begin(); it != map.end(); it++)
+      {
+        std::stringstream ss;
+        ss<<label<<"::"<<it->first;
+        PPIDpair ppid(pointID,mpirank);
+        // Write to each buffer
+        //buffer_manager.get_buffer(vID, i, ss.str()).append(it->second);
+        if(synchronised)
+        {
+          // Write the data to the selected buffer ("just works" for simple numeric types)
+          buffer_manager.get_buffer(vID, i, ss.str()).append(it->second,ppid);
+        }
+        else
+        {
+          // Queue up a desynchronised ("random access") dataset write to previous scan iteration
+          if(not seen_PPID_before(ppid))
+          {
+            add_PPID_to_list(ppid);
+          }
+          buffer_manager.get_buffer(vID, i, ss.str()).RA_write(it->second,ppid,primary_printer->global_index_lookup);
+        }
+        i++;
+      }
     }
 
     #ifndef SCANNER_STANDALONE // All the types inside HDF5_MODULE_BACKEND_TYPES need to go inside this def guard.

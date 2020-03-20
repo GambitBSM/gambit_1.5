@@ -25,24 +25,26 @@
 #  \author Antje Putze (putze@lapth.cnrs.fr)
 #  \date 2016 Jan
 #
+#  \author Will Handley (wh260@cam.ac.uk)
+#  \date 2018 May, Dec
+#
 #************************************************
-
 
 # Diver
 set(name "diver")
 set(ver "1.0.0")
 set(lib "libdiver")
-set(dl "https://www.hepforge.org/archive/${name}/${name}-${ver}.tar.gz")
+set(dl "https://${name}.hepforge.org/downloads/${name}-${ver}.tar.gz")
 set(md5 "61c76e948855f19dfa394c14df8c6af2")
 set(dir "${PROJECT_SOURCE_DIR}/ScannerBit/installed/${name}/${ver}")
 set(patch "${PROJECT_SOURCE_DIR}/ScannerBit/patches/${name}/${ver}/patch_${name}_${ver}.dif")
 set(diverSO_LINK_FLAGS "${CMAKE_Fortran_MPI_SO_LINK_FLAGS} -fopenmp")
 if(MPI_Fortran_FOUND)
-  set(diverFFLAGS "${GAMBIT_Fortran_FLAGS_PLUS_MPI}")
+  set(diverFFLAGS "${BACKEND_Fortran_FLAGS_PLUS_MPI}")
 else()
-  set(diverFFLAGS "${GAMBIT_Fortran_FLAGS}")
+  set(diverFFLAGS "${BACKEND_Fortran_FLAGS}")
 endif()
-check_ditch_status(${name} ${ver})
+check_ditch_status(${name} ${ver} ${dir})
 if(NOT ditched_${name}_${ver})
   ExternalProject_Add(${name}_${ver}
     DOWNLOAD_DIR ${scanner_download}
@@ -60,16 +62,42 @@ endif()
 set(name "diver")
 set(ver "1.0.2")
 set(lib "libdiver")
-set(dl "https://www.hepforge.org/archive/${name}/${name}-${ver}.tar.gz")
+set(dl "https://${name}.hepforge.org/downloads/${name}-${ver}.tar.gz")
 set(md5 "28c74db26c573d745383e303f6bece18")
 set(dir "${PROJECT_SOURCE_DIR}/ScannerBit/installed/${name}/${ver}")
 set(diverSO_LINK_FLAGS "${CMAKE_Fortran_MPI_SO_LINK_FLAGS} -fopenmp")
 if(MPI_Fortran_FOUND)
-  set(diverFFLAGS "${GAMBIT_Fortran_FLAGS_PLUS_MPI}")
+  set(diverFFLAGS "${BACKEND_Fortran_FLAGS_PLUS_MPI}")
 else()
-  set(diverFFLAGS "${GAMBIT_Fortran_FLAGS}")
+  set(diverFFLAGS "${BACKEND_Fortran_FLAGS}")
 endif()
-check_ditch_status(${name} ${ver})
+check_ditch_status(${name} ${ver} ${dir})
+if(NOT ditched_${name}_${ver})
+  ExternalProject_Add(${name}_${ver}
+    DOWNLOAD_DIR ${scanner_download}
+    DOWNLOAD_COMMAND ${DL_SCANNER} ${dl} ${md5} ${dir} ${name} ${ver}
+    SOURCE_DIR ${dir}
+    BUILD_IN_SOURCE 1
+    CONFIGURE_COMMAND ""
+    BUILD_COMMAND ${CMAKE_MAKE_PROGRAM} ${lib}.so FF=${CMAKE_Fortran_COMPILER} MODULE=${FMODULE} FOPT=${diverFFLAGS} SO_LINK_FLAGS=${diverSO_LINK_FLAGS}
+    INSTALL_COMMAND ""
+  )
+  add_extra_targets("scanner" ${name} ${ver} ${dir} ${dl} clean)
+endif()
+
+set(name "diver")
+set(ver "1.0.4")
+set(lib "libdiver")
+set(dl "https://${name}.hepforge.org/downloads/${name}-${ver}.tar.gz")
+set(md5 "2cdf72c58d57ba88ef6b747737796ddf")
+set(dir "${PROJECT_SOURCE_DIR}/ScannerBit/installed/${name}/${ver}")
+set(diverSO_LINK_FLAGS "${CMAKE_Fortran_MPI_SO_LINK_FLAGS} -fopenmp")
+if(MPI_Fortran_FOUND)
+  set(diverFFLAGS "${BACKEND_Fortran_FLAGS_PLUS_MPI}")
+else()
+  set(diverFFLAGS "${BACKEND_Fortran_FLAGS}")
+endif()
+check_ditch_status(${name} ${ver} ${dir})
 if(NOT ditched_${name}_${ver})
   ExternalProject_Add(${name}_${ver}
     DOWNLOAD_DIR ${scanner_download}
@@ -83,6 +111,51 @@ if(NOT ditched_${name}_${ver})
   add_extra_targets("scanner" ${name} ${ver} ${dir} ${dl} clean)
   set_as_default_version("scanner" ${name} ${ver})
 endif()
+
+# PolyChord
+set(name "polychord")
+set(ver "1.16")
+set(lib "libchord")
+set(md5 "ca1def7c88effac6c8ca35b0f1598ca3")
+set(dl "https://github.com/PolyChord/PolyChordLite/archive/40022f52d37b3bd74e2f99c0e59d014899d24fb4.tar.gz")
+set(dir "${PROJECT_SOURCE_DIR}/ScannerBit/installed/${name}/${ver}")
+set(pcSO_LINK "${CMAKE_Fortran_COMPILER} ${OpenMP_Fortran_FLAGS} ${CMAKE_Fortran_MPI_SO_LINK_FLAGS} ${CMAKE_CXX_MPI_SO_LINK_FLAGS}")
+if("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang" OR "${CMAKE_CXX_COMPILER_ID}" STREQUAL "AppleClang")
+  string(REGEX REPLACE "(-lstdc\\+\\+)" "-lc++" pcSO_LINK "${pcSO_LINK}")
+  string(REGEX MATCH "(-lc\\+\\+)" LINKED_OK "${pcSO_LINK}")
+  if (NOT LINKED_OK)
+  set(pcSO_LINK "${pcSO_LINK} -lc++")
+  endif()
+endif()
+if(MPI_Fortran_FOUND)
+  set(pcFFLAGS "${BACKEND_Fortran_FLAGS_PLUS_MPI}")
+else()
+  set(pcFFLAGS "${BACKEND_Fortran_FLAGS}")
+endif()
+if(MPI_CXX_FOUND)
+  set(pcCXXFLAGS "${BACKEND_CXX_FLAGS_PLUS_MPI}")
+else()
+  set(pcCXXFLAGS "${BACKEND_CXX_FLAGS}")
+endif()
+if("${CMAKE_Fortran_COMPILER_ID}" STREQUAL "Intel")
+  set(pcFFLAGS "${pcFFLAGS} -heap-arrays -assume noold_maxminloc ")
+else()
+  set(pcFFLAGS "${pcFFLAGS} -fno-stack-arrays")
+endif()
+check_ditch_status(${name} ${ver} ${dir})
+if(NOT ditched_${name}_${ver})
+  ExternalProject_Add(${name}_${ver}
+    DOWNLOAD_COMMAND ${DL_SCANNER} ${dl} ${md5} ${dir} ${name} ${ver}
+    SOURCE_DIR ${dir}
+    BUILD_IN_SOURCE 1
+    CONFIGURE_COMMAND ""
+    BUILD_COMMAND ${CMAKE_MAKE_PROGRAM} ${lib}.so FC=${CMAKE_Fortran_COMPILER} FFLAGS=${pcFFLAGS} CXX=${CMAKE_CXX_COMPILER} CXXFLAGS=${pcCXXFLAGS} LD=${pcSO_LINK}
+    INSTALL_COMMAND ""
+  )
+  add_extra_targets("scanner" ${name} ${ver} ${dir} ${dl} clean)
+  set_as_default_version("scanner" ${name} ${ver})
+endif()
+
 
 # MultiNest
 set(name "multinest")
@@ -101,11 +174,11 @@ if (NOT LAPACK_STATIC)
   set(mnLAPACK "${LAPACK_LINKLIBS}")
 endif()
 if(MPI_Fortran_FOUND)
-  set(mnFFLAGS "${GAMBIT_Fortran_FLAGS_PLUS_MPI}")
+  set(mnFFLAGS "${BACKEND_Fortran_FLAGS_PLUS_MPI}")
 else()
-  set(mnFFLAGS "${GAMBIT_Fortran_FLAGS}")
+  set(mnFFLAGS "${BACKEND_Fortran_FLAGS}")
 endif()
-check_ditch_status(${name} ${ver})
+check_ditch_status(${name} ${ver} ${dir})
 if(NOT ditched_${name}_${ver})
   ExternalProject_Add(${name}_${ver}
     DOWNLOAD_COMMAND ${DL_SCANNER} ${dl} ${md5} ${dir} ${name} ${ver} "null" ${login_data} ${dl2}
@@ -125,6 +198,44 @@ if(NOT ditched_${name}_${ver})
     INSTALL_COMMAND ""
   )
   add_extra_targets("scanner" ${name} ${ver} ${dir} ${dl} clean)
+endif()
+
+# MultiNest
+set(name "multinest")
+set(ver "3.11")
+set(lib "libnest3")
+set(md5 "ebaf960c348592a1b6e3a50b3794c357")
+set(dl "https://github.com/farhanferoz/MultiNest/archive/4b3709c6d659adbd62c85e3e95ff7eeb6e6617af.tar.gz")
+set(dir "${PROJECT_SOURCE_DIR}/ScannerBit/installed/${name}/${ver}")
+set(mnSO_LINK "${CMAKE_Fortran_COMPILER} -shared ${OpenMP_Fortran_FLAGS} ${CMAKE_Fortran_MPI_SO_LINK_FLAGS}")
+if (NOT LAPACK_STATIC)
+  set(mnLAPACK "${LAPACK_LINKLIBS}")
+endif()
+if(MPI_Fortran_FOUND)
+  set(mnFFLAGS "${BACKEND_Fortran_FLAGS_PLUS_MPI}")
+else()
+  set(mnFFLAGS "${BACKEND_Fortran_FLAGS}")
+endif()
+check_ditch_status(${name} ${ver} ${dir})
+if(NOT ditched_${name}_${ver})
+  ExternalProject_Add(${name}_${ver}
+    DOWNLOAD_COMMAND ${DL_SCANNER} ${dl} ${md5} ${dir} ${name} ${ver}
+    SOURCE_DIR ${dir}
+    BUILD_IN_SOURCE 1
+    CONFIGURE_COMMAND sed ${dashi} -e "s#nested.o[[:space:]]*$#nested.o cwrapper.o#g"
+                                   -e "s#-o[[:space:]]*\\(\\$\\)(LIBS)[[:space:]]*\\$@[[:space:]]*\\$^#-o \\$\\(LIBS\\)\\$@ \\$^ ${mnLAPACK}#g"
+                                   -e "s#default:#.NOTPARALLEL:${nl}${nl}default:#"
+                                   <SOURCE_DIR>/MultiNest_v${ver}/Makefile
+              COMMAND ${CMAKE_COMMAND} -E copy <SOURCE_DIR>/MultiNest_v${ver}/Makefile <SOURCE_DIR>/MultiNest_v${ver}/Makefile.tmp
+              COMMAND awk "{gsub(/${nl}/,${true_nl})}{print}" <SOURCE_DIR>/MultiNest_v${ver}/Makefile.tmp > <SOURCE_DIR>/MultiNest_v${ver}/Makefile
+              COMMAND ${CMAKE_COMMAND} -E remove <SOURCE_DIR>/MultiNest_v${ver}/Makefile.tmp
+              COMMAND sed ${dashi} -e "s#function[[:space:]]*loglike_proto(Cube,n_dim,nPar,context)[[:space:]]*$#function loglike_proto(Cube,n_dim,nPar,context) bind(c)#g"
+                                   -e "s#subroutine[[:space:]]*dumper_proto(nSamples,nlive,nPar,physLive,posterior,paramConstr,maxLogLike,logZ,INSlogZ,logZerr,context)[[:space:]]*$#subroutine dumper_proto(nSamples,nlive,nPar,physLive,posterior,paramConstr,maxLogLike,logZ,INSlogZ,logZerr,context) bind(c)#g"
+                                   <SOURCE_DIR>/MultiNest_v${ver}/cwrapper.f90
+    BUILD_COMMAND ${CMAKE_COMMAND} -E chdir MultiNest_v${ver} ${CMAKE_MAKE_PROGRAM} ${lib}.so FC=${CMAKE_Fortran_COMPILER} FFLAGS=${mnFFLAGS} LINKLIB=${mnSO_LINK} LIBS=${dir}/
+    INSTALL_COMMAND ""
+  )
+  add_extra_targets("scanner" ${name} ${ver} ${dir} ${dl} clean)
   set_as_default_version("scanner" ${name} ${ver})
 endif()
 
@@ -135,15 +246,19 @@ set(ver "1.0.0")
 set(lib "libgreat")
 set(dl "null")
 set(dir "${PROJECT_SOURCE_DIR}/ScannerBit/installed/${name}/${ver}")
-check_ditch_status(${name} ${ver})
+set(patch "${PROJECT_SOURCE_DIR}/ScannerBit/patches/${name}/${ver}/patch_${name}_${ver}.dif")
+set(build_dir "${PROJECT_BINARY_DIR}/${name}_${ver}-prefix/src/${name}_${ver}-build")
+check_ditch_status(${name} ${ver} ${dir})
 if(NOT ditched_${name}_${ver})
   ExternalProject_Add(${name}_${ver}
     GIT_REPOSITORY https://gitlab.in2p3.fr/derome/GreAT.git
     SOURCE_DIR ${dir}
+    PATCH_COMMAND patch -p1 < ${patch}
     CMAKE_COMMAND ${CMAKE_COMMAND} ..
-    CMAKE_ARGS -DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE} -DCMAKE_CXX_COMPILER=${CMAKE_CXX_COMPILER} -DCMAKE_CXX_FLAGS=${CMAKE_CXX_FLAGS}
-    BUILD_COMMAND ${CMAKE_MAKE_PROGRAM}
-    INSTALL_COMMAND ""
+    CMAKE_ARGS -DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE} -DCMAKE_CXX_COMPILER=${CMAKE_CXX_COMPILER} -DCMAKE_CXX_FLAGS=${BACKEND_CXX_FLAGS}
+    BUILD_COMMAND ${CMAKE_MAKE_PROGRAM} ${name}
+    INSTALL_COMMAND ${CMAKE_COMMAND} -E create_symlink ${build_dir}/Manager/Manager_Dict_rdict.pcm ${build_dir}/lib/Manager_Dict_rdict.pcm
+            COMMAND ${CMAKE_COMMAND} -E create_symlink ${build_dir}/MCMC/MCMC_Dict_rdict.pcm ${build_dir}/lib/MCMC_Dict_rdict.pcm
   )
   add_extra_targets("scanner" ${name} ${ver} ${dir} ${dl} clean)
   set_as_default_version("scanner" ${name} ${ver})

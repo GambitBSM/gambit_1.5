@@ -60,8 +60,6 @@ namespace Gambit
     gambit_core::gambit_core(const Models::ModelFunctorClaw &claw, const Backends::backend_info &beinfo )
      : modelInfo(&claw)
      , backendData(&beinfo)
-     , capability_dbase_file(GAMBIT_DIR "/scratch/central_capabilities.dat")
-     , model_dbase_file(GAMBIT_DIR "/scratch/central_models.dat")
      , input_capability_descriptions(GAMBIT_DIR "/config/capabilities.dat")
      , input_model_descriptions(GAMBIT_DIR "/config/models.dat")
      , outprec(8)
@@ -156,8 +154,7 @@ namespace Gambit
         {
           case 1:
           {
-            // Display version number and shutdown.
-            if (GET_RANK == 0) cout << "\nThis is GAMBIT v" + gambit_version() << endl;
+            // Shut down.
             logger().disable();
             throw SilentShutdownException();
           }
@@ -392,7 +389,7 @@ namespace Gambit
       out << YAML::EndSeq;
       // Create file and write YAML output there
       std::ofstream outfile;
-      outfile.open(capability_dbase_file);
+      outfile.open(Utils::runtime_scratch()+"central_capabilities.dat");
       outfile << "# Auto-generated capability description library. Edits will be erased." << endl;;
       outfile << "# Edit \"" << input_capability_descriptions << "\" instead." << endl << endl << out.c_str();
 
@@ -463,17 +460,15 @@ namespace Gambit
       if(missing_flag)
       {
         // Warn user of missing descriptions
-        std::ostringstream msg;
-        msg << "Descriptions are missing for the following models:" <<endl;
+        cout << "Descriptions are missing for the following models:" << endl;
         for (std::vector<model_info>::const_iterator it = model_dbase.begin(); it != model_dbase.end(); ++it)
         {
           if(not it->has_description)
           {
-            msg << "   " << it->name << endl;
+            cout << "   " << it->name << endl;
           }
         }
-        msg << "Please add descriptions of these to "<< input_model_descriptions << endl;
-        core_error().raise(LOCAL_INFO,msg.str());
+        cout << "Please add descriptions of these to "<< input_model_descriptions << endl;
       }
 
       // Write out the centralised database file containing all this information
@@ -490,7 +485,7 @@ namespace Gambit
       out2 << YAML::EndSeq;
       // Create file and write YAML output there
       std::ofstream outfile2;
-      outfile2.open(model_dbase_file);
+      outfile2.open(Utils::runtime_scratch()+"central_models.dat");
       outfile2 << "# Auto-generated model description library. Edits will be erased." << endl;;
       outfile2 << "# Edit \"" << input_model_descriptions << "\" instead." << endl << endl << out2.c_str();
 
@@ -500,24 +495,19 @@ namespace Gambit
     void gambit_core::check_capability_descriptions()
     {
 
-      if (missing_capability_description && !developer_mode)
+      if (missing_capability_description)
       {
-        std::ostringstream msg;
-        msg << "Descriptions are missing for the following capabilities:" <<endl;
+        cout << "Descriptions are missing for the following capabilities:" << endl;
         for (std::vector<capability_info>::const_iterator it = capability_dbase.begin(); it != capability_dbase.end(); ++it)
         {
           if(not it->has_description)
           {
-            msg << "   " << it->name << endl;
+            cout << "   " << it->name << endl;
           }
         }
-        msg << "Please add descriptions of these to "<< input_capability_descriptions << endl;
-        msg << "or temporarily run in developer mode with the --developer runtime option" << endl;
-        core_error().raise(LOCAL_INFO,msg.str());
+        cout << "Please add descriptions of these to "<< input_capability_descriptions << endl;
       }
     }
-
-
 
     /// Get the description of the named capability from the description database
     const capability_info gambit_core::get_capability_info(const str& name) const
@@ -583,6 +573,12 @@ namespace Gambit
           status = missingMath;
         #endif
       }
+      else if (backendData->missingPythonVersion.at(be+version) > 0)
+      {
+        std::ostringstream status_stream;
+        status_stream << "needs Python " << backendData->missingPythonVersion.at(be+version);
+        status = status_stream.str();
+      }
       else { status = bad; }
       if (status == bad or status == badclass) no_failures = false;
       return status;
@@ -605,7 +601,7 @@ namespace Gambit
           str x(GAMBIT_EXECUTABLE);
           int len = arg.length();
           int xlen = x.length();
-          if (len > xlen and arg.substr(len-xlen,len-1) == x)
+          if (len >= xlen and arg.substr(len-xlen,xlen) == x)
           {
             command = argv[i+1];
             break;
@@ -704,7 +700,6 @@ namespace Gambit
       // Disable all but the master MPI node
       if (mpirank == 0)
       {
-        cout << "\nThis is GAMBIT." << endl << endl;
         if (command == "modules") module_diagnostic();
         if (command == "backends") backend_diagnostic();
         if (command == "models") model_diagnostic();
@@ -722,7 +717,7 @@ namespace Gambit
         cout << endl;
       }
 
-      // Silently print the logs to scratch/default.log
+      // Silently print the logs to scratch/run_time/<processID>/default.log
       logger().emit_backlog(false);
       // Split.
       logger().disable();

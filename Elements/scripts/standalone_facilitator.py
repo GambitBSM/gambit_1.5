@@ -17,11 +17,14 @@
 #  \author Pat Scott
 #          (p.scott@imperial.ac.uk)
 #    \date 2016 Aug
+#          2018 Dec
 #
 #*********************************************
 
 import pickle
-execfile("./Utils/scripts/harvesting_tools.py")
+
+toolsfile="./Utils/scripts/harvesting_tools.py"
+exec(compile(open(toolsfile, "rb").read(), toolsfile, 'exec')) # Python 2/3 compatible version of 'execfile'
 
 def main(argv):
 
@@ -34,26 +37,26 @@ def main(argv):
         executablename = argv[0]
         opts, args = getopt.getopt(argv[1:],"vm:",["verbose","use-modules="])
     except getopt.GetoptError:
-        print 'Usage: standalone_facilitator.py [flags]'
-        print ' flags:'
-        print '        -v                     : More verbose output'
-        print '        -m module1,module2,... : Link against module1, module2, etc.'
+        print('Usage: standalone_facilitator.py [flags]')
+        print(' flags:')
+        print('        -v                     : More verbose output')
+        print('        -m module1,module2,... : Link against module1, module2, etc.')
         sys.exit(2)
     for opt, arg in opts:
       if opt in ('-v','--verbose'):
         verbose = True
-        print 'standalone_facilitator.py: verbose=True'
+        print('standalone_facilitator.py: verbose=True')
       elif opt in ('-m','--use-modules'):
         modules_list = neatsplit(",",arg)
         modules.update(modules_list)
 
     # Retrieve the pickled module types.
     try:
-        with open('./scratch/harvested_types.pickle', 'rb') as handle:
+        with open('./scratch/build_time/harvested_types.pickle', 'rb') as handle:
             returned_types = pickle.load(handle)
     except:
-        print "Could not open previously harvested module functor types."
-        print "filename: ./scratch/harvested_types.pickle"
+        print("Could not open previously harvested module functor types.")
+        print("filename: ./scratch/build_time/harvested_types.pickle")
         exit(2)
 
     # Generate the union of types.
@@ -118,12 +121,12 @@ namespace Gambit                                                      \n\
 
     # Don't touch any existing file unless it is actually different from what we will create
     filename = "./"+modules_list[1]+"/examples/functors_for_"+executablename+".cpp"
-    candidate = "./scratch/functors_for_"+executablename+".cpp.candidate"
+    candidate = "./scratch/build_time/functors_for_"+executablename+".cpp.candidate"
     with open(candidate,"w") as f: f.write(towrite)
     update_only_if_different(filename, candidate)
 
     if verbose:
-        print "Generated "+filename+"."
+        print("Generated "+filename+".")
 
 
 # Handle command line arguments (verbosity)
