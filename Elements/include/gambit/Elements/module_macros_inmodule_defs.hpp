@@ -3,7 +3,7 @@
 ///  \file
 ///
 ///  Generic observable and likelihood function
-///  macro definitions, for inclusion from 
+///  macro definitions, for inclusion from
 ///  macro redirection headers.
 ///
 ///  *********************************************
@@ -42,6 +42,8 @@
 #include "gambit/Utils/exceptions.hpp"
 #include "gambit/Utils/util_macros.hpp"
 #include "gambit/Models/safe_param_map.hpp"
+
+#include <vector>
 
 //  *******************************************************************************
 /// \name In-module rollcall macros
@@ -100,6 +102,19 @@
            extern bool (*ModelInUse)(str); )                                   \
           /* Declare the safe pointer to the run options as external. */       \
           extern safe_ptr<Options> runOptions;                                 \
+          /* Set up Downstream pipes */                                        \
+          namespace Downstream                                                 \
+          {                                                                    \
+             /* Declare the dependees pipe external */                         \
+             extern safe_ptr<std::set<sspair>> dependees;                      \
+             /* Pipes to test whether dependees include specific things */     \
+             template<typename... Args>                                        \
+             bool neededFor(Args&&... args)                                    \
+             { return Utils::sspairset_contains(args..., *dependees); }        \
+             /* Declare the subcaps pipe external */                           \
+             extern safe_ptr<Options> subcaps;                                 \
+          }                                                                    \
+          /* Set up Loop pipes */                                              \
           namespace Loop                                                       \
           {                                                                    \
             BOOST_PP_IIF(BOOST_PP_EQUAL(CAN_MANAGE, 1),                        \

@@ -136,7 +136,8 @@ namespace Gambit
 
   /// Register a function with a module.
   int register_function(module_functor_common& f, bool can_manage, safe_ptr<bool>* done,
-   std::map<str,str>& iCanDo, std::map<str, bool(*)()>& map, bool(&provides)(), safe_ptr<Options>& opts)
+   std::map<str,str>& iCanDo, std::map<str, bool(*)()>& map, bool(&provides)(),
+   safe_ptr<Options>& opts, safe_ptr<std::set<sspair>>& dependees, safe_ptr<Options>& subcaps)
   {
     try
     {
@@ -148,6 +149,8 @@ namespace Gambit
       map[f.capability()] = &provides;
       iCanDo[f.name()] = f.type();
       opts = f.getOptions();
+      dependees = f.getDependees();
+      subcaps = f.getSubCaps();
     }
     catch (std::exception& e) { ini_catch(e); }
     return 0;

@@ -93,6 +93,15 @@ namespace Gambit
     /// Strips leading and/or trailing parentheses from a string.
     EXPORT_SYMBOLS void strip_parentheses(str&);
 
+    /// Test if a set of str,str pairs contains any entry with first element matching a given string
+    EXPORT_SYMBOLS bool sspairset_contains(const str&, const std::set<sspair>&);
+
+    /// Tests if a set of str,str pairs contains an entry matching two given strings
+    EXPORT_SYMBOLS bool sspairset_contains(const str&, const str&, const std::set<sspair>&);
+
+    /// Tests if a set of str,str pairs contains an entry matching a given pair
+    EXPORT_SYMBOLS bool sspairset_contains(const sspair&, const std::set<sspair>&);
+
     /// Created a str of a specified length.
     EXPORT_SYMBOLS str str_fixed_len(str, int);
 
@@ -110,7 +119,7 @@ namespace Gambit
 
     /// Split string into vector of strings, using a delimiter string
     EXPORT_SYMBOLS std::vector<std::string> split(const std::string& input, const std::string& delimiter);
-    
+
     /************************************************************************/
     /* Comparator for case-insensitive comparison in STL assos. containers  */
     /************************************************************************/

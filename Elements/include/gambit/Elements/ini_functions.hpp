@@ -64,7 +64,9 @@ namespace Gambit
   int register_module_with_log(str);
 
   /// Register a function with a module.
-  int register_function(module_functor_common&, bool, safe_ptr<bool>*, std::map<str,str>&, std::map<str, bool(*)()>&, bool(&)(), safe_ptr<Options>&);
+  int register_function(module_functor_common&, bool, safe_ptr<bool>*, std::map<str,str>&,
+                        std::map<str, bool(*)()>&, bool(&)(), safe_ptr<Options>&,
+                        safe_ptr<std::set<sspair>>&, safe_ptr<Options>&);
 
   namespace slhahelp
   {

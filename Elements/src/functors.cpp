@@ -331,6 +331,12 @@ namespace Gambit
       utils_error().raise(LOCAL_INFO,"The notifyOfModel method has not been defined in this class.");
     }
 
+    /// Notify the functor that it is being used to fill a dependency of another functor
+    void functor::notifyOfDependee (functor*)
+    {
+      utils_error().raise(LOCAL_INFO,"The notifyOfDependee method has not been defined in this class.");
+    }
+
     /// Indicate to the functor which backends are actually loaded and working
     void functor::notifyOfBackends(std::map<str, std::set<str> >)
     {
@@ -369,6 +375,18 @@ namespace Gambit
     safe_ptr<Options> functor::getOptions()
     {
       return safe_ptr<Options>(&myOptions);
+    }
+
+    /// Return a safe pointer to the subcaps that this functor realises it is supposed to facilitate downstream calculation of.
+    safe_ptr<Options> functor::getSubCaps()
+    {
+      return safe_ptr<Options>(&mySubCaps);
+    }
+
+    /// Return a safe pointer to the vector of all capability,type pairs of functors arranged downstream of this one in the dependency tree.
+    safe_ptr<std::set<sspair>> functor::getDependees()
+    {
+      return safe_ptr<std::set<sspair>>(&myDependees);
     }
 
     /// Test whether the functor is allowed (either explicitly or implicitly) to be used with a given model
@@ -1321,6 +1339,8 @@ namespace Gambit
         if (dependency_map.find(key) != dependency_map.end()) (*dependency_map[key])(dep_functor,this);
         // propagate purpose from next to next-to-output nodes
         dep_functor->setPurpose(this->myPurpose);
+        // propagate this functor's dependees and subcaps on to the resolving functor
+        //dep_functor->notifyOfDependee(this);
       }
     }
 

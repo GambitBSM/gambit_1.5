@@ -93,6 +93,13 @@ namespace Gambit
         //Example of how to declare a point invalid.
         invalid_point().raise("I don't like this point.");
       }
+      // Example of how to check if computation of another capability depends on this one at all.
+      cout << "My name is nevents_pred_rounded, and I am" <<
+       (Pipes::nevents_pred_rounded::Downstream::neededFor("nevents") ?
+       "proud to contribute to the calculation of nevents today." :
+       "completely superfluous to the calculation of nevents.")
+      << endl;
+
     }
 
     void test_sigma(double &result)

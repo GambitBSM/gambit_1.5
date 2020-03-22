@@ -242,6 +242,9 @@ namespace Gambit
       /// Notify the functor that a certain model is being scanned, so that it can activate itself accordingly.
       virtual void notifyOfModel(str);
 
+      /// Notify the functor that it is being used to fill a dependency of another functor
+      virtual void notifyOfDependee(functor*);
+
       /// Indicate to the functor which backends are actually loaded and working
       virtual void notifyOfBackends(std::map<str, std::set<str> >);
 
@@ -270,6 +273,19 @@ namespace Gambit
 
       /// Return a safe pointer to the options that this functor is supposed to run with (e.g. from the ini file).
       safe_ptr<Options> getOptions();
+
+      /// Set a sub-capability (subcap)for the functor directly (for use in standalone executables).
+      template<typename TYPE>
+      void setSubCap(const str& key, const TYPE val)
+      {
+        mySubCaps.setValue<str,TYPE>(key, val);
+      }
+
+      /// Return a safe pointer to the subcaps that this functor realises it is supposed to facilitate downstream calculation of.
+      safe_ptr<Options> getSubCaps();
+
+      /// Return a safe pointer to the vector of all capability,type pairs of functors arranged downstream of this one in the dependency tree.
+      safe_ptr<std::set<sspair>> getDependees();
 
       /// Test whether the functor is allowed to be used with all models
       bool allModelsAllowed();
@@ -334,6 +350,12 @@ namespace Gambit
 
       /// Internal storage of function options, as a YAML node
       Options myOptions;
+
+      /// Internal storage of function sub-capabilities, as a YAML node
+      Options mySubCaps;
+
+      /// List of all capability,type pairs of functors downstream of this one in the dependency tree
+      std::set<sspair> myDependees;
 
       /// List of allowed models
       std::set<str> allowedModels;

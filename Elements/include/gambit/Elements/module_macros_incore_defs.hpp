@@ -2,8 +2,8 @@
 //   *********************************************
 ///  \file
 ///
-///  Redirection macros for generic observable and 
-///  likelihood function macro definitions, for 
+///  Redirection macros for generic observable and
+///  likelihood function macro definitions, for
 ///  inclusion from the Core.
 ///
 ///
@@ -474,9 +474,19 @@
        bool (*ModelInUse)(str) = &Functown::CAT(FUNCTION,_modelInUse); )       \
       /* Declare a safe pointer to the functor's run options. */               \
       safe_ptr<Options> runOptions;                                            \
-      BOOST_PP_IIF(CAN_MANAGE,                                                 \
-       namespace Loop                                                          \
-       {                                                                       \
+      /* Set up Downstream pipes */                                            \
+      namespace Downstream                                                     \
+      {                                                                        \
+         /* Create a pipe to hold a vector of all capability,type pairs of     \
+         functors that get connected downstream of this one. */                \
+         safe_ptr<std::set<sspair>> dependees;                                 \
+         /* Create a pipe to hold all subcaps given for downstream functors */ \
+         safe_ptr<Options> subcaps;                                            \
+      }                                                                        \
+      /* Set up Loop pipes */                                                  \
+      namespace Loop                                                           \
+      {                                                                        \
+        BOOST_PP_IIF(CAN_MANAGE,                                               \
          /* Create a pointer to the single iteration of the loop that can      \
          be executed by this functor */                                        \
          void (*executeIteration)(long long)=&Functown::CAT(FUNCTION,_iterate);\
@@ -485,8 +495,8 @@
          safe_ptr<bool> done;                                                  \
          /* Declare a function that is used to reset the done flag. */         \
          void reset() { Functown::FUNCTION.resetLoop(); }                      \
-       }                                                                       \
-      ,)                                                                       \
+        ,)                                                                     \
+      }                                                                        \
     }                                                                          \
                                                                                \
   }                                                                            \
@@ -497,7 +507,9 @@
    CAN_MANAGE,                                                                 \
    BOOST_PP_IIF(CAN_MANAGE, &Pipes::FUNCTION::Loop::done, NULL),               \
    Accessors::iCanDo, Accessors::map_bools,                                    \
-   Accessors::provides<Gambit::Tags::CAPABILITY>, Pipes::FUNCTION::runOptions);\
+   Accessors::provides<Gambit::Tags::CAPABILITY>, Pipes::FUNCTION::runOptions, \
+   Pipes::FUNCTION::Downstream::dependees,                                     \
+   Pipes::FUNCTION::Downstream::subcaps);                                      \
 
 // Determine whether to make registration calls to the Core in the
 // CORE_NEEDS_MANAGER macro, depending on STANDALONE flag
