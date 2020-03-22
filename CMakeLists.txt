@@ -53,6 +53,7 @@ foreach(p
   CMP0042 # CMake 3.0
   CMP0051 # CMake 3.1
   CMP0054 # CMake 3.1
+  CMP0060 # CMake 3.16.2
   CMP0063 # CMake 3.3.2
   CMP0068 # CMake 3.9.1
   CMP0074 # CMake 3.12
@@ -141,7 +142,7 @@ if(PYTHONLIBS_FOUND)
             "   1. invoke cmake as cmake -DFORCE_PYTHON2=True .. (or similar)\n"
             "   2. invoke cmake as cmake -DFORCE_PYTHON3=True .. (or similar)\n"
             "   3. set the following variables when invoking cmake:\n"
-            "     PYTHON_LIBRARIES\n"
+            "     PYTHON_LIBRARY\n"
             "     PYTHON_INCLUDE_DIR\n"
             "     PYTHON_INCLUDE_DIR2 (you might be able to get away without setting this one)\n"
             "     PYTHON_EXECUTABLE   (you might be able to get away without setting this one)\n")
@@ -155,7 +156,7 @@ if(NOT PYTHONLIBS_FOUND)
           "   FORCE_PYTHON2 or FORCE_PYTHON3 when invoking cmake (make sure to clean out your build\n"
           "   directory in between any such changes).  If that does not work, you can manually set the\n"
           "   following variables when invoking cmake (also making sure to clean out your build dir):\n"
-          "     PYTHON_LIBRARIES\n"
+          "     PYTHON_LIBRARY\n"
           "     PYTHON_INCLUDE_DIR\n"
           "     PYTHON_INCLUDE_DIR2 (you might be able to get away without setting this one)\n"
           "     PYTHON_EXECUTABLE   (you might be able to get away without setting this one)")
