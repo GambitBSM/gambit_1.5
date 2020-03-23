@@ -53,6 +53,7 @@ foreach(p
   CMP0042 # CMake 3.0
   CMP0051 # CMake 3.1
   CMP0054 # CMake 3.1
+  CMP0060 # CMake 3.16.2
   CMP0063 # CMake 3.3.2
   CMP0068 # CMake 3.9.1
   CMP0074 # CMake 3.12

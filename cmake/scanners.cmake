@@ -139,8 +139,10 @@ else()
 endif()
 if("${CMAKE_Fortran_COMPILER_ID}" STREQUAL "Intel")
   set(pcFFLAGS "${pcFFLAGS} -heap-arrays -assume noold_maxminloc ")
+  set(pcCOMPILER_TYPE "intel")
 else()
   set(pcFFLAGS "${pcFFLAGS} -fno-stack-arrays")
+  set(pcCOMPILER_TYPE "gnu")
 endif()
 check_ditch_status(${name} ${ver} ${dir})
 if(NOT ditched_${name}_${ver})
@@ -149,7 +151,7 @@ if(NOT ditched_${name}_${ver})
     SOURCE_DIR ${dir}
     BUILD_IN_SOURCE 1
     CONFIGURE_COMMAND ""
-    BUILD_COMMAND ${MAKE_PARALLEL} ${lib}.so FC=${CMAKE_Fortran_COMPILER} FFLAGS=${pcFFLAGS} CXX=${CMAKE_CXX_COMPILER} CXXFLAGS=${pcCXXFLAGS} LD=${pcSO_LINK}
+    BUILD_COMMAND ${MAKE_PARALLEL} ${lib}.so FC=${CMAKE_Fortran_COMPILER} FFLAGS=${pcFFLAGS} CXX=${CMAKE_CXX_COMPILER} CXXFLAGS=${pcCXXFLAGS} LD=${pcSO_LINK} COMPILER_TYPE=${pcCOMPILER_TYPE}
     INSTALL_COMMAND ""
   )
   add_extra_targets("scanner" ${name} ${ver} ${dir} ${dl} clean)
