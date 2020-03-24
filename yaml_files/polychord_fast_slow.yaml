@@ -1,0 +1,284 @@
+##########################################################################
+## Validation for LCDM constraints on from various Planck Combinations..
+##
+##   - Using Multinest sampler
+##
+## Patrick Stoecker <stoecker@physik.rwth-aachen.de>
+## 2020, Jan
+##########################################################################
+
+#======== Input parameter declarations =======
+Parameters:
+ 
+  # --- import model parameters for models to scan over ---
+  LCDM: 
+    omega_b:
+      prior_type: flat
+      range: [0.020,0.024]
+    omega_cdm:
+      prior_type: flat
+      range: [0.10,0.13]
+    H0:
+      prior_type: flat
+      range: [62,74]
+    ln10A_s:
+      prior_type: flat
+      range: [2.9,3.2]
+    n_s:
+      prior_type: flat
+      range: [0.9,1.10]
+    tau_reio:
+      prior_type: flat
+      range: [0.004,0.20]
+    T_cmb: 2.72548
+
+  # nuisance parameters in Planck likelihood
+  cosmo_nuisance_Planck_TTTEEE:
+    A_cib_217:
+      prior_type: flat
+      range: [0.0,200.0]
+    cib_index:
+      fixed_value: -1.3
+    xi_sz_cib:
+      prior_type: flat
+      range: [0.0,1.0]
+    A_sz:
+      prior_type: flat
+      range: [0.0,10.0]
+    ps_A_100_100:
+      prior_type: flat
+      range: [0.0,400.0]
+    ps_A_143_143:
+      prior_type: flat
+      range: [0.0,400.0]
+    ps_A_143_217:
+      prior_type: flat
+      range: [0.0,400.0]
+    ps_A_217_217:
+      prior_type: flat
+      range: [0.0,400.0]
+    ksz_norm:
+      prior_type: flat
+      range: [0.0,10.0]
+    gal545_A_100:
+      prior_type: flat
+      range: [0.0,50.0]
+    gal545_A_143:
+      prior_type: flat
+      range: [0.0,50.0]
+    gal545_A_143_217:
+      prior_type: flat
+      range: [0.0,100.0]
+    gal545_A_217:
+      prior_type: flat
+      range: [0.0,400.0]
+    galf_EE_A_100:
+      fixed_value: 0.055
+    galf_EE_A_100_143:
+      fixed_value: 0.040
+    galf_EE_A_100_217:
+      fixed_value: 0.094
+    galf_EE_A_143:
+      fixed_value: 0.086
+    galf_EE_A_143_217:
+      fixed_value: 0.21
+    galf_EE_A_217:
+      fixed_value: 0.70
+    galf_EE_index:
+      fixed_value: -2.4
+    galf_TE_A_100:
+      prior_type: flat
+      range: [0.0,10.0]
+    galf_TE_A_100_143:
+      prior_type: flat
+      range: [0.0,10.0]
+    galf_TE_A_100_217:
+      prior_type: flat
+      range: [0.0,10.0]
+    galf_TE_A_143:
+      prior_type: flat
+      range: [0.0,10.0]
+    galf_TE_A_143_217:
+      prior_type: flat
+      range: [0.0,10.0]
+    galf_TE_A_217:
+      prior_type: flat
+      range: [0.0,10.0]
+    galf_TE_index:
+      fixed_value: -2.4
+    calib_100T:
+      prior_type: flat
+      range: [0.0,3.0]
+    calib_217T:
+      prior_type: flat
+      range: [0.0,3.0]
+    calib_100P:
+      fixed_value: 1.021
+    calib_143P:
+      fixed_value: 0.966
+    calib_217P:
+      fixed_value: 1.05
+    A_pol:
+      fixed_value: 1.0
+    A_planck:
+      prior_type: flat
+      range: [0.9,1.1]
+
+
+#======== Prior setup ========
+Priors:
+
+#======== Output setup ========
+Printer:
+  printer: hdf5
+  options:
+    output_file: "Validation_Planck_TTTEEE_lowl_lowE_lensing.hdf5"
+    group: "/data"
+    delete_file_on_restart: false
+    buffer_length: 10
+
+#======== Scanner setup ========
+Scanner:
+  use_scanner: polychord
+
+  scanners:
+    multinest:
+      plugin: multinest
+      like:  LogLike
+      nlive: 10000
+      tol: 1e-5
+
+    diver:
+      plugin: diver
+      like: LogLike
+      convthresh: 1e-5
+      verbosity: 2
+      NP: 10000
+      jDE: true
+      lambdajDE: false
+
+    random:
+      plugin: random
+      point_number: 25
+      like:  LogLike
+
+    polychord:
+      plugin: polychord
+      like:  LogLike
+      nlive: 1
+      nprior: 1
+      tol: 0.1
+      fast_params: 
+        - cosmo_nuisance_Planck_TTTEEE::A_cib_217
+        - cosmo_nuisance_Planck_TTTEEE::A_planck
+        - cosmo_nuisance_Planck_TTTEEE::A_pol
+        - cosmo_nuisance_Planck_TTTEEE::A_sz
+        - cosmo_nuisance_Planck_TTTEEE::calib_100P
+        - cosmo_nuisance_Planck_TTTEEE::calib_100T
+        - cosmo_nuisance_Planck_TTTEEE::calib_143P
+        - cosmo_nuisance_Planck_TTTEEE::calib_217P
+        - cosmo_nuisance_Planck_TTTEEE::calib_217T
+        - cosmo_nuisance_Planck_TTTEEE::cib_index
+        - cosmo_nuisance_Planck_TTTEEE::gal545_A_100
+        - cosmo_nuisance_Planck_TTTEEE::gal545_A_143
+        - cosmo_nuisance_Planck_TTTEEE::gal545_A_143_217
+        - cosmo_nuisance_Planck_TTTEEE::gal545_A_217
+        - cosmo_nuisance_Planck_TTTEEE::galf_EE_A_100
+        - cosmo_nuisance_Planck_TTTEEE::galf_EE_A_100_143
+        - cosmo_nuisance_Planck_TTTEEE::galf_EE_A_100_217
+        - cosmo_nuisance_Planck_TTTEEE::galf_EE_A_143
+        - cosmo_nuisance_Planck_TTTEEE::galf_EE_A_143_217
+        - cosmo_nuisance_Planck_TTTEEE::galf_EE_A_217
+        - cosmo_nuisance_Planck_TTTEEE::galf_EE_index
+        - cosmo_nuisance_Planck_TTTEEE::galf_TE_A_100
+        - cosmo_nuisance_Planck_TTTEEE::galf_TE_A_100_143
+        - cosmo_nuisance_Planck_TTTEEE::galf_TE_A_100_217
+        - cosmo_nuisance_Planck_TTTEEE::galf_TE_A_143
+        - cosmo_nuisance_Planck_TTTEEE::galf_TE_A_143_217
+        - cosmo_nuisance_Planck_TTTEEE::galf_TE_A_217
+        - cosmo_nuisance_Planck_TTTEEE::galf_TE_index
+        - cosmo_nuisance_Planck_TTTEEE::ksz_norm
+        - cosmo_nuisance_Planck_TTTEEE::ps_A_100_100
+        - cosmo_nuisance_Planck_TTTEEE::ps_A_143_143
+        - cosmo_nuisance_Planck_TTTEEE::ps_A_143_217
+        - cosmo_nuisance_Planck_TTTEEE::ps_A_217_217
+        - cosmo_nuisance_Planck_TTTEEE::xi_sz_cib
+
+
+#======== Observables of interest ========
+ObsLikes:
+
+  # ----- BBN ------
+
+  - purpose:      LogLike
+    capability:   Planck_nuisance_prior_loglike
+
+  - purpose:      LogLike
+    capability:   Planck_highl_loglike
+    function:     function_Planck_highl_TTTEEE_2018_loglike
+
+  - purpose:      LogLike
+    capability:   Planck_lowl_loglike
+    function:     function_Planck_lowl_TTEE_2018_loglike
+ 
+  - purpose:      LogLike
+    capability:   Planck_lensing_loglike
+    function:     function_Planck_lensing_2018_loglike
+ 
+#======== Rule entries ========
+Rules:
+
+#####
+##
+##  Inputs for class / classy
+##  Since there is no MontePython in use, we need an empty classy_input_dict to fill
+##
+####
+
+  - capability: classy_final_input
+    function: set_classy_input
+
+#####
+##
+##  Settings for AlterBBN and treatment of uncertainties
+##
+####
+
+  - capability: AlterBBN_Input
+    options:
+      failsafe: 3
+      err: 0
+
+  - capability: BBN_abundances
+    options:
+      elements: [Yp, D, He3, Be7, Li7]
+      correlation_matrix: [[+1.000e00, +1.524e-2, +2.667e-2, +2.303e-2, +2.429e-2],
+                           [+1.524e-2, +1.000e00, -8.160e-1, -3.775e-1, -3.653e-1],
+                           [+2.667e-2, -8.160e-1, +1.000e00, +3.897e-1, +3.780e-1],
+                           [+2.303e-2, -3.775e-1, +3.897e-1, +1.000e00, +9.974e-1],
+                           [+2.429e-2, -3.653e-1, +3.780e-1, +9.974e-1, +1.000e00]]
+      relative_errors: [1.348e-3, 1.596e-2, 1.618e-2, 6.788e-2, 6.579e-2]
+
+  - capability:   plc_3_0_init
+    options:
+      plc_3.0_path: /home/wh260/rds/hpc-work/data/code/plc_3.0/
+
+#======== Logging setup ========
+Logger:
+  redirection:
+    [Default]  : "default.log"
+    [CosmoBit] : "CosmoBit.log"
+
+#======== Generic Name/Value Section ========
+KeyValues:
+
+  debug: false
+
+  default_output_path: "./runs/debug/"
+
+  rng:
+    generator: ranlux48
+    seed: -1
+
+  likelihood:
+    model_invalid_for_lnlike_below: -1e30
