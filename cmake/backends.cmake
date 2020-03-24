@@ -1257,9 +1257,9 @@ if(NOT ditched_${name}_${ver})
     # Since someone put a tarball into a tarball, we need to extract again
     PATCH_COMMAND tar -C ${dir}/ -xf ${dir}/code/plc_3.0/plc-3.0.tar.bz2 --strip-components=1
     COMMAND patch -p1 < ${patch}/${name}_${ver}.diff
-    CONFIGURE_COMMAND ${PYTHON_EXECUTABLE} ${dir}/waf configure ${PLC_C_COMPILER} ${PLC_Fortran_COMPILER} --cfitsio_include=${cfitsio_dir}/include --cfitsio_lib=${cfitsio_dir}/lib ${mkl_libs_option}
+    CONFIGURE_COMMAND ${PYTHON_EXECUTABLE} ${dir}/waf configure ${PLC_C_COMPILER} ${PLC_Fortran_COMPILER} --cfitsio_include=${cfitsio_dir}/include --cfitsio_lib=${cfitsio_dir}/lib ${mkl_libs_option} --no_pytools
     BUILD_COMMAND ""
-    INSTALL_COMMAND C_INCLUDE_PATH=$(C_INCLUDE_PATH):${PYTHON_INCLUDE_DIR} ${PYTHON_EXECUTABLE} ${dir}/waf install
+    INSTALL_COMMAND C_INCLUDE_PATH=$(C_INCLUDE_PATH):${PYTHON_INCLUDE_DIR} ${PYTHON_EXECUTABLE} ${dir}/waf install --no_pytools
   )
   add_extra_targets("backend" ${name} ${ver} ${dir} ${dl} clean)
   set_as_default_version("backend" ${name} ${ver})
