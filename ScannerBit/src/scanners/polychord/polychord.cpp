@@ -103,6 +103,7 @@ scanner_plugin(polychord, version(1, 16))
       // Read list of fast parameters from file
       std::vector<std::string> fast_params = get_inifile_value<std::vector<std::string>>("fast_params", {});
       // Get list of parameters used from loglikelihood
+      std::vector<std::string> varied_params = LogLike->getShownParameters();
       std::vector<std::string> all_params = LogLike->getParameters();
 
       // Compute the set difference between fast_params and all_params to check if there are any fast_params not included in all_params
@@ -125,14 +126,14 @@ scanner_plugin(polychord, version(1, 16))
       int i = 0;
       // Run through all the parameters, and if they're slow parameters
       // give them an index i, then increment i
-      for (auto param : all_params) 
+      for (auto param : varied_params) 
           if (std::find(fast_params.begin(), fast_params.end(),param) == fast_params.end())
               Gambit::PolyChord::global_loglike_object->index_map[param] = (i++);
       int nslow = i;
       if(nslow!=0) settings.grade_dims.push_back(nslow);
 
       // Do the same for the fast parameters
-      for (auto param : all_params) 
+      for (auto param : varied_params) 
           if (std::find(fast_params.begin(), fast_params.end(),param) != fast_params.end())
               Gambit::PolyChord::global_loglike_object->index_map[param] = (i++);
       int nfast = i-nslow;
@@ -273,7 +274,7 @@ namespace Gambit {
       double LogLikeWrapper::LogLike(double *Cube, int ndim, double* phi, int nderived)
       {
          //convert C style array to C++ vector class, reordering parameters slow->fast
-         std::vector<std::string> params = boundLogLike->getParameters();
+         std::vector<std::string> params = boundLogLike->getShownParameters();
          std::vector<double> unitpars(ndim);
          for (auto i=0; i<ndim; i++) 
          {
