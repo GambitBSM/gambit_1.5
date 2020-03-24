@@ -277,14 +277,10 @@ namespace Gambit {
          std::vector<std::string> params = boundLogLike->getShownParameters();
          std::vector<double> unitpars(ndim);
          for (auto i=0; i<ndim; i++) 
-         {
              unitpars[i] = Cube[index_map[params[i]]];
-             std::cout << unitpars[i] << " ";
-         }
          std::vector<double> derived(phi, phi + nderived);
 
          double lnew = boundLogLike(unitpars);
-         std::cout << lnew << std::endl;
 
          // Done! (lnew will be used by PolyChord to guide the search)
 

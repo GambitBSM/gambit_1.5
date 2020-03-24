@@ -165,8 +165,7 @@ Scanner:
     polychord:
       plugin: polychord
       like:  LogLike
-      nlive: 1
-      nprior: 1
+      nlive: 150
       tol: 0.1
       fast_params: 
         - cosmo_nuisance_Planck_TTTEEE::A_cib_217
@@ -274,7 +273,7 @@ KeyValues:
 
   debug: false
 
-  default_output_path: "./runs/debug/"
+  default_output_path: "./runs/optimised/"
 
   rng:
     generator: ranlux48
