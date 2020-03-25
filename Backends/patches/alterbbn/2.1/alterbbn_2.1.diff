@@ -1,0 +1,30 @@
+--- a/src/bbn.c	2019-08-02 19:37:29.344864911 +0200
++++ b/src/bbn.c	2020-03-25 22:27:29.076328235 +0100
+@@ -589,7 +589,7 @@
+ 		// SM and equivalent neutrinos share same temperature
+ 		rho_neuteq=2.*pow(pi,2.)/30.*7./8.*paramrelic->dNnu*pow(Tnu,4.);
+ 		P_neuteq=rho_neuteq/3.;
+-		drho_neuteq=0.;
++		drho_neuteq=7.*pow(pi,2.)/30.*paramrelic->dNnu*pow(Tnu,3.);
+ 	}
+ 
+ 	/* ############### BARYON DENSITY ################ */
+@@ -693,8 +693,8 @@
+ 	}
+ 
+ 	double dTnu_dt,dT_dt;
+-	if(isinf(dlna3_dTnu)) dTnu_dt=0.; else dTnu_dt=3.*H/dlna3_dTnu;
+-	if(isinf(dlna3_dT)) dT_dt=0.; dT_dt=3.*H/dlna3_dT;
++	if(isinf(dlna3_dTnu) || isnan(dlna3_dTnu)) dTnu_dt=0.; else dTnu_dt=3.*H/dlna3_dTnu;
++	if(isinf(dlna3_dT) || isnan(dlna3_dT)) dT_dt=0.; else dT_dt=3.*H/dlna3_dT;
+ 	
+ 	double dlnT_dt=dT_dt/T;
+ 	double dh_dt=-3.*h_eta*(H+dlnT_dt);
+@@ -1097,6 +1097,7 @@
+         Y0[i]=Y[i];
+         Y0b[i]=Y[i];
+    }
++   Y[0] = 0.; // An unitialised value for Y[0] can lead to problems when building the a-matrix in "linearize". (This was observed with gcc-7.5.0 and openmpi-2.1.1)
+ 
+ /* --------------------------------------- Integration part ------------------------------------------------------------ */    
+ 
