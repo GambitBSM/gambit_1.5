@@ -17,6 +17,10 @@
 ///         (stoecker@physik.rwth-achen.de)
 /// \date 2019 Sep
 ///
+/// \author Will Handley
+///         (wh260@cam.ac.uk)
+/// \date 2020 Mar
+///
 ///  *********************************************
 
 #include <sstream>
@@ -36,6 +40,10 @@ END_BE_INI_FUNCTION
 // Convenience functions (definitions)
 BE_NAMESPACE
 {
+  static int                 nucl_err_res=0;
+  static map_str_dbl         prev_AlterBBN_input{};
+  static std::vector<double> prev_ratioH(0., NNUC+1);
+  static std::vector<double> prev_cov_ratioH(0., (NNUC+1)*(NNUC+1));
 
   /// string set containing the name of all members of the AlterBBN relicparam structures that can currently 
   /// be set with GAMBIT. If you add a new model and need to pass a different option to AlterBBN add e.g. "life_neutron" 
@@ -88,13 +96,23 @@ BE_NAMESPACE
   /// all computed element abundances, and cov_ratioH with their errors & covariances
   int call_nucl_err(map_str_dbl &AlterBBN_input, double* ratioH, double* cov_ratioH )
   {
-    AlterBBN::AlterBBN_2_2::relicparam input_relicparam;
-    Init_cosmomodel(&input_relicparam); // initialise valuse of relicparam structure to their defaults
-    fill_cosmomodel(&input_relicparam, AlterBBN_input); // fill strucutre with values contained in AlerBBN_input map which is filled in CosmoBit.ccp for different models
+    if (AlterBBN_input != prev_AlterBBN_input)
+    {
+      AlterBBN::AlterBBN_2_2::relicparam input_relicparam;
+      Init_cosmomodel(&input_relicparam); // initialise valuse of relicparam structure to their defaults
+      fill_cosmomodel(&input_relicparam, AlterBBN_input); // fill strucutre with values contained in AlerBBN_input map which is filled in CosmoBit.ccp for different models
 
-    int nucl_err_res = nucl_err(&input_relicparam, ratioH, cov_ratioH);
-    //int bbn_exc = bbn_excluded_chi2(&input_relicparam); just for testing purposes to compare internal AlterBBN output to GAMBIT result
-
+      nucl_err_res = nucl_err(&input_relicparam, ratioH, cov_ratioH);
+      //int bbn_exc = bbn_excluded_chi2(&input_relicparam); just for testing purposes to compare internal AlterBBN output to GAMBIT result
+      prev_ratioH = std::vector<double>(ratioH, ratioH+NNUC+1);
+      prev_cov_ratioH = std::vector<double>(cov_ratioH, cov_ratioH+(NNUC+1)*(NNUC+1));
+      prev_AlterBBN_input = AlterBBN_input;
+    }
+    else
+    {
+      for (int i=0;i<NNUC+1;i++) ratioH[i] = prev_ratioH[i];
+      for (int i=0;i<(NNUC+1)*(NNUC+1);i++) cov_ratioH[i] = prev_cov_ratioH[i];
+    }
     return nucl_err_res;
   }
  
