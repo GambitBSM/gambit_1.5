@@ -296,7 +296,6 @@ START_MODULE
      #define FUNCTION set_classy_PlanckLike_input
       START_FUNCTION(pybind11::dict)
       BACKEND_REQ(plc_required_Cl,(plc_tag),void,(int&,bool&,bool&))
-      ALLOW_MODELS(cosmo_nuisance_Planck_lite,cosmo_nuisance_Planck_TTTEEE,cosmo_nuisance_Planck_TT)
      #undef FUNCTION
   #undef CAPABILITY
 
