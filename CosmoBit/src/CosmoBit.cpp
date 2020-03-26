@@ -435,6 +435,8 @@ namespace Gambit
 
       map_str_dbl NuMassInfo = *Dep::NuMasses_SM;
 
+      static bool allow_massless = runOptions->getValueOrDef<bool>(false,"allow_massless_neutrinos");
+
       int N_ncdm = static_cast<int>(NuMassInfo["N_ncdm"]);
       double N_ur{};
       switch (N_ncdm)
@@ -449,12 +451,19 @@ namespace Gambit
           N_ur = 0.00641;  // N_ur (today) = 0.00641 for 3 massive neutrinos at CMB release
           break;
         case 0:
+          if (!allow_massless)
           {
             std::ostringstream err;
-            err << "Warning: All your neutrino masses are zero. The Planck baseline LCDM model assumes at least one massive neutrino.\n";
-            err << "A cosmological model without massive neutrinos is not implemented in CosmoBit. If you want to consider this you can add it to the function 'get_N_ur' of the capability 'N_ur' ";
-            CosmoBit_warning().raise(LOCAL_INFO, err.str());
+            err << "Warning/Error: All your neutrino masses are zero. The Planck baseline LCDM model assumes at least one massive neutrino of mass 0.06 eV.\n";
+            err << "A cosmological model without massive neutrinos can heavily affect your cosmological observables.\n\n";
+            err << "You can proceed at your own risk by adding\n\n";
+            err << "  - module: CosmoBit\n";
+            err << "    options:\n";
+            err << "      allow_massless_neutrinos: true\n\n";
+            err << "to the Rules section of the yaml-file";
+            CosmoBit_error().raise(LOCAL_INFO, err.str());
           }
+          N_ur = 3.046;
           break;
         default:
           {
@@ -469,15 +478,20 @@ namespace Gambit
       if (ModelInUse("etaBBN_rBBN_rCMB_dNurBBN_dNurCMB"))
       {
         // Check if the input for dNeff is negative (unphysical)
-        static bool allow_negative_dNeff = runOptions->getValueOrDef<bool>(false,"allow_negative_delta_N_ur");
+        static bool allow_negative_delta_N_ur = runOptions->getValueOrDef<bool>(false,"allow_negative_delta_N_ur");
         const ModelParameters& NP_params = *Dep::etaBBN_rBBN_rCMB_dNurBBN_dNurCMB_parameters;
         double dNurCMB =  NP_params.at("dNur_CMB");
         double rCMB =  NP_params.at("r_CMB");
-        if ( (!allow_negative_dNeff) && (dNurCMB < 0.0) )
+        if ( (!allow_negative_delta_N_ur) && (dNurCMB < 0.0) )
         {
-          std::string err = "A negative value for \"dNur_CMB\" is unphysical and is not allowed in CosmoBit by default!\n\n";
-          err += "If you want to proceed with megative values, please set the \"allow_negative_delta_N_ur\"-rule to \"true\" within the yaml-file.";
-          CosmoBit_error().raise(LOCAL_INFO,err.c_str());
+          std::ostringstream err;
+          err << "A negative value for \"dNur_CMB\" is unphysical and is not allowed in CosmoBit by default!\n\n";
+          err << "If you want to proceed with megative values, please add\n\n";
+          err << "  - module: CosmoBit\n";
+          err << "    options:\n";
+          err << "      allow_negative_delta_N_ur: true\n\n";
+          err << "to the Rules section of the yaml-file.";
+          CosmoBit_error().raise(LOCAL_INFO,err.str());
         }
 
         // If the check is passed, set the result.
@@ -531,10 +545,6 @@ namespace Gambit
 
         result["m_ncdm"] = ss1.str();
         result["T_ncdm"] = ss2.str();
-      }
-      else
-      {
-        result["T_ncdm"] = *Dep::T_ncdm;
       }
     }
 
@@ -1316,9 +1326,9 @@ namespace Gambit
       result = rCMB*(*Dep::T_ncdm_SM);
     }
 
-    void calculate_eta0(double &result)
+    void eta0_LCDM(double &result)
     {
-      using namespace Pipes::calculate_eta0;
+      using namespace Pipes::eta0_LCDM;
 
       double ngamma, nb;
       ngamma = 16*pi*zeta3*pow(*Param["T_cmb"]*_kB_eV_over_K_/_hc_eVcm_,3); // photon number density today
@@ -1326,6 +1336,13 @@ namespace Gambit
 
       result =  nb/ngamma;
       logger() << "Baryon to photon ratio (eta) today computed to be " << result << EOM;
+    }
+
+    void etaBBN_SM(double& result)
+    {
+      using namespace Pipes::etaBBN_SM;
+
+      result = *Dep::eta0;
     }
 
     void compute_Omega0_m(double &result)
@@ -1433,26 +1450,30 @@ namespace Gambit
         double dNurBBN =  NP_params.at("dNur_BBN");
 
         // Check if the input for dNeff is negative (unphysical)
-        static bool allow_negative_dNeff = runOptions->getValueOrDef<bool>(false,"allow_negative_delta_N_ur");
-        if ( (!allow_negative_dNeff) && (dNurBBN < 0.0) )
+        static bool allow_negative_delta_N_ur = runOptions->getValueOrDef<bool>(false,"allow_negative_delta_N_ur");
+        if ( (!allow_negative_delta_N_ur) && (dNurBBN < 0.0) )
         {
-          std::string err = "A negative value for \"dNur_BBN\" is unphysical and is not allowed in CosmoBit by default!\n\n";
-          err += "If you want to proceed with megative values, please set the \"allow_negative_delta_N_ur\"-rule to \"true\" within the yaml-file.";
-          CosmoBit_error().raise(LOCAL_INFO,err.c_str());
+          std::ostringstream err;
+          err << "A negative value for \"dNur_BBN\" is unphysical and is not allowed in CosmoBit by default!\n\n";
+          err << "If you want to proceed with megative values, please add\n\n";
+          err << "  - module: CosmoBit\n";
+          err << "    options:\n";
+          err << "      allow_negative_delta_N_ur: true\n\n";
+          err << "to the Rules section of the yaml-file.";
+          CosmoBit_error().raise(LOCAL_INFO,err.str());
         }
 
         //If check is passed, set inputs.
-        result["eta0"] = NP_params.at("eta_BBN");    // eta AFTER BBN (variable during)
         result["Nnu"]=3.046*pow(NP_params.at("r_BBN"),4); // contribution from SM neutrinos
         result["dNnu"]=dNurBBN;    // dNnu: within AlterBBN scenarios in which the sum Nnu+dNnu is the same are identical
       }
       else
       {
-        result["eta0"] = *Dep::eta0;    // eta AFTER BBN equal to eta today calculated from omgea_b
         result["Nnu"]=3.046; // contribution from SM neutrinos
         result["dNnu"]=0.;    // no extra ur species in standard LCDM model
       }
-
+      result["eta0"] = *Dep::etaBBN;
+  
       result["failsafe"] = runOptions->getValueOrDef<double>(3,"failsafe");
       result["err"] = runOptions->getValueOrDef<double>(3,"err");
 
@@ -1482,14 +1503,9 @@ namespace Gambit
       // properly supported even though there are no errors at compile time.
       // using a unique pointer for ratioH and a 2d vector for cov_ratioH avoids
       // these problems.
-      // auto deleter = [&](double* ptr){delete [] ptr;};
-      // std::unique_ptr<double[], decltype(deleter)> ratioH(new double[NNUC+1](), deleter);
-      // std::unique_ptr<double[], decltype(deleter)> cov_ratioH(new double[(NNUC+1)*(NNUC+1)](), deleter);
-
-      std::vector<double> ratioHvec(NNUC+1);
-      std::vector<double> cov_ratioHvec((NNUC+1)*(NNUC+1));
-      auto ratioH = ratioHvec.data();
-      auto cov_ratioH = cov_ratioHvec.data();
+      auto deleter = [&](double* ptr){delete [] ptr;};
+      std::unique_ptr<double[], decltype(deleter)> ratioH(new double[NNUC+1](), deleter);
+      std::unique_ptr<double[], decltype(deleter)> cov_ratioH(new double[(NNUC+1)*(NNUC+1)](), deleter);
 
       static bool first = true;
       const bool use_fudged_correlations = (runOptions->hasKey("correlation_matrix") && runOptions->hasKey("elements"));

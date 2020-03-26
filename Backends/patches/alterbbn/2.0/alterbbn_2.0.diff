@@ -1,0 +1,10 @@
+--- a/src/bbn.c	2018-06-20 21:45:23.000000000 +0200
++++ b/src/bbn.c	2020-03-25 22:47:32.364080964 +0100
+@@ -785,6 +785,7 @@
+         Y0[i]=Y[i];
+     }
+     rate_weak(f,paramrelic,paramerror);
++    Y[0] = 0.; // An unitialised value for Y[0] can lead to problems when building the a-matrix in "linearize". (This was observed with gcc-7.5.0 and openmpi-2.1.1)
+ 
+     /* ############## MAIN LOOP ############ */
+     

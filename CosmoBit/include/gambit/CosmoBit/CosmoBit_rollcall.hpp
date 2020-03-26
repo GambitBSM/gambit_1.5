@@ -296,7 +296,6 @@ START_MODULE
      #define FUNCTION set_classy_PlanckLike_input
       START_FUNCTION(pybind11::dict)
       BACKEND_REQ(plc_required_Cl,(plc_tag),void,(int&,bool&,bool&))
-      ALLOW_MODELS(cosmo_nuisance_Planck_lite,cosmo_nuisance_Planck_TTTEEE,cosmo_nuisance_Planck_TT)
      #undef FUNCTION
   #undef CAPABILITY
 
@@ -774,12 +773,26 @@ START_MODULE
   #define CAPABILITY eta0
     START_CAPABILITY
 
-    #define FUNCTION calculate_eta0
+    // Calcualte eta0 (today) from omega_b and T_cmb
+    #define FUNCTION eta0_LCDM
       START_FUNCTION(double)
       ALLOW_MODELS(LCDM, LCDM_theta)
     #undef FUNCTION
 
   #undef CAPABILITY
+
+  #define CAPABILITY etaBBN
+    START_CAPABILITY
+
+    // Fallback for etaBBN if 'etaBBN_rBBN_rCMB_dNurBBN_dNurCMB'
+    // cannot be used to provide the capability
+    #define FUNCTION etaBBN_SM
+      START_FUNCTION(double)
+      DEPENDENCY(eta0,double)
+    #undef FUNCTION
+
+  #undef CAPABILITY
+
 
   #define CAPABILITY rs_drag
   START_CAPABILITY
@@ -855,7 +868,7 @@ START_MODULE
     START_CAPABILITY
     #define FUNCTION AlterBBN_Input
       START_FUNCTION(map_str_dbl)
-      DEPENDENCY(eta0, double)
+      DEPENDENCY(etaBBN, double)
       MODEL_CONDITIONAL_DEPENDENCY(etaBBN_rBBN_rCMB_dNurBBN_dNurCMB_parameters,ModelParameters,etaBBN_rBBN_rCMB_dNurBBN_dNurCMB)
     #undef FUNCTION
   #undef CAPABILITY
