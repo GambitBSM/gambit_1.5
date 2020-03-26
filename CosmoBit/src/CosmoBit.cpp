@@ -478,15 +478,20 @@ namespace Gambit
       if (ModelInUse("etaBBN_rBBN_rCMB_dNurBBN_dNurCMB"))
       {
         // Check if the input for dNeff is negative (unphysical)
-        static bool allow_negative_dNeff = runOptions->getValueOrDef<bool>(false,"allow_negative_delta_N_ur");
+        static bool allow_negative_delta_N_ur = runOptions->getValueOrDef<bool>(false,"allow_negative_delta_N_ur");
         const ModelParameters& NP_params = *Dep::etaBBN_rBBN_rCMB_dNurBBN_dNurCMB_parameters;
         double dNurCMB =  NP_params.at("dNur_CMB");
         double rCMB =  NP_params.at("r_CMB");
-        if ( (!allow_negative_dNeff) && (dNurCMB < 0.0) )
+        if ( (!allow_negative_delta_N_ur) && (dNurCMB < 0.0) )
         {
-          std::string err = "A negative value for \"dNur_CMB\" is unphysical and is not allowed in CosmoBit by default!\n\n";
-          err += "If you want to proceed with megative values, please set the \"allow_negative_delta_N_ur\"-rule to \"true\" within the yaml-file.";
-          CosmoBit_error().raise(LOCAL_INFO,err.c_str());
+          std::ostringstream err;
+          err << "A negative value for \"dNur_CMB\" is unphysical and is not allowed in CosmoBit by default!\n\n";
+          err << "If you want to proceed with megative values, please add\n\n";
+          err << "  - module: CosmoBit\n";
+          err << "    options:\n";
+          err << "      allow_negative_delta_N_ur: true\n\n";
+          err << "to the Rules section of the yaml-file.";
+          CosmoBit_error().raise(LOCAL_INFO,err.str());
         }
 
         // If the check is passed, set the result.
@@ -1438,12 +1443,17 @@ namespace Gambit
         double dNurBBN =  NP_params.at("dNur_BBN");
 
         // Check if the input for dNeff is negative (unphysical)
-        static bool allow_negative_dNeff = runOptions->getValueOrDef<bool>(false,"allow_negative_delta_N_ur");
-        if ( (!allow_negative_dNeff) && (dNurBBN < 0.0) )
+        static bool allow_negative_delta_N_ur = runOptions->getValueOrDef<bool>(false,"allow_negative_delta_N_ur");
+        if ( (!allow_negative_delta_N_ur) && (dNurBBN < 0.0) )
         {
-          std::string err = "A negative value for \"dNur_BBN\" is unphysical and is not allowed in CosmoBit by default!\n\n";
-          err += "If you want to proceed with megative values, please set the \"allow_negative_delta_N_ur\"-rule to \"true\" within the yaml-file.";
-          CosmoBit_error().raise(LOCAL_INFO,err.c_str());
+          std::ostringstream err;
+          err << "A negative value for \"dNur_BBN\" is unphysical and is not allowed in CosmoBit by default!\n\n";
+          err << "If you want to proceed with megative values, please add\n\n";
+          err << "  - module: CosmoBit\n";
+          err << "    options:\n";
+          err << "      allow_negative_delta_N_ur: true\n\n";
+          err << "to the Rules section of the yaml-file.";
+          CosmoBit_error().raise(LOCAL_INFO,err.str());
         }
 
         //If check is passed, set inputs.
