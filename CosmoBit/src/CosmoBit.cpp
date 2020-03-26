@@ -1326,9 +1326,9 @@ namespace Gambit
       result = rCMB*(*Dep::T_ncdm_SM);
     }
 
-    void calculate_eta0(double &result)
+    void eta0_LCDM(double &result)
     {
-      using namespace Pipes::calculate_eta0;
+      using namespace Pipes::eta0_LCDM;
 
       double ngamma, nb;
       ngamma = 16*pi*zeta3*pow(*Param["T_cmb"]*_kB_eV_over_K_/_hc_eVcm_,3); // photon number density today
@@ -1336,6 +1336,13 @@ namespace Gambit
 
       result =  nb/ngamma;
       logger() << "Baryon to photon ratio (eta) today computed to be " << result << EOM;
+    }
+
+    void etaBBN_SM(double& result)
+    {
+      using namespace Pipes::etaBBN_SM;
+
+      result = *Dep::eta0;
     }
 
     void compute_Omega0_m(double &result)
@@ -1457,17 +1464,16 @@ namespace Gambit
         }
 
         //If check is passed, set inputs.
-        result["eta0"] = NP_params.at("eta_BBN");    // eta AFTER BBN (variable during)
         result["Nnu"]=3.046*pow(NP_params.at("r_BBN"),4); // contribution from SM neutrinos
         result["dNnu"]=dNurBBN;    // dNnu: within AlterBBN scenarios in which the sum Nnu+dNnu is the same are identical
       }
       else
       {
-        result["eta0"] = *Dep::eta0;    // eta AFTER BBN equal to eta today calculated from omgea_b
         result["Nnu"]=3.046; // contribution from SM neutrinos
         result["dNnu"]=0.;    // no extra ur species in standard LCDM model
       }
-
+      result["eta0"] = *Dep::etaBBN;
+  
       result["failsafe"] = runOptions->getValueOrDef<double>(3,"failsafe");
       result["err"] = runOptions->getValueOrDef<double>(3,"err");
 
