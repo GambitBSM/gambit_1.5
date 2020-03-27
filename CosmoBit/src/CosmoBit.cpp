@@ -856,13 +856,14 @@ namespace Gambit
         // MultiModeCode uses log10 of both parameters below
         result.vparams.push_back(log10(*Param["Lambda"]));
         result.vparams.push_back(log10(*Param["f_phi"]));
-        result.potential_choice = 2; // V(phi) = Lambda^4 [1 + cos(phi/f)]
+        result.potential_choice = 2; // V(phi) = Lambda^4 [ 1 + cos(phi/f) ]
         result.vparam_rows = 2;
       }
       else if (ModelInUse("Inflation_InstReh_1Starobinsky"))
       {
-        result.vparams.push_back(*Param["Lambda"]);
-        result.potential_choice = 19; // V(phi) = ...
+        double lsquared = (*Param["Lambda"])*(*Param["Lambda"]);
+        result.vparams.push_back(lsquared*lsquared); // MultiModeCode uses the fourth power of Lambda as a parameter
+        result.potential_choice = 19; // V(phi) = Lambda^4 [ 1 - exp(-sqrt(2/3) phi) ]^2
         result.vparam_rows = 1;
       }
 
@@ -1473,7 +1474,7 @@ namespace Gambit
         result["dNnu"]=0.;    // no extra ur species in standard LCDM model
       }
       result["eta0"] = *Dep::etaBBN;
-  
+
       result["failsafe"] = runOptions->getValueOrDef<double>(3,"failsafe");
       result["err"] = runOptions->getValueOrDef<double>(3,"err");
 
