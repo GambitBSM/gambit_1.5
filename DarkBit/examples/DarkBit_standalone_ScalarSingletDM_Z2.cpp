@@ -100,9 +100,9 @@ int main()
 
     if (not Backends::backendInfo().works["DarkSUSY5.1.3"]) backend_error().raise(LOCAL_INFO, "DarkSUSY 5.1.3 is missing!");
     if (not Backends::backendInfo().works["MicrOmegas_ScalarSingletDM_Z23.6.9.2"]) backend_error().raise(LOCAL_INFO, "MicrOmegas 3.6.9.2 for ScalarSingletDM_Z2 is missing!");
-    if (not Backends::backendInfo().works["gamLike1.0.0"]) backend_error().raise(LOCAL_INFO, "gamLike 1.0.0 is missing!");
+    if (not Backends::backendInfo().works["gamLike1.0.1"]) backend_error().raise(LOCAL_INFO, "gamLike 1.0.1 is missing!");
     if (not Backends::backendInfo().works["DDCalc2.0.0"]) backend_error().raise(LOCAL_INFO, "DDCalc 2.0.0 is missing!");
-    if (not Backends::backendInfo().works["nulike1.0.7"]) backend_error().raise(LOCAL_INFO, "nulike 1.0.7 is missing!");
+    if (not Backends::backendInfo().works["nulike1.0.8"]) backend_error().raise(LOCAL_INFO, "nulike 1.0.8 is missing!");
 
 
     // ---- Initialize models ----
@@ -185,11 +185,11 @@ int main()
     // ---- Initialize backends ----
 
     // Initialize nulike backend
-    Backends::nulike_1_0_7::Functown::nulike_bounds.setStatus(2);
-    nulike_1_0_7_init.reset_and_calculate();
+    Backends::nulike_1_0_8::Functown::nulike_bounds.setStatus(2);
+    nulike_1_0_8_init.reset_and_calculate();
 
     // Initialize gamLike backend
-    gamLike_1_0_0_init.reset_and_calculate();
+    gamLike_1_0_1_init.reset_and_calculate();
 
     // Initialize MicrOmegas backend (specific for ScalarSingletDM_Z2)
     MicrOmegas_ScalarSingletDM_Z2_3_6_9_2_init.notifyOfModel("ScalarSingletDM_Z2");
