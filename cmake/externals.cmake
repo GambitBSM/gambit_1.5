@@ -128,10 +128,30 @@ endmacro()
 
 # Function to check whether or not a given scanner or backend has been ditched
 function(check_ditch_status name version dir)
-  # Check first for optional argument for Mathematica backends
-  if ((ARGN STREQUAL "Mathematica" OR ARGN STREQUAL "mathematica") AND NOT HAVE_MATHEMATICA)
-    set (itch "${itch}" "${name}_${version}")
-  endif()
+  # Check first for optional argument
+  foreach(arg0 ${ARGN})
+    string(TOLOWER ${arg0} arg)
+    if ((arg STREQUAL "mathematica") AND NOT HAVE_MATHEMATICA)
+      set (itch "${itch}" "${name}_${version};")
+    elseif ((arg STREQUAL "python") AND NOT HAVE_PYBIND11)
+      set (itch "${itch}" "${name}_${version};")
+    elseif ((arg STREQUAL "python2") AND (NOT PYTHON_VERSION_MAJOR EQUAL 2 OR NOT HAVE_PYBIND11))
+      set (itch "${itch}" "${name}_${version};")
+    elseif ((arg STREQUAL "python3") AND (NOT PYTHON_VERSION_MAJOR EQUAL 3 OR NOT HAVE_PYBIND11))
+      set (itch "${itch}" "${name}_${version};")
+    else()
+      # Assuming all python modules are lower cased, as it is the convention
+      string(REGEX REPLACE "py_" "" module ${arg})
+      if(NOT ${module} STREQUAL ${arg})
+        if(NOT DEFINED PY_${module}_FOUND)
+          find_python_module(${module})
+        endif()
+        if(NOT PY_${module}_FOUND)
+          set(itch "${itch}" "${name}_${version};")
+        endif()
+      endif()
+    endif()
+  endforeach()
   foreach(ditch_command ${itch})
     execute_process(COMMAND ${PYTHON_EXECUTABLE} -c "print(\"${name}_${version}\".startswith(\"${ditch_command}\"))"
                     WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
