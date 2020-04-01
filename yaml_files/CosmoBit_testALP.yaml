@@ -191,6 +191,9 @@ Rules:
       do_rejection: true
       reject_tau_bigger_than: 1e17
 
+  - capability: etaBBN
+    function: eta_BBN
+    module: etaBBN_rBBN_rCMB_dNurBBN_dNurCMB
 
 #======== Logging setup ========
 Logger:

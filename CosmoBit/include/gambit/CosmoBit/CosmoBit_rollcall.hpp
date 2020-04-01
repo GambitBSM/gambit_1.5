@@ -773,7 +773,7 @@ START_MODULE
   #define CAPABILITY eta0
     START_CAPABILITY
 
-    // Calcualte eta0 (today) from omega_b and T_cmb
+    // Calculate eta0 (today) from omega_b and T_cmb
     #define FUNCTION eta0_LCDM
       START_FUNCTION(double)
       ALLOW_MODELS(LCDM, LCDM_theta)

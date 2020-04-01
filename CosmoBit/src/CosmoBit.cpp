@@ -1478,8 +1478,8 @@ namespace Gambit
       result["failsafe"] = runOptions->getValueOrDef<double>(3,"failsafe");
       result["err"] = runOptions->getValueOrDef<double>(3,"err");
 
-      logger() << "Set AlterBBN with parameters eta = " << result["eta0"] << ", Nnu = " << result["Nnu"] << ", dNnu = " << result["dNnu"] << EOM;
-      logger() << "     and error params: failsafe = " << result["failsafe"] << ", err = " << result["err"] << EOM;
+      logger() << "Set AlterBBN with parameters eta = " << result["eta0"] << ", Nnu = " << result["Nnu"] << ", dNnu = " << result["dNnu"];
+      logger() << " and error params: failsafe = " << result["failsafe"] << ", err = " << result["err"] << EOM;
     }
 
 
