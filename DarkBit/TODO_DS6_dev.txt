@@ -15,8 +15,6 @@ TODO
 
 * [Jonathan] Silveira-Zee standalone + yaml file
 
-* [Anders] CMSSM.yaml
-
 * update to 6.2.2
    - [Torsten] grep FIXME in MSSM frontend! (also in DarkSUSY.hpp)
 
@@ -31,6 +29,8 @@ TODO
 --------
 [done]
 -------
+
+[*] CMSSM.yaml
 
 [*] neutrinos completely wrong !?
 
