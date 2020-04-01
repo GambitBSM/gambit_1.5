@@ -110,10 +110,9 @@ START_MODULE
       BACKEND_REQ(dshmisodf,(be_req_tag),DS_HMISODF)
       BACKEND_REQ(dshmframevelcom,(be_req_tag),DS_HMFRAMEVELCOM)
       BACKEND_REQ(dshmnoclue,(be_req_tag),DS_HMNOCLUE)
-      BACKEND_OPTION((DarkSUSY_MSSM, 6.1.1, 6.2.2), (be_req_tag))
-      BACKEND_OPTION((DarkSUSY_generic_wimp, 6.1.1, 6.2.2), (be_req_tag))
-      BACKEND_OPTION((DarkSUSY_silveira_zee, 6.1.1, 6.2.2), (be_req_tag))
-      FORCE_SAME_BACKEND(be_req_tag)  // Shouldn't matter, but let's make sure we get all the BACKEND_REQs from the same DS6 backend library
+      BACKEND_OPTION((DarkSUSY_MSSM, 6.1.1, 6.2.2), (be_req_tag))  // Only DS6
+      BACKEND_OPTION((DarkSUSY_generic_wimp, 6.1.1, 6.2.2), (be_req_tag))  // Only DS6
+      BACKEND_OPTION((DarkSUSY_silveira_zee, 6.1.1, 6.2.2), (be_req_tag))  // Only DS6
     #undef FUNCTION
   #undef CAPABILITY
 
@@ -1311,7 +1310,7 @@ START_MODULE
   START_CAPABILITY
     #define FUNCTION SimYieldTable_DarkSUSY
     START_FUNCTION(SimYieldTable)
-  BACKEND_REQ(dsanyield_sim, (), double, (double&,double&,int&,char*,int&,int&,int&)) 
+    BACKEND_REQ(dsanyield_sim, (), double, (double&,double&,int&,char*,int&,int&,int&)) 
     #undef FUNCTION
     #define FUNCTION SimYieldTable_DS5 // DS5 only
     START_FUNCTION(SimYieldTable)

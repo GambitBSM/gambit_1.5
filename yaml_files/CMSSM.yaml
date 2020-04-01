@@ -66,8 +66,9 @@ Priors:
 
 Printer:
 
-  printer: hdf5
+  # printer: cout
 
+  printer: hdf5
   options:
     output_file: "CMSSM.hdf5"
     group: "/CMSSM"
@@ -83,6 +84,13 @@ Scanner:
   use_scanner: de
 
   scanners:
+
+    # Useful for testing
+    random: 
+      plugin: random 
+      like:  LogLike 
+      point_number: 1 
+      output_file: output 
 
     multinest:
       plugin: multinest
@@ -168,7 +176,7 @@ ObsLikes:
     - capability: lnL_W_mass
       purpose:    LogLike
 
-    #- capability: lnL_sinW2_eff
+    # - capability: lnL_sinW2_eff
     #  purpose:    LogLike
 
     #- capability: lnL_deltarho
@@ -301,9 +309,16 @@ Rules:
   #- options:
   #    drop_SLHA_file: true
 
-  # Choose to use DarkSUSY rather than Capt'n General for calculating the capture rate of DM in the Sun
+  # Choose to use DarkSUSY 6 rather than Capt'n General for calculating the capture rate of DM in the Sun
   - capability: capture_rate_Sun
     function: capture_rate_Sun_const_xsec
+
+  # If you have multiple versions of DarkSUSY installed, you can pick which one to provide 
+  # the backend requirements to the function nuyield_from_DS
+  # - capability: nuyield_ptr
+  #   function: nuyield_from_DS
+  #   backends:
+  #     - {backend: DarkSUSY_MSSM, version: 6.2.2}
 
   # Globally permit maximal mixing between gauge and family eigenstates
   - options:
@@ -336,7 +351,7 @@ Rules:
 
   # Use DarkSUSY, MicrOmegas or the DarkBit native calculator for the relic density?
   - capability: RD_oh2
-    function: RD_oh2_general
+    function: RD_oh2_DS_general   # DarkBit native RD calculator using the Boltzmann solver from DarkSUSY 6
     #function: RD_oh2_DarkSUSY
     #function: RD_oh2_MicrOmegas
     options:
@@ -346,6 +361,24 @@ Rules:
       omtype: 1
       # used by RD_oh2_MicrOmegas only
       Beps: 1e-5
+
+  # Choose to use the function RD_eff_annrate_DS_MSSM rather than RD_eff_annrate_from_ProcessCatalog
+  - capability: RD_eff_annrate
+    function: RD_eff_annrate_DS_MSSM
+  # ...and use the function RD_annrate_DSprep_MSSM_func to supply the dependency RD_eff_annrate_DSprep_MSSM 
+  - capability: RD_eff_annrate_DSprep_MSSM
+    function: RD_annrate_DSprep_MSSM_func
+  # ...and get the dependency RD_spectrum from RD_spectrum_MSSM
+  - capability: RD_spectrum
+    function: RD_spectrum_MSSM
+
+  # Choose module function to provide the TH_ProcessCatalog
+  - capability: TH_ProcessCatalog
+    function: TH_ProcessCatalog_DS_MSSM   # For DarkSUSY 6
+
+  # Choose between the functions sigmav_late_universe and sigmav_late_universe_MicrOmegas
+  - capability: sigmav
+    function: sigmav_late_universe
 
   # Choose to use detailed Fermi Pass 8 dwarf likelihoood from gamlike
   - capability: lnL_FermiLATdwarfs
@@ -359,7 +392,7 @@ Rules:
 
   # Use DarkSUSY or MicrOmegas for calculating direct detection couplings
   - capability: DD_couplings
-    function: DD_couplings_DarkSUSY
+    function: DD_couplings_DarkSUSY_MSSM
     #function: DD_couplings_MicrOmegas
 
   # Choose to get decays from DecayBit proper, not from an SLHA file.
@@ -551,10 +584,9 @@ Rules:
           - TauDecays:mode = 0
           - TimeShower:pTmin = 2
 
-  # Choose to get cross-sections from the Monte Carlo
+  # Choose to get collider cross-sections from the event generator (Pythia)
   - capability: CrossSection
     function: getMCxsec
-    module: ColliderBit
 
   # Choose ATLAS detector simulation and options.
   - capability: ATLASDetectorSim
@@ -599,10 +631,16 @@ KeyValues:
   dependency_resolution:
     prefer_model_specific_functions: true
 
+  rng:
+    generator: ranlux48
+    seed: -1
+
   likelihood:
     model_invalid_for_lnlike_below: -5e5
     model_invalid_for_lnlike_below_alt: -1e5
 
   default_output_path: "runs/CMSSM/"
 
-  debug: true
+  debug: false
+
+
