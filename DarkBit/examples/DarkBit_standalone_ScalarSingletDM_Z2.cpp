@@ -13,6 +13,8 @@
 ///  \date 2016 Feb
 ///  \author Sebastian Wild
 ///  \date 2016 Aug
+///  \author Jonathan Cornell
+///  \date 2016, 2020
 ///
 ///  *********************************************
 
@@ -99,10 +101,11 @@ int main()
     // ---- Check that required backends are present ----
 
     if (not Backends::backendInfo().works["DarkSUSY5.1.3"]) backend_error().raise(LOCAL_INFO, "DarkSUSY 5.1.3 is missing!");
+    if (not Backends::backendInfo().works["DarkSUSY_generic_wimp6.2.2"]) backend_error().raise(LOCAL_INFO, "DarkSUSY 6.2.2 for a generic WIMP is missing!");
     if (not Backends::backendInfo().works["MicrOmegas_ScalarSingletDM_Z23.6.9.2"]) backend_error().raise(LOCAL_INFO, "MicrOmegas 3.6.9.2 for ScalarSingletDM_Z2 is missing!");
-    if (not Backends::backendInfo().works["gamLike1.0.0"]) backend_error().raise(LOCAL_INFO, "gamLike 1.0.0 is missing!");
+    if (not Backends::backendInfo().works["gamLike1.0.1"]) backend_error().raise(LOCAL_INFO, "gamLike 1.0.1 is missing!");
     if (not Backends::backendInfo().works["DDCalc2.0.0"]) backend_error().raise(LOCAL_INFO, "DDCalc 2.0.0 is missing!");
-    if (not Backends::backendInfo().works["nulike1.0.7"]) backend_error().raise(LOCAL_INFO, "nulike 1.0.7 is missing!");
+    if (not Backends::backendInfo().works["nulike1.0.8"]) backend_error().raise(LOCAL_INFO, "nulike 1.0.8 is missing!");
 
 
     // ---- Initialize models ----
@@ -185,11 +188,11 @@ int main()
     // ---- Initialize backends ----
 
     // Initialize nulike backend
-    Backends::nulike_1_0_7::Functown::nulike_bounds.setStatus(2);
-    nulike_1_0_7_init.reset_and_calculate();
+    Backends::nulike_1_0_8::Functown::nulike_bounds.setStatus(2);
+    nulike_1_0_8_init.reset_and_calculate();
 
     // Initialize gamLike backend
-    gamLike_1_0_0_init.reset_and_calculate();
+    gamLike_1_0_1_init.reset_and_calculate();
 
     // Initialize MicrOmegas backend (specific for ScalarSingletDM_Z2)
     MicrOmegas_ScalarSingletDM_Z2_3_6_9_2_init.notifyOfModel("ScalarSingletDM_Z2");
@@ -205,14 +208,15 @@ int main()
 
     // Initialize DarkSUSY backend
     DarkSUSY_5_1_3_init.reset_and_calculate();
+    DarkSUSY_generic_wimp_6_2_2_init.reset_and_calculate();
 
     // Initialize DarkSUSY Local Halo Model
     DarkSUSY_PointInit_LocalHalo_func.resolveDependency(&ExtractLocalMaxwellianHalo);
     DarkSUSY_PointInit_LocalHalo_func.resolveDependency(&RD_fraction_one);
-    DarkSUSY_PointInit_LocalHalo_func.resolveBackendReq(&Backends::DarkSUSY_5_1_3::Functown::dshmcom);
-    DarkSUSY_PointInit_LocalHalo_func.resolveBackendReq(&Backends::DarkSUSY_5_1_3::Functown::dshmisodf);
-    DarkSUSY_PointInit_LocalHalo_func.resolveBackendReq(&Backends::DarkSUSY_5_1_3::Functown::dshmframevelcom);
-    DarkSUSY_PointInit_LocalHalo_func.resolveBackendReq(&Backends::DarkSUSY_5_1_3::Functown::dshmnoclue);
+    DarkSUSY_PointInit_LocalHalo_func.resolveBackendReq(&Backends::DarkSUSY_generic_wimp_6_2_2::Functown::dshmcom);
+    DarkSUSY_PointInit_LocalHalo_func.resolveBackendReq(&Backends::DarkSUSY_generic_wimp_6_2_2::Functown::dshmisodf);
+    DarkSUSY_PointInit_LocalHalo_func.resolveBackendReq(&Backends::DarkSUSY_generic_wimp_6_2_2::Functown::dshmframevelcom);
+    DarkSUSY_PointInit_LocalHalo_func.resolveBackendReq(&Backends::DarkSUSY_generic_wimp_6_2_2::Functown::dshmnoclue);
     DarkSUSY_PointInit_LocalHalo_func.reset_and_calculate();
 
     // ---- Relic density ----
@@ -239,33 +243,23 @@ int main()
     RD_spectrum_ordered_func.resolveDependency(&RD_spectrum_from_ProcessCatalog);
     RD_spectrum_ordered_func.reset_and_calculate();
 
-    RD_oh2_DS5_general.resolveDependency(&RD_spectrum_ordered_func);
-    RD_oh2_DS5_general.resolveDependency(&RD_eff_annrate_from_ProcessCatalog);
-    RD_oh2_DS5_general.resolveBackendReq(&Backends::DarkSUSY_5_1_3::Functown::dsrdthlim);
-    RD_oh2_DS5_general.resolveBackendReq(&Backends::DarkSUSY_5_1_3::Functown::dsrdtab);
-    RD_oh2_DS5_general.resolveBackendReq(&Backends::DarkSUSY_5_1_3::Functown::dsrdeqn);
-    RD_oh2_DS5_general.resolveBackendReq(&Backends::DarkSUSY_5_1_3::Functown::dsrdwintp);
-    RD_oh2_DS5_general.resolveBackendReq(&Backends::DarkSUSY_5_1_3::Functown::DSparticle_code);
-    RD_oh2_DS5_general.resolveBackendReq(&Backends::DarkSUSY_5_1_3::Functown::widths);
-    RD_oh2_DS5_general.resolveBackendReq(&Backends::DarkSUSY_5_1_3::Functown::rdmgev);
-    RD_oh2_DS5_general.resolveBackendReq(&Backends::DarkSUSY_5_1_3::Functown::rdpth);
-    RD_oh2_DS5_general.resolveBackendReq(&Backends::DarkSUSY_5_1_3::Functown::rdpars);
-    RD_oh2_DS5_general.resolveBackendReq(&Backends::DarkSUSY_5_1_3::Functown::rdswitch);
-    RD_oh2_DS5_general.resolveBackendReq(&Backends::DarkSUSY_5_1_3::Functown::rdlun);
-    RD_oh2_DS5_general.resolveBackendReq(&Backends::DarkSUSY_5_1_3::Functown::rdpadd);
-    RD_oh2_DS5_general.resolveBackendReq(&Backends::DarkSUSY_5_1_3::Functown::rddof);
-    RD_oh2_DS5_general.resolveBackendReq(&Backends::DarkSUSY_5_1_3::Functown::rderrors);
-    RD_oh2_DS5_general.resolveBackendReq(&Backends::DarkSUSY_5_1_3::Functown::rdtime);
-    RD_oh2_DS5_general.setOption<int>("fast", 1);  // 0: normal; 1: fast; 2: dirty
-    RD_oh2_DS5_general.reset_and_calculate();
+    RD_oh2_DS_general.resolveDependency(&RD_spectrum_ordered_func);
+    RD_oh2_DS_general.resolveDependency(&RD_eff_annrate_from_ProcessCatalog);
+    RD_oh2_DS_general.resolveBackendReq(&Backends::DarkSUSY_generic_wimp_6_2_2::Functown::rdpars);
+    RD_oh2_DS_general.resolveBackendReq(&Backends::DarkSUSY_generic_wimp_6_2_2::Functown::rdtime);
+    RD_oh2_DS_general.resolveBackendReq(&Backends::DarkSUSY_generic_wimp_6_2_2::Functown::dsrdcom);
+    RD_oh2_DS_general.resolveBackendReq(&Backends::DarkSUSY_generic_wimp_6_2_2::Functown::dsrdstart);
+    RD_oh2_DS_general.resolveBackendReq(&Backends::DarkSUSY_generic_wimp_6_2_2::Functown::dsrdens);
+    RD_oh2_DS_general.setOption<int>("fast", 1);  // 0: normal; 1: fast; 2: dirty
+    RD_oh2_DS_general.reset_and_calculate();
 
     // Retrieve and print GAMBIT result
-    logger() << "Omega h^2 from GAMBIT: " << RD_oh2_DS5_general(0) << LogTags::info << EOM;
+    logger() << "Omega h^2 from GAMBIT: " << RD_oh2_DS_general(0) << LogTags::info << EOM;
 
     // Calculate WMAP likelihoods
     // Uncomment one of the following two line to choose which Omega h^2 value to use
     //lnL_oh2_Simple.resolveDependency(&RD_oh2_MicrOmegas);
-    lnL_oh2_Simple.resolveDependency(&RD_oh2_DS5_general);
+    lnL_oh2_Simple.resolveDependency(&RD_oh2_DS_general);
     lnL_oh2_Simple.reset_and_calculate();
 
     logger() << "Relic density lnL: " << lnL_oh2_Simple((0)) << LogTags::info << EOM;
@@ -452,17 +446,17 @@ int main()
     IC79WH_full.resolveDependency(&mwimp_generic);
     IC79WH_full.resolveDependency(&annihilation_rate_Sun);
     IC79WH_full.resolveDependency(&nuyield_from_DS);
-    IC79WH_full.resolveBackendReq(&Backends::nulike_1_0_7::Functown::nulike_bounds);
+    IC79WH_full.resolveBackendReq(&Backends::nulike_1_0_8::Functown::nulike_bounds);
     IC79WH_full.reset_and_calculate();
     IC79WL_full.resolveDependency(&mwimp_generic);
     IC79WL_full.resolveDependency(&annihilation_rate_Sun);
     IC79WL_full.resolveDependency(&nuyield_from_DS);
-    IC79WL_full.resolveBackendReq(&Backends::nulike_1_0_7::Functown::nulike_bounds);
+    IC79WL_full.resolveBackendReq(&Backends::nulike_1_0_8::Functown::nulike_bounds);
     IC79WL_full.reset_and_calculate();
     IC79SL_full.resolveDependency(&mwimp_generic);
     IC79SL_full.resolveDependency(&annihilation_rate_Sun);
     IC79SL_full.resolveDependency(&nuyield_from_DS);
-    IC79SL_full.resolveBackendReq(&Backends::nulike_1_0_7::Functown::nulike_bounds);
+    IC79SL_full.resolveBackendReq(&Backends::nulike_1_0_8::Functown::nulike_bounds);
     IC79SL_full.reset_and_calculate();
 
     // Calculate IceCube likelihood
