@@ -39,7 +39,6 @@
 
 #include "gambit/Elements/safety_bucket.hpp"
 #include "gambit/Elements/module_macros_common.hpp"
-#include "gambit/Elements/terminator.hpp"
 #include "gambit/Utils/exceptions.hpp"
 #include "gambit/Utils/util_macros.hpp"
 #include "gambit/Models/safe_param_map.hpp"

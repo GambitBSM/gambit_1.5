@@ -63,6 +63,7 @@
 #include "gambit/Elements/module_macros_common.hpp"
 #include "gambit/Elements/safety_bucket.hpp"
 #include "gambit/Elements/ini_functions.hpp"
+#include "gambit/Elements/terminator.hpp"
 #include "gambit/Utils/static_members.hpp"
 #include "gambit/Utils/exceptions.hpp"
 #include "gambit/Backends/backend_singleton.hpp"
