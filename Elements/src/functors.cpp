@@ -1003,31 +1003,51 @@ namespace Gambit
     }
 
     /// Add and activate unconditional dependencies.
-    void module_functor_common::setDependency(str dep, str type, void(*resolver)(functor*, module_functor_common*), str purpose)
+    void module_functor_common::setDependency(str dep, str dep_type, void(*resolver)(functor*, module_functor_common*), str purpose)
     {
-      sspair key (dep, Utils::fix_type(type));
+      sspair key (dep, Utils::fix_type(dep_type));
       myDependencies.insert(key);
       dependency_map[key] = resolver;
       this->myPurpose = purpose; // only relevant for output nodes
     }
 
+    /// Add conditional dependency-type pairs in advance of later conditions.
+    void module_functor_common::setConditionalDependency(str dep, str dep_type)
+    {
+      myConditionalDependencies[dep] = dep_type;
+    }
+
+    /// Retrieve full conditional dependency-type pair from conditional dependency only
+    sspair module_functor_common::retrieve_conditional_dep_type_pair(str dep)
+    {
+      if (myConditionalDependencies.find(dep) == myConditionalDependencies.end())
+      {
+        str errmsg = "Problem whilst attempting to set conditional dependency:";
+        errmsg +=  "\nThe conditional dependency " + dep + " appears not to have"
+                   "\nbeen fully declared; START_CONDITIONAL_DEPENDENCY() is missing."
+                   "\nThis is " + this->name() + " in " + this->origin() + ".";
+        utils_error().raise(LOCAL_INFO,errmsg);
+      }
+      return sspair(dep, myConditionalDependencies.at(dep));
+    }
+
     /// Add a backend conditional dependency for multiple backend versions
     void module_functor_common::setBackendConditionalDependency
-     (str req, str be, str ver, str dep, str dep_type, void(*resolver)(functor*, module_functor_common*))
+     (str req, str be, str ver, str dep, void(*resolver)(functor*, module_functor_common*))
     {
       // Split the version string and send each version to be registered
       std::vector<str> versions = Utils::delimiterSplit(ver, ",");
       for (std::vector<str>::iterator it = versions.begin() ; it != versions.end(); ++it)
       {
-        setBackendConditionalDependencySingular(req, be, *it, dep, dep_type, resolver);
+        setBackendConditionalDependencySingular(req, be, *it, dep, resolver);
       }
     }
 
     /// Add a backend conditional dependency for a single backend version
     void module_functor_common::setBackendConditionalDependencySingular
-     (str req, str be, str ver, str dep, str dep_type, void(*resolver)(functor*, module_functor_common*))
+     (str req, str be, str ver, str dep, void(*resolver)(functor*, module_functor_common*))
     {
-      sspair key (dep, Utils::fix_type(dep_type));
+      sspair key = retrieve_conditional_dep_type_pair(dep);
       std::vector<str> quad;
       if (backendreq_types.find(req) != backendreq_types.end())
       {
@@ -1055,21 +1075,21 @@ namespace Gambit
 
     /// Add a model conditional dependency for multiple models
     void module_functor_common::setModelConditionalDependency
-     (str model, str dep, str dep_type, void(*resolver)(functor*, module_functor_common*))
+     (str model, str dep, void(*resolver)(functor*, module_functor_common*))
     {
       // Split the model string and send each model to be registered
       std::vector<str> models = Utils::delimiterSplit(model, ",");
       for (std::vector<str>::iterator it = models.begin() ; it != models.end(); ++it)
       {
-        setModelConditionalDependencySingular(*it, dep, dep_type, resolver);
+        setModelConditionalDependencySingular(*it, dep, resolver);
       }
     }
 
     /// Add a model conditional dependency for a single model
     void module_functor_common::setModelConditionalDependencySingular
-     (str model, str dep, str dep_type, void(*resolver)(functor*, module_functor_common*))
+     (str model, str dep, void(*resolver)(functor*, module_functor_common*))
     {
-      sspair key (dep, Utils::fix_type(dep_type));
+      sspair key = retrieve_conditional_dep_type_pair(dep);
       if (myModelConditionalDependencies.find(model) == myModelConditionalDependencies.end())
       {
         std::set<sspair> newvec;

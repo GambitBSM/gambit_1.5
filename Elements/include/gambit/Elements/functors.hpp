@@ -499,17 +499,20 @@ namespace Gambit
       /// Add and activate unconditional dependencies.
       void setDependency(str, str, void(*)(functor*, module_functor_common*), str purpose= "");
 
+      /// Add conditional dependency-type pairs in advance of later conditions.
+      void setConditionalDependency(str, str);
+
       /// Add a backend conditional dependency for multiple backend versions
-      void setBackendConditionalDependency(str, str, str, str, str, void(*)(functor*, module_functor_common*));
+      void setBackendConditionalDependency(str, str, str, str, void(*)(functor*, module_functor_common*));
 
       /// Add a backend conditional dependency for a single backend version
-      void setBackendConditionalDependencySingular(str, str, str, str, str, void(*)(functor*, module_functor_common*));
+      void setBackendConditionalDependencySingular(str, str, str, str, void(*)(functor*, module_functor_common*));
 
       /// Add a model conditional dependency for multiple models
-      void setModelConditionalDependency(str, str, str, void(*)(functor*, module_functor_common*));
+      void setModelConditionalDependency(str, str, void(*)(functor*, module_functor_common*));
 
       /// Add a model conditional dependency for a single model
-      void setModelConditionalDependencySingular(str, str, str, void(*)(functor*, module_functor_common*));
+      void setModelConditionalDependencySingular(str, str, void(*)(functor*, module_functor_common*));
 
       /// Add a rule for activating backend requirements according to the model being scanned.
       void makeBackendRuleForModel(str, str);
@@ -581,6 +584,9 @@ namespace Gambit
       /// Construct the list of known models only if it doesn't yet exist
       void fill_activeModelFlags();
 
+      /// Retrieve full conditional dependency-type pair from conditional dependency only
+      sspair retrieve_conditional_dep_type_pair(str);
+
       /// Beginning and end timing points
       std::chrono::time_point<std::chrono::system_clock> *start, *end;
 
@@ -650,6 +656,9 @@ namespace Gambit
 
       /// Vector of dependency-type string pairs
       std::set<sspair> myDependencies;
+
+      /// Map of conditional dependencies to their types
+      std::map<str,str> myConditionalDependencies;
 
       /// Map from (vector with 4 strings: backend req, type, backend, version) to (set of {conditional dependency-type} pairs)
       std::map< std::vector<str>, std::set<sspair> > myBackendConditionalDependencies;

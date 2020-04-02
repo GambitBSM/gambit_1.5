@@ -79,11 +79,6 @@ int main()
     // Initialise the random number generator.
     Random::create_rng_engine("default");
 
-    // Print some basic diagnostics.
-    cout << endl << SpecBit::Accessors::name() << " found." << endl;
-    cout << DecayBit::Accessors::name() << " found." << endl;
-    cout << PrecisionBit::Accessors::name() << " found." << endl << endl;
-
     // Read in the model
     YAML::Node infile, SM_parameters, SUSY_parameters;
     bool model_is_GUT_scale;
