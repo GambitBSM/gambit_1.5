@@ -889,7 +889,7 @@
     {                                                                          \
       const int CAT_3(FUNCTION,_,BOOST_PP_SEQ_CAT(BOOST_PP_TUPLE_TO_SEQ((      \
        STRIP_PARENS(__VA_ARGS__))))) =                                         \
-       apply_rule(Functown::FUNCTION, #__VA_ARGS__);                           \
+       apply_backend_matching_rule(Functown::FUNCTION, #__VA_ARGS__);          \
     }                                                                          \
                                                                                \
     /* End Models namespace */                                                 \
@@ -968,7 +968,7 @@
       /* Register the backend conditional dependency with the functor */       \
       const int CAT_7(CONDITIONAL_DEPENDENCY,_for_,FUNCTION,_with_,BACKEND_REQ,\
        _provided_by_,BACKEND) = register_backend_conditional_dependency(       \
-       Functown::FUNCTOR, STRINGIFY(BACKEND_REQ), STRINGIFY(BACKEND),          \
+       Functown::FUNCTION, STRINGIFY(BACKEND_REQ), STRINGIFY(BACKEND),         \
        VERSTRING, STRINGIFY(CONDITIONAL_DEPENDENCY), &resolve_dependency       \
        <Gambit::Tags::CONDITIONAL_DEPENDENCY, Tags::FUNCTION>);                \
     }                                                                          \
