@@ -35,12 +35,12 @@
 # Require a minimum cmake version of 2.8.5
 cmake_minimum_required(VERSION 2.8.5 FATAL_ERROR)
 
-SET(CMAKE_BUILD_TYPE_STRING "Choose the type of build, options are: None Debug Release Release_03 RelWithDebInfo MinSizeRel.")
+SET(CMAKE_BUILD_TYPE_STRING "Choose the type of build, options are: None Debug Release Release_O3 RelWithDebInfo MinSizeRel.")
 if(NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
   SET(CMAKE_BUILD_TYPE None CACHE STRING "${CMAKE_BUILD_TYPE_STRING}" FORCE)
-elseif(CMAKE_BUILD_TYPE STREQUAL "Release_03")
+elseif(CMAKE_BUILD_TYPE STREQUAL "Release_O3")
   SET(CMAKE_BUILD_TYPE Release CACHE STRING "${CMAKE_BUILD_TYPE_STRING}" FORCE)
-  SET(FORCE_03 TRUE)
+  SET(FORCE_O3 TRUE)
 endif()
 message("${Yellow}-- Build type is set to ${CMAKE_BUILD_TYPE} ${ColourReset}")
 
