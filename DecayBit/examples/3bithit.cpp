@@ -80,8 +80,6 @@ int main()
     // Initialise the random number generator.
     Random::create_rng_engine("default");
 
-    cout << "here" << endl;
-
     // Read in the model
     YAML::Node infile, SM_parameters, SUSY_parameters;
     bool model_is_GUT_scale;
@@ -90,7 +88,6 @@ int main()
     model[false] = "MSSM20atQ";
     try
     {
-    cout << "here" << endl;
       infile = YAML::LoadFile(filename_in);
       if (infile["StandardModel_SLHA2"]) SM_parameters = infile["StandardModel_SLHA2"];
       else throw std::runtime_error("Block StandardModel_SLHA2 not found in "+filename_in+".  Quitting...");
@@ -109,8 +106,6 @@ int main()
       throw std::runtime_error("YAML error in "+filename_in+".\n(yaml-cpp error: "+std::string(e.what())+" )");
     }
     std::string SUSY_model = model[model_is_GUT_scale];
-
-    cout << "here" << endl;
 
     // Retrieve a raw pointer to the parameter set of each primary model to be scanned, for manually setting parameter values
     ModelParameters* SM_primpar = Models::StandardModel_SLHA2::Functown::primary_parameters.getcontentsPtr();
@@ -439,8 +434,9 @@ int main()
     all_decays.resolveDependency(&neutralino_3_decays);
     all_decays.resolveDependency(&neutralino_4_decays);
 
-    // Set some module function options here if you need to, e.g.
-    //all_decays.setOption<double>("blahblah", 0.1);
+    // Set some module function options
+    get_MSSM_spectrum_SPheno.setOption<double>("n_run", 30);
+    get_MSSM_spectrum_SPheno.setOption<double>("delta_mass", 1.0e-4);
 
     try
     {
