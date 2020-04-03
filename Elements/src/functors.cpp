@@ -383,13 +383,22 @@ namespace Gambit
       for (auto entry : subcaps)
       {
         str key = entry.first.as<std::string>();
-        cout << "About to add entry for key " << key << " in functor " << myName << endl;
         if (not mySubCaps.hasKey(key)) mySubCaps.setValue(key, entry.second);
-        else if (mySubCaps.getValue<YAML::Node>(key) != entry.second.as<YAML::Node>())
+        else
         {
-          utils_error().raise(LOCAL_INFO, "SubCap clash: the sub-capability " + key + ":\n"
-           "has been given different definitions in two or more functions that rely on the results of\n"
-           + myName + " in " + myOrigin + ".");
+          std::ostringstream ss1, ss2;
+          ss1 << mySubCaps.getValue<YAML::Node>(key);
+          ss2 << entry.second.as<YAML::Node>();
+          if (not (ss1.str() == ss2.str()))
+          {
+            std::ostringstream ss;
+            ss << "Duplicate sub_capability clash. " << endl
+               << "Your ObsLike section of the YAML file contains both " << endl
+               << key << ": " << ss1.str() << endl << "and" << endl << key << ": " << ss2.str() << endl
+               << "GAMBIT does not know which value to choose when trying to determine the sub-capabilities" << endl
+               << "served by " << myOrigin << "::" << myName << ", as both ObsLike entries depend on this function.";
+            utils_error().raise(LOCAL_INFO, ss.str());
+          }
         }
       }
     }
