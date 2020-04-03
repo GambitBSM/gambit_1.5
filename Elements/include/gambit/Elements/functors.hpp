@@ -274,6 +274,9 @@ namespace Gambit
       /// Return a safe pointer to the options that this functor is supposed to run with (e.g. from the ini file).
       safe_ptr<Options> getOptions();
 
+      /// Notify the functor about an instance of the options class that contains sub-capability information
+      void notifyOfSubCaps(const Options&);
+
       /// Set a sub-capability (subcap)for the functor directly (for use in standalone executables).
       template<typename TYPE>
       void setSubCap(const str& key, const TYPE val)
@@ -557,6 +560,9 @@ namespace Gambit
       /// Notify the functor that a certain model is being scanned, so that it can activate its dependencies and backend reqs accordingly.
       virtual void notifyOfModel(str model);
 
+      /// Notify the functor that another functor depends on it
+      virtual void notifyOfDependee (functor*);
+
       /// Retrieve the previously saved exception generated when this functor invalidated the current point in model space.
       virtual invalid_point_exception* retrieve_invalid_point_exception();
 
@@ -675,6 +681,10 @@ namespace Gambit
       /// Map from (dependency-type pairs) to (pointers to templated void functions
       /// that set dependency functor pointers)
       std::map<sspair, void(*)(functor*, module_functor_common*)> dependency_map;
+
+      /// Map from (dependency-type pairs) to pointers to functors used to resolve them
+      /// that set dependency functor pointers)
+      std::map<sspair, functor*> dependency_functor_map;
 
       /// Map from backend requirements to their required types
       std::map<str, str> backendreq_types;

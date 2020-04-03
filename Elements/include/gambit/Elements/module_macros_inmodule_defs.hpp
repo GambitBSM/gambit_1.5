@@ -19,7 +19,7 @@
 ///  \author Abram Krislock
 ///          (abram.krislock@fysik.su.se)
 ///  \date 2013 Jan, Feb
-//
+///
 ///  \author Christoph Weniger
 ///          (c.weniger@uva.nl)
 ///  \date 2013 Jan, Feb, 2014 Jan
@@ -31,7 +31,7 @@
 ///  \author Ben Farmer
 ///          (b.farmer@imperial.ac.uk)
 ///  \date 2015 Apr, 2019 Jul
-//
+///
 ///  *********************************************
 
 #ifndef __module_macros_inmodule_defs_hpp__

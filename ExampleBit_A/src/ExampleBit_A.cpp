@@ -104,7 +104,7 @@ namespace Gambit
 
     void test_sigma(double &result)
     {
-       result = 1.; //trivial test
+      result = 1.; //trivial test
     }
 
     void function_pointer_retriever( double(*&result)(int&) )
@@ -310,6 +310,17 @@ namespace Gambit
       using namespace Pipes::exampleCut;
       result = (int) *Dep::event;
       logger()<<"  Running exampleCut in iteration "<<*Loop::iteration<<endl;
+
+      cout << "exampleCut has the following dependees: " << endl;
+      for (auto x : *Downstream::dependees) { cout << "  " << x << endl; }
+
+      cout << "and the following subcaps: " << endl;
+      cout << "  " << Downstream::subcaps->getNames() << endl;
+
+      str s1 = (Downstream::neededFor("eventAccumulation") ? " " : " not ");
+      str s2 = (Downstream::neededFor("xsection") ? " " : " not ");
+      cout << "It is" << s1 << "needed for eventAccumulation." << endl;
+      cout << "It is" << s2 << "needed for xsection." << endl;
     }
 
     /// Adds an integral event count to a total number of accumulated events.
