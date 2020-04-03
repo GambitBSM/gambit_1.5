@@ -1668,7 +1668,7 @@ namespace Gambit
           masterGraph[fromVertex]->setStatus(2); // activate node
           resolveVertexBackend(fromVertex);
 
-          // Don't need options or subcaps during dry-run, so skip this (just to simplify terminal output)
+          // Don't need options during dry-run, so skip this (just to simplify terminal output)
           if(not boundCore->show_runorder)
           {
             if ( boundIniFile->getValueOrDef<bool>( false, "dependency_resolution", "use_old_routines") )
