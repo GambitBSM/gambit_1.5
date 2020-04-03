@@ -478,7 +478,7 @@ namespace Gambit
       }
 
       //write model-dependent info about coannihilating particles to DS common blocks
-      // Note: translation from PDG codes assumes for consistnecy context integer = 0 here
+      // Note: translation from PDG codes assumes for consistency context integer = 0 here
       // (as done in RD_spectrum_MSSM)
       int ContInt = 0;      
       DS_DSANCOANN mydsancoann;
