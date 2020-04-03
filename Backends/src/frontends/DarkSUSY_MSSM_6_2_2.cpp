@@ -735,7 +735,7 @@ BE_NAMESPACE
 
     // Block MINPAR we skip, it is not needed
 
-    // Block MSOFT ! TB FIXME: this comes later in DS -> problem ()?
+    // Block MSOFT (this comes later in DS, but this has no effect on DS calls)
     mssmpar->m1 = to<double>(mySLHA.at("MSOFT").at(1).at(1));
     mssmpar->m2 = to<double>(mySLHA.at("MSOFT").at(2).at(1));
     mssmpar->m3 = to<double>(mySLHA.at("MSOFT").at(3).at(1));
@@ -764,7 +764,7 @@ BE_NAMESPACE
     mssmpar->ma = pmasses->mass(DSparticle_code("A0"));
 
     // Now set up some defaults (part of it will be overwritten later)
-    // TB FIXME: do these require ckm params (only set later here, but not in ds)?
+    // (this does not require ckm matrices, which are set up earlier in DS)
     dssuconst_yukawa();
     dssuconst_higgs();
     
@@ -976,11 +976,9 @@ BE_NAMESPACE
     }
 
     // Do flavour reordering for SLHA2 compatibility
-    // TB FIXME. The call to dsorder_flavour and dsvertex needs to go AFTER
-    // the widhts are read. Move this later. It requires that we use
-    // a version of dsorder_flavour that also orders widths, dvs a version
-    // of DarkSUSY later than 6.1.1.
-    // THIS IS NOT DONE in 6.2.2 ???
+    // NB: This does *not* have to go after the widhts are read, as indicated by the comment
+    // in the DS 6.1.1 frontend, becasuse dsorder_flavour no longer actually orders the
+    // standard mass and width arrays (and instead provides new, 'ordered' particle codes).
     dsorder_flavour();
     // Set up SUSY vertices
     dsvertx();
