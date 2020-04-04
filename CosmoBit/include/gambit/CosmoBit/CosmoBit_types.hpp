@@ -31,6 +31,10 @@
 ///          (hoof@uni-goettingen.de)
 ///  \date 2020 Mar
 ///
+///  \author Pat Scott
+///          (pat.scott@uq.edu.au)
+///  \date 2020 Apr
+///
 ///  *********************************************
 
 
@@ -41,11 +45,9 @@
 #include "gambit/CosmoBit/CosmoBit_utils.hpp"
 #include "gambit/Backends/backend_types/MontePythonLike.hpp"
 #include <valarray>
-#include <stdint.h>  // save memory address as int
+#include <tuple>
 
 #include <pybind11/stl.h>
-#include <pybind11/stl_bind.h>
-#include <pybind11/functional.h>
 
 namespace Gambit
 {
@@ -53,64 +55,12 @@ namespace Gambit
   namespace CosmoBit
   {
 
-    /// helper to convert the memory address a double pointer points to
-    /// to an integer (-> uintptr_t, size of type depends on system & ensures
-    /// it is big enough to store memory addresses of the underlying setup)
-    /// (implemented to pass contents of arrays to CLASS)
-    uintptr_t memaddress_to_uint(double* ptr);
+    // Forward declaration of warnings and errors
+    error& CosmoBit_error();
+    warning& CosmoBit_warning();
 
     typedef std::map< std::string,std::valarray < double > > map_str_valarray_dbl;
-
-    /// type to store likelihood calculation results from MontePython
-    /// has two members: logLike_results & obs_results, both string to double map
-    /// mapping the MontePython experiment/likelihood name to the calculated LogLike
-    ///     - logLike_results:  contains results from all experiment names tagged with 'Likelihood',
-    ///         i.e. the likelihoods being added to total LogLike to drive scan
-    ///     - obs_results:  contains results from all experiment names tagged with 'Observable',
-    ///         i.e. the likelihoods NOT added to total LogLike to drive scan
-    class MPLike_result_container
-    {
-    public:
-
-        MPLike_result_container(){};
-
-        // add map entry to likelihood/observables map
-        void add_logLike(std::string experiment_name, double logLike) {logLike_results[experiment_name] = logLike;}
-        void add_obs(std::string experiment_name, double obs) {obs_results[experiment_name] = obs;}
-
-        // return likelihood/observable result mpas
-        map_str_dbl get_logLike_results () {return logLike_results;}
-        map_str_dbl get_obs_results     () {return obs_results;}
-
-    private:
-        map_str_dbl logLike_results;
-        map_str_dbl obs_results;
-
-    };
-
-    class MPLike_data_container
-    {
-    /* Class holing MPLIke data structure & map with initialised Likelihoods objects; this is
-        separated form the Classy_cosmo_container since it needs to be initialised as 'static const'
-        such that the initialisation and reading in of data only happens once.
-        This is essential since the parsing of the data at initialisation of a Likelihood object can take
-        much longer than the actual Likelihood calculation.
-        --
-        Memebers:
-        --
-        pybind11::object data : MPLike data structure
-        map_str_pyobj likelihoods : map likelihood name to initialised MPLike likelihood object
-    */
-    public:
-
-        MPLike_data_container();
-        MPLike_data_container(pybind11::object &data_in, map_str_pyobj likelihoods_in);
-
-        pybind11::object data;
-        map_str_pyobj likelihoods;
-
-    };
-
+    typedef std::tuple<pybind11::object, map_str_str, map_str_pyobj> MPLike_objects_container;
 
     /// Class to store all results from an AlterBBN run
     /// -> element abundances stored in BBN_nuc (length NNUC+1),
@@ -201,74 +151,6 @@ namespace Gambit
         double factor_T_evo;
         double factor_Tnu_evo;
         double factor_HT_evo;
-    };
-
-
-    // Forward declaration of warnings and errors
-    error& CosmoBit_error();
-    warning& CosmoBit_warning();
-
-/*
-    ----------  ClassyInput Methods ---------
-    In the following the methods of the Class 'ClassyInput' are implemented.
-    ClassyInput has the attribute 'input_dict' which is a python dictionary
-    containing the input parameters for CLASS
-
-*/
-    // Class that manages the input dictionary for classy
-    class Classy_input
-    {
-      public:
-
-        /// add all entries from extra_entries to input_dict, concatenates and returns all
-        /// keys that are contained in both dictionaries:
-        /// -> no keys in common: returns empty string ("")
-        /// -> else: returns sting containing all duplicated keys
-        /// need to check after use of this function if returned string was empty to avoid overwriting of
-        /// input values & inconsistencies.
-        std::string add_dict(pybind11::dict extra_entries);
-
-        void add_entry(str key, double value) {input_dict[key.c_str()]=std::to_string(value).c_str();};
-        void add_entry(str key, int    value) {input_dict[key.c_str()]=std::to_string(value).c_str();};
-        void add_entry(str key, str    value) {input_dict[key.c_str()]=value.c_str();};
-        void add_entry(str key, std::vector<double>& values)
-        {
-            // get pointers to arrays holding the information that needs
-            // to be passed on to class, convert to uintptr_t (type large enough
-            // to store memory address of the used system) and pass to class
-            //uintptr_t addr;
-            //addr = reinterpret_cast<uintptr_t>(&values[0]);
-            input_dict[key.c_str()] = memaddress_to_uint(&values[0]);
-
-        };
-        //void addEntry(str key, double* ptr)
-        //{
-        //    // get pointers to arrays holding the information that needs
-        //    // to be passed on to class, convert to uintptr_t (type large enough
-        //    // to store memory address of the used system) and pass to class
-        //    uintptr_t addr;
-        //    addr = reinterpret_cast<uintptr_t>(ptr);
-        //    input_dict[key.c_str()] = addr;
-        //};
-
-        bool has_key(str key){return input_dict.contains(key.c_str());};
-        //int addEntry(str key,std::ostringstream value){input_dict[key.c_str()]=value.c_str()};
-
-        // merge dictionaries with overwriting/combining rules that only
-        // apply for CLASS input dictionaries
-        void merge_input_dicts(pybind11::dict extra_dict);
-
-        // routine to print CLASS input values to logger
-        std::string print_entries_to_logger();
-
-        // clears all entries from input_dict
-        void clear(){input_dict.attr("clear")();};
-
-        // return input_dict
-        pybind11::dict get_input_dict(){return input_dict;};
-
-      private:
-        pybind11::dict input_dict;
     };
 
     /// Class containing the inputs used for inputs to MultiModeCode
