@@ -2234,7 +2234,7 @@ namespace Gambit
         std::vector<YAML::Node> empties;
         for (const auto& x : subcaps) if (x.second.IsNull()) empties.push_back(x.first);
         for (const auto& x : empties) subcaps[x] = "default";
-        experiments = subcaps.as<map_str_str>();
+        if (!subcaps.IsNull()) experiments = subcaps.as<map_str_str>();
 
         // Check that all the requested likelihoods can actually be provided by MP
         for (const auto& x : experiments)
