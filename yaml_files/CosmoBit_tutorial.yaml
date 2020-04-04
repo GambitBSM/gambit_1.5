@@ -232,19 +232,36 @@ ObsLikes:
   # Since the single MontePython likelihoods are not implemented in GAMBIT as capabilites
   # (and are more flexible -- you import them at runtime and don't need to know their name
   # at compile time) you just tell GAMBIT to include the likelihoods coming from MP here
-  # => specify which ones to use below in the Rules section
+  # => specify which ones to use below as subcapabilities
   # => this would e.g. contain LogLike(BAO)+LogLike(Pantheon)
   - purpose:      LogLike
     capability:   MP_Combined_LogLike
     module:       CosmoBit
     type:         double
+    # add likelihoods to be used for scan here & set path to the '<likelihood_name>.data' file containing
+    # the settings you want the likelihood to run with (e.g. path to data, which z-bins to use... ).
+    # Note that the path has to be relative to your GAMBIT directory.
+    # If you set it so "default" the default MontePython file 'likelihoods/<likelihood_name>/<likelihood_name>.data'
+    # will be used
+    sub_capabilities:
+      bao_smallz_2014: default #../montepython_public/montepython/likelihoods/bao_smallz_2014/bao_smallz_2014.data
+      Pantheon: default
+      #Planck_SZ: default
+      # should eventually be possible to choose any MP like, atm only bao, Pantheon, Planck_SZ (& kids after
+      # downloading data and when commenting out line 'parser_mp.existing_file(fname)', will include that into
+      # build step soon) safe to use;
+      # still need to write a proper patch for MPLike backend & test all Likes
 
   # A breakdown of each likelihood component in the above total lnL
   # (just to print the single contributions of the total sum)
   # => this would e.g. print LogLike(BAO) and LogLike(Pantheon)
+  # => In case the user wants to get a specific likelihood (e.g LogLike(hst))
+  #    but does not want to use it to drive the scan, it can added as a subcapability
   - purpose:      Observable
     capability:   MP_LogLikes
     type:         map_str_dbl
+    sub_capabilities: 
+      - hst
 
   # Print out the Hubble parameter today
   - purpose:      Observable
@@ -321,28 +338,6 @@ Rules:
                            [+2.303e-2, -3.775e-1, +3.897e-1, +1.000e00, +9.974e-1],
                            [+2.429e-2, -3.653e-1, +3.780e-1, +9.974e-1, +1.000e00]]
       relative_errors: [1.348e-3, 1.596e-2, 1.618e-2, 6.788e-2, 6.579e-2]
-
-
-  # ---- MontePython Likelihoods -----
-
-  # Here you set the names of the MP likelihoods that should be used in the scan
-  - capability: MP_experiment_names
-    function: set_MP_experiment_names
-    options:
-      # add likelihoods to be used for scan here & set path to the '<likelihood_name>.data' file containing
-      # the settings you want the likelihood to run with (e.g. path to data, which z-bins to use... ). 
-      # Note that the path has to be relative to your GAMBIT directory. 
-      # If you set it so "default" the default MontePython file 'likelihoods/<likelihood_name>/<likelihood_name>.data'
-      # will be used
-      Likelihoods: 
-        bao_smallz_2014: default #../montepython_public/montepython/likelihoods/bao_smallz_2014/bao_smallz_2014.data
-        Pantheon: default
-        #Planck_SZ: default
-      # should eventually be possible to choose any MP like, atm only bao, Pantheon, Planck_SZ (& kids after 
-      # downloading data and when commenting out line 'parser_mp.existing_file(fname)', will include that into 
-      # build step soon) safe to use;
-      # still need to write a proper patch for MPLike backend & test all Likes
-
 
 #======== Logging setup ========
 Logger:
