@@ -607,7 +607,6 @@ set(sfver "3_1_0")
 set(dl "null")
 set(dir "${PROJECT_SOURCE_DIR}/Backends/installed/${name}/${ver}")
 set(patchdir "${PROJECT_SOURCE_DIR}/Backends/patches/${name}/${ver}/")
-#set(lib "libmontepythonlike")
 # Ditch MP if Python version is 3
 set(ditch_if_absent "Python2")
 check_ditch_status(${name} ${ver} ${dir} ${ditch_if_absent})
@@ -1324,7 +1323,8 @@ set(patch "${PROJECT_SOURCE_DIR}/Backends/patches/${name}/${ver}")
 set(dl "https://github.com/lesgourg/class_public/archive/42e8f9418e3442d1ea3f26ff84dc9f0e856a0f1d.tar.gz") # The huge number is the commit ID of ExoCLASS_2.7.0
 set(md5 "8f3139eacae4d1cc5bb02bab3ec75073")
 set(dir "${PROJECT_SOURCE_DIR}/Backends/installed/${name}/${ver}")
-check_ditch_status(${name} ${ver} ${dir})
+set(ditch_if_absent "Python")
+check_ditch_status(${name} ${ver} ${dir} ${ditch_if_absent})
 if(NOT ditched_${name}_${ver})
   ExternalProject_Add(${name}_${ver}
     DOWNLOAD_COMMAND ${DL_BACKEND} ${dl} ${md5} ${dir}
