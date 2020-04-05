@@ -2249,7 +2249,7 @@ namespace Gambit
         }
 
         // MPLike_data_container should only be created and set once, when calculating the first point.
-        // After that is has to be kept alive since it contains a vector with the initialised MPLike Likelihood objects.
+        // After that it has to be kept alive since it contains a vector with the initialised MPLike Likelihood objects.
         data = BEreq::create_MP_data_object(experiments);
 
         // Add current parameters to data object to enable check if all nuisance parameters are
@@ -2321,7 +2321,6 @@ namespace Gambit
       // Iterate through map of doubles and return one big fat double,
       // selecting only those entries specified as sub-capabilities.
       double lnL = 0.;
-
       logger() << LogTags::debug << "(compute_MP_combined_LogLike):";
       for (const auto &p : MP_lnLs)
       {
@@ -2332,7 +2331,6 @@ namespace Gambit
         }
       }
       logger() << EOM;
-
       result = lnL;
     }
 
