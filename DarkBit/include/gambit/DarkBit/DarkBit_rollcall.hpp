@@ -75,6 +75,10 @@
 ///         (anders.kvellestad@fys.uio.no)
 /// \date 2020 Feb
 ///
+/// \author Jonathan Cornell
+///         (jonathancornell@weber.edu)
+/// \date 2013 - 2020
+///
 ///  *********************************************
 
 #ifndef __DarkBit_rollcall_hpp__
@@ -198,11 +202,14 @@ START_MODULE
       #ifdef DARKBIT_RD_DEBUG
         DEPENDENCY(MSSM_spectrum, Spectrum)
       #endif
-      BACKEND_REQ(rdpars, (), DS_RDPARS)
-      BACKEND_REQ(rdtime, (), DS_RDTIME)
-      BACKEND_REQ(dsrdcom, (), void, ())
-      BACKEND_REQ(dsrdstart,(),void,(int&, double(&)[1000], double(&)[1000], int&, double(&)[1000], double(&)[1000], int&, double(&)[1000]))
-      BACKEND_REQ(dsrdens, (), void, (double(*)(double&), double&, double&, int&, int&, int&))
+      BACKEND_REQ(rdpars, (ds6), DS_RDPARS)
+      BACKEND_REQ(rdtime, (ds6), DS_RDTIME)
+      BACKEND_REQ(dsrdcom, (ds6), void, ())
+      BACKEND_REQ(dsrdstart,(ds6),void,(int&, double(&)[1000], double(&)[1000], int&, double(&)[1000], double(&)[1000], int&, double(&)[1000]))
+      BACKEND_REQ(dsrdens, (ds6), void, (double(*)(double&), double&, double&, int&, int&, int&))
+      BACKEND_OPTION((DarkSUSY_MSSM),(ds6))
+      BACKEND_OPTION((DarkSUSY_generic_wimp),(ds6))
+      FORCE_SAME_BACKEND(ds6)
     #undef FUNCTION
 
     #define FUNCTION RD_oh2_DS5_general
@@ -212,22 +219,22 @@ START_MODULE
       #ifdef DARKBIT_RD_DEBUG
         DEPENDENCY(MSSM_spectrum, Spectrum)
       #endif
-      BACKEND_REQ(dsrdthlim, (), void, ())
-      BACKEND_REQ(dsrdtab, (), void, (double(*)(double&), double&, int&))
-      BACKEND_REQ(dsrdeqn, (), void, (double(*)(double&),double&,double&,double&,double&,int&))
-      BACKEND_REQ(dsrdwintp, (), double, (double&))
-      BACKEND_REQ(DS5particle_code, (), int, (const str&))
-      BACKEND_REQ(widths, (), DS5_WIDTHS)
-      BACKEND_REQ(rdmgev, (), DS5_RDMGEV)
-      BACKEND_REQ(rdpth, (), DS_RDPTH)
-      BACKEND_REQ(rdpars, (), DS_RDPARS)
-      BACKEND_REQ(rdswitch, (), DS_RDSWITCH)
-      BACKEND_REQ(rdlun, (), DS_RDLUN)
-      BACKEND_REQ(rdpadd, (), DS_RDPADD)
-      BACKEND_REQ(rddof, (), DS_RDDOF)
-      BACKEND_REQ(rderrors, (), DS_RDERRORS)
-      BACKEND_REQ(rdtime, (), DS_RDTIME)
-      BACKEND_OPTION((DarkSUSY, 5.1.3), (dummy_tag))  // Only for DarkSUSY5
+      BACKEND_REQ(dsrdthlim, (ds5), void, ())
+      BACKEND_REQ(dsrdtab, (ds5), void, (double(*)(double&), double&, int&))
+      BACKEND_REQ(dsrdeqn, (ds5), void, (double(*)(double&),double&,double&,double&,double&,int&))
+      BACKEND_REQ(dsrdwintp, (ds5), double, (double&))
+      BACKEND_REQ(DS5particle_code, (ds5), int, (const str&))
+      BACKEND_REQ(widths, (ds5), DS5_WIDTHS)
+      BACKEND_REQ(rdmgev, (ds5), DS5_RDMGEV)
+      BACKEND_REQ(rdpth, (ds5), DS_RDPTH)
+      BACKEND_REQ(rdpars, (ds5), DS_RDPARS)
+      BACKEND_REQ(rdswitch, (ds5), DS_RDSWITCH)
+      BACKEND_REQ(rdlun, (ds5), DS_RDLUN)
+      BACKEND_REQ(rdpadd, (ds5), DS_RDPADD)
+      BACKEND_REQ(rddof, (ds5), DS_RDDOF)
+      BACKEND_REQ(rderrors, (ds5), DS_RDERRORS)
+      BACKEND_REQ(rdtime, (ds5), DS_RDTIME)
+      BACKEND_OPTION((DarkSUSY, 5.1.3), (ds5))  // Only for DarkSUSY5
     #undef FUNCTION
 
     // Routine for cross checking relic density results

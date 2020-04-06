@@ -1,13 +1,6 @@
 TODO
 =====
 
-* large difference DS5/DS6 for funnel models
-  -> sv to quarks
-  -> running ?
-   NLOoption = off: <sigma v> [cm^3/s] --   DS6: 6.17142e-28
-   NLOoption = default: <sigma v> [cm^3/s] --  DS6: 6.53436e-28
-  -> JE/TB: add option NLOoption = 'DS5! -> DS 6.2.3.
-
 * DS5 standalone: neutrino routines sometimes hang...
   -> mail to Pat: nulike ?
 
@@ -15,20 +8,18 @@ TODO
 
 * [Jonathan] Silveira-Zee standalone + yaml file
 
-* update to 6.2.2
-   - [Torsten] grep FIXME in MSSM frontend! (also in DarkSUSY.hpp)
+* (!) we need a test of indirect detection routines: are yields/fluxes passed correctly?
 
 * get rid of prelim. standalones
   (DarkBit_standalone_MSSM_DS5, DarkBit_standalone_MSSM_DS6, 
    DarkBit_standalone_MSSM,DarkBit_standalone_WIMP),
   then rename remaining ones
 
-
-* add new relic density feature (maybe only after merging to trunk !)
-
 --------
 [done]
 -------
+
+[*] 
 
 [*] CMSSM.yaml
 
@@ -45,8 +36,17 @@ TODO
 
 [*] backended generic_WIMP6.2.2 + updated standalone   
 
-[*]] rename _DS6 -> standard; standard -> _DS5
+[*] rename _DS6 -> standard; standard -> _DS5
    (as well as darksusy -> darksusy5)
 
 
+[*] large difference DS5/DS6 for funnel models (sigma v to quarks)
+    conclusion: this is (most likely) *not* a problem with the running,
+    but rather an issue with a wrong way of setting up DS 6.1 in gambit
+    [DarkSUSY_MSSM_6_1_1.cpp, see comment before call to dsorder_flavour()]
+    DS_6.2.2 gives almost identical results for sigma v and Oh2 as DS_5. 
+
+
+[*] add new relic density feature   
+    -> included in 6.2.2, but without timing. Will be added to DS 6.2.3.
 

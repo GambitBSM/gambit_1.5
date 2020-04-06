@@ -519,7 +519,6 @@ BE_NAMESPACE
     } 
     std::vector<double> couplings;
     couplings.clear();
-    //TB FIXME: correct type conversion!?
     couplings.push_back((double)gg(1,1).re); // gps
     couplings.push_back((double)gg(1,2).re); // gns
     couplings.push_back((double)gg(4,1).re); // gpa
@@ -532,7 +531,8 @@ BE_NAMESPACE
 
   /// Translates GAMBIT string identifiers to the SUSY
   /// particle codes used internally in DS (as stored in common block /pacodes_mssm/)
-  // FIXME: add channel codes! JE: Already forgot, why do we need channel codes?
+  /// presently this is only needed in RD_annrate_DSprep_MSSM_func, to prepare (RelicDensity.cpp),
+  /// to prepare DS for the calculation of the invariant rate, dsanwx.
   // Note: DarkSUSY use the opposite convention on h1_0 and h2_0. The names
   // used here are the gambit names where h1_0 hence refers to what DarkSUSY
   // calls H2. 
@@ -716,7 +716,7 @@ BE_NAMESPACE
     // Quark masses as defined in SLHA2
     smquarkmasses->mu2gev        = to<double>(mySLHA.at("SMINPUTS").at(22).at(1)); // up quark mass @ 2 GeV
     smquarkmasses->md2gev        = to<double>(mySLHA.at("SMINPUTS").at(21).at(1)); // down quark mass @ 2 GeV
-    smquarkmasses->ms2gev        = to<double>(mySLHA.at("SMINPUTS").at(23).at(1)); // stange mass @ 2 GeV
+    smquarkmasses->ms2gev        = to<double>(mySLHA.at("SMINPUTS").at(23).at(1)); // strange mass @ 2 GeV
     smquarkmasses->mcmc          = to<double>(mySLHA.at("SMINPUTS").at(24).at(1)); // charm mass at m_c
     smquarkmasses->mbmb          = to<double>(mySLHA.at("SMINPUTS").at(5).at(1));  // bottom mass at m_b
     pmasses->mass(DSpart->kqu(3)) = to<double>(mySLHA.at("SMINPUTS").at(6).at(1));  // top pole mass
@@ -735,7 +735,7 @@ BE_NAMESPACE
 
     // Block MINPAR we skip, it is not needed
 
-    // Block MSOFT
+    // Block MSOFT (this comes later in DS, but this has no effect on DS calls)
     mssmpar->m1 = to<double>(mySLHA.at("MSOFT").at(1).at(1));
     mssmpar->m2 = to<double>(mySLHA.at("MSOFT").at(2).at(1));
     mssmpar->m3 = to<double>(mySLHA.at("MSOFT").at(3).at(1));
@@ -759,11 +759,12 @@ BE_NAMESPACE
     mssmpar->mu = to<double>(mySLHA.at("HMIX").at(1).at(1));
     mssmpar->tanbe = to<double>(mySLHA.at("HMIX").at(2).at(1));
 
-    // A boson mass
+    // A boson mass (h3 in DarkSUSY)
     pmasses->mass(DSparticle_code("A0")) = to<double>(mySLHA.at("MASS").at(36).at(1));
     mssmpar->ma = pmasses->mass(DSparticle_code("A0"));
 
     // Now set up some defaults (part of it will be overwritten later)
+    // (this does not require ckm matrices, which are set up earlier in DS)
     dssuconst_yukawa();
     dssuconst_higgs();
     
@@ -824,7 +825,6 @@ BE_NAMESPACE
     pmasses->mass(DSparticle_code("A0"))   = to<double>(mySLHA.at("MASS").at(36).at(1));
 
     // SUSY particles
-    // TB FIXME -- sfermions: ksf or ksf_flav!?
     pmasses->mass(DSpart->ksnu(1)) =  to<double>(mySLHA.at("MASS").at(1000012).at(1));
     pmasses->mass(DSpart->ksnu(2)) =  to<double>(mySLHA.at("MASS").at(1000014).at(1));
     pmasses->mass(DSpart->ksnu(3)) =  to<double>(mySLHA.at("MASS").at(1000016).at(1));
@@ -908,6 +908,7 @@ BE_NAMESPACE
 
     //If you want to exactly match the DarkSUSY SLHAreader, you should also now run
     //dssuconst_yukawa_running();
+    // these settings will be overwritten later, however
 
     // Block YE, YU, YD - Yukawas
     for (int i=1; i<=3; i++)
@@ -975,10 +976,9 @@ BE_NAMESPACE
     }
 
     // Do flavour reordering for SLHA2 compatibility
-    // TB FIXME. The call to dsorder_flavour and dsvertex needs to go AFTER
-    // the widhts are read. Move this later. It requires that we use
-    // a version of dsorder_flavour that also orders widths, dvs a version
-    // of DarkSUSY later than 6.1.1.
+    // NB: This does *not* have to go after the widhts are read, as indicated by the comment
+    // in the DS 6.1.1 frontend, becasuse dsorder_flavour no longer actually orders the
+    // standard mass and width arrays (and instead provides new, 'ordered' particle codes).
     dsorder_flavour();
     // Set up SUSY vertices
     dsvertx();
@@ -1031,7 +1031,6 @@ BE_NAMESPACE
     pwidths->width(DSparticle_code("Z0")) = myDecays.at(std::pair<int,int>(23,0)).width_in_GeV;
 
     // Set up sfermion widths
-    //TB FIXME -- sfermions: ksf or ksf_flav ?
     pwidths->width(DSpart->ksnu(1)) = myDecays.at(std::pair<int,int>(1000012,0)).width_in_GeV;
     pwidths->width(DSpart->ksnu(2)) = myDecays.at(std::pair<int,int>(1000014,0)).width_in_GeV;
     pwidths->width(DSpart->ksnu(3)) = myDecays.at(std::pair<int,int>(1000016,0)).width_in_GeV;

@@ -531,7 +531,8 @@ BE_NAMESPACE
 
   /// Translates GAMBIT string identifiers to the SUSY
   /// particle codes used internally in DS (as stored in common block /pacodes_mssm/)
-  // FIXME: add channel codes! JE: Already forgot, why do we need channel codes?
+  /// presently this is only needed in RD_annrate_DSprep_MSSM_func, to prepare (RelicDensity.cpp),
+  /// to prepare DS for the calculation of the invariant rate, dsanwx.
   // Note: DarkSUSY use the opposite convention on h1_0 and h2_0. The names
   // used here are the gambit names where h1_0 hence refers to what DarkSUSY
   // calls H2. 
@@ -973,7 +974,7 @@ BE_NAMESPACE
     // Do flavour reordering for SLHA2 compatibility
     // FIXME. The call to dsorder_flavour and dsvertex needs to go AFTER
     // the widhts are read. Move this later. It requires that we use
-    // a version of dsorder_flavour that also orders widths, dvs a version
+    // a version of dsorder_flavour that also orders widths, i.e. a version
     // of DarkSUSY later than 6.1.1.
     dsorder_flavour();
     // Set up SUSY vertices
