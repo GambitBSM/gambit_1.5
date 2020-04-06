@@ -404,7 +404,7 @@ int main()
     // Calculate Fermi LAT dwarf likelihood
     lnL_FermiLATdwarfs_gamLike.resolveDependency(&GA_AnnYield_General);
     lnL_FermiLATdwarfs_gamLike.resolveDependency(&RD_fraction_one);
-    lnL_FermiLATdwarfs_gamLike.resolveBackendReq(&Backends::gamLike_1_0_0::Functown::lnL);
+    lnL_FermiLATdwarfs_gamLike.resolveBackendReq(&Backends::gamLike_1_0_1::Functown::lnL);
     lnL_FermiLATdwarfs_gamLike.reset_and_calculate();
 
     logger() << "Fermi LAT dwarf spheroidal lnL: " << lnL_FermiLATdwarfs_gamLike(0) << LogTags::info << EOM;
