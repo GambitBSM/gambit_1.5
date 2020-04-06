@@ -91,7 +91,7 @@ endif()
 
 
 # DarkSUSY
-set(name "darksusy5")
+set(name "darksusy")
 set(ver "5.1.3")
 set(dl "https://darksusy.hepforge.org/tars/darksusy-5.1.3.tar.gz")
 set(md5 "ca95ffa083941a469469710fab2f3c97")
@@ -113,7 +113,7 @@ if(NOT ditched_${name}_${ver})
     INSTALL_COMMAND ""
   )
   add_extra_targets("backend" ${name} ${ver} ${dir} ${dl} clean)
-  set_as_default_version("backend" ${name} ${ver})
+  # set_as_default_version("backend" ${name} ${ver})
 endif()
 
 # DarkSUSY base (for all models)
