@@ -338,22 +338,23 @@ int main()
     // ---- Gamma-ray yields ----
 
     // Initialize tabulated gamma-ray yields
-    SimYieldTable_DS5.resolveBackendReq(&Backends::DarkSUSY_5_1_3::Functown::dshayield);
-    SimYieldTable_DS5.reset_and_calculate();
+    SimYieldTable_DarkSUSY.resolveBackendReq(&Backends::DarkSUSY_generic_wimp_6_1_1::Functown::dsanyield_sim);
+    SimYieldTable_DarkSUSY.reset_and_calculate();
 
     // Collect missing final states for simulation in cascade MC
     GA_missingFinalStates.resolveDependency(&TH_ProcessCatalog_ScalarSingletDM_Z2);
-    GA_missingFinalStates.resolveDependency(&SimYieldTable_DS5);
+    GA_missingFinalStates.resolveDependency(&SimYieldTable_DarkSUSY);
     GA_missingFinalStates.resolveDependency(&DarkMatter_ID_ScalarSingletDM);
     GA_missingFinalStates.reset_and_calculate();
 
 
     // Infer for which type of final states particles MC should be performed
+    cascadeMC_FinalStates.setOption<std::vector<std::string>>("cMC_finalStates", daFunk::vec<std::string>("gamma"));
     cascadeMC_FinalStates.reset_and_calculate();
 
     // Collect decay information for cascade MC
     cascadeMC_DecayTable.resolveDependency(&TH_ProcessCatalog_ScalarSingletDM_Z2);
-    cascadeMC_DecayTable.resolveDependency(&SimYieldTable_DS5);
+    cascadeMC_DecayTable.resolveDependency(&SimYieldTable_DarkSUSY);
     cascadeMC_DecayTable.reset_and_calculate();
 
     // Set up MC loop manager for cascade MC
@@ -375,7 +376,7 @@ int main()
     cascadeMC_Histograms.resolveDependency(&cascadeMC_InitialState);
     cascadeMC_Histograms.resolveDependency(&cascadeMC_GenerateChain);
     cascadeMC_Histograms.resolveDependency(&TH_ProcessCatalog_ScalarSingletDM_Z2);
-    cascadeMC_Histograms.resolveDependency(&SimYieldTable_DS5);
+    cascadeMC_Histograms.resolveDependency(&SimYieldTable_DarkSUSY);
     cascadeMC_Histograms.resolveDependency(&cascadeMC_FinalStates);
     cascadeMC_Histograms.resolveLoopManager(&cascadeMC_LoopManager);
 
@@ -395,7 +396,7 @@ int main()
 
     // Calculate total gamma-ray yield (cascade MC + tabulated results)
     GA_AnnYield_General.resolveDependency(&TH_ProcessCatalog_ScalarSingletDM_Z2);
-    GA_AnnYield_General.resolveDependency(&SimYieldTable_DS5);
+    GA_AnnYield_General.resolveDependency(&SimYieldTable_DarkSUSY);
     GA_AnnYield_General.resolveDependency(&DarkMatter_ID_ScalarSingletDM);
     GA_AnnYield_General.resolveDependency(&cascadeMC_gammaSpectra);
     GA_AnnYield_General.reset_and_calculate();
