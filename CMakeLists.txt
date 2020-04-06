@@ -147,8 +147,14 @@ endif()
 message("${BoldYellow}   Using Python interpreter version ${PYTHON_VERSION_STRING} for build.${ColourReset}")
 
 if(PYTHONLIBS_FOUND)
+  string(FIND "${PYTHONLIBS_VERSION_STRING}" "2.7" PY2_POSITION)
+  if(PY2_POSITION EQUAL 0)
+    set(UNSUPPORTED_PYTHON_VERSION "3")
+  else()
+    set(UNSUPPORTED_PYTHON_VERSION "2.7")
+  endif()
   message("${BoldYellow}   Using Python libraries version ${PYTHONLIBS_VERSION_STRING} for Python backend support.${ColourReset}\n"
-          "   Backends using different version of Python will be ditched.")
+          "   Backends requiring Python ${UNSUPPORTED_PYTHON_VERSION} will be ditched.")
   if (NOT "${PYTHON_VERSION_STRING}" STREQUAL "${PYTHONLIBS_VERSION_STRING}")
     message("${BoldRed}   NOTE: You are using different Python versions for the interpreter and the libraries!${ColourReset}\n"
             "   In principle this should be fine, as the interpreter is only used for building GAMBIT, and the\n"
