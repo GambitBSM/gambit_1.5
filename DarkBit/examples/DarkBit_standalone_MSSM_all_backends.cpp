@@ -247,6 +247,9 @@ int main(int argc, char* argv[])
     DarkMatter_ID_MSSM.resolveDependency(&createSpectrum);
     DarkMatter_ID_MSSM.reset_and_calculate();
 
+    // Assume for direct and indirect detection likelihoods that dark matter
+    // density is always the measured one (regardless of relic density results)
+    RD_fraction_one.reset_and_calculate();
 
 
     //
