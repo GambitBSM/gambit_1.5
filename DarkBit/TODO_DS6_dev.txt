@@ -1,14 +1,9 @@
 TODO
 =====
 
-* DS5 standalone: neutrino routines sometimes hang...
-  -> mail to Pat: nulike ?
-
 * [Jonathan] IC, sv, DSphs from mO ?
 
 * [Jonathan] Silveira-Zee standalone + yaml file
-
-* (!) we need a test of indirect detection routines: are yields/fluxes passed correctly?
 
 * get rid of prelim. standalones
   (DarkBit_standalone_MSSM_DS5, DarkBit_standalone_MSSM_DS6, 
@@ -19,7 +14,12 @@ TODO
 [done]
 -------
 
-[*] 
+[*] neutrino routines sometimes hang -> nulike 1.0.9
+
+[*] indirect detection routines work:
+    - output files with fluxes look good
+    - Fermi and IceCube likelihoods now look reasonable 
+      (after adding missing RD_fraction_one.reset_and_calculate)
 
 [*] CMSSM.yaml
 

@@ -131,34 +131,34 @@ int main(int argc, char* argv[])
     // if (not Backends::backendInfo().works["MicrOmegas_MSSM3.6.9.2"]) backend_error().raise(LOCAL_INFO, "MicrOmegas 3.6.9.2 for MSSM is missing!");
     if (not Backends::backendInfo().works["gamLike1.0.1"]) backend_error().raise(LOCAL_INFO, "gamLike 1.0.1 is missing!");
     if (not Backends::backendInfo().works["DDCalc2.0.0"]) backend_error().raise(LOCAL_INFO, "DDCalc 2.0.0 is missing!");
-    if (not Backends::backendInfo().works["nulike1.0.8"]) backend_error().raise(LOCAL_INFO, "nulike 1.0.8 is missing!");
+    if (not Backends::backendInfo().works["nulike1.0.9"]) backend_error().raise(LOCAL_INFO, "nulike 1.0.9 is missing!");
 
     // ---- Useful variables ----
     //
     // Prepare a str-str-double map of maps to hold the results.
-    // We will add results for the individual backends as 
-    //   results["oh2"]["MicrOmegas_MSSM3.6.9.2"] = ... 
-    //   results["oh2"]["DarkSUSY_MSSM6.1.1"] = ... 
+    // We will add results for the individual backends as
+    //   results["oh2"]["MicrOmegas_MSSM3.6.9.2"] = ...
+    //   results["oh2"]["DarkSUSY_MSSM6.1.1"] = ...
     //
     std::map<std::string, std::map<std::string,double> > results;
-    results["oh2"] = std::map<std::string,double>(); 
-    results["oh2_lnL"] = std::map<std::string,double>(); 
-    results["sigma_SI_p"] = std::map<std::string,double>(); 
-    results["sigma_SD_p"] = std::map<std::string,double>(); 
-    results["LUX_2016_lnL"] = std::map<std::string,double>(); 
-    results["IceCube_79_lnL"] = std::map<std::string,double>(); 
-    results["sigmav0"] = std::map<std::string,double>(); 
-    results["FermiLAT_dwarfsph_lnL"] = std::map<std::string,double>(); 
+    results["oh2"] = std::map<std::string,double>();
+    results["oh2_lnL"] = std::map<std::string,double>();
+    results["sigma_SI_p"] = std::map<std::string,double>();
+    results["sigma_SD_p"] = std::map<std::string,double>();
+    results["LUX_2016_lnL"] = std::map<std::string,double>();
+    results["IceCube_79_lnL"] = std::map<std::string,double>();
+    results["sigmav0"] = std::map<std::string,double>();
+    results["FermiLAT_dwarfsph_lnL"] = std::map<std::string,double>();
 
     std::map<std::string, std::string> results_units;
-    results_units["oh2"] = ""; 
-    results_units["oh2_lnL"] = ""; 
-    results_units["sigma_SI_p"] = "cm^2"; 
-    results_units["sigma_SD_p"] = "cm^2"; 
-    results_units["LUX_2016_lnL"] = ""; 
-    results_units["IceCube_79_lnL"] = ""; 
-    results_units["sigmav0"] = "cm^3/s"; 
-    results_units["FermiLAT_dwarfsph_lnL"] = ""; 
+    results_units["oh2"] = "";
+    results_units["oh2_lnL"] = "";
+    results_units["sigma_SI_p"] = "cm^2";
+    results_units["sigma_SD_p"] = "cm^2";
+    results_units["LUX_2016_lnL"] = "";
+    results_units["IceCube_79_lnL"] = "";
+    results_units["sigmav0"] = "cm^3/s";
+    results_units["FermiLAT_dwarfsph_lnL"] = "";
 
     std::vector<std::string> result_output_order = {
       "oh2",
@@ -247,24 +247,27 @@ int main(int argc, char* argv[])
     DarkMatter_ID_MSSM.resolveDependency(&createSpectrum);
     DarkMatter_ID_MSSM.reset_and_calculate();
 
+    // Assume for direct and indirect detection likelihoods that dark matter
+    // density is always the measured one (regardless of relic density results)
+    RD_fraction_one.reset_and_calculate();
 
 
-    // 
+    //
     // ======= Initializations that can be done once =======
-    // 
+    //
 
     // Initialize nulike backend
-    Backends::nulike_1_0_8::Functown::nulike_bounds.setStatus(2);
-    nulike_1_0_8_init.reset_and_calculate();
+    Backends::nulike_1_0_9::Functown::nulike_bounds.setStatus(2);
+    nulike_1_0_9_init.reset_and_calculate();
 
     // Initialize gamLike backend
     gamLike_1_0_1_init.reset_and_calculate();
 
 
 
-    // 
+    //
     // ======= Perform all calculations for backend DarkSUSY 5.1.3 =======
-    // 
+    //
 
     current_backend = "DarkSUSY5.1.3";
 
@@ -547,17 +550,17 @@ int main(int argc, char* argv[])
       IC79WH_full.resolveDependency(&mwimp_generic);
       IC79WH_full.resolveDependency(&annihilation_rate_Sun);
       IC79WH_full.resolveDependency(&nuyield_from_DS);
-      IC79WH_full.resolveBackendReq(&Backends::nulike_1_0_8::Functown::nulike_bounds);
+      IC79WH_full.resolveBackendReq(&Backends::nulike_1_0_9::Functown::nulike_bounds);
       IC79WH_full.reset_and_calculate();
       IC79WL_full.resolveDependency(&mwimp_generic);
       IC79WL_full.resolveDependency(&annihilation_rate_Sun);
       IC79WL_full.resolveDependency(&nuyield_from_DS);
-      IC79WL_full.resolveBackendReq(&Backends::nulike_1_0_8::Functown::nulike_bounds);
+      IC79WL_full.resolveBackendReq(&Backends::nulike_1_0_9::Functown::nulike_bounds);
       IC79WL_full.reset_and_calculate();
       IC79SL_full.resolveDependency(&mwimp_generic);
       IC79SL_full.resolveDependency(&annihilation_rate_Sun);
       IC79SL_full.resolveDependency(&nuyield_from_DS);
-      IC79SL_full.resolveBackendReq(&Backends::nulike_1_0_8::Functown::nulike_bounds);
+      IC79SL_full.resolveBackendReq(&Backends::nulike_1_0_9::Functown::nulike_bounds);
       IC79SL_full.reset_and_calculate();
 
       // Calculate IceCube likelihood
@@ -588,9 +591,9 @@ int main(int argc, char* argv[])
 
 
 
-    // 
+    //
     // ======= Perform all calculations for backend DarkSUSY_MSSM 6.1.1 =======
-    // 
+    //
 
     current_backend = "DarkSUSY_MSSM6.1.1";
 
@@ -854,17 +857,17 @@ int main(int argc, char* argv[])
       IC79WH_full.resolveDependency(&mwimp_generic);
       IC79WH_full.resolveDependency(&annihilation_rate_Sun);
       IC79WH_full.resolveDependency(&nuyield_from_DS);
-      IC79WH_full.resolveBackendReq(&Backends::nulike_1_0_8::Functown::nulike_bounds);
+      IC79WH_full.resolveBackendReq(&Backends::nulike_1_0_9::Functown::nulike_bounds);
       IC79WH_full.reset_and_calculate();
       IC79WL_full.resolveDependency(&mwimp_generic);
       IC79WL_full.resolveDependency(&annihilation_rate_Sun);
       IC79WL_full.resolveDependency(&nuyield_from_DS);
-      IC79WL_full.resolveBackendReq(&Backends::nulike_1_0_8::Functown::nulike_bounds);
+      IC79WL_full.resolveBackendReq(&Backends::nulike_1_0_9::Functown::nulike_bounds);
       IC79WL_full.reset_and_calculate();
       IC79SL_full.resolveDependency(&mwimp_generic);
       IC79SL_full.resolveDependency(&annihilation_rate_Sun);
       IC79SL_full.resolveDependency(&nuyield_from_DS);
-      IC79SL_full.resolveBackendReq(&Backends::nulike_1_0_8::Functown::nulike_bounds);
+      IC79SL_full.resolveBackendReq(&Backends::nulike_1_0_9::Functown::nulike_bounds);
       IC79SL_full.reset_and_calculate();
 
       // Calculate IceCube likelihood
@@ -895,9 +898,9 @@ int main(int argc, char* argv[])
 
 
 
-    // 
+    //
     // ======= Perform all calculations for backend DarkSUSY_MSSM 6.2.2 =======
-    // 
+    //
 
     current_backend = "DarkSUSY_MSSM6.2.2";
 
@@ -1161,17 +1164,17 @@ int main(int argc, char* argv[])
       IC79WH_full.resolveDependency(&mwimp_generic);
       IC79WH_full.resolveDependency(&annihilation_rate_Sun);
       IC79WH_full.resolveDependency(&nuyield_from_DS);
-      IC79WH_full.resolveBackendReq(&Backends::nulike_1_0_8::Functown::nulike_bounds);
+      IC79WH_full.resolveBackendReq(&Backends::nulike_1_0_9::Functown::nulike_bounds);
       IC79WH_full.reset_and_calculate();
       IC79WL_full.resolveDependency(&mwimp_generic);
       IC79WL_full.resolveDependency(&annihilation_rate_Sun);
       IC79WL_full.resolveDependency(&nuyield_from_DS);
-      IC79WL_full.resolveBackendReq(&Backends::nulike_1_0_8::Functown::nulike_bounds);
+      IC79WL_full.resolveBackendReq(&Backends::nulike_1_0_9::Functown::nulike_bounds);
       IC79WL_full.reset_and_calculate();
       IC79SL_full.resolveDependency(&mwimp_generic);
       IC79SL_full.resolveDependency(&annihilation_rate_Sun);
       IC79SL_full.resolveDependency(&nuyield_from_DS);
-      IC79SL_full.resolveBackendReq(&Backends::nulike_1_0_8::Functown::nulike_bounds);
+      IC79SL_full.resolveBackendReq(&Backends::nulike_1_0_9::Functown::nulike_bounds);
       IC79SL_full.reset_and_calculate();
 
       // Calculate IceCube likelihood
@@ -1202,9 +1205,9 @@ int main(int argc, char* argv[])
 
 
 
-    // 
+    //
     // ======= Perform all calculations for backend MicrOmegas_MSSM 3.6.9.2 =======
-    // 
+    //
 
     current_backend = "MicrOmegas_MSSM3.6.9.2";
 
@@ -1292,9 +1295,9 @@ int main(int argc, char* argv[])
 
 
 
-    // 
+    //
     // ======= Construct the output string =======
-    // 
+    //
 
     std::stringstream results_ss;
 
@@ -1315,9 +1318,9 @@ int main(int argc, char* argv[])
     }
 
 
-    // 
+    //
     // ======= Output the result string to screen =======
-    // 
+    //
 
     cout << endl;
     cout << "==== RESULTS ====" << endl;
@@ -1327,7 +1330,7 @@ int main(int argc, char* argv[])
 
     // Let the user know what they are missing...
     if (backends_not_built.size() > 0)
-    {      
+    {
       cout << endl;
       cout << "NOTE: The following backend(s) are not present:" << endl;
       for (const std::string& backend_name : backends_not_built)
@@ -1339,9 +1342,9 @@ int main(int argc, char* argv[])
     }
 
 
-    // 
+    //
     // ======= Output the result string to file =======
-    // 
+    //
 
     std::fstream file;
     file.open(outname_data, std::ios_base::out);

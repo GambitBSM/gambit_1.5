@@ -132,7 +132,7 @@ int main(int argc, char* argv[])
     if (not Backends::backendInfo().works["MicrOmegas_MSSM3.6.9.2"]) backend_error().raise(LOCAL_INFO, "MicrOmegas 3.6.9.2 for MSSM is missing!");
     if (not Backends::backendInfo().works["gamLike1.0.1"]) backend_error().raise(LOCAL_INFO, "gamLike 1.0.1 is missing!");
     if (not Backends::backendInfo().works["DDCalc2.0.0"]) backend_error().raise(LOCAL_INFO, "DDCalc 2.0.0 is missing!");
-    if (not Backends::backendInfo().works["nulike1.0.8"]) backend_error().raise(LOCAL_INFO, "nulike 1.0.7 is missing!");
+    if (not Backends::backendInfo().works["nulike1.0.9"]) backend_error().raise(LOCAL_INFO, "nulike 1.0.9 is missing!");
 
 
     // ---- Initialize models ----
@@ -195,8 +195,8 @@ int main(int argc, char* argv[])
     // ---- Initialize backends ----
 
     // Initialize nulike backend
-    Backends::nulike_1_0_8::Functown::nulike_bounds.setStatus(2);
-    nulike_1_0_8_init.reset_and_calculate();
+    Backends::nulike_1_0_9::Functown::nulike_bounds.setStatus(2);
+    nulike_1_0_9_init.reset_and_calculate();
 
     // Initialize gamLike backend
     gamLike_1_0_1_init.reset_and_calculate();
@@ -547,17 +547,17 @@ int main(int argc, char* argv[])
     IC79WH_full.resolveDependency(&mwimp_generic);
     IC79WH_full.resolveDependency(&annihilation_rate_Sun);
     IC79WH_full.resolveDependency(&nuyield_from_DS);
-    IC79WH_full.resolveBackendReq(&Backends::nulike_1_0_8::Functown::nulike_bounds);
+    IC79WH_full.resolveBackendReq(&Backends::nulike_1_0_9::Functown::nulike_bounds);
     IC79WH_full.reset_and_calculate();
     IC79WL_full.resolveDependency(&mwimp_generic);
     IC79WL_full.resolveDependency(&annihilation_rate_Sun);
     IC79WL_full.resolveDependency(&nuyield_from_DS);
-    IC79WL_full.resolveBackendReq(&Backends::nulike_1_0_8::Functown::nulike_bounds);
+    IC79WL_full.resolveBackendReq(&Backends::nulike_1_0_9::Functown::nulike_bounds);
     IC79WL_full.reset_and_calculate();
     IC79SL_full.resolveDependency(&mwimp_generic);
     IC79SL_full.resolveDependency(&annihilation_rate_Sun);
     IC79SL_full.resolveDependency(&nuyield_from_DS);
-    IC79SL_full.resolveBackendReq(&Backends::nulike_1_0_8::Functown::nulike_bounds);
+    IC79SL_full.resolveBackendReq(&Backends::nulike_1_0_9::Functown::nulike_bounds);
     IC79SL_full.reset_and_calculate();
 
     // Calculate IceCube likelihood
@@ -596,7 +596,7 @@ int main(int argc, char* argv[])
     // --------------------------------------------------------------
     // -------------- Now do the same for DarkSUSY 6 ----------------
     // --------------------------------------------------------------
-    
+
     // Relic density calculation with GAMBIT routines and DarkSUSY 6:
     RD_spectrum_MSSM.resolveDependency(&createDecays);
     RD_spectrum_MSSM.resolveDependency(&createSpectrum);
@@ -637,7 +637,7 @@ int main(int argc, char* argv[])
     lnL_oh2_Simple.reset_and_calculate();
     double lnoh2_DS6 = lnL_oh2_Simple(0);
 
-    
+
     // Set up process catalog based on DarkSUSY annihilation rates
     TH_ProcessCatalog_DS_MSSM.resolveDependency(&createSpectrum);
     TH_ProcessCatalog_DS_MSSM.resolveDependency(&createDecays);
@@ -824,17 +824,17 @@ int main(int argc, char* argv[])
     IC79WH_full.resolveDependency(&mwimp_generic);
     IC79WH_full.resolveDependency(&annihilation_rate_Sun);
     IC79WH_full.resolveDependency(&nuyield_from_DS);
-    IC79WH_full.resolveBackendReq(&Backends::nulike_1_0_8::Functown::nulike_bounds);
+    IC79WH_full.resolveBackendReq(&Backends::nulike_1_0_9::Functown::nulike_bounds);
     IC79WH_full.reset_and_calculate();
     IC79WL_full.resolveDependency(&mwimp_generic);
     IC79WL_full.resolveDependency(&annihilation_rate_Sun);
     IC79WL_full.resolveDependency(&nuyield_from_DS);
-    IC79WL_full.resolveBackendReq(&Backends::nulike_1_0_8::Functown::nulike_bounds);
+    IC79WL_full.resolveBackendReq(&Backends::nulike_1_0_9::Functown::nulike_bounds);
     IC79WL_full.reset_and_calculate();
     IC79SL_full.resolveDependency(&mwimp_generic);
     IC79SL_full.resolveDependency(&annihilation_rate_Sun);
     IC79SL_full.resolveDependency(&nuyield_from_DS);
-    IC79SL_full.resolveBackendReq(&Backends::nulike_1_0_8::Functown::nulike_bounds);
+    IC79SL_full.resolveBackendReq(&Backends::nulike_1_0_9::Functown::nulike_bounds);
     IC79SL_full.reset_and_calculate();
 
     // Calculate IceCube likelihood
@@ -870,7 +870,7 @@ int main(int argc, char* argv[])
     // Retrieve and print DarkSUSY result
     cout << "Omega h^2 (lnL) from RD_oh2_DS5_general routine: " << oh2_DS5 << " (" << lnoh2_DS5 << ") " << endl;
     cout << "Omega h^2 (lnL) from RD_oh2_DS_general routine (DarkSUSY 6): " << oh2_DS6 << " (" << lnoh2_DS6 << ") " << endl;
-    cout << endl;  
+    cout << endl;
 
     // Print scattering cross section for DS and MO:
     cout << " sigma_SI_p [cm^2] -- " << endl;
@@ -885,22 +885,22 @@ int main(int argc, char* argv[])
     cout << "LUX 2016 lnL -- " << endl;
     cout << "    DS5: " <<  lnLUX_DS5 << endl;
     cout << "    DS6: " <<  lnLUX_DS6 << endl;
-    cout << endl;  
+    cout << endl;
 
     cout << "IceCube 79 lnL -- " << endl;
     cout << "    DS5: " <<  IC79_DS5 << endl;
     cout << "    DS6: " <<  IC79_DS6 << endl;
-    cout << endl;  
+    cout << endl;
 
     cout << "<sigma v> [cm^3/s] -- "<< endl;
     cout << "    DS5: " <<  sv0_DS5  << endl;
     cout << "    DS6: " <<  sv0_DS6  << endl;
-    cout << endl;  
+    cout << endl;
 
     cout << "Fermi LAT dwarf spheroidal lnL -- " << endl;
     cout << "    DS5: " <<  lnLFermi_DS5 << endl;
     cout << "    DS6: " <<  lnLFermi_DS6 << endl;
-    cout << endl;  
+    cout << endl;
 
 
     // ---- Dump output into file ----

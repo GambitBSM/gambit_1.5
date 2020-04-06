@@ -56,7 +56,7 @@
 #  \date 2016 Aug
 #
 #  \author Ankit Beniwal
-#  	   (ankit.beniwal@adelaide.edu.au)
+#      (ankit.beniwal@adelaide.edu.au)
 #  \date 2016 Aug
 #  \date 2017 Jun
 #  \date 2018 Aug
@@ -88,7 +88,6 @@ if(NOT ditched_${name}_${ver})
   add_extra_targets("backend" ${name} ${ver} ${dir} ${dl} clean)
   set_as_default_version("backend" ${name} ${ver})
 endif()
-
 
 
 # DarkSUSY
@@ -777,8 +776,27 @@ if(NOT ditched_${name}_${ver})
     INSTALL_COMMAND ""
   )
   add_extra_targets("backend" ${name} ${ver} ${dir} ${dl} distclean)
+endif()
+
+# Nulike
+set(name "nulike")
+set(ver "1.0.9")
+set(lib "libnulike")
+set(dir "${PROJECT_SOURCE_DIR}/Backends/installed/${name}/${ver}")
+check_ditch_status(${name} ${ver} ${dir})
+if(NOT ditched_${name}_${ver})
+  ExternalProject_Add(${name}_${ver}
+    GIT_REPOSITORY "https://github.com/patscott/nulike.git"
+    SOURCE_DIR ${dir}
+    BUILD_IN_SOURCE 1
+    CONFIGURE_COMMAND ""
+    BUILD_COMMAND ${CMAKE_MAKE_PROGRAM} ${lib}.so FF=${CMAKE_Fortran_COMPILER} FOPT=${BACKEND_Fortran_FLAGS} MODULE=${FMODULE}
+    INSTALL_COMMAND ""
+  )
+  add_extra_targets("backend" ${name} ${ver} ${dir} ${dl} distclean)
   set_as_default_version("backend" ${name} ${ver})
 endif()
+
 
 # SUSY-HIT
 set(name "susyhit")
