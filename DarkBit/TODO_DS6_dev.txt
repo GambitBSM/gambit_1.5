@@ -9,10 +9,13 @@ TODO
   (DarkBit_standalone_MSSM_DS5, DarkBit_standalone_MSSM_DS6, 
    DarkBit_standalone_MSSM,DarkBit_standalone_WIMP),
   then rename remaining ones
+  [Anders: all the MSSM ones are done] 
 
 --------
 [done]
 -------
+
+[*] revert name change in cmake system: "darksusy5" --> "darksusy"
 
 [*] neutrino routines sometimes hang -> nulike 1.0.9
 
