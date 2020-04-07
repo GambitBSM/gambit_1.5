@@ -2236,6 +2236,34 @@ namespace Gambit
         for (const auto& x : empties) subcaps[x] = "default";
         if (!subcaps.IsNull()) experiments = subcaps.as<map_str_str>();
 
+        // if the experiments map is empty the user  
+        //  a) either did not specify the MP experiment names correctly in the YAML file
+        //  b) or did not intend to use MP at all, but ended up here because the wrong 
+        //     function (set_classy_input_with_MPLike) was choosen to satisfy the 
+        //     capability 'classy_final_input'
+        // in that case throw an informative error message
+        if(experiments.empty())
+        {
+          std::ostringstream ss;
+          ss << "CosmoBit is tyring to create a MontePython data object, but no MontePython " << endl
+             << "likelihoods have been specified to be used in the YAML file." << endl
+             << "If you want to use MontePython likelihoods make sure to check the 'ObsLikes' section" << endl
+             << "for capability CosmoBit::MP_Combined_LogLike for typos. It could look like this:" << endl << endl
+             << "  - purpose:      LogLike" << endl
+             << "    capability:   MP_Combined_LogLike" << endl
+             << "    type:         double" << endl
+             << "    sub_capabilities:" << endl
+             << "      - bao_smallz_2014" << endl
+             << "      - Pantheon" << endl <<endl
+             << "If you do not want to use MontePython likelihoods please modify the Rules section "
+             << "of your YAML file to instead point to the function" << endl
+             << "CosmoBit::set_classy_input_with_MPLike. An appropriate rule would look like this:" << endl << endl
+             << "  - capability: classy_final_input" << endl
+             << "    function: set_classy_input" << endl;
+          CosmoBit_error().raise(LOCAL_INFO, ss.str());
+          std::cout<< "Experitmens are empty!!"<< std::endl;
+        }
+
         // Check that all the requested likelihoods can actually be provided by MP
         for (const auto& x : experiments)
         {

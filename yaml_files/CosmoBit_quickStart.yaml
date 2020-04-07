@@ -209,6 +209,13 @@ ObsLikes:
     #  Pantheon: default
     #  Planck_SZ:
 
+  # print energy density of ncdm component 
+  # as derived by CLASS
+  - purpose:      Obs
+    capability:   Omega0_ncdm_tot
+    module:       CosmoBit
+    type:         double
+
 
 #======== 7) Rule entries ========
 Rules:
