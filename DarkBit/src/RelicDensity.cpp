@@ -990,11 +990,11 @@ namespace Gambit
       logger() << LogTags::debug << "X_f = " << Xf << " Omega h^2 = " << oh2 << EOM;
     }
 
-    /*! \brief Relic density directly from a call of initialized DarkSUSY.
+    /*! \brief Relic density directly from a call of initialized DarkSUSY 5.
     */
-    void RD_oh2_DarkSUSY(double &result)
+    void RD_oh2_DarkSUSY_DS5(double &result)
     {
-      using namespace Pipes::RD_oh2_DarkSUSY;
+      using namespace Pipes::RD_oh2_DarkSUSY_DS5;
       // Input
       int omtype;  // 0: no coann; 1: all coann
       int fast;  // 0: standard; 1: fast; 2: dirty
@@ -1024,7 +1024,7 @@ namespace Gambit
       }
 
       result = oh2;
-      logger() << LogTags::debug << "RD_oh2_DarkSUSY: oh2 is " << oh2 << EOM;
+      logger() << LogTags::debug << "RD_oh2_DarkSUSY_DS5: oh2 is " << oh2 << EOM;
     }
 
 
