@@ -243,6 +243,7 @@ int main()
       Models::MSSM25atQ::Functown::MSSM30atQ_parameters.notifyOfModel(SUSY_model);
       Models::MSSM30atQ::Functown::MSSM63atQ_parameters.notifyOfModel(SUSY_model);
     }
+    SPheno_3_3_8_init.notifyOfModel(SUSY_model);
     get_MSSM_spectrum_SPheno.notifyOfModel(SUSY_model);
     FH_AllHiggsMasses.notifyOfModel(SUSY_model);
     FH_Couplings.notifyOfModel(SUSY_model);
@@ -468,6 +469,7 @@ int main()
         Models::MSSM25atQ::Functown::MSSM30atQ_parameters.reset_and_calculate();
         Models::MSSM30atQ::Functown::MSSM63atQ_parameters.reset_and_calculate();
       }
+      SPheno_3_3_8_init.reset_and_calculate();
       get_MSSM_spectrum_SPheno.reset_and_calculate();
       FeynHiggs_2_11_3_init.reset_and_calculate();
       FH_AllHiggsMasses.reset_and_calculate();
