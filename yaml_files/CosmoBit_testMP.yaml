@@ -80,27 +80,27 @@ Scanner:
 
 #======== Observables of interest ========
 ObsLikes:
- 
-  # The total lnL from MontePython
+
   - purpose:      Observable
     capability:   Neff
     type:         double
-    
+
+  # The total lnL from MontePython
   - purpose:      LogLike
     capability:   MP_Combined_LogLike
     module:       CosmoBit
     type:         double
-  
+    sub_capabilities:
+      bao_smallz_2014: default
+      Pantheon: default
+      Planck_SZ: default
+
   # A breakdown of each likelihood component in the above total lnL
   - purpose:      Observable
     capability:   MP_LogLikes
     type:         map_str_dbl
-  
-  # Any observables requested by the user -- these are basically
-  # additional likelihoods -- so as not to optimise on lnL.
-  - purpose:      Observable
-    capability:   MP_Observables
-    type:         map_str_dbl
+    sub_capabilities:
+      WiggleZ: default
 
 #======== Rule entries ========
 Rules:
@@ -120,22 +120,6 @@ Rules:
     function: set_classy_input_with_MPLike
     module: CosmoBit
 
-  - capability: MP_experiment_names
-    function: set_MP_experiment_names
-    options:
-      #Likelihoods: ["bao","Pantheon","Planck_SZ",]  
-      Likelihoods: 
-        bao_smallz_2014: default
-        Pantheon: default 
-        Planck_SZ: default  
-      # should eventually be possible to choose any MP like, atm only bao, Pantheon, Planck_SZ (& kids after 
-      # downloading data and when commenting out line 'parser_mp.existing_file(fname)', will include that into 
-      # build step soon) safe to use;
-      # still need to write a proper patch for MPLike backend & test all Likes
-      Observables:
-        WiggleZ: default
-
-
   # to speed up Neff calc for testing
   - capability: AlterBBN_Input
     options:
@@ -151,10 +135,6 @@ Rules:
                             [+2.303e-2, -3.775e-1, +3.897e-1, +1.000e00, +9.974e-1],
                             [+2.429e-2, -3.653e-1, +3.780e-1, +9.974e-1, +1.000e00]]
       relative_errors: [1.348e-3, 1.596e-2, 1.618e-2, 6.788e-2, 6.579e-2]
-
-  - capability: T_cmb
-    options:
-      T_cmb: 2.7255
 
    # Allow for negative values of dNur_BBN and dNur_CMB
    #  -> In this form, the option is set for all CosmoBit function and applies

@@ -45,9 +45,9 @@ Parameters:
  # nuisance parameters in Planck likelihood
  cosmo_nuisance_Planck_lite: !import include/Planck_2018/cosmo_nuisance_Planck_lite_gauss.yaml
 
- # model parameters for "DecayingDM_general"
- #AnnihilatingDM_general: !import include/AnnihilatingDM_general_scan.yaml
- DecayingDM_general: !import include/DecayingDM_general_scan.yaml
+ # model parameters for "AnnihilatingDM_mixture" / "DecayingDM_mixture"
+ #AnnihilatingDM_mixture: !import include/AnnihilatingDM_mixture_scan.yaml
+ DecayingDM_mixture: !import include/DecayingDM_mixture_scan.yaml
 
 #======== Prior setup ========
 Priors:
@@ -112,17 +112,20 @@ ObsLikes:
     capability:   MP_Combined_LogLike
     module:       CosmoBit
     type:         double
+    sub_capabilities:
+      bao_smallz_2014: default
+      Pantheon: default
+      Planck_SZ: default
 
   # A breakdown of each likelihood component in the above total lnL
   - purpose:      Observable
     capability:   MP_LogLikes
     type:         map_str_dbl
-
-  # Any observables requested by the user -- these are basically
-  # additional likelihoods -- so as not to optimise on lnL.
-  - purpose:      Observable
-    capability:   MP_Observables
-    type:         map_str_dbl
+    sub_capabilities:
+      bao_smallz_2014: default
+      Pantheon: default
+      Planck_SZ: default
+      WiggleZ: default
 
 #======== Rule entries ========
 Rules:
@@ -132,25 +135,6 @@ Rules:
   - capability: classy_final_input
     function: set_classy_input_with_MPLike
     module: CosmoBit
-
-  - capability: MP_experiment_names
-    function: set_MP_experiment_names
-    options:
-      # add likelihoods to be used for scan here & set path to the '<likelihood_name>.data' file containing
-      # the settings you want the likelihood to run with (e.g. path to data, which z-bins to use... ). 
-      # Note that the path has to be relative to your GAMBIT directory. 
-      # If you set it so "default" the default MontePython file 'likelihoods/<likelihood_name>/<likelihood_name>.data'
-      # will be used
-      Likelihoods: 
-        bao_smallz_2014: default #../montepython_public/montepython/likelihoods/bao_smallz_2014/bao_smallz_2014.data
-        Pantheon: default
-        Planck_SZ: default
-      # should eventually be possible to choose any MP like, atm only bao, Pantheon, Planck_SZ (& kids after 
-      # downloading data and when commenting out line 'parser_mp.existing_file(fname)', will include that into 
-      # build step soon) safe to use;
-      # still need to write a proper patch for MPLike backend & test all Likes
-      Observables:
-        WiggleZ: default
 
   # to speed up Neff calc for testing
   - capability: AlterBBN_Input

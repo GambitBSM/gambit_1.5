@@ -26,6 +26,10 @@
 ///          (sanjay.bloor12@imperial.ac.uk)
 ///   \date 2019 Nov
 ///
+///  \author Sebastian Hoof
+///          (hoof@uni-goettingen.de)
+///   \date 2020 Mar
+///
 ///  *********************************************
 
 #ifndef __CosmoModels_hpp__
@@ -36,11 +40,12 @@
   START_MODEL
   DEFINEPARS(T_cmb,omega_b,omega_cdm,H0,ln10A_s,n_s,tau_reio)
   MAP_TO_CAPABILITY(T_cmb,T_cmb)
+  MAP_TO_CAPABILITY(H0, H0)
 #undef MODEL
 
 // ΛCDM parameters without those relating to the primordial power spectrum (A_s, n_s)
 // This model should be scanned alongside an inflationary model able to provide
-// a primordial power spectrum. 
+// a primordial power spectrum.
 #define MODEL LCDM_no_primordial
   #define PARENT LCDM
   START_MODEL
@@ -48,6 +53,26 @@
   INTERPRET_AS_PARENT_FUNCTION(LCDM_to_LCDM_no_primordial)
   #undef PARENT
 #undef MODEL
+
+// Vanilla ΛCDM.
+#define MODEL LCDM_theta
+  START_MODEL
+  DEFINEPARS(T_cmb,omega_b,omega_cdm,100theta_s,ln10A_s,n_s,tau_reio)
+  MAP_TO_CAPABILITY(T_cmb,T_cmb)
+#undef MODEL
+
+// ΛCDM parameters without those relating to the primordial power spectrum (A_s, n_s)
+// This model should be scanned alongside an inflationary model able to provide
+// a primordial power spectrum.
+#define MODEL LCDM_theta_no_primordial
+  #define PARENT LCDM_theta
+  START_MODEL
+  DEFINEPARS(T_cmb,omega_b,omega_cdm,100theta_s,tau_reio)
+  INTERPRET_AS_PARENT_FUNCTION(LCDM_theta_to_LCDM_theta_no_primordial)
+  #undef PARENT
+#undef MODEL
+
+
 
 /* CMB + BBN */
 
@@ -120,155 +145,55 @@
   INTERPRET_AS_PARENT_FUNCTION(dNurCMB_to_dNurBBN_dNurCMB)
  #undef PARENT
 #undef MODEL
-  
+
 
 /* INFLATION */
 
-// inflationary models -- if one of them is in use you have to use the model LCDM_no_primordial 
-// to scan over the four standard cosmological parameters (H0, omega_b, omega_cdm, tau_reio) and
-// the shape of the primordial power spectrum will be determined by the inflation model in use
+// Inflationary models -- if one of them is in use you have to use the model LCDM_theta_no_primordial
+// to scan over the four standard cosmological parameters (H0 or theta, omega_b, omega_cdm, tau_reio).
+// The shape of the (either parameterised or full) primordial power spectrum will be determined by
+// the inflation model in use.
 
-
-// not used atm -- have to think about if we should keep it or not
-#define MODEL Inflation_tensor
-START_MODEL
-DEFINEPARS(ln10A_s,n_s,r_tensor)
-#undef MODEL
-
-/*
-#define MODEL inflation // a minimally defined general inflationary model with 3 sets of parameters.
+// Single field, monomic inflation with exponent 2/3 (assuming instant reheating)
+// Potential: V(phi) = 1.5 lambda phi^(2/3)
+#define MODEL Inflation_InstReh_1mono23
   START_MODEL
-  DEFINEPARS(phi_init0,dphi_init0,vparams1,vparams2,vparams3)
+  DEFINEPARS(lambda)
 #undef MODEL
-*/
 
-// Inflation model: 0.5 m^2 phi^2 --- quadratic inflation
-// A_s, n_s and r are given by inflationary model
-// parameters: N_piv, m^2.
-#define MODEL Inflation_SR1quad
+// Single field, quadratic inflation (assuming instant reheating)
+// Potential: V(phi) = lambda phi
+#define MODEL Inflation_InstReh_1linear
   START_MODEL
-  DEFINEPARS(m2_inflaton,N_pivot,phi_init0)
+  DEFINEPARS(lambda)
 #undef MODEL
 
-// Inflation model: 0.25 \lambda phi^4  --- quartic inflation
-// A_s, n_s and r are given by inflationary model
-// parameters: N_piv, lambda.
-#define MODEL Inflation_1quar
-START_MODEL
-DEFINEPARS(lambda,N_pivot,phi_init0)
-#undef MODEL
-
-// Inflation model: 3/2 \lambda phi^2/3 --- inflation
-// A_s, n_s and r are given by inflationary model
-// parameters: N_piv, lambda.
-#define MODEL Inflation_1mono23
-START_MODEL
-DEFINEPARS(lambda,N_pivot,phi_init0)
-#undef MODEL
-
-// Inflation model: m phi --- linear inflation
-// A_s, n_s and r are given by inflationary model
-// parameters: N_piv, m^2.
-#define MODEL Inflation_1linear
-START_MODEL
-DEFINEPARS(lambda,N_pivot,phi_init0)
-#undef MODEL
-
-// simplest 8 parameter cosmology smash inflation model --- smash inflation
-// A_s, n_s and r are given by inflationary model
-// parameters: xi, m^2.
-#define MODEL Inflation_smash
-START_MODEL
-DEFINEPARS(log10_xi,log10_beta,log10_lambda,N_pivot)
-#undef MODEL
-
-#define MODEL Inflation_1natural // N-flation (axions)
-START_MODEL
-DEFINEPARS(lambda,faxion,N_pivot,phi_init0)
-#undef MODEL
-
-
-/*
-
-#define MODEL inf_diff1 // Lambda^4 - mu*phi^4
+// Single field, quadratic inflation (assuming instant reheating)
+// Potential: V(phi) = 0.5 m^2 phi^2
+#define MODEL Inflation_InstReh_1quadratic
   START_MODEL
-  DEFINEPARS(phi_init0,dphi_init0,vparams1,vparams2,vparams3)
+  DEFINEPARS(m_phi)
 #undef MODEL
 
-#define MODEL inf_exp // Product of exponentials
+// Single field, quartic inflation (assuming instant reheating)
+// Potential: V(phi) = 0.25 lambda phi^4
+#define MODEL Inflation_InstReh_1quartic
   START_MODEL
-  DEFINEPARS(phi_init0,dphi_init0,vparams1,vparams2,vparams3)
+  DEFINEPARS(lambda)
 #undef MODEL
 
-#define MODEL inf_hybrid // Canonical two-field hybrid
+// Single field, natural inflation (assuming instant reheating)
+// Potential: V(phi) = Lambda^4 [1 + cos(phi/f)]
+#define MODEL Inflation_InstReh_1natural
   START_MODEL
-  DEFINEPARS(phi_init0,dphi_init0,vparams1,vparams2,vparams3)
+  DEFINEPARS(Lambda, f_phi)
 #undef MODEL
 
-#define MODEL inf_offset // V0 + m_i^2 phi_i^2
+// Single field, Starobinsky - aka R^2 - inflation (assuming instant reheating)
+// Potential: V(phi) = ...
+#define MODEL Inflation_InstReh_1Starobinsky
   START_MODEL
-  DEFINEPARS(phi_init0,dphi_init0,vparams1,vparams2,vparams3)
+  DEFINEPARS(Lambda)
 #undef MODEL
-
-// N-quadratic w/one quartic interaction
-// term phi_i^2 + phi_{lightest}^2*phi_i^2
-#define MODEL inf_intrx
-  START_MODEL
-  DEFINEPARS(phi_init0,dphi_init0,vparams1,vparams2,vparams3)
-#undef MODEL
-
-// Mass matrix with diagonal terms = m_i^2
-// Off-diagonal terms = \eps
-#define MODEL inf_offdiag
-  START_MODEL
-  DEFINEPARS(phi_init0,dphi_init0,vparams1,vparams2,vparams3)
-#undef MODEL
-
-#define MODEL inf_step // Multifield step potential
-  START_MODEL
-  DEFINEPARS(phi_init0,dphi_init0,vparams1,vparams2,vparams3)
-#undef MODEL
-
-#define MODEL inf_monomial // (1/p) lambda_i |phi_i|^p --- N-monomial
-  START_MODEL
-  DEFINEPARS(phi_init0,dphi_init0,vparams1,vparams2,vparams3)
-#undef MODEL
-
-#define MODEL inf_gaxion // Generalized axions
-  START_MODEL
-  DEFINEPARS(phi_init0,dphi_init0,vparams1,vparams2,vparams3)
-#undef MODEL
-
-#define MODEL inf_smash // SMASH potential
-  START_MODEL
-  DEFINEPARS(phi_init0,dphi_init0,vparams1,vparams2,vparams3)
-#undef MODEL
- */
-
-/* PLANCK NUISANCE PARAMETERS */
-
-#define MODEL cosmo_nuisance_Planck_TTTEEE
-  START_MODEL
-    DEFINEPARS(A_cib_217,cib_index,xi_sz_cib,A_sz,ps_A_100_100,ps_A_143_143,ps_A_143_217,ps_A_217_217,ksz_norm,gal545_A_100,gal545_A_143,gal545_A_143_217,gal545_A_217,galf_EE_A_100,galf_EE_A_100_143,galf_EE_A_100_217,galf_EE_A_143,galf_EE_A_143_217,galf_EE_A_217,galf_EE_index,galf_TE_A_100,galf_TE_A_100_143,galf_TE_A_100_217,galf_TE_A_143,galf_TE_A_143_217,galf_TE_A_217,galf_TE_index,calib_100T,calib_217T,calib_100P,calib_143P,calib_217P,A_pol,A_planck)
-#undef MODEL
-
-#define MODEL cosmo_nuisance_Planck_TT
-  //#define PARENT cosmo_nuisance_Planck_TTTEEE
-    START_MODEL
-    DEFINEPARS(A_cib_217,cib_index,xi_sz_cib,A_sz,ps_A_100_100,ps_A_143_143,ps_A_143_217,ps_A_217_217,ksz_norm,gal545_A_100,gal545_A_143,gal545_A_143_217,gal545_A_217,calib_100T,calib_217T,A_planck)
-  //#undef PARENT
-#undef MODEL
-
-#define MODEL cosmo_nuisance_Planck_lite
-  //#define PARENT cosmo_nuisance_Planck_TT
-    START_MODEL
-    DEFINEPARS(A_planck)
-  //#undef PARENT
-#undef MODEL
-
-//#define MODEL inflation
-//START_MODEL
-//DEFINEPARS(num_inflaton, potential_choice, slowroll_infl_end, instreheat, vparam_rows, use_deltaN_SR, evaluate_modes, use_horiz_cross_approx, get_runningofrunning, ic_sampling, energy_scale, numb_samples, save_iso_N, N_iso_ref, param_sampling, vp_prior_min, vp_prior_max, varying_N_pivot, use_first_priorval, phi_init0, dphi_init0, vparams, N_pivot, k_pivot, dlnk, turning_choice  calc_full_pk,  steps,  kmin,  kmax,  phi_init0_priors_min,  phi_init0_priors_max,  dphi_init0_priors_min,  dphi_init0_priors_max,  N_pivot_prior_min,  N_pivot_prior_max)
-//#undef MODEL
 
 #endif

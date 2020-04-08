@@ -53,6 +53,14 @@ endif()
 set(backend_download "${PROJECT_SOURCE_DIR}/Backends/downloaded")
 set(scanner_download "${PROJECT_SOURCE_DIR}/ScannerBit/downloaded")
 
+# Specify native make command to be put into backend build steps (for correct usage of gmake jobserver)
+set(MAKE_SERIAL "${CMAKE_MAKE_PROGRAM}")
+if(CMAKE_MAKE_PROGRAM MATCHES "make$")
+  set(MAKE_PARALLEL "$(MAKE)")
+else()
+  set(MAKE_PARALLEL "${MAKE_SERIAL}")
+endif()
+
 # Safer download function than what is in cmake (avoid buggy libcurl vs https issue)
 set(DL_BACKEND "${PROJECT_SOURCE_DIR}/cmake/scripts/safe_dl.sh" "${backend_download}" "${CMAKE_COMMAND}")
 set(DL_SCANNER "${PROJECT_SOURCE_DIR}/cmake/scripts/safe_dl.sh" "${scanner_download}" "${CMAKE_COMMAND}")
@@ -128,14 +136,25 @@ endmacro()
 
 # Function to check whether or not a given scanner or backend has been ditched
 function(check_ditch_status name version dir)
-  # Check first for optional argument for Mathematica backends
-  if ((ARGN STREQUAL "Mathematica" OR ARGN STREQUAL "mathematica") AND NOT HAVE_MATHEMATICA)
-    set (itch "${itch}" "${name}_${version}")
-  endif()  
-  # Check first for optional argument for Python2 specific backends
-  if ((ARGN STREQUAL "Python2" OR ARGN STREQUAL "python2"))
-    set (itch "${itch}" "${name}_${version}")
-  endif()
+  # Check first for optional argument
+  foreach(arg0 ${ARGN})
+    string(TOLOWER ${arg0} arg)
+    if ((arg STREQUAL "mathematica") AND NOT HAVE_MATHEMATICA)
+      set (itch "${itch}" "${name}_${version};")
+    elseif ((arg STREQUAL "python") AND NOT HAVE_PYBIND11)
+      set (itch "${itch}" "${name}_${version};")
+    elseif ((arg STREQUAL "python2") AND (NOT PYTHON_VERSION_MAJOR EQUAL 2 OR NOT HAVE_PYBIND11))
+      set (itch "${itch}" "${name}_${version};")
+    elseif ((arg STREQUAL "python3") AND (NOT PYTHON_VERSION_MAJOR EQUAL 3 OR NOT HAVE_PYBIND11))
+      set (itch "${itch}" "${name}_${version};")
+    elseif ((arg STREQUAL "hepmc") AND EXCLUDE_HEPMC)
+      set (itch "${itch}" "${name}_${version}")
+    elseif ((arg STREQUAL "yoda") AND EXCLUDE_YODA)
+      set (itch "${itch}" "${name}_${version}")
+    elseif ((arg STREQUAL "sqlite3") AND NOT SQLITE3_FOUND)
+      set (itch "${itch}" "${name}_${version}")
+    endif()
+  endforeach()
   foreach(ditch_command ${itch})
     execute_process(COMMAND ${PYTHON_EXECUTABLE} -c "print(\"${name}_${version}\".startswith(\"${ditch_command}\"))"
                     WORKING_DIRECTORY ${CMAKE_BINARY_DIR}

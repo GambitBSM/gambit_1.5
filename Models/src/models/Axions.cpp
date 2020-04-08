@@ -37,7 +37,7 @@ void MODEL_NAMESPACE::GeneralCosmoALP_to_DecayingDM_photon (const ModelParameter
 #undef FRIEND
 
 #define FRIEND etaBBN_rBBN_rCMB_dNurBBN_dNurCMB
-void MODEL_NAMESPACE::GeneralCosmoALP_to_etaBBN_rBBN_rCMB_dNurBBN_dNurCMB (const ModelParameters &myparams, ModelParameters &friendparams)
+void MODEL_NAMESPACE::GeneralCosmoALP_to_etaBBN_rBBN_rCMB_dNurBBN_dNurCMB (const ModelParameters & /*myparams*/, ModelParameters &friendparams)
 {
     USE_MODEL_PIPE(FRIEND) // get pipe for "interpret as friend" function
     logger()<<"Running interpret_as_friend calculations for GeneralCosmoALP -> etaBBN_rBBN_rCMB_dNurBBN_dNurCMB ..."<<EOM;

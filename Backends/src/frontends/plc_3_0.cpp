@@ -86,7 +86,7 @@ if(*InUse::CAT(plc_loglike_,NAME))                                              
     double res;                                                                          \
     clik_error* plc_Error = initError();                                                 \
     res =  CAT(TYPE,_compute) (CAT(TYPE,_map)[name].get(), cl_and_pars, &plc_Error);     \
-    if (isError(plc_Error))                                                              \
+    if (isError(plc_Error) || !(std::isfinite(res)))                                     \
     {                                                                                    \
       std::string ErrMssg = "Calling \"";                                                \
       ErrMssg +=  std::string(STRINGIFY(CAT(plc_loglike_,NAME))) + "\" ";                \

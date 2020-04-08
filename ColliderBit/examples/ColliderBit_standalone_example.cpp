@@ -28,7 +28,6 @@
 #include "gambit/Elements/standalone_module.hpp"
 #include "gambit/ColliderBit/ColliderBit_rollcall.hpp"
 
-using namespace ColliderBit::Accessors;     // Helper functions that provide some info about the module (here: ColliderBit)
 using namespace ColliderBit::Functown;      // Functors wrapping the module's actual module functions
 using namespace BackendIniBit::Functown;    // Functors wrapping the backend initialisation functions
 
@@ -82,13 +81,6 @@ int main(int argc, char* argv[])
     // Check that required backends are present. For this example we use the GAMBIT backend Pythia_EM 8.212, which is connected to GAMBIT via BOSS.
     if (not Backends::backendInfo().works["Pythia_EM8.212"]) backend_error().raise(LOCAL_INFO, "Pythia_EM 8.212 is missing!");
     if (not Backends::backendInfo().works["nulike1.0.7"]) backend_error().raise(LOCAL_INFO, "nulike 1.0.7 is missing!");
-
-    // Output some info about ColliderBit
-    cout << endl << "My name is " << name() << endl;
-    cout << endl << "I can calculate: " << endl << iCanDo << endl;
-    cout << endl << "...but I may need: " << endl << iMayNeed << endl << endl;
-
-
 
 
     // -----------------------------------

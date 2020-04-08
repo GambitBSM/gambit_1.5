@@ -63,7 +63,7 @@ BE_NAMESPACE
     return repeat_front_and_end(input,front,back);
   }
 
-  void calc_f(DarkAges::injectionSpectrum spec, double mass, double lifetime)
+  void calc_f(DarkAges::Energy_injection_spectrum spec, double mass, double lifetime)
   {
     if (alreadyCalculated)
       return;
@@ -139,9 +139,9 @@ BE_NAMESPACE
     return;
   }
 
-  DarkAges::fz_table gather_results()
+  DarkAges::Energy_injection_efficiency_table get_energy_injection_efficiency_table()
   {
-    DarkAges::fz_table result{};
+    DarkAges::Energy_injection_efficiency_table result{};
     logger().send("Message from 'gather_results' backend convenience function in DarkAges v1.0.0 wrapper (Start)",LogTags::info);
 
     auto safe_retrieve = [](const str& key) -> std::vector<double>
@@ -182,7 +182,7 @@ BE_NAMESPACE
 
     logger().send("Message from 'gather_results' backend convenience function in DarkAges v1.0.0 wrapper (Done casting NumPy-arrays into std vectors)",LogTags::info);
 
-    return std::move(result);
+    return result;
   }
 }
 END_BE_NAMESPACE
@@ -192,6 +192,7 @@ BE_INI_FUNCTION
 {
   result_map.clear();
   static bool scan_level = true;
+  static bool print_table = false;
   if (scan_level)
   {
     // Check if annihilating DM or decaying DM is considered.
@@ -239,13 +240,16 @@ BE_INI_FUNCTION
     }
 
     zmax = runOptions->getValueOrDef<double>(1e7,"z_max");
+
+    // Should the f(z) be printed (for debugging)
+    print_table = runOptions->getValueOrDef<bool>(false,"print_table");
   }
   scan_level = false;
 
   // Reset the 'alreadyCalculated' flag
   alreadyCalculated = false;
   logger().send("Message from \'DarkAges_1.2.0_ini\'. Retrieving the injection spectrum",LogTags::info);
-  DarkAges::injectionSpectrum spec = *Dep::injection_spectrum;
+  DarkAges::Energy_injection_spectrum spec = *Dep::energy_injection_spectrum;
   double mass{};
   double lifetime{};
   if (hasDecay)
@@ -264,5 +268,33 @@ BE_INI_FUNCTION
   logger().send("Message from \'DarkAges_1.2.0_ini\'. Starting now to execute \'calc_f\'.",LogTags::info);
   calc_f(spec,mass,lifetime);
   logger().send("Message from \'DarkAges_1.2.0_ini\'. Done executing \'calc_f\'.",LogTags::info);
+
+  if (print_table)
+  {
+    std::ostringstream buff;
+    buff << "---------------" << "\n";
+    if (f_eff_mode)
+      buff << "z\tf_eff" << "\n";
+    else
+      buff << "z\tf_heat\tf_lya\tf_hion\tf_heion\tf_lowe" << "\n";
+    for (unsigned int i = 0; i < result_map["redshift"].size(); i++)
+    {
+      buff << result_map["redshift"].at(i) << "\t";
+      if (f_eff_mode)
+      {
+        buff << result_map["effective"].at(i) << "\n";
+      }
+      else
+      {
+        buff << result_map["Heat"].at(i) << "\t";
+        buff << result_map["Ly-A"].at(i) << "\t";
+        buff << result_map["H-Ion"].at(i) << "\t";
+        buff << result_map["He-Ion"].at(i) << "\t";
+        buff << result_map["LowE"].at(i)  << "\n";
+      }
+    }
+    buff << "---------------" << "\n";
+    std::cout << buff.str();
+  }
 }
 END_BE_INI_FUNCTION

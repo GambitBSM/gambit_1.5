@@ -29,6 +29,16 @@
 ///          (sanjay.bloor12@imperial.ac.uk)
 ///  \date 2019 June, Nov
 ///
+///  \author Sebastian Hoof
+///          (hoof@uni-goettingen.de)
+///  \date 2020 Mar
+///
+///  \author Pat Scott
+///          (pat.scott@uq.edu.au)
+///  \date 2018 Mar
+///  \date 2019 Jul
+///  \date 2020 Apr
+///
 ///  *********************************************
 #include <cmath>
 #include <functional>
@@ -79,7 +89,7 @@ std::string multimode_error_handling(int& err)
       message = "The pivot scale didn't leave the horizon.";
       break;
     case 3:
-      message = "A modes' IC couldn't be consistently set.";
+      message = "A modes' initial conditions couldn't be set consistently.";
       break;
     case 4:
       message = "Too many e-folds; can't initialize the scale factor.";
@@ -93,20 +103,14 @@ std::string multimode_error_handling(int& err)
 
 
     /// < 0 = "fatal"
-    case -1: 
+    case -1:
       message = "Numerical underflow error in odeint.";
       break;
 
 
-    // Specifically added for SMASH
-    case 999:
-      message = "ICs for SMASH potential resulted in too long(or short) inflation.";
-      break;
-
-
     // Otherwise -- who knows.
-    default: 
-      message = "GAMBIT caught an error in MultiMode. Check the MultiModeCode output for more info.";
+    default:
+      message = "GAMBIT caught an unknown error in MultiMode. Check MultiModeCode output and error messages for more info (set the 'debug' switch in 'set_multimode_inputs' to '1' if you have set it to '0').";
   }
   return message;
 }
@@ -118,92 +122,9 @@ namespace Gambit
   {
     using namespace LogTags;
 
-    struct my_f_params { double a; double b; double c; double d; };
-
-    // Utility functions (not rolcalled)
-    double fn1 (double x, void * p)
+    void energy_injection_spectrum_AnnihilatingDM_mixture(DarkAges::Energy_injection_spectrum& spectrum)
     {
-      struct my_f_params * params
-      = (struct my_f_params *)p;
-      double a = (params->a);
-      double b = (params->b);
-      double c = (params->c);
-      double d = (params->d);
-
-      return exp(4.0/3.0*(d-0.125*(pow(10.0,b)+6.0*pow(10.0,a))*(-c*c+x*x)))
-      -(1.0+pow(10.0,a)*c*c)/(1.0+pow(10.0,a)*x*x);
-    }
-
-
-    // Returns SMASH potential value given parameters and field amplitude
-    double pot_SMASH(double lambda, double phi, double xi)
-    {
-      double Mpl = 1.0;
-      double pot;
-
-      pot = lambda/4.0*pow(phi,4.0)*pow(1.0+xi*(pow(phi,2.0))/Mpl,-2.0);
-
-      return pot;
-    }
-
-    double SRparameters_epsilon_SMASH(double phi, double b, double xi)
-    {
-      double Mpl = 1.0;
-      double eps = 0.0;
-
-      eps = 8.0*pow(Mpl,4.0)/(b*phi*phi*Mpl*Mpl+xi*(b+6.0*xi)*pow(phi,4.0));
-
-      std::cout << "eps = " << eps << std::endl;
-
-      return eps;
-    }
-
-    double SRparameters_eta_SMASH(double phi, double b, double xi)
-    {
-      double Mpl = 1.0;
-      double eta = 0.0;
-
-      eta = ((12.0*b*pow(Mpl,6.0)+4.0*pow(Mpl,4.0)*xi*phi*phi*(b+12.0*xi)
-      -8.0*Mpl*Mpl*xi*xi*pow(phi,4.0)*(b+6.0*xi))
-      /pow(b*Mpl*Mpl*phi+xi*pow(phi,3.0)*(b+6.0*xi),2.0));
-
-      std::cout << "eta = " << eta << std::endl;
-
-      return eta;
-    }
-
-    double ns_SR(double eps,double eta)
-    {
-      double ns = 0.0;
-
-      ns = 1.0 + 2.0*eta - 6.0*eps;
-
-      return ns;
-    }
-
-    double r_SR(double eps)
-    {
-      double r = 0.0;
-
-      r = 16.0*eps;
-
-      return r;
-    }
-
-    double As_SR(double eps,double pot)
-    {
-      const double pi = std::acos(-1);
-      double Mpl = 1.0;
-      double As = 0.0;
-
-      As = pot/24.0/pi/pi/eps/pow(Mpl,4.0);
-
-      return As;
-    }
-
-    void injection_spectrum_annihilatingDM(DarkAges::injectionSpectrum& spectrum)
-    {
-      using namespace Pipes::injection_spectrum_annihilatingDM;
+      using namespace Pipes::energy_injection_spectrum_AnnihilatingDM_mixture;
 
       double m = *Param["mass"];
       double BR_el = *Param["BR"];
@@ -228,9 +149,9 @@ namespace Gambit
       spectrum.spec_ph.resize(1,BR_ph*2e9);
     }
 
-    void injection_spectrum_decayingDM(DarkAges::injectionSpectrum& spectrum)
+    void energy_injection_spectrum_DecayingDM_mixture(DarkAges::Energy_injection_spectrum& spectrum)
     {
-      using namespace Pipes::injection_spectrum_decayingDM;
+      using namespace Pipes::energy_injection_spectrum_DecayingDM_mixture;
 
       double m = *Param["mass"];
       double BR_el = *Param["BR"];
@@ -373,19 +294,16 @@ namespace Gambit
       result = rho0_ALP / (ma0 * ssm0);
     }
 
-    void energy_injection_efficiency_func(DarkAges::fz_table& result)
+    void energy_injection_efficiency_func(DarkAges::Energy_injection_efficiency_table& result)
     {
       using namespace Pipes::energy_injection_efficiency_func;
-      result = BEreq::DA_efficiency_function();
+      result = BEreq::get_energy_injection_efficiency_table();
     }
-
 
     void f_effective_func(double& result)
     {
       using namespace Pipes::f_effective_func;
 
-      bool silent = runOptions->getValueOrDef<bool>(false,"silent_mode");
-      int last_steps = runOptions->getValueOrDef<int>(4,"show_last_steps");
       double z_eff = 0.01;
       if(ModelInUse("DecayingDM_general"))
       {
@@ -396,7 +314,7 @@ namespace Gambit
         z_eff = runOptions->getValueOrDef<double>(600.,"z_eff");
       }
 
-      DarkAges::fz_table fzt = *Dep::energy_injection_efficiency;
+      DarkAges::Energy_injection_efficiency_table fzt = *Dep::energy_injection_efficiency;
 
       bool f_eff_mode = fzt.f_eff_mode;
       std::vector<double> z = fzt.redshift;
@@ -408,67 +326,37 @@ namespace Gambit
       std::vector<double> feff = fzt.f_eff;
 
       int npts = z.size();
-      double ftot[npts];
-      double red[npts];
+      std::vector<double> ftot(npts);
       for (int i = 0; i < npts; i++)
       {
         if (f_eff_mode)
-          ftot[i] = feff.at(i);
+          ftot.at(i) = feff.at(i);
         else
-          ftot[i] = fh.at(i)+fly.at(i)+fhi.at(i)+fhei.at(i)+flo.at(i);
-        red[i] = z.at(i);
+          ftot.at(i) = fh.at(i) + fly.at(i) + fhi.at(i) + fhei.at(i) + flo.at(i);
       }
 
       gsl_interp_accel *gsl_accel_ptr = gsl_interp_accel_alloc();
       gsl_spline *spline_ptr = gsl_spline_alloc(gsl_interp_cspline, npts);
 
-      gsl_spline_init(spline_ptr, red, ftot, npts);
+      gsl_spline_init(spline_ptr, z.data(), ftot.data(), npts);
 
       result = gsl_spline_eval(spline_ptr, z_eff, gsl_accel_ptr);
 
       gsl_spline_free(spline_ptr);
       gsl_interp_accel_free(gsl_accel_ptr);
-
-      if (!silent)
-      {
-        std::cout << "################" << std::endl;
-        if (ModelInUse("DecayingDM_general"))
-        {
-          std::cout << "Scenario: Dark Matter Decay" << std::endl;
-          std::cout << "tau = " << *Param["lifetime"] << std::endl;
-        }
-        else if (ModelInUse("AnnihilatingDM_general"))
-          std::cout << "Scenario: Dark matter (s-wave) annihilation" << std::endl;
-        std::cout << "m = " << *Param["mass"] << std::endl;
-        std::cout << "BR (electron) = " << *Param["BR"] << std::endl;
-        std::cout << "---------------" << std::endl;
-        if (f_eff_mode)
-          std::cout << "z\tf_eff" << std::endl;
-        else
-          std::cout << "z\tf_heat\tf_lya\tf_hion\tf_heion\tf_lowe" << std::endl;
-        for (unsigned int i = z.size() - last_steps; i < z.size(); i++)
-        {
-          if (f_eff_mode)
-            std::cout << z.at(i) << "\t" << feff.at(i) << std::endl;
-          else
-            std::cout << z.at(i) << "\t" << fh.at(i) << "\t" << fly.at(i) << "\t" << fhi.at(i) << "\t" << fhei.at(i) << "\t" << flo.at(i)  << std::endl;
-        }
-        std::cout << "f_eff (sum of all channels at z = "<< z_eff << ") = " << result << std::endl;
-        std::cout << "################\n" << std::endl;
-      }
     }
 
 
     /// If no value for N_star (number of e folds before inflation ends) is specified in the yaml
-    /// file AND no inflation model is scanned fall back to default value of CLASS; otherwise 
-    /// it is a model parameter of the 
+    /// file AND no inflation model is scanned fall back to default value of CLASS; otherwise
+    /// it is a model parameter of the
     /// (heads-up: name in CLASS is N_star, not N_pivot)
     void set_N_pivot(double &result)
     {
 
       using namespace Pipes::set_N_pivot;
 
-      // if N_pivot is not in Parameter map either read in yaml file Rule if it exists or 
+      // if N_pivot is not in Parameter map either read in yaml file Rule if it exists or
       // fall back to default value in CLASS
       if( Param.find("N_pivot") == Param.end())
       {
@@ -481,16 +369,12 @@ namespace Gambit
       }
 
     }
-    
-    /// capability to set k_pivot for consistent use within cosmobit 
+
+    /// Function for setting k_pivot in Mpc^-1 for consistent use within CosmoBit
     /// (to make sure it is consistent between CLASS and multimodecode)
     void set_k_pivot(double &result)
     {
-
-      using namespace Pipes::set_k_pivot;
-
-      result = runOptions->getValueOrDef<double>(0.05, "k_pivot");
-
+      result = Pipes::set_k_pivot::runOptions->getValueOrDef<double>(0.05, "k_pivot");
     }
 
 
@@ -553,6 +437,8 @@ namespace Gambit
 
       map_str_dbl NuMassInfo = *Dep::NuMasses_SM;
 
+      static bool allow_massless = runOptions->getValueOrDef<bool>(false,"allow_massless_neutrinos");
+
       int N_ncdm = static_cast<int>(NuMassInfo["N_ncdm"]);
       double N_ur{};
       switch (N_ncdm)
@@ -567,12 +453,19 @@ namespace Gambit
           N_ur = 0.00641;  // N_ur (today) = 0.00641 for 3 massive neutrinos at CMB release
           break;
         case 0:
+          if (!allow_massless)
           {
             std::ostringstream err;
-            err << "Warning: All your neutrino masses are zero. The Planck baseline LCDM model assumes at least one massive neutrino.\n";
-            err << "A cosmological model without massive neutrinos is not implemented in CosmoBit. If you want to consider this you can add it to the function 'get_N_ur' of the capability 'N_ur' ";
-            CosmoBit_warning().raise(LOCAL_INFO, err.str());
+            err << "Warning/Error: All your neutrino masses are zero. The Planck baseline LCDM model assumes at least one massive neutrino of mass 0.06 eV.\n";
+            err << "A cosmological model without massive neutrinos can heavily affect your cosmological observables.\n\n";
+            err << "You can proceed at your own risk by adding\n\n";
+            err << "  - module: CosmoBit\n";
+            err << "    options:\n";
+            err << "      allow_massless_neutrinos: true\n\n";
+            err << "to the Rules section of the yaml-file";
+            CosmoBit_error().raise(LOCAL_INFO, err.str());
           }
+          N_ur = 3.046;
           break;
         default:
           {
@@ -587,15 +480,20 @@ namespace Gambit
       if (ModelInUse("etaBBN_rBBN_rCMB_dNurBBN_dNurCMB"))
       {
         // Check if the input for dNeff is negative (unphysical)
-        static bool allow_negative_dNeff = runOptions->getValueOrDef<bool>(false,"allow_negative_delta_N_ur");
+        static bool allow_negative_delta_N_ur = runOptions->getValueOrDef<bool>(false,"allow_negative_delta_N_ur");
         const ModelParameters& NP_params = *Dep::etaBBN_rBBN_rCMB_dNurBBN_dNurCMB_parameters;
         double dNurCMB =  NP_params.at("dNur_CMB");
         double rCMB =  NP_params.at("r_CMB");
-        if ( (!allow_negative_dNeff) && (dNurCMB < 0.0) )
+        if ( (!allow_negative_delta_N_ur) && (dNurCMB < 0.0) )
         {
-          std::string err = "A negative value for \"dNur_CMB\" is unphysical and is not allowed in CosmoBit by default!\n\n";
-          err += "If you want to proceed with megative values, please set the \"allow_negative_delta_N_ur\"-rule to \"true\" within the yaml-file.";
-          CosmoBit_error().raise(LOCAL_INFO,err.c_str());
+          std::ostringstream err;
+          err << "A negative value for \"dNur_CMB\" is unphysical and is not allowed in CosmoBit by default!\n\n";
+          err << "If you want to proceed with megative values, please add\n\n";
+          err << "  - module: CosmoBit\n";
+          err << "    options:\n";
+          err << "      allow_negative_delta_N_ur: true\n\n";
+          err << "to the Rules section of the yaml-file.";
+          CosmoBit_error().raise(LOCAL_INFO,err.str());
         }
 
         // If the check is passed, set the result.
@@ -604,7 +502,7 @@ namespace Gambit
       logger() << "N_ur calculated to be " << result << EOM;
     }
 
-    /// create a python dictionary with the inputs that have to be passed to class 
+    /// create a python dictionary with the inputs that have to be passed to class
     /// setting parameters related to (massive) neutrinos & ncdm components
     void set_classy_NuMasses_Nur_input(pybind11::dict &result)
     {
@@ -620,44 +518,40 @@ namespace Gambit
       result["N_ur"] = *Dep::N_ur;
 
       // Number of non-cold DM species
-      // if non-zero a mass & temperature for each species has to be 
+      // if non-zero a mass & temperature for each species has to be
       // passed to class
       if (N_ncdm > 0.)
       {
-        result["N_ncdm"] = N_ncdm;   
+        result["N_ncdm"] = N_ncdm;
 
         std::vector<double> m_ncdm = m_ncdm_classInput(NuMasses_SM);
-        // head up: this explicitly assumed that all ncdm components have the same temperature!! todo ? 
-        std::vector<double> T_ncdm(N_ncdm,*Dep::T_ncdm); 
+        // head up: this explicitly assumed that all ncdm components have the same temperature!! todo ?
+        std::vector<double> T_ncdm(N_ncdm,*Dep::T_ncdm);
 
-        // create one string with m_ncdm masses and 
+        // create one string with m_ncdm masses and
         // T_ncdm temperatures separated by commas (to match the input
         // format of class)
         std::ostringstream ss1, ss2;
         std::string separator;
-        for (auto x : m_ncdm) 
+        for (auto x : m_ncdm)
         {
           ss1 << separator << x;
           separator = ",";
         }
         separator = "";
-        for (auto x : T_ncdm) 
+        for (auto x : T_ncdm)
         {
           ss2 << separator << x;
           separator = ",";
         }
-        
+
         result["m_ncdm"] = ss1.str();
         result["T_ncdm"] = ss2.str();
-      }
-      else
-      {
-        result["T_ncdm"] = *Dep::T_ncdm;
       }
     }
 
     /// create a python dictionary with the standard inputs that have to be passed
-    /// to class: cosmological parameters (H0,omega_b,tau_reio,omega_cdm) & add 
+    /// to class: cosmological parameters ([H0/100*theta_s],omega_b,tau_reio,omega_cdm) & add
     /// model dependent results for N_ur, neutrino masses & helium abundance
     /// here potential extra input options given in the yaml file are read in
     void set_classy_baseline_params(pybind11::dict &result)
@@ -666,10 +560,16 @@ namespace Gambit
 
       //std::cout << " enter " << __PRETTY_FUNCTION__ << std::endl;
 
+      if (ModelInUse("LCDM") and ModelInUse("LCDM_theta"))
+      {
+        CosmoBit_error().raise(LOCAL_INFO, "You have requested to scan both LCDM and LCDM_theta.\n"
+                                           "This is not allowed. Please select one in your YAML file.");
+      }
+
       // make sure dict is empty
       result.clear();
 
-      // keep track if it is the first run -- if so 
+      // keep track if it is the first run -- if so
       // some extra consistency checks to make sure no contradicting
       // values are in the classy python input dictionary
       static bool first_run = true;
@@ -680,26 +580,35 @@ namespace Gambit
       merge_pybind_dicts(result, NuMasses_In, first_run);
 
       // standard cosmological parameters (common to all CDM -like models)
-      result["H0"] =            *Param["H0"];
       result["T_cmb"] =         *Param["T_cmb"];
       result["omega_b"] =       *Param["omega_b"];
       result["tau_reio"] =      *Param["tau_reio"];
       result["omega_cdm"] =     *Param["omega_cdm"];
 
+      // Depending on parametrisation, pass either Hubble or the acoustic scale
+      if (ModelInUse("LCDM"))
+      {
+        result["H0"] =  *Param["H0"];
+      }
+      else if (ModelInUse("LCDM_theta"))
+      {
+        result["100*theta_s"] = *Param["100theta_s"];
+      }
+
       // set helium abundance (vector Helium_abundance.at(0): mean, .at(1): uncertainty)
       std::vector<double> Helium_abundance = *Dep::Helium_abundance;
-      result["YHe"] = Helium_abundance.at(0); 
+      result["YHe"] = Helium_abundance.at(0);
 
       // TODO: need to test if class or exo_class in use! does not work -> (JR) should be fixed with classy implementation
-      // -> (JR again) not sure if that is actually true.. need to test.  
+      // -> (JR again) not sure if that is actually true.. need to test.
       if (ModelInUse("DecayingDM_general") || ModelInUse("AnnihilatingDM_general"))
       {
         // add Decaying/annihilating DM specific options to python dictionary passed to CLASS, consistency checks only executed in first run
         merge_pybind_dicts(result,*Dep::classy_parameters_EnergyInjection, first_run);
       }
-      
 
-      // Other Class input direct from the YAML file 
+
+      // Other Class input direct from the YAML file
       // check if these are already contained in the input dictionary -- if so throw an error
       // only do it for the first run though
       static pybind11::dict yaml_input;
@@ -713,7 +622,7 @@ namespace Gambit
           {
             std::string name = it->first.as<std::string>();
             std::string value = it->second.as<std::string>();
-            
+
             // Check if the key exists in the dictionary
             if (not result.contains(name.c_str()))
             {
@@ -721,7 +630,7 @@ namespace Gambit
             }
             // If it does, throw an error, there's some YAML conflict going on.
             else
-            { 
+            {
               std::cout << pybind11::repr(result) << std::endl;
               CosmoBit_error().raise(LOCAL_INFO, "The key '" + name + "' already "
                 "exists in the CLASSY dictionary. You are probably trying to override a model parameter. If you really"
@@ -732,7 +641,7 @@ namespace Gambit
         }
       }
 
-      /// check that user did not try to pass k_pivot or N_star through class dictionary -- these are 
+      /// check that user did not try to pass k_pivot or N_star through class dictionary -- these are
       /// fixed by capabilities to ensure consistent use throughout the code
       if (yaml_input.contains("k_pivot") || yaml_input.contains("N_star"))
       {
@@ -752,7 +661,7 @@ namespace Gambit
       }
       // If the model LCDM_no_primordial is used the primordial power spectrum is computed independent of CLASS. Therefore
       // this option should not be passed by the user
-      if (ModelInUse("LCDM_no_primordial"))
+      if (ModelInUse("LCDM_no_primordial") || ModelInUse("LCDM_theta_no_primordial"))
       {
         if (yaml_input.contains("P_k_ini type"))
         {
@@ -766,11 +675,11 @@ namespace Gambit
 
       // add yaml options to python dictionary passed to CLASS, consistency checks only executed in first run
       merge_pybind_dicts(result,yaml_input, first_run);
-      
+
 
       // At last: if the Planck likelihood is used add all relevant input parameters to the CLASS dictionary:
       // output: 'lCl, pCl, tCl', lensing: yes, non linear: halofit , l_max_scalar: 2508
-      // Note: this has to be done *after* the yaml options are read it since it would trigger an error of duplicated 
+      // Note: this has to be done *after* the yaml options are read it since it would trigger an error of duplicated
       //   keys in case the user specifies one of the options themselves. The 'merge_pybind_dicts' routine will properly
       //   with concatennating the output values and choosing the maximum passed value for l_max_scalars. Contradictions
       //   in the lensing or non linear choice will rightfully trigger an error.
@@ -786,7 +695,7 @@ namespace Gambit
     /// Set the LCDM_no_primordial_ps in classy. Depends on a parametrised primordial_ps.
     /// Looks at the parameters used in a run,
     /// and passes them to classy in the form of a Python dictionary.
-    void set_classy_parameters_parametrised_ps(CosmoBit::Classy_input& result)
+    void set_classy_parameters_parametrised_ps(Classy_input& result)
     {
       using namespace Pipes::set_classy_parameters_parametrised_ps;
 
@@ -801,21 +710,21 @@ namespace Gambit
       result.add_entry("n_s", pps.get_n_s());
       result.add_entry("ln10^{10}A_s", pps.get_A_s());
 
-      // add k_pivot and N_pivot entries
+      // add k_pivot entry
       result.add_entry("P_k_ini type", "analytic_Pk");
       result.add_entry("k_pivot", *Dep::k_pivot);
-      
+
 
       // if r = 0 only compute scalar modes, else tensor modes as well
       //
       // => don't explicitly set "modes" to 's' since it defaults to it. If you set it here anyways
       // you won't be able to run CLASS when only requesting background quantities (e.g. for BAO & SNe likelihoods)
-      // as the perturbations module won't run and therefore the entry "modes" won't be read. 
-      if(pps.get_r() == 0){} 
+      // as the perturbations module won't run and therefore the entry "modes" won't be read.
+      if(pps.get_r() == 0){}
       else
       {
         // don't set to zero in CLASS dict as it won't be read if no tensor modes are requested
-        result.add_entry("r", pps.get_r()); 
+        result.add_entry("r", pps.get_r());
         result.add_entry("modes","t,s");
       }
 
@@ -825,7 +734,7 @@ namespace Gambit
       // Note: this should only contain a value for 'k_pivot' if the model 'LCDM'
       //    is in use.
       pybind11::dict classy_base_dict = *Dep::classy_baseline_params;
-      
+
       // Add classy_base_dict entries to the result dictionary of the type Classy_input
       std::string common_keys = result.add_dict(classy_base_dict);
       if(common_keys != "")
@@ -840,7 +749,7 @@ namespace Gambit
     /// Set the LCDM_no_primordial_ps in classy. Depends on a primordial_ps.
     /// Looks at the parameters used in a run,
     /// and passes them to classy in the form of a Python dictionary.
-    void set_classy_parameters_primordial_ps(CosmoBit::Classy_input& result)
+    void set_classy_parameters_primordial_ps(Classy_input& result)
     {
       using namespace Pipes::set_classy_parameters_primordial_ps;
 
@@ -849,7 +758,7 @@ namespace Gambit
       // Clean the input container
       result.clear();
 
-      // Now need to pass the primordial power spectrum 
+      // Now need to pass the primordial power spectrum
       static Primordial_ps pps{};
       pps = *Dep::primordial_power_spectrum;
       result.add_entry("modes", "t,s");
@@ -861,8 +770,9 @@ namespace Gambit
       result.add_entry("lnk_size" , pps.get_vec_size()); // don't hard code but somehow make consistent with multimode @TODO -> test
       // pass pivot scale of external spectrum to CLASS
       result.add_entry("k_pivot", *Dep::k_pivot);
-      result.add_entry("N_star",  *Dep::N_pivot);
-      
+      // N.B. We don't need to pass this parameter as it is only used in class to get the shape of the primordial power spectrum
+      //result.add_entry("N_star",  *Dep::N_pivot);
+
       // Get standard cosmo parameters, nu masses, helium abundance &
       // extra run options for class passed in yaml file to capability
       // 'classy_baseline_params'
@@ -887,7 +797,10 @@ namespace Gambit
       }
     }
 
-    /// Function to set the generic inputs used for MultiModeCode.
+    // Function to set the generic inputs used for MultiModeCode (MMC).
+    // N.B. Most of the available MMC parameters are already set by the default constructor of Multimode_inputs. These default
+    //      values generally relate to the case of a single inflation field with instant reheating. In general, at least some of the
+    //      parameters need to be adjusted for other models.
     void set_multimode_inputs(Multimode_inputs &result)
     {
       using namespace Pipes::set_multimode_inputs;
@@ -895,78 +808,66 @@ namespace Gambit
       // Clear anything from previous run
       result = Multimode_inputs();
 
-      // N_pivot is model parameter in all inflation models
-      result.N_pivot = *Param["N_pivot"];
-      
-      // NOTE: if the flag 'ic_samp_flags' is set to 1 then phi0 is fixed to phi_ini0
-      // and the fields velocities are assumed to be slow roll => no sampling over 
-      // phi_init0 and dphi_init0. Set them as GAMBIT model parameters if you want to 
-      // sample over these as well (and adopt the choice for the sampling flag s.t.
-      // the entries for dphi_init0 are taken into account. You will also need to set
-      // the prior ranges to be equal to the central value to prevent multimode from 
-      // doing some sampling on its own.. )
+      // Silence uncaught error messages from MMC ('0' = output, '1' = no output).
+      result.silence_output = runOptions->getValueOrDef<int>(0,"silence_output");
 
+      // Set pivot scale consistently with the rest of CosmoBit via capability
+      result.k_pivot = *Dep::k_pivot;
+      // Difference in k-space used when pivot-scale observables from mode equations are evaluated
+      result.dlnk = runOptions->getValueOrDef<double>(0.4,"dlnk");
 
-      // Go through each allowed inflationary model and set the choice of potential parameters (vparams), 
-      // the number of inflatons, and the initial conditions from the GAMBIT inputs.
-      
-      // N.B. Potential definitions are in the MultiModeCode file modpk_potential.f90, if you wish to 
-      // study a new inflationary potential then implement it there.
-      if (ModelInUse("Inflation_SR1quad"))
+      // Set k-range and number of k-values (in log space) where the full power spectrum (PS) is evaluated
+      // N.B. Not used if only the parameterised PS has been requested in a scan
+      result.k_min = runOptions->getValueOrDef<double>(1e-6,"k_min");
+      result.k_max = runOptions->getValueOrDef<double>(1e+6,"k_max");
+      result.numsteps = runOptions->getValueOrDef<int>(100,"numsteps");
+      if (result.numsteps > 1000) { CosmoBit_error().raise(LOCAL_INFO, "Currently MultiModeCode supports a maximum k-array size of 1000. Please change your yaml file settings."); };
+
+      // Go through each inflation model known to GAMBIT, set the number of inflaton field, the parameters
+      // for the inflation potential parameters (vparams), and initial conditions.
+
+      // N.B. Available inflation potentials are defined in the MultiModeCode file modpk_potential.f90.
+      //      If you want to study an inflation model of inflation that is not listed below, check if
+      //      the model is available in modpk_potential.f90 or add it to that file before adding it here.
+      if (ModelInUse("Inflation_InstReh_1mono23"))
       {
-        result.vparams.push_back(*Param["m2_inflaton"]);
-        result.phi_init0.push_back(*Param["phi_init0"]);
-        result.potential_choice = 1; // -> 0.5 m_i^2 phi_i^2 --- N-quadratic
-        result.num_inflaton = 1;
+        result.vparams.push_back(log10(*Param["lambda"])); // MultiModeCode uses log10 of this parameter
+        result.potential_choice = 5; // V(phi) = 1.5 lambda phi^(2/3)
         result.vparam_rows = 1;
       }
-      else if (ModelInUse("Inflation_1natural"))
+      else if (ModelInUse("Inflation_InstReh_1linear"))
       {
-        result.vparams.push_back(*Param["lambda"]); 
-        result.vparams.push_back(*Param["faxion"]); // finv = 1.e0_dp/(10.e0_dp**faxion))
-        result.phi_init0.push_back(*Param["phi_init0"]);
-        result.potential_choice = 2; // -> lambda**4*(1.e0_dp+cos(finv*phi))
-        result.num_inflaton = 1;
+        result.vparams.push_back(log10(*Param["lambda"])); // MultiModeCode uses log10 of this parameter
+        result.potential_choice = 4; // V(phi) = lambda phi
+        result.vparam_rows = 1;
+      }
+      else if (ModelInUse("Inflation_InstReh_1quadratic"))
+      {
+        result.vparams.push_back(2.0*log10(*Param["m_phi"])); // MultiModeCode uses log10 of m_phi^2
+        result.potential_choice = 1; // V(phi) = 0.5 m^2 phi^2
+        result.vparam_rows = 1;
+      }
+      else if (ModelInUse("Inflation_InstReh_1quartic"))
+      {
+        result.vparams.push_back(log10(*Param["lambda"])); // MultiModeCode uses log10 of this parameter
+        result.potential_choice = 3; // V(phi) = 0.25 lambda phi^4
+        result.vparam_rows = 1;
+      }
+      else if (ModelInUse("Inflation_InstReh_1natural"))
+      {
+        // MultiModeCode uses log10 of both parameters below
+        result.vparams.push_back(log10(*Param["Lambda"]));
+        result.vparams.push_back(log10(*Param["f_phi"]));
+        result.potential_choice = 2; // V(phi) = Lambda^4 [ 1 + cos(phi/f) ]
         result.vparam_rows = 2;
       }
-      else if (ModelInUse("Inflation_1quar"))
+      else if (ModelInUse("Inflation_InstReh_1Starobinsky"))
       {
-        result.vparams.push_back(*Param["lambda"]);
-        result.phi_init0.push_back(*Param["phi_init0"]);
-        result.potential_choice = 3; // -> 0.25 lambda_i phi_i^4 --- N-quartic
-        result.num_inflaton = 1;
+        double lsquared = (*Param["Lambda"])*(*Param["Lambda"]);
+        result.vparams.push_back(lsquared*lsquared); // MultiModeCode uses the fourth power of Lambda as a parameter
+        result.potential_choice = 19; // V(phi) = Lambda^4 [ 1 - exp(-sqrt(2/3) phi) ]^2
         result.vparam_rows = 1;
       }
-      else if (ModelInUse("Inflation_1linear"))
-      {
-        result.vparams.push_back(*Param["lambda"]);
-        result.phi_init0.push_back(*Param["phi_init0"]);
-        result.potential_choice = 4; // -> lambda_i phi_i --- N-linear
-        result.num_inflaton = 1;
-        result.vparam_rows = 1;
-      }
-      else if (ModelInUse("Inflation_1mono23"))
-      {
-        result.vparams.push_back(*Param["lambda"]);
-        result.phi_init0.push_back(*Param["phi_init0"]);
-        result.potential_choice = 5; // -> 1.5 lambda_i phi_i^(2/3)
-        result.num_inflaton = 1;
-        result.vparam_rows = 1;
-      }
-      else if (ModelInUse("Inflation_1hilltopInf"))
-      {
-        // @Selim, I don't know the form of the potential so I can't figure 
-        // out which one the corresponding one in multimode would be
-        result.vparams.push_back(*Param["lambda"]); 
-        result.vparams.push_back(*Param["mu"]);
-        result.phi_init0.push_back(*Param["phi_init0"]);
-        result.potential_choice = 5; 
-        result.num_inflaton = 1;
-        result.vparam_rows = 2;
-      }
-
-      // (JR) TODO: MultiMode segFaults if this is empty have to do this properly though 
-      result.dphi_init0.push_back(1.);
 
       static bool first_run = true;
       // do some consistency check for inputs passed to multimode before the first run
@@ -991,71 +892,20 @@ namespace Gambit
         }
         first_run = false;
       }
-
-
-      /// @TODO Separate into cases where we want the full ps and the parametrised ps
-
-      result.k_min = runOptions->getValueOrDef<double>(1e-6,"k_min");
-      result.k_max = runOptions->getValueOrDef<double>(1e+6,"k_max");
-      result.numsteps = runOptions->getValueOrDef<int>(100, "numsteps");
-
-      if (result.numsteps > 1000)
-        CosmoBit_error().raise(LOCAL_INFO, "Currently MultiModeCode supports a maximum k-array size of 1000. Please change your yaml file settings.");
-
-
-      //  Read in MultiMode settings from the yaml file
-      // TODO use getValueOrDef as much as possible
-
-      //-------------------------------------------------------------
-      // Parameters to control how the ICs are sampled.
-      //-------------------------------------------------------------
-      result.ic_sampling = runOptions->getValue<int> ("ic_sampling");
-      result.energy_scale = runOptions->getValue<double> ("energy_scale");
-      result.numb_samples = runOptions->getValue<int> ("numb_samples");
-      result.save_iso_N = runOptions->getValue<int> ("save_iso_N");
-      result.N_iso_ref = runOptions->getValue<int> ("N_iso_ref"); //double check this
-      result.slowroll_infl_end = runOptions->getValue<int> ("slowroll_infl_end");
-      result.instreheat = runOptions->getValue<int> ("instreheat");
-
-
-      // (JR) @Selim: we should probably double check if we need
-      // to set these parameters or if we can/should fix them as well. 
-      //-------------------------------------------------------------
-      // Control the output of analytic approximations for comparison.
-      //-------------------------------------------------------------
-      result.use_deltaN_SR = runOptions->getValue<int> ("use_deltaN_SR");
-      result.evaluate_modes = runOptions->getValue<int> ("evaluate_modes");
-      result.use_horiz_cross_approx = runOptions->getValue<int> ("use_horiz_cross_approx");
-      result.get_runningofrunning = runOptions->getValue<int> ("get_runningofrunning");
-
-      // has to be set to be the same as the scale entering class. todo
-      // fix through some capability (probably the same setting the clac_pk_full variable for first version)
-      result.k_pivot = *Dep::k_pivot; 
-      // difference in k-space used when pivot-scale observables from mode equations are evaluated
-      // Samples in uniform increments in log(k).
-      result.dlnk = runOptions->getValue<double> ("dlnk");
-
     }
 
-    /// Passes the inputs from the MultiModeCode initialisation function 
-    /// and computes the outputs.
-    /// TODO: split this up into primordial_ps and parametrised_ps versions.
+    /// Uses the inputs from the MultiModeCode initialisation function to computes inflationary observables.
     void get_multimode_primordial_ps(Primordial_ps &result)
-    { 
+    {
       using namespace Pipes::get_multimode_primordial_ps;
 
       // Clear it all
       result = Primordial_ps();
 
-      
       // Get the inflationary inputs
       Multimode_inputs inputs = *Dep::multimode_input_parameters;
 
-      // TODO S.B shouldn't need these...
-      // double N_pivot_prior_min = inputs.N_pivot;
-      // double N_pivot_prior_max = inputs.N_pivot;
-
-      // The parameters below are only used by multimode if the full Pk is requested. 
+      // The parameters below are only used by multimode if the full Pk is requested.
       int steps = inputs.numsteps;
       double kmin = inputs.k_min;
       double kmax = inputs.k_max;
@@ -1069,7 +919,7 @@ namespace Gambit
       //-------------------------------------------------------------
 
       try
-      { 
+      {
         observables = BEreq::multimodecode_primordial_ps(inputs.num_inflaton,
                                                        inputs.potential_choice,
                                                        inputs.evaluate_modes,
@@ -1083,7 +933,11 @@ namespace Gambit
                                                        steps,
                                                        kmin,
                                                        kmax,
-                                                       inputs.vparam_rows);
+                                                       inputs.vparam_rows,
+                                                       inputs.slowroll_infl_end,
+                                                       inputs.instreheat,
+                                                       inputs.use_deltaN_SR,
+                                                       inputs.use_horiz_cross_approx);
       }
       catch(std::runtime_error &e)
       {
@@ -1100,6 +954,7 @@ namespace Gambit
       }
 
       // Fill up the GAMBIT prim. PS if we're good.
+      result.set_N_pivot(observables.N_pivot);
       result.fill_k(observables.k_array, inputs.numsteps);
       result.fill_P_s(observables.pks_array, inputs.numsteps);
       result.fill_P_s_iso(observables.pks_array_iso, inputs.numsteps);
@@ -1107,19 +962,15 @@ namespace Gambit
 
     }
 
-    /// Passes the inputs from the MultiModeCode initialisation function 
+    /// Passes the inputs from the MultiModeCode initialisation function
     /// and computes the outputs.
     /// TODO: split this up into primordial_ps and parametrised_ps versions.
     void get_multimode_parametrised_ps(Parametrised_ps &result)
-    { 
+    {
       using namespace Pipes::get_multimode_parametrised_ps;
 
       // Get the inflationary inputs
       Multimode_inputs inputs = *Dep::multimode_input_parameters;
-
-      // TODO S.B shouldn't need these...
-      // double N_pivot_prior_min = inputs.N_pivot;
-      // double N_pivot_prior_max = inputs.N_pivot;
 
       gambit_inflation_observables observables;
 
@@ -1140,12 +991,16 @@ namespace Gambit
                                                          inputs.N_pivot,
                                                          inputs.k_pivot,
                                                          inputs.dlnk,
-                                                         inputs.vparam_rows);
+                                                         inputs.vparam_rows,
+                                                         inputs.slowroll_infl_end,
+                                                         inputs.instreheat,
+                                                         inputs.use_deltaN_SR,
+                                                         inputs.use_horiz_cross_approx);
       }
       catch(std::runtime_error &e)
       {
         logger() << e.what() << EOM;
-	invalid_point().raise(e.what());
+        invalid_point().raise(e.what());
       }
       // If there's an error -> pass it to the helper function and invalidate the point
       if(observables.err != 0)
@@ -1155,10 +1010,11 @@ namespace Gambit
         invalid_point().raise(message);
       }
 
+      result.set_N_pivot(observables.N_pivot);
       result.set_n_s(observables.ns);
       result.set_A_s(observables.As);
       result.set_r(observables.r);
- 
+
     }
 
     void get_parametrised_ps_LCDM(Parametrised_ps &result)
@@ -1167,23 +1023,24 @@ namespace Gambit
 
       // Check not using non-primordial version
 
-      // (JR) got the error when the lines below were uncommented... todo check what's going on 
+      // (JR) got the error when the lines below were uncommented... todo check what's going on
       //Problem with ModelInUse("LCDM_no_primordial").
-      //This model is not known by CosmoBit::get_parametrised_ps_LCDM.  
+      //This model is not known by CosmoBit::get_parametrised_ps_LCDM.
       //Please make sure that it has been mentioned in some context in the
       //rollcall header declaration of this function.
 
 
-      //if (ModelInUse("LCDM_no_primordial"))  
+      //if (ModelInUse("LCDM_no_primordial"))
       //{
       //  CosmoBit_error().raise(LOCAL_INFO, "You cannot use the LCDM_no_primordial_ps model to get"
       //                      " a power spectrum!! Try the function get_multimode_parametrised_ps...");
       //}
 
       Parametrised_ps pps;
+      pps.set_N_pivot(55);
       pps.set_n_s(*Param["n_s"]);
       pps.set_A_s(*Param["ln10A_s"]);
-      pps.set_r(0); 
+      pps.set_r(0);
 
       result = pps;
     }
@@ -1196,153 +1053,6 @@ namespace Gambit
       result = pps.get_parametrised_ps_map();
     }
 
-    // still needs to be rewritten and dived into two functions. Also 
-    // should fill the new 
-    void get_parametrised_ps_SMASH(Parametrised_ps &result)
-    {
-      using namespace Pipes::get_parametrised_ps_SMASH;
-
-      //---------------------------------------------------------------//
-      // Below, SMASH inflationary potential is calculated and
-      // the slow-roll apporximation is used to get the observables
-      // A_s, n_s and r from model parameters and the inital value
-      // of the inflaton potential at which infator starts its
-      // slow-roll with zero-velocity.
-      //---------------------------------------------------------------//
-
-        std::vector<double> vparams = runOptions->getValue<std::vector<double> >("vparams");
-
-        vparams[0] = *Param["log10_xi"];
-        vparams[1] = *Param["log10_beta"];
-        vparams[2] = *Param["log10_lambda"];
-
-
-        /* coefficients of:
-         P(x) = -8+b*\phi**2+b*\xi*\phi**4+6*\xi**2*\phi**4
-         */
-        double smashp1[5] = { -8.0, 0, pow(10.0,vparams[1]), 0, (pow(10.0,vparams[1])*
-                                                                 pow(10.0,vparams[0])+
-                                                                 6.0*pow(10.0,vparams[0])*
-                                                                 pow(10.0,vparams[0]))};
-
-        double smashd1[8];
-
-        gsl_poly_complex_workspace * wsmash = gsl_poly_complex_workspace_alloc (5);
-        gsl_poly_complex_solve (smashp1, 5, wsmash, smashd1);
-        gsl_poly_complex_workspace_free (wsmash);
-
-        double badway[4] = {smashd1[0],smashd1[2],smashd1[4],smashd1[6]};
-        double tempbw = 0;
-
-        for(int i=0;i<4;i++)
-        {
-          if(badway[i]>tempbw) tempbw=badway[i];
-        }
-
-        vparams[3] = tempbw;
-
-        //-------------------------------------------------------------
-        //                  Sampling N_pivot
-        //-------------------------------------------------------------
-        double N_pivot = *Param["N_pivot"];
-
-        // Solving the slow-roll equality to
-        int status;
-        int iter = 0, max_iter = 100000;
-        const gsl_min_fminimizer_type *T;
-        gsl_min_fminimizer *s;
-        double m = tempbw*10.0; // Correct for.
-        double a = 0.0, b = 100.0; // Correct for.
-        gsl_function F;
-
-        struct my_f_params params = { vparams[0], vparams[1], vparams[3] , N_pivot};
-
-        F.function = &fn1;
-        F.params = &params;
-
-        T = gsl_min_fminimizer_brent;
-        s = gsl_min_fminimizer_alloc (T);
-        gsl_min_fminimizer_set (s, &F, m, a, b);
-
-        do
-        {
-          iter++;
-          status = gsl_min_fminimizer_iterate (s);
-
-          m = gsl_min_fminimizer_x_minimum (s);
-          a = gsl_min_fminimizer_x_lower (s);
-          b = gsl_min_fminimizer_x_upper (s);
-
-          status = gsl_min_test_interval (a, b, 0.01, 0.0);
-
-        }
-        while (status == GSL_CONTINUE && iter < max_iter);
-
-        gsl_min_fminimizer_free (s);
-
-        double smash_pot = 0.0;
-        double smash_eps = 0.0;
-        double smash_eta = 0.0;
-
-        smash_pot = pot_SMASH(pow(10.0,*Param["log10_lambda"]),
-                              a,
-                              pow(10.0,*Param["log10_xi"]));
-        smash_eps = SRparameters_epsilon_SMASH(a,
-                                               pow(10.0,*Param["log10_beta"]),
-                                               pow(10.0,*Param["log10_xi"]));
-        smash_eta = SRparameters_eta_SMASH(a,
-                                           pow(10.0,*Param["log10_beta"]),
-                                           pow(10.0,*Param["log10_xi"]));
-
-        double As_self = 0.0;
-        double ns_self = 0.0;
-        double r_self = 0.0;
-
-        As_self = As_SR(smash_eps,smash_pot);
-        ns_self = ns_SR(smash_eps,smash_eta);
-        r_self  = r_SR(smash_eps);
-
-        //-------------------------------------------------------------
-        /* Have calculated the field value at N_pivot
-         predicted by slow-roll approximation.
-         Choosing a very close slightly higher
-         value will be satisfactory for initial conditions.
-         */
-        //-------------------------------------------------------------
-        Parametrised_ps pps;
-        pps.set_n_s(ns_self);
-        pps.set_A_s(As_self); // TODO check if we need to exponentiate
-        pps.set_r(r_self); 
-
-        result = pps;
-    }
-
-
-    /*
-    /// have to think about how tho to that without causing a cricle in dep resolution
-    //  -- need to pass the options below to class and 
-    /// then class can return the vectors with the k, Pks and Pkt. todo
-    void get_primordial_ps_SMASH(Primordial_ps &result)
-    {
-      using namespace Pipes::get_primordial_ps_SMASH;
-      
-      pybind11::dict classy_input;
-      //-------------------------------------------------------------
-      // Having CLASS primordial.h module calculate inflationary predictions of the SMASH potential.
-      //-------------------------------------------------------------
-      classy_input["P_k_ini type"] = "inflation_V";
-      classy_input["potential"] = "smash_inflation";
-      classy_input["V_0"] = *Param["log10_xi"];
-      classy_input["V_1"] = *Param["log10_beta"];
-      classy_input["V_3"] = *Param["log10_lambda"];
-      classy_input["V_2"] = -100.; //Hard coding \chi inflaton potential boundaries
-      
-      // this does not do anything but and also does not work but I couldn't introduce a 
-      // new compiler warning after Sanjay just removed all of them... 
-      std::vector<double> k = result.get_k(); 
-    }*/
-
-    
 
 // Getter functions for CL spectra from classy
 
@@ -1601,30 +1311,27 @@ namespace Gambit
       // result = runOptions->getValueOrDef<double>(0.71611,"T_ncdm");
     }
 
-    void set_T_ncdm_SM(double &result)
+    void T_ncdm(double &result)
     {
-      using namespace Pipes::set_T_ncdm_SM;
+      using namespace Pipes::T_ncdm;
 
-      // set to 0.71611 in units of photon temperature, above the instantaneous decoupling value (4/11)^(1/3)
-      // to recover Sum_i mNu_i/omega = 93.14 eV resulting from studies of active neutrino decoupling (hep-ph/0506164)
-      result = *Dep::T_ncdm_SM;
-      // This standard values enters in many assumption entering class. Therefore changing this value in
-      // the yaml file is disabled at the moment. If you still want to modify it uncomment the line below and
-      // you can set is as a run option (as T_cmb).
-      // result = runOptions->getValueOrDef<double>(0.71611,"T_ncdm");
+      double rCMB = 1.0; // Default value if no energy injection is assumed.
+
+      // If the "etaBBN_rBBN_rCMB_dNurBBN_dNurCMB" model is included in the scan,
+      // we use rCMB of this model.
+      if (ModelInUse("etaBBN_rBBN_rCMB_dNurBBN_dNurCMB"))
+      {
+        const ModelParameters& NP_params = *Dep::etaBBN_rBBN_rCMB_dNurBBN_dNurCMB_parameters;
+        rCMB = NP_params.at("r_CMB");
+      }
+
+      // Take the SM value of T_ncdm (T_nu) and multiply it with the value of rCMB
+      result = rCMB*(*Dep::T_ncdm_SM);
     }
 
-    void set_T_ncdm(double &result)
+    void eta0_LCDM(double &result)
     {
-      using namespace Pipes::set_T_ncdm;
-
-      // Take the SM value of T_ncdm (T_nu) and multiply it with the value of r_CMB; 
-      result = (*Param["r_CMB"])*(*Dep::T_ncdm_SM);
-    }
-
-    void calculate_eta0(double &result)
-    {
-      using namespace Pipes::calculate_eta0;
+      using namespace Pipes::eta0_LCDM;
 
       double ngamma, nb;
       ngamma = 16*pi*zeta3*pow(*Param["T_cmb"]*_kB_eV_over_K_/_hc_eVcm_,3); // photon number density today
@@ -1632,6 +1339,13 @@ namespace Gambit
 
       result =  nb/ngamma;
       logger() << "Baryon to photon ratio (eta) today computed to be " << result << EOM;
+    }
+
+    void etaBBN_SM(double& result)
+    {
+      using namespace Pipes::etaBBN_SM;
+
+      result = *Dep::eta0;
     }
 
     void compute_Omega0_m(double &result)
@@ -1645,7 +1359,7 @@ namespace Gambit
     {
       using namespace Pipes::compute_Omega0_b;
 
-      double h = *Param["H0"]/100;
+      double h = *Dep::H0/100.;
       result =*Param["omega_b"]/h/h;
     }
 
@@ -1653,7 +1367,7 @@ namespace Gambit
     {
       using namespace Pipes::compute_Omega0_cdm;
 
-      double h = *Param["H0"]/100;
+      double h = *Dep::H0/100.;
       result =*Param["omega_cdm"]/h/h;
     }
 
@@ -1661,7 +1375,7 @@ namespace Gambit
     {
       using namespace Pipes::compute_Omega0_g;
 
-      double h = *Param["H0"]/100.;
+      double h = *Dep::H0/100.;
       result = (4.*_sigmaB_SI_/_c_SI_*pow(*Param["T_cmb"],4.)) / (3.*_c_SI_*_c_SI_*1.e10*h*h/_Mpc_SI_/_Mpc_SI_/8./pi/_GN_SI_);
     }
 
@@ -1688,7 +1402,7 @@ namespace Gambit
       using namespace Pipes::compute_Omega0_ncdm;
 
       double mNu_tot_eV = *Dep::mNu_tot;
-      double h = *Param["H0"]/100;
+      double h = *Dep::H0/100.;
 
       result = mNu_tot_eV/(93.14*h*h);  // TODO: heads up: explicit assumption of T_ncdm = 0.71611 and T_cmb goes in here. Has to be generalised
     }
@@ -1703,7 +1417,7 @@ namespace Gambit
 
 /*
     (PS: Not sure if we really need this step in between. For all our casess so far we directly could map from eta0 to eta_BBN (up to constnat factors in front))
- * 
+ *
     void calculate_etaCMB_SM(double &result)
     {
       using namespace Pipes::calculate_etaCMB_SM;
@@ -1739,25 +1453,29 @@ namespace Gambit
         double dNurBBN =  NP_params.at("dNur_BBN");
 
         // Check if the input for dNeff is negative (unphysical)
-        static bool allow_negative_dNeff = runOptions->getValueOrDef<bool>(false,"allow_negative_delta_N_ur");
-        if ( (!allow_negative_dNeff) && (dNurBBN < 0.0) )
+        static bool allow_negative_delta_N_ur = runOptions->getValueOrDef<bool>(false,"allow_negative_delta_N_ur");
+        if ( (!allow_negative_delta_N_ur) && (dNurBBN < 0.0) )
         {
-          std::string err = "A negative value for \"dNur_BBN\" is unphysical and is not allowed in CosmoBit by default!\n\n";
-          err += "If you want to proceed with megative values, please set the \"allow_negative_delta_N_ur\"-rule to \"true\" within the yaml-file.";
-          CosmoBit_error().raise(LOCAL_INFO,err.c_str());
+          std::ostringstream err;
+          err << "A negative value for \"dNur_BBN\" is unphysical and is not allowed in CosmoBit by default!\n\n";
+          err << "If you want to proceed with megative values, please add\n\n";
+          err << "  - module: CosmoBit\n";
+          err << "    options:\n";
+          err << "      allow_negative_delta_N_ur: true\n\n";
+          err << "to the Rules section of the yaml-file.";
+          CosmoBit_error().raise(LOCAL_INFO,err.str());
         }
 
         //If check is passed, set inputs.
-        result["eta0"] = NP_params.at("eta_BBN");    // eta AFTER BBN (variable during)
         result["Nnu"]=3.046*pow(NP_params.at("r_BBN"),4); // contribution from SM neutrinos
         result["dNnu"]=dNurBBN;    // dNnu: within AlterBBN scenarios in which the sum Nnu+dNnu is the same are identical
       }
       else
       {
-        result["eta0"] = *Dep::eta0;    // eta AFTER BBN equal to eta today calculated from omgea_b
         result["Nnu"]=3.046; // contribution from SM neutrinos
         result["dNnu"]=0.;    // no extra ur species in standard LCDM model
       }
+      result["eta0"] = *Dep::etaBBN;
 
       result["failsafe"] = runOptions->getValueOrDef<double>(3,"failsafe");
       result["err"] = runOptions->getValueOrDef<double>(3,"err");
@@ -1767,27 +1485,27 @@ namespace Gambit
     }
 
 
-    /// (JR) this function is huge (200 lines..) -- considering that it is acually only there to call 
+    /// (JR) this function is huge (200 lines..) -- considering that it is acually only there to call
     /// a BE function from AlterBBN, can we split that up somehow or define utility functions
     /// to do some of the checks and error calculation things so it is not totally blown up? TODO
-    void compute_BBN_abundances(CosmoBit::BBN_container &result)
+    void compute_BBN_abundances(BBN_container &result)
     {
       using namespace Pipes::compute_BBN_abundances;
 
       // global variable of AlterBBN (# computed element abundances)
-      const int NNUC = BEreq::get_NNUC();  
+      const int NNUC = BEreq::get_NNUC();
       result.set_abund_map(BEreq::get_abund_map_AlterBBN());
       // init arrays in BBN_container with right length
-      result.init_arr_size(NNUC);         
+      result.init_arr_size(NNUC);
 
       // in AlterBBN ratioH and cov_ratioH are arrays of fixed length
       // with certain compiler versions (gcc 5.4.0) we have seen memory corruption problems
-      // if we initialise these as 
+      // if we initialise these as
       // double ratioH[NNUC+1]
       // since the memory was not allocated properly. Fixed size arrays do not seem to be
-      // properly supported even though there are no errors at compile time. 
-      // using a unique pointer for ratioH and a 2d vector for cov_ratioH avoids 
-      // these problems. 
+      // properly supported even though there are no errors at compile time.
+      // using a unique pointer for ratioH and a 2d vector for cov_ratioH avoids
+      // these problems.
       auto deleter = [&](double* ptr){delete [] ptr;};
       std::unique_ptr<double[], decltype(deleter)> ratioH(new double[NNUC+1](), deleter);
       std::unique_ptr<double[], decltype(deleter)> cov_ratioH(new double[(NNUC+1)*(NNUC+1)](), deleter);
@@ -1906,10 +1624,10 @@ namespace Gambit
       }
 
       // fill AlterBBN_input map with the parameters for the model in consideration
-      map_str_dbl AlterBBN_input = *Dep::AlterBBN_Input; 
+      map_str_dbl AlterBBN_input = *Dep::AlterBBN_Input;
 
-      // call AlterBBN routine to calculate element abundances (& errors -- depending 
-      // on error calculation settings made with parameters 'err' and failsafe set in 
+      // call AlterBBN routine to calculate element abundances (& errors -- depending
+      // on error calculation settings made with parameters 'err' and failsafe set in
       // 'AlterBBN_Input')
       int nucl_err = BEreq::call_nucl_err(AlterBBN_input, &ratioH[0], &cov_ratioH[0]);
 
@@ -1958,7 +1676,7 @@ namespace Gambit
     {
       using namespace Pipes::get_Helium_abundance;
 
-      CosmoBit::BBN_container BBN_res = *Dep::BBN_abundances;
+      BBN_container BBN_res = *Dep::BBN_abundances;
       std::map<std::string, int> abund_map = BBN_res.get_abund_map();
 
       result.clear();
@@ -1973,7 +1691,7 @@ namespace Gambit
     {
       using namespace Pipes::get_Helium3_abundance;
 
-      CosmoBit::BBN_container BBN_res = *Dep::BBN_abundances;
+      BBN_container BBN_res = *Dep::BBN_abundances;
       std::map<std::string, int> abund_map = BBN_res.get_abund_map();
 
       result.clear();
@@ -1987,7 +1705,7 @@ namespace Gambit
     {
       using namespace Pipes::get_Deuterium_abundance;
 
-      CosmoBit::BBN_container BBN_res = *Dep::BBN_abundances;
+      BBN_container BBN_res = *Dep::BBN_abundances;
       std::map<std::string, int> abund_map = BBN_res.get_abund_map();
 
       result.clear();
@@ -2001,7 +1719,7 @@ namespace Gambit
     {
       using namespace Pipes::get_Lithium7_abundance;
 
-      CosmoBit::BBN_container BBN_res = *Dep::BBN_abundances;
+      BBN_container BBN_res = *Dep::BBN_abundances;
       std::map<std::string, int> abund_map = BBN_res.get_abund_map();
 
       result.clear();
@@ -2015,7 +1733,7 @@ namespace Gambit
     {
       using namespace Pipes::get_Beryllium7_abundance;
 
-      CosmoBit::BBN_container BBN_res = *Dep::BBN_abundances;
+      BBN_container BBN_res = *Dep::BBN_abundances;
       std::map<std::string, int> abund_map = BBN_res.get_abund_map();
 
       result.clear();
@@ -2033,7 +1751,7 @@ namespace Gambit
       int ii = 0;
       int ie,je,s;
 
-      CosmoBit::BBN_container BBN_res = *Dep::BBN_abundances; // fill BBN_container with abundance results from AlterBBN
+      BBN_container BBN_res = *Dep::BBN_abundances; // fill BBN_container with abundance results from AlterBBN
       std::map<std::string, int> abund_map = BBN_res.get_abund_map();
 
       const str filename = runOptions->getValue<std::string>("DataFile"); // read in BBN data file
@@ -2098,7 +1816,7 @@ namespace Gambit
 
       // compute chi2
       for(ie=0;ie<nobs;ie++) for(je=0;je<nobs;je++) chi2+=(prediction[ie]-observed[ie])*gsl_matrix_get(invcov,ie,je)*(prediction[je]-observed[je]);
-      //std::cout << "    BBN Like: chi2 = " << chi2 << "  factor " <<  log(pow(2*pi,nobs)*det_cov) << "  det cov = " << det_cov << std::endl; 
+      //std::cout << "    BBN Like: chi2 = " << chi2 << "  factor " <<  log(pow(2*pi,nobs)*det_cov) << "  det cov = " << det_cov << std::endl;
       result = -0.5*(chi2 + log(pow(2*pi,nobs)*det_cov));
 
       //std::cout << "    BBN LogLike computed to be: " << result << std::endl;
@@ -2136,7 +1854,7 @@ namespace Gambit
         }
         read_data = true;
       }
-      result = -0.5 * pow(*Param["H0"] - data["mean"][0],2)/ pow(data["sigma"][0],2);
+      result = -0.5 * pow(*Dep::H0 - data["mean"][0],2)/ pow(data["sigma"][0],2);
     }
 
     void compute_sigma8_LogLike(double &result)
@@ -2180,32 +1898,45 @@ namespace Gambit
     /// an instance of the classy class Class() (Yep, I know...)
     /// which can be handed over to MontePython, or just used to compute
     /// some observables.
-    void set_classy_input(CosmoBit::Classy_input& result)
+    void set_classy_input(Classy_input& result)
     {
       using namespace Pipes::set_classy_input;
-
       result = *Dep::classy_primordial_parameters;
+      // Make sure nobody is trying to use MP downstream (prevents segfaults).
+      if (Downstream::neededFor("MP_LogLikes"))
+      {
+        std::ostringstream ss;
+        ss << "Sorry, you cannot use the function CosmoBit::set_classy_input with MontePython." << endl
+           << "Please modify the Rules section of your YAML file to instead point to the function" << endl
+           << "CosmoBit::set_classy_input_with_MPLike. An appropriate rule would look like this:" << endl << endl
+           << "  - capability: classy_final_input" << endl
+           << "    function: set_classy_input_with_MPLike" << endl;
+        CosmoBit_error().raise(LOCAL_INFO, ss.str());
+      }
     }
 
     /// Initialises the container within CosmoBit from classy, but designed specifically
     /// to be used when MontePython is in use. This will ensure additional outputs are
     /// computed by classy CLASS to be passed to MontePython.
-    void set_classy_input_with_MPLike(CosmoBit::Classy_input& result)
+    void set_classy_input_with_MPLike(Classy_input& result)
     {
       using namespace Pipes::set_classy_input_with_MPLike;
-
-      // get extra cosmo_arguments from MP (gives a dictionary with output values that need
-      // to be set for the class run)
-      static pybind11::dict MP_cosmo_arguments = *Dep::cosmo_args_from_MPLike;
-      logger() << LogTags::debug << "Extra cosmo_arguments needed from MP Likelihoods: ";
-      logger() << pybind11::repr(MP_cosmo_arguments) << EOM;
-
       result = *Dep::classy_primordial_parameters;
 
-      // add the arguments from Mp_cosmo_arguments which are not yet in cosmo_input_dict to it
-      // also takes care of merging the "output" key values
-      result.merge_input_dicts(MP_cosmo_arguments); // TODO (JR) use merge_pybind_dict routine instead -> don't need to duplicate code
-      //merge_pybind_dicts(result, MP_cosmo_arguments);
+      // Only get info from MP if something actually needs it downstream
+      if (Downstream::neededFor("MP_LogLikes"))
+      {
+        // get extra cosmo_arguments from MP (gives a dictionary with output values that need
+        // to be set for the class run)
+        static pybind11::dict MP_cosmo_arguments = *Dep::cosmo_args_from_MPLike;
+        logger() << LogTags::debug << "Extra cosmo_arguments needed from MP Likelihoods: ";
+        logger() << pybind11::repr(MP_cosmo_arguments) << EOM;
+
+        // add the arguments from Mp_cosmo_arguments which are not yet in cosmo_input_dict to it
+        // also takes care of merging the "output" key values
+        result.merge_input_dicts(MP_cosmo_arguments); // TODO (JR) use merge_pybind_dict routine instead -> don't need to duplicate code
+        //merge_pybind_dicts(result, MP_cosmo_arguments);
+      }
     }
 
 
@@ -2222,7 +1953,7 @@ namespace Gambit
     result["DM_annihilation_mass"] = NP_params.at("mass");
 
     // Get the results from the DarkAges tables that hold extra information to be passed to the CLASS thermodynamics structure
-    static DarkAges::fz_table fz;
+    static DarkAges::Energy_injection_efficiency_table fz;
     fz = *Dep::energy_injection_efficiency;
     bool f_eff_mode = fz.f_eff_mode;
 
@@ -2274,7 +2005,7 @@ namespace Gambit
     result["DM_decay_fraction"] = NP_params.at("fraction");
 
     // Get the results from the DarkAges tables that hold extra information to be passed to the CLASS thermodynamics structure
-    static DarkAges::fz_table fz;
+    static DarkAges::Energy_injection_efficiency_table fz;
     fz = *Dep::energy_injection_efficiency;
     bool f_eff_mode = fz.f_eff_mode;
 
@@ -2313,7 +2044,7 @@ namespace Gambit
     }
   }
 
-  /// add all inputs for CLASS needed to produce the correct output to be 
+  /// add all inputs for CLASS needed to produce the correct output to be
   /// able to compute the Planck CMB likelihoods
   void set_classy_PlanckLike_input(pybind11::dict &result)
   {
@@ -2359,6 +2090,15 @@ namespace Gambit
 
 
     /* Classy getter functions */
+
+    /// Hubble
+    void get_H0_classy(double &result)
+    {
+      using namespace Pipes::get_H0_classy;
+
+      // Rescale by c [km/s]
+      result = _c_SI_*BEreq::class_get_H0()/1000;
+    }
 
     /// Energy densities *today* (Omega0)
 
@@ -2427,20 +2167,20 @@ namespace Gambit
 /* MontePython */
 /***************/
 
-    /// function to fill the mcmc_parameters dictionary of MontePython's Data object with current 
+    /// function to fill the mcmc_parameters dictionary of MontePython's Data object with current
     /// values of nuisance parameters
     void set_parameter_dict_for_MPLike(pybind11::dict & result)
     {
       using namespace Pipes::set_parameter_dict_for_MPLike;
       using namespace pybind11::literals;
 
-      // The loop has to be executed for every parameter point. It takes about 0.00023 s -> ~4 minutes for 1e6 points 
+      // The loop has to be executed for every parameter point. It takes about 0.00023 s -> ~4 minutes for 1e6 points
       for (auto it=Param.begin(); it != Param.end(); it++)
       {
         std::string name = it->first;
         double value = *Param[name];
 
-        // check if any models are scanned for which we had to rename the nuisance parameters due to 
+        // check if any models are scanned for which we had to rename the nuisance parameters due to
         //    a) parameters having the same name  -> e.g. 'epsilon' and 'sigma_NL'
         //    b) parameter names containing symbols that can't be used in macros -> e.g. "^" in 'beta_0^Euclid'
 
@@ -2459,7 +2199,7 @@ namespace Gambit
       }
     }
 
-    /// function to fill the mcmc_parameters dictionary of MontePython's Data object with current 
+    /// function to fill the mcmc_parameters dictionary of MontePython's Data object with current
     /// This version of the capability 'parameter_dict_for_MPLike' is used when no Likelihood with nuisance parameters is in use
     /// just passes an empty py dictionary
     void pass_empty_parameter_dict_for_MPLike(pybind11::dict & result)
@@ -2470,134 +2210,89 @@ namespace Gambit
       // Nothing to do here.
     }
 
-    /// Set the names of all experiments in use for scan
-    /// basically reads in the runOptions 'Likelihoods' and/or 'Observables' of capability MP_experiment_names
-    void set_MP_experiment_names(map_str_map_str_str & result)
+    /// Create the MontePython data and likelihood objects, determining which experiments are in use in the process
+    void create_MP_objects(MPLike_objects_container &result)
     {
-      using namespace Pipes::set_MP_experiment_names;
-
+      using namespace Pipes::create_MP_objects;
+      static map_str_pyobj likelihoods;
       static bool first = true;
+
+      // Determine which likelihoods to compute and initialise the relevant MontePython objects.
       if (first)
       {
-        // get list of likelihoods implemented in MP
+        // Set up some references for easier reading
+        auto& data = std::get<0>(result);
+        auto& experiments = std::get<1>(result);
+        auto& likelihoods = std::get<2>(result);
+
+        // Get list of likelihoods implemented in MP
         std::vector<str> avail_likes = BEreq::get_MP_available_likelihoods();
 
-        // read in requested likelihoods
-        YAML::Node MP_Likelihoods;
-        if (runOptions->hasKey("Likelihoods")) MP_Likelihoods = runOptions->getValue<YAML::Node>("Likelihoods");
-
-        // create string -> string map mapping the likelihood name to the '.data' file that will
-        // be used to initialise likelihood object in MP. If you want to use the default one simply
-        // set the the data-file string to "default"
-        for (auto it=MP_Likelihoods.begin(); it != MP_Likelihoods.end(); it++)
+        // Get the list of the experiments and datafiles given in the YAML file as sub-capabilities.
+        // Using the default datafile can be achieved by leaving the datafile out, or settting it to "default".
+        YAML::Node subcaps = Downstream::subcaps->getNode();
+        std::vector<YAML::Node> empties;
+        for (const auto& x : subcaps) if (x.second.IsNull()) empties.push_back(x.first);
+        for (const auto& x : empties) subcaps[x] = "default";
+        if (subcaps.IsNull())
         {
-          std::string likelihood = it->first.as<std::string>();
-          std::string data_file = it->second.as<std::string>();
-
-          // check if requested likelihood is contained in vector of implemented likelihoods
-          // if not throw error & list all available options
-          if (std::find(avail_likes.begin(), avail_likes.end(), likelihood) == avail_likes.end())
+          if (Downstream::neededFor("MP_LogLikes"))
           {
-
-            str errmsg = "Likelihood '" + likelihood + "' is not implemented in MontePython. Check for typos or implement it.\nLikelihoods currently available are:\n"; 
-            for(auto const& value: avail_likes)
-            {
-              errmsg += ("\t"+value+"\n");
-            }
-            CosmoBit_error().raise(LOCAL_INFO,errmsg);
-          }
-          else
-          {
-            result["Likelihoods"][likelihood] = data_file;
-            logger() << LogTags::debug << "Read MontePythonLike option "<< likelihood << ", using data file " << data_file<< EOM;
+            std::ostringstream ss;
+            ss << "No sub-capabilities found when attempting to create MontePython objects." << endl
+               << "This can happen because you either forgot to choose any experiments," << endl
+               << "or because you used incorrect syntax to choose them as sub-capabilities." << endl
+               << "You can do this in the relevant entry of the ObsLikes section of your YAML file," << endl
+               << "by setting sub_capabilities as a scalar (if you only want one experiment), e.g." << endl
+               << "    sub_capabilities: bao_smallz_2014" << endl
+               << "or as a sequence (if you don't need to specify data files), e.g." << endl
+               << "    sub_capabilities:" << endl
+               << "      - bao_smallz_2014" << endl
+               << "      - Pantheon" << endl
+               << "or even as a map (if you want to specify data files), e.g." << endl
+               << "    sub_capabilities:" << endl
+               << "      bao_smallz_2014: default" << endl
+               << "      Pantheon: default" << endl;
+            CosmoBit_error().raise(LOCAL_INFO, ss.str());
           }
         }
+        else experiments = subcaps.as<map_str_str>();
 
-        // & Observables
-        YAML::Node MP_Observables;
-        if (runOptions->hasKey("Observables")) MP_Observables = runOptions->getValue<YAML::Node>("Observables");
-
-        for (auto it=MP_Observables.begin(); it != MP_Observables.end(); it++)
+        // Check that all the requested likelihoods can actually be provided by MP
+        for (const auto& x : experiments)
         {
-          std::string obs = it->first.as<std::string>();
-          std::string data_file = it->second.as<std::string>();
-
-          // check if requested likelihood is contained in vector of implemented likelihoods
-          // if not throw error & list all available options
-          if (std::find(avail_likes.begin(), avail_likes.end(), obs) == avail_likes.end())
+          if (std::find(avail_likes.begin(), avail_likes.end(), x.first) == avail_likes.end())
           {
-
-            str errmsg = "Likelihood '" + obs + "' is not implemented in MontePython. Check for typos or implement it.\nLikelihoods currently available are:\n"; 
-            for(auto const& value: avail_likes)
-            {
-              errmsg += ("\t"+value+"\n");
-            }
-            CosmoBit_error().raise(LOCAL_INFO,errmsg);
+            str errmsg = "Likelihood '" + x.first + "' is not implemented in MontePython. Check for typos or implement it.\nLikelihoods currently available are:\n";
+            for (const auto& value : avail_likes) errmsg += ("\t"+value+"\n");
+            CosmoBit_error().raise(LOCAL_INFO, errmsg);
           }
-          else
-          {
-            result["Observables"][obs] = data_file;
-            logger() << LogTags::debug << "Read MontePythonLike option "<< obs << ", using data file " << data_file<< EOM;
-          }
+          logger() << LogTags::debug << "Read MontePythonLike option "<< x.first << ", using data file " << x.second << EOM;
         }
+
+        // MPLike_data_container should only be created and set once, when calculating the first point.
+        // After that it has to be kept alive since it contains a vector with the initialised MPLike Likelihood objects.
+        data = BEreq::create_MP_data_object(experiments);
+
+        // Add current parameters to data object to enable check if all nuisance parameters are
+        // scanned upon initialisation of likelihood objects
+        data.attr("mcmc_parameters") = *Dep::parameter_dict_for_MPLike;
+        likelihoods = BEreq::create_MP_likelihood_objects(data, experiments);
+
+        // It's been nice, but let's not do this again.
         first = false;
       }
     }
 
     /// When initialising the MontePython Likelihood objects they add the output that needs to be computed by class
     /// to the input dictionary. We need to get these before starting the class run
-    /// e.g. for Planck_SZ likelihood the entries {'output': ' mPk ', 'P_k_max_h/Mpc': '1.'} need to be added 
+    /// e.g. for Planck_SZ likelihood the entries {'output': ' mPk ', 'P_k_max_h/Mpc': '1.'} need to be added
     /// to compute all needed observables
     void init_cosmo_args_from_MPLike(pybind11::dict &result)
     {
       using namespace Pipes::init_cosmo_args_from_MPLike;
-
-      // CosmoBit::MPLike_data_container should only be created once when calculating the first point.
-      // After that is has to be kept alive since it contains a vector with the initialised MPLike 
-      // Likelihood objects.
-      static bool first_run = true;
-      static pybind11::object data;
-      if(first_run)
-      {
-        // This is a map with the following structure:
-        // { Likelihoods: {likelihood1: mode, likelihood2: mode...}
-        //   Observables: {observable1: mode, observable2: mode...} }
-        map_str_map_str_str experiment_names = *Dep::MP_experiment_names;
-
-        // We need to pull the names of all Likelihoods AND observables
-        // to initialise the data structures in MontePython
-        map_str_str experiments;
-
-        if (experiment_names.find("Likelihoods") != experiment_names.end())
-        {
-          for (auto it = experiment_names.at("Likelihoods").begin();
-                    it != experiment_names.at("Likelihoods").end(); ++it)
-          {
-            // Add each experiment : datafile pair to the map_str_str.
-            experiments[it->first] = it->second;
-          }
-        }
-        if (experiment_names.find("Observables") != experiment_names.end())
-        {
-          for (auto it = experiment_names.at("Observables").begin();
-                    it != experiment_names.at("Observables").end(); ++it)
-          {
-            // Add each experiment : datafile pair to the map_str_str.
-            experiments[it->first] = it->second;
-          }
-        }
-
-        logger() << LogTags::info << "(init_cosmo_args_from_MPLike) List of experiments: " << experiments << EOM;
-        data = BEreq::create_MP_data_object(experiments);
-        // add current parameters to data object to enable check if all nuisance parameters are 
-        // scanned upon initialisation of likelihood objects
-        data.attr("mcmc_parameters") = *Dep::parameter_dict_for_MPLike;
-        map_str_pyobj likelihoods = BEreq::create_MP_likelihood_objects(data, experiments);
-        first_run = false;
-      }
-
       result.clear();
-      pybind11::dict tmp_dict = data.attr("cosmo_arguments");
+      pybind11::dict tmp_dict = std::get<0>(*Dep::MP_objects).attr("cosmo_arguments");
       // Stringify all values in the dictionary and strip off leading and trailing whitespaces
       for (auto it: tmp_dict)
       {
@@ -2609,159 +2304,57 @@ namespace Gambit
     }
 
     /// Computes lnL for each experiment initialised in MontePython
-    void calc_MP_LogLikes(CosmoBit::MPLike_result_container & result)
+    void compute_MP_LogLikes(map_str_dbl & result)
     {
-      using namespace Pipes::calc_MP_LogLikes;
-      using namespace pybind11::literals;
+      using namespace Pipes::compute_MP_LogLikes;
+      static pybind11::object data = std::get<0>(*Dep::MP_objects);
+      static const map_str_str& experiments = std::get<1>(*Dep::MP_objects);
+      static const map_str_pyobj& likelihoods = std::get<2>(*Dep::MP_objects);
+      static const MPLike_data_container mplike_cont(data, likelihoods);
 
-      // A list of the experiments initialised in the YAML file
-      // This is a map with the following structure:
-      // { Likelihoods: {likelihood1: mode, likelihood2: mode...}
-      //   Observables: {observable1: mode, observable2: mode...} }
-      map_str_map_str_str experiment_names = *Dep::MP_experiment_names;
-
-      // We need to pull the names of all Likelihoods AND observables
-      // to initialise the data structures in MontePython
-      map_str_str experiments;
-
-      if (experiment_names.find("Likelihoods") != experiment_names.end())
-      {
-        for (auto it = experiment_names.at("Likelihoods").begin();
-                  it != experiment_names.at("Likelihoods").end(); ++it)
-        {
-          // Add each experiment : datafile pair to the map_str_str.
-          experiments[it->first] = it->second;
-        }
-      }
-      if (experiment_names.find("Observables") != experiment_names.end())
-      {
-        for (auto it = experiment_names.at("Observables").begin();
-                  it != experiment_names.at("Observables").end(); ++it)
-        {
-          // Add each experiment : datafile pair to the map_str_str.
-          experiments[it->first] = it->second;
-        }
-      }
- 
-      // CosmoBit::MPLike_data_container should only be created once when calculating the first point.
-      // After that is has to be kept alive since it contains a vector with the initialised MPLike 
-      // Likelihood objects.
-      pybind11::object data;
-      map_str_pyobj likelihoods;
-      static bool first_run = true;
-      if(first_run)
-      {
-        data = BEreq::create_MP_data_object(experiments);
-        // add current parameters to data object to enable check if all nuisance parameters are 
-        // scanned upon initialisation of likelihood objects
-        data.attr("mcmc_parameters") = *Dep::parameter_dict_for_MPLike;
-        likelihoods = BEreq::create_MP_likelihood_objects(data, experiments);
-        first_run = false;
-      }
-
-      static const CosmoBit::MPLike_data_container mplike_cont(data, likelihoods);
-
-      // pass current values of nuisance parameters to data.mcmc_parameters dictionary for likelihood computation in MP
+      // Pass current values of nuisance parameters to data.mcmc_parameters dictionary for likelihood computation in MP
       mplike_cont.data.attr("mcmc_parameters") = *Dep::parameter_dict_for_MPLike;
 
       // Create instance of classy class Class
       pybind11::object cosmo = BEreq::get_classy_cosmo_object();
 
-      // Loop through the list of experiments, and query the lnL from the
-      // MontePython backend
-      // Only if the experiment is requested as a Likelihood.
-      // Separate loop below for observables.
-      if (experiment_names.find("Likelihoods") != experiment_names.end())
+      // Loop through the list of experiments, and query the lnL from the MontePython backend.
+      for (sspair it : experiments)
       {
-        logger() << LogTags::debug << "(calc_MP_LogLikes): Likelihoods\n\n";
-        for (auto const& it : experiment_names.at("Likelihoods"))
-        {
-          // likelihood names are keys of experiment map (str, str map mapping likelihood name to .data file)
-          std::string like_name = it.first;
-          double logLike = BEreq::get_MP_loglike(mplike_cont, cosmo, like_name);
-          result.add_logLike(like_name, logLike);
-          logger() << "name: " << it.first << "\tvalue: " << logLike << "\n";
-          //std::cout << "name: " << it.first << "\tvalue: " << logLike << std::endl;
-        }
+        // Likelihood names are keys of experiment map (str, str map mapping likelihood name to .data file)
+        double logLike = BEreq::get_MP_loglike(mplike_cont, cosmo, it.first);
+        result[it.first] = logLike;
+        logger() << "(compute_MP_LogLikes):  name: " << it.first << "\tvalue: " << logLike << EOM;
       }
-
-      // Loop through the list of experiments, and query the lnL from the
-      // MontePython backend.
-      // ONLY if the experiment is requested as an observable.
-      if (experiment_names.find("Observables") != experiment_names.end())
-      {
-        logger() << LogTags::debug << "(calc_MP_LogLikes): Observables\n\n";
-        for (auto const& it : experiment_names.at("Observables"))
-        {
-          // likelihood names are keys of experiment map (str, str map mapping likelihood name to .data file)
-          std::string like_name = it.first;
-          double logLike = BEreq::get_MP_loglike(mplike_cont, cosmo, like_name);
-          result.add_obs(like_name, logLike);
-          logger() << "name: " << it.first << "\tvalue: " << logLike << "\n";
-          //std::cout << "name: " << it.first << "\tvalue: " << logLike << std::endl;
-        }
-        logger() << EOM;
-      }
-
     }
 
     /// Computes the combined lnL from the set of experiments
     /// given to MontePython.
-    void calc_MP_combined_LogLike(double& result)
+    void compute_MP_combined_LogLike(double& result)
     {
-      using namespace Pipes::calc_MP_combined_LogLike;
+      using namespace Pipes::compute_MP_combined_LogLike;
 
-      // get string double map from MPlike result container mapping
-      // experiment name to LogLike value for Likelihoods included 
-      // into the scan
-      CosmoBit::MPLike_result_container MPLike_results = *Dep::calc_MP_LogLikes;
-      map_str_dbl MP_lnLs = MPLike_results.get_logLike_results();
+      // Get likelihoods computed by MontePython
+      map_str_dbl MP_lnLs = *Dep::MP_LogLikes;
 
-      // Iterate through map of doubles and return one big fat double.
+      // Retrieve the sub-capabilities requested in the YAML file
+      std::vector<str> subcaps = Downstream::subcaps->getNames();
+
+      // Iterate through map of doubles and return one big fat double,
+      // selecting only those entries specified as sub-capabilities.
       double lnL = 0.;
-
-      logger() << LogTags::debug << "(calc_MP_combined_LogLike):\n\n";
+      logger() << LogTags::debug << "(compute_MP_combined_LogLike):";
       for (const auto &p : MP_lnLs)
       {
-          logger()  << "name: "  << p.first << "\tvalue: " << p.second << "\n";
-        lnL += p.second;
+        if (std::find(subcaps.begin(), subcaps.end(), p.first) != subcaps.end())
+        {
+          logger() << endl << "  name: "  << p.first << "\tvalue: " << p.second;
+          lnL += p.second;
+        }
       }
       logger() << EOM;
-
       result = lnL;
     }
-    /// Computes lnL for each experiment initialised in MontePython
-    /// but DOES NOT add it to the compound lnL in GAMBIT.
-    /// This should be used when one wishes to grab a Likelihood from
-    /// MontePython but does not want it to steer the scans
-    /// (e.g. for forecasting; conflicting likelihoods; etc.) -- use with caution!
-    void get_MP_LogLikes(map_str_dbl & result)
-    {
-      using namespace Pipes::get_MP_LogLikes;
-      using namespace pybind11::literals;
 
-      // get string double map from MPlike result container mapping
-      // experiment name to LogLike value for Observables included 
-      // into the scan
-      CosmoBit::MPLike_result_container MPLike_results = *Dep::calc_MP_LogLikes;
-      result = MPLike_results.get_logLike_results();
-    }
-
-    /// Computes lnL for each experiment initialised in MontePython
-    /// but DOES NOT add it to the compound lnL in GAMBIT.
-    /// This should be used when one wishes to grab a Likelihood from
-    /// MontePython but does not want it to steer the scans
-    /// (e.g. for forecasting; conflicting likelihoods; etc.) -- use with caution!
-    void get_MP_Observables(map_str_dbl & result)
-    {
-      using namespace Pipes::get_MP_Observables;
-      using namespace pybind11::literals;
-
-      // get string double map from MPlike result container mapping
-      // experiment name to LogLike value for Observables included 
-      // into the scan
-      CosmoBit::MPLike_result_container MPLike_results = *Dep::calc_MP_LogLikes;
-      result = MPLike_results.get_obs_results();
-    }
   }
 }
