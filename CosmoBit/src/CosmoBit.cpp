@@ -2236,22 +2236,25 @@ namespace Gambit
         for (const auto& x : empties) subcaps[x] = "default";
         if (subcaps.IsNull())
         {
-          std::ostringstream ss;
-          ss << "No sub-capabilities found when attempting to create MontePython objects." << endl
-             << "This can happen because you either forgot to choose any experiments," << endl
-             << "or because you used incorrect syntax to choose them as sub-capabilities." << endl
-             << "You can do this in the relevant entry of the ObsLikes section of your YAML file," << endl
-             << "by setting sub_capabilities as a scalar (if you only want one experiment), e.g." << endl
-             << "    sub_capabilities: bao_smallz_2014" << endl
-             << "or as a sequence (if you don't need to specify data files), e.g." << endl
-             << "    sub_capabilities:" << endl
-             << "      - bao_smallz_2014" << endl
-             << "      - Pantheon" << endl
-             << "or even as a map (if you want to specify data files), e.g." << endl
-             << "    sub_capabilities:" << endl
-             << "      bao_smallz_2014: default" << endl
-             << "      Pantheon: default" << endl;
-          CosmoBit_error().raise(LOCAL_INFO, ss.str());
+          if (Downstream::neededFor("MP_LogLikes"))
+          {
+            std::ostringstream ss;
+            ss << "No sub-capabilities found when attempting to create MontePython objects." << endl
+               << "This can happen because you either forgot to choose any experiments," << endl
+               << "or because you used incorrect syntax to choose them as sub-capabilities." << endl
+               << "You can do this in the relevant entry of the ObsLikes section of your YAML file," << endl
+               << "by setting sub_capabilities as a scalar (if you only want one experiment), e.g." << endl
+               << "    sub_capabilities: bao_smallz_2014" << endl
+               << "or as a sequence (if you don't need to specify data files), e.g." << endl
+               << "    sub_capabilities:" << endl
+               << "      - bao_smallz_2014" << endl
+               << "      - Pantheon" << endl
+               << "or even as a map (if you want to specify data files), e.g." << endl
+               << "    sub_capabilities:" << endl
+               << "      bao_smallz_2014: default" << endl
+               << "      Pantheon: default" << endl;
+            CosmoBit_error().raise(LOCAL_INFO, ss.str());
+          }
         }
         else experiments = subcaps.as<map_str_str>();
 
