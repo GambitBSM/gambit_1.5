@@ -2234,35 +2234,26 @@ namespace Gambit
         std::vector<YAML::Node> empties;
         for (const auto& x : subcaps) if (x.second.IsNull()) empties.push_back(x.first);
         for (const auto& x : empties) subcaps[x] = "default";
-        if (!subcaps.IsNull()) experiments = subcaps.as<map_str_str>();
-
-        // if the experiments map is empty the user  
-        //  a) either did not specify the MP experiment names correctly in the YAML file
-        //  b) or did not intend to use MP at all, but ended up here because the wrong 
-        //     function (set_classy_input_with_MPLike) was choosen to satisfy the 
-        //     capability 'classy_final_input'
-        // in that case throw an informative error message
-        if(experiments.empty())
+        if (subcaps.IsNull())
         {
           std::ostringstream ss;
-          ss << "CosmoBit is tyring to create a MontePython data object, but no MontePython " << endl
-             << "likelihoods have been specified to be used in the YAML file." << endl
-             << "If you want to use MontePython likelihoods make sure to check the 'ObsLikes' section" << endl
-             << "for capability CosmoBit::MP_Combined_LogLike for typos. It could look like this:" << endl << endl
-             << "  - purpose:      LogLike" << endl
-             << "    capability:   MP_Combined_LogLike" << endl
-             << "    type:         double" << endl
+          ss << "No sub-capabilities found when attempting to create MontePython objects." << endl
+             << "This can happen because you either forgot to choose any experiments," << endl
+             << "or because you used incorrect syntax to choose them as sub-capabilities." << endl
+             << "You can do this in the relevant entry of the ObsLikes section of your YAML file," << endl
+             << "by setting sub_capapbilities as a scalar (if you only want one experiment), e.g." << endl
+             << "    sub_capabilities: bao_smallz_2014" << endl
+             << "or as a sequence (if you don't need to specify data files), e.g." << endl
              << "    sub_capabilities:" << endl
              << "      - bao_smallz_2014" << endl
-             << "      - Pantheon" << endl <<endl
-             << "If you do not want to use MontePython likelihoods please modify the Rules section "
-             << "of your YAML file to instead point to the function" << endl
-             << "CosmoBit::set_classy_input_with_MPLike. An appropriate rule would look like this:" << endl << endl
-             << "  - capability: classy_final_input" << endl
-             << "    function: set_classy_input" << endl;
+             << "      - Pantheon" << endl
+             << "or even as a map (if you want to specify data files), e.g." << endl
+             << "    sub_capabilities:" << endl
+             << "      bao_smallz_2014: default" << endl
+             << "      Pantheon: default" << endl;
           CosmoBit_error().raise(LOCAL_INFO, ss.str());
-          std::cout<< "Experitmens are empty!!"<< std::endl;
         }
+        else experiments = subcaps.as<map_str_str>();
 
         // Check that all the requested likelihoods can actually be provided by MP
         for (const auto& x : experiments)
