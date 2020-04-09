@@ -64,7 +64,7 @@ namespace Gambit
       pybind11::str arg = pybind11::str(item.second);
 
       // if item not contained in extra_dict but not in input_dict it will be added to input_dict
-      if(!input_dict.attr("has_key")(key).cast<bool>())
+      if(!input_dict.attr("__contains__")(key).cast<bool>())
       {
         input_dict[key] = arg;
         //std::cout << "Adding key = " << std::string(pybind11::str(item.first)) << ", "<< "value=" << std::string(pybind11::str(item.second)) << std::endl;
@@ -170,7 +170,7 @@ namespace Gambit
       pybind11::str key = pybind11::str(item.first);
       pybind11::str arg = pybind11::str(item.second);
 
-      if(!input_dict.attr("has_key")(key).cast<bool>())
+      if(!input_dict.attr("__contains__")(key).cast<bool>())
       {
         input_dict[key] = arg;
         //std::cout << "Adding key = " << std::string(pybind11::str(item.first)) << ", "<< "value=" << std::string(pybind11::str(item.second)) << std::endl;

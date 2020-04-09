@@ -129,7 +129,7 @@ BE_NAMESPACE
       pybind11::str newkey = pybind11::str(item.first);
       pybind11::str oldkey = pybind11::str(item.second);
 
-      if (cosmo_input_dict.attr("has_key")(newkey).cast<bool>())
+      if (cosmo_input_dict.attr("__contains__")(newkey).cast<bool>())
       {
         cosmo_input_dict[oldkey] = cosmo_input_dict.attr("pop")(newkey);
       }
@@ -141,7 +141,7 @@ BE_NAMESPACE
     //
     // NOTE: This only affects versions of exoclass <= 2.7.2.
     //
-    if (cosmo_input_dict.attr("has_key")("energy_repartition_coefficient").cast<bool>())
+    if (cosmo_input_dict.attr("__contains__")("energy_repartition_coefficient").cast<bool>())
     {
       std::string entry = (cosmo_input_dict["energy_repartition_coefficient"]).cast<std::string>();
       if (entry.compare("CK_2004") == 0)

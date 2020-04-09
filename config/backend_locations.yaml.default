@@ -67,6 +67,7 @@ gm2calc:
 
 MontePythonLike:
   3.1.0:       ./Backends/installed/montepythonlike/3.1.0/montepython/MontePythonLike_3_1_0.py
+  3.3.0:       ./Backends/installed/montepythonlike/3.3.0/montepython/MontePythonLike_3_3_0.py
 
 MicrOmegas_MSSM:
   3.6.9.2:     ./Backends/installed/micromegas/3.6.9.2/MSSM/libmicromegas.so

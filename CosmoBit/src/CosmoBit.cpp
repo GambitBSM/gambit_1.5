@@ -2325,6 +2325,7 @@ namespace Gambit
         double logLike = BEreq::get_MP_loglike(mplike_cont, cosmo, it.first);
         result[it.first] = logLike;
         logger() << "(compute_MP_LogLikes):  name: " << it.first << "\tvalue: " << logLike << EOM;
+        //std::cout << "(compute_MP_LogLikes):  name: " << it.first << "\tvalue: "<< logLike << std::endl;
       }
     }
 
