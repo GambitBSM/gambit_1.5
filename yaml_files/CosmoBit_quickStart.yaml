@@ -1,8 +1,8 @@
 ##########################################################################
-## 
-## 
-##      quick start yaml file for CosmoBit 
-## 
+##
+##
+##      quick start yaml file for CosmoBit
+##
 ##  \author Janina Renk <janina.renk@fysik.su.se>
 ##      \date 2020 Feb
 ##
@@ -10,21 +10,21 @@
 
 # =======  1) Install GAMBIT & Backends =========
 #
-#   => To install GAMBIT do 
+#   => To install GAMBIT do
 #     (check README.md for more details on prerequisites & dependencies)
-#  
-#         Note: 
+#
+#         Note:
 #         -----
-#           *) for this specific yaml file you only need CosmoBit, DarkBit and NeutrinoBit 
-#                 => there is no need to build all Bits of GAMBIT, you can ditch the others 
+#           *) for this specific yaml file you only need CosmoBit, DarkBit and NeutrinoBit
+#                 => there is no need to build all Bits of GAMBIT, you can ditch the others
 #                    with the cmake flag -Ditch="Collider;Decay;Spec;Flav;Precision"
-#           *) some of the backends needed for the scan are only available in python2 so far 
+#           *) some of the backends needed for the scan are only available in python2 so far
 #                 => if you have python 3 you have to set cmake flags to your python2 library and
 #                 interpreters s.t. GAMBIT is configures with python2
 #                 If the -DFORCE_PYTHON2 flag does not do the job you have to provide the following paths, something like
 #                 -DPYTHON_INCLUDE_DIR=/usr/include/python2.7 -DPYTHON_LIBRARY=/usr/lib/x86_64-linux-gnu/libpython2.7.so -DPYTHON_EXECUTABLE=/usr/bin/python2.7
 #           *) you will need the python package cython (now added to cmake prerequisite)
-#   
+#
 #
 #      cmake -Ditch="Collider;Decay;Spec;Flav;Precision;Neutrino;Dark" -DFORCE_PYTHON2=ON -D WITH_MPI=ON ..
 #      make -jn scanners (where n specifies the desired number of cores for the build, e.g. 4)
@@ -38,75 +38,75 @@
 #      ./gambit <model_name>
 #
 #    => To clean/nuke a backend just do
-#     
-#     make clean-<backendname>
-#     make nuke-<backendname> 
 #
-#    => To check if a backend is correctly installed & look at available backed functions 
-#     ./gambit backends   
+#     make clean-<backendname>
+#     make nuke-<backendname>
+#
+#    => To check if a backend is correctly installed & look at available backed functions
+#     ./gambit backends
 #     ./gambit <backend_name>
 #
 # ======================================
 
 
 #======== 2) Input parameter declarations =======
-#  In this section the models to be scanned over are specified. You can 
-#  set all model parameters here or import another yaml file containing them. 
-#  
-#  => for more details check out chapter 6.2 of the GAMBIT manual (https://arxiv.org/abs/1705.07908) 
+#  In this section the models to be scanned over are specified. You can
+#  set all model parameters here or import another yaml file containing them.
+#
+#  => for more details check out chapter 6.2 of the GAMBIT manual (https://arxiv.org/abs/1705.07908)
 #
 
 Parameters:
 
- # Neutrino masses, choose between normal hierachy (NH) and inverted hierarch (IH)
- #    To fix the sum of the neutrino masses to 0.06 with only one massive neutrino 
- #    (as in Planck 'baseline' analysis don't include the model 'StandardModel_mNudiff'
- #    into the scan)
- StandardModel_mNudiff: !import include/StandardModel_mNudiff_NH_scan.yaml
- #StandardModel_mNudiff: !import include/StandardModel_mNudiff_IH_scan.yaml
- 
- # base-line LCDM model parameters and prior
- LCDM:
-   omega_b: 
-     prior_type: flat
-     range: [0.020,0.024]
-   omega_cdm:
-     prior_type: flat
-     range: [0.10,0.13]
-   H0:
-     prior_type: flat
-     range: [62,74]
-   ln10A_s:
-     prior_type: flat
-     range: [2.9,3.2]
-   n_s:
-     prior_type: flat
-     range: [0.9,1.10]
-   tau_reio:
-     prior_type: flat
-     range: [0.004,0.20]
-   T_cmb: 2.72548  
+  # Neutrino masses, choose between normal hierachy (NH) and inverted hierarch (IH)
+  #    To fix the sum of the neutrino masses to 0.06 with only one massive neutrino
+  #    (as in Planck 'baseline' analysis don't include the model 'StandardModel_mNudiff'
+  #    into the scan)
+  StandardModel_mNudiff: !import include/StandardModel_mNudiff_NH_scan.yaml
+  #StandardModel_mNudiff: !import include/StandardModel_mNudiff_IH_scan.yaml
 
- # extension of standard LCDM: allow for values of dNeff @CMB & @ BBN different from today
- dNurBBN_dNurCMB:
-  dNur_BBN:
-    prior_type: flat
-    range: [0.000,0.50]
-  dNur_CMB:
-    prior_type: flat
-    range: [0.000,0.50]
+  # base-line LCDM model parameters and prior
+  LCDM:
+    omega_b:
+      prior_type: flat
+      range: [0.020,0.024]
+    omega_cdm:
+      prior_type: flat
+      range: [0.10,0.13]
+    H0:
+      prior_type: flat
+      range: [62,74]
+    ln10A_s:
+      prior_type: flat
+      range: [2.9,3.2]
+    n_s:
+      prior_type: flat
+      range: [0.9,1.10]
+    tau_reio:
+      prior_type: flat
+      range: [0.004,0.20]
+    T_cmb: 2.72548
 
- # Include this if you use the Pantheon SNe likelihood into your scan
- cosmo_nuisance_Pantheon: !import include/cosmo_nuisance_Pantheon.yaml
- 
-  
+  # extension of standard LCDM: allow for values of dNeff @CMB & @ BBN different from today
+  dNurBBN_dNurCMB:
+    dNur_BBN:
+      prior_type: flat
+      range: [0.000,0.50]
+    dNur_CMB:
+      prior_type: flat
+      range: [0.000,0.50]
+
+  # Include this if you use the Pantheon SNe likelihood into your scan
+  cosmo_nuisance_Pantheon: !import include/cosmo_nuisance_Pantheon.yaml
+
+
 #======== 3) Prior setup ========
 # you can also have an extra section specifying priors. Or just do it as above
-# for details check chapter 6.3 of the GAMBIT manual (https://arxiv.org/abs/1705.07908) 
+# for details check chapter 6.3 of the GAMBIT manual (https://arxiv.org/abs/1705.07908)
 Priors:
 
 #======== 4) Output setup ========
-# different output formats, for details check chapter 6.6 of the GAMBIT manual (https://arxiv.org/abs/1705.07908) 
+# different output formats, for details check chapter 6.6 of the GAMBIT manual (https://arxiv.org/abs/1705.07908)
 Printer:
   printer: ascii
   options:
@@ -114,11 +114,11 @@ Printer:
     buffer_length: 100
 
 #======== 5) Scanner setup ========
-# different scanner settings, for details check chapter 6.7 of the GAMBIT manual (https://arxiv.org/abs/1705.07908) 
+# different scanner settings, for details check chapter 6.7 of the GAMBIT manual (https://arxiv.org/abs/1705.07908)
 #   comparison of different sampling algorithms in https://arxiv.org/abs/1705.07959
 
 Scanner:
-  # use random just for testing. 
+  # use random just for testing.
   use_scanner: random
 
   scanners:
@@ -133,7 +133,7 @@ Scanner:
 
     random:
       plugin: random
-      point_number: 2 
+      point_number: 2
       like:  LogLike
 
 #======== 6) Observables of interest ========
@@ -145,7 +145,7 @@ Scanner:
 #
 
 ObsLikes:
-  
+
 
   # ---- 6.a) BBN -----
   # Likelihood from BBN (need to specify which data to use in rules section below in 7.a))
@@ -153,8 +153,8 @@ ObsLikes:
     capability:   BBN_LogLike
     module:       CosmoBit
     type:         double
-  
-  # print helium abundance + error 
+
+  # print helium abundance + error
   - purpose:      Observable
     capability:   Helium_abundance
     module:       CosmoBit
@@ -164,20 +164,50 @@ ObsLikes:
   # ---- 6.b) MontePython Likelihoods -----
   # The total lnL from MontePython
   # Since the single MontePython likelihoods are not implemented in GAMBIT as capabilites
-  # (and are more flexible -- you import them at runtime and don't need to know their name
-  # at compile time) you just tell GAMBIT to include the likelihoods coming from MP here
-  # => specify which ones to use below in the Rules section 7.b)
+  # (and are more flexible -- you import them at runtime and don't need to know their names
+  # at compile time) you can just tell GAMBIT here which to include
   - purpose:      LogLike
     capability:   MP_Combined_LogLike
     module:       CosmoBit
     type:         double
+    # i) Choose which likelihoods to include (simple way)
+    sub_capabilities:
+      - bao_smallz_2014
+      - Pantheon
+    # ii) Choose which likelihoods to include (complicated way).  You can give a path to the '<likelihood_name>.data'
+    #     file containing the settings that you want the likelihood to run with (e.g. path to data, which z-bins to use... ).
+    #     Note that the path must be given relative to your GAMBIT directory.  If you set it to "default", or empty,
+    #     the default MontePython file 'Backends/installed/montepythonlike/<version>/montepython/likelihoods/
+    #     <likelihood_name>/<likelihood_name>.data' will be used.  This is also what happens in syntax i) above.
+    #sub_capabilities:
+    #  bao_smallz_2014: Backends/installed/montepythonlike/3.1.0/montepython/likelihoods/bao_smallz_2014/bao_smallz_2014.data
+    #  Pantheon: default
 
-  # A breakdown of each likelihood component in the above total lnL
-  # (just to print the single contributions of the total sum)
-  # => this would e.g. print LogLike(BAO) and LogLike(Pantheon)
+  # FIXME -- old comment from Janina (I guess?)
+  # should eventually be possible to choose any MP like, atm only bao, Pantheon, Planck_SZ safe to use (& kids after
+  # downloading data and when commenting out line 'parser_mp.existing_file(fname)', will include that into
+  # build step soon)
+  # still need to test all Likes
+
+  # A breakdown of each likelihood component in the above total lnL,
+  # plus any others that you might like to compute but not include in the
+  # likelihood.  This entry is just to make sure to output the individual
+  # log-likelihood contributions. (Actually you can leave out any of those
+  # already mentioned above if you want; they will still get printed.)
+  # => this would e.g. print LogLike(BAO), LogLike(Pantheon) and LogLike(Planck_SZ)
   - purpose:      Observable
     capability:   MP_LogLikes
     type:         map_str_dbl
+    # i) Choose which likelihoods to include (simple way)
+    sub_capabilities:
+      - bao_smallz_2014
+      - Pantheon
+      - Planck_SZ
+    # ii) Choose which likelihoods to include (complicated way).
+    #sub_capabilities:
+    #  bao_smallz_2014: Backends/installed/montepythonlike/3.1.0/montepython/likelihoods/bao_smallz_2014/bao_smallz_2014.data
+    #  Pantheon: default
+    #  Planck_SZ:
 
 
 #======== 7) Rule entries ========
@@ -186,13 +216,13 @@ Rules:
   # ----------- 7.a) BBN Likelihoods, AlterBBN interface -----------
   #                (CosmoBit Module paper, Appendix C.1)
 
-  # Set path to file containing measured values of light element abundances to use for 
+  # Set path to file containing measured values of light element abundances to use for
   # Likelihood calculation (assumes root directory is gambit/CosmoBit/data/BBN)
   - capability: BBN_LogLike
     options:
       DataFile: PDG_2017.dat # Use both, the Yp and D/H measurement as given in PDG 2017
       #DataFile: PDG_2017_updated.dat # Use the Yp measurement from PDG 2017 and the updated D/H measurement of 1801.08023
-  
+
   # error calculation precision settings for AltterBBN
   # (use 1 and 0 to speed up Helium abundance calculation for testing)
   # (For more precise calculations, use 3 or 7)
@@ -201,45 +231,18 @@ Rules:
       failsafe: 3
       err: 1
 
-  
+
   # ----------- 7.b) MontePython Likelihoods ------------
   #         (CosmoBit Module paper, Appendix C.4)
 
-  # Set the names of the MP likelihoods that should be used in the scan. 
-  # Note: You can get a list with all available likelihoods if you misspell one of the likelihoods below,
-  #     GAMBIT will throw an error that this likelihood is not know and print a list with all implemented ones 
-  - capability: MP_experiment_names
-    function: set_MP_experiment_names
-    options:
-      # add likelihoods to be used for scan here & set path to the '<likelihood_name>.data' file containing
-      # the settings you want the likelihood to run with (e.g. path to data, which z-bins to use... ). 
-      # Note that the path has to be relative to your GAMBIT directory. 
-      # If you set it so "default" the default MontePython file 'Backends/installed/montepythonlike/<version>/
-      #     /montepython/likelihoods/<likelihood_name>/<likelihood_name>.data'   will be used
-      #
-      Likelihoods: 
-        bao_smallz_2014: default #../montepython_public/montepython/likelihoods/bao_smallz_2014/bao_smallz_2014.data
-        Pantheon: default
-        Planck_SZ: default
-      # should eventually be possible to choose any MP like, atm only bao, Pantheon, Planck_SZ safe to use (& kids after 
-      # downloading data and when commenting out line 'parser_mp.existing_file(fname)', will include that into 
-      # build step soon) 
-      # still need to test all Likes
-
-  # Set if CLASS input parameters are passed with (i) or without (ii) setting arguments from MontePython (MP) Likelihoods
-  # This is important to set correctly for each run since: 
-  #   => if MontePython Likelihoods are used but CLASS is not initialised with the MP arguments 
-  #      it could lead to a SegFault or unreasonable/random LogLike values as MP might try to access
-  #      quantities that have not been computed
-  #   => if no MP likelihoods are used but CLASS is initialised with MPLike arguments you might be 
-  #      scanning over nuisance parameter models that are not needed without realising it. 
-  # (i) set CLASS input with MP arguments
+  # Choose which function to use for initialising the input parameters to be sent to CLASS.
+  # If including MontePython likelihoods in your scan, the first option must be used.
+  # If you have not installed MontePython, the second option must be used.
+  # GAMBIT will stop and tell you to fix this if you get it wrong though, so don't stress.
+  # (i) set CLASS input with MP compatibility
   - capability: classy_final_input
     function: set_classy_input_with_MPLike
-  #   ||
-  #   \/
-  # (ii) set CLASS input without MP arguments
-  # If not MontePython Likelihoods are used, use this rule
+  # (ii) set CLASS input without MP compatibility
   #- capability: classy_final_input
   #  function: set_classy_input
 
@@ -247,7 +250,7 @@ Rules:
 
 #======== 8) Logging setup ========
 Logger:
-  # log tags => check default.log and CosmoBit.log to see more details than 
+  # log tags => check default.log and CosmoBit.log to see more details than
   # printed to screen
   redirection:
     [Debug]      : "debug.log"

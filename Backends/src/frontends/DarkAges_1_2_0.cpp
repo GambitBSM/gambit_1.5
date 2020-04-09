@@ -182,7 +182,7 @@ BE_NAMESPACE
 
     logger().send("Message from 'gather_results' backend convenience function in DarkAges v1.0.0 wrapper (Done casting NumPy-arrays into std vectors)",LogTags::info);
 
-    return std::move(result);
+    return result;
   }
 }
 END_BE_NAMESPACE

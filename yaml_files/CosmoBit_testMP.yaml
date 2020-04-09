@@ -80,27 +80,27 @@ Scanner:
 
 #======== Observables of interest ========
 ObsLikes:
- 
-  # The total lnL from MontePython
+
   - purpose:      Observable
     capability:   Neff
     type:         double
-    
+
+  # The total lnL from MontePython
   - purpose:      LogLike
     capability:   MP_Combined_LogLike
     module:       CosmoBit
     type:         double
-  
+    sub_capabilities:
+      bao_smallz_2014: default
+      Pantheon: default
+      Planck_SZ: default
+
   # A breakdown of each likelihood component in the above total lnL
   - purpose:      Observable
     capability:   MP_LogLikes
     type:         map_str_dbl
-  
-  # Any observables requested by the user -- these are basically
-  # additional likelihoods -- so as not to optimise on lnL.
-  - purpose:      Observable
-    capability:   MP_Observables
-    type:         map_str_dbl
+    sub_capabilities:
+      WiggleZ: default
 
 #======== Rule entries ========
 Rules:
@@ -119,22 +119,6 @@ Rules:
   - capability: classy_final_input
     function: set_classy_input_with_MPLike
     module: CosmoBit
-
-  - capability: MP_experiment_names
-    function: set_MP_experiment_names
-    options:
-      #Likelihoods: ["bao","Pantheon","Planck_SZ",]  
-      Likelihoods: 
-        bao_smallz_2014: default
-        Pantheon: default 
-        Planck_SZ: default  
-      # should eventually be possible to choose any MP like, atm only bao, Pantheon, Planck_SZ (& kids after 
-      # downloading data and when commenting out line 'parser_mp.existing_file(fname)', will include that into 
-      # build step soon) safe to use;
-      # still need to write a proper patch for MPLike backend & test all Likes
-      Observables:
-        WiggleZ: default
-
 
   # to speed up Neff calc for testing
   - capability: AlterBBN_Input

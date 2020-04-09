@@ -963,11 +963,10 @@ namespace Gambit
       #endif
 
       const IniParser::ObservablesType & entries = boundIniFile->getRules();
-      //entries = boundIniFile->getObservables();
       for (IniParser::ObservablesType::const_iterator it =
           entries.begin(); it != entries.end(); ++it)
       {
-        if ( moduleFuncMatchesIniEntry(masterGraph[vertex], *it, *boundTEs) )
+        if (moduleFuncMatchesIniEntry(masterGraph[vertex], *it, *boundTEs))
         {
           #ifdef DEPRES_DEBUG
             cout << "Getting option from: " << it->capability << " " << it->type << endl;
@@ -1002,8 +1001,63 @@ namespace Gambit
           }
         }
       }
-      Options myOptions(nodes);
-      return myOptions;
+      return Options(nodes);
+    }
+
+    /// Collect sub-capabilities
+    Options DependencyResolver::collectSubCaps(const DRes::VertexID & vertex)
+    {
+      #ifdef DEPRES_DEBUG
+        cout << "Searching for subcaps of " << masterGraph[vertex]->capability() << endl;
+      #endif
+
+      YAML::Node nodes;
+      const IniParser::ObservablesType& entries = boundIniFile->getObservables();
+
+      // Iterate over the ObsLikes entries
+      for (auto it = entries.begin(); it != entries.end(); ++it)
+      {
+        // Select only those entries that match the current graph vertex (i.e. module function)
+        if (moduleFuncMatchesIniEntry(masterGraph[vertex], *it, *boundTEs) and not it->subcaps.IsNull())
+        {
+          #ifdef DEPRES_DEBUG
+            cout << "Found subcaps for " << it->capability << " " << it->type << " " << it->module << ":" << endl;
+          #endif
+          // The user has given just a single entry as a subcap
+          if (it->subcaps.IsScalar())
+          {
+            str key = it->subcaps.as<str>();
+            if (nodes[key]) dependency_resolver_error().raise(LOCAL_INFO,"Duplicate sub-capability for " + key + ".");
+            nodes[key] = YAML::Node();
+          }
+          // The user has passed a simple list of subcaps
+          else if (it->subcaps.IsSequence())
+          {
+            for (auto jt = it->subcaps.begin(); jt != it->subcaps.end(); ++jt)
+            {
+              if (not jt->IsScalar())
+               dependency_resolver_error().raise(LOCAL_INFO,"Attempt to pass map using sequence syntax for subcaps of "+it->capability+".");
+              str key = jt->as<str>();
+              if (nodes[key]) dependency_resolver_error().raise(LOCAL_INFO,"Duplicate sub-capability for " + key + ".");
+              nodes[key] = YAML::Node();
+            }
+          }
+          // The user has passed some more complicated subcap structure than just a list of strings
+          else if (it->subcaps.IsMap())
+          {
+            for (auto jt = it->subcaps.begin(); jt != it->subcaps.end(); ++jt)
+            {
+              str key = jt->first.as<str>();
+              if (nodes[key]) dependency_resolver_error().raise(LOCAL_INFO,"Duplicate sub-capability for " + key + ".");
+              nodes[key] = jt->second.as<YAML::Node>();
+            }
+          }
+          #ifdef DEPRES_DEBUG
+            cout << nodes << endl;
+          #endif
+        }
+      }
+      return Options(nodes);
     }
 
     /// Resolve dependency
@@ -1595,12 +1649,16 @@ namespace Gambit
         }
         else // if output vertex
         {
-          //iniEntry = NULL;
-          //boost::tie(iniEntry, fromVertex) = resolveDependency(toVertex, quantity);
           iniEntry = findIniEntry(quantity, boundIniFile->getObservables(), "ObsLike");
           outInfo.vertex = fromVertex;
           outInfo.iniEntry = iniEntry;
           outputVertexInfos.push_back(outInfo);
+          // Don't need subcaps during dry-run
+          if (not boundCore->show_runorder)
+          {
+            Options mySubCaps = collectSubCaps(fromVertex);
+            masterGraph[fromVertex]->notifyOfSubCaps(mySubCaps);
+          }
         }
 
         // If fromVertex is new, activate it

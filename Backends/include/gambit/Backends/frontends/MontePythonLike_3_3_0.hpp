@@ -10,7 +10,7 @@
 ///
 ///  \author Janina Renk
 ///          (janina.renk@fysik.su.se)
-///  \date 2019 June
+///  \date 2019 June, 2020 May
 ///
 ///  \author Sanjay Bloor
 ///          (sanjay.bloor12@imperial.ac.uk)
@@ -23,9 +23,9 @@
 ///  *********************************************
 
 #define BACKENDNAME MontePythonLike
-#define BACKENDLANG Python2
-#define VERSION 3.1.0
-#define SAFE_VERSION 3_1_0
+#define BACKENDLANG Python
+#define VERSION 3.3.0
+#define SAFE_VERSION 3_3_0
 
 LOAD_LIBRARY
 

@@ -10,7 +10,7 @@
 ///
 ///  \author Janina Renk
 ///          (janina.renk@fysik.su.se)
-///  \date 2019 June
+///  \date 2019 June, 2020 May
 ///
 ///  \author Sanjay Bloor
 ///          (sanjay.bloor12@imperial.ac.uk)
@@ -23,7 +23,7 @@
 ///  *********************************************
 
 #include "gambit/Backends/frontend_macros.hpp"
-#include "gambit/Backends/frontends/MontePythonLike_3_1_0.hpp"
+#include "gambit/Backends/frontends/MontePythonLike_3_3_0.hpp"
 
 #include <pybind11/stl.h>
 #include <pybind11/stl_bind.h>

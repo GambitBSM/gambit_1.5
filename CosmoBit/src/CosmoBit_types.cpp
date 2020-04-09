@@ -15,7 +15,7 @@
 ///  \date 2017 Nov
 ///
 ///  \author Selim Hotinli
-///	 \date 2018 Jan
+///  \date 2018 Jan
 ///
 ///  \author Janina Renk
 ///          (janina.renk@fysik.su.se)
@@ -25,11 +25,14 @@
 ///          (hoof@uni-goettingen.de)
 ///  \date 2020 Mar
 ///
+///  \author Pat Scott
+///          (pat.scott@uq.edu.au)
+///  \date 2020 Apr
+///
 ///  *********************************************
 
 #include <string>
 #include <iostream>
-#include <stdlib.h>     /* malloc, free, rand */
 #include <valarray>
 
 #include "gambit/CosmoBit/CosmoBit_types.hpp"
@@ -40,18 +43,6 @@ namespace Gambit
 {
   namespace CosmoBit
   {
-
-    /// helper to convert the memory address a double pointer points to
-    /// to an integer (-> uintptr_t, size of type depends on system & ensures
-    /// it is big enough to store memory addresses of the underlying setup)
-    /// (implemented to pass contents of arrays to CLASS)
-    uintptr_t memaddress_to_uint(double* ptr)
-    {
-      uintptr_t addr;
-      addr = reinterpret_cast<uintptr_t>(ptr);
-      return addr;
-    }
-
 
     BBN_container::BBN_container()
     {
@@ -75,9 +66,6 @@ namespace Gambit
       BBN_abund.resize(NNUC+1, 0.);
       BBN_covmat.resize(NNUC+1, std::vector<double>(NNUC+1,0.));
     }
-
-    MPLike_data_container::MPLike_data_container(){}
-    MPLike_data_container::MPLike_data_container(pybind11::object &data_in, map_str_pyobj likelihoods_in): data(data_in), likelihoods(likelihoods_in){}
 
     SM_time_evo::SM_time_evo(double t0, double tf, double N_t) : grid_size(N_t), t_grid(N_t), T_evo(N_t), Tnu_evo(N_t), H_evo(N_t), H_int(N_t)
     {
@@ -133,76 +121,6 @@ namespace Gambit
           H_int[i] = 0.5*Delta_z*(g_grid[0] + g_grid[i] + 2.0*cumsum);
           cumsum = cumsum + g_grid[i];
       }
-    }
-
-/*
-    ----------  Classy_input Methods ---------
-    In the following the methods of the Class 'Classy_input' are implemented.
-    Classy_input has the attribute 'input_dict' which is a python dictionary
-    containing the input parameters for CLASS
-
-*/
-
-
-    /// add all entries from extra_entries to input_dict, concatenates and returns all
-    /// keys that are contained in both dictionaries:
-    /// -> no keys in common: returns empty string ("")
-    /// -> else: returns sting containing all duplicated keys
-    /// need to check after use of this function if returned string was empty to avoid overwriting of
-    /// input values & inconsistencies.
-    std::string Classy_input::add_dict(pybind11::dict extra_dict)
-    {
-      // string to be returned -- stays empty if no duplicated dict entries are found
-      std::string common_keys ("");
-
-      for (auto item : extra_dict)
-      {
-        pybind11::str key = pybind11::str(item.first);
-        pybind11::str arg = pybind11::str(item.second);
-
-        if(!input_dict.attr("has_key")(key).cast<bool>())
-        {
-          input_dict[key] = arg;
-          //std::cout << "Adding key = " << std::string(pybind11::str(item.first)) << ", "<< "value=" << std::string(pybind11::str(item.second)) << std::endl;
-        }
-        else
-        {
-          // add duplicated strings
-          common_keys = common_keys + " " + key.cast<std::string>();
-          //std::cout << "Found duplicated key = " << std::string(pybind11::str(item.first)) << ", "<< "value=" << std::string(pybind11::str(item.second)) << std::endl;
-        }
-      }
-      return common_keys;
-    }
-
-    // function to merge python dictionary extra_dict into input_dict (member of Classy_input).
-    void Classy_input::merge_input_dicts(pybind11::dict extra_dict)
-    {
-      static bool first_run = true;
-      // call function to merge classy pybind dicts defined in CosmoBit_utils.cpp
-      // this function takes care of merging the input. If a key is contained in both
-      // dictionaries it has to be decided on a case-by-case basis how to deal with that
-      // some examples are already implemented, might have to be extended in the future
-      // if more CLASS features are used.
-      merge_pybind_dicts(input_dict, extra_dict, first_run);
-      first_run = false;
-    }
-
-    // return stringstream to print current entries of
-    // input_dict (can be send to logger)
-    std::string Classy_input::print_entries_to_logger()
-    {
-      using namespace LogTags;
-      std::ostringstream log_msg;
-      log_msg << "Parameters passed to class: \n \n";
-      for (auto item : input_dict)
-      {
-        pybind11::str key = pybind11::str(item.first);
-        pybind11::str value = pybind11::str(item.second);
-
-        log_msg << std::string(key) << " = " << std::string(value) << " \n";
-      }
-      return log_msg.str();
     }
 
     // Default constructor for multimode inputs

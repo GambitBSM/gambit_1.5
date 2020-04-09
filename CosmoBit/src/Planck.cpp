@@ -85,7 +85,6 @@ namespace Gambit
         else if (ModelInUse("cosmo_nuisance_Planck_TTTEEE"))
           modelcode = 7;
 
-        data.empty();
         for (auto iter=tmp.begin(); iter != tmp.end(); iter++)
         {
           //std::cout << "Read data: " << iter->first << " --- " << iter->second << std::endl;
@@ -744,7 +743,7 @@ namespace Gambit
 
     /* 2015 */
 
-    
+
     void function_Planck_lowl_TT_2015_loglike(double& result)
     {
       using namespace Pipes::function_Planck_lowl_TT_2015_loglike;
