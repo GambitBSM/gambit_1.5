@@ -1788,6 +1788,12 @@ namespace Gambit
                 // It has, so resolve the backend requirement with that function and add it to the list of successful resolutions.
                 resolveRequirement(solution,vertex);
                 previous_successes.push_back(solution);
+
+                // If *req is in remaining_reqs, remove it
+                if (remaining_reqs.find(*req) != remaining_reqs.end())
+                {
+                  remaining_reqs.erase(*req);
+                }
               }
               else // No valid solution found, but deferral has been suggested - so defer resolution of this group until later.
               {
