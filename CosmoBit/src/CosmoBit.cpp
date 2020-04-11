@@ -1190,14 +1190,12 @@ namespace Gambit
 
 // ***************************************************************************************************************
 
-    int diff_eq_rhs (double t, const double y[], double f[], void *params) // @Pat: this is the function for the differential equation that has to be solved in 'compute_dNeff_etaBBN_ALP' routine
+    /// RHS of differential equation
+    ///  dT/dt = 15/pi^2 (m_a n_a(t)/ tau_a) T^(-3) - H(T) T , where H(T) = 3.7978719e-7*T*T  // TODO: refer to Eq. number in paper when ready
+    ///  params: stores (m_a n_a(t)/ tau_a)
+    ///  y[0]: stores SM T[t0]
+    int diff_eq_rhs (double t, const double y[], double f[], void *params)
     {
-      /* RHS of differential equation
-        dT/dt = 15/pi^2 (m_a n_a(t)/ tau_a) T^(-3) - H(T) T , where H(T) = 3.7978719e-7*T*T  // TODO: refer to Eq. number in paper when ready
-        params: stores (m_a n_a(t)/ tau_a)
-        y[0]: stores SM T[t0]
-      */
-
       fast_interpolation injection_inter = *(static_cast<fast_interpolation*>(params));
       f[0] = (15.0/(4.0*pi*pi)) * injection_inter.interp(t)/pow(y[0], 3) - 3.7978719e-7*y[0]*y[0]*y[0];
       return GSL_SUCCESS;
@@ -1485,9 +1483,112 @@ namespace Gambit
     }
 
 
-    /// (JR) this function is huge (200 lines..) -- considering that it is acually only there to call
-    /// a BE function from AlterBBN, can we split that up somehow or define utility functions
-    /// to do some of the checks and error calculation things so it is not totally blown up? TODO
+    /// Check the validity of a correlation matrix for AlterBBN likelihood calculations given in the YAML file, and use it to populate a correlation matrix object
+    void populate_correlation_matrix(const std::map<std::string, int>& abund_map, std::vector<std::vector<double>>& corr,
+                                     std::vector<double>& relerr, bool use_relative_errors, const Options& runOptions)
+    {
+      std::vector<str> isotope_basis = runOptions.getValue<std::vector<str> >("isotope_basis");
+      std::vector<std::vector<double>> tmp_corr = runOptions.getValue<std::vector<std::vector<double>>>("correlation_matrix");
+      std::vector<double> tmp_relerr;
+      unsigned int nisotopes = isotope_basis.size();
+
+      // Check if the size of the isotope_basis and the size of the correlation matrix agree
+      if (nisotopes != tmp_corr.size())
+      {
+        std::ostringstream err;
+        err << "The length of the list \'isotope_basis\' and the size of the correlation matrix \'correlation_matrix\' do not agree";
+        CosmoBit_error().raise(LOCAL_INFO, err.str());
+      }
+
+      // If the relative errors are also given, then do also a check if the length of the list is correct and if the entries are positive.
+      if (use_relative_errors)
+      {
+        tmp_relerr = runOptions.getValue< std::vector<double> >("relative_errors");
+        if (nisotopes != tmp_relerr.size())
+        {
+          std::ostringstream err;
+          err << "The length of the list \'isotope_basis\' and the length of \'relative_errors\' do not agree";
+          CosmoBit_error().raise(LOCAL_INFO, err.str());
+        }
+        for (std::vector<double>::iterator it = tmp_relerr.begin(); it != tmp_relerr.end(); it++)
+        {
+          if (*it <= 0.0)
+          {
+            std::ostringstream err;
+            err << "One entry for the relative error is not positive";
+            CosmoBit_error().raise(LOCAL_INFO, err.str());
+          }
+        }
+      }
+
+      // Check if the correlation matrix is square
+      for (std::vector<std::vector<double>>::iterator it = tmp_corr.begin(); it != tmp_corr.end(); it++)
+      {
+        if (it->size() != nisotopes)
+        {
+          std::ostringstream err;
+          err << "The correlation matrix is not a square matrix";
+          CosmoBit_error().raise(LOCAL_INFO, err.str());
+        }
+      }
+
+      // Check if the entries in the correlation matrix are reasonable
+      for (unsigned int ie=0; ie<nisotopes; ie++)
+      {
+        //Check if the diagonal entries are equal to 1.
+        if (std::abs(tmp_corr.at(ie).at(ie) - 1.) > 1e-6)
+        {
+          std::ostringstream err;
+          err << "Not all diagonal elements of the correlation matirx are 1.";
+          CosmoBit_error().raise(LOCAL_INFO, err.str());
+        }
+        for (unsigned int je=0; je<=ie; je++)
+        {
+          //Check for symmetry
+          if (std::abs(tmp_corr.at(ie).at(je) - tmp_corr.at(je).at(ie)) > 1e-6)
+          {
+            std::ostringstream err;
+            err << "The correlation matrix is not symmetric";
+            CosmoBit_error().raise(LOCAL_INFO, err.str());
+          }
+          // Check if the off-diagonal elements are between -1 and 1.
+          if (std::abs(tmp_corr.at(ie).at(je)) >= 1. && (ie != je))
+          {
+            std::ostringstream err;
+            err << "The off-diagonal elements of the correlation matrix are not sensible (abs(..) > 1)";
+            CosmoBit_error().raise(LOCAL_INFO, err.str());
+          }
+        }
+      }
+
+      // Check if the isotopes in the basis are actually known.
+      for (std::vector<str>::iterator it = isotope_basis.begin(); it != isotope_basis.end(); it++)
+      {
+        if (abund_map.count(*it) == 0)
+        {
+          std::ostringstream err;
+          err << "I do not recognise the element \'" << *it << "\'";
+          CosmoBit_error().raise(LOCAL_INFO, err.str());
+        }
+      }
+
+      // Populate the correlation matrix and relative errors
+      for (std::vector<str>::iterator it1 = isotope_basis.begin(); it1 != isotope_basis.end(); it1++)
+      {
+        int ie  =  abund_map.at(*it1);
+        int i = std::distance( isotope_basis.begin(), it1 );
+        // If the relative errors are given, fill relerr with the respective values (-1.0 refers to no errors given).
+        if (use_relative_errors) relerr.at(ie) = tmp_relerr.at(i);
+        for (std::vector<str>::iterator it2 = isotope_basis.begin(); it2 != isotope_basis.end(); it2++)
+        {
+          int je = abund_map.at(*it2);
+          int j = std::distance( isotope_basis.begin(), it2 );
+          corr.at(ie).at(je) = tmp_corr.at(i).at(j);
+        }
+      }
+    }
+
+    /// Compute elemental abundances from BBN
     void compute_BBN_abundances(BBN_container &result)
     {
       using namespace Pipes::compute_BBN_abundances;
@@ -1511,238 +1612,68 @@ namespace Gambit
       std::unique_ptr<double[], decltype(deleter)> cov_ratioH(new double[(NNUC+1)*(NNUC+1)](), deleter);
 
       static bool first = true;
-      const bool use_fudged_correlations = (runOptions->hasKey("correlation_matrix") && runOptions->hasKey("elements"));
-      const bool use_relative_errors = runOptions->hasKey("relative_errors");
+      const static bool use_fudged_correlations = (runOptions->hasKey("correlation_matrix") && runOptions->hasKey("isotope_basis"));
+      const static bool use_relative_errors = runOptions->hasKey("relative_errors");
       static std::vector<double> relerr(NNUC+1, -1.0);
       static std::vector<std::vector<double>> corr(NNUC+1, std::vector<double>(NNUC+1, 0.0));
-      if (use_fudged_correlations && first)
+
+      if (first)
       {
-        for (int ie = 1; ie < NNUC; ie++) corr.at(ie).at(ie) = 1.;
-        std::vector<str> elements =  runOptions->getValue< std::vector<str> >("elements");
-        std::vector<std::vector<double>> tmp_corr = runOptions->getValue< std::vector<std::vector<double>> >("correlation_matrix");
-        std::vector<double> tmp_relerr;
-
-        unsigned int nelements = elements.size();
-
-        // Check if the size of the list of elements and the size of the correlation matrix agree
-        if (nelements != tmp_corr.size())
-        {
-          std::ostringstream err;
-          err << "The length of the list \'elements\' and the size of the correlation matrix \'correlation_matrix\' do not agree";
-          CosmoBit_error().raise(LOCAL_INFO, err.str());
-        }
-
-        // If the relative errors are also given, then do also a check if the length of the list is correct and if the entries are positive.
-        if (use_relative_errors)
-        {
-          tmp_relerr = runOptions->getValue< std::vector<double> >("relative_errors");
-          if (nelements != tmp_relerr.size())
-          {
-            std::ostringstream err;
-            err << "The length of the list \'elements\' and the length of \'relative_errors\' do not agree";
-            CosmoBit_error().raise(LOCAL_INFO, err.str());
-          }
-          for (std::vector<double>::iterator it = tmp_relerr.begin(); it != tmp_relerr.end(); it++)
-          {
-            if (*it <= 0.0)
-            {
-              std::ostringstream err;
-              err << "One entry for the relative error is not positive";
-              CosmoBit_error().raise(LOCAL_INFO, err.str());
-            }
-          }
-        }
-
-        // Check if the correlation matrix is symmetric
-        for (std::vector<std::vector<double>>::iterator it = tmp_corr.begin(); it != tmp_corr.end(); it++)
-        {
-          if (it->size() != nelements)
-          {
-            std::ostringstream err;
-            err << "The correlation matrix is not a square matrix";
-            CosmoBit_error().raise(LOCAL_INFO, err.str());
-          }
-        }
-
-        // Check if the entries in the correlation matrix are reasonable
-        for (unsigned int ie=0; ie<nelements; ie++)
-        {
-          //Check if the diagonal entries are equal to 1.
-          if (std::abs(tmp_corr.at(ie).at(ie) - 1.) > 1e-6)
-          {
-            std::ostringstream err;
-            err << "Not all diagonal elements of the correlation matirx are 1.";
-            CosmoBit_error().raise(LOCAL_INFO, err.str());
-          }
-          for (unsigned int je=0; je<=ie; je++)
-          {
-            //Check for symmetry
-            if (std::abs(tmp_corr.at(ie).at(je) - tmp_corr.at(je).at(ie)) > 1e-6)
-            {
-              std::ostringstream err;
-              err << "The correlation matrix is not symmetric";
-              CosmoBit_error().raise(LOCAL_INFO, err.str());
-            }
-            // Check if the off-diagonal elements are between -1 and 1.
-            if (std::abs(tmp_corr.at(ie).at(je)) >= 1. && (ie != je))
-            {
-              std::ostringstream err;
-              err << "The off-diagonal elements of the correlation matrix are not sensible (abs(..) > 1)";
-              CosmoBit_error().raise(LOCAL_INFO, err.str());
-            }
-          }
-        }
-
-        // Check if the elements which are passed via runOptions are actually known.
-        std::map<std::string, int> abund_map = result.get_abund_map();
-        for (std::vector<str>::iterator it = elements.begin(); it != elements.end(); it++)
-        {
-          if (abund_map.count(*it) == 0)
-          {
-            std::ostringstream err;
-            err << "I do not recognise the element \'" << *it << "\'";
-            CosmoBit_error().raise(LOCAL_INFO, err.str());
-          }
-        }
-
-        // Populate the correlation matrix
-        for (std::vector<str>::iterator it1 = elements.begin(); it1 != elements.end(); it1++)
-        {
-          int ie  =  abund_map[*it1];
-          int i = std::distance( elements.begin(), it1 );
-          // If the relative errors are given fill it with the respective values (-1.0 refers to no errors given).
-          if (use_relative_errors) relerr.at(ie) = tmp_relerr.at(i);
-          for (std::vector<str>::iterator it2 = elements.begin(); it2 != elements.end(); it2++)
-          {
-            int je  =  abund_map[*it2];
-            int j = std::distance( elements.begin(), it2 );
-            corr.at(ie).at(je) = tmp_corr.at(i).at(j);
-          }
-        }
-
+        // Here for a good time, not a long time
         first = false;
+
+        // Work out which isotopes have been requested in the yaml file
+        const std::vector<str>& v = Downstream::subcaps->getNames();
+        result.set_active_isotopes(std::set<str>(v.begin(), v.end()));
+
+        // Process user-defined correlations (if provided)
+        if (use_fudged_correlations)
+        {
+          for (int ie = 1; ie < NNUC; ie++) corr.at(ie).at(ie) = 1.;
+          const std::map<std::string, int>& abund_map = result.get_abund_map();
+          populate_correlation_matrix(abund_map, corr, relerr, use_relative_errors, *runOptions);
+        }
       }
 
-      // fill AlterBBN_input map with the parameters for the model in consideration
+      // Fill AlterBBN_input map with the parameters for the model in consideration
       map_str_dbl AlterBBN_input = *Dep::AlterBBN_Input;
 
-      // call AlterBBN routine to calculate element abundances (& errors -- depending
+      // Call AlterBBN routine to calculate element abundances (& errors -- depending
       // on error calculation settings made with parameters 'err' and failsafe set in
       // 'AlterBBN_Input')
-      int nucl_err = BEreq::call_nucl_err(AlterBBN_input, &ratioH[0], &cov_ratioH[0]);
-
-      // TODO: replace .at() by [] to speed up
-      std::vector<double> err_ratio(NNUC+1,0);
-      if (use_fudged_correlations)
-      {
-        for (int ie=1;ie<=NNUC;ie++)
-        {
-          if (use_relative_errors && (relerr.at(ie) > 0.0))
-          {
-            err_ratio.at(ie) =  relerr.at(ie) * ratioH[ie];
-          }
-          else
-          {
-            // get every diagonal element (row and line 0not filled)
-            err_ratio.at(ie) = sqrt(cov_ratioH[ie*(NNUC+1)+ie]);
-          }
-        }
-      }
-
-      // fill abundances and covariance matrix of BBN_container with results from AlterBBN
-      if (nucl_err)
-      {
-        for(int ie=1;ie<=NNUC;ie++)
-        {
-          result.set_BBN_abund(ie, ratioH[ie]);
-          for(int je=1;je<=NNUC;je++)
-          {
-            if (use_fudged_correlations)
-              result.set_BBN_covmat(ie, je, corr.at(ie).at(je) * err_ratio.at(ie) * err_ratio.at(je));
-            else
-              result.set_BBN_covmat(ie, je, cov_ratioH[ie*(NNUC+1)+je]);
-          }
-        }
-      }
-      else
+      if (not BEreq::call_nucl_err(AlterBBN_input, &ratioH[0], &cov_ratioH[0]))
       {
         std::ostringstream err;
         err << "AlterBBN calculation for primordial element abundances failed. Invalidating Point.";
         invalid_point().raise(err.str());
       }
+
+      // Fill relative errors
+      std::vector<double> err_ratio(NNUC+1,0);
+      if (use_fudged_correlations) for (const int& ie : result.get_active_isotope_indices())
+      {
+        if (use_relative_errors && (relerr.at(ie) > 0.0))
+          err_ratio.at(ie) =  relerr.at(ie) * ratioH[ie];
+        else
+          // get every diagonal element (row and line 0 is not filled)
+          err_ratio.at(ie) = sqrt(cov_ratioH[ie*(NNUC+1)+ie]);
+      }
+
+      // Fill abundances and covariance matrix of BBN_container with requested results from AlterBBN
+      for (const int& ie : result.get_active_isotope_indices())
+      {
+        result.set_BBN_abund(ie, ratioH[ie]);
+        for (const int& je : result.get_active_isotope_indices())
+        {
+          if (use_fudged_correlations)
+            result.set_BBN_covmat(ie, je, corr.at(ie).at(je) * err_ratio.at(ie) * err_ratio.at(je));
+          else
+            result.set_BBN_covmat(ie, je, cov_ratioH[ie*(NNUC+1)+je]);
+        }
+      }
     }
 
-    void get_Helium_abundance(std::vector<double> &result)
-    {
-      using namespace Pipes::get_Helium_abundance;
-
-      BBN_container BBN_res = *Dep::BBN_abundances;
-      std::map<std::string, int> abund_map = BBN_res.get_abund_map();
-
-      result.clear();
-      result.push_back(BBN_res.get_BBN_abund(abund_map["Yp"]));
-      result.push_back(sqrt(BBN_res.get_BBN_covmat(abund_map["Yp"], abund_map["Yp"])));
-
-      //std::cout << "Helium Abundance from AlterBBN: " << result.at(0) << " +/- " << result.at(1) << std::endl;
-      logger() << "Helium Abundance from AlterBBN: " << result.at(0) << " +/- " << result.at(1) << EOM;
-    }
-
-    void get_Helium3_abundance(std::vector<double> &result)
-    {
-      using namespace Pipes::get_Helium3_abundance;
-
-      BBN_container BBN_res = *Dep::BBN_abundances;
-      std::map<std::string, int> abund_map = BBN_res.get_abund_map();
-
-      result.clear();
-      result.push_back(BBN_res.get_BBN_abund(abund_map["He3"]));
-      result.push_back(sqrt(BBN_res.get_BBN_covmat(abund_map["He3"], abund_map["He3"])));
-
-      logger() << "Helium 3 Abundance from AlterBBN: " << result.at(0) << " +/- " << result.at(1) << EOM;
-    }
-
-    void get_Deuterium_abundance(std::vector<double> &result)
-    {
-      using namespace Pipes::get_Deuterium_abundance;
-
-      BBN_container BBN_res = *Dep::BBN_abundances;
-      std::map<std::string, int> abund_map = BBN_res.get_abund_map();
-
-      result.clear();
-      result.push_back(BBN_res.get_BBN_abund(abund_map["D"]));
-      result.push_back(sqrt(BBN_res.get_BBN_covmat(abund_map["D"], abund_map["D"])));
-
-      logger() << "Deuterium Abundance from AlterBBN: " << result.at(0) << " +/- " << result.at(1) << EOM;
-    }
-
-    void get_Lithium7_abundance(std::vector<double> &result)
-    {
-      using namespace Pipes::get_Lithium7_abundance;
-
-      BBN_container BBN_res = *Dep::BBN_abundances;
-      std::map<std::string, int> abund_map = BBN_res.get_abund_map();
-
-      result.clear();
-      result.push_back(BBN_res.get_BBN_abund(abund_map["Li7"]));
-      result.push_back(sqrt(BBN_res.get_BBN_covmat(abund_map["Li7"], abund_map["Li7"])));
-
-      logger() << "Lithium Abundance from AlterBBN: " << result.at(0) << " +/- " << result.at(1) << EOM;
-    }
-
-    void get_Beryllium7_abundance(std::vector<double> &result)
-    {
-      using namespace Pipes::get_Beryllium7_abundance;
-
-      BBN_container BBN_res = *Dep::BBN_abundances;
-      std::map<std::string, int> abund_map = BBN_res.get_abund_map();
-
-      result.clear();
-      result.push_back(BBN_res.get_BBN_abund(abund_map["Be7"]));
-      result.push_back(sqrt(BBN_res.get_BBN_covmat(abund_map["Be7"], abund_map["Be7"])));
-
-      logger() << "Beryllium Abundance from AlterBBN: " << result.at(0) << " +/- " << result.at(1) << EOM;
-    }
-
+    /// Compute the overall log-likelihood from BBN
     void compute_BBN_LogLike(double &result)
     {
       using namespace Pipes::compute_BBN_LogLike;
@@ -1752,42 +1683,68 @@ namespace Gambit
       int ie,je,s;
 
       BBN_container BBN_res = *Dep::BBN_abundances; // fill BBN_container with abundance results from AlterBBN
-      std::map<std::string, int> abund_map = BBN_res.get_abund_map();
+      const std::map<std::string, int>& abund_map = BBN_res.get_abund_map();
 
-      const str filename = runOptions->getValue<std::string>("DataFile"); // read in BBN data file
-      const str path_to_file = GAMBIT_DIR "/CosmoBit/data/BBN/" + runOptions->getValue<std::string>("DataFile");
-      static ASCIIdictReader data(path_to_file);
-      static bool read_data = false;
+      static bool first = true;
+      const static str filename = runOptions->getValueOrDef<std::string>("default.dat", "DataFile");
+      const static str path_to_file = GAMBIT_DIR "/CosmoBit/data/BBN/" + filename;
       static std::map<std::string,std::vector<double>> dict;
       static int nobs;
 
-      if(read_data == false)
+      if (first)
       {
-        logger() << "BBN data read from file '"<<filename<<"'." << EOM;
-        nobs = data.nrow();
-        dict = data.get_dict();
-        if(data.duplicated_keys()==true) // check for double key entries in data file
+        // Read the data
+        const ASCIIdictReader data(path_to_file);
+        logger() << "BBN data read from file '" << filename << "'." << EOM;
+
+        // Execute initialisation checks on the contents of the datafile
+        std::map<std::string,std::vector<double>> td = data.get_dict();
+        const str err = "Double entry for one element in BBN data file '" + filename + "'. \nYou can only enter one measurement per element.";
+        if (data.duplicated_keys()) CosmoBit_error().raise(LOCAL_INFO, err);
+        std::vector<sspair> doppelgangers = {{"Yp", "He4"}, {"D","H2"}};
+        for (const sspair& x : doppelgangers)
         {
-          std::ostringstream err;
-          err << "Double entry for one element in BBN data file '"<< filename<<"'. \nYou can only enter one measurement per element.";
-          CosmoBit_error().raise(LOCAL_INFO, err.str());
+          if (td.count(x.first) == 0 and td.count(x.second) == 0)
+          {
+            CosmoBit_error().raise(LOCAL_INFO, err + "\nNote that "+x.first+" and "+x.second+" are the same species!");
+          }
         }
-        if((dict.count("Yp")>0 and dict.count("He4")>0) or (dict.count("D")>0 and dict.count("H2")>0))
+
+        // Check that all isotopes requested in the yaml file exist in the datafile, and keep only the data needed
+        const std::vector<str>& v = Downstream::subcaps->getNames();
+        for (const str& isotope : std::set<str>(v.begin(), v.end()))
         {
-          std::ostringstream err;
-          err << "Double entry for 'Yp' and 'He4' or 'D' and 'H2' in BBN data file '"<< filename<<"'. \nYou can only enter one measurement per element ('Yp' OR 'He4', 'D' OR 'H2').";
-          CosmoBit_error().raise(LOCAL_INFO, err.str());
+          auto it = td.find(isotope);
+          // Check if the isotope has been listed as a subcapability
+          if (it == td.end())
+          {
+            str alt_name = "";
+            for (const sspair& pair : doppelgangers)
+            {
+              if (isotope == pair.first) alt_name = pair.second;
+              if (isotope == pair.second) alt_name = pair.first;
+            }
+            // Check if the isotope's doppelganger has been listed as a subcapability
+            if (alt_name != "") it = td.find(alt_name);
+          }
+          // Throw an error if the isotope is not found in the datafile
+          if (it == td.end()) CosmoBit_error().raise(LOCAL_INFO, "Did not find observations for "+isotope+" in "+filename+".");
+          // Otherwise, save the corresponding dictionary entry
+          else dict[isotope] = it->second;
         }
-        read_data = true;
+
+        // Save the number of observations to include in the likelihood, and split.
+        nobs = dict.size();
+        first = false;
       }
 
-      // init vectors with observations, predictions and covmat
+      // Init vectors with observations, predictions and covmat
       double prediction[nobs],observed[nobs],sigmaobs[nobs],translate[nobs];
       gsl_matrix *cov = gsl_matrix_alloc(nobs, nobs);
       gsl_matrix *invcov = gsl_matrix_alloc(nobs, nobs);
       gsl_permutation *p = gsl_permutation_alloc(nobs);
 
-      // iterate through observation dictionary to fill observed, sigmaobs and prediction arrays
+      // Iterate through observation dictionary to fill observed, sigmaobs and prediction arrays
       for(std::map<std::string,std::vector<double>>::iterator iter = dict.begin(); iter != dict.end(); ++iter)
       {
         std::string key = iter->first; // iter = ["element key", [mean, sigma]]
@@ -1797,14 +1754,14 @@ namespace Gambit
           err << "Unknown element '"<< key <<"' in BBN data file '"<< filename<<"'. \nYou can only enter 'Yp' or 'He4', 'D' or 'H2', 'He3', 'Li7'.";
           CosmoBit_error().raise(LOCAL_INFO, err.str());
         }
-        translate[ii]=abund_map[key]; // to order observed and predicted abundances consistently
+        translate[ii]=abund_map.at(key); // to order observed and predicted abundances consistently
         observed[ii]=iter->second[0];
         sigmaobs[ii]=iter->second[1];
-        prediction[ii]= BBN_res.get_BBN_abund(abund_map[key]);
+        prediction[ii]= BBN_res.get_BBN_abund(abund_map.at(key));
         ii++;
       }
 
-      // fill covmat
+      // Fill the covariance matrix
       for(ie=0;ie<nobs;ie++) {for(je=0;je<nobs;je++) gsl_matrix_set(cov, ie, je,pow(sigmaobs[ie],2.)*(ie==je)+BBN_res.get_BBN_covmat(translate[ie], translate[je]));}
 
       // Compute the LU decomposition and inverse of cov mat
@@ -1816,10 +1773,8 @@ namespace Gambit
 
       // compute chi2
       for(ie=0;ie<nobs;ie++) for(je=0;je<nobs;je++) chi2+=(prediction[ie]-observed[ie])*gsl_matrix_get(invcov,ie,je)*(prediction[je]-observed[je]);
-      //std::cout << "    BBN Like: chi2 = " << chi2 << "  factor " <<  log(pow(2*pi,nobs)*det_cov) << "  det cov = " << det_cov << std::endl;
       result = -0.5*(chi2 + log(pow(2*pi,nobs)*det_cov));
 
-      //std::cout << "    BBN LogLike computed to be: " << result << std::endl;
       logger() << "BBN LogLike computed to be: " << result << EOM;
 
       gsl_matrix_free(cov);
@@ -1827,9 +1782,9 @@ namespace Gambit
       gsl_permutation_free(p);
     }
 
-/// -----------
-/// Background Likelihoods (SNe + H0 + BAO + Sigma8)
-/// -----------
+    /// -----------
+    /// Background Likelihoods (SNe + H0 + BAO + Sigma8)
+    /// -----------
 
     void compute_H0_LogLike(double &result)
     {

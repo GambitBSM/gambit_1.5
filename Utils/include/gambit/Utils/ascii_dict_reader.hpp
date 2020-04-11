@@ -49,11 +49,11 @@ namespace Gambit
       ~ASCIIdictReader() {}
 
       int read(std::string filename);
-      std::vector<std::string> get_keys() {return keys;}
-      std::map<std::string,std::vector<double>> get_dict(){return dict;}
-      bool duplicated_keys() {return duplicate;}
-      int nrow() {return keys.size();}
- 
+      const std::vector<std::string>& get_keys() const {return keys;}
+      const std::map<std::string,std::vector<double>>& get_dict() const {return dict;}
+      bool duplicated_keys() const {return duplicate;}
+      int nrow() const {return keys.size();}
+
     private:
       std::map<std::string,std::vector<double>> dict;
       std::vector<std::string> keys;

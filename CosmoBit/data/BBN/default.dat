@@ -13,10 +13,10 @@
 #                     Li7
 # Sources:
 #   He: PDG_2017; http://pdg.lbl.gov/2017/reviews/rpp2017-rev-bbang-nucleosynthesis.pdf
-#    D: Conservative bounds; https://arxiv.org/pdf/1412.4043.pdf
+#    D: Equation 5 of arXiv::1801.08023
 #
 # -------------------------
 
 # Isotope  central value  1 sigma uncertainty
 Yp         0.245          0.003
-D          2.45e-5        0.28e-5
+D          2.527e-5       0.030e-5

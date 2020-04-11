@@ -821,7 +821,27 @@ START_MODULE
     #undef FUNCTION
   #undef CAPABILITY
 
-  // AlterBBN related functions & capabilities
+  #define CAPABILITY sigma8_LogLike
+  START_CAPABILITY
+    #define FUNCTION compute_sigma8_LogLike
+    START_FUNCTION(double)
+    DEPENDENCY(Omega0_m, double)
+    BACKEND_REQ(class_get_sigma8,(class_tag),double,())
+    #undef FUNCTION
+  #undef CAPABILITY
+
+  #define CAPABILITY H0_LogLike
+  START_CAPABILITY
+    #define FUNCTION compute_H0_LogLike
+    START_FUNCTION(double)
+    DEPENDENCY(H0,double)
+    #undef FUNCTION
+  #undef CAPABILITY
+
+  // ----------------------
+
+  // AlterBBN
+
   #define CAPABILITY AlterBBN_Input
   START_CAPABILITY
     #define FUNCTION AlterBBN_Input
@@ -888,23 +908,6 @@ START_MODULE
     #define FUNCTION compute_BBN_LogLike
     START_FUNCTION(double)
     DEPENDENCY(BBN_abundances, BBN_container)
-    #undef FUNCTION
-  #undef CAPABILITY
-
-  #define CAPABILITY H0_LogLike
-  START_CAPABILITY
-    #define FUNCTION compute_H0_LogLike
-    START_FUNCTION(double)
-    DEPENDENCY(H0,double)
-    #undef FUNCTION
-  #undef CAPABILITY
-
-  #define CAPABILITY sigma8_LogLike
-  START_CAPABILITY
-    #define FUNCTION compute_sigma8_LogLike
-    START_FUNCTION(double)
-    DEPENDENCY(Omega0_m, double)
-    BACKEND_REQ(class_get_sigma8,(class_tag),double,())
     #undef FUNCTION
   #undef CAPABILITY
 

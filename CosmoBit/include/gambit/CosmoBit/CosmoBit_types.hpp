@@ -59,7 +59,7 @@ namespace Gambit
     error& CosmoBit_error();
     warning& CosmoBit_warning();
 
-    typedef std::map< std::string,std::valarray < double > > map_str_valarray_dbl;
+    typedef std::map< str,std::valarray < double > > map_str_valarray_dbl;
     typedef std::tuple<pybind11::object, map_str_str, map_str_pyobj> MPLike_objects_container;
 
     /// Class to store all results from an AlterBBN run
@@ -70,30 +70,49 @@ namespace Gambit
     class BBN_container
     {
       public:
+        /// Constructor
         BBN_container();
 
-        // initialize sizes of vectors (get NNUC from AlterBBN, number of computed element abundances)
-        // and get a translation map from element name to position in abundance vector
-        void init_arr_size(int nnuc);
-        void set_abund_map(map_str_int map_in){abund_map = map_in;}
+        /// Initialize sizes of vectors (get NNUC, number of computed element abundances, from AlterBBN)
+        void init_arr_size(int);
 
-        // setter functions for abundance vector and cov mat
-        void set_BBN_abund(int pos, double val) {BBN_abund[pos] = val;}
-        void set_BBN_covmat(int row, int col, double val) {BBN_covmat[row][col] = val;}
+        /// Initialise the translation map from element name to position in abundance vector
+        void set_abund_map(map_str_int);
 
-        // global parameter in AlterBBN, holds number of computed element abundances
-        int get_NNUC(){return NNUC;};
-        std::map<std::string,int> get_abund_map(){return abund_map;};
+        /// Setter functions for abundance vector
+        void set_BBN_abund(int, double);
 
-        // getter functions for abundance vector and cov mat
-        double get_BBN_abund(int pos) {return BBN_abund[pos];}
-        double get_BBN_covmat(int row, int col) {return BBN_covmat[row][col];}
+        /// Setter function for covariance matrix
+        void set_BBN_covmat(int, int, double);
+
+        /// Global parameter in AlterBBN; holds number of computed element abundances
+        int get_NNUC();
+
+        /// Getter for map from isotope names to position in BBN_abundance vector
+        const std::map<str,int>& get_abund_map();
+
+        /// Getter for abundance vector
+        double get_BBN_abund(int);
+
+        /// Getter for covariance matrix
+        double get_BBN_covmat(int, int);
+
+        /// Setter for active isotopes
+        void set_active_isotopes(std::set<str>);
+
+        /// Getter for active isotopes
+        const std::set<str>& get_active_isotopes();
+
+        /// Getter for indices of active isotopes in BBN_abundance vector
+        const std::set<int>& get_active_isotope_indices();
 
       private:
         int NNUC;
         std::vector<double> BBN_abund;
-        std::vector< std::vector<double> > BBN_covmat;
-        std::map<std::string, int> abund_map;
+        std::vector<std::vector<double>> BBN_covmat;
+        std::map<str,int> abund_map;
+        std::set<str> active_isotopes;
+        std::set<int> active_isotope_indices;
     };
 
     class SM_time_evo
