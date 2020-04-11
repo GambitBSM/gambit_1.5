@@ -149,7 +149,7 @@ namespace Gambit
       // get pointers to arrays holding the information that needs
       // to be passed on to class, convert to uintptr_t (type large enough
       // to store memory address of the used system) and pass to class
-      input_dict[key.c_str()] = memaddress_to_uint(&values[0]);
+      input_dict[key.c_str()] = std::to_string(memaddress_to_uint(&values[0])).c_str();
   }
 
   bool Classy_input::has_key(str key){return input_dict.contains(key.c_str());}
