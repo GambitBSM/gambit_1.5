@@ -1012,7 +1012,7 @@ namespace Gambit
 
       result.set_N_pivot(observables.N_pivot);
       result.set_n_s(observables.ns);
-      result.set_ln10A_s( 10. + log(observables.As) );
+      result.set_ln10A_s( 10. * log(10.) + log(observables.As) );
       result.set_r(observables.r);
 
     }
