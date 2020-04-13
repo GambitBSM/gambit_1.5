@@ -126,14 +126,14 @@ namespace Gambit
     template<typename P>
     void _common_print(P& printer, BBN_container const& value, const std::string& label, const int vID, const unsigned int mpirank, const unsigned long pointID)
     {
+      std::map<std::string, double> m;
       for (const str& i : value.get_active_isotopes())
       {
         int index = value.get_abund_map().at(i);
-        double abund = value.get_BBN_abund(index);
-        double sigma = sqrt(value.get_BBN_covmat(index, index));
-        printer._print(abund, label+"::"+i, vID, mpirank,pointID);
-        printer._print(sigma, label+"::"+i+"::1sigma_err", vID, mpirank, pointID);
+        m[i] = value.get_BBN_abund(index);
+        m[i+"::1sigma_err"] = sqrt(value.get_BBN_covmat(index, index));
       }
+      printer._print(m, label, vID, mpirank, pointID);
     }
 
   }
