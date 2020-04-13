@@ -44,54 +44,6 @@ namespace Gambit
   namespace CosmoBit
   {
 
-    /// Constructor
-    BBN_container::BBN_container() : abund_map{{"H2",3}, {"D",3}, {"H3",4}, {"He3",5}, {"He4",6}, {"Yp",6}, {"Li6",7}, {"Li7",8}, {"Be7",9}, {"Li8",10}}
-    {}
-
-    /// Initialize sizes of vectors (get NNUC, number of computed element abundances, from AlterBBN)
-    void BBN_container::init_arr_size(int nnuc)
-    {
-      NNUC = nnuc;
-      BBN_abund.resize(NNUC+1, 0.);
-      BBN_covmat.resize(NNUC+1, std::vector<double>(NNUC+1,0.));
-    }
-
-    /// Initialise the translation map from element name to position in abundance vector
-    void BBN_container::set_abund_map(map_str_int map_in) {abund_map = map_in;}
-
-    /// Setter functions for abundance vector
-    void BBN_container::set_BBN_abund(int pos, double val) {BBN_abund[pos] = val;}
-
-    /// Setter function for covariance matrix
-    void BBN_container::set_BBN_covmat(int row, int col, double val) {BBN_covmat[row][col] = val;}
-
-    /// Global parameter in AlterBBN; holds number of computed element abundances
-    int BBN_container::get_NNUC() {return NNUC;};
-
-    /// Getter for map from isotope names to position in BBN_abundance vector
-    const std::map<std::string,int>& BBN_container::get_abund_map() {return abund_map;};
-
-    /// Getter for abundance vector
-    double BBN_container::get_BBN_abund(int pos) {return BBN_abund[pos];}
-
-    /// Getter for covariance matrix
-    double BBN_container::get_BBN_covmat(int row, int col) {return BBN_covmat[row][col];}
-
-    /// Setter for active isotopes
-    void BBN_container::set_active_isotopes(std::set<str> isos)
-    {
-      active_isotopes = isos;
-      active_isotope_indices.clear();
-      for (const str& s : active_isotopes) active_isotope_indices.insert(abund_map.at(s));
-    }
-
-    /// Getter for active isotopes
-    const std::set<str>& BBN_container::get_active_isotopes() {return active_isotopes;}
-
-    /// Getter for indices of active isotopes in BBN_abundance vector
-    const std::set<int>& BBN_container::get_active_isotope_indices() {return active_isotope_indices;}
-
-
     SM_time_evo::SM_time_evo(double t0, double tf, double N_t) : grid_size(N_t), t_grid(N_t), T_evo(N_t), Tnu_evo(N_t), H_evo(N_t), H_int(N_t)
     {
 
@@ -122,7 +74,6 @@ namespace Gambit
       set_Tnu_evo();
       set_Ht_evo();
     }
-
 
     void SM_time_evo::calc_H_int()
     {

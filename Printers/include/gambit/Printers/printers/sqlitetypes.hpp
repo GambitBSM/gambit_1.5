@@ -35,8 +35,9 @@
   (map_intpair_dbl)         \
 
 
-#define SQLITE_MODULE_BACKEND_TYPES \
+#define SQLITE_BACKEND_TYPES\
   (DM_nucleon_couplings)    \
   (Flav_KstarMuMu_obs)      \
+  (BBN_container)
 
 #endif

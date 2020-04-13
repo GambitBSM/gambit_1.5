@@ -62,59 +62,6 @@ namespace Gambit
     typedef std::map< str,std::valarray < double > > map_str_valarray_dbl;
     typedef std::tuple<pybind11::object, map_str_str, map_str_pyobj> MPLike_objects_container;
 
-    /// Class to store all results from an AlterBBN run
-    /// -> element abundances stored in BBN_nuc (length NNUC+1),
-    /// -> covariance matrix in BBN_covmat ( dim NNUC+1 x NNUC+1)
-    /// -> abund_map maps name of element to position in BBN_abundance vector
-    ///    see constructor of BBN_container
-    class BBN_container
-    {
-      public:
-        /// Constructor
-        BBN_container();
-
-        /// Initialize sizes of vectors (get NNUC, number of computed element abundances, from AlterBBN)
-        void init_arr_size(int);
-
-        /// Initialise the translation map from element name to position in abundance vector
-        void set_abund_map(map_str_int);
-
-        /// Setter functions for abundance vector
-        void set_BBN_abund(int, double);
-
-        /// Setter function for covariance matrix
-        void set_BBN_covmat(int, int, double);
-
-        /// Global parameter in AlterBBN; holds number of computed element abundances
-        int get_NNUC();
-
-        /// Getter for map from isotope names to position in BBN_abundance vector
-        const std::map<str,int>& get_abund_map();
-
-        /// Getter for abundance vector
-        double get_BBN_abund(int);
-
-        /// Getter for covariance matrix
-        double get_BBN_covmat(int, int);
-
-        /// Setter for active isotopes
-        void set_active_isotopes(std::set<str>);
-
-        /// Getter for active isotopes
-        const std::set<str>& get_active_isotopes();
-
-        /// Getter for indices of active isotopes in BBN_abundance vector
-        const std::set<int>& get_active_isotope_indices();
-
-      private:
-        int NNUC;
-        std::vector<double> BBN_abund;
-        std::vector<std::vector<double>> BBN_covmat;
-        std::map<str,int> abund_map;
-        std::set<str> active_isotopes;
-        std::set<int> active_isotope_indices;
-    };
-
     class SM_time_evo
     {
      /* Time evolution of photon & neutrino temperature as well as Hubble rate in SM for time t > 1e3 s.
