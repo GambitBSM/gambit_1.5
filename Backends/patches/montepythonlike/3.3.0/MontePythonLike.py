@@ -271,7 +271,7 @@ class Likelihood(object):
                     data.cosmo_arguments[key] += ' '+value+' '
             else:
                 if array_flag is False:
-                    if float(data.cosmo_arguments[key]) < value:
+                    if float(data.cosmo_arguments[key]) < float(value):
                         data.cosmo_arguments[key] = value
                 else:
                     data.cosmo_arguments[key] = '%.2g' % value[0]
@@ -2508,11 +2508,11 @@ class Likelihood_sn(Likelihood):
         .. note::
 
             the length of the matrix is stored on the first line... then it has
-            to be unwrapped. The pandas routine read_table understands this
+            to be unwrapped. The pandas routine read_csv understands this
             immediatly, though.
 
         """
-        from pandas import read_table
+        from pandas import read_csv
         path = os.path.join(self.data_directory, path)
         # The first line should contain the length.
         with open(path, 'r') as text:
@@ -2521,7 +2521,7 @@ class Likelihood_sn(Likelihood):
         # Note that this function does not require to skiprows, as it
         # understands the convention of writing the length in the first
         # line
-        matrix = read_table(path).as_matrix().reshape((length, length))
+        matrix = read_csv(path).values.reshape((length, length))
 
         return matrix
 
@@ -2535,7 +2535,7 @@ class Likelihood_sn(Likelihood):
             the covariance matrices stored in C00, etc...
 
         """
-        from pandas import read_table
+        from pandas import read_csv
         path = os.path.join(self.data_directory, self.data_file)
 
         # Recover the names of the columns. The names '3rdvar' and 'd3rdvar'
@@ -2545,10 +2545,9 @@ class Likelihood_sn(Likelihood):
             names = [e.strip().replace('3rd', 'third')
                      for e in clean_first_line.split()]
 
-        lc_parameters = read_table(
+        lc_parameters = read_csv(
             path, sep=' ', names=names, header=0, index_col=False)
         return lc_parameters
-
 
 class Likelihood_clocks(Likelihood):
     """Base implementation of H(z) measurements"""
