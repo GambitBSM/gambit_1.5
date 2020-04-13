@@ -1618,19 +1618,16 @@ namespace Gambit
 
       if (first)
       {
-        // Here for a good time, not a long time
-        first = false;
-
         // Work out which isotopes have been requested in the yaml file
         const std::vector<str>& v = Downstream::subcaps->getNames();
-        if (v.empty())
+        result.set_active_isotopes(std::set<str>(v.begin(), v.end()));
+        if (result.get_active_isotopes().empty())
         {
-          str err = "No sub-capabilities found for compute_BBN_abundances.  Please specify elements to compute abundances for \n"
-                    "in the ObsLikes section of your yaml file as in e.g.\n"
+          str err = "No relevant sub-capabilities found for compute_BBN_abundances.  Please specify elements to\n"
+                    "compute abundances for in the ObsLikes section of your yaml file as in e.g.\n"
                     "  sub_capabilities: [He4, D, Li7]";
           CosmoBit_error().raise(LOCAL_INFO, err);
         }
-        result.set_active_isotopes(std::set<str>(v.begin(), v.end()));
 
         // Process user-defined correlations (if provided)
         if (use_fudged_correlations)
@@ -1639,6 +1636,9 @@ namespace Gambit
           const std::map<std::string, int>& abund_map = result.get_abund_map();
           populate_correlation_matrix(abund_map, corr, relerr, use_relative_errors, *runOptions);
         }
+
+        // Here for a good time, not a long time
+        first = false;
       }
 
       // Fill AlterBBN_input map with the parameters for the model in consideration
@@ -1739,8 +1739,17 @@ namespace Gambit
           else dict[isotope] = it->second;
         }
 
-        // Save the number of observations to include in the likelihood, and split.
+        // Save the number of observations to include in the likelihood.
         nobs = dict.size();
+        if (nobs == 0)
+        {
+          str err = "No relevant sub-capabilities found for compute_BBN_LogLike.  Please specify elements to\n"
+                    "compute likelihoods from in the ObsLikes section of your yaml file as in e.g.\n"
+                    "  sub_capabilities: [He4, D]";
+          CosmoBit_error().raise(LOCAL_INFO, err);
+        }
+
+        // Init out.
         first = false;
       }
 

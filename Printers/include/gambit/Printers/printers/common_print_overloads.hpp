@@ -132,7 +132,7 @@ namespace Gambit
         double abund = value.get_BBN_abund(index);
         double sigma = sqrt(value.get_BBN_covmat(index, index));
         printer._print(abund, label+"::"+i, vID, mpirank,pointID);
-        printer._print(sigma, label+"::"+i+"_1sigma_err", vID, mpirank, pointID);
+        printer._print(sigma, label+"::"+i+"::1sigma_err", vID, mpirank, pointID);
       }
     }
 

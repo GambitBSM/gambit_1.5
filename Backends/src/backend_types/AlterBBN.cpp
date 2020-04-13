@@ -64,9 +64,16 @@ namespace Gambit
   /// Setter for active isotopes
   void BBN_container::set_active_isotopes(std::set<str> isos)
   {
-    active_isotopes = isos;
+    active_isotopes.clear();
     active_isotope_indices.clear();
-    for (const str& s : active_isotopes) active_isotope_indices.insert(abund_map.at(s));
+    for (const str& s : isos)
+    {
+      if (abund_map.find(s) != abund_map.end())
+      {
+       active_isotopes.insert(s);
+       active_isotope_indices.insert(abund_map.at(s));
+      }
+    }
   }
 
   /// Getter for active isotopes
