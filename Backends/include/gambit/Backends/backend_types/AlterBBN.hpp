@@ -26,8 +26,11 @@
 #define NNUCREAC 100
 #define NTABMAX 1000
 
-/* Different Versions of AlterBBN have different memebers of relicparam and error structures.
-    -> Define the strucutre for each version of AlterBBN in namespace of the according verions to avoid clashes */
+// Different versions of AlterBBN have different members of the relicparam and error structures.
+// We therefore declare the structures for each version of AlterBBN in their own namespace to avoid clashes.
+// We need to declare typedefs at the end within the Backends namespace too, so that the rollcall system
+// does not get confused (since we choose namespace names that actually clash with those that the rollcall macros
+// define themselves within the Backends namespace).
 
 namespace Gambit
 {
