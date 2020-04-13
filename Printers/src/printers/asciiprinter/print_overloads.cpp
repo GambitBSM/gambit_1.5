@@ -23,6 +23,7 @@
 ///  *********************************************
 
 #include "gambit/Printers/printers/asciiprinter.hpp"
+#include "gambit/Printers/printers/common_print_overloads.hpp"
 
 namespace Gambit
 {
@@ -117,12 +118,12 @@ namespace Gambit
     }
 
     // Piggyback off existing print functions to build standard overloads
-    //USE_COMMON_PRINT_OVERLOAD(asciiPrinter, ModelParameters)
-    //USE_COMMON_PRINT_OVERLOAD(asciiPrinter, triplet<double>)
+    USE_COMMON_PRINT_OVERLOAD(asciiPrinter, ModelParameters)
+    USE_COMMON_PRINT_OVERLOAD(asciiPrinter, triplet<double>)
     #ifndef SCANNER_STANDALONE
-      //USE_COMMON_PRINT_OVERLOAD(asciiPrinter, DM_nucleon_couplings)
-      //USE_COMMON_PRINT_OVERLOAD(asciiPrinter, Flav_KstarMuMu_obs)
-      //USE_COMMON_PRINT_OVERLOAD(asciiPrinter, BBN_container)
+      USE_COMMON_PRINT_OVERLOAD(asciiPrinter, DM_nucleon_couplings)
+      USE_COMMON_PRINT_OVERLOAD(asciiPrinter, Flav_KstarMuMu_obs)
+      USE_COMMON_PRINT_OVERLOAD(asciiPrinter, BBN_container)
     #endif
 
     /// @}
