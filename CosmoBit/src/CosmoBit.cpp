@@ -708,7 +708,7 @@ namespace Gambit
       // TODO check whether A_s from MultiModeCode has the log taken or not.
       Parametrised_ps pps = *Dep::parametrised_power_spectrum;
       result.add_entry("n_s", pps.get_n_s());
-      result.add_entry("ln10^{10}A_s", pps.get_A_s());
+      result.add_entry("ln10^{10}A_s", pps.get_ln10A_s());
 
       // add k_pivot entry
       result.add_entry("P_k_ini type", "analytic_Pk");
@@ -1012,7 +1012,7 @@ namespace Gambit
 
       result.set_N_pivot(observables.N_pivot);
       result.set_n_s(observables.ns);
-      result.set_A_s(observables.As);
+      result.set_ln10A_s( 10. * log(10.) + log(observables.As) );
       result.set_r(observables.r);
 
     }
@@ -1039,7 +1039,7 @@ namespace Gambit
       Parametrised_ps pps;
       pps.set_N_pivot(55);
       pps.set_n_s(*Param["n_s"]);
-      pps.set_A_s(*Param["ln10A_s"]);
+      pps.set_ln10A_s(*Param["ln10A_s"]);
       pps.set_r(0);
 
       result = pps;

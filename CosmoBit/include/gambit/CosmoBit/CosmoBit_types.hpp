@@ -254,12 +254,12 @@ namespace Gambit
 
             void set_N_pivot(double npiv) { N_pivot = npiv; }
             void set_n_s(double ns) { n_s = ns; }
-            void set_A_s(double As) { A_s = As; }
+            void set_ln10A_s(double ln10As) { ln10A_s = ln10As; }
             void set_r(double rr) { r = rr; }
 
             double get_N_pivot() { return N_pivot; }
             double get_n_s() { return n_s; }
-            double get_A_s() { return A_s; }
+            double get_ln10A_s() { return ln10A_s; }
             double get_r() { return r; }
 
             // return members as str to double map for printing
@@ -269,7 +269,7 @@ namespace Gambit
         private:
             double N_pivot;
             double n_s;
-            double A_s;
+            double ln10A_s;
             double r;
     };
   }

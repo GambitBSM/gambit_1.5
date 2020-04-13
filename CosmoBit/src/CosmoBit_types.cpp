@@ -175,7 +175,7 @@ namespace Gambit
     map_str_dbl Parametrised_ps::get_parametrised_ps_map()
     {
       map_str_dbl result;
-      result["A_s"] = A_s;
+      result["ln10A_s"] = ln10A_s;
       result["n_s"] = n_s;
       result["r"] = r;
       result["N_pivot"] = N_pivot;
