@@ -148,17 +148,17 @@ ObsLikes:
 
 
   # ---- 6.a) BBN -----
-  # Likelihood from BBN (need to specify which data to use in rules section below in 7.a))
+  # Likelihood from BBN; use only deuterium for this example
   - purpose:      LogLike
     capability:   BBN_LogLike
-    module:       CosmoBit
-    type:         double
+    sub_capabilities: D
 
-  # print helium abundance + error
+  # print helium abundances + errors
   - purpose:      Observable
-    capability:   Helium_abundance
-    module:       CosmoBit
-    type:         std::vector<double>
+    capability:   BBN_abundances
+    sub_capabilities:
+      - He3
+      - He4
 
 
   # ---- 6.b) MontePython Likelihoods -----
@@ -215,13 +215,6 @@ Rules:
 
   # ----------- 7.a) BBN Likelihoods, AlterBBN interface -----------
   #                (CosmoBit Module paper, Appendix C.1)
-
-  # Set path to file containing measured values of light element abundances to use for
-  # Likelihood calculation (assumes root directory is gambit/CosmoBit/data/BBN)
-  - capability: BBN_LogLike
-    options:
-      DataFile: PDG_2017.dat # Use both, the Yp and D/H measurement as given in PDG 2017
-      #DataFile: PDG_2017_updated.dat # Use the Yp measurement from PDG 2017 and the updated D/H measurement of 1801.08023
 
   # error calculation precision settings for AltterBBN
   # (use 1 and 0 to speed up Helium abundance calculation for testing)

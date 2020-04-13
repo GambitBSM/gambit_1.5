@@ -214,17 +214,15 @@ ObsLikes:
     function:     function_Planck_lowl_TTEE_2018_loglike
 
   # ---- BBN -----
-  # Likelihood from BBN (need to specify which data to use in rules section below)
+  # Likelihood from BBN, based only helium and deuterium abundances
   - purpose:      LogLike
     capability:   BBN_LogLike
-    module:       CosmoBit
-    type:         double
+    sub_capabilities: [He4, D]
 
-  # print helium abundance + error
+  # Print lithium-7 abundance + error
   - purpose:      Observable
-    capability:   Helium_abundance
-    module:       CosmoBit
-    type:         std::vector<double>
+    capability:   BBN_abundances
+    sub_capabilities: [Li7]
 
 
   # ---- MontePython Likelihoods -----
@@ -316,8 +314,9 @@ Rules:
   # Likelihood calculation (assumes root directory is gambit/CosmoBit/data/BBN)
   - capability: BBN_LogLike
     options:
-      DataFile: PDG_2017.dat # Use both, the Yp and D/H measurement as given in PDG 2017
-      #DataFile: PDG_2017_updated.dat # Use the Yp measurement from PDG 2017 and the updated D/H measurement of 1801.08023
+      DataFile: default.dat     # Use the Yp measurement from PDG 2017 and the updated D/H measurement of 1801.08023
+      #DataFile: ConsD_2014.dat # Use the Yp measurement from PDG 2017 and the conservative D/H measurement of 1412.4043
+      #DataFile: AlterBBN.dat   # Use the observed values given in AlterBBN
 
   # error calculation precision settings for AltterBBN
   # (use 1 and 0 to speed up Helium abundance calculation for testing)
@@ -330,7 +329,7 @@ Rules:
   # correlation matrix for BBN error calculation todo explain what that is!
   - capability: BBN_abundances
     options:
-      elements: [Yp, D, He3, Be7, Li7]
+      isotope_basis: [Yp, D, He3, Be7, Li7]
       correlation_matrix: [[+1.000e00, +1.524e-2, +2.667e-2, +2.303e-2, +2.429e-2],
                            [+1.524e-2, +1.000e00, -8.160e-1, -3.775e-1, -3.653e-1],
                            [+2.667e-2, -8.160e-1, +1.000e00, +3.897e-1, +3.780e-1],

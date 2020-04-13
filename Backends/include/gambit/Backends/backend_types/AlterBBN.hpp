@@ -64,8 +64,11 @@ namespace Gambit
       /// Getter for map from isotope names to position in BBN_abundance vector
       const std::map<str,int>& get_abund_map() const;
 
-      /// Getter for abundance vector
-      double get_BBN_abund(int) const;
+      /// Getter for abundance
+      double get_BBN_abund(int pos) const;
+
+      /// Getter for abundance
+      double get_BBN_abund(str iso) const;
 
       /// Getter for covariance matrix
       double get_BBN_covmat(int, int) const;

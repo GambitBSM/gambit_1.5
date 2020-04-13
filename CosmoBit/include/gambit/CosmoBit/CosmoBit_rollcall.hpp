@@ -225,7 +225,7 @@ START_MODULE
     //ALLOW_MODELS(LCDM)
     MODEL_CONDITIONAL_DEPENDENCY(classy_parameters_EnergyInjection, pybind11::dict, AnnihilatingDM_general, DecayingDM_general)
     MODEL_CONDITIONAL_DEPENDENCY(classy_PlanckLike_input, pybind11::dict, cosmo_nuisance_Planck_lite,cosmo_nuisance_Planck_TTTEEE,cosmo_nuisance_Planck_TT,plik_dx11dr2_HM_v18_TT)
-    DEPENDENCY(Helium_abundance,      std::vector<double>)
+    DEPENDENCY(BBN_abundances, BBN_container)
     DEPENDENCY(classy_NuMasses_Nur_input, pybind11::dict)
     #undef FUNCTION
   #undef CAPABILITY

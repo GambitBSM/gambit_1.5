@@ -595,9 +595,8 @@ namespace Gambit
         result["100*theta_s"] = *Param["100theta_s"];
       }
 
-      // set helium abundance (vector Helium_abundance.at(0): mean, .at(1): uncertainty)
-      std::vector<double> Helium_abundance = *Dep::Helium_abundance;
-      result["YHe"] = Helium_abundance.at(0);
+      // Set helium abundance
+      result["YHe"] = Dep::BBN_abundances->get_BBN_abund("He4");
 
       // TODO: need to test if class or exo_class in use! does not work -> (JR) should be fixed with classy implementation
       // -> (JR again) not sure if that is actually true.. need to test.
@@ -1624,6 +1623,13 @@ namespace Gambit
 
         // Work out which isotopes have been requested in the yaml file
         const std::vector<str>& v = Downstream::subcaps->getNames();
+        if (v.empty())
+        {
+          str err = "No sub-capabilities found for compute_BBN_abundances.  Please specify elements to compute abundances for \n"
+                    "in the ObsLikes section of your yaml file as in e.g.\n"
+                    "  sub_capabilities: [He4, D, Li7]";
+          CosmoBit_error().raise(LOCAL_INFO, err);
+        }
         result.set_active_isotopes(std::set<str>(v.begin(), v.end()));
 
         // Process user-defined correlations (if provided)
@@ -1757,7 +1763,7 @@ namespace Gambit
         translate[ii]=abund_map.at(key); // to order observed and predicted abundances consistently
         observed[ii]=iter->second[0];
         sigmaobs[ii]=iter->second[1];
-        prediction[ii]= BBN_res.get_BBN_abund(abund_map.at(key));
+        prediction[ii]= BBN_res.get_BBN_abund(key);
         ii++;
       }
 

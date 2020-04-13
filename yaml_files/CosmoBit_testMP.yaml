@@ -17,7 +17,7 @@
 
 #======== Input parameter declarations =======
 Parameters:
- 
+
  # --- import model parameters for models to scan over ---
  LCDM: !import include/LCDM_fixed.yaml        # base LCDM
 
@@ -29,24 +29,24 @@ Parameters:
   r_BBN: 1.08566
   r_CMB: 0.947919
 
-  #dNeff_CMB: 
+  #dNeff_CMB:
   #  prior_type: flat
   #  range: [0,1.0]
-  #dNeff_BBN: 
+  #dNeff_BBN:
   #  prior_type: flat
   #  range: [0,1.0]
-  #r_CMB: 
+  #r_CMB:
   #  prior_type: flat
   #  range: [0.8,1.2]
-  #r_BBN: 
+  #r_BBN:
   #  prior_type: flat
   #  range: [0.8,1.2]
-  
+
 
  # neutrino masses
  #StandardModel_mNudiff: !import include/StandardModel_mNudiff_both_scan.yaml
 
- # Cosmological nuisance parameters (except for Planck CMB Likelihoods) 
+ # Cosmological nuisance parameters (except for Planck CMB Likelihoods)
  cosmo_nuisance_Pantheon: !import include/cosmo_nuisance_Pantheon.yaml
 
 #======== Prior setup ========
@@ -113,7 +113,7 @@ Rules:
       classy_dict:
          #P_k_max_h/Mpc: 3
          #m_ncdm: 2
-      
+
   # you have to set by hand if you want to set the class parameters with or without setting arguments from MontePython Likelihoods
   # if the montepythonlike backend is installed (if not it should automatically choose the function 'init_Classy_cosmo_container')
   - capability: classy_final_input
@@ -128,7 +128,7 @@ Rules:
 
   - capability: BBN_abundances
     options:
-      elements: [Yp, D, He3, Be7, Li7]
+      isotope_basis: [Yp, D, He3, Be7, Li7]
       correlation_matrix: [[+1.000e00, +1.524e-2, +2.667e-2, +2.303e-2, +2.429e-2],
                             [+1.524e-2, +1.000e00, -8.160e-1, -3.775e-1, -3.653e-1],
                             [+2.667e-2, -8.160e-1, +1.000e00, +3.897e-1, +3.780e-1],
