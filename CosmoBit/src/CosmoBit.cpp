@@ -1593,10 +1593,7 @@ namespace Gambit
       using namespace Pipes::compute_BBN_abundances;
 
       // global variable of AlterBBN (# computed element abundances)
-      const int NNUC = BEreq::get_NNUC();
-      result.set_abund_map(BEreq::get_abund_map_AlterBBN());
-      // init arrays in BBN_container with right length
-      result.init_arr_size(NNUC);
+      const static int NNUC = BEreq::get_NNUC();
 
       // in AlterBBN ratioH and cov_ratioH are arrays of fixed length
       // with certain compiler versions (gcc 5.4.0) we have seen memory corruption problems
@@ -1618,6 +1615,10 @@ namespace Gambit
 
       if (first)
       {
+        // Init abundance map and allocate arrays in result
+        result.set_abund_map(BEreq::get_abund_map_AlterBBN());
+        result.init_arr_size(NNUC);
+
         // Work out which isotopes have been requested in the yaml file
         const std::vector<str>& v = Downstream::subcaps->getNames();
         result.set_active_isotopes(std::set<str>(v.begin(), v.end()));

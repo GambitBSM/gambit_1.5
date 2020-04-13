@@ -28,11 +28,6 @@ LOAD_LIBRARY
 
 BE_FUNCTION(Init_cosmomodel, void, (AlterBBN_2_0::relicparam*), "Init_cosmomodel", "Init_cosmomodel")
 BE_FUNCTION(nucl_err, int, (AlterBBN_2_0::relicparam*, double* , double* ), "nucl_err", "nucl_err")
-//BE_FUNCTION(bbn_excluded_chi2, int, (AlterBBN_2_0::relicparam*), "bbn_excluded_chi2", "bbn_excluded_chi2")
-
-//BE_FUNCTION(heff, double, (double, relicparam*), "heff", "heff")
-//BE_FUNCTION(geff, double, (double, relicparam*), "geff", "geff")
-//BE_FUNCTION(sgStar, double, (double, relicparam*), "sgStar", "sgStar")
 
 BE_CONV_FUNCTION(get_NNUC, int, (), "get_NNUC")
 BE_CONV_FUNCTION(get_abund_map_AlterBBN, map_str_int, (), "get_abund_map_AlterBBN")
