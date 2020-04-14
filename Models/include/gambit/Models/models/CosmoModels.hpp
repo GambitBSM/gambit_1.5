@@ -30,49 +30,30 @@
 ///          (hoof@uni-goettingen.de)
 ///   \date 2020 Mar
 ///
+///  \author Pat Scott
+///          (pat.scott@uq.edu.au)
+///  \date 2020 Apr
+///
 ///  *********************************************
 
-#ifndef __CosmoModels_hpp__
-#define __CosmoModels_hpp__
+#pragma once
 
 // Vanilla ΛCDM.
+// This model would usually be scanned alongside an inflationary model and a neutrino model
 #define MODEL LCDM
   START_MODEL
-  DEFINEPARS(T_cmb,omega_b,omega_cdm,H0,ln10A_s,n_s,tau_reio)
+  DEFINEPARS(T_cmb,omega_b,omega_cdm,H0,tau_reio)
   MAP_TO_CAPABILITY(T_cmb,T_cmb)
   MAP_TO_CAPABILITY(H0, H0)
 #undef MODEL
 
-// ΛCDM parameters without those relating to the primordial power spectrum (A_s, n_s)
-// This model should be scanned alongside an inflationary model able to provide
-// a primordial power spectrum.
-#define MODEL LCDM_no_primordial
-  #define PARENT LCDM
-  START_MODEL
-  DEFINEPARS(T_cmb,omega_b,omega_cdm,H0,tau_reio)
-  INTERPRET_AS_PARENT_FUNCTION(LCDM_to_LCDM_no_primordial)
-  #undef PARENT
-#undef MODEL
-
 // Vanilla ΛCDM.
+// This model would usually be scanned alongside an inflationary model and a neutrino model
 #define MODEL LCDM_theta
   START_MODEL
-  DEFINEPARS(T_cmb,omega_b,omega_cdm,100theta_s,ln10A_s,n_s,tau_reio)
+  DEFINEPARS(T_cmb,omega_b,omega_cdm,100theta_s,tau_reio)
   MAP_TO_CAPABILITY(T_cmb,T_cmb)
 #undef MODEL
-
-// ΛCDM parameters without those relating to the primordial power spectrum (A_s, n_s)
-// This model should be scanned alongside an inflationary model able to provide
-// a primordial power spectrum.
-#define MODEL LCDM_theta_no_primordial
-  #define PARENT LCDM_theta
-  START_MODEL
-  DEFINEPARS(T_cmb,omega_b,omega_cdm,100theta_s,tau_reio)
-  INTERPRET_AS_PARENT_FUNCTION(LCDM_theta_to_LCDM_theta_no_primordial)
-  #undef PARENT
-#undef MODEL
-
-
 
 /* CMB + BBN */
 
@@ -149,27 +130,33 @@
 
 /* INFLATION */
 
-// Inflationary models -- if one of them is in use you have to use the model LCDM_theta_no_primordial
+// Inflationary models -- if one of these is in use, you would usually need to use a cosmological model
 // to scan over the four standard cosmological parameters (H0 or theta, omega_b, omega_cdm, tau_reio).
 // The shape of the (either parameterised or full) primordial power spectrum will be determined by
 // the inflation model in use.
 
+// Simple, parameterised, purely phenomenological, scale-free power spectrum
+#define MODEL PowerLaw_ps
+  START_MODEL
+  DEFINEPARS(ln10A_s,n_s,r,N_pivot)
+#undef MODEL
+
 // Single field, monomic inflation with exponent 2/3 (assuming instant reheating)
-// Potential: V(phi) = 1.5 lambda phi^(2/3)
+// Potential: V(phi) = 1.5 lambda M_P^(10/3) phi^(2/3)
 #define MODEL Inflation_InstReh_1mono23
   START_MODEL
   DEFINEPARS(lambda)
 #undef MODEL
 
 // Single field, quadratic inflation (assuming instant reheating)
-// Potential: V(phi) = lambda phi
+// Potential: V(phi) = lambda M_P^3 phi
 #define MODEL Inflation_InstReh_1linear
   START_MODEL
   DEFINEPARS(lambda)
 #undef MODEL
 
 // Single field, quadratic inflation (assuming instant reheating)
-// Potential: V(phi) = 0.5 m^2 phi^2
+// Potential: V(phi) = 0.5 m^2 phi^2 = 0.5 m_phi^2 M_P^2 phi^2
 #define MODEL Inflation_InstReh_1quadratic
   START_MODEL
   DEFINEPARS(m_phi)
@@ -183,17 +170,15 @@
 #undef MODEL
 
 // Single field, natural inflation (assuming instant reheating)
-// Potential: V(phi) = Lambda^4 [1 + cos(phi/f)]
+// Potential: V(phi) = Lambda^4 [ 1 + cos(phi/f) ] = (lambda M_P)^4 [ 1 + cos(phi/[f_phi M_P]) ]
 #define MODEL Inflation_InstReh_1natural
   START_MODEL
-  DEFINEPARS(Lambda, f_phi)
+  DEFINEPARS(lambda, f_phi)
 #undef MODEL
 
 // Single field, Starobinsky - aka R^2 - inflation (assuming instant reheating)
-// Potential: V(phi) = ...
+// Potential: V(phi) = Lambda^4 [1-exp(-sqrt(2/3)phi/M_P)]^2 = (lambda M_P)^4 [1-exp(-sqrt(2/3)phi/M_P)]^2
 #define MODEL Inflation_InstReh_1Starobinsky
   START_MODEL
-  DEFINEPARS(Lambda)
+  DEFINEPARS(lambda)
 #undef MODEL
-
-#endif

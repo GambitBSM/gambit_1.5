@@ -201,17 +201,6 @@ START_MODULE
     #undef FUNCTION
   #undef CAPABILITY
 
-  // Number of e-folds before the end of inflation. If no inflation model is in use,
-  // this can be set by a yaml file rule. Otherwise, it is obtained from the model of inflation.
-  #define CAPABILITY N_pivot
-  START_CAPABILITY
-    #define FUNCTION set_N_pivot
-    START_FUNCTION(double)
-    ALLOW_MODELS(LCDM, LCDM_theta)
-    ALLOW_MODELS(Inflation_InstReh_1mono23, Inflation_InstReh_1linear, Inflation_InstReh_1quadratic, Inflation_InstReh_1quartic, Inflation_InstReh_1natural, Inflation_InstReh_1Starobinsky)
-    #undef FUNCTION
-  #undef CAPABILITY
-
   // ------------------------
 
   // Capabilities related to setting input options for CLASS
@@ -221,8 +210,7 @@ START_MODULE
   START_CAPABILITY
     #define FUNCTION set_classy_baseline_params
     START_FUNCTION(pybind11::dict)
-    ALLOW_MODELS(LCDM,LCDM_no_primordial,LCDM_theta,LCDM_theta_no_primordial)
-    //ALLOW_MODELS(LCDM)
+    ALLOW_MODELS(LCDM,LCDM_theta)
     MODEL_CONDITIONAL_DEPENDENCY(classy_parameters_EnergyInjection, pybind11::dict, AnnihilatingDM_general, DecayingDM_general)
     MODEL_CONDITIONAL_DEPENDENCY(classy_PlanckLike_input, pybind11::dict, cosmo_nuisance_Planck_lite,cosmo_nuisance_Planck_TTTEEE,cosmo_nuisance_Planck_TT,plik_dx11dr2_HM_v18_TT)
     DEPENDENCY(BBN_abundances, BBN_container)
@@ -252,24 +240,17 @@ START_MODULE
     // H0, tau_reio, Omega_m, Omega_b plus an external primordial power spectrum
     #define FUNCTION set_classy_parameters_primordial_ps
     START_FUNCTION(Classy_input)
-    //ALLOW_MODELS(LCDM_no_primordial)
-    MODEL_GROUP(inflation,(Inflation_InstReh_1mono23, Inflation_InstReh_1linear, Inflation_InstReh_1quadratic, Inflation_InstReh_1quartic, Inflation_InstReh_1natural, Inflation_InstReh_1Starobinsky))
-    MODEL_GROUP(cosmo,(LCDM_no_primordial))
-    ALLOW_MODEL_COMBINATION(cosmo,inflation)
-    DEPENDENCY(classy_baseline_params, pybind11::dict)
     DEPENDENCY(primordial_power_spectrum, Primordial_ps)
+    DEPENDENCY(classy_baseline_params, pybind11::dict)
     DEPENDENCY(k_pivot, double)
-    DEPENDENCY(N_pivot, double)
     #undef FUNCTION
 
     // H0, tau_reio, Omega_m, Omega_b plus an external *parametrised* primordial power spectrum
     #define FUNCTION set_classy_parameters_parametrised_ps
     START_FUNCTION(Classy_input)
-    //ALLOW_MODELS(LCDM_no_primordial, LCDM)
+    ALLOW_MODELS(PowerLaw_ps)
     DEPENDENCY(classy_baseline_params, pybind11::dict)
-    DEPENDENCY(parametrised_power_spectrum,   Parametrised_ps)
     DEPENDENCY(k_pivot, double)
-    DEPENDENCY(N_pivot, double)
     #undef FUNCTION
   #undef CAPABILITY
 
@@ -312,7 +293,7 @@ START_MODULE
 
   // Primodial power spectra (MultiModeCode)
 
-  // Initialise settings for MultiModeCode
+  /// Initialise settings for MultiModeCode
   #define CAPABILITY multimode_input_parameters
   START_CAPABILITY
     #define FUNCTION set_multimode_inputs
@@ -322,50 +303,31 @@ START_MODULE
     #undef FUNCTION
   #undef CAPABILITY
 
-  #define CAPABILITY parametrised_power_spectrum
-  START_CAPABILITY
-    #define FUNCTION get_multimode_parametrised_ps
-    START_FUNCTION(Parametrised_ps)
-    MODEL_GROUP(inflation,(Inflation_InstReh_1mono23, Inflation_InstReh_1linear, Inflation_InstReh_1quadratic, Inflation_InstReh_1quartic, Inflation_InstReh_1natural, Inflation_InstReh_1Starobinsky))
-    MODEL_GROUP(cosmo,(LCDM_no_primordial))
-    ALLOW_MODEL_COMBINATION(cosmo,inflation)
-    DEPENDENCY(multimode_input_parameters, Multimode_inputs)
-    BACKEND_REQ(multimodecode_parametrised_ps, (), gambit_inflation_observables,
-     (int&,int&,int&,int&,double*,double*,double*,double&,double&,double&,int&,int&,int&,int&,int&))
-    #undef FUNCTION
-
-    #define FUNCTION get_parametrised_ps_LCDM
-    START_FUNCTION(Parametrised_ps)
-    ALLOW_MODELS(LCDM,LCDM_theta)
-    #undef FUNCTION
-  #undef CAPABILITY
-
-  #define CAPABILITY print_parametrised_ps
-  START_CAPABILITY
-    #define FUNCTION print_parametrised_ps
-    START_FUNCTION(map_str_dbl)
-    DEPENDENCY(parametrised_power_spectrum, Parametrised_ps)
-    #undef FUNCTION
-  #undef CAPABILITY
-
-  // Pass settings to MultiModeCode, run it and return the structure containing the results
+  /// Use MultiModeCode to compute a non-parametric primordial power spectrum
   #define CAPABILITY primordial_power_spectrum
   START_CAPABILITY
     #define FUNCTION get_multimode_primordial_ps
     START_FUNCTION(Primordial_ps)
-    ALLOW_MODELS(Inflation_InstReh_1mono23, Inflation_InstReh_1linear, Inflation_InstReh_1quadratic, Inflation_InstReh_1quartic, Inflation_InstReh_1natural, Inflation_InstReh_1Starobinsky)
     DEPENDENCY(multimode_input_parameters, Multimode_inputs)
     BACKEND_REQ(multimodecode_primordial_ps, (), gambit_inflation_observables,
      (int&,int&,int&,int&,double*,double*,double*,double&,double&,double&,int&,double&,double&,int&,int&,int&,int&,int&))
     #undef FUNCTION
-
-    /*
-    #define FUNCTION get_LCDM_primordial_ps
-    START_FUNCTION(Primordial_ps)
-    ALLOW_MODELS(LCDM)
-    #undef FUNCTION
-    */
   #undef CAPABILITY
+
+  /// Use MultiModeCode to compute a parameterised primordial power spectrum
+  #define CAPABILITY PowerLaw_ps_parameters
+  START_CAPABILITY
+    #define FUNCTION get_multimode_parametrised_ps
+    START_FUNCTION(ModelParameters)
+    DEPENDENCY(multimode_input_parameters, Multimode_inputs)
+    BACKEND_REQ(multimodecode_parametrised_ps, (), gambit_inflation_observables,
+     (int&,int&,int&,int&,double*,double*,double*,double&,double&,double&,int&,int&,int&,int&,int&))
+    #undef FUNCTION
+  #undef CAPABILITY
+
+  // -----------
+
+  // CMB (CLASS / Planck)
 
   #define CAPABILITY unlensed_Cl_TT
   START_CAPABILITY
@@ -619,7 +581,6 @@ START_MODULE
   START_CAPABILITY
     #define FUNCTION T_ncdm_SM
     START_FUNCTION(double)
-    ALLOW_MODELS(LCDM,LCDM_theta)
     #undef FUNCTION
   #undef CAPABILITY
 
@@ -778,29 +739,6 @@ START_MODULE
     #undef FUNCTION
   #undef CAPABILITY
 
-/* Is there even a possible distinction between etaCMB and eta0?
-  #define CAPABILITY etaCMB
-  START_CAPABILITY
-    #define FUNCTION calculate_etaCMB_SM // here: eta0 = etaCMB
-    START_FUNCTION(double)
-    DEPENDENCY(eta0, double)
-    ALLOW_MODELS(LCDM_dNeffCMB_dNeffBBN_etaBBN) // To get etaCMB for LCDM_dNeffCMB_dNeffBBN_etaBBN
-    ALLOW_MODELS(LCDM_dNeffCMB_dNeffBBN) // Allow for all direct childs of LCDM_dNeffCMB_dNeffBBN_etaBBN. Needed for the translation into LCDM_dNeffCMB_dNeffBBN_etaBBN
-    ALLOW_MODELS(LCDM_ExtdNeffCMB_ExtetaBBN)
-    #undef FUNCTION
-  #undef CAPABILITY
-*/
-
-/* This capability lives now in the etaBBN_rBBN_rCMB_dNurBBN_dNurCMB model
-   by using the MAP_TO_CAPABILITY macro. It might be cleaner to have this definition here.
-   #define CAPABILITY etaBBN
-   START_CAPABILITY
-     #define FUNCTION set_etaBBN // etaBBN is model parameter
-     START_FUNCTION(double)
-     ALLOW_MODELS(etaBBN_rBBN_rCMB_dNurBBN_dNurCMB) // To get etaCMB for etaBBN_rBBN_rCMB_dNurBBN_dNurCMB
-     #undef FUNCTION
-   #undef CAPABILITY
-*/
   // Compute dNeff AND etaBBN for non-standard models
   #define CAPABILITY external_dNeff_etaBBN
   START_CAPABILITY
