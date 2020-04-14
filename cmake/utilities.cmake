@@ -113,6 +113,15 @@ macro(retrieve_bits bits root excludes quiet)
 
 endmacro()
 
+# Specify native make command to be put into external build steps (for correct usage of gmake jobserver)
+if(CMAKE_MAKE_PROGRAM MATCHES "make$")
+  set(MAKE_SERIAL   $(MAKE) -j1)
+  set(MAKE_PARALLEL $(MAKE))
+else()
+  set(MAKE_SERIAL   "${CMAKE_MAKE_PROGRAM}")
+  set(MAKE_PARALLEL "${CMAKE_MAKE_PROGRAM}")
+endif()
+
 # Arrange clean commands
 include(cmake/cleaning.cmake)
 
