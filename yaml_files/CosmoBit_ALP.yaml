@@ -15,6 +15,8 @@ Parameters:
     n_s:
       prior_type: flat
       range: [0.9,1.10]
+    r: 0
+    N_pivot: 55
 
   CosmoALP:
     fa: 1.0

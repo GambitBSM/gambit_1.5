@@ -89,6 +89,8 @@ Parameters:
     n_s:
       prior_type: flat
       range: [0.9,1.10]
+    r: 0
+    N_pivot: 55
 
   # extension of standard LCDM: allow for values of dNeff @CMB & @ BBN different from today
   dNurBBN_dNurCMB:
