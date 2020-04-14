@@ -95,9 +95,7 @@ Rules:
 
   - capability: classy_primordial_parameters
     function: set_classy_parameters_parametrised_ps
-
-  - capability: parametrised_power_spectrum
-    function: get_multimode_parametrised_ps
+#    function: set_classy_parameters_primordial_ps
 
   - capability: classy_baseline_params
     #function: set_classy_baseline_params
