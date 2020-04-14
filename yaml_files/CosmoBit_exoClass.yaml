@@ -22,32 +22,40 @@
 #======== Input parameter declarations =======
 Parameters:
 
- # --- import model parameters for models to scan over ---
- LCDM: !import include/LCDM_scan.yaml
+  # --- import model parameters for models to scan over ---
+  LCDM: !import include/LCDM_scan.yaml
 
- # Everything Neff and eta related
- #etaBBN:                         !import include/etaBBN.yaml
- #rCMB:                           !import include/rCMB.yaml
- #rBBN_rCMB:                      !import include/rBBN_rCMB.yaml
- #dNurCMB:                        !import include/dNurCMB.yaml
- #dNurBBN_dNurCMB:                !import include/dNurBBN_dNurCMB.yaml
- #rBBN_rCMB_dNurBBN_dNurCMB:      !import include/rBBN_rCMB_dNurBBN_dNurCMB.yaml
- etaBBN_rBBN_rCMB_dNurBBN_dNurCMB: !import include/etaBBN_rBBN_rCMB_dNurBBN_dNurCMB.yaml
+  PowerLaw_ps:
+    ln10A_s:
+      prior_type: flat
+      range: [2.9,3.2]
+    n_s:
+      prior_type: flat
+      range: [0.9,1.10]
 
- # neutrino masses
- StandardModel_mNudiff: !import include/StandardModel_mNudiff_both_scan.yaml
- #StandardModel_mNudiff: !import include/StandardModel_mNudiff_NH_scan.yaml
- #StandardModel_mNudiff: !import include/StandardModel_mNudiff_IH_scan.yaml
+  # Everything Neff and eta related
+  #etaBBN:                         !import include/etaBBN.yaml
+  #rCMB:                           !import include/rCMB.yaml
+  #rBBN_rCMB:                      !import include/rBBN_rCMB.yaml
+  #dNurCMB:                        !import include/dNurCMB.yaml
+  #dNurBBN_dNurCMB:                !import include/dNurBBN_dNurCMB.yaml
+  #rBBN_rCMB_dNurBBN_dNurCMB:      !import include/rBBN_rCMB_dNurBBN_dNurCMB.yaml
+  etaBBN_rBBN_rCMB_dNurBBN_dNurCMB: !import include/etaBBN_rBBN_rCMB_dNurBBN_dNurCMB.yaml
 
- # Cosmological nuisance parameters (except for Planck CMB Likelihoods)
- cosmo_nuisance_Pantheon: !import include/cosmo_nuisance_Pantheon.yaml
+  # neutrino masses
+  StandardModel_mNudiff: !import include/StandardModel_mNudiff_both_scan.yaml
+  #StandardModel_mNudiff: !import include/StandardModel_mNudiff_NH_scan.yaml
+  #StandardModel_mNudiff: !import include/StandardModel_mNudiff_IH_scan.yaml
 
- # nuisance parameters in Planck likelihood
- cosmo_nuisance_Planck_lite: !import include/Planck_2018/cosmo_nuisance_Planck_lite_gauss.yaml
+  # Cosmological nuisance parameters (except for Planck CMB Likelihoods)
+  cosmo_nuisance_Pantheon: !import include/cosmo_nuisance_Pantheon.yaml
 
- # model parameters for "AnnihilatingDM_mixture" / "DecayingDM_mixture"
- #AnnihilatingDM_mixture: !import include/AnnihilatingDM_mixture_scan.yaml
- DecayingDM_mixture: !import include/DecayingDM_mixture_scan.yaml
+  # nuisance parameters in Planck likelihood
+  cosmo_nuisance_Planck_lite: !import include/Planck_2018/cosmo_nuisance_Planck_lite_gauss.yaml
+
+  # model parameters for "AnnihilatingDM_mixture" / "DecayingDM_mixture"
+  #AnnihilatingDM_mixture: !import include/AnnihilatingDM_mixture_scan.yaml
+  DecayingDM_mixture: !import include/DecayingDM_mixture_scan.yaml
 
 #======== Prior setup ========
 Priors:

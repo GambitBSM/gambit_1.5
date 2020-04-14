@@ -23,25 +23,33 @@
 #======== Input parameter declarations =======
 Parameters:
 
- # --- import model parameters for models to scan over ---
- LCDM: !import include/LCDM_scan.yaml        # base LCDM
+  # --- import model parameters for models to scan over ---
+  LCDM: !import include/LCDM_scan.yaml        # base LCDM
 
- # Everything Neff and eta related
- #etaBBN:                             !import include/etaBBN.yaml
- #rCMB:                               !import include/rCMB.yaml
- #rBBN_rCMB:                          !import include/rBBN_rCMB.yaml
- #dNurCMB:                           !import include/dNurCMB.yaml
- #dNurBBN_dNurCMB:                  !import include/dNurBBN_dNurCMB.yaml
- #rBBN_rCMB_dNurBBN_dNurCMB:        !import include/rBBN_rCMB_dNurBBN_dNurCMB.yaml
- etaBBN_rBBN_rCMB_dNurBBN_dNurCMB: !import include/etaBBN_rBBN_rCMB_dNurBBN_dNurCMB.yaml
+  PowerLaw_ps:
+    ln10A_s:
+      prior_type: flat
+      range: [2.9,3.2]
+    n_s:
+      prior_type: flat
+      range: [0.9,1.10]
 
- # neutrino masses
- StandardModel_mNudiff: !import include/StandardModel_mNudiff_both_scan.yaml
- #StandardModel_mNudiff: !import include/StandardModel_mNudiff_NH_scan.yaml
- #StandardModel_mNudiff: !import include/StandardModel_mNudiff_IH_scan.yaml
+  # Everything Neff and eta related
+  #etaBBN:                             !import include/etaBBN.yaml
+  #rCMB:                               !import include/rCMB.yaml
+  #rBBN_rCMB:                          !import include/rBBN_rCMB.yaml
+  #dNurCMB:                           !import include/dNurCMB.yaml
+  #dNurBBN_dNurCMB:                  !import include/dNurBBN_dNurCMB.yaml
+  #rBBN_rCMB_dNurBBN_dNurCMB:        !import include/rBBN_rCMB_dNurBBN_dNurCMB.yaml
+  etaBBN_rBBN_rCMB_dNurBBN_dNurCMB: !import include/etaBBN_rBBN_rCMB_dNurBBN_dNurCMB.yaml
 
- # nuisance parameters in Planck likelihood
- cosmo_nuisance_Planck_lite: !import include/Planck_2018/cosmo_nuisance_Planck_lite_gauss.yaml
+  # neutrino masses
+  StandardModel_mNudiff: !import include/StandardModel_mNudiff_both_scan.yaml
+  #StandardModel_mNudiff: !import include/StandardModel_mNudiff_NH_scan.yaml
+  #StandardModel_mNudiff: !import include/StandardModel_mNudiff_IH_scan.yaml
+
+  # nuisance parameters in Planck likelihood
+  cosmo_nuisance_Planck_lite: !import include/Planck_2018/cosmo_nuisance_Planck_lite_gauss.yaml
 
 #======== Prior setup ========
 Priors:

@@ -14,12 +14,6 @@ omega_cdm:
 H0:
   prior_type: flat
   range: [62,74]
-ln10A_s:
-  prior_type: flat
-  range: [2.9,3.2]
-n_s:
-  prior_type: flat
-  range: [0.9,1.10]
 tau_reio:
   prior_type: flat
   #range: [0.04,0.20]

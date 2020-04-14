@@ -13,7 +13,7 @@
 Parameters:
   StandardModel_mNudiff: !import include/StandardModel_mNudiff_both_scan.yaml
 
-  LCDM_no_primordial:
+  LCDM:
     omega_b:
       fixed_value: 2.24052e-02
     omega_cdm:
@@ -68,8 +68,8 @@ ObsLikes:
       hst: default
 
   - purpose:      Observable
-    capability:   print_parametrised_ps
-    type:         map_str_dbl
+    capability:   PowerLaw_ps_parameters
+    type:         ModelParameters
 
 #======== Rule entries ========
 Rules:
