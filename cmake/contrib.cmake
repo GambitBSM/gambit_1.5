@@ -325,8 +325,8 @@ if(";${GAMBIT_BITS};" MATCHES ";SpecBit;")
   # Add clean info
   set(rmstring "${CMAKE_BINARY_DIR}/flexiblesusy-prefix/src/flexiblesusy-stamp/flexiblesusy")
   add_custom_target(clean-flexiblesusy COMMAND ${CMAKE_COMMAND} -E remove -f ${rmstring}-configure ${rmstring}-build ${rmstring}-install ${rmstring}-done
-                                       COMMAND [ -e ${FS_DIR} ] && cd ${FS_DIR} && ([ -e makefile ] || [ -e Makefile ] && ${MAKE_PARALLEL} clean) || true)
-  add_custom_target(distclean-flexiblesusy COMMAND cd ${FS_DIR} && ([ -e makefile ] || [ -e Makefile ] && ${MAKE_PARALLEL} distclean) || true)
+                                       COMMAND [ -e ${FS_DIR} ] && cd ${FS_DIR} && ([ -e makefile ] || [ -e Makefile ] && ${MAKE_SERIAL} clean) || true)
+  add_custom_target(distclean-flexiblesusy COMMAND cd ${FS_DIR} && ([ -e makefile ] || [ -e Makefile ] && ${MAKE_SERIAL} distclean) || true)
   add_custom_target(nuke-flexiblesusy)
   add_dependencies(distclean-flexiblesusy clean-flexiblesusy)
   add_dependencies(nuke-flexiblesusy distclean-flexiblesusy)
