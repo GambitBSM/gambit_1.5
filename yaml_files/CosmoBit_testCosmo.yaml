@@ -101,8 +101,11 @@ ObsLikes:
 
   - purpose:      LogLike
     capability:   BBN_LogLike
-    module:       CosmoBit
-    type:         double
+    sub_capabilities: [Yp, D]
+
+  - purpose:      Observable
+    capability:   BBN_abundances
+    sub_capabilities: [Li7, Be7, He3]
 
   - purpose:      LogLike
     capability:   Planck_lowl_loglike
@@ -118,31 +121,6 @@ ObsLikes:
     capability:   Planck_lensing_loglike
     module:       CosmoBit
     type:         double
-
-  - purpose:      Observable
-    capability:   Helium_abundance
-    module:       CosmoBit
-    type:         std::vector<double>
-
-  - purpose:      Observable
-    capability:   Deuterium_abundance
-    module:       CosmoBit
-    type:         std::vector<double>
-
-  - purpose:      Observable
-    capability:   Helium3_abundance
-    module:       CosmoBit
-    type:         std::vector<double>
-
-  - purpose:      Observable
-    capability:   Lithium7_abundance
-    module:       CosmoBit
-    type:         std::vector<double>
-
-  - purpose:      Observable
-    capability:   Beryllium7_abundance
-    module:       CosmoBit
-    type:         std::vector<double>
 
   - purpose:      Observable
     capability:   Sigma8
