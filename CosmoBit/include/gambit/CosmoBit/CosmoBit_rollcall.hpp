@@ -155,21 +155,9 @@ START_MODULE
 
   #define CAPABILITY NuMasses_SM
   START_CAPABILITY
-    #define FUNCTION set_NuMasses_SM_baseline
-    START_FUNCTION(map_str_dbl)
-    #undef FUNCTION
-
     #define FUNCTION set_NuMasses_SM
     START_FUNCTION(map_str_dbl)
     ALLOW_MODELS(StandardModel_SLHA2)
-    #undef FUNCTION
-  #undef CAPABILITY
-
-  #define CAPABILITY mNu_tot
-  START_CAPABILITY
-    #define FUNCTION get_mNu_tot
-    START_FUNCTION(double)
-    DEPENDENCY(NuMasses_SM, map_str_dbl)
     #undef FUNCTION
   #undef CAPABILITY
 
@@ -690,7 +678,7 @@ START_MODULE
     #define FUNCTION compute_Omega0_ncdm
     START_FUNCTION(double)
     DEPENDENCY(H0, double)
-    DEPENDENCY(mNu_tot,double)
+    DEPENDENCY(NuMasses_SM, map_str_dbl)
     #undef FUNCTION
   #undef CAPABILITY
 

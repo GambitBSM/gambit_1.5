@@ -354,22 +354,6 @@ namespace Gambit
       result = Pipes::set_k_pivot::runOptions->getValueOrDef<double>(0.05, "k_pivot");
     }
 
-
-    void set_NuMasses_SM_baseline(map_str_dbl &result)
-    {
-      // Fallback for NuMasses_SM capability if Neutrino masses are not set, i.e. neither StandardModel_SLHA2 nor any child is in use
-      // The Planck baseline analysis assumes a single massive neutrino with a fixed masss of 0.06 eV.
-      using namespace Pipes::set_NuMasses_SM_baseline;
-
-      result["mNu1"] = 0.06;
-      result["mNu2"] = 0.0;
-      result["mNu3"] = 0.0;
-
-      result["N_ncdm"] = 1;
-
-      result["mNu_tot_eV"] = 0.06;
-    }
-
     void set_NuMasses_SM(map_str_dbl &result)
     {
       using namespace Pipes::set_NuMasses_SM;
@@ -377,8 +361,7 @@ namespace Gambit
       double mNu1, mNu2, mNu3;
       int N_ncdm = 0;
 
-      // (PS) Heads up! The units in StandardModel_SLHA2 are GeV
-      // Here we are using eV
+      // The units in StandardModel_SLHA2 are GeV; here we are using eV
       mNu1 = 1e9*(*Param["mNu1"]);
       mNu2 = 1e9*(*Param["mNu2"]);
       mNu3 = 1e9*(*Param["mNu3"]);
@@ -397,14 +380,6 @@ namespace Gambit
       result["N_ncdm"] = N_ncdm;
 
       result["mNu_tot_eV"] = mNu1 + mNu2 + mNu3;
-    }
-
-    void get_mNu_tot(double& result)
-    {
-      using namespace Pipes::get_mNu_tot;
-
-      map_str_dbl NuMasses = *Dep::NuMasses_SM;
-      result = NuMasses["mNu_tot_eV"];
     }
 
     void get_N_ur(double& result)
@@ -1317,7 +1292,7 @@ namespace Gambit
     {
       using namespace Pipes::compute_Omega0_ncdm;
 
-      double mNu_tot_eV = *Dep::mNu_tot;
+      double mNu_tot_eV = Dep::NuMasses_SM->at("mNu_tot_eV");
       double h = *Dep::H0/100.;
 
       result = mNu_tot_eV/(93.14*h*h);  // TODO: heads up: explicit assumption of T_ncdm = 0.71611 and T_cmb goes in here. Has to be generalised

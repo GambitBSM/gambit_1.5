@@ -18,9 +18,10 @@
 #======== Input parameter declarations =======
 Parameters:
 
-  # --- import model parameters for models to scan over ---
-  LCDM: !import include/LCDM_fixed.yaml        # base LCDM
+  # Base LCDM
+  LCDM: !import include/LCDM_scan.yaml
 
+  # Simple power-law spectrum of perturbations
   PowerLaw_ps:
     ln10A_s:
       prior_type: flat
@@ -53,7 +54,7 @@ Parameters:
   #  range: [0.8,1.2]
 
   # neutrino masses
-  #StandardModel_mNudiff: !import include/StandardModel_mNudiff_both_scan.yaml
+  StandardModel_SLHA2: !import include/StandardModel_SLHA2_Planckbaseline.yaml
 
   # Cosmological nuisance parameters (except for Planck CMB Likelihoods)
   cosmo_nuisance_Pantheon: !import include/cosmo_nuisance_Pantheon.yaml

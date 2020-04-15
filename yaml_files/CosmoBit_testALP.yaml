@@ -23,9 +23,10 @@
 #======== Input parameter declarations =======
 Parameters:
 
-  # --- import model parameters for models to scan over ---
+  # Base LCDM
   LCDM: !import include/LCDM_scan.yaml
 
+  # Simple power-law spectrum of perturbations
   PowerLaw_ps:
     ln10A_s:
       prior_type: flat

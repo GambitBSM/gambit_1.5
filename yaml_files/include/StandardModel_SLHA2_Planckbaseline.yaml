@@ -1,5 +1,6 @@
 ##########################################################################
-## Defaults for StandardModel_SLHA2 parameters.
+## Defaults for StandardModel_SLHA2 parameters, with Planck Collaboration
+## baseline assumptions about neutrino masses (one massive nu of mass 0.06eV).
 ##
 ## Not a top-level configuration file! Instead, import this file, e.g.
 ## Parameters:
@@ -28,10 +29,13 @@ mZ      :  9.11876000E+01 # mZ(pole) !
 mBmB    :  4.18000000E+00 # mb(mb)^MSbar #
 mT      :  1.73340000E+02 # mtop(pole) $
 mTau    :  1.77686000E+00 # mtau(pole) &
+mNu3    :  0.06000000E-09 # mnu3(pole)
 
 # SLHA2
 mE      :  5.10998946E-04 # melectron(pole) &
+mNu1    :               0 # mnu1(pole)
 mMu     :  1.05658375E-01 # mmuon(pole) &
+mNu2    :               0 # mnu2(pole)
 mD      :  4.70000000E-03 # md(2 GeV)^MSbar #
 mU      :  2.20000000E-03 # mu(2 GeV)^MSbar #
 mS      :  9.60000000E-02 # ms(2 GeV)^MSbar #
@@ -57,7 +61,3 @@ theta13 :  0.15495 #
 delta13 :  0       # Dirac CP-violating phase
 alpha1  :  0       # first Majorana CP-violating phase
 alpha2  :  0       # second CP-violating Majorana phase
-
-mNu:
-  prior_type: flat
-  range: [0.06,2.]
