@@ -914,11 +914,19 @@ namespace Gambit
     void get_multimode_parametrised_ps(ModelParameters &result)
     {
       using namespace Pipes::get_multimode_parametrised_ps;
+      gambit_inflation_observables observables;
+
+      // Set up this ModelParameters object on first run
+      static bool first = true;
+      if (first)
+      {
+        result.setModelName("PowerLaw_ps");
+        result._definePars({"ln10A_s","n_s","r","N_pivot"});
+        first = false;
+      }
 
       // Get the inflationary inputs
       Multimode_inputs inputs = *Dep::multimode_input_parameters;
-
-      gambit_inflation_observables observables;
 
       //-------------------------------------------------------------
       // The function below calls the MultiModeCode backend
@@ -1530,8 +1538,11 @@ namespace Gambit
         result.set_abund_map(BEreq::get_abund_map_AlterBBN());
         result.init_arr_size(NNUC);
 
-        // Work out which isotopes have been requested in the yaml file
-        const std::vector<str>& v = Downstream::subcaps->getNames();
+        // Work out which isotopes have been requested downstream
+        // From the yaml sub-capabilities
+        std::vector<str> v = Downstream::subcaps->getNames();
+        // From other dependencies
+        if (Downstream::neededFor("classy_baseline_params")) v.push_back("He4");
         result.set_active_isotopes(std::set<str>(v.begin(), v.end()));
         if (result.get_active_isotopes().empty())
         {

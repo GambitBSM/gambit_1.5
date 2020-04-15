@@ -146,6 +146,8 @@
 #define MODEL Inflation_InstReh_1mono23
   START_MODEL
   DEFINEPARS(lambda)
+  INTERPRET_AS_X_FUNCTION(PowerLaw_ps, as_PowerLaw)
+  INTERPRET_AS_X_DEPENDENCY(PowerLaw_ps, PowerLaw_ps_parameters, ModelParameters)
 #undef MODEL
 
 // Single field, quadratic inflation (assuming instant reheating)
@@ -153,6 +155,8 @@
 #define MODEL Inflation_InstReh_1linear
   START_MODEL
   DEFINEPARS(lambda)
+  INTERPRET_AS_X_FUNCTION(PowerLaw_ps, as_PowerLaw)
+  INTERPRET_AS_X_DEPENDENCY(PowerLaw_ps, PowerLaw_ps_parameters, ModelParameters)
 #undef MODEL
 
 // Single field, quadratic inflation (assuming instant reheating)
@@ -160,6 +164,8 @@
 #define MODEL Inflation_InstReh_1quadratic
   START_MODEL
   DEFINEPARS(m_phi)
+  INTERPRET_AS_X_FUNCTION(PowerLaw_ps, as_PowerLaw)
+  INTERPRET_AS_X_DEPENDENCY(PowerLaw_ps, PowerLaw_ps_parameters, ModelParameters)
 #undef MODEL
 
 // Single field, quartic inflation (assuming instant reheating)
@@ -167,6 +173,8 @@
 #define MODEL Inflation_InstReh_1quartic
   START_MODEL
   DEFINEPARS(lambda)
+  INTERPRET_AS_X_FUNCTION(PowerLaw_ps, as_PowerLaw)
+  INTERPRET_AS_X_DEPENDENCY(PowerLaw_ps, PowerLaw_ps_parameters, ModelParameters)
 #undef MODEL
 
 // Single field, natural inflation (assuming instant reheating)
@@ -174,6 +182,8 @@
 #define MODEL Inflation_InstReh_1natural
   START_MODEL
   DEFINEPARS(lambda, f_phi)
+  INTERPRET_AS_X_FUNCTION(PowerLaw_ps, as_PowerLaw)
+  INTERPRET_AS_X_DEPENDENCY(PowerLaw_ps, PowerLaw_ps_parameters, ModelParameters)
 #undef MODEL
 
 // Single field, Starobinsky - aka R^2 - inflation (assuming instant reheating)
@@ -181,4 +191,6 @@
 #define MODEL Inflation_InstReh_1Starobinsky
   START_MODEL
   DEFINEPARS(lambda)
+  INTERPRET_AS_X_FUNCTION(PowerLaw_ps, as_PowerLaw)
+  INTERPRET_AS_X_DEPENDENCY(PowerLaw_ps, PowerLaw_ps_parameters, ModelParameters)
 #undef MODEL

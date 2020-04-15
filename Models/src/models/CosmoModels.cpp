@@ -132,3 +132,25 @@ void MODEL_NAMESPACE::dNurCMB_to_dNurBBN_dNurCMB (const ModelParameters &myP, Mo
   targetP.setValue("dNur_CMB", myP.getValue("dNur_CMB"));
 }
 #undef MODEL
+
+// Define a bunch of translation functions that just take power-law spectra from CosmoBit.
+// This is an example of "the most extreme case" discussed in the final paragraph of Sec 5.1
+// of the original GAMBIT paper.
+#define INFLATION_MODEL_TO_POWER_LAW(MODEL)                                               \
+void Gambit::Models::MODEL::as_PowerLaw(const ModelParameters&, ModelParameters &targetP) \
+{                                                                                         \
+  using namespace Gambit::Models::MODEL::Pipes::PowerLaw_ps_parameters;                   \
+  logger()<<"Running interpret_as_X calculations for "                                    \
+            STRINGIFY(MODEL) " --> PowerLaw_ps ..."<<LogTags::info<<EOM;                  \
+  /* Copy the parameters */                                                               \
+  targetP.setValues(*Dep::PowerLaw_ps_parameters);                                        \
+}
+
+INFLATION_MODEL_TO_POWER_LAW(Inflation_InstReh_1mono23)
+INFLATION_MODEL_TO_POWER_LAW(Inflation_InstReh_1linear)
+INFLATION_MODEL_TO_POWER_LAW(Inflation_InstReh_1quadratic)
+INFLATION_MODEL_TO_POWER_LAW(Inflation_InstReh_1quartic)
+INFLATION_MODEL_TO_POWER_LAW(Inflation_InstReh_1natural)
+INFLATION_MODEL_TO_POWER_LAW(Inflation_InstReh_1Starobinsky)
+
+#undef INFLATION_MODEL_TO_POWER_LAW
