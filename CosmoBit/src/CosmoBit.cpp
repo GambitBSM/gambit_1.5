@@ -389,8 +389,6 @@ namespace Gambit
 
       map_str_dbl NuMassInfo = *Dep::NuMasses_SM;
 
-      static bool allow_massless = runOptions->getValueOrDef<bool>(false,"allow_massless_neutrinos");
-
       int N_ncdm = static_cast<int>(NuMassInfo["N_ncdm"]);
       double N_ur{};
       switch (N_ncdm)
@@ -405,18 +403,6 @@ namespace Gambit
           N_ur = 0.00641;  // N_ur (today) = 0.00641 for 3 massive neutrinos at CMB release
           break;
         case 0:
-          if (!allow_massless)
-          {
-            std::ostringstream err;
-            err << "Warning/Error: All your neutrino masses are zero. The Planck baseline LCDM model assumes at least one massive neutrino of mass 0.06 eV.\n";
-            err << "A cosmological model without massive neutrinos can heavily affect your cosmological observables.\n\n";
-            err << "You can proceed at your own risk by adding\n\n";
-            err << "  - module: CosmoBit\n";
-            err << "    options:\n";
-            err << "      allow_massless_neutrinos: true\n\n";
-            err << "to the Rules section of the yaml-file";
-            CosmoBit_error().raise(LOCAL_INFO, err.str());
-          }
           N_ur = 3.046;
           break;
         default:
