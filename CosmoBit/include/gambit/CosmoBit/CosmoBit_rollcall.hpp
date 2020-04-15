@@ -56,19 +56,6 @@
 #define MODULE CosmoBit
 START_MODULE
 
-  #define CAPABILITY energy_injection_spectrum
-  START_CAPABILITY
-    #define FUNCTION energy_injection_spectrum_AnnihilatingDM_mixture
-    START_FUNCTION(DarkAges::Energy_injection_spectrum)
-    ALLOW_MODELS(AnnihilatingDM_mixture)
-    #undef FUNCTION
-
-    #define FUNCTION energy_injection_spectrum_DecayingDM_mixture
-    START_FUNCTION(DarkAges::Energy_injection_spectrum)
-    ALLOW_MODELS(DecayingDM_mixture)
-    #undef FUNCTION
-  #undef CAPABILITY
-
   #define CAPABILITY DM_fraction
   START_CAPABILITY
     #define FUNCTION DM_fraction_ALP

@@ -122,60 +122,6 @@ namespace Gambit
   {
     using namespace LogTags;
 
-    void energy_injection_spectrum_AnnihilatingDM_mixture(DarkAges::Energy_injection_spectrum& spectrum)
-    {
-      using namespace Pipes::energy_injection_spectrum_AnnihilatingDM_mixture;
-
-      double m = *Param["mass"];
-      double BR_el = *Param["BR"];
-      double BR_ph = 1.0 - BR_el;
-
-      if (m <= m_electron && BR_el >= std::numeric_limits<double>::epsilon())
-      {
-        std::ostringstream err;
-        err << "The mass of the annihilating dark matter candiate is below the electron mass.";
-        err << " No production of e+/e- is possible.";
-        CosmoBit_error().raise(LOCAL_INFO,err.str());
-      }
-
-      spectrum.E_el.clear();
-      spectrum.E_ph.clear();
-      spectrum.spec_el.clear();
-      spectrum.spec_ph.clear();
-
-      spectrum.E_el.resize(1,std::max(m-m_electron, std::numeric_limits<double>::min()));
-      spectrum.E_ph.resize(1,m);
-      spectrum.spec_el.resize(1,BR_el*2e9);
-      spectrum.spec_ph.resize(1,BR_ph*2e9);
-    }
-
-    void energy_injection_spectrum_DecayingDM_mixture(DarkAges::Energy_injection_spectrum& spectrum)
-    {
-      using namespace Pipes::energy_injection_spectrum_DecayingDM_mixture;
-
-      double m = *Param["mass"];
-      double BR_el = *Param["BR"];
-      double BR_ph = 1.0 - BR_el;
-
-      if (m <= 2*m_electron && BR_el >= std::numeric_limits<double>::epsilon())
-      {
-        std::ostringstream err;
-        err << "The mass of the decaying dark matter candiate is below twice the electron mass.";
-        err << " No production of e+/e- is possible.";
-        CosmoBit_error().raise(LOCAL_INFO,err.str());
-      }
-
-      spectrum.E_el.clear();
-      spectrum.E_ph.clear();
-      spectrum.spec_el.clear();
-      spectrum.spec_ph.clear();
-
-      spectrum.E_el.resize(1,std::max(m*0.5-m_electron, std::numeric_limits<double>::min()));
-      spectrum.E_ph.resize(1,m*0.5);
-      spectrum.spec_el.resize(1,BR_el*2e9);
-      spectrum.spec_ph.resize(1,BR_ph*2e9);
-    }
-
     void lifetime_ALP_agg(double& result)
     {
       // lifetime in s if onlz the decay a -> g g is open.
