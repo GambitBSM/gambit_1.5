@@ -26,16 +26,14 @@ Parameters:
   # Base LCDM
   LCDM: !import include/LCDM_scan.yaml
 
-  # Simple power-law spectrum of perturbations
-  PowerLaw_ps:
+  # Minimal version of simple power-law spectrum of perturbations
+  Minimal_PowerLaw_ps:
     ln10A_s:
       prior_type: flat
       range: [2.9,3.2]
     n_s:
       prior_type: flat
       range: [0.9,1.10]
-    r: 0
-    N_pivot: 55
 
   # neutrino masses
   StandardModel_mNudiff: !import include/StandardModel_mNudiff_both_scan.yaml

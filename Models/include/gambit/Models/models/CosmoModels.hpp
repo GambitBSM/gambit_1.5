@@ -141,6 +141,15 @@
   DEFINEPARS(ln10A_s,n_s,r,N_pivot)
 #undef MODEL
 
+// Even simpler, parameterised, purely phenomenological, scale-free power spectrum
+#define MODEL Minimal_PowerLaw_ps
+ #define PARENT PowerLaw_ps
+  START_MODEL
+  DEFINEPARS(ln10A_s,n_s)
+  INTERPRET_AS_PARENT_FUNCTION(Minimal_PowerLaw_ps_to_PowerLaw_ps)
+ #undef PARENT
+#undef MODEL
+
 // Single field, monomic inflation with exponent 2/3 (assuming instant reheating)
 // Potential: V(phi) = 1.5 lambda M_P^(10/3) phi^(2/3)
 #define MODEL Inflation_InstReh_1mono23

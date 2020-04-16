@@ -528,7 +528,7 @@ namespace Gambit
       else result["100*theta_s"] = *Param["100theta_s"];
 
       // Set helium abundance
-      result["YHe"] = Dep::BBN_abundances->get_BBN_abund("He4");
+      result["YHe"] = *Dep::helium_abundance;
 
       // TODO: need to test if class or exo_class in use! does not work -> (JR) should be fixed with classy implementation
       // -> (JR again) not sure if that is actually true.. need to test.
@@ -1503,7 +1503,7 @@ namespace Gambit
         // From the yaml sub-capabilities
         std::vector<str> v = Downstream::subcaps->getNames();
         // From other dependencies
-        if (Downstream::neededFor("classy_baseline_params")) v.push_back("He4");
+        if (Downstream::neededFor("helium_abundance")) v.push_back("He4");
         result.set_active_isotopes(std::set<str>(v.begin(), v.end()));
         if (result.get_active_isotopes().empty())
         {
@@ -1561,6 +1561,12 @@ namespace Gambit
             result.set_BBN_covmat(ie, je, cov_ratioH[ie*(NNUC+1)+je]);
         }
       }
+    }
+
+    /// Extract helium-4 abundance from BBN abundance container
+    void extract_helium_abundance(double &result)
+    {
+      result = Pipes::extract_helium_abundance::Dep::BBN_abundances->get_BBN_abund("He4");
     }
 
     /// Compute the overall log-likelihood from BBN

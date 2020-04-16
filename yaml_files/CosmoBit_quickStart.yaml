@@ -81,16 +81,14 @@ Parameters:
       range: [0.004,0.20]
     T_cmb: 2.72548
 
-  # base-line power-law power spectrum and priors
-  PowerLaw_ps:
+  # minimal base-line power-law power spectrum and priors
+  Minimal_PowerLaw_ps:
     ln10A_s:
       prior_type: flat
       range: [2.9,3.2]
     n_s:
       prior_type: flat
       range: [0.9,1.10]
-    r: 0
-    N_pivot: 55
 
   # extension of standard LCDM: allow for values of dNeff @CMB & @ BBN different from today
   dNurBBN_dNurCMB:

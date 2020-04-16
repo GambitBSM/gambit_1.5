@@ -133,6 +133,16 @@ void MODEL_NAMESPACE::dNurCMB_to_dNurBBN_dNurCMB (const ModelParameters &myP, Mo
 }
 #undef MODEL
 
+#define MODEL Minimal_PowerLaw_ps
+void MODEL_NAMESPACE::Minimal_PowerLaw_ps_to_PowerLaw_ps (const ModelParameters &myP, ModelParameters &targetP)
+{
+  logger()<<"Running interpret_as_parent calculations for Minimal_PowerLaw_ps --> PowerLaw_ps ..."<<LogTags::info<<EOM;
+  targetP.setValues(myP);
+  targetP.setValue("N_pivot", 55);
+  targetP.setValue("r", 0);
+}
+#undef MODEL
+
 // Define a bunch of translation functions that just take power-law spectra from CosmoBit.
 // This is an example of "the most extreme case" discussed in the final paragraph of Sec 5.1
 // of the original GAMBIT paper.

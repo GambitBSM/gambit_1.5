@@ -192,7 +192,7 @@ START_MODULE
     ALLOW_MODELS(LCDM,LCDM_theta)
     MODEL_CONDITIONAL_DEPENDENCY(classy_parameters_EnergyInjection, pybind11::dict, AnnihilatingDM_general, DecayingDM_general)
     MODEL_CONDITIONAL_DEPENDENCY(classy_PlanckLike_input, pybind11::dict, cosmo_nuisance_Planck_lite,cosmo_nuisance_Planck_TTTEEE,cosmo_nuisance_Planck_TT,plik_dx11dr2_HM_v18_TT)
-    DEPENDENCY(BBN_abundances, BBN_container)
+    DEPENDENCY(helium_abundance, double)
     DEPENDENCY(classy_NuMasses_Nur_input, pybind11::dict)
     #undef FUNCTION
   #undef CAPABILITY
@@ -777,6 +777,14 @@ START_MODULE
     BACKEND_REQ(get_NNUC, (libbbn), int, ())
     BACKEND_REQ(get_abund_map_AlterBBN, (libbbn), map_str_int, ())
     BACKEND_OPTION( (AlterBBN), (libbbn) )
+    #undef FUNCTION
+  #undef CAPABILITY
+
+  #define CAPABILITY helium_abundance
+  START_CAPABILITY
+    #define FUNCTION extract_helium_abundance
+    START_FUNCTION(double)
+    DEPENDENCY(BBN_abundances, BBN_container)
     #undef FUNCTION
   #undef CAPABILITY
 
