@@ -2,19 +2,22 @@
 //   *********************************************
 ///  \file
 ///
-///  Frontend for SPheno 3.3.8 backend
+///  Backend macros for SPheno 3.3.8
+///  (out of the box version)
 ///
 ///  *********************************************
 ///
 ///  Authors (add name and date if you modify):
 ///
 ///  \author Tomas Gonzalo
+///          (tomas.gonzalo@monash.edu)
 ///  \date 2016 Apr, May, June
+///  \date 2020 Apr
 ///
 ///  *********************************************
 
 #include "gambit/Backends/frontend_macros.hpp"
-#include "gambit/Backends/frontends/SPheno.hpp"
+#include "gambit/Backends/frontends/SPheno_3_3_8.hpp"
 #include "gambit/Elements/slhaea_helpers.hpp"
 #include "gambit/Elements/spectrum_factories.hpp"
 #include "gambit/Models/SimpleSpectra/MSSMSimpleSpec.hpp"
@@ -651,8 +654,8 @@ BE_NAMESPACE
           slha["STAUMIX"][""] << i << j << (*RSlepton)(i+4,j+4).re << "# R_sta(" << i << "," << j << ")";
           if((*RSlepton)(i+4,j+4).im != 0)
           {
-            SLHAea_check_block(slha, "IMSBOTMIX", i, true);
-            slha["IMSBOTMIX"][""] << i << j << (*RSlepton)(i+4,j+4).im << "# Im(R_sta)(" << i << "," << j << ")";
+            SLHAea_check_block(slha, "IMSTAUMIX", i, true);
+            slha["IMSTAUMIX"][""] << i << j << (*RSlepton)(i+4,j+4).im << "# Im(R_sta)(" << i << "," << j << ")";
           }
         }
     }
