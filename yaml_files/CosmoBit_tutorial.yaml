@@ -82,26 +82,26 @@
 
 Parameters:
 
- # neutrino masses
- StandardModel_mNudiff: !import include/StandardModel_mNudiff_both_scan.yaml
- #StandardModel_mNudiff: !import include/StandardModel_mNudiff_NH_scan.yaml
- #StandardModel_mNudiff: !import include/StandardModel_mNudiff_IH_scan.yaml
+  # neutrino masses
+  StandardModel_mNudiff: !import include/StandardModel_mNudiff_both_scan.yaml
+  #StandardModel_mNudiff: !import include/StandardModel_mNudiff_NH_scan.yaml
+  #StandardModel_mNudiff: !import include/StandardModel_mNudiff_IH_scan.yaml
 
- # base-line LCDM model parameters and prior
- LCDM:
-   omega_b:
-     prior_type: flat
-     range: [0.020,0.024]
-   omega_cdm:
-     prior_type: flat
-     range: [0.10,0.13]
-   H0:
-     prior_type: flat
-     range: [62,74]
-   tau_reio:
-     prior_type: flat
-     range: [0.004,0.20]
-   T_cmb: 2.72548
+  # base-line LCDM model parameters and prior
+  LCDM:
+    omega_b:
+      prior_type: flat
+      range: [0.020,0.024]
+    omega_cdm:
+      prior_type: flat
+      range: [0.10,0.13]
+    H0:
+      prior_type: flat
+      range: [62,74]
+    tau_reio:
+      prior_type: flat
+      range: [0.004,0.20]
+    T_cmb: 2.72548
 
  # # LCDM_theta...
  # LCDM_theta:
