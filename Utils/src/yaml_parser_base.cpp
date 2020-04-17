@@ -166,7 +166,7 @@ namespace Gambit
       std::string defpath;
       if(hasKey("default_output_path"))
       {
-         defpath = getValue<std::string>("default_output_path");
+         defpath = expandEnvironmentVariables(getValue<std::string>("default_output_path"));
       }
       else
       {
