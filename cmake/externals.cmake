@@ -174,6 +174,45 @@ function(set_as_default_version type name default)
   add_dependencies(${type}s ${name})
 endfunction()
 
+# Check whether or not Python modules required for backend builds are available
+macro(check_python_modules name ver modules_with_commas)
+  string (REPLACE "," ";" modules "${modules_with_commas}")
+  string (REPLACE " " "" modules "${modules}")
+  foreach(module ${modules})
+    find_python_module(${module})
+    if (NOT PY_${module}_FOUND)
+      set(modules_missing_${name}_${ver} "${modules_missing_${name}_${ver}},${module}" )
+    endif()
+  endforeach()
+endmacro()
+
+# Set up a mock external project that tells the user about missing Python modules and forces a rerun of cmake at next attempted build
+macro(inform_of_missing_modules name ver missing_with_commas)
+  string (REPLACE "," " " missing "${missing_with_commas}")
+  set(package ${name}_${ver})
+  set(rmstring "${CMAKE_BINARY_DIR}/${package}-prefix/src/${package}-stamp/${package}-configure")
+  set(errmsg1 "Cannot make ${package} because you are missing Python module(s):${missing}")
+  set(errmsg2 "Please install the missing package(s), e.g. with ")
+  set(errmsg3 "  pip install --user${missing}")
+  set(errmsg4 "and then rerun ")
+  set(errmsg5 "  make ${package}")
+  ExternalProject_Add(${package}
+    DOWNLOAD_COMMAND ${CMAKE_COMMAND} -E make_directory ${package}-prefix/src/${package}
+    CONFIGURE_COMMAND ${CMAKE_COMMAND} -E echo
+              COMMAND ${CMAKE_COMMAND} -E cmake_echo_color --red --bold ${errmsg1}
+              COMMAND ${CMAKE_COMMAND} -E cmake_echo_color --red --bold ${errmsg2}
+              COMMAND ${CMAKE_COMMAND} -E echo
+              COMMAND ${CMAKE_COMMAND} -E cmake_echo_color       --bold ${errmsg3}
+              COMMAND ${CMAKE_COMMAND} -E echo
+              COMMAND ${CMAKE_COMMAND} -E cmake_echo_color --red --bold ${errmsg4}
+              COMMAND ${CMAKE_COMMAND} -E echo
+              COMMAND ${CMAKE_COMMAND} -E cmake_echo_color       --bold ${errmsg5}
+              COMMAND ${CMAKE_COMMAND} -E echo
+    BUILD_COMMAND ${CMAKE_COMMAND} -E touch ${CMAKE_SOURCE_DIR}/cmake/backends.cmake
+    INSTALL_COMMAND ${CMAKE_COMMAND} -E remove ${rmstring}
+  )
+endmacro()
+
 if(EXISTS "${PROJECT_SOURCE_DIR}/Backends/")
   include(cmake/backends.cmake)
 endif()
