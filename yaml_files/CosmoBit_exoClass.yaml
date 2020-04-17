@@ -144,8 +144,8 @@ Rules:
 
   - capability: plc_3_0_init
     options:
-      #plc_2.0_path: /PATH/TO/plc_2.0
-      #plc_3.0_path: /PATH/TO/plc_3.0
+      #plc_data_2_path: /PATH/TO/plc_2.0
+      #plc_data_3_path: /PATH/TO/plc_3.0
 
   # Compute a total (effective) f(z) instead of f(z) per channel
   - capability: DarkAges_1_2_0_init
