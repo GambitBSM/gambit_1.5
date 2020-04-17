@@ -352,6 +352,11 @@ namespace Gambit
         while ( std::regex_search( text, match, env ) ) {
             const char * s = getenv( match[1].str().c_str() );
             const std::string var( s == NULL ? "" : s );
+            if (s == NULL) {
+                std::ostringstream os;
+                os << "Environment variable " << match.str() << " not set";
+                utils_error().raise(LOCAL_INFO, os.str());
+            }
             text.replace( match[0].first, match[0].second, var );
         }
     }
