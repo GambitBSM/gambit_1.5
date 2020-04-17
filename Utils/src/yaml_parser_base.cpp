@@ -346,7 +346,7 @@ namespace Gambit
     }
 
     /// Update the input string.
-    void autoExpandEnvironmentVariables( std::string & text ) {
+    void Parser::autoExpandEnvironmentVariables( std::string & text ) {
         static std::regex env( "\\$\\{([^}]+)\\}" );
         std::smatch match;
         while ( std::regex_search( text, match, env ) ) {
@@ -357,7 +357,7 @@ namespace Gambit
     }
     
     /// Leave input alone and return new string.
-    std::string expandEnvironmentVariables( const std::string & input ) {
+    std::string Parser::expandEnvironmentVariables( const std::string & input ) {
         std::string text = input;
         autoExpandEnvironmentVariables( text );
         return text;
