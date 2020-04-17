@@ -143,7 +143,7 @@ BE_INI_FUNCTION
   {
     // Check if "plc_data_2_path" and/or "plc_data_3_path" are in the runOptions. If not, look in the same place as plc for the data.
     str plc_default_path = Backends::backendInfo().path_dir("plc", STRINGIFY(VERSION)) + "/../../../plc_data/";
-    plc2_location = runOptions->getValueOrDef<std::string>(plc_default_path+"2.0","plc_data_2_path");
+    plc2_location = runOptions->getValueOrDef<std::string>(plc_default_path+"2.0/plc_2.0","plc_data_2_path");
     plc3_location = runOptions->getValueOrDef<std::string>(plc_default_path+"3.0/plc_3.0","plc_data_3_path");
     if (plc2_location.back() != '/') plc2_location.push_back('/');
     if (plc3_location.back() != '/') plc3_location.push_back('/');
