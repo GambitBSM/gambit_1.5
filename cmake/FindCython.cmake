@@ -62,11 +62,12 @@ if(CYTHON_EXECUTABLE)
   execute_process(COMMAND ${PYTHON_EXECUTABLE} -m cython --version
                   RESULT_VARIABLE cython_result
                   ERROR_VARIABLE cython_output)
-  
+
   if(cython_result EQUAL 0)
     string(REGEX REPLACE "^Cython version ([0-9]+\\.[0-9]+).*" "\\1" CYTHON_VERSION "${cython_output}")
   else()
-    message("Could not find cython${PYTHON_VERSION}: ${cython_output}")
+    string(REGEX REPLACE "\n" "" cython_output "${cython_output}")
+    message("   Did not find cython${PYTHON_VERSION}: ${cython_output}")
   endif()
 
 #   if(NOT ${CYTHON_version_result} EQUAL 0)

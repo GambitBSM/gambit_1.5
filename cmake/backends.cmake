@@ -609,22 +609,28 @@ set(dir "${PROJECT_SOURCE_DIR}/Backends/installed/${name}/${ver}")
 set(patchdir "${PROJECT_SOURCE_DIR}/Backends/patches/${name}/${ver}/")
 # Ditch MP if Python version is 3
 set(ditch_if_absent "Python2")
+set(required_modules "scipy")
 check_ditch_status(${name} ${ver} ${dir} ${ditch_if_absent})
 if(NOT ditched_${name}_${ver})
-  ExternalProject_Add(${name}_${ver}
-    GIT_REPOSITORY https://github.com/brinckmann/montepython_public.git
-    GIT_TAG ${ver}
-    SOURCE_DIR ${dir}
-    BUILD_IN_SOURCE 1
-    CONFIGURE_COMMAND ${CMAKE_COMMAND} -E copy ${patchdir}/MontePythonLike.py ${dir}/montepython/MontePythonLike_${sfver}.py
-    COMMAND ${CMAKE_COMMAND} -E copy ${patchdir}/MPLike_patch_script.py ${dir}/montepython/MPLike_patch_script.py
-    COMMAND sed ${dashi} -e "s#from MontePythonLike import#from MontePythonLike_${sfver} import#g" ${dir}/montepython/MPLike_patch_script.py
-    COMMAND ${CMAKE_COMMAND} -E copy ${patchdir}/sdss_lrgDR7_fiducialmodel.dat ${dir}/data/sdss_lrgDR7/sdss_lrgDR7_fiducialmodel.dat
-    COMMAND ${CMAKE_COMMAND} -E copy_directory ${patchdir}/WiggleZ_bao_highz ${dir}/montepython/likelihoods/WiggleZ_bao_highz/
-    BUILD_COMMAND ""
-    INSTALL_COMMAND python ${dir}/montepython/MPLike_patch_script.py
-  )
-  add_extra_targets("backend" ${name} ${ver} ${dir} ${dl} clean)
+  check_python_modules(${name} ${ver} ${required_modules})
+  if(modules_missing_${name}_${ver})
+    inform_of_missing_modules(${name} ${ver} ${modules_missing_${name}_${ver}})
+  else()
+    ExternalProject_Add(${name}_${ver}
+      GIT_REPOSITORY https://github.com/brinckmann/montepython_public.git
+      GIT_TAG ${ver}
+      SOURCE_DIR ${dir}
+      BUILD_IN_SOURCE 1
+      CONFIGURE_COMMAND ${CMAKE_COMMAND} -E copy ${patchdir}/MontePythonLike.py ${dir}/montepython/MontePythonLike_${sfver}.py
+      COMMAND ${CMAKE_COMMAND} -E copy ${patchdir}/MPLike_patch_script.py ${dir}/montepython/MPLike_patch_script.py
+      COMMAND sed ${dashi} -e "s#from MontePythonLike import#from MontePythonLike_${sfver} import#g" ${dir}/montepython/MPLike_patch_script.py
+      COMMAND ${CMAKE_COMMAND} -E copy ${patchdir}/sdss_lrgDR7_fiducialmodel.dat ${dir}/data/sdss_lrgDR7/sdss_lrgDR7_fiducialmodel.dat
+      COMMAND ${CMAKE_COMMAND} -E copy_directory ${patchdir}/WiggleZ_bao_highz ${dir}/montepython/likelihoods/WiggleZ_bao_highz/
+      BUILD_COMMAND ""
+      INSTALL_COMMAND python ${dir}/montepython/MPLike_patch_script.py
+    )
+  endif()
+  add_extra_targets("backend" ${name} ${ver} ${dir} ${dl} none)
 endif()
 
 # MontePythonLike
@@ -635,21 +641,27 @@ set(dl "null")
 set(dir "${PROJECT_SOURCE_DIR}/Backends/installed/${name}/${ver}")
 set(patchdir "${PROJECT_SOURCE_DIR}/Backends/patches/${name}/${ver}/")
 set(ditch_if_absent "Python")
+set(required_modules "scipy")
 check_ditch_status(${name} ${ver} ${dir} ${ditch_if_absent})
 if(NOT ditched_${name}_${ver})
-  ExternalProject_Add(${name}_${ver}
-    GIT_REPOSITORY https://github.com/brinckmann/montepython_public.git
-    GIT_TAG ${ver}
-    SOURCE_DIR ${dir}
-    BUILD_IN_SOURCE 1
-    CONFIGURE_COMMAND ${CMAKE_COMMAND} -E copy ${patchdir}/MontePythonLike.py ${dir}/montepython/MontePythonLike_${sfver}.py
-    COMMAND ${CMAKE_COMMAND} -E copy ${patchdir}/MPLike_patch_script.py ${dir}/montepython/MPLike_patch_script.py
-    COMMAND sed ${dashi} -e "s#from MontePythonLike import#from MontePythonLike_${sfver} import#g" ${dir}/montepython/MPLike_patch_script.py
-    COMMAND ${CMAKE_COMMAND} -E copy ${patchdir}/sdss_lrgDR7_fiducialmodel.dat ${dir}/data/sdss_lrgDR7/sdss_lrgDR7_fiducialmodel.dat
-    COMMAND ${CMAKE_COMMAND} -E copy_directory ${patchdir}/WiggleZ_bao_highz ${dir}/montepython/likelihoods/WiggleZ_bao_highz/
-    BUILD_COMMAND ""
-    INSTALL_COMMAND python ${dir}/montepython/MPLike_patch_script.py
-  )
+  check_python_modules(${name} ${ver} ${required_modules})
+  if(modules_missing_${name}_${ver})
+    inform_of_missing_modules(${name} ${ver} ${modules_missing_${name}_${ver}})
+  else()
+    ExternalProject_Add(${name}_${ver}
+      GIT_REPOSITORY https://github.com/brinckmann/montepython_public.git
+      GIT_TAG ${ver}
+      SOURCE_DIR ${dir}
+      BUILD_IN_SOURCE 1
+      CONFIGURE_COMMAND ${CMAKE_COMMAND} -E copy ${patchdir}/MontePythonLike.py ${dir}/montepython/MontePythonLike_${sfver}.py
+      COMMAND ${CMAKE_COMMAND} -E copy ${patchdir}/MPLike_patch_script.py ${dir}/montepython/MPLike_patch_script.py
+      COMMAND sed ${dashi} -e "s#from MontePythonLike import#from MontePythonLike_${sfver} import#g" ${dir}/montepython/MPLike_patch_script.py
+      COMMAND ${CMAKE_COMMAND} -E copy ${patchdir}/sdss_lrgDR7_fiducialmodel.dat ${dir}/data/sdss_lrgDR7/sdss_lrgDR7_fiducialmodel.dat
+      COMMAND ${CMAKE_COMMAND} -E copy_directory ${patchdir}/WiggleZ_bao_highz ${dir}/montepython/likelihoods/WiggleZ_bao_highz/
+      BUILD_COMMAND ""
+      INSTALL_COMMAND python ${dir}/montepython/MPLike_patch_script.py
+    )
+  endif()
   add_extra_targets("backend" ${name} ${ver} ${dir} ${dl} clean)
   set_as_default_version("backend" ${name} ${ver})
 endif()
@@ -1291,23 +1303,29 @@ set(dl "https://github.com/lesgourg/class_public/archive/v${ver}.tar.gz")
 set(md5 "e6eb0fd721bb1098e642f5d1970501ce")
 set(dir "${PROJECT_SOURCE_DIR}/Backends/installed/${name}/${ver}")
 set(ditch_if_absent "Python")
+set(required_modules "cython")
 check_ditch_status(${name} ${ver} ${dir} ${ditch_if_absent})
 if(NOT ditched_${name}_${ver})
-  ExternalProject_Add(${name}_${ver}
-    DOWNLOAD_COMMAND ${DL_BACKEND} ${dl} ${md5} ${dir}
-    SOURCE_DIR ${dir}
-    BUILD_IN_SOURCE 1
-    PATCH_COMMAND patch -p1 < ${patch}/${name}_${ver}.diff
-    CONFIGURE_COMMAND ""
-    COMMAND sed ${dashi} -e "s#autosetup.py install#autosetup.py build#g" Makefile
-    COMMAND sed ${dashi} -e "s#\".\"#\"${dir}\"#g" include/common.h
-    BUILD_COMMAND ${MAKE_PARALLEL} CC=${CMAKE_C_COMPILER} OMPFLAG=${OpenMP_C_FLAGS} OPTFLAG= CCFLAG=${BACKEND_GNU99_FLAGS} LDFLAG=${BACKEND_GNU99_FLAGS} PYTHON=${PYTHON_EXECUTABLE} all
-    COMMAND ${CMAKE_COMMAND} -E make_directory lib
-    COMMAND find python/ -name "classy*.so" | xargs -I {} cp "{}" lib/
-    COMMAND ${CMAKE_COMMAND} -E echo "#This is a trampoline script to import the cythonized python module under a different name" > lib/${lib}_${sfver}.py
-    COMMAND ${CMAKE_COMMAND} -E echo "from ${lib} import *" >> lib/${lib}_${sfver}.py
-    INSTALL_COMMAND ""
-  )
+  check_python_modules(${name} ${ver} ${required_modules})
+  if(modules_missing_${name}_${ver})
+    inform_of_missing_modules(${name} ${ver} ${modules_missing_${name}_${ver}})
+  else()
+    ExternalProject_Add(${name}_${ver}
+      DOWNLOAD_COMMAND ${DL_BACKEND} ${dl} ${md5} ${dir}
+      SOURCE_DIR ${dir}
+      BUILD_IN_SOURCE 1
+      PATCH_COMMAND patch -p1 < ${patch}/${name}_${ver}.diff
+      CONFIGURE_COMMAND ""
+      COMMAND sed ${dashi} -e "s#autosetup.py install#autosetup.py build#g" Makefile
+      COMMAND sed ${dashi} -e "s#\".\"#\"${dir}\"#g" include/common.h
+      BUILD_COMMAND ${MAKE_PARALLEL} CC=${CMAKE_C_COMPILER} OMPFLAG=${OpenMP_C_FLAGS} OPTFLAG= CCFLAG=${BACKEND_GNU99_FLAGS} LDFLAG=${BACKEND_GNU99_FLAGS} PYTHON=${PYTHON_EXECUTABLE} all
+      COMMAND ${CMAKE_COMMAND} -E make_directory lib
+      COMMAND find python/ -name "classy*.so" | xargs -I {} cp "{}" lib/
+      COMMAND ${CMAKE_COMMAND} -E echo "#This is a trampoline script to import the cythonized python module under a different name" > lib/${lib}_${sfver}.py
+      COMMAND ${CMAKE_COMMAND} -E echo "from ${lib} import *" >> lib/${lib}_${sfver}.py
+      INSTALL_COMMAND ""
+    )
+  endif()
   add_extra_targets("backend" ${name} ${ver} ${dir} ${dl} clean)
   set_as_default_version("backend" ${name} ${ver})
 endif()
@@ -1321,23 +1339,29 @@ set(dl "https://github.com/lesgourg/class_public/archive/067b3868f6501eb68df3555
 set(md5 "6f7d59ac552744fadf47214fde2cbeac")
 set(dir "${PROJECT_SOURCE_DIR}/Backends/installed/${name}/${ver}")
 set(ditch_if_absent "Python")
+set(required_modules "cython")
 check_ditch_status(${name} ${ver} ${dir} ${ditch_if_absent})
 if(NOT ditched_${name}_${ver})
-  ExternalProject_Add(${name}_${ver}
-    DOWNLOAD_COMMAND ${DL_BACKEND} ${dl} ${md5} ${dir}
-    SOURCE_DIR ${dir}
-    BUILD_IN_SOURCE 1
-    PATCH_COMMAND patch -p1 < ${patch}/${name}_${ver}.diff
-    CONFIGURE_COMMAND ""
-    COMMAND sed ${dashi} -e "s#autosetup.py install#autosetup.py build#g" Makefile
-    COMMAND sed ${dashi} -e "s#\".\"#\"${dir}\"#g" include/common.h
-    BUILD_COMMAND ${MAKE_PARALLEL} CC=${CMAKE_C_COMPILER} OMPFLAG=${OpenMP_C_FLAGS} OPTFLAG= CCFLAG=${BACKEND_GNU99_FLAGS} LDFLAG=${BACKEND_GNU99_FLAGS} PYTHON=${PYTHON_EXECUTABLE} all
-    COMMAND ${CMAKE_COMMAND} -E make_directory lib
-    COMMAND find python/ -name "classy*.so" | xargs -I {} cp "{}" lib/
-    COMMAND ${CMAKE_COMMAND} -E echo "#This is a trampoline script to import the cythonized python module under a different name" > lib/${lib}_${sfver}.py
-    COMMAND ${CMAKE_COMMAND} -E echo "from ${lib} import *" >> lib/${lib}_${sfver}.py
-    INSTALL_COMMAND ""
-  )
+  check_python_modules(${name} ${ver} ${required_modules})
+  if(modules_missing_${name}_${ver})
+    inform_of_missing_modules(${name} ${ver} ${modules_missing_${name}_${ver}})
+  else()
+    ExternalProject_Add(${name}_${ver}
+      DOWNLOAD_COMMAND ${DL_BACKEND} ${dl} ${md5} ${dir}
+      SOURCE_DIR ${dir}
+      BUILD_IN_SOURCE 1
+      PATCH_COMMAND patch -p1 < ${patch}/${name}_${ver}.diff
+      CONFIGURE_COMMAND ""
+      COMMAND sed ${dashi} -e "s#autosetup.py install#autosetup.py build#g" Makefile
+      COMMAND sed ${dashi} -e "s#\".\"#\"${dir}\"#g" include/common.h
+      BUILD_COMMAND ${MAKE_PARALLEL} CC=${CMAKE_C_COMPILER} OMPFLAG=${OpenMP_C_FLAGS} OPTFLAG= CCFLAG=${BACKEND_GNU99_FLAGS} LDFLAG=${BACKEND_GNU99_FLAGS} PYTHON=${PYTHON_EXECUTABLE} all
+      COMMAND ${CMAKE_COMMAND} -E make_directory lib
+      COMMAND find python/ -name "classy*.so" | xargs -I {} cp "{}" lib/
+      COMMAND ${CMAKE_COMMAND} -E echo "#This is a trampoline script to import the cythonized python module under a different name" > lib/${lib}_${sfver}.py
+      COMMAND ${CMAKE_COMMAND} -E echo "from ${lib} import *" >> lib/${lib}_${sfver}.py
+      INSTALL_COMMAND ""
+    )
+  endif()
   add_extra_targets("backend" ${name} ${ver} ${dir} ${dl} clean)
 endif()
 
@@ -1350,23 +1374,29 @@ set(dl "https://github.com/lesgourg/class_public/archive/42e8f9418e3442d1ea3f26f
 set(md5 "8f3139eacae4d1cc5bb02bab3ec75073")
 set(dir "${PROJECT_SOURCE_DIR}/Backends/installed/${name}/${ver}")
 set(ditch_if_absent "Python")
+set(required_modules "cython")
 check_ditch_status(${name} ${ver} ${dir} ${ditch_if_absent})
 if(NOT ditched_${name}_${ver})
-  ExternalProject_Add(${name}_${ver}
-    DOWNLOAD_COMMAND ${DL_BACKEND} ${dl} ${md5} ${dir}
-    SOURCE_DIR ${dir}
-    BUILD_IN_SOURCE 1
-    PATCH_COMMAND patch -p1 < ${patch}/${name}_${ver}.diff
-    CONFIGURE_COMMAND ""
-    COMMAND sed ${dashi} -e "s#autosetup.py install#autosetup.py build#g" Makefile
-    COMMAND sed ${dashi} -e "s#\".\"#\"${dir}\"#g" include/common.h
-    BUILD_COMMAND ${MAKE_PARALLEL} CC=${CMAKE_C_COMPILER} OMPFLAG=${OpenMP_C_FLAGS} OPTFLAG= CCFLAG=${BACKEND_GNU99_FLAGS} LDFLAG=${BACKEND_GNU99_FLAGS} PYTHON=${PYTHON_EXECUTABLE} all
-    COMMAND ${CMAKE_COMMAND} -E make_directory lib
-    COMMAND find python/ -name "classy*.so" | xargs -I {} cp "{}" lib/
-    COMMAND ${CMAKE_COMMAND} -E echo "#This is a trampoline script to import the cythonized python module under a different name" > lib/${lib}_${sfver}.py
-    COMMAND ${CMAKE_COMMAND} -E echo "from ${lib} import *" >> lib/${lib}_${sfver}.py
-    INSTALL_COMMAND ""
-  )
+  check_python_modules(${name} ${ver} ${required_modules})
+  if(modules_missing_${name}_${ver})
+    inform_of_missing_modules(${name} ${ver} ${modules_missing_${name}_${ver}})
+  else()
+    ExternalProject_Add(${name}_${ver}
+      DOWNLOAD_COMMAND ${DL_BACKEND} ${dl} ${md5} ${dir}
+      SOURCE_DIR ${dir}
+      BUILD_IN_SOURCE 1
+      PATCH_COMMAND patch -p1 < ${patch}/${name}_${ver}.diff
+      CONFIGURE_COMMAND ""
+      COMMAND sed ${dashi} -e "s#autosetup.py install#autosetup.py build#g" Makefile
+      COMMAND sed ${dashi} -e "s#\".\"#\"${dir}\"#g" include/common.h
+      BUILD_COMMAND ${MAKE_PARALLEL} CC=${CMAKE_C_COMPILER} OMPFLAG=${OpenMP_C_FLAGS} OPTFLAG= CCFLAG=${BACKEND_GNU99_FLAGS} LDFLAG=${BACKEND_GNU99_FLAGS} PYTHON=${PYTHON_EXECUTABLE} all
+      COMMAND ${CMAKE_COMMAND} -E make_directory lib
+      COMMAND find python/ -name "classy*.so" | xargs -I {} cp "{}" lib/
+      COMMAND ${CMAKE_COMMAND} -E echo "#This is a trampoline script to import the cythonized python module under a different name" > lib/${lib}_${sfver}.py
+      COMMAND ${CMAKE_COMMAND} -E echo "from ${lib} import *" >> lib/${lib}_${sfver}.py
+      INSTALL_COMMAND ""
+    )
+  endif()
   add_extra_targets("backend" ${name} ${ver} ${dir} ${dl} clean)
 endif()
 
