@@ -148,10 +148,6 @@ BE_INI_FUNCTION
     if (plc2_location.back() != '/') plc2_location.push_back('/');
     if (plc3_location.back() != '/') plc3_location.push_back('/');
 
-    cout << plc2_location << " " << plc3_location << endl;
-    cout << "plc 2 exists: " << Utils::file_exists(plc2_location) << endl;
-    cout << "plc 3 exists: " << Utils::file_exists(plc3_location) << endl;
-
     // Initialise the plc2 likelihoods
     if (*InUse::plc_loglike_highl_TT_2015)          plc_init("highl_TT_2015",     "hi_l/plik/plik_dx11dr2_HM_v18_TT.clik",            2,false);
     if (*InUse::plc_loglike_highl_TTTEEE_2015)      plc_init("highl_TTTEEE_2015", "hi_l/plik/plik_dx11dr2_HM_v18_TTTEEE.clik",        2,false);
