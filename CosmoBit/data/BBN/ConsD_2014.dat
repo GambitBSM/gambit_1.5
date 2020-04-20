@@ -1,20 +1,22 @@
 # -------------------------
 #
-# 		BBN data file 
+#     BBN data file
 #
 # -------------------------
-# Data file for compuation of BBN likelihood
-# 
-# Specify the data to use for the scan in .yaml file via the Rule
-# - capability: BBN_LogLike
-#    options:
-#      DataFile:  ConsD_2014.dat
+# Data to use for computation of BBN likelihoods.
 #
-# Conservative Deuterium bounds, source: https://arxiv.org/pdf/1412.4043.pdf 
+# All values are given normalised to the abundance of hydrogen.
 #
-# Specify the measured abundance of the elements (options: Yp or He4, D or H2, He3, Li7) normalized to the Hydrogen abundance. 
+# Recognised species: Yp or He4
+#                     D  or H2
+#                     He3
+#                     Li7
+# Sources:
+#   He: PDG_2017; http://pdg.lbl.gov/2017/reviews/rpp2017-rev-bbang-nucleosynthesis.pdf
+#    D: Conservative bounds; https://arxiv.org/pdf/1412.4043.pdf
 #
-# 
-# Element \t central value \t 1 sigma uncertainty
-Yp	0.245	0.003
-D	2.45e-5	0.28e-5
+# -------------------------
+
+# Isotope  central value  1 sigma uncertainty
+Yp         0.245          0.003
+D          2.45e-5        0.28e-5

@@ -35,12 +35,12 @@
 # Require a minimum cmake version of 2.8.5
 cmake_minimum_required(VERSION 2.8.5 FATAL_ERROR)
 
-SET(CMAKE_BUILD_TYPE_STRING "Choose the type of build, options are: None Debug Release Release_03 RelWithDebInfo MinSizeRel.")
+SET(CMAKE_BUILD_TYPE_STRING "Choose the type of build, options are: None Debug Release Release_O3 RelWithDebInfo MinSizeRel.")
 if(NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
   SET(CMAKE_BUILD_TYPE None CACHE STRING "${CMAKE_BUILD_TYPE_STRING}" FORCE)
-elseif(CMAKE_BUILD_TYPE STREQUAL "Release_03")
+elseif(CMAKE_BUILD_TYPE STREQUAL "Release_O3")
   SET(CMAKE_BUILD_TYPE Release CACHE STRING "${CMAKE_BUILD_TYPE_STRING}" FORCE)
-  SET(FORCE_03 TRUE)
+  SET(FORCE_O3 TRUE)
 endif()
 message("${Yellow}-- Build type is set to ${CMAKE_BUILD_TYPE} ${ColourReset}")
 
@@ -103,22 +103,34 @@ SET(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
 # Include cmake utility scripts, including colour definitions.
 include(cmake/utilities.cmake)
 
+# Check if pybind11 is to be ditched
+string(REGEX MATCH ";pybind;|;pybind11;|;Pybind;|;Pybind11;" DITCH_PYBIND ";${itch};")
+
 # Check for Python interpreter
 # We also need to search for PythonLibs before letting pybind11 look for them,
 # otherwise it seems to get it wrong.  Also, we need to add versions of python
 # greater than 3.3 manually, for compatibility with CMake 2.8.12.
-set(Python_ADDITIONAL_VERSIONS 3.4 3.5 3.6 3.7)
+# If pybind11 is ditched, do not worry about PythonLibs
+set(Python_ADDITIONAL_VERSIONS 3.4 3.5 3.6 3.7 3.8 3.9)
+# If both FORCE_PYTHON2 and FORCE_PYTHON3 are set, throw error
+if (FORCE_PYTHON2 AND FORCE_PYTHON3)
+  message(FATAL_ERROR "Two different versions of python requested. Switch either FORCE_PYTHON2 or FORCE_PYTHON3 off.")
+endif()
 if (FORCE_PYTHON2)
   message("${BoldYellow}   Python 2 requested; searching for Python 2.7${ColourReset}")
   find_package(PythonInterp 2.7 REQUIRED)
-  find_package(PythonLibs ${PYTHON_VERSION_STRING} REQUIRED)
+  if(NOT DITCH_PYBIND)
+    find_package(PythonLibs ${PYTHON_VERSION_STRING} EXACT)
+  endif()
 elseif (FORCE_PYTHON3)
   message("${BoldYellow}   Python 3 requested; searching for Python 3.x${ColourReset}")
   find_package(PythonInterp 3 REQUIRED)
-  find_package(PythonLibs ${PYTHON_VERSION_STRING} EXACT)
+  if(NOT DITCH_PYBIND)
+    find_package(PythonLibs ${PYTHON_VERSION_STRING} EXACT)
+  endif()
 else()
   find_package(PythonInterp 3)
-  if(PYTHONINTERP_FOUND)
+  if(PYTHONINTERP_FOUND AND NOT DITCH_PYBIND)
     find_package(PythonLibs 3)
   else()
     message("${BoldYellow}   Python 3 not found, searching for Python 2.7${ColourReset}")
@@ -127,17 +139,27 @@ else()
       message(FATAL_ERROR "\nGAMBIT requires Python 2.7.  \nIf you need to set the path to the Python interpreter manually, "
                           "please use -D PYTHON_EXECUTABLE=path/to/preferred/python.")
     endif()
-    find_package(PythonLibs 2)
+    if(NOT DITCH_PYBIND)
+      find_package(PythonLibs 2)
+    endif()
   endif()
 endif()
 message("${BoldYellow}   Using Python interpreter version ${PYTHON_VERSION_STRING} for build.${ColourReset}")
+
 if(PYTHONLIBS_FOUND)
-  message("${BoldYellow}   Using Python libraries version ${PYTHONLIBS_VERSION_STRING} for Python backend support.${ColourReset}")
+  string(FIND "${PYTHONLIBS_VERSION_STRING}" "2.7" PY2_POSITION)
+  if(PY2_POSITION EQUAL 0)
+    set(UNSUPPORTED_PYTHON_VERSION "3")
+  else()
+    set(UNSUPPORTED_PYTHON_VERSION "2.7")
+  endif()
+  message("${BoldYellow}   Using Python libraries version ${PYTHONLIBS_VERSION_STRING} for Python backend support.${ColourReset}\n"
+          "   Backends requiring Python ${UNSUPPORTED_PYTHON_VERSION} will be ditched.")
   if (NOT "${PYTHON_VERSION_STRING}" STREQUAL "${PYTHONLIBS_VERSION_STRING}")
     message("${BoldRed}   NOTE: You are using different Python versions for the interpreter and the libraries!${ColourReset}\n"
             "   In principle this should be fine, as the interpreter is only used for building GAMBIT, and the\n"
             "   libraries are only used for providing support for Python backends at runtime.  However, if you\n"
-            "   have matching versions installed, you can make this message go away by trying the following\n"
+            "   have matching versions installed, you can make this message go away by trying one of the following\n"
             "   (making sure to clean out your build directory in between any such changes):\n"
             "   1. invoke cmake as cmake -DFORCE_PYTHON2=True .. (or similar)\n"
             "   2. invoke cmake as cmake -DFORCE_PYTHON3=True .. (or similar)\n"
@@ -148,20 +170,24 @@ if(PYTHONLIBS_FOUND)
   endif()
 endif()
 
-# Check for pybind11 if PythonLibs were found
+# Check for pybind11 if PythonLibs were found and not ditched
 if(NOT PYTHONLIBS_FOUND)
-  message("${BoldRed}   PythonLibs NOT found, so pybind11 cannot be used. Ditching support for CosmoBit and Python backends.${ColourReset}\n"
-          "   If you *do* have the Python libraries installed, you should first try setting/unsetting\n"
-          "   FORCE_PYTHON2 or FORCE_PYTHON3 when invoking cmake (make sure to clean out your build\n"
-          "   directory in between any such changes).  If that does not work, you can manually set the\n"
-          "   following variables when invoking cmake (also making sure to clean out your build dir):\n"
-          "     PYTHON_LIBRARY\n"
-          "     PYTHON_INCLUDE_DIR\n"
-          "     PYTHON_EXECUTABLE")
+  if(DITCH_PYBIND)
+    message("${BoldCyan} X Excluding pybind11 from GAMBIT configuration. Ditching support for CosmoBit and Python backends.${ColourReset}")
+  else()
+    message("${BoldRed}   PythonLibs NOT found, so pybind11 cannot be used. Ditching support for CosmoBit and Python backends.${ColourReset}\n"
+            "   If you *do* have the Python libraries installed, you should first try setting/unsetting\n"
+            "   FORCE_PYTHON2 or FORCE_PYTHON3 when invoking cmake (make sure to clean out your build\n"
+            "   directory in between any such changes).  If that does not work, you can manually set the\n"
+            "   following variables when invoking cmake (also making sure to clean out your build dir):\n"
+            "     PYTHON_LIBRARY\n"
+            "     PYTHON_INCLUDE_DIR\n"
+            "     PYTHON_EXECUTABLE")
+  endif()
   set(itch "${itch};CosmoBit")
 else()
-  set(MIN_pybind11_VERSION "2.4.3")
-  set(PREFERRED_pybind11_VERSION "2.4.3")
+  set(MIN_pybind11_VERSION "2.5.0")
+  set(PREFERRED_pybind11_VERSION "2.5.0")
   set(pybind11_CONTRIB_DIR "${PROJECT_SOURCE_DIR}/contrib/pybind11")
   find_package(pybind11 QUIET)
   if(NOT pybind11_FOUND AND EXISTS "${pybind11_CONTRIB_DIR}")

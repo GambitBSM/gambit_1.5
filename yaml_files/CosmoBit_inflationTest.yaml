@@ -64,6 +64,8 @@ ObsLikes:
     capability:   MP_Combined_LogLike
     module:       CosmoBit
     type:         double
+    sub_capabilities:
+      hst: default
 
   - purpose:      Observable
     capability:   print_parametrised_ps
@@ -113,19 +115,6 @@ Rules:
   #                      # in the future this would ideally be taken care of automatically -> one observable that you HAVE to
   #                      # calculate for every inflation model? Then we can add it to the set_classy_function (there probably
   #                      # is but I just have no idea about inflation ;))
-
-  - capability: MP_experiment_names
-    function: set_MP_experiment_names
-    options:
-      # Tested & verified likelihoods: bao, bao_boss,bao_aniso,bao_aniso_gauss_approx, bao_boss_dr12,bao_fs_boss_dr12,
-      #     bao_known_rs, bao_smallz_2014 bicep2, hst,Planck_SZ, Pantheon, sdss_lrgDR4, sdss_lrgDR7, timedelay, WiggleZ, WiggleZ_ba0,
-      # Note: bao_angular won't work since the likelihood is not written in MP conformal way (it does not even work trying
-      #       to call in from MontePython directly.. )
-      #       bicep does not work -> gaussian nuisance param problem in 'add_nuisance_prior'
-      Likelihoods:
-        #acbar: default
-        #bao_smallz_2014: default
-        hst: default
 
   # error calculation precision settings for AltterBBN
   # (use 1 and 0 to speed up Helium abundance calculation for testing)

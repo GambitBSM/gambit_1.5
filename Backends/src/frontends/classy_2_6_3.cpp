@@ -24,7 +24,6 @@
 
 #include "gambit/Backends/frontend_macros.hpp"
 #include "gambit/Backends/frontends/classy_2_6_3.hpp"
-#include "gambit/CosmoBit/CosmoBit_utils.hpp"
 
 #include <pybind11/stl.h>
 #include <pybind11/stl_bind.h>
@@ -35,7 +34,7 @@
 BE_NAMESPACE
 {
   pybind11::object static cosmo;
-  // save input dictionary from CLASS run from 
+  // save input dictionary from CLASS run from
   // previously computed point
   pybind11::dict static prev_input_dict;
 
@@ -53,7 +52,7 @@ BE_NAMESPACE
     {
       // test if any pointer is being passed to CLASS -- if so you'd need to compare the contents
       // of the vectors, so just recompute by default in that case (atm the options that pass pointser
-      // can be identified by searching for 'array' or 'pointer_to' in the CLASS input dict. If more of 
+      // can be identified by searching for 'array' or 'pointer_to' in the CLASS input dict. If more of
       // these cases are implemented the checks have to be added here.)
       // (as soon there is a real fast-slow scanner implemented this sould probably be changed)
       if(it.first.cast<std::string>().find("array") != std::string::npos){return false;}
@@ -62,19 +61,19 @@ BE_NAMESPACE
       // return false if unequal values are found
       if (classy_input[it.first].cast<std::string>() != prev_input_dict[it.first].cast<std::string>()){return false;}
     }
-    // all key values are identical --> no need to run class again, yay!  
+    // all key values are identical --> no need to run class again, yay!
     return true;
   }
 
-  /// routine to check class input for consistency. If a case is not treated here class will 
+  /// routine to check class input for consistency. If a case is not treated here class will
   /// throw an error saying that one input parameter was not read. Checking for some specific cases
-  /// here allows us to give more informative error messages and fix suggestions 
+  /// here allows us to give more informative error messages and fix suggestions
   void class_input_consistency_checks(pybind11::dict classy_input)
   {
 
     std::ostringstream errMssg;
-    // one thing that can go wrong is that the primordial power spectrum is requested but 
-    // not output of requiring the perturbations to be solved is asked for => 
+    // one thing that can go wrong is that the primordial power spectrum is requested but
+    // not output of requiring the perturbations to be solved is asked for =>
     // check if "modes" input is set while "output" is not set
     if(classy_input.contains("modes") and not classy_input.contains("output"))
     {
@@ -88,7 +87,7 @@ BE_NAMESPACE
   }
 
   // getter functions to return a bunch of CLASS outputs. This is here in the frontend
-  // to make the capabilities inside CosmoBit independent of types that depend on the 
+  // to make the capabilities inside CosmoBit independent of types that depend on the
   // Boltzmann solver in use
 
   // get the lensed Cl.
@@ -157,8 +156,8 @@ BE_NAMESPACE
     return growth_fact;
   }
 
-  // returns scale_independent_growth_factor for given redshift  TODO: what is different with and without f? think it 
-  // is connected to power spectra with baryons vs. baryons + cdm 
+  // returns scale_independent_growth_factor for given redshift  TODO: what is different with and without f? think it
+  // is connected to power spectra with baryons vs. baryons + cdm
   double class_get_scale_independent_growth_factor_f(double z)
   {
     double growth_fact_f = cosmo.attr("scale_independent_growth_factor_f")(z).cast<double>();
@@ -202,7 +201,7 @@ BE_NAMESPACE
 
 /* you *could* also have this function in principle, however since the contains
   the contribution from ALL ncdm components it is not in general true, that Omega_ncdm = Omega_nu
-  so I would not recommend doing it. 
+  so I would not recommend doing it.
   // returns Omega nu today
   double class_get_Omega0_nu()
   {
@@ -246,7 +245,7 @@ BE_NAMESPACE
     double H0 = cosmo.attr("Hubble")(0).cast<double>();
     return H0;
   }
-  
+
   // print primordial power spectrum for consistency check & debug purposes
   void print_pps()
   {
@@ -255,19 +254,19 @@ BE_NAMESPACE
 
 }
 END_BE_NAMESPACE
-  
+
 
 BE_INI_FUNCTION
 {
   static int error_counter = 0;
   static int max_errors = 100;
 
-  // get input for CLASS run set by CosmoBit 
-  CosmoBit::Classy_input input_container = *Dep::classy_final_input;
+  // get input for CLASS run set by CosmoBit
+  Classy_input input_container = *Dep::classy_final_input;
   pybind11::dict cosmo_input_dict = input_container.get_input_dict();
 
   static bool first_run = true;
-  
+
   if(first_run)
   {
     max_errors = runOptions->getValueOrDef<int>(100,"max_errors");
@@ -293,7 +292,7 @@ BE_INI_FUNCTION
     cosmo.attr("empty")();
 
     // set cosmological parameters
-    logger() << LogTags::debug << "[classy_"<< STRINGIFY(VERSION) <<"] These are the inputs:\n\n";
+    logger() << LogTags::debug << "[classy_"<< STRINGIFY(VERSION) <<"] These are the inputs:"<<endl;
     logger() << pybind11::repr(cosmo_input_dict) << EOM;
     cosmo.attr("set")(cosmo_input_dict);
 
@@ -315,7 +314,7 @@ BE_INI_FUNCTION
       // If the error is a CosmoSevereError raise an backend_error ...
       if (rawErrMessage.find("CosmoSevereError") != std::string::npos)
       {
-        errMssg << "Caught a \'CosmoSevereError\':\n\n";
+        errMssg << "Caught a \'CosmoSevereError\':"<<endl;
         errMssg << rawErrMessage;
         backend_error().raise(LOCAL_INFO,errMssg.str());
       }
@@ -326,7 +325,7 @@ BE_INI_FUNCTION
       else if (rawErrMessage.find("CosmoComputationError") != std::string::npos)
       {
         ++error_counter;
-        errMssg << "Caught a \'CosmoComputationError\':\n\n";
+        errMssg << "Caught a \'CosmoComputationError\':"<<endl;
         errMssg << rawErrMessage;
         if ( max_errors < 0 || error_counter <= max_errors )
         {
@@ -343,7 +342,7 @@ BE_INI_FUNCTION
       // any other error (which shouldn't occur) gets also caught as invalid point.
       else
       {
-        errMssg << "Caught an unspecified error:\n\n";
+        errMssg << "Caught an unspecified error:"<<endl;
         errMssg << rawErrMessage;
         cout << "An unspecified error occurred during compute() in classy_"<< STRINGIFY(VERSION) <<":\n";
         cout << rawErrMessage;
@@ -355,7 +354,7 @@ BE_INI_FUNCTION
     //print_pps();
 
   }
-  // identical CLASS input -- skip compute step & save time! 
+  // identical CLASS input -- skip compute step & save time!
   else
   {
     logger() << LogTags::info << "[classy_"<< STRINGIFY(VERSION) <<"] \"cosmo.compute\" was skipped, input was identical to previously computed point" << EOM;

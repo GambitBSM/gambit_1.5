@@ -136,33 +136,25 @@ endmacro()
 
 # Function to check whether or not a given scanner or backend has been ditched
 function(check_ditch_status name version dir)
-  # Check first for optional argument for Mathematica backends
-  foreach(arg ${ARGN})
-    if ((arg STREQUAL "Mathematica" OR arg STREQUAL "mathematica") AND NOT HAVE_MATHEMATICA)
+  # Check first for optional argument
+  foreach(arg0 ${ARGN})
+    string(TOLOWER ${arg0} arg)
+    if ((arg STREQUAL "mathematica") AND NOT HAVE_MATHEMATICA)
+      set (itch "${itch}" "${name}_${version};")
+    elseif ((arg STREQUAL "python") AND NOT HAVE_PYBIND11)
+      set (itch "${itch}" "${name}_${version};")
+    elseif ((arg STREQUAL "python2") AND (NOT PYTHON_VERSION_MAJOR EQUAL 2 OR NOT HAVE_PYBIND11))
+      set (itch "${itch}" "${name}_${version};")
+    elseif ((arg STREQUAL "python3") AND (NOT PYTHON_VERSION_MAJOR EQUAL 3 OR NOT HAVE_PYBIND11))
+      set (itch "${itch}" "${name}_${version};")
+    elseif ((arg STREQUAL "hepmc") AND EXCLUDE_HEPMC)
       set (itch "${itch}" "${name}_${version}")
-    elseif ((arg STREQUAL "HEPMC" OR arg STREQUAL "HepMC" OR arg STREQUAL "hepmc") AND EXCLUDE_HEPMC)
+    elseif ((arg STREQUAL "yoda") AND EXCLUDE_YODA)
       set (itch "${itch}" "${name}_${version}")
-    elseif ((arg STREQUAL "YODA" OR arg STREQUAL "Yoda" OR arg STREQUAL "yoda") AND EXCLUDE_YODA)
+    elseif ((arg STREQUAL "sqlite3") AND NOT SQLITE3_FOUND)
       set (itch "${itch}" "${name}_${version}")
-    elseif ((arg STREQUAL "SQLITE3" OR arg STREQUAL "SQLite3" OR arg STREQUAL "sqlite3") AND NOT SQLITE3_FOUND)
-      set (itch "${itch}" "${name}_${version}")
-    elseif ((arg STREQUAL "Python" OR arg STREQUAL "python") AND NOT HAVE_PYBIND11)
-      set (itch "${itch}" "${name}_${version}")
-    elseif ((arg STREQUAL "Python2" OR arg STREQUAL "python2") AND (NOT HAVE_PYBIND11 OR NOT PYTHON_VERSION_MAJOR EQUAL 2))
-      set (itch "${itch}" "${name}_${version}")
-    else()
-      string(REGEX REPLACE "PY_" "" module ${arg})
-      if(NOT ${module} STREQUAL ${arg})
-        if(NOT DEFINED PY_${module}_FOUND)
-          find_python_module(${module})
-        endif()
-        if(NOT PY_${module}_FOUND)
-          set(itch "${itch}" "${name}_${version}")
-        endif()
-      endif()
     endif()
   endforeach()
-
   foreach(ditch_command ${itch})
     execute_process(COMMAND ${PYTHON_EXECUTABLE} -c "print(\"${name}_${version}\".startswith(\"${ditch_command}\"))"
                     WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
@@ -195,6 +187,50 @@ function(set_as_default_version type name default)
   endif()
   add_dependencies(${type}s ${name})
 endfunction()
+
+# Check whether or not Python modules required for backend builds are available
+macro(check_python_modules name ver modules_with_commas)
+  string (REPLACE "," ";" modules "${modules_with_commas}")
+  string (REPLACE " " "" modules "${modules}")
+  foreach(module ${modules})
+    if (NOT DEFINED PY_${module}_FOUND)
+      find_python_module(${module})
+      if (NOT PY_${module}_FOUND)
+        set(PY_${module}_FOUND FALSE)
+      endif()
+    endif()
+    if (NOT PY_${module}_FOUND)
+      set(modules_missing_${name}_${ver} "${modules_missing_${name}_${ver}},${module}" )
+    endif()
+  endforeach()
+endmacro()
+
+# Set up a mock external project that tells the user about missing Python modules and forces a rerun of cmake at next attempted build
+macro(inform_of_missing_modules name ver missing_with_commas)
+  string (REPLACE "," " " missing "${missing_with_commas}")
+  set(package ${name}_${ver})
+  set(rmstring "${CMAKE_BINARY_DIR}/${package}-prefix/src/${package}-stamp/${package}-configure")
+  set(errmsg1 "Cannot make ${package} because you are missing Python module(s):${missing}")
+  set(errmsg2 "Please install the missing package(s), e.g. with ")
+  set(errmsg3 "  pip install --user${missing}")
+  set(errmsg4 "and then rerun ")
+  set(errmsg5 "  make ${package}")
+  ExternalProject_Add(${package}
+    DOWNLOAD_COMMAND ${CMAKE_COMMAND} -E make_directory ${package}-prefix/src/${package}
+    CONFIGURE_COMMAND ${CMAKE_COMMAND} -E echo
+              COMMAND ${CMAKE_COMMAND} -E cmake_echo_color --red --bold ${errmsg1}
+              COMMAND ${CMAKE_COMMAND} -E cmake_echo_color --red --bold ${errmsg2}
+              COMMAND ${CMAKE_COMMAND} -E echo
+              COMMAND ${CMAKE_COMMAND} -E cmake_echo_color       --bold ${errmsg3}
+              COMMAND ${CMAKE_COMMAND} -E echo
+              COMMAND ${CMAKE_COMMAND} -E cmake_echo_color --red --bold ${errmsg4}
+              COMMAND ${CMAKE_COMMAND} -E echo
+              COMMAND ${CMAKE_COMMAND} -E cmake_echo_color       --bold ${errmsg5}
+              COMMAND ${CMAKE_COMMAND} -E echo
+    BUILD_COMMAND ${CMAKE_COMMAND} -E touch ${CMAKE_SOURCE_DIR}/cmake/backends.cmake
+    INSTALL_COMMAND ${CMAKE_COMMAND} -E remove ${rmstring}
+  )
+endmacro()
 
 if(EXISTS "${PROJECT_SOURCE_DIR}/Backends/")
   include(cmake/backends.cmake)

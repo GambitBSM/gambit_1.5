@@ -33,6 +33,12 @@
 ///          (hoof@uni-goettingen.de)
 ///  \date 2020 Mar
 ///
+///  \author Pat Scott
+///          (pat.scott@uq.edu.au)
+///  \date 2018 Mar
+///  \date 2019 Jul
+///  \date 2020 Apr
+///
 ///  *********************************************
 #include <cmath>
 #include <functional>
@@ -115,60 +121,6 @@ namespace Gambit
   namespace CosmoBit
   {
     using namespace LogTags;
-
-    void energy_injection_spectrum_AnnihilatingDM_mixture(DarkAges::Energy_injection_spectrum& spectrum)
-    {
-      using namespace Pipes::energy_injection_spectrum_AnnihilatingDM_mixture;
-
-      double m = *Param["mass"];
-      double BR_el = *Param["BR"];
-      double BR_ph = 1.0 - BR_el;
-
-      if (m <= m_electron && BR_el >= std::numeric_limits<double>::epsilon())
-      {
-        std::ostringstream err;
-        err << "The mass of the annihilating dark matter candiate is below the electron mass.";
-        err << " No production of e+/e- is possible.";
-        CosmoBit_error().raise(LOCAL_INFO,err.str());
-      }
-
-      spectrum.E_el.clear();
-      spectrum.E_ph.clear();
-      spectrum.spec_el.clear();
-      spectrum.spec_ph.clear();
-
-      spectrum.E_el.resize(1,std::max(m-m_electron, std::numeric_limits<double>::min()));
-      spectrum.E_ph.resize(1,m);
-      spectrum.spec_el.resize(1,BR_el*2e9);
-      spectrum.spec_ph.resize(1,BR_ph*2e9);
-    }
-
-    void energy_injection_spectrum_DecayingDM_mixture(DarkAges::Energy_injection_spectrum& spectrum)
-    {
-      using namespace Pipes::energy_injection_spectrum_DecayingDM_mixture;
-
-      double m = *Param["mass"];
-      double BR_el = *Param["BR"];
-      double BR_ph = 1.0 - BR_el;
-
-      if (m <= 2*m_electron && BR_el >= std::numeric_limits<double>::epsilon())
-      {
-        std::ostringstream err;
-        err << "The mass of the decaying dark matter candiate is below twice the electron mass.";
-        err << " No production of e+/e- is possible.";
-        CosmoBit_error().raise(LOCAL_INFO,err.str());
-      }
-
-      spectrum.E_el.clear();
-      spectrum.E_ph.clear();
-      spectrum.spec_el.clear();
-      spectrum.spec_ph.clear();
-
-      spectrum.E_el.resize(1,std::max(m*0.5-m_electron, std::numeric_limits<double>::min()));
-      spectrum.E_ph.resize(1,m*0.5);
-      spectrum.spec_el.resize(1,BR_el*2e9);
-      spectrum.spec_ph.resize(1,BR_ph*2e9);
-    }
 
     void lifetime_ALP_agg(double& result)
     {
@@ -364,15 +316,11 @@ namespace Gambit
 
     }
 
-    /// capability to set k_pivot for consistent use within cosmobit
+    /// Function for setting k_pivot in Mpc^-1 for consistent use within CosmoBit
     /// (to make sure it is consistent between CLASS and multimodecode)
     void set_k_pivot(double &result)
     {
-
-      using namespace Pipes::set_k_pivot;
-
-      result = runOptions->getValueOrDef<double>(0.05, "k_pivot");
-
+      result = Pipes::set_k_pivot::runOptions->getValueOrDef<double>(0.05, "k_pivot");
     }
 
 
@@ -593,9 +541,8 @@ namespace Gambit
         result["100*theta_s"] = *Param["100theta_s"];
       }
 
-      // set helium abundance (vector Helium_abundance.at(0): mean, .at(1): uncertainty)
-      std::vector<double> Helium_abundance = *Dep::Helium_abundance;
-      result["YHe"] = Helium_abundance.at(0);
+      // Set helium abundance
+      result["YHe"] = Dep::BBN_abundances->get_BBN_abund("He4");
 
       // TODO: need to test if class or exo_class in use! does not work -> (JR) should be fixed with classy implementation
       // -> (JR again) not sure if that is actually true.. need to test.
@@ -693,7 +640,7 @@ namespace Gambit
     /// Set the LCDM_no_primordial_ps in classy. Depends on a parametrised primordial_ps.
     /// Looks at the parameters used in a run,
     /// and passes them to classy in the form of a Python dictionary.
-    void set_classy_parameters_parametrised_ps(CosmoBit::Classy_input& result)
+    void set_classy_parameters_parametrised_ps(Classy_input& result)
     {
       using namespace Pipes::set_classy_parameters_parametrised_ps;
 
@@ -706,7 +653,7 @@ namespace Gambit
       // TODO check whether A_s from MultiModeCode has the log taken or not.
       Parametrised_ps pps = *Dep::parametrised_power_spectrum;
       result.add_entry("n_s", pps.get_n_s());
-      result.add_entry("ln10^{10}A_s", pps.get_A_s());
+      result.add_entry("ln10^{10}A_s", pps.get_ln10A_s());
 
       // add k_pivot entry
       result.add_entry("P_k_ini type", "analytic_Pk");
@@ -747,7 +694,7 @@ namespace Gambit
     /// Set the LCDM_no_primordial_ps in classy. Depends on a primordial_ps.
     /// Looks at the parameters used in a run,
     /// and passes them to classy in the form of a Python dictionary.
-    void set_classy_parameters_primordial_ps(CosmoBit::Classy_input& result)
+    void set_classy_parameters_primordial_ps(Classy_input& result)
     {
       using namespace Pipes::set_classy_parameters_primordial_ps;
 
@@ -856,13 +803,14 @@ namespace Gambit
         // MultiModeCode uses log10 of both parameters below
         result.vparams.push_back(log10(*Param["Lambda"]));
         result.vparams.push_back(log10(*Param["f_phi"]));
-        result.potential_choice = 2; // V(phi) = Lambda^4 [1 + cos(phi/f)]
+        result.potential_choice = 2; // V(phi) = Lambda^4 [ 1 + cos(phi/f) ]
         result.vparam_rows = 2;
       }
       else if (ModelInUse("Inflation_InstReh_1Starobinsky"))
       {
-        result.vparams.push_back(*Param["Lambda"]);
-        result.potential_choice = 19; // V(phi) = ...
+        double lsquared = (*Param["Lambda"])*(*Param["Lambda"]);
+        result.vparams.push_back(lsquared*lsquared); // MultiModeCode uses the fourth power of Lambda as a parameter
+        result.potential_choice = 19; // V(phi) = Lambda^4 [ 1 - exp(-sqrt(2/3) phi) ]^2
         result.vparam_rows = 1;
       }
 
@@ -1009,7 +957,7 @@ namespace Gambit
 
       result.set_N_pivot(observables.N_pivot);
       result.set_n_s(observables.ns);
-      result.set_A_s(observables.As);
+      result.set_ln10A_s( 10. * log(10.) + log(observables.As) );
       result.set_r(observables.r);
 
     }
@@ -1036,7 +984,7 @@ namespace Gambit
       Parametrised_ps pps;
       pps.set_N_pivot(55);
       pps.set_n_s(*Param["n_s"]);
-      pps.set_A_s(*Param["ln10A_s"]);
+      pps.set_ln10A_s(*Param["ln10A_s"]);
       pps.set_r(0);
 
       result = pps;
@@ -1187,14 +1135,12 @@ namespace Gambit
 
 // ***************************************************************************************************************
 
-    int diff_eq_rhs (double t, const double y[], double f[], void *params) // @Pat: this is the function for the differential equation that has to be solved in 'compute_dNeff_etaBBN_ALP' routine
+    /// RHS of differential equation
+    ///  dT/dt = 15/pi^2 (m_a n_a(t)/ tau_a) T^(-3) - H(T) T , where H(T) = 3.7978719e-7*T*T  // TODO: refer to Eq. number in paper when ready
+    ///  params: stores (m_a n_a(t)/ tau_a)
+    ///  y[0]: stores SM T[t0]
+    int diff_eq_rhs (double t, const double y[], double f[], void *params)
     {
-      /* RHS of differential equation
-        dT/dt = 15/pi^2 (m_a n_a(t)/ tau_a) T^(-3) - H(T) T , where H(T) = 3.7978719e-7*T*T  // TODO: refer to Eq. number in paper when ready
-        params: stores (m_a n_a(t)/ tau_a)
-        y[0]: stores SM T[t0]
-      */
-
       fast_interpolation injection_inter = *(static_cast<fast_interpolation*>(params));
       f[0] = (15.0/(4.0*pi*pi)) * injection_inter.interp(t)/pow(y[0], 3) - 3.7978719e-7*y[0]*y[0]*y[0];
       return GSL_SUCCESS;
@@ -1473,27 +1419,127 @@ namespace Gambit
         result["dNnu"]=0.;    // no extra ur species in standard LCDM model
       }
       result["eta0"] = *Dep::etaBBN;
-  
+
       result["failsafe"] = runOptions->getValueOrDef<double>(3,"failsafe");
       result["err"] = runOptions->getValueOrDef<double>(3,"err");
 
-      logger() << "Set AlterBBN with parameters eta = " << result["eta0"] << ", Nnu = " << result["Nnu"] << ", dNnu = " << result["dNnu"] << EOM;
-      logger() << "     and error params: failsafe = " << result["failsafe"] << ", err = " << result["err"] << EOM;
+      logger() << "Set AlterBBN with parameters eta = " << result["eta0"] << ", Nnu = " << result["Nnu"] << ", dNnu = " << result["dNnu"];
+      logger() << " and error params: failsafe = " << result["failsafe"] << ", err = " << result["err"] << EOM;
     }
 
 
-    /// (JR) this function is huge (200 lines..) -- considering that it is acually only there to call
-    /// a BE function from AlterBBN, can we split that up somehow or define utility functions
-    /// to do some of the checks and error calculation things so it is not totally blown up? TODO
-    void compute_BBN_abundances(CosmoBit::BBN_container &result)
+    /// Check the validity of a correlation matrix for AlterBBN likelihood calculations given in the YAML file, and use it to populate a correlation matrix object
+    void populate_correlation_matrix(const std::map<std::string, int>& abund_map, std::vector<std::vector<double>>& corr,
+                                     std::vector<double>& relerr, bool use_relative_errors, const Options& runOptions)
+    {
+      std::vector<str> isotope_basis = runOptions.getValue<std::vector<str> >("isotope_basis");
+      std::vector<std::vector<double>> tmp_corr = runOptions.getValue<std::vector<std::vector<double>>>("correlation_matrix");
+      std::vector<double> tmp_relerr;
+      unsigned int nisotopes = isotope_basis.size();
+
+      // Check if the size of the isotope_basis and the size of the correlation matrix agree
+      if (nisotopes != tmp_corr.size())
+      {
+        std::ostringstream err;
+        err << "The length of the list \'isotope_basis\' and the size of the correlation matrix \'correlation_matrix\' do not agree";
+        CosmoBit_error().raise(LOCAL_INFO, err.str());
+      }
+
+      // If the relative errors are also given, then do also a check if the length of the list is correct and if the entries are positive.
+      if (use_relative_errors)
+      {
+        tmp_relerr = runOptions.getValue< std::vector<double> >("relative_errors");
+        if (nisotopes != tmp_relerr.size())
+        {
+          std::ostringstream err;
+          err << "The length of the list \'isotope_basis\' and the length of \'relative_errors\' do not agree";
+          CosmoBit_error().raise(LOCAL_INFO, err.str());
+        }
+        for (std::vector<double>::iterator it = tmp_relerr.begin(); it != tmp_relerr.end(); it++)
+        {
+          if (*it <= 0.0)
+          {
+            std::ostringstream err;
+            err << "One entry for the relative error is not positive";
+            CosmoBit_error().raise(LOCAL_INFO, err.str());
+          }
+        }
+      }
+
+      // Check if the correlation matrix is square
+      for (std::vector<std::vector<double>>::iterator it = tmp_corr.begin(); it != tmp_corr.end(); it++)
+      {
+        if (it->size() != nisotopes)
+        {
+          std::ostringstream err;
+          err << "The correlation matrix is not a square matrix";
+          CosmoBit_error().raise(LOCAL_INFO, err.str());
+        }
+      }
+
+      // Check if the entries in the correlation matrix are reasonable
+      for (unsigned int ie=0; ie<nisotopes; ie++)
+      {
+        //Check if the diagonal entries are equal to 1.
+        if (std::abs(tmp_corr.at(ie).at(ie) - 1.) > 1e-6)
+        {
+          std::ostringstream err;
+          err << "Not all diagonal elements of the correlation matirx are 1.";
+          CosmoBit_error().raise(LOCAL_INFO, err.str());
+        }
+        for (unsigned int je=0; je<=ie; je++)
+        {
+          //Check for symmetry
+          if (std::abs(tmp_corr.at(ie).at(je) - tmp_corr.at(je).at(ie)) > 1e-6)
+          {
+            std::ostringstream err;
+            err << "The correlation matrix is not symmetric";
+            CosmoBit_error().raise(LOCAL_INFO, err.str());
+          }
+          // Check if the off-diagonal elements are between -1 and 1.
+          if (std::abs(tmp_corr.at(ie).at(je)) >= 1. && (ie != je))
+          {
+            std::ostringstream err;
+            err << "The off-diagonal elements of the correlation matrix are not sensible (abs(..) > 1)";
+            CosmoBit_error().raise(LOCAL_INFO, err.str());
+          }
+        }
+      }
+
+      // Check if the isotopes in the basis are actually known.
+      for (std::vector<str>::iterator it = isotope_basis.begin(); it != isotope_basis.end(); it++)
+      {
+        if (abund_map.count(*it) == 0)
+        {
+          std::ostringstream err;
+          err << "I do not recognise the element \'" << *it << "\'";
+          CosmoBit_error().raise(LOCAL_INFO, err.str());
+        }
+      }
+
+      // Populate the correlation matrix and relative errors
+      for (std::vector<str>::iterator it1 = isotope_basis.begin(); it1 != isotope_basis.end(); it1++)
+      {
+        int ie  =  abund_map.at(*it1);
+        int i = std::distance( isotope_basis.begin(), it1 );
+        // If the relative errors are given, fill relerr with the respective values (-1.0 refers to no errors given).
+        if (use_relative_errors) relerr.at(ie) = tmp_relerr.at(i);
+        for (std::vector<str>::iterator it2 = isotope_basis.begin(); it2 != isotope_basis.end(); it2++)
+        {
+          int je = abund_map.at(*it2);
+          int j = std::distance( isotope_basis.begin(), it2 );
+          corr.at(ie).at(je) = tmp_corr.at(i).at(j);
+        }
+      }
+    }
+
+    /// Compute elemental abundances from BBN
+    void compute_BBN_abundances(BBN_container &result)
     {
       using namespace Pipes::compute_BBN_abundances;
 
       // global variable of AlterBBN (# computed element abundances)
-      const int NNUC = BEreq::get_NNUC();
-      result.set_abund_map(BEreq::get_abund_map_AlterBBN());
-      // init arrays in BBN_container with right length
-      result.init_arr_size(NNUC);
+      const static int NNUC = BEreq::get_NNUC();
 
       // in AlterBBN ratioH and cov_ratioH are arrays of fixed length
       // with certain compiler versions (gcc 5.4.0) we have seen memory corruption problems
@@ -1508,238 +1554,79 @@ namespace Gambit
       std::unique_ptr<double[], decltype(deleter)> cov_ratioH(new double[(NNUC+1)*(NNUC+1)](), deleter);
 
       static bool first = true;
-      const bool use_fudged_correlations = (runOptions->hasKey("correlation_matrix") && runOptions->hasKey("elements"));
-      const bool use_relative_errors = runOptions->hasKey("relative_errors");
+      const static bool use_fudged_correlations = (runOptions->hasKey("correlation_matrix") && runOptions->hasKey("isotope_basis"));
+      const static bool use_relative_errors = runOptions->hasKey("relative_errors");
       static std::vector<double> relerr(NNUC+1, -1.0);
       static std::vector<std::vector<double>> corr(NNUC+1, std::vector<double>(NNUC+1, 0.0));
-      if (use_fudged_correlations && first)
+
+      if (first)
       {
-        for (int ie = 1; ie < NNUC; ie++) corr.at(ie).at(ie) = 1.;
-        std::vector<str> elements =  runOptions->getValue< std::vector<str> >("elements");
-        std::vector<std::vector<double>> tmp_corr = runOptions->getValue< std::vector<std::vector<double>> >("correlation_matrix");
-        std::vector<double> tmp_relerr;
+        // Init abundance map and allocate arrays in result
+        result.set_abund_map(BEreq::get_abund_map_AlterBBN());
+        result.init_arr_size(NNUC);
 
-        unsigned int nelements = elements.size();
-
-        // Check if the size of the list of elements and the size of the correlation matrix agree
-        if (nelements != tmp_corr.size())
+        // Work out which isotopes have been requested in the yaml file
+        const std::vector<str>& v = Downstream::subcaps->getNames();
+        result.set_active_isotopes(std::set<str>(v.begin(), v.end()));
+        if (result.get_active_isotopes().empty())
         {
-          std::ostringstream err;
-          err << "The length of the list \'elements\' and the size of the correlation matrix \'correlation_matrix\' do not agree";
-          CosmoBit_error().raise(LOCAL_INFO, err.str());
+          str err = "No relevant sub-capabilities found for compute_BBN_abundances.  Please specify elements to\n"
+                    "compute abundances for in the ObsLikes section of your yaml file as in e.g.\n"
+                    "  sub_capabilities: [He4, D, Li7]";
+          CosmoBit_error().raise(LOCAL_INFO, err);
         }
 
-        // If the relative errors are also given, then do also a check if the length of the list is correct and if the entries are positive.
-        if (use_relative_errors)
+        // Process user-defined correlations (if provided)
+        if (use_fudged_correlations)
         {
-          tmp_relerr = runOptions->getValue< std::vector<double> >("relative_errors");
-          if (nelements != tmp_relerr.size())
-          {
-            std::ostringstream err;
-            err << "The length of the list \'elements\' and the length of \'relative_errors\' do not agree";
-            CosmoBit_error().raise(LOCAL_INFO, err.str());
-          }
-          for (std::vector<double>::iterator it = tmp_relerr.begin(); it != tmp_relerr.end(); it++)
-          {
-            if (*it <= 0.0)
-            {
-              std::ostringstream err;
-              err << "One entry for the relative error is not positive";
-              CosmoBit_error().raise(LOCAL_INFO, err.str());
-            }
-          }
+          for (int ie = 1; ie < NNUC; ie++) corr.at(ie).at(ie) = 1.;
+          const std::map<std::string, int>& abund_map = result.get_abund_map();
+          populate_correlation_matrix(abund_map, corr, relerr, use_relative_errors, *runOptions);
         }
 
-        // Check if the correlation matrix is symmetric
-        for (std::vector<std::vector<double>>::iterator it = tmp_corr.begin(); it != tmp_corr.end(); it++)
-        {
-          if (it->size() != nelements)
-          {
-            std::ostringstream err;
-            err << "The correlation matrix is not a square matrix";
-            CosmoBit_error().raise(LOCAL_INFO, err.str());
-          }
-        }
-
-        // Check if the entries in the correlation matrix are reasonable
-        for (unsigned int ie=0; ie<nelements; ie++)
-        {
-          //Check if the diagonal entries are equal to 1.
-          if (std::abs(tmp_corr.at(ie).at(ie) - 1.) > 1e-6)
-          {
-            std::ostringstream err;
-            err << "Not all diagonal elements of the correlation matirx are 1.";
-            CosmoBit_error().raise(LOCAL_INFO, err.str());
-          }
-          for (unsigned int je=0; je<=ie; je++)
-          {
-            //Check for symmetry
-            if (std::abs(tmp_corr.at(ie).at(je) - tmp_corr.at(je).at(ie)) > 1e-6)
-            {
-              std::ostringstream err;
-              err << "The correlation matrix is not symmetric";
-              CosmoBit_error().raise(LOCAL_INFO, err.str());
-            }
-            // Check if the off-diagonal elements are between -1 and 1.
-            if (std::abs(tmp_corr.at(ie).at(je)) >= 1. && (ie != je))
-            {
-              std::ostringstream err;
-              err << "The off-diagonal elements of the correlation matrix are not sensible (abs(..) > 1)";
-              CosmoBit_error().raise(LOCAL_INFO, err.str());
-            }
-          }
-        }
-
-        // Check if the elements which are passed via runOptions are actually known.
-        std::map<std::string, int> abund_map = result.get_abund_map();
-        for (std::vector<str>::iterator it = elements.begin(); it != elements.end(); it++)
-        {
-          if (abund_map.count(*it) == 0)
-          {
-            std::ostringstream err;
-            err << "I do not recognise the element \'" << *it << "\'";
-            CosmoBit_error().raise(LOCAL_INFO, err.str());
-          }
-        }
-
-        // Populate the correlation matrix
-        for (std::vector<str>::iterator it1 = elements.begin(); it1 != elements.end(); it1++)
-        {
-          int ie  =  abund_map[*it1];
-          int i = std::distance( elements.begin(), it1 );
-          // If the relative errors are given fill it with the respective values (-1.0 refers to no errors given).
-          if (use_relative_errors) relerr.at(ie) = tmp_relerr.at(i);
-          for (std::vector<str>::iterator it2 = elements.begin(); it2 != elements.end(); it2++)
-          {
-            int je  =  abund_map[*it2];
-            int j = std::distance( elements.begin(), it2 );
-            corr.at(ie).at(je) = tmp_corr.at(i).at(j);
-          }
-        }
-
+        // Here for a good time, not a long time
         first = false;
       }
 
-      // fill AlterBBN_input map with the parameters for the model in consideration
+      // Fill AlterBBN_input map with the parameters for the model in consideration
       map_str_dbl AlterBBN_input = *Dep::AlterBBN_Input;
 
-      // call AlterBBN routine to calculate element abundances (& errors -- depending
+      // Call AlterBBN routine to calculate element abundances (& errors -- depending
       // on error calculation settings made with parameters 'err' and failsafe set in
       // 'AlterBBN_Input')
-      int nucl_err = BEreq::call_nucl_err(AlterBBN_input, &ratioH[0], &cov_ratioH[0]);
-
-      // TODO: replace .at() by [] to speed up
-      std::vector<double> err_ratio(NNUC+1,0);
-      if (use_fudged_correlations)
-      {
-        for (int ie=1;ie<=NNUC;ie++)
-        {
-          if (use_relative_errors && (relerr.at(ie) > 0.0))
-          {
-            err_ratio.at(ie) =  relerr.at(ie) * ratioH[ie];
-          }
-          else
-          {
-            // get every diagonal element (row and line 0not filled)
-            err_ratio.at(ie) = sqrt(cov_ratioH[ie*(NNUC+1)+ie]);
-          }
-        }
-      }
-
-      // fill abundances and covariance matrix of BBN_container with results from AlterBBN
-      if (nucl_err)
-      {
-        for(int ie=1;ie<=NNUC;ie++)
-        {
-          result.set_BBN_abund(ie, ratioH[ie]);
-          for(int je=1;je<=NNUC;je++)
-          {
-            if (use_fudged_correlations)
-              result.set_BBN_covmat(ie, je, corr.at(ie).at(je) * err_ratio.at(ie) * err_ratio.at(je));
-            else
-              result.set_BBN_covmat(ie, je, cov_ratioH[ie*(NNUC+1)+je]);
-          }
-        }
-      }
-      else
+      if (not BEreq::call_nucl_err(AlterBBN_input, &ratioH[0], &cov_ratioH[0]))
       {
         std::ostringstream err;
         err << "AlterBBN calculation for primordial element abundances failed. Invalidating Point.";
         invalid_point().raise(err.str());
       }
+
+      // Fill relative errors
+      std::vector<double> err_ratio(NNUC+1,0);
+      if (use_fudged_correlations) for (const int& ie : result.get_active_isotope_indices())
+      {
+        if (use_relative_errors && (relerr.at(ie) > 0.0))
+          err_ratio.at(ie) =  relerr.at(ie) * ratioH[ie];
+        else
+          // get every diagonal element (row and line 0 is not filled)
+          err_ratio.at(ie) = sqrt(cov_ratioH[ie*(NNUC+1)+ie]);
+      }
+
+      // Fill abundances and covariance matrix of BBN_container with requested results from AlterBBN
+      for (const int& ie : result.get_active_isotope_indices())
+      {
+        result.set_BBN_abund(ie, ratioH[ie]);
+        for (const int& je : result.get_active_isotope_indices())
+        {
+          if (use_fudged_correlations)
+            result.set_BBN_covmat(ie, je, corr.at(ie).at(je) * err_ratio.at(ie) * err_ratio.at(je));
+          else
+            result.set_BBN_covmat(ie, je, cov_ratioH[ie*(NNUC+1)+je]);
+        }
+      }
     }
 
-    void get_Helium_abundance(std::vector<double> &result)
-    {
-      using namespace Pipes::get_Helium_abundance;
-
-      CosmoBit::BBN_container BBN_res = *Dep::BBN_abundances;
-      std::map<std::string, int> abund_map = BBN_res.get_abund_map();
-
-      result.clear();
-      result.push_back(BBN_res.get_BBN_abund(abund_map["Yp"]));
-      result.push_back(sqrt(BBN_res.get_BBN_covmat(abund_map["Yp"], abund_map["Yp"])));
-
-      //std::cout << "Helium Abundance from AlterBBN: " << result.at(0) << " +/- " << result.at(1) << std::endl;
-      logger() << "Helium Abundance from AlterBBN: " << result.at(0) << " +/- " << result.at(1) << EOM;
-    }
-
-    void get_Helium3_abundance(std::vector<double> &result)
-    {
-      using namespace Pipes::get_Helium3_abundance;
-
-      CosmoBit::BBN_container BBN_res = *Dep::BBN_abundances;
-      std::map<std::string, int> abund_map = BBN_res.get_abund_map();
-
-      result.clear();
-      result.push_back(BBN_res.get_BBN_abund(abund_map["He3"]));
-      result.push_back(sqrt(BBN_res.get_BBN_covmat(abund_map["He3"], abund_map["He3"])));
-
-      logger() << "Helium 3 Abundance from AlterBBN: " << result.at(0) << " +/- " << result.at(1) << EOM;
-    }
-
-    void get_Deuterium_abundance(std::vector<double> &result)
-    {
-      using namespace Pipes::get_Deuterium_abundance;
-
-      CosmoBit::BBN_container BBN_res = *Dep::BBN_abundances;
-      std::map<std::string, int> abund_map = BBN_res.get_abund_map();
-
-      result.clear();
-      result.push_back(BBN_res.get_BBN_abund(abund_map["D"]));
-      result.push_back(sqrt(BBN_res.get_BBN_covmat(abund_map["D"], abund_map["D"])));
-
-      logger() << "Deuterium Abundance from AlterBBN: " << result.at(0) << " +/- " << result.at(1) << EOM;
-    }
-
-    void get_Lithium7_abundance(std::vector<double> &result)
-    {
-      using namespace Pipes::get_Lithium7_abundance;
-
-      CosmoBit::BBN_container BBN_res = *Dep::BBN_abundances;
-      std::map<std::string, int> abund_map = BBN_res.get_abund_map();
-
-      result.clear();
-      result.push_back(BBN_res.get_BBN_abund(abund_map["Li7"]));
-      result.push_back(sqrt(BBN_res.get_BBN_covmat(abund_map["Li7"], abund_map["Li7"])));
-
-      logger() << "Lithium Abundance from AlterBBN: " << result.at(0) << " +/- " << result.at(1) << EOM;
-    }
-
-    void get_Beryllium7_abundance(std::vector<double> &result)
-    {
-      using namespace Pipes::get_Beryllium7_abundance;
-
-      CosmoBit::BBN_container BBN_res = *Dep::BBN_abundances;
-      std::map<std::string, int> abund_map = BBN_res.get_abund_map();
-
-      result.clear();
-      result.push_back(BBN_res.get_BBN_abund(abund_map["Be7"]));
-      result.push_back(sqrt(BBN_res.get_BBN_covmat(abund_map["Be7"], abund_map["Be7"])));
-
-      logger() << "Beryllium Abundance from AlterBBN: " << result.at(0) << " +/- " << result.at(1) << EOM;
-    }
-
+    /// Compute the overall log-likelihood from BBN
     void compute_BBN_LogLike(double &result)
     {
       using namespace Pipes::compute_BBN_LogLike;
@@ -1748,43 +1635,78 @@ namespace Gambit
       int ii = 0;
       int ie,je,s;
 
-      CosmoBit::BBN_container BBN_res = *Dep::BBN_abundances; // fill BBN_container with abundance results from AlterBBN
-      std::map<std::string, int> abund_map = BBN_res.get_abund_map();
+      BBN_container BBN_res = *Dep::BBN_abundances; // fill BBN_container with abundance results from AlterBBN
+      const std::map<std::string, int>& abund_map = BBN_res.get_abund_map();
 
-      const str filename = runOptions->getValue<std::string>("DataFile"); // read in BBN data file
-      const str path_to_file = GAMBIT_DIR "/CosmoBit/data/BBN/" + runOptions->getValue<std::string>("DataFile");
-      static ASCIIdictReader data(path_to_file);
-      static bool read_data = false;
+      static bool first = true;
+      const static str filename = runOptions->getValueOrDef<std::string>("default.dat", "DataFile");
+      const static str path_to_file = GAMBIT_DIR "/CosmoBit/data/BBN/" + filename;
       static std::map<std::string,std::vector<double>> dict;
       static int nobs;
 
-      if(read_data == false)
+      if (first)
       {
-        logger() << "BBN data read from file '"<<filename<<"'." << EOM;
-        nobs = data.nrow();
-        dict = data.get_dict();
-        if(data.duplicated_keys()==true) // check for double key entries in data file
+        // Read the data
+        const ASCIIdictReader data(path_to_file);
+        logger() << "BBN data read from file '" << filename << "'." << EOM;
+
+        // Execute initialisation checks on the contents of the datafile
+        std::map<std::string,std::vector<double>> td = data.get_dict();
+        const str err = "Double entry for one element in BBN data file '" + filename + "'. \nYou can only enter one measurement per element.";
+        if (data.duplicated_keys()) CosmoBit_error().raise(LOCAL_INFO, err);
+        std::vector<sspair> doppelgangers = {{"Yp", "He4"}, {"D","H2"}};
+        for (const sspair& x : doppelgangers)
         {
-          std::ostringstream err;
-          err << "Double entry for one element in BBN data file '"<< filename<<"'. \nYou can only enter one measurement per element.";
-          CosmoBit_error().raise(LOCAL_INFO, err.str());
+          if (td.count(x.first) == 0 and td.count(x.second) == 0)
+          {
+            CosmoBit_error().raise(LOCAL_INFO, err + "\nNote that "+x.first+" and "+x.second+" are the same species!");
+          }
         }
-        if((dict.count("Yp")>0 and dict.count("He4")>0) or (dict.count("D")>0 and dict.count("H2")>0))
+
+        // Check that all isotopes requested in the yaml file exist in the datafile, and keep only the data needed
+        const std::vector<str>& v = Downstream::subcaps->getNames();
+        for (const str& isotope : std::set<str>(v.begin(), v.end()))
         {
-          std::ostringstream err;
-          err << "Double entry for 'Yp' and 'He4' or 'D' and 'H2' in BBN data file '"<< filename<<"'. \nYou can only enter one measurement per element ('Yp' OR 'He4', 'D' OR 'H2').";
-          CosmoBit_error().raise(LOCAL_INFO, err.str());
+          auto it = td.find(isotope);
+          // Check if the isotope has been listed as a subcapability
+          if (it == td.end())
+          {
+            str alt_name = "";
+            for (const sspair& pair : doppelgangers)
+            {
+              if (isotope == pair.first) alt_name = pair.second;
+              if (isotope == pair.second) alt_name = pair.first;
+            }
+            // Check if the isotope's doppelganger has been listed as a subcapability
+            if (alt_name != "") it = td.find(alt_name);
+          }
+          // Throw an error if the isotope is not found in the datafile
+          if (it == td.end()) CosmoBit_error().raise(LOCAL_INFO, "Did not find observations for "+isotope+" in "+filename+".");
+          // Otherwise, save the corresponding dictionary entry
+          else dict[isotope] = it->second;
         }
-        read_data = true;
+
+        // Save the number of observations to include in the likelihood.
+        nobs = dict.size();
+        if (nobs == 0)
+        {
+          str err = "No relevant sub-capabilities found for compute_BBN_LogLike.  Please specify elements to\n"
+                    "compute likelihoods from in the ObsLikes section of your yaml file as in e.g.\n"
+                    "  sub_capabilities: [He4, D]";
+          CosmoBit_error().raise(LOCAL_INFO, err);
+        }
+
+        // Init out.
+        first = false;
       }
 
-      // init vectors with observations, predictions and covmat
+      // Init vectors with observations, predictions and covmat
       double prediction[nobs],observed[nobs],sigmaobs[nobs],translate[nobs];
       gsl_matrix *cov = gsl_matrix_alloc(nobs, nobs);
       gsl_matrix *invcov = gsl_matrix_alloc(nobs, nobs);
       gsl_permutation *p = gsl_permutation_alloc(nobs);
 
-      // iterate through observation dictionary to fill observed, sigmaobs and prediction arrays
+      // Iterate through observation dictionary to fill observed, sigmaobs and prediction arrays
       for(std::map<std::string,std::vector<double>>::iterator iter = dict.begin(); iter != dict.end(); ++iter)
       {
         std::string key = iter->first; // iter = ["element key", [mean, sigma]]
@@ -1794,14 +1716,14 @@ namespace Gambit
           err << "Unknown element '"<< key <<"' in BBN data file '"<< filename<<"'. \nYou can only enter 'Yp' or 'He4', 'D' or 'H2', 'He3', 'Li7'.";
           CosmoBit_error().raise(LOCAL_INFO, err.str());
         }
-        translate[ii]=abund_map[key]; // to order observed and predicted abundances consistently
+        translate[ii]=abund_map.at(key); // to order observed and predicted abundances consistently
         observed[ii]=iter->second[0];
         sigmaobs[ii]=iter->second[1];
-        prediction[ii]= BBN_res.get_BBN_abund(abund_map[key]);
+        prediction[ii]= BBN_res.get_BBN_abund(key);
         ii++;
       }
 
-      // fill covmat
+      // Fill the covariance matrix
       for(ie=0;ie<nobs;ie++) {for(je=0;je<nobs;je++) gsl_matrix_set(cov, ie, je,pow(sigmaobs[ie],2.)*(ie==je)+BBN_res.get_BBN_covmat(translate[ie], translate[je]));}
 
       // Compute the LU decomposition and inverse of cov mat
@@ -1813,10 +1735,8 @@ namespace Gambit
 
       // compute chi2
       for(ie=0;ie<nobs;ie++) for(je=0;je<nobs;je++) chi2+=(prediction[ie]-observed[ie])*gsl_matrix_get(invcov,ie,je)*(prediction[je]-observed[je]);
-      //std::cout << "    BBN Like: chi2 = " << chi2 << "  factor " <<  log(pow(2*pi,nobs)*det_cov) << "  det cov = " << det_cov << std::endl;
       result = -0.5*(chi2 + log(pow(2*pi,nobs)*det_cov));
 
-      //std::cout << "    BBN LogLike computed to be: " << result << std::endl;
       logger() << "BBN LogLike computed to be: " << result << EOM;
 
       gsl_matrix_free(cov);
@@ -1824,9 +1744,9 @@ namespace Gambit
       gsl_permutation_free(p);
     }
 
-/// -----------
-/// Background Likelihoods (SNe + H0 + BAO + Sigma8)
-/// -----------
+    /// -----------
+    /// Background Likelihoods (SNe + H0 + BAO + Sigma8)
+    /// -----------
 
     void compute_H0_LogLike(double &result)
     {
@@ -1895,32 +1815,45 @@ namespace Gambit
     /// an instance of the classy class Class() (Yep, I know...)
     /// which can be handed over to MontePython, or just used to compute
     /// some observables.
-    void set_classy_input(CosmoBit::Classy_input& result)
+    void set_classy_input(Classy_input& result)
     {
       using namespace Pipes::set_classy_input;
-
       result = *Dep::classy_primordial_parameters;
+      // Make sure nobody is trying to use MP downstream (prevents segfaults).
+      if (Downstream::neededFor("MP_LogLikes"))
+      {
+        std::ostringstream ss;
+        ss << "Sorry, you cannot use the function CosmoBit::set_classy_input with MontePython." << endl
+           << "Please modify the Rules section of your YAML file to instead point to the function" << endl
+           << "CosmoBit::set_classy_input_with_MPLike. An appropriate rule would look like this:" << endl << endl
+           << "  - capability: classy_final_input" << endl
+           << "    function: set_classy_input_with_MPLike" << endl;
+        CosmoBit_error().raise(LOCAL_INFO, ss.str());
+      }
     }
 
     /// Initialises the container within CosmoBit from classy, but designed specifically
     /// to be used when MontePython is in use. This will ensure additional outputs are
     /// computed by classy CLASS to be passed to MontePython.
-    void set_classy_input_with_MPLike(CosmoBit::Classy_input& result)
+    void set_classy_input_with_MPLike(Classy_input& result)
     {
       using namespace Pipes::set_classy_input_with_MPLike;
-
-      // get extra cosmo_arguments from MP (gives a dictionary with output values that need
-      // to be set for the class run)
-      static pybind11::dict MP_cosmo_arguments = *Dep::cosmo_args_from_MPLike;
-      logger() << LogTags::debug << "Extra cosmo_arguments needed from MP Likelihoods: ";
-      logger() << pybind11::repr(MP_cosmo_arguments) << EOM;
-
       result = *Dep::classy_primordial_parameters;
 
-      // add the arguments from Mp_cosmo_arguments which are not yet in cosmo_input_dict to it
-      // also takes care of merging the "output" key values
-      result.merge_input_dicts(MP_cosmo_arguments); // TODO (JR) use merge_pybind_dict routine instead -> don't need to duplicate code
-      //merge_pybind_dicts(result, MP_cosmo_arguments);
+      // Only get info from MP if something actually needs it downstream
+      if (Downstream::neededFor("MP_LogLikes"))
+      {
+        // get extra cosmo_arguments from MP (gives a dictionary with output values that need
+        // to be set for the class run)
+        static pybind11::dict MP_cosmo_arguments = *Dep::cosmo_args_from_MPLike;
+        logger() << LogTags::debug << "Extra cosmo_arguments needed from MP Likelihoods: ";
+        logger() << pybind11::repr(MP_cosmo_arguments) << EOM;
+
+        // add the arguments from Mp_cosmo_arguments which are not yet in cosmo_input_dict to it
+        // also takes care of merging the "output" key values
+        result.merge_input_dicts(MP_cosmo_arguments); // TODO (JR) use merge_pybind_dict routine instead -> don't need to duplicate code
+        //merge_pybind_dicts(result, MP_cosmo_arguments);
+      }
     }
 
 
@@ -2194,76 +2127,76 @@ namespace Gambit
       // Nothing to do here.
     }
 
-    /// Set the names of all experiments in use for scan
-    /// basically reads in the runOptions 'Likelihoods' and/or 'Observables' of capability MP_experiment_names
-    void set_MP_experiment_names(map_str_map_str_str & result)
+    /// Create the MontePython data and likelihood objects, determining which experiments are in use in the process
+    void create_MP_objects(MPLike_objects_container &result)
     {
-      using namespace Pipes::set_MP_experiment_names;
-
+      using namespace Pipes::create_MP_objects;
+      static map_str_pyobj likelihoods;
       static bool first = true;
+
+      // Determine which likelihoods to compute and initialise the relevant MontePython objects.
       if (first)
       {
-        // get list of likelihoods implemented in MP
+        // Set up some references for easier reading
+        auto& data = std::get<0>(result);
+        auto& experiments = std::get<1>(result);
+        auto& likelihoods = std::get<2>(result);
+
+        // Get list of likelihoods implemented in MP
         std::vector<str> avail_likes = BEreq::get_MP_available_likelihoods();
 
-        // read in requested likelihoods
-        YAML::Node MP_Likelihoods;
-        if (runOptions->hasKey("Likelihoods")) MP_Likelihoods = runOptions->getValue<YAML::Node>("Likelihoods");
-
-        // create string -> string map mapping the likelihood name to the '.data' file that will
-        // be used to initialise likelihood object in MP. If you want to use the default one simply
-        // set the the data-file string to "default"
-        for (auto it=MP_Likelihoods.begin(); it != MP_Likelihoods.end(); it++)
+        // Get the list of the experiments and datafiles given in the YAML file as sub-capabilities.
+        // Using the default datafile can be achieved by leaving the datafile out, or settting it to "default".
+        YAML::Node subcaps = Downstream::subcaps->getNode();
+        std::vector<YAML::Node> empties;
+        for (const auto& x : subcaps) if (x.second.IsNull()) empties.push_back(x.first);
+        for (const auto& x : empties) subcaps[x] = "default";
+        if (subcaps.IsNull())
         {
-          std::string likelihood = it->first.as<std::string>();
-          std::string data_file = it->second.as<std::string>();
-
-          // check if requested likelihood is contained in vector of implemented likelihoods
-          // if not throw error & list all available options
-          if (std::find(avail_likes.begin(), avail_likes.end(), likelihood) == avail_likes.end())
+          if (Downstream::neededFor("MP_LogLikes"))
           {
-
-            str errmsg = "Likelihood '" + likelihood + "' is not implemented in MontePython. Check for typos or implement it.\nLikelihoods currently available are:\n";
-            for(auto const& value: avail_likes)
-            {
-              errmsg += ("\t"+value+"\n");
-            }
-            CosmoBit_error().raise(LOCAL_INFO,errmsg);
-          }
-          else
-          {
-            result["Likelihoods"][likelihood] = data_file;
-            logger() << LogTags::debug << "Read MontePythonLike option "<< likelihood << ", using data file " << data_file<< EOM;
+            std::ostringstream ss;
+            ss << "No sub-capabilities found when attempting to create MontePython objects." << endl
+               << "This can happen because you either forgot to choose any experiments," << endl
+               << "or because you used incorrect syntax to choose them as sub-capabilities." << endl
+               << "You can do this in the relevant entry of the ObsLikes section of your YAML file," << endl
+               << "by setting sub_capabilities as a scalar (if you only want one experiment), e.g." << endl
+               << "    sub_capabilities: bao_smallz_2014" << endl
+               << "or as a sequence (if you don't need to specify data files), e.g." << endl
+               << "    sub_capabilities:" << endl
+               << "      - bao_smallz_2014" << endl
+               << "      - Pantheon" << endl
+               << "or even as a map (if you want to specify data files), e.g." << endl
+               << "    sub_capabilities:" << endl
+               << "      bao_smallz_2014: default" << endl
+               << "      Pantheon: default" << endl;
+            CosmoBit_error().raise(LOCAL_INFO, ss.str());
           }
         }
+        else experiments = subcaps.as<map_str_str>();
 
-        // & Observables
-        YAML::Node MP_Observables;
-        if (runOptions->hasKey("Observables")) MP_Observables = runOptions->getValue<YAML::Node>("Observables");
-
-        for (auto it=MP_Observables.begin(); it != MP_Observables.end(); it++)
+        // Check that all the requested likelihoods can actually be provided by MP
+        for (const auto& x : experiments)
         {
-          std::string obs = it->first.as<std::string>();
-          std::string data_file = it->second.as<std::string>();
-
-          // check if requested likelihood is contained in vector of implemented likelihoods
-          // if not throw error & list all available options
-          if (std::find(avail_likes.begin(), avail_likes.end(), obs) == avail_likes.end())
+          if (std::find(avail_likes.begin(), avail_likes.end(), x.first) == avail_likes.end())
           {
-
-            str errmsg = "Likelihood '" + obs + "' is not implemented in MontePython. Check for typos or implement it.\nLikelihoods currently available are:\n";
-            for(auto const& value: avail_likes)
-            {
-              errmsg += ("\t"+value+"\n");
-            }
-            CosmoBit_error().raise(LOCAL_INFO,errmsg);
+            str errmsg = "Likelihood '" + x.first + "' is not implemented in MontePython. Check for typos or implement it.\nLikelihoods currently available are:\n";
+            for (const auto& value : avail_likes) errmsg += ("\t"+value+"\n");
+            CosmoBit_error().raise(LOCAL_INFO, errmsg);
           }
-          else
-          {
-            result["Observables"][obs] = data_file;
-            logger() << LogTags::debug << "Read MontePythonLike option "<< obs << ", using data file " << data_file<< EOM;
-          }
+          logger() << LogTags::debug << "Read MontePythonLike option "<< x.first << ", using data file " << x.second << EOM;
         }
+
+        // MPLike_data_container should only be created and set once, when calculating the first point.
+        // After that it has to be kept alive since it contains a vector with the initialised MPLike Likelihood objects.
+        data = BEreq::create_MP_data_object(experiments);
+
+        // Add current parameters to data object to enable check if all nuisance parameters are
+        // scanned upon initialisation of likelihood objects
+        data.attr("mcmc_parameters") = *Dep::parameter_dict_for_MPLike;
+        likelihoods = BEreq::create_MP_likelihood_objects(data, experiments);
+
+        // It's been nice, but let's not do this again.
         first = false;
       }
     }
@@ -2275,53 +2208,8 @@ namespace Gambit
     void init_cosmo_args_from_MPLike(pybind11::dict &result)
     {
       using namespace Pipes::init_cosmo_args_from_MPLike;
-
-      // CosmoBit::MPLike_data_container should only be created once when calculating the first point.
-      // After that is has to be kept alive since it contains a vector with the initialised MPLike
-      // Likelihood objects.
-      static bool first_run = true;
-      static pybind11::object data;
-      if(first_run)
-      {
-        // This is a map with the following structure:
-        // { Likelihoods: {likelihood1: mode, likelihood2: mode...}
-        //   Observables: {observable1: mode, observable2: mode...} }
-        map_str_map_str_str experiment_names = *Dep::MP_experiment_names;
-
-        // We need to pull the names of all Likelihoods AND observables
-        // to initialise the data structures in MontePython
-        map_str_str experiments;
-
-        if (experiment_names.find("Likelihoods") != experiment_names.end())
-        {
-          for (auto it = experiment_names.at("Likelihoods").begin();
-                    it != experiment_names.at("Likelihoods").end(); ++it)
-          {
-            // Add each experiment : datafile pair to the map_str_str.
-            experiments[it->first] = it->second;
-          }
-        }
-        if (experiment_names.find("Observables") != experiment_names.end())
-        {
-          for (auto it = experiment_names.at("Observables").begin();
-                    it != experiment_names.at("Observables").end(); ++it)
-          {
-            // Add each experiment : datafile pair to the map_str_str.
-            experiments[it->first] = it->second;
-          }
-        }
-
-        logger() << LogTags::info << "(init_cosmo_args_from_MPLike) List of experiments: " << experiments << EOM;
-        data = BEreq::create_MP_data_object(experiments);
-        // add current parameters to data object to enable check if all nuisance parameters are
-        // scanned upon initialisation of likelihood objects
-        data.attr("mcmc_parameters") = *Dep::parameter_dict_for_MPLike;
-        map_str_pyobj likelihoods = BEreq::create_MP_likelihood_objects(data, experiments);
-        first_run = false;
-      }
-
       result.clear();
-      pybind11::dict tmp_dict = data.attr("cosmo_arguments");
+      pybind11::dict tmp_dict = std::get<0>(*Dep::MP_objects).attr("cosmo_arguments");
       // Stringify all values in the dictionary and strip off leading and trailing whitespaces
       for (auto it: tmp_dict)
       {
@@ -2333,159 +2221,58 @@ namespace Gambit
     }
 
     /// Computes lnL for each experiment initialised in MontePython
-    void calc_MP_LogLikes(CosmoBit::MPLike_result_container & result)
+    void compute_MP_LogLikes(map_str_dbl & result)
     {
-      using namespace Pipes::calc_MP_LogLikes;
-      using namespace pybind11::literals;
+      using namespace Pipes::compute_MP_LogLikes;
+      static pybind11::object data = std::get<0>(*Dep::MP_objects);
+      static const map_str_str& experiments = std::get<1>(*Dep::MP_objects);
+      static const map_str_pyobj& likelihoods = std::get<2>(*Dep::MP_objects);
+      static const MPLike_data_container mplike_cont(data, likelihoods);
 
-      // A list of the experiments initialised in the YAML file
-      // This is a map with the following structure:
-      // { Likelihoods: {likelihood1: mode, likelihood2: mode...}
-      //   Observables: {observable1: mode, observable2: mode...} }
-      map_str_map_str_str experiment_names = *Dep::MP_experiment_names;
-
-      // We need to pull the names of all Likelihoods AND observables
-      // to initialise the data structures in MontePython
-      map_str_str experiments;
-
-      if (experiment_names.find("Likelihoods") != experiment_names.end())
-      {
-        for (auto it = experiment_names.at("Likelihoods").begin();
-                  it != experiment_names.at("Likelihoods").end(); ++it)
-        {
-          // Add each experiment : datafile pair to the map_str_str.
-          experiments[it->first] = it->second;
-        }
-      }
-      if (experiment_names.find("Observables") != experiment_names.end())
-      {
-        for (auto it = experiment_names.at("Observables").begin();
-                  it != experiment_names.at("Observables").end(); ++it)
-        {
-          // Add each experiment : datafile pair to the map_str_str.
-          experiments[it->first] = it->second;
-        }
-      }
-
-      // CosmoBit::MPLike_data_container should only be created once when calculating the first point.
-      // After that is has to be kept alive since it contains a vector with the initialised MPLike
-      // Likelihood objects.
-      pybind11::object data;
-      map_str_pyobj likelihoods;
-      static bool first_run = true;
-      if(first_run)
-      {
-        data = BEreq::create_MP_data_object(experiments);
-        // add current parameters to data object to enable check if all nuisance parameters are
-        // scanned upon initialisation of likelihood objects
-        data.attr("mcmc_parameters") = *Dep::parameter_dict_for_MPLike;
-        likelihoods = BEreq::create_MP_likelihood_objects(data, experiments);
-        first_run = false;
-      }
-
-      static const CosmoBit::MPLike_data_container mplike_cont(data, likelihoods);
-
-      // pass current values of nuisance parameters to data.mcmc_parameters dictionary for likelihood computation in MP
+      // Pass current values of nuisance parameters to data.mcmc_parameters dictionary for likelihood computation in MP
       mplike_cont.data.attr("mcmc_parameters") = *Dep::parameter_dict_for_MPLike;
 
       // Create instance of classy class Class
       pybind11::object cosmo = BEreq::get_classy_cosmo_object();
 
-      // Loop through the list of experiments, and query the lnL from the
-      // MontePython backend
-      // Only if the experiment is requested as a Likelihood.
-      // Separate loop below for observables.
-      if (experiment_names.find("Likelihoods") != experiment_names.end())
+      // Loop through the list of experiments, and query the lnL from the MontePython backend.
+      for (sspair it : experiments)
       {
-        logger() << LogTags::debug << "(calc_MP_LogLikes): Likelihoods\n\n";
-        for (auto const& it : experiment_names.at("Likelihoods"))
-        {
-          // likelihood names are keys of experiment map (str, str map mapping likelihood name to .data file)
-          std::string like_name = it.first;
-          double logLike = BEreq::get_MP_loglike(mplike_cont, cosmo, like_name);
-          result.add_logLike(like_name, logLike);
-          logger() << "name: " << it.first << "\tvalue: " << logLike << "\n";
-          //std::cout << "name: " << it.first << "\tvalue: " << logLike << std::endl;
-        }
+        // Likelihood names are keys of experiment map (str, str map mapping likelihood name to .data file)
+        double logLike = BEreq::get_MP_loglike(mplike_cont, cosmo, it.first);
+        result[it.first] = logLike;
+        logger() << "(compute_MP_LogLikes):  name: " << it.first << "\tvalue: " << logLike << EOM;
+        //std::cout << "(compute_MP_LogLikes):  name: " << it.first << "\tvalue: "<< logLike << std::endl;
       }
-
-      // Loop through the list of experiments, and query the lnL from the
-      // MontePython backend.
-      // ONLY if the experiment is requested as an observable.
-      if (experiment_names.find("Observables") != experiment_names.end())
-      {
-        logger() << LogTags::debug << "(calc_MP_LogLikes): Observables\n\n";
-        for (auto const& it : experiment_names.at("Observables"))
-        {
-          // likelihood names are keys of experiment map (str, str map mapping likelihood name to .data file)
-          std::string like_name = it.first;
-          double logLike = BEreq::get_MP_loglike(mplike_cont, cosmo, like_name);
-          result.add_obs(like_name, logLike);
-          logger() << "name: " << it.first << "\tvalue: " << logLike << "\n";
-          //std::cout << "name: " << it.first << "\tvalue: " << logLike << std::endl;
-        }
-        logger() << EOM;
-      }
-
     }
 
     /// Computes the combined lnL from the set of experiments
     /// given to MontePython.
-    void calc_MP_combined_LogLike(double& result)
+    void compute_MP_combined_LogLike(double& result)
     {
-      using namespace Pipes::calc_MP_combined_LogLike;
+      using namespace Pipes::compute_MP_combined_LogLike;
 
-      // get string double map from MPlike result container mapping
-      // experiment name to LogLike value for Likelihoods included
-      // into the scan
-      CosmoBit::MPLike_result_container MPLike_results = *Dep::calc_MP_LogLikes;
-      map_str_dbl MP_lnLs = MPLike_results.get_logLike_results();
+      // Get likelihoods computed by MontePython
+      map_str_dbl MP_lnLs = *Dep::MP_LogLikes;
 
-      // Iterate through map of doubles and return one big fat double.
+      // Retrieve the sub-capabilities requested in the YAML file
+      std::vector<str> subcaps = Downstream::subcaps->getNames();
+
+      // Iterate through map of doubles and return one big fat double,
+      // selecting only those entries specified as sub-capabilities.
       double lnL = 0.;
-
-      logger() << LogTags::debug << "(calc_MP_combined_LogLike):\n\n";
+      logger() << LogTags::debug << "(compute_MP_combined_LogLike):";
       for (const auto &p : MP_lnLs)
       {
-          logger()  << "name: "  << p.first << "\tvalue: " << p.second << "\n";
-        lnL += p.second;
+        if (std::find(subcaps.begin(), subcaps.end(), p.first) != subcaps.end())
+        {
+          logger() << endl << "  name: "  << p.first << "\tvalue: " << p.second;
+          lnL += p.second;
+        }
       }
       logger() << EOM;
-
       result = lnL;
     }
-    /// Computes lnL for each experiment initialised in MontePython
-    /// but DOES NOT add it to the compound lnL in GAMBIT.
-    /// This should be used when one wishes to grab a Likelihood from
-    /// MontePython but does not want it to steer the scans
-    /// (e.g. for forecasting; conflicting likelihoods; etc.) -- use with caution!
-    void get_MP_LogLikes(map_str_dbl & result)
-    {
-      using namespace Pipes::get_MP_LogLikes;
-      using namespace pybind11::literals;
 
-      // get string double map from MPlike result container mapping
-      // experiment name to LogLike value for Observables included
-      // into the scan
-      CosmoBit::MPLike_result_container MPLike_results = *Dep::calc_MP_LogLikes;
-      result = MPLike_results.get_logLike_results();
-    }
-
-    /// Computes lnL for each experiment initialised in MontePython
-    /// but DOES NOT add it to the compound lnL in GAMBIT.
-    /// This should be used when one wishes to grab a Likelihood from
-    /// MontePython but does not want it to steer the scans
-    /// (e.g. for forecasting; conflicting likelihoods; etc.) -- use with caution!
-    void get_MP_Observables(map_str_dbl & result)
-    {
-      using namespace Pipes::get_MP_Observables;
-      using namespace pybind11::literals;
-
-      // get string double map from MPlike result container mapping
-      // experiment name to LogLike value for Observables included
-      // into the scan
-      CosmoBit::MPLike_result_container MPLike_results = *Dep::calc_MP_LogLikes;
-      result = MPLike_results.get_obs_results();
-    }
   }
 }

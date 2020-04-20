@@ -43,19 +43,17 @@
   (bool)                    \
   (std::vector<double>)     \
   (map_str_dbl)             \
-  (ModelParameters)         \
-
-/*(std::vector<double>)     \
-  (triplet<double>)         \
   (map_intpair_dbl)         \
-  */
+  (ModelParameters)         \
+  (triplet<double>)         \
+
 // Printable types that need to be excluded in
 // standalone builds
-#define SQL_MODULE_BACKEND_TYPES \
+#define SQL_BACKEND_TYPES   \
+  (DM_nucleon_couplings)    \
+  (Flav_KstarMuMu_obs)      \
+  (BBN_container)           \
 
-  /*(DM_nucleon_couplings)    \
-    (Flav_KstarMuMu_obs)      \
-  */
 
 namespace Gambit
 {
@@ -93,9 +91,9 @@ namespace Gambit
         ///@{ Print functions
         using BasePrinter::_print; // Tell compiler we are using some of the base class overloads of this on purpose.
         #define DECLARE_PRINT(r,data,i,elem) void _print(elem const&, const std::string&, const int, const unsigned int, const unsigned long);
-        BOOST_PP_SEQ_FOR_EACH_I(DECLARE_PRINT, , SQLITE_TYPES)
+        BOOST_PP_SEQ_FOR_EACH_I(DECLARE_PRINT, , SQL_TYPES)
         #ifndef SCANNER_STANDALONE
-          BOOST_PP_SEQ_FOR_EACH_I(DECLARE_PRINT, , SQLITE_MODULE_BACKEND_TYPES)
+          BOOST_PP_SEQ_FOR_EACH_I(DECLARE_PRINT, , SQL_BACKEND_TYPES)
         #endif
         #undef DECLARE_PRINT
         ///@}
