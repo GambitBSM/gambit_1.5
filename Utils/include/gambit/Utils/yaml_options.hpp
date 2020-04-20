@@ -235,35 +235,35 @@ namespace Gambit
 template<>
 inline int Options::getNode<int>(const YAML::Node node) const {
   try { return node.as<int>(); }
-  catch (...) { return static_cast<int>(std::stoi(node.as<std::string>())); }
+  catch (...) { return static_cast<int>(std::stod(node.as<std::string>())); }
 }
 
 /// See int specialization.
 template<>
 inline long Options::getNode<long>(const YAML::Node node) const {
   try { return node.as<long>(); }
-  catch (...) { return static_cast<long>(std::stol(node.as<std::string>())); }
+  catch (...) { return static_cast<long>(std::stod(node.as<std::string>())); }
 }
 
 /// See int specialization.
 template<>
 inline unsigned long Options::getNode<unsigned long>(const YAML::Node node) const {
   try { return node.as<unsigned long>(); }
-  catch (...) { return static_cast<unsigned long>(std::stoul(node.as<std::string>())); }
+  catch (...) { return static_cast<unsigned long>(std::stod(node.as<std::string>())); }
 }
 
 /// See int specialization.
 template<>
 inline long long Options::getNode<long long>(const YAML::Node node) const {
   try { return node.as<long long>(); }
-  catch (...) { return static_cast<long long>(std::stoll(node.as<std::string>())); }
+  catch (...) { return static_cast<long long>(std::stod(node.as<std::string>())); }
 }
 
 /// See int specialization.
 template<>
 inline unsigned long long Options::getNode<unsigned long long>(const YAML::Node node) const {
   try { return node.as<unsigned long long>(); }
-  catch (...) { return static_cast<unsigned long long>(std::stoull(node.as<std::string>())); }
+  catch (...) { return static_cast<unsigned long long>(std::stod(node.as<std::string>())); }
 }
 
 }
