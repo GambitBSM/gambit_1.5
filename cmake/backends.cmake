@@ -56,7 +56,7 @@
 #  \date 2016 Aug
 #
 #  \author Ankit Beniwal
-#  	   (ankit.beniwal@adelaide.edu.au)
+#      (ankit.beniwal@adelaide.edu.au)
 #  \date 2016 Aug
 #  \date 2017 Jun
 #  \date 2018 Aug
@@ -66,7 +66,6 @@
 #  \date 2017 Sep, Nov
 #
 #************************************************
-
 
 
 # CaptnGeneral
@@ -88,7 +87,6 @@ if(NOT ditched_${name}_${ver})
   add_extra_targets("backend" ${name} ${ver} ${dir} ${dl} clean)
   set_as_default_version("backend" ${name} ${ver})
 endif()
-
 
 
 # DarkSUSY
