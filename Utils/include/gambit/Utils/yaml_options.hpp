@@ -39,37 +39,6 @@
 
 namespace Gambit
 {
-  namespace OptionsNodeWrapper {
-    /// Wrapper for reading the node for a given type. Default case does nothing.
-    /// However in sum instances we want to catch the yamlcpp exepction and try 
-    /// to interpret it, e.g. scientific notation numbers as integers.
-    template<class TYPE>
-    TYPE getNode(const YAML::Node node) { return node.as<TYPE>(); }
-
-    /// Allows to read scientific notation integer numbers. If the number does not
-    /// fit into the given type (here int) std::stoi will raise std::out_of_range
-    /// and if it can not be interpreted it will raise std::invalid_argument.
-    /// This exception is then caught by Options::getValue and handled.
-    template<>
-    inline int getNode<int>(const YAML::Node node) {
-      try { return node.as<int>(); }
-      catch (...) { return static_cast<int>(std::stoi(node.as<std::string>())); }
-    }
-
-    /// See int specialization.
-    template<>
-    inline long getNode<long>(const YAML::Node node) {
-      try { return node.as<long>(); }
-      catch (...) { return static_cast<long>(std::stol(node.as<std::string>())); }
-    }
-
-    /// See int specialization.
-    template<>
-    inline long long getNode<long long>(const YAML::Node node) {
-      try { return node.as<long long>(); }
-      catch (...) { return static_cast<long long>(std::stoll(node.as<std::string>())); }
-    }
-  }
 
   ///  A small wrapper object for 'options' nodes.
   ///  These can be extracted from the prior, observable/likelihood and rules sections of the
@@ -112,7 +81,7 @@ namespace Gambit
         {
           try
           {
-            result = OptionsNodeWrapper::getNode<TYPE>(node);
+            result = getNode<TYPE>(node);
           }
           catch(YAML::Exception& e)
           {
@@ -251,7 +220,37 @@ namespace Gambit
 
       YAML::Node options;
 
+      /// Wrapper for reading the node for a given type. Default case does nothing.
+      /// However in sum instances we want to catch the yamlcpp exepction and try
+      /// to interpret it, e.g. scientific notation numbers as integers.
+      template<class TYPE>
+      TYPE getNode(const YAML::Node node) const { return node.as<TYPE>(); }
+
   };
+
+/// Allows to read scientific notation integer numbers. If the number does not
+/// fit into the given type (here int) std::stoi will raise std::out_of_range
+/// and if it can not be interpreted it will raise std::invalid_argument.
+/// This exception is then caught by Options::getValue and handled.
+template<>
+inline int Options::getNode<int>(const YAML::Node node) const {
+  try { return node.as<int>(); }
+  catch (...) { return static_cast<int>(std::stoi(node.as<std::string>())); }
+}
+
+/// See int specialization.
+template<>
+inline long Options::getNode<long>(const YAML::Node node) const {
+  try { return node.as<long>(); }
+  catch (...) { return static_cast<long>(std::stol(node.as<std::string>())); }
+}
+
+/// See int specialization.
+template<>
+inline long long Options::getNode<long long>(const YAML::Node node) const {
+  try { return node.as<long long>(); }
+  catch (...) { return static_cast<long long>(std::stoll(node.as<std::string>())); }
+}
 
 }
 
