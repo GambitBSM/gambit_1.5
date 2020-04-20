@@ -221,7 +221,7 @@ namespace Gambit
       YAML::Node options;
 
       /// Wrapper for reading the node for a given type. Default case does nothing.
-      /// However in sum instances we want to catch the yamlcpp exepction and try
+      /// However in some instances we want to catch the yamlcpp exception and try
       /// to interpret it, e.g. scientific notation numbers as integers.
       template<class TYPE>
       TYPE getNode(const YAML::Node node) const { return node.as<TYPE>(); }
