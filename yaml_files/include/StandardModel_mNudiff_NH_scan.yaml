@@ -51,7 +51,7 @@ CKM_etabar  :  0.353
 theta12 :  0.59027 # solar angle
 theta23 :  0.86568 # atmospheric mixing angle
 theta13 :  0.15027 #
-delta13 :  0       # Dirac CP-violating phase
+delta13 :  3.75246 # Dirac CP-violating phase
 alpha1  :  0       # first Majorana CP-violating phase
 alpha2  :  0       # second CP-violating Majorana phase
 
