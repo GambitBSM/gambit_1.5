@@ -135,7 +135,7 @@ Printer:
     output_file: "Validation_Planck_TTTEEE_lowl_lowE_lensing.hdf5"
     group: "/data"
     delete_file_on_restart: false
-    buffer_length: 10
+    buffer_length: 1000
 
 #======== Scanner setup ========
 Scanner:
@@ -166,7 +166,7 @@ Scanner:
       plugin: polychord
       like:  LogLike
       nlive: 150
-      tol: 0.1
+      tol: 0.01
       fast_params: 
         - cosmo_nuisance_Planck_TTTEEE::A_cib_217
         - cosmo_nuisance_Planck_TTTEEE::A_planck
@@ -273,7 +273,7 @@ KeyValues:
 
   debug: false
 
-  default_output_path: "./runs/optimised/"
+  default_output_path: "./runs/lcdm/"
 
   rng:
     generator: ranlux48
