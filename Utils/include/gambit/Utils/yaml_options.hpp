@@ -247,9 +247,23 @@ inline long Options::getNode<long>(const YAML::Node node) const {
 
 /// See int specialization.
 template<>
+inline unsigned long Options::getNode<unsigned long>(const YAML::Node node) const {
+  try { return node.as<unsigned long>(); }
+  catch (...) { return static_cast<unsigned long>(std::stoul(node.as<std::string>())); }
+}
+
+/// See int specialization.
+template<>
 inline long long Options::getNode<long long>(const YAML::Node node) const {
   try { return node.as<long long>(); }
   catch (...) { return static_cast<long long>(std::stoll(node.as<std::string>())); }
+}
+
+/// See int specialization.
+template<>
+inline unsigned long long Options::getNode<unsigned long long>(const YAML::Node node) const {
+  try { return node.as<unsigned long long>(); }
+  catch (...) { return static_cast<unsigned long long>(std::stoull(node.as<std::string>())); }
 }
 
 }
