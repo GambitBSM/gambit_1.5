@@ -226,44 +226,68 @@ namespace Gambit
       template<class TYPE>
       TYPE getNode(const YAML::Node node) const { return node.as<TYPE>(); }
 
+      template<class TYPE>
+      TYPE safeIntegerTypeCast(const std::string& s) const {
+        const double d = std::stod(s); // First savely convert to double and perform checks before casting to an integer type.
+        if (d != std::floor(d))
+        {
+          std::ostringstream os;
+          os << "Provided value " << d << " does not represent an integer.";
+          utils_error().raise(LOCAL_INFO, os.str());
+        }
+        if (std::numeric_limits<TYPE>::max() < d or std::numeric_limits<TYPE>::min() > d)
+        {
+          std::ostringstream os;
+          os << "Provided value " << d << " does not fit into the implemented integer type.";
+          utils_error().raise(LOCAL_INFO, os.str());
+        }
+        return static_cast<TYPE>(d);
+      }
+
   };
 
 /// Allows to read scientific notation integer numbers. If the number does not
-/// fit into the given type (here int) std::stoi will raise std::out_of_range
-/// and if it can not be interpreted it will raise std::invalid_argument.
+/// fit into the given type (here int) or is not an integer, this function will raise.
 /// This exception is then caught by Options::getValue and handled.
 template<>
 inline int Options::getNode<int>(const YAML::Node node) const {
   try { return node.as<int>(); }
-  catch (...) { return static_cast<int>(std::stoi(node.as<std::string>())); }
+  catch (...) { return Options::safeIntegerTypeCast<int>(node.as<std::string>()); }
+}
+
+/// See int specialization.
+template<>
+inline unsigned int Options::getNode<unsigned int>(const YAML::Node node) const {
+  try { return node.as<unsigned int>(); }
+  catch (...) { return Options::safeIntegerTypeCast<unsigned int>(node.as<std::string>()); }
 }
 
 /// See int specialization.
 template<>
 inline long Options::getNode<long>(const YAML::Node node) const {
   try { return node.as<long>(); }
-  catch (...) { return static_cast<long>(std::stol(node.as<std::string>())); }
+  catch (...) { return Options::safeIntegerTypeCast<long>(node.as<std::string>()); }
 }
 
 /// See int specialization.
 template<>
 inline unsigned long Options::getNode<unsigned long>(const YAML::Node node) const {
   try { return node.as<unsigned long>(); }
-  catch (...) { return static_cast<unsigned long>(std::stoul(node.as<std::string>())); }
+  catch (...) { return Options::safeIntegerTypeCast<unsigned long>(node.as<std::string>()); }
 }
 
 /// See int specialization.
 template<>
 inline long long Options::getNode<long long>(const YAML::Node node) const {
   try { return node.as<long long>(); }
-  catch (...) { return static_cast<long long>(std::stoll(node.as<std::string>())); }
+  catch (...) { return Options::safeIntegerTypeCast<long long>(node.as<std::string>()); }
 }
 
 /// See int specialization.
 template<>
 inline unsigned long long Options::getNode<unsigned long long>(const YAML::Node node) const {
   try { return node.as<unsigned long long>(); }
-  catch (...) { return static_cast<unsigned long long>(std::stoull(node.as<std::string>())); }
+  catch (...) { return Options::safeIntegerTypeCast<unsigned long long>(node.as<std::string>()); }
 }
 
 }
