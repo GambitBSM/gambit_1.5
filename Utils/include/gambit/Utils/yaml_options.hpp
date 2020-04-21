@@ -226,9 +226,12 @@ namespace Gambit
       template<class TYPE>
       TYPE getNode(const YAML::Node node) const { return node.as<TYPE>(); }
 
+      /// Wrapper for integer type casts from a double in string representation.
+      /// It does first try to safely convert the string to a double and 
+      /// then performs checks before casting to an integer type.
       template<class TYPE>
       TYPE safeIntegerTypeCast(const std::string& s) const {
-        const double d = std::stod(s); // First savely convert to double and perform checks before casting to an integer type.
+        const double d = std::stod(s);
         if (d != std::floor(d))
         {
           std::ostringstream os;
