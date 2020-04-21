@@ -79,6 +79,7 @@
 #
 #************************************************
 
+
 # AlterBBN
 if("${CMAKE_C_COMPILER_ID}" STREQUAL "Intel")
   set(AlterBBN_C_FLAGS "${BACKEND_C99_FLAGS} -fast")
@@ -183,6 +184,7 @@ if(NOT ditched_${name}_${ver})
   add_extra_targets("backend" ${name} ${ver} ${dir} ${dl} clean)
 endif()
 
+
 # CaptnGeneral
 set(name "capgen")
 set(ver "1.0")
@@ -203,6 +205,7 @@ if(NOT ditched_${name}_${ver})
   set_as_default_version("backend" ${name} ${ver})
 endif()
 
+
 # DarkSUSY
 set(name "darksusy")
 set(ver "5.1.3")
@@ -221,7 +224,7 @@ if(NOT ditched_${name}_${ver})
     #COMMAND patch -b -p2 -d src < ${patch}/patchDS_OMP_src.dif
     #COMMAND patch -b -p2 -d include < ${patch}/patchDS_OMP_include.dif
     CONFIGURE_COMMAND ./configure FC=${CMAKE_Fortran_COMPILER} FCFLAGS=${BACKEND_Fortran_FLAGS} FFLAGS=${BACKEND_Fortran_FLAGS} CC=${CMAKE_C_COMPILER} CFLAGS=${BACKEND_C_FLAGS} CXX=${CMAKE_CXX_COMPILER} CXXFLAGS=${BACKEND_CXX_FLAGS}
-    BUILD_COMMAND ${MAKE_PARALLEL} dslib_shared
+    BUILD_COMMAND ${MAKE_SERIAL} dslib_shared
           COMMAND ${MAKE_PARALLEL} install_tables
     INSTALL_COMMAND ""
   )
