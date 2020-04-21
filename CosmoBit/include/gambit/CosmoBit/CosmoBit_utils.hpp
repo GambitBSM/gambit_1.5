@@ -75,7 +75,6 @@ namespace Gambit
 
     double entropy_density_SM(double T, bool T_in_eV=false);
 
-    std::vector<double> m_ncdm_classInput(std::map<std::string,double> NuMasses_SM);
   }
 }
 

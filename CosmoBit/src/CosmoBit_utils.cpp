@@ -31,28 +31,5 @@ namespace Gambit
         return (2.*pow(pi,2)/45.) * (43./11.) * pow((_kB_eV_over_K_*T),3);
     }
 
-    // TODO: comment
-    std::vector<double> m_ncdm_classInput(std::map<std::string,double> NuMasses_SM)
-    {
-      std::vector<double> numasses;
-
-      if(NuMasses_SM["mNu1"]>0.)
-        numasses.push_back(NuMasses_SM["mNu1"]);
-      if(NuMasses_SM["mNu2"]>0.)
-        numasses.push_back(NuMasses_SM["mNu2"]);
-      if(NuMasses_SM["mNu3"]>0.)
-        numasses.push_back(NuMasses_SM["mNu3"]);
-
-      // Do a quick check if the size of numasses fits the expectation.
-      // If this particular error is thrown I messed up big time.
-      if (numasses.size() != NuMasses_SM["N_ncdm"])
-      {
-        std::ostringstream err;
-        err << "Sonmething went wrong in \'m_ncdm_classInput\'. The size of the vector \'numasses\' (=" << numasses.size() <<") is not what is expected (=" << NuMasses_SM["N_ncdm"] <<").";
-        CosmoBit_error().raise(LOCAL_INFO, err.str());
-      }
-
-      return numasses;
-    }
   }
 }
