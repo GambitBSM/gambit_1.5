@@ -24,6 +24,10 @@
 ///          (patscott@physics.mcgill.ca)
 ///  \date 2014 Mar
 ///
+///  \author Markus Prim
+///          (markus.prim@kit.edu)
+///  \date 2020 April
+///
 ///  *********************************************
 
 #ifndef __yaml_options_hpp__
