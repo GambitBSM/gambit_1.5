@@ -231,20 +231,34 @@ namespace Gambit
       /// then performs checks before casting to an integer type.
       template<class TYPE>
       TYPE safeIntegerTypeCast(const std::string& s) const {
-        const double d = std::stod(s);
-        if (d != std::floor(d))
-        {
+        try {
+          const double d = std::stod(s);
+          if (d != std::floor(d))
+          {
+            std::ostringstream os;
+            os << "Provided value " << d << " as option in the yaml file does not represent an integer.";
+            utils_error().raise(LOCAL_INFO, os.str());
+          }
+          if (std::numeric_limits<TYPE>::max() < d or std::numeric_limits<TYPE>::min() > d)
+          {
+            std::ostringstream os;
+            os << "Provided value " << d << " as option in the yaml file does not fit into the implemented integer type.";
+            utils_error().raise(LOCAL_INFO, os.str());
+          }
+          return static_cast<TYPE>(d);
+        }
+        catch (const std::out_of_range& e) {
           std::ostringstream os;
-          os << "Provided value " << d << " as option in the yaml file does not represent an integer.";
+          os << "Out of range error: " << e.what() << "\n";
+          os << "Provided value " << s << " as option in the yaml file does not fit into double.";
           utils_error().raise(LOCAL_INFO, os.str());
         }
-        if (std::numeric_limits<TYPE>::max() < d or std::numeric_limits<TYPE>::min() > d)
-        {
+        catch (const std::invalid_argument& e) {
           std::ostringstream os;
-          os << "Provided value " << d << " as option in the yaml file does not fit into the implemented integer type.";
+          os << "Invalid argument: " << e.what() << "\n";
+          os << "Provided value " << s << " as option in the yaml file can not be interpreted as double.";
           utils_error().raise(LOCAL_INFO, os.str());
         }
-        return static_cast<TYPE>(d);
       }
 
   };
