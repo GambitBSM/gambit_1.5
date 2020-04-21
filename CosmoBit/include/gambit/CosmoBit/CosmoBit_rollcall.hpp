@@ -153,20 +153,22 @@ START_MODULE
   // Capabilities related to setting neutrino masses,
   // temperature, ncdm components & number of ultra-relativistic species Nur
 
-  #define CAPABILITY NuMasses_SM
+  // Total mass of neutrinos (in eV)
+  #define CAPABILITY mNu_tot
   START_CAPABILITY
-    #define FUNCTION set_NuMasses_SM
-    START_FUNCTION(map_str_dbl)
-    ALLOW_MODELS(StandardModel_SLHA2)
+    #define FUNCTION get_mNu_tot
+    START_FUNCTION(double)
+    ALLOW_MODEL(StandardModel_SLHA2)
     #undef FUNCTION
   #undef CAPABILITY
 
+  // Value of N_ur (today) (aka. contribution of massive neutrinos which are still relativistic)
   #define CAPABILITY N_ur
   START_CAPABILITY
     #define FUNCTION get_N_ur
     START_FUNCTION(double)
+    ALLOW_MODEL(StandardModel_SLHA2)
     MODEL_CONDITIONAL_DEPENDENCY(etaBBN_rBBN_rCMB_dNurBBN_dNurCMB_parameters,ModelParameters,etaBBN_rBBN_rCMB_dNurBBN_dNurCMB)
-    DEPENDENCY(NuMasses_SM, map_str_dbl)
     #undef FUNCTION
   #undef CAPABILITY
 
@@ -262,9 +264,9 @@ START_MODULE
   START_CAPABILITY
     #define FUNCTION set_classy_NuMasses_Nur_input
     START_FUNCTION(pybind11::dict)
-    DEPENDENCY(T_ncdm,            double)
-    DEPENDENCY(NuMasses_SM, map_str_dbl)
-    DEPENDENCY(N_ur,double)
+    ALLOW_MODEL(StandardModel_SLHA2)
+    DEPENDENCY(T_ncdm, double)
+    DEPENDENCY(N_ur, double)
     #undef FUNCTION
   #undef CAPABILITY
 
@@ -678,7 +680,7 @@ START_MODULE
     #define FUNCTION compute_Omega0_ncdm
     START_FUNCTION(double)
     DEPENDENCY(H0, double)
-    DEPENDENCY(NuMasses_SM, map_str_dbl)
+    DEPENDENCY(mNu_tot, double)
     #undef FUNCTION
   #undef CAPABILITY
 

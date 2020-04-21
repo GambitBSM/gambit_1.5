@@ -354,67 +354,56 @@ namespace Gambit
       result = Pipes::set_k_pivot::runOptions->getValueOrDef<double>(0.05, "k_pivot");
     }
 
-    void set_NuMasses_SM(map_str_dbl &result)
+    void get_mNu_tot(double& result)
     {
-      using namespace Pipes::set_NuMasses_SM;
+      using namespace Pipes::get_mNu_tot;
 
-      double mNu1, mNu2, mNu3;
-      int N_ncdm = 0;
-
-      // The units in StandardModel_SLHA2 are GeV; here we are using eV
-      mNu1 = 1e9*(*Param["mNu1"]);
-      mNu2 = 1e9*(*Param["mNu2"]);
-      mNu3 = 1e9*(*Param["mNu3"]);
-
-      if(mNu1 > 0.)
-        N_ncdm++;
-      if(mNu2 > 0.)
-        N_ncdm++;
-      if(mNu3 > 0.)
-        N_ncdm++;
-
-      result["mNu1"]=mNu1;
-      result["mNu2"]=mNu2;
-      result["mNu3"]=mNu3;
-
-      result["N_ncdm"] = N_ncdm;
-
-      result["mNu_tot_eV"] = mNu1 + mNu2 + mNu3;
+      // The untis of StandardModel_SLHA2 are GeV; here we are using eV.
+      result = 1e9 * ( *Param["mNu1"] + *Param["mNu2"] + *Param["mNu3"] );
     }
 
+    // Returns the effective number of ultrarelativistic species today
     void get_N_ur(double& result)
     {
-      // Returns the effective number of ultrarelativistic species today
       using namespace Pipes::get_N_ur;
 
-      map_str_dbl NuMassInfo = *Dep::NuMasses_SM;
+      // The untis of StandardModel_SLHA2 are GeV; here we are using eV.
+      std::vector<double> nuMasses{
+        1e9*(*Param["mNu1"]), 1e9*(*Param["mNu2"]), 1e9*(*Param["mNu3"])
+      };
 
-      int N_ncdm = static_cast<int>(NuMassInfo["N_ncdm"]);
-      double N_ur{};
+      // Count the nonzero entries
+      auto isNonZero = [](double i) {return i > 0.;};
+      int N_ncdm = std::count_if(nuMasses.begin(), nuMasses.end(), isNonZero);
+
+      // Assing the result to the standard value of N_ur depending on the number of massive neutrinos.
       switch (N_ncdm)
       {
         case 1:
-          N_ur = 2.0328;  // N_ur (today) = 2.0328 for 1 massive neutrino at CMB release
+          result = 2.0328;  // N_ur (today) = 2.0328 for 1 massive neutrino at CMB release
           break;
         case 2:
-          N_ur= 1.0196;  // N_ur (today) = 1.0196 for 2 massive neutrino at CMB release
+          result = 1.0196;  // N_ur (today) = 1.0196 for 2 massive neutrino at CMB release
           break;
         case 3:
-          N_ur = 0.00641;  // N_ur (today) = 0.00641 for 3 massive neutrinos at CMB release
+          result = 0.00641;  // N_ur (today) = 0.00641 for 3 massive neutrinos at CMB release
           break;
         case 0:
-          N_ur = 3.046;
+          result = 3.046;
           break;
         default:
           {
             std::ostringstream err;
             err << "You are asking for more than three massive neutrino species.\n";
-            err << "Such a case is not implemented in CosmoBit. If you want to consider this you can add it to the function 'get_N_ur' of the capability 'N_ur'.";
+            err << "Such a case is not implemented in CosmoBit. ";
+            err << "If you want to consider this you can add it to the function ";
+            err << "'get_N_ur' of the capability 'N_ur'.";
             CosmoBit_error().raise(LOCAL_INFO, err.str());
           }
       }
 
-      result = N_ur;
+      // If "etaBBN_rBBN_rCMB_dNurBBN_dNurCMB" is in use, the result will
+      // be scaled and gets extra contributions
       if (ModelInUse("etaBBN_rBBN_rCMB_dNurBBN_dNurCMB"))
       {
         // Check if the input for dNeff is negative (unphysical)
@@ -435,7 +424,7 @@ namespace Gambit
         }
 
         // If the check is passed, set the result.
-        result = pow(rCMB,4)*(N_ur) + dNurCMB;
+        result = pow(rCMB,4)*(result) + dNurCMB;
       }
       logger() << "N_ur calculated to be " << result << EOM;
     }
@@ -449,20 +438,28 @@ namespace Gambit
       // make sure dict is empty
       result.clear();
 
-      map_str_dbl NuMasses_SM = *Dep::NuMasses_SM;
-      int N_ncdm = static_cast<int>(NuMasses_SM["N_ncdm"]);
-
       // set number of ultra relativistic species
       result["N_ur"] = *Dep::N_ur;
 
-      // Number of non-cold DM species
-      // if non-zero a mass & temperature for each species has to be
+      // Get the neutrino masses
+      // The untis of StandardModel_SLHA2 are GeV; here we are using eV.
+      std::vector<double> nuMasses{
+        1e9*(*Param["mNu1"]), 1e9*(*Param["mNu2"]), 1e9*(*Param["mNu3"])
+      };
+
+      // Count the nonzero entries
+      auto isNonZero = [](double i) {return i > 0.;};
+      int N_ncdm = std::count_if(nuMasses.begin(), nuMasses.end(), isNonZero);
+
+      // if nonzero, a mass & temperature for each species has to be
       // passed to class
       if (N_ncdm > 0.)
       {
         result["N_ncdm"] = N_ncdm;
 
-        std::vector<double> m_ncdm = m_ncdm_classInput(NuMasses_SM);
+        std::vector<double> m_ncdm(N_ncdm);
+        std::copy_if(nuMasses.begin(), nuMasses.end(), m_ncdm.begin(), isNonZero);
+
         // head up: this explicitly assumed that all ncdm components have the same temperature!! todo ?
         std::vector<double> T_ncdm(N_ncdm,*Dep::T_ncdm);
 
@@ -1278,7 +1275,7 @@ namespace Gambit
     {
       using namespace Pipes::compute_Omega0_ncdm;
 
-      double mNu_tot_eV = Dep::NuMasses_SM->at("mNu_tot_eV");
+      double mNu_tot_eV = *Dep::mNu_tot;
       double h = *Dep::H0/100.;
 
       result = mNu_tot_eV/(93.14*h*h);  // TODO: heads up: explicit assumption of T_ncdm = 0.71611 and T_cmb goes in here. Has to be generalised
