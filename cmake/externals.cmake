@@ -53,14 +53,6 @@ endif()
 set(backend_download "${PROJECT_SOURCE_DIR}/Backends/downloaded")
 set(scanner_download "${PROJECT_SOURCE_DIR}/ScannerBit/downloaded")
 
-# Specify native make command to be put into backend build steps (for correct usage of gmake jobserver)
-set(MAKE_SERIAL "${CMAKE_MAKE_PROGRAM}")
-if(CMAKE_MAKE_PROGRAM MATCHES "make$")
-  set(MAKE_PARALLEL "$(MAKE)")
-else()
-  set(MAKE_PARALLEL "${MAKE_SERIAL}")
-endif()
-
 # Safer download function than what is in cmake (avoid buggy libcurl vs https issue)
 set(DL_BACKEND "${PROJECT_SOURCE_DIR}/cmake/scripts/safe_dl.sh" "${backend_download}" "${CMAKE_COMMAND}")
 set(DL_SCANNER "${PROJECT_SOURCE_DIR}/cmake/scripts/safe_dl.sh" "${scanner_download}" "${CMAKE_COMMAND}")
@@ -107,10 +99,10 @@ endmacro()
 
 # Macro to add all additional targets for a new backend or scanner
 macro(add_extra_targets type package ver dir dl target)
-  string(REPLACE "|" "| ${CMAKE_MAKE_PROGRAM}" updated_target ${target})
+  string(REPLACE "|" "| ${MAKE_SERIAL}" updated_target ${target})
   string(FIND "${target}" "|" pipe_found)
   if (pipe_found STREQUAL "-1")
-    set(updated_target "${CMAKE_MAKE_PROGRAM} ${target}")
+    set(updated_target "${MAKE_SERIAL} ${target}")
   endif()
   string(REGEX REPLACE " " ";" updated_target "${updated_target}")
   if (${type} STREQUAL "backend model")
@@ -187,6 +179,51 @@ function(set_as_default_version type name default)
   endif()
   add_dependencies(${type}s ${name})
 endfunction()
+
+# Check whether or not Python modules required for backend builds are available
+macro(check_python_modules name ver modules)
+  set(_modules ${modules} ${ARGN})
+  string (REPLACE "," ";" _modules "${_modules}")
+  string (REPLACE " " "" _modules "${_modules}")
+  foreach(module ${_modules})
+    if (NOT DEFINED PY_${module}_FOUND)
+      find_python_module(${module})
+      if (NOT PY_${module}_FOUND)
+        set(PY_${module}_FOUND FALSE)
+      endif()
+    endif()
+    if (NOT PY_${module}_FOUND)
+      set(modules_missing_${name}_${ver} "${modules_missing_${name}_${ver}},${module}" )
+    endif()
+  endforeach()
+endmacro()
+
+# Set up a mock external project that tells the user about missing Python modules and forces a rerun of cmake at next attempted build
+macro(inform_of_missing_modules name ver missing_with_commas)
+  string (REPLACE "," " " missing "${missing_with_commas}")
+  set(package ${name}_${ver})
+  set(rmstring "${CMAKE_BINARY_DIR}/${package}-prefix/src/${package}-stamp/${package}-configure")
+  set(errmsg1 "Cannot make ${package} because you are missing Python module(s):${missing}")
+  set(errmsg2 "Please install the missing package(s), e.g. with ")
+  set(errmsg3 "  pip install --user${missing}")
+  set(errmsg4 "and then rerun ")
+  set(errmsg5 "  make ${package}")
+  ExternalProject_Add(${package}
+    DOWNLOAD_COMMAND ${CMAKE_COMMAND} -E make_directory ${package}-prefix/src/${package}
+    CONFIGURE_COMMAND ${CMAKE_COMMAND} -E echo
+              COMMAND ${CMAKE_COMMAND} -E cmake_echo_color --red --bold ${errmsg1}
+              COMMAND ${CMAKE_COMMAND} -E cmake_echo_color --red --bold ${errmsg2}
+              COMMAND ${CMAKE_COMMAND} -E echo
+              COMMAND ${CMAKE_COMMAND} -E cmake_echo_color       --bold ${errmsg3}
+              COMMAND ${CMAKE_COMMAND} -E echo
+              COMMAND ${CMAKE_COMMAND} -E cmake_echo_color --red --bold ${errmsg4}
+              COMMAND ${CMAKE_COMMAND} -E echo
+              COMMAND ${CMAKE_COMMAND} -E cmake_echo_color       --bold ${errmsg5}
+              COMMAND ${CMAKE_COMMAND} -E echo
+    BUILD_COMMAND ${CMAKE_COMMAND} -E touch ${CMAKE_SOURCE_DIR}/cmake/backends.cmake
+    INSTALL_COMMAND ${CMAKE_COMMAND} -E remove ${rmstring}
+  )
+endmacro()
 
 if(EXISTS "${PROJECT_SOURCE_DIR}/Backends/")
   include(cmake/backends.cmake)
