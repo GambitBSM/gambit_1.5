@@ -28,7 +28,7 @@ BE_ALLOW_MODELS(MSSM63atQ)
 
 // Functions
 BE_FUNCTION(Set_All_Parameters_0, void, (), ("__model_data_MOD_set_all_parameters_0", "model_data_mp_set_all_parameters_0_"), "SPheno_internal")
-BE_FUNCTION(SPheno_Main, void, (), ("__sphenomssm_MOD_spheno_main", "sphenomssm_mp_spheno_main"), "SPheno_internal")
+BE_FUNCTION(SPheno_Main, void, (), ("__spheno_MOD_spheno_main", "spheno_mp_spheno_main_"), "SPheno_internal")
 BE_FUNCTION(InitializeLoopFunctions, void, (), ("__loopfunctions_MOD_initializeloopfunctions", "loopfunctions_mp_initializeloopfunctions_"), "SPheno_internal")
 BE_FUNCTION(CalculateRunningMasses, void, (Farray_Freal8_1_3&, //mf_l_in
                                         Farray_Freal8_1_3&, // mf_d_in
@@ -63,6 +63,23 @@ BE_FUNCTION(Switch_to_superCKM, void,
          Farray_Fcomplex16_1_3_1_3&, // CKM_Q
          Farray_Freal8_1_3&, // Yd_ckm
          Farray_Freal8_1_3&  // Yu_ckm
+        ), ("__model_data_MOD_switch_to_superckm", "model_data_mp_switch_to_superckm_"), "SPheno_internal")
+BE_FUNCTION(Switch_to_superPMNS, void,
+        (Farray_Fcomplex16_1_3_1_3&, // Yl
+         Farray_Fcomplex16_1_3_1_3&, // id3C
+         Farray_Fcomplex16_1_3_1_3&, // Al
+         Farray_Fcomplex16_1_3_1_3&, // me2
+         Farray_Fcomplex16_1_3_1_3&, // ml2
+         Farray_Fcomplex16_1_3_1_3&, // Al_pmns
+         Farray_Fcomplex16_1_3_1_3&, // me2_pmns
+         Farray_Fcomplex16_1_3_1_3&, // ml2_pmns
+         Flogical&, // Tranposed
+         Farray_Fcomplex16_1_6_1_6&, // RSl
+         Farray_Fcomplex16_1_3_1_3&, // Rsn
+         Farray_Fcomplex16_1_6_1_6&, // RSl_pmns
+         Farray_Fcomplex16_1_3_1_3&, // RSn_pmns
+         Farray_Fcomplex16_1_3_1_3&, // PMNS_Q
+         Farray_Freal8_1_3&  // Yl_pmns
         ), ("__model_data_MOD_switch_to_superckm", "model_data_mp_switch_to_superckm_"), "SPheno_internal")
 BE_FUNCTION(GetRenormalizationScale, Freal8, (), ("__loopfunctions_MOD_getrenormalizationscale", "loopfunctions_mp_getrenormalizationscale_"), "SPheno_internal")
 BE_FUNCTION(SetRGEScale, void, (Freal8), ("__sugraruns_MOD_setrgescale", "sugraruns_mp_setrgescale_"), "SPheno_internal")
@@ -141,10 +158,17 @@ BE_VARIABLE(AlphaS_mZ, Freal8, ("__standardmodel_MOD_alphas_mz", "standardmodel_
 BE_VARIABLE(G_F, Freal8, ("__standardmodel_MOD_g_f", "standardmodel_mp_g_f"), "SPheno_internal")
 BE_VARIABLE(KFactorLee, Freal8, ("__standardmodel_MOD_kfactorlee", "standardmodel_mp_kfactorlee"), "SPheno_internal")
 BE_VARIABLE(CKM, Farray_Fcomplex16_1_3_1_3, ("__standardmodel_MOD_ckm", "standardmodel_mp_ckm"), "SPheno_internal")
+BE_VARIABLE(Unu, Farray_Fcomplex16_1_3_1_3, ("__standardmodel_MOD_unu", "standardmodel_mp_unu_"), "SPheno_internal")
 BE_VARIABLE(lam_wolf, Freal8, ("__standardmodel_MOD_lam_wolf", "standardmodel_mp_lam_wolf"), "SPheno_internal")
 BE_VARIABLE(A_wolf, Freal8, ("__standardmodel_MOD_a_wolf", "standardmodel_mp_a_wolf"), "SPheno_internal")
 BE_VARIABLE(rho_wolf, Freal8, ("__standardmodel_MOD_rho_wolf", "standardmodel_mp_rho_wolf"), "SPheno_internal")
 BE_VARIABLE(eta_wolf, Freal8, ("__standardmodel_MOD_eta_wolf", "standardmodel_mp_eta_wolf"), "SPheno_internal")
+BE_VARIABLE(theta_12, Freal8, ("__standardmodel_MOD_theta_12", "standardmodel_mp_theta_12_"), "SPheno_internal")
+BE_VARIABLE(theta_23, Freal8, ("__standardmodel_MOD_theta_23", "standardmodel_mp_theta_23_"), "SPheno_internal")
+BE_VARIABLE(theta_13, Freal8, ("__standardmodel_MOD_theta_13", "standardmodel_mp_theta_13_"), "SPheno_internal")
+BE_VARIABLE(delta_nu, Freal8, ("__standardmodel_MOD_delta_nu", "standardmodel_mp_delta_nu_"), "SPheno_internal")
+BE_VARIABLE(alpha_nu1, Freal8, ("__standardmodel_MOD_alpha_nu1", "standardmodel_mp_alpha_nu1_"), "SPheno_internal")
+BE_VARIABLE(alpha_nu2, Freal8, ("__standardmodel_MOD_alpha_nu2", "standardmodel_mp_alpha_nu2_"), "SPheno_internal")
 
 // LoopMasses.f90 variables
 BE_VARIABLE(SPA_convention, Flogical, ("__loopmasses_MOD_spa_convention", "loopmasses_mp_spa_convention_"), "SPheno_internal")
@@ -173,13 +197,11 @@ BE_VARIABLE(TwoLoopRGE, Flogical, ("__rges_MOD_twolooprge", "rges_mp_twolooprge_
 BE_VARIABLE(ThreeLoopRGE, Flogical, ("__rges_MOD_threelooprge", "rges_mp_threelooprge_"), "SPheno_internal")
 
 // SPheno4.f90 variables
-//BE_VARIABLE(Qin, Freal8, ("__sphenomssm_MOD_qin", "sphenomssm_mp_qin"), "SPheno_internal")
 BE_VARIABLE(ratioWoM, Freal8, ("__spheno_MOD_ratiowom", "spheno_mp_ratiowom_"), "SPheno_internal")
 BE_VARIABLE(CalcTBD, Flogical, ("__spheno_MOD_calctbd", "spheno_mp_calctbd_"), "SPheno_internal")
 BE_VARIABLE(kont, Finteger, ("__spheno_MOD_kont", "spheno_mp_kont_"), "SPheno_internal")
 BE_VARIABLE(epsI, Freal8, ("__spheno_MOD_epsi", "spheno_mp_epsi_"), "SPheno_internal")
 BE_VARIABLE(deltaM, Freal8, ("__spheno_MOD_deltam", "spheno_mp_deltam_"), "SPheno_internal")
-//BE_VARIABLE(mGUT, Freal8, ("__sphenomssm_MOD_mgut", "sphenomssm_mp_mgut"), "SPheno_internal")
 
 // InputOutput.f90
 BE_VARIABLE(Calc_Mass, Flogical, ("__inputoutput_MOD_calc_mass", "inputoutput_mp_calc_mass_"), "SPheno_internal")
@@ -258,6 +280,8 @@ BE_VARIABLE(A_l, Farray_Fcomplex16_1_3_1_3, ("__model_data_MOD_a_l", "model_data
 BE_VARIABLE(M2_Q, Farray_Fcomplex16_1_3_1_3, ("__model_data_MOD_m2_q", "model_data_mp_m2_q_"), "SPheno_internal")
 BE_VARIABLE(M2_U, Farray_Fcomplex16_1_3_1_3, ("__model_data_MOD_m2_u", "model_data_mp_m2_u_"), "SPheno_internal")
 BE_VARIABLE(M2_D, Farray_Fcomplex16_1_3_1_3, ("__model_data_MOD_m2_d", "model_data_mp_m2_d_"), "SPheno_internal")
+BE_VARIABLE(M2_L, Farray_Fcomplex16_1_3_1_3, ("__model_data_MOD_m2_l", "model_data_mp_m2_l_"), "SPheno_internal")
+BE_VARIABLE(M2_E, Farray_Fcomplex16_1_3_1_3, ("__model_data_MOD_m2_e", "model_data_mp_m2_e_"), "SPheno_internal")
 
 // MASS and mixings
 BE_VARIABLE(S0, Farray_particle23_1_2, ("__mssm_data_MOD_s0", "mssm_data_mp_s0_"), "SPheno_internal")

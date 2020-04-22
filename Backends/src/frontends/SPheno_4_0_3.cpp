@@ -94,8 +94,8 @@ BE_NAMESPACE
 
     // Spectrum generator information
     SLHAea_add_block(slha, "SPINFO");
-    SLHAea_add(slha, "SPINFO", 1, "GAMBIT, using "+str(STRINGIFY(BACKENDNAME))+" from SARAH");
-    SLHAea_add(slha, "SPINFO", 2, gambit_version()+" (GAMBIT); "+str(STRINGIFY(VERSION))+" ("+str(STRINGIFY(BACKENDNAME))+"); "+str(STRINGIFY(SARAH_VERSION))+" (SARAH)");
+    SLHAea_add(slha, "SPINFO", 1, "GAMBIT, using "+str(STRINGIFY(BACKENDNAME)));
+    SLHAea_add(slha, "SPINFO", 2, gambit_version()+" (GAMBIT); "+str(STRINGIFY(VERSION))+" ("+str(STRINGIFY(BACKENDNAME))+");");
 
     // Block MODSEL
     SLHAea_add_block(slha, "MODSEL");
@@ -198,8 +198,8 @@ BE_NAMESPACE
     slha["SMINPUTS"][""] << 24 << (*mf_u)(2) << "# m_c(m_c), MSbar";
 
     Farray<Fcomplex16,1,6,1,6> RDsq_ckm, RUsq_ckm, RSl_pmns;
-    Farray<Fcomplex16,1,3,1,3> RSn_pmns;
-    Farray<Fcomplex16,1,3,1,3> CKM_Q;
+    Farray<Fcomplex16,1,3,1,3> RSn_pmns, id3C;
+    Farray<Fcomplex16,1,3,1,3> CKM_Q, PMNS_Q;
     Farray<Freal8,1,3> Yu, Yd, Yl;
     if(*GenerationMixing)
     {
@@ -213,7 +213,16 @@ BE_NAMESPACE
       try{ Switch_to_superCKM(*Y_d,*Y_u,*A_d,*A_u,*M2_D,*M2_Q,*M2_U,*Ad_sckm,*Au_sckm,*M2D_sckm,*M2Q_sckm,*M2U_sckm,False,*RSdown,*RSup,RDsq_ckm,RUsq_ckm,CKM_Q,Yd,Yu); }
       catch(std::runtime_error e) { invalid_point().raise(e.what()); }
 
-      // Missing PMNS
+      SLHAea_add_block(slha, "UPMNSIN");
+      slha["UPMNSIN"][""] << 1 << *theta_12 << "# theta_12, solar";
+      slha["UPMNSIN"][""] << 2 << *theta_23<< "# theta_23, atmospheric";
+      slha["UPMNSIN"][""] << 3 << *theta_13 << "# theta_13";
+      slha["UPMNSIN"][""] << 4 << *delta_nu << "# delta_nu";
+      slha["UPMNSIN"][""] << 5 << *alpha_nu1 << "# alpha_1";
+      slha["UPMNSIN"][""] << 6 << *alpha_nu2 << "# alpha_2";
+
+      try{ Switch_to_superPMNS(*Y_l,id3C,*A_l,*M2_E,*M2_L,*Al_pmns,*M2E_pmns,*M2L_pmns,False,*RSlepton,*RSneut,RSl_pmns,RSn_pmns,PMNS_Q,Yl); }
+      catch(std::runtime_error e) { invalid_point().raise(e.what()); }
 
     }
     else
@@ -255,18 +264,20 @@ BE_NAMESPACE
 
     if(*GenerationMixing)
     {
-      // Block VKCM
+      // Blocks VKCM and UPMNS
       SLHAea_add_block(slha, "VCKM", Q);
       SLHAea_add_block(slha, "IMVCKM", Q);
+      SLHAea_add_block(slha, "UPMNS", Q);
+      SLHAea_add_block(slha, "IMUPMNS", Q);
       for(int i=1; i<=3; i++)
         for(int j=1; j<=3; j++)
         {
           slha["VCKM"][""] << i << j << CKM_Q(i,j).re << "# V_" << i << j;
           slha["IMVCKM"][""] << i << j << CKM_Q(i,j).im << "# Im(V_" << i << j << ")";
+          slha["UPMNS"][""] << i << j << PMNS_Q(i,j).re << "# UPMNS_" << i << j;
+          slha["IMUPMNS"][""] << i << j << PMNS_Q(i,j).im << "# Im(UPMNS_" << i << j << ")";
         }
      
-      // TODO: Block UPMNS
-
       // Blocks Te, Tu, Td
       SLHAea_add_block(slha, "Te", Q);
       SLHAea_add_block(slha, "Tu", Q);
@@ -783,8 +794,7 @@ BE_NAMESPACE
     // GAMBIT: private variable, cannot import
 
     // 5, FermionMassResummation
-    // GAMBIT: not covered
-    *FermionMassResummation = true;
+    *FermionMassResummation = inputs.options->getValueOrDef<bool>(true, "FermionMassResummation");
 
     // 6, Ynu_at_MR3, Fixed_Nu_Yukawas
     *Ynu_at_MR3 = false;
@@ -1182,10 +1192,10 @@ BE_NAMESPACE
     (*mf_l)(2) = sminputs.mMu;
     (*mf_l)(3) = sminputs.mTau;
 
-    // default for neutrino masses
-    (*mf_nu)(1) = 0.0;
-    (*mf_nu)(2) = 0.0;
-    (*mf_nu)(3) = 0.0;
+    // neutrino masses
+    (*mf_nu)(1) = sminputs.mNu1;
+    (*mf_nu)(2) = sminputs.mNu2;
+    (*mf_nu)(3) = sminputs.mNu3;
 
     // scale where masses of light quarks are defined [in GeV]
     (*Q_light_quarks) = 2;
@@ -1223,16 +1233,16 @@ BE_NAMESPACE
     *eta_wolf = sminputs.CKM.etabar;
 
 
-    float s12 = sminputs.CKM.lambda;
-    float s23 = pow(s12,2) * sminputs.CKM.A;
-    float s13 = s23 * sminputs.CKM.lambda * sqrt(pow(sminputs.CKM.etabar,2) + pow(sminputs.CKM.rhobar,2));
-    float phase = atan(sminputs.CKM.etabar/sminputs.CKM.rhobar);
+    double s12 = sminputs.CKM.lambda;
+    double s23 = pow(s12,2) * sminputs.CKM.A;
+    double s13 = s23 * sminputs.CKM.lambda * sqrt(pow(sminputs.CKM.etabar,2) + pow(sminputs.CKM.rhobar,2));
+    double phase = atan(sminputs.CKM.etabar/sminputs.CKM.rhobar);
 
-    float c12 = sqrt(1.0 - s12*s12);
-    float c23 = sqrt(1.0 - s23*s23);
-    float c13 = sqrt(1.0 - s13*s13);
+    double c12 = sqrt(1.0 - s12*s12);
+    double c23 = sqrt(1.0 - s23*s23);
+    double c13 = sqrt(1.0 - s13*s13);
 
-    std::complex<float> i = -1;
+    std::complex<double> i = -1;
     i = sqrt(i);
 
     (*CKM)(1,1) = c12 * c13;
@@ -1253,9 +1263,35 @@ BE_NAMESPACE
     }
     try{ CalculateRunningMasses(*mf_l, *mf_d, *mf_u, *Q_light_quarks, *Alpha_mZ, *AlphaS_mZ, *mZ, *mf_l_mZ, *mf_d_mZ, *mf_u_mZ, *kont); }
     catch(std::runtime_error e) { invalid_point().raise(e.what()); }
+
+    // PMNS matrix
+    *theta_12 = sminputs.PMNS.theta12;
+    *theta_23 = sminputs.PMNS.theta23;
+    *theta_13 = sminputs.PMNS.theta13;
+    *delta_nu = sminputs.PMNS.delta13;
+    *alpha_nu1 = sminputs.PMNS.alpha1;
+    *alpha_nu2 = sminputs.PMNS.alpha2;
+
+    s12 = sin(*theta_12);
+    s23 = sin(*theta_23);
+    s13 = sin(*theta_13);
+
+    c12 = sqrt(1.0 - pow(s12,2));
+    c23 = sqrt(1.0 - pow(s23,2));
+    c13 = sqrt(1.0 - pow(s13,2));
+
+    (*Unu)(1,1) = c12 * c13 * exp(-0.5*i * *alpha_nu1);
+    (*Unu)(1,2) = s12 * c13 * exp(-0.5*i * *alpha_nu1);
+    (*Unu)(1,3) = s13 * exp(-i * *delta_nu) * exp(-0.5*i * *alpha_nu1);
+    (*Unu)(2,1) = -s12*c23 - c12*s23*s13 * exp(i * *delta_nu) * exp(-0.5*i * *alpha_nu2);
+    (*Unu)(2,2) = c12*c23 - s12*s23*s13 * exp(i * *delta_nu) * exp(-0.5*i * *alpha_nu2);
+    (*Unu)(2,3) = s23 * c13 * exp(-0.5*i * *alpha_nu2);
+    (*Unu)(3,1) = s12*s23 - c12*c23*s13 * exp(i * *delta_nu);
+    (*Unu)(3,2) = -c12*s23 - s12*c23*s13 * exp(i * *delta_nu);
+    (*Unu)(3,3) = c23 * c13;
+
     if(*kont != 0)
       ErrorHandling(*kont);
-
   }
 
   // Function that handles errors
@@ -1263,7 +1299,6 @@ BE_NAMESPACE
   {
 
     str message;
-
 
     if (kont > 0 and kont <= 31)
       message = (*Math_Error)(kont).str();
