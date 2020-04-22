@@ -263,6 +263,7 @@ namespace Gambit
           os << "Provided value " << s << " as option in the yaml file can not be interpreted as double.";
           utils_error().raise(LOCAL_INFO, os.str());
         }
+        throw std::runtime_error("Reached end of function safeIntegerTypeCast. This should not happen.");
       }
 
   };
