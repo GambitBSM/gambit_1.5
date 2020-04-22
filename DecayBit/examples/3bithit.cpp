@@ -80,6 +80,12 @@ int main()
     // Initialise the random number generator.
     Random::create_rng_engine("default");
 
+    // Check that required backends are present
+    if (not Backends::backendInfo().works["SPheno4.0.3"]) backend_error().raise(LOCAL_INFO, "SPheno 4.0.3 is missing!");
+    if (not Backends::backendInfo().works["gm2calc1.3.0"]) backend_error().raise(LOCAL_INFO, "gm2calc 1.3.1 is missing!");
+    if (not Backends::backendInfo().works["FeynHiggs2.11.3"]) backend_error().raise(LOCAL_INFO, "FeynHiggs 2.11.3 is missing!");
+    if (not Backends::backendInfo().works["SUSY_HIT1.5"]) backend_error().raise(LOCAL_INFO, "SUSY-HIT 1.5 is missing!");
+
     // Read in the model
     YAML::Node infile, SM_parameters, SUSY_parameters;
     bool model_is_GUT_scale;
@@ -113,7 +119,7 @@ int main()
                                                        : Models::MSSM20atQ::Functown::primary_parameters.getcontentsPtr();
 
     // Resolve backend requirements 'by hand'.  Must be done before dependencies are resolved.
-    get_MSSM_spectrum_SPheno.resolveBackendReq(&Backends::SPheno_3_3_8::Functown::run_SPheno);
+    get_MSSM_spectrum_SPheno.resolveBackendReq(&Backends::SPheno_4_0_3::Functown::run_SPheno);
 
     FH_AllHiggsMasses.resolveBackendReq(&Backends::FeynHiggs_2_11_3::Functown::FHHiggsCorr);
     FH_AllHiggsMasses.resolveBackendReq(&Backends::FeynHiggs_2_11_3::Functown::FHUncertainties);
@@ -243,7 +249,7 @@ int main()
       Models::MSSM25atQ::Functown::MSSM30atQ_parameters.notifyOfModel(SUSY_model);
       Models::MSSM30atQ::Functown::MSSM63atQ_parameters.notifyOfModel(SUSY_model);
     }
-    SPheno_3_3_8_init.notifyOfModel(SUSY_model);
+    SPheno_4_0_3_init.notifyOfModel(SUSY_model);
     get_MSSM_spectrum_SPheno.notifyOfModel(SUSY_model);
     FH_AllHiggsMasses.notifyOfModel(SUSY_model);
     FH_Couplings.notifyOfModel(SUSY_model);
@@ -469,7 +475,7 @@ int main()
         Models::MSSM25atQ::Functown::MSSM30atQ_parameters.reset_and_calculate();
         Models::MSSM30atQ::Functown::MSSM63atQ_parameters.reset_and_calculate();
       }
-      SPheno_3_3_8_init.reset_and_calculate();
+      SPheno_4_0_3_init.reset_and_calculate();
       get_MSSM_spectrum_SPheno.reset_and_calculate();
       FeynHiggs_2_11_3_init.reset_and_calculate();
       FH_AllHiggsMasses.reset_and_calculate();
