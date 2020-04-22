@@ -19,7 +19,6 @@
 ///  *********************************************
 
 #include <iostream>
-#include <regex>
 
 #include "gambit/Utils/yaml_parser_base.hpp"
 #include "gambit/Utils/util_functions.hpp"
@@ -166,7 +165,7 @@ namespace Gambit
       std::string defpath;
       if(hasKey("default_output_path"))
       {
-         defpath = expandEnvironmentVariables(getValue<std::string>("default_output_path"));
+         defpath = getValue<std::string>("default_output_path");
       }
       else
       {
@@ -343,29 +342,6 @@ namespace Gambit
       {
         return Options(keyValuePairNode[key]);
       }
-    }
-
-    /// Update the input string.
-    void Parser::autoExpandEnvironmentVariables( std::string & text ) {
-        static std::regex env( "\\$\\{([^}]+)\\}" );
-        std::smatch match;
-        while ( std::regex_search( text, match, env ) ) {
-            const char * s = getenv( match[1].str().c_str() );
-            const std::string var( s == NULL ? "" : s );
-            if (s == NULL) {
-                std::ostringstream os;
-                os << "Environment variable " << match.str() << " not set";
-                utils_error().raise(LOCAL_INFO, os.str());
-            }
-            text.replace( match[0].first, match[0].second, var );
-        }
-    }
-    
-    /// Leave input alone and return new string.
-    std::string Parser::expandEnvironmentVariables( const std::string & input ) {
-        std::string text = input;
-        autoExpandEnvironmentVariables( text );
-        return text;
     }
 
     /// @}

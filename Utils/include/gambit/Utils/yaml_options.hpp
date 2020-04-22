@@ -36,6 +36,8 @@
 #include <vector>
 #include <sstream>
 #include <utility>
+#include <regex>
+#include <cstdlib>
 
 #include "gambit/Utils/util_types.hpp"
 #include "gambit/Utils/standalone_error_handlers.hpp"
@@ -266,6 +268,31 @@ namespace Gambit
         throw std::runtime_error("Reached end of function safeIntegerTypeCast. This should not happen.");
       }
 
+      /// Update the input string.
+      void autoExpandEnvironmentVariables(std::string& text) const {
+        static std::regex env("\\$\\{([^}]+)\\}");
+        std::smatch match;
+        while (std::regex_search(text, match, env))
+        {
+          const char* s = getenv(match[1].str().c_str());
+          const std::string var(s == NULL ? "" : s);
+          if (s == NULL)
+          {
+            std::ostringstream os;
+            os << "Environment variable " << match.str() << " not set";
+            utils_error().raise(LOCAL_INFO, os.str());
+          }
+          text.replace(match[0].first, match[0].second, var);
+        }
+      }
+
+      /// Leave input alone and return new string.
+      std::string expandEnvironmentVariables(const std::string& input ) const {
+        std::string text = input;
+        autoExpandEnvironmentVariables(text);
+        return text;
+      }
+
   };
 
 /// Allows to read scientific notation integer numbers. If the number does not
@@ -310,6 +337,14 @@ template<>
 inline unsigned long long Options::getNode<unsigned long long>(const YAML::Node node) const {
   try { return node.as<unsigned long long>(); }
   catch (...) { return Options::safeIntegerTypeCast<unsigned long long>(node.as<std::string>()); }
+}
+
+/// Read string and expand environment variables of the type ${MYVAR}.
+/// Expansion of environment variables is not performed if given as
+/// $MYVAR and \${MYVAR}.
+template<>
+inline std::string Options::getNode<std::string>(const YAML::Node node) const {
+  return expandEnvironmentVariables(node.as<std::string>());
 }
 
 }
