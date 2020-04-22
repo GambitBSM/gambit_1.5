@@ -107,8 +107,6 @@ namespace Gambit
         void basicParse(YAML::Node,str);
          
       private:     
-        void autoExpandEnvironmentVariables(std::string& text);
-        std::string expandEnvironmentVariables(const std::string& input);
 
         YAML::Node keyValuePairNode;
         YAML::Node parametersNode;
