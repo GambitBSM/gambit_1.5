@@ -2,14 +2,14 @@
 //   *********************************************
 ///  \file
 ///
-///  Backend macros for SPheno 4.0.3 
+///  Backend macros for SPheno 4.0.3
 ///  (out of the box version)
 ///
 ///  *********************************************
 ///
 ///  Authors (add name and date if you modify):
-///   
-///  \author Tomas Gonzalo 
+///
+///  \author Tomas Gonzalo
 ///          (tomas.gonzalo@monash.edu)
 ///  \date 2020 Apr
 ///
@@ -115,7 +115,7 @@ BE_VARIABLE(L_BR, Flogical, ("__control_MOD_l_br", "control_mp_l_br"), "SPheno_i
 BE_VARIABLE(UseNewBoundaryEW, Flogical, ("__control_MOD_usenewboundaryew", "control_mp_usenewboundaryew"), "SPheno_internal")
 BE_VARIABLE(UseNewScale, Flogical, ("__control_MOD_usenewscale", "control_mp_usenewscale"), "SPheno_internal")
 BE_VARIABLE(WriteOut, Flogical, ("__control_MOD_writeout", "control_mp_writeout_"), "SPheno_internal")
-BE_VARIABLE(Switch_to_1_loop_mh, Flogical, ("__control_MOD_switch_to_1_loop_mh", "control_mp_switch_to_1_loop_mh_"), "SPheno_internal") 
+BE_VARIABLE(Switch_to_1_loop_mh, Flogical, ("__control_MOD_switch_to_1_loop_mh", "control_mp_switch_to_1_loop_mh_"), "SPheno_internal")
 BE_VARIABLE(l_fit_RP_parameters, Flogical, ("__control_MOD_l_fit_rp_parameters", "control_mp_l_fit_rp_parameters_"), "SPheno_internal");
 BE_VARIABLE(l_CSrp, Flogical, ("__control_MOD_l_csrp", "control_mp_l_csrp_"), "SPheno_internal");
 BE_VARIABLE(ErrorHandler_cptr, type_fptr_SPhenoErrorHandler, ("__control_MOD_errorhandler_cptr", "control_mp_errorhandler_cptr_"), "SPheno_internal")
@@ -306,7 +306,7 @@ BE_VARIABLE(Chi0, Farray_particle23_1_4, ("__mssm_data_MOD_chi0", "mssm_data_mp_
 BE_VARIABLE(N, Farray_Fcomplex16_1_4_1_4, ("__model_data_MOD_n", "model_data_mp_n_"), "SPheno_internal")
 
 // Convenience functions (registration)
-BE_CONV_FUNCTION(run_SPheno, int, (Spectrum&, const Finputs&), "SPheno_spectrum")
+BE_CONV_FUNCTION(run_SPheno, int, (Spectrum&, const Finputs&), "SPheno_MSSMspectrum")
 BE_CONV_FUNCTION(Spectrum_Out, Spectrum, (const Finputs&), "SPheno_internal")
 BE_CONV_FUNCTION(ReadingData, void, (const Finputs&), "SPheno_internal")
 BE_CONV_FUNCTION(InitializeStandardModel, void, (const SMInputs&), "SPheno_internal")
@@ -314,4 +314,4 @@ BE_CONV_FUNCTION(ErrorHandling, void, (const int&), "SPheno_internal")
 
 // End
 #include "gambit/Backends/backend_undefs.hpp"
-                                                
+
