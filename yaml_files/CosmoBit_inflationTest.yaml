@@ -11,7 +11,7 @@
 
 #======== Input parameter declarations =======
 Parameters:
-  StandardModel_mNudiff: !import include/StandardModel_mNudiff_both_scan.yaml
+  StandardModel_mNudiff: !import include/StandardModel_mNudiff_NH_scan.yaml
 
   LCDM_no_primordial:
     omega_b:

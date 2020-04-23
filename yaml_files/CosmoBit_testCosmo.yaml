@@ -36,8 +36,7 @@ Parameters:
  etaBBN_rBBN_rCMB_dNurBBN_dNurCMB: !import include/etaBBN_rBBN_rCMB_dNurBBN_dNurCMB.yaml
 
  # neutrino masses
- StandardModel_mNudiff: !import include/StandardModel_mNudiff_both_scan.yaml
- #StandardModel_mNudiff: !import include/StandardModel_mNudiff_NH_scan.yaml
+ StandardModel_mNudiff: !import include/StandardModel_mNudiff_NH_scan.yaml
  #StandardModel_mNudiff: !import include/StandardModel_mNudiff_IH_scan.yaml
 
  # nuisance parameters in Planck likelihood

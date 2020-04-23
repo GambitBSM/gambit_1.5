@@ -44,7 +44,7 @@ Parameters:
 
 
  # neutrino masses
- #StandardModel_mNudiff: !import include/StandardModel_mNudiff_both_scan.yaml
+ StandardModel_mNudiff: !import include/StandardModel_mNudiff_NH_scan.yaml
 
  # Cosmological nuisance parameters (except for Planck CMB Likelihoods)
  cosmo_nuisance_Pantheon: !import include/cosmo_nuisance_Pantheon.yaml

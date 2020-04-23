@@ -83,8 +83,7 @@
 Parameters:
 
  # neutrino masses
- StandardModel_mNudiff: !import include/StandardModel_mNudiff_both_scan.yaml
- #StandardModel_mNudiff: !import include/StandardModel_mNudiff_NH_scan.yaml
+ StandardModel_mNudiff: !import include/StandardModel_mNudiff_NH_scan.yaml
  #StandardModel_mNudiff: !import include/StandardModel_mNudiff_IH_scan.yaml
 
  # base-line LCDM model parameters and prior
