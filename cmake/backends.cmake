@@ -1454,17 +1454,23 @@ set(sfver "1_2_0")
 set(dl "null")
 set(dir "${PROJECT_SOURCE_DIR}/Backends/installed/${name}/${ver}")
 set(ditch_if_absent "Python")
+set(required_modules "scipy,dill,future")
 check_ditch_status(${name} ${ver} ${dir} ${ditch_if_absent})
 if(NOT ditched_${name}_${ver})
-  ExternalProject_Add(${name}_${ver}
-    GIT_REPOSITORY https://github.com/pstoecker/DarkAges.git
-    GIT_TAG v${ver}
-    SOURCE_DIR ${dir}
-    BUILD_IN_SOURCE 1
-    CONFIGURE_COMMAND ln ${DarkAges_SYMLINK_FLAGS} DarkAges DarkAges_${sfver}
-    BUILD_COMMAND ""
-    INSTALL_COMMAND ""
-  )
+  check_python_modules(${name} ${ver} ${required_modules})
+  if(modules_missing_${name}_${ver})
+    inform_of_missing_modules(${name} ${ver} ${modules_missing_${name}_${ver}})
+  else()
+    ExternalProject_Add(${name}_${ver}
+      GIT_REPOSITORY https://github.com/pstoecker/DarkAges.git
+      GIT_TAG v${ver}
+      SOURCE_DIR ${dir}
+      BUILD_IN_SOURCE 1
+      CONFIGURE_COMMAND ln ${DarkAges_SYMLINK_FLAGS} DarkAges DarkAges_${sfver}
+      BUILD_COMMAND ""
+      INSTALL_COMMAND ""
+    )
+  endif()
   add_extra_targets("backend" ${name} ${ver} ${dir} ${dl} clean)
   set_as_default_version("backend" ${name} ${ver})
 endif()
