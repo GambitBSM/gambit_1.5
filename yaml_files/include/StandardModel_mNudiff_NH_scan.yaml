@@ -47,7 +47,6 @@ CKM_etabar  :  0.353
 
 # PMNS
 # from NuFit 4.0 / JHEP 01 (2019) 106 / arXiv:1811.05487
-# No CP-violation assumed -> set to zero.
 theta12 :  0.59027 # solar angle
 theta23 :  0.86568 # atmospheric mixing angle
 theta13 :  0.15027 #

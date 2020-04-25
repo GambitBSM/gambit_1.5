@@ -995,6 +995,17 @@ START_MODULE
     #undef FUNCTION
   #undef CAPABILITY 
 
+  #define CAPABILITY md21_md3l_lnL
+  START_CAPABILITY
+    #define FUNCTION md21_md3l_NuFit_lnL
+    START_FUNCTION(double)
+    DEPENDENCY(ordering, bool)
+    DEPENDENCY(md21, double)
+    DEPENDENCY(md31, double)
+    DEPENDENCY(md32, double)
+    #undef FUNCTION
+  #undef CAPABILITY
+
   #define CAPABILITY sum_mnu_lnL
   START_CAPABILITY
     #define FUNCTION sum_mnu_lnL

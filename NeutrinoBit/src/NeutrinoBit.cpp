@@ -9,9 +9,9 @@
 ///  Authors (add name and date if you modify):
 ///
 ///  \author Tomas Gonzalo
-///          (t.e.gonzalo@fys.uio.no)
+///          (tomas.gonzalo@monash.edu)
 ///  \date 2017 July
-///  \date 2018, 2019
+///  \date 2018, 2019, 2020
 ///
 ///  \author Julia Harz
 ///          (jharz@lpthe.jussieu.fr)
@@ -643,6 +643,58 @@ namespace Gambit
         }
         
       }     
+    }
+
+    // NuFit 2D likelihood for the solar and atmospheric mass splittings
+    void md21_md3l_NuFit_lnL(double &result)
+    {
+      using namespace Pipes::md21_md3l_NuFit_lnL;
+
+      static double low_lim_n = 0.2;
+      static double upp_lim_n = 7.0;
+      static double low_lim_i = -7.0;
+      static double upp_lim_i = -0.2;
+      static double low_lim = -6.0;
+      static double upp_lim = -3.0;
+
+      // Invalidate outside ranges
+      if  ((log10(*Dep::md21 * pow(10,18)) < low_lim) or (log10(*Dep::md21 * pow(10,18)) > upp_lim) or (*Dep::md21 * pow(10,18)<0))
+      {
+          std::ostringstream msg;
+          msg << "md12 outside NuFit range; point is invalidated by active neutrino constraint.";
+          logger() << msg.str() << EOM;
+          invalid_point().raise(msg.str());
+          return;
+      }
+      if (*Dep::ordering == 1 and ((*Dep::md31 * pow(10,21) < low_lim_n) or (*Dep::md31 * pow(10,21) > upp_lim_n)))
+      {
+          std::ostringstream msg;
+          msg << "md31 outside NuFit range; point is invalidated by active neutrino constraint.";
+          logger() << msg.str() << EOM;
+          invalid_point().raise(msg.str());
+          return;
+      }
+      if (*Dep::ordering == 0 and ((*Dep::md32 * pow(10,21) < low_lim_i) or (*Dep::md32 * pow(10,21) > upp_lim_i)))
+      {
+          std::ostringstream msg;
+          msg << "md32 outside NuFit range; point is invalidated by active neutrino constraint.";
+          logger() << msg.str() << EOM;
+          invalid_point().raise(msg.str());
+          return;
+      }
+
+      if (*Dep::ordering == 1) // Normal ordering
+      {
+          static NeutrinoInterpolator2D spline_md21_md31_n("NeutrinoBit/data/DMSDMAn.csv");
+
+          result = -0.5*spline_md21_md31_n.eval(log10(*Dep::md21 * 1e18), *Dep::md31 * 1e21);
+      }
+      else if (*Dep::ordering == 0) // Inverted ordering
+      {
+          static NeutrinoInterpolator2D spline_md21_md32_i("NeutrinoBit/data/DMSDMAi.csv");
+
+          result = -0.5*spline_md21_md32_i.eval(log10(*Dep::md21 * 1e18), *Dep::md32 * 1e21);
+      }
     }
 
     // Limit on the sum of neutrino likelihoods from Planck (1502.01589)
