@@ -1,0 +1,11 @@
+##########################################################################
+## nuisance parameters for MontePython likelilihood "BK14priors"
+##
+## Janina Renk <janina.renk@fysik.su.se>
+## 2020, April
+##########################################################################
+  
+# just for testing.. set prior ranges to sensible values
+# if you want to use the BK14priors likelihoods
+BBalphadust: 0.78
+BBbetadust: 0.78

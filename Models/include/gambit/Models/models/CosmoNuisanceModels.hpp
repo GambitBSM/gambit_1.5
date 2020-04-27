@@ -54,12 +54,21 @@
   #undef PARENT
 #undef MODEL
 
-/// nuisance params for bicep/keck array likelihood implemented in MontePython
+/// nuisance params for bicep/keck array BK14 likelihood implemented in MontePython
 #define MODEL cosmo_nuisance_BK14
     START_MODEL
-    DEFINEPARS(BBdust, BBsync,BBalphadust,BBbetadust,BBTdust,BBalphasync,BBbetasync,BBdustsynccorr,EEtoBB_dust,EEtoBBsync)
+    DEFINEPARS(BBdust,BBsync,BBalphadust,BBbetadust,BBTdust,BBalphasync,BBbetasync,BBdustsynccorr,EEtoBB_dust,EEtoBB_sync)
 #undef MODEL
 
+/// nuisance params for bicep/keck array BK14priors likelihood implemented in MontePython
+/// nuisance params for bicep/keck array BK14priors likelihood implemented in MontePython
+#define MODEL cosmo_nuisance_BK14priors
+  #define PARENT cosmo_nuisance_BK14
+    START_MODEL
+    DEFINEPARS(BBbetadust,BBbetasync)
+    INTERPRET_AS_PARENT_FUNCTION(cosmo_nuisance_BK14priors_to_cosmo_nuisance_BK14)
+  #undef PARENT
+#undef MODEL
 /// nuisance params for CFHTLenS tomographic weak lensing likelihood implemented in MontePython
 #define MODEL cosmo_nuisance_CFHTLens_correlation
     START_MODEL
