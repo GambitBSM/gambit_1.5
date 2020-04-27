@@ -74,12 +74,12 @@ Scanner:
 #======== Observables of interest ========
 ObsLikes:
   - purpose:      LogLike
-    capability:   md21_lnL
+    capability:   md21_NuFit_v4_1_lnL
     module:       NeutrinoBit
     type:         double
 
   - purpose:      LogLike
-    capability:   md3l_lnL
+    capability:   md3l_NuFit_v4_1_lnL
     module:       NeutrinoBit
     type:         double
 

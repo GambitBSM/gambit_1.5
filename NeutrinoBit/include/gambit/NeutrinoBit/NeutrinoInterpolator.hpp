@@ -39,9 +39,13 @@ namespace Gambit
         // Constructor
         NeutrinoInterpolator(std::string file)
         {
+          str filename = GAMBIT_DIR "/"+file;
+          if(not Utils::file_exists(filename))
+            NeutrinoBit_error().raise(LOCAL_INFO, "Data file '"+filename+"' does not exist.\n");
+
           // Read file
           std::vector<std::pair<double,double> > array;
-          std::ifstream f(GAMBIT_DIR "/"+file);
+          std::ifstream f(filename);
           std::string line;
           while(getline(f, line))
           {
@@ -103,11 +107,15 @@ namespace Gambit
         // Constructor
         NeutrinoInterpolator2D(std::string file)
         {
+          str filename = GAMBIT_DIR "/"+file;
+          if(not Utils::file_exists(filename))
+            NeutrinoBit_error().raise(LOCAL_INFO, "Data file '"+filename+"' does not exist.\n");
+
           // Read file
           std::vector<double> xvals, yvals;
           std::map<std::pair<double,double>,double> zvals;
           double maxzval = 0;
-          std::ifstream f(GAMBIT_DIR "/"+file);
+          std::ifstream f(filename);
           std::string line;
           while(getline(f, line))
           {
