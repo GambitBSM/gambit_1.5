@@ -7,5 +7,11 @@
   
 # just for testing.. set prior ranges to sensible values
 # if you want to use the BK14priors likelihoods
-BBalphadust: 0.78
-BBbetadust: 0.78
+BBalphadust: 
+  prior_type: gaussian
+  mean: [1.59]
+  sigs: [0.11]
+BBbetadust:
+  prior_type: gaussian
+  mean: [-3.1]
+  sigs: [0.3]
