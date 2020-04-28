@@ -18,16 +18,25 @@
 #======== Input parameter declarations =======
 Parameters:
 
- # --- import model parameters for models to scan over ---
- LCDM: !import include/LCDM_fixed.yaml        # base LCDM
+  # Base LCDM
+  LCDM: !import include/LCDM_scan.yaml
 
- # Everything Neff and eta related
- #etaBBN: !import include/etaBBN.yaml
- rBBN_rCMB_dNurBBN_dNurCMB:
-  dNur_BBN: 0.698708
-  dNur_CMB: 0.388434
-  r_BBN: 1.08566
-  r_CMB: 0.947919
+  # Minimal version of simple power-law spectrum of perturbations
+  Minimal_PowerLaw_ps:
+    ln10A_s:
+      prior_type: flat
+      range: [2.9,3.2]
+    n_s:
+      prior_type: flat
+      range: [0.9,1.10]
+
+  # Everything Neff and eta related
+  #etaBBN: !import include/etaBBN.yaml
+  rBBN_rCMB_dNurBBN_dNurCMB:
+    dNur_BBN: 0.698708
+    dNur_CMB: 0.388434
+    r_BBN: 1.08566
+    r_CMB: 0.947919
 
   #dNeff_CMB:
   #  prior_type: flat
@@ -42,12 +51,11 @@ Parameters:
   #  prior_type: flat
   #  range: [0.8,1.2]
 
+  # neutrino masses
+  StandardModel_SLHA2: !import include/StandardModel_SLHA2_Planckbaseline.yaml
 
- # neutrino masses
- StandardModel_mNudiff: !import include/StandardModel_mNudiff_NH_scan.yaml
-
- # Cosmological nuisance parameters (except for Planck CMB Likelihoods)
- cosmo_nuisance_Pantheon: !import include/cosmo_nuisance_Pantheon.yaml
+  # Cosmological nuisance parameters (except for Planck CMB Likelihoods)
+  cosmo_nuisance_Pantheon: !import include/cosmo_nuisance_Pantheon.yaml
 
 #======== Prior setup ========
 Priors:

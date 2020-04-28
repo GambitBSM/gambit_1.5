@@ -59,11 +59,14 @@
 Parameters:
 
   # Neutrino masses, choose between normal hierachy (NH) and inverted hierarch (IH)
-  #    To fix the sum of the neutrino masses to 0.06 with only one massive neutrino
-  #    (as in Planck 'baseline' analysis don't include the model 'StandardModel_mNudiff'
-  #    into the scan)
   StandardModel_mNudiff: !import include/StandardModel_mNudiff_NH_scan.yaml
   #StandardModel_mNudiff: !import include/StandardModel_mNudiff_IH_scan.yaml
+
+  # To fix the sum of the neutrino masses to 0.06 with only one massive neutrino
+  #    (as in Planck 'baseline' analysis don't include the model 'StandardModel_mNudiff'
+  #    into the scan)
+  # uncomment the line below (and do not use 'StandardModel_mNudiff') 
+  #StandardModel_SLHA2: !import include/StandardModel_SLHA2_Planckbaseline.yaml
 
   # base-line LCDM model parameters and prior
   LCDM:
@@ -76,16 +79,19 @@ Parameters:
     H0:
       prior_type: flat
       range: [62,74]
+    tau_reio:
+      prior_type: flat
+      range: [0.004,0.20]
+    T_cmb: 2.72548
+
+  # minimal base-line power-law power spectrum and priors
+  Minimal_PowerLaw_ps:
     ln10A_s:
       prior_type: flat
       range: [2.9,3.2]
     n_s:
       prior_type: flat
       range: [0.9,1.10]
-    tau_reio:
-      prior_type: flat
-      range: [0.004,0.20]
-    T_cmb: 2.72548
 
   # extension of standard LCDM: allow for values of dNeff @CMB & @ BBN different from today
   dNurBBN_dNurCMB:
