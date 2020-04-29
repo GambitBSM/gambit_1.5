@@ -83,8 +83,8 @@ BE_FUNCTION(Switch_to_superPMNS, void,
         ), ("__model_data_MOD_switch_to_superckm", "model_data_mp_switch_to_superckm_"), "SPheno_internal")
 
 BE_FUNCTION(GetRenormalizationScale, Freal8, (), ("__loopfunctions_MOD_getrenormalizationscale", "loopfunctions_mp_getrenormalizationscale_"), "SPheno_internal")
+BE_FUNCTION(SetHighScaleModel, Flogical, (Fstring20), ("__sugraruns_MOD_sethighscalemodel", "sugraruns_mp_sethighscalemodel_"), "SPheno_internal")
 BE_FUNCTION(SetRGEScale, void, (Freal8&), ("__sugraruns_MOD_setrgescale", "sugraruns_mp_setrgescale_"), "SPheno_internal")
-//BE_FUNCTION(SetHighScaleModel, Flogical, (Fstring<20>), ("__sugraruns_MOD_sethighscalemodel", "sugraruns_mp_sethighscalemodel_"), "SPheno_internal")
 BE_FUNCTION(SetGUTScale, void, (Freal8&), ("__sugraruns_MOD_setgutscale", "sugraruns_mp_setgutscale_"), "SPheno_internal")
 BE_FUNCTION(SetStrictUnification, Flogical, (Flogical&), ("__sugraruns_MOD_setstrictunification", "sugraruns_mp_setstrictunification_"), "SPheno_internal")
 BE_FUNCTION(SetYukawaScheme, Finteger, (Finteger&), ("__sugraruns_MOD_setyukawascheme", "sugraruns_mp_setyukawascheme_"), "SPheno_internal")

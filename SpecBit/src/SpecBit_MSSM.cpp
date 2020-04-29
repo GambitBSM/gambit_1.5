@@ -1140,7 +1140,6 @@ namespace Gambit
       // For example; add this to your input SLHAstruct:
       input_slha["GAMBIT"][""] << "BLOCK" << "GAMBIT";
       input_slha["GAMBIT"][""] <<      1  << 1e99 << "# Input scale";
-      std::cout << input_slha << std::endl; // test.
 
       // Retrieve any mass cuts
       static const Spectrum::mc_info mass_cut = myPipe::runOptions->getValueOrDef<Spectrum::mc_info>(Spectrum::mc_info(), "mass_cut");
@@ -1772,14 +1771,12 @@ namespace Gambit
            std::ostringstream label;
            label << name <<" "<< Par::toString.at(tag);
            specmap[label.str()] = subspec.get(tag,name);
-           //std::cout << label.str() <<", " << subspec.has(tag,name,overrides_only) << "," << subspec.has(tag,name,ignore_overrides) << std::endl; // debugging
            // Check again ignoring overrides (if the value has an override defined)
            if(subspec.has(tag,name,overrides_only) and
               subspec.has(tag,name,ignore_overrides))
            {
              label << " (unimproved)";
              specmap[label.str()] = subspec.get(tag,name,ignore_overrides);
-             //std::cout << label.str() << ": " << specmap[label.str()];
            }
          }
          // Check vector case
@@ -1789,14 +1786,12 @@ namespace Gambit
              std::ostringstream label;
              label << name <<"_"<<i<<" "<< Par::toString.at(tag);
              specmap[label.str()] = subspec.get(tag,name,i);
-             //std::cout << label.str() <<", " << subspec.has(tag,name,i,overrides_only) << "," << subspec.has(tag,name,i,ignore_overrides) << std::endl; // debugging
              // Check again ignoring overrides
              if(subspec.has(tag,name,i,overrides_only) and
                 subspec.has(tag,name,i,ignore_overrides))
              {
                label << " (unimproved)";
                specmap[label.str()] = subspec.get(tag,name,i,ignore_overrides);
-               //std::cout << label.str() << ": " << specmap[label.str()];
              }
            }
          }

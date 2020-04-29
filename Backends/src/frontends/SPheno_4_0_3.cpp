@@ -41,7 +41,8 @@ BE_NAMESPACE
   int run_SPheno(Spectrum &spectrum, const Finputs &inputs)
   {
 
-    Set_All_Parameters_0();
+    try{ Set_All_Parameters_0(); }
+    catch(std::runtime_error e) { invalid_point().raise(e.what()); }
 
     ReadingData(inputs);
 
@@ -58,24 +59,6 @@ BE_NAMESPACE
       
     spectrum = Spectrum_Out(inputs);
 
-    // In debug mode, output a summary line with masses and parameters to the logger,
-    // to aid quick tests/debugging of ongoing scans
-    std::stringstream summary_line;
-    summary_line << "Spectrum summary:"
-                 << " mN1=" << (*Chi0)(1).m
-                 << " mN2=" << (*Chi0)(2).m
-                 << " mN3=" << (*Chi0)(3).m
-                 << " mN4=" << (*Chi0)(4).m
-                 << " mC1=" << (*ChiPm)(1).m
-                 << " mC2=" << (*ChiPm)(2).m
-                 << " mh1=" << (*S0)(1).m
-                 << " mh2=" << (*S0)(2).m
-                 << " ma1=" << (*P0)(2).m
-                 << " M1=" << *inputs.param.at("M1")
-                 << " M2=" << *inputs.param.at("M2")
-                 << " TanBeta=" << *inputs.param.at("TanBeta");
-    logger() << LogTags::debug << summary_line.str() << EOM;
-    
     return *kont;
 
   }
@@ -196,6 +179,7 @@ BE_NAMESPACE
     slha["SMINPUTS"][""] << 22 << (*mf_u)(1) << "# m_u(2 GeV), MSbar";
     slha["SMINPUTS"][""] << 23 << (*mf_d)(2) << "# m_s(2 GeV), MSbar";
     slha["SMINPUTS"][""] << 24 << (*mf_u)(2) << "# m_c(m_c), MSbar";
+
 
     Farray<Fcomplex16,1,6,1,6> RDsq_ckm, RUsq_ckm, RSl_pmns;
     Farray<Fcomplex16,1,3,1,3> RSn_pmns, id3C;
@@ -548,12 +532,12 @@ BE_NAMESPACE
     // BLOCK HMIX
     SLHAea_add_block(slha, "HMIX", Q);
     slha["HMIX"][""] << 1 << mu->re << "# mu";
-    slha["HMIX"][""] << 2 << *tanb_Q << "# tan[beta](Q)";
-    slha["HMIX"][""] << 3 << *vev_Q << "# v(Q)";
-    slha["HMIX"][""] << 4 << *mA2_Q << "# m^2_A(Q)";
-    slha["HMIX"][""] << 101 << B->re << "# Bmu DRBar";
-    slha["HMIX"][""] << 102 << (*vevSM)(1) << "# vd DRBar";
-    slha["HMIX"][""] << 103 << (*vevSM)(2) << "# vu DRBar";
+   slha["HMIX"][""] << 2 << *tanb_Q << "# tan[beta](Q)";
+   slha["HMIX"][""] << 3 << *vev_Q << "# v(Q)";
+   slha["HMIX"][""] << 4 << *mA2_Q << "# m^2_A(Q)";
+   slha["HMIX"][""] << 101 << B->re << "# Bmu DRBar";
+   slha["HMIX"][""] << 102 << (*vevSM)(1) << "# vd DRBar";
+   slha["HMIX"][""] << 103 << (*vevSM)(2) << "# vu DRBar";
 
     if(mu->im != 0)
     {
@@ -703,10 +687,9 @@ BE_NAMESPACE
         }
       }
 
-
     // Block GAMBIT
-    //SLHAea_add_block(slha, "GAMBIT");
-    //slha["GAMBIT"][""] << 1 << *m_GUT << "# Input scale of (upper) boundary contidions, e.g. GUT scale";
+    SLHAea_add_block(slha, "GAMBIT");
+    slha["GAMBIT"][""] << 1 << *m_GUT << "# Input scale of (upper) boundary contidions, e.g. GUT scale";
 
     //Create Spectrum object
     static const Spectrum::mc_info mass_cut;
@@ -714,7 +697,7 @@ BE_NAMESPACE
     Spectrum spectrum = spectrum_from_SLHAea<MSSMSimpleSpec, SLHAstruct>(slha,slha,mass_cut,mass_ratio_cut);
 
     // Add the high scale variable by hand
-    //spectrum.get_HE().set_override(Par::mass1, SLHAea::to<double>(slha.at("GAMBIT").at(1).at(1)), "high_scale", true);
+    spectrum.get_HE().set_override(Par::mass1, SLHAea::to<double>(slha.at("GAMBIT").at(1).at(1)), "high_scale", true);
 
     return spectrum;
 
@@ -773,6 +756,7 @@ BE_NAMESPACE
     /*******************************/
     /* Block SPHENOINPUT (options) */
     /*******************************/
+
     // 1, Error_Level
     *ErrorLevel = inputs.options->getValueOrDef<Finteger>(-1, "ErrorLevel");
 
@@ -892,16 +876,16 @@ BE_NAMESPACE
     *l_fit_RP_parameters = false;
 
     // 92, for Pythia input
-    *l_RP_Pythia = false;
+    // GAMBIT: private variable, cannot import
 
     // 93, calculates cross section in case of RP, only partially implemented
     *l_CSrp = false;
 
     // 94, calculates cross section in case of RP, only partially implemented
-    *io_RP = false;
+    // GAMBIT: private variable, cannot import
 
     // 99, MADGraph output style, some additional information
-    *MADGraph_style = false;
+    // GAMBIT: private variable, cannot import
 
     // 100, use bsstep instead of rkqs
     Flogical Use_bsstep_instead_of_rkqs = inputs.options->getValueOrDef<bool>(false, "Use_bsstep_instead_of_rkqs");
@@ -920,7 +904,7 @@ BE_NAMESPACE
     }
 
     // 110, write output for LHC observables
-    *LWrite_LHC_Observables = false;
+    // GAMBIT: private variable, cannot import
 
     // Silence screen output, added by GAMBIT to SPheno
     *SilenceOutput = inputs.options->getValueOrDef<bool>(false, "SilenceOutput");
@@ -1349,7 +1333,12 @@ BE_INI_FUNCTION
     /****************/
     /* Block MODSEL */
     /****************/
-    if((*ModelInUse)("MSSM63atQ"))
+    if((*ModelInUse)("CMSSM") or (*ModelInUse)("MSSM63atMGUT"))
+    {
+      *HighScaleModel = "mSUGRA";
+      SetHighScaleModel("SUGRA");
+    }
+    else if((*ModelInUse)("MSSM63atQ"))
     {
       *HighScaleModel = "MSSM";
     }
