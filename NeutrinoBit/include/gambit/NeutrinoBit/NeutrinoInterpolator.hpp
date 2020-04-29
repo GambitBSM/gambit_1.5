@@ -49,6 +49,9 @@ namespace Gambit
           std::string line;
           while(getline(f, line))
           {
+            if(line.empty() or line[0] == '#')
+              continue;
+
             std::stringstream iss(line);
             std::pair<double,double> point;
             iss >> point.first;
