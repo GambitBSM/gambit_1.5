@@ -63,10 +63,7 @@ START_MODULE
     DEPENDENCY(minimum_fraction,double)
     DEPENDENCY(lifetime,double)
     DEPENDENCY(RD_oh2, double)
-    ALLOW_MODEL_DEPENDENCE(GeneralCosmoALP,LCDM)
-    MODEL_GROUP(alp,(GeneralCosmoALP))
-    MODEL_GROUP(cosmo,(LCDM))
-    ALLOW_MODEL_COMBINATION(cosmo,alp)
+    ALLOW_JOINT_MODEL(LCDM, GeneralCosmoALP)
     #undef FUNCTION
   #undef CAPABILITY
 
@@ -75,10 +72,7 @@ START_MODULE
     #define FUNCTION total_DM_abundance_ALP
     START_FUNCTION(double)
     DEPENDENCY(DM_fraction,double)
-    ALLOW_MODEL_DEPENDENCE(GeneralCosmoALP,LCDM)
-    MODEL_GROUP(alp,(GeneralCosmoALP))
-    MODEL_GROUP(cosmo,(LCDM))
-    ALLOW_MODEL_COMBINATION(cosmo,alp)
+    ALLOW_JOINT_MODEL(LCDM, GeneralCosmoALP)
     #undef FUNCTION
   #undef CAPABILITY
 
@@ -103,10 +97,7 @@ START_MODULE
     #define FUNCTION minimum_fraction_ALP
     START_FUNCTION(double)
     DEPENDENCY(minimum_abundance,double)
-    ALLOW_MODEL_DEPENDENCE(GeneralCosmoALP,LCDM)
-    MODEL_GROUP(alp,(GeneralCosmoALP))
-    MODEL_GROUP(cosmo,(LCDM))
-    ALLOW_MODEL_COMBINATION(cosmo,alp)
+    ALLOW_JOINT_MODEL(LCDM,GeneralCosmoALP)
     #undef FUNCTION
   #undef CAPABILITY
 
@@ -149,32 +140,22 @@ START_MODULE
   // Capabilities related to setting neutrino masses,
   // temperature, ncdm components & number of ultra-relativistic species Nur
 
-  #define CAPABILITY NuMasses_SM
-  START_CAPABILITY
-    #define FUNCTION set_NuMasses_SM_baseline
-    START_FUNCTION(map_str_dbl)
-    #undef FUNCTION
-
-    #define FUNCTION set_NuMasses_SM
-    START_FUNCTION(map_str_dbl)
-    ALLOW_MODELS(StandardModel_SLHA2)
-    #undef FUNCTION
-  #undef CAPABILITY
-
+  // Total mass of neutrinos (in eV)
   #define CAPABILITY mNu_tot
   START_CAPABILITY
     #define FUNCTION get_mNu_tot
     START_FUNCTION(double)
-    DEPENDENCY(NuMasses_SM, map_str_dbl)
+    ALLOW_MODEL(StandardModel_SLHA2)
     #undef FUNCTION
   #undef CAPABILITY
 
+  // Value of N_ur (today) (aka. contribution of massive neutrinos which are still relativistic)
   #define CAPABILITY N_ur
   START_CAPABILITY
     #define FUNCTION get_N_ur
     START_FUNCTION(double)
+    ALLOW_MODEL(StandardModel_SLHA2)
     MODEL_CONDITIONAL_DEPENDENCY(etaBBN_rBBN_rCMB_dNurBBN_dNurCMB_parameters,ModelParameters,etaBBN_rBBN_rCMB_dNurBBN_dNurCMB)
-    DEPENDENCY(NuMasses_SM, map_str_dbl)
     #undef FUNCTION
   #undef CAPABILITY
 
@@ -188,17 +169,6 @@ START_MODULE
     #undef FUNCTION
   #undef CAPABILITY
 
-  // Number of e-folds before the end of inflation. If no inflation model is in use,
-  // this can be set by a yaml file rule. Otherwise, it is obtained from the model of inflation.
-  #define CAPABILITY N_pivot
-  START_CAPABILITY
-    #define FUNCTION set_N_pivot
-    START_FUNCTION(double)
-    ALLOW_MODELS(LCDM, LCDM_theta)
-    ALLOW_MODELS(Inflation_InstReh_1mono23, Inflation_InstReh_1linear, Inflation_InstReh_1quadratic, Inflation_InstReh_1quartic, Inflation_InstReh_1natural, Inflation_InstReh_1Starobinsky)
-    #undef FUNCTION
-  #undef CAPABILITY
-
   // ------------------------
 
   // Capabilities related to setting input options for CLASS
@@ -208,11 +178,10 @@ START_MODULE
   START_CAPABILITY
     #define FUNCTION set_classy_baseline_params
     START_FUNCTION(pybind11::dict)
-    ALLOW_MODELS(LCDM,LCDM_no_primordial,LCDM_theta,LCDM_theta_no_primordial)
-    //ALLOW_MODELS(LCDM)
+    ALLOW_MODELS(LCDM,LCDM_theta)
     MODEL_CONDITIONAL_DEPENDENCY(classy_parameters_EnergyInjection, pybind11::dict, AnnihilatingDM_general, DecayingDM_general)
     MODEL_CONDITIONAL_DEPENDENCY(classy_PlanckLike_input, pybind11::dict, cosmo_nuisance_Planck_lite,cosmo_nuisance_Planck_TTTEEE,cosmo_nuisance_Planck_TT,plik_dx11dr2_HM_v18_TT)
-    DEPENDENCY(BBN_abundances, BBN_container)
+    DEPENDENCY(helium_abundance, double)
     DEPENDENCY(classy_NuMasses_Nur_input, pybind11::dict)
     #undef FUNCTION
   #undef CAPABILITY
@@ -239,24 +208,17 @@ START_MODULE
     // H0, tau_reio, Omega_m, Omega_b plus an external primordial power spectrum
     #define FUNCTION set_classy_parameters_primordial_ps
     START_FUNCTION(Classy_input)
-    //ALLOW_MODELS(LCDM_no_primordial)
-    MODEL_GROUP(inflation,(Inflation_InstReh_1mono23, Inflation_InstReh_1linear, Inflation_InstReh_1quadratic, Inflation_InstReh_1quartic, Inflation_InstReh_1natural, Inflation_InstReh_1Starobinsky))
-    MODEL_GROUP(cosmo,(LCDM_no_primordial))
-    ALLOW_MODEL_COMBINATION(cosmo,inflation)
-    DEPENDENCY(classy_baseline_params, pybind11::dict)
     DEPENDENCY(primordial_power_spectrum, Primordial_ps)
+    DEPENDENCY(classy_baseline_params, pybind11::dict)
     DEPENDENCY(k_pivot, double)
-    DEPENDENCY(N_pivot, double)
     #undef FUNCTION
 
     // H0, tau_reio, Omega_m, Omega_b plus an external *parametrised* primordial power spectrum
     #define FUNCTION set_classy_parameters_parametrised_ps
     START_FUNCTION(Classy_input)
-    //ALLOW_MODELS(LCDM_no_primordial, LCDM)
+    ALLOW_MODELS(PowerLaw_ps)
     DEPENDENCY(classy_baseline_params, pybind11::dict)
-    DEPENDENCY(parametrised_power_spectrum,   Parametrised_ps)
     DEPENDENCY(k_pivot, double)
-    DEPENDENCY(N_pivot, double)
     #undef FUNCTION
   #undef CAPABILITY
 
@@ -289,9 +251,9 @@ START_MODULE
   START_CAPABILITY
     #define FUNCTION set_classy_NuMasses_Nur_input
     START_FUNCTION(pybind11::dict)
-    DEPENDENCY(T_ncdm,            double)
-    DEPENDENCY(NuMasses_SM, map_str_dbl)
-    DEPENDENCY(N_ur,double)
+    ALLOW_MODEL(StandardModel_SLHA2)
+    DEPENDENCY(T_ncdm, double)
+    DEPENDENCY(N_ur, double)
     #undef FUNCTION
   #undef CAPABILITY
 
@@ -299,7 +261,7 @@ START_MODULE
 
   // Primodial power spectra (MultiModeCode)
 
-  // Initialise settings for MultiModeCode
+  /// Initialise settings for MultiModeCode
   #define CAPABILITY multimode_input_parameters
   START_CAPABILITY
     #define FUNCTION set_multimode_inputs
@@ -309,50 +271,31 @@ START_MODULE
     #undef FUNCTION
   #undef CAPABILITY
 
-  #define CAPABILITY parametrised_power_spectrum
-  START_CAPABILITY
-    #define FUNCTION get_multimode_parametrised_ps
-    START_FUNCTION(Parametrised_ps)
-    MODEL_GROUP(inflation,(Inflation_InstReh_1mono23, Inflation_InstReh_1linear, Inflation_InstReh_1quadratic, Inflation_InstReh_1quartic, Inflation_InstReh_1natural, Inflation_InstReh_1Starobinsky))
-    MODEL_GROUP(cosmo,(LCDM_no_primordial))
-    ALLOW_MODEL_COMBINATION(cosmo,inflation)
-    DEPENDENCY(multimode_input_parameters, Multimode_inputs)
-    BACKEND_REQ(multimodecode_parametrised_ps, (), gambit_inflation_observables,
-     (int&,int&,int&,int&,double*,double*,double*,double&,double&,double&,int&,int&,int&,int&,int&))
-    #undef FUNCTION
-
-    #define FUNCTION get_parametrised_ps_LCDM
-    START_FUNCTION(Parametrised_ps)
-    ALLOW_MODELS(LCDM,LCDM_theta)
-    #undef FUNCTION
-  #undef CAPABILITY
-
-  #define CAPABILITY print_parametrised_ps
-  START_CAPABILITY
-    #define FUNCTION print_parametrised_ps
-    START_FUNCTION(map_str_dbl)
-    DEPENDENCY(parametrised_power_spectrum, Parametrised_ps)
-    #undef FUNCTION
-  #undef CAPABILITY
-
-  // Pass settings to MultiModeCode, run it and return the structure containing the results
+  /// Use MultiModeCode to compute a non-parametric primordial power spectrum
   #define CAPABILITY primordial_power_spectrum
   START_CAPABILITY
     #define FUNCTION get_multimode_primordial_ps
     START_FUNCTION(Primordial_ps)
-    ALLOW_MODELS(Inflation_InstReh_1mono23, Inflation_InstReh_1linear, Inflation_InstReh_1quadratic, Inflation_InstReh_1quartic, Inflation_InstReh_1natural, Inflation_InstReh_1Starobinsky)
     DEPENDENCY(multimode_input_parameters, Multimode_inputs)
     BACKEND_REQ(multimodecode_primordial_ps, (), gambit_inflation_observables,
      (int&,int&,int&,int&,double*,double*,double*,double&,double&,double&,int&,double&,double&,int&,int&,int&,int&,int&))
     #undef FUNCTION
-
-    /*
-    #define FUNCTION get_LCDM_primordial_ps
-    START_FUNCTION(Primordial_ps)
-    ALLOW_MODELS(LCDM)
-    #undef FUNCTION
-    */
   #undef CAPABILITY
+
+  /// Use MultiModeCode to compute a parameterised primordial power spectrum
+  #define CAPABILITY PowerLaw_ps_parameters
+  START_CAPABILITY
+    #define FUNCTION get_multimode_parametrised_ps
+    START_FUNCTION(ModelParameters)
+    DEPENDENCY(multimode_input_parameters, Multimode_inputs)
+    BACKEND_REQ(multimodecode_parametrised_ps, (), gambit_inflation_observables,
+     (int&,int&,int&,int&,double*,double*,double*,double&,double&,double&,int&,int&,int&,int&,int&))
+    #undef FUNCTION
+  #undef CAPABILITY
+
+  // -----------
+
+  // CMB (CLASS / Planck)
 
   #define CAPABILITY unlensed_Cl_TT
   START_CAPABILITY
@@ -606,7 +549,6 @@ START_MODULE
   START_CAPABILITY
     #define FUNCTION T_ncdm_SM
     START_FUNCTION(double)
-    ALLOW_MODELS(LCDM,LCDM_theta)
     #undef FUNCTION
   #undef CAPABILITY
 
@@ -725,7 +667,7 @@ START_MODULE
     #define FUNCTION compute_Omega0_ncdm
     START_FUNCTION(double)
     DEPENDENCY(H0, double)
-    DEPENDENCY(mNu_tot,double)
+    DEPENDENCY(mNu_tot, double)
     #undef FUNCTION
   #undef CAPABILITY
 
@@ -765,29 +707,6 @@ START_MODULE
     #undef FUNCTION
   #undef CAPABILITY
 
-/* Is there even a possible distinction between etaCMB and eta0?
-  #define CAPABILITY etaCMB
-  START_CAPABILITY
-    #define FUNCTION calculate_etaCMB_SM // here: eta0 = etaCMB
-    START_FUNCTION(double)
-    DEPENDENCY(eta0, double)
-    ALLOW_MODELS(LCDM_dNeffCMB_dNeffBBN_etaBBN) // To get etaCMB for LCDM_dNeffCMB_dNeffBBN_etaBBN
-    ALLOW_MODELS(LCDM_dNeffCMB_dNeffBBN) // Allow for all direct childs of LCDM_dNeffCMB_dNeffBBN_etaBBN. Needed for the translation into LCDM_dNeffCMB_dNeffBBN_etaBBN
-    ALLOW_MODELS(LCDM_ExtdNeffCMB_ExtetaBBN)
-    #undef FUNCTION
-  #undef CAPABILITY
-*/
-
-/* This capability lives now in the etaBBN_rBBN_rCMB_dNurBBN_dNurCMB model
-   by using the MAP_TO_CAPABILITY macro. It might be cleaner to have this definition here.
-   #define CAPABILITY etaBBN
-   START_CAPABILITY
-     #define FUNCTION set_etaBBN // etaBBN is model parameter
-     START_FUNCTION(double)
-     ALLOW_MODELS(etaBBN_rBBN_rCMB_dNurBBN_dNurCMB) // To get etaCMB for etaBBN_rBBN_rCMB_dNurBBN_dNurCMB
-     #undef FUNCTION
-   #undef CAPABILITY
-*/
   // Compute dNeff AND etaBBN for non-standard models
   #define CAPABILITY external_dNeff_etaBBN
   START_CAPABILITY
@@ -847,6 +766,14 @@ START_MODULE
     BACKEND_REQ(get_NNUC, (libbbn), int, ())
     BACKEND_REQ(get_abund_map_AlterBBN, (libbbn), map_str_int, ())
     BACKEND_OPTION( (AlterBBN), (libbbn) )
+    #undef FUNCTION
+  #undef CAPABILITY
+
+  #define CAPABILITY helium_abundance
+  START_CAPABILITY
+    #define FUNCTION extract_helium_abundance
+    START_FUNCTION(double)
+    DEPENDENCY(BBN_abundances, BBN_container)
     #undef FUNCTION
   #undef CAPABILITY
 

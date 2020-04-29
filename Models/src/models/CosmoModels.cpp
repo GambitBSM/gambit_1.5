@@ -16,11 +16,15 @@
 ///
 ///  \author Janina Renk
 ///          (janina.renk@fysik.su.se)
-///   \date 2019 Feb, Jun
+///  \date 2019 Feb, Jun
 ///
 ///  \author Sanjay Bloor
 ///          (sanjay.bloor12@imperial.ac.uk)
-///   \date 2019 Nov
+///  \date 2019 Nov
+///
+///  \author Pat Scott
+///          (pat.scott@uq.edu.au)
+///  \date 2020 Apr
 ///
 ///  *********************************************
 
@@ -36,50 +40,6 @@
 #include "gambit/Models/models/CosmoModels.hpp"
 
 /////////////// translation functions for Cosmology models ///////////////////////////
-
-// ΛCDM parameters without those relating to the primordial power spectrum (A_s, n_s)
-// This model should be scanned alongside an inflationary model able to provide
-// a primordial power spectrum. 
-#define MODEL LCDM_no_primordial
-void MODEL_NAMESPACE::LCDM_to_LCDM_no_primordial(const ModelParameters &myP, ModelParameters &targetP)
-{
-  logger()<<"Running interpret_as_parent calculations for LCDM --> LCDM_no_primordial ..." << LogTags::info << EOM;
-
-  // Same non-primordial parameters as vanilla ΛCDM.
-  targetP.setValue("T_cmb",     myP.getValue("T_cmb"));
-  targetP.setValue("H0",        myP.getValue("H0"));
-  targetP.setValue("omega_b",   myP.getValue("omega_b"));
-  targetP.setValue("omega_cdm", myP.getValue("omega_cdm"));
-  targetP.setValue("tau_reio",  myP.getValue("tau_reio"));
-
-  // Don't take any of the model parameters
-  targetP.setValue("n_s", 0.);
-  targetP.setValue("ln10A_s", 0.); 
-  // *Technically* log of 0 is undefined but I think this is okay for the translation functions...
-}
-#undef MODEL
-
-// ΛCDM_theta parameters without those relating to the primordial power spectrum (A_s, n_s)
-// This model should be scanned alongside an inflationary model able to provide
-// a primordial power spectrum. 
-#define MODEL LCDM_theta_no_primordial
-void MODEL_NAMESPACE::LCDM_theta_to_LCDM_theta_no_primordial(const ModelParameters &myP, ModelParameters &targetP)
-{
-  logger()<<"Running interpret_as_parent calculations for LCDM_theta --> LCDM_theta_no_primordial ..." << LogTags::info << EOM;
-
-  // Same non-primordial parameters as vanilla ΛCDM.
-  targetP.setValue("T_cmb",     myP.getValue("T_cmb"));
-  targetP.setValue("100theta_s",myP.getValue("100theta_s"));
-  targetP.setValue("omega_b",   myP.getValue("omega_b"));
-  targetP.setValue("omega_cdm", myP.getValue("omega_cdm"));
-  targetP.setValue("tau_reio",  myP.getValue("tau_reio"));
-
-  // Don't take any of the model parameters
-  targetP.setValue("n_s", 0.);
-  targetP.setValue("ln10A_s", 0.); 
-  // *Technically* log of 0 is undefined but I think this is okay for the translation functions...
-}
-#undef MODEL
 
 #define MODEL etaBBN
 void MODEL_NAMESPACE::etaBBN_to_etaBBN_rBBN_rCMB_dNurBBN_dNurCMB (const ModelParameters &myP, ModelParameters &targetP)
@@ -172,3 +132,35 @@ void MODEL_NAMESPACE::dNurCMB_to_dNurBBN_dNurCMB (const ModelParameters &myP, Mo
   targetP.setValue("dNur_CMB", myP.getValue("dNur_CMB"));
 }
 #undef MODEL
+
+#define MODEL Minimal_PowerLaw_ps
+void MODEL_NAMESPACE::Minimal_PowerLaw_ps_to_PowerLaw_ps (const ModelParameters &myP, ModelParameters &targetP)
+{
+  logger()<<"Running interpret_as_parent calculations for Minimal_PowerLaw_ps --> PowerLaw_ps ..."<<LogTags::info<<EOM;
+  targetP.setValues(myP);
+  targetP.setValue("N_pivot", 55);
+  targetP.setValue("r", 0);
+}
+#undef MODEL
+
+// Define a bunch of translation functions that just take power-law spectra from CosmoBit.
+// This is an example of "the most extreme case" discussed in the final paragraph of Sec 5.1
+// of the original GAMBIT paper.
+#define INFLATION_MODEL_TO_POWER_LAW(MODEL)                                               \
+void Gambit::Models::MODEL::as_PowerLaw(const ModelParameters&, ModelParameters &targetP) \
+{                                                                                         \
+  using namespace Gambit::Models::MODEL::Pipes::PowerLaw_ps_parameters;                   \
+  logger()<<"Running interpret_as_X calculations for "                                    \
+            STRINGIFY(MODEL) " --> PowerLaw_ps ..."<<LogTags::info<<EOM;                  \
+  /* Copy the parameters */                                                               \
+  targetP.setValues(*Dep::PowerLaw_ps_parameters);                                        \
+}
+
+INFLATION_MODEL_TO_POWER_LAW(Inflation_InstReh_1mono23)
+INFLATION_MODEL_TO_POWER_LAW(Inflation_InstReh_1linear)
+INFLATION_MODEL_TO_POWER_LAW(Inflation_InstReh_1quadratic)
+INFLATION_MODEL_TO_POWER_LAW(Inflation_InstReh_1quartic)
+INFLATION_MODEL_TO_POWER_LAW(Inflation_InstReh_1natural)
+INFLATION_MODEL_TO_POWER_LAW(Inflation_InstReh_1Starobinsky)
+
+#undef INFLATION_MODEL_TO_POWER_LAW
