@@ -2,7 +2,7 @@
 //  *********************************************
 ///  \file
 ///
-///  ScannerBit interface to PolyChord 1.14
+///  ScannerBit interface to PolyChord 1.17.1
 ///
 ///  Header file
 ///

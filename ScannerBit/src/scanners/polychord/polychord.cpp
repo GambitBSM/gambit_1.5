@@ -2,7 +2,7 @@
 //  *********************************************
 ///  \file
 ///
-///  ScannerBit interface to PolyChord 1.16
+///  ScannerBit interface to PolyChord 1.17.1
 ///
 ///  *********************************************
 ///
@@ -51,7 +51,7 @@ typedef Gambit::Scanner::like_ptr scanPtr;
 /// Interface to ScannerBit
 /// =================================================
 
-scanner_plugin(polychord, version(1, 16))
+scanner_plugin(polychord, version(1, 17, 1))
 {
    // An error is thrown if any of the following entries are not present in the inifile (none absolutely required for PolyChord).
    reqd_inifile_entries();
