@@ -224,6 +224,9 @@ ObsLikes:
     capability:   Planck_lensing_loglike
     function:     function_Planck_lensing_2018_loglike
 
+  - purpose:      LogLike
+    capability:   Planck_sz_prior_loglike
+
 #======== Rule entries ========
 Rules:
 
