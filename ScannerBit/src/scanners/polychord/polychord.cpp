@@ -346,7 +346,11 @@ namespace Gambit {
              int myrank  = dead[npars*i_dead + npars-4]; //MPI rank stored in fourth last column
              int pointID = dead[npars*i_dead + npars-3]; //pointID stored in third last column
              double logw = logweights[i_dead];           //posterior weight stored in logweights
+             double birth = dead[npars*i_dead + npars-2];   // birth contours
+             double death = dead[npars*i_dead + npars-1]; // death contours
              txt_stream->print( std::exp(logw), "Posterior", myrank, pointID);
+             txt_stream->print( birth, "LogLike_birth", myrank, pointID);
+             txt_stream->print( death, "LogLike_death", myrank, pointID);
           }
 
           // The last set of live points
