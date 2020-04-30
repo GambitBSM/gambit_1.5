@@ -110,7 +110,8 @@ std::string multimode_error_handling(int& err)
 
     // Otherwise -- who knows.
     default:
-      message = "GAMBIT caught an unknown error in MultiMode. Check MultiModeCode output and error messages for more info (set the 'debug' switch in 'set_multimode_inputs' to '1' if you have set it to '0').";
+      message = "GAMBIT caught an unknown error in MultiModeCode. Check MultiModeCode output and error messages for more "
+                "info (set the 'debug' switch in 'set_multimode_inputs' to '1' if you have set it to '0').";
   }
   return message;
 }
@@ -292,30 +293,6 @@ namespace Gambit
       gsl_interp_accel_free(gsl_accel_ptr);
     }
 
-
-    /// If no value for N_star (number of e folds before inflation ends) is specified in the yaml
-    /// file AND no inflation model is scanned fall back to default value of CLASS; otherwise
-    /// it is a model parameter of the
-    /// (heads-up: name in CLASS is N_star, not N_pivot)
-    void set_N_pivot(double &result)
-    {
-
-      using namespace Pipes::set_N_pivot;
-
-      // if N_pivot is not in Parameter map either read in yaml file Rule if it exists or
-      // fall back to default value in CLASS
-      if( Param.find("N_pivot") == Param.end())
-      {
-        result = runOptions->getValueOrDef<double>(60, "N_pivot");
-      }
-      // else "N_pivot" is contained in parameter map return the parameter value
-      else
-      {
-        result = *Param["N_pivot"];
-      }
-
-    }
-
     /// Function for setting k_pivot in Mpc^-1 for consistent use within CosmoBit
     /// (to make sure it is consistent between CLASS and multimodecode)
     void set_k_pivot(double &result)
@@ -323,106 +300,56 @@ namespace Gambit
       result = Pipes::set_k_pivot::runOptions->getValueOrDef<double>(0.05, "k_pivot");
     }
 
-
-    void set_NuMasses_SM_baseline(map_str_dbl &result)
-    {
-      // Fallback for NuMasses_SM capability if Neutrino masses are not set, i.e. neither StandardModel_SLHA2 nor any child is in use
-      // The Planck baseline analysis assumes a single massive neutrino with a fixed masss of 0.06 eV.
-      using namespace Pipes::set_NuMasses_SM_baseline;
-
-      result["mNu1"] = 0.06;
-      result["mNu2"] = 0.0;
-      result["mNu3"] = 0.0;
-
-      result["N_ncdm"] = 1;
-
-      result["mNu_tot_eV"] = 0.06;
-    }
-
-    void set_NuMasses_SM(map_str_dbl &result)
-    {
-      using namespace Pipes::set_NuMasses_SM;
-
-      double mNu1, mNu2, mNu3;
-      int N_ncdm = 0;
-
-      // (PS) Heads up! The units in StandardModel_SLHA2 are GeV
-      // Here we are using eV
-      mNu1 = 1e9*(*Param["mNu1"]);
-      mNu2 = 1e9*(*Param["mNu2"]);
-      mNu3 = 1e9*(*Param["mNu3"]);
-
-      if(mNu1 > 0.)
-        N_ncdm++;
-      if(mNu2 > 0.)
-        N_ncdm++;
-      if(mNu3 > 0.)
-        N_ncdm++;
-
-      result["mNu1"]=mNu1;
-      result["mNu2"]=mNu2;
-      result["mNu3"]=mNu3;
-
-      result["N_ncdm"] = N_ncdm;
-
-      result["mNu_tot_eV"] = mNu1 + mNu2 + mNu3;
-    }
-
     void get_mNu_tot(double& result)
     {
       using namespace Pipes::get_mNu_tot;
 
-      map_str_dbl NuMasses = *Dep::NuMasses_SM;
-      result = NuMasses["mNu_tot_eV"];
+      // The untis of StandardModel_SLHA2 are GeV; here we are using eV.
+      result = 1e9 * ( *Param["mNu1"] + *Param["mNu2"] + *Param["mNu3"] );
     }
 
+    // Returns the effective number of ultrarelativistic species today
     void get_N_ur(double& result)
     {
-      // Returns the effective number of ultrarelativistic species today
       using namespace Pipes::get_N_ur;
 
-      map_str_dbl NuMassInfo = *Dep::NuMasses_SM;
+      // The untis of StandardModel_SLHA2 are GeV; here we are using eV.
+      std::vector<double> nuMasses{
+        1e9*(*Param["mNu1"]), 1e9*(*Param["mNu2"]), 1e9*(*Param["mNu3"])
+      };
 
-      static bool allow_massless = runOptions->getValueOrDef<bool>(false,"allow_massless_neutrinos");
+      // Count the nonzero entries
+      auto isNonZero = [](double i) {return i > 0.;};
+      int N_ncdm = std::count_if(nuMasses.begin(), nuMasses.end(), isNonZero);
 
-      int N_ncdm = static_cast<int>(NuMassInfo["N_ncdm"]);
-      double N_ur{};
+      // Assing the result to the standard value of N_ur depending on the number of massive neutrinos.
       switch (N_ncdm)
       {
         case 1:
-          N_ur = 2.0328;  // N_ur (today) = 2.0328 for 1 massive neutrino at CMB release
+          result = 2.0328;  // N_ur (today) = 2.0328 for 1 massive neutrino at CMB release
           break;
         case 2:
-          N_ur= 1.0196;  // N_ur (today) = 1.0196 for 2 massive neutrino at CMB release
+          result = 1.0196;  // N_ur (today) = 1.0196 for 2 massive neutrino at CMB release
           break;
         case 3:
-          N_ur = 0.00641;  // N_ur (today) = 0.00641 for 3 massive neutrinos at CMB release
+          result = 0.00641;  // N_ur (today) = 0.00641 for 3 massive neutrinos at CMB release
           break;
         case 0:
-          if (!allow_massless)
-          {
-            std::ostringstream err;
-            err << "Warning/Error: All your neutrino masses are zero. The Planck baseline LCDM model assumes at least one massive neutrino of mass 0.06 eV.\n";
-            err << "A cosmological model without massive neutrinos can heavily affect your cosmological observables.\n\n";
-            err << "You can proceed at your own risk by adding\n\n";
-            err << "  - module: CosmoBit\n";
-            err << "    options:\n";
-            err << "      allow_massless_neutrinos: true\n\n";
-            err << "to the Rules section of the yaml-file";
-            CosmoBit_error().raise(LOCAL_INFO, err.str());
-          }
-          N_ur = 3.046;
+          result = 3.046;
           break;
         default:
           {
             std::ostringstream err;
             err << "You are asking for more than three massive neutrino species.\n";
-            err << "Such a case is not implemented in CosmoBit. If you want to consider this you can add it to the function 'get_N_ur' of the capability 'N_ur'.";
+            err << "Such a case is not implemented in CosmoBit. ";
+            err << "If you want to consider this you can add it to the function ";
+            err << "'get_N_ur' of the capability 'N_ur'.";
             CosmoBit_error().raise(LOCAL_INFO, err.str());
           }
       }
 
-      result = N_ur;
+      // If "etaBBN_rBBN_rCMB_dNurBBN_dNurCMB" is in use, the result will
+      // be scaled and gets extra contributions
       if (ModelInUse("etaBBN_rBBN_rCMB_dNurBBN_dNurCMB"))
       {
         // Check if the input for dNeff is negative (unphysical)
@@ -443,7 +370,7 @@ namespace Gambit
         }
 
         // If the check is passed, set the result.
-        result = pow(rCMB,4)*(N_ur) + dNurCMB;
+        result = pow(rCMB,4)*(result) + dNurCMB;
       }
       logger() << "N_ur calculated to be " << result << EOM;
     }
@@ -457,20 +384,28 @@ namespace Gambit
       // make sure dict is empty
       result.clear();
 
-      map_str_dbl NuMasses_SM = *Dep::NuMasses_SM;
-      int N_ncdm = static_cast<int>(NuMasses_SM["N_ncdm"]);
-
       // set number of ultra relativistic species
       result["N_ur"] = *Dep::N_ur;
 
-      // Number of non-cold DM species
-      // if non-zero a mass & temperature for each species has to be
+      // Get the neutrino masses
+      // The untis of StandardModel_SLHA2 are GeV; here we are using eV.
+      std::vector<double> nuMasses{
+        1e9*(*Param["mNu1"]), 1e9*(*Param["mNu2"]), 1e9*(*Param["mNu3"])
+      };
+
+      // Count the nonzero entries
+      auto isNonZero = [](double i) {return i > 0.;};
+      int N_ncdm = std::count_if(nuMasses.begin(), nuMasses.end(), isNonZero);
+
+      // if nonzero, a mass & temperature for each species has to be
       // passed to class
       if (N_ncdm > 0.)
       {
         result["N_ncdm"] = N_ncdm;
 
-        std::vector<double> m_ncdm = m_ncdm_classInput(NuMasses_SM);
+        std::vector<double> m_ncdm(N_ncdm);
+        std::copy_if(nuMasses.begin(), nuMasses.end(), m_ncdm.begin(), isNonZero);
+
         // head up: this explicitly assumed that all ncdm components have the same temperature!! todo ?
         std::vector<double> T_ncdm(N_ncdm,*Dep::T_ncdm);
 
@@ -532,17 +467,11 @@ namespace Gambit
       result["omega_cdm"] =     *Param["omega_cdm"];
 
       // Depending on parametrisation, pass either Hubble or the acoustic scale
-      if (ModelInUse("LCDM"))
-      {
-        result["H0"] =  *Param["H0"];
-      }
-      else if (ModelInUse("LCDM_theta"))
-      {
-        result["100*theta_s"] = *Param["100theta_s"];
-      }
+      if (ModelInUse("LCDM")) result["H0"] = *Param["H0"];
+      else result["100*theta_s"] = *Param["100theta_s"];
 
       // Set helium abundance
-      result["YHe"] = Dep::BBN_abundances->get_BBN_abund("He4");
+      result["YHe"] = *Dep::helium_abundance;
 
       // TODO: need to test if class or exo_class in use! does not work -> (JR) should be fixed with classy implementation
       // -> (JR again) not sure if that is actually true.. need to test.
@@ -551,7 +480,6 @@ namespace Gambit
         // add Decaying/annihilating DM specific options to python dictionary passed to CLASS, consistency checks only executed in first run
         merge_pybind_dicts(result,*Dep::classy_parameters_EnergyInjection, first_run);
       }
-
 
       // Other Class input direct from the YAML file
       // check if these are already contained in the input dictionary -- if so throw an error
@@ -583,44 +511,30 @@ namespace Gambit
                 "are considering.");
             }
           }
+          // Make sure that user did not try to pass k_pivot, N_star or P_k_ini type through class dictionary.
+          // These are fixed by capabilities to ensure consistent use throughout the code
+          if (yaml_input.contains("k_pivot") || yaml_input.contains("N_star"))
+          {
+            CosmoBit_error().raise(LOCAL_INFO,
+                  "You tried to pass 'k_pivot' and/or 'N_star' to CLASS. These values must \n"
+                  "be set consistently throughout the code. N_pivot is set automatically\n"
+                  "by the assumption of instant reheating, or as an explicit model parameter.\n"
+                  "k_pivot can be set by adding\n "
+                  "  - capability: k_pivot\n    function: set_k_pivot\n    options:\n"
+                  "      k_pivot: 0.02\n"
+                  "to the Rules section of your yaml file.");
+          }
+          if (yaml_input.contains("P_k_ini type"))
+          {
+            CosmoBit_error().raise(LOCAL_INFO,
+              "GAMBIT will take care of setting all CLASS inputs regarding the primordial power spectrum consistently.\n"
+              "Please remove the option 'P_k_ini type' for the capability 'classy_baseline_params'.");
+          }
         }
       }
 
-      /// check that user did not try to pass k_pivot or N_star through class dictionary -- these are
-      /// fixed by capabilities to ensure consistent use throughout the code
-      if (yaml_input.contains("k_pivot") || yaml_input.contains("N_star"))
-      {
-
-        CosmoBit_error().raise(LOCAL_INFO, "You tried to pass (one of) the parameters - k_pivot\n  - N_star\n"
-              "to CLASS. If an inflationary model is in use these have to be consistent throughout the code."
-              "Hence, the values have to be set via a capability. Add "
-              "  - capability: k_pivot\n    function: set_k_pivot\n    options:\n"
-              "      k_pivot: 0.02\n"
-              "or\n"
-              "  - capability: N_pivot\n    function: set_N_pivot\n    options:\n"
-              "      N_pivot: 40\n"
-              "to the Rules section of your yaml file. If you are not scanning an inflation model "
-              "in combination with LCDM_no_primordial the rule for N_pivot will be ignored as it is an "
-              "inflationary model parameter. It will therefore be set to the according value.");
-
-      }
-      // If the model LCDM_no_primordial is used the primordial power spectrum is computed independent of CLASS. Therefore
-      // this option should not be passed by the user
-      if (ModelInUse("LCDM_no_primordial") || ModelInUse("LCDM_theta_no_primordial"))
-      {
-        if (yaml_input.contains("P_k_ini type"))
-        {
-          CosmoBit_error().raise(LOCAL_INFO, "You are using the model 'LCDM_no_primordial' which means the (shape of the) primordial "
-                "power spectrum is set by an additional inflation model. Therefore the computation of the pps happens "
-                "independent of CLASS.\n"
-                "GAMBIT will take care of setting all CLASS inputs regarding that consistently. Please remove the option "
-                "'P_k_ini type' for the capability 'classy_baseline_params'");
-        }
-      }
-
-      // add yaml options to python dictionary passed to CLASS, consistency checks only executed in first run
-      merge_pybind_dicts(result,yaml_input, first_run);
-
+      // Add yaml options to python dictionary passed to CLASS; consistency checks only executed on first run
+      merge_pybind_dicts(result, yaml_input, first_run);
 
       // At last: if the Planck likelihood is used add all relevant input parameters to the CLASS dictionary:
       // output: 'lCl, pCl, tCl', lensing: yes, non linear: halofit , l_max_scalar: 2508
@@ -630,16 +544,14 @@ namespace Gambit
       //   in the lensing or non linear choice will rightfully trigger an error.
       if (ModelInUse("cosmo_nuisance_Planck_lite") || ModelInUse("cosmo_nuisance_Planck_TTTEEE")|| ModelInUse("cosmo_nuisance_Planck_TT"))
       {
-        // add Planck like specific options to python dictionary passed to CLASS, consistency checks only executed in first run
+        // add Planck-likelihood-specific options to python dictionary passed to CLASS; consistency checks only executed on first run
         merge_pybind_dicts(result,*Dep::classy_PlanckLike_input, first_run);
       }
 
       first_run = false;
     }
 
-    /// Set the LCDM_no_primordial_ps in classy. Depends on a parametrised primordial_ps.
-    /// Looks at the parameters used in a run,
-    /// and passes them to classy in the form of a Python dictionary.
+    /// Set the classy parameter for an LCDM run with a parameterised primordial power spectrum.
     void set_classy_parameters_parametrised_ps(Classy_input& result)
     {
       using namespace Pipes::set_classy_parameters_parametrised_ps;
@@ -650,26 +562,24 @@ namespace Gambit
       result.clear();
 
       // Now need to pass the primordial power spectrum
-      // TODO check whether A_s from MultiModeCode has the log taken or not.
-      Parametrised_ps pps = *Dep::parametrised_power_spectrum;
-      result.add_entry("n_s", pps.get_n_s());
-      result.add_entry("ln10^{10}A_s", pps.get_ln10A_s());
+      // FIXME are the units on A_s correct here or should there be another 10?
+      result.add_entry("n_s", *Param["n_s"]);
+      result.add_entry("ln10^{10}A_s", *Param["ln10A_s"]);
 
       // add k_pivot entry
       result.add_entry("P_k_ini type", "analytic_Pk");
       result.add_entry("k_pivot", *Dep::k_pivot);
-
 
       // if r = 0 only compute scalar modes, else tensor modes as well
       //
       // => don't explicitly set "modes" to 's' since it defaults to it. If you set it here anyways
       // you won't be able to run CLASS when only requesting background quantities (e.g. for BAO & SNe likelihoods)
       // as the perturbations module won't run and therefore the entry "modes" won't be read.
-      if(pps.get_r() == 0){}
+      if(*Param["r"] == 0){}
       else
       {
         // don't set to zero in CLASS dict as it won't be read if no tensor modes are requested
-        result.add_entry("r", pps.get_r());
+        result.add_entry("r", *Param["r"]);
         result.add_entry("modes","t,s");
       }
 
@@ -685,15 +595,13 @@ namespace Gambit
       if(common_keys != "")
       {
         CosmoBit_error().raise(LOCAL_INFO, "The key(s) '" + common_keys + "' already "
-                "exists in the CLASSY dictionary. You are probably trying to override a CLASS setting. Check that none "
-                "of the parameters you pass through your yaml file through RunOptions for the capability 'classy_baseline_params' "
+                "exist in the CLASSY dictionary. You are probably trying to override a CLASS setting. Check that none "
+                "of the parameters that you pass in your yaml file through RunOptions for the capability 'classy_baseline_params' "
                 "is in contradiction with any settings made via the dependency resolution by CosmoBit in the function '"+__func__+"'.");
       }
     }
 
-    /// Set the LCDM_no_primordial_ps in classy. Depends on a primordial_ps.
-    /// Looks at the parameters used in a run,
-    /// and passes them to classy in the form of a Python dictionary.
+    /// Set the classy parameter for an LCDM run with an explicit non-parametric primordial power spectrum.
     void set_classy_parameters_primordial_ps(Classy_input& result)
     {
       using namespace Pipes::set_classy_parameters_primordial_ps;
@@ -715,8 +623,6 @@ namespace Gambit
       result.add_entry("lnk_size" , pps.get_vec_size()); // don't hard code but somehow make consistent with multimode @TODO -> test
       // pass pivot scale of external spectrum to CLASS
       result.add_entry("k_pivot", *Dep::k_pivot);
-      // N.B. We don't need to pass this parameter as it is only used in class to get the shape of the primordial power spectrum
-      //result.add_entry("N_star",  *Dep::N_pivot);
 
       // Get standard cosmo parameters, nu masses, helium abundance &
       // extra run options for class passed in yaml file to capability
@@ -777,19 +683,19 @@ namespace Gambit
       if (ModelInUse("Inflation_InstReh_1mono23"))
       {
         result.vparams.push_back(log10(*Param["lambda"])); // MultiModeCode uses log10 of this parameter
-        result.potential_choice = 5; // V(phi) = 1.5 lambda phi^(2/3)
+        result.potential_choice = 5; // V(phi) = 1.5 lambda M_P^(10/3) phi^(2/3)
         result.vparam_rows = 1;
       }
       else if (ModelInUse("Inflation_InstReh_1linear"))
       {
         result.vparams.push_back(log10(*Param["lambda"])); // MultiModeCode uses log10 of this parameter
-        result.potential_choice = 4; // V(phi) = lambda phi
+        result.potential_choice = 4; // V(phi) = lambda M_P^3 phi
         result.vparam_rows = 1;
       }
       else if (ModelInUse("Inflation_InstReh_1quadratic"))
       {
         result.vparams.push_back(2.0*log10(*Param["m_phi"])); // MultiModeCode uses log10 of m_phi^2
-        result.potential_choice = 1; // V(phi) = 0.5 m^2 phi^2
+        result.potential_choice = 1; // V(phi) = 0.5 m^2 phi^2 = 0.5 m_phi^2 M_P^2 phi^2
         result.vparam_rows = 1;
       }
       else if (ModelInUse("Inflation_InstReh_1quartic"))
@@ -801,16 +707,15 @@ namespace Gambit
       else if (ModelInUse("Inflation_InstReh_1natural"))
       {
         // MultiModeCode uses log10 of both parameters below
-        result.vparams.push_back(log10(*Param["Lambda"]));
+        result.vparams.push_back(log10(*Param["lambda"]));
         result.vparams.push_back(log10(*Param["f_phi"]));
-        result.potential_choice = 2; // V(phi) = Lambda^4 [ 1 + cos(phi/f) ]
+        result.potential_choice = 2; // V(phi) = Lambda^4 [ 1 + cos(phi/f) ] = (lambda M_P)^4 [ 1 + cos(phi/[f_phi M_P]) ]
         result.vparam_rows = 2;
       }
       else if (ModelInUse("Inflation_InstReh_1Starobinsky"))
       {
-        double lsquared = (*Param["Lambda"])*(*Param["Lambda"]);
-        result.vparams.push_back(lsquared*lsquared); // MultiModeCode uses the fourth power of Lambda as a parameter
-        result.potential_choice = 19; // V(phi) = Lambda^4 [ 1 - exp(-sqrt(2/3) phi) ]^2
+        result.vparams.push_back(pow(*Param["lambda"],4)); // MultiModeCode uses the fourth power of Lambda as a parameter
+        result.potential_choice = 19; // V(phi) = Lambda^4 [ 1 - exp(-sqrt(2/3) phi / M_P) ]^2 = (lambda M_P)^4 [ 1 - exp(-sqrt(2/3) phi / M_P) ]^2
         result.vparam_rows = 1;
       }
 
@@ -839,7 +744,8 @@ namespace Gambit
       }
     }
 
-    /// Uses the inputs from the MultiModeCode initialisation function to computes inflationary observables.
+    /// Use the inputs from the MultiModeCode initialisation function to compute
+    /// a non-parametric primordial power spectrum.
     void get_multimode_primordial_ps(Primordial_ps &result)
     {
       using namespace Pipes::get_multimode_primordial_ps;
@@ -907,17 +813,24 @@ namespace Gambit
 
     }
 
-    /// Passes the inputs from the MultiModeCode initialisation function
-    /// and computes the outputs.
-    /// TODO: split this up into primordial_ps and parametrised_ps versions.
-    void get_multimode_parametrised_ps(Parametrised_ps &result)
+    /// Use the inputs from the MultiModeCode initialisation function to compute
+    /// a parameterised primordial power spectrum.
+    void get_multimode_parametrised_ps(ModelParameters &result)
     {
       using namespace Pipes::get_multimode_parametrised_ps;
+      gambit_inflation_observables observables;
+
+      // Set up this ModelParameters object on first run
+      static bool first = true;
+      if (first)
+      {
+        result.setModelName("PowerLaw_ps");
+        result._definePars({"ln10A_s","n_s","r","N_pivot"});
+        first = false;
+      }
 
       // Get the inflationary inputs
       Multimode_inputs inputs = *Dep::multimode_input_parameters;
-
-      gambit_inflation_observables observables;
 
       //-------------------------------------------------------------
       // The function below calls the MultiModeCode backend
@@ -955,51 +868,15 @@ namespace Gambit
         invalid_point().raise(message);
       }
 
-      result.set_N_pivot(observables.N_pivot);
-      result.set_n_s(observables.ns);
-      result.set_ln10A_s( 10. * log(10.) + log(observables.As) );
-      result.set_r(observables.r);
+      result.setValue("N_pivot", observables.N_pivot);
+      result.setValue("n_s", observables.ns);
+      result.setValue("ln10A_s", 10. * log(10.) + log(observables.As) );
+      result.setValue("r", observables.r);
 
     }
 
-    void get_parametrised_ps_LCDM(Parametrised_ps &result)
-    {
-      using namespace Pipes::get_parametrised_ps_LCDM;
 
-      // Check not using non-primordial version
-
-      // (JR) got the error when the lines below were uncommented... todo check what's going on
-      //Problem with ModelInUse("LCDM_no_primordial").
-      //This model is not known by CosmoBit::get_parametrised_ps_LCDM.
-      //Please make sure that it has been mentioned in some context in the
-      //rollcall header declaration of this function.
-
-
-      //if (ModelInUse("LCDM_no_primordial"))
-      //{
-      //  CosmoBit_error().raise(LOCAL_INFO, "You cannot use the LCDM_no_primordial_ps model to get"
-      //                      " a power spectrum!! Try the function get_multimode_parametrised_ps...");
-      //}
-
-      Parametrised_ps pps;
-      pps.set_N_pivot(55);
-      pps.set_n_s(*Param["n_s"]);
-      pps.set_ln10A_s(*Param["ln10A_s"]);
-      pps.set_r(0);
-
-      result = pps;
-    }
-
-    void print_parametrised_ps(map_str_dbl &result)
-    {
-      using namespace Pipes::print_parametrised_ps;
-
-      Parametrised_ps pps  = *Dep::parametrised_power_spectrum;
-      result = pps.get_parametrised_ps_map();
-    }
-
-
-// Getter functions for CL spectra from classy
+    // Getter functions for CL spectra from classy
 
     void class_get_unlensed_Cl_TT(std::vector<double>& result)
     {
@@ -1565,8 +1442,11 @@ namespace Gambit
         result.set_abund_map(BEreq::get_abund_map_AlterBBN());
         result.init_arr_size(NNUC);
 
-        // Work out which isotopes have been requested in the yaml file
-        const std::vector<str>& v = Downstream::subcaps->getNames();
+        // Work out which isotopes have been requested downstream
+        // From the yaml sub-capabilities
+        std::vector<str> v = Downstream::subcaps->getNames();
+        // From other dependencies
+        if (Downstream::neededFor("helium_abundance")) v.push_back("He4");
         result.set_active_isotopes(std::set<str>(v.begin(), v.end()));
         if (result.get_active_isotopes().empty())
         {
@@ -1624,6 +1504,12 @@ namespace Gambit
             result.set_BBN_covmat(ie, je, cov_ratioH[ie*(NNUC+1)+je]);
         }
       }
+    }
+
+    /// Extract helium-4 abundance from BBN abundance container
+    void extract_helium_abundance(double &result)
+    {
+      result = Pipes::extract_helium_abundance::Dep::BBN_abundances->get_BBN_abund("He4");
     }
 
     /// Compute the overall log-likelihood from BBN

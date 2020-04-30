@@ -4555,38 +4555,59 @@ min_mass: |
 ordering: |
   Ordering of the neutrino mass eigenstates: 1 = normal, 0 = inverted
 
-deltaCP: |
-  CP violating phase of the UPMNS matrix
-
-deltaCP_lnL: |
-  Log-likelihood of the CP violating phase with respect to NuFit data
-
-md21_lnL: |
-  Log-likelihood of the 1-2 mass splitting with respect to NuFit data
-
-md3l_lnL: |
-  Log-likelihood of the 3-l (l= 1 for NO, 2 for IO) mass splitting with respect to NuFit data
-
-sum_mnu_lnL: |
-  Log-likelihood of the sum of light neutrino masses usign cosmological constraints
-
 theta12: |
   Active neutrino mixing angle theta12
-
-theta12_lnL: |
-  Log-likelihood of the active neutrino mixing angle theta12 with respect to NuFit data
 
 theta13: |
   Active neutrino mixing angle theta13
 
-theta13_lnL: |
-  Log-likelihood of the active neutrino mixing angle theta13 with respect to NuFit data
-
 theta23: |
   Active neutrino mixing angle theta23
 
-theta23_lnL: |
-  Log-likelihood of the sin of the active neutrino mixing angle theta23 with respect to NuFit data
+deltaCP: |
+  CP violating phase of the UPMNS matrix
+
+theta12_NuFit_v3_2_lnL: |
+  Log-likelihood of the active neutrino mixing angle theta12 with respect to NuFit v3.2 data
+
+theta12_NuFit_v4_1_lnL: |
+  Log-likelihood of the active neutrino mixing angle theta12 with respect to NuFit v4.1 data
+
+theta13_NuFit_v3_2_lnL: |
+  Log-likelihood of the active neutrino mixing angle theta13 with respect to NuFit v3.2 data
+
+theta13_NuFit_v4_1_lnL: |
+  Log-likelihood of the active neutrino mixing angle theta13 with respect to NuFit v4.1 data
+
+theta23_NuFit_v3_2_lnL: |
+  Log-likelihood of the active neutrino mixing angle theta23 with respect to NuFit v3.2 data
+
+theta23_NuFit_v4_1_lnL: |
+  Log-likelihood of the active neutrino mixing angle theta23 with respect to NuFit v4.1 data
+
+deltaCP_NuFit_v3_2_lnL: |
+  Log-likelihood of the CP violating phase with respect to NuFit v3.2 data
+
+deltaCP_NuFit_v4_1_lnL: |
+  Log-likelihood of the CP violating phase with respect to NuFit v4.1 data
+
+md21_NuFit_v3_2_lnL: |
+  Log-likelihood of the 1-2 mass splitting with respect to NuFit v3.2 data
+
+md21_NuFit_v4_1_lnL: |
+  Log-likelihood of the 1-2 mass splitting with respect to NuFit v4.1 data
+
+md3l_NuFit_v3_2_lnL: |
+  Log-likelihood of the 3-l (l= 1 for NO, 2 for IO) mass splitting with respect to NuFit v3.2 data
+
+md3l_NuFit_v4_1_lnL: |
+  Log-likelihood of the 3-l (l= 1 for NO, 2 for IO) mass splitting with respect to NuFit v4.1 data
+
+md21_md3l_NuFit_v4_1_lnL: |
+  2D log-likelihood of the 1-2 and 3-l (l= 1 for NO, 2 for IO) mass splittings with respect to NuFit v4.1 data
+
+sum_mnu_lnL: |
+  Log-likelihood of the sum of light neutrino masses usign cosmological constraints
 
 Unitarity: |
   Test for unitarity of the full mixing matrix

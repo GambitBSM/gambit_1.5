@@ -8,6 +8,16 @@ Parameters:
 
   LCDM: !import include/LCDM_scan.yaml
 
+  StandardModel_SLHA2: !import include/StandardModel_SLHA2_Planckbaseline.yaml
+
+  Minimal_PowerLaw_ps:
+    ln10A_s:
+      prior_type: flat
+      range: [2.9,3.2]
+    n_s:
+      prior_type: flat
+      range: [0.9,1.10]
+
   CosmoALP:
     fa: 1.0
     ma0:

@@ -79,6 +79,7 @@
 #
 #************************************************
 
+
 # AlterBBN
 if("${CMAKE_C_COMPILER_ID}" STREQUAL "Intel")
   set(AlterBBN_C_FLAGS "${BACKEND_C99_FLAGS} -fast")
@@ -183,6 +184,7 @@ if(NOT ditched_${name}_${ver})
   add_extra_targets("backend" ${name} ${ver} ${dir} ${dl} clean)
 endif()
 
+
 # CaptnGeneral
 set(name "capgen")
 set(ver "1.0")
@@ -203,6 +205,7 @@ if(NOT ditched_${name}_${ver})
   set_as_default_version("backend" ${name} ${ver})
 endif()
 
+
 # DarkSUSY
 set(name "darksusy")
 set(ver "5.1.3")
@@ -221,7 +224,7 @@ if(NOT ditched_${name}_${ver})
     #COMMAND patch -b -p2 -d src < ${patch}/patchDS_OMP_src.dif
     #COMMAND patch -b -p2 -d include < ${patch}/patchDS_OMP_include.dif
     CONFIGURE_COMMAND ./configure FC=${CMAKE_Fortran_COMPILER} FCFLAGS=${BACKEND_Fortran_FLAGS} FFLAGS=${BACKEND_Fortran_FLAGS} CC=${CMAKE_C_COMPILER} CFLAGS=${BACKEND_C_FLAGS} CXX=${CMAKE_CXX_COMPILER} CXXFLAGS=${BACKEND_CXX_FLAGS}
-    BUILD_COMMAND ${MAKE_PARALLEL} dslib_shared
+    BUILD_COMMAND ${MAKE_SERIAL} dslib_shared
           COMMAND ${MAKE_PARALLEL} install_tables
     INSTALL_COMMAND ""
   )
@@ -1254,6 +1257,44 @@ if(NOT ditched_${name}_${ver})
   set_as_default_version("backend" ${name} ${ver})
 endif()
 
+
+# plc data
+set(name "plc_data")
+set(ver "2.0")
+set(dl "http://pla.esac.esa.int/pla/aio/product-action?COSMOLOGY.FILE_ID=COM_Likelihood_Data-baseline_R2.00.tar.gz")
+set(md5 "7e784819cea65dbc290ea3619420295a")
+set(dir "${PROJECT_SOURCE_DIR}/Backends/installed/${name}/${ver}")
+check_ditch_status(${name} ${ver} ${dir})
+if(NOT ditched_${name}_${ver})
+  ExternalProject_Add(${name}_${ver}
+    DOWNLOAD_COMMAND ${DL_BACKEND} ${dl} ${md5} ${dir} ${name} ${ver} "retain container folder"
+    SOURCE_DIR ${dir}
+    CONFIGURE_COMMAND ""
+    BUILD_COMMAND ""
+    INSTALL_COMMAND ""
+  )
+  add_extra_targets("backend" ${name} ${ver} ${dir} ${dl} clean)
+endif()
+
+# plc data
+set(name "plc_data")
+set(ver "3.0")
+set(dl "http://pla.esac.esa.int/pla/aio/product-action?COSMOLOGY.FILE_ID=COM_Likelihood_Data-baseline_R3.00.tar.gz")
+set(md5 "682e6859421b0e7bc7d82f1460613e06")
+set(dir "${PROJECT_SOURCE_DIR}/Backends/installed/${name}/${ver}")
+check_ditch_status(${name} ${ver} ${dir})
+if(NOT ditched_${name}_${ver})
+  ExternalProject_Add(${name}_${ver}
+    DOWNLOAD_COMMAND ${DL_BACKEND} ${dl} ${md5} ${dir} ${name} ${ver}
+    SOURCE_DIR ${dir}
+    CONFIGURE_COMMAND ""
+    BUILD_COMMAND ""
+    INSTALL_COMMAND ""
+  )
+  add_extra_targets("backend" ${name} ${ver} ${dir} ${dl} clean)
+  set_as_default_version("backend" ${name} ${ver})
+endif()
+
 # plc
 set(name "plc")
 set(ver "3.0")
@@ -1413,17 +1454,23 @@ set(sfver "1_2_0")
 set(dl "null")
 set(dir "${PROJECT_SOURCE_DIR}/Backends/installed/${name}/${ver}")
 set(ditch_if_absent "Python")
+set(required_modules "scipy,dill,future")
 check_ditch_status(${name} ${ver} ${dir} ${ditch_if_absent})
 if(NOT ditched_${name}_${ver})
-  ExternalProject_Add(${name}_${ver}
-    GIT_REPOSITORY https://github.com/pstoecker/DarkAges.git
-    GIT_TAG v${ver}
-    SOURCE_DIR ${dir}
-    BUILD_IN_SOURCE 1
-    CONFIGURE_COMMAND ln ${DarkAges_SYMLINK_FLAGS} DarkAges DarkAges_${sfver}
-    BUILD_COMMAND ""
-    INSTALL_COMMAND ""
-  )
+  check_python_modules(${name} ${ver} ${required_modules})
+  if(modules_missing_${name}_${ver})
+    inform_of_missing_modules(${name} ${ver} ${modules_missing_${name}_${ver}})
+  else()
+    ExternalProject_Add(${name}_${ver}
+      GIT_REPOSITORY https://github.com/pstoecker/DarkAges.git
+      GIT_TAG v${ver}
+      SOURCE_DIR ${dir}
+      BUILD_IN_SOURCE 1
+      CONFIGURE_COMMAND ln ${DarkAges_SYMLINK_FLAGS} DarkAges DarkAges_${sfver}
+      BUILD_COMMAND ""
+      INSTALL_COMMAND ""
+    )
+  endif()
   add_extra_targets("backend" ${name} ${ver} ${dir} ${dl} clean)
   set_as_default_version("backend" ${name} ${ver})
 endif()

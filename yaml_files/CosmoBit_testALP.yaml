@@ -23,19 +23,27 @@
 #======== Input parameter declarations =======
 Parameters:
 
- # --- import model parameters for models to scan over ---
- LCDM: !import include/LCDM_scan.yaml
+  # Base LCDM
+  LCDM: !import include/LCDM_scan.yaml
 
- # neutrino masses
- StandardModel_mNudiff: !import include/StandardModel_mNudiff_both_scan.yaml
- #StandardModel_mNudiff: !import include/StandardModel_mNudiff_NH_scan.yaml
- #StandardModel_mNudiff: !import include/StandardModel_mNudiff_IH_scan.yaml
+  # Minimal version of simple power-law spectrum of perturbations
+  Minimal_PowerLaw_ps:
+    ln10A_s:
+      prior_type: flat
+      range: [2.9,3.2]
+    n_s:
+      prior_type: flat
+      range: [0.9,1.10]
 
- # nuisance parameters in Planck likelihood
- cosmo_nuisance_Planck_lite: !import include/Planck_2018/cosmo_nuisance_Planck_lite_gauss.yaml
+  # neutrino masses
+  StandardModel_mNudiff: !import include/StandardModel_mNudiff_NH_scan.yaml
+  #StandardModel_mNudiff: !import include/StandardModel_mNudiff_IH_scan.yaml
 
- # Model Parameters of CosmoALP
- CosmoALP:
+  # nuisance parameters in Planck likelihood
+  cosmo_nuisance_Planck_lite: !import include/Planck_2018/cosmo_nuisance_Planck_lite_gauss.yaml
+
+  # Model Parameters of CosmoALP
+  CosmoALP:
    Cagg: 1.0
    fa:
      range: [1e2, 1e12]
@@ -81,12 +89,12 @@ Scanner:
 ObsLikes:
 
   - purpose:      LogLike
-    capability:   md21_lnL
+    capability:   md21_NuFit_v4_1_lnL
     module:       NeutrinoBit
     type:         double
 
   - purpose:      LogLike
-    capability:   md3l_lnL
+    capability:   md3l_NuFit_v4_1_lnL
     module:       NeutrinoBit
     type:         double
 
@@ -175,8 +183,8 @@ Rules:
 
   - capability: plc_3_0_init
     options:
-      #plc_2.0_path: /PATH/TO/plc_2.0
-      #plc_3.0_path: /PATH/TO/plc_3.0
+      #plc_data_2_path: /PATH/TO/plc_2.0
+      #plc_data_3_path: /PATH/TO/plc_3.0
 
   - capability: lifetime
     function: lifetime_ALP_agg

@@ -11,9 +11,9 @@
 
 #======== Input parameter declarations =======
 Parameters:
-  StandardModel_mNudiff: !import include/StandardModel_mNudiff_both_scan.yaml
+  StandardModel_mNudiff: !import include/StandardModel_mNudiff_NH_scan.yaml
 
-  LCDM_no_primordial:
+  LCDM:
     omega_b:
       fixed_value: 2.24052e-02
     omega_cdm:
@@ -68,8 +68,8 @@ ObsLikes:
       hst: default
 
   - purpose:      Observable
-    capability:   print_parametrised_ps
-    type:         map_str_dbl
+    capability:   PowerLaw_ps_parameters
+    type:         ModelParameters
 
 #======== Rule entries ========
 Rules:
@@ -95,9 +95,7 @@ Rules:
 
   - capability: classy_primordial_parameters
     function: set_classy_parameters_parametrised_ps
-
-  - capability: parametrised_power_spectrum
-    function: get_multimode_parametrised_ps
+    #function: set_classy_parameters_primordial_ps
 
   - capability: classy_baseline_params
     #function: set_classy_baseline_params
@@ -116,7 +114,7 @@ Rules:
   #                      # calculate for every inflation model? Then we can add it to the set_classy_function (there probably
   #                      # is but I just have no idea about inflation ;))
 
-  # error calculation precision settings for AltterBBN
+  # error calculation precision settings for AlterBBN
   # (use 1 and 0 to speed up Helium abundance calculation for testing)
   - capability: AlterBBN_Input
     options:

@@ -12,101 +12,16 @@
 ///          (stoecker@physik.rwth-aachen.de)
 ///  \date 2019 Aug, Nov
 ///  \date 2020 Feb
-//
+///
+///  \author Pat Scott
+///          (pat.scott@uq.edu.au)
+///  \date 2020 Apr
+///
 ///  *********************************************
 
 #include "gambit/Backends/frontend_macros.hpp"
 #include "gambit/Backends/frontends/plc_3_0.hpp"
-
-// Set the path to the plc_2.0 directory:
-// This can either done at compile-time or during a scan via the rules-section
-#ifndef PLC2_PATH
-#define PLC2_PATH "EMPTY"
-#endif
-
-// Set the path to the plc_3.0 directory:
-// This can either done at compile-time or during a scan via the rules-section
-#ifndef PLC3_PATH
-#define PLC3_PATH "EMPTY"
-#endif
-
-// Before we define the function, registered in the frontend-header let's define some macros,
-// since the structure of these functions are redundant
-
-// Check if we will calll "plc_loglike_NAME()" in the scan. If so, then run "initialize_NAME()"
-// First check if the respective path (plc2_location or plc3_location) is already set.
-#define CHECK_AND_ACTIVATE(NAME,VERSION)                                                 \
-                                                                                         \
-if(*InUse::CAT(plc_loglike_,NAME))                                                       \
-{                                                                                        \
-  if ( CAT_3(plc,VERSION,_location).empty() )                                            \
-  {                                                                                      \
-    CAT(set_planck_path_,VERSION) ( CAT_3(planck,VERSION,_path) );                       \
-  }                                                                                      \
-  CAT(initialize_,NAME) ();                                                              \
-}                                                                                        \
-
-// Definition of "void initialize_NAME()"  [Helper functions - Not registered in the header]
-#define PLC_INITIALIZE(NAME,TYPE,VERSION,LOC,PRINT_NAME)                                 \
-                                                                                         \
-  void CAT(initialize_,NAME) ()                                                          \
-  {                                                                                      \
-    std::cout << "Loading the " << PRINT_NAME << " likelihood " << std::endl;            \
-    std::string full_path = CAT_3(plc,VERSION,_location);                                \
-    full_path += LOC;                                                                    \
-    if (not Utils::file_exists(full_path))                                               \
-    {                                                                                    \
-      std::string ErrMssg = "Error while loading likelihood in plc_3.0:\n\nThe file \'"; \
-      ErrMssg += full_path;                                                              \
-      ErrMssg += "\' does not exist. Hence we will fail to load it.";                    \
-      backend_error().raise(LOCAL_INFO,ErrMssg.c_str());                                 \
-    }                                                                                    \
-    char* clik_path = (char*)full_path.c_str();                                          \
-    clik_error* plc_Error = initError();                                                 \
-    auto destructor = []( CAT(TYPE,_object)* clikid){ CAT(TYPE,_cleanup)(&(clikid)); };  \
-    CAT(TYPE,_map)[STRINGIFY(NAME)] =                                                    \
-      std::shared_ptr<CAT(TYPE,_object)>(CAT(TYPE,_init)(clik_path, &plc_Error), destructor);  \
-    cleanupError(&plc_Error);                                                            \
-  }
-
-// Definition of "double plc_loglike_NAME(double* cl_and_pars)"
-#define PLC_CLIK_LOGLIKE(NAME,TYPE)                                                      \
-                                                                                         \
-  double CAT(plc_loglike_,NAME)(double* cl_and_pars)                                     \
-  {                                                                                      \
-    const std::string name = STRINGIFY(NAME);                                            \
-    logger() << "Calling \""<< STRINGIFY(CAT(plc_loglike_,NAME)) << "\":" << EOM;        \
-    if (CAT(TYPE,_map).count(name) == 0)                                                 \
-    {                                                                                    \
-      std::string mssg = "Could not find the Likelihood object \"";                      \
-      mssg += name;                                                                      \
-      mssg += "\" in the map of activated likelihoods.";                                 \
-      backend_error().raise(LOCAL_INFO,mssg.c_str());                                    \
-    }                                                                                    \
-    double res;                                                                          \
-    clik_error* plc_Error = initError();                                                 \
-    res =  CAT(TYPE,_compute) (CAT(TYPE,_map)[name].get(), cl_and_pars, &plc_Error);     \
-    if (isError(plc_Error) || !(std::isfinite(res)))                                     \
-    {                                                                                    \
-      std::string ErrMssg = "Calling \"";                                                \
-      ErrMssg +=  std::string(STRINGIFY(CAT(plc_loglike_,NAME))) + "\" ";                \
-      ErrMssg += "was not successful.\n\n";                                              \
-      char forwardedErr[4096];                                                           \
-      stringError(byVal(forwardedErr), plc_Error);                                       \
-      ErrMssg += forwardedErr;                                                           \
-      logger() << ErrMssg << "\n\nPoint will be invalidated.\n" << EOM;                  \
-      invalid_point().raise(ErrMssg.c_str());                                            \
-    }                                                                                    \
-    else                                                                                 \
-    {                                                                                    \
-      logger() << "Calling \""<< STRINGIFY(CAT(plc_loglike_,NAME)) << "\"";              \
-      logger() << " was successfull. Got " << res << EOM;                                \
-    }                                                                                    \
-    cleanupError(&plc_Error);                                                            \
-    return res;                                                                          \
-  }                                                                                      \
-
-// Macros end here.
+#include "gambit/Utils/util_functions.hpp"
 
 BE_NAMESPACE
 {
@@ -122,83 +37,87 @@ BE_NAMESPACE
   //     The order is [phiphi TT EE BB TE TB EB]
   static std::array<int,7> lmax_array{-1,-1,-1,-1,-1,-1,-1};
 
-  void set_planck_path_2(std::string& planck_path)
+  // Initialise specific plc likelihood (helper function)
+  void plc_init(const str& name, const str& location, const int& version, const bool& lensing)
   {
-    // Check if the path is set (e.g. it is different to "EMPTY")
-    if (planck_path.compare("EMPTY") == 0)
+    logger() << "Loading the " << name << " likelihood " << EOM;
+    std::string full_path = (version == 2 ? plc2_location : plc3_location) + location;
+    if (not Utils::file_exists(full_path))
     {
-      std::string message = "The location of the planck data does not seem to be set properly!\n\n";
-      message += "Either change the PLC2_PATH macro in Backends/include/... .../plc_3_0.hpp or include\n\n";
-      message += "  - capability:   plc_3_0_init\n";
-      message += "    options:\n";
-      message += "      plc_2.0_path: /YOUR/PATH/TO/plc_2.0/\n\n";
-      message += "in the rules section of your input.";
-      backend_error().raise(LOCAL_INFO,message.c_str());
+      std::ostringstream err;
+      err << "You have requested a plc " << version << " likelihood but it cannot be loaded." << endl
+          << "The file \'" << full_path << "\' does not exist." << endl
+          << "Please either do \'make plc_data" << (version == 2 ? "_2.0" : "")
+          << "\', or set plc_data_" << version << "_path in the Rules section of your YAML file.";
+      backend_error().raise(LOCAL_INFO, err.str());
     }
-
-    // If the path does not already end with "/", then add it.
-    if (planck_path.back() != '/')
-      planck_path.push_back('/');
-
-    plc2_location = planck_path;
+    char* clik_path = (char*)full_path.c_str();
+    clik_error* plc_Error = initError();
+    if (lensing)
+    {
+      auto destructor = [](clik_lensing_object* clikid){ clik_lensing_cleanup(&(clikid)); };
+      clik_lensing_map[name] = std::shared_ptr<clik_lensing_object>(clik_lensing_init(clik_path, &plc_Error), destructor);
+    }
+    else
+    {
+      auto destructor = [](clik_object* clikid){ clik_cleanup(&(clikid)); };
+      clik_map[name] = std::shared_ptr<clik_object>(clik_init(clik_path, &plc_Error), destructor);
+    }
+    cleanupError(&plc_Error);
   }
 
-  void set_planck_path_3(std::string& planck_path)
+  // Compute specific plc likelihood(helper function)
+  double plc_loglike(double* cl_and_pars, const str& name, const bool& lensing)
   {
-    // Check if the path is set (e.g. it is different to "EMPTY")
-    if (planck_path.compare("EMPTY") == 0)
+    logger() << "Calling \"plc_loglike_" << name << "\":" << EOM;
+    int map_count = (lensing ? clik_lensing_map.count(name) : clik_map.count(name));
+    if (map_count == 0)
     {
-      std::string message = "The location of the planck data does not seem to be set properly!\n\n";
-      message += "Either change the PLC3_PATH macro in Backends/include/... .../plc_3_0.hpp or include\n\n";
-      message += "  - capability:   plc_3_0_init\n";
-      message += "    options:\n";
-      message += "      plc_3.0_path: /YOUR/PATH/TO/plc_3.0/\n\n";
-      message += "in the rules section of your input.";
-      backend_error().raise(LOCAL_INFO,message.c_str());
+      std::string mssg = "Could not find the Likelihood object \"";
+      mssg += name;
+      mssg += "\" in the map of activated likelihoods.";
+      backend_error().raise(LOCAL_INFO,mssg.c_str());
     }
-
-    // If the path does not already end with "/", then add it.
-    if (planck_path.back() != '/')
-      planck_path.push_back('/');
-
-    plc3_location = planck_path;
+    double res;
+    clik_error* plc_Error = initError();
+    if (lensing)
+     res = clik_lensing_compute(clik_lensing_map[name].get(), cl_and_pars, &plc_Error);
+    else
+     res = clik_compute(clik_map[name].get(), cl_and_pars, &plc_Error);
+    if (isError(plc_Error) || !(std::isfinite(res)))
+    {
+      std::string err = "Calling \"plc_loglike_" + name + "\" was not successful.\n";
+      char forwardedErr[4096];
+      stringError(byVal(forwardedErr), plc_Error);
+      invalid_point().raise(err + forwardedErr);
+    }
+    else
+    {
+      logger() << LogTags::debug << "Calling \"plc_loglike_" << name << "\""
+               << " was successfull. Got " << res << EOM;
+    }
+    cleanupError(&plc_Error);
+    return res;
   }
 
-  // "Write" the code for all "void initialize_NAME()"
-  PLC_INITIALIZE(highl_TT_2015,clik,2,"hi_l/plik/plik_dx11dr2_HM_v18_TT.clik","high-l TT (PR2 - 2015)")
-  PLC_INITIALIZE(highl_TTTEEE_2015,clik,2,"hi_l/plik/plik_dx11dr2_HM_v18_TTTEEE.clik","high-l TTTEEE (PR2 - 2015)")
-  PLC_INITIALIZE(highl_TT_lite_2015,clik,2,"hi_l/plik_lite/plik_lite_v18_TT.clik","high-l TT-lite (PR2 - 2015)")
-  PLC_INITIALIZE(highl_TTTEEE_lite_2015,clik,2,"hi_l/plik_lite/plik_lite_v18_TTTEEE.clik","high-l TTTEEE-lite (PR2 - 2015)")
-  PLC_INITIALIZE(lowl_TEB_2015,clik,2,"low_l/bflike/lowl_SMW_70_dx11d_2014_10_03_v5c_Ap.clik","low-l TEB (PR2 - 2015)")
-  PLC_INITIALIZE(lowl_TT_2015,clik,2,"low_l/commander/commander_rc2_v1.1_l2_29_B.clik","low-l TT (PR2 - 2015)")
-  PLC_INITIALIZE(lensing_2015,clik_lensing,2,"lensing/smica_g30_ftl_full_pp.clik_lensing","lensing (PR2 - 2015)")
+  // Define the individual likelihood functions for plc2
+  double plc_loglike_highl_TTTEEE_2015     (double* x) { return plc_loglike(x, "highl_TTTEEE_2015",      false); }
+  double plc_loglike_highl_TT_2015         (double* x) { return plc_loglike(x, "highl_TT_2015",          false); }
+  double plc_loglike_highl_TTTEEE_lite_2015(double* x) { return plc_loglike(x, "highl_TTTEEE_lite_2015", false); }
+  double plc_loglike_highl_TT_lite_2015    (double* x) { return plc_loglike(x, "highl_TT_lite_2015",     false); }
+  double plc_loglike_lowl_TEB_2015         (double* x) { return plc_loglike(x, "lowl_TEB_2015",          false); }
+  double plc_loglike_lowl_TT_2015          (double* x) { return plc_loglike(x, "lowl_TT_2015",           false); }
+  double plc_loglike_lensing_2015          (double* x) { return plc_loglike(x, "lensing_2015",           true);  }
 
-  PLC_INITIALIZE(highl_TT_2018,clik,3,"hi_l/plik/plik_rd12_HM_v22_TT.clik","high-l TT (PR3 - 2018)")
-  PLC_INITIALIZE(highl_TTTEEE_2018,clik,3,"hi_l/plik/plik_rd12_HM_v22b_TTTEEE.clik","high-l TTTEEE (PR3 - 2018)")
-  PLC_INITIALIZE(highl_TT_lite_2018,clik,3,"hi_l/plik_lite/plik_lite_v22_TT.clik","high-l TT-lite (PR3 - 2018)")
-  PLC_INITIALIZE(highl_TTTEEE_lite_2018,clik,3,"hi_l/plik_lite/plik_lite_v22_TTTEEE.clik","high-l TTTEEE-lite (PR3 - 2018)")
-  PLC_INITIALIZE(lowl_TT_2018,clik,3,"low_l/commander/commander_dx12_v3_2_29.clik","low-l TT (PR3 - 2018)")
-  PLC_INITIALIZE(lowl_EE_2018,clik,3,"low_l/simall/simall_100x143_offlike5_EE_Aplanck_B.clik","low-l EE (PR3 - 2018)")
-  PLC_INITIALIZE(lensing_2018,clik_lensing,3,"lensing/smicadx12_Dec5_ftl_mv2_ndclpp_p_teb_consext8.clik_lensing","lensing (PR3 - 2018)")
-  PLC_INITIALIZE(lensing_marged_2018,clik_lensing,3,"lensing/smicadx12_Dec5_ftl_mv2_ndclpp_p_teb_consext8_CMBmarged.clik_lensing","marginalized lensing (PR3 - 2018)")
-
-  // "Write" the code for all "double plc_loglike_NAME(double* cl_and_pars)"
-  PLC_CLIK_LOGLIKE(highl_TTTEEE_2015,clik)
-  PLC_CLIK_LOGLIKE(highl_TT_2015,clik)
-  PLC_CLIK_LOGLIKE(highl_TTTEEE_lite_2015,clik)
-  PLC_CLIK_LOGLIKE(highl_TT_lite_2015,clik)
-  PLC_CLIK_LOGLIKE(lowl_TEB_2015,clik)
-  PLC_CLIK_LOGLIKE(lowl_TT_2015,clik)
-  PLC_CLIK_LOGLIKE(lensing_2015,clik_lensing)
-
-  PLC_CLIK_LOGLIKE(highl_TTTEEE_2018,clik)
-  PLC_CLIK_LOGLIKE(highl_TT_2018,clik)
-  PLC_CLIK_LOGLIKE(highl_TTTEEE_lite_2018,clik)
-  PLC_CLIK_LOGLIKE(highl_TT_lite_2018,clik)
-  PLC_CLIK_LOGLIKE(lowl_TT_2018,clik)
-  PLC_CLIK_LOGLIKE(lowl_EE_2018,clik)
-  PLC_CLIK_LOGLIKE(lensing_2018,clik_lensing)
-  PLC_CLIK_LOGLIKE(lensing_marged_2018,clik_lensing)
+  // Define the individual likelihood functions for plc3
+  double plc_loglike_highl_TTTEEE_2018     (double* x) { return plc_loglike(x, "highl_TTTEEE_2018",      false); }
+  double plc_loglike_highl_TT_2018         (double* x) { return plc_loglike(x, "highl_TT_2018",          false); }
+  double plc_loglike_highl_TTTEEE_lite_2018(double* x) { return plc_loglike(x, "highl_TTTEEE_lite_2018", false); }
+  double plc_loglike_highl_TT_lite_2018    (double* x) { return plc_loglike(x, "highl_TT_lite_2018",     false); }
+  double plc_loglike_lowl_TT_2018          (double* x) { return plc_loglike(x, "lowl_TT_2018",           false); }
+  double plc_loglike_lowl_EE_2018          (double* x) { return plc_loglike(x, "lowl_EE_2018",           false); }
+  double plc_loglike_lensing_2018          (double* x) { return plc_loglike(x, "lensing_2018",           true);  }
+  double plc_loglike_lensing_marged_2018   (double* x) { return plc_loglike(x, "lensing_marged_2018",    true);  }
 
   void plc_required_Cl(int& lmax, bool& needs_tCl, bool& needs_pCl)
   {
@@ -207,13 +126,12 @@ BE_NAMESPACE
     {
       lmax = std::max(lmax, it);
     }
-
     needs_tCl = (lmax_array[1] > -1);
-
     auto begin = lmax_array.begin() + 2;
     auto end = lmax_array.end();
     needs_pCl = std::any_of(begin,end,[](int& i){return i > -1;});
   }
+
 }
 END_BE_NAMESPACE
 
@@ -223,51 +141,36 @@ BE_INI_FUNCTION
   static bool scan_level = true;
   if (scan_level)
   {
-    std::string planck2_path;
-    std::string planck3_path;
+    // Check if "plc_data_2_path" and/or "plc_data_3_path" are in the runOptions. If not, look in the same place as plc for the data.
+    str plc_default_path = Backends::backendInfo().path_dir("plc", STRINGIFY(VERSION)) + "/../../../plc_data/";
+    plc2_location = runOptions->getValueOrDef<std::string>(plc_default_path+"2.0/plc_2.0","plc_data_2_path");
+    plc3_location = runOptions->getValueOrDef<std::string>(plc_default_path+"3.0/plc_3.0","plc_data_3_path");
+    if (plc2_location.back() != '/') plc2_location.push_back('/');
+    if (plc3_location.back() != '/') plc3_location.push_back('/');
 
-    // Check if "plc_prefix" is in the runOptions. If so, then we assume that
-    // the folders "plc_2.0" and "plc_3.0" are contained in it.
-    // If this is not the case we will check for "plc_2.0_path" and "plc_3.0_path"
-    // in case they have completely different locations.
-    if (runOptions->hasKey("plc_prefix"))
-    {
-      std::string plc_pre = runOptions->getValue<std::string>("plc_prefix");
-      if (plc_pre.back() != '/')
-        plc_pre.push_back('/');
-      planck2_path = plc_pre + "plc_2.0/";
-      planck3_path = plc_pre + "plc_3.0/";
-    }
-    else
-    {
-      planck2_path = runOptions->getValueOrDef<std::string>(PLC2_PATH,"plc_2.0_path");
-      planck3_path = runOptions->getValueOrDef<std::string>(PLC3_PATH,"plc_3.0_path");
-    }
+    // Initialise the plc2 likelihoods
+    if (*InUse::plc_loglike_highl_TT_2015)          plc_init("highl_TT_2015",     "hi_l/plik/plik_dx11dr2_HM_v18_TT.clik",            2,false);
+    if (*InUse::plc_loglike_highl_TTTEEE_2015)      plc_init("highl_TTTEEE_2015", "hi_l/plik/plik_dx11dr2_HM_v18_TTTEEE.clik",        2,false);
+    if (*InUse::plc_loglike_highl_TT_lite_2015)     plc_init("highl_TT_lite_2015","hi_l/plik_lite/plik_lite_v18_TT.clik",             2,false);
+    if (*InUse::plc_loglike_highl_TTTEEE_lite_2015) plc_init("highl_TTTEEE_lite_2015","hi_l/plik_lite/plik_lite_v18_TTTEEE.clik",     2,false);
+    if (*InUse::plc_loglike_lowl_TEB_2015)          plc_init("lowl_TEB_2015","low_l/bflike/lowl_SMW_70_dx11d_2014_10_03_v5c_Ap.clik", 2,false);
+    if (*InUse::plc_loglike_lowl_TT_2015)           plc_init("lowl_TT_2015","low_l/commander/commander_rc2_v1.1_l2_29_B.clik",        2,false);
+    if (*InUse::plc_loglike_lensing_2015)           plc_init("lensing_2015","lensing/smica_g30_ftl_full_pp.clik_lensing",             2,true);
 
-    // Check whcih lilelihood is used and initialise it when needed.
-    CHECK_AND_ACTIVATE(highl_TTTEEE_2015,2)
-    CHECK_AND_ACTIVATE(highl_TT_2015,2)
-    CHECK_AND_ACTIVATE(highl_TTTEEE_lite_2015,2)
-    CHECK_AND_ACTIVATE(highl_TT_lite_2015,2)
-    CHECK_AND_ACTIVATE(lowl_TEB_2015,2)
-    CHECK_AND_ACTIVATE(lowl_TT_2015,2)
-    CHECK_AND_ACTIVATE(lensing_2015,2)
-
-    CHECK_AND_ACTIVATE(highl_TTTEEE_2018,3)
-    CHECK_AND_ACTIVATE(highl_TT_2018,3)
-    CHECK_AND_ACTIVATE(highl_TTTEEE_lite_2018,3)
-    CHECK_AND_ACTIVATE(highl_TT_lite_2018,3)
-    CHECK_AND_ACTIVATE(lowl_TT_2018,3)
-    CHECK_AND_ACTIVATE(lowl_EE_2018,3)
-    CHECK_AND_ACTIVATE(lensing_2018,3)
-    CHECK_AND_ACTIVATE(lensing_marged_2018,3)
+    // Initialise the plc3 likelihoods
+    if (*InUse::plc_loglike_highl_TT_2018)          plc_init("highl_TT_2018","hi_l/plik/plik_rd12_HM_v22_TT.clik",                                               3,false);
+    if (*InUse::plc_loglike_highl_TTTEEE_2018)      plc_init("highl_TTTEEE_2018","hi_l/plik/plik_rd12_HM_v22b_TTTEEE.clik",                                      3,false);
+    if (*InUse::plc_loglike_highl_TT_lite_2018)     plc_init("highl_TT_lite_2018","hi_l/plik_lite/plik_lite_v22_TT.clik",                                        3,false);
+    if (*InUse::plc_loglike_highl_TTTEEE_lite_2018) plc_init("highl_TTTEEE_lite_2018","hi_l/plik_lite/plik_lite_v22_TTTEEE.clik",                                3,false);
+    if (*InUse::plc_loglike_lowl_TT_2018)           plc_init("lowl_TT_2018","low_l/commander/commander_dx12_v3_2_29.clik",                                       3,false);
+    if (*InUse::plc_loglike_lowl_EE_2018)           plc_init("lowl_EE_2018","low_l/simall/simall_100x143_offlike5_EE_Aplanck_B.clik",                            3,false);
+    if (*InUse::plc_loglike_lensing_2018)           plc_init("lensing_2018","lensing/smicadx12_Dec5_ftl_mv2_ndclpp_p_teb_consext8.clik_lensing",                 3,true);
+    if (*InUse::plc_loglike_lensing_marged_2018)    plc_init("lensing_marged_2018","lensing/smicadx12_Dec5_ftl_mv2_ndclpp_p_teb_consext8_CMBmarged.clik_lensing",3,true);
 
     for (const auto& it: clik_map)
     {
       std::array<int,7> tmp{};
-
       clik_get_lmax(it.second.get(), tmp.data()+1, NULL);
-
       for (size_t i = 1; i < 7; ++i)
       {
         lmax_array[i] = std::max(lmax_array[i],tmp[i]);
@@ -277,23 +180,14 @@ BE_INI_FUNCTION
     for (const auto& it: clik_lensing_map)
     {
       std::array<int,7> tmp{};
-
       clik_lensing_get_lmaxs(it.second.get(), tmp.data(), NULL);
-
       for (size_t i = 0; i < 7; ++i)
       {
         lmax_array[i] = std::max(lmax_array[i],tmp[i]);
       }
     }
+
+    scan_level = false;
   }
-  scan_level = false;
 }
 END_BE_INI_FUNCTION
-
-// undefine all macros
-#undef CHECK_AND_ACTIVATE
-#undef PLC_CLIK_LOGLIKE
-#undef PLC_INITIALIZE
-
-//#undef PLC2_PATH
-//#undef PLC3_PATH
