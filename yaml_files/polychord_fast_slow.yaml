@@ -9,6 +9,7 @@
 
 #======== Input parameter declarations =======
 Parameters:
+  StandardModel_SLHA2: !import include/StandardModel_SLHA2_Planckbaseline.yaml
 
   # --- import model parameters for models to scan over ---
   LCDM:
@@ -21,16 +22,20 @@ Parameters:
     H0:
       prior_type: flat
       range: [62,74]
+    tau_reio:
+      prior_type: flat
+      range: [0.004,0.20]
+    T_cmb: 2.72548
+
+  # minimal base-line power-law power spectrum and priors
+  Minimal_PowerLaw_ps:
     ln10A_s:
       prior_type: flat
       range: [2.9,3.2]
     n_s:
       prior_type: flat
       range: [0.9,1.10]
-    tau_reio:
-      prior_type: flat
-      range: [0.004,0.20]
-    T_cmb: 2.72548
+
 
   # nuisance parameters in Planck likelihood
   cosmo_nuisance_Planck_TTTEEE:
