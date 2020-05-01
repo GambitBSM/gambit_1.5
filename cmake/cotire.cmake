@@ -1811,13 +1811,6 @@ function (cotire_check_precompiled_header_support _language _target _msgVar)
 	else()
 		set (${_msgVar} "${_unsupportedCompiler}." PARENT_SCOPE)
 	endif()
-	if (CMAKE_${_language}_COMPILER MATCHES "ccache")
-		if (NOT "$ENV{CCACHE_SLOPPINESS}" MATCHES "time_macros|pch_defines")
-			set (${_msgVar}
-				"ccache requires the environment variable CCACHE_SLOPPINESS to be set to \"pch_defines,time_macros\"."
-				PARENT_SCOPE)
-		endif()
-	endif()
 	if (APPLE)
 		# PCH compilation not supported by GCC / Clang for multi-architecture builds (e.g., i386, x86_64)
 		cotire_get_configuration_types(_configs)
