@@ -1005,6 +1005,8 @@ START_MODULE
   START_CAPABILITY
     #define FUNCTION nuyield_from_DS
     START_FUNCTION(nuyield_info)
+    ALLOW_MODELS(MSSM63atQ, ScalarSingletDM_Z2_running, ScalarSingletDM_Z3_running,
+                 MajoranaSingletDM_Z2, DiracSingletDM_Z2, VectorSingletDM_Z2)
     DEPENDENCY(TH_ProcessCatalog, TH_ProcessCatalog)
     DEPENDENCY(mwimp, double)
     DEPENDENCY(sigmav, double)
