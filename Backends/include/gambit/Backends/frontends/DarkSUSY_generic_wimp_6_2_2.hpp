@@ -50,9 +50,6 @@ BE_VARIABLE(dshmframevelcom, DS_HMFRAMEVELCOM, "dshmframevelcom_", "dshmframevel
 BE_VARIABLE(dshmisodf, DS_HMISODF, "dshmisodf_", "dshmisodf")
 BE_VARIABLE(dshmnoclue, DS_HMNOCLUE, "dshmnoclue_", "dshmnoclue")
 
-// FIXME: Is this MSSM specific or not? It appears to be missing from this backend.
-BE_VARIABLE(anbranch,DS_NUCOM, "anbranch_", "nu_common_block") // BRs
-
 // Common blocks in the DarkSUSY core library
 BE_VARIABLE(ddcomlegacy, DS_DDCOMLEGACY, "ddcomlegacy_", "ddcomlegacy") //DD
 BE_VARIABLE(rdtime, DS_RDTIME,     "rdtime_",    "rdtime")    // RD timeout
