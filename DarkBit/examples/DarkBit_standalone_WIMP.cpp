@@ -310,6 +310,7 @@ int main(int argc, char* argv[])
     DDCalc_2_0_0_init.resolveDependency(&ExtractLocalMaxwellianHalo);
     // Assume for direct and indirect detection likelihoods that dark matter
     // density is always the measured one (despite relic density results)
+    DDCalc_2_0_0_init.notifyOfModel("ScalarSingletDM_Z2"); // FIXME This can be removed once one moves to using DDCalc 2.2 or later.
     DDCalc_2_0_0_init.resolveDependency(&RD_fraction_one);
     DDCalc_2_0_0_init.resolveDependency(&mwimp_generic);
     DDCalc_2_0_0_init.resolveDependency(&DD_couplings_WIMP);

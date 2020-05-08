@@ -370,6 +370,7 @@ int main(int argc, char* argv[])
     Backends::DDCalc_2_0_0::Functown::DDCalc_CalcRates_simple.setStatus(2);
     Backends::DDCalc_2_0_0::Functown::DDCalc_Experiment.setStatus(2);
     Backends::DDCalc_2_0_0::Functown::DDCalc_LogLikelihood.setStatus(2);
+    DDCalc_2_0_0_init.notifyOfModel("MSSM30atQ"); // FIXME This can be removed once one moves to using DDCalc 2.2 or later.
     DDCalc_2_0_0_init.resolveDependency(&ExtractLocalMaxwellianHalo);
     DDCalc_2_0_0_init.resolveDependency(&RD_fraction_one);
     DDCalc_2_0_0_init.resolveDependency(&mwimp_generic);
