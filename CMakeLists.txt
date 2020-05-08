@@ -266,7 +266,6 @@ endforeach()
 
 # Check if we are using 2019 intel compilers together with pybind11, and forbid the use of C++17 if so.
 if(HAVE_PYBIND11 AND "${CMAKE_CXX_COMPILER_ID}" STREQUAL "Intel")
-  message("${CMAKE_CXX_COMPILER_VERSION}")
   if(CMAKE_CXX_COMPILER_VERSION VERSION_GREATER 18.0.6)
     set(PERMIT_CXX17_CHECK FALSE)
   else()
