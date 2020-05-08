@@ -29,9 +29,9 @@ namespace Gambit
     double gna;
   };
 
-  // Container for fermionic Higgs-portal SI and SD dark matter - nucleon couplings
-  // This can be removed in future, when newere versions of DDCalc are interfaced and
-  // support for HP models with DDCalc 2.0.0 is dropped from GAMBIT.
+  // Container for fermionic Higgs-portal SI constant and q^2-dependent dark matter-nucleon couplings.
+  // This can be removed in future, when newer versions of DDCalc are interfaced and support for HP
+  // models with DDCalc 2.0.0 is dropped from GAMBIT.
   struct DM_nucleon_couplings_fermionic_HP
   {
     double gps;
