@@ -1757,6 +1757,8 @@ namespace Gambit
 
     // Get the results from the DarkAges tables that hold extra information to be passed to the CLASS thermodynamics structure
     static DarkAges::Energy_injection_efficiency_table fz;
+    static DarkAges::Energy_injection_efficiency_table cached_fz;
+
     fz = *Dep::energy_injection_efficiency;
     bool f_eff_mode = fz.f_eff_mode;
 
@@ -1793,6 +1795,16 @@ namespace Gambit
       result["energyinj_coef_ionHe"] = memaddress_to_uint(fz.f_heion.data());
       result["energyinj_coef_lowE"] = memaddress_to_uint(fz.f_lowe.data());
     }
+
+    // Check if the table has changed compared to the previous iteration
+    // If so, notify class by adding {"EnergyInjection_changed":"yes"}
+    // to the dictionary.
+    // (The classy frontend will just look for the key, The value is not important here)
+    if (fz != cached_fz)
+      result["EnergyInjection_changed"] = "yes";
+
+    // copy fz to cache
+    cached_fz = fz;
   }
 
   void set_classy_parameters_EnergyInjection_DecayingDM(pybind11::dict &result)
@@ -1809,6 +1821,8 @@ namespace Gambit
 
     // Get the results from the DarkAges tables that hold extra information to be passed to the CLASS thermodynamics structure
     static DarkAges::Energy_injection_efficiency_table fz;
+    static DarkAges::Energy_injection_efficiency_table cached_fz;
+
     fz = *Dep::energy_injection_efficiency;
     bool f_eff_mode = fz.f_eff_mode;
 
@@ -1845,6 +1859,16 @@ namespace Gambit
       result["energyinj_coef_ionHe"] = memaddress_to_uint(fz.f_heion.data());
       result["energyinj_coef_lowE"] = memaddress_to_uint(fz.f_lowe.data());
     }
+
+    // Check if the table has changed compared to the previous iteration
+    // If not, notify class by adding {"EnergyInjection_changed":"yes"}
+    // to the dictionary.
+    // (The classy frontend will just look for the key, The value is not important here)
+    if (fz != cached_fz)
+      result["EnergyInjection_changed"] = "yes";
+
+    // copy fz to cache
+    cached_fz = fz;
   }
 
   /// add all inputs for CLASS needed to produce the correct output to be
