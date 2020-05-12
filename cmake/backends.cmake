@@ -135,10 +135,10 @@ if(NOT ditched_${name}_${ver})
     #CONFIGURE_COMMAND ./configure FC=${CMAKE_Fortran_COMPILER} FCFLAGS=${GAMBIT_Fortran_FLAGS} FFLAGS=${GAMBIT_Fortran_FLAGS} CC=${CMAKE_C_COMPILER} CFLAGS=${GAMBIT_C_FLAGS} CXX=${CMAKE_CXX_COMPILER} CXXFLAGS=${GAMBIT_CXX_FLAGS}
     CONFIGURE_COMMAND ./configure FC=${CMAKE_Fortran_COMPILER} FCFLAGS=${DS_Fortran_FLAGS} FFLAGS=${DS_Fortran_FLAGS} CC=${CMAKE_C_COMPILER} CFLAGS=${CMAKE_C_FLAGS} CXX=${CMAKE_CXX_COMPILER} CXXFLAGS=${CMAKE_CXX_FLAGS}
     # FIXME Need to add shared option
-    # BUILD_COMMAND ${CMAKE_MAKE_PROGRAM} dslib_shared
-    BUILD_COMMAND ${CMAKE_MAKE_PROGRAM} all
-#          COMMAND ${CMAKE_MAKE_PROGRAM} install_tables
-#          COMMAND ${CMAKE_MAKE_PROGRAM} ds_mssm_shared
+    # BUILD_COMMAND ${MAKE_PARALLEL} dslib_shared
+    BUILD_COMMAND ${MAKE_PARALLEL} all
+#          COMMAND ${MAKE_PARALLEL} install_tables
+#          COMMAND ${MAKE_PARALLEL} ds_mssm_shared
     INSTALL_COMMAND ""
   )
   add_extra_targets("backend" ${name} ${ver} ${dir} ${dl} clean)
@@ -156,7 +156,7 @@ if(NOT ditched_${name}_${model}_${ver})
 #    PATCH_COMMAND patch -p1 < ${patch}
     BUILD_IN_SOURCE 1
     CONFIGURE_COMMAND ""
-    BUILD_COMMAND ${CMAKE_MAKE_PROGRAM} ds_mssm_shared
+    BUILD_COMMAND ${MAKE_PARALLEL} ds_mssm_shared
     INSTALL_COMMAND ""
   )
   add_extra_targets("backend model" ${name} ${ver} ${dir}/${model} ${model} "yes | clean")
@@ -174,7 +174,7 @@ if(NOT ditched_${name}_${model}_${ver})
 #    PATCH_COMMAND patch -p1 < ${patch}
     BUILD_IN_SOURCE 1
     CONFIGURE_COMMAND ""
-    BUILD_COMMAND ${CMAKE_MAKE_PROGRAM} ds_generic_wimp_shared
+    BUILD_COMMAND ${MAKE_PARALLEL} ds_generic_wimp_shared
     INSTALL_COMMAND ""
   )
   add_extra_targets("backend model" ${name} ${ver} ${dir}/${model} ${model} "yes | clean")
@@ -201,10 +201,10 @@ if(NOT ditched_${name}_${ver})
     #CONFIGURE_COMMAND ./configure FC=${CMAKE_Fortran_COMPILER} FCFLAGS=${GAMBIT_Fortran_FLAGS} FFLAGS=${GAMBIT_Fortran_FLAGS} CC=${CMAKE_C_COMPILER} CFLAGS=${GAMBIT_C_FLAGS} CXX=${CMAKE_CXX_COMPILER} CXXFLAGS=${GAMBIT_CXX_FLAGS}
     CONFIGURE_COMMAND ./configure FC=${CMAKE_Fortran_COMPILER} FCFLAGS=${DS_Fortran_FLAGS} FFLAGS=${DS_Fortran_FLAGS} CC=${CMAKE_C_COMPILER} CFLAGS=${CMAKE_C_FLAGS} CXX=${CMAKE_CXX_COMPILER} CXXFLAGS=${CMAKE_CXX_FLAGS}
     # FIXME Need to add shared option
-    # BUILD_COMMAND ${CMAKE_MAKE_PROGRAM} dslib_shared
-    BUILD_COMMAND ${CMAKE_MAKE_PROGRAM} all
-#          COMMAND ${CMAKE_MAKE_PROGRAM} install_tables
-#          COMMAND ${CMAKE_MAKE_PROGRAM} ds_mssm_shared
+    # BUILD_COMMAND ${MAKE_PARALLEL} dslib_shared
+    BUILD_COMMAND ${MAKE_PARALLEL} all
+#          COMMAND ${MAKE_PARALLEL} install_tables
+#          COMMAND ${MAKE_PARALLEL} ds_mssm_shared
     INSTALL_COMMAND ""
   )
   add_extra_targets("backend" ${name} ${ver} ${dir} ${dl} clean)
@@ -222,7 +222,7 @@ if(NOT ditched_${name}_${model}_${ver})
 #    PATCH_COMMAND patch -p1 < ${patch}
     BUILD_IN_SOURCE 1
     CONFIGURE_COMMAND ""
-    BUILD_COMMAND ${CMAKE_MAKE_PROGRAM} ds_mssm_shared
+    BUILD_COMMAND ${MAKE_PARALLEL} ds_mssm_shared
     INSTALL_COMMAND ""
   )
   add_extra_targets("backend model" ${name} ${ver} ${dir}/${model} ${model} "yes | clean")
@@ -240,7 +240,7 @@ if(NOT ditched_${name}_${model}_${ver})
 #    PATCH_COMMAND patch -p1 < ${patch}
     BUILD_IN_SOURCE 1
     CONFIGURE_COMMAND ""
-    BUILD_COMMAND ${CMAKE_MAKE_PROGRAM} ds_generic_wimp_shared
+    BUILD_COMMAND ${MAKE_PARALLEL} ds_generic_wimp_shared
     INSTALL_COMMAND ""
   )
   add_extra_targets("backend model" ${name} ${ver} ${dir}/${model} ${model} "yes | clean")
@@ -831,7 +831,7 @@ if(NOT ditched_${name}_${ver})
     SOURCE_DIR ${dir}
     BUILD_IN_SOURCE 1
     CONFIGURE_COMMAND ""
-    BUILD_COMMAND ${CMAKE_MAKE_PROGRAM} ${lib}.so FF=${CMAKE_Fortran_COMPILER} FOPT=${BACKEND_Fortran_FLAGS} MODULE=${FMODULE}
+    BUILD_COMMAND ${MAKE_PARALLEL} ${lib}.so FF=${CMAKE_Fortran_COMPILER} FOPT=${BACKEND_Fortran_FLAGS} MODULE=${FMODULE}
     INSTALL_COMMAND ""
   )
   add_extra_targets("backend" ${name} ${ver} ${dir} ${dl} distclean)
