@@ -236,8 +236,10 @@ namespace Gambit
       /// It does first try to safely convert the string to a double and 
       /// then performs checks before casting to an integer type.
       template<class TYPE>
-      TYPE safeIntegerTypeCast(const std::string& s) const {
-        try {
+      TYPE safeIntegerTypeCast(const std::string& s) const
+      {
+        try
+        {
           const double d = std::stod(s);
           if (d != std::floor(d))
           {
@@ -253,13 +255,15 @@ namespace Gambit
           }
           return static_cast<TYPE>(d);
         }
-        catch (const std::out_of_range& e) {
+        catch (const std::out_of_range& e)
+        {
           std::ostringstream os;
           os << "Out of range error: " << e.what() << "\n";
           os << "Provided value " << s << " as option in the yaml file does not fit into double.";
           utils_error().raise(LOCAL_INFO, os.str());
         }
-        catch (const std::invalid_argument& e) {
+        catch (const std::invalid_argument& e)
+        {
           std::ostringstream os;
           os << "Invalid argument: " << e.what() << "\n";
           os << "Provided value " << s << " as option in the yaml file can not be interpreted as double.";
@@ -269,7 +273,8 @@ namespace Gambit
       }
 
       /// Expand environment variables in the given string.
-      void autoExpandEnvironmentVariables(std::string & text) const {
+      void autoExpandEnvironmentVariables(std::string & text) const
+      {
         // C++ regex does not support negative lookahead. So let us reverse the string.
         std::reverse(text.begin(), text.end());
 
@@ -277,8 +282,8 @@ namespace Gambit
         const static std::regex env( "\\}([^{]+)\\{\\$(?!\\\\)" );
 
         std::smatch match;
-        while (std::regex_search(text, match, env)) {
-
+        while (std::regex_search(text, match, env))
+        {
             // Reverse the found match into a temporary variable, this is what we actually
             // want to look for, e.g. we found RAV, but we want to look for VAR.
             std::string tmp = match[1].str();
@@ -302,18 +307,21 @@ namespace Gambit
       }
 
       /// Remove characters in the given string.
-      void removeCharsFromString(std::string& text, const char* charsToRemove ) const {
-         for (unsigned int i = 0; i < strlen(charsToRemove); ++i) {
+      void removeCharsFromString(std::string& text, const char* charsToRemove ) const
+      {
+         for (unsigned int i = 0; i < strlen(charsToRemove); ++i)
+         {
             text.erase(std::remove(text.begin(), text.end(), charsToRemove[i]), text.end());
          }
       }
 
       /// Leave input alone and return new string, which has environment variables
       /// substituted and escpae characters removed.
-      std::string expandEnvironmentVariables(const std::string& input ) const {
+      std::string expandEnvironmentVariables(const std::string& input ) const
+      {
         static const char* escape_character = "\\";
         std::string text = input;
-        removeCharsFromString( text, escape_character );
+        removeCharsFromString(text, escape_character);
         autoExpandEnvironmentVariables(text);
         return text;
       }
@@ -324,35 +332,40 @@ namespace Gambit
 /// fit into the given type (here int) or is not an integer, this function will raise.
 /// This exception is then caught by Options::getValue and handled.
 template<>
-inline int Options::getNode<int>(const YAML::Node node) const {
+inline int Options::getNode<int>(const YAML::Node node) const
+{
   try { return node.as<int>(); }
   catch (...) { return Options::safeIntegerTypeCast<int>(node.as<std::string>()); }
 }
 
 /// See int specialization.
 template<>
-inline unsigned int Options::getNode<unsigned int>(const YAML::Node node) const {
+inline unsigned int Options::getNode<unsigned int>(const YAML::Node node) const
+{
   try { return node.as<unsigned int>(); }
   catch (...) { return Options::safeIntegerTypeCast<unsigned int>(node.as<std::string>()); }
 }
 
 /// See int specialization.
 template<>
-inline long Options::getNode<long>(const YAML::Node node) const {
+inline long Options::getNode<long>(const YAML::Node node) const
+{
   try { return node.as<long>(); }
   catch (...) { return Options::safeIntegerTypeCast<long>(node.as<std::string>()); }
 }
 
 /// See int specialization.
 template<>
-inline unsigned long Options::getNode<unsigned long>(const YAML::Node node) const {
+inline unsigned long Options::getNode<unsigned long>(const YAML::Node node) const
+{
   try { return node.as<unsigned long>(); }
   catch (...) { return Options::safeIntegerTypeCast<unsigned long>(node.as<std::string>()); }
 }
 
 /// See int specialization.
 template<>
-inline long long Options::getNode<long long>(const YAML::Node node) const {
+inline long long Options::getNode<long long>(const YAML::Node node) const
+{
   try { return node.as<long long>(); }
   catch (...) { return Options::safeIntegerTypeCast<long long>(node.as<std::string>()); }
 }
