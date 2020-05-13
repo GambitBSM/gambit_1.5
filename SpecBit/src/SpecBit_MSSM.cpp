@@ -693,12 +693,6 @@ namespace Gambit
       // Get the spectrum from the Backend
       myPipe::BEreq::SPheno_MSSMspectrum(spectrum, inputs);
 
-      // Get the SLHA struct from the spectrum object
-      SLHAstruct slha = spectrum.getSLHAea(1);
-
-      // Convert into a spectrum object
-      spectrum = spectrum_from_SLHAea<MSSMSimpleSpec, SLHAstruct>(slha,slha,mass_cut,mass_ratio_cut);
-
     }
 
   // Runs FlexibleSUSY MSSMEFTHiggs model spectrum generator with SUSY
@@ -1727,6 +1721,15 @@ namespace Gambit
       const str gs_sMuR = slhahelp::mass_es_from_gauge_es("~mu_R", mssm, tol,
                                                          LOCAL_INFO, pt_error);
       specmap["msmuonR"] = mssm.get(Par::Pole_Mass,gs_sMuR);
+      const str gs_snu1 = slhahelp::mass_es_from_gauge_es("~nu_e_L", mssm, tol,
+                                                         LOCAL_INFO, pt_error);
+      specmap["msnue"] = mssm.get(Par::Pole_Mass,gs_snu1);
+      const str gs_snu2 = slhahelp::mass_es_from_gauge_es("~nu_mu_L", mssm, tol,
+                                                         LOCAL_INFO, pt_error);
+      specmap["msnumu"] = mssm.get(Par::Pole_Mass,gs_snu2);
+      const str gs_snu3 = slhahelp::mass_es_from_gauge_es("~nu_tau_L", mssm, tol,
+                                                         LOCAL_INFO, pt_error);
+      specmap["msnutau"] = mssm.get(Par::Pole_Mass,gs_snu3);
 
     }
 

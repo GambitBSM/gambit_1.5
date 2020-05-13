@@ -80,7 +80,7 @@ BE_FUNCTION(Switch_to_superPMNS, void,
          Farray_Fcomplex16_1_3_1_3&, // RSn_pmns
          Farray_Fcomplex16_1_3_1_3&, // PMNS_Q
          Farray_Freal8_1_3&  // Yl_pmns
-        ), ("__model_data_MOD_switch_to_superckm", "model_data_mp_switch_to_superckm_"), "SPheno_internal")
+        ), ("__model_data_MOD_switch_to_superpmns", "model_data_mp_switch_to_superpmns_"), "SPheno_internal")
 BE_FUNCTION(GetRenormalizationScale, Freal8, (), ("__loopfunctions_MOD_getrenormalizationscale", "loopfunctions_mp_getrenormalizationscale_"), "SPheno_internal")
 BE_FUNCTION(SetHighScaleModel, Flogical, (Fstring20), ("__sugraruns_MOD_sethighscalemodel", "sugraruns_mp_sethighscalemodle_"), "SPheno_internal")
 BE_FUNCTION(SetRGEScale, void, (Freal8), ("__sugraruns_MOD_setrgescale", "sugraruns_mp_setrgescale_"), "SPheno_internal")

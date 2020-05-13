@@ -85,8 +85,8 @@ namespace Gambit
 	Freal8 m2;
 	Freal8 g;
 	Finteger id;
-	Farray<Freal8,1,200,1,2> id2;
-	Farray<Freal8,1,600,1,3> id3;
+	Farray<Finteger,1,200,1,2> id2;
+	Farray<Finteger,1,600,1,3> id3;
 	Farray<Freal8,1,200> gi2;
 	Farray<Freal8,1,600> gi3;
 	Farray<Freal8,1,200> bi2;

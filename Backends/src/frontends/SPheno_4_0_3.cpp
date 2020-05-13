@@ -208,6 +208,7 @@ BE_NAMESPACE
       try{ Switch_to_superPMNS(*Y_l,id3C,*A_l,*M2_E,*M2_L,*Al_pmns,*M2E_pmns,*M2L_pmns,False,*RSlepton,*RSneut,RSl_pmns,RSn_pmns,PMNS_Q,Yl); }
       catch(std::runtime_error e) { invalid_point().raise(e.what()); }
 
+
     }
     else
     {
@@ -220,6 +221,12 @@ BE_NAMESPACE
       *Al_pmns = *A_l;
       *Ad_sckm = *A_d;
       *Au_sckm = *A_u;
+
+      *M2D_sckm = *M2_D;
+      *M2U_sckm = *M2_U;
+      *M2Q_sckm = *M2_Q;
+      *M2E_pmns = *M2_E;
+      *M2L_pmns = *M2_L;
 
       RUsq_ckm = *RSup;
       RDsq_ckm = *RSdown;
@@ -241,9 +248,15 @@ BE_NAMESPACE
     SLHAea_add_block(slha, "Ye", Q);
     for(int i=1; i<=3; i++)
     {
-      slha["Yu"][""] << i << Yu(i) << "# Yu(" << i << ")(Q)^DRbar";
-      slha["Yd"][""] << i << Yd(i) << "# Yd(" << i << ")(Q)^DRbar";
-      slha["Ye"][""] << i << Yl(i) << "# Ye(" << i << ")(Q)^DRbar";
+      slha["Yu"][""] << i << i << Yu(i) << "# Yu(" << i << "," << i << ")(Q)^DRbar";
+      slha["Yd"][""] << i << i << Yd(i) << "# Yd(" << i << "," << i << ")(Q)^DRbar";
+      slha["Ye"][""] << i << i << Yl(i) << "# Ye(" << i << "," << i << ")(Q)^DRbar";
+      for(int j=1; j<=3; j++)
+      {
+        slha["Yu"][""] << i << j << 0.0 << "# Yu(" << i << "," << j << ")(Q)^DRbar";
+        slha["Yd"][""] << i << j << 0.0 << "# Yd(" << i << "," << j << ")(Q)^DRbar";
+        slha["Ye"][""] << i << j << 0.0 << "# Ye(" << i << "," << j << ")(Q)^DRbar";
+      }
     }
 
     if(*GenerationMixing)
@@ -281,32 +294,47 @@ BE_NAMESPACE
         }
 
     }
-    else
-    {
 
-      // Blocks Au, Ad, Ae
-      SLHAea_add_block(slha, "Ae", Q);
-      SLHAea_add_block(slha, "Au", Q);
-      SLHAea_add_block(slha, "Ad", Q);
-      SLHAea_add_block(slha, "IMAe", Q);
-      SLHAea_add_block(slha, "IMAu", Q);
-      SLHAea_add_block(slha, "IMAd", Q);
-      for(int i=1; i<=3; i++)
+    // Blocks Au, Ad, Ae
+    SLHAea_add_block(slha, "Ae", Q);
+    SLHAea_add_block(slha, "Au", Q);
+    SLHAea_add_block(slha, "Ad", Q);
+    SLHAea_add_block(slha, "IMAe", Q);
+    SLHAea_add_block(slha, "IMAu", Q);
+    SLHAea_add_block(slha, "IMAd", Q);
+    for(int i=1; i<=3; i++)
+    {
+      for(int j=1; j<=3; j++)
       {
-        if(std::fabs(Yl(i)) > 0.0)
+        if((*Y_l)(i,j).abs() > 0.0)
         {
-          slha["Ae"][""] << i << i << (*Al_pmns)(i,i).re/Yl(i) << "# Ae(" << i << ")";
-          slha["IMAe"][""] << i << i << (*Al_pmns)(i,i).im/Yl(i) << "# Im(Ae(" << i << "))";
+          slha["Ae"][""] << i << j << ((*Al_pmns)(i,j)/(*Y_l)(i,j)).re << "# Ae(" << i << "," << j << ")";
+          slha["IMAe"][""] << i << j << ((*Al_pmns)(i,j)/(*Y_l)(i,j)).im << "# Im(Ae(" << i << "," << j << "))";
+        }
+        else
+        {
+          slha["Ae"][""] << i << j << 0.0 << "# Ae(" << i << "," << j << ")";
+          slha["IMAe"][""] << i << j << 0.0 << "# Im(Ae(" << i << "," << j << "))";
         }
         if((*Y_u)(i,i).abs() > 0.0)
         {
-          slha["Au"][""] << i << i << ((*Au_sckm)(i,i)/(*Y_u)(i,i)).re << "# Au(" << i  << ")";
-          slha["IMAu"][""] << i << i << ((*Au_sckm)(i,i)/(*Y_u)(i,i)).im << "# Im(Au(" << i << "))";
+          slha["Au"][""] << i << j << ((*Au_sckm)(i,j)/(*Y_u)(i,j)).re << "# Au(" << i << "," << j << ")";
+          slha["IMAu"][""] << i << j << ((*Au_sckm)(i,j)/(*Y_u)(i,j)).im << "# Im(Au(" << i << "," << j << "))";
+        }
+        else
+        {
+          slha["Au"][""] << i << j << 0.0 << "# Au(" << i << "," << j << ")";
+          slha["IMAu"][""] << i << j << 0.0 << "# Im(Au(" << i << "," << j << "))";
         }
         if((*Y_d)(i,i).abs() > 0.0)
         {
-          slha["Ad"][""] << i << i << ((*Ad_sckm)(i,i)/(*Y_d)(i,i)).re << "# Ad(" << i  << ")";
-          slha["IMAd"][""] << i << i << ((*Ad_sckm)(i,i)/(*Y_d)(i,i)).im << "# Im(Ad(" << i << "))";
+          slha["Ad"][""] << i << j << ((*Ad_sckm)(i,i)/(*Y_d)(i,j)).re << "# Ad(" << i << "," << j << ")";
+          slha["IMAd"][""] << i << j << ((*Ad_sckm)(i,i)/(*Y_d)(i,j)).im << "# Im(Ad(" << i << "," << j << "))";
+        }
+        else
+        {
+          slha["Ad"][""] << i << j << 0.0 << "# Ad(" << i << "," << j << ")";
+          slha["IMAd"][""] << i << j << 0.0 << "# Im(Ad(" << i << "," << j << "))";
         }
       }
 
@@ -344,34 +372,32 @@ BE_NAMESPACE
       slha["IMMSOFT"][""] << 3 << (*Mi)(3).im << "# M_3";
     }
 
-    if(*GenerationMixing)
-    {
-      // Blocks MSL2, MSE2, MSQ2, MSU2, MSD2
-      SLHAea_add_block(slha, "MSL2", Q);
-      SLHAea_add_block(slha, "MSE2", Q);
-      SLHAea_add_block(slha, "MSQ2", Q);
-      SLHAea_add_block(slha, "MSU2", Q);
-      SLHAea_add_block(slha, "MSD2", Q);
-      SLHAea_add_block(slha, "IMMSL2", Q);
-      SLHAea_add_block(slha, "IMMSE2", Q);
-      SLHAea_add_block(slha, "IMMSQ2", Q);
-      SLHAea_add_block(slha, "IMMSU2", Q);
-      SLHAea_add_block(slha, "IMMSD2", Q);
-      for(int i=1; i<=3; i++)
-        for(int j=1; j<=3; j++)
-        {
-          slha["MSL2"][""] << i << j << (*M2L_pmns)(i,j).re << "# ml2(" << i << "," << j << ")";
-          slha["MSE2"][""] << i << j << (*M2E_pmns)(i,j).re << "# me2(" << i << "," << j << ")";
-          slha["MSQ2"][""] << i << j << (*M2Q_sckm)(i,j).re << "# mq2(" << i << "," << j << ")";
-          slha["MSU2"][""] << i << j << (*M2U_sckm)(i,j).re << "# mu2(" << i << "," << j << ")";
-          slha["MSD2"][""] << i << j << (*M2D_sckm)(i,j).re << "# md2(" << i << "," << j << ")";
-          slha["IMMSL2"][""] << i << j << (*M2L_pmns)(i,j).im << "# Im(ml2(" << i << "," << j << "))";
-          slha["IMMSE2"][""] << i << j << (*M2E_pmns)(i,j).im << "# Im(me2(" << i << "," << j << "))";
-          slha["IMMSQ2"][""] << i << j << (*M2Q_sckm)(i,j).im << "# Im(mq2(" << i << "," << j << "))";
-          slha["IMMSU2"][""] << i << j << (*M2U_sckm)(i,j).im << "# Im(mu2(" << i << "," << j << "))";
-          slha["IMMSD2"][""] << i << j << (*M2D_sckm)(i,j).im << "# Im(md2(" << i << "," << j << "))";
-        }
-    }
+    // Blocks MSL2, MSE2, MSQ2, MSU2, MSD2
+    SLHAea_add_block(slha, "MSL2", Q);
+    SLHAea_add_block(slha, "MSE2", Q);
+    SLHAea_add_block(slha, "MSQ2", Q);
+    SLHAea_add_block(slha, "MSU2", Q);
+    SLHAea_add_block(slha, "MSD2", Q);
+    SLHAea_add_block(slha, "IMMSL2", Q);
+    SLHAea_add_block(slha, "IMMSE2", Q);
+    SLHAea_add_block(slha, "IMMSQ2", Q);
+    SLHAea_add_block(slha, "IMMSU2", Q);
+    SLHAea_add_block(slha, "IMMSD2", Q);
+    for(int i=1; i<=3; i++)
+      for(int j=1; j<=3; j++)
+      {
+        slha["MSL2"][""] << i << j << (*M2L_pmns)(i,j).re << "# ml2(" << i << "," << j << ")";
+        slha["MSE2"][""] << i << j << (*M2E_pmns)(i,j).re << "# me2(" << i << "," << j << ")";
+        slha["MSQ2"][""] << i << j << (*M2Q_sckm)(i,j).re << "# mq2(" << i << "," << j << ")";
+        slha["MSU2"][""] << i << j << (*M2U_sckm)(i,j).re << "# mu2(" << i << "," << j << ")";
+        slha["MSD2"][""] << i << j << (*M2D_sckm)(i,j).re << "# md2(" << i << "," << j << ")";
+        slha["IMMSL2"][""] << i << j << (*M2L_pmns)(i,j).im << "# Im(ml2(" << i << "," << j << "))";
+        slha["IMMSE2"][""] << i << j << (*M2E_pmns)(i,j).im << "# Im(me2(" << i << "," << j << "))";
+        slha["IMMSQ2"][""] << i << j << (*M2Q_sckm)(i,j).im << "# Im(mq2(" << i << "," << j << "))";
+        slha["IMMSU2"][""] << i << j << (*M2U_sckm)(i,j).im << "# Im(mu2(" << i << "," << j << "))";
+        slha["IMMSD2"][""] << i << j << (*M2D_sckm)(i,j).im << "# Im(md2(" << i << "," << j << "))";
+      }
+   
 
     // Block MASS
     SLHAea_add_block(slha, "MASS");
@@ -390,21 +416,21 @@ BE_NAMESPACE
       std::vector<int> id_sd = {1000001, 1000003, 1000005, 
                                 2000001, 2000003, 2000005};
       for(int i=1; i<=6; i++)
-        slha["MASS"][""] << id_sd[i] << (*Sdown)(i).m << "# ~d_" << i;
+        slha["MASS"][""] << id_sd[i-1] << (*Sdown)(i).m << "# ~d_" << i;
 
       std::vector<int> id_su = {1000002, 1000004, 1000006, 
                                 2000002, 2000004, 2000006};
       for(int i=1; i<=6; i++)
-        slha["MASS"][""] << id_su[i] << (*Sup)(i).m << "# ~u_" << i;
+        slha["MASS"][""] << id_su[i-1] << (*Sup)(i).m << "# ~u_" << i;
 
       std::vector<int> id_snu = {1000012, 1000014, 1000016};
       for(int i=1; i<=3; i++)
-        slha["MASS"][""] << id_snu[i] << (*Sneut)(i).m << "# ~nu_" << i;
+        slha["MASS"][""] << id_snu[i-1] << (*Sneut)(i).m << "# ~nu_" << i;
 
       std::vector<int> id_sle = {1000011, 1000013, 1000015,
                                  2000011, 2000013, 2000015};
       for(int i=1; i<=6; i++)
-        slha["MASS"][""] << id_sle[i] << (*Slepton)(i).m << "# ~l_" << i;
+        slha["MASS"][""] << id_sle[i-1] << (*Slepton)(i).m << "# ~l_" << i;
 
     }
     else
@@ -726,7 +752,8 @@ BE_NAMESPACE
     /****************/
     /* Block MODSEL */
     /****************/
-    // Already in Backend initialization function
+
+    *GenerationMixing = inputs.options->getValueOrDef<bool>(true, "GenerationMixing");
 
     /******************/
     /* Block SMINPUTS */
