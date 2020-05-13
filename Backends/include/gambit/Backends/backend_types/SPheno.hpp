@@ -63,6 +63,7 @@ namespace Gambit
     typedef Farray<Fstring<60>,1,22> Farray_Fstring60_1_22;
     typedef Farray<Fstring<60>,1,25> Farray_Fstring60_1_25;
     typedef Farray<Fstring<60>,1,9> Farray_Fstring60_1_9;
+    typedef Fstring<20> Fstring20;
    
     struct particle2
     {
@@ -84,8 +85,8 @@ namespace Gambit
 	Freal8 m2;
 	Freal8 g;
 	Finteger id;
-	Farray<Freal8,1,200,1,2> id2;
-	Farray<Freal8,1,600,1,3> id3;
+	Farray<Finteger,1,200,1,2> id2;
+	Farray<Finteger,1,600,1,3> id3;
 	Farray<Freal8,1,200> gi2;
 	Farray<Freal8,1,600> gi3;
 	Farray<Freal8,1,200> bi2;

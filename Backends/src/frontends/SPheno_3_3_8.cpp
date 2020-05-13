@@ -858,7 +858,7 @@ BE_NAMESPACE
     // GAMBIT: private variable, cannot import
 
     // 99, MADGraph output style, some additional information
-    // GAMBIT: always false, no file output, private variable, cannot import
+    // GAMBIT: private variable, cannot import
 
     // 100, use bsstep instead of rkqs, Use_bsstep_instead_of_rkqs
     Flogical bsstep = inputs.options->getValueOrDef<Flogical>(false, "Use_bsstep_instead_of_rkqs");
@@ -1321,15 +1321,15 @@ BE_INI_FUNCTION
     if((*ModelInUse)("CMSSM"))
     {
       *HighScaleModel = "mSUGRA";
-      //try {SetHighScaleModel("SUGRA"); }
-      //catch(std::runtime_error e) { invalid_point().raise(e.what()); }
+      try {SetHighScaleModel("SUGRA"); }
+      catch(std::runtime_error e) { invalid_point().raise(e.what()); }
 
     }
     else
     {
       *HighScaleModel = "SUGRA"; // SUGRA
-      //try {SetHighScaleModel("SUGRA"); }
-      //catch(std::runtime_error e) { invalid_point().raise(e.what()); }
+      try {SetHighScaleModel("SUGRA"); }
+      catch(std::runtime_error e) { invalid_point().raise(e.what()); }
 
     }
 
