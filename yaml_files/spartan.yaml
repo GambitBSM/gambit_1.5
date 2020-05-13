@@ -111,7 +111,7 @@ Logger:
 
 KeyValues:
 
-  default_output_path: "runs/spartan"
+  default_output_path: "${PWD}/runs/spartan"
 
   rng:
     generator: ranlux48

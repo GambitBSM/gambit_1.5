@@ -36,6 +36,8 @@
 #include <vector>
 #include <sstream>
 #include <utility>
+#include <regex>
+#include <cstdlib>
 
 #include "gambit/Utils/util_types.hpp"
 #include "gambit/Utils/standalone_error_handlers.hpp"
@@ -266,6 +268,56 @@ namespace Gambit
         throw std::runtime_error("Reached end of function safeIntegerTypeCast. This should not happen.");
       }
 
+      /// Expand environment variables in the given string.
+      void autoExpandEnvironmentVariables(std::string & text) const {
+        // C++ regex does not support negative lookahead. So let us reverse the string.
+        std::reverse(text.begin(), text.end());
+
+        // Matches reverse ${MYVAR}, but not \${MYVAR} and $MYVAR
+        const static std::regex env( "\\}([^{]+)\\{\\$(?!\\\\)" );
+
+        std::smatch match;
+        while (std::regex_search(text, match, env)) {
+
+            // Reverse the found match into a temporary variable, this is what we actually
+            // want to look for, e.g. we found RAV, but we want to look for VAR.
+            std::string tmp = match[1].str();
+            std::reverse(tmp.begin(), tmp.end());
+
+            // Look for VAR
+            const char * s = std::getenv(tmp.c_str());
+
+            std::string var(s == NULL ? "" : s);
+            if (s == NULL)  {
+              std::cout << "Environment variable " << match.str() << " not set";
+            }
+            // Reverse the found environment variable...
+            std::reverse(var.begin(), var.end());
+            // and plug it into the text string.
+            text.replace( match[0].first, match[0].second, var);
+
+        }
+        // Finally return the text string in the normal order.
+        std::reverse(text.begin(), text.end());
+      }
+
+      /// Remove characters in the given string.
+      void removeCharsFromString(std::string& text, const char* charsToRemove ) const {
+         for (unsigned int i = 0; i < strlen(charsToRemove); ++i) {
+            text.erase(std::remove(text.begin(), text.end(), charsToRemove[i]), text.end());
+         }
+      }
+
+      /// Leave input alone and return new string, which has environment variables
+      /// substituted and escpae characters removed.
+      std::string expandEnvironmentVariables(const std::string& input ) const {
+        static const char* escape_character = "\\";
+        std::string text = input;
+        removeCharsFromString( text, escape_character );
+        autoExpandEnvironmentVariables(text);
+        return text;
+      }
+
   };
 
 /// Allows to read scientific notation integer numbers. If the number does not
@@ -310,6 +362,14 @@ template<>
 inline unsigned long long Options::getNode<unsigned long long>(const YAML::Node node) const {
   try { return node.as<unsigned long long>(); }
   catch (...) { return Options::safeIntegerTypeCast<unsigned long long>(node.as<std::string>()); }
+}
+
+/// Read string and expand environment variables of the type ${MYVAR}.
+/// Expansion of environment variables is not performed if given as
+/// $MYVAR and \${MYVAR}.
+template<>
+inline std::string Options::getNode<std::string>(const YAML::Node node) const {
+  return expandEnvironmentVariables(node.as<std::string>());
 }
 
 }
