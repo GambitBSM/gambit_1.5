@@ -46,6 +46,8 @@ Printer:
 
   #printer: cout
 
+  #printer: "null" # <- 'null' needs to be put in quotations. Otherwise, the parser will confuse it with an empty YAML node.
+
 Scanner:
 
   use_scanner: random
