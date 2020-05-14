@@ -119,5 +119,7 @@ KeyValues:
 
   print_timing_data: true
 
+  print_unitcube: false
+
   likelihood:
     model_invalid_for_lnlike_below: -1e6
