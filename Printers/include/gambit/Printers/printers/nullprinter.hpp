@@ -51,8 +51,8 @@ namespace Gambit
         nullPrinter(const Options& options, BasePrinter* const primary)
         : BasePrinter(primary,options.getValueOrDef<bool>(false,"auxilliary"))
         {
-	  // This printer requires no setup
-	} 
+          // This printer requires no setup
+        }
 
         /// Virtual function overloads:
         ///@{
@@ -67,14 +67,14 @@ namespace Gambit
         // Permanently unavailable for this printer
         Options resume_reader_options()
         {
-	  std::ostringstream err;
-	  err << "The null printer is intrinsically incapable of reading from previous output, since the previous output was never printed." << std::endl; 
-	  printer_error().raise(LOCAL_INFO, err.str());
-	  return Options();
-	}
- 
+          std::ostringstream err;
+          err << "The null printer is intrinsically incapable of reading from previous output, since the previous output was never printed." << std::endl;
+          printer_error().raise(LOCAL_INFO, err.str());
+          return Options();
+        }
+
         ///@}
- 
+
         // PRINT FUNCTIONS
         //----------------------------
         // Need to define one of these for every type we want to print!
