@@ -264,9 +264,10 @@ foreach(OUTPUTCONFIG ${CMAKE_CONFIGURATION_TYPES} )
     set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY_${OUTPUTCONFIG} ${mylibdir} )
 endforeach()
 
-# Check if we are using 2019 intel compilers together with pybind11, and forbid the use of C++17 if so.
-if(HAVE_PYBIND11 AND "${CMAKE_CXX_COMPILER_ID}" STREQUAL "Intel")
-  if(CMAKE_CXX_COMPILER_VERSION VERSION_GREATER 18.0.6)
+# Check if we are using 2019 intel compilers or gcc 6.1 or 6.2 together with pybind11, and forbid the use of C++17 if so.
+if(HAVE_PYBIND11)
+  if(("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Intel" AND CMAKE_CXX_COMPILER_VERSION VERSION_GREATER 18.0.6) OR
+     ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU" AND CMAKE_CXX_COMPILER_VERSION VERSION_GREATER 5.6 AND CMAKE_CXX_COMPILER_VERSION VERSION_LESS 6.3))
     set(PERMIT_CXX17_CHECK FALSE)
   else()
     set(PERMIT_CXX17_CHECK TRUE)
