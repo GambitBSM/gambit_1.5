@@ -200,6 +200,9 @@ namespace Gambit
         /// Derive options from ini-entries
         Options collectIniOptions(const DRes::VertexID & vertex);
 
+        /// Collect sub-capabilities
+        Options collectSubCaps(const DRes::VertexID & vertex);
+
         /// Generate full dependency tree
         void generateTree(std::queue<QueueEntry> parQueue);
 

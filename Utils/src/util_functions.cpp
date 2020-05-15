@@ -167,6 +167,25 @@ namespace Gambit
       if (*s.rbegin() == ')')   s = s.substr(0, s.size()-1);
     }
 
+    /// Test if a set of str,str pairs contains any entry with first element matching a given string
+    bool sspairset_contains(const str& el, const std::set<std::pair<str,str>>& set)
+    {
+      for (std::pair<str,str> x : set) { if (x.first == el) return true; }
+      return false;
+    }
+
+    /// Tests if a set of str,str pairs contains an entry matching two given strings
+    bool sspairset_contains(const str& el1, const str& el2, const std::set<std::pair<str,str>>& set)
+    {
+      return sspairset_contains(std::pair<str,str>(el1, el2), set);
+    }
+
+    /// Tests if a set of str,str pairs contains an entry matching a given pair
+    bool sspairset_contains(const sspair& quantity, const std::set<sspair>& set)
+    {
+      return std::find(set.begin(), set.end(), quantity) != set.end();
+    }
+
     /// Created a std::string of a specified length.
     str str_fixed_len(str s, int len)
     {
