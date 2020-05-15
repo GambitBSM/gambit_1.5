@@ -2,7 +2,7 @@
 //   *********************************************
 ///  \file
 ///
-///  "null" printer class declaration
+///  "none" printer class declaration
 ///
 ///  This printer has the most simplistic
 ///  implementation of the virtual functions of BasePrinter
@@ -22,18 +22,12 @@
 ///  *********************************************
 
 
-#ifndef __null_printer_hpp__
-#define __null_printer_hpp__
-
-// Standard libraries
-#include <vector>
+#ifndef __none_printer_hpp__
+#define __none_printer_hpp__
 
 // Gambit
 #include "gambit/Printers/baseprinter.hpp"
 #include "gambit/Printers/printers/asciitypes.hpp"
-#include "gambit/Utils/yaml_options.hpp"
-#include "gambit/Utils/stream_overloads.hpp"
-#include "gambit/Utils/standalone_error_handlers.hpp"
 
 // BOOST_PP
 #include <boost/preprocessor/seq/for_each_i.hpp>
@@ -44,11 +38,11 @@ namespace Gambit
   namespace Printers
   {
 
-    class nullPrinter : public BasePrinter
+    class nonePrinter : public BasePrinter
     {
       public:
         // Constructor
-        nullPrinter(const Options& options, BasePrinter* const primary)
+        nonePrinter(const Options& options, BasePrinter* const primary)
         : BasePrinter(primary,options.getValueOrDef<bool>(false,"auxilliary"))
         {
           // This printer requires no setup
@@ -68,7 +62,7 @@ namespace Gambit
         Options resume_reader_options()
         {
           std::ostringstream err;
-          err << "The null printer is intrinsically incapable of reading from previous output, since the previous output was never printed." << std::endl;
+          err << "The none printer is intrinsically incapable of reading from previous output, since the previous output was never printed." << std::endl;
           printer_error().raise(LOCAL_INFO, err.str());
           return Options();
         }
@@ -97,9 +91,9 @@ namespace Gambit
 
     // Register printer so it can be constructed via inifile instructions
     // First argument is string label for inifile access, second is class from which to construct printer
-    LOAD_PRINTER(null, nullPrinter)
+    LOAD_PRINTER(none, nonePrinter)
 
   } // end namespace Printers
 } // end namespace Gambit
 
-#endif //ifndef __null_printer_hpp__
+#endif //ifndef __none_printer_hpp__
