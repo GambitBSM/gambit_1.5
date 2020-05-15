@@ -81,7 +81,7 @@ namespace Gambit
         bool printUnitcube; // Flag whether unitCubeParameters should be printed.
 
       public:
-        BaseBasePrinter(): rank(0), printUnitcube(true), printer_enabled(true), printer_cooldown(-1) {}
+        BaseBasePrinter(): rank(0), printUnitcube(false), printer_enabled(true), printer_cooldown(-1) {}
         virtual ~BaseBasePrinter() {}
         /// Function to signal to the printer to write buffer contents to disk
         //virtual void flush() {}; // TODO: needed?

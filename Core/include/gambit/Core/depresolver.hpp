@@ -279,7 +279,7 @@ namespace Gambit
         bool print_timing = false;
 
         /// Global flag for triggering printing of unitCubeParameters
-        bool print_unitcube = true;
+        bool print_unitcube = false;
   };
   }
 }

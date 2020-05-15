@@ -1438,11 +1438,11 @@ namespace Gambit
       // Read ini entries
       use_regex    = boundIniFile->getValueOrDef<bool>(false, "dependency_resolution", "use_regex");
       print_timing = boundIniFile->getValueOrDef<bool>(false, "print_timing_data");
-      print_unitcube = boundIniFile->getValueOrDef<bool>(true, "print_unitcube");
+      print_unitcube = boundIniFile->getValueOrDef<bool>(false, "print_unitcube");
 
       if ( use_regex )    logger() << "Using regex for string comparison." << endl;
       if ( print_timing ) logger() << "Will output timing information for all functors (via printer system)" << EOM;
-      if ( !print_unitcube ) logger() << "Printing of unitCubeParameters will be disabled." << EOM;
+      if ( print_unitcube ) logger() << "Printing of unitCubeParameters will be enabled." << EOM;
 
       //
       // Main loop: repeat until dependency queue is empty
