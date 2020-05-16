@@ -24,6 +24,10 @@
 ///          (patscott@physics.mcgill.ca)
 ///  \date 2014 Mar
 ///
+///  \author Markus Prim
+///          (markus.prim@kit.edu)
+///  \date 2020 April
+///
 ///  *********************************************
 
 #ifndef __yaml_options_hpp__
@@ -31,11 +35,11 @@
 
 #include <vector>
 #include <sstream>
-#include <utility>
 
 #include "gambit/Utils/util_types.hpp"
 #include "gambit/Utils/standalone_error_handlers.hpp"
 #include "gambit/Utils/yaml_variadic_functions.hpp"
+#include "gambit/Utils/yaml_node_utility.hpp"
 
 namespace Gambit
 {
@@ -81,7 +85,7 @@ namespace Gambit
         {
           try
           {
-            result = node.as<TYPE>();
+            result = NodeUtility::getNode<TYPE>(node);
           }
           catch(YAML::Exception& e)
           {
@@ -219,8 +223,8 @@ namespace Gambit
     private:
 
       YAML::Node options;
-
   };
+
 
 }
 
