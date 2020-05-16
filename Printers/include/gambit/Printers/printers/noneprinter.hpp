@@ -80,7 +80,7 @@ namespace Gambit
         #define DECLARE_PRINT(r,data,i,elem) void _print(elem const&, const std::string&, const int, const uint, const ulong) { /* do nothing */}
         BOOST_PP_SEQ_FOR_EACH_I(DECLARE_PRINT, , ASCII_TYPES)
         #ifndef SCANNER_STANDALONE
-          BOOST_PP_SEQ_FOR_EACH_I(DECLARE_PRINT, , ASCII_MODULE_BACKEND_TYPES)
+          BOOST_PP_SEQ_FOR_EACH_I(DECLARE_PRINT, , ASCII_BACKEND_TYPES)
         #endif
         #undef DECLARE_PRINT
         ///@}
