@@ -25,6 +25,7 @@
 // Convenience functions (definitions)
 BE_NAMESPACE
 {
+  // Make life convenient
   using Backends::cast_std_to_np;
   using Backends::cast_np_to_std;
 
@@ -34,7 +35,7 @@ BE_NAMESPACE
   using pyArray = typename py::array_t<T>;
   using pyArray_dbl = pyArray<>;
 
-  static bool alreadyCalculated = false;
+  // Static variables
   static bool hasAnnihilation = false;
   static bool hasDecay = false;
   static bool f_eff_mode;
@@ -49,48 +50,59 @@ BE_NAMESPACE
   static std::map<std::string, py::object> transfer_functions;
   static std::map<std::string, pyArray_dbl> result_map;
 
-  inline pyArray_dbl repeat_front_and_end(pyArray_dbl input, double front, double back)
+  // Convenience function to add given values to the front and the back of a numpy array
+  inline pyArray_dbl push_to_front_and_back(pyArray_dbl input, double front, double back)
   {
     return Backends::merge(front, Backends::merge(input, back));
   }
 
-  inline pyArray_dbl repeat_front_and_end(pyArray_dbl input)
+  // Convenience function to repeat the front and the back of a numpy array.
+  inline pyArray_dbl repeat_front_and_back(pyArray_dbl input)
   {
     size_t len = input.size();
     double front = (input.attr("__getitem__")(0)).cast<double>();
     double back = (input.attr("__getitem__")(len-1)).cast<double>();
 
-    return repeat_front_and_end(input,front,back);
+    return push_to_front_and_back(input,front,back);
   }
 
   void calc_f(DarkAges::Energy_injection_spectrum spec, double mass, double lifetime)
   {
-    if (alreadyCalculated)
-      return;
-
+    // This is nothing else than 'import numpy as np'
     static py::module np = py::module::import("numpy");
 
+    // Define lambdas to transform the input spectrum
     static auto transform_spectrum = [](double& x){x *= 1e-9;};
     static auto transform_energy = [](double& x){x = log10(1e9*x);};
-    static auto isNonZero = [](double& x){return abs(x) > std::numeric_limits<double>::epsilon();};
+    static auto isNonZero = [](double& x){return abs(x) > 0;};
 
+    // Transform E (in GeV) to log10E (E in eV)
     std::for_each(spec.E_el.begin(), spec.E_el.end(), transform_energy);
+    std::for_each(spec.E_ph.begin(), spec.E_ph.end(), transform_energy);
+
+    // Transform dN/dE from 1/GeV to 1/eV
     std::for_each(spec.spec_el.begin(), spec.spec_el.end(), transform_spectrum);
+    std::for_each(spec.spec_ph.begin(), spec.spec_ph.end(), transform_spectrum);
+
+    // Do we have electrons/postitrons?
     bool hasElectrons = std::any_of(spec.spec_el.begin(), spec.spec_el.end(), isNonZero);
+    // Do we have photons?
+    bool hasPhotons = std::any_of(spec.spec_ph.begin(), spec.spec_ph.end(), isNonZero);
+
+    // Cast the STL vectors into numpy arrays
     pyArray_dbl logE_el = cast_std_to_np(spec.E_el);
     pyArray_dbl spec_el = cast_std_to_np(spec.spec_el);
     pyArray_dbl null_el = np.attr("zeros_like")(spec_el);
-
-    std::for_each(spec.E_ph.begin(), spec.E_ph.end(), transform_energy);
-    std::for_each(spec.spec_ph.begin(), spec.spec_ph.end(), transform_spectrum);
-    bool hasPhotons = std::any_of(spec.spec_ph.begin(), spec.spec_ph.end(), isNonZero);
     pyArray_dbl logE_ph = cast_std_to_np(spec.E_ph);
     pyArray_dbl spec_ph = cast_std_to_np(spec.spec_ph);
     pyArray_dbl null_ph = np.attr("zeros_like")(spec_ph);
 
+    // Shift the mass from GeV to eV
     mass *= 1.e9;
     const double me_eV = 1.e9 * m_electron;
 
+    // Initialise the appropriate "model"
+    // Electrons/positrons and photns are treated separately
     static py::object model_el;
     static py::object model_ph;
     if (hasAnnihilation)
@@ -114,6 +126,8 @@ BE_NAMESPACE
                      py::arg("normalize_spectrum_by") = "mass");
     }
 
+    // Loop through all transfer functions and calculate f_c(z)
+    // and add it to result_map
     for (auto const& it : transfer_functions)
     {
       std::string channel = it.first;
@@ -123,27 +137,24 @@ BE_NAMESPACE
         f = f.attr("__add__")((model_el.attr("calc_f")(tf)).attr("__getitem__")(-1));
       if (hasPhotons)
         f = f.attr("__add__")((model_ph.attr("calc_f")(tf)).attr("__getitem__")(-1));
-      //f = f.attr("__getslice__")(0,z_size-1);
-      result_map[channel] = repeat_front_and_end(f);
+      result_map[channel] = repeat_front_and_back(f);
     }
 
-    // Get an independent copy of "redshift" to modify
+    // Add redshift to result_map
     // (Shift entries by one to get z and not z+1)
     pyArray_dbl z(z_size,redshift.data());
-    //z = z.attr("__getslice__")(0,z_size-1);
     std::for_each(z.mutable_data(), z.mutable_data()+z.size(), [](double& x){x -= 1;});
-    result_map["redshift"] =  repeat_front_and_end(z,0,zmax);
+    result_map["redshift"] =  push_to_front_and_back(z,0,zmax);
 
-    alreadyCalculated = true;
-
+    // And we are done
     return;
   }
 
   DarkAges::Energy_injection_efficiency_table get_energy_injection_efficiency_table()
   {
     DarkAges::Energy_injection_efficiency_table result{};
-    logger().send("Message from 'gather_results' backend convenience function in DarkAges v1.0.0 wrapper (Start)",LogTags::info);
 
+    // lambda to safely check if requested column is in result_map
     auto safe_retrieve = [](const str& key) -> std::vector<double>
     {
        if (result_map.count(key) != 0)
@@ -163,6 +174,7 @@ BE_NAMESPACE
        }
     };
 
+    // Fill the effiency table with all calculated columns
     result.f_eff_mode = f_eff_mode;
 
     result.redshift = safe_retrieve("redshift");
@@ -180,8 +192,6 @@ BE_NAMESPACE
       result.f_lowe = safe_retrieve("LowE");
     }
 
-    logger().send("Message from 'gather_results' backend convenience function in DarkAges v1.0.0 wrapper (Done casting NumPy-arrays into std vectors)",LogTags::info);
-
     return result;
   }
 }
@@ -190,11 +200,19 @@ END_BE_NAMESPACE
 // Initialisation function (definition)
 BE_INI_FUNCTION
 {
-  result_map.clear();
-  static bool scan_level = true;
+  static bool first_point = true;
   static bool print_table = false;
-  if (scan_level)
+
+  // Cache the Inputs
+  static DarkAges::Energy_injection_spectrum cached_spec{};
+  static double cached_mass{};
+  static double cached_lifetime{};
+
+  // Enter this scope only for the first point
+  if (first_point)
   {
+    first_point = false;
+
     // Check if annihilating DM or decaying DM is considered.
     // If both is considered, raise an error.
     // The BE_ALLOW_MODELS-macro in the frontend header ensures that
@@ -210,14 +228,22 @@ BE_INI_FUNCTION
       backend_error().raise(LOCAL_INFO,errMssg.str());
     }
 
+    // Save the submodule "model" (for later)
     DA = Gambit::Backends::DarkAges_1_2_0::DarkAges;
     std::string module_name = DA.attr("__name__").cast<std::string>();
     DA_model = py::module::import( (module_name + ".model").c_str() );
 
+    // Get redshift array (z+1) and its size
     redshift = DA.attr("get_redshift")();
     z_size = redshift.size();
 
+    // Should the f(z) be printed (for debugging)
+    print_table = runOptions->getValueOrDef<bool>(false,"print_table");
+
+    // What is the execution mode today?
     f_eff_mode = runOptions->getValueOrDef<bool>(false,"f_eff_mode");
+
+    // Depending on the execution mode, collect the relevant transfer functions.
     if (f_eff_mode)
     {
       py::object tf_vec = DA.attr("transfer_functions");
@@ -239,17 +265,14 @@ BE_INI_FUNCTION
       }
     }
 
+    // How far (in redshift) should the table be extended?
     zmax = runOptions->getValueOrDef<double>(1e7,"z_max");
-
-    // Should the f(z) be printed (for debugging)
-    print_table = runOptions->getValueOrDef<bool>(false,"print_table");
   }
-  scan_level = false;
 
-  // Reset the 'alreadyCalculated' flag
-  alreadyCalculated = false;
-  logger().send("Message from \'DarkAges_1.2.0_ini\'. Retrieving the injection spectrum",LogTags::info);
+  // Get the injected spectrum
   DarkAges::Energy_injection_spectrum spec = *Dep::energy_injection_spectrum;
+
+  // Get the remaining inputs depneding on the scenario (decay / annihilation)
   double mass{};
   double lifetime{};
   if (hasDecay)
@@ -265,10 +288,29 @@ BE_INI_FUNCTION
     lifetime  = -1.0; // This input will be ignored anyway if hasAnnihilation is true
   }
 
-  logger().send("Message from \'DarkAges_1.2.0_ini\'. Starting now to execute \'calc_f\'.",LogTags::info);
-  calc_f(spec,mass,lifetime);
-  logger().send("Message from \'DarkAges_1.2.0_ini\'. Done executing \'calc_f\'.",LogTags::info);
+  // Only calculate when the inputs changed, skip it otherwise
+  if ( spec == cached_spec && mass == cached_mass && lifetime == cached_lifetime )
+  {
+    logger().send("Message from \'DarkAges_1.2.0_ini\'. Skipped \'calc_f\' as the inputs have not changed.",LogTags::info);
+  }
+  else
+  {
+    logger().send("Message from \'DarkAges_1.2.0_ini\'. Starting \'calc_f\'.",LogTags::info);
 
+    // Reset results from previous point
+    result_map.clear();
+
+    calc_f(spec,mass,lifetime);
+
+    // Update the cache
+    cached_spec = spec;
+    cached_mass = mass;
+    cached_lifetime = lifetime;
+
+    logger().send("Message from \'DarkAges_1.2.0_ini\'. Finished \'calc_f\'.",LogTags::info);
+  }
+
+  // Print the table effiency functions if asked for
   if (print_table)
   {
     std::ostringstream buff;

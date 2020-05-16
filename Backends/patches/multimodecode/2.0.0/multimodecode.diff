@@ -343,7 +343,7 @@ index 3226d39..9b2419f 100644
        procedure, public :: printout => ic_print_observables
        procedure, public :: print_header => ic_print_headers
 diff --git a/modpk_potential.f90 b/modpk_potential.f90
-index 630ec5b..7812598 100644
+index 630ec5b..65bc8af 100644
 --- a/modpk_potential.f90
 +++ b/modpk_potential.f90
 @@ -48,7 +48,7 @@ contains
@@ -365,7 +365,7 @@ index 630ec5b..7812598 100644
 +      call polint(chiHarray(ii:ii+4), potHarray(ii:ii+4), phi(1), V_potential, derr)
 +
 +    case(19)
-+      ! Starobinsky 
++      ! Starobinsky
 +      ! R + R^2/(6M^2)
 +      ! or
 +      ! Lambda^4 (1 - exp(-sqrt(2/3)phi/Mpl))^2
@@ -374,7 +374,7 @@ index 630ec5b..7812598 100644
 +      call assert%check(num_inflaton==1,__FILE__,__LINE__)
 +      Lambda4 = vparams(1,:)
 +      V_potential = Lambda4(1) * (1 - exp(-sqrt(2.0e0_dp/3.0e0_dp)*phi(1)))**2
-+ 
++
  
  
      case default
@@ -402,7 +402,7 @@ index 630ec5b..7812598 100644
 +         first_deriv = lambda4 * 2.0e0_dp * sqrt(2.0e0_dp/3.0e0_dp) * &
 +                       (-exp(-2.0e0_dp * sqrt(2.0e0_dp/3.0e0_dp)*phi(1)) &
 +                       + exp(-sqrt(2.0e0_dp/3.0e0_dp)*phi(1)))
-+ 
++
  
         !END MULTIFIELD
         case default
@@ -427,7 +427,7 @@ index 630ec5b..7812598 100644
 +       case(19)
 +       ! Starobinsky
 +         lambda4 = vparams(1,:)
-+         second_deriv = lambda4(1)**4 * 4.0e0_dp/3.0e0_dp * &
++         second_deriv = lambda4(1) * 4.0e0_dp/3.0e0_dp * &
 +             (2.0e0_dp * exp(-2.0e0_dp * sqrt(2.0e0_dp/3.0e0_dp)*phi(1)) &
 +             - exp(-sqrt(2.0e0_dp/3.0e0_dp)*phi(1)))
 +
@@ -491,7 +491,18 @@ index 630ec5b..7812598 100644
      case default
  
        print*, "MODECODE: potential_choice =", potential_choice
-@@ -923,9 +989,17 @@ contains
+@@ -906,6 +972,10 @@ contains
+              x2 = 4.e0_dp*Ninit + 2.e0_dp*x1/phesq + 0.5e0_dp*phesq
+              phii = sqrt(x2)*sqrt(1.e0_dp-sqrt(1.e0_dp-4.e0_dp*x1/x2/x2))
+           end if
++       case(19)
++          ! Approximation for intial conditions in Starobinsky inflation
++          ! For Ninit in [50, 80] error < 0.5 percent w.r.t. slow roll
++          phii = 3.91397_dp + 1.68848e-2_dp*(Ninit - 65.0_dp) - 1.17594e-4_dp*(Ninit - 65.0_dp)**2
+        case default
+           phii = phi0
+        end select
+@@ -923,9 +993,17 @@ contains
      !
      real(dp) :: getEps
      real(dp), INTENT(IN) :: phi(:), dphi(:)

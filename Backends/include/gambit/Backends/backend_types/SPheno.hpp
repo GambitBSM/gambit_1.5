@@ -9,8 +9,10 @@
 ///
 ///  Authors (add name and date if you modify):
 ///  
-/// \author Tomas Gonzalo
-/// \date 2016 Apr
+///  \author Tomas Gonzalo
+///          (tomas.gonzalo@monash.edu)
+///  \date 2016 Apr
+///  \date 2020 Apr
 ///
 ///  *********************************************
 
@@ -21,6 +23,10 @@
 
 namespace Gambit
 {
+
+    // Typedef for function pointer to a void() function 
+    typedef void (*type_fptr_SPhenoErrorHandler)();
+
     typedef Farray<Finteger,1,3> Farray_Finteger_1_3;
     typedef Farray<Freal8,1,2> Farray_Freal8_1_2;
     typedef Farray<Freal8,1,3> Farray_Freal8_1_3;
@@ -49,6 +55,15 @@ namespace Gambit
     typedef Farray<Freal8,1,100,1,5,1,5> Farray_Freal8_1_100_1_5_1_5;
     typedef Farray<Freal8,1,100,1,6,1,6> Farray_Freal8_1_100_1_6_1_6;
     typedef Farray<Freal8,1,100,1,7,1,7> Farray_Freal8_1_100_1_7_1_7;
+    typedef Farray<Fstring<60>,1,31> Farray_Fstring60_1_31;
+    typedef Farray<Fstring<60>,1,10> Farray_Fstring60_1_10;
+    typedef Farray<Fstring<60>,1,2> Farray_Fstring60_1_2;
+    typedef Farray<Fstring<60>,1,33> Farray_Fstring60_1_33;
+    typedef Farray<Fstring<60>,1,15> Farray_Fstring60_1_15;
+    typedef Farray<Fstring<60>,1,22> Farray_Fstring60_1_22;
+    typedef Farray<Fstring<60>,1,25> Farray_Fstring60_1_25;
+    typedef Farray<Fstring<60>,1,9> Farray_Fstring60_1_9;
+    typedef Fstring<20> Fstring20;
    
     struct particle2
     {
@@ -70,8 +85,8 @@ namespace Gambit
 	Freal8 m2;
 	Freal8 g;
 	Finteger id;
-	Farray<Freal8,1,200,1,2> id2;
-	Farray<Freal8,1,600,1,3> id3;
+	Farray<Finteger,1,200,1,2> id2;
+	Farray<Finteger,1,600,1,3> id3;
 	Farray<Freal8,1,200> gi2;
 	Farray<Freal8,1,600> gi3;
 	Farray<Freal8,1,200> bi2;

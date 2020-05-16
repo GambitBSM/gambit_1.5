@@ -30,6 +30,10 @@
 ///  \date 2017 June
 ///        2019 May
 ///
+///  \author Patrick Stoecker
+///          (stoecker@physik.rwth-aachen.de)
+///  \date 2020 May
+///
 ///  *********************************************
 
 #include "gambit/Core/depresolver.hpp"
@@ -872,6 +876,9 @@ namespace Gambit
     // (i.e. give it the list of functors that need printing)
     void DependencyResolver::initialisePrinter()
     {
+      // Send the state of the "print_unitcube" flag to the printer
+      boundPrinter->set_printUnitcube(print_unitcube);
+
       std::vector<int> functors_to_print;
       graph_traits<MasterGraphType>::vertex_iterator vi, vi_end;
       //IndexMap index = get(vertex_index, masterGraph); // Now done in the constructor
@@ -1485,8 +1492,11 @@ namespace Gambit
       // Read ini entries
       use_regex    = boundIniFile->getValueOrDef<bool>(false, "dependency_resolution", "use_regex");
       print_timing = boundIniFile->getValueOrDef<bool>(false, "print_timing_data");
+      print_unitcube = boundIniFile->getValueOrDef<bool>(false, "print_unitcube");
+
       if ( use_regex )    logger() << "Using regex for string comparison." << endl;
       if ( print_timing ) logger() << "Will output timing information for all functors (via printer system)" << EOM;
+      if ( print_unitcube ) logger() << "Printing of unitCubeParameters will be enabled." << EOM;
 
       //
       // Main loop: repeat until dependency queue is empty

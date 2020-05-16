@@ -265,6 +265,15 @@ BE_INI_FUNCTION
   Classy_input input_container = *Dep::classy_final_input;
   pybind11::dict cosmo_input_dict = input_container.get_input_dict();
 
+  // Check whether the energy injection tables have changed.
+  // Then remove the entry from the dict, as it cannot be understood by classy.
+  bool EnergyInjection_changed = false;
+  if(cosmo_input_dict.attr("__contains__")("EnergyInjection_changed").cast<bool>())
+  {
+    EnergyInjection_changed = true;
+    cosmo_input_dict.attr("pop")("EnergyInjection_changed").cast<str>();
+  }
+
   static bool first_run = true;
 
   if(first_run)
@@ -280,6 +289,7 @@ BE_INI_FUNCTION
 
   // test if input arguments for CLASS are exactly the same as in previous run ...
   bool equal = compare_dicts(prev_input_dict, cosmo_input_dict);
+  equal &= !EnergyInjection_changed;
 
   // .. if so there is no need to recompute the results. If not, clean structure, re-fill input & re-compute
   if(not equal or first_run)
