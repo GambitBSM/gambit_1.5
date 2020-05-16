@@ -27,6 +27,7 @@
 #include <regex>
 #include <cstdlib>
 #include <cmath>
+#include <cstring>
 
 #include "yaml-cpp/yaml.h"
 
