@@ -38,7 +38,7 @@ BE_FUNCTION(multimodecode_parametrised_ps, gambit_inflation_observables,
             ("__multimodecode_gambit_MOD_multimodecode_parametrised_ps","multimodecode_gambit_mp_multimodecode_parametrised_ps_"), "multimodecode_parametrised_ps")
 
 // Fortran error handling issue
-BE_VARIABLE(ErrorHandler_cptr, type_fptr_multimodecode_ErrorHandler, 
+BE_VARIABLE(ErrorHandler_cptr, type_fptr_ErrorHandler,
             ("__modpk_errorhandling_MOD_errorhandler_cptr","modpk_errorhandling_mp_errorhandler_cptr_"), "multimode_internal")
 
 // Variable to silence MultiModeCode output

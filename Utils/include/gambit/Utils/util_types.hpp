@@ -638,6 +638,9 @@ namespace Gambit
   typedef double            Freal8;
   typedef long double       Freal16;
 
+  // Typedef for function pointer to a fotran void() function
+  // Used in the context of SPheno and MultiModeCode
+  typedef void (*type_fptr_ErrorHandler)();
 
   /// Types used for Mathematica backends
   typedef void         MVoid;

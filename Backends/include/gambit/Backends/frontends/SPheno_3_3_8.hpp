@@ -265,7 +265,7 @@ BE_VARIABLE(epsI, Freal8, ("__spheno_MOD_epsi", "spheno_mp_epsi_"), "SPheno_inte
 BE_VARIABLE(deltaM, Freal8, ("__spheno_MOD_deltam", "spheno_mp_deltam_"), "SPheno_internal")
 BE_VARIABLE(kont, Finteger, ("__spheno_MOD_kont", "spheno_mp_kont_"), "SPheno_internal")
 BE_VARIABLE(ErrCan, Finteger, ("__control_MOD_errcan", "control_mp_errcan_"), "SPheno_internal")
-BE_VARIABLE(ErrorHandler_cptr, type_fptr_SPhenoErrorHandler, ("__control_MOD_errorhandler_cptr", "control_mp_errorhandler_cptr_"), "SPheno_internal")
+BE_VARIABLE(ErrorHandler_cptr, type_fptr_ErrorHandler, ("__control_MOD_errorhandler_cptr", "control_mp_errorhandler_cptr_"), "SPheno_internal")
 BE_VARIABLE(SilenceOutput, Flogical, ("__control_MOD_silenceoutput", "control_mp_silenceoutput"), "SPheno_internal")
 BE_VARIABLE(Math_Error, Farray_Fstring60_1_31, ("__control_MOD_math_error", "control_mp_math_error"), "SPheno_internal")
 BE_VARIABLE(SM_Error, Farray_Fstring60_1_2, ("__control_MOD_sm_error", "control_mp_sm_error"), "SPheno_internal")
