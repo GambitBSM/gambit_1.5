@@ -47,7 +47,7 @@ namespace Gambit
           // Reverse the found environment variable...
           std::reverse(var.begin(), var.end());
           // and plug it into the text string.
-          text.replace( match[0].first, match[0].second, var);
+          text.replace( match.position(0), match[0].length(), var);
 
       }
       // Finally return the text string in the normal order.
