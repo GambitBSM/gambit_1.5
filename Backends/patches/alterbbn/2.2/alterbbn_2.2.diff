@@ -19,3 +19,12 @@
  
  /* --------------------------------------- Integration part ------------------------------------------------------------ */    
  
+@@ -2359,7 +2359,7 @@
+         if(nucl(paramrelic,ratioH_tmp)>0) return 0;
+         paramrelic->err=0;
+         if(nucl(paramrelic,ratioH)>0) return 0;
+-        for(ie=1;ie<=NNUC;ie++) cov_ratioH[ie][ie]=fabs(ratioH_tmp[ie]-ratioH[ie]);
++        for(ie=1;ie<=NNUC;ie++) cov_ratioH[ie][ie]=pow(fabs(ratioH_tmp[ie]-ratioH[ie]),2);
+     }
+     
+     else if(paramrelic->err==3)
