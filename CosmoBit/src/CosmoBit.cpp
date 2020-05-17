@@ -123,6 +123,30 @@ namespace Gambit
   {
     using namespace LogTags;
 
+    /// set neutron lifetime to fixed, default value
+    void set_default_neutron_lifetime(double& result)
+    {
+      using namespace Pipes::set_default_neutron_lifetime;
+
+      // default to 880.2 s (PDG 2018 http://pdg.lbl.gov/2018/listings/rpp2018-list-n.pdf), 
+      // can be overwritten with yaml file rule. Or treated as a free parameter with
+      // model  nuclear_params_neutron_lifetime, see function get_param_neutron_lifetime
+      result = runOptions->getValueOrDef<double>(880.2,"neutron_lifetime");
+
+    }
+    
+    /// set neutron lifetime from model 
+    void get_param_neutron_lifetime(double& result)
+    {
+      using namespace Pipes::get_param_neutron_lifetime;
+
+      // set neutron lifetime to model parameter from 
+      // model  nuclear_params_neutron_lifetime
+      result = *Param["neutron_lifetime"];
+
+    }
+    
+
     void lifetime_ALP_agg(double& result)
     {
       // lifetime in s if onlz the decay a -> g g is open.
@@ -1296,11 +1320,15 @@ namespace Gambit
         result["dNnu"]=0.;    // no extra ur species in standard LCDM model
       }
       result["eta0"] = *Dep::etaBBN;
+      
+      // pass neutron lifetime -- can be fixed or treated as a free 
+      // parameter if model nuclear_params_neutron_lifetime is in use
+      result["neutron_lifetime"] = *Dep::neutron_lifetime;
 
       result["failsafe"] = runOptions->getValueOrDef<double>(3,"failsafe");
       result["err"] = runOptions->getValueOrDef<double>(3,"err");
 
-      logger() << "Set AlterBBN with parameters eta = " << result["eta0"] << ", Nnu = " << result["Nnu"] << ", dNnu = " << result["dNnu"];
+      logger() << "Set AlterBBN with parameters eta = " << result["eta0"] << ", Nnu = " << result["Nnu"] << ", dNnu = " << result["dNnu"] << ", neutron lifetime = " << result["neutron_lifetime"];
       logger() << " and error params: failsafe = " << result["failsafe"] << ", err = " << result["err"] << EOM;
     }
 
