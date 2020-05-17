@@ -89,6 +89,9 @@ elseif("${CMAKE_C_COMPILER_ID}" STREQUAL "GNU" OR "${CMAKE_C_COMPILER_ID}" STREQ
   set(AlterBBN_C_FLAGS "${BACKEND_C99_FLAGS} -fno-math-errno -funsafe-math-optimizations")
   if("${CMAKE_C_COMPILER_ID}" STREQUAL "GNU")
     set(AlterBBN_C_FLAGS "${AlterBBN_C_FLAGS} -fcx-limited-range") # Clang doesn't have this one.
+    # For some reason "-fomit-frame-pointer" must be explicitly included -- at least for gcc --
+    # otherwise the uncertainty estimates of AlterBBN are bogus.
+    set(AlterBBN_C_FLAGS "${AlterBBN_C_FLAGS} -fomit-frame-pointer")
   endif()
 endif()
 
