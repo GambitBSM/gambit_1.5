@@ -16,6 +16,7 @@
 ///  *********************************************
 
 #include "gambit/Utils/yaml_node_utility.hpp"
+#include <cstring>
 
 namespace Gambit 
 {
