@@ -22,6 +22,10 @@
 ///          (tomas.gonzalo@monash.edu)
 ///  \date 2019 May
 ///
+///  \author Patrick Stoecker
+///          (stoecker@physik.rwth-aachen.de)
+///  \date 2020 May
+///
 ///  *********************************************
 
 #ifndef __depresolver_hpp__
@@ -277,6 +281,8 @@ namespace Gambit
         /// Global flag for triggering printing of timing data
         bool print_timing = false;
 
+        /// Global flag for triggering printing of unitCubeParameters
+        bool print_unitcube = false;
   };
   }
 }

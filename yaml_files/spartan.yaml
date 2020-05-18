@@ -46,6 +46,8 @@ Printer:
 
   #printer: cout
 
+  #printer: none
+
 Scanner:
 
   use_scanner: random
@@ -118,6 +120,8 @@ KeyValues:
     seed: -1
 
   print_timing_data: true
+
+  print_unitcube: true
 
   likelihood:
     model_invalid_for_lnlike_below: -1e6
