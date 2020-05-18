@@ -104,7 +104,7 @@ def main(argv):
                 if (name.endswith(".c") or name.endswith(".cc") or name.endswith(".cpp")) and not hidden(name):
                     short_root = re.sub("\\./"+mod+"/src/?","",root)
                     if short_root != "" : short_root += "/"
-                    if mod in ["Backends", "Models"] and "/backend_types/" not in short_root and excluded(name, exclude_backends | exclude_models):
+                    if mod in ["Backends"] and "/backend_types/" not in short_root and excluded(name, exclude_backends | exclude_models):
                         if verbose: print("    Ignoring {0} source file '{1}'".format(mod,short_root+name))
                         excluded_components.add(os.path.splitext(name)[0])
                         continue # skip this file
@@ -122,7 +122,7 @@ def main(argv):
             for name in files:
                 short_root = re.sub("\\./"+mod+"/include/?","",root)
                 if short_root != "" : short_root += "/"
-                if mod in ["Backends", "Models", "Printers"] and "/backend_types/" not in short_root and excluded(name, exclude_backends | exclude_models | exclude_printers):
+                if mod in ["Backends", "Printers"] and "/backend_types/" not in short_root and excluded(name, exclude_backends | exclude_models | exclude_printers):
                     if verbose: print("    Ignoring {0} header file '{1}'".format(mod,short_root+name))
                     excluded_components.add(os.path.splitext(name)[0])
                     continue # skip this file
