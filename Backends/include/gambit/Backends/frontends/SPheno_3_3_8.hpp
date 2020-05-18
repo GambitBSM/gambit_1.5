@@ -7,8 +7,8 @@
 ///  *********************************************
 ///
 ///  Authors (add name and date if you modify):
-///   
-///  \author Tomas Gonzalo 
+///
+///  \author Tomas Gonzalo
 ///          (tomas.gonzalo@monash.edu)
 ///  \date 2016 May, June
 ///  \date 2020 Apr
@@ -31,17 +31,17 @@ BE_FUNCTION(Set_All_Parameters_0, void, (), ("__model_data_MOD_set_all_parameter
 BE_FUNCTION(SPheno_Main, void, (), ("__spheno_MOD_spheno_main", "spheno_mp_spheno_main_"), "SPheno_internal")
 BE_FUNCTION(InitializeLoopFunctions, void, (), ("__loopfunctions_MOD_initializeloopfunctions", "loopfunctions_mp_initializeloopfunctions_"), "SPheno_internal")
 BE_FUNCTION(CalculateRunningMasses, void, (Farray_Freal8_1_3&, //mf_l_in
-					Farray_Freal8_1_3&, // mf_d_in
-					Farray_Freal8_1_3&, // mf_u_in
-					Freal8&, // Qlow
+          Farray_Freal8_1_3&, // mf_d_in
+          Farray_Freal8_1_3&, // mf_u_in
+          Freal8&, // Qlow
                                         Freal8&, // Alpha
                                         Freal8&, // AlphaS
                                         Freal8&, // Qhigh
                                         Farray_Freal8_1_3&, // mf_l_out
                                         Farray_Freal8_1_3&, // mf_d_out
-                                        Farray_Freal8_1_3&, // mf_u_out 
+                                        Farray_Freal8_1_3&, // mf_u_out
                                         Finteger&), //kont))
-	 ("__standardmodel_MOD_calculaterunningmasses", "standardmodel_mp_calculaterunningmasses_"), "SPheno_internal")
+   ("__standardmodel_MOD_calculaterunningmasses", "standardmodel_mp_calculaterunningmasses_"), "SPheno_internal")
 BE_FUNCTION(Switch_to_superCKM, void,
         (Farray_Fcomplex16_1_3_1_3&, // Yd
          Farray_Fcomplex16_1_3_1_3&, // Yu
@@ -111,7 +111,7 @@ BE_VARIABLE(L_BR, Flogical, ("__control_MOD_l_br", "control_mp_l_br_"), "SPheno_
 BE_VARIABLE(L_CS, Flogical, ("__control_MOD_l_cs", "control_mp_l_cs_"), "SPheno_internal")
 BE_VARIABLE(delta_mass, Freal8, ("__control_MOD_delta_mass", "control_mp_delta_mass_"), "SPheno_internal")
 BE_VARIABLE(n_run, Finteger, ("__control_MOD_n_run", "control_mp_n_run_"), "SPheno_internal")
-BE_VARIABLE(WriteOut, Flogical, ("__control_MOD_writeout", "control_mp_writeout_"), "SPheno_internal") 
+BE_VARIABLE(WriteOut, Flogical, ("__control_MOD_writeout", "control_mp_writeout_"), "SPheno_internal")
 BE_VARIABLE(TwoLoopRGE, Flogical, ("__rges_MOD_twolooprge", "rges_mp_twolooprge_"), "SPheno_internal")
 BE_VARIABLE(Write_SLHA1, Flogical, ("__inputoutput_MOD_write_slha1", "inputoutput_mp_write_slha1_"), "SPheno_internal")
 BE_VARIABLE(Non_Zero_Exit, Flogical, ("__control_MOD_non_zero_exit", "control_mp_non_zero_exit_"), "SPheno_internal")
@@ -265,7 +265,7 @@ BE_VARIABLE(epsI, Freal8, ("__spheno_MOD_epsi", "spheno_mp_epsi_"), "SPheno_inte
 BE_VARIABLE(deltaM, Freal8, ("__spheno_MOD_deltam", "spheno_mp_deltam_"), "SPheno_internal")
 BE_VARIABLE(kont, Finteger, ("__spheno_MOD_kont", "spheno_mp_kont_"), "SPheno_internal")
 BE_VARIABLE(ErrCan, Finteger, ("__control_MOD_errcan", "control_mp_errcan_"), "SPheno_internal")
-BE_VARIABLE(ErrorHandler_cptr, type_fptr_SPhenoErrorHandler, ("__control_MOD_errorhandler_cptr", "control_mp_errorhandler_cptr_"), "SPheno_internal")
+BE_VARIABLE(ErrorHandler_cptr, fptr_void, ("__control_MOD_errorhandler_cptr", "control_mp_errorhandler_cptr_"), "SPheno_internal")
 BE_VARIABLE(SilenceOutput, Flogical, ("__control_MOD_silenceoutput", "control_mp_silenceoutput"), "SPheno_internal")
 BE_VARIABLE(Math_Error, Farray_Fstring60_1_31, ("__control_MOD_math_error", "control_mp_math_error"), "SPheno_internal")
 BE_VARIABLE(SM_Error, Farray_Fstring60_1_2, ("__control_MOD_sm_error", "control_mp_sm_error"), "SPheno_internal")
