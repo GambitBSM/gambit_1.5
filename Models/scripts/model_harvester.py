@@ -42,7 +42,6 @@ def main(argv):
         print('Usage: model_harvestor.py [flags]')
         print(' flags:')
         print('        -v : More verbose output')
-        print('        -x : Legacy option for compatiblity, does nothing. ')
         sys.exit(2)
     for opt, arg in opts:
       if opt in ('-v','--verbose'):

@@ -236,8 +236,12 @@ endmacro()
 
 # Function to add a GAMBIT custom command and target
 macro(add_gambit_custom target filename HARVESTER DEPS)
+  set(ditch_string "")
+  if (${ARGN})
+    set(ditch_string "-x __not_a_real_name__,${ARGN}")
+  endif()
   add_custom_command(OUTPUT ${CMAKE_BINARY_DIR}/${filename}
-                     COMMAND ${PYTHON_EXECUTABLE} ${${HARVESTER}} -x __not_a_real_name__,${itch_with_commas}
+                     COMMAND ${PYTHON_EXECUTABLE} ${${HARVESTER}} ${ditch_string}}
                      COMMAND touch ${CMAKE_BINARY_DIR}/${filename}
                      WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
                      DEPENDS ${${HARVESTER}}
