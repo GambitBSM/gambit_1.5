@@ -36,8 +36,8 @@
 cmake_minimum_required(VERSION 2.8.12 FATAL_ERROR)
 
 # Define minimum compiler versions
-set(MIN_GCC_VERSION 4.9.0)
-set(MIN_ICC_VERSION 15.0.0)
+set(MIN_GCC_VERSION 5.1)
+set(MIN_ICC_VERSION 15.0.2)
 
 SET(CMAKE_BUILD_TYPE_STRING "Choose the type of build, options are: None Debug Release Release_O3 RelWithDebInfo MinSizeRel.")
 if(NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
