@@ -2,7 +2,7 @@
 //   *********************************************
 ///  \file
 ///
-///  Frontend for SPheno 4.3.0 backend 
+///  Frontend for SPheno 4.3.0 backend
 ///  (out of the box version)
 ///
 ///  *********************************************
@@ -42,7 +42,7 @@ BE_NAMESPACE
   {
 
     try{ Set_All_Parameters_0(); }
-    catch(std::runtime_error e) { invalid_point().raise(e.what()); }
+    catch(std::runtime_error& e) { invalid_point().raise(e.what()); }
 
     ReadingData(inputs);
 
@@ -52,11 +52,11 @@ BE_NAMESPACE
     *ratioWoM = 0.0;
 
     try{ SPheno_Main(); }
-    catch(std::runtime_error e) { invalid_point().raise(e.what()); }
+    catch(std::runtime_error& e) { invalid_point().raise(e.what()); }
 
     if(*kont != 0)
        ErrorHandling(*kont);
-      
+
     spectrum = Spectrum_Out(inputs);
 
     return *kont;
@@ -71,7 +71,7 @@ BE_NAMESPACE
 
     Freal8 Q;
     try{ Q = sqrt(GetRenormalizationScale()); }
-    catch(std::runtime_error e) { invalid_point().raise(e.what()); }
+    catch(std::runtime_error& e) { invalid_point().raise(e.what()); }
 
     // TODO: Chi masses are not rotated, I think. Check
 
@@ -195,7 +195,7 @@ BE_NAMESPACE
 
       Flogical False = false;
       try{ Switch_to_superCKM(*Y_d,*Y_u,*A_d,*A_u,*M2_D,*M2_Q,*M2_U,*Ad_sckm,*Au_sckm,*M2D_sckm,*M2Q_sckm,*M2U_sckm,False,*RSdown,*RSup,RDsq_ckm,RUsq_ckm,CKM_Q,Yd,Yu); }
-      catch(std::runtime_error e) { invalid_point().raise(e.what()); }
+      catch(std::runtime_error& e) { invalid_point().raise(e.what()); }
 
       SLHAea_add_block(slha, "UPMNSIN");
       slha["UPMNSIN"][""] << 1 << *theta_12 << "# theta_12, solar";
@@ -206,7 +206,7 @@ BE_NAMESPACE
       slha["UPMNSIN"][""] << 6 << *alpha_nu2 << "# alpha_2";
 
       try{ Switch_to_superPMNS(*Y_l,id3C,*A_l,*M2_E,*M2_L,*Al_pmns,*M2E_pmns,*M2L_pmns,False,*RSlepton,*RSneut,RSl_pmns,RSn_pmns,PMNS_Q,Yl); }
-      catch(std::runtime_error e) { invalid_point().raise(e.what()); }
+      catch(std::runtime_error& e) { invalid_point().raise(e.what()); }
 
 
     }
@@ -274,7 +274,7 @@ BE_NAMESPACE
           slha["UPMNS"][""] << i << j << PMNS_Q(i,j).re << "# UPMNS_" << i << j;
           slha["IMUPMNS"][""] << i << j << PMNS_Q(i,j).im << "# Im(UPMNS_" << i << j << ")";
         }
-     
+
       // Blocks Te, Tu, Td
       SLHAea_add_block(slha, "Te", Q);
       SLHAea_add_block(slha, "Tu", Q);
@@ -397,7 +397,7 @@ BE_NAMESPACE
         slha["IMMSU2"][""] << i << j << (*M2U_sckm)(i,j).im << "# Im(mu2(" << i << "," << j << "))";
         slha["IMMSD2"][""] << i << j << (*M2D_sckm)(i,j).im << "# Im(md2(" << i << "," << j << "))";
       }
-   
+
 
     // Block MASS
     SLHAea_add_block(slha, "MASS");
@@ -413,12 +413,12 @@ BE_NAMESPACE
 
     if(*GenerationMixing)
     {
-      std::vector<int> id_sd = {1000001, 1000003, 1000005, 
+      std::vector<int> id_sd = {1000001, 1000003, 1000005,
                                 2000001, 2000003, 2000005};
       for(int i=1; i<=6; i++)
         slha["MASS"][""] << id_sd[i-1] << (*Sdown)(i).m << "# ~d_" << i;
 
-      std::vector<int> id_su = {1000002, 1000004, 1000006, 
+      std::vector<int> id_su = {1000002, 1000004, 1000006,
                                 2000002, 2000004, 2000006};
       for(int i=1; i<=6; i++)
         slha["MASS"][""] << id_su[i-1] << (*Sup)(i).m << "# ~u_" << i;
@@ -436,7 +436,7 @@ BE_NAMESPACE
     else
     {
       if((*RSdown)(1,1).abs() > 0.5)
-      { 
+      {
         slha["MASS"][""] << 1000001 << (*Sdown)(1).m << "# ~d_L";
         slha["MASS"][""] << 2000001 << (*Sdown)(2).m << "# ~d_R";
       }
@@ -633,7 +633,7 @@ BE_NAMESPACE
             slha["IMSNUMIX"][""] << i << j << RSn_pmns(i,j).im << "# Im(R_Sn)(" << i << "," << j << ")";
           }
         }
- 
+
     }
     else
     {
@@ -682,7 +682,7 @@ BE_NAMESPACE
       {
         slha["NMIX"][""] << i << j << Nr(i,j).re << "# N(" << i << j << ")";
         if(Nr(i,j).im != 0)
-        { 
+        {
           SLHAea_check_block(slha, "IMNMIX", i, true);
           slha["IMNMIX"][""] << i << j << Nr(i,j).im << "# Im(N)(" << i << j << ")";
         }
@@ -735,7 +735,7 @@ BE_NAMESPACE
 
     InitializeStandardModel(inputs.sminputs);
     try{ InitializeLoopFunctions(); }
-    catch(std::runtime_error e) { invalid_point().raise(e.what()); }
+    catch(std::runtime_error& e) { invalid_point().raise(e.what()); }
 
     *ErrorLevel = -1;
     *GenerationMixing = false;
@@ -743,7 +743,7 @@ BE_NAMESPACE
     *L_CS = false;
 
     try{ Set_All_Parameters_0(); }
-    catch(std::runtime_error e) { invalid_point().raise(e.what()); }
+    catch(std::runtime_error& e) { invalid_point().raise(e.what()); }
 
     *TwoLoopRGE = true;
 
@@ -793,7 +793,7 @@ BE_NAMESPACE
     {
       Freal8 scale = 1.0E6;  // SPA convention is 1 TeV
       try {SetRGEScale(scale); }
-      catch(std::runtime_error e) { invalid_point().raise(e.what()); }
+      catch(std::runtime_error& e) { invalid_point().raise(e.what()); }
     }
 
     // 3, External_Spectrum
@@ -834,7 +834,7 @@ BE_NAMESPACE
     if(GUTScale > 0.0)
     {
       try{ SetGUTScale(GUTScale); }
-      catch(std::runtime_error e) { invalid_point().raise(e.what()); }
+      catch(std::runtime_error& e) { invalid_point().raise(e.what()); }
     }
 
     // 32, requires strict unification, StrictUnification
@@ -842,7 +842,7 @@ BE_NAMESPACE
     if(StrictUnification)
     {
       try{ SetStrictUnification(StrictUnification); }
-      catch(std::runtime_error e) { invalid_point().raise(e.what()); }
+      catch(std::runtime_error& e) { invalid_point().raise(e.what()); }
     }
 
     // 34, precision of mass calculation, delta_mass
@@ -859,7 +859,7 @@ BE_NAMESPACE
     if(YukawaScheme == 1 or YukawaScheme == 2)
     {
       try{ SetYukawaScheme(YukawaScheme); }
-      catch(std::runtime_error e) { invalid_point().raise(e.what()); }
+      catch(std::runtime_error& e) { invalid_point().raise(e.what()); }
     }
 
     // 38, set looplevel of RGEs, TwoLoopRGE
@@ -884,7 +884,7 @@ BE_NAMESPACE
     // 45, in case of large logs for m_h switch to 1-loop calculation
     *Switch_to_1_loop_mh = inputs.options->getValueOrDef<bool>(false, "Switch_to_1_loop_mh");
 
-    // 48, switch on NNNL fit formula for m_t and alpha_s values at Q=m_t 
+    // 48, switch on NNNL fit formula for m_t and alpha_s values at Q=m_t
     *l_mt_3loop = inputs.options->getValueOrDef<bool>(false,"l_mt_3loop");
 
     // 49, switch on SM decoupling
@@ -919,7 +919,7 @@ BE_NAMESPACE
     if(Use_bsstep_instead_of_rkqs)
     {
       try{ Set_Use_bsstep_instead_of_rkqs(Use_bsstep_instead_of_rkqs); }
-      catch(std::runtime_error e) { invalid_point().raise(e.what()); }
+      catch(std::runtime_error& e) { invalid_point().raise(e.what()); }
     }
 
     // 101, use rzextr instead of pzextr
@@ -927,7 +927,7 @@ BE_NAMESPACE
     if(Use_rzextr_instead_of_pzextr)
     {
       try{ Set_Use_rzextr_instead_of_pzextr(Use_rzextr_instead_of_pzextr); }
-      catch(std::runtime_error e) { invalid_point().raise(e.what()); }
+      catch(std::runtime_error& e) { invalid_point().raise(e.what()); }
     }
 
     // 110, write output for LHC observables
@@ -1048,7 +1048,7 @@ BE_NAMESPACE
     if(inputs.param.find("mA") != inputs.param.end())
     {
       (*mP0)(2) = *inputs.param.at("mA");
-      (*mP02)(2) = pow((*mP0)(2),2); 
+      (*mP02)(2) = pow((*mP0)(2),2);
     }
 
     for(int i=1; i<=3; i++)
@@ -1273,7 +1273,7 @@ BE_NAMESPACE
       (*mf_u_mZ)(i) = 0.0;
     }
     try{ CalculateRunningMasses(*mf_l, *mf_d, *mf_u, *Q_light_quarks, *Alpha_mZ, *AlphaS_mZ, *mZ, *mf_l_mZ, *mf_d_mZ, *mf_u_mZ, *kont); }
-    catch(std::runtime_error e) { invalid_point().raise(e.what()); }
+    catch(std::runtime_error& e) { invalid_point().raise(e.what()); }
 
     // PMNS matrix
     *theta_12 = sminputs.PMNS.theta12;
@@ -1355,7 +1355,7 @@ BE_INI_FUNCTION
     *ErrorHandler_cptr = & CAT_4(BACKENDNAME,_,SAFE_VERSION,_ErrorHandler);
 
     try{ Set_All_Parameters_0(); }
-    catch(std::runtime_error e) { invalid_point().raise(e.what()); }
+    catch(std::runtime_error& e) { invalid_point().raise(e.what()); }
 
     /****************/
     /* Block MODSEL */
