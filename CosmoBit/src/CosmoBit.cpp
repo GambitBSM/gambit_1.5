@@ -129,9 +129,10 @@ namespace Gambit
       using namespace Pipes::set_default_neutron_lifetime;
 
       // default to 880.2 s (PDG 2018 http://pdg.lbl.gov/2018/listings/rpp2018-list-n.pdf), 
-      // can be overwritten with yaml file rule. Or treated as a free parameter with
-      // model  nuclear_params_neutron_lifetime, see function get_param_neutron_lifetime
-      result = runOptions->getValueOrDef<double>(880.2,"neutron_lifetime");
+      // if you want to set it do a different value or treat it as a free parameter 
+      // use the model nuclear_params_neutron_lifetime. Then the function get_param_neutron_lifetime
+      // will be used to set the neutron lifetime 
+      result = 880.2;
 
     }
     

@@ -92,12 +92,14 @@ Parameters:
   # uncomment the line below (and do not use 'StandardModel_mNudiff') 
   #StandardModel_SLHA2: !import include/StandardModel_SLHA2_Planckbaseline.yaml
 
-  # neutron lifetime
-  nuclear_params_neutron_lifetime: 
-    neutron_lifetime: 
-      prior_type: gaussian
-      mean: [880.2]
-      sigs: [1]
+  # neutron lifetime, does not need to be inlcuded as a model. If it is absent the 
+  # lifetime will default to 880.2. Use this model to overwrite the value or treat
+  # it as a free parameter
+  #nuclear_params_neutron_lifetime: 
+  #  neutron_lifetime: 
+  #    prior_type: gaussian
+  #    mean: [880.2]
+  #    sigs: [1]
 
   # base-line LCDM model parameters and prior
   LCDM:
@@ -304,13 +306,6 @@ Rules:
     module: CosmoBit
 
   # ---- BBN -----
-
-  # If neutron lifetime is not a model parameter and you don't want to use the 
-  # default value of 880.2 s it can be overwritten with this rule
-  #- capability: neutron_lifetime
-  #  function: set_default_neutron_lifetime
-  #  options:
-  #    neutron_lifetime: 880.9
 
   # Set path to file containing measured values of light element abundances to use for
   # Likelihood calculation (assumes root directory is gambit/CosmoBit/data/BBN)
