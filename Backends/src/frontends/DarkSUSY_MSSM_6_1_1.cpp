@@ -448,7 +448,7 @@ BE_NAMESPACE
 	}
 	iistat=0;
 	if ((ptype == 1) or (ptype == 3)) { // particles
-	  tmp=dsseyield_sim_ls(anmwimp,pow(10.0,log10E),10.0,DSanpdg1[i],DSanpdg2[i],twoj,cp,twos,twol,object,3,t1,iistat);
+	  tmp=dsseyield_sim_ls(anmwimp,pow(10.0,log10E),10.0,DSanpdg1[i],DSanpdg2[i],twoj,cp,twol,twos,object,3,t1,iistat);
 	    if ((iistat bitand 8) == 8) { // not simulated channel
 	     
         tmp=dsseyield_ch(anmwimp,pow(10.0,log10E),10.0,DSanpdg1[i],DSanpdg2[i],object,3,t1,iistat);
@@ -461,7 +461,7 @@ BE_NAMESPACE
 	  istat=(istat bitor iistat);
 	}
 	if ((ptype == 2) or (ptype == 3)) { // anti-particles
-	  tmp=dsseyield_sim_ls(anmwimp,pow(10.0,log10E),10.0,DSanpdg1[i],DSanpdg2[i],twoj,cp,twos,twol,object,3,t2,iistat);
+	  tmp=dsseyield_sim_ls(anmwimp,pow(10.0,log10E),10.0,DSanpdg1[i],DSanpdg2[i],twoj,cp,twol,twos,object,3,t2,iistat);
 	    if ((iistat bitand 8) == 8) { // not simulated channel
 	      // cout << "CCC: " << i << " " << DSanpdg1[i] << " " << DSanpdg2[i] << endl; // JE TMP
 
