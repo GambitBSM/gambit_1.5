@@ -13,6 +13,9 @@
 //  Jonathan Cornell
 //  2015 March
 //
+//  Janina Renk
+//  2020 May
+//
 //  *********************************************
 
 #ifndef __nuclear_params_hpp__
@@ -52,6 +55,13 @@ namespace Gambit
   INTERPRET_AS_PARENT_FUNCTION(sigmas_to_sigma0)
   INTERPRET_AS_PARENT_DEPENDENCY(SMINPUTS, SMInputs)
 #undef PARENT
+#undef MODEL
+
+
+// model for neutron lifetime
+#define MODEL nuclear_params_neutron_lifetime
+  START_MODEL
+  DEFINEPARS(neutron_lifetime)
 #undef MODEL
 
 #endif /* __nuclear_params_hpp__ */

@@ -123,9 +123,9 @@ namespace Gambit
   {
     using namespace LogTags;
 
+    // Lifetime in s of an ALP if only the decay a -> g g is open.
     void lifetime_ALP_agg(double& result)
     {
-      // lifetime in s if onlz the decay a -> g g is open.
       using namespace Pipes::lifetime_ALP_agg;
 
       double gagg = *Param["gagg"]; // in GeV^-1
@@ -1261,7 +1261,6 @@ namespace Gambit
     {
       using namespace Pipes::AlterBBN_Input;
 
-
       // If we are using some of the "non-standard energy content" models, set the
       // inputs for the AlterBBN_input map according to the parameters of that model.
       // In case we are not using one of these models, we use the default values
@@ -1293,14 +1292,24 @@ namespace Gambit
       else
       {
         result["Nnu"]=3.046; // contribution from SM neutrinos
-        result["dNnu"]=0.;    // no extra ur species in standard LCDM model
+        result["dNnu"]=0.;   // no extra ur species in standard LCDM model
       }
       result["eta0"] = *Dep::etaBBN;
+
+      // Adopt the default value for the neutron lifetime in seconds if is not passed as a model parameter
+      if (ModelInUse("nuclear_params_neutron_lifetime"))
+      {
+        result["neutron_lifetime"] = Dep::nuclear_params_neutron_lifetime_parameters->at("neutron_lifetime");
+      }
+      else
+      {
+        result["neutron_lifetime"] = 879.4; // (PDG 2019 recommendation http://pdg.lbl.gov/2019/listings/rpp2019-list-n.pdf);
+      }
 
       result["failsafe"] = runOptions->getValueOrDef<double>(3,"failsafe");
       result["err"] = runOptions->getValueOrDef<double>(3,"err");
 
-      logger() << "Set AlterBBN with parameters eta = " << result["eta0"] << ", Nnu = " << result["Nnu"] << ", dNnu = " << result["dNnu"];
+      logger() << "Set AlterBBN with parameters eta = " << result["eta0"] << ", Nnu = " << result["Nnu"] << ", dNnu = " << result["dNnu"] << ", neutron lifetime = " << result["neutron_lifetime"];
       logger() << " and error params: failsafe = " << result["failsafe"] << ", err = " << result["err"] << EOM;
     }
 
