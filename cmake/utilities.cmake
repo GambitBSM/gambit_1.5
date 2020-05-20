@@ -237,7 +237,7 @@ endmacro()
 # Function to add a GAMBIT custom command and target
 macro(add_gambit_custom target filename HARVESTER DEPS)
   set(ditch_string "")
-  if (${ARGN})
+  if (NOT "${ARGN}" STREQUAL "")
     set(ditch_string "-x __not_a_real_name__,${ARGN}")
   endif()
   add_custom_command(OUTPUT ${CMAKE_BINARY_DIR}/${filename}
