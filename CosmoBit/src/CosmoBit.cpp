@@ -123,34 +123,9 @@ namespace Gambit
   {
     using namespace LogTags;
 
-    /// set neutron lifetime to fixed, default value
-    void set_default_neutron_lifetime(double& result)
-    {
-      using namespace Pipes::set_default_neutron_lifetime;
-
-      // default to 880.2 s (PDG 2018 http://pdg.lbl.gov/2018/listings/rpp2018-list-n.pdf), 
-      // if you want to set it do a different value or treat it as a free parameter 
-      // use the model nuclear_params_neutron_lifetime. Then the function get_param_neutron_lifetime
-      // will be used to set the neutron lifetime 
-      result = 880.2;
-
-    }
-    
-    /// set neutron lifetime from model 
-    void get_param_neutron_lifetime(double& result)
-    {
-      using namespace Pipes::get_param_neutron_lifetime;
-
-      // set neutron lifetime to model parameter from 
-      // model  nuclear_params_neutron_lifetime
-      result = *Param["neutron_lifetime"];
-
-    }
-    
-
+    // Lifetime in s of an ALP if only the decay a -> g g is open.
     void lifetime_ALP_agg(double& result)
     {
-      // lifetime in s if onlz the decay a -> g g is open.
       using namespace Pipes::lifetime_ALP_agg;
 
       double gagg = *Param["gagg"]; // in GeV^-1
@@ -1286,7 +1261,6 @@ namespace Gambit
     {
       using namespace Pipes::AlterBBN_Input;
 
-
       // If we are using some of the "non-standard energy content" models, set the
       // inputs for the AlterBBN_input map according to the parameters of that model.
       // In case we are not using one of these models, we use the default values
@@ -1318,13 +1292,19 @@ namespace Gambit
       else
       {
         result["Nnu"]=3.046; // contribution from SM neutrinos
-        result["dNnu"]=0.;    // no extra ur species in standard LCDM model
+        result["dNnu"]=0.;   // no extra ur species in standard LCDM model
       }
       result["eta0"] = *Dep::etaBBN;
-      
-      // pass neutron lifetime -- can be fixed or treated as a free 
-      // parameter if model nuclear_params_neutron_lifetime is in use
-      result["neutron_lifetime"] = *Dep::neutron_lifetime;
+
+      // Adopt the default value for the neutron lifetime if is not passed as a model parameter
+      if (ModelInUse("nuclear_params_neutron_lifetime"))
+      {
+        result["neutron_lifetime"] = Dep::nuclear_params_neutron_lifetime_parameters->at("neutron_lifetime");
+      }
+      else
+      {
+        result["neutron_lifetime"] = 880.2; // (PDG 2018 http://pdg.lbl.gov/2018/listings/rpp2018-list-n.pdf);
+      }
 
       result["failsafe"] = runOptions->getValueOrDef<double>(3,"failsafe");
       result["err"] = runOptions->getValueOrDef<double>(3,"err");

@@ -83,24 +83,6 @@ START_MODULE
     ALLOW_MODELS(GeneralCosmoALP)
     #undef FUNCTION
   #undef CAPABILITY
- 
-  /// set lifetime of neutron. 
-  #define CAPABILITY neutron_lifetime
-  START_CAPABILITY
-
-    /// default to 880.2 s, can be overwritten with yaml
-    /// file rule
-    #define FUNCTION set_default_neutron_lifetime
-    START_FUNCTION(double)
-    #undef FUNCTION
-
-    /// get neutron_lifetime as free model parameter
-    /// from model nuclear_params_neutron_lifetime
-    #define FUNCTION get_param_neutron_lifetime
-    START_FUNCTION(double)
-    ALLOW_MODELS(nuclear_params_neutron_lifetime)
-    #undef FUNCTION
-  #undef CAPABILITY
 
   #define CAPABILITY minimum_abundance
   START_CAPABILITY
@@ -771,7 +753,7 @@ START_MODULE
     #define FUNCTION AlterBBN_Input
     START_FUNCTION(map_str_dbl)
     DEPENDENCY(etaBBN, double)
-    DEPENDENCY(neutron_lifetime, double)
+    MODEL_CONDITIONAL_DEPENDENCY(nuclear_params_neutron_lifetime_parameters,ModelParameters,nuclear_params_neutron_lifetime)
     MODEL_CONDITIONAL_DEPENDENCY(etaBBN_rBBN_rCMB_dNurBBN_dNurCMB_parameters,ModelParameters,etaBBN_rBBN_rCMB_dNurBBN_dNurCMB)
     #undef FUNCTION
   #undef CAPABILITY
