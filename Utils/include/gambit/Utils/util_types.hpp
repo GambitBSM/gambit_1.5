@@ -77,6 +77,9 @@ namespace Gambit
   /// Shorthand for an int-int pair to double map
   typedef std::map< std::pair < int, int >, double> map_intpair_dbl;
 
+  /// Shorthand for a pointer to a void function with no arguments
+  typedef void (*fptr_void)();
+
   // Useful unqualified functions
   using std::cout;
   using std::cerr;
@@ -637,10 +640,6 @@ namespace Gambit
   typedef float             Freal4;
   typedef double            Freal8;
   typedef long double       Freal16;
-
-  // Typedef for function pointer to a fotran void() function
-  // Used in the context of SPheno and MultiModeCode
-  typedef void (*type_fptr_ErrorHandler)();
 
   /// Types used for Mathematica backends
   typedef void         MVoid;

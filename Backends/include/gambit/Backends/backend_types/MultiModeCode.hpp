@@ -26,14 +26,6 @@
 
 namespace Gambit
 {
-    /*
-    // Typedef for function pointer to a void() function
-    typedef void (*type_fptr_multimodecode_ErrorHandler)();
-
-      -> Moved to 'gambit/Utils/util_types.hpp' and renamed
-         to 'type_fptr_ErrorHandler' to avoid clash with
-         similar typedefs of other Fortran backends
-    */
 
     // type definition for the multimodecode output.
     typedef struct

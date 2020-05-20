@@ -753,6 +753,7 @@ START_MODULE
     #define FUNCTION AlterBBN_Input
     START_FUNCTION(map_str_dbl)
     DEPENDENCY(etaBBN, double)
+    MODEL_CONDITIONAL_DEPENDENCY(nuclear_params_neutron_lifetime_parameters,ModelParameters,nuclear_params_neutron_lifetime)
     MODEL_CONDITIONAL_DEPENDENCY(etaBBN_rBBN_rCMB_dNurBBN_dNurCMB_parameters,ModelParameters,etaBBN_rBBN_rCMB_dNurBBN_dNurCMB)
     #undef FUNCTION
   #undef CAPABILITY

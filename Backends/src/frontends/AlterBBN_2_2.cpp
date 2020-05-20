@@ -12,6 +12,7 @@
 ///         (janina.renk@fysik.su.se)
 /// \date 2018 Jun
 /// \date 2020 Jan
+/// \date 2020 May
 ///
 /// \author Patrick Stöcker
 ///         (stoecker@physik.rwth-achen.de)
@@ -49,9 +50,9 @@ BE_NAMESPACE
   static std::vector<double> prev_cov_ratioH(0., (NNUC+1)*(NNUC+1));
 
   /// string set containing the name of all members of the AlterBBN relicparam structures that can currently
-  /// be set with GAMBIT. If you add a new model and need to pass a different option to AlterBBN add e.g. "life_neutron"
+  /// be set with GAMBIT. If you add a new model and need to pass a different option to AlterBBN add e.g. "neutron_lifetime"
   /// here and in the function fill_cosmomodel below to modify the lifetime of the neutron
-  std::set<std::string> known_relicparam_options = {"eta0", "Nnu", "dNnu", "err","failsafe"};
+  std::set<std::string> known_relicparam_options = {"eta0", "Nnu", "dNnu", "neutron_lifetime", "err","failsafe"};
 
   /// pass all values of AlterBBN's relicparam structure that
   void fill_cosmomodel(AlterBBN_2_2::relicparam * input_relicparam, map_str_dbl & AlterBBN_input)
@@ -81,14 +82,11 @@ BE_NAMESPACE
       first_run = false;
     }
 
-    // if a value for a member of the relicparam structure has been added to the AlterBBN_input map
-    // set the value accordingly
+    // below for the parameter you want to overwrite
     if (AlterBBN_input.count("eta0")){input_relicparam->eta0 = AlterBBN_input["eta0"];}
     if (AlterBBN_input.count("Nnu")){input_relicparam->Nnu = AlterBBN_input["Nnu"];}
     if (AlterBBN_input.count("dNnu")){input_relicparam->dNnu = AlterBBN_input["dNnu"];}
-    // to overwrite the default value of another relicparam structure member, e.g. life_neutron,
-    // to AlterBBN uncomment the line below
-    // if (AlterBBN_input.count("life_neutron")){input_relicparam->life_neutron = AlterBBN_input["life_neutron"];}
+    if (AlterBBN_input.count("neutron_lifetime")){input_relicparam->life_neutron = AlterBBN_input["neutron_lifetime"];}
 
     // set error handling related parameters
     if (AlterBBN_input.count("failsafe")){input_relicparam->failsafe = (int)AlterBBN_input["failsafe"];}
