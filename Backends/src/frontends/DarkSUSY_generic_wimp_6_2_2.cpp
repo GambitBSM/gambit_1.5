@@ -94,7 +94,7 @@ BE_NAMESPACE
     for (int i=1; i<=2; i++)
     {
         if (annihilation_bf[i-1] != 0.)
-        backend_error().raise(LOCAL_INFO, "ERROR: The DarkSUSY neutrino telescope routines "
+          backend_error().raise(LOCAL_INFO, "ERROR: The DarkSUSY neutrino telescope routines "
                               "for a generic WIMP cannot handle models with non-standard model\n"
                               "WIMP annihilation final states.");
         DSanbr.push_back(0.);
@@ -107,7 +107,7 @@ BE_NAMESPACE
     for (int i=4; i<=8; i++)
     {
         if (annihilation_bf[i-1] != 0.)
-        backend_error().raise(LOCAL_INFO, "ERROR: The DarkSUSY neutrino telescope routines "
+          backend_error().raise(LOCAL_INFO, "ERROR: The DarkSUSY neutrino telescope routines "
                               "for a generic WIMP cannot handle models with non-standard model\n"
                               "WIMP annihilation final states.");
         DSanbr.push_back(0.);
@@ -120,7 +120,7 @@ BE_NAMESPACE
     for (int i=10; i<=11; i++)
     {
         if (annihilation_bf[i-1] != 0.)
-        backend_error().raise(LOCAL_INFO, "ERROR: The DarkSUSY neutrino telescope routines "
+          backend_error().raise(LOCAL_INFO, "ERROR: The DarkSUSY neutrino telescope routines "
                               "for a generic WIMP cannot handle models with non-standard model\n"
                               "WIMP annihilation final states.");
         DSanbr.push_back(0.);
@@ -132,7 +132,6 @@ BE_NAMESPACE
     }
 
     // Setup PDG common blocks
-    // TODO: Get rid of non-SM channels?
     DSanpdg1.clear();
     DSanpdg2.clear();
     DSanpdg1.push_back(10000); // not used, as I keep the same numbering as for Fortran
@@ -258,7 +257,7 @@ BE_NAMESPACE
           // The following is just a warning, not an error: unpolarized yields
           // are used even if polarized yields are asked for
           if ((iistat bitand 16) == 16) iistat -= 16;
-             istat=(istat bitor iistat);
+          istat=(istat bitor iistat);
         }
       } // end if DSanbr>0
     } // end loop
