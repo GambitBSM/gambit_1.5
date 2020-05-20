@@ -77,6 +77,9 @@ namespace Gambit
   /// Shorthand for an int-int pair to double map
   typedef std::map< std::pair < int, int >, double> map_intpair_dbl;
 
+  /// Shorthand for a pointer to a void function with no arguments
+  typedef void (*fptr_void)();
+
   // Useful unqualified functions
   using std::cout;
   using std::cerr;

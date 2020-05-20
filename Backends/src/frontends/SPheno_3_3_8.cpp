@@ -53,7 +53,7 @@ BE_NAMESPACE
     *ratioWoM = 0.0;
 
     try{ SPheno_Main(); }
-    catch(std::runtime_error e) { invalid_point().raise(e.what()); }
+    catch(std::runtime_error& e) { invalid_point().raise(e.what()); }
 
     if(*kont != 0)
       ErrorHandling(*kont);
@@ -71,7 +71,7 @@ BE_NAMESPACE
 
     Freal8 Q;
     try{ Q = sqrt(GetRenormalizationScale()); }
-    catch(std::runtime_error e) { invalid_point().raise(e.what()); }
+    catch(std::runtime_error& e) { invalid_point().raise(e.what()); }
 
     // Spectrum generator information
     SLHAea_add_block(slha, "SPINFO");
@@ -175,12 +175,12 @@ BE_NAMESPACE
     {
       Flogical True = true;
       try{ Switch_to_superCKM(*Y_d_0,*Y_u_0,*A_d_0,*A_u_0,*M2_D_0,*M2_Q_0,*M2_U_0,*Ad_sckm,*Au_sckm,*M2D_sckm,*M2Q_sckm,*M2U_sckm,True,*RSdown,*RSup,RDsq_ckm,RUsq_ckm,CKM_Q,Yd,Yu); }
-      catch(std::runtime_error e) { invalid_point().raise(e.what()); }
+      catch(std::runtime_error& e) { invalid_point().raise(e.what()); }
       for(int i=1; i<=3; i++)
       {
         Yl(i) = (*Y_l_0)(i,i).re;
       }
-   
+
     }
     else
     {
@@ -191,7 +191,7 @@ BE_NAMESPACE
         Yl(i) = (*Y_l_0)(i,i).re;
       }
     }
- 
+
     SLHAea_add_block(slha, "Yu", *m_GUT);
     SLHAea_add_block(slha, "Yd", *m_GUT);
     SLHAea_add_block(slha, "Ye", *m_GUT);
@@ -244,7 +244,7 @@ BE_NAMESPACE
 
       Flogical False = false;
       try{ Switch_to_superCKM(*Y_d,*Y_u,*A_d,*A_u,*M2_D,*M2_Q,*M2_U,*Ad_sckm,*Au_sckm,*M2D_sckm,*M2Q_sckm,*M2U_sckm,False,*RSdown,*RSup,RDsq_ckm,RUsq_ckm,CKM_Q,Yd,Yu); }
-      catch(std::runtime_error e) { invalid_point().raise(e.what()); }
+      catch(std::runtime_error& e) { invalid_point().raise(e.what()); }
 
       SLHAea_add_block(slha, "UPMNSIN");
       slha["UPMNSIN"][""] << 1 << *theta_12 << "# theta_12, solar";
@@ -255,7 +255,7 @@ BE_NAMESPACE
       slha["UPMNSIN"][""] << 6 << *alpha_nu2 << "# alpha_2";
 
       try{ Switch_to_superPMNS(*Y_l,id3C,*A_l,*M2_E,*M2_L,*Al_pmns,*M2E_pmns,*M2L_pmns,False,*RSlepton,*RSneut,RSl_pmns,RSn_pmns,PMNS_Q,Yl); }
-      catch(std::runtime_error e) { invalid_point().raise(e.what()); }
+      catch(std::runtime_error& e) { invalid_point().raise(e.what()); }
 
     }
     else
@@ -719,7 +719,7 @@ BE_NAMESPACE
 
     InitializeStandardModel(inputs.sminputs);
     try{ InitializeLoopFunctions(); }
-    catch(std::runtime_error e) { invalid_point().raise(e.what()); }
+    catch(std::runtime_error& e) { invalid_point().raise(e.what()); }
 
     *ErrorLevel = -1;
     *GenerationMixing = false;
@@ -727,7 +727,7 @@ BE_NAMESPACE
     *L_CS = false;
 
     try{ Set_All_Parameters_0(); }
-    catch(std::runtime_error e) { invalid_point().raise(e.what()); }
+    catch(std::runtime_error& e) { invalid_point().raise(e.what()); }
 
     // necessary to exclude right handed neutrinos from RGEs
     // is set to positive in the corresponding model
@@ -813,7 +813,7 @@ BE_NAMESPACE
     if(YukawaScheme == 1 or YukawaScheme == 2)
     {
       try{ SetYukawaScheme(YukawaScheme); }
-      catch(std::runtime_error e) { invalid_point().raise(e.what()); }
+      catch(std::runtime_error& e) { invalid_point().raise(e.what()); }
     }
 
     // 38, set looplevel of RGEs, TwoLoopRGE
@@ -935,7 +935,7 @@ BE_NAMESPACE
       if(inputs.param.find("Qin") != inputs.param.end())
       {
         Freal8 Qin = *inputs.param.at("Qin");
-	SetGUTScale(Qin);
+  SetGUTScale(Qin);
       }
       // M_1
       if(inputs.param.find("M1") != inputs.param.end())
@@ -1102,8 +1102,8 @@ BE_NAMESPACE
 
     // W-boson, first rough estimate
     *mW2 = *mZ2 * (0.5 + sqrt(0.25 - *Alpha_mZ*M_PI / (sqrt(2) * *G_F * *mZ2))) / 0.985;
-    *mW = sqrt(*mW2); 	// mass
-    *gamW = 2.06;	// width
+    *mW = sqrt(*mW2);   // mass
+    *gamW = 2.06; // width
     *gamW2 = pow(*gamW, 2);
     *gmW = *gamW * *mW;
     *gmW2 = pow(*gmW, 2);
@@ -1141,17 +1141,17 @@ BE_NAMESPACE
     *Delta_Alpha_Hadron = 0.027651;
 
     // Z-boson
-    *mZ = sminputs.mZ;    	// mass
-    *gamZ = 2.4952;		// width, values henceforth from StandardModel.f90
-    (*BrZqq)(1) = 0.156;	// branching ratio in d \bar{d}
-    (*BrZqq)(2) = 0.156;	// branching ratio in s \bar{s}
-    (*BrZqq)(3) = 0.151;	// branching ratio in b \bar{b}
-    (*BrZqq)(4) = 0.116;	// branching ratio in u \bar{u}
-    (*BrZqq)(5) = 0.12;		// branching ratio in c \bar{c}
-    (*BrZll)(1) = 0.0336;	// branching ratio in e+ e-
-    (*BrZll)(2) = 0.0336;	// branching ratio in mu+ mu-
-    (*BrZll)(3) = 0.0338;	// branching ratio in tau+ tau-
-    *BrZinv = 0.2;		// invisible branching ratio
+    *mZ = sminputs.mZ;      // mass
+    *gamZ = 2.4952;   // width, values henceforth from StandardModel.f90
+    (*BrZqq)(1) = 0.156;  // branching ratio in d \bar{d}
+    (*BrZqq)(2) = 0.156;  // branching ratio in s \bar{s}
+    (*BrZqq)(3) = 0.151;  // branching ratio in b \bar{b}
+    (*BrZqq)(4) = 0.116;  // branching ratio in u \bar{u}
+    (*BrZqq)(5) = 0.12;   // branching ratio in c \bar{c}
+    (*BrZll)(1) = 0.0336; // branching ratio in e+ e-
+    (*BrZll)(2) = 0.0336; // branching ratio in mu+ mu-
+    (*BrZll)(3) = 0.0338; // branching ratio in tau+ tau-
+    *BrZinv = 0.2;    // invisible branching ratio
 
     *mZ2 = *mZ * *mZ;
     *gamZ2 = *gamZ * *gamZ;
@@ -1240,7 +1240,7 @@ BE_NAMESPACE
     (*CKM)(3,3) = c23 * c13;
 
     try{ CalculateRunningMasses(*mf_l, *mf_d, *mf_u, *Q_light_quarks, *Alpha_mZ, *AlphaS_mZ, *mZ, *mf_l_mZ, *mf_d_mZ, *mf_u_mZ, *kont); }
-    catch(std::runtime_error e) { invalid_point().raise(e.what()); }
+    catch(std::runtime_error& e) { invalid_point().raise(e.what()); }
 
     // PMNS matrix
     *theta_12 = sminputs.PMNS.theta12;
@@ -1315,21 +1315,21 @@ BE_INI_FUNCTION
     *ErrCan = 0;
 
     try{ Set_All_Parameters_0(); }
-    catch(std::runtime_error e) { invalid_point().raise(e.what()); }
+    catch(std::runtime_error& e) { invalid_point().raise(e.what()); }
 
     // Set up model, same as Block MODSEL
     if((*ModelInUse)("CMSSM"))
     {
       *HighScaleModel = "mSUGRA";
       try {SetHighScaleModel("SUGRA"); }
-      catch(std::runtime_error e) { invalid_point().raise(e.what()); }
+      catch(std::runtime_error& e) { invalid_point().raise(e.what()); }
 
     }
     else
     {
       *HighScaleModel = "SUGRA"; // SUGRA
       try {SetHighScaleModel("SUGRA"); }
-      catch(std::runtime_error e) { invalid_point().raise(e.what()); }
+      catch(std::runtime_error& e) { invalid_point().raise(e.what()); }
 
     }
 
