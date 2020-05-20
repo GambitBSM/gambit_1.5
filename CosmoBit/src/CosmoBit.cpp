@@ -1296,14 +1296,14 @@ namespace Gambit
       }
       result["eta0"] = *Dep::etaBBN;
 
-      // Adopt the default value for the neutron lifetime if is not passed as a model parameter
+      // Adopt the default value for the neutron lifetime in seconds if is not passed as a model parameter
       if (ModelInUse("nuclear_params_neutron_lifetime"))
       {
         result["neutron_lifetime"] = Dep::nuclear_params_neutron_lifetime_parameters->at("neutron_lifetime");
       }
       else
       {
-        result["neutron_lifetime"] = 880.2; // (PDG 2018 http://pdg.lbl.gov/2018/listings/rpp2018-list-n.pdf);
+        result["neutron_lifetime"] = 879.4; // (PDG 2019 recommendation http://pdg.lbl.gov/2019/listings/rpp2019-list-n.pdf);
       }
 
       result["failsafe"] = runOptions->getValueOrDef<double>(3,"failsafe");

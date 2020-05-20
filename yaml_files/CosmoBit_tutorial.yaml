@@ -89,17 +89,13 @@ Parameters:
   # To fix the sum of the neutrino masses to 0.06 with only one massive neutrino
   #    (as in Planck 'baseline' analysis don't include the model 'StandardModel_mNudiff'
   #    into the scan)
-  # uncomment the line below (and do not use 'StandardModel_mNudiff') 
+  # uncomment the line below (and do not use 'StandardModel_mNudiff')
   #StandardModel_SLHA2: !import include/StandardModel_SLHA2_Planckbaseline.yaml
 
-  # neutron lifetime, does not need to be inlcuded as a model. If it is absent the 
-  # lifetime will default to 880.2. Use this model to overwrite the value or treat
-  # it as a free parameter
-  #nuclear_params_neutron_lifetime: 
-  #  neutron_lifetime: 
-  #    prior_type: gaussian
-  #    mean: [880.2]
-  #    sigs: [1]
+  # Neutron lifetime.  If this is not included as a model, the lifetime will default to 879.4.
+  #nuclear_params_neutron_lifetime:
+  #  neutron_lifetime:
+  #    range: [875,895]
 
   # base-line LCDM model parameters and prior
   LCDM:
@@ -233,10 +229,17 @@ ObsLikes:
     capability:   BBN_LogLike
     sub_capabilities: [He4, D]
 
+  # Available neutron lifetime likelihoods (only turn either of these on if varying the neutron lifetime)
+  #- purpose:      LogLike
+  #  capability:   lnL_neutron_lifetime_beam
+  #- purpose:      LogLike
+  #  capability:   lnL_neutron_lifetime_bottle
+
   # Print lithium-7 abundance + error
   - purpose:      Observable
     capability:   BBN_abundances
     sub_capabilities: [Li7]
+
 
   # ---- MontePython Likelihoods -----
   # The total lnL from MontePython
