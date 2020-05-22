@@ -92,10 +92,10 @@ if [ "${axel_worked}" = "0" ]; then
     fi
   elif command -v curl >/dev/null; then
     if [ -z "$10" ]; then
-      $2 -E chdir $1 curl -O $4
+      $2 -E chdir $1 curl -L -O $4
     else
-      $2 -E chdir $1 curl -O -c $cfile --data "$10" ${11}
-      $2 -E chdir $1 curl -O -b $cfile $4
+      $2 -E chdir $1 curl -L -O -c $cfile --data "$10" ${11}
+      $2 -E chdir $1 curl -L -O -b $cfile $4
       $2 -E remove $1/$cfile
     fi
   else
