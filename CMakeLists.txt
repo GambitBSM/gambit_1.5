@@ -217,11 +217,13 @@ foreach(module yaml os re datetime sys getopt shutil itertools)
 endforeach()
 
 # Check for axel
+set(CMAKE_DOWNLOAD_FLAGS "NONE")
 option(WITH_AXEL "Compile with MPI enabled" OFF)
 if(WITH_AXEL)
   find_program(axel_FOUND axel)
   if(axel_FOUND)
     message("${BoldYellow}   Found axel.${ColourReset} Backend and scanner downloads will be as fast as possible.")
+    set(CMAKE_DOWNLOAD_FLAGS "WITH_AXEL")
   else()
     message("${Red}   Axel utility not found.  Backend downloads would be faster if you installed axel.${ColourReset}")
   endif()
