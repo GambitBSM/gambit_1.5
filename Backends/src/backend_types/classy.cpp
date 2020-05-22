@@ -104,7 +104,8 @@ namespace Gambit
         // e.g. input_dict['l_max_scalars'] = '500'
         //      extra_dict['l_max_scalars'] = '2500'
         // should result in input_dict['l_max_scalars'] = '2500'
-        else if(key.attr("find")(pybind11::str("l_max")).cast<int>()!=-1)
+        // same for max redshift at which power spectrum is computed (z_max_pk)
+        else if(key.attr("find")(pybind11::str("l_max")).cast<int>()!=-1 || key.attr("find")(pybind11::str("z_max_pk")).cast<int>()!=-1)
         {
           // cast pybind11::detail::item_accessor to pybind11::str, to c++ string and then to int
           //  (I know... the problem is that the yaml file entries are all parsed as strings so
@@ -119,6 +120,21 @@ namespace Gambit
           // if lmax_extra_dict is higher than the entry in the input_dict replace it
           if (lmax_input_dict < lmax_extra_dict){input_dict[key] = lmax_extra_dict;}
           // if not 'input_dict'already contains the higher value and there is nothing to do here.
+        }
+
+        // both dictionaries have entry for non-linear treatment
+        else if(key.attr("find")(pybind11::str("non linear")).cast<int>()!=-1)
+        {
+          
+          std::string nonlin_input_dict = (std::string(pybind11::str(input_dict[key])));
+          std::string nonlin_extra_dict = (std::string(pybind11::str(extra_dict[key])));
+
+          // throw error if the treatment of non-linearities disagree
+          if (nonlin_input_dict != nonlin_extra_dict)
+          {
+            std::cout<<"Should throw proper error here -- two different non linear treatments requested"<<std::endl;
+          }
+
         }
         else
         {
