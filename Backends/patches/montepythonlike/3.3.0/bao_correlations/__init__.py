@@ -7,14 +7,14 @@ import scipy.constants as conts
 from scipy.interpolate import splrep, splev
 from scipy.integrate import simps
 from scipy.linalg.lapack import dgesv
-from findiff import FinDiff 
+from .findiff_py23 import FinDiff
 
 
 class bao_correlations(Likelihood):
     '''
-        (JR) copied "bao_small_z" likelihood and added some comments. It should still run 
-        and produce the same result as the normal "bao_small_z" likelihood, but I hope the 
-        comments help to generalise it. 
+        (JR) copied "bao_small_z" likelihood and added some comments. It should still run
+        and produce the same result as the normal "bao_small_z" likelihood, but I hope the
+        comments help to generalise it.
     '''
 
     # initialization routine
@@ -32,7 +32,7 @@ class bao_correlations(Likelihood):
                 raise io_mp.LikelihoodError(
                     'conflicting BAO measurements')
 
-        # (JR) now read in all likelihood specific data, e.g. n(z) values 
+        # (JR) now read in all likelihood specific data, e.g. n(z) values
         # for different experiments, Dv/Dh/Da measurements, errors...
         # The lines below are from the original likelihood and set
         # the redshift array, measurements, uncertainties & format (Da,DH,Dv?)
@@ -109,14 +109,12 @@ class bao_correlations(Likelihood):
         # maximum redshift, needed to set mPk computing range
         self.zmax = max(self.z + 0.1)
 
-        self.need_cosmo_arguments(data, {'non linear': 'halofit'})
+        self.need_cosmo_arguments(data, {'non linear': 'halofit'})    # Is the halofit model appropriate for massive neutrinos?
         self.need_cosmo_arguments(data, {'output': 'mPk'})
-        # had to add 0.5-- otherwise interpolation routine of class 2.9.3 failed 
-        # because it got out of range
-        self.need_cosmo_arguments(data, {'z_max_pk': self.zmax+0.5}) 
+        self.need_cosmo_arguments(data, {'z_max_pk': self.zmax+0.5}) # (JR) added 0.5 to avoid class interpolation out-of-bounds error
         # depending on the k values we need, we might have to adjust some
         # CLASS parameters that fix the k range (P_k_max_h/Mpc = 1.)
-        self.need_cosmo_arguments(data, {'P_k_max_h/Mpc': 1.})
+        self.need_cosmo_arguments(data, {'P_k_max_1/Mpc': 1.})
 
         # end of initialization
 
