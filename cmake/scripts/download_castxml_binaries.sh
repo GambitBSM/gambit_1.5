@@ -34,7 +34,7 @@ if ! [ -d $1/castxml ] ; then
     if command -v wget >/dev/null; then
       wget --output-document=$1/$5 $4 
     elif command -v curl >/dev/null; then
-      $2 -E chdir $1 curl -o $1/$5 $4
+      $2 -E chdir $1 curl -L -o $1/$5 $4
     else
       $2 -E cmake_echo_color --red --bold "ERROR: No axel, no wget, no curl?  What kind of OS are you running anyway?"
       exit 1

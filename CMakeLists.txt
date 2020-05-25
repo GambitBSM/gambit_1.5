@@ -218,7 +218,7 @@ endforeach()
 
 # Check for axel
 set(CMAKE_DOWNLOAD_FLAGS "NONE")
-option(WITH_AXEL "Compile with MPI enabled" OFF)
+option(WITH_AXEL "Compile with Axel enabled" OFF)
 if(WITH_AXEL)
   find_program(axel_FOUND axel)
   if(axel_FOUND)
