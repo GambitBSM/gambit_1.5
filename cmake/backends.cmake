@@ -663,8 +663,12 @@ if(NOT ditched_${name}_${ver})
       CONFIGURE_COMMAND ${CMAKE_COMMAND} -E copy ${patchdir}/MontePythonLike.py ${dir}/montepython/MontePythonLike_${sfver}.py
       COMMAND ${CMAKE_COMMAND} -E copy ${patchdir}/sdss_lrgDR7_fiducialmodel.dat ${dir}/data/sdss_lrgDR7/sdss_lrgDR7_fiducialmodel.dat
       COMMAND ${CMAKE_COMMAND} -E copy ${patchdir}/bao_eBOSS_2017.txt ${dir}/data/bao_eBOSS_2017.txt
+      COMMAND ${CMAKE_COMMAND} -E copy ${patchdir}/bao_smallz_combined_2018.txt ${dir}/data/bao_smallz_combined_2018.txt
+      COMMAND ${CMAKE_COMMAND} -E copy ${patchdir}/des_bao_Y1.txt ${dir}/data/des_bao_Y1.txt
       COMMAND ${CMAKE_COMMAND} -E copy_directory ${patchdir}/WiggleZ_bao_highz ${dir}/montepython/likelihoods/WiggleZ_bao_highz/
       COMMAND ${CMAKE_COMMAND} -E copy_directory ${patchdir}/bao_correlations ${dir}/montepython/likelihoods/bao_correlations/
+      COMMAND ${CMAKE_COMMAND} -E copy_directory ${patchdir}/bao_smallz_combined_2018 ${dir}/montepython/likelihoods/bao_smallz_combined_2018/
+      COMMAND ${CMAKE_COMMAND} -E copy_directory ${patchdir}/des_bao_Y1 ${dir}/montepython/likelihoods/des_bao_Y1/
       COMMAND ${CMAKE_COMMAND} -E copy_directory ${patchdir}/bao_correlations_data ${dir}/data/bao_correlations/
       COMMAND ${CMAKE_COMMAND} -E copy ${patchdir}/MPLike_patch_script.py ${dir}/montepython/MPLike_patch_script.py
       COMMAND sed ${dashi} -e "s#from MontePythonLike import#from MontePythonLike_${sfver} import#g" ${dir}/montepython/MPLike_patch_script.py

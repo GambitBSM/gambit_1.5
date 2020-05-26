@@ -114,7 +114,7 @@ class bao_correlations(Likelihood):
         self.need_cosmo_arguments(data, {'z_max_pk': self.zmax+0.5}) # (JR) added 0.5 to avoid class interpolation out-of-bounds error
         # depending on the k values we need, we might have to adjust some
         # CLASS parameters that fix the k range (P_k_max_h/Mpc = 1.)
-        self.need_cosmo_arguments(data, {'P_k_max_1/Mpc': 1.})
+        self.need_cosmo_arguments(data, {'P_k_max_h/Mpc': 1.})
 
         # end of initialization
 
