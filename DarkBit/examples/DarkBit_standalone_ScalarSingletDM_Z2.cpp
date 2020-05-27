@@ -337,7 +337,7 @@ int main()
     // ---- Gamma-ray yields ----
 
     // Initialize tabulated gamma-ray yields
-    SimYieldTable_DarkSUSY.resolveBackendReq(&Backends::DarkSUSY_generic_wimp_6_1_1::Functown::dsanyield_sim);
+    SimYieldTable_DarkSUSY.resolveBackendReq(&Backends::DarkSUSY_generic_wimp_6_2_2::Functown::dsanyield_sim);
     SimYieldTable_DarkSUSY.reset_and_calculate();
 
     // Collect missing final states for simulation in cascade MC
@@ -411,24 +411,25 @@ int main()
     // ---- IceCube limits ----
 
     // Infer WIMP capture rate in Sun
-    capture_rate_Sun_const_xsec_DS5.resolveDependency(&mwimp_generic);
-    capture_rate_Sun_const_xsec_DS5.resolveDependency(&sigma_SI_p_simple);
-    capture_rate_Sun_const_xsec_DS5.resolveDependency(&sigma_SD_p_simple);
-    capture_rate_Sun_const_xsec_DS5.resolveBackendReq(&Backends::DarkSUSY_5_1_3::Functown::dsntcapsuntab);
-    capture_rate_Sun_const_xsec_DS5.resolveDependency(&DarkSUSY_PointInit_LocalHalo_func);
-    capture_rate_Sun_const_xsec_DS5.reset_and_calculate();
-
+    capture_rate_Sun_const_xsec.resolveDependency(&mwimp_generic);
+    capture_rate_Sun_const_xsec.resolveDependency(&sigma_SI_p_simple);
+    capture_rate_Sun_const_xsec.resolveDependency(&sigma_SD_p_simple);
+    capture_rate_Sun_const_xsec.resolveDependency(&RD_fraction_one);
+    capture_rate_Sun_const_xsec.resolveBackendReq(&Backends::DarkSUSY_generic_wimp_6_2_2::Functown::dssenu_capsuntab);
+    capture_rate_Sun_const_xsec.resolveDependency(&ExtractLocalMaxwellianHalo);
+    capture_rate_Sun_const_xsec.resolveDependency(&DarkSUSY_PointInit_LocalHalo_func);
+    capture_rate_Sun_const_xsec.reset_and_calculate();
 
     // Infer WIMP equilibration time in Sun
-    equilibration_time_Sun.resolveDependency(&TH_ProcessCatalog_ScalarSingletDM_Z2);
+    equilibration_time_Sun.resolveDependency(&TH_ProcessCatalog_DS_MSSM);
     equilibration_time_Sun.resolveDependency(&DarkMatter_ID_ScalarSingletDM);
     equilibration_time_Sun.resolveDependency(&mwimp_generic);
-    equilibration_time_Sun.resolveDependency(&capture_rate_Sun_const_xsec_DS5);
+    equilibration_time_Sun.resolveDependency(&capture_rate_Sun_const_xsec);
     equilibration_time_Sun.reset_and_calculate();
 
     // Infer WIMP annihilation rate in Sun
     annihilation_rate_Sun.resolveDependency(&equilibration_time_Sun);
-    annihilation_rate_Sun.resolveDependency(&capture_rate_Sun_const_xsec_DS5);
+    annihilation_rate_Sun.resolveDependency(&capture_rate_Sun_const_xsec);
     annihilation_rate_Sun.reset_and_calculate();
 
     // Infer neutrino yield from Sun
@@ -436,10 +437,10 @@ int main()
     nuyield_from_DS.resolveDependency(&mwimp_generic);
     nuyield_from_DS.resolveDependency(&sigmav_late_universe);
     nuyield_from_DS.resolveDependency(&DarkMatter_ID_ScalarSingletDM);
-    nuyield_from_DS.resolveBackendReq(&Backends::DarkSUSY_5_1_3::Functown::dsgenericwimp_nusetup);
-    nuyield_from_DS.resolveBackendReq(&Backends::DarkSUSY_5_1_3::Functown::neutrino_yield);
-    nuyield_from_DS.resolveBackendReq(&Backends::DarkSUSY_5_1_3::Functown::DS_neutral_h_decay_channels);
-    nuyield_from_DS.resolveBackendReq(&Backends::DarkSUSY_5_1_3::Functown::DS_charged_h_decay_channels);
+    nuyield_from_DS.resolveBackendReq(&Backends::DarkSUSY_generic_wimp_6_2_2::Functown::dsgenericwimp_nusetup);
+    nuyield_from_DS.resolveBackendReq(&Backends::DarkSUSY_generic_wimp_6_2_2::Functown::neutrino_yield);
+    nuyield_from_DS.resolveBackendReq(&Backends::DarkSUSY_generic_wimp_6_2_2::Functown::DS_neutral_h_decay_channels);
+    nuyield_from_DS.resolveBackendReq(&Backends::DarkSUSY_generic_wimp_6_2_2::Functown::DS_charged_h_decay_channels);
     nuyield_from_DS.reset_and_calculate();
 
     // Calculate number of events at IceCube
