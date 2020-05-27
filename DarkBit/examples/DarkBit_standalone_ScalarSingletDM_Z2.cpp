@@ -100,7 +100,7 @@ int main()
 
     // ---- Check that required backends are present ----
 
-    if (not Backends::backendInfo().works["DarkSUSY5.1.3"]) backend_error().raise(LOCAL_INFO, "DarkSUSY 5.1.3 is missing!");
+//    if (not Backends::backendInfo().works["DarkSUSY5.1.3"]) backend_error().raise(LOCAL_INFO, "DarkSUSY 5.1.3 is missing!");
     if (not Backends::backendInfo().works["DarkSUSY_generic_wimp6.2.2"]) backend_error().raise(LOCAL_INFO, "DarkSUSY 6.2.2 for a generic WIMP is missing!");
     if (not Backends::backendInfo().works["MicrOmegas_ScalarSingletDM_Z23.6.9.2"]) backend_error().raise(LOCAL_INFO, "MicrOmegas 3.6.9.2 for ScalarSingletDM_Z2 is missing!");
     if (not Backends::backendInfo().works["gamLike1.0.1"]) backend_error().raise(LOCAL_INFO, "gamLike 1.0.1 is missing!");
@@ -487,10 +487,10 @@ int main()
 
     cout << endl;
     cout << "Omega h^2 from MicrOmegas: " << RD_oh2_MicrOmegas(0) << endl;
-    cout << "Omega h^2 from GAMBIT: " << RD_oh2_DS_general(0) << endl;
+    cout << "Omega h^2 from DarkSUSY (via DarkBit): " << RD_oh2_DS_general(0) << endl;
     cout << "Relic density lnL: " << lnL_oh2_Simple(0) << endl;
     cout << "sigma_SI,p with MicrOmegas: " << sigma_SI_p_MO << endl;
-    cout << "sigma_SI,p with GAMBIT: " << sigma_SI_p_GB << endl;
+    cout << "sigma_SI,p with DarkBit: " << sigma_SI_p_GB << endl;
     cout << "LUX_2016 lnL: " << LUX_2016_GetLogLikelihood(0) << endl;
     cout << "Fermi LAT dwarf spheroidal lnL: " << lnL_FermiLATdwarfs_gamLike(0) << endl;
     cout << "IceCube 79 lnL: " << IC79_loglike(0) << endl;
