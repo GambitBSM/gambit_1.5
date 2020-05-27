@@ -487,7 +487,7 @@ int main()
 
     cout << endl;
     cout << "Omega h^2 from MicrOmegas: " << RD_oh2_MicrOmegas(0) << endl;
-    cout << "Omega h^2 from GAMBIT: " << RD_oh2_DS5_general(0) << endl;
+    cout << "Omega h^2 from GAMBIT: " << RD_oh2_DS_general(0) << endl;
     cout << "Relic density lnL: " << lnL_oh2_Simple(0) << endl;
     cout << "sigma_SI,p with MicrOmegas: " << sigma_SI_p_MO << endl;
     cout << "sigma_SI,p with GAMBIT: " << sigma_SI_p_GB << endl;
