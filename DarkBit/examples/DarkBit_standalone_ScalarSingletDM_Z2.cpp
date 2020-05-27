@@ -308,28 +308,28 @@ int main()
     logger() << "sigma_SI,p with GAMBIT: " << sigma_SI_p_simple(0) << LogTags::info << EOM;
 
     // Initialize DDCalc backend
-    Backends::DDCalc_2_0_0::Functown::DDCalc_CalcRates_simple.setStatus(2);
-    Backends::DDCalc_2_0_0::Functown::DDCalc_Experiment.setStatus(2);
-    Backends::DDCalc_2_0_0::Functown::DDCalc_LogLikelihood.setStatus(2);
+    Backends::DDCalc_2_2_0::Functown::DDCalc_CalcRates_simple.setStatus(2);
+    Backends::DDCalc_2_2_0::Functown::DDCalc_Experiment.setStatus(2);
+    Backends::DDCalc_2_2_0::Functown::DDCalc_LogLikelihood.setStatus(2);
 
-    DDCalc_2_0_0_init.resolveDependency(&ExtractLocalMaxwellianHalo);
-    DDCalc_2_0_0_init.resolveDependency(&RD_fraction_one);
-    DDCalc_2_0_0_init.resolveDependency(&mwimp_generic);
+    DDCalc_2_2_0_init.resolveDependency(&ExtractLocalMaxwellianHalo);
+    DDCalc_2_2_0_init.resolveDependency(&RD_fraction_one);
+    DDCalc_2_2_0_init.resolveDependency(&mwimp_generic);
     // Choose one of the two below lines to determine where the couplings used in the likelihood
     // calculation come from
-    DDCalc_2_0_0_init.resolveDependency(&DD_couplings_ScalarSingletDM_Z2);
-    //DDCalc_2_0_0_init.resolveDependency(&DD_couplings_MicrOmegas);
-    DDCalc_2_0_0_init.reset_and_calculate();
+    DDCalc_2_2_0_init.resolveDependency(&DD_couplings_ScalarSingletDM_Z2);
+    //DDCalc_2_2_0_init.resolveDependency(&DD_couplings_MicrOmegas);
+    DDCalc_2_2_0_init.reset_and_calculate();
 
     // Calculate direct detection rates for LUX 2016
-    LUX_2016_Calc.resolveBackendReq(&Backends::DDCalc_2_0_0::Functown::DDCalc_Experiment);
-    LUX_2016_Calc.resolveBackendReq(&Backends::DDCalc_2_0_0::Functown::DDCalc_CalcRates_simple);
+    LUX_2016_Calc.resolveBackendReq(&Backends::DDCalc_2_2_0::Functown::DDCalc_Experiment);
+    LUX_2016_Calc.resolveBackendReq(&Backends::DDCalc_2_2_0::Functown::DDCalc_CalcRates_simple);
     LUX_2016_Calc.reset_and_calculate();
 
     // Calculate direct detection likelihood for LUX 2016
     LUX_2016_GetLogLikelihood.resolveDependency(&LUX_2016_Calc);
-    LUX_2016_GetLogLikelihood.resolveBackendReq(&Backends::DDCalc_2_0_0::Functown::DDCalc_Experiment);
-    LUX_2016_GetLogLikelihood.resolveBackendReq(&Backends::DDCalc_2_0_0::Functown::DDCalc_LogLikelihood);
+    LUX_2016_GetLogLikelihood.resolveBackendReq(&Backends::DDCalc_2_2_0::Functown::DDCalc_Experiment);
+    LUX_2016_GetLogLikelihood.resolveBackendReq(&Backends::DDCalc_2_2_0::Functown::DDCalc_LogLikelihood);
     LUX_2016_GetLogLikelihood.reset_and_calculate();
 
     logger() << "LUX_2016 lnL: " << LUX_2016_GetLogLikelihood(0) << LogTags::info << EOM;
