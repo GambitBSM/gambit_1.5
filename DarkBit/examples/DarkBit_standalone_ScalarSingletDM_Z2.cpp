@@ -421,7 +421,7 @@ int main()
     capture_rate_Sun_const_xsec.reset_and_calculate();
 
     // Infer WIMP equilibration time in Sun
-    equilibration_time_Sun.resolveDependency(&TH_ProcessCatalog_DS_MSSM);
+    equilibration_time_Sun.resolveDependency(&TH_ProcessCatalog_ScalarSingletDM_Z2);
     equilibration_time_Sun.resolveDependency(&DarkMatter_ID_ScalarSingletDM);
     equilibration_time_Sun.resolveDependency(&mwimp_generic);
     equilibration_time_Sun.resolveDependency(&capture_rate_Sun_const_xsec);
