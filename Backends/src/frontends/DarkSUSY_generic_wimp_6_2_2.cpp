@@ -85,79 +85,35 @@ BE_NAMESPACE
     // Transfer WIMP mass common block.
     anmwimp = mwimp;
 
-    // Transfer branching fractions to WIMP annihilation common blocks.
-    // For channel indices, see dswayieldone.f
-    DSanbr.clear();
-    DSanbr.push_back(0.0);
-
-    // The below are channels with non-SM Higgs
-    for (int i=1; i<=2; i++)
-    {
-        if (annihilation_bf[i-1] != 0.)
-          backend_error().raise(LOCAL_INFO, "ERROR: The DarkSUSY neutrino telescope routines "
-                              "for a generic WIMP cannot handle models with non-standard model\n"
-                              "WIMP annihilation final states.");
-        DSanbr.push_back(0.);
-    }
-
-    // h0_1 h0_1 final state
-    DSanbr.push_back(annihilation_bf[2]);
-
-    // The below are channels with non-SM Higgs
-    for (int i=4; i<=8; i++)
-    {
-        if (annihilation_bf[i-1] != 0.)
-          backend_error().raise(LOCAL_INFO, "ERROR: The DarkSUSY neutrino telescope routines "
-                              "for a generic WIMP cannot handle models with non-standard model\n"
-                              "WIMP annihilation final states.");
-        DSanbr.push_back(0.);
-    }
-
-    // Z0 h0_1
-    DSanbr.push_back(annihilation_bf[8]);
-
-    // The below are channels with non-SM Higgs
-    for (int i=10; i<=11; i++)
-    {
-        if (annihilation_bf[i-1] != 0.)
-          backend_error().raise(LOCAL_INFO, "ERROR: The DarkSUSY neutrino telescope routines "
-                              "for a generic WIMP cannot handle models with non-standard model\n"
-                              "WIMP annihilation final states.");
-        DSanbr.push_back(0.);
-    }
-
-    for (int i=12; i<=29; i++)
-    {
-        DSanbr.push_back(annihilation_bf[i-1]);
-    }
-
-    // Setup PDG common blocks
+    // The below give the PDG codes for the final states each element of the
+    // annihilation_bf array is associated with. Non-SM final states are given
+    // PDG code 20000.
     DSanpdg1.clear();
     DSanpdg2.clear();
     DSanpdg1.push_back(10000); // not used, as I keep the same numbering as for Fortran
     DSanpdg2.push_back(10000);
-    DSanpdg1.push_back(35);  // H H, channel 1
-    DSanpdg2.push_back(35);
+    DSanpdg1.push_back(20000);  // H H, channel 1
+    DSanpdg2.push_back(20000);
     DSanpdg1.push_back(25);  // h H, channel 2
-    DSanpdg2.push_back(35);
+    DSanpdg2.push_back(20000);
     DSanpdg1.push_back(25);  // h h, channel 3
     DSanpdg2.push_back(25);
-    DSanpdg1.push_back(36);  // A A, channel 4
-    DSanpdg2.push_back(36);
-    DSanpdg1.push_back(35);  // H A, channel 5
-    DSanpdg2.push_back(36);
+    DSanpdg1.push_back(20000);  // A A, channel 4
+    DSanpdg2.push_back(20000);
+    DSanpdg1.push_back(20000);  // H A, channel 5
+    DSanpdg2.push_back(20000);
     DSanpdg1.push_back(25);  // h A, channel 6
-    DSanpdg2.push_back(36);
-    DSanpdg1.push_back(37);  // H+ H-, channel 7
-    DSanpdg2.push_back(-37);
-    DSanpdg1.push_back(23);  // Z H, channel 8
-    DSanpdg2.push_back(35);
-    DSanpdg1.push_back(23);  // Z h, channel 9
+    DSanpdg2.push_back(20000);
+    DSanpdg1.push_back(20000);  // H+ H-, channel 7
+    DSanpdg2.push_back(20000);
+    DSanpdg1.push_back(20000);  // Z H, channel 8
+    DSanpdg2.push_back(20000);
+    DSanpdg1.push_back(20000);  // Z h, channel 9
     DSanpdg2.push_back(25);
     DSanpdg1.push_back(23);  // Z A, channel 10
-    DSanpdg2.push_back(36);
+    DSanpdg2.push_back(20000);
     DSanpdg1.push_back(24);  // W+ H-, channel 11
-    DSanpdg2.push_back(-37);
+    DSanpdg2.push_back(20000);
     DSanpdg1.push_back(23);  // Z Z, channel 12
     DSanpdg2.push_back(23);
     DSanpdg1.push_back(24);  // W+ W-, channel 13
@@ -194,7 +150,29 @@ BE_NAMESPACE
     DSanpdg2.push_back(22);
     DSanpdg1.push_back(22);   // gamma Z, channel 29
     DSanpdg2.push_back(23);
-  }
+
+    // Transfer branching fractions to WIMP annihilation common blocks.
+    // For channel indices, see dswayieldone.f
+    DSanbr.clear();
+    DSanbr.push_back(0.0);
+
+    for (int i=1; i<=29; i++)
+    {
+        if (DSanpdg1[i] == 10000 || DSanpdg2[i] == 10000)
+          DSanbr.push_back(0.);
+        else if (DSanpdg1[i] == 20000 || DSanpdg2[i] == 20000)
+        {
+            if (annihilation_bf[i-1] > 0.00001)
+              backend_error().raise(LOCAL_INFO, "ERROR: The DarkSUSY neutrino telescope routines "
+                              "for a generic WIMP cannot handle models with non-standard model\n"
+                              "WIMP annihilation final states.");
+            else
+              DSanbr.push_back(0.);
+        } // if
+        else
+          DSanbr.push_back(annihilation_bf[i-1]);
+    } // for
+  } // dsgenericwimp_nusetup
 
   /// Function nuyield returns neutrino yields at the top of the
   /// the atmosphere, in m^-2 GeV^-1 annihilation^-1.  Provided
@@ -221,7 +199,7 @@ BE_NAMESPACE
 
     for (int i=1; i<=29; i++)
     {
-      if (DSanbr[i]>0.)
+      if (DSanbr[i]>0.00001)
       {
         iistat=0;
         if ((ptype == 1) or (ptype == 3)) // particles
