@@ -12,3 +12,7 @@
 #
 # QSOs: Ata et. al., 2017. ArXiv:1705.06373
 1.52    26.00     0.99      3
+#
+#
+#QSOs: Gil-Marin et. al., 2018. ArXiv:1801.02689 (Section 8.1)
+# 1.52    26.27     0.90      3
