@@ -93,11 +93,46 @@ BE_NAMESPACE
     // For channel indices, see dswayieldone.f
     DSanbr.clear();
     DSanbr.push_back(0.0);
-//    DSanbr[0]=0.0; // not used, keep Fortran numbering below
-    for (int i=1; i<=29; i++)
+
+    // The below are channels with non-SM Higgs
+    for (int i=1; i<=2; i++)
+    {
+        if (annihilation_bf[i-1] != 0.)
+          backend_error().raise(LOCAL_INFO, "ERROR: The DarkSUSY neutrino telescope routines "
+                              "for a generic WIMP cannot handle models with non-standard model\n"
+                              "WIMP annihilation final states.");
+        DSanbr.push_back(0.);
+    }
+
+    // h0_1 h0_1 final state
+    DSanbr.push_back(annihilation_bf[2]);
+
+    // The below are channels with non-SM Higgs
+    for (int i=4; i<=8; i++)
+    {
+        if (annihilation_bf[i-1] != 0.)
+          backend_error().raise(LOCAL_INFO, "ERROR: The DarkSUSY neutrino telescope routines "
+                              "for a generic WIMP cannot handle models with non-standard model\n"
+                              "WIMP annihilation final states.");
+        DSanbr.push_back(0.);
+    }
+
+    // Z0 h0_1
+    DSanbr.push_back(annihilation_bf[8]);
+
+    // The below are channels with non-SM Higgs
+    for (int i=10; i<=11; i++)
+    {
+        if (annihilation_bf[i-1] != 0.)
+          backend_error().raise(LOCAL_INFO, "ERROR: The DarkSUSY neutrino telescope routines "
+                              "for a generic WIMP cannot handle models with non-standard model\n"
+                              "WIMP annihilation final states.");
+        DSanbr.push_back(0.);
+    }
+
+    for (int i=12; i<=29; i++)
     {
         DSanbr.push_back(annihilation_bf[i-1]);
-//      DSanbr[i] = annihilation_bf[i-1];
     }
 
     // Setup PDG common blocks
@@ -163,40 +198,14 @@ BE_NAMESPACE
     DSanpdg2.push_back(22);
     DSanpdg1.push_back(22);   // gamma Z, channel 29
     DSanpdg2.push_back(23);
-
-    // Transfer Higgs decay branching fractions (not widths) to Higgs decay common blocks.
-    // The total width is not relevant, as all Higgs decay in flight eventually, so
-    // only the BFs are needed to calculate the yields into neutrinos from decays in flight.
-    for (int i=1; i<=3; i++)    // Loop over the neutral Higgses
-    {
-      for (int j=1; j<=29; j++) // Loop over the known decay channels
-      {
-        anbranch->ans0br(j,i) = Higgs_decay_BFs_neutral[j-1][i-1];
-      }
-    }
-
-    for (int i=1; i<=15; i++)   // Loop over the known charged Higgs decay channels
-    {
-      anbranch->anscbr(i) = Higgs_decay_BFs_charged[i-1];
-    }
-
-    // Transfer Higgs masses to common blocks.
-    for (int i=1; i<=3; i++)    // Loop over the neutral Higgses
-    {
-      anbranch->ans0m(i) = Higgs_masses_neutral[i-1];                   // Neutral Higgses
-    }
-    anbranch->anscm = Higgs_mass_charged;                               // Charged Higgses
-
-    // Tell DarkSUSY we've taken care of business.
-    // wabranch->dswasetupcalled = true; // No longer needed
-
   }
 
   /// Function nuyield returns neutrino yields at the top of the
   /// the atmosphere, in m^-2 GeV^-1 annihilation^-1.  Provided
   /// here for interfacing with nulike.
   ///   --> log10Enu log_10(neutrino energy/GeV)
-  ///   --> p        p=1 for neutrino yield, p=2 for nubar yield
+  ///   --> p        p=1 for neutrino yield, p=2 for nubar yield,
+  ///                p=3 for nu and nubar yields
   ///   --> context  void pointer (ignored)
 
   double neutrino_yield(const double& log10E, const int& ptype, void*&)
@@ -208,54 +217,53 @@ BE_NAMESPACE
     const char*object =  (char *)"su";
 
     double tmp=0;
-    int twoj=0;
-    int twos=0;
-    int twol=0;
-    int cp=-1;
+    int twoj=0; // ignored by current version of DS
+    int twos=0; // ignored by current version of DS
+    int twol=0; // ignored by current version of DS
+    int cp=-1; // ignored by current version of DS
     double result=0.0;
 
     for (int i=1; i<=29; i++)
     {
-      // cout << "DDD: " << i << " " << DSanbr[i] << " " << DSanpdg1[i] << " " << DSanpdg2[i] << endl; // JE TMP
-      if (DSanbr[i]>0) {
-        if (i==13) { // W+ W-
-          twos=2;
-          twol=2;
-        } else {
-          twos=0;
-          twol=0;
-        }
+      if (DSanbr[i]>0.)
+      {
         iistat=0;
-        if ((ptype == 1) or (ptype == 3)) { // particles
-          tmp=dsseyield_sim_ls(anmwimp,pow(10.0,log10E),10.0,DSanpdg1[i],DSanpdg2[i],twoj,cp,twos,twol,object,3,t1,iistat);
-            if ((iistat bitand 8) == 8) { // not simulated channel
-
-        tmp=dsseyield_ch(anmwimp,pow(10.0,log10E),10.0,DSanpdg1[i],DSanpdg2[i],object,3,t1,iistat);
-            }
+        if ((ptype == 1) or (ptype == 3)) // particles
+        {
+          // Temporary hack replacing h h and Z h final state spectra with Z Z
+          if ((DSanpdg1[i] == 25 && DSanpdg2[i] == 25) || (DSanpdg1[i] == 23 && DSanpdg2[i] == 25))
+            tmp=dsseyield_sim_ls(anmwimp,pow(10.0,log10E),10.0,23,23,twoj,cp,twol,twos,object,3,t1,iistat);
+          else
+            tmp=dsseyield_sim_ls(anmwimp,pow(10.0,log10E),10.0,DSanpdg1[i],DSanpdg2[i],twoj,cp,twol,twos,object,3,t1,iistat);
+          if ((iistat bitand 8) == 8) // not simulated channel
+            backend_error().raise(LOCAL_INFO, "ERROR: The DarkSUSY neutrino telescope routines "
+                                  "for a generic WIMP cannot handle models with non-standard model\n"
+                                  "WIMP annihilation final states.");
           result += 1e-30 * DSanbr[i] * tmp;
-
-      // The following is just a warning, not an error: unpolarized yields
-      // are used even if polarized yields are asked for
-      if ((iistat bitand 16) == 16) iistat -= 16;
-          istat=(istat bitor iistat);
-        }
-        if ((ptype == 2) or (ptype == 3)) { // anti-particles
-          tmp=dsseyield_sim_ls(anmwimp,pow(10.0,log10E),10.0,DSanpdg1[i],DSanpdg2[i],twoj,cp,twos,twol,object,3,t2,iistat);
-            if ((iistat bitand 8) == 8) { // not simulated channel
-              // cout << "CCC: " << i << " " << DSanpdg1[i] << " " << DSanpdg2[i] << endl; // JE TMP
-
-          tmp=dsseyield_ch(anmwimp,pow(10.0,log10E),10.0,DSanpdg1[i],DSanpdg2[i],object,3,t2,iistat);
-            }
-          result += 1e-30 * DSanbr[i] * tmp;
-
-      // The following is just a warning, not an error: unpolarized yields
-      // are used even if polarized yields are asked for
-      if ((iistat bitand 16) == 16) iistat -= 16;
-          istat=(istat bitor iistat);
+          // The following is just a warning, not an error: unpolarized yields
+          // are used even if polarized yields are asked for
+          if ((iistat bitand 16) == 16) iistat -= 16;
+             istat=(istat bitor iistat);
         }
 
+        if ((ptype == 2) or (ptype == 3)) // anti-particles
+        {
+          // Temporary hack replacing h h and Z h final state spectra with Z Z
+          if ((DSanpdg1[i] == 25 && DSanpdg2[i] == 25) || (DSanpdg1[i] == 23 && DSanpdg2[i] == 25))
+            tmp=dsseyield_sim_ls(anmwimp,pow(10.0,log10E),10.0,23,23,twoj,cp,twol,twos,object,3,t2,iistat);
+          else
+            tmp=dsseyield_sim_ls(anmwimp,pow(10.0,log10E),10.0,DSanpdg1[i],DSanpdg2[i],twoj,cp,twol,twos,object,3,t2,iistat);
+          if ((iistat bitand 8) == 8) // not simulated channel
+            backend_error().raise(LOCAL_INFO, "ERROR: The DarkSUSY neutrino telescope routines "
+                                  "for a generic WIMP cannot handle models with non-standard model\n"
+                                  "WIMP annihilation final states.");
+          result += 1e-30 * DSanbr[i] * tmp;
+          // The following is just a warning, not an error: unpolarized yields
+          // are used even if polarized yields are asked for
+          if ((iistat bitand 16) == 16) iistat -= 16;
+          istat=(istat bitor iistat);
+        }
       } // end if DSanbr>0
-
     } // end loop
 
 
@@ -277,7 +285,6 @@ BE_NAMESPACE
       err << "Error from DarkSUSY::dsseyield functions in neutrino flux calculation.  istat = " << istat;
       piped_errors.request(LOCAL_INFO, err.str());
     }
-    // cout << "AAA: nuyield DS6: " << result << endl; // JE TMP
     return result;
   }
 
