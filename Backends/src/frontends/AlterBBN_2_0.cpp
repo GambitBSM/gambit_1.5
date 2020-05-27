@@ -87,6 +87,10 @@ BE_NAMESPACE
     // set error handling related parameters
     if (AlterBBN_input.count("failsafe")){input_relicparam->failsafe = (int)AlterBBN_input["failsafe"];}
     if (AlterBBN_input.count("err")){input_relicparam->err = (int)AlterBBN_input["err"];}
+
+    // As version 2.0 has only failsafe = 0 and failsafe = 1, every non-zero value
+    // will be set to one
+    if (input_relicparam->err > 0) input_relicparam->err = 1;
   }
 
   /// calls the AlterBBN routine nucl_err with the filled relicparam structure. This will fill the array ratioH with
