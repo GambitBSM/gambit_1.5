@@ -39,19 +39,6 @@ extern "C"
   #include "mkpath/mkpath.h"
 }
 
-# if GAMBIT_CONFIG_FLAG_use_std_regex
-  #include <regex>
-  #define GAMBIT_CONFIG_FLAG_use_regex 1
-  namespace Gambit { using std::regex; using std::regex_replace; }
-#elif GAMBIT_CONFIG_FLAG_use_boost_regex
-  #include <boost/regex.hpp>
-  #define GAMBIT_CONFIG_FLAG_use_regex 1
-  namespace Gambit { using boost::regex; using boost::regex_replace; }
-#else
-  #include <boost/algorithm/string/replace.hpp>
-  #define GAMBIT_CONFIG_FLAG_use_regex 0
-#endif
-
 namespace Gambit
 {
 

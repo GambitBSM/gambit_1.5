@@ -21,25 +21,21 @@
 
 #include <string>
 #include <iostream>
-#include <stdexcept>
 #include <limits>
-#include <utility>
-#include <regex>
-#include <cstdlib>
 #include <cmath>
 
 #include "yaml-cpp/yaml.h"
 
 #include "gambit/Utils/standalone_error_handlers.hpp"
 
-namespace Gambit 
+namespace Gambit
 {
 
   namespace NodeUtility
   {
 
       /// Wrapper for integer type casts from a double in string representation.
-      /// It does first try to safely convert the string to a double and 
+      /// It does first try to safely convert the string to a double and
       /// then performs checks before casting to an integer type.
       template<class TYPE>
       TYPE safeIntegerTypeCast(const std::string& s)
@@ -103,7 +99,7 @@ namespace Gambit
         try { return node.as<int>(); }
         catch (...) { return safeIntegerTypeCast<int>(node.as<std::string>()); }
       }
-      
+
       /// See int specialization.
       template<>
       inline unsigned int getNode<unsigned int>(const YAML::Node node)
@@ -111,7 +107,7 @@ namespace Gambit
         try { return node.as<unsigned int>(); }
         catch (...) { return safeIntegerTypeCast<unsigned int>(node.as<std::string>()); }
       }
-      
+
       /// See int specialization.
       template<>
       inline long getNode<long>(const YAML::Node node)
@@ -119,7 +115,7 @@ namespace Gambit
         try { return node.as<long>(); }
         catch (...) { return safeIntegerTypeCast<long>(node.as<std::string>()); }
       }
-      
+
       /// See int specialization.
       template<>
       inline unsigned long getNode<unsigned long>(const YAML::Node node)
@@ -127,7 +123,7 @@ namespace Gambit
         try { return node.as<unsigned long>(); }
         catch (...) { return safeIntegerTypeCast<unsigned long>(node.as<std::string>()); }
       }
-      
+
       /// See int specialization.
       template<>
       inline long long getNode<long long>(const YAML::Node node)
@@ -135,7 +131,7 @@ namespace Gambit
         try { return node.as<long long>(); }
         catch (...) { return safeIntegerTypeCast<long long>(node.as<std::string>()); }
       }
-      
+
       /// See int specialization.
       template<>
       inline unsigned long long getNode<unsigned long long>(const YAML::Node node)
@@ -143,7 +139,7 @@ namespace Gambit
         try { return node.as<unsigned long long>(); }
         catch (...) { return safeIntegerTypeCast<unsigned long long>(node.as<std::string>()); }
       }
-      
+
       /// Read string and expand environment variables of the type ${MYVAR}.
       /// Expansion of environment variables is not performed if given as
       /// $MYVAR and \${MYVAR}.

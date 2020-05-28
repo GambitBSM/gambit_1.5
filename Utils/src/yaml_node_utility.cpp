@@ -15,15 +15,18 @@
 ///
 ///  *********************************************
 
+#include <cstring>
+#include <regex>
+
 #include "gambit/Utils/yaml_node_utility.hpp"
 #include <cstring>
 
-namespace Gambit 
+namespace Gambit
 {
 
     /// Expand environment variables in the given string.
     void NodeUtility::autoExpandEnvironmentVariables(std::string & text)
-    {   
+    {
       // C++ regex does not support negative lookahead. So let us reverse the string.
       std::reverse(text.begin(), text.end());
 
@@ -42,23 +45,23 @@ namespace Gambit
           const char * s = std::getenv(tmp.c_str());
 
           std::string var(s == NULL ? "" : s);
-          if (s == NULL)  {
+          if (s == NULL)
+          {
             std::cout << "Environment variable " << match.str() << " not set";
           }
           // Reverse the found environment variable...
           std::reverse(var.begin(), var.end());
           // and plug it into the text string.
-          text.replace( match[0].first, match[0].second, var);
-
+          text.replace(match[0].first, match[0].second, var);
       }
       // Finally return the text string in the normal order.
       std::reverse(text.begin(), text.end());
-    } 
+    }
 
     /// Remove characters in the given string.
     void NodeUtility::removeCharsFromString(std::string& text, const char* charsToRemove)
     {
-       for (unsigned int i = 0; i < strlen(charsToRemove); ++i)
+       for (unsigned int i = 0; i < std::strlen(charsToRemove); ++i)
        {
           text.erase(std::remove(text.begin(), text.end(), charsToRemove[i]), text.end());
        }

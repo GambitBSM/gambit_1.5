@@ -32,8 +32,12 @@
 #
 #************************************************
 
-# Require a minimum cmake version of 2.8.5
-cmake_minimum_required(VERSION 2.8.5 FATAL_ERROR)
+# Define minimum cmake version
+cmake_minimum_required(VERSION 2.8.12 FATAL_ERROR)
+
+# Define minimum compiler versions
+set(MIN_GCC_VERSION 5.1)
+set(MIN_ICC_VERSION 15.0.2)
 
 SET(CMAKE_BUILD_TYPE_STRING "Choose the type of build, options are: None Debug Release Release_O3 RelWithDebInfo MinSizeRel.")
 if(NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
@@ -76,6 +80,15 @@ elseif (CXX_COMPILER_NAME MATCHES "icc.*$")
   message(FATAL_ERROR "\nYou have set CMAKE_CXX_COMPILER to icc.  Did you mean icpc?")
 endif()
 
+# Include cmake utility scripts, including colour definitions.
+include(cmake/utilities.cmake)
+
+# Enforce minimum versions for the C/C++ compiler
+if (("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Intel" AND CMAKE_CXX_COMPILER_VERSION VERSION_LESS MIN_ICC_VERSION) OR
+    ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU" AND CMAKE_CXX_COMPILER_VERSION VERSION_LESS MIN_GCC_VERSION))
+  message(FATAL_ERROR "${BoldRed}\nGAMBIT requires at least g++ ${MIN_GCC_VERSION} or icpc ${MIN_ICC_VERSION}.  Please install a newer compiler.${ColourReset}")
+endif()
+
 # Don't relink all binaries when shared lib changes (programs will be rebuilt anyway if used headers change)
 set(CMAKE_LINK_DEPENDS_NO_SHARED 1)
 
@@ -91,9 +104,6 @@ set(CMAKE_BUILD_WITH_INSTALL_RPATH TRUE)
 
 # Add the automatically determined parts of the RPATH that point to directories outside the build tree to the install RPATH
 SET(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
-
-# Include cmake utility scripts, including colour definitions.
-include(cmake/utilities.cmake)
 
 # Check if pybind11 is to be ditched
 string(REGEX MATCH ";pybind;|;pybind11;|;Pybind;|;Pybind11;" DITCH_PYBIND ";${itch};")
