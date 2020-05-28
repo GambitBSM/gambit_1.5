@@ -14,7 +14,7 @@ Please cite the following GAMBIT papers, depending on your use of different modu
  - GAMBIT Flavour Workgroup: F. U. Bernlochner, et. al., **FlavBit**: A GAMBIT module for computing flavour observables and likelihoods, Eur. Phys. J. C 77 (2017) 786, arXiv:1705.07933
  - GAMBIT Scanner Workgroup: G. D. Martinez, et. al., Comparison of statistical sampling methods with **ScannerBit**, the GAMBIT scanning module, Eur. Phys. J. C 77 (2017) 761, arXiv:1705.07959
  - GAMBIT Dark Matter Workgroup: T. Bringmann, et. al., **DarkBit**: A GAMBIT module for computing dark matter observables and likelihoods, Eur. Phys. J. C 77 (2017) 831, arXiv:1705.07920
- - **NeutrinoBit**: M. Chrzaszcz, M. Drewes, T. Gonzalo, J. Harz, S. Krishnamurthy, C. Weniger, A frequentist analysis of three right-handed neutrinos with GAMBIT, arXiv:1908.02302
+ - **NeutrinoBit**: M. Chrzaszcz, M. Drewes, T. Gonzalo, J. Harz, S. Krishnamurthy, C. Weniger, A frequentist analysis of three right-handed neutrinos with GAMBIT, Eur. Phys. J. C (2020) in press, arXiv:1908.02302
 
 GAMBIT contains interfaces to various external codes, along with scripts for downloading and configuring them. Please cite as appropriate if you use those codes:
 
@@ -49,12 +49,12 @@ GAMBIT is built using the CMake system (version 2.8.12 or greater required). The
 
 COMPULSORY:
 
- - gcc/gfortran 4.8.4 or greater, or icc/ifort 12.1.0 or greater
- - Python 2.7 or greater (Python 3 *is* now supported)
+ - gcc/gfortran 5.1 or greater, or icc/ifort 15.0.2 or greater
+ - Python 2.7 or greater (Python 3 is supported)
  - Python modules: yaml, os, re, datetime, sys, getopt, shutil and itertools.
  - git
  - Boost 1.41 or greater
- - GNU Scientific Library (GSL) 1.10 or greater
+ - GNU Scientific Library (GSL) 2.1 or greater
  - Eigen 3.1.0 or greater
  - LAPACK
  - PKG Config
