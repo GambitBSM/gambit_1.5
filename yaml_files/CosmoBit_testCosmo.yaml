@@ -160,8 +160,8 @@ Rules:
 ##
 ####
 
-  - capability: classy_final_input
-    function: set_classy_input
+  - capability: classy_MPLike_input
+    function: set_classy_input_no_MPLike
 
 #####
 ##

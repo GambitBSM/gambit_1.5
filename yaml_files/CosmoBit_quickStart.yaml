@@ -59,8 +59,8 @@
 Parameters:
 
   # Neutrino masses, choose between normal hierachy (NH) and inverted hierarch (IH)
-  StandardModel_mNudiff: !import include/StandardModel_mNudiff_NH_scan.yaml
-  #StandardModel_mNudiff: !import include/StandardModel_mNudiff_IH_scan.yaml
+  #StandardModel_mNudiff: !import include/StandardModel_mNudiff_NH_scan.yaml
+  StandardModel_mNudiff: !import include/StandardModel_mNudiff_IH_scan.yaml
 
   # To fix the sum of the neutrino masses to 0.06 with only one massive neutrino
   #    (as in Planck 'baseline' analysis don't include the model 'StandardModel_mNudiff'
@@ -94,16 +94,16 @@ Parameters:
       range: [0.9,1.10]
 
   # extension of standard LCDM: allow for values of dNeff @CMB & @ BBN different from today
-  dNurBBN_dNurCMB:
-    dNur_BBN:
-      prior_type: flat
-      range: [0.000,0.50]
-    dNur_CMB:
-      prior_type: flat
-      range: [0.000,0.50]
+  #dNurBBN_dNurCMB:
+  #  dNur_BBN:
+  #    prior_type: flat
+  #    range: [0.000,0.50]
+  #  dNur_CMB:
+  #    prior_type: flat
+  #    range: [0.000,0.50]
 
   # Include this if you use the Pantheon SNe likelihood into your scan
-  cosmo_nuisance_Pantheon: !import include/cosmo_nuisance_Pantheon.yaml
+  #cosmo_nuisance_Pantheon: !import include/cosmo_nuisance_Pantheon.yaml
 
 
 #======== 3) Prior setup ========
@@ -179,7 +179,7 @@ ObsLikes:
     # i) Choose which likelihoods to include (simple way)
     sub_capabilities:
       - bao_smallz_2014
-      - Pantheon
+      #- Pantheon
     # ii) Choose which likelihoods to include (complicated way).  You can give a path to the '<likelihood_name>.data'
     #     file containing the settings that you want the likelihood to run with (e.g. path to data, which z-bins to use... ).
     #     Note that the path must be given relative to your GAMBIT directory.  If you set it to "default", or empty,
@@ -207,8 +207,8 @@ ObsLikes:
     # i) Choose which likelihoods to include (simple way)
     sub_capabilities:
       - bao_smallz_2014
-      - Pantheon
-      - Planck_SZ
+      #- Pantheon
+      #- Planck_SZ
     # ii) Choose which likelihoods to include (complicated way).
     #sub_capabilities:
     #  bao_smallz_2014: Backends/installed/montepythonlike/3.1.0/montepython/likelihoods/bao_smallz_2014/bao_smallz_2014.data
@@ -239,7 +239,7 @@ Rules:
   # If you have not installed MontePython, the second option must be used.
   # GAMBIT will stop and tell you to fix this if you get it wrong though, so don't stress.
   # (i) set CLASS input with MP compatibility
-  - capability: classy_final_input
+  - capability: classy_MPLike_input
     function: set_classy_input_with_MPLike
   # (ii) set CLASS input without MP compatibility
   #- capability: classy_final_input

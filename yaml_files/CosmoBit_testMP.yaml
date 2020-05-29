@@ -108,15 +108,15 @@ ObsLikes:
     capability:   MP_LogLikes
     type:         map_str_dbl
     sub_capabilities:
-      WiggleZ: default
+      #bao: default
 
 #======== Rule entries ========
 Rules:
 
 
   # classy (class through python wrapper)
-  - capability: classy_baseline_params
-    function: set_classy_baseline_params
+  - capability: classy_input_params
+    function: set_classy_input_params
     options:
       classy_dict:
          #P_k_max_h/Mpc: 3
@@ -124,7 +124,7 @@ Rules:
 
   # you have to set by hand if you want to set the class parameters with or without setting arguments from MontePython Likelihoods
   # if the montepythonlike backend is installed (if not it should automatically choose the function 'init_Classy_cosmo_container')
-  - capability: classy_final_input
+  - capability: classy_MPLike_input
     function: set_classy_input_with_MPLike
     module: CosmoBit
 

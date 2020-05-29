@@ -174,50 +174,49 @@ START_MODULE
   // Capabilities related to setting input options for CLASS
   // (cosmo parameters, temperature and number of ultra-relativistic species Nur)
 
-  #define CAPABILITY classy_baseline_params
+  #define CAPABILITY classy_input_params
   START_CAPABILITY
-    #define FUNCTION set_classy_baseline_params
-    START_FUNCTION(pybind11::dict)
+    #define FUNCTION set_classy_input_params
+    START_FUNCTION(Classy_input)
     ALLOW_MODELS(LCDM,LCDM_theta)
+    DEPENDENCY(classy_MPLike_input, pybind11::dict)
+    DEPENDENCY(classy_NuMasses_Nur_input, pybind11::dict)
+    DEPENDENCY(classy_primordial_input, pybind11::dict)
     MODEL_CONDITIONAL_DEPENDENCY(classy_parameters_EnergyInjection, pybind11::dict, AnnihilatingDM_general, DecayingDM_general)
     MODEL_CONDITIONAL_DEPENDENCY(classy_PlanckLike_input, pybind11::dict, cosmo_nuisance_Planck_lite,cosmo_nuisance_Planck_TTTEEE,cosmo_nuisance_Planck_TT,plik_dx11dr2_HM_v18_TT)
-    DEPENDENCY(helium_abundance, double)
-    DEPENDENCY(classy_NuMasses_Nur_input, pybind11::dict)
     #undef FUNCTION
   #undef CAPABILITY
 
   // Initialise CLASS either with the run options needed by
   // MontePython Likelihoods (t modes, Pk at specific z,..), or not.
-  #define CAPABILITY classy_final_input
+  #define CAPABILITY classy_MPLike_input
   START_CAPABILITY
     #define FUNCTION set_classy_input_with_MPLike
-    START_FUNCTION(Classy_input)
+    START_FUNCTION(pybind11::dict)
     DEPENDENCY(cosmo_args_from_MPLike,  pybind11::dict)
-    DEPENDENCY(classy_primordial_parameters, Classy_input)
     #undef FUNCTION
 
-    #define FUNCTION set_classy_input
-    START_FUNCTION(Classy_input)
-    DEPENDENCY(classy_primordial_parameters, Classy_input)
+    #define FUNCTION set_classy_input_no_MPLike
+    START_FUNCTION(pybind11::dict)
     #undef FUNCTION
   #undef CAPABILITY
 
   // Set different CLASS input parameters
-  #define CAPABILITY classy_primordial_parameters
+  #define CAPABILITY classy_primordial_input
   START_CAPABILITY
     // H0, tau_reio, Omega_m, Omega_b plus an external primordial power spectrum
     #define FUNCTION set_classy_parameters_primordial_ps
-    START_FUNCTION(Classy_input)
+    START_FUNCTION(pybind11::dict)
     DEPENDENCY(primordial_power_spectrum, Primordial_ps)
-    DEPENDENCY(classy_baseline_params, pybind11::dict)
+    DEPENDENCY(helium_abundance, double)
     DEPENDENCY(k_pivot, double)
     #undef FUNCTION
 
     // H0, tau_reio, Omega_m, Omega_b plus an external *parametrised* primordial power spectrum
     #define FUNCTION set_classy_parameters_parametrised_ps
-    START_FUNCTION(Classy_input)
+    START_FUNCTION(pybind11::dict)
     ALLOW_MODELS(PowerLaw_ps)
-    DEPENDENCY(classy_baseline_params, pybind11::dict)
+    DEPENDENCY(helium_abundance, double)
     DEPENDENCY(k_pivot, double)
     #undef FUNCTION
   #undef CAPABILITY

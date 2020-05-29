@@ -435,9 +435,9 @@ namespace Gambit
     /// to class: cosmological parameters ([H0/100*theta_s],omega_b,tau_reio,omega_cdm) & add
     /// model dependent results for N_ur, neutrino masses & helium abundance
     /// here potential extra input options given in the yaml file are read in
-    void set_classy_baseline_params(pybind11::dict &result)
+    void set_classy_input_params(Classy_input &result)
     {
-      using namespace Pipes::set_classy_baseline_params;
+      using namespace Pipes::set_classy_input_params;
 
       //std::cout << " enter " << __PRETTY_FUNCTION__ << std::endl;
 
@@ -456,29 +456,37 @@ namespace Gambit
       static bool first_run = true;
 
       // Get the dictionary with inputs for the neutrino masses and merge it
-      // into the empty results dictionary.
-      pybind11::dict NuMasses_In = *Dep::classy_NuMasses_Nur_input;
-      merge_pybind_dicts(result, NuMasses_In, first_run);
+      // into Classy_Input dictionary     
+      std::string common_keyszero = result.add_dict(*Dep::classy_MPLike_input);
+      result.merge_input_dicts(*Dep::classy_NuMasses_Nur_input);
+      result.merge_input_dicts(*Dep::classy_primordial_input);
+
+      // No check if something went wrong and some parameters were defined twice
+      //if(common_keys != "")
+      //{
+      //  CosmoBit_error().raise(LOCAL_INFO, "The key(s) '" + common_keys + "' already "
+      //          "exists in the CLASSY dictionary. You are probably trying to override a CLASS setting. Check that none "
+      //          "of the parameters you pass through your yaml file through RunOptions for the capability 'classy_baseline_params' "
+      //          "is in contradiction with any settings made via the dependency resolution by CosmoBit in the function '"+__func__+"'.");
+      //}
 
       // standard cosmological parameters (common to all CDM -like models)
-      result["T_cmb"] =         *Param["T_cmb"];
-      result["omega_b"] =       *Param["omega_b"];
-      result["tau_reio"] =      *Param["tau_reio"];
-      result["omega_cdm"] =     *Param["omega_cdm"];
+      result.add_entry("T_cmb"      , *Param["T_cmb"]);
+      result.add_entry("omega_b"    , *Param["omega_b"]);
+      result.add_entry("tau_reio"   , *Param["tau_reio"]);
+      result.add_entry("omega_cdm"  , *Param["omega_cdm"]);
 
       // Depending on parametrisation, pass either Hubble or the acoustic scale
-      if (ModelInUse("LCDM")) result["H0"] = *Param["H0"];
-      else result["100*theta_s"] = *Param["100theta_s"];
+      if (ModelInUse("LCDM")) result.add_entry("H0", *Param["H0"]);
+      else result.add_entry("100*theta_s", *Param["100theta_s"]);
 
-      // Set helium abundance
-      result["YHe"] = *Dep::helium_abundance;
 
       // TODO: need to test if class or exo_class in use! does not work -> (JR) should be fixed with classy implementation
       // -> (JR again) not sure if that is actually true.. need to test.
       if (ModelInUse("DecayingDM_general") || ModelInUse("AnnihilatingDM_general"))
       {
         // add Decaying/annihilating DM specific options to python dictionary passed to CLASS, consistency checks only executed in first run
-        merge_pybind_dicts(result,*Dep::classy_parameters_EnergyInjection, first_run);
+        std::string common_keystwo = result.add_dict(*Dep::classy_parameters_EnergyInjection);
       }
 
       // Other Class input direct from the YAML file
@@ -497,14 +505,16 @@ namespace Gambit
             std::string value = it->second.as<std::string>();
 
             // Check if the key exists in the dictionary
-            if (not result.contains(name.c_str()))
+            if (not result.has_key(name.c_str()))
             {
               yaml_input[name.c_str()] = value;
+              //std::cout<< "Class input dict, adding "<< name.c_str()<<" " << value << std::endl;
+
             }
             // If it does, throw an error, there's some YAML conflict going on.
             else
             {
-              std::cout << pybind11::repr(result) << std::endl;
+              //std::cout << pybind11::repr(result) << std::endl;
               CosmoBit_error().raise(LOCAL_INFO, "The key '" + name + "' already "
                 "exists in the CLASSY dictionary. You are probably trying to override a model parameter. If you really"
                 "want to do this you should define an extra function to set the class parameters for the model you "
@@ -534,7 +544,7 @@ namespace Gambit
       }
 
       // Add yaml options to python dictionary passed to CLASS; consistency checks only executed on first run
-      merge_pybind_dicts(result, yaml_input, first_run);
+      result.merge_input_dicts(yaml_input);
 
       // At last: if the Planck likelihood is used add all relevant input parameters to the CLASS dictionary:
       // output: 'lCl, pCl, tCl', lensing: yes, non linear: halofit , l_max_scalar: 2508
@@ -545,14 +555,14 @@ namespace Gambit
       if (ModelInUse("cosmo_nuisance_Planck_lite") || ModelInUse("cosmo_nuisance_Planck_TTTEEE")|| ModelInUse("cosmo_nuisance_Planck_TT"))
       {
         // add Planck-likelihood-specific options to python dictionary passed to CLASS; consistency checks only executed on first run
-        merge_pybind_dicts(result,*Dep::classy_PlanckLike_input, first_run);
+        result.merge_input_dicts(*Dep::classy_PlanckLike_input);
       }
 
       first_run = false;
     }
 
     /// Set the classy parameter for an LCDM run with a parameterised primordial power spectrum.
-    void set_classy_parameters_parametrised_ps(Classy_input& result)
+    void set_classy_parameters_parametrised_ps(pybind11::dict& result)
     {
       using namespace Pipes::set_classy_parameters_parametrised_ps;
 
@@ -563,12 +573,12 @@ namespace Gambit
 
       // Now need to pass the primordial power spectrum
       // FIXME are the units on A_s correct here or should there be another 10?
-      result.add_entry("n_s", *Param["n_s"]);
-      result.add_entry("ln10^{10}A_s", *Param["ln10A_s"]);
+      result["n_s"] = *Param["n_s"];
+      result["ln10^{10}A_s"] = *Param["ln10A_s"];
 
-      // add k_pivot entry
-      result.add_entry("P_k_ini type", "analytic_Pk");
-      result.add_entry("k_pivot", *Dep::k_pivot);
+      // pass pivot scale of external spectrum to CLASS
+      result["P_k_ini type"] = "analytic_Pk";
+      result["k_pivot"] = *Dep::k_pivot;
 
       // if r = 0 only compute scalar modes, else tensor modes as well
       //
@@ -579,30 +589,17 @@ namespace Gambit
       else
       {
         // don't set to zero in CLASS dict as it won't be read if no tensor modes are requested
-        result.add_entry("r", *Param["r"]);
-        result.add_entry("modes","t,s");
+        result["r"] = *Param["r"];
+        result["modes"] = "t,s";
       }
 
-      // Get standard cosmo parameters, nu masses, helium abundance &
-      // extra run options for class passed in yaml file to capability
-      // 'classy_baseline_params'
-      // Note: this should only contain a value for 'k_pivot' if the model 'LCDM'
-      //    is in use.
-      pybind11::dict classy_base_dict = *Dep::classy_baseline_params;
+      // Set helium abundance
+      result["YHe"] = *Dep::helium_abundance; 
 
-      // Add classy_base_dict entries to the result dictionary of the type Classy_input
-      std::string common_keys = result.add_dict(classy_base_dict);
-      if(common_keys != "")
-      {
-        CosmoBit_error().raise(LOCAL_INFO, "The key(s) '" + common_keys + "' already "
-                "exist in the CLASSY dictionary. You are probably trying to override a CLASS setting. Check that none "
-                "of the parameters that you pass in your yaml file through RunOptions for the capability 'classy_baseline_params' "
-                "is in contradiction with any settings made via the dependency resolution by CosmoBit in the function '"+__func__+"'.");
-      }
     }
 
     /// Set the classy parameter for an LCDM run with an explicit non-parametric primordial power spectrum.
-    void set_classy_parameters_primordial_ps(Classy_input& result)
+    void set_classy_parameters_primordial_ps(pybind11::dict& result)
     {
       using namespace Pipes::set_classy_parameters_primordial_ps;
 
@@ -614,38 +611,19 @@ namespace Gambit
       // Now need to pass the primordial power spectrum
       static Primordial_ps pps{};
       pps = *Dep::primordial_power_spectrum;
-      result.add_entry("modes", "t,s");
-
-      result.add_entry("P_k_ini type", "pointer_to_Pk");
-      result.add_entry("k_array", pps.get_k());
-      result.add_entry("pks_array", pps.get_P_s());
-      result.add_entry("pkt_array", pps.get_P_t());
-      result.add_entry("lnk_size" , pps.get_vec_size()); // don't hard code but somehow make consistent with multimode @TODO -> test
+      result["modes"] = "t,s";
+      result["P_k_ini type"] = "pointer_to_Pk";
+      result["k_array"] = pps.get_k();
+      result["pks_array"] = pps.get_P_s();
+      result["pkt_array"] = pps.get_P_t();
+      result["lnk_size" ] = pps.get_vec_size(); // don't hard code but somehow make consistent with multimode @TODO -> tet
       // pass pivot scale of external spectrum to CLASS
-      result.add_entry("k_pivot", *Dep::k_pivot);
+      result["k_pivot"] = *Dep::k_pivot;
 
-      // Get standard cosmo parameters, nu masses, helium abundance &
-      // extra run options for class passed in yaml file to capability
-      // 'classy_baseline_params'
-      // Note: this should only contain a value for 'k_pivot' if the model 'LCDM'
-      //    is in use, which is not allowed in this function as the full pk
-      //    is provided by an external model scanned in combination with 'LCDM_no_primordial'
-      pybind11::dict classy_base_dict = *Dep::classy_baseline_params;
 
-      // Add classy_base_dict entries to the result dictionary of the type Classy_input
-      // The string common_keys will be empty if the two dictionaries 'result'
-      // and 'classy_base_dict' have no keys in common. If so 'common_keys'
-      // will be a concatenation of the duplicated entries.
-      std::string common_keys = result.add_dict(classy_base_dict);
+      // Set helium abundance
+      result["YHe"] = *Dep::helium_abundance;
 
-      // No check if something went wrong and some parameters were defined twice
-      if(common_keys != "")
-      {
-        CosmoBit_error().raise(LOCAL_INFO, "The key(s) '" + common_keys + "' already "
-                "exists in the CLASSY dictionary. You are probably trying to override a CLASS setting. Check that none "
-                "of the parameters you pass through your yaml file through RunOptions for the capability 'classy_baseline_params' "
-                "is in contradiction with any settings made via the dependency resolution by CosmoBit in the function '"+__func__+"'.");
-      }
     }
 
     // Function to set the generic inputs used for MultiModeCode (MMC).
@@ -1710,10 +1688,10 @@ namespace Gambit
     /// an instance of the classy class Class() (Yep, I know...)
     /// which can be handed over to MontePython, or just used to compute
     /// some observables.
-    void set_classy_input(Classy_input& result)
+    void set_classy_input_no_MPLike(pybind11::dict& result)
     {
-      using namespace Pipes::set_classy_input;
-      result = *Dep::classy_primordial_parameters;
+      using namespace Pipes::set_classy_input_no_MPLike;
+
       // Make sure nobody is trying to use MP downstream (prevents segfaults).
       if (Downstream::neededFor("MP_LogLikes"))
       {
@@ -1725,15 +1703,18 @@ namespace Gambit
            << "    function: set_classy_input_with_MPLike" << endl;
         CosmoBit_error().raise(LOCAL_INFO, ss.str());
       }
+
+      // if that check passes, nothing to do here.
+      pybind11::dict r;
+      result = r;
     }
 
     /// Initialises the container within CosmoBit from classy, but designed specifically
     /// to be used when MontePython is in use. This will ensure additional outputs are
     /// computed by classy CLASS to be passed to MontePython.
-    void set_classy_input_with_MPLike(Classy_input& result)
+    void set_classy_input_with_MPLike(pybind11::dict& result)
     {
       using namespace Pipes::set_classy_input_with_MPLike;
-      result = *Dep::classy_primordial_parameters;
 
       // Only get info from MP if something actually needs it downstream
       if (Downstream::neededFor("MP_LogLikes"))
@@ -1743,12 +1724,10 @@ namespace Gambit
         static pybind11::dict MP_cosmo_arguments = *Dep::cosmo_args_from_MPLike;
         logger() << LogTags::debug << "Extra cosmo_arguments needed from MP Likelihoods: ";
         logger() << pybind11::repr(MP_cosmo_arguments) << EOM;
-
-        // add the arguments from Mp_cosmo_arguments which are not yet in cosmo_input_dict to it
-        // also takes care of merging the "output" key values
-        result.merge_input_dicts(MP_cosmo_arguments); // TODO (JR) use merge_pybind_dict routine instead -> don't need to duplicate code
-        //merge_pybind_dicts(result, MP_cosmo_arguments);
+        // pass dictionary containing input arguments from MP likelihoods
+        result = MP_cosmo_arguments;
       }
+
     }
 
 

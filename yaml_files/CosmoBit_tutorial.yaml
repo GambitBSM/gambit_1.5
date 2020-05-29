@@ -285,8 +285,8 @@ ObsLikes:
 Rules:
 
   # Specify any CLASS input parameters (despite the model parameters) that usually go into the .ini file here
-  - capability: classy_baseline_params
-    function: set_classy_baseline_params
+  - capability: classy_input_params
+    function: set_classy_input_params
     #options:
       #classy_dict:
         #output: "tCl lCl pCl"   # classy + MP: even when no output specified all spectra etc. the likelihoods need
@@ -304,7 +304,7 @@ Rules:
 
   # You need to choose by hand whether to have the possibility to set up the class parameters with arguments from MontePython Likelihoods.
   # GAMBIT will tell you if you get this wrong; if it doesn't complain it is fine.
-  - capability: classy_final_input
+  - capability: classy_MPLike_input
     function: set_classy_input_with_MPLike
     module: CosmoBit
 

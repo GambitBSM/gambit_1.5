@@ -158,8 +158,8 @@ Rules:
   - capability: Planck_lensing_loglike
     function: function_Planck_lensing_2018_loglike
 
-  - capability: classy_final_input
-    function: set_classy_input
+  - capability: classy_MPLike_input
+    function: set_classy_input_no_MPLike
 
   - capability: AlterBBN_Input
     options:

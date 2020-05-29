@@ -263,7 +263,7 @@ BE_INI_FUNCTION
   static int max_errors = 100;
 
   // get input for CLASS run set by CosmoBit
-  Classy_input input_container = *Dep::classy_final_input;
+  Classy_input input_container = *Dep::classy_input_params;
   pybind11::dict cosmo_input_dict = input_container.get_input_dict();
 
   // Check whether the energy injection tables have changed.
