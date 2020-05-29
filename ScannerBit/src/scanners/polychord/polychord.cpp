@@ -97,8 +97,12 @@ scanner_plugin(polychord, version(1, 17, 1))
       // Offset the minimum interesting likelihood by the offset
       gl0 = gl0 + offset;
 
+      // Retrieve whether the scanned parameters should be added to the native output and determine nderived
+      int nderived = 2;
+      if (get_inifile_value<bool>("print_parameters_in_native_output", false)) nderived += ma;
+
       // Initialise polychord settings
-      Settings settings(ma, 2);
+      Settings settings(ma, nderived);
 
       // Create the object that interfaces to the PolyChord LogLike callback function
       Gambit::PolyChord::LogLikeWrapper loglwrapper(LogLike, get_printer());
@@ -318,11 +322,18 @@ namespace Gambit {
 
          // Done! (lnew will be used by PolyChord to guide the search)
 
+         // Get the transformed parameters and add them as derived parameters
+         std::unordered_map<std::string,double> param_map;
+         boundLogLike->getPrior().transform(unitpars, param_map);
+         for (auto& param: param_map)
+           phi[index_map[param.first]] = param.second;
+
          // Get, set and ouptut the process rank and this point's ID
          int myrank  = boundLogLike->getRank(); // MPI rank of this process
          int pointID = boundLogLike->getPtID();   // point ID number
-         phi[0] = myrank;
-         phi[1] = pointID;
+         phi[nderived - 2] = myrank;
+         phi[nderived - 1] = pointID;
+
          return lnew;
       }
 
@@ -359,6 +370,40 @@ namespace Gambit {
                       <<"if e.g. the described behaviour has changed since this plugin was written."
                       << scan_end;
           }
+
+          // Write a file at first run of dumper to specify the index of a given dataset.
+          static bool first = true;
+          if (first)
+          {
+            int ndim = boundSettings.nDims;
+            int nderived = boundSettings.nDerived;
+
+            // Construct the inversed index map
+            // map[polychord_hypercube] = {name, gambit_hypercube}
+            std::vector<std::string> params = boundLogLike->getShownParameters();
+            std::map<int,std::pair<std::string,int>> inversed_map;
+            for (int i=0; i<ndim; ++i)
+              inversed_map[index_map[params[i]]] = {params[i],i};
+
+            std::ostringstream fname;
+            fname << boundSettings.base_dir << "/" <<boundSettings.file_root << ".indices";
+            std::ofstream ofs(fname.str());
+
+            int index = 0;
+            ofs << index++ << "\t" << "Posterior" << std::endl;
+            ofs << index++ << "\t" << "-2*(" << boundLogLike->getPurpose() << ")" << std::endl;
+
+            for (int i=0; i<ndim; ++i)
+              ofs << index++ << "\t" << "unitCubeParameters[" << inversed_map[i].second <<"]" << std::endl;
+            for (int i=0; i<nderived -2; ++i)
+              ofs << index++ << "\t" << inversed_map[i].first << std::endl;
+
+            ofs << index++ << "\t" << "MPIrank" << std::endl;
+            ofs << index++ << "\t" << "PointID" << std::endl;
+
+            ofs.close();
+          }
+          first = false;
 
           // Get printers for each auxiliary stream
           printer* txt_stream(   boundPrinter.get_stream("txt")   );
