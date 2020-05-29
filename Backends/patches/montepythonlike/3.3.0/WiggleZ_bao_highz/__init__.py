@@ -1,6 +1,5 @@
 import sys 
-sys.path.append('../../')
-from MontePythonLike_3_1_0 import Likelihood
+from montepython.likelihood_class import Likelihood
 import numpy as np
 from math import log
 import os
