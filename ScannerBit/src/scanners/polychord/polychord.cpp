@@ -16,6 +16,10 @@
 ///          (wh260@cam.ac.uk)
 ///  \date May 2018
 ///
+///  \author Patrick Stoecker
+///          (stoecker@physik.rwth-aachen.de)
+///  \date May 2020
+///
 ///  *********************************************
 
 #include <vector>
@@ -27,6 +31,7 @@
 #include <sstream>
 #include <iomanip>  // For debugging only
 #include <algorithm>
+#include <numeric>
 
 #include "gambit/ScannerBit/scanner_plugin.hpp"
 #include "gambit/ScannerBit/scanners/polychord/polychord.hpp"
@@ -179,6 +184,14 @@ scanner_plugin(polychord, version(1, 17, 1))
       Gambit::Utils::ensure_path_exists(settings.base_dir);
       Gambit::Utils::ensure_path_exists(settings.base_dir + "/clusters/");
 
+      // Point the boundSettings to the settings in use
+      Gambit::PolyChord::global_loglike_object->boundSettings = settings;
+
+      // Set the speed threshold for the printer.
+      // Evaluations of speeds >= threshold are not printed
+      // Speeds start at 0
+      Gambit::PolyChord::global_loglike_object->printer_speed_threshold =
+        get_inifile_value<int>("printer_speed_threshold",settings.grade_dims.size());
 
       if(resume_mode==1 and outfile==0)
       {
@@ -273,12 +286,33 @@ namespace Gambit {
       ///
       double LogLikeWrapper::LogLike(double *Cube, int ndim, double* phi, int nderived)
       {
+         // Cached "below threshold" unitcube parameters of the previous point.
+         static int ndim_threshold =
+           std::accumulate( boundSettings.grade_dims.begin(),
+                            boundSettings.grade_dims.begin() + printer_speed_threshold,
+                            0);
+         static std::vector<double> prev_slow_unit(ndim_threshold);
+
          //convert C style array to C++ vector class, reordering parameters slow->fast
          std::vector<std::string> params = boundLogLike->getShownParameters();
          std::vector<double> unitpars(ndim);
          for (auto i=0; i<ndim; i++) 
              unitpars[i] = Cube[index_map[params[i]]];
          std::vector<double> derived(phi, phi + nderived);
+
+         // Disable the printer when the unitcube parameters with speeds below
+         // the threshold have not changed and enbale it otherwise
+         // (It might be probably already enabled again at that point)
+         if (   ndim_threshold < ndim
+             &&  std::equal(prev_slow_unit.begin(),prev_slow_unit.end(),Cube) )
+         {
+           boundLogLike->getPrinter().disable();
+         }
+         else
+         {
+           boundLogLike->getPrinter().enable();
+         }
+         prev_slow_unit = std::vector<double>(Cube,Cube+ndim_threshold);
 
          double lnew = boundLogLike(unitpars);
 

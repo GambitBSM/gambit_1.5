@@ -172,6 +172,7 @@ Scanner:
       like:  LogLike
       nlive: 150
       tol: 0.01
+      #printer_speed_threshold: 1  # This is buggy #
       fast_params:
         - cosmo_nuisance_Planck_TTTEEE::A_cib_217
         - cosmo_nuisance_Planck_TTTEEE::A_planck
