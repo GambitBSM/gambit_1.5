@@ -707,6 +707,15 @@ namespace Gambit
       result = gamma;
     }
 
+    // Helper function; formula is in [arXiv:0705.1729]
+    // This function varies wrt the paper to include the x^4 factor up front and a cutoff for small x
+    double L(double x)
+    {
+      if(x < 1E-2)
+        return -pow(x,4);
+      return pow(x,4)*log((1-(3*pow(x,2.0))-((1-pow(x,2.0))*sqrt(1 - (4*pow(x,2.0))))) / (pow(x,2.0)*(1+sqrt(1 - (4*pow(x,2.0))))) );
+    }
+
     // Decay widths of RHNs, for BBN (N -> nu l+ l-)
     // Formula is from [arXiv:0705.1729]
     void Gamma_RHN2null(std::vector<double>& result)
@@ -728,15 +737,6 @@ namespace Gambit
       M[1] = *Param["M_2"];
       M[2] = *Param["M_3"];
       Matrix3d Usq = Dep::SeesawI_Theta->cwiseAbs2(); // |\Theta_{ij}|^2
-
-      // Helper function; formula is in [arXiv:0705.1729]
-      // This function varies wrt the paper to include the x^4 factor up front and a cutoff for small x
-      auto L = [&](double x)
-      {
-        if(x < 1E-2)
-          return -pow(x,4);
-        return pow(x,4)*log((1-(3*pow(x,2.0))-((1-pow(x,2.0))*sqrt(1 - (4*pow(x,2.0))))) / (pow(x,2.0)*(1+sqrt(1 - (4*pow(x,2.0))))) );
-      };
 
       for (int i=0; i<3; i++)
       {
@@ -783,15 +783,6 @@ namespace Gambit
       M[2] = *Param["M_3"];
       Matrix3d Usq = Dep::SeesawI_Theta->cwiseAbs2(); // |\Theta_{ij}|^2
 
-      // Helper function; formula is in 0705.1729 and 1805.08567
-      // This function varies wrt the paper to include the x^4 factor up front and a cutoff for small x
-      auto L = [&](double x)
-      {
-        if(x < 1E-2)
-          return -pow(x,4);
-        return pow(x,4)*log((1 - 3*pow(x,2.0) - (1 - pow(x,2.0))*sqrt(1 - 4*pow(x,2.0))) / (pow(x,2.0)*(1 + sqrt(1 - 4*pow(x,2.0)))) );
-      };
-
       for (int i=0; i<3; i++)
       {
         gamma[i] = 0;
@@ -834,13 +825,6 @@ namespace Gambit
 
       // Helper function; formula is in 0705.1729 and 1805.08567
       // This function varies wrt the paper to include the x^4 factor up front and a cutoff for small x
-      auto L = [&](double x)
-      {
-        if(x < 1E-2)
-          return -pow(x,4);
-        return pow(x,4)*log((1 - 3*pow(x,2.0) - (1 - pow(x,2.0))*sqrt(1 - 4*pow(x,2.0))) / (pow(x,2.0)*(1 + sqrt(1 - 4*pow(x,2.0)))) );
-      };
-
       for (int i=0; i<3; i++)
       {
         gamma[i] = 0;
