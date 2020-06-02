@@ -23,6 +23,10 @@
 ///          (tomas.gonzalo@monash.edu)
 ///  \date 2019 May
 ///
+///  \author Patrick Stoecker
+///          (stoecker@physik.rwth-aachen.de)
+///  \date 2020 May
+///
 ///  *********************************************
 
 #ifndef __base_base_printer_hpp__
@@ -74,9 +78,10 @@ namespace Gambit
         int rank;
         std::set<std::string> print_list; // List of names of data that may be printed (i.e. with printme=true)
         bool resume; // Flag to query to determine if printer is appending points to existing output
+        bool printUnitcube; // Flag whether unitCubeParameters should be printed.
 
       public:
-        BaseBasePrinter(): rank(0), printer_enabled(true), printer_cooldown(-1) {}
+        BaseBasePrinter(): rank(0), printUnitcube(false), printer_enabled(true), printer_cooldown(-1) {}
         virtual ~BaseBasePrinter() {}
         /// Function to signal to the printer to write buffer contents to disk
         //virtual void flush() {}; // TODO: needed?
@@ -92,6 +97,10 @@ namespace Gambit
         /// Retrieve/Set MPI rank (setting is useful for e.g. the postprocessor to re-print points from other ranks)
         int  getRank() {return rank;}
         void setRank(int r) {rank = r;}
+
+        // Retrieve and set the state of the 'printUnitcube' flag
+        bool& get_printUnitcube() { return printUnitcube; }
+        void set_printUnitcube(const bool& rflag) { printUnitcube = rflag; }
 
         /// Retrieve/Set print list for this printer
         /// Required by e.g. postprocessor.
@@ -304,8 +313,18 @@ namespace Gambit
         template<typename T>
         bool retrieve(T& out, const std::string& label)
         {
+          bool valid;
           PPIDpair pt = get_current_point();
-          return retrieve(out, label, pt.rank, pt.pointID);
+          // Need to check if the current rank/pointID pair is valid before trying to retrieve from it
+          if(pt==nullpoint)
+          {
+             valid = false;
+          } 
+          else 
+          {
+             valid = retrieve(out, label, pt.rank, pt.pointID);
+          }
+          return valid;
         }
 
         /// Retrieve and directly print data to new output
@@ -329,8 +348,18 @@ namespace Gambit
         /// As above, but allows for different input/output labels
         bool retrieve_and_print(const std::string& in_label, const std::string& out_label, BaseBasePrinter& printer)
         {
+          bool valid;
           PPIDpair pt = get_current_point();
-          return retrieve_and_print(in_label, out_label, printer, pt.rank, pt.pointID);
+          // Need to check if the current rank/pointID pair is valid before trying to retrieve from it
+          if(pt==nullpoint)
+          {
+             valid = false;
+          } 
+          else 
+          {
+             valid = retrieve_and_print(in_label, out_label, printer, pt.rank, pt.pointID);
+          }
+          return valid;
         }
 
         /// Get type information for a data entry, i.e. defines the C++ type which this should be

@@ -27,7 +27,7 @@ set(nl "___totally_unlikely_to_occur_naturally___")
 set(true_nl \"\\n\")
 
 # Define the download command to use for contributed packages
-set(DL_CONTRIB "${PROJECT_SOURCE_DIR}/cmake/scripts/safe_dl.sh" "${CMAKE_BINARY_DIR}" "${CMAKE_COMMAND}")
+set(DL_CONTRIB "${PROJECT_SOURCE_DIR}/cmake/scripts/safe_dl.sh" "${CMAKE_BINARY_DIR}" "${CMAKE_COMMAND}" "${CMAKE_DOWNLOAD_FLAGS}")
 
 # Define a series of functions and macros to be used for cleaning ditched components and adding nuke and clean targets for contributed codes
 macro(get_paths package build_path clean_stamps nuke_stamps)
@@ -47,8 +47,8 @@ endfunction()
 function(add_contrib_clean_and_nuke package dir clean)
   get_paths(${package} build_path clean-stamps nuke-stamps)
   add_custom_target(clean-${package} COMMAND ${CMAKE_COMMAND} -E remove -f ${clean-stamps}
-                                     COMMAND [ -e ${dir} ] && cd ${dir} && ([ -e makefile ] || [ -e Makefile ] && ${CMAKE_MAKE_PROGRAM} ${clean}) || true
-                                     COMMAND [ -e ${build_path} ] && cd ${build_path} && ([ -e makefile ] || [ -e Makefile ] && ${CMAKE_MAKE_PROGRAM} ${clean}) || true)
+                                     COMMAND [ -e ${dir} ] && cd ${dir} && ([ -e makefile ] || [ -e Makefile ] && ${MAKE_SERIAL} ${clean}) || true
+                                     COMMAND [ -e ${build_path} ] && cd ${build_path} && ([ -e makefile ] || [ -e Makefile ] && ${MAKE_SERIAL} ${clean}) || true)
   add_dependencies(distclean clean-${package})
   add_custom_target(nuke-${package} COMMAND ${CMAKE_COMMAND} -E remove -f ${nuke-stamps}
                                     COMMAND ${CMAKE_COMMAND} -E remove_directory "${build_path}"
@@ -142,8 +142,8 @@ if(NOT EXCLUDE_RESTFRAMES)
     SOURCE_DIR ${dir}
     BUILD_IN_SOURCE 1
     CONFIGURE_COMMAND ./configure -prefix=${dir} CC=${CMAKE_C_COMPILER} CFLAGS=${BACKEND_C_FLAGS} CPP=${RESTFRAMES_CPP} CXX=${CMAKE_CXX_COMPILER} CXXFLAGS=${BACKEND_CXX_FLAGS} CXXCPP=${RESTFRAMES_CXXCPP} LDFLAGS=${RESTFRAMES_CONFIG_LDFLAGS} LIBS=${RESTFRAMES_CONFIG_LIBS}
-    BUILD_COMMAND ${CMAKE_MAKE_PROGRAM}
-    INSTALL_COMMAND ${CMAKE_MAKE_PROGRAM} install
+    BUILD_COMMAND ${MAKE_PARALLEL}
+    INSTALL_COMMAND ${MAKE_PARALLEL} install
     )
   # Force the preload library to come before RestFrames
   add_dependencies(${name} gambit_preload)
@@ -169,6 +169,11 @@ if(WITH_HEPMC)
   message("-- HepMC-dependent functions in ColliderBit will be activated.")
   message("   HepMC v${ver} will be downloaded and installed when building GAMBIT.")
   message("   ColliderBit Solo (CBS) will be activated.")
+  if(EXCLUDE_ROOT)
+    set(HEPMC3_ROOTIO FALSE)
+  else()
+    set(HEPMC3_ROOTIO TRUE)
+  endif()
   set(EXCLUDE_HEPMC FALSE)
 else()
   message("   HepMC-dependent functions in ColliderBit will be deactivated.")
@@ -189,8 +194,8 @@ if(NOT EXCLUDE_HEPMC)
     DOWNLOAD_COMMAND ${DL_CONTRIB} ${dl} ${md5} ${dir} ${name} ${ver}
     SOURCE_DIR ${dir}
     CMAKE_COMMAND ${CMAKE_COMMAND} ..
-    CMAKE_ARGS -DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE} -DCMAKE_CXX_COMPILER=${CMAKE_CXX_COMPILER} -DCMAKE_CXX_FLAGS=${BACKEND_CXX_FLAGS}
-    BUILD_COMMAND ${CMAKE_MAKE_PROGRAM}
+    CMAKE_ARGS -DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE} -DCMAKE_CXX_COMPILER=${CMAKE_CXX_COMPILER} -DCMAKE_CXX_FLAGS=${BACKEND_CXX_FLAGS} -DHEPMC3_ENABLE_ROOTIO=${HEPMC3_ROOTIO}
+    BUILD_COMMAND ${MAKE_PARALLEL}
     INSTALL_COMMAND ""
     )
   # Add clean-hepmc and nuke-hepmc
@@ -207,10 +212,13 @@ add_gambit_library(fjcore OPTION OBJECT
                           HEADERS ${PROJECT_SOURCE_DIR}/contrib/fjcore-3.2.0/fjcore.hh)
 set(GAMBIT_BASIC_COMMON_OBJECTS "${GAMBIT_BASIC_COMMON_OBJECTS}" $<TARGET_OBJECTS:fjcore>)
 
-#contrib/MassSpectra; include only if SpecBit is in use
+#contrib/MassSpectra; include only if SpecBit is in use and if
+#BUILD_FS_MODELS is set to something other than "" or "None" or "none"
 set (FS_DIR "${PROJECT_SOURCE_DIR}/contrib/MassSpectra/flexiblesusy")
+# Set the models (spectrum generators) existing in flexiblesusy (could autogen this, but that would build some things we don't need).
+# Doing this out here so that we can use them in messages even when FS is excluded
+set(ALL_FS_MODELS MDM CMSSM MSSM MSSMatMGUT MSSM_mAmu MSSMatMSUSY_mAmu MSSMatMGUT_mAmu MSSMEFTHiggs MSSMEFTHiggs_mAmu MSSMatMSUSYEFTHiggs_mAmu MSSMatMGUTEFTHiggs MSSMatMGUTEFTHiggs_mAmu ScalarSingletDM_Z3 ScalarSingletDM_Z2)
 if(";${GAMBIT_BITS};" MATCHES ";SpecBit;")
-
   set (EXCLUDE_FLEXIBLESUSY FALSE)
 
   # Always use -O2 for flexiblesusy to ensure fast spectrum generation.
@@ -266,13 +274,17 @@ if(";${GAMBIT_BITS};" MATCHES ";SpecBit;")
       #--enable-verbose flag causes verbose output at runtime as well. Maybe set it dynamically somehow in future.
      )
 
-  # Set the models (spectrum generators) existing in flexiblesusy (could autogen this, but that would build some things we don't need)
-  set(ALL_FS_MODELS MDM CMSSM MSSM MSSMatMGUT MSSM_mAmu MSSMatMSUSY_mAmu MSSMatMGUT_mAmu MSSMEFTHiggs MSSMEFTHiggs_mAmu MSSMatMSUSYEFTHiggs_mAmu MSSMatMGUTEFTHiggs MSSMatMGUTEFTHiggs_mAmu ScalarSingletDM_Z3 ScalarSingletDM_Z2)
-  # Check if there has been command line instructions to only build with certain models. Default is to build everything!
-  if(BUILD_FS_MODELS AND NOT ";${BUILD_FS_MODELS};" MATCHES ";ALL_FS_MODELS;")
-    # Use whatever the user has supplied!
-  else()
+  # Check for command line instructions to build ALL models
+  if(   ";${BUILD_FS_MODELS};" MATCHES ";ALL;"
+     OR ";${BUILD_FS_MODELS};" MATCHES ";All;"
+     OR ";${BUILD_FS_MODELS};" MATCHES ";all;"
+    )
     set(BUILD_FS_MODELS ${ALL_FS_MODELS})
+  elseif(";${BUILD_FS_MODELS};" MATCHES ";None;"
+      OR ";${BUILD_FS_MODELS};" MATCHES ";none;"
+      OR ";${BUILD_FS_MODELS};" MATCHES ";;"
+      )
+    set(BUILD_FS_MODELS "")
   endif()
 
   set(EXCLUDED_FS_MODELS "")
@@ -313,8 +325,8 @@ if(";${GAMBIT_BITS};" MATCHES ";SpecBit;")
   # Add clean info
   set(rmstring "${CMAKE_BINARY_DIR}/flexiblesusy-prefix/src/flexiblesusy-stamp/flexiblesusy")
   add_custom_target(clean-flexiblesusy COMMAND ${CMAKE_COMMAND} -E remove -f ${rmstring}-configure ${rmstring}-build ${rmstring}-install ${rmstring}-done
-                                       COMMAND [ -e ${FS_DIR} ] && cd ${FS_DIR} && ([ -e makefile ] || [ -e Makefile ] && ${CMAKE_MAKE_PROGRAM} clean) || true)
-  add_custom_target(distclean-flexiblesusy COMMAND cd ${FS_DIR} && ([ -e makefile ] || [ -e Makefile ] && ${CMAKE_MAKE_PROGRAM} distclean) || true)
+                                       COMMAND [ -e ${FS_DIR} ] && cd ${FS_DIR} && ([ -e makefile ] || [ -e Makefile ] && ${MAKE_SERIAL} clean) || true)
+  add_custom_target(distclean-flexiblesusy COMMAND cd ${FS_DIR} && ([ -e makefile ] || [ -e Makefile ] && ${MAKE_SERIAL} distclean) || true)
   add_custom_target(nuke-flexiblesusy)
   add_dependencies(distclean-flexiblesusy clean-flexiblesusy)
   add_dependencies(nuke-flexiblesusy distclean-flexiblesusy)
@@ -346,9 +358,17 @@ if(";${GAMBIT_BITS};" MATCHES ";SpecBit;")
   endforeach()
 
   # Configure now, serially, to prevent parallel build issues.
-  message("${Yellow}-- Configuring FlexibleSUSY for models: ${BoldYellow}${BUILD_FS_MODELS_COMMAS}${ColourReset}")
-  if (NOT "${EXCLUDED_FS_MODELS_COMMAS}" STREQUAL "")
-    message("${Red}   Switching OFF FlexibleSUSY support for models: ${BoldRed}${EXCLUDED_FS_MODELS_COMMAS}${ColourReset}")
+  if(NOT "${BUILD_FS_MODELS}" STREQUAL "")
+      message("${Yellow}-- Configuring FlexibleSUSY for models: ${BoldYellow}${BUILD_FS_MODELS_COMMAS}${ColourReset}")
+      if (NOT "${EXCLUDED_FS_MODELS_COMMAS}" STREQUAL "")
+          message("${BoldCyan}   Switching OFF FlexibleSUSY support for models: ${EXCLUDED_FS_MODELS_COMMAS}${ColourReset}")
+      endif()
+  else()
+      message("${BoldCyan} X Switching OFF FlexibleSUSY support for ALL models.${ColourReset}")
+      message("   If you want to activate support for any model(s) please list them in the cmake flag -DBUILD_FS_MODELS=<list> as a semi-colon separated list.")
+      message("   Buildable models are: ${ALL_FS_MODELS}")
+      message("   To build ALL models use ALL, All, or all.")
+      message("   To build NO models use None or none.")
   endif()
   #message("${Yellow}-- Using configure command \n${config_command}${output}${ColourReset}" )
   execute_process(COMMAND ${config_command}
@@ -362,7 +382,6 @@ if(";${GAMBIT_BITS};" MATCHES ";SpecBit;")
   endif()
   execute_process(COMMAND ${CMAKE_COMMAND} -E touch ${rmstring}-configure)
   message("${Yellow}-- Configuring FlexibleSUSY - done.${ColourReset}")
-
 
 else()
 
