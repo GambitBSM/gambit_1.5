@@ -20,6 +20,7 @@
 
 #include "gambit/Utils/integration.hpp"
 #include <gsl/gsl_integration.h>
+#include <functional>
 
 namespace Gambit
 {

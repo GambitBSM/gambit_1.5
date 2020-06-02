@@ -55,7 +55,7 @@ namespace Gambit
     // Lambda function 
     double lambda(double a, double b, double c)
     {
-      return pow(a,2) + pow(b,2) + pow(c,2) - 2*a*b - 2*b*c - 2*c*a;
+      return a*a + b*b + c*c - 2*a*b - 2*b*c - 2*c*a;
     }
 
     // Decay with of RHNs to charged lepton and pseudoscalar meson
@@ -65,7 +65,7 @@ namespace Gambit
       double xl = pow(ml/mN,2);
       double xP = pow(mP/mN,2);
 
-      return ( pow(GF,2) * pow(fP,2) * pow(VCKM,2) * Usq * pow(mN,3) ) / (16*pi) * ( pow(1 - xl,2) - xP*(1 + xl) )*sqrt(lambda(1,xP,xl));
+      return ( GF*GF * fP*f * VCKM*VCKM * Usq * mN*mN*mN ) / (16*pi) * ( pow(1 - xl,2) - xP*(1 + xl) )*sqrt(lambda(1,xP,xl));
     }
 
     // Decay widths of RHNs, for BBN (N -> pi+ l-)
@@ -74,10 +74,10 @@ namespace Gambit
       using namespace Pipes::Gamma_RHN2piplusl;
       SMInputs sminputs = *Dep::SMINPUTS;
 
-      static double m_pi_plus = meson_masses.pi_plus;
-      static double f_pi_plus = meson_decay_constants.pi_plus;
+      static const double m_pi_plus = meson_masses.pi_plus;
+      static const double f_pi_plus = meson_decay_constants.pi_plus;
       // Take from the model parameters (Wolfenstein) PDG value: 0.97434
-      static double Vud = 1.0 - 0.5*pow(*Param["CKM_lambda"],2);
+      double Vud = 1.0 - 0.5*pow(*Param["CKM_lambda"],2);
       std::vector<double> m_lep(3), gamma(3), M(3);
       // Since we scan the SLHA2 model, we take masses from it
       m_lep[0] = *Param["mE"];
@@ -108,10 +108,10 @@ namespace Gambit
       using namespace Pipes::Gamma_RHN2Kplusl;
       SMInputs sminputs = *Dep::SMINPUTS;
 
-      static double m_K_plus = meson_masses.kaon_plus;
-      static double f_K_plus = meson_decay_constants.K_plus;
+      static const double m_K_plus = meson_masses.kaon_plus;
+      static const double f_K_plus = meson_decay_constants.K_plus;
       // Take from the model parameters (Wolfenstein) PDG value: 0.22506
-      static double Vus = *Param["CKM_lambda"];
+      double Vus = *Param["CKM_lambda"];
       std::vector<double> m_lep(3), gamma(3), M(3);
        // Since we scan the SLHA2 model, we take masses from it
       m_lep[0] = *Param["mE"];
@@ -142,10 +142,10 @@ namespace Gambit
       using namespace Pipes::Gamma_RHN2Dplusl;
       SMInputs sminputs = *Dep::SMINPUTS;
 
-      static double m_D_plus = meson_masses.D_plus;
-      static double f_D_plus = meson_decay_constants.D_plus;
+      static const double m_D_plus = meson_masses.D_plus;
+      static const double f_D_plus = meson_decay_constants.D_plus;
       // Take from the model parameters (Wolfenstein) PDG value: 0.22492
-      static double Vcd = -*Param["CKM_lambda"];
+      double Vcd = -*Param["CKM_lambda"];
       std::vector<double> m_lep(3), gamma(3), M(3);
       // Since we scan the SLHA2 model, we take masses from it
       m_lep[0] = *Param["mE"];
@@ -176,10 +176,10 @@ namespace Gambit
       using namespace Pipes::Gamma_RHN2Dsl;
       SMInputs sminputs = *Dep::SMINPUTS;
 
-      static double m_D_s = meson_masses.D_s;
-      static double f_D_s = meson_decay_constants.D_s;
+      static const double m_D_s = meson_masses.D_s;
+      static const double f_D_s = meson_decay_constants.D_s;
       // Take from the model parameters (Wolfenstein) PDG value: 0.97351
-      static double Vcs = 1 - 0.5*pow(*Param["CKM_lambda"],2);
+      double Vcs = 1 - 0.5*pow(*Param["CKM_lambda"],2);
       std::vector<double> m_lep(3), gamma(3), M(3);
       // Since we scan the SLHA2 model, we take masses from it
       m_lep[0] = *Param["mE"];
@@ -210,10 +210,10 @@ namespace Gambit
       using namespace Pipes::Gamma_RHN2Bplusl;
       SMInputs sminputs = *Dep::SMINPUTS;
 
-      static double m_B_plus = meson_masses.B_plus;
-      static double f_B_plus = meson_decay_constants.B_plus;
+      static const double m_B_plus = meson_masses.B_plus;
+      static const double f_B_plus = meson_decay_constants.B_plus;
       // Take from the model parameters (Wolfenstein) PDG value: 0.00357 (absolute value)
-      static double Vub = *Param["CKM_A"]*pow(*Param["CKM_lambda"],3)*sqrt(pow(*Param["CKM_rhobar"],2) + pow(*Param["CKM_etabar"],2));
+      double Vub = *Param["CKM_A"]*pow(*Param["CKM_lambda"],3)*sqrt(pow(*Param["CKM_rhobar"],2) + pow(*Param["CKM_etabar"],2));
       std::vector<double> m_lep(3), gamma(3), M(3);
       // Since we scan the SLHA2 model, we take masses from it
       m_lep[0] = *Param["mE"];
@@ -244,10 +244,10 @@ namespace Gambit
       using namespace Pipes::Gamma_RHN2Bcl;
       SMInputs sminputs = *Dep::SMINPUTS;
 
-      static double m_B_c = meson_masses.B_c;
-      static double f_B_c = meson_decay_constants.B_c;
+      static const double m_B_c = meson_masses.B_c;
+      static const double f_B_c = meson_decay_constants.B_c;
       // Take from the model parameters (Wolfenstein) PDG value: 0.0411
-      static double Vcb = *Param["CKM_A"]*pow(*Param["CKM_lambda"],2);
+      double Vcb = *Param["CKM_A"]*pow(*Param["CKM_lambda"],2);
       std::vector<double> m_lep(3), gamma(3), M(3);
       // Since we scan the SLHA2 model, we take masses from it
       m_lep[0] = *Param["mE"];
@@ -287,8 +287,8 @@ namespace Gambit
       using namespace Pipes::Gamma_RHN2pi0nu;
       SMInputs sminputs = *Dep::SMINPUTS;
 
-      static double m_pi_0 = meson_masses.pi0;
-      static double f_pi_0 = meson_decay_constants.pi0;
+      static const double m_pi_0 = meson_masses.pi0;
+      static const double f_pi_0 = meson_decay_constants.pi0;
       std::vector<double> gamma(3), M(3);
       M[0] = *Param["M_1"];
       M[1] = *Param["M_2"];
@@ -315,8 +315,8 @@ namespace Gambit
       using namespace Pipes::Gamma_RHN2etanu;
       SMInputs sminputs = *Dep::SMINPUTS;
 
-      static double m_eta = meson_masses.eta;
-      static double f_eta = meson_decay_constants.eta;
+      static const double m_eta = meson_masses.eta;
+      static const double f_eta = meson_decay_constants.eta;
       std::vector<double> gamma(3), M(3);
       M[0] = *Param["M_1"];
       M[1] = *Param["M_2"];
@@ -343,8 +343,8 @@ namespace Gambit
       using namespace Pipes::Gamma_RHN2etaprimenu;
       SMInputs sminputs = *Dep::SMINPUTS;
 
-      static double m_eta_prime = meson_masses.eta_prime;
-      static double f_eta_prime = meson_decay_constants.eta_prime;
+      static const double m_eta_prime = meson_masses.eta_prime;
+      static const double f_eta_prime = meson_decay_constants.eta_prime;
       std::vector<double> gamma(3), M(3);
       M[0] = *Param["M_1"];
       M[1] = *Param["M_2"];
@@ -371,8 +371,8 @@ namespace Gambit
       using namespace Pipes::Gamma_RHN2etacnu;
       SMInputs sminputs = *Dep::SMINPUTS;
 
-      static double m_eta_c = meson_masses.eta_c;
-      static double f_eta_c = meson_decay_constants.eta_c;
+      static const double m_eta_c = meson_masses.eta_c;
+      static const double f_eta_c = meson_decay_constants.eta_c;
       std::vector<double> gamma(3), M(3);
       M[0] = *Param["M_1"];
       M[1] = *Param["M_2"];
@@ -409,10 +409,10 @@ namespace Gambit
       using namespace Pipes::Gamma_RHN2rhoplusl;
       SMInputs sminputs = *Dep::SMINPUTS;
  
-      static double m_rho_plus = meson_masses.rho_plus;
-      static double f_rho_plus = meson_decay_constants.rho_plus;
+      static const double m_rho_plus = meson_masses.rho_plus;
+      static const double f_rho_plus = meson_decay_constants.rho_plus;
       // Take from the model parameters (Wolfenstein) PDG value: 0.97434
-      static double Vud = 1.0 - 0.5*pow(*Param["CKM_lambda"],2);
+      double Vud = 1.0 - 0.5*pow(*Param["CKM_lambda"],2);
       std::vector<double> m_lep(3), gamma(3), M(3);
       // Since we scan the SLHA2 model, we take masses from it
       m_lep[0] = *Param["mE"];
@@ -443,10 +443,10 @@ namespace Gambit
       using namespace Pipes::Gamma_RHN2Dstarplusl;
       SMInputs sminputs = *Dep::SMINPUTS;
  
-      static double m_Dstar_plus = meson_masses.Dstar_plus;
-      static double f_Dstar_plus = meson_decay_constants.Dstar_plus;
+      static const double m_Dstar_plus = meson_masses.Dstar_plus;
+      static const double f_Dstar_plus = meson_decay_constants.Dstar_plus;
       // Take from the model parameters (Wolfenstein) PDG value: 0.22492
-      static double Vcd = -*Param["CKM_lambda"];
+      double Vcd = -*Param["CKM_lambda"];
       std::vector<double> m_lep(3), gamma(3), M(3);
       // Since we scan the SLHA2 model, we take masses from it
       m_lep[0] = *Param["mE"];
@@ -477,10 +477,10 @@ namespace Gambit
       using namespace Pipes::Gamma_RHN2Dstarsl;
       SMInputs sminputs = *Dep::SMINPUTS;
  
-      static double m_Dstar_s = meson_masses.Dstar_s;
-      static double f_Dstar_s = meson_decay_constants.Dstar_s;
+      static const double m_Dstar_s = meson_masses.Dstar_s;
+      static const double f_Dstar_s = meson_decay_constants.Dstar_s;
       // Take from the model parameters (Wolfenstein) PDG value: 0.97351
-      static double Vcs = 1 - 0.5*pow(*Param["CKM_lambda"],2);
+      double Vcs = 1 - 0.5*pow(*Param["CKM_lambda"],2);
       std::vector<double> m_lep(3), gamma(3), M(3);
       // Since we scan the SLHA2 model, we take masses from it
       m_lep[0] = *Param["mE"];
@@ -521,10 +521,10 @@ namespace Gambit
       SMInputs sminputs = *Dep::SMINPUTS;
       double sinW2_eff = Dep::prec_sinW2_eff->central;
 
-      static double m_rho0 = meson_masses.rho0;
-      static double f_rho0 = meson_decay_constants.rho0;
+      static const double m_rho0 = meson_masses.rho0;
+      static const double f_rho0 = meson_decay_constants.rho0;
       // kappa value from 1805.08567, it differs from that in 1905.00284
-      static double kappa_rho0 = 1 - 2*sinW2_eff;
+      double kappa_rho0 = 1 - 2*sinW2_eff;
       std::vector<double> gamma(3), M(3);
       M[0] = *Param["M_1"];
       M[1] = *Param["M_2"];
@@ -552,10 +552,10 @@ namespace Gambit
       SMInputs sminputs = *Dep::SMINPUTS;
       double sinW2_eff = Dep::prec_sinW2_eff->central;
 
-      static double m_omega = meson_masses.omega;
-      static double f_omega = meson_decay_constants.omega;
+      static const double m_omega = meson_masses.omega;
+      static const double f_omega = meson_decay_constants.omega;
       // kappa value from 1805.08567 and 1905.00284
-      static double kappa_omega = (4./3.)*sinW2_eff;
+      double kappa_omega = (4./3.)*sinW2_eff;
       std::vector<double> gamma(3), M(3);
       M[0] = *Param["M_1"];
       M[1] = *Param["M_2"];
@@ -583,10 +583,10 @@ namespace Gambit
       SMInputs sminputs = *Dep::SMINPUTS;
       double sinW2_eff = Dep::prec_sinW2_eff->central;
 
-      static double m_phi = meson_masses.phi;
-      static double f_phi = meson_decay_constants.phi;
+      static const double m_phi = meson_masses.phi;
+      static const double f_phi = meson_decay_constants.phi;
       // kappa value from 1805.08567 and 1905.00284
-      static double kappa_phi = (4./3.)*sinW2_eff - 1;
+      double kappa_phi = (4./3.)*sinW2_eff - 1;
       std::vector<double> gamma(3), M(3);
       M[0] = *Param["M_1"];
       M[1] = *Param["M_2"];
@@ -614,10 +614,10 @@ namespace Gambit
       SMInputs sminputs = *Dep::SMINPUTS;
       double sinW2_eff = Dep::prec_sinW2_eff->central;
 
-      static double m_Jpsi = meson_masses.Jpsi;
-      static double f_Jpsi = meson_decay_constants.Jpsi;
+      static const double m_Jpsi = meson_masses.Jpsi;
+      static const double f_Jpsi = meson_decay_constants.Jpsi;
       // kappa value from 1805.08567
-      static double kappa_Jpsi = 1 - (8./3.)*sinW2_eff;
+      double kappa_Jpsi = 1 - (8./3.)*sinW2_eff;
       std::vector<double> gamma(3), M(3);
       M[0] = *Param["M_1"];
       M[1] = *Param["M_2"];
@@ -715,10 +715,10 @@ namespace Gambit
       SMInputs sminputs = *Dep::SMINPUTS;
       double sinW2_eff = Dep::prec_sinW2_eff->central;
 
-      static double C1 = 0.25*(1 - (4*sinW2_eff) + (8*pow(sinW2_eff,2)));
-      static double C2 = 0.5*sinW2_eff*((2*sinW2_eff) - 1);
-      static double C3 = 0.25*(1 + (4*sinW2_eff) + (8*pow(sinW2_eff,2)));
-      static double C4 = 0.5*sinW2_eff*((2*sinW2_eff) + 1);
+      double C1 = 0.25*(1 - (4*sinW2_eff) + (8*pow(sinW2_eff,2)));
+      double C2 = 0.5*sinW2_eff*((2*sinW2_eff) - 1);
+      double C3 = 0.25*(1 + (4*sinW2_eff) + (8*pow(sinW2_eff,2)));
+      double C4 = 0.5*sinW2_eff*((2*sinW2_eff) + 1);
       std::vector<double> m_lep(3), gamma(3), M(3);
        // Since we scan the SLHA2 model, we take masses from it
       m_lep[0] = *Param["mE"];
@@ -771,9 +771,8 @@ namespace Gambit
       SMInputs sminputs = *Dep::SMINPUTS;
       double sinW2_eff = Dep::prec_sinW2_eff->central;
 
-      //static double C1 = sinW2_eff*(3 - (4*sinW2_eff));
-      static double C1 = 0.25*(1-(8./3)*sinW2_eff +(32./9)*pow(sinW2_eff,2));
-      static double C2 = (sinW2_eff/3.)*((4./3)*sinW2_eff -1);
+      double C1 = 0.25*(1-(8./3)*sinW2_eff +(32./9)*pow(sinW2_eff,2));
+      double C2 = (sinW2_eff/3.)*((4./3)*sinW2_eff -1);
       std::vector<double> m_uquark(3), gamma(3), M(3);
       // Since we scan the SLHA2 model, we take masses from it
       m_uquark[0] = *Param["mU"];
@@ -821,9 +820,8 @@ namespace Gambit
       SMInputs sminputs = *Dep::SMINPUTS;
       double sinW2_eff = Dep::prec_sinW2_eff->central;
 
-      //static double C2 = sinW2_eff*(3 - (2*sinW2_eff));
-      static double C1 = 0.25*(1-(4./3)*sinW2_eff+(8./9)*pow(sinW2_eff,2));
-      static double C2 = (sinW2_eff/6)*((2./3)*sinW2_eff - 1);
+      double C1 = 0.25*(1-(4./3)*sinW2_eff+(8./9)*pow(sinW2_eff,2));
+      double C2 = (sinW2_eff/6)*((2./3)*sinW2_eff - 1);
       std::vector<double> m_dquark(3), gamma(3), M(3);
       // Since we scan the SLHA2 model, we take masses from it
       m_dquark[0] = *Param["mD"];
@@ -875,16 +873,16 @@ namespace Gambit
       // Values from PDG: V =  { {0.97434,0.22506,0.00357},
       //                         {0.22492,0.97351,0.0411},
       //                         {0.00875,0.0403,0.99915} };
-      static double Vus = *Param["CKM_lambda"];
-      static double Vud = 1.0 - 0.5*pow(Vus,2);
-      static double Vub = *Param["CKM_A"]*pow(Vus,3)*sqrt(pow(*Param["CKM_rhobar"],2) + pow(*Param["CKM_etabar"],2));
-      static double Vcd = Vus;
-      static double Vcs = Vud;
-      static double Vcb = *Param["CKM_A"]*pow(Vus,2);
-      static double Vtd = Vcb*Vus*sqrt(pow(1.0 - *Param["CKM_rhobar"],2) + pow(*Param["CKM_etabar"],2));
-      static double Vts = Vcb;
-      static double Vtb = 1;
-      static std::vector<std::vector<double> > V = { {Vud, Vus, Vub}, {Vcd, Vcs, Vcb}, {Vtd, Vts, Vtb} };
+      double Vus = *Param["CKM_lambda"];
+      double Vud = 1.0 - 0.5*pow(Vus,2);
+      double Vub = *Param["CKM_A"]*pow(Vus,3)*sqrt(pow(*Param["CKM_rhobar"],2) + pow(*Param["CKM_etabar"],2));
+      double Vcd = Vus;
+      double Vcs = Vud;
+      double Vcb = *Param["CKM_A"]*pow(Vus,2);
+      double Vtd = Vcb*Vus*sqrt(pow(1.0 - *Param["CKM_rhobar"],2) + pow(*Param["CKM_etabar"],2));
+      double Vts = Vcb;
+      double Vtb = 1;
+      std::vector<std::vector<double> > V = { {Vud, Vus, Vub}, {Vcd, Vcs, Vcb}, {Vtd, Vts, Vtb} };
 
       std::vector<double> m_lep(3), m_uquark(3), m_dquark(3), gamma(3), M(3), decay_prod(3), two_heaviest(2);
       // Since we scan the SLHA2 model, we take masses from it
@@ -983,7 +981,7 @@ namespace Gambit
       M[2] = *Param["M_3"];
       
       // Hadronization scale 
-      static double LQCD = 1; // (GeV)
+      static const double LQCD = 1; // (GeV)
 
       // factor of 2 in front accounts for Majorana nature
       for (int i=0; i<3; i++)
@@ -1028,10 +1026,10 @@ namespace Gambit
     {
       using namespace Pipes::RHN_R_pi;
       SMInputs sminputs = *Dep::SMINPUTS;
-      static double m_pi = meson_masses.pi_plus;
-      static double R_pi_SM = 1.2354e-4;
-      static double r_e_pi = pow(sminputs.mE,2)/pow(m_pi,2);
-      static double r_mu_pi = pow(sminputs.mMu,2)/pow(m_pi,2);
+      static const double m_pi = meson_masses.pi_plus;
+      static const double R_pi_SM = 1.2354e-4;
+      double r_e_pi = pow(sminputs.mE,2)/pow(m_pi,2);
+      double r_mu_pi = pow(sminputs.mMu,2)/pow(m_pi,2);
       double e_f_pi = 0.0, mu_f_pi = 0.0, d_r_pi = 1.0;
       std::vector<double> M(3), r_I_pi(3), G_e_pi = {0.0,0.0,0.0}, G_mu_pi = {0.0,0.0,0.0};
       Matrix3d Usq = Dep::SeesawI_Theta->cwiseAbs2();
@@ -1073,10 +1071,10 @@ namespace Gambit
     {
       using namespace Pipes::RHN_R_K;
       SMInputs sminputs = *Dep::SMINPUTS;
-      static double m_K = meson_masses.kaon_plus; 
-      static double R_K_SM = 2.477e-5;
-      static double r_e_K = pow(sminputs.mE,2)/pow(m_K,2);
-      static double r_mu_K = pow(sminputs.mMu,2)/pow(m_K,2);
+      static const double m_K = meson_masses.kaon_plus; 
+      static const double R_K_SM = 2.477e-5;
+      double r_e_K = pow(sminputs.mE,2)/pow(m_K,2);
+      double r_mu_K = pow(sminputs.mMu,2)/pow(m_K,2);
       double e_f_K = 0.0, mu_f_K = 0.0, d_r_K = 1.0;
       std::vector<double> M(3), r_I_K(3), G_e_K = {0.0,0.0,0.0}, G_mu_K = {0.0,0.0,0.0};
       Matrix3d Usq = Dep::SeesawI_Theta->cwiseAbs2();
@@ -1117,8 +1115,8 @@ namespace Gambit
     {
       using namespace Pipes::RHN_R_tau;
       SMInputs sminputs = *Dep::SMINPUTS;
-      static double m_tau = sminputs.mTau;  // GeV
-      static double R_tau_SM = 0.973;
+      static const double m_tau = sminputs.mTau;  // GeV
+      static const double R_tau_SM = 0.973;
       double e_f_tau = 0.0, mu_f_tau = 0.0, d_r_tau = 1.0;
       std::vector<double> M(3);
       Matrix3d Usq = Dep::SeesawI_Theta->cwiseAbs2();
@@ -1421,8 +1419,8 @@ namespace Gambit
 
       // Vud
       // Combined value from the PDG
-      static double V_ud_exp = 0.97417;
-      static double err_V_ud_exp = 0.00021;
+      static const double V_ud_exp = 0.97417;
+      static const double err_V_ud_exp = 0.00021;
  
       // Fill Vud_exp triplet
       Vud_exp.central = V_ud_exp;
@@ -1457,8 +1455,8 @@ namespace Gambit
       fill_ckm_exp(Theta, sminputs.GF, V_us_exp, V_ud_exp, f);
       
       // For the minimalization it's much better to transform the Vud experimental result to Vus the same as we do for theory and minimize only Vus
-      static double V_us_from_Vud=sqrt(1.-V_ud_exp.central*V_ud_exp.central);
-      static double err_V_us_from_Vud_exp= ( (V_ud_exp.central)/(sqrt(1-V_ud_exp.central*V_ud_exp.central))  ) * V_ud_exp.upper;
+      double V_us_from_Vud=sqrt(1.-V_ud_exp.central*V_ud_exp.central);
+      double err_V_us_from_Vud_exp= ( (V_ud_exp.central)/(sqrt(1-V_ud_exp.central*V_ud_exp.central))  ) * V_ud_exp.upper;
                                              
       double est_Vus = 0.;
       double sum_numerator = 0;
@@ -1528,8 +1526,8 @@ namespace Gambit
       using namespace Pipes::lnL_pienu;
 
       // Mass range of experiment
-      static double low_lim = 0.06060759493670887;  // GeV
-      static double upp_lim = 0.12926582278481014;  // GeV
+      static const double low_lim = 0.06060759493670887;  // GeV
+      static const double upp_lim = 0.12926582278481014;  // GeV
       std::vector<double> M(3), U(3), mixing_sq(3);
 
       mixing_sq[0] = *Dep::Ue1;
@@ -1563,8 +1561,8 @@ namespace Gambit
       using namespace Pipes::lnL_ps191_e;
 
       // Mass range of experiment
-      static double low_lim = 0.011810586;  // GeV
-      static double upp_lim = 0.4491907842;  // GeV
+      static const double low_lim = 0.011810586;  // GeV
+      static const double upp_lim = 0.4491907842;  // GeV
       std::vector<double> M(3), U(3), mixing_sq(3);
       double c_e = 0.5711;
       double c_mu = 0.1265;
@@ -1601,8 +1599,8 @@ namespace Gambit
       using namespace Pipes::lnL_ps191_mu;
 
       // Mass range of experiment
-      static double low_lim = 0.0103348894;  // GeV
-      static double upp_lim = 0.3610401587;  // GeV
+      static const double low_lim = 0.0103348894;  // GeV
+      static const double upp_lim = 0.3610401587;  // GeV
       std::vector<double> M(3), U(3), mixing_sq(3);
       double c_e = 0.5711;
       double c_mu = 0.1265;
@@ -1639,8 +1637,8 @@ namespace Gambit
       using namespace Pipes::lnL_charm_e;
 
       // Mass range of experiment
-      static double low_lim = 0.1595725833606568;  // GeV
-      static double upp_lim = 2.0814785578102417;  // GeV
+      static const double low_lim = 0.1595725833606568;  // GeV
+      static const double upp_lim = 2.0814785578102417;  // GeV
       std::vector<double> M(3), U(3), mixing_sq(3);
       double c_e = 0.5711;
       double c_mu = 0.1265;
@@ -1677,8 +1675,8 @@ namespace Gambit
       using namespace Pipes::lnL_charm_mu;
 
       // Mass range of experiment
-      static double low_lim = 0.4483153374997989;  // GeV
-      static double upp_lim = 1.9231171483448785;  // GeV
+      static const double low_lim = 0.4483153374997989;  // GeV
+      static const double upp_lim = 1.9231171483448785;  // GeV
       std::vector<double> M(3), U(3), mixing_sq(3);
       double c_e = 0.5711;
       double c_mu = 0.1265;
@@ -1715,8 +1713,8 @@ namespace Gambit
       using namespace Pipes::lnL_delphi_short_lived;
 
       // Mass range of experiment
-      static double low_lim = 1.8102188251700203;  // GeV
-      static double upp_lim = 80.00000000000006;  // GeV
+      static const double low_lim = 1.8102188251700203;  // GeV
+      static const double upp_lim = 80.00000000000006;  // GeV
       std::vector<double> M(3), U(3), mixing_sq(9);
 
       mixing_sq[0] = *Dep::Ue1;  // This is |U_{e1}|^2 etc
@@ -1759,8 +1757,8 @@ namespace Gambit
       using namespace Pipes::lnL_delphi_long_lived;
 
       // Mass range of experiment
-      static double low_lim = 0.4383563;  // GeV
-      static double upp_lim = 4.1954595;  // GeV
+      static const double low_lim = 0.4383563;  // GeV
+      static const double upp_lim = 4.1954595;  // GeV
       std::vector<double> M(3), U(3), mixing_sq(9);
 
       mixing_sq[0] = *Dep::Ue1;  // This is |U_{e1}|^2 etc
@@ -1803,8 +1801,8 @@ namespace Gambit
       using namespace Pipes::lnL_atlas_e;
 
       // Mass range of experiment
-      static double low_lim = 100.1041668;  // GeV
-      static double upp_lim = 476.1458333;  // GeV
+      static const double low_lim = 100.1041668;  // GeV
+      static const double upp_lim = 476.1458333;  // GeV
       std::vector<double> M(3), U(3), mixing_sq(3);
 
       mixing_sq[0] = *Dep::Ue1;
@@ -1838,8 +1836,8 @@ namespace Gambit
       using namespace Pipes::lnL_atlas_mu;
 
       // Mass range of experiment
-      static double low_lim = 101.89094090419824;  // GeV
-      static double upp_lim = 500.76903192219294;  // GeV
+      static const double low_lim = 101.89094090419824;  // GeV
+      static const double upp_lim = 500.76903192219294;  // GeV
       std::vector<double> M(3), U(3), mixing_sq(3);
 
       mixing_sq[0] = *Dep::Um1;
@@ -1873,8 +1871,8 @@ namespace Gambit
       using namespace Pipes::lnL_e949;
 
       // Mass range of experiment
-      static double low_lim = 0.1794613032227713;  // GeV
-      static double upp_lim = 0.2995365796283227;  // GeV
+      static const double low_lim = 0.1794613032227713;  // GeV
+      static const double upp_lim = 0.2995365796283227;  // GeV
       std::vector<double> M(3), U(3), mixing_sq(3);
 
       mixing_sq[0] = *Dep::Um1;
@@ -1908,8 +1906,8 @@ namespace Gambit
       using namespace Pipes::lnL_nutev;
 
       // Mass range of experiment
-      static double low_lim = 0.2116390354;  // GeV
-      static double upp_lim = 2.0161957132;  // GeV
+      static const double low_lim = 0.2116390354;  // GeV
+      static const double upp_lim = 2.0161957132;  // GeV
       std::vector<double> M(3), U(3), mixing_sq(3);
 
       mixing_sq[0] = *Dep::Um1;
@@ -1943,8 +1941,8 @@ namespace Gambit
       using namespace Pipes::lnL_charm_tau;
 
       // Mass range of experiment
-      static double low_lim = 0.010685579196217497;  // GeV
-      static double upp_lim = 0.288745725563687;  // GeV
+      static const double low_lim = 0.010685579196217497;  // GeV
+      static const double upp_lim = 0.288745725563687;  // GeV
       std::vector<double> M(3), U(3), mixing_sq(3);
 
       mixing_sq[0] = *Dep::Ut1;
@@ -1978,8 +1976,8 @@ namespace Gambit
       using namespace Pipes::lnL_lhc_e;
 
       // Mass range of experiment
-      static double low_lim = 1.0293246;  // GeV
-      static double upp_lim = 1e3;  // GeV
+      static const double low_lim = 1.0293246;  // GeV
+      static const double upp_lim = 1e3;  // GeV
       std::vector<double> M(3), U(3), mixing_sq(3);
 
       mixing_sq[0] = *Dep::Ue1;
@@ -2013,8 +2011,8 @@ namespace Gambit
       using namespace Pipes::lnL_lhc_mu;
 
       // Mass range of experiment
-      static double low_lim = 1.0145564;  // GeV
-      static double upp_lim = 985.652549;  // GeV
+      static const double low_lim = 1.0145564;  // GeV
+      static const double upp_lim = 985.652549;  // GeV
       std::vector<double> M(3), U(3), mixing_sq(3);
 
       mixing_sq[0] = *Dep::Um1;
