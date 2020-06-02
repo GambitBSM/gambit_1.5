@@ -676,7 +676,12 @@ START_MODULE
 
     #define FUNCTION sigmav_late_universe_MicrOmegas
       START_FUNCTION(double)
-      BACKEND_REQ(calcSpectrum, () , double,  (int, double*, double*, double*, double*, double*, double*, int*))
+      BACKEND_REQ(calcSpectrum, (gimmemicro) , double,  (int, double*, double*, double*, double*, double*, double*, int*))
+      BACKEND_OPTION((MicrOmegas_MSSM),(gimmemicro))
+      BACKEND_OPTION((MicrOmegas_ScalarSingletDM_Z2),(gimmemicro))
+      BACKEND_OPTION((MicrOmegas_ScalarSingletDM_Z3),(gimmemicro))
+      BACKEND_OPTION((MicrOmegas_VectorSingletDM_Z2),(gimmemicro))
+      FORCE_SAME_BACKEND(gimmemicro)
     #undef FUNCTION
 
   #undef CAPABILITY

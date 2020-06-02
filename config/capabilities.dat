@@ -2009,12 +2009,21 @@ DarkSUSY_PointInit: |
    Initialises DarkSUSY (up to version 5) for a specific model point.
 
 DarkSUSY_MSSM_6_1_1_init: |
-   Initialises an MSSM model point for DarkSUSY 6.1.1.
+   Initialises DarkSUSY 6.1.1 for the MSSM.
+
+DarkSUSY_MSSM_6_2_2_init: |
+   Initialises DarkSUSY 6.2.2 for the MSSM.
+
+DarkSUSY_generic_wimp_6_1_1_init: |
+   Initialises DarkSUSY 6.1.1 for a generic WIMP.
+
+DarkSUSY_generic_wimp_6_2_2_init: |
+   Initialises DarkSUSY 6.2.2 for a generic WIMP.
 
 DarkSUSY5_PointInit_LocalHalo: |
    Initialises Milky Way halo model parameters in DarkSUSY5
 
-DarkSUSY6_PointInit_LocalHalo: |
+DarkSUSY_PointInit_LocalHalo: |
    Initialises Milky Way halo model parameters in DarkSUSY6+
 
 dump_GammaSpectrum: |
@@ -2037,6 +2046,12 @@ DDCalc_1_2_0_init: |
 
 DDCalc_2_0_0_init: |
    Initialises DDCalc 2.0.0.
+
+DDCalc_2_1_0_init: |
+   Initialises DDCalc 2.1.0.
+
+DDCalc_2_2_0_init: |
+   Initialises DDCalc 2.2.0.
 
 DD_Experiment: |
    The name of the DDcalc experiment corresponding to a specific experiment index.
@@ -2541,6 +2556,15 @@ smcoupling: |
 smquarkmasses: |
    SM (running) quark masses for DarkSUSY.
 
+dsfindmtmt: |
+   quark mass at the scale mt (used in DarkSUSY).
+
+dssuconst_higgs: |
+   Higgs couplings in MSSM used as fallback in DarkSUSY.
+
+dssuconst_yukawa: |
+   Yukawa couplings in MSSM used as fallback in DarkSUSY.
+
 rdmgev: |
    Information about (co)annihilating particles for the DarkSUSY relic density routines.
 
@@ -2592,13 +2616,13 @@ raw_nuyield_sim: |
 raw_nuyield_casc: |
    Neutrino yields from MSSM cascade decays provided by DarkSUSY 6.
 
-nuyield_setup: |
+DS_nuyield_setup: |
    Sets DarkSUSY common blocks with all necessary information to calculate neutrino yields.
 
 DS5particle_code: |
    Translates GAMBIT string particle identifiers to corresponding DarkSUSY 5 integer codes.
 
-DS6particle_code: |
+DSparticle_code: |
    Translates GAMBIT string particle identifiers to corresponding DarkSUSY 6 integer codes.
 
 initFromSLHAeaAndDecayTable: |
