@@ -118,11 +118,11 @@ Printer:
   # Can switch to the ascii printer by commenting out and
   # using the ascii lines below
 
-  #printer: hdf5
-  #options:
-  #  output_file: "MSSM7.hdf5"
-  #  group: "/MSSM7"
-  #  delete_file_on_restart: true
+  printer: hdf5
+  options:
+    output_file: "MSSM7.hdf5"
+    group: "/MSSM7"
+    delete_file_on_restart: true
 
   #printer: ascii
   #options:
@@ -130,7 +130,7 @@ Printer:
   #  buffer_length: 10
   #  delete_file_on_restart: true
 
-  printer: cout 
+  #printer: cout 
 
 
 Scanner:
@@ -285,8 +285,9 @@ Rules:
        CoannSfermions: true # Are sfermions included in coannihilations?
        CoannMaxMass: 1.6 # Maximum sparticle mass to include in coannihilations in units of DM mass
 
-  # Choose to use DarkSUSY rather than Capt'n General for calculating the capture rate of DM in the Sun
+  # Choose to use DarkSUSY (5 or 6) rather than Capt'n General for calculating the capture rate of DM in the Sun
   - capability: capture_rate_Sun
+    #function: capture_rate_Sun_const_xsec_DS5
     function: capture_rate_Sun_const_xsec
 
   # Choose to implement the relic density likelihood as an upper bound, not a detection
@@ -334,10 +335,9 @@ Rules:
   # Consult the DarkBit manual for the required options in each case
   - capability: RD_oh2
     #function: RD_oh2_DS5_general
-    #options:
-    #  fast: 1  # 0: standard, 1: fast (default)
     function: RD_oh2_DS_general
     options:
+      # these options are identical for DS5 and DS6+ version 
       fast: 1  # 0: standard, 1: fast (default)
     #function: RD_oh2_DarkSUSY_DS5
     #options:
@@ -358,7 +358,6 @@ Rules:
     #function: RD_spectrum_SUSY_DS5
     function: RD_spectrum_MSSM 
 
-
   # Choose between the functions sigmav_late_universe and sigmav_late_universe_MicrOmegas
   - capability: sigmav
     function: sigmav_late_universe
@@ -377,10 +376,12 @@ Rules:
        version: "spectral_externalJ"
        # Other options are integral_fixedJ, integral_externalJ, and spectral_fixedJ
 
-  # Choose to use DarkSUSY yield tables for indirect detection
+  # Choose to use DarkSUSY DS5 or DS6 yield tables for indirect detection
   - capability: SimYieldTable
-    function: SimYieldTable_DarkSUSY
+    function: SimYieldTable_DS5
+    #function: SimYieldTable_DarkSUSY
     options:
+       # options are identical for DS5 and DS6
        allow_yield_extrapolation:  false # Allow extrapolation beyond masses simulated in tables
 
   # Other options can be obtained by uncommenting the relevant lines below (and commenting the above)
