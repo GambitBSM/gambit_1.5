@@ -65,7 +65,7 @@ namespace Gambit
       double xl = pow(ml/mN,2);
       double xP = pow(mP/mN,2);
 
-      return ( GF*GF * fP*f * VCKM*VCKM * Usq * mN*mN*mN ) / (16*pi) * ( pow(1 - xl,2) - xP*(1 + xl) )*sqrt(lambda(1,xP,xl));
+      return ( GF*GF * fP*fP * VCKM*VCKM * Usq * mN*mN*mN ) / (16*pi) * ( pow(1 - xl,2) - xP*(1 + xl) )*sqrt(lambda(1,xP,xl));
     }
 
     // Decay widths of RHNs, for BBN (N -> pi+ l-)
