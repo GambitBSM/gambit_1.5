@@ -111,27 +111,34 @@ class bao_correlations(Likelihood):
 
         self.need_cosmo_arguments(data, {'non linear': 'halofit'})    # Is the halofit model appropriate for massive neutrinos?
         self.need_cosmo_arguments(data, {'output': 'mPk'})
-        self.need_cosmo_arguments(data, {'z_max_pk': self.zmax+0.5}) # (JR) added 0.5 to avoid class interpolation out-of-bounds error
+        self.need_cosmo_arguments(data, {'z_max_pk': self.zmax})
         # depending on the k values we need, we might have to adjust some
         # CLASS parameters that fix the k range (P_k_max_h/Mpc = 1.)
         self.need_cosmo_arguments(data, {'P_k_max_h/Mpc': 1.})
 
+        # Dummy variables to store the latest version of the cross-correlation coefficients, and the likelihood
+        # setting these cross-correlation coefficients to zero
+        self.inv_cov_data = np.linalg.inv(self.cov_comb)
+        self.uncorrelated_loglike = None
+        self.correlation_coeffs = None
+
         # end of initialization
+
 
     # compute likelihood
 
     def loglkl(self, cosmo, data):
 
         # Extra routine needed to compute the cross-correlation coefficients between DR12 and DR14
-        cross_corr_BOSS_Da_eBOSS_Dv, cross_corr_BOSS_H_eBOSS_Dv, cross_corr_eBOSS_LRG_eBOSS_QSO = self.compute_cross_corr_fisher(cosmo)
-        print(cross_corr_BOSS_Da_eBOSS_Dv, cross_corr_BOSS_H_eBOSS_Dv, cross_corr_eBOSS_LRG_eBOSS_QSO)
-        cov_comb = copy.copy(self.cov_comb)
-        cov_comb[4, 6] = cross_corr_BOSS_Da_eBOSS_Dv * np.sqrt(cov_comb[4, 4]*cov_comb[6, 6])
-        cov_comb[5, 6] = cross_corr_BOSS_H_eBOSS_Dv * np.sqrt(cov_comb[5, 5]*cov_comb[6, 6])
-        cov_comb[7, 6] = cross_corr_eBOSS_LRG_eBOSS_QSO * np.sqrt(cov_comb[7, 7]*cov_comb[6, 6])
-        cov_comb[6, 4] = cov_comb[4, 6]
-        cov_comb[6, 5] = cov_comb[5, 6]
-        cov_comb[6, 7] = cov_comb[7, 6]
+        #cross_corr_BOSS_Da_eBOSS_Dv, cross_corr_BOSS_H_eBOSS_Dv, cross_corr_eBOSS_LRG_eBOSS_QSO = self.compute_cross_corr_fisher(cosmo)
+        self.correlation_coeffs = self.compute_cross_corr_fisher(cosmo)
+        cov_comb_corr = copy.copy(self.cov_comb)
+        cov_comb_corr[4, 6] = self.correlation_coeffs[0] * np.sqrt(cov_comb_corr[4, 4]*cov_comb_corr[6, 6])
+        cov_comb_corr[5, 6] = self.correlation_coeffs[1] * np.sqrt(cov_comb_corr[5, 5]*cov_comb_corr[6, 6])
+        cov_comb_corr[7, 6] = self.correlation_coeffs[2] * np.sqrt(cov_comb_corr[7, 7]*cov_comb_corr[6, 6])
+        cov_comb_corr[6, 4] = cov_comb_corr[4, 6]
+        cov_comb_corr[6, 5] = cov_comb_corr[5, 6]
+        cov_comb_corr[6, 7] = cov_comb_corr[7, 6]
 
         # define array for  values of D_M_diff = D_M^th - D_M^obs and H_diff = H^th - H^obs,
         # ordered by redshift bin (z=[0.38, 0.51, 0.61]) as following:
@@ -166,11 +173,13 @@ class bao_correlations(Likelihood):
                 data_array = np.append(data_array, DV_diff)
 
         # compute chi squared
-        inv_cov_data = np.linalg.inv(cov_comb)
-        chi2 = np.dot(np.dot(data_array,inv_cov_data),data_array)
+        inv_cov_data_corr = np.linalg.inv(cov_comb_corr)
+        chi2 = np.dot(np.dot(data_array,self.inv_cov_data),data_array)
+        chi2_corr = np.dot(np.dot(data_array,inv_cov_data_corr),data_array)
 
         # return ln(L)
-        loglkl = - 0.5 * chi2
+        self.uncorrelated_loglike = -0.5 * chi2
+        loglkl = - 0.5 * chi2_corr
 
         return loglkl
 
@@ -286,7 +295,7 @@ class bao_correlations(Likelihood):
         cross_corr_BOSS_Da_eBOSS_Dv = cov[0, 2]/np.sqrt(cov[0, 0]*cov[2, 2])
         cross_corr_BOSS_H_eBOSS_Dv = cov[1, 2]/np.sqrt(cov[1, 1]*cov[2, 2])
         cross_corr_eBOSS_LRG_eBOSS_QSO = cov[2, 3]/np.sqrt(cov[2, 2]*cov[3, 3])
-        return cross_corr_BOSS_Da_eBOSS_Dv, cross_corr_BOSS_H_eBOSS_Dv, cross_corr_eBOSS_LRG_eBOSS_QSO
+        return [cross_corr_BOSS_Da_eBOSS_Dv, cross_corr_BOSS_H_eBOSS_Dv, cross_corr_eBOSS_LRG_eBOSS_QSO]
 
     def set_kvals(self, order, dalpha):
 
