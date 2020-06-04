@@ -323,10 +323,13 @@ namespace Gambit {
          // Done! (lnew will be used by PolyChord to guide the search)
 
          // Get the transformed parameters and add them as derived parameters
-         std::unordered_map<std::string,double> param_map;
-         boundLogLike->getPrior().transform(unitpars, param_map);
-         for (auto& param: param_map)
-           phi[index_map[param.first]] = param.second;
+         if (nderived > 2)
+         {
+           std::unordered_map<std::string,double> param_map;
+           boundLogLike->getPrior().transform(unitpars, param_map);
+           for (auto& param: param_map)
+             phi[index_map[param.first]] = param.second;
+         }
 
          // Get, set and ouptut the process rank and this point's ID
          int myrank  = boundLogLike->getRank(); // MPI rank of this process
