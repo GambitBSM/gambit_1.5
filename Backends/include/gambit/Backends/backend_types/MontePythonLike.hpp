@@ -21,32 +21,36 @@
 
 #pragma once
 
-#include <pybind11/pybind11.h>
-#include <pybind11/stl_bind.h>
+#ifdef HAVE_PYBIND11
 
-namespace Gambit
-{
+  #include <pybind11/pybind11.h>
+  #include <pybind11/stl_bind.h>
 
-  /// Shorthand for a string to pybind object map map to avoid commas in macros
-  typedef std::map<std::string,pybind11::object> map_str_pyobj;
-
-  /// Class holding MPLike data structure & map with initialised Likelihoods objects; this is
-  /// separated form the Classy_cosmo_container since it needs to be initialised as 'static const'
-  /// such that the initialisation and reading in of data only happens once.
-  /// This is essential since the parsing of the data at initialisation of a Likelihood object can take
-  /// much longer than the actual Likelihood calculation.
-  class MPLike_data_container
+  namespace Gambit
   {
-    public:
 
-      MPLike_data_container() {}
-      MPLike_data_container(pybind11::object &data_in, map_str_pyobj likelihoods_in): data(data_in), likelihoods(likelihoods_in){}
+    /// Shorthand for a string to pybind object map map to avoid commas in macros
+    typedef std::map<std::string,pybind11::object> map_str_pyobj;
 
-      /// MPLike data structure
-      pybind11::object data;
+    /// Class holding MPLike data structure & map with initialised Likelihoods objects; this is
+    /// separated form the Classy_cosmo_container since it needs to be initialised as 'static const'
+    /// such that the initialisation and reading in of data only happens once.
+    /// This is essential since the parsing of the data at initialisation of a Likelihood object can take
+    /// much longer than the actual Likelihood calculation.
+    class MPLike_data_container
+    {
+      public:
 
-      /// Map likelihood name to initialised MPLike likelihood object
-      map_str_pyobj likelihoods;
-  };
+        MPLike_data_container() {}
+        MPLike_data_container(pybind11::object &data_in, map_str_pyobj likelihoods_in): data(data_in), likelihoods(likelihoods_in){}
 
-}
+        /// MPLike data structure
+        pybind11::object data;
+
+        /// Map likelihood name to initialised MPLike likelihood object
+        map_str_pyobj likelihoods;
+    };
+
+  }
+
+#endif

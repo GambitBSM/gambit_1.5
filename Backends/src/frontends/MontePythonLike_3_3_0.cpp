@@ -25,113 +25,116 @@
 #include "gambit/Backends/frontend_macros.hpp"
 #include "gambit/Backends/frontends/MontePythonLike_3_3_0.hpp"
 
-#include <pybind11/stl.h>
-#include <pybind11/stl_bind.h>
-#include <pybind11/functional.h>
+#ifdef HAVE_PYBIND11
 
-BE_NAMESPACE
-{
-  using namespace pybind11::literals; // to bring in the `_a` literal to initialise python dictionarys with pybind11
+  #include <pybind11/stl.h>
+  #include <pybind11/stl_bind.h>
+  #include <pybind11/functional.h>
 
-  /// calls the function "get_available_likelihoods" in the patched MontePythonLike.py file of MontePython backend.
-  /// This returns a list containing strings with the names of all likelihoods available in the MontePythonLike backend
-  std::vector<str> get_MP_available_likelihoods()
+  BE_NAMESPACE
   {
-    pybind11::list avail_likes = MontePythonLike.attr("get_available_likelihoods")(backendDir);
-    return avail_likes.cast<std::vector<str>>();
-  }
+    using namespace pybind11::literals; // to bring in the `_a` literal to initialise python dictionarys with pybind11
 
-  /// Convenience function to compute the loglike from a given experiment, given a MontePython likelihood-data container
-  /// mplike, using the CLASS Python object cosmo.
-  double get_MP_loglike(const MPLike_data_container& mplike, pybind11::object& cosmo, std::string& experiment)
-  {
-    logger() << LogTags::info << "[MontePythonLike_" << STRINGIFY(VERSION) << "]:  Start evaluation for -> " << experiment << " <-" << EOM;
-
-    // need to use likelihood.at() since it is a const map -> [] can create entry & can't be used on const object
-    double result = mplike.likelihoods.at(experiment).attr("loglkl")(cosmo, mplike.data).cast<double>();
-    logger() << LogTags::info << "[MontePythonLike_" << STRINGIFY(VERSION) << "]:  Finished evaluation for -> " << experiment << " <-";
-    logger() << " and got: " << result <<  EOM;
-
-    return result;
-  }
-
-  /// Creates a MontePython 'Data' object.
-  /// This is initialised with a list of the relevant experimental limits to import.
-  pybind11::object create_MP_data_object(map_str_str& experiments)
-  {
-
-    pybind11::dict path_dict = pybind11::dict("MontePython"_a=backendDir,
-                          "data"_a=backendDir+"/../data/",
-                          "cosmo"_a=backendDir+"",  // we never want to class CLASS from MP so there is no need to pass anything here
-                          "root"_a=backendDir+"/../../../");
-
-    // Cast the list of experiments to a tuple, for MP to fire up...
-    // not experiments is a str to str map where the key is the likelihood name.
-    // This is the only thing we need here when creating the data object
-    // The value of the keys (data files to use) will be needed when initialising the likelihood objects
-    // in the funciton 'create_MP_likelihood_objects'
-    pybind11::list MP_experiments;
-    for (auto const& it : experiments)
+    /// calls the function "get_available_likelihoods" in the patched MontePythonLike.py file of MontePython backend.
+    /// This returns a list containing strings with the names of all likelihoods available in the MontePythonLike backend
+    std::vector<str> get_MP_available_likelihoods()
     {
-        MP_experiments.attr("append")( it.first.c_str() );
+      pybind11::list avail_likes = MontePythonLike.attr("get_available_likelihoods")(backendDir);
+      return avail_likes.cast<std::vector<str>>();
     }
 
-    // Import Data object from MontePython
-    // (pass empty string as "command_line" since we do not need this information as sampling is taken care
-    // of by GAMBIT)
-    pybind11::object data = MontePythonLike.attr("Data")("", path_dict, MP_experiments);
-
-    return data;
-  }
-
-  /// Returns a map of string to Python objects. These Python objects from MontePython are the initialised
-  /// "Likelihood" objects used internal to MontePython. GAMBIT interfaces to these by requesting the
-  /// loglike methods of these Python objects.
-  /// Note that this is only executed once before the likelihoods for the first point in parameter space
-  /// are calculated. -> time expensive loading up of all modules and data files is just done once.
-  map_str_pyobj create_MP_likelihood_objects(pybind11::object& data, map_str_str& experiments)
-  {
-    // in stand-alone MP the command line contains some information for the sampler (how many points, restart..)
-    // since the scanner module of GAMBIT is taking care of these things we do not need to pass anything here
-    pybind11::str command_line = "";
-
-    // Root likelihood path.
-    std::string like_path = backendDir+"/likelihoods/";
-
-    // Add the Likelihood path to sys so we can import it in Python
-    pybind11::module sys = pybind11::module::import("sys");
-    sys.attr("path").attr("insert")(0, like_path);
-
-    map_str_pyobj likelihoods;
-
-    // Now go through each experiment one by one, and initialise the Likelihood containers in
-    // MontePython, then add them to a dictionary to pass back to CosmoBit.
-    //for (std::vector<std::string>::const_iterator it = experiments.begin(); it != experiments.end(); ++it)
-    for (auto const& it : experiments)
+    /// Convenience function to compute the loglike from a given experiment, given a MontePython likelihood-data container
+    /// mplike, using the CLASS Python object cosmo.
+    double get_MP_loglike(const MPLike_data_container& mplike, pybind11::object& cosmo, std::string& experiment)
     {
-      std::string exp_name = it.first;
-      std::string data_file = it.second;
+      logger() << LogTags::info << "[MontePythonLike_" << STRINGIFY(VERSION) << "]:  Start evaluation for -> " << experiment << " <-" << EOM;
 
-      pybind11::str exp_path;
-      // set path to .data file to the default one in MP if the "default" option is choosen
-      // if not use the data file that has been chossen in the yaml file
-      if(data_file == "default")  {exp_path = like_path + "/" + exp_name + "/" + exp_name + ".data";}
-      else                        {exp_path = data_file;}
+      // need to use likelihood.at() since it is a const map -> [] can create entry & can't be used on const object
+      double result = mplike.likelihoods.at(experiment).attr("loglkl")(cosmo, mplike.data).cast<double>();
+      logger() << LogTags::info << "[MontePythonLike_" << STRINGIFY(VERSION) << "]:  Finished evaluation for -> " << experiment << " <-";
+      logger() << " and got: " << result <<  EOM;
 
-      pybind11::module  exp_module = pybind11::module::import(exp_name.c_str());
-      pybind11::object  EXP_MODULE = exp_module.attr(exp_name.c_str())(exp_path, data, command_line);
-
-      likelihoods[exp_name] = EXP_MODULE;
+      return result;
     }
 
-    // Remove "like_path" from sys.path (The likelihoods are now loaded)
-    sys.attr("path").attr("remove")(like_path);
+    /// Creates a MontePython 'Data' object.
+    /// This is initialised with a list of the relevant experimental limits to import.
+    pybind11::object create_MP_data_object(map_str_str& experiments)
+    {
 
-    return likelihoods;
+      pybind11::dict path_dict = pybind11::dict("MontePython"_a=backendDir,
+			    "data"_a=backendDir+"/../data/",
+			    "cosmo"_a=backendDir+"",  // we never want to class CLASS from MP so there is no need to pass anything here
+			    "root"_a=backendDir+"/../../../");
+
+      // Cast the list of experiments to a tuple, for MP to fire up...
+      // not experiments is a str to str map where the key is the likelihood name.
+      // This is the only thing we need here when creating the data object
+      // The value of the keys (data files to use) will be needed when initialising the likelihood objects
+      // in the funciton 'create_MP_likelihood_objects'
+      pybind11::list MP_experiments;
+      for (auto const& it : experiments)
+      {
+	  MP_experiments.attr("append")( it.first.c_str() );
+      }
+
+      // Import Data object from MontePython
+      // (pass empty string as "command_line" since we do not need this information as sampling is taken care
+      // of by GAMBIT)
+      pybind11::object data = MontePythonLike.attr("Data")("", path_dict, MP_experiments);
+
+      return data;
+    }
+
+    /// Returns a map of string to Python objects. These Python objects from MontePython are the initialised
+    /// "Likelihood" objects used internal to MontePython. GAMBIT interfaces to these by requesting the
+    /// loglike methods of these Python objects.
+    /// Note that this is only executed once before the likelihoods for the first point in parameter space
+    /// are calculated. -> time expensive loading up of all modules and data files is just done once.
+    map_str_pyobj create_MP_likelihood_objects(pybind11::object& data, map_str_str& experiments)
+    {
+      // in stand-alone MP the command line contains some information for the sampler (how many points, restart..)
+      // since the scanner module of GAMBIT is taking care of these things we do not need to pass anything here
+      pybind11::str command_line = "";
+
+      // Root likelihood path.
+      std::string like_path = backendDir+"/likelihoods/";
+
+      // Add the Likelihood path to sys so we can import it in Python
+      pybind11::module sys = pybind11::module::import("sys");
+      sys.attr("path").attr("insert")(0, like_path);
+
+      map_str_pyobj likelihoods;
+
+      // Now go through each experiment one by one, and initialise the Likelihood containers in
+      // MontePython, then add them to a dictionary to pass back to CosmoBit.
+      //for (std::vector<std::string>::const_iterator it = experiments.begin(); it != experiments.end(); ++it)
+      for (auto const& it : experiments)
+      {
+	std::string exp_name = it.first;
+	std::string data_file = it.second;
+
+	pybind11::str exp_path;
+	// set path to .data file to the default one in MP if the "default" option is choosen
+	// if not use the data file that has been chossen in the yaml file
+	if(data_file == "default")  {exp_path = like_path + "/" + exp_name + "/" + exp_name + ".data";}
+	else                        {exp_path = data_file;}
+
+	pybind11::module  exp_module = pybind11::module::import(exp_name.c_str());
+	pybind11::object  EXP_MODULE = exp_module.attr(exp_name.c_str())(exp_path, data, command_line);
+
+	likelihoods[exp_name] = EXP_MODULE;
+      }
+
+      // Remove "like_path" from sys.path (The likelihoods are now loaded)
+      sys.attr("path").attr("remove")(like_path);
+
+      return likelihoods;
+    }
   }
-}
-END_BE_NAMESPACE
+  END_BE_NAMESPACE
 
+#endif
 
 BE_INI_FUNCTION
 {}
