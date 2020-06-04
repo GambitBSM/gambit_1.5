@@ -3223,9 +3223,6 @@ mueAu: |
 muePb: |
    Calculates the ratio for mu-e conversion in lead wrt capture
 
-mueAu: |
-   Calculates the ratio for mu-e conversion in gold wrt capture
-
 l2lgamma_lnL: |
    Log-likelihood for l -> l gamma processes
 
