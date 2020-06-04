@@ -85,7 +85,7 @@ namespace Gambit
     str strip_leading_namespace(str s, str ns)
     {
       std::regex expression("(^|[\\s\\*\\&\\(\\,\\[])"+ns+"::");
-      s = std::regex_replace(s, expression, str("\\1"));
+      s = std::regex_replace(s, expression, str("$1"));
       return s;
     }
 
@@ -93,7 +93,7 @@ namespace Gambit
     str replace_leading_namespace(str s, str ns, str ns_new)
     {
       std::regex expression("(^|[\\s\\*\\&\\(\\,\\[])"+ns+"::");
-      s = std::regex_replace(s, expression, str("\\1")+ns_new+"::");
+      s = std::regex_replace(s, expression, str("$1")+ns_new+"::");
       return s;
     }
 
