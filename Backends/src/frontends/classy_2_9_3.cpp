@@ -307,6 +307,12 @@ BE_INI_FUNCTION
     logger() << pybind11::repr(cosmo_input_dict) << EOM;
     cosmo.attr("set")(cosmo_input_dict);
 
+    // CLASS re-computed -> safe this information in cosmo container, so MontePython
+    // (and potentially other backends) have access to this information 
+    cosmo.attr("set_cosmo_update")(true);
+    // -> access value
+    //int recomputed = cosmo.attr("recomputed").cast<int>();
+
     // Try to run class and catch potential errors
     logger() << LogTags::info << "[classy_"<< STRINGIFY(VERSION) <<"] Start to run \"cosmo.compute\"" << EOM;
     try
@@ -369,7 +375,15 @@ BE_INI_FUNCTION
   else
   {
     logger() << LogTags::info << "[classy_"<< STRINGIFY(VERSION) <<"] \"cosmo.compute\" was skipped, input was identical to previously computed point" << EOM;
+    // CLASS did not recompute -> safe this information in cosmo container, so MontePython
+    // (and potentially other backends) have access to this information and can skip
+    // their computations as well 
+    cosmo.attr("set_cosmo_update")(false);
+    // -> access the information with 
+    //int recomputed = cosmo.attr("recomputed").cast<int>();
   }
+  //std::cout << "Trying to print power spectrum..." << std::endl;
+  //print_pps();
 
   first_run = false;
   // save input arguments from this run to dictionary prev_input_dict

@@ -69,6 +69,28 @@ diff --git a/python/classy.pyx b/python/classy.pyx
 index fae0dd04..a8020991 100644
 --- a/python/classy.pyx
 +++ b/python/classy.pyx
+@@ -113,8 +113,21 @@
+             "output":"tCl mPk",}
+         self.set(**_pars)
+ 
++    # (JR) added to get information from cosmo object
++    # whether class re-computed or not
++    #recomputed = True
++    cpdef int recomputed
++    property recomputed:
++        def __get__(self):
++            return self.recomputed
++
++    def set_cosmo_update(self,update):
++        self.recomputed = update
++    # ------------------
++
+     def __cinit__(self, default=False):
+         cpdef char* dumc
++        self.recomputed = True
+         self.ready = False
+         self._pars = {}
+         self.fc.size=0
 @@ -1016,8 +1016,10 @@ cdef class Class:
      # This is commented because in the current form it only applies
      # to minimal LambdaCDM.
