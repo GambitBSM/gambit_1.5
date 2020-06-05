@@ -2171,6 +2171,47 @@ namespace Gambit
       logger() << EOM;
       result = lnL;
     }
+    
+    /// get correlation coefficients and uncorrelated likelihood
+    /// of MP likelihood "bao_correlations"
+    /// heads-up: this is specific to this likelihood, don't use 
+    /// for anything else!
+    void get_bao_like_correlation(map_str_dbl& result)
+    {
+      using namespace Pipes::get_bao_like_correlation;
+
+      // This function has a dependency on MP_LogLikes even though it is not directly 
+      // needed in the calculation. However, through this dependency we make sure that 
+      // MP was called before this function is executed -> don't remove it!
+
+      // get map containing python likelihood objects
+      static const map_str_pyobj& likelihoods = std::get<2>(*Dep::MP_objects);
+
+      // check if "bao_correlations" likelihood was computed, if so
+      // retrieve correlation coefficients and uncorrelated likelihood value
+      if(likelihoods.find("bao_correlations") != likelihoods.end()) 
+      {
+          result["uncorrelated_loglike"] = likelihoods.at("bao_correlations").attr("uncorrelated_loglike").cast<double>();
+          pybind11::list corr_coeffs =  likelihoods.at("bao_correlations").attr("correlation_coeffs");
+          result["correlation_coeffs_0"] = corr_coeffs[0].cast<double>();
+          result["correlation_coeffs_1"] = corr_coeffs[1].cast<double>();
+          result["correlation_coeffs_2"] = corr_coeffs[2].cast<double>();
+      } 
+      else 
+      {
+          str errmsg = "Likelihood 'bao_correlations' was not requested in yaml file, but you are asking for\n";
+          errmsg += "the correlation coefficients from this likelihood. Either remove 'bao_like_correlation' from the ObsLikes section\n";
+          errmsg += "in your yaml file or include the computation of the 'bao_correlations' likelihood by adding:\n\n";
+          errmsg += "  - purpose:      LogLike\n";
+          errmsg += "    capability:   MP_Combined_LogLike\n";
+          errmsg += "    sub_capabilities:\n";
+          errmsg += "      - bao_correlations\n\n";         
+          errmsg += "to the yaml file.";         
+          CosmoBit_error().raise(LOCAL_INFO, errmsg);
+      }
+
+
+    }
 
   }
 }

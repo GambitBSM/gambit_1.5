@@ -27,6 +27,7 @@
 ///          (janina.renk@fysik.su.se)
 ///  \date 2018 Jun
 ///  \date 2019 Mar
+///  \date 2020 Jun
 ///
 ///  \author Sanjay Bloor
 ///          (sanjay.bloor12@imperial.ac.uk)
@@ -844,6 +845,17 @@ START_MODULE
     #define FUNCTION compute_MP_combined_LogLike
     START_FUNCTION(double)
     DEPENDENCY(MP_LogLikes, map_str_dbl)
+    #undef FUNCTION
+  #undef CAPABILITY
+ 
+  // Retrieves the correlation coefficients and the LogLike not taking 
+  // bao correlations into account from the MP likelihood "bao_correlations"
+  #define CAPABILITY bao_like_correlation
+    START_CAPABILITY
+    #define FUNCTION get_bao_like_correlation
+    START_FUNCTION(map_str_dbl)
+    DEPENDENCY(MP_LogLikes, map_str_dbl)
+    DEPENDENCY(MP_objects, MPLike_objects_container)
     #undef FUNCTION
   #undef CAPABILITY
 
