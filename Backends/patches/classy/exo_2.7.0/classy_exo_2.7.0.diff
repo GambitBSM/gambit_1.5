@@ -44,6 +44,28 @@
          int bt_size
 --- a/python/classy.pyx	2018-09-21 07:00:18.000000000 +0200
 +++ b/python/classy.pyx	2019-12-04 16:32:23.229238378 +0100
+@@ -112,8 +112,21 @@
+             "output":"tCl mPk",}
+         self.set(**_pars)
+ 
++    # (JR) added to get information from cosmo object
++    # whether class re-computed or not
++    #recomputed = True
++    cpdef int recomputed
++    property recomputed:
++        def __get__(self):
++            return self.recomputed
++
++    def set_cosmo_update(self,update):
++        self.recomputed = update
++    # ------------------
++
+     def __cinit__(self, default=False):
+         cpdef char* dumc
++        self.recomputed = True
+         self.ready = False
+         self._pars = {}
+         self.fc.size=0
 @@ -971,8 +971,10 @@
      # This is commented because in the current form it only applies
      # to minimal LambdaCDM.

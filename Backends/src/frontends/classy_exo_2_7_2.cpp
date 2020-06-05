@@ -393,6 +393,12 @@ BE_INI_FUNCTION
       // but just to make sure nothing's going wrong do it anyways..
       cosmo.attr("empty")();
 
+      // CLASS re-computed -> safe this information in cosmo container, so MontePython
+      // (and potentially other backends) have access to this information 
+      cosmo.attr("set_cosmo_update")(true);
+      // -> access value
+      //int recomputed = cosmo.attr("recomputed").cast<int>();
+
       // set cosmological parameters
       logger() << LogTags::debug << "[classy_"<< STRINGIFY(VERSION) <<"] These are the inputs:"<<endl;
       logger() << pybind11::repr(cosmo_input_dict) << EOM;
@@ -460,6 +466,12 @@ BE_INI_FUNCTION
     else
     {
       logger() << LogTags::info << "[classy_"<< STRINGIFY(VERSION) <<"] \"cosmo.compute\" was skipped, input was identical to previously computed point" << EOM;
+      // CLASS did not recompute -> safe this information in cosmo container, so MontePython
+      // (and potentially other backends) have access to this information and can skip
+      // their computations as well 
+      cosmo.attr("set_cosmo_update")(false);
+      // -> access the information with 
+      //int recomputed = cosmo.attr("recomputed").cast<int>();
     }
 
     first_run = false;

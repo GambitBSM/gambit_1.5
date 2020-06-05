@@ -35,6 +35,8 @@
   {
     using namespace pybind11::literals; // to bring in the `_a` literal to initialise python dictionarys with pybind11
 
+    static map_str_dbl chached_likelihoods; // string double map to save likelihood calculation from previous param point
+
     /// calls the function "get_available_likelihoods" in the patched MontePythonLike.py file of MontePython backend.
     /// This returns a list containing strings with the names of all likelihoods available in the MontePythonLike backend
     std::vector<str> get_MP_available_likelihoods()
@@ -45,14 +47,60 @@
 
     /// Convenience function to compute the loglike from a given experiment, given a MontePython likelihood-data container
     /// mplike, using the CLASS Python object cosmo.
+    /// Convenience function to compute the loglike from a given experiment, given a MontePython likelihood-data container
+    /// mplike, using the CLASS Python object cosmo.
     double get_MP_loglike(const MPLike_data_container& mplike, pybind11::object& cosmo, std::string& experiment)
     {
-      logger() << LogTags::info << "[MontePythonLike_" << STRINGIFY(VERSION) << "]:  Start evaluation for -> " << experiment << " <-" << EOM;
 
-      // need to use likelihood.at() since it is a const map -> [] can create entry & can't be used on const object
-      double result = mplike.likelihoods.at(experiment).attr("loglkl")(cosmo, mplike.data).cast<double>();
-      logger() << LogTags::info << "[MontePythonLike_" << STRINGIFY(VERSION) << "]:  Finished evaluation for -> " << experiment << " <-";
-      logger() << " and got: " << result <<  EOM;
+      double result;
+
+      //static const bool first_run 
+      // check if likelihood needs to be re-evaluated:
+      // => if CLASS re-ran likelihood needs updating in any case
+      bool needs_update = cosmo.attr("recomputed").cast<bool>();
+
+      // => if CLASS did not re-compute: check if likelihood has nuisance parameters
+      if(not needs_update)
+      {
+        try
+        {
+          // get list of nuisance parameter needed for likelihood calculation from MP
+          // => if the list is not empty, there are nuisance parameters, hence we need to update MP likelihood
+          //   (note: pybind11::bool_(list) = True if list contains entries, False if list is empty)
+          pybind11::list nuisance_list  = mplike.likelihoods.at(experiment).attr("use_nuisance");
+          needs_update = pybind11::bool_(nuisance_list);
+        }
+        catch(const std::exception&)
+        {
+          // if for some reason the MP likelihood object does not have the attribute "use_nusicane" (even though all of them
+          //  should, but let's not count on it...) there are no nuisance parameters. So calculation can be skipped. 
+          needs_update = false;
+        }
+      }
+
+      // calculate likelihood if check above concluded that it needs updating
+      // (CLASS rerun and/or likelihood has nuisance parameters)
+      if(needs_update)
+      {
+
+        logger() << LogTags::info << "[MontePythonLike_" << STRINGIFY(VERSION) << "]:  Start evaluation for -> " << experiment << " <-" << EOM;
+        // need to use likelihood.at() since it is a const map -> [] can create entry & can't be used on const object
+        result = mplike.likelihoods.at(experiment).attr("loglkl")(cosmo, mplike.data).cast<double>();
+
+        logger() << LogTags::info << "[MontePythonLike_" << STRINGIFY(VERSION) << "]:  Finished evaluation for -> " << experiment << " <-";
+        logger() << " and got: " << result <<  EOM;
+
+        // save likelihood result
+        chached_likelihoods[experiment] = result;
+      }
+      // use cached likelihood value if the cosmology has not changed w.r.t. previously calculated point
+      else
+      {
+        // get cached result
+        result = chached_likelihoods[experiment];
+        logger() << LogTags::info << "[MontePythonLike_" << STRINGIFY(VERSION) << "]:  Using cached LogLike value for -> " << experiment << " <-";
+        logger() << " which is: " << result <<  EOM;
+      }
 
       return result;
     }

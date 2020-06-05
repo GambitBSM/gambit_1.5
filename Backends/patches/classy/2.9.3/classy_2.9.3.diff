@@ -1,5 +1,35 @@
 --- a/python/classy.pyx	2017-10-24 14:42:41.000000000 +0100
 +++ b/python/classy.pyx	2019-07-03 12:45:27.100272668 +0100
+@@ -118,13 +118,28 @@
+         def __get__(self):
+             return self.nl.method
+ 
++
++
+     def set_default(self):
+         _pars = {
+             "output":"tCl mPk",}
+         self.set(**_pars)
+ 
++    # (JR) added to get information from cosmo object
++    # whether class re-computed or not
++    #recomputed = True
++    cpdef int recomputed
++    property recomputed:
++        def __get__(self):
++            return self.recomputed
++
++    def set_cosmo_update(self,update):
++        self.recomputed = update
++    # ------------------
++
+     def __cinit__(self, default=False):
+         cpdef char* dumc
++        self.recomputed = True
+         self.allocated = False
+         self.computed = False
+         self._pars = {}
+
 @@ -1082,6 +1082,21 @@
      def omega_b(self):
          return self.ba.Omega0_b * self.ba.h * self.ba.h
