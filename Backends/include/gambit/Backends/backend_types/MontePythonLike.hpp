@@ -21,6 +21,8 @@
 
 #pragma once
 
+#include "gambit/cmake/cmake_variables.hpp"
+
 #ifdef HAVE_PYBIND11
 
   #include <pybind11/pybind11.h>

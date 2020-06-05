@@ -33,6 +33,7 @@
 
 #pragma once
 
+#include "gambit/cmake/cmake_variables.hpp"
 #include "gambit/Utils/util_types.hpp"
 
 #ifdef HAVE_PYBIND11
