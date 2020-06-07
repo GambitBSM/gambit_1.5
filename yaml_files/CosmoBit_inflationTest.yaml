@@ -109,26 +109,16 @@ Rules:
   - capability: classy_MPLike_input
     function: set_classy_input_with_MPLike
 
-  - capability: classy_primordial_parameters
-    function: set_classy_parameters_parametrised_ps
+  - capability: classy_primordial_input
     #function: set_classy_parameters_primordial_ps
+    function: set_classy_parameters_parametrised_ps
 
   - capability: classy_input_params
     #function: set_classy_baseline_params
     options:
       classy_dict:
-        output: tCl
+        #output: tCl  
         #k_pivot: 0.03
-        #P_k_ini type : analytic_Pk
-
-  #- capability: set_classy_parameters
-  #  function: set_classy_parameters_parametrised_ps
-  #  options:
-  #    classy_dict:
-  #      output: 'tCl'   # need to add this since otherwise the input 'modes' is not read => class throws an error
-  #                      # in the future this would ideally be taken care of automatically -> one observable that you HAVE to
-  #                      # calculate for every inflation model? Then we can add it to the set_classy_function (there probably
-  #                      # is but I just have no idea about inflation ;))
 
   # error calculation precision settings for AlterBBN
   # (use 1 and 0 to speed up Helium abundance calculation for testing)

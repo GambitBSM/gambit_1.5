@@ -133,7 +133,7 @@ ObsLikes:
       bao_smallz_2014: default
       Pantheon: default
       Planck_SZ: default
-      WiggleZ: default
+      #WiggleZ: default -> does not work atm with python3 #todo
 
 #======== Rule entries ========
 Rules:
