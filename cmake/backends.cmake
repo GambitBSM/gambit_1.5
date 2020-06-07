@@ -635,7 +635,7 @@ if(NOT ditched_${name}_${ver})
       COMMAND ${CMAKE_COMMAND} -E copy ${patchdir}/MPLike_patch_script.py ${dir}/montepython/MPLike_patch_script.py
       COMMAND sed ${dashi} -e "s#from MontePythonLike import#from MontePythonLike_${sfver} import#g" ${dir}/montepython/MPLike_patch_script.py
       BUILD_COMMAND ""
-      INSTALL_COMMAND python ${dir}/montepython/MPLike_patch_script.py
+      INSTALL_COMMAND ${PYTHON_EXECUTABLE} ${dir}/montepython/MPLike_patch_script.py
     )
   endif()
   add_extra_targets("backend" ${name} ${ver} ${dir} ${dl} none)
@@ -676,7 +676,7 @@ if(NOT ditched_${name}_${ver})
       COMMAND sed ${dashi} -e "s#from MontePythonLike import#from MontePythonLike_${sfver} import#g" ${dir}/montepython/MPLike_patch_script.py
       COMMAND ${CMAKE_COMMAND} -E copy ${patchdir}/__init__eBOSS_DR14_Lya_combined.py ${dir}/montepython/likelihoods/eBOSS_DR14_Lya_combined/__init__.py
       BUILD_COMMAND ""
-      INSTALL_COMMAND python ${dir}/montepython/MPLike_patch_script.py
+      INSTALL_COMMAND ${PYTHON_EXECUTABLE} ${dir}/montepython/MPLike_patch_script.py
     )
   endif()
   add_extra_targets("backend" ${name} ${ver} ${dir} ${dl} clean)
