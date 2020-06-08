@@ -120,7 +120,7 @@ Printer:
 
   printer: hdf5
   options:
-    output_file: "MSSM7.hdf5"
+    output_file: "MSSM7_DarkBit.hdf5"
     group: "/MSSM7"
     delete_file_on_restart: true
 
@@ -262,15 +262,7 @@ ObsLikes:
 
 Rules:
 
-  # Choose between the process catalogue for DarkSUSY 5 and DarkSUSY 6, respectively 
-#  - capability:  TH_ProcessCatalog
-#    function: TH_ProcessCatalog_DS_MSSM
-#  - function: TH_ProcessCatalog_DS_MSSM
-#    options:
-#       ignore_three_body: false # Ignore 3 body final states?
-#       ProcessCatalog_MinBranching: 0 # Minimum branching fraction of included processes
-
-  - capability:  TH_ProcessCatalog
+  - capability: TH_ProcessCatalog
     #function: TH_ProcessCatalog_DS5_MSSM
     function: TH_ProcessCatalog_DS_MSSM
     options:
@@ -378,8 +370,8 @@ Rules:
 
   # Choose to use DarkSUSY DS5 or DS6 yield tables for indirect detection
   - capability: SimYieldTable
-    function: SimYieldTable_DS5
-    #function: SimYieldTable_DarkSUSY
+    #function: SimYieldTable_DS5
+    function: SimYieldTable_DarkSUSY
     options:
        # options are identical for DS5 and DS6
        allow_yield_extrapolation:  false # Allow extrapolation beyond masses simulated in tables
