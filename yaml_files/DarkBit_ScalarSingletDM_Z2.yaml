@@ -270,14 +270,14 @@ Rules:
        VZdecay: 1 # 0 - no 3 body final states, 1 - virtual Z in annihilations, 2 - virtual Z in coannihilations
        VWdecay: 1 # 0 - no 3 body final states, 1 - virtual W in annihilations, 2 - virtual W in coannihilations
 
-  # Use DarkBit native calculator (based on the DarkSUSY Boltzmann solver or MicrOmegas for the relic density?
+  # Use DarkBit native calculator (based on the DarkSUSY Boltzmann solver) or MicrOmegas for the relic density?
   # Consult the DarkBit manual for the required options in each case
   - capability: RD_oh2
     #function: RD_oh2_DS5_general
     function: RD_oh2_DS_general
     options:
       # these options are identical for DS5 and DS6+ version 
-      fast: 1  # 0: standard, 1: fast (defalt)
+      fast: 0  # 0: standard, 1: fast (default when co-annihilations etc are involved)
     #function: RD_oh2_MicrOmegas
     #options:
     #  fast: 1  # 0: standard (default), 1: fast
