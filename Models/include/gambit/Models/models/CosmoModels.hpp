@@ -150,7 +150,7 @@
  #undef PARENT
 #undef MODEL
 
-// Single field, monomic inflation with exponent 2/3 (assuming instant reheating)
+// Single field, monomial inflation with exponent 2/3 (assuming instant reheating)
 // Potential: V(phi) = 1.5 lambda M_P^(10/3) phi^(2/3)
 #define MODEL Inflation_InstReh_1mono23
   START_MODEL
@@ -159,7 +159,7 @@
   INTERPRET_AS_X_DEPENDENCY(PowerLaw_ps, PowerLaw_ps_parameters, ModelParameters)
 #undef MODEL
 
-// Single field, quadratic inflation (assuming instant reheating)
+// Single field, linear inflation (assuming instant reheating)
 // Potential: V(phi) = lambda M_P^3 phi
 #define MODEL Inflation_InstReh_1linear
   START_MODEL
