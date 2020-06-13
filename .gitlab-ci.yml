@@ -1,0 +1,42 @@
+stages:
+- build_gambit
+- build_scanners
+- build_backends
+- check
+
+
+build_gambit:
+  image:
+    ubuntu:latest
+  stage: build
+  script:
+    - apt-get -y update
+    - apt-get -y install cmake git curl axel make g++ gfortran python python-yaml libeigen3-dev libboost-dev libgsl-dev
+    - git clean -dffx
+    # - export CMAKE_C_COMPILER=`which gcc`
+    # - export CMAKE_CXX_COMPILER=`which g++`
+    # - export CMAKE_Fortran_COMPILER=`which gfortran`
+    - mkdir BUILD && cd BUILD
+    - CMAKE_ARGS="-DCMAKE_BUILD_TYPE=Release -DEIGEN3_INCLUDE_DIR=/usr/include/eigen3/"
+    - cmake $CMAKE_ARGS ..
+    - make -j2
+  artifacts:
+    when: always
+    paths:
+      - $CI_PROJECT_DIR/BUILD
+    expire_in: 1 week
+
+
+build_backends:
+  image:
+    ubuntu:latest
+  stage: build
+  script:
+    - apt-get -y update
+    - apt-get -y install cmake git curl axel make g++ gfortran python python-yaml libeigen3-dev libboost-dev libgsl-dev
+    - mkdir BUILD && cd BUILD
+    - make scanners
+    - make backends
+    - CMAKE_ARGS="-DCMAKE_BUILD_TYPE=Release -DEIGEN3_INCLUDE_DIR=/usr/include/eigen3/"
+    - cmake $CMAKE_ARGS ..
+    - make -j2
