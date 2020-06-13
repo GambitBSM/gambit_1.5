@@ -63,7 +63,7 @@ test_gambit:
     - cowsay "$(git log -n 5)"
     - rm -f ../bats.tap
     - export GAMBIT="$PWD/../"
-    - ## Pipe test results to file for JENKINS
+    ## Pipe test results to file for JENKINS
     - bats --tap *.bats > ../bats.tap
     - cd ..
     ## Note email addresses for failed tests
