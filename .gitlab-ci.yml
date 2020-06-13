@@ -7,7 +7,7 @@ stages:
 
 build_gambit_x:
   image:
-    ubuntu:latest
+    gambitbsm/gambit-base:fedora
   stage: build_gambit
   script:
     - apt-get -y update
@@ -29,7 +29,7 @@ build_gambit_x:
 
 build_backends_x:
   image:
-    ubuntu:latest
+    gambitbsm/gambit-base:fedora
   stage: build_backends
   script:
     - apt-get -y update
@@ -49,7 +49,7 @@ build_backends_x:
 
 test_gambit:
   image:
-    ubuntu:latest
+    gambitbsm/gambit-base:fedora
   stage: check
   script:
     - apt-get -y update
