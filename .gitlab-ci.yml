@@ -5,10 +5,10 @@ stages:
 - check
 
 
-build_gambit:
+build_gambit_x:
   image:
     ubuntu:latest
-  stage: build
+  stage: build_gambit
   script:
     - apt-get -y update
     - apt-get -y install cmake git curl axel make g++ gfortran python python-yaml libeigen3-dev libboost-dev libgsl-dev
@@ -27,16 +27,53 @@ build_gambit:
     expire_in: 1 week
 
 
-build_backends:
+build_backends_x:
   image:
     ubuntu:latest
-  stage: build
+  stage: build_backends
   script:
     - apt-get -y update
     - apt-get -y install cmake git curl axel make g++ gfortran python python-yaml libeigen3-dev libboost-dev libgsl-dev
-    - mkdir BUILD && cd BUILD
+    - cd BUILD
     - make scanners
     - make backends
     - CMAKE_ARGS="-DCMAKE_BUILD_TYPE=Release -DEIGEN3_INCLUDE_DIR=/usr/include/eigen3/"
     - cmake $CMAKE_ARGS ..
     - make -j2
+  artifacts:
+    when: always
+    paths:
+      - $CI_PROJECT_DIR/BUILD
+    expire_in: 1 week
+
+
+test_gambit:
+  image:
+    ubuntu:latest
+  stage: check
+  script:
+    - apt-get -y update
+    - apt-get -y install git python python-yaml cowsay bats numdiff
+    - cowsay "Testing GAMBIT on $(date)"
+    - cowsay "$(git log -n 5)"
+    ## Get BATS tests and notify re. updates
+    - git clone https://github.com/andrewfowlie/gambit_bats
+    - cd gambit_bats
+    - git pull
+    - cowsay "$(git log -n 5)"
+    - rm -f ../bats.tap
+    - export GAMBIT="$PWD/../"
+    - ## Pipe test results to file for JENKINS
+    - bats --tap *.bats > ../bats.tap
+    - cd ..
+    ## Note email addresses for failed tests
+    - source gambit_bats/email.bash
+    - export BATS_FAIL_EMAIL=$(bats_fail_email ./bats.tap)
+    - export GIT_FAIL_EMAIL="$(git_fail_email ./gambit_bats) $(git_fail_email ./)"
+    - cowsay "For BATS yaml failures, contact $BATS_FAIL_EMAIL"
+    - cowsay "For GAMBIT and test changes, contact $GIT_FAIL_EMAIL"
+  artifacts:
+    when: always
+    paths:
+      - $CI_PROJECT_DIR/gambit_bats
+    expire_in: 1 week
