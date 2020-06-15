@@ -1,14 +1,14 @@
 stages:
-- build_gambit
+- build_core
 - build_scanners
 - build_backends
 - check
 
 
-build_gambit_x:
+gambit:
   image:
     gambitbsm/gambit-base:fedora
-  stage: build_gambit
+  stage: build_core
   script:
     - apt-get -y update
     - apt-get -y install cmake git curl axel make g++ gfortran python python-yaml libeigen3-dev libboost-dev libgsl-dev
@@ -27,7 +27,7 @@ build_gambit_x:
     expire_in: 1 week
 
 
-build_backends_x:
+backends:
   image:
     gambitbsm/gambit-base:fedora
   stage: build_backends
@@ -47,7 +47,7 @@ build_backends_x:
     expire_in: 1 week
 
 
-test_gambit:
+validate:
   image:
     gambitbsm/gambit-base:fedora
   stage: check
