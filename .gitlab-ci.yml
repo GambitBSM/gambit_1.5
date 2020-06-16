@@ -5,8 +5,11 @@ stages:
 - check
 
 
-# TODO: template the very similar build blocks
+variables:
+  LD_LIBRARY_PATH: /usr/lib/x86_64-linux-gnu:$LD_LIBRARY_PATH
 
+
+# TODO: template the very similar build blocks
 
 scanners:
   image:
@@ -91,7 +94,7 @@ validate:
     - cowsay "Testing GAMBIT on $(date)"
     - cowsay "$(git log -n 5)"
     ## Get BATS tests and notify re. updates
-    - git clone https://github.com/andrewfowlie/gambit_bats
+    - git clone https://github.com/GambitBSM/gambit_bats.git
     - cd gambit_bats
     - git pull
     - cowsay "$(git log -n 5)"
