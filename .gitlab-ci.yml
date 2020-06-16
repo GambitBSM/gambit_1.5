@@ -18,9 +18,9 @@ scanners:
   script:
     #- git clean -dffx
     - export CMAKE_BUILD_TYPE=None
-    - export CMAKE_C_COMPILER=`which gcc`
-    - export CMAKE_CXX_COMPILER=`which g++`
-    - export CMAKE_Fortran_COMPILER=`which gfortran`
+    - export CMAKE_C_COMPILER=`which mpicc`
+    - export CMAKE_CXX_COMPILER=`which mpicxx`
+    - export CMAKE_Fortran_COMPILER=`which mpifort`
     - export PYTHON_EXECUTABLE=`which python`
     - export PYTHON_LIBRARY="`python-config --prefix`/lib/libpython3.8.so"
     - export PYTHON_INCLUDE_DIR="`python-config --prefix`/include/python3.8"
