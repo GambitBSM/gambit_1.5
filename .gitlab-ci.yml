@@ -1,25 +1,29 @@
 stages:
-- build_core
 - build_scanners
 - build_backends
+- build_gambit
 - check
 
 
-gambit:
+# TODO: template the very similar build blocks
+
+
+scanners:
   image:
-    gambitbsm/gambit-base:fedora
-  stage: build_core
+    gambitbsm/gambit-base:ubuntu
+  stage: build_scanners
   script:
-    - apt-get -y update
-    - apt-get -y install cmake git curl axel make g++ gfortran python python-yaml libeigen3-dev libboost-dev libgsl-dev
-    - git clean -dffx
-    # - export CMAKE_C_COMPILER=`which gcc`
-    # - export CMAKE_CXX_COMPILER=`which g++`
-    # - export CMAKE_Fortran_COMPILER=`which gfortran`
-    - mkdir BUILD && cd BUILD
-    - CMAKE_ARGS="-DCMAKE_BUILD_TYPE=Release -DEIGEN3_INCLUDE_DIR=/usr/include/eigen3/"
-    - cmake $CMAKE_ARGS ..
-    - make -j2
+    #- git clean -dffx
+    - export CMAKE_BUILD_TYPE=None
+    - export CMAKE_C_COMPILER=`which gcc`
+    - export CMAKE_CXX_COMPILER=`which g++`
+    - export CMAKE_Fortran_COMPILER=`which gfortran`
+    - export PYTHON_EXECUTABLE=`which python`
+    - export PYTHON_LIBRARY="`python-config --prefix`/lib/libpython3.8.so"
+    - export PYTHON_INCLUDE_DIR="`python-config --prefix`/include/python3.8"
+    - mkdir -p BUILD && cd BUILD
+    - cmake .. -D WITH_ROOT=ON -D WITH_RESTFRAMES=ON -D WITH_HEPMC=ON -D BUILD_FS_MODELS=MDM
+    - make scanners -j2
   artifacts:
     when: always
     paths:
@@ -29,21 +33,51 @@ gambit:
 
 backends:
   image:
-    gambitbsm/gambit-base:fedora
+    gambitbsm/gambit-base:ubuntu
   stage: build_backends
   script:
-    - apt-get -y update
-    - apt-get -y install cmake git curl axel make g++ gfortran python python-yaml libeigen3-dev libboost-dev libgsl-dev
-    - cd BUILD
-    - make scanners
-    - make backends
-    - CMAKE_ARGS="-DCMAKE_BUILD_TYPE=Release -DEIGEN3_INCLUDE_DIR=/usr/include/eigen3/"
-    - cmake $CMAKE_ARGS ..
-    - make -j2
+    #- git clean -dffx
+    - export CMAKE_BUILD_TYPE=None
+    - export CMAKE_C_COMPILER=`which gcc`
+    - export CMAKE_CXX_COMPILER=`which g++`
+    - export CMAKE_Fortran_COMPILER=`which gfortran`
+    - export PYTHON_EXECUTABLE=`which python`
+    - export PYTHON_LIBRARY="`python-config --prefix`/lib/libpython3.8.so"
+    - export PYTHON_INCLUDE_DIR="`python-config --prefix`/include/python3.8"
+    - mkdir -p BUILD && cd BUILD
+    - cmake .. -D WITH_ROOT=ON -D WITH_RESTFRAMES=ON -D WITH_HEPMC=ON -D BUILD_FS_MODELS=MDM
+    - make backends -j2
+  needs:
+    - scanners
   artifacts:
     when: always
     paths:
       - $CI_PROJECT_DIR/BUILD
+    expire_in: 1 week
+
+
+gambit:
+  image:
+    gambitbsm/gambit-base:ubuntu
+  stage: build_gambit
+  script:
+    - export CMAKE_BUILD_TYPE=None
+    - export CMAKE_C_COMPILER=`which gcc`
+    - export CMAKE_CXX_COMPILER=`which g++`
+    - export CMAKE_Fortran_COMPILER=`which gfortran`
+    - export PYTHON_EXECUTABLE=`which python`
+    - export PYTHON_LIBRARY="`python-config --prefix`/lib/libpython3.8.so"
+    - export PYTHON_INCLUDE_DIR="`python-config --prefix`/include/python3.8"
+    - mkdir BUILD && cd BUILD
+    - cmake .. -D WITH_ROOT=ON -D WITH_RESTFRAMES=ON -D WITH_HEPMC=ON -D BUILD_FS_MODELS=MDM
+    - make gambit -j2
+  needs:
+    - scanners
+    - backends
+  artifacts:
+    when: always
+    paths:
+      - BUILD
     expire_in: 1 week
 
 
@@ -72,6 +106,10 @@ validate:
     - export GIT_FAIL_EMAIL="$(git_fail_email ./gambit_bats) $(git_fail_email ./)"
     - cowsay "For BATS yaml failures, contact $BATS_FAIL_EMAIL"
     - cowsay "For GAMBIT and test changes, contact $GIT_FAIL_EMAIL"
+  needs:
+    - scanners
+    - backends
+    - gambit
   artifacts:
     when: always
     paths:
