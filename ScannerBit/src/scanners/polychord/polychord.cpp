@@ -178,7 +178,7 @@ scanner_plugin(polychord, version(1, 17, 1))
       settings.write_live = outfile; 
       settings.write_dead = outfile;
       settings.write_prior = outfile;
-      settings.write_resume = resume_mode;
+      settings.write_resume = outfile;
       settings.read_resume = resume_mode;
       settings.compression_factor = get_inifile_value<double>("compression_factor",0.36787944117144233);
       settings.base_dir = get_inifile_value<std::string>("default_output_path")+"PolyChord";
