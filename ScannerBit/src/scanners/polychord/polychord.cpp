@@ -328,7 +328,12 @@ namespace Gambit {
            std::unordered_map<std::string,double> param_map;
            boundLogLike->getPrior().transform(unitpars, param_map);
            for (auto& param: param_map)
-             phi[index_map[param.first]] = param.second;
+           {
+             // param_map contains ALL parameters.
+             // We just need the ones which are varied (i.e. the keys of index_map)
+             if (index_map.find(param.first) != index_map.end())
+               phi[index_map[param.first]] = param.second;
+           }
          }
 
          // Get, set and ouptut the process rank and this point's ID
@@ -402,7 +407,7 @@ namespace Gambit {
               ofs << index++ << "\t" << inversed_map[i].first << std::endl;
 
             ofs << index++ << "\t" << "MPIrank" << std::endl;
-            ofs << index++ << "\t" << "PointID" << std::endl;
+            ofs << index++ << "\t" << "pointID" << std::endl;
 
             ofs.close();
           }
