@@ -17,8 +17,8 @@ variables:
     - export CMAKE_CXX_COMPILER=`which g++`
     - export CMAKE_Fortran_COMPILER=`which gfortran`
     - export PYTHON_EXECUTABLE=`which python`
-    - export PYTHON_LIBRARY="`python-config --prefix`/lib/libpython3.8.so"
-    - export PYTHON_INCLUDE_DIR="`python-config --prefix`/include/python3.8"
+    - export PYTHON_LIBRARY=`python -c 'from __future__ import print_function; from distutils.sysconfig import get_config_var; print("%s/%s" % (get_config_var("LIBDIR"), get_config_var("INSTSONAME")))'`
+    - export PYTHON_INCLUDE_DIR=`python -c 'from __future__ import print_function; from distutils import sysconfig; print(sysconfig.get_config_var("INCLUDEPY"))'`
     - mkdir -p BUILD && cd BUILD
     - cmake .. -D WITH_ROOT=ON -D WITH_RESTFRAMES=ON -D WITH_HEPMC=ON -D BUILD_FS_MODELS=MDM
     - make $TARGET -j`nproc --ignore=2`
