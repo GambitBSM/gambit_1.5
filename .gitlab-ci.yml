@@ -21,7 +21,9 @@ variables:
     - export PYTHON_INCLUDE_DIR=`python -c 'from __future__ import print_function; from distutils import sysconfig; print(sysconfig.get_config_var("INCLUDEPY"))'`
     - mkdir -p BUILD && cd BUILD
     - cmake .. -D WITH_ROOT=ON -D WITH_RESTFRAMES=ON -D WITH_HEPMC=ON -D BUILD_FS_MODELS=MDM
-    - make $TARGET -j`nproc --ignore=2`
+    - nproc
+    #- make $TARGET -j`nproc --ignore=2`
+    - make $TARGET
   artifacts:
     when: always
     paths:
