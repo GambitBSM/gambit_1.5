@@ -29,34 +29,59 @@ variables:
     expire_in: 1 week
 
 
-scanners:
+scanners_ubuntu:
   variables:
     OS: ubuntu
     TARGET: scanners
   stage: build_scanners
   <<: *build_template
 
-backends:
+backends_ubuntu:
   variables:
     OS: ubuntu
     TARGET: backends
   stage: build_backends
   <<: *build_template
   needs:
-    - scanners
+    - scanners_ubuntu
 
-gambit:
+gambit_ubuntu:
   variables:
     OS: ubuntu
     TARGET: gambit
   stage: build_gambit
   <<: *build_template
   needs:
-    - scanners
-    - backends
+    - scanners_ubuntu
+    - backends_ubuntu
 
 
-# TODO: add Fedora variations via $OS
+scanners_fedora:
+  variables:
+    OS: fedora
+    TARGET: scanners
+  stage: build_scanners
+  <<: *build_template
+
+backends_fedora:
+  variables:
+    OS: fedora
+    TARGET: backends
+  stage: build_backends
+  <<: *build_template
+  needs:
+    - scanners_fedora
+
+gambit_fedora:
+  variables:
+    OS: fedora
+    TARGET: gambit
+  stage: build_gambit
+  <<: *build_template
+  needs:
+    - scanners_fedora
+    - backends_fedora
+
 
 
 # TODO: template on OS
@@ -86,9 +111,9 @@ validate:
     - cowsay "For BATS yaml failures, contact $BATS_FAIL_EMAIL"
     - cowsay "For GAMBIT and test changes, contact $GIT_FAIL_EMAIL"
   needs:
-    - scanners
-    - backends
-    - gambit
+    - scanners_ubuntu
+    - backends_ubuntu
+    - gambit_ubuntu
   artifacts:
     when: always
     paths:
