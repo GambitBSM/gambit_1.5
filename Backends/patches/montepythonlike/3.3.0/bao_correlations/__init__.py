@@ -111,7 +111,7 @@ class bao_correlations(Likelihood):
 
         self.need_cosmo_arguments(data, {'non linear': 'halofit'})    # Is the halofit model appropriate for massive neutrinos?
         self.need_cosmo_arguments(data, {'output': 'mPk'})
-        self.need_cosmo_arguments(data, {'z_max_pk': self.zmax+0.2})
+        self.need_cosmo_arguments(data, {'z_max_pk': self.zmax+0.5})
         # depending on the k values we need, we might have to adjust some
         # CLASS parameters that fix the k range (P_k_max_h/Mpc = 1.)
         self.need_cosmo_arguments(data, {'P_k_max_h/Mpc': 1.})
