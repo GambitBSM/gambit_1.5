@@ -109,9 +109,9 @@ class bao_correlations(Likelihood):
         # maximum redshift, needed to set mPk computing range
         self.zmax = max(self.z + 0.1)
 
-        self.need_cosmo_arguments(data, {'non linear': 'halofit'})    # Is the halofit model appropriate for massive neutrinos?
+        self.need_cosmo_arguments(data, {'non linear': 'halofit'})   
         self.need_cosmo_arguments(data, {'output': 'mPk'})
-        self.need_cosmo_arguments(data, {'z_max_pk': self.zmax+0.2})
+        self.need_cosmo_arguments(data, {'z_max_pk': self.zmax+0.5})  # (JR) had to add 0.5, otherwise class threw an out of range error
         # depending on the k values we need, we might have to adjust some
         # CLASS parameters that fix the k range (P_k_max_h/Mpc = 1.)
         self.need_cosmo_arguments(data, {'P_k_max_h/Mpc': 1.})
@@ -130,7 +130,6 @@ class bao_correlations(Likelihood):
     def loglkl(self, cosmo, data):
 
         # Extra routine needed to compute the cross-correlation coefficients between DR12 and DR14
-        #cross_corr_BOSS_Da_eBOSS_Dv, cross_corr_BOSS_H_eBOSS_Dv, cross_corr_eBOSS_LRG_eBOSS_QSO = self.compute_cross_corr_fisher(cosmo)
         self.correlation_coeffs = self.compute_cross_corr_fisher(cosmo)
         cov_comb_corr = copy.copy(self.cov_comb)
         cov_comb_corr[4, 6] = self.correlation_coeffs[0] * np.sqrt(cov_comb_corr[4, 4]*cov_comb_corr[6, 6])
@@ -288,12 +287,15 @@ class bao_correlations(Likelihood):
                 Fisher *= self.eBOSS_QSO_area*prefac
                 Fisher_tot[3, 3] += Fisher
 
+
+        Fisher_tot[2, 3] *= -1   # Minus sign to ensure eBOSS_LRG and QSO correlation coefficient is positive, as
+        Fisher_tot[3, 2] *= -1   # expected given they measure the same quantity, just in slightly different bins. See comment in get_derivsDaHDv
         Fisher_tot /= 4.0*np.pi**2
 
         cov_lu, pivots, cov, info = dgesv(Fisher_tot, identity)
 
         cross_corr_BOSS_Da_eBOSS_Dv = cov[0, 2]/np.sqrt(cov[0, 0]*cov[2, 2])
-        cross_corr_BOSS_H_eBOSS_Dv = cov[1, 2]/np.sqrt(cov[1, 1]*cov[2, 2])
+        cross_corr_BOSS_H_eBOSS_Dv = -cov[1, 2]/np.sqrt(cov[1, 1]*cov[2, 2])    # Minus sign to convert from coefficient for alpha_par to H(z)
         cross_corr_eBOSS_LRG_eBOSS_QSO = cov[2, 3]/np.sqrt(cov[2, 2]*cov[3, 3])
         return [cross_corr_BOSS_Da_eBOSS_Dv, cross_corr_BOSS_H_eBOSS_Dv, cross_corr_eBOSS_LRG_eBOSS_QSO]
 
@@ -384,6 +386,15 @@ class bao_correlations(Likelihood):
         derivs = np.zeros((3, len(self.kvals), len(self.muvals)))
         derivs[0] = prefac * dpkdalphaperp
         derivs[1] = prefac * dpkdalphapar
-        derivs[2] = prefac * dpkdalpha
+        derivs[2] = -prefac * dpkdalpha
+        # Minus sign in derivs[2] ensures correlation coefficient matrix has positive sign.
+        # We would expect Da and Dv to be positively correlated, so the cross-term in the Fisher matrix
+        # should be negative. This is adhoc, as my way of adding information from each redshift slice to diagonal/off-diagonal
+        # terms means the off- diagonal components are always positive, but I think the correct thing to do.
+        # It is most obvious if you consider the eBOSS LRG and eBOSS QSO overlap. They are both measuring the same quantity,
+        # and we would expect a high value in one to correspond to a high value in the other if they share cosmic variance.
+        # But, if we let the Fisher information in the cross-term be positive, that means we would get a negative cross-
+        # correlation coefficient. This way also gives cross-correlation coefficients equivalent to the Veff ratio
+        # calculated in the eBOSS LRG paper.
 
         return derivs
