@@ -16,9 +16,6 @@ jobs:
     - uses: actions/checkout@v2
     - name: mkenv
       run: |
-           ls
-           ls gambit
-           cd gambit
            mkdir -p BUILD
            cd BUILD
            > buildenv.sh
@@ -33,22 +30,19 @@ jobs:
            echo "export PYTHON_INCLUDE_DIR="$PYTHON_INCLUDE_DIR" >> buildenv.sh
     - name: scanners
       run: |
-           cd gambit/BUILD
-           . buildenv.sh
+           cd BUILD && . buildenv.sh
            cmake .. -D WITH_ROOT=ON -D WITH_RESTFRAMES=ON -D WITH_HEPMC=ON -D BUILD_FS_MODELS=MDM -D WITH_MPI=OFF
            nproc
            make scanners
     - name: backends
       run: |
-           cd gambit/BUILD
-           . buildenv.sh
+           cd BUILD && . buildenv.sh
            cmake .. -D WITH_ROOT=ON -D WITH_RESTFRAMES=ON -D WITH_HEPMC=ON -D BUILD_FS_MODELS=MDM -D WITH_MPI=OFF
            nproc
            make backends
     - name: gambit
       run: |
-           cd gambit/BUILD
-           . buildenv.sh
+           cd BUILD && . buildenv.sh
            cmake .. -D WITH_ROOT=ON -D WITH_RESTFRAMES=ON -D WITH_HEPMC=ON -D BUILD_FS_MODELS=MDM -D WITH_MPI=OFF
            nproc
            make gambit
