@@ -9,59 +9,62 @@ on:
 # TODO: arch matrix
 
 jobs:
-  build:
+  gambit_build:
     runs-on: ubuntu-latest
     container: gambitbsm/gambit-base:ubuntu
     steps:
     - uses: actions/checkout@v2
     - name: mkenv
       run: |
-           mkdir -p BUILD
-           cd BUILD
-           pwd
-           > buildenv.sh
-           echo "export CMAKE_BUILD_TYPE=None" >> buildenv.sh
-           echo "export CMAKE_C_COMPILER=$(which gcc)" >> buildenv.sh
-           echo "export CMAKE_CXX_COMPILER=$(which g++) >> buildenv.sh
-           echo "export CMAKE_Fortran_COMPILER=$(which gfortran) >> buildenv.sh
-           PYTHON_LIBRARY=$(python -c 'from __future__ import print_function; from distutils.sysconfig import get_config_var; print("%s/%s" % (get_config_var("LIBDIR"), get_config_var("INSTSONAME")))')
-           PYTHON_INCLUDE_DIR=$(python -c 'from __future__ import print_function; from distutils import sysconfig; print(sysconfig.get_config_var("INCLUDEPY"))')
-           echo "export PYTHON_EXECUTABLE="$(which python)" >> buildenv.sh
-           echo "export PYTHON_LIBRARY=$PYTHON_LIBRARY" >> buildenv.sh
-           echo "export PYTHON_INCLUDE_DIR="$PYTHON_INCLUDE_DIR" >> buildenv.sh
-           pwd
-           ls
+        mkdir -p BUILD
+        cd BUILD
+        pwd
+        > buildenv.sh
+        echo "export CMAKE_BUILD_TYPE=None" >> buildenv.sh
+        echo "export CMAKE_C_COMPILER=$(which gcc)" >> buildenv.sh
+        echo "export CMAKE_CXX_COMPILER=$(which g++) >> buildenv.sh
+        echo "export CMAKE_Fortran_COMPILER=$(which gfortran) >> buildenv.sh
+        PYTHON_LIBRARY=$(python -c 'from __future__ import print_function; from distutils.sysconfig import get_config_var; print("%s/%s" % (get_config_var("LIBDIR"), get_config_var("INSTSONAME")))')
+        PYTHON_INCLUDE_DIR=$(python -c 'from __future__ import print_function; from distutils import sysconfig; print(sysconfig.get_config_var("INCLUDEPY"))')
+        echo "export PYTHON_EXECUTABLE="$(which python)" >> buildenv.sh
+        echo "export PYTHON_LIBRARY=$PYTHON_LIBRARY" >> buildenv.sh
+        echo "export PYTHON_INCLUDE_DIR="$PYTHON_INCLUDE_DIR" >> buildenv.sh
+        pwd
+        ls
     - name: scanners
       run: |
-           nproc
-           echo
-           ls
-           echo
-           pwd
-           echo
-           ls BUILD/
-           echo
-           pwd
-           echo A
-           cd BUILD/
-           echo B
-           pwd
-           echo C
-           ls
-           echo D
-           . buildenv.sh
-           #cmake .. -D WITH_ROOT=ON -D WITH_RESTFRAMES=ON -D WITH_HEPMC=ON -D BUILD_FS_MODELS=MDM -D WITH_MPI=OFF
-           #nproc
-           #make scanners
+        nproc
+        echo
+        ls
+        echo
+        pwd
+        echo
+        ls BUILD/
+        echo
+        pwd
+        echo A
+        cd BUILD/
+        echo B
+        pwd
+        echo C
+        ls
+        echo D
+        cat buildenv.sh
+        echo E
+        # . buildenv.sh
+        echo F
+        #cmake .. -D WITH_ROOT=ON -D WITH_RESTFRAMES=ON -D WITH_HEPMC=ON -D BUILD_FS_MODELS=MDM -D WITH_MPI=OFF
+        #nproc
+        #make scanners
     - name: backends
       run: |
-           cd BUILD && . buildenv.sh
-           cmake .. -D WITH_ROOT=ON -D WITH_RESTFRAMES=ON -D WITH_HEPMC=ON -D BUILD_FS_MODELS=MDM -D WITH_MPI=OFF
-           nproc
-           make backends
+        cd BUILD && . buildenv.sh
+        cmake .. -D WITH_ROOT=ON -D WITH_RESTFRAMES=ON -D WITH_HEPMC=ON -D BUILD_FS_MODELS=MDM -D WITH_MPI=OFF
+        nproc
+       make backends
     - name: gambit
       run: |
-           cd BUILD && . buildenv.sh
-           cmake .. -D WITH_ROOT=ON -D WITH_RESTFRAMES=ON -D WITH_HEPMC=ON -D BUILD_FS_MODELS=MDM -D WITH_MPI=OFF
-           nproc
-           make gambit
+        cd BUILD && . buildenv.sh
+        cmake .. -D WITH_ROOT=ON -D WITH_RESTFRAMES=ON -D WITH_HEPMC=ON -D BUILD_FS_MODELS=MDM -D WITH_MPI=OFF
+        nproc
+        make gambit
