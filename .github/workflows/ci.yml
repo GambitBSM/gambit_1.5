@@ -11,7 +11,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        arch: [ubuntu, fedora]
+        arch: [ubuntu] #, fedora]
         #mpi: [on, off]
     container: gambitbsm/gambit-base:${{ matrix.arch }}
     defaults:
@@ -23,9 +23,7 @@ jobs:
       run: |
         mkdir -p BUILD
         cd BUILD
-        pwd
         . /etc/profile
-        pwd
         > buildenv.sh
         echo ". /etc/profile" >> buildenv.sh
         echo "export CMAKE_BUILD_TYPE=None" >> buildenv.sh
@@ -38,7 +36,6 @@ jobs:
         echo "export PYTHON_LIBRARY=$PYTHON_LIBRARY" >> buildenv.sh
         echo "export PYTHON_INCLUDE_DIR=$PYTHON_INCLUDE_DIR" >> buildenv.sh
         echo "export LD_LIBRARY_PATH=/usr/lib/x86_64-linux-gnu:$LD_LIBRARY_PATH" >> buildenv.sh
-        pwd
         cat buildenv.sh
     - name: Build scanners
       run: |
