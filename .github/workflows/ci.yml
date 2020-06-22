@@ -51,7 +51,8 @@ jobs:
         echo D
         cat buildenv.sh
         echo E
-        . buildenv.sh
+        echo $SHELL
+        source buildenv.sh
         echo F
         cmake .. -D WITH_ROOT=ON -D WITH_RESTFRAMES=ON -D WITH_HEPMC=ON -D BUILD_FS_MODELS=MDM -D WITH_MPI=OFF
         nproc
