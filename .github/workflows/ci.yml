@@ -1,0 +1,45 @@
+name: Gambit CI
+
+on:
+  push:
+    branches: [ gitlab-ci ]
+  pull_request:
+    branches: [ gitlab-ci ]
+
+# TODO: arch matrix
+
+jobs:
+  build:
+    runs-on: linux
+    container: gambitbsm/gambit-base:ubuntu
+    steps:
+    - uses: actions/checkout
+    - name: mkenv
+      run: |
+           mkdir -p BUILD
+           cd BUILD
+           > buildenv.sh
+           echo "export CMAKE_BUILD_TYPE=None" >> buildenv.sh
+           echo "export CMAKE_C_COMPILER=$(which gcc)" >> buildenv.sh
+           echo "export CMAKE_CXX_COMPILER=$(which g++) >> buildenv.sh
+           echo "export CMAKE_Fortran_COMPILER=$(which gfortran) >> buildenv.sh
+           PYTHON_LIBRARY=$(python -c 'from __future__ import print_function; from distutils.sysconfig import get_config_var; print("%s/%s" % (get_config_var("LIBDIR"), get_config_var("INSTSONAME")))')
+           PYTHON_INCLUDE_DIR=$(python -c 'from __future__ import print_function; from distutils import sysconfig; print(sysconfig.get_config_var("INCLUDEPY"))')
+           echo "export PYTHON_EXECUTABLE="$(which python)" >> buildenv.sh
+           echo "export PYTHON_LIBRARY=$PYTHON_LIBRARY" >> buildenv.sh
+           echo "export PYTHON_INCLUDE_DIR="$PYTHON_INCLUDE_DIR" >> buildenv.sh
+    - name: scanners
+      run: |
+           cmake .. -D WITH_ROOT=ON -D WITH_RESTFRAMES=ON -D WITH_HEPMC=ON -D BUILD_FS_MODELS=MDM -D WITH_MPI=OFF
+           nproc
+           make scanners
+    - name: backends
+      run: |
+           cmake .. -D WITH_ROOT=ON -D WITH_RESTFRAMES=ON -D WITH_HEPMC=ON -D BUILD_FS_MODELS=MDM -D WITH_MPI=OFF
+           nproc
+           make backends
+    - name: gambit
+      run: |
+           cmake .. -D WITH_ROOT=ON -D WITH_RESTFRAMES=ON -D WITH_HEPMC=ON -D BUILD_FS_MODELS=MDM -D WITH_MPI=OFF
+           nproc
+           make gambit
