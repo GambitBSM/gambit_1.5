@@ -99,7 +99,7 @@ BE_NAMESPACE
     if(inputs.param.find("M12") != inputs.param.end())
       slha["MINPAR"][""] << 2 << *inputs.param.at("M12") << "# m12";
     if(inputs.param.find("TanBeta") != inputs.param.end())
-      slha["MINPAR"][""] << 3 << *inputs.param.at("TanBeta") << "# tanb at m_Z";
+      slha["MINPAR"][""] << 3 << *inputs.param.at("TanBeta") << "# tanb at MZ";
     if(inputs.param.find("SignMu") != inputs.param.end())
       slha["MINPAR"][""] << 4 << *inputs.param.at("SignMu") << "# sign(mu)";
     if(inputs.param.find("A0") != inputs.param.end())
@@ -129,7 +129,6 @@ BE_NAMESPACE
       slha["EXTPAR"][""] << 23 << *inputs.param.at("mu") << "# mu";
     if(inputs.param.find("mA") != inputs.param.end())
       slha["EXTPAR"][""] << 24 << pow(*inputs.param.at("mA"),2) << "# mA";
-    if(inputs.param.find("ml2_11") != inputs.param.end())
     if(inputs.param.find("ml2_11") != inputs.param.end())
       slha["EXTPAR"][""] << 31 << sqrt(*inputs.param.at("ml2_11")) << "# M_(L,11)";
     if(inputs.param.find("ml2_22") != inputs.param.end())
@@ -558,12 +557,12 @@ BE_NAMESPACE
     // BLOCK HMIX
     SLHAea_add_block(slha, "HMIX", Q);
     slha["HMIX"][""] << 1 << mu->re << "# mu";
-   slha["HMIX"][""] << 2 << *tanb_Q << "# tan[beta](Q)";
-   slha["HMIX"][""] << 3 << *vev_Q << "# v(Q)";
-   slha["HMIX"][""] << 4 << *mA2_Q << "# m^2_A(Q)";
-   slha["HMIX"][""] << 101 << B->re << "# Bmu DRBar";
-   slha["HMIX"][""] << 102 << (*vevSM)(1) << "# vd DRBar";
-   slha["HMIX"][""] << 103 << (*vevSM)(2) << "# vu DRBar";
+    slha["HMIX"][""] << 2 << *tanb_Q << "# tan[beta](Q)";
+    slha["HMIX"][""] << 3 << *vev_Q << "# v(Q)";
+    slha["HMIX"][""] << 4 << *mA2_Q << "# m^2_A(Q)";
+    slha["HMIX"][""] << 101 << B->re << "# Bmu DRBar";
+    slha["HMIX"][""] << 102 << (*vevSM)(1) << "# vd DRBar";
+    slha["HMIX"][""] << 103 << (*vevSM)(2) << "# vu DRBar";
 
     if(mu->im != 0)
     {
@@ -958,7 +957,7 @@ BE_NAMESPACE
       for(int i=1; i<=3; i++)
         (*Mi_0)(i).re = *inputs.param.at("M12");
     }
-    // TanBeta
+    // TanBeta (at MZ)
     if(inputs.param.find("TanBeta") != inputs.param.end())
     {
       *tanb = *inputs.param.at("TanBeta");
