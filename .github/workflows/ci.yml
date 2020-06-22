@@ -18,6 +18,7 @@ jobs:
       run: |
            mkdir -p BUILD
            cd BUILD
+           pwd
            > buildenv.sh
            echo "export CMAKE_BUILD_TYPE=None" >> buildenv.sh
            echo "export CMAKE_C_COMPILER=$(which gcc)" >> buildenv.sh
@@ -28,12 +29,17 @@ jobs:
            echo "export PYTHON_EXECUTABLE="$(which python)" >> buildenv.sh
            echo "export PYTHON_LIBRARY=$PYTHON_LIBRARY" >> buildenv.sh
            echo "export PYTHON_INCLUDE_DIR="$PYTHON_INCLUDE_DIR" >> buildenv.sh
+           pwd
            ls
     - name: scanners
       run: |
            ls
+           pwd
            ls BUILD/
-           cd BUILD && . buildenv.sh
+           pwd
+           cd BUILD
+           pwd
+           . buildenv.sh
            cmake .. -D WITH_ROOT=ON -D WITH_RESTFRAMES=ON -D WITH_HEPMC=ON -D BUILD_FS_MODELS=MDM -D WITH_MPI=OFF
            nproc
            make scanners
