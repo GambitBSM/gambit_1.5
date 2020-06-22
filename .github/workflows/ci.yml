@@ -55,6 +55,7 @@ jobs:
         cat buildenv.sh
         echo E
         echo @$SHELL@
+        source /etc/profile.d/gambit-setup.sh
         source buildenv.sh
         echo F
         cmake .. -D WITH_ROOT=ON -D WITH_RESTFRAMES=ON -D WITH_HEPMC=ON -D BUILD_FS_MODELS=MDM -D WITH_MPI=OFF
