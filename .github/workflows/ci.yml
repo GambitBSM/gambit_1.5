@@ -6,12 +6,13 @@ on:
   pull_request:
     branches: [ gitlab-ci ]
 
-# TODO: arch matrix
-
 jobs:
   gambit_build:
     runs-on: ubuntu-latest
-    container: gambitbsm/gambit-base:ubuntu
+    strategy:
+      matrix:
+        os: [ubuntu, fedora]
+    container: gambitbsm/gambit-base: ${{ matrix.os }}
     defaults:
       run:
         shell: bash -eo pipefail {0}
