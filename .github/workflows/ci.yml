@@ -23,9 +23,9 @@ jobs:
       run: |
         mkdir -p BUILD
         cd BUILD
-        source /etc/bash.bashrc
+        . /etc/profile
         > buildenv.sh
-        echo "source /etc/bash.bashrc" >> buildenv.sh
+        echo ". /etc/profile" >> buildenv.sh
         echo "export CMAKE_BUILD_TYPE=None" >> buildenv.sh
         echo "export CMAKE_C_COMPILER=$(which mpicc)" >> buildenv.sh
         echo "export CMAKE_CXX_COMPILER=$(which mpic++)" >> buildenv.sh
