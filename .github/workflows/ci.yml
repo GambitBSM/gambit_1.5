@@ -42,11 +42,13 @@ jobs:
            ls BUILD/
            echo
            pwd
-           echo
-           cd BUILD
-           echo
+           echo A
+           cd BUILD/
+           echo B
            pwd
-           echo
+           echo C
+           ls
+           echo D
            . buildenv.sh
            #cmake .. -D WITH_ROOT=ON -D WITH_RESTFRAMES=ON -D WITH_HEPMC=ON -D BUILD_FS_MODELS=MDM -D WITH_MPI=OFF
            #nproc
