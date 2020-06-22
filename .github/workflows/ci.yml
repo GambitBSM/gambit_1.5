@@ -11,8 +11,9 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        os: [ubuntu, fedora]
-    container: gambitbsm/gambit-base: ${{ matrix.os }}
+        arch: [ubuntu, fedora]
+        #mpi: [on, off]
+    container: gambitbsm/gambit-base:${{ matrix.arch }}
     defaults:
       run:
         shell: bash -eo pipefail {0}
@@ -26,9 +27,9 @@ jobs:
         > buildenv.sh
         echo "source /etc/bash.bashrc" >> buildenv.sh
         echo "export CMAKE_BUILD_TYPE=None" >> buildenv.sh
-        echo "export CMAKE_C_COMPILER=$(which gcc)" >> buildenv.sh
-        echo "export CMAKE_CXX_COMPILER=$(which g++)" >> buildenv.sh
-        echo "export CMAKE_Fortran_COMPILER=$(which gfortran)" >> buildenv.sh
+        echo "export CMAKE_C_COMPILER=$(which mpicc)" >> buildenv.sh
+        echo "export CMAKE_CXX_COMPILER=$(which mpic++)" >> buildenv.sh
+        echo "export CMAKE_Fortran_COMPILER=$(which mpifort)" >> buildenv.sh
         PYTHON_LIBRARY=$(python -c 'from __future__ import print_function; from distutils.sysconfig import get_config_var; print("%s/%s" % (get_config_var("LIBDIR"), get_config_var("INSTSONAME")))')
         PYTHON_INCLUDE_DIR=$(python -c 'from __future__ import print_function; from distutils import sysconfig; print(sysconfig.get_config_var("INCLUDEPY"))')
         echo "export PYTHON_EXECUTABLE=$(which python)" >> buildenv.sh
