@@ -32,7 +32,7 @@ Parameters:
     T_cmb: 2.72548
 
   Inflation_InstReh_1quartic:
-    lambda: 1.0e-10
+    lambda: 1.45e-13
 
   dNurCMB:
     dNur_CMB: 0.01
@@ -63,7 +63,7 @@ Scanner:
 
     random:
       plugin: random
-      point_number: 10
+      point_number: 2
       like:  LogLike
 
 #======== Observables of interest ========
@@ -110,8 +110,8 @@ Rules:
     function: set_classy_input_with_MPLike
 
   - capability: classy_primordial_input
-    #function: set_classy_parameters_primordial_ps
-    function: set_classy_parameters_parametrised_ps
+    function: set_classy_parameters_primordial_ps
+    #function: set_classy_parameters_parametrised_ps
 
   - capability: classy_input_params
     #function: set_classy_baseline_params

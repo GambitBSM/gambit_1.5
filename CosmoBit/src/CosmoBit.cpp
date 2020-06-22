@@ -613,9 +613,9 @@ namespace Gambit
       pps = *Dep::primordial_power_spectrum;
       result["modes"] = "t,s";
       result["P_k_ini type"] = "pointer_to_Pk";
-      result["k_array"] = pps.get_k();
-      result["pks_array"] = pps.get_P_s();
-      result["pkt_array"] = pps.get_P_t();
+      result["k_array"] = memaddress_to_uint(pps.get_k().data());
+      result["pks_array"] = memaddress_to_uint(pps.get_P_s().data());
+      result["pkt_array"] = memaddress_to_uint(pps.get_P_t().data());
       result["lnk_size" ] = pps.get_vec_size(); // don't hard code but somehow make consistent with multimode @TODO -> tet
       // pass pivot scale of external spectrum to CLASS
       result["k_pivot"] = *Dep::k_pivot;
