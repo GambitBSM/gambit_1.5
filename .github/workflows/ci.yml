@@ -82,20 +82,20 @@ jobs:
         cowsay "$(git log -n 5)"
         # Install BATS
         git clone https://github.com/bats-core/bats-core.git
-        echo 'export PATH=$PATH:$PWD/bats-core/bin' >> ../BUILD/buildenv.sh
+        echo 'export PATH=$PATH:$GITHUB_WORKSPACE/gambit_bats/bats-core/bin' >> ../BUILD/buildenv.sh
         # Install numdiff
         git clone https://github.com/tjhei/numdiff
         (cd numdiff && ./configure && make)
-        echo 'export PATH=$PATH:PWD/numdiff' >> ../BUILD/buildenv.sh
+        echo 'export PATH=$PATH:$GITHUB_WORKSPACE/gambit_bats/numdiff' >> ../BUILD/buildenv.sh
     - name: Validate with BATS
       run: |
+        cat BUILD/buildenv.sh
         . BUILD/buildenv.sh
         cowsay "Testing GAMBIT on $(date)"
         cowsay "$(git log -n 5)"
         cd gambit_bats
-        export GAMBIT="$PWD/../"
-        # Pipe test results to file for JENKINS
-        bats --tap *.bats > ../bats.tap
+        export GAMBIT="$GITHUB_WORKSPACE"
+        bats --tap *.bats > $GAMBIT/bats.tap
         cd ..
         # Note email addresses for failed tests
         source gambit_bats/email.bash
