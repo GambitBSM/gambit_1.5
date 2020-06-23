@@ -22,8 +22,8 @@ jobs:
     - name: Ubuntu HDF5 clean
       if: ${{ matrix.arch == 'ubuntu' }}
       run: |
-        apt-get remove libhdf5-openmpi-dev
-        apt-get install libhdf5-dev
+        apt-get -y remove libhdf5-openmpi-dev
+        apt-get -y install libhdf5-dev
     - name: Set up build environment
       run: |
         mkdir -p BUILD
