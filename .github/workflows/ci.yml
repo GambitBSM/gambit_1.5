@@ -10,9 +10,10 @@ jobs:
   gambit_build:
     runs-on: ubuntu-latest
     strategy:
+      fail-fast: false
       matrix:
-        arch: [ubuntu] #, fedora]
-        #mpi: [on, off]
+        arch: [ubuntu, fedora]
+        #mpi: [ON, OFF]
     container: gambitbsm/gambit-base:${{ matrix.arch }}
     defaults:
       run:
