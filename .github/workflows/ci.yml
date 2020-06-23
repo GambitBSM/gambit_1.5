@@ -19,6 +19,11 @@ jobs:
         shell: bash -eo pipefail {0}
     steps:
     - uses: actions/checkout@v2
+    - name: Ubuntu HDF5 clean
+      if: ${{ matrix.os == 'ubuntu' }}
+      run: |
+        apt-get remove libhdf5-openmpi-dev
+        apt-get install libhdf5-dev
     - name: Set up build environment
       run: |
         mkdir -p BUILD
