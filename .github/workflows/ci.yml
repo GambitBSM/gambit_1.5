@@ -19,11 +19,17 @@ jobs:
         shell: bash -eo pipefail {0}
     steps:
     - uses: actions/checkout@v2
-    - name: Ubuntu HDF5 clean
+    - name: Ubuntu packages
       if: ${{ matrix.arch == 'ubuntu' }}
       run: |
         apt-get -y remove libhdf5-openmpi-dev
         apt-get -y install libhdf5-dev
+        apt-get -y autoclean
+    - name: Fedora packages
+      if: ${{ matrix.arch == 'fedora' }}
+      run: |
+        echo "max_parallel_downloads=10" >> /etc/dnf/dnf.conf
+        #dnf install -y
     - name: Set up build environment
       run: |
         mkdir -p BUILD
@@ -56,19 +62,36 @@ jobs:
       run: |
         cd BUILD && . buildenv.sh
         make -j$(nproc) gambit
+    - name: Ubuntu validation packages
+      if: ${{ matrix.arch == 'ubuntu' }}
+      run: |
+        apt-get -y update
+        apt-get -y install cowsay
+        echo 'export PATH=$PATH:/usr/games' >> BUILD/buildenv.sh
+    - name: Fedora validation packages
+      if: ${{ matrix.arch == 'fedora' }}
+      run: |
+        dnf install cowsay
+    - name: Validation dependencies
+      run: |
+        . BUILD/buildenv.sh
+        # Fetch my tests
+        git clone https://github.com/andrewfowlie/gambit_bats
+        cd gambit_bats
+        cowsay "$(git log -n 5)"
+        # Install BATS
+        git clone https://github.com/bats-core/bats-core.git
+        echo 'export PATH=$PATH:$PWD/bats-core/bin' >> ../BUILD/buildenv.sh
+        # Install numdiff
+        git clone https://github.com/tjhei/numdiff
+        (cd numdiff && ./configure && make)
+        echo 'export PATH=$PATH:PWD/numdiff' >> ../BUILD/buildenv.sh
     - name: Validate with BATS
       run: |
         . BUILD/buildenv.sh
-        apt-get -y update
-        apt-get -y install git python python-yaml cowsay bats numdiff
         cowsay "Testing GAMBIT on $(date)"
         cowsay "$(git log -n 5)"
-        # Get BATS tests and notify re. updates
-        git clone https://github.com/GambitBSM/gambit_bats.git
         cd gambit_bats
-        git pull
-        cowsay "$(git log -n 5)"
-        rm -f ../bats.tap
         export GAMBIT="$PWD/../"
         # Pipe test results to file for JENKINS
         bats --tap *.bats > ../bats.tap
