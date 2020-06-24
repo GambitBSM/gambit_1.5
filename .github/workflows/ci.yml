@@ -94,9 +94,16 @@ jobs:
         cowsay "Testing GAMBIT on $(date)"
         cowsay "$(git log -n 5)"
         cd gambit_bats
+        echo "Dir = $PWD"
+        echo "Dir contents:"
+        ls
         export GAMBIT="$GITHUB_WORKSPACE"
+        echo "Running BATS"
         bats --tap *.bats > $GAMBIT/bats.tap
+        echo "Finished BATS"
         cd ..
+        echo "Dir = $PWD"
+        echo "Dir contents:"
         # Note email addresses for failed tests
         source gambit_bats/email.bash
         export BATS_FAIL_EMAIL=$(bats_fail_email ./bats.tap)
