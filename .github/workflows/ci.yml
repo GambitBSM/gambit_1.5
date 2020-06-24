@@ -97,6 +97,9 @@ jobs:
         echo "Dir = $PWD"
         echo "Dir contents:"
         ls
+        echo "Testing BATS"
+        bats
+        numdiff
         export GAMBIT="$GITHUB_WORKSPACE"
         echo "Running BATS"
         bats --tap *.bats > $GAMBIT/bats.tap
