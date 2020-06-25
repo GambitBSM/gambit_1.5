@@ -19,7 +19,8 @@ jobs:
       run:
         shell: bash -eo pipefail {0}
     steps:
-    - uses: actions/checkout@v2
+    - name: Checkout
+      uses: actions/checkout@v2
     - name: Ubuntu packages
       if: ${{ matrix.arch == 'ubuntu' }}
       run: |
@@ -124,7 +125,7 @@ jobs:
         echo "Running BATS with TAP output (to bats.tap)"
         bats --tap *.bats > $GAMBIT/bats.tap
     - name: Upload BATS output
-        uses: actions/upload-artifact@v2
-        with:
-          name: bats_tests
-          path: bats.t*
+      uses: actions/upload-artifact@v2
+      with:
+        name: bats_tests
+        path: bats.t*
