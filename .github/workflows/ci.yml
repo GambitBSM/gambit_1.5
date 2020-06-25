@@ -111,16 +111,20 @@ jobs:
         #numdiff || true
         echo "Running BATS"
         export GAMBIT="$GITHUB_WORKSPACE"
-        bats *.bats || true
-        echo "Running BATS (with TAP output)"
-        (bats --tap *.bats | tee $GAMBIT/bats.tap) || true
-        echo "Finished BATS"
+        (bats *.bats | tee $GAMBIT/bats.txt) || true
         cd ..
-        echo "Dir = $PWD"
-        echo "Dir contents:"
         # Note email addresses for failed tests
         source gambit_bats/email.bash
         export BATS_FAIL_EMAIL=$(bats_fail_email ./bats.tap)
         export GIT_FAIL_EMAIL="$(git_fail_email ./gambit_bats) $(git_fail_email ./)"
         cowsay "For BATS yaml failures, contact $BATS_FAIL_EMAIL"
         cowsay "For GAMBIT and test changes, contact $GIT_FAIL_EMAIL"
+        echo
+        # Run again, now with TAP output (may fail, causing the job to report correctly)
+        echo "Running BATS with TAP output (to bats.tap)"
+        bats --tap *.bats > $GAMBIT/bats.tap
+    - name: Upload BATS output
+        uses: actions/upload-artifact@v2
+        with:
+          name: bats_tests
+          path: bats.t*
