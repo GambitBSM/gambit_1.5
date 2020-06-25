@@ -36,6 +36,8 @@ jobs:
         mkdir -p BUILD
         cd BUILD
         echo 1
+        ls -l /etc/profile
+        cat /etc/profile
         . /etc/profile
         echo 2
         > buildenv.sh
