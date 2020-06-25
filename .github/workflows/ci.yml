@@ -104,16 +104,16 @@ jobs:
         cowsay "Testing GAMBIT on $(date)"
         cowsay "$(git log -n 5)"
         cd gambit_bats
-        echo "Dir = $PWD"
-        echo "Dir contents:"
         ls
-        echo "Testing BATS"
-        bats -h
-        echo "Testing numdiff"
-        numdiff || true
+        #echo "Testing BATS"
+        #bats -h
+        #echo "Testing numdiff"
+        #numdiff || true
         echo "Running BATS"
         export GAMBIT="$GITHUB_WORKSPACE"
-        bats --tap *.bats > $GAMBIT/bats.tap
+        bats *.bats || true
+        echo "Running BATS (with TAP output)"
+        (bats --tap *.bats | tee $GAMBIT/bats.tap) || true
         echo "Finished BATS"
         cd ..
         echo "Dir = $PWD"
