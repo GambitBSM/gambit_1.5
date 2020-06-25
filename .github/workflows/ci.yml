@@ -99,9 +99,10 @@ jobs:
         ls
         echo "Testing BATS"
         bats
+        echo "Testing numdiff"
         numdiff
-        export GAMBIT="$GITHUB_WORKSPACE"
         echo "Running BATS"
+        export GAMBIT="$GITHUB_WORKSPACE"
         bats --tap *.bats > $GAMBIT/bats.tap
         echo "Finished BATS"
         cd ..
