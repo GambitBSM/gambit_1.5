@@ -12,7 +12,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        arch: [ubuntu, fedora]
+        arch: [ubuntu, fedora, debpy2]
         #mpi: [ON, OFF]
     container: gambitbsm/gambit-base:${{ matrix.arch }}
     defaults:
@@ -24,8 +24,8 @@ jobs:
     - name: Ubuntu packages
       if: ${{ matrix.arch == 'ubuntu' }}
       run: |
-        apt-get -y remove libhdf5-openmpi-dev
-        apt-get -y install libhdf5-dev
+        apt-get -y remove libhdf5-openmpi-dev || true
+        apt-get -y install libhdf5-dev || true
         apt-get -y autoclean
     - name: Fedora packages
       if: ${{ matrix.arch == 'fedora' }}
@@ -75,7 +75,7 @@ jobs:
         cd BUILD && . buildenv.sh
         make -j$(nproc) gambit
     - name: Ubuntu validation packages
-      if: ${{ matrix.arch == 'ubuntu' }}
+      if: ${{ matrix.arch == 'ubuntu' || matrix.arch == 'debpy2' }}
       run: |
         apt-get -y update
         apt-get -y install cowsay
