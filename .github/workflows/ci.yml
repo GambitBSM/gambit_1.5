@@ -63,7 +63,6 @@ jobs:
     - name: Build scanners
       run: |
         cd BUILD/ && . buildenv.sh
-        -DBUILD_FS_MODELS="CMSSM;MSSM"
         cmake .. -D WITH_ROOT=ON -D WITH_RESTFRAMES=ON -D WITH_HEPMC=ON -D BUILD_FS_MODELS="CMSSM;MSSM;MDM" -D WITH_MPI=OFF
         make -j$(nproc) scanners
         cmake .. -D WITH_ROOT=ON -D WITH_RESTFRAMES=ON -D WITH_HEPMC=ON -D BUILD_FS_MODELS="CMSSM;MSSM;MDM" -D WITH_MPI=OFF
