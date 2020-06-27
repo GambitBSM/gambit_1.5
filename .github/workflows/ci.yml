@@ -22,11 +22,12 @@ jobs:
     - name: Checkout
       uses: actions/checkout@v2
     - name: Ubuntu packages
-      if: ${{ matrix.arch == 'ubuntu' }}
+      if: ${{ matrix.arch == 'ubuntu' || matrix.arch == 'debpy2' }}
       run: |
         apt-get -y remove libhdf5-openmpi-dev || true
         apt-get -y install libhdf5-dev || true
         apt-get -y autoclean
+        apt-get -y autoremove
     - name: Fedora packages
       if: ${{ matrix.arch == 'fedora' }}
       run: |
@@ -60,6 +61,7 @@ jobs:
         echo "export LD_LIBRARY_PATH=/usr/lib/x86_64-linux-gnu:$LD_LIBRARY_PATH" >> buildenv.sh
         echo 8
         cat buildenv.sh
+        pip install pyyaml pybind11 h5py
     - name: Build scanners
       run: |
         cd BUILD/ && . buildenv.sh
