@@ -86,8 +86,8 @@ jobs:
         #numdiff || true
         echo "Running BATS"
         export GAMBIT="$GITHUB_WORKSPACE"
-        (python2 `which bats` *.bats | tee $GAMBIT/bats.txt) || true
-        # (bats *.bats | tee $GAMBIT/bats.txt) || true
+        #(python2 `which bats` *.bats | tee $GAMBIT/bats.txt) || true
+        (bats *.bats | tee $GAMBIT/bats.txt) || true
         cd ..
         # Note email addresses for failed tests
         source gambit_bats/email.bash
@@ -98,6 +98,7 @@ jobs:
         echo
         # Run again, now with TAP output (may fail, causing the job to report correctly)
         echo "Running BATS with TAP output (to bats.tap)"
+        cd gambit_bats
         bats --tap *.bats > $GAMBIT/bats.tap
     - name: Upload BATS output
       uses: actions/upload-artifact@v2
