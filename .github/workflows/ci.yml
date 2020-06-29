@@ -21,17 +21,6 @@ jobs:
     steps:
     - name: Checkout
       uses: actions/checkout@v2
-    # - name: Ubuntu packages
-    #   if: ${{ matrix.arch == 'ubuntu' }}
-    #   run: |
-    #     apt-get -y remove libhdf5-openmpi-dev || true
-    #     apt-get -y install libhdf5-dev || true
-    #     apt-get -y autoclean
-    #     apt-get -y autoremove
-    # - name: Fedora packages
-    #   if: ${{ matrix.arch == 'fedora' }}
-    #   run: |
-    #     #dnf install -y
     - name: Set up build environment
       run: |
         mkdir -p BUILD
@@ -68,19 +57,10 @@ jobs:
       run: |
         cd BUILD && . buildenv.sh
         make -j$(nproc) gambit
-    - name: Ubuntu validation packages
-      if: ${{ matrix.arch == 'ubuntu' || matrix.arch == 'debpy2' }}
-      run: |
-        apt-get -y update
-        apt-get -y install cowsay
-        echo 'export PATH=$PATH:/usr/games' >> BUILD/buildenv.sh
-    - name: Fedora validation packages
-      if: ${{ matrix.arch == 'fedora' }}
-      run: |
-        dnf install cowsay
     - name: Validation dependencies
       run: |
         . BUILD/buildenv.sh
+        pip install cowsay
         # Fetch my tests
         git clone https://github.com/andrewfowlie/gambit_bats
         cd gambit_bats
