@@ -12,7 +12,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        arch: [ubuntu, fedora, debpy2]
+        arch: [ubuntu, fedora, ubuntu-py2]
         #mpi: [ON, OFF]
     container: gambitbsm/gambit-base:${{ matrix.arch }}
     defaults:
@@ -21,18 +21,17 @@ jobs:
     steps:
     - name: Checkout
       uses: actions/checkout@v2
-    - name: Ubuntu packages
-      if: ${{ matrix.arch == 'ubuntu' || matrix.arch == 'debpy2' }}
-      run: |
-        apt-get -y remove libhdf5-openmpi-dev || true
-        apt-get -y install libhdf5-dev || true
-        apt-get -y autoclean
-        apt-get -y autoremove
-    - name: Fedora packages
-      if: ${{ matrix.arch == 'fedora' }}
-      run: |
-        echo "max_parallel_downloads=10" >> /etc/dnf/dnf.conf
-        #dnf install -y
+    # - name: Ubuntu packages
+    #   if: ${{ matrix.arch == 'ubuntu' }}
+    #   run: |
+    #     apt-get -y remove libhdf5-openmpi-dev || true
+    #     apt-get -y install libhdf5-dev || true
+    #     apt-get -y autoclean
+    #     apt-get -y autoremove
+    # - name: Fedora packages
+    #   if: ${{ matrix.arch == 'fedora' }}
+    #   run: |
+    #     #dnf install -y
     - name: Set up build environment
       run: |
         mkdir -p BUILD
@@ -40,11 +39,11 @@ jobs:
         echo 1
         ls -l /etc/profile
         cat /etc/profile
-        . /etc/profile
+        source /etc/profile.d/gambit-setup.sh
         echo 2
         > buildenv.sh
         echo 3
-        echo ". /etc/profile" >> buildenv.sh
+        echo "source /etc/profile.d/gambit-setup.sh" >> buildenv.sh
         echo "export CMAKE_BUILD_TYPE=None" >> buildenv.sh
         echo 4
         echo "export CMAKE_C_COMPILER=$(which gcc)" >> buildenv.sh
