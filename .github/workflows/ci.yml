@@ -86,7 +86,8 @@ jobs:
         #numdiff || true
         echo "Running BATS"
         export GAMBIT="$GITHUB_WORKSPACE"
-        (bats *.bats | tee $GAMBIT/bats.txt) || true
+        (python2 `which bats` *.bats | tee $GAMBIT/bats.txt) || true
+        # (bats *.bats | tee $GAMBIT/bats.txt) || true
         cd ..
         # Note email addresses for failed tests
         source gambit_bats/email.bash
