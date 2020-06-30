@@ -1711,17 +1711,36 @@ namespace Gambit
 
     /// Initialises the container within CosmoBit from classy, but designed specifically
     /// to be used when MontePython is in use. This will ensure additional outputs are
-    /// computed by classy CLASS to be passed to MontePython.
+    /// computed by classy CLASS to be passed to MontePython:
+    /// When initialising the MontePython Likelihood objects they add the output that needs to be computed by class
+    /// to the input dictionary. We need to get these before starting the class run
+    /// e.g. for Planck_SZ likelihood the entries {'output': ' mPk ', 'P_k_max_h/Mpc': '1.'} need to be added
+    /// to compute all needed observables, these entries are collected here.
     void set_classy_input_with_MPLike(pybind11::dict& result)
     {
       using namespace Pipes::set_classy_input_with_MPLike;
+
+      // make sure nothing from previous run is contained
+      result.clear();
 
       // Only get info from MP if something actually needs it downstream
       if (Downstream::neededFor("MP_LogLikes"))
       {
         // get extra cosmo_arguments from MP (gives a dictionary with output values that need
         // to be set for the class run)
-        static pybind11::dict MP_cosmo_arguments = *Dep::cosmo_args_from_MPLike;
+
+        static pybind11::dict tmp_dict = std::get<0>(*Dep::MP_objects).attr("cosmo_arguments");
+        static pybind11::dict MP_cosmo_arguments;
+        // Stringify all values in the dictionary and strip off leading and trailing whitespaces
+        for (auto it: tmp_dict)
+        {
+          std::string key = (pybind11::str(it.first)).cast<std::string>();
+          std::string val = (pybind11::str(it.second)).cast<std::string>();
+          boost::algorithm::trim(val);
+          MP_cosmo_arguments[key.c_str()] = val.c_str();
+        }
+
+
         logger() << LogTags::debug << "Extra cosmo_arguments needed from MP Likelihoods: ";
         logger() << pybind11::repr(MP_cosmo_arguments) << EOM;
         // pass dictionary containing input arguments from MP likelihoods
@@ -2099,24 +2118,6 @@ namespace Gambit
       }
     }
 
-    /// When initialising the MontePython Likelihood objects they add the output that needs to be computed by class
-    /// to the input dictionary. We need to get these before starting the class run
-    /// e.g. for Planck_SZ likelihood the entries {'output': ' mPk ', 'P_k_max_h/Mpc': '1.'} need to be added
-    /// to compute all needed observables
-    void init_cosmo_args_from_MPLike(pybind11::dict &result)
-    {
-      using namespace Pipes::init_cosmo_args_from_MPLike;
-      result.clear();
-      pybind11::dict tmp_dict = std::get<0>(*Dep::MP_objects).attr("cosmo_arguments");
-      // Stringify all values in the dictionary and strip off leading and trailing whitespaces
-      for (auto it: tmp_dict)
-      {
-        std::string key = (pybind11::str(it.first)).cast<std::string>();
-        std::string val = (pybind11::str(it.second)).cast<std::string>();
-        boost::algorithm::trim(val);
-        result[key.c_str()] = val.c_str();
-      }
-    }
 
     /// Computes lnL for each experiment initialised in MontePython
     void compute_MP_LogLikes(map_str_dbl & result)

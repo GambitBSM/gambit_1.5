@@ -194,7 +194,7 @@ START_MODULE
   START_CAPABILITY
     #define FUNCTION set_classy_input_with_MPLike
     START_FUNCTION(pybind11::dict)
-    DEPENDENCY(cosmo_args_from_MPLike,  pybind11::dict)
+    DEPENDENCY(MP_objects, MPLike_objects_container)
     #undef FUNCTION
 
     #define FUNCTION set_classy_input_no_MPLike
@@ -804,14 +804,6 @@ START_MODULE
 
     #define FUNCTION pass_empty_parameter_dict_for_MPLike
     START_FUNCTION(pybind11::dict)
-    #undef FUNCTION
-  #undef CAPABILITY
-
-  #define CAPABILITY cosmo_args_from_MPLike
-  START_CAPABILITY
-    #define FUNCTION init_cosmo_args_from_MPLike
-    START_FUNCTION(pybind11::dict)
-    DEPENDENCY(MP_objects, MPLike_objects_container)
     #undef FUNCTION
   #undef CAPABILITY
 
