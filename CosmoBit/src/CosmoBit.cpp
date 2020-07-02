@@ -456,7 +456,7 @@ namespace Gambit
       static bool first_run = true;
 
       // Get the dictionary with inputs for the neutrino masses and merge it
-      // into Classy_Input dictionary     
+      // into Classy_Input dictionary
       std::string common_keyszero = result.add_dict(*Dep::classy_MPLike_input);
       result.merge_input_dicts(*Dep::classy_NuMasses_Nur_input);
       result.merge_input_dicts(*Dep::classy_primordial_input);
@@ -594,7 +594,7 @@ namespace Gambit
       }
 
       // Set helium abundance
-      result["YHe"] = *Dep::helium_abundance; 
+      result["YHe"] = *Dep::helium_abundance;
 
     }
 
@@ -1719,207 +1719,199 @@ namespace Gambit
     void set_classy_input_with_MPLike(pybind11::dict& result)
     {
       using namespace Pipes::set_classy_input_with_MPLike;
+      static bool first = true;
 
-      // make sure nothing from previous run is contained
-      result.clear();
-
-      // Only get info from MP if something actually needs it downstream
-      if (Downstream::neededFor("MP_LogLikes"))
+      // Only do this this first time through, and if something actually needs info from MP downstream
+      if (first and Downstream::neededFor("MP_LogLikes"))
       {
         // get extra cosmo_arguments from MP (gives a dictionary with output values that need
         // to be set for the class run)
-
-        static pybind11::dict tmp_dict = std::get<0>(*Dep::MP_objects).attr("cosmo_arguments");
-        static pybind11::dict MP_cosmo_arguments;
+        pybind11::dict tmp_dict = std::get<0>(*Dep::MP_objects).attr("cosmo_arguments");
         // Stringify all values in the dictionary and strip off leading and trailing whitespaces
         for (auto it: tmp_dict)
         {
           std::string key = (pybind11::str(it.first)).cast<std::string>();
           std::string val = (pybind11::str(it.second)).cast<std::string>();
           boost::algorithm::trim(val);
-          MP_cosmo_arguments[key.c_str()] = val.c_str();
+          result[key.c_str()] = val.c_str();
         }
-
-
         logger() << LogTags::debug << "Extra cosmo_arguments needed from MP Likelihoods: ";
-        logger() << pybind11::repr(MP_cosmo_arguments) << EOM;
-        // pass dictionary containing input arguments from MP likelihoods
-        result = MP_cosmo_arguments;
+        logger() << pybind11::repr(result) << EOM;
+        first = false;
+      }
+    }
+
+
+    void set_classy_parameters_EnergyInjection_AnnihilatingDM(pybind11::dict &result)
+    {
+      using namespace Pipes::set_classy_parameters_EnergyInjection_AnnihilatingDM;
+
+      // make sure nothing from previous run is contained
+      result.clear();
+
+      // Set relevant inputs for the scenario of s-wave annihilating DM
+      const ModelParameters& NP_params = *Dep::AnnihilatingDM_general_parameters;
+      result["DM_annihilation_cross_section"] = NP_params.at("sigmav");
+      result["DM_annihilation_mass"] = NP_params.at("mass");
+
+      // Get the results from the DarkAges tables that hold extra information to be passed to the CLASS thermodynamics structure
+      static DarkAges::Energy_injection_efficiency_table fz;
+      static DarkAges::Energy_injection_efficiency_table cached_fz;
+
+      fz = *Dep::energy_injection_efficiency;
+      bool f_eff_mode = fz.f_eff_mode;
+
+      // flag passed to CLASS to signal that the energy_deposition_function is coming from GAMBIT
+      // we patched exoclass to accept this. An alternative way without patching would be to write the tables to disk &
+      // just have CLASS read in the file. To avoid the repeated file writing & deleting we pass pointers to the vector/arrays
+      // to CLASS instead
+      if (f_eff_mode)
+      {
+        result["f_eff_type"] = "pointer_to_fz_eff";
+      }
+      else
+      {
+        result["f_eff_type"] = "pointer_to_fz_channel";
       }
 
+      // set the lengths of the input tables (since we are passing pointers to arrays CLASS has to know how long they are)
+      result["energyinj_coef_num_lines"] = fz.redshift.size();
+
+      // add the pointers to arrays class needs to know about to input dictionary
+      // Note:
+      //    - memory addresses are passed as strings (python wrapper for CLASS converts every entry to a string internally so
+      //      we need to do that for the memory addresses before python casts them to something else)
+      result["energyinj_coef_z"] = memaddress_to_uint(fz.redshift.data());
+      if (f_eff_mode)
+      {
+        result["energyinj_coef_tot"] = memaddress_to_uint(fz.f_eff.data());
+      }
+      else
+      {
+        result["energyinj_coef_heat"] = memaddress_to_uint(fz.f_heat.data());
+        result["energyinj_coef_lya"] = memaddress_to_uint(fz.f_lya.data());
+        result["energyinj_coef_ionH"] = memaddress_to_uint(fz.f_hion.data());
+        result["energyinj_coef_ionHe"] = memaddress_to_uint(fz.f_heion.data());
+        result["energyinj_coef_lowE"] = memaddress_to_uint(fz.f_lowe.data());
+      }
+
+      // Check if the table has changed compared to the previous iteration
+      // If so, notify class by adding {"EnergyInjection_changed":"yes"}
+      // to the dictionary.
+      // (The classy frontend will just look for the key, The value is not important here)
+      if (fz != cached_fz)
+        result["EnergyInjection_changed"] = "yes";
+
+      // copy fz to cache
+      cached_fz = fz;
     }
 
-
-  void set_classy_parameters_EnergyInjection_AnnihilatingDM(pybind11::dict &result)
-  {
-    using namespace Pipes::set_classy_parameters_EnergyInjection_AnnihilatingDM;
-
-    // make sure nothing from previous run is contained
-    result.clear();
-
-    // Set relevant inputs for the scenario of s-wave annihilating DM
-    const ModelParameters& NP_params = *Dep::AnnihilatingDM_general_parameters;
-    result["DM_annihilation_cross_section"] = NP_params.at("sigmav");
-    result["DM_annihilation_mass"] = NP_params.at("mass");
-
-    // Get the results from the DarkAges tables that hold extra information to be passed to the CLASS thermodynamics structure
-    static DarkAges::Energy_injection_efficiency_table fz;
-    static DarkAges::Energy_injection_efficiency_table cached_fz;
-
-    fz = *Dep::energy_injection_efficiency;
-    bool f_eff_mode = fz.f_eff_mode;
-
-    // flag passed to CLASS to signal that the energy_deposition_function is coming from GAMBIT
-    // we patched exoclass to accept this. An alternative way without patching would be to write the tables to disk &
-    // just have CLASS read in the file. To avoid the repeated file writing & deleting we pass pointers to the vector/arrays
-    // to CLASS instead
-    if (f_eff_mode)
+    void set_classy_parameters_EnergyInjection_DecayingDM(pybind11::dict &result)
     {
-      result["f_eff_type"] = "pointer_to_fz_eff";
+      using namespace Pipes::set_classy_parameters_EnergyInjection_DecayingDM;
+
+      // make sure nothing from previous run is contained
+      result.clear();
+
+      // Set relevant inputs for the scenario of decaying DM
+      const ModelParameters& NP_params = *Dep::DecayingDM_general_parameters;
+      result["DM_decay_tau"] = NP_params.at("lifetime");
+      result["DM_decay_fraction"] = NP_params.at("fraction");
+
+      // Get the results from the DarkAges tables that hold extra information to be passed to the CLASS thermodynamics structure
+      static DarkAges::Energy_injection_efficiency_table fz;
+      static DarkAges::Energy_injection_efficiency_table cached_fz;
+
+      fz = *Dep::energy_injection_efficiency;
+      bool f_eff_mode = fz.f_eff_mode;
+
+      // flag passed to CLASS to signal that the energy_deposition_function is coming from GAMBIT
+      // we patched exoclass to accept this. An alternative way without patching would be to write the tables to disk &
+      // just have CLASS read in the file. To avoid the repeated file writing & deleting we pass pointers to the vector/arrays
+      // to CLASS instead
+      if (f_eff_mode)
+      {
+        result["f_eff_type"] = "pointer_to_fz_eff";
+      }
+      else
+      {
+        result["f_eff_type"] = "pointer_to_fz_channel";
+      }
+
+      // set the lengths of the input tables (since we are passing pointers to arrays CLASS has to know how long they are)
+      result["energyinj_coef_num_lines"] = fz.redshift.size();
+
+      // add the pointers to arrays class needs to know about to input dictionary
+      // Note:
+      //    - memory addresses are passed as strings (python wrapper for CLASS converts every entry to a string internally so
+      //      we need to do that for the memory addresses before python casts them to something else)
+      result["energyinj_coef_z"] = memaddress_to_uint(fz.redshift.data());
+      if (f_eff_mode)
+      {
+        result["energyinj_coef_tot"] = memaddress_to_uint(fz.f_eff.data());
+      }
+      else
+      {
+        result["energyinj_coef_heat"] = memaddress_to_uint(fz.f_heat.data());
+        result["energyinj_coef_lya"] = memaddress_to_uint(fz.f_lya.data());
+        result["energyinj_coef_ionH"] = memaddress_to_uint(fz.f_hion.data());
+        result["energyinj_coef_ionHe"] = memaddress_to_uint(fz.f_heion.data());
+        result["energyinj_coef_lowE"] = memaddress_to_uint(fz.f_lowe.data());
+      }
+
+      // Check if the table has changed compared to the previous iteration
+      // If not, notify class by adding {"EnergyInjection_changed":"yes"}
+      // to the dictionary.
+      // (The classy frontend will just look for the key, The value is not important here)
+      if (fz != cached_fz)
+        result["EnergyInjection_changed"] = "yes";
+
+      // copy fz to cache
+      cached_fz = fz;
     }
-    else
+
+    /// add all inputs for CLASS needed to produce the correct output to be
+    /// able to compute the Planck CMB likelihoods
+    void set_classy_PlanckLike_input(pybind11::dict &result)
     {
-      result["f_eff_type"] = "pointer_to_fz_channel";
+      using namespace Pipes::set_classy_PlanckLike_input;
+
+      // make sure nothing from previous run is contained
+      result.clear();
+
+      static std::ostringstream output;
+      static std::ostringstream l_max_scalars;
+
+      static bool first = true;
+      if(first)
+      {
+        int lmax = -1;
+        bool needs_tCl = false;
+        bool needs_pCl = false;
+
+        // Get requirements of the loaded likelihoods in the plc backend
+        BEreq::plc_required_Cl(lmax,needs_tCl,needs_pCl);
+
+        // Prepare the classy input for "output"
+        // -- The likelihoods need the lensed Cl such that lensing is required everytime
+        output << "lCl";
+        // -- Are additional Cl, other to Cl_phiphi, required?
+        if (needs_tCl)
+          output << ", tCl";
+        if (needs_pCl)
+          output << ", pCl";
+
+        // Prepare the classy input for "l_max_scalars"
+        l_max_scalars << lmax;
+
+        first = false;
+      }
+
+      result["lensing"] = "yes";
+      result["non linear"] = "halofit";
+      result["output"] = output.str();
+      result["l_max_scalars"] = l_max_scalars.str();
     }
-
-    // set the lengths of the input tables (since we are passing pointers to arrays CLASS has to know how long they are)
-    result["energyinj_coef_num_lines"] = fz.redshift.size();
-
-    // add the pointers to arrays class needs to know about to input dictionary
-    // Note:
-    //    - memory addresses are passed as strings (python wrapper for CLASS converts every entry to a string internally so
-    //      we need to do that for the memory addresses before python casts them to something else)
-    result["energyinj_coef_z"] = memaddress_to_uint(fz.redshift.data());
-    if (f_eff_mode)
-    {
-      result["energyinj_coef_tot"] = memaddress_to_uint(fz.f_eff.data());
-    }
-    else
-    {
-      result["energyinj_coef_heat"] = memaddress_to_uint(fz.f_heat.data());
-      result["energyinj_coef_lya"] = memaddress_to_uint(fz.f_lya.data());
-      result["energyinj_coef_ionH"] = memaddress_to_uint(fz.f_hion.data());
-      result["energyinj_coef_ionHe"] = memaddress_to_uint(fz.f_heion.data());
-      result["energyinj_coef_lowE"] = memaddress_to_uint(fz.f_lowe.data());
-    }
-
-    // Check if the table has changed compared to the previous iteration
-    // If so, notify class by adding {"EnergyInjection_changed":"yes"}
-    // to the dictionary.
-    // (The classy frontend will just look for the key, The value is not important here)
-    if (fz != cached_fz)
-      result["EnergyInjection_changed"] = "yes";
-
-    // copy fz to cache
-    cached_fz = fz;
-  }
-
-  void set_classy_parameters_EnergyInjection_DecayingDM(pybind11::dict &result)
-  {
-    using namespace Pipes::set_classy_parameters_EnergyInjection_DecayingDM;
-
-    // make sure nothing from previous run is contained
-    result.clear();
-
-    // Set relevant inputs for the scenario of decaying DM
-    const ModelParameters& NP_params = *Dep::DecayingDM_general_parameters;
-    result["DM_decay_tau"] = NP_params.at("lifetime");
-    result["DM_decay_fraction"] = NP_params.at("fraction");
-
-    // Get the results from the DarkAges tables that hold extra information to be passed to the CLASS thermodynamics structure
-    static DarkAges::Energy_injection_efficiency_table fz;
-    static DarkAges::Energy_injection_efficiency_table cached_fz;
-
-    fz = *Dep::energy_injection_efficiency;
-    bool f_eff_mode = fz.f_eff_mode;
-
-    // flag passed to CLASS to signal that the energy_deposition_function is coming from GAMBIT
-    // we patched exoclass to accept this. An alternative way without patching would be to write the tables to disk &
-    // just have CLASS read in the file. To avoid the repeated file writing & deleting we pass pointers to the vector/arrays
-    // to CLASS instead
-    if (f_eff_mode)
-    {
-      result["f_eff_type"] = "pointer_to_fz_eff";
-    }
-    else
-    {
-      result["f_eff_type"] = "pointer_to_fz_channel";
-    }
-
-    // set the lengths of the input tables (since we are passing pointers to arrays CLASS has to know how long they are)
-    result["energyinj_coef_num_lines"] = fz.redshift.size();
-
-    // add the pointers to arrays class needs to know about to input dictionary
-    // Note:
-    //    - memory addresses are passed as strings (python wrapper for CLASS converts every entry to a string internally so
-    //      we need to do that for the memory addresses before python casts them to something else)
-    result["energyinj_coef_z"] = memaddress_to_uint(fz.redshift.data());
-    if (f_eff_mode)
-    {
-      result["energyinj_coef_tot"] = memaddress_to_uint(fz.f_eff.data());
-    }
-    else
-    {
-      result["energyinj_coef_heat"] = memaddress_to_uint(fz.f_heat.data());
-      result["energyinj_coef_lya"] = memaddress_to_uint(fz.f_lya.data());
-      result["energyinj_coef_ionH"] = memaddress_to_uint(fz.f_hion.data());
-      result["energyinj_coef_ionHe"] = memaddress_to_uint(fz.f_heion.data());
-      result["energyinj_coef_lowE"] = memaddress_to_uint(fz.f_lowe.data());
-    }
-
-    // Check if the table has changed compared to the previous iteration
-    // If not, notify class by adding {"EnergyInjection_changed":"yes"}
-    // to the dictionary.
-    // (The classy frontend will just look for the key, The value is not important here)
-    if (fz != cached_fz)
-      result["EnergyInjection_changed"] = "yes";
-
-    // copy fz to cache
-    cached_fz = fz;
-  }
-
-  /// add all inputs for CLASS needed to produce the correct output to be
-  /// able to compute the Planck CMB likelihoods
-  void set_classy_PlanckLike_input(pybind11::dict &result)
-  {
-    using namespace Pipes::set_classy_PlanckLike_input;
-
-    // make sure nothing from previous run is contained
-    result.clear();
-
-    static std::ostringstream output;
-    static std::ostringstream l_max_scalars;
-
-    static bool first = true;
-    if(first)
-    {
-      int lmax = -1;
-      bool needs_tCl = false;
-      bool needs_pCl = false;
-
-      // Get requirements of the loaded likelihoods in the plc backend
-      BEreq::plc_required_Cl(lmax,needs_tCl,needs_pCl);
-
-      // Prepare the classy input for "output"
-      // -- The likelihoods need the lensed Cl such that lensing is required everytime
-      output << "lCl";
-      // -- Are additional Cl, other to Cl_phiphi, required?
-      if (needs_tCl)
-        output << ", tCl";
-      if (needs_pCl)
-        output << ", pCl";
-
-      // Prepare the classy input for "l_max_scalars"
-      l_max_scalars << lmax;
-
-      first = false;
-    }
-
-    result["lensing"] = "yes";
-    result["non linear"] = "halofit";
-    result["output"] = output.str();
-    result["l_max_scalars"] = l_max_scalars.str();
-  }
 
 
 
@@ -2172,17 +2164,17 @@ namespace Gambit
       logger() << EOM;
       result = lnL;
     }
-    
+
     /// get correlation coefficients and uncorrelated likelihood
     /// of MP likelihood "bao_correlations"
-    /// heads-up: this is specific to this likelihood, don't use 
+    /// heads-up: this is specific to this likelihood, don't use
     /// for anything else!
     void get_bao_like_correlation(map_str_dbl& result)
     {
       using namespace Pipes::get_bao_like_correlation;
 
-      // This function has a dependency on MP_LogLikes even though it is not directly 
-      // needed in the calculation. However, through this dependency we make sure that 
+      // This function has a dependency on MP_LogLikes even though it is not directly
+      // needed in the calculation. However, through this dependency we make sure that
       // MP was called before this function is executed -> don't remove it!
 
       // get map containing python likelihood objects
@@ -2190,15 +2182,15 @@ namespace Gambit
 
       // check if "bao_correlations" likelihood was computed, if so
       // retrieve correlation coefficients and uncorrelated likelihood value
-      if(likelihoods.find("bao_correlations") != likelihoods.end()) 
+      if(likelihoods.find("bao_correlations") != likelihoods.end())
       {
           result["uncorrelated_loglike"] = likelihoods.at("bao_correlations").attr("uncorrelated_loglike").cast<double>();
           pybind11::list corr_coeffs =  likelihoods.at("bao_correlations").attr("correlation_coeffs");
           result["correlation_coeffs_0"] = corr_coeffs[0].cast<double>();
           result["correlation_coeffs_1"] = corr_coeffs[1].cast<double>();
           result["correlation_coeffs_2"] = corr_coeffs[2].cast<double>();
-      } 
-      else 
+      }
+      else
       {
           str errmsg = "Likelihood 'bao_correlations' was not requested in yaml file, but you are asking for\n";
           errmsg += "the correlation coefficients from this likelihood. Either remove 'bao_like_correlation' from the ObsLikes section\n";
@@ -2206,13 +2198,12 @@ namespace Gambit
           errmsg += "  - purpose:      LogLike\n";
           errmsg += "    capability:   MP_Combined_LogLike\n";
           errmsg += "    sub_capabilities:\n";
-          errmsg += "      - bao_correlations\n\n";         
-          errmsg += "to the yaml file.";         
+          errmsg += "      - bao_correlations\n\n";
+          errmsg += "to the yaml file.";
           CosmoBit_error().raise(LOCAL_INFO, errmsg);
       }
-
-
     }
+
 
   }
 }
