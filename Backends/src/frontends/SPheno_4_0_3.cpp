@@ -712,17 +712,20 @@ BE_NAMESPACE
         }
       }
 
-    // Block GAMBIT
-    SLHAea_add_block(slha, "GAMBIT");
-    slha["GAMBIT"][""] << 1 << *m_GUT << "# Input scale of (upper) boundary contidions, e.g. GUT scale";
-
     //Create Spectrum object
     static const Spectrum::mc_info mass_cut;
     static const Spectrum::mr_info mass_ratio_cut;
     Spectrum spectrum = spectrum_from_SLHAea<MSSMSimpleSpec, SLHAstruct>(slha,slha,mass_cut,mass_ratio_cut);
 
-    // Add the high scale variable by hand
-    spectrum.get_HE().set_override(Par::mass1, SLHAea::to<double>(slha.at("GAMBIT").at(1).at(1)), "high_scale", true);
+    // Add the high scale and susy scale variables by hand
+    double high_scale;
+    if(inputs.param.find("Qin") != inputs.param.end())
+      high_scale = *inputs.param.at("Qin");
+    else
+      high_scale = *m_GUT;
+    double susy_scale = Q;
+    spectrum.get_HE().set_override(Par::mass1, high_scale, "high_scale", true);
+    spectrum.get_HE().set_override(Par::mass1, susy_scale, "susy_scale", true);
 
     return spectrum;
 
