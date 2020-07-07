@@ -53,17 +53,18 @@
     {
       for (auto it : classy_input)
       {
-	// test if any pointer is being passed to CLASS -- if so you'd need to compare the contents
-	// of the vectors, so just recompute by default in that case (atm the options that pass pointser
-	// can be identified by searching for 'array' or 'pointer_to' in the CLASS input dict. If more of
-	// these cases are implemented the checks have to be added here.)
-	// (as soon there is a real fast-slow scanner implemented this sould probably be changed)
-	if(it.first.cast<std::string>().find("array") != std::string::npos){return false;}
-	if(it.first.cast<std::string>().find("pointer_to") != std::string::npos){return false;}
+        // test if any pointer is being passed to CLASS -- if so you'd need to compare the contents
+        // of the vectors, so just recompute by default in that case (atm the options that pass pointser
+        // can be identified by searching for 'array' or 'pointer_to' in the CLASS input dict. If more of
+        // these cases are implemented the checks have to be added here.)
+        // (as soon there is a real fast-slow scanner implemented this sould probably be changed)
+        if(it.first.cast<std::string>().find("array") != std::string::npos){return false;}
+        if(it.first.cast<std::string>().find("pointer_to") != std::string::npos){return false;}
 
-	// return false if unequal values are found
-	if (classy_input[it.first].cast<std::string>() != prev_input_dict[it.first].cast<std::string>()){return false;}
+        // return false if unequal values are found
+        if (classy_input[it.first].cast<std::string>() != prev_input_dict[it.first].cast<std::string>()){return false;}
       }
+      
       // all key values are identical --> no need to run class again, yay!
       return true;
     }
@@ -80,12 +81,12 @@
       // check if "modes" input is set while "output" is not set
       if(classy_input.contains("modes") and not classy_input.contains("output"))
       {
-	errMssg << "You are calling class asking for the following modes to be computed : "<< pybind11::repr(classy_input["modes"]);
-	errMssg << "\nHowever, you did not request any output that requires solving the perturbations.\nHence CLASS";
-	errMssg << " will not read the input 'modes' and won't run. Add the CLASS input parameter 'output' requesting";
-	errMssg << " a spectrum to be computed to the yaml file as run option, e.g. \n  - capability: classy_baseline_params\n";
-	errMssg << "    options:\n      classy_dict:\n        output: tCl";
-	backend_error().raise(LOCAL_INFO,errMssg.str());
+        errMssg << "You are calling class asking for the following modes to be computed : "<< pybind11::repr(classy_input["modes"]);
+        errMssg << "\nHowever, you did not request any output that requires solving the perturbations.\nHence CLASS";
+        errMssg << " will not read the input 'modes' and won't run. Add the CLASS input parameter 'output' requesting";
+        errMssg << " a spectrum to be computed to the yaml file as run option, e.g. \n  - capability: classy_baseline_params\n";
+        errMssg << "    options:\n      classy_dict:\n        output: tCl";
+        backend_error().raise(LOCAL_INFO,errMssg.str());
       }
     }
 
@@ -113,28 +114,28 @@
       static std::map<std::string,std::string> new_old_names;
       if (first)
       {
-	first = false;
-	new_old_names["DM_decay_tau"]                  = "tau_dcdm";
-	new_old_names["DM_decay_fraction"]             = "decay_fraction";
-	new_old_names["DM_annihilation_efficiency"]    = "annihilation";
-	new_old_names["DM_annihilation_cross_section"] = "annihilation_cross_section";
-	new_old_names["DM_annihilation_mass"]          = "DM_mass";
-	new_old_names["f_eff_type"]                    = "energy_deposition_function";
-	new_old_names["chi_type"]                      = "energy_repartition_coefficient";
-	new_old_names["chi_file"]                      = "energy repartition coefficient file";
+        first = false;
+        new_old_names["DM_decay_tau"]                  = "tau_dcdm";
+        new_old_names["DM_decay_fraction"]             = "decay_fraction";
+        new_old_names["DM_annihilation_efficiency"]    = "annihilation";
+        new_old_names["DM_annihilation_cross_section"] = "annihilation_cross_section";
+        new_old_names["DM_annihilation_mass"]          = "DM_mass";
+        new_old_names["f_eff_type"]                    = "energy_deposition_function";
+        new_old_names["chi_type"]                      = "energy_repartition_coefficient";
+        new_old_names["chi_file"]                      = "energy repartition coefficient file";
       }
 
       // In the first batch, we will fix the names of the inputs.
       // We will fix the entries itself, if needed, later.
       for (const auto& item: new_old_names)
       {
-	pybind11::str newkey = pybind11::str(item.first);
-	pybind11::str oldkey = pybind11::str(item.second);
+        pybind11::str newkey = pybind11::str(item.first);
+        pybind11::str oldkey = pybind11::str(item.second);
 
-	if (cosmo_input_dict.attr("__contains__")(newkey).cast<bool>())
-	{
-	  cosmo_input_dict[oldkey] = cosmo_input_dict.attr("pop")(newkey);
-	}
+        if (cosmo_input_dict.attr("__contains__")(newkey).cast<bool>())
+        {
+          cosmo_input_dict[oldkey] = cosmo_input_dict.attr("pop")(newkey);
+        }
       }
 
       // For the input "energy_repartition_coefficient" ("chi_type" in new versions),
@@ -145,28 +146,28 @@
       //
       if (cosmo_input_dict.attr("__contains__")("energy_repartition_coefficient").cast<bool>())
       {
-	std::string entry = (cosmo_input_dict["energy_repartition_coefficient"]).cast<std::string>();
-	if (entry.compare("CK_2004") == 0)
-	{
-	  cosmo_input_dict["energy_repartition_coefficient"] = "SSCK";
-	}
-	else if (entry.compare("Galli_2013_file") == 0 || entry.compare("Galli_2013_analytic") == 0)
-	{
-	  cosmo_input_dict["energy_repartition_coefficient"] = "GSVI";
-	}
-	else if (entry.compare("from_x_file") == 0)
-	{
-	  cosmo_input_dict["energy_repartition_coefficient"] = "from_file";
-	}
-	else
-	{
-	  std::ostringstream errMssg;
-	  errMssg << "The chosen version of classy [classy_" << STRINGIFY(VERSION) << "] ";
-	  errMssg << "cannot handle the argument \'" << entry << "\' ";
-	  errMssg << "of the iput 'chi_type' (aka. 'energy_repartition_coefficient').\n";
-	  errMssg << "Please adjust your input or use a suitable version.";
-	  backend_error().raise(LOCAL_INFO,errMssg.str());
-	}
+        std::string entry = (cosmo_input_dict["energy_repartition_coefficient"]).cast<std::string>();
+        if (entry.compare("CK_2004") == 0)
+        {
+          cosmo_input_dict["energy_repartition_coefficient"] = "SSCK";
+        }
+        else if (entry.compare("Galli_2013_file") == 0 || entry.compare("Galli_2013_analytic") == 0)
+        {
+          cosmo_input_dict["energy_repartition_coefficient"] = "GSVI";
+        }
+        else if (entry.compare("from_x_file") == 0)
+        {
+          cosmo_input_dict["energy_repartition_coefficient"] = "from_file";
+        }
+        else
+        {
+          std::ostringstream errMssg;
+          errMssg << "The chosen version of classy [classy_" << STRINGIFY(VERSION) << "] ";
+          errMssg << "cannot handle the argument \'" << entry << "\' ";
+          errMssg << "of the iput 'chi_type' (aka. 'energy_repartition_coefficient').\n";
+          errMssg << "Please adjust your input or use a suitable version.";
+          backend_error().raise(LOCAL_INFO,errMssg.str());
+        }
       }
     }
 
@@ -283,7 +284,7 @@
       return Omega0_ncdm;
     }
 
-  /* you *could* also have this function in principle, however since the containts
+    /* you *could* also have this function in principle, however since the containts
     the contribution from ALL ncdm components it is not in general true, that Omega_ncdm = Omega_nu
     so I would not reccomend doing it.
     // returns Omega nu today
@@ -292,7 +293,7 @@
       double Omega0_nu = cosmo.attr("Omega_nu")().cast<double>();
       return Omega0_nu;
     }
-  */
+    */
     // returns Omega_Lambda
     double class_get_Omega0_Lambda()
     {
@@ -408,55 +409,55 @@ BE_INI_FUNCTION
       logger() << LogTags::info << "[classy_"<< STRINGIFY(VERSION) <<"] Start to run \"cosmo.compute\"" << EOM;
       try
       {
-	// Try to run classy
-	cosmo.attr("compute")();
-	// reset counter when no exception is thrown.
-	error_counter = 0;
-	logger() << LogTags::info << "[classy_"<< STRINGIFY(VERSION) <<"] \"cosmo.compute\" was successful" << EOM;
+        // Try to run classy
+        cosmo.attr("compute")();
+        // reset counter when no exception is thrown.
+        error_counter = 0;
+        logger() << LogTags::info << "[classy_"<< STRINGIFY(VERSION) <<"] \"cosmo.compute\" was successful" << EOM;
       }
       catch (std::exception &e)
       {
-	std::ostringstream errMssg;
-	errMssg << "Could not successfully execute cosmo.compute() in classy_"<< STRINGIFY(VERSION)<<"\n";
-	std::string rawErrMessage(e.what());
-	// If the error is a CosmoSevereError raise an backend_error ...
-	if (rawErrMessage.find("CosmoSevereError") != std::string::npos)
-	{
-	  errMssg << "Caught a \'CosmoSevereError\':"<<endl;
-	  errMssg << rawErrMessage;
-	  backend_error().raise(LOCAL_INFO,errMssg.str());
-	}
-	// .. but if it is 'only' a CosmoComputationError, invalidate the parameter point
-	// and raise a backend_warning.
-	// In case this happens "max_errors" times in a row, raise a backend_error
-	// instead, since it probably points to some issue with the inputs
-	else if (rawErrMessage.find("CosmoComputationError") != std::string::npos)
-	{
-	  ++error_counter;
-	  errMssg << "Caught a \'CosmoComputationError\':"<<endl;
-	  errMssg << rawErrMessage;
-	  if ( max_errors < 0 || error_counter <= max_errors )
-	  {
-	    backend_warning().raise(LOCAL_INFO,errMssg.str());
-	    invalid_point().raise(errMssg.str());
-	  }
-	  else
-	  {
-	    errMssg << "\nThis happens now for the " << error_counter << "-th time ";
-	    errMssg << "in a row. There is probably something wrong with your inputs.";
-	    backend_error().raise(LOCAL_INFO,errMssg.str());
-	  }
-	}
-	// any other error (which shouldn't occur) gets also caught as invalid point.
-	else
-	{
-	  errMssg << "Caught an unspecified error:"<<endl;
-	  errMssg << rawErrMessage;
-	  cout << "An unspecified error occurred during compute() in classy_"<< STRINGIFY(VERSION) <<":\n";
-	  cout << rawErrMessage;
-	  cout << "\n(This point gets invalidated) " << endl;
-	  invalid_point().raise(errMssg.str());
-	}
+        std::ostringstream errMssg;
+        errMssg << "Could not successfully execute cosmo.compute() in classy_"<< STRINGIFY(VERSION)<<"\n";
+        std::string rawErrMessage(e.what());
+        // If the error is a CosmoSevereError raise an backend_error ...
+        if (rawErrMessage.find("CosmoSevereError") != std::string::npos)
+        {
+          errMssg << "Caught a \'CosmoSevereError\':"<<endl;
+          errMssg << rawErrMessage;
+          backend_error().raise(LOCAL_INFO,errMssg.str());
+        }
+        // .. but if it is 'only' a CosmoComputationError, invalidate the parameter point
+        // and raise a backend_warning.
+        // In case this happens "max_errors" times in a row, raise a backend_error
+        // instead, since it probably points to some issue with the inputs
+        else if (rawErrMessage.find("CosmoComputationError") != std::string::npos)
+        {
+          ++error_counter;
+          errMssg << "Caught a \'CosmoComputationError\':"<<endl;
+          errMssg << rawErrMessage;
+          if ( max_errors < 0 || error_counter <= max_errors )
+          {
+            backend_warning().raise(LOCAL_INFO,errMssg.str());
+            invalid_point().raise(errMssg.str());
+          }
+          else
+          {
+            errMssg << "\nThis happens now for the " << error_counter << "-th time ";
+            errMssg << "in a row. There is probably something wrong with your inputs.";
+            backend_error().raise(LOCAL_INFO,errMssg.str());
+          }
+        }
+        // any other error (which shouldn't occur) gets also caught as invalid point.
+        else
+        {
+          errMssg << "Caught an unspecified error:"<<endl;
+          errMssg << rawErrMessage;
+          cout << "An unspecified error occurred during compute() in classy_"<< STRINGIFY(VERSION) <<":\n";
+          cout << rawErrMessage;
+          cout << "\n(This point gets invalidated) " << endl;
+          invalid_point().raise(errMssg.str());
+        }
       }
       //std::cout << "Trying to print power spectrum..." << std::endl;
       //print_pps();

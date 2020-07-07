@@ -111,9 +111,9 @@
     {
 
       pybind11::dict path_dict = pybind11::dict("MontePython"_a=backendDir,
-			    "data"_a=backendDir+"/../data/",
-			    "cosmo"_a=backendDir+"",  // we never want to class CLASS from MP so there is no need to pass anything here
-			    "root"_a=backendDir+"/../../../");
+          "data"_a=backendDir+"/../data/",
+          "cosmo"_a=backendDir+"",  // we never want to class CLASS from MP so there is no need to pass anything here
+          "root"_a=backendDir+"/../../../");
 
       // Cast the list of experiments to a tuple, for MP to fire up...
       // not experiments is a str to str map where the key is the likelihood name.
@@ -123,7 +123,7 @@
       pybind11::list MP_experiments;
       for (auto const& it : experiments)
       {
-	  MP_experiments.attr("append")( it.first.c_str() );
+        MP_experiments.attr("append")( it.first.c_str() );
       }
 
       // Import Data object from MontePython
@@ -159,19 +159,19 @@
       //for (std::vector<std::string>::const_iterator it = experiments.begin(); it != experiments.end(); ++it)
       for (auto const& it : experiments)
       {
-	std::string exp_name = it.first;
-	std::string data_file = it.second;
+        std::string exp_name = it.first;
+        std::string data_file = it.second;
 
-	pybind11::str exp_path;
-	// set path to .data file to the default one in MP if the "default" option is choosen
-	// if not use the data file that has been chossen in the yaml file
-	if(data_file == "default")  {exp_path = like_path + "/" + exp_name + "/" + exp_name + ".data";}
-	else                        {exp_path = data_file;}
+        pybind11::str exp_path;
+        // set path to .data file to the default one in MP if the "default" option is choosen
+        // if not use the data file that has been chossen in the yaml file
+        if(data_file == "default")  {exp_path = like_path + "/" + exp_name + "/" + exp_name + ".data";}
+        else                        {exp_path = data_file;}
 
-	pybind11::module  exp_module = pybind11::module::import(exp_name.c_str());
-	pybind11::object  EXP_MODULE = exp_module.attr(exp_name.c_str())(exp_path, data, command_line);
+        pybind11::module  exp_module = pybind11::module::import(exp_name.c_str());
+        pybind11::object  EXP_MODULE = exp_module.attr(exp_name.c_str())(exp_path, data, command_line);
 
-	likelihoods[exp_name] = EXP_MODULE;
+        likelihoods[exp_name] = EXP_MODULE;
       }
 
       // Remove "like_path" from sys.path (The likelihoods are now loaded)
