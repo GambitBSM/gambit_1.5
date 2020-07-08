@@ -2105,6 +2105,10 @@ namespace Gambit
         data.attr("mcmc_parameters") = *Dep::parameter_dict_for_MPLike;
         likelihoods = BEreq::create_MP_likelihood_objects(data, experiments);
 
+        // call check implemented in MPLike patch to ensure no nuisance parameter
+        // that is not needed by any likelihood is scanned over.
+        data.attr("check_nuisance_params")();
+
         // It's been nice, but let's not do this again.
         first = false;
       }

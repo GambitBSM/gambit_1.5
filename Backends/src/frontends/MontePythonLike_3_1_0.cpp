@@ -172,6 +172,13 @@
         pybind11::object  EXP_MODULE = exp_module.attr(exp_name.c_str())(exp_path, data, command_line);
 
         likelihoods[exp_name] = EXP_MODULE;
+
+        // store likelihood objects in data object
+        // this is needed to be able to get a list with
+        // all nuisance parameters that need to be included
+        // in the scan. This is done in the function 'create_MP_objects'
+        // by calling data.check_nuisance_params()
+        data.attr("add_experiment")(exp_name,EXP_MODULE);
       }
 
       // Remove "like_path" from sys.path (The likelihoods are now loaded)

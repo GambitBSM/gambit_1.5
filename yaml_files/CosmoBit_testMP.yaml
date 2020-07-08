@@ -56,6 +56,8 @@ Parameters:
 
   # Cosmological nuisance parameters (except for Planck CMB Likelihoods)
   cosmo_nuisance_Pantheon: !import include/cosmo_nuisance_Pantheon.yaml
+  #cosmo_nuisance_euclid_lensing:
+  #  epsilon_euclid: 1.0
 
 #======== Prior setup ========
 Priors:
