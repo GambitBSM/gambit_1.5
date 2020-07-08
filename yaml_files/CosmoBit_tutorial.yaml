@@ -308,6 +308,13 @@ Rules:
     function: set_classy_input_with_MPLike
     module: CosmoBit
 
+
+  # This rule is only stricly needed when more than one
+  # MP likelihoods with nuisance parameters are in use
+  - capability: parameter_dict_for_MPLike
+    function: set_parameter_dict_for_MPLike
+    module: CosmoBit
+
   # ---- BBN -----
 
   # Set path to file containing measured values of light element abundances to use for
