@@ -835,7 +835,7 @@ namespace Gambit
     }
 
     /// -----------
-    /// Background Likelihoods (SNe + H0 + BAO + Sigma8)
+    /// Background Likelihoods (H0 + Sigma8)
     /// -----------
 
     /// Compute a Gaussian lnL for the Hubble constant from a given DataFile.
