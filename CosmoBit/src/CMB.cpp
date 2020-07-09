@@ -224,11 +224,13 @@ namespace Gambit
       result = BEreq::get_energy_injection_efficiency_table();
     }
 
-    /// @TODO: could do with some comments/description...
-    void f_effective_func(double& result)
+    /// Get the value of the the nergy injection efficieny at a given redshift
+    void f_effective_at_z(double& result)
     {
-      using namespace Pipes::f_effective_func;
+      using namespace Pipes::f_effective_at_z;
 
+      // Get the redshift at which f_eff should be evaluated
+      // The default depends on the scenario in question
       double z_eff = 0.01;
       if(ModelInUse("DecayingDM_general"))
       {
@@ -239,8 +241,10 @@ namespace Gambit
         z_eff = runOptions->getValueOrDef<double>(600.,"z_eff");
       }
 
+      // Retrieve the energy injection efficiency table
       DarkAges::Energy_injection_efficiency_table fzt = *Dep::energy_injection_efficiency;
 
+      // Get all entries of the table
       bool f_eff_mode = fzt.f_eff_mode;
       std::vector<double> z = fzt.redshift;
       std::vector<double> fh = fzt.f_heat;
@@ -250,6 +254,7 @@ namespace Gambit
       std::vector<double> flo = fzt.f_lowe;
       std::vector<double> feff = fzt.f_eff;
 
+      // Sum up all channels, if needed
       int npts = z.size();
       std::vector<double> ftot(npts);
       for (int i = 0; i < npts; i++)
@@ -260,9 +265,9 @@ namespace Gambit
           ftot.at(i) = fh.at(i) + fly.at(i) + fhi.at(i) + fhei.at(i) + flo.at(i);
       }
 
+      /// Set-up, do the interpolation, and claen-up
       gsl_interp_accel *gsl_accel_ptr = gsl_interp_accel_alloc();
       gsl_spline *spline_ptr = gsl_spline_alloc(gsl_interp_cspline, npts);
-
       gsl_spline_init(spline_ptr, z.data(), ftot.data(), npts);
 
       result = gsl_spline_eval(spline_ptr, z_eff, gsl_accel_ptr);
