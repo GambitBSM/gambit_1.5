@@ -49,24 +49,29 @@ namespace Gambit
   {
     using namespace LogTags;
 
-    // TODO comment
+    /// Apply Gaussian priors on some of the Planck nuisance parameters (cf. table 16 of 1907.1287)
+    /// By default, the 2018 priors are used.
+    /// If the 2015 priors should be considered, set "version: 2015" in the rules of this function.
+    /// If needed, a custom file with the priors can be passed via the "prior_file" keyword in the rules.
     void compute_Planck_nuisance_prior_loglike(double& result)
     {
       using namespace Pipes::compute_Planck_nuisance_prior_loglike;
 
       static std::map<std::string, std::vector<double> > data;
 
+      // Read the data only at first iteration
       static bool first = true;
       if (first)
       {
         first = false;
-        std::string filename = GAMBIT_DIR "/CosmoBit/data/Planck/";
+        std::string filename;
         if (runOptions->hasKey("prior_file"))
         {
-          filename += runOptions->getValue<std::string>("prior_file");
+          filename = runOptions->getValue<std::string>("prior_file");
         }
         else
         {
+          filename = GAMBIT_DIR "/CosmoBit/data/Planck/";
           std::string version = runOptions->getValueOrDef<std::string>("2018","version");
           filename += "priors_" + version + ".dat";
         }
@@ -87,7 +92,6 @@ namespace Gambit
 
         for (auto iter=tmp.begin(); iter != tmp.end(); iter++)
         {
-          //std::cout << "Read data: " << iter->first << " --- " << iter->second << std::endl;
           if ( int(iter->second[0]) <= modelcode )
           {
             std::string key = iter->first;
@@ -109,10 +113,10 @@ namespace Gambit
         logger() << LogTags::info << "Data for Planck nuisance priors read." << EOM;
       }
 
+      /// Loop over all parameters and apply the prior
       result = 0.0;
       for (auto iter = data.begin(); iter != data.end(); iter++)
       {
-        //std::cout << "Use data: " << iter->first << " --- " << iter->second << std::endl;
         result += Stats::gaussian_loglikelihood((*Param[iter->first]), iter->second[0], 0.0, iter->second[1], false);
       }
     }

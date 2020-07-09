@@ -161,7 +161,8 @@ namespace Gambit
       result = xi_ini;
     }
 
-    /// @TODO function definition needed
+    /// Return the total abundance (Y = n/s) of ALPs
+    /// We assume non relativistic ALPs such that rho = n * m
     void total_DM_abundance_ALP(double& result)
     {
       using namespace Pipes::total_DM_abundance_ALP;
