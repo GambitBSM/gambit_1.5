@@ -283,19 +283,6 @@ namespace Gambit
       result = *Dep::Omega0_g + (*Dep::Omega0_ur);
     }
 
-    /// @TODO: can this be deleted then?
-    /*
-        (PS: Not sure if we really need this step in between. For all our cases so far we directly could map from eta0 to eta_BBN (up to constant factors in front))
-     *
-        void calculate_etaCMB_SM(double &result)
-        {
-          using namespace Pipes::calculate_etaCMB_SM;
-
-          result =  *Dep::eta0; // in SM the baryon to photon ratio does not change between today an CMB release
-          logger() << "Baryon to photon ratio (eta) @CMB computed to be " << result << EOM;
-        }
-    */
-
     /*****************/
     /* Classy inputs */
     /*****************/
@@ -331,7 +318,7 @@ namespace Gambit
         std::vector<double> m_ncdm(N_ncdm);
         std::copy_if(nuMasses.begin(), nuMasses.end(), m_ncdm.begin(), isNonZero);
 
-        // NOTE: this explicitly assumed that all non-CDM components have the same temperature!! @TODO?
+        // NOTE: this explicitly assumed that all non-CDM components have the same temperature!!
         std::vector<double> T_ncdm(N_ncdm,*Dep::T_ncdm);
 
         // Create one string with m_ncdm masses and
@@ -365,7 +352,6 @@ namespace Gambit
       result.clear();
 
       // Now need to pass the primordial power spectrum
-      // FIXME are the units on A_s correct here or should there be another 10? @TODO
       result["n_s"] = *Param["n_s"];
       result["ln10^{10}A_s"] = *Param["ln10A_s"];
 
@@ -406,7 +392,7 @@ namespace Gambit
       result["k_array"] = memaddress_to_uint(pps.get_k().data());
       result["pks_array"] = memaddress_to_uint(pps.get_P_s().data());
       result["pkt_array"] = memaddress_to_uint(pps.get_P_t().data());
-      result["lnk_size" ] = pps.get_vec_size(); // don't hard code but somehow make consistent with multimode @TODO -> test
+      result["lnk_size" ] = pps.get_vec_size(); // don't hard code but somehow make consistent with multimode
       
       // Pass pivot scale of external spectrum to CLASS
       result["k_pivot"] = *Dep::k_pivot;
