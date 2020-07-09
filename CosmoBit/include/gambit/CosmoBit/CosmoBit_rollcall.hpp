@@ -727,23 +727,6 @@ START_MODULE
     #undef FUNCTION
   #undef CAPABILITY
 
-  #define CAPABILITY sigma8_LogLike
-  START_CAPABILITY
-    #define FUNCTION compute_sigma8_LogLike
-    START_FUNCTION(double)
-    DEPENDENCY(Omega0_m, double)
-    BACKEND_REQ(class_get_sigma8,(class_tag),double,())
-    #undef FUNCTION
-  #undef CAPABILITY
-
-  #define CAPABILITY H0_LogLike
-  START_CAPABILITY
-    #define FUNCTION compute_H0_LogLike
-    START_FUNCTION(double)
-    DEPENDENCY(H0,double)
-    #undef FUNCTION
-  #undef CAPABILITY
-
   // ----------------------
 
   // AlterBBN
