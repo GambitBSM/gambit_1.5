@@ -88,6 +88,16 @@
 
       private:
         pybind11::dict input_dict;
+
+        // string lists containing the input parameters for
+        // CLASS that are more precise when they take
+        // larger/smaller values.
+        // These are used to decide wether to keep the smaller/
+        // larger value when merging two CLASS input dictionaries
+        // containing the same parameter. Hard-coded -- add to these
+        // lists if you want to use a parameter that is not implemented yet.
+        std::set<std::string> keep_larger_val { "l_max_scalars", "l_max_tensors", "l_max_vectors", "l_max_lss", "z_max_pk","selection_sampling_bessel", "P_k_max_h/Mpc", "P_k_max_1/Mpc" };
+        std::set<std::string> keep_smaller_val { "l_logstep", "l_linstep", "l_switch_limber", "l_switch_limber_for_cl_density_over_z"};
     };
 
   }

@@ -121,7 +121,8 @@ Rules:
     function: set_classy_input_params
     options:
       classy_dict:
-         #P_k_max_h/Mpc: 3
+         #P_k_max_h/Mpc: 0.3  
+         #l_logstep: 0.2
          #m_ncdm: 2
 
   # This rule is only stricly needed when more than one

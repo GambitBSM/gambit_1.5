@@ -504,22 +504,10 @@ namespace Gambit
             std::string name = it->first.as<std::string>();
             std::string value = it->second.as<std::string>();
 
-            // Check if the key exists in the dictionary
-            if (not result.has_key(name.c_str()))
-            {
-              yaml_input[name.c_str()] = value;
-              //std::cout<< "Class input dict, adding "<< name.c_str()<<" " << value << std::endl;
-
-            }
-            // If it does, throw an error, there's some YAML conflict going on.
-            else
-            {
-              //std::cout << pybind11::repr(result) << std::endl;
-              CosmoBit_error().raise(LOCAL_INFO, "The key '" + name + "' already "
-                "exists in the CLASSY dictionary. You are probably trying to override a model parameter. If you really"
-                "want to do this you should define an extra function to set the class parameters for the model you "
-                "are considering.");
-            }
+            // add value to dictionary -- check if it overwrites anything important
+            // will be done when it's merged to the final input dictionary in the function 
+            // function 'merge_input_dicts'
+            yaml_input[name.c_str()] = value;
           }
           // Make sure that user did not try to pass k_pivot, N_star or P_k_ini type through class dictionary.
           // These are fixed by capabilities to ensure consistent use throughout the code
@@ -543,7 +531,9 @@ namespace Gambit
         }
       }
 
-      // Add yaml options to python dictionary passed to CLASS; consistency checks only executed on first run
+      // Add yaml options to python dictionary passed to CLASS; 
+      // includes consistency checks for duplicated keys including 
+      // rules how to decide which values to keep
       result.merge_input_dicts(yaml_input);
 
       // At last: if the Planck likelihood is used add all relevant input parameters to the CLASS dictionary:
