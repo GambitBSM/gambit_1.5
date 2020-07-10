@@ -1,10 +1,16 @@
 ##########################################################################
 ##
 ##
-##      quick start yaml file for CosmoBit
+##      Quickstart yaml file for CosmoBit
+##
+##        With this file, you can reproduce Fig. 5 in the 
+##        CosmoBit Module paper (arXiv: ). It shows the constraints on 
+##        Omega_m and H0 arising from BBN and BAO data. See 1907.11594 
+##        for the original study. 
+##
 ##
 ##  \author Janina Renk <janina.renk@fysik.su.se>
-##      \date 2020 Feb
+##      \date 2020 Feb,July
 ##
 ##########################################################################
 
@@ -15,14 +21,9 @@
 #
 #         Note:
 #         -----
-#           *) for this specific yaml file you only need CosmoBit, DarkBit and NeutrinoBit
+#           *) for this specific yaml file you only need CosmoBit and NeutrinoBit
 #                 => there is no need to build all Bits of GAMBIT, you can ditch the others
 #                    with the cmake flag -Ditch="Collider;Decay;Spec;Flav;Precision"
-#           *) some of the backends needed for the scan are only available in python2 so far
-#                 => if you have python 3 you have to set cmake flags to your python2 library and
-#                 interpreters s.t. GAMBIT is configures with python2
-#                 If the -DFORCE_PYTHON2 flag does not do the job you have to provide the following paths, something like
-#                 -DPYTHON_INCLUDE_DIR=/usr/include/python2.7 -DPYTHON_LIBRARY=/usr/lib/x86_64-linux-gnu/libpython2.7.so -DPYTHON_EXECUTABLE=/usr/bin/python2.7
 #           *) you will need the python package cython (now added to cmake prerequisite)
 #
 #
@@ -58,15 +59,10 @@
 
 Parameters:
 
-  # Neutrino masses, choose between normal hierachy (NH) and inverted hierarch (IH)
-  #StandardModel_mNudiff: !import include/StandardModel_mNudiff_NH_scan.yaml
-  StandardModel_mNudiff: !import include/StandardModel_mNudiff_IH_scan.yaml
-
-  # To fix the sum of the neutrino masses to 0.06 with only one massive neutrino
-  #    (as in Planck 'baseline' analysis don't include the model 'StandardModel_mNudiff'
-  #    into the scan)
-  # uncomment the line below (and do not use 'StandardModel_mNudiff') 
-  #StandardModel_SLHA2: !import include/StandardModel_SLHA2_Planckbaseline.yaml
+  # Fix the sum of the neutrino masses to 0.06 with only one massive neutrino, as in
+  # the Planck 'baseline' analysis and in 1907.11594.
+  # For a physical treatment of neutrino masses, see yaml_files/CosmoBit_tutorial. 
+  StandardModel_SLHA2: !import include/StandardModel_SLHA2_Planckbaseline.yaml
 
   # base-line LCDM model parameters and prior
   LCDM:
@@ -79,31 +75,23 @@ Parameters:
     H0:
       prior_type: flat
       range: [62,74]
-    tau_reio:
-      prior_type: flat
-      range: [0.004,0.20]
+    # Fix all non-background parameters as they do not
+    # impact BBN or the BAO scale
+    tau_reio: 0.0544
     T_cmb: 2.72548
 
-  # minimal base-line power-law power spectrum and priors
+  # Minimal base-line power-law power spectrum and priors
+  # the values can be fixed as well as A_s and n_s don't impact
+  # the BBN and BAO scale likelihoods
   Minimal_PowerLaw_ps:
-    ln10A_s:
-      prior_type: flat
-      range: [2.9,3.2]
-    n_s:
-      prior_type: flat
-      range: [0.9,1.10]
+    ln10A_s: 3.044
+    n_s: 0.9649
 
-  # extension of standard LCDM: allow for values of dNeff @CMB & @ BBN different from today
-  #dNurBBN_dNurCMB:
-  #  dNur_BBN:
-  #    prior_type: flat
-  #    range: [0.000,0.50]
-  #  dNur_CMB:
-  #    prior_type: flat
-  #    range: [0.000,0.50]
-
-  # Include this if you use the Pantheon SNe likelihood into your scan
-  #cosmo_nuisance_Pantheon: !import include/cosmo_nuisance_Pantheon.yaml
+  # Uncomment to allow for non-standard values of dNeff
+  dNurCMB:
+    dNur_CMB:
+      prior_type: flat
+      range: [0.000,0.50]
 
 
 #======== 3) Prior setup ========
@@ -152,68 +140,60 @@ Scanner:
 
 ObsLikes:
 
-
   # ---- 6.a) BBN -----
   # Likelihood from BBN; use only deuterium for this example
   - purpose:      LogLike
     capability:   BBN_LogLike
-    sub_capabilities: D
+    sub_capabilities: [D, He4]
 
-  # print helium abundances + errors
+  # print isotope abundances + errors
   - purpose:      Observable
     capability:   BBN_abundances
     sub_capabilities:
       - He3
+      - D
       - He4
+      - Li7
 
 
   # ---- 6.b) MontePython Likelihoods -----
   # The total lnL from MontePython
-  # Since the single MontePython likelihoods are not implemented in GAMBIT as capabilites
+  # Since the single MontePython likelihoods are not implemented in GAMBIT as capabilities
   # (and are more flexible -- you import them at runtime and don't need to know their names
   # at compile time) you can just tell GAMBIT here which to include
   - purpose:      LogLike
     capability:   MP_Combined_LogLike
     module:       CosmoBit
     type:         double
-    # i) Choose which likelihoods to include (simple way)
     sub_capabilities:
-      - bao_smallz_2014
-      #- Pantheon
-    # ii) Choose which likelihoods to include (complicated way).  You can give a path to the '<likelihood_name>.data'
-    #     file containing the settings that you want the likelihood to run with (e.g. path to data, which z-bins to use... ).
-    #     Note that the path must be given relative to your GAMBIT directory.  If you set it to "default", or empty,
-    #     the default MontePython file 'Backends/installed/montepythonlike/<version>/montepython/likelihoods/
-    #     <likelihood_name>/<likelihood_name>.data' will be used.  This is also what happens in syntax i) above.
-    #sub_capabilities:
-    #  bao_smallz_2014: Backends/installed/montepythonlike/3.1.0/montepython/likelihoods/bao_smallz_2014/bao_smallz_2014.data
-    #  Pantheon: default
-
-  # FIXME -- old comment from Janina (I guess?)
-  # should eventually be possible to choose any MP like, atm only bao, Pantheon, Planck_SZ safe to use (& kids after
-  # downloading data and when commenting out line 'parser_mp.existing_file(fname)', will include that into
-  # build step soon)
-  # still need to test all Likes
+      # Include BAO likelihoods: 
+      # Galactic data:
+      bao_boss_dr12: default
+      # (use custom data file for bao_smallz_2014 likelihood)
+      bao_smallz_2014: CosmoBit/data/BAO/bao_galactic_settings.data
+      # Lyman alpha data:
+      eBOSS_DR14_Lya_combined: default 
 
   # A breakdown of each likelihood component in the above total lnL,
   # plus any others that you might like to compute but not include in the
   # likelihood.  This entry is just to make sure to output the individual
-  # log-likelihood contributions. (Actually you can leave out any of those
-  # already mentioned above if you want; they will still get printed.)
-  # => this would e.g. print LogLike(BAO), LogLike(Pantheon) and LogLike(Planck_SZ)
+  # log-likelihood contributions. 
   - purpose:      Observable
     capability:   MP_LogLikes
     type:         map_str_dbl
-    # i) Choose which likelihoods to include (simple way)
     sub_capabilities:
-      - bao_smallz_2014
-      #- Pantheon
-      #- Planck_SZ
-    # ii) Choose which likelihoods to include (complicated way).
-    #sub_capabilities:
-    #  bao_smallz_2014: Backends/installed/montepythonlike/3.1.0/montepython/likelihoods/bao_smallz_2014/bao_smallz_2014.data
-    #  Pantheon: default
-    #  Planck_SZ:
+      # Include BAO likelihoods: 
+      # Galactic data:
+      bao_boss_dr12: default
+      # (use custom data file for bao_smallz_2014 likelihood)
+      bao_smallz_2014: CosmoBit/data/BAO/bao_galactic_settings.data
+      # Lyman alpha data:
+      eBOSS_DR14_Lya_combined: default 
+
+  # Add Omega0_m  to output data file
+  - purpose:     Observable
+    capability:  Omega0_m
+    function:    get_Omega0_m_classy
 
 
 #======== 7) Rule entries ========
@@ -223,13 +203,21 @@ Rules:
   #                (CosmoBit Module paper, Appendix C.1)
 
   # error calculation precision settings for AltterBBN
-  # (use 1 and 0 to speed up Helium abundance calculation for testing)
+  # (use failsafe 1 and 0 to speed up Helium abundance calculation for testing)
   # (For more precise calculations, use 3 or 7)
+  # Here, we choose err: 0, as the error calculation is dictated by the rule below
   - capability: AlterBBN_Input
     options:
       failsafe: 3
-      err: 1
+      err: 0
 
+  # Fix relative error and covariance of helium-4 and deuterium abundances
+  - capability: BBN_abundances
+    options:
+      isotope_basis: [Yp, D]
+      correlation_matrix: [[+1.000e00, +1.524e-2],
+                           [+1.524e-2, +1.000e00]]
+      relative_errors: [1.348e-3, 1.596e-2]
 
   # ----------- 7.b) MontePython Likelihoods ------------
   #         (CosmoBit Module paper, Appendix C.4)
@@ -252,14 +240,16 @@ Logger:
   # log tags => check default.log and CosmoBit.log to see more details than
   # printed to screen
   redirection:
-    [Debug]      : "debug.log"
-    [Default]      : "default.log"
-    [CosmoBit]  : "CosmoBit.log"
-    [Scanner]      : "Scanner.log"
+    [Debug]   : "debug.log"
+    [Default] : "default.log"
+    [CosmoBit]: "CosmoBit.log"
+    [Scanner] : "Scanner.log"
 
 #======== 9) Generic Name/Value Section ========
 KeyValues:
 
+  # if set to true, the log files will contain more information, e.g.
+  # the complete input dictionary passed to CLASS for each parameter point
   debug: true
 
   # where to safe the output

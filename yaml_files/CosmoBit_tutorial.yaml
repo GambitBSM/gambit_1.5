@@ -93,6 +93,8 @@ Parameters:
   #StandardModel_SLHA2: !import include/StandardModel_SLHA2_Planckbaseline.yaml
 
   # Neutron lifetime.  If this is not included as a model, the lifetime will default to 879.4.
+  # Note: If you include any likelihoods related to the neutron lifetime, you have to include
+  # PrecisionBit in the build!
   #nuclear_params_neutron_lifetime:
   #  neutron_lifetime:
   #    range: [875,895]
