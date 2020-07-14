@@ -179,6 +179,20 @@ BE_NAMESPACE
     slha["SMINPUTS"][""] << 23 << (*mf_d)(2) << "# m_s(2 GeV), MSbar";
     slha["SMINPUTS"][""] << 24 << (*mf_u)(2) << "# m_c(m_c), MSbar";
 
+    // SUSY-HIT requires these blocks to be present, so add them
+    SLHAea_add_block(slha, "VCKMIN");
+    slha["VCKMIN"][""] << 1 << *lam_wolf << "# lambda";
+    slha["VCKMIN"][""] << 2 << *A_wolf << "# A";
+    slha["VCKMIN"][""] << 3 << *rho_wolf << "# rho bar";
+    slha["VCKMIN"][""] << 4 << *eta_wolf << "# eta bar";
+
+    SLHAea_add_block(slha, "UPMNSIN");
+    slha["UPMNSIN"][""] << 1 << *theta_12 << "# theta_12, solar";
+    slha["UPMNSIN"][""] << 2 << *theta_23<< "# theta_23, atmospheric";
+    slha["UPMNSIN"][""] << 3 << *theta_13 << "# theta_13";
+    slha["UPMNSIN"][""] << 4 << *delta_nu << "# delta_nu";
+    slha["UPMNSIN"][""] << 5 << *alpha_nu1 << "# alpha_1";
+    slha["UPMNSIN"][""] << 6 << *alpha_nu2 << "# alpha_2";
 
     Farray<Fcomplex16,1,6,1,6> RDsq_ckm, RUsq_ckm, RSl_pmns;
     Farray<Fcomplex16,1,3,1,3> RSn_pmns, id3C;
@@ -186,27 +200,12 @@ BE_NAMESPACE
     Farray<Freal8,1,3> Yu, Yd, Yl;
     if(*GenerationMixing)
     {
-      SLHAea_add_block(slha, "VCKMIN");
-      slha["VCKMIN"][""] << 1 << *lam_wolf << "# lambda";
-      slha["VCKMIN"][""] << 2 << *A_wolf << "# A";
-      slha["VCKMIN"][""] << 3 << *rho_wolf << "# rho bar";
-      slha["VCKMIN"][""] << 4 << *eta_wolf << "# eta bar";
-
       Flogical False = false;
       try{ Switch_to_superCKM(*Y_d,*Y_u,*A_d,*A_u,*M2_D,*M2_Q,*M2_U,*Ad_sckm,*Au_sckm,*M2D_sckm,*M2Q_sckm,*M2U_sckm,False,*RSdown,*RSup,RDsq_ckm,RUsq_ckm,CKM_Q,Yd,Yu); }
       catch(std::runtime_error& e) { invalid_point().raise(e.what()); }
 
-      SLHAea_add_block(slha, "UPMNSIN");
-      slha["UPMNSIN"][""] << 1 << *theta_12 << "# theta_12, solar";
-      slha["UPMNSIN"][""] << 2 << *theta_23<< "# theta_23, atmospheric";
-      slha["UPMNSIN"][""] << 3 << *theta_13 << "# theta_13";
-      slha["UPMNSIN"][""] << 4 << *delta_nu << "# delta_nu";
-      slha["UPMNSIN"][""] << 5 << *alpha_nu1 << "# alpha_1";
-      slha["UPMNSIN"][""] << 6 << *alpha_nu2 << "# alpha_2";
-
       try{ Switch_to_superPMNS(*Y_l,id3C,*A_l,*M2_E,*M2_L,*Al_pmns,*M2E_pmns,*M2L_pmns,False,*RSlepton,*RSneut,RSl_pmns,RSn_pmns,PMNS_Q,Yl); }
       catch(std::runtime_error& e) { invalid_point().raise(e.what()); }
-
 
     }
     else
@@ -400,6 +399,7 @@ BE_NAMESPACE
 
     // Block MASS
     SLHAea_add_block(slha, "MASS");
+    slha["MASS"][""] << 5 << (*mf_d)(3) << "# m_b(pole)";
     slha["MASS"][""] << 6 << (*mf_u)(3) << "# m_t(pole)";
     slha["MASS"][""] << 23 << *mZ << "# m_Z(pole)";
     slha["MASS"][""] << 24 << *mW << "# m_W(pole)";
@@ -755,7 +755,7 @@ BE_NAMESPACE
     /* Block MODSEL */
     /****************/
 
-    *GenerationMixing = inputs.options->getValueOrDef<bool>(true, "GenerationMixing");
+    *GenerationMixing = inputs.options->getValueOrDef<bool>(false, "GenerationMixing");
 
     /******************/
     /* Block SMINPUTS */
@@ -1231,8 +1231,9 @@ BE_NAMESPACE
     }
 
    // couplings: Alpha(Q=0), Alpha(mZ), Alpha_S(mZ), Fermi constant G_F
-    *Alpha =  1.0/137.035999074;
     *Alpha_mZ = 1.0/sminputs.alphainv;
+    *Alpha_mZ_MS = *Alpha_mZ; // from SMINPUTS
+    *MZ_input = true;
     *AlphaS_mZ = sminputs.alphaS;
     *G_F = sminputs.GF;
 
