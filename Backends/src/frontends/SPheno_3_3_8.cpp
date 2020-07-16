@@ -22,6 +22,7 @@
 #include "gambit/Elements/spectrum_factories.hpp"
 #include "gambit/Models/SimpleSpectra/MSSMSimpleSpec.hpp"
 #include "gambit/Utils/version.hpp"
+#include "gambit/Utils/util_functions.hpp"
 
 // Callback function for error handling
 BE_NAMESPACE
@@ -359,21 +360,21 @@ BE_NAMESPACE
     slha["MSOFT"][""] << 21 << (*M2_H)(1) << "# M^2_(H,d)";
     slha["MSOFT"][""] << 22 << (*M2_H)(2) << "# M^2_(H,u)";
 
-    slha["MSOFT"][""] << 31 << sqrt((*M2L_pmns)(1,1).re) << "# M_(L,11)";
-    slha["MSOFT"][""] << 32 << sqrt((*M2L_pmns)(2,2).re) << "# M_(L,22)";
-    slha["MSOFT"][""] << 33 << sqrt((*M2L_pmns)(3,3).re) << "# M_(L,33)";
-    slha["MSOFT"][""] << 34 << sqrt((*M2E_pmns)(1,1).re) << "# M_(E,11)";
-    slha["MSOFT"][""] << 35 << sqrt((*M2E_pmns)(2,2).re) << "# M_(E,22)";
-    slha["MSOFT"][""] << 36 << sqrt((*M2E_pmns)(3,3).re) << "# M_(E,33)";
-    slha["MSOFT"][""] << 41 << sqrt((*M2Q_sckm)(1,1).re) << "# M_(Q,11)";
-    slha["MSOFT"][""] << 42 << sqrt((*M2Q_sckm)(2,2).re) << "# M_(Q,22)";
-    slha["MSOFT"][""] << 43 << sqrt((*M2Q_sckm)(3,3).re) << "# M_(Q,33)";
-    slha["MSOFT"][""] << 44 << sqrt((*M2U_sckm)(1,1).re) << "# M_(U,11)";
-    slha["MSOFT"][""] << 45 << sqrt((*M2U_sckm)(2,2).re) << "# M_(U,22)";
-    slha["MSOFT"][""] << 46 << sqrt((*M2U_sckm)(3,3).re) << "# M_(U,33)";
-    slha["MSOFT"][""] << 47 << sqrt((*M2D_sckm)(1,1).re) << "# M_(D,11)";
-    slha["MSOFT"][""] << 48 << sqrt((*M2D_sckm)(2,2).re) << "# M_(D,22)";
-    slha["MSOFT"][""] << 49 << sqrt((*M2D_sckm)(3,3).re) << "# M_(D,33)";
+    slha["MSOFT"][""] << 31 << Utils::sgn((*M2L_pmns)(1,1).re) * sqrt(abs((*M2L_pmns)(1,1).re)) << "# M_(L,11)";
+    slha["MSOFT"][""] << 32 << Utils::sgn((*M2L_pmns)(2,2).re) * sqrt(abs((*M2L_pmns)(2,2).re)) << "# M_(L,22)";
+    slha["MSOFT"][""] << 33 << Utils::sgn((*M2L_pmns)(3,3).re) * sqrt(abs((*M2L_pmns)(3,3).re)) << "# M_(L,33)";
+    slha["MSOFT"][""] << 34 << Utils::sgn((*M2E_pmns)(1,1).re) * sqrt(abs((*M2E_pmns)(1,1).re)) << "# M_(E,11)";
+    slha["MSOFT"][""] << 35 << Utils::sgn((*M2E_pmns)(2,2).re) * sqrt(abs((*M2E_pmns)(2,2).re)) << "# M_(E,22)";
+    slha["MSOFT"][""] << 36 << Utils::sgn((*M2E_pmns)(3,3).re) * sqrt(abs((*M2E_pmns)(3,3).re)) << "# M_(E,33)";
+    slha["MSOFT"][""] << 41 << Utils::sgn((*M2Q_sckm)(1,1).re) * sqrt(abs((*M2Q_sckm)(1,1).re)) << "# M_(Q,11)";
+    slha["MSOFT"][""] << 42 << Utils::sgn((*M2Q_sckm)(2,2).re) * sqrt(abs((*M2Q_sckm)(2,2).re)) << "# M_(Q,22)";
+    slha["MSOFT"][""] << 43 << Utils::sgn((*M2Q_sckm)(3,3).re) * sqrt(abs((*M2Q_sckm)(3,3).re)) << "# M_(Q,33)";
+    slha["MSOFT"][""] << 44 << Utils::sgn((*M2U_sckm)(1,1).re) * sqrt(abs((*M2U_sckm)(1,1).re)) << "# M_(U,11)";
+    slha["MSOFT"][""] << 45 << Utils::sgn((*M2U_sckm)(2,2).re) * sqrt(abs((*M2U_sckm)(2,2).re)) << "# M_(U,22)";
+    slha["MSOFT"][""] << 46 << Utils::sgn((*M2U_sckm)(3,3).re) * sqrt(abs((*M2U_sckm)(3,3).re)) << "# M_(U,33)";
+    slha["MSOFT"][""] << 47 << Utils::sgn((*M2D_sckm)(1,1).re) * sqrt(abs((*M2D_sckm)(1,1).re)) << "# M_(D,11)";
+    slha["MSOFT"][""] << 48 << Utils::sgn((*M2D_sckm)(2,2).re) * sqrt(abs((*M2D_sckm)(2,2).re)) << "# M_(D,22)";
+    slha["MSOFT"][""] << 49 << Utils::sgn((*M2D_sckm)(3,3).re) * sqrt(abs((*M2D_sckm)(3,3).re)) << "# M_(D,33)";
 
     if((*Mi)(1).im != 0 or (*Mi)(2).im != 0 or (*Mi)(3).im != 0)
     {
