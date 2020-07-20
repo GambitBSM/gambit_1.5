@@ -1405,6 +1405,7 @@ if(NOT ditched_${name}_${ver})
       COMMAND ${CMAKE_COMMAND} -E echo "#This is a trampoline script to import the cythonized python module under a different name" > lib/${lib}_${sfver}.py
       COMMAND ${CMAKE_COMMAND} -E echo "from ${lib} import *" >> lib/${lib}_${sfver}.py
       INSTALL_COMMAND ""
+      COMMAND ${PYTHON_EXECUTABLE} ${patch}/../create_SDSSDR7_fid.py ${dir} ${sfver}
     )
   endif()
   add_extra_targets("backend" ${name} ${ver} ${dir} ${dl} clean)
@@ -1442,6 +1443,7 @@ if(NOT ditched_${name}_${ver})
       COMMAND ${CMAKE_COMMAND} -E echo "#This is a trampoline script to import the cythonized python module under a different name" > lib/${lib}_${sfver}.py
       COMMAND ${CMAKE_COMMAND} -E echo "from ${lib} import *" >> lib/${lib}_${sfver}.py
       INSTALL_COMMAND ""
+      COMMAND ${PYTHON_EXECUTABLE} ${patch}/../create_SDSSDR7_fid.py ${dir} ${sfver}
     )
   endif()
   add_extra_targets("backend" ${name} ${ver} ${dir} ${dl} clean)
@@ -1477,6 +1479,7 @@ if(NOT ditched_${name}_${ver})
       COMMAND ${CMAKE_COMMAND} -E echo "#This is a trampoline script to import the cythonized python module under a different name" > lib/${lib}_${sfver}.py
       COMMAND ${CMAKE_COMMAND} -E echo "from ${lib} import *" >> lib/${lib}_${sfver}.py
       INSTALL_COMMAND ""
+      COMMAND ${PYTHON_EXECUTABLE} ${patch}/../create_SDSSDR7_fid.py ${dir} ${sfver}
     )
   endif()
   add_extra_targets("backend" ${name} ${ver} ${dir} ${dl} clean)
@@ -1512,6 +1515,7 @@ if(NOT ditched_${name}_${ver})
       COMMAND ${CMAKE_COMMAND} -E echo "#This is a trampoline script to import the cythonized python module under a different name" > lib/${lib}_${sfver}.py
       COMMAND ${CMAKE_COMMAND} -E echo "from ${lib} import *" >> lib/${lib}_${sfver}.py
       INSTALL_COMMAND ""
+      COMMAND ${PYTHON_EXECUTABLE} ${patch}/../create_SDSSDR7_fid.py ${dir} ${sfver}
     )
   endif()
   add_extra_targets("backend" ${name} ${ver} ${dir} ${dl} clean)
