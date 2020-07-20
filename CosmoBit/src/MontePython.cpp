@@ -187,6 +187,17 @@ namespace Gambit
       static const map_str_pyobj& likelihoods = std::get<2>(*Dep::MP_objects);
       static const MPLike_data_container mplike_cont(data, likelihoods);
 
+      // get classy backend directory and the safe version. The only reason we need to pass this
+      // to MP is because the likelihood 'sdss_lrgDR7' requires pre-computed fiducial spectra.
+      // These can, in general, depend on the CLASS version they were calculated with (if the 
+      // treatment of non-linearities changes). To make sure the fiducial spectra and the ones
+      // for each point in parameter space are computed with the same CLASS version, we pass the 
+      // CLASS version to MP. The fiducial spectra are automatically calculated when CLASS is build.
+      static std::string class_sfversion = BEreq::get_classy_sfversion();
+      static std::string backendDir = BEreq::get_classy_backendDir();
+      mplike_cont.data.attr("path[cosmo]") = backendDir;
+      mplike_cont.data.attr("path[class_version]") = class_sfversion;
+
       // Pass current values of nuisance parameters to data.mcmc_parameters dictionary for likelihood computation in MP
       mplike_cont.data.attr("mcmc_parameters") = *Dep::parameter_dict_for_MPLike;
 

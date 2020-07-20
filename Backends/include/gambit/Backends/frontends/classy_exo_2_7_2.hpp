@@ -11,6 +11,7 @@
 ///  \author Janina Renk
 ///          (janina.renk@fysik.su.se)
 ///  \date 2019 June
+///  \date 2020 July
 ///
 ///  \author Sanjay Bloor
 ///          (sanjay.bloor12@imperial.ac.uk)
@@ -33,7 +34,9 @@ LOAD_LIBRARY
 #ifdef HAVE_PYBIND11
 
   BE_CONV_FUNCTION(get_classy_cosmo_object, pybind11::object, (), "get_classy_cosmo_object")
-
+  BE_CONV_FUNCTION(get_classy_sfversion, std::string, (), "get_classy_sfversion")
+  BE_CONV_FUNCTION(get_classy_backendDir, std::string, (), "get_classy_backendDir")
+  
   BE_CONV_FUNCTION(class_get_rs,        double, (), "class_get_rs")
   BE_CONV_FUNCTION(class_get_Neff,      double, (), "class_get_Neff")
   BE_CONV_FUNCTION(class_get_sigma8,      double, (), "class_get_sigma8")

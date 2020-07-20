@@ -47,6 +47,18 @@
       return cosmo;
     }
 
+    // return safe version of CLASS
+    std::string get_classy_sfversion()
+    {
+      return STRINGIFY(SAFE_VERSION);
+    }
+
+    // return backend directory of CLASS
+    std::string get_classy_backendDir()
+    {
+      return backendDir;
+    }
+
     /// test if two dictionaries contain exactly the same values for all keys
     /// return true if so, false if there is at least one different value
     bool compare_dicts(pybind11::dict classy_input, pybind11::dict prev_input_dict)
