@@ -111,9 +111,9 @@ START_MODULE
     #undef FUNCTION
   #undef CAPABILITY
 
-  #define CAPABILITY f_effective
+  #define CAPABILITY f_effective_at_z
   START_CAPABILITY
-    #define FUNCTION f_effective_func
+    #define FUNCTION f_effective_at_z
     START_FUNCTION(double)
     ALLOW_MODELS(AnnihilatingDM_general,DecayingDM_general)
     DEPENDENCY(energy_injection_efficiency,DarkAges::Energy_injection_efficiency_table)
@@ -724,23 +724,6 @@ START_MODULE
     START_FUNCTION(double)
     DEPENDENCY(Omega0_m, double)
     BACKEND_REQ(class_get_sigma8,(class_tag),double,())
-    #undef FUNCTION
-  #undef CAPABILITY
-
-  #define CAPABILITY sigma8_LogLike
-  START_CAPABILITY
-    #define FUNCTION compute_sigma8_LogLike
-    START_FUNCTION(double)
-    DEPENDENCY(Omega0_m, double)
-    BACKEND_REQ(class_get_sigma8,(class_tag),double,())
-    #undef FUNCTION
-  #undef CAPABILITY
-
-  #define CAPABILITY H0_LogLike
-  START_CAPABILITY
-    #define FUNCTION compute_H0_LogLike
-    START_FUNCTION(double)
-    DEPENDENCY(H0,double)
     #undef FUNCTION
   #undef CAPABILITY
 
