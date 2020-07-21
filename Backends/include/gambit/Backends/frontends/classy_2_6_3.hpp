@@ -33,7 +33,6 @@ LOAD_LIBRARY
 #ifdef HAVE_PYBIND11
 
   BE_CONV_FUNCTION(get_classy_cosmo_object, pybind11::object, (), "get_classy_cosmo_object")
-  BE_CONV_FUNCTION(get_classy_sfversion, std::string, (), "get_classy_sfversion")
   BE_CONV_FUNCTION(get_classy_backendDir, std::string, (), "get_classy_backendDir")
 
   BE_CONV_FUNCTION(class_get_rs,        double, (), "class_get_rs")

@@ -1701,17 +1701,21 @@ class Likelihood_mpk(Likelihood):
 
         # require k_max and z_max from the cosmological module
         if self.use_sdssDR7:
+
             self.need_cosmo_arguments(data, {'z_max_pk': self.zmax})
             self.need_cosmo_arguments(data, {'P_k_max_h/Mpc': 7.5*self.kmax})
+
+            # (JR) Modifications for use with GAMBIT:
+            # init members storing the spectra of the fiducial cosmology
+            # don't read them in here though, as at the stage of initialising
+            # the likelihood objects, MP does not know the path to the CLASS
+            # backend, yet. The CLASS backend folder is where the version-de-
+            # pdendent fiducial spectra are stored. 
+            # Keep the data as members of the likelihood object though, such that
+            # they can only be read in once to avoid problems when several 
+            # MPI processes try to access this file.
+            self.fiducial_SDSSDR7, self.fiducial_SDSSDR7_nlratio = [],[]
             
-            # (JR) this was previously done in the likelihood calculation 
-            # -> takes a lot of time and can cause problems when multiple MPI processes try to 
-            # access the file. Within GAMBIT we don't ever have to create this file since it is 
-            # included in the patch so we can do it when loading the likelihood
-            print("Trying to load %s" % os.path.join(self.data_directory,'sdss_lrgDR7/sdss_lrgDR7_fiducialmodel.dat'))
-            fiducial = np.loadtxt(os.path.join(self.data_directory,'sdss_lrgDR7/sdss_lrgDR7_fiducialmodel.dat'))
-            self.fiducial_SDSSDR7 = fiducial[:,1:4]
-            self.fiducial_SDSSDR7_nlratio = fiducial[:,1:7]
         else:
             self.need_cosmo_arguments(
                 data, {'P_k_max_h/Mpc': khmax, 'z_max_pk': self.redshift})
@@ -1856,11 +1860,11 @@ class Likelihood_mpk(Likelihood):
             a1maxval=self.a1maxval
             self.a1list=np.zeros(self.nptstot)
             self.a2list=np.zeros(self.nptstot)
-            da1 = a1maxval/(nptsa1/2)
-            da2 = self.a2maxpos(-a1maxval) / (nptsa2/2)
+            da1 = a1maxval/(nptsa1//2)
+            da2 = self.a2maxpos(-a1maxval) / (nptsa2//2)
             count=0
-            for i in range(-nptsa1/2, nptsa1/2+1):
-                for j in range(-nptsa2/2, nptsa2/2+1):
+            for i in range(-nptsa1//2, nptsa1//2+1):
+                for j in range(-nptsa2//2, nptsa2//2+1):
                     a1val = da1*i
                     a2val = da2*j
                     if ((a2val >= 0.0 and a2val <= self.a2maxpos(a1val) and a2val >= self.a2minfinalpos(a1val)) or \
@@ -2047,7 +2051,13 @@ class Likelihood_mpk(Likelihood):
                 P_lin = np.interp(self.kh, self.k_fid, P)
 
         elif self.use_sdssDR7:
-            kh = np.logspace(math.log(1e-3),math.log(1.0),num=(math.log(1.0)-math.log(1e-3))/0.01+1,base=math.exp(1.0)) # k in h/Mpc
+            # update in numpy's logspace function breaks python3 compatibility, fixed by using
+            # goemspace function, giving same result as old logspace
+            if sys.version_info[0] < 3:
+              kh = np.logspace(math.log(1e-3),math.log(1.0),num=(math.log(1.0)-math.log(1e-3))/0.01+1,base=math.exp(1.0))
+            else:
+              kh = np.geomspace(1e-3,1,num=int((math.log(1.0)-math.log(1e-3))/0.01)+1)
+
             # Rescale the scaling factor by the fiducial value for h divided by the sampled value
             # h=0.701 was used for the N-body calibration simulations
             scaling = scaling * (0.701/h)
@@ -2100,41 +2110,20 @@ class Likelihood_mpk(Likelihood):
             # To re-run fiducial, set <experiment>.create_fid = True in .data file
             # Can leave option enabled, as it will only compute once at the start
 
-            # !!!!! --- Heads-up ---- !!!!
-            # (JR) forced 'self.create_fid' to false for use with GAMBIT -> if true the function 
-            #      'get_flat_fid' wipes content of cosmo container, fills it with params to 
-            #       calculate a fiducial model, run CLASS with fiducial model and then the routine
-            #       spits out a table in form of file. After that the cosmo object is filled 
-            #       again.. We do not want any interference with the cosmo object or a CLASS run 
-            #       initiated by MontePython so we are taking care of creating this 'fiducial'
-            #       data file when installing MontePython through GAMBIT.
-            # --|> This file has to be updated if something in the non-linear module of CLASS changes!!
-            self.create_fid = False
+            # (JR) changed the above described behaviour for use within GAMBIT
+            #       to make sure you never get inconsistent results because of 
+            #       the use of different CLASS versions. The file containing the
+            #       fiducial spectra is created after CLASS is build wit GAMBIT.
+            #       Here, we just have to read it in, pointing MP to the CLASS
+            #       version that is used in the current run.       
 
-            if self.create_fid == True:
-                # Calculate relevant flat fiducial quantities
-                fidnlratio, fidNEAR, fidMID, fidFAR = self.get_flat_fid(cosmo,data,kh,z,sigma2bao)
-                try:
-                    existing_fid = np.loadtxt(os.path.join(self.data_directory,'/sdss_lrgDR7/sdss_lrgDR7_fiducialmodel.dat'))
-                    print( 'sdss_lrgDR7: Checking fiducial deviations for near, mid and far bins:', np.sum(existing_fid[:,1] - fidNEAR),np.sum(existing_fid[:,2] - fidMID), np.sum(existing_fid[:,3] - fidFAR))
-                    if np.sum(existing_fid[:,1] - fidNEAR) + np.sum(existing_fid[:,2] - fidMID) + np.sum(existing_fid[:,3] - fidFAR) < 10**-5:
-                        self.create_fid = False
-                except:
-                    pass
-                if self.create_fid == True:
-                    print( 'sdss_lrgDR7: Creating fiducial file with Omega_b = 0.25, Omega_L = 0.75, h = 0.701')
-                    print ('             Required for non-linear modeling')
-                    # Save non-linear corrections from N-body sims for each redshift bin
-                    arr=np.zeros((np.size(kh),7))
-                    arr[:,0]=kh
-                    arr[:,1]=fidNEAR
-                    arr[:,2]=fidMID
-                    arr[:,3]=fidFAR
-                    # Save non-linear corrections from halofit for each redshift bin
-                    arr[:,4:7]=fidnlratio
-                    np.savetxt('data/sdss_lrgDR7/sdss_lrgDR7_fiducialmodel.dat',arr)
-                    self.create_fid = False
-                    print ('             Fiducial created')
+            # read in fiducial spectra when executing the first time
+            if len(self.fiducial_SDSSDR7) == 0:
+
+                fiducial = np.loadtxt(data.path["cosmo"]+'/../sdss_lrgDR7_fiducialmodel.dat')
+                
+                self.fiducial_SDSSDR7 = fiducial[:,1:4]
+                self.fiducial_SDSSDR7_nlratio = fiducial[:,1:7]
 
             # Load fiducial model (loaded data in likelihood initialisation to save time and avoid 
             # problems when several MPI processes try to access one file multiple times during a scan)
@@ -2347,88 +2336,7 @@ class Likelihood_mpk(Likelihood):
 
         return pk_nobao
 
-    def get_flat_fid(self,cosmo,data,kh,z,sigma2bao):
-        # SDSS DR7 LRG specific function
-        # Compute fiducial properties for a flat fiducial
-        # with Omega_m = 0.25, Omega_L = 0.75, h = 0.701
         
-
-        raise io_mp.LikelihoodError(
-                        "You entered the attribute 'get_flat_fid' of the 'Likelihood_mpk' object.\n" +
-                        "This should never happen in GAMBIT as this routine is a bit dodgy as\n" +
-                        "it manipulates the the 'cosmo' instance of the classy Class Class()\n" +
-                        "by filling it with different parameters and executing a CLASS run.\n"+
-                        "The purpose is to get a table with data from a fiducial cosmology.\n"+
-                        "Therefore the GAMBIT patch provides this fiducial table which is supposed to be copied to\n"+
-                        " \t'montepythonlike/<verion_number>/data/sdss_lrgDR7/sdss_lrgDR7_fiducialmodel.data'\n"+
-                        "This message will show up if the copying did not work... (blame Janina)")
-
-        ''' ---- MontePython original routine --- 
-        param_backup = data.cosmo_arguments
-        data.cosmo_arguments = {'P_k_max_h/Mpc': 1.5, 'ln10^{10}A_s': 3.0, 'N_ur': 3.04, 'h': 0.701,
-                                'omega_b': 0.035*0.701**2, 'non linear': ' halofit ', 'YHe': 0.24, 'k_pivot': 0.05,
-                                'n_s': 0.96, 'tau_reio': 0.084, 'z_max_pk': 0.5, 'output': ' mPk ',
-                                'omega_cdm': 0.215*0.701**2, 'T_cmb': 2.726}
-        cosmo.empty()
-        cosmo.set(data.cosmo_arguments)
-        cosmo.compute(['lensing'])
-        h = data.cosmo_arguments['h']
-        k = kh*h
-        # P(k) *with* wiggles, both linear and nonlinear
-        Plin = np.zeros(len(k), 'float64')
-        Pnl = np.zeros(len(k), 'float64')
-        # P(k) *without* wiggles, both linear and nonlinear
-        Psmooth = np.zeros(len(k), 'float64')
-        Psmooth_nl = np.zeros(len(k), 'float64')
-        # Damping function and smeared P(k)
-        fdamp = np.zeros([len(k), len(z)], 'float64')
-        Psmear = np.zeros([len(k), len(z)], 'float64')
-        # Ratio of smoothened non-linear to linear P(k)
-        fidnlratio = np.zeros([len(k), len(z)], 'float64')
-        # Loop over each redshift bin
-        for j in range(len(z)):
-            # Compute Pk *with* wiggles, both linear and nonlinear
-            # Get P(k) at right values of k in Mpc**3, convert it to (Mpc/h)^3 and rescale it
-            # Get values of P(k) in Mpc**3
-            for i in range(len(k)):
-                Plin[i] = cosmo.pk_lin(k[i], z[j])
-                Pnl[i] = cosmo.pk(k[i], z[j])
-            # Get rescaled values of P(k) in (Mpc/h)**3
-            Plin *= h**3 #(h/scaling)**3
-            Pnl *= h**3 #(h/scaling)**3
-            # Compute Pk *without* wiggles, both linear and nonlinear
-            Psmooth = self.remove_bao(kh,Plin)
-            Psmooth_nl = self.remove_bao(kh,Pnl)
-            # Apply Gaussian damping due to non-linearities
-            fdamp[:,j] = np.exp(-0.5*sigma2bao[j]*kh**2)
-            Psmear[:,j] = Plin*fdamp[:,j]+Psmooth*(1.0-fdamp[:,j])
-            # Take ratio of smoothened non-linear to linear P(k)
-            fidnlratio[:,j] = Psmooth_nl/Psmooth
-
-        # Polynomials to shape small scale behavior from N-body sims
-        kdata=kh
-        fidpolyNEAR=np.zeros(np.size(kdata))
-        fidpolyNEAR[kdata<=0.194055] = (1.0 - 0.680886*kdata[kdata<=0.194055] + 6.48151*kdata[kdata<=0.194055]**2)
-        fidpolyNEAR[kdata>0.194055] = (1.0 - 2.13627*kdata[kdata>0.194055] + 21.0537*kdata[kdata>0.194055]**2 - 50.1167*kdata[kdata>0.194055]**3 + 36.8155*kdata[kdata>0.194055]**4)*1.04482
-        fidpolyMID=np.zeros(np.size(kdata))
-        fidpolyMID[kdata<=0.19431] = (1.0 - 0.530799*kdata[kdata<=0.19431] + 6.31822*kdata[kdata<=0.19431]**2)
-        fidpolyMID[kdata>0.19431] = (1.0 - 1.97873*kdata[kdata>0.19431] + 20.8551*kdata[kdata>0.19431]**2 - 50.0376*kdata[kdata>0.19431]**3 + 36.4056*kdata[kdata>0.19431]**4)*1.04384
-        fidpolyFAR=np.zeros(np.size(kdata))
-        fidpolyFAR[kdata<=0.19148] = (1.0 - 0.475028*kdata[kdata<=0.19148] + 6.69004*kdata[kdata<=0.19148]**2)
-        fidpolyFAR[kdata>0.19148] = (1.0 - 1.84891*kdata[kdata>0.19148] + 21.3479*kdata[kdata>0.19148]**2 - 52.4846*kdata[kdata>0.19148]**3 + 38.9541*kdata[kdata>0.19148]**4)*1.03753
-
-        fidNEAR=np.interp(kh,kdata,fidpolyNEAR)
-        fidMID=np.interp(kh,kdata,fidpolyMID)
-        fidFAR=np.interp(kh,kdata,fidpolyFAR)
-
-        cosmo.empty()
-        data.cosmo_arguments = param_backup
-        cosmo.set(data.cosmo_arguments)
-        cosmo.compute(['lensing'])
-
-        return fidnlratio, fidNEAR, fidMID, fidFAR
-        '''
-    
 class Likelihood_sn(Likelihood):
 
     def __init__(self, path, data, command_line):
@@ -2888,6 +2796,13 @@ class Data(object):
         """
 
         self.need_cosmo_update = True
+
+    def set_class_version(self,class_path):
+        """ (JR) Add path to CLASS version in use and the safe version number (e.g. 2_6_3)
+            to the path dictionary. Needed for use with GAMBIT, so MP knows where to
+            find CLASS version dependent files
+        """
+        self.path['cosmo'] = class_path
 
     def read_file(self, param, structure, field='', separate=False):
         """
