@@ -61,7 +61,6 @@
 #undef MODEL
 
 /// nuisance params for bicep/keck array BK14priors likelihood implemented in MontePython
-/// nuisance params for bicep/keck array BK14priors likelihood implemented in MontePython
 #define MODEL cosmo_nuisance_BK14priors
   #define PARENT cosmo_nuisance_BK14
     START_MODEL

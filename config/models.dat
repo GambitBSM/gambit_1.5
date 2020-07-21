@@ -19,6 +19,9 @@
 NormalDist: |
    A simple test model consisting of two parameters: the width and central value of a Gaussian distribution.
 
+demo_CAP: |
+   A simple example model demonstrating the usage of module functions within a model namespace.
+
 TestModel1D: |
    A one-dimensional test model, typically used for debugging simple prior transformations, or when a dummy model is required (as in the external model example in ColliderBit).
 
@@ -476,6 +479,10 @@ nuclear_params_sigmas_sigmal: |
 
    The same as nuclear_params_fnq, but with the replacement of the six quark content matrix elements by the matrix element sigma0 and the strange quark content of the nucleon sigmas. See the GAMBIT core paper for details and definitions.
 
+nuclear_params_neutron_lifetime : |
+
+   Model for the neutron lifetime (parameter name neutron_lifetime [s]).
+
 ScalarSingletDM_Z2: |
 
    The scalar singlet DM model, with two parameters mS (the mass of the scalar DM), and lambda_hS, the strength of the new scalar interaction with the SM Higgs. Note that mS should either be interpreted as the tree level mass or directly as the pole mass for S. This is analogous to the treatment of the SM Higgs mass in the model StandardModel_Higgs.
@@ -483,53 +490,6 @@ ScalarSingletDM_Z2: |
 ScalarSingletDM_Z2_running: |
 
    The scalar singlet DM model with lambda_S (the scalar self-coupling), lambda_hS (the scalar-SM Higgs interaction strength) and mS (the mass of the new scalar) defined at the scale mZ as free parameters, allowing full calculation of pole masses, renormalisation group running and vacuum stability.
-
-AnnihilatingDM_general: |
-
-  Simple model of promptly annihilating dark matter into e+/e- and/or photons.
-
-  mass   - mass of the dark matter candidate [in GeV]
-  sigmav - thermally averaged cross section [in cm^3 s^-1]
-  BR     - the fraction of how much energy will be contributed in e+/e-. (1-BR will be asinged to photons)
-
-AnnihilatingDM_photon: |
-
-  Special case of AnnihilatingDM_general. (Annihilation only into photons -> BR = 0)
-
-  mass   - mass of the dark matter candidate [in GeV]
-  sigmav - thermally averaged cross section [in cm^3 s^-1]
-
-AnnihilatingDM_electron: |
-
-  Special case of AnnihilatingDM_general. (Annihilation only into e+/e- -> BR = 1)
-
-  mass   - mass of the dark matter candidate [in GeV]
-  sigmav - thermally averaged cross section [in cm^3 s^-1]
-
-DecayingDM_general: |
-
-  Simple model of promptly decaying dark matter into e+/e- and/or photons.
-
-  mass     - mass of the dark matter candidate [in GeV]
-  lifetime - lifetime of said DM candidate [in s]
-  fraction - fraction of how much the decaying DM component contributes to all DM.
-  BR       - the fraction of how much energy will be contributed in e+/e-. (1-BR will be asinged to photons)
-
-DecayingDM_photon: |
-
-  Special case of DecayingDM_general. (Decay only into photons -> BR = 0)
-
-  mass     - mass of the dark matter candidate [in GeV]
-  lifetime - lifetime of said DM candidate [in s]
-  fraction - fraction of how much the decaying DM component contributes to all DM.
-
-DecayingDM_electron: |
-
-  Special case of DecayingDM_general. (Decay only into e+/e- -> BR = 1)
-
-  mass     - mass of the dark matter candidate [in GeV]
-  lifetime - lifetime of said DM candidate [in s]
-  fraction - fraction of how much the decaying DM component contributes to all DM.
 
 MDM: |
 
@@ -601,42 +561,41 @@ RightHandedNeutrinos_diff: |
 StandardModel_mNudiff: |
    Daughter model of the StandardModel_SLHA2 where the masses of neutrinos have been substituted by mass differences and the absolute lightest neutrino mass.
 
-##
-# Cosmology related models
-##
+############################
+# Cosmology related models #
+############################
 
 LCDM: |
 
-   The standard Lambda-CDM model, i.e. the simplest standard contemporary model with six effective parameters including cosmological constant Lambda and cold dark matter. The 6 parameters are chosen as:
+   The standard Lambda-CDM model, but without any details of the inflationary or neutrino sectors. Chooses Hubble scale as an input parameter. 
+   The simplest standard contemporary model with 4+1 effective parameters, chosen as:
 
    omega_b             - baryon density parameter
    omega_cdm           - dark matter density parameter
-   H0                  - Hubble constant
-   ln10A_s             - primordial curvature fluctuation amplitude
-   n_s                 - parametrises the primordial scale dependence.
+   H0                  - Hubble constant [km/s/Mpc]
    tau_reio            - reionization optical depth
+   T_cmb               - CMB temperature [K] (if not specified, default value is used)
 
-   Neutrino masses:
-   default: 1 massive neutrino with m_nu = 0.06eV (as in the Planck 2015/2018 'baseline' model)
-   Scan in combination with model ..
-    .. StandardModel_mNudiff_both_scan  for realistic neutrino masses (normal & inverted hierarchy)
-    .. StandardModel_mNudiff_NH_scan  for realistic neutrino masses (normal hierarchy only)
-    .. StandardModel_mNudiff_IH_scan  for realistic neutrino masses (inverted hierarchy only)
+LCDM_theta: |
 
-LCDM_no_primordial: |
-
-   A Lambda-CDM model without the parameters related to the shape of the primordial power spectrum. Use this model in combination with any model providing either a parameterised or full primordial power spectrum independently, e.g. any of the 'Inflation_' models.
+   The standard Lambda-CDM model, but without any details of the inflationary or neutrino sectors. Chooses the acoustic scale as an input parameter.
+   The simplest standard contemporary model with 4+1 effective parameters including cosmological constant Lambda and cold dark matter. The 5 parameters are chosen as:
 
    omega_b             - baryon density parameter
    omega_cdm           - dark matter density parameter
-   H0                  - Hubble constant
+   100theta_s          - acoustic angular scale, times 100
    tau_reio            - reionization optical depth
+   T_cmb               - CMB temperature [K]
+
+#
+# Modifications to N_eff
+#
 
 etaBBN_rBBN_rCMB_dNurBBN_dNurCMB: |
 
    Model to be scanned in addition to LCDM as an extension: allowing for non-standard values of the baryon-to-photon ratio at BBN, non-standard values of the temperature ratio between photon and neutrinos at BBN and CMB release, as well as additional ultra-relativistic species present during BBN or at CMB release.
-   Total value of Neff @BBN: 3.046 x (r_BBN)^4 + dNur_BBN
-   Total value of Neff @CMB: 3.046 x (r_CMB)^4 + dNur_CMB
+   Total value of Neff @BBN: 3.045 x (r_BBN)^4 + dNur_BBN
+   Total value of Neff @CMB: 3.045 x (r_CMB)^4 + dNur_CMB
    Total value of Neff today: Neff @CMB - N_ur_SMnu x (r_CMB)^4 (value of Neff depending on #massive Nu) assuming that r_CMB = r_0 and dNur_CMB = dNur_0   => this is the value we have to pass to class as `N_ur`
 
    eta_BBN             - baryon-to-photon ratio during BBN (eta at CMB set by omega_b)
@@ -648,6 +607,7 @@ etaBBN_rBBN_rCMB_dNurBBN_dNurCMB: |
    dNur_CMB            - additional ultra-relativistic species at CMB
 
 etaBBN: |
+
    Child model of etaBBN_rBBN_rCMB_dNurBBN_dNurCMB with only etaBBN as free parameter. Only allows for non-standard baryon-to-photon ratios, Neff as in SM at all times => r_BBN = r_CMB = 1 and dNur_BBN = dNur_CMB = 0.
 
    eta_BBN             - baryon-to-photon ratio during BBN (eta at CMB set by omega_b)
@@ -671,6 +631,32 @@ rBBN_rCMB: |
 rCMB: |
 
    Child model of rBBN_rCMB model. Parameters are as in parent model but the neutrino to photon temperature ratio between BBN and CMB is assumed to be constant, hence r_BBN = r_CMB.
+
+#
+# Inflationary models
+#
+
+PowerLaw_ps: |
+
+   Simple, parameterised, purely phenomenological, scale-free power spectrum.
+   Parameters:
+
+   ln10A_s             - primordial curvature fluctuation amplitude
+   n_s                 - parametrises the primordial scale dependence
+   r                   - scalar to tensor ratio
+   N_pivot             - pivot scale: number of e-folds from the end of inflation (for k_pivot)
+
+Minimal_PowerLaw_ps: |
+
+   As PowerLaw_ps, but with no tensor perturbations (r=0) and fixed N_pivot (=55).
+
+Inflation_InstReh_1Starobinsky : |
+
+   Single field Starobinsky inflation (aka R^2 inflation), assuming instant reheating.
+   Potential: V(phi) = Lambda^4 [1-exp(-sqrt(2/3)phi/M_P)]^2 (dimensionful Lambda == lambda * M_P)
+                     = (lambda M_P)^4 [1-exp(-sqrt(2/3)phi/M_P)]^2 
+
+   lambda:       - the [dimensionless] amplitude of the coupling term in the potential
 
 Inflation_InstReh_1mono23: |
 
@@ -707,6 +693,10 @@ Inflation_InstReh_1natural: |
    Lambda       - overall energy scale of the potential
    f_phi        - decay constant of the inflaton
 
+#
+# Cosmological nuisance parameters
+#
+
 cosmo_nuisance_dummy: |
    Dummy model for cosmological nuisance parameters that can be used by new MontePython likelihoods. This model has 10 parameters, more can be added anytime to Models/include/gambit/Models/models/CosmoNuisanceModels.hpp.
    Note: if you want to use this model for nuisance parameters in MP make sure that the
@@ -741,6 +731,13 @@ cosmo_nuisance_BK14: |
    BBsync              - sync power at ell=80, nu=23 GHz [uK^2]
    EEtoBB_dust         - EE/BB ratios -- recommended to fix to 2 / only used if E-modes are turned on
    EEtoBB_sync         - EE/BB ratios -- recommended to fix to 2 / only used if E-modes are turned on
+
+cosmo_nuisance_BK14priors: |
+   Cosmological nuisance parameters for BK14priors likelihood in MontePython, from http://arxiv.org/pdf/1510.09217.pdf
+   @TODO
+
+   BBbetadust          - dust SED power law index
+   BBbetasync          - sync SED power law index
 
 cosmo_nuisance_CFHTLens_correlation: |
    Cosmological nuisance parameters for CFHTLenS tomographic weak lensing likelihood from Heymans et al. (https://arxiv.org/abs/1303.1808 ).
@@ -874,3 +871,101 @@ cosmo_nuisance_Planck_lite: |
    Planck likelihood for high-l TT-spectrum (marginalized) with 1 nuissance parameter.
 
    A_planck            - the Planck absolute calibration.
+
+#
+# Energy injection models
+#
+
+AnnihilatingDM_general: |
+
+   The most general scenario of dark matter s-wave annihilating, to inject energy. An additional module function
+   must be written to provide the correct efficiency functions or spectra of injected photons & electrons. 
+
+   This scenario implicitly assumes that the particle in question is all of dark matter,
+   such that the fractional abundance ξ = 1. To consider scenarios where ξ != 1, the
+   cross-section should be scaled down by ξ^2.
+
+   mass        - mass of the dark matter candidate [in GeV]
+   sigmav      - thermally averaged cross section [in cm^3 s^-1]
+
+AnnihilatingDM_mixture : |
+
+   Simple model of promptly annihilating dark matter into e+/e- and/or photons.
+
+   This scenario implicitly assumes that the particle in question is all of dark matter,
+   such that the fractional abundance ξ = 1. To consider scenarios where ξ != 1, the
+   cross-section should be scaled down by ξ^2.
+
+   mass        - mass of the dark matter candidate [in GeV]
+   sigmav      - thermally averaged cross section [in cm^3 s^-1]
+   BR          - the fraction of how much energy will be contributed in e+/e-. (1-BR will be assigned to photons)
+
+AnnihilatingDM_photon: |
+
+   Special case of AnnihilatingDM_mixture. (Annihilation only into photons -> BR = 0)
+
+   mass        - mass of the dark matter candidate [in GeV]
+   sigmav      - thermally averaged cross section [in cm^3 s^-1]
+
+AnnihilatingDM_electron: |
+
+   Special case of AnnihilatingDM_mixture. (Annihilation only into e+/e- -> BR = 1)
+
+   mass        - mass of the dark matter candidate [in GeV]
+   sigmav      - thermally averaged cross section [in cm^3 s^-1]
+
+DecayingDM_general : |
+
+   The most general scenario of decaying dark matter, to inject energy. An additional module function
+   must be written to provide the correct efficiency functions or spectra of injected photons & electrons. 
+
+   mass        - mass of the dark matter candidate [in GeV]
+   fraction    - fraction of how much the decaying DM component contributes to all DM.
+   sigmav      - thermally averaged cross section [in cm^3 s^-1]
+
+DecayingDM_mixture: |
+
+   Simple model of promptly decaying dark matter into e+/e- and/or photons.
+
+   mass        - mass of the dark matter candidate [in GeV]
+   lifetime    - lifetime of said DM candidate [in s]
+   fraction    - fraction of how much the decaying DM component contributes to all DM.
+   BR          - the fraction of how much energy will be contributed in e+/e-. (1-BR will be assigned to photons)
+
+DecayingDM_photon: |
+
+   Special case of DecayingDM_mixture. (Decay only into photons -> BR = 0)
+
+   mass        - mass of the dark matter candidate [in GeV]
+   lifetime    - lifetime of said DM candidate [in s]
+   fraction    - fraction of how much the decaying DM component contributes to all DM.
+
+DecayingDM_electron: |
+
+   Special case of DecayingDM_mixture. (Decay only into e+/e- -> BR = 1)
+
+   mass        - mass of the dark matter candidate [in GeV]
+   lifetime    - lifetime of said DM candidate [in s]
+   fraction    - fraction of how much the decaying DM component contributes to all DM.
+
+#
+# Cosmological ALPs
+#
+
+GeneralCosmoALP : |
+
+   General axion model with parametric temperature-dependent mass and cosmological applications.
+
+   gagg                 - Axion-photon coupling [GeV^-1]                       
+   gaee                 - Axion-electron coupling     [dimensionless]                   
+   fa                   - Axion decay constant/pNGB scale [GeV]                            
+   ma0                  - Axion (zero-temperature) mass [e                           
+   Tchi                 - Critical temperature below which the axion mass is constant [MeV]                          
+   beta                 - Exponent of the temperature scaling of the axion mass above Tchi [dimensionless]             
+   thetai               - Initial misalignment angle [dimensionless]           
+   f0_thermal           - Fraction of total CDM in ALPs produced thermally, at production [dimensionless]          
+   T_R                  - Reheating temperature [MeV]                        
+
+CosmoALP : |
+
+   Specialised version of GeneralCosmoALP. @TODO.

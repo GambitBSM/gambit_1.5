@@ -42,7 +42,7 @@ BE_VARIABLE(ErrorHandler_cptr, fptr_void,
             ("__modpk_errorhandling_MOD_errorhandler_cptr","modpk_errorhandling_mp_errorhandler_cptr_"), "multimode_internal")
 
 // Variable to silence MultiModeCode output
-BE_VARIABLE(SilenceOutput, Flogical, ("__multimodecode_gambit_MOD_silenceoutput", "multimodecode_gambit_mp_silenceoutput_"), "mutlimode_internal")
+BE_VARIABLE(SilenceOutput, Flogical, ("__multimodecode_gambit_MOD_silenceoutput", "multimodecode_gambit_mp_silenceoutput_"), "multimode_internal")
 
 // Undefine macros to avoid conflict with other backends
 #include "gambit/Backends/backend_undefs.hpp"

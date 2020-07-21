@@ -3736,6 +3736,10 @@ nuclear_params_sigma0_sigmal_parameters: |
 nuclear_params_sigmas_sigmal_parameters: |
    Parameters for the model nuclear_params_sigmas_sigmal (see ./gambit nuclear_params_sigmas_sigmal)
 
+nuclear_params_neutron_lifetime_parameters: |
+   Model for the neutron lifetime. 
+   See ./gambit nuclear_params_neutron_lifetime for details.
+
 RightHandedNeutrinos_parameters: |
    Parameters for the model RightHandedNeutrinos (see ./gambit RightHandedNeutrios)
 
@@ -3839,6 +3843,14 @@ calculate_uncertainty_amu_2loop: |
 #----------------------------
 #  Axion-related capabilities
 #----------------------------
+
+CosmoALP_parameters: |
+   Parameters of the CosmoALP model (Cagg, fa, ma0, thetai, f0_thermal, T_R).
+   See ./gambit CosmoALP
+
+GeneralCosmoALP_parameters: |
+   Parameters of the GeneralCosmoALP model (gagg, gaee, fa, ma0, Tchi, beta, thetai, f0_thermal, T_R).
+   See ./gambit GeneralCosmoALP
 
 GeneralALP_parameters: |
    Parameters of the GeneralALP model (gagg, gaee, fa, ma0, Tchi, beta, thetai).
@@ -4089,6 +4101,18 @@ multimodecode_gambit_driver_test: |
    some test function with less parameters for input.
    will be deleted.
 
+multimode_input_parameters: |
+   Object containing the generic inputs used when calling MultiModeCode.
+
+multimode_internal: |
+   Exclusively used for internal variables and function for the MultiModeCode backend.
+
+multimodecode_parametrised_ps: |
+   Backend convenience function to fill the values parametrising the phenomenological power spectrum in the gambit_inflation_observables object.
+
+multimodecode_primordial_ps: |
+   Backend convenience function to fill the arrays in the gambit_inflation_observables object for the full primordial power spectrum.
+
 #----------------------------
 #  CLASS / classy
 #----------------------------
@@ -4142,6 +4166,9 @@ class_get_Omega0_r: |
 class_get_Omega0_ur: |
     Returns Omega0_ur as computed by CLASS. Contains contributions from ultra-relativistic species today.
 
+class_get_H0: |
+    Returns the Hubble rate today, as computed by CLASS [km/s/Mpc].
+
 #----------------------------
 #  MontePythonLike
 #----------------------------
@@ -4155,6 +4182,36 @@ get_MP_loglike: |
 
 create_MP_data_object: |
     Create a python object storing all information
+
+calc_MP_LogLikes: |
+    Calls MontePython to get the likelihood of all experiments (tagged with 'Likelihood' and 'Observable'). The results are stored as map from experiment name to LogLike result in the type MPLike_result_container.
+
+MP_Combined_LogLike: |
+    Returns combined LogLike of all MontePython Likelihoods used in the scan.
+
+MP_LogLikes: |
+    Returns a map from experiment name to LogLike value containing the likelihood of all experiments used as an Observable. All LogLike values contained here are added up an count to the total LogLike that drives the scan.
+
+MP_Observables: |
+    Returns a map from experiment name to LogLike value containing the likelihood of all experiments used as an Observable. These are not added to the value returned by MP_Combined_LogLike, hence they are not driving the scan.
+
+MP_experiment_names: |
+  Set names of all experiments in use for a scan and stores the path to the settings file for the different likelihoods by reading in the runOptions 'Likelihoods' and/or 'Observables' of this capability.
+
+MontePythonLike_3_1_0_init: |
+  Initialise MontePython backend v3.1.0.
+
+MontePythonLike_3_3_0_init: |
+  Initialise MontePython backend v3.3.0.
+
+MP_objects: |
+   An object containing the MontePython data and likelihood objects, determining which experiments are in use in the process.
+
+parameter_dict_for_MPLike: |
+   A pybind11::dict filled with the mcmc_parameters dictionary of MontePython's Data object, with current values of nuisance parameters.
+
+create_MP_likelihood_objects: |
+   Returns a map of string to Python objects: the Python objects from MontePython are the initialised "Likelihood" objects used internally.
 
 #----------------------------
 #  DarkAges
@@ -4186,8 +4243,12 @@ DA_alreadyCalculated: |
 #----------------------------
 
 AnnihilatingDM_general_parameters: |
-   Model of (s-wave) annihilating dark matter into prompt pairs of e+/e- and/or photons.
+   General model of (s-wave) annihilating dark matter into prompt pairs of e+/e- and/or photons.
    See ./gambit AnnihilatingDM_general for more details.
+
+AnnihilatingDM_mixture_parameters: |
+   Model of (s-wave) annihilating dark matter into prompt pairs of e+/e- and/or photons.
+   See ./gambit AnnihilatingDM_mixture for more details.
 
 AnnihilatingDM_photon_parameters: |
    Model of (s-wave) annihilating matter into a prompt pair of photons.
@@ -4198,8 +4259,12 @@ AnnihilatingDM_electron_parameters: |
    See ./gambit AnnihilatingDM_electron and ./gambit AnnihilatingDM_general for more details.
 
 DecayingDM_general_parameters: |
-   Model of decaying dark matter into prompt pairs of e+/e- and/or photons.
+   General model of decaying dark matter into prompt pairs of e+/e- and/or photons.
    See ./gambit DecayingDM_general for more details.
+
+DecayingDM_mixture_parameters: |
+   Model of decaying dark matter into prompt pairs of e+/e- and/or photons.
+   See ./gambit DecayingDM_mixture for more details.
 
 DecayingDM_photon_parameters: |
    Model of decaying dark matter into a prompt pair of photons.
@@ -4210,10 +4275,12 @@ DecayingDM_electron_parameters: |
    See ./gambit DecayingDM_electron and ./gambit DecayingDM_general for more details.
 
 LCDM_parameters: |
-   Standard 6-parameters LCDM model. See ./gambit LCDM for more details.
+   Standard (4+1)-parameter LCDM model (no neutrinos, no inflation), using H0 instead of 100*theta_s. 
+   See ./gambit LCDM for more details.
 
-LCDM_no_primordial_parameters: |
-   As LCDM_parameters but without the parameters related to the shape of the primordial power spectrum. See ./gambit LCDM_no_primordial for more details.
+LCDM_theta_parameters: |
+   Standard (4+1)-parameter LCDM model (no neutrinos, no inflation), using 100*theta_s instead of H0.
+   See ./gambit LCDM_theta for more details.
 
 etaBBN_rBBN_rCMB_dNurBBN_dNurCMB_parameters: |
 
@@ -4242,25 +4309,37 @@ rCMB_parameters: |
 
    Child model of rBBN_rCMB model. See ./gambit rCMB for more details.
 
+PowerLaw_ps_parameters: |
+   Simple, parameterised, purely phenomenological, scale-free power spectrum.
+   See ./gambit PowerLaw_ps for details.
+
+Minimal_PowerLaw_ps_parameters: |
+   Simple, parameterised, purely phenomenological, scale-free power spectrum, with no tensor modes.
+   See ./gambit Minimal_PowerLaw_ps for details.
+
+Inflation_InstReh_1Starobinsky_parameters: |
+   Inflation model with potential V(phi) = (lambda M_P)^4 [1-exp(-sqrt(2/3)phi/M_P)]^2, assuming instant reheating.
+   See ./gambit Inflation_InstReh_1Starobinsky for more details.
+
 Inflation_InstReh_1mono23_parameters: |
 
-      Inflation model with potential V(phi) = 1.5 lambda phi^(2/3), assuming instant reheating. See ./gambit Inflation_InstReh_1mono23 for more details.
+   Inflation model with potential V(phi) = 1.5 lambda phi^(2/3), assuming instant reheating. See ./gambit Inflation_InstReh_1mono23 for more details.
 
 Inflation_InstReh_1linear_parameters: |
 
-      Inflation model with potential V(phi) = lambda phi, assuming instant reheating. See ./gambit Inflation_InstReh_1linear for more details.
+   Inflation model with potential V(phi) = lambda phi, assuming instant reheating. See ./gambit Inflation_InstReh_1linear for more details.
 
 Inflation_InstReh_1quadratic_parameters: |
 
-      Inflation model with potential V(phi) = lambda phi, assuming instant reheating. See ./gambit Inflation_InstReh_1quadratic for more details.
+   Inflation model with potential V(phi) = lambda phi, assuming instant reheating. See ./gambit Inflation_InstReh_1quadratic for more details.
 
 Inflation_InstReh_1quartic_parameters: |
 
-     Inflation model with potential V(phi) = 0.25 lambda phi^4, assuming instant reheating. See ./gambit Inflation_InstReh_1quartic for more details.
+   Inflation model with potential V(phi) = 0.25 lambda phi^4, assuming instant reheating. See ./gambit Inflation_InstReh_1quartic for more details.
 
 Inflation_InstReh_1natural_parameters: |
 
-      Natural inflation model (axion-like particles) with potential V(phi) = Lambda^4 [1 + cos(phi/f)], assuming instant reheating. See ./gambit Inflation_InstReh_1natural for more details.
+   Natural inflation model (axion-like particles) with potential V(phi) = Lambda^4 [1 + cos(phi/f)], assuming instant reheating. See ./gambit Inflation_InstReh_1natural for more details.
 
 cosmo_nuisance_JLA_parameters: |
    Cosmological nuisance parameters for JLA SNe Ia likelihood. See ./gambit cosmo_nuisance_JLA for more details.
@@ -4270,6 +4349,9 @@ cosmo_nuisance_Pantheon_parameters: |
 
 cosmo_nuisance_BK14_parameters: |
    Cosmological nuisance parameters for Keck Array/BICEP. See ./gambit cosmo_nuisance_BK14 for more details.
+
+cosmo_nuisance_BK14priors_parameters: |
+   Cosmological nuisance parameters for Keck Array/BICEP. See ./gambit cosmo_nuisance_BK14priors for more details.
 
 cosmo_nuisance_CFHTLens_correlation_parameters: |
    Cosmological nuisance parameters for CFHTLenS tomographic weak lensing likelihood. See ./gambit cosmo_nuisance_CFHTLens_correlation for more details.
@@ -4288,6 +4370,10 @@ cosmo_nuisance_kids450_qe_likelihood_public_parameters: |
 
 cosmo_nuisance_ska_parameters: |
    Cosmological nuisance parameters for SKA1 21cm intensity mapping, SKA1 & SKA2 cosmic shear, SKA1 & SKA2 galaxy clustering. See ./gambit cosmo_nuisance_ska for more details.
+
+cosmo_nuisance_dummy_parameters: |
+   Dummy model for cosmological nuisance parameters that can be used by new MontePython likelihoods. This model has 10 parameters, more can be added anytime to Models/include/gambit/Models/models/CosmoNuisanceModels.hpp.
+   See ./gambit cosmo_nuisance_dummy for more details.
 
 #----------------------------
 #  CosmoBit
@@ -4335,6 +4421,27 @@ Omega0_ncdm: |
 Omega0_b: |
   Energy density of baryons today.
 
+H0:
+   The Hubble rate today [km/s/Mpc].
+
+helium_abundance:
+   The He4 abundance.
+
+primordial_power_spectrum: |
+   An object containing the primordial power spectra of scalar, tensor, and isocurvature perturbations, for a given array of [k] values.
+
+k_pivot: |
+   The pivot scale used to evaluate the primordial power spectrum. Can be set by the function "set_k_pivot".
+
+mNu_tot: |
+   The total mass of neutrinos [eV].
+
+N_ur: |
+   The value of N_ur (today) (i.e. the contribution of massive neutrinos which are still relativistic).
+
+Omega0_ncdm_tut: |
+   The total density in non-CDM today (massive neutrinos and potential extra species).
+
 Sigma8:  |
   Returns sigma8.
 
@@ -4353,7 +4460,7 @@ unlensed_Cl_BB:  |
 unlensed_Cl_TE:  |
   Capability returning the unlensed dimensionless CMB TE cross-correlations.
 
-unlensed_Cl_phiphi:  |
+unlensed_Cl_PhiPhi:  |
   Capability returning the unlensed dimensionless CMB lensing potential.
 
 lensed_Cl_TT:  |
@@ -4368,7 +4475,7 @@ lensed_Cl_BB:  |
 lensed_Cl_TE:  |
   Capability returning the lensed dimensionless CMB TE cross-correlations.
 
-lensed_Cl_phiphi:  |
+lensed_Cl_PhiPhi:  |
   Capability returning the lensed dimensionless CMB lensing potential.
 
 ExtNeffCMB: |
@@ -4376,24 +4483,6 @@ ExtNeffCMB: |
 
 external_dNeff_etaBBN: |
    Compute dNeff @CMB and etaBBN for non-standard models. E.g. needed for the CosmoALP model.
-
-calc_MP_LogLikes: |
-    Calls MontePython to get the likelihood of all experiments (tagged with 'Likelihood' and 'Observable'). The results are stored as map from experiment name to LogLike result in the type MPLike_result_container.
-
-MP_Combined_LogLike: |
-    Returns combined LogLike of all MontePython Likelihoods used in the scan.
-
-MP_LogLikes: |
-    Returns a map from experiment name to LogLike value containing the likelihood of all experiments used as an Observable. All LogLike values contained here are added up an count to the total LogLike that drives the scan.
-
-MP_Observables: |
-    Returns a map from experiment name to LogLike value containing the likelihood of all experiments used as an Observable. These are not added to the value returned by MP_Combined_LogLike, hence they are not driving the scan.
-
-MP_experiment_names: |
-  Set names of all experiments in use for a scan and stores the path to the settings file for the different likelihoods by reading in the runOptions 'Likelihoods' and/or 'Observables' of this capability.
-
-MontePythonLike_3_1_0_init: |
-  Initialise MontePython backend.
 
 Neff: |
   Return the value of Neff from CLASS.
@@ -4403,7 +4492,6 @@ NuMasses_SM: |
 
 NuMasses_classy_input: |
   Set all neutrino related input parameters for CLASS (N_ur, N_ncdm, T_ncdm, m_ncdm) and store it in a python dictionary.
-
 
 baseline_classy_input: |
   Fill python dictionary with some base parameters needed to be set for each CLASS call independent of exact model in use _> H0, T_cmb, omega_b, tau_reio, omega_cdm, calculated YHe from AlterBBN. Further input options for CLASS (precision parameters, more output...) can be set by setting a runOption 'classy_dict' and specifying these parameters.
@@ -4416,6 +4504,9 @@ class_get_cl: |
 
 classy_2_6_3_init: |
   Initialise CLASS 2.6.3 run through the classy python wrapper.
+
+classy_2_9_3_init: |
+  Initialise CLASS 2.9.3 run through the classy python wrapper.
 
 classy_exo_2_7_0_init: |
   Initialise ExoCLASS 2.7.0 run through the classy python wrapper.
@@ -4460,6 +4551,10 @@ energy_injection_spectrum: |
     m for annihilating DM) is assumed.
     The relative contribution of the electron and photon channel is
     given by the branching ratio (BR).
+
+# -----------
+# AlterBBN
+# -----------
 
 AlterBBN_2_0_init: |
     Initialise AlterBBN.
@@ -4512,17 +4607,8 @@ Lithium7_abundance: |
 Beryllium7_abundance: |
     Compute predicted Beryllium7 abundance (by number w.r.t. hydrogen) and theoretical error from BBN. First vector entry mean, second standard deviation.
 
-BAO_LogLike: |
-    Compute likelihood for BAO measurements from specified data file.
-
-H0_LogLike: |
-    Compute likelihood for local H0 measurements from specified data file.
-
-sigma8_LogLike: |
-    Compute likelihood for Simga8 measurements from specified data file.
-
-Pantheon_LogLike:  |
-    Compute SNe Ia likelihood with Pantheon SNe.
+get_abund_map_AlterBBN: |
+    A map that translates element name to position of element in the ratioH (abundances) vector.
 
 #-------------------
 # NeutrinoBit capabilities
