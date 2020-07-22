@@ -586,13 +586,6 @@ START_MODULE
 
   #define CAPABILITY Omega0_m
   START_CAPABILITY
-    #define FUNCTION compute_Omega0_m
-    START_FUNCTION(double)
-    DEPENDENCY(Omega0_b, double)
-    DEPENDENCY(Omega0_cdm, double)
-    DEPENDENCY(Omega0_ncdm, double)
-    #undef FUNCTION
-
     #define FUNCTION get_Omega0_m_classy
     START_FUNCTION(double)
     BACKEND_REQ(class_get_Omega0_m,(class_tag),double,())
@@ -619,12 +612,6 @@ START_MODULE
 
   #define CAPABILITY Omega0_r
   START_CAPABILITY
-    #define FUNCTION compute_Omega0_r
-    START_FUNCTION(double)
-    DEPENDENCY(Omega0_g, double)
-    DEPENDENCY(Omega0_ur, double)
-    #undef FUNCTION
-
     #define FUNCTION get_Omega0_r_classy
     START_FUNCTION(double)
     BACKEND_REQ(class_get_Omega0_r,(class_tag),double,())
@@ -653,21 +640,11 @@ START_MODULE
     #undef FUNCTION
   #undef CAPABILITY
 
-  #define CAPABILITY Omega0_ncdm_tot
-  START_CAPABILITY
-    #define FUNCTION get_Omega0_ncdm_tot_classy
-    START_FUNCTION(double)
-    BACKEND_REQ(class_get_Omega0_ncdm_tot,(class_tag),double,())
-    #undef FUNCTION
-  #undef CAPABILITY
-
-
   #define CAPABILITY Omega0_ncdm
   START_CAPABILITY
-    #define FUNCTION compute_Omega0_ncdm
+    #define FUNCTION get_Omega0_ncdm_classy
     START_FUNCTION(double)
-    DEPENDENCY(H0, double)
-    DEPENDENCY(mNu_tot, double)
+    BACKEND_REQ(class_get_Omega0_ncdm_tot,(class_tag),double,())
     #undef FUNCTION
   #undef CAPABILITY
 
@@ -777,6 +754,7 @@ START_MODULE
   START_CAPABILITY
     #define FUNCTION set_parameter_dict_for_MPLike
     START_FUNCTION(pybind11::dict)
+    ALLOW_MODELS(cosmo_nuisance_acbar,cosmo_nuisance_spt)
     ALLOW_MODELS(cosmo_nuisance_JLA,cosmo_nuisance_Pantheon,cosmo_nuisance_BK14,cosmo_nuisance_BK14priors)
     ALLOW_MODELS(cosmo_nuisance_CFHTLens_correlation,cosmo_nuisance_euclid_lensing,cosmo_nuisance_euclid_pk,cosmo_nuisance_ISW)
     ALLOW_MODELS(cosmo_nuisance_kids450_qe_likelihood_public,cosmo_nuisance_ska,cosmo_nuisance_wmap)

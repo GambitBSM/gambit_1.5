@@ -210,14 +210,6 @@ namespace Gambit
       result = *Dep::eta0;
     }
 
-    /// The total matter content today.
-    void compute_Omega0_m(double &result)
-    {
-      using namespace Pipes::compute_Omega0_m;
-
-      result =(*Dep::Omega0_b) + (*Dep::Omega0_cdm) + (*Dep::Omega0_ncdm);
-    }
-
     /// The total baryon content today.
     void compute_Omega0_b(double &result)
     {
@@ -263,26 +255,6 @@ namespace Gambit
       result = (N_ur)*7./8.*pow(4./11.,4./3.)* Omega0_g;
     }
 
-    /// (JR) delete when CLASS c interface is removed.
-    /// @TODO: can this be deleted now? 
-    void compute_Omega0_ncdm(double &result)
-    {
-      using namespace Pipes::compute_Omega0_ncdm;
-
-      double mNu_tot_eV = *Dep::mNu_tot;
-      double h = *Dep::H0/100.;
-
-      result = mNu_tot_eV/(93.14*h*h);  // TODO: heads up: explicit assumption of T_ncdm = 0.71611 and T_cmb goes in here. Has to be generalised
-    }
-
-    /// The total relativistic content today.
-    void compute_Omega0_r(double &result)
-    {
-      using namespace Pipes::compute_Omega0_r;
-
-      result = *Dep::Omega0_g + (*Dep::Omega0_ur);
-    }
-
     /* Classy getter functions */
 
     /// Hubble
@@ -321,9 +293,9 @@ namespace Gambit
     }
 
     /// Non-cold dark matter
-    void get_Omega0_ncdm_tot_classy(double& result)
+    void get_Omega0_ncdm_classy(double& result)
     {
-      using namespace Pipes::get_Omega0_ncdm_tot_classy;
+      using namespace Pipes::get_Omega0_ncdm_classy;
 
       result = BEreq::class_get_Omega0_ncdm_tot();
     }

@@ -4213,12 +4213,20 @@ parameter_dict_for_MPLike: |
 create_MP_likelihood_objects: |
    Returns a map of string to Python objects: the Python objects from MontePython are the initialised "Likelihood" objects used internally.
 
+bao_like_correlation: |
+   Optional to use in combination with the 'bao_correlations' MontePython likelihoods. Including this capability as an Observable in the yaml file will add the correlation coefficients of the 'bao_correlations' likelihood to the ouput file.
+
 #----------------------------
 #  DarkAges
 #----------------------------
 
 DarkAges_1_0_0_init: |
-   Convenience function to initialize the instance of the DarkAges package.
+   Function to initialize the instance of the DarkAges package.
+   Retrieve all input dependencies (DM-mass, injection spectra, ...) and
+   perform the convolution wit the transfer functions to get f(z).
+
+DarkAges_1_2_0_init: |
+   Function to initialize the instance of the DarkAges package.
    Retrieve all input dependencies (DM-mass, injection spectra, ...) and
    perform the convolution wit the transfer functions to get f(z).
 
@@ -4347,6 +4355,9 @@ cosmo_nuisance_JLA_parameters: |
 cosmo_nuisance_Pantheon_parameters: |
    Cosmological nuisance parameters for Pantheon SNe Ia likelihood. See ./gambit cosmo_nuisance_Pantheon for more details.
 
+cosmo_nuisance_acbar_parameters: |
+   Cosmological nuisance parameters for acbar. See ./gambit cosmo_nuisance_acbar for more details.
+
 cosmo_nuisance_BK14_parameters: |
    Cosmological nuisance parameters for Keck Array/BICEP. See ./gambit cosmo_nuisance_BK14 for more details.
 
@@ -4370,6 +4381,9 @@ cosmo_nuisance_kids450_qe_likelihood_public_parameters: |
 
 cosmo_nuisance_ska_parameters: |
    Cosmological nuisance parameters for SKA1 21cm intensity mapping, SKA1 & SKA2 cosmic shear, SKA1 & SKA2 galaxy clustering. See ./gambit cosmo_nuisance_ska for more details.
+
+cosmo_nuisance_spt_parameters: |
+      Cosmological nuisance parameters for acbar. See ./gambit cosmo_nuisance_spt for more details.
 
 cosmo_nuisance_dummy_parameters: |
    Dummy model for cosmological nuisance parameters that can be used by new MontePython likelihoods. This model has 10 parameters, more can be added anytime to Models/include/gambit/Models/models/CosmoNuisanceModels.hpp.
@@ -4439,9 +4453,6 @@ mNu_tot: |
 N_ur: |
    The value of N_ur (today) (i.e. the contribution of massive neutrinos which are still relativistic).
 
-Omega0_ncdm_tut: |
-   The total density in non-CDM today (massive neutrinos and potential extra species).
-
 Sigma8:  |
   Returns sigma8.
 
@@ -4490,11 +4501,24 @@ Neff: |
 NuMasses_SM: |
   Create a map containing neutrino masses, the corresponding number of non-cold DM components (N_ncdm) today as well as the sum of the neutrino masses. Needed to pass correct parameters to CLASS.
 
-NuMasses_classy_input: |
-  Set all neutrino related input parameters for CLASS (N_ur, N_ncdm, T_ncdm, m_ncdm) and store it in a python dictionary.
+classy_NuMasses_Nur_input: |
+  Set all neutrino related input parameters for CLASS (N_ur, N_ncdm, T_ncdm, m_ncdm) and store them in a python dictionary.
 
-baseline_classy_input: |
-  Fill python dictionary with some base parameters needed to be set for each CLASS call independent of exact model in use _> H0, T_cmb, omega_b, tau_reio, omega_cdm, calculated YHe from AlterBBN. Further input options for CLASS (precision parameters, more output...) can be set by setting a runOption 'classy_dict' and specifying these parameters.
+classy_MPLike_input: |
+  Set all input parameters for CLASS from active MontePython likelihoods and store them in a python dictionary. If no MontePython likelihoods are in use, this will simply pass an empty dictionary.
+
+classy_PlanckLike_input: |
+  Set all input parameters for CLASS needed for the calculation of active Planck CMB likelihoods. This sets the non linear treatment to 'halofit', the maximum angular scale up to which the CMB spectra are computed, and which spectra need to be computed (temperature, polarization and/or lensing).
+
+classy_primordial_input: |
+  Set all primordial input parameters for CLASS. These are the primordial helium abundance, and parameters related to the primordial power spectrum. This can either be just A_s, n_s (and r) through the function 'set_classy_parameters_parametrised_ps, or the full shape of the spectrum calculated from an inflationary model through the function 'set_classy_parameters_primordial_ps. 
+
+classy_parameters_EnergyInjection: |
+  Set all input parameters for exo_CLASS relevant for energy injection in the early Universe. These parameters are for example the DM mass and cross section (for annihilating DM models) or the DM lifetime and fraction (decaying DM models). Further, the energy injection coefficients and the injection efficiency functions are passed.
+
+classy_input_params: |
+  Create an object of type Classy_input containing a python dictionary with all relevant input parameters for the CLASS run. Here, the parameters H0, T_cmb, omega_b, tau_reio, omega_cdm are set. Further, all input parameters from the capabilities 'classy_NuMasses_Nur_input', 'classy_MPLike_input', 'classy_PlanckLike_input', 'classy_primordial_input' and 'classy_parameters_EnergyInjection' are gathered and merged into one dictionary which will be passed to CLASS.
+  Additional input options for CLASS (precision parameters, more output...) can be set by setting a runOption 'classy_dict' for the function 'set_classy_input_params' and specifying these parameters.
 
 class_get_Neff: |
   Return Neff as calculated by CLASS.
@@ -4514,6 +4538,12 @@ classy_exo_2_7_0_init: |
 classy_exo_2_7_2_init: |
   Initialise ExoCLASS 2.7.2 run through the classy python wrapper.
 
+get_classy_backendDir: |
+  Return the path to the CLASS version that is used in the current run. 
+
+get_classy_cosmo_object: |
+  Return an instance of the CLASS python object, usually initialised as 'cosmo'. In GAMBIT, this object will be passed to MontePython for the computation of external likelihoods. 
+
 compute_Planck_lowp_TT_loglike: |
    function computes the planck log-likelihood for a  given
    set of  Cl's for low values of l (below 30).
@@ -4530,6 +4560,18 @@ lnL_A_planck : |
    "prior"-likelihood for A_planck. Applies the Gauss bell on
     A_planck if a flat prior is chosen. Should have the same
     effect than using a gaussian prior on it in the first place.
+
+Planck_highl_loglike: |
+   Planck CMB likelihood for the multipole range 30 ≤ ell ≤ 2508.
+
+Planck_lowl_loglike: |
+   Planck CMB likelihood for the multipole range 2 ≤ ell ≤ 29.
+
+Planck_lensing_loglike: |
+   Planck CMB lensing likelihood.
+
+Planck_sz_prior_loglike: |
+   SZ- prior: Prior on the tSZ and kSZ amplitudes. The correlation is unconstrained by Planck. Use prior based on SPT and ACT data, cf. https://arxiv.org/pdf/1507.02704.pdf -- eq. 32.
 
 f_effective: |
     returns f(z) at  z~600 summed over all channels.

@@ -54,6 +54,12 @@
   #undef PARENT
 #undef MODEL
 
+/// nuisance params for acbar likelihood implemented in MontePython
+#define MODEL cosmo_nuisance_acbar
+    START_MODEL
+    DEFINEPARS(A_SZ)
+#undef MODEL
+
 /// nuisance params for bicep/keck array BK14 likelihood implemented in MontePython
 #define MODEL cosmo_nuisance_BK14
     START_MODEL
@@ -117,6 +123,12 @@
     // parameter name in MP likelihood: epsilon,sigma_NL renamed to epsilon_ska & sigma_NL_ska, have to translate back before passing to MP
     // (we can not have several parameters with the same name in GAMBIT)
     DEFINEPARS(sigma_NL_ska,beta_0IM,beta_1IM,Omega_HI0,alpha_HI,beta_0SKA1,beta_1SKA1,beta_0SKA2,beta_1SKA2,epsilon_ska)
+#undef MODEL
+
+/// nuisance params for spt and spt_2500 likelihood implemented in MontePython
+#define MODEL cosmo_nuisance_spt
+    START_MODEL
+    DEFINEPARS(SPT_SZ,SPT_PS,SPT_CL)
 #undef MODEL
 
 // add new model holding cosmological nuisance parameters 

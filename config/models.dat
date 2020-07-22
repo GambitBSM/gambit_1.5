@@ -703,6 +703,11 @@ cosmo_nuisance_dummy: |
          name of the nuisance parameters matches the variable name in GAMBIT -> 'nuisance_param_X'.
          You can fix all not needed parameters to a constant value in the yaml file before starting a scan.
 
+cosmo_nuisance_acbar: |
+   Cosmological nuisance parameters for MontePython acbar likelihood.
+
+cosmo_nuisance_spt: |
+   Cosmological nuisance parameters for MontePython spt and spt_2500 likelihood.
 
 cosmo_nuisance_Pantheon: |
    Cosmological nuisance parameters for Pantheon SNe Ia likelihood from Scolnic et al. (https://arxiv.org/abs/1710.00845).
