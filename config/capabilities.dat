@@ -4084,6 +4084,49 @@ return_high_TTTEEE_lite: |
    return the (marginalized) likelihood result for
    high-l temperature and polarization Cl's (above l=30)
 
+plc_loglike_highl_TTTEEE_2015: |
+ Planck high-ell likelihood for CMB temperature and polarisation provided by the plc package for the 2015 data release.
+
+plc_loglike_highl_TTTEEE_2018: |
+ Planck high-ell likelihood for CMB temperature and polarisation provided by the plc package for the 2018 data release.
+
+plc_loglike_highl_TTTEEE_lite_2015: |
+  Planck lite high-ell likelihood for CMB and polarisation with marginalised foregrounds provided by the plc package for the 2015 data release.
+
+plc_loglike_highl_TTTEEE_lite_2018: |
+  Planck lite high-ell likelihood for CMB and polarisation with marginalised foregrounds provided by the plc package for the 2018 data release.
+
+plc_loglike_highl_TT_2015: |
+  Planck high-ell likelihood for CMB temperature anisotropies provided by the plc package for the 2015 data release.
+
+plc_loglike_highl_TT_2018: |
+  Planck high-ell likelihood for CMB temperature anisotropies provided by the plc package for the 2018 data release.
+
+plc_loglike_highl_TT_lite_2015: |
+  Planck lite high-ell likelihood for CMB temperature anisotropies with marginalised foregrounds provided by the plc package for the 2015 data release.
+
+plc_loglike_highl_TT_lite_2018: |
+  Planck lite high-ell likelihood for CMB temperature anisotropies with marginalised foregrounds provided by the plc package for the 2018 data release.
+
+plc_loglike_lensing_2015: |
+  Planck CMB lensing likelihood provided by the plc package for the 2015 data release.
+
+plc_loglike_lensing_2018: |
+  Planck CMB lensing likelihood provided by the plc package for the 2018 data release.
+
+plc_loglike_lowl_EE_2018: |
+  Planck low-ell likelihood for CMB temperature and polarisation provided by the plc package for the 2018 data release.
+
+plc_loglike_lowl_TEB_2015: |
+  Planck low-ell likelihood for CMB temperature and polarisation provided by the plc package for the 2015 data release.
+
+plc_loglike_lowl_TT_2015: |
+  Planck low-ell likelihood for CMB temperature anisotropies provided by the plc package for the 2015 data release.
+
+plc_loglike_lowl_TT_2018: |
+  Planck low-ell likelihood for CMB temperature anisotropies provided by the plc package for the 2018 data release.
+
+
 #----------------------------
 #  MultiModeCode
 #----------------------------
