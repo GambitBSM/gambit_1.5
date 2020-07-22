@@ -341,26 +341,35 @@ class Likelihood(object):
 
     def add_nuisance_prior(self, lkl, data):
 
-        raise io_mp.LikelihoodError(
-            "Entered the Likelihood object's attribute ' add_nuisance_prior'\n" +
-            "ATM I don't know how to deal with that (if we have to do it at all?)\n" +
-            "in GAMBIT -- so let's not support these likelihoods for now.\n"+
-            "(This is relevant in the following likelihoods:\n \t'achbar'\n'bicep'\n \n")
-
+        # (JR) what's been here (commented below) to avoid the use of 
+        # additional likelihoods without explicitly choosing them.
+        warnings.warn("\n\n/!\  WARNING /!\ \n\nEntered the Likelihood object's attribute 'add_nuisance_prior'.\n" +
+            "In MontePython, this routine treats the prior as a likelihood and\n" +
+            "and adds the value to the total LogLike.\n"+
+            "This is an implicit addition of a likelihood on a nuisance parameter\n"+
+            "and can lead to over-estimated constraints as the same information\n"+
+            "enters the posterior and the prior.\n"+
+            "Therefore, we skip this step for the use within GAMBIT.\n"+
+            "If you want to add a likelihood for a nuisance parameter, you.\n"+
+            "can do this by implementing a simple Gaussian likelihood for them.\n"+
+            "See, e.g. 'BK14priors'.\n"+
+            "This is relevant for all likelihoods deriving from the class 'Likelihood_newdat'."+
+            "At the moment, these are:\n\t- acbar\n\t- bicep\n\t"+
+            "- boomerang\n\t- cbi\n\t- quad\n\t- spt\n\t- spt_2500\n\t"+
+            "- wmap\n\t- wmap_9yr")
         
         # Recover the current value of the nuisance parameter.
-        for nuisance in self.use_nuisance:
-            nuisance_value = float(
-                data.mcmc_parameters[nuisance]['current'] *
-                data.mcmc_parameters[nuisance]['scale'])
+        #for nuisance in self.use_nuisance:
+        #    nuisance_value = float(
+        #        data.mcmc_parameters[nuisance]['current'] *
+        #        data.mcmc_parameters[nuisance]['scale'])
 
             # add prior on nuisance parameters
-            if getattr(self, "%s_prior_variance" % nuisance) > 0:
-                # convenience variables
-                prior_center = getattr(self, "%s_prior_center" % nuisance)
-                prior_variance = getattr(self, "%s_prior_variance" % nuisance)
-                lkl += -0.5*((nuisance_value-prior_center)/prior_variance)**2
-            
+            #if getattr(self, "%s_prior_variance" % nuisance) > 0:
+            #    # convenience variables
+            #    prior_center = getattr(self, "%s_prior_center" % nuisance)
+            #    prior_variance = getattr(self, "%s_prior_variance" % nuisance)
+            #    lkl += -0.5*((nuisance_value-prior_center)/prior_variance)**2
 
         return lkl
 
@@ -1637,7 +1646,7 @@ class Likelihood_mpk(Likelihood):
         self.k = np.zeros((self.k_size), 'float64')
         self.kh = np.zeros((self.k_size), 'float64')
 
-        # (JR) this reading in works in Gambit
+        # (JR) changed reading in of files to work with GAMBI
         datafile = open(os.path.join(self.data_directory, self.kbands_file), 'r')
         for i in range(self.num_mpk_kbands_full):
             line = datafile.readline()
@@ -1750,7 +1759,7 @@ class Likelihood_mpk(Likelihood):
             (self.num_regions, self.n_size, self.k_size), 'float64')
 
 
-        # (JR) this reading in works in GAMBIT
+        # (JR) changed reading in of files to work with GAMBIT
         datafile = open(os.path.join(self.data_directory, self.windows_file), 'r')
         for i_region in range(self.num_regions):
             for i in range(self.num_mpk_points_full):
@@ -1767,7 +1776,7 @@ class Likelihood_mpk(Likelihood):
         self.P_err = np.zeros((self.num_regions, self.n_size), 'float64')
 
 
-        # (JR) this reading in works in GAMBIT
+        # (JR) changed reading in of files to work with GAMBIT
         datafile = open(os.path.join(self.data_directory, self.measurements_file), 'r')
         for i_region in range(self.num_regions):
             for i in range(self.num_mpk_points_full):
