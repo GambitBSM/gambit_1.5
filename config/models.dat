@@ -517,24 +517,24 @@ DiracSingletDM_Z2_sps: |
 
 GeneralALP: |
 
-   A general model for an axion-like particle with the possibility of having a temperature-dependent mass similar to QCD axions.
+   A general model for an axion-like particle with the possibility of having a temperature-dependent mass.
 
-   gagg              - Axion-photon coupling in eV^-1
-   gaee              - Axion-electron couplings
-   fa                - Axion decay constant/pNGB scale in GeV
-   ma0               - Axion (zero-temperature) mass in eV
-   Tcrit             - Critical temperature below which the axion mass is constant
-   beta              - Exponent of the temperature scaling of the axion mass above Tcrit
-   thetai            - Initial misalignment angle
+   gagg              - ALP-photon coupling [GeV^-1]
+   gaee              - ALP-electron couplings [dimensionless]
+   fa                - ALP decay constant [GeV]
+   ma0               - ALP mass (at zero temperature) [eV]
+   Tchi              - Critical temperature below which the axion mass is constant [MeV]
+   beta              - Exponent of the temperature scaling of the axion mass above Tchi [dimensionless]
+   thetai            - Initial misalignment angle [dimensionless]
 
 QCDAxion: |
 
    A convenient version of the GeneralALP model for QCD axion studies. Comes with several model-specific nuisance likelihoods and one additional nuisance parameter (Cagg). The differences are:
 
-   Cagg              - Contribution to the axion-photon coupling gagg from chiral Lagrangian
-   EoverN            - Contribution to the axion-photon coupling gagg from the ratio of electromagnetic vs colour anomaly
-   Caee              - Re-parameterised axion-electron coupling gaee
-   LambdaQCD2        - Convenient re-parameterisation of the axion zero-temperature mass ma0 in terms of the QCD scale LambdaQCD^2
+   Cagg              - Contribution to the axion-photon coupling gagg from chiral Lagrangian [dimensionless]
+   EoverN            - Contribution to the axion-photon coupling gagg from the ratio of electromagnetic vs colour anomaly [dimensionless]
+   Caee              - Re-parameterised axion-electron coupling gaee [dimensionless]
+   LambdaChi         - Convenient re-parameterisation of the axion zero-temperature mass ma0 = LambdaChi^2/fa [MeV]
 
 KSVZAxion: |
 
@@ -542,15 +542,15 @@ KSVZAxion: |
 
 DFSZAxion_I: |
 
-   DFSZ axion model with E/N = 8/3 and CAee = sin^2(beta)/3.
+   DFSZ axion model with E/N = 8/3 and Caee = sin^2(beta)/3.
 
 DFSZAxion_II: |
 
-   DFSZ axion model with E/N = 8/3 and CAee = [1 - sin^2(beta)]/3.
+   DFSZ axion model with E/N = 8/3 and Caee = [1 - sin^2(beta)]/3.
 
 ConstantMassALP: |
 
-   A convenient version of the GeneralALP model for studies of ALPs with not explicitly temperature-dependent axion mass, i.e. beta = 0 and Tcrit is irrelevant.
+   A convenient version of the GeneralALP model for studies of ALPs with not explicitly temperature-dependent axion mass (beta=0, Tchi irrelevant).
 
 RightHandedNeutrinos: |
    Type I Seesaw model with 3 right handed neutrinos. The parameters include the masses of the RHNs and the mixing angles in the Casas-Ibarra parametrisations.
@@ -567,7 +567,7 @@ StandardModel_mNudiff: |
 
 LCDM: |
 
-   The standard Lambda-CDM model, but without any details of the inflationary or neutrino sectors. Chooses Hubble scale as an input parameter. 
+   The standard Lambda-CDM model, but without any details of the inflationary or neutrino sectors. Chooses Hubble scale as an input parameter.
    The simplest standard contemporary model with 4+1 effective parameters, chosen as:
 
    omega_b             - baryon density parameter
@@ -654,7 +654,7 @@ Inflation_InstReh_1Starobinsky : |
 
    Single field Starobinsky inflation (aka R^2 inflation), assuming instant reheating.
    Potential: V(phi) = Lambda^4 [1-exp(-sqrt(2/3)phi/M_P)]^2 (dimensionful Lambda == lambda * M_P)
-                     = (lambda M_P)^4 [1-exp(-sqrt(2/3)phi/M_P)]^2 
+                     = (lambda M_P)^4 [1-exp(-sqrt(2/3)phi/M_P)]^2
 
    lambda:       - the [dimensionless] amplitude of the coupling term in the potential
 
@@ -884,7 +884,7 @@ cosmo_nuisance_Planck_lite: |
 AnnihilatingDM_general: |
 
    The most general scenario of dark matter s-wave annihilating, to inject energy. An additional module function
-   must be written to provide the correct efficiency functions or spectra of injected photons & electrons. 
+   must be written to provide the correct efficiency functions or spectra of injected photons & electrons.
 
    This scenario implicitly assumes that the particle in question is all of dark matter,
    such that the fractional abundance ξ = 1. To consider scenarios where ξ != 1, the
@@ -922,7 +922,7 @@ AnnihilatingDM_electron: |
 DecayingDM_general : |
 
    The most general scenario of decaying dark matter, to inject energy. An additional module function
-   must be written to provide the correct efficiency functions or spectra of injected photons & electrons. 
+   must be written to provide the correct efficiency functions or spectra of injected photons & electrons.
 
    mass        - mass of the dark matter candidate [in GeV]
    fraction    - fraction of how much the decaying DM component contributes to all DM.
@@ -959,18 +959,19 @@ DecayingDM_electron: |
 
 GeneralCosmoALP : |
 
-   General axion model with parametric temperature-dependent mass and cosmological applications.
+   General ALP model with parametric temperature-dependent mass and cosmological applications.
 
-   gagg                 - Axion-photon coupling [GeV^-1]                       
-   gaee                 - Axion-electron coupling     [dimensionless]                   
-   fa                   - Axion decay constant/pNGB scale [GeV]                            
-   ma0                  - Axion (zero-temperature) mass [e                           
-   Tchi                 - Critical temperature below which the axion mass is constant [MeV]                          
-   beta                 - Exponent of the temperature scaling of the axion mass above Tchi [dimensionless]             
-   thetai               - Initial misalignment angle [dimensionless]           
-   f0_thermal           - Fraction of total CDM in ALPs produced thermally, at production [dimensionless]          
-   T_R                  - Reheating temperature [MeV]                        
+   gagg                 - ALP-photon coupling [GeV^-1]
+   gaee                 - ALP-electron coupling [dimensionless]
+   fa                   - ALP decay constant scale [GeV]
+   ma0                  - ALP mass (at zero temperature) [eV]
+   Tchi                 - Critical temperature below which the axion mass is constant [MeV]
+   beta                 - Exponent of the temperature scaling of the axion mass above Tchi [dimensionless]
+   thetai               - Initial misalignment angle [dimensionless]
+   f0_thermal           - Fraction of total CDM in ALPs produced thermally (at production) [dimensionless]
+   T_R                  - Reheating temperature [MeV]
 
 CosmoALP : |
 
-   Specialised version of GeneralCosmoALP. @TODO.
+   Specialised version of GeneralCosmoALP for cosmological applications, without ALP-election coupling (gaee=0) and with temperature-
+   independent mass (beta=0, Tchi irrelevant). The ALP-photon coupling (gagg) is replaced by its dimensionless equivalent (Cagg).
