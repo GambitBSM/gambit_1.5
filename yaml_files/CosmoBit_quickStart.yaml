@@ -71,10 +71,10 @@ Parameters:
       range: [0.020,0.024]
     omega_cdm:
       prior_type: flat
-      range: [0.10,0.13]
+      range: [0.0,0.6]
     H0:
       prior_type: flat
-      range: [62,74]
+      range: [50.,100.]
     # Fix all non-background parameters as they do not
     # impact BBN or the BAO scale
     tau_reio: 0.0544
@@ -91,7 +91,7 @@ Parameters:
   dNurCMB:
     dNur_CMB:
       prior_type: flat
-      range: [0.000,0.50]
+      range: [-1.0,1.0]
 
 
 #======== 3) Prior setup ========
@@ -119,11 +119,8 @@ Scanner:
     multinest:
       plugin: multinest
       like:  LogLike
-      nlive: 1000
+      nlive: 5000
       tol: 0.01
-      aux_printer_txt_options:
-      aux_printer_stats_options:
-      aux_printer_live_options:
 
     random:
       plugin: random
@@ -141,18 +138,18 @@ Scanner:
 ObsLikes:
 
   # ---- 6.a) BBN -----
-  # Likelihood from BBN; use only deuterium for this example
+  # Likelihood from BBN; use deuterium (D) and Helium-4 (He4)
   - purpose:      LogLike
     capability:   BBN_LogLike
     sub_capabilities: [D, He4]
 
   # print isotope abundances + errors
+  # As D and He4 are used for BBN_LogLike, they are automatically included.
+  # Here we also include Helium-3 and Lithium-7
   - purpose:      Observable
     capability:   BBN_abundances
     sub_capabilities:
       - He3
-      - D
-      - He4
       - Li7
 
 
@@ -166,29 +163,20 @@ ObsLikes:
     module:       CosmoBit
     type:         double
     sub_capabilities:
-      # Include BAO likelihoods: 
+      # Include BAO likelihoods:
       # Galactic data:
       bao_boss_dr12: default
       # (use custom data file for bao_smallz_2014 likelihood)
       bao_smallz_2014: CosmoBit/data/BAO/bao_galactic_settings.data
       # Lyman alpha data:
-      eBOSS_DR14_Lya_combined: default 
+      eBOSS_DR14_Lya_combined: default
 
   # A breakdown of each likelihood component in the above total lnL,
   # plus any others that you might like to compute but not include in the
-  # likelihood.  This entry is just to make sure to output the individual
-  # log-likelihood contributions. 
+  # likelihood.
   - purpose:      Observable
     capability:   MP_LogLikes
     type:         map_str_dbl
-    sub_capabilities:
-      # Include BAO likelihoods: 
-      # Galactic data:
-      bao_boss_dr12: default
-      # (use custom data file for bao_smallz_2014 likelihood)
-      bao_smallz_2014: CosmoBit/data/BAO/bao_galactic_settings.data
-      # Lyman alpha data:
-      eBOSS_DR14_Lya_combined: default 
 
   # Add Omega0_m  to output data file
   - purpose:     Observable
@@ -233,7 +221,15 @@ Rules:
   #- capability: classy_final_input
   #  function: set_classy_input
 
+  # ----------- 7.c) "Global" (CossmoBit-wide) settings ------------
 
+  # By default, CosmoBit does not allow negative values for dNur_BBN and dNur_CMB as this leads
+  # in general to unphysical inputs.
+  # As this scan assumes only one massive neutrino, the resultant inputs for CLASS remain valid
+  # and we can safely circumvent the limitation
+  - module: CosmoBit
+    options:
+      allow_negative_delta_N_ur: true
 
 #======== 8) Logging setup ========
 Logger:
