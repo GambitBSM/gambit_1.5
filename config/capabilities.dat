@@ -3981,19 +3981,19 @@ SUSYHD_DeltaMHiggs : |
 #----------------------------
 
 plc_3_0_init: |
-   initialize the planck likelihood from an cldf file.
+   initialize the Planck likelihood from an cldf file.
 
 clik_cleanup: |
-   clean-up delete allocated pointers to a planck likelihood object.
+   clean-up delete allocated pointers to a Planck likelihood object.
 
 clik_lensing_cleanup: |
-   clean-up delete allocated pointers to a planck lensing likelihood object.
+   clean-up delete allocated pointers to a Planck lensing likelihood object.
 
 clik_cleanup_error: |
    clean-up delete the allocated pointer to the "Error" instance
 
 clik_is_error: |
-   check whether an error occured within the plc execution
+   check whether an error occurred within the plc execution
 
 clik_string_error: |
    get explanation of plc error
@@ -4001,7 +4001,7 @@ clik_string_error: |
 clik_compute_loglike: |
    compute a log likelihood value
    cl_and_pars is order this way
-   first the powerspectra from l=0 to l=lmax[cli] (included) in the order
+   first the power spectra from l=0 to l=lmax[cli] (included) in the order
    TT EE BB TE TB EB. Only the one where lmax[cli]!=-1 have to be included
    then the extra parameters in the order given by clik_get_extra_parameters.
    The power spectra are in microK^2
@@ -4038,10 +4038,10 @@ clik_lensing_get_lmaxs: |
    lmax = 2000 2000 2000 -1 2000 -1 -1 -1
 
 clik_initialize: |
-   initialize the planck likelihood from an cldf file.
+   initialize the Planck likelihood from an cldf file.
 
 clik_lensing_initialize: |
-   initialize the planck lensing likelihood.
+   initialize the Planck lensing likelihood.
 
 clik_initialize_error: |
    initialize the error object.
@@ -4092,20 +4092,20 @@ plc_loglike_lowl_TT_2018: |
   Planck low-ell likelihood for CMB temperature anisotropies provided by the plc package for the 2018 data release.
 
 plc_required_Cl:
-  Retrieve lmax and boolean flags whether the temperature and/or polarisation power spectra should be calcualted. Needed as input for the Boltzmann solver.
+  Retrieve lmax and boolean flags whether the temperature and/or polarisation power spectra should be calculated. Needed as input for the Boltzmann solver.
 
 #----------------------------
 #  MultiModeCode
 #----------------------------
 
 multimodecode_gambit_driver: |
-   multimodecode driver for gambit, takes in all
+   MultiModeCode driver for GAMBIT: takes in all
    input parameters as well as ode solver and other
    initialization parameters and solves the inflationary
-   dynamics with multimodecode.
+   dynamics with MultiModeCode.
 
 MultiModeCode_2_0_0_init: |
-   initializer for multimodecode.
+   initializer for MultiModeCode.
 
 multimodecode_gambit_driver_test: |
    some test function with less parameters for input.
@@ -4224,7 +4224,7 @@ create_MP_likelihood_objects: |
    Returns a map of string to Python objects: the Python objects from MontePython are the initialised "Likelihood" objects used internally.
 
 bao_like_correlation: |
-   Optional to use in combination with the 'bao_correlations' MontePython likelihoods. Including this capability as an Observable in the yaml file will add the correlation coefficients of the 'bao_correlations' likelihood to the ouput file.
+   Optional to use in combination with the 'bao_correlations' MontePython likelihoods. Including this capability as an Observable in the YAML file will add the correlation coefficients of the 'bao_correlations' likelihood to the ouput file.
 
 #----------------------------
 #  DarkAges
@@ -4310,11 +4310,11 @@ rCMB_parameters: |
    Child model of rBBN_rCMB model. See ./gambit rCMB for more details.
 
 PowerLaw_ps_parameters: |
-   Simple, parameterised, purely phenomenological, scale-free power spectrum.
+   Simple, parametrised, purely phenomenological, scale-free power spectrum.
    See ./gambit PowerLaw_ps for details.
 
 Minimal_PowerLaw_ps_parameters: |
-   Simple, parameterised, purely phenomenological, scale-free power spectrum, with no tensor modes.
+   Simple, parametrised, purely phenomenological, scale-free power spectrum, with no tensor modes.
    See ./gambit Minimal_PowerLaw_ps for details.
 
 Inflation_InstReh_1Starobinsky_parameters: |
@@ -4395,13 +4395,13 @@ cosmo_nuisance_dummy_parameters: |
 #----------------------------
 
 T_cmb: |
-  Sets CMB temperature (to 2.7255 if not specified in yaml file via runOption).
+  Sets CMB temperature (to 2.7255 if not specified in the YAML file).
 
 T_ncdm_SM: |
   Temperature of non-cold DM components in units of T_cmb in the SM, fixed to 0.71611. This is larger than the value obtained by assuming instantaneous neutrino decoupling to account for the effect of flavour oscillations (hep-ph/0506164).
 
 T_ncdm: |
-  Sets temperature of non-cold DM components in units of T_cmb (fixed to 0.71611, uncomment line in function set_Tncdm to be able to  specify it in yaml file via runOption).
+  Sets temperature of non-cold DM components in units of T_cmb (fixed to 0.71611, uncomment line in function set_Tncdm to be able to specify it in the YAML file via runOptions).
 
 n0_g: |
   Compute the number density of photons today per cm^3 from CMB temperature.
@@ -4455,7 +4455,7 @@ N_ur: |
    The value of N_ur (today) (i.e. the contribution of massive neutrinos which are still relativistic).
 
 Sigma8:  |
-  Returns sigma8.
+  Returns Sigma8.
 
 rs_drag:  |
   Returns comoving sound horizon at baryon drag.
@@ -4555,21 +4555,21 @@ get_classy_cosmo_object: |
   Return an instance of the CLASS python object, usually initialised as 'cosmo'. In GAMBIT, this object will be passed to MontePython for the computation of external likelihoods. 
 
 compute_Planck_lowp_TT_loglike: |
-   function computes the planck log-likelihood for a  given
+   function computes the Planck log-likelihood for a  given
    set of  Cl's for low values of l (below 30).
 
 compute_Planck_high_TT_loglike: |
-   function computes the planck log-likelihood for a  given
+   function computes the Planck log-likelihood for a  given
    set of  Cl's for high values of l (above 30).
 
 compute_Planck_lensing_loglike: |
-   function computes the planck lensing- log-likelihood for
+   function computes the Planck lensing- log-likelihood for
    a  given set of  Cl's.
 
 lnL_A_planck : |
    "prior"-likelihood for A_planck. Applies the Gauss bell on
     A_planck if a flat prior is chosen. Should have the same
-    effect than using a gaussian prior on it in the first place.
+    effect than using a Gaussian prior on it in the first place.
 
 Planck_highl_loglike: |
    Planck CMB likelihood for the multipole range 30 ≤ ell ≤ 2508.
@@ -4581,7 +4581,7 @@ Planck_lensing_loglike: |
    Planck CMB lensing likelihood.
 
 Planck_nuisance_prior_loglike: |
-   Gaussian priors on nusiance paramters of the Planck Likelihoods as suggestd by the Planck collaboration.
+   Gaussian priors on nuisance parameters of the Planck Likelihoods as suggested by the Planck collaboration.
 
 Planck_sz_prior_loglike: |
    SZ- prior: Prior on the tSZ and kSZ amplitudes. The correlation is unconstrained by Planck. Use prior based on SPT and ACT data, cf. https://arxiv.org/pdf/1507.02704.pdf -- eq. 32.
@@ -4604,7 +4604,7 @@ energy_injection_spectrum: |
     the decay or annihilation of a DM particle with a certain mass.
 
 energy_injection_efficiency: |
-    Table of energy injection effciency functions
+    Table of energy injection efficiency functions
 
 # -----------
 # AlterBBN
@@ -4623,7 +4623,7 @@ AlterBBN_Input: |
     Set input parameters depending on scanned model & error calculation settings for AlterBBN run.
 
 Init_AlterBBN: |
-    Set the members of the AlterBBN relicparame strucutre to their according values and. Modify this function if you want to pass so far unimplemented options to AlterBBN.
+    Set the members of the AlterBBN relicparam structure to their according values and. Modify this function if you want to pass so far unimplemented options to AlterBBN.
 
 AlterBBN_modelinfo: |
      Holds internal AlterBBN parameters in structure relicparam.
