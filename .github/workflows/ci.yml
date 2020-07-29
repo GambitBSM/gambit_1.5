@@ -2,9 +2,9 @@ name: Gambit CI
 
 on:
   push:
-    branches: [ gitlab-ci ]
+    branches: [ master, gitlab-ci ]
   pull_request:
-    branches: [ gitlab-ci ]
+    branches: [ master ]
 
 jobs:
   gambit_build:
