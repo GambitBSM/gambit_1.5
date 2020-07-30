@@ -9,6 +9,7 @@
 
 #======== Input parameter declarations =======
 Parameters:
+  StandardModel_SLHA2: !import include/StandardModel_SLHA2_Planckbaseline.yaml
 
   # --- import model parameters for models to scan over ---
   LCDM:
@@ -21,16 +22,20 @@ Parameters:
     H0:
       prior_type: flat
       range: [62,74]
+    tau_reio:
+      prior_type: flat
+      range: [0.004,0.20]
+    T_cmb: 2.72548
+
+  # minimal base-line power-law power spectrum and priors
+  Minimal_PowerLaw_ps:
     ln10A_s:
       prior_type: flat
       range: [2.9,3.2]
     n_s:
       prior_type: flat
       range: [0.9,1.10]
-    tau_reio:
-      prior_type: flat
-      range: [0.004,0.20]
-    T_cmb: 2.72548
+
 
   # nuisance parameters in Planck likelihood
   cosmo_nuisance_Planck_TTTEEE:
@@ -135,7 +140,7 @@ Printer:
     output_file: "Validation_Planck_TTTEEE_lowl_lowE_lensing.hdf5"
     group: "/data"
     delete_file_on_restart: false
-    buffer_length: 10
+    buffer_length: 1000
 
 #======== Scanner setup ========
 Scanner:
@@ -166,7 +171,9 @@ Scanner:
       plugin: polychord
       like:  LogLike
       nlive: 150
-      tol: 0.1
+      tol: 0.01
+      print_parameters_in_native_output: true
+      #printer_speed_threshold: 1  # This is buggy #
       fast_params:
         - cosmo_nuisance_Planck_TTTEEE::A_cib_217
         - cosmo_nuisance_Planck_TTTEEE::A_planck
@@ -224,6 +231,9 @@ ObsLikes:
     capability:   Planck_lensing_loglike
     function:     function_Planck_lensing_2018_loglike
 
+  - purpose:      LogLike
+    capability:   Planck_sz_prior_loglike
+
 #======== Rule entries ========
 Rules:
 
@@ -273,7 +283,7 @@ KeyValues:
 
   debug: false
 
-  default_output_path: "./runs/optimised/"
+  default_output_path: "./runs/lcdm/"
 
   rng:
     generator: ranlux48
