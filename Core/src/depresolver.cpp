@@ -47,11 +47,10 @@
 #include <sstream>
 #include <fstream>
 #include <iomanip>
-#ifdef HAVE_REGEX_H
-  #include <regex>
-#endif
+#include <regex>
 
 #include <boost/format.hpp>
+#include <boost/algorithm/string/replace.hpp>
 #ifdef HAVE_GRAPHVIZ
   #include <boost/graph/graphviz.hpp>
 #endif
@@ -251,29 +250,23 @@ namespace Gambit
     }
 
     // Check whether s1 (wildcard + regex allowed) matches s2
-    bool stringComp(const str & s1, const str & s2, bool
-                   #ifdef HAVE_REGEX_H
-                     with_regex
-                   #endif
-                   )
+    bool stringComp(const str & s1, const str & s2, bool with_regex)
     {
       if ( s1 == s2 ) return true;
       if ( s1 == "" ) return true;
       if ( s1 == "*" ) return true;
-      #ifdef HAVE_REGEX_H
-        try
-        {
-          if (with_regex) if (std::regex_match(s2, std::regex(s1))) return true;
-        }
-        catch (std::regex_error & err)
-        {
-          std::ostringstream errmsg;
-          errmsg << "ERROR during regex string comparison." << std::endl;
-          errmsg << "  Comparing regular expression: " << s1 << std::endl;
-          errmsg << "  with test string: " << s2 << std::endl;
-          dependency_resolver_error().raise(LOCAL_INFO,errmsg.str());
-        }
-      #endif
+      try
+      {
+        if (with_regex) if (std::regex_match(s2, std::regex(s1))) return true;
+      }
+      catch (std::regex_error & err)
+      {
+        std::ostringstream errmsg;
+        errmsg << "ERROR during regex string comparison." << std::endl;
+        errmsg << "  Comparing regular expression: " << s1 << std::endl;
+        errmsg << "  with test string: " << s2 << std::endl;
+        dependency_resolver_error().raise(LOCAL_INFO,errmsg.str());
+      }
       return false;
     }
 
@@ -1289,7 +1282,9 @@ namespace Gambit
         str errmsg = "None of the vertex candidates for";
         errmsg += "\n" + printQuantityToBeResolved(quantity, toVertex);
         errmsg += "\nfulfills all rules in the YAML file.";
-        errmsg += "\nPlease check your YAML file for contradictory rules.";
+        errmsg += "\nPlease check your YAML file for contradictory rules, and";
+        errmsg += "\nensure that you have built GAMBIT in the first place with";
+        errmsg += "\nall of the components that you are trying to use.";
         dependency_resolver_error().raise(LOCAL_INFO,errmsg);
       }
 
@@ -1490,12 +1485,12 @@ namespace Gambit
       #endif
 
       // Read ini entries
-      use_regex    = boundIniFile->getValueOrDef<bool>(false, "dependency_resolution", "use_regex");
-      print_timing = boundIniFile->getValueOrDef<bool>(false, "print_timing_data");
+      use_regex      = boundIniFile->getValueOrDef<bool>(true,  "dependency_resolution", "use_regex");
+      print_timing   = boundIniFile->getValueOrDef<bool>(false, "print_timing_data");
       print_unitcube = boundIniFile->getValueOrDef<bool>(false, "print_unitcube");
 
-      if ( use_regex )    logger() << "Using regex for string comparison." << endl;
-      if ( print_timing ) logger() << "Will output timing information for all functors (via printer system)" << EOM;
+      if ( use_regex      ) logger() << "Using regex for string comparison." << endl;
+      if ( print_timing   ) logger() << "Will output timing information for all functors (via printer system)" << EOM;
       if ( print_unitcube ) logger() << "Printing of unitCubeParameters will be enabled." << EOM;
 
       //

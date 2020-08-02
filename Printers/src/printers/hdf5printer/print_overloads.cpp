@@ -67,10 +67,10 @@ namespace Gambit
       // Retrieve the buffer manager for buffers with the desired output type
       auto& buffer_manager = get_mybuffermanager<double>(pointID,mpirank);
 
-      #ifdef HDEBUG_MODE
-        std::cout<<"printing vector<double>: "<<label<<std::endl;
-        std::cout<<"pointID: "<<pointID<<", mpirank: "<<mpirank<<std::endl;
-      #endif
+#ifdef HDEBUG_MODE
+      std::cout<<"printing vector<double>: "<<label<<std::endl;
+      std::cout<<"pointID: "<<pointID<<", mpirank: "<<mpirank<<std::endl;
+#endif
 
       for(unsigned int i=0;i<value.size();i++)
       {
@@ -167,6 +167,7 @@ namespace Gambit
     USE_COMMON_PRINT_OVERLOAD(HDF5Printer, triplet<double>)
     #ifndef SCANNER_STANDALONE
       USE_COMMON_PRINT_OVERLOAD(HDF5Printer, DM_nucleon_couplings)
+      USE_COMMON_PRINT_OVERLOAD(HDF5Printer, DM_nucleon_couplings_fermionic_HP)
       USE_COMMON_PRINT_OVERLOAD(HDF5Printer, Flav_KstarMuMu_obs)
       USE_COMMON_PRINT_OVERLOAD(HDF5Printer, BBN_container)
     #endif

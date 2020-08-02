@@ -49,10 +49,11 @@
 
 // Printable types that need to be excluded in
 // standalone builds
-#define SQL_BACKEND_TYPES   \
-  (DM_nucleon_couplings)    \
-  (Flav_KstarMuMu_obs)      \
-  (BBN_container)           \
+#define SQL_BACKEND_TYPES             \
+  (DM_nucleon_couplings)              \
+  (DM_nucleon_couplings_fermionic_HP) \
+  (Flav_KstarMuMu_obs)                \
+  (BBN_container)                     \
 
 
 namespace Gambit
