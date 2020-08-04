@@ -298,6 +298,8 @@ int main(int argc, char* argv[])
     RD_oh2_general.resolveBackendReq(&Backends::DarkSUSY_5_1_3::Functown::rderrors);
     RD_oh2_general.resolveBackendReq(&Backends::DarkSUSY_5_1_3::Functown::rdtime);
     RD_oh2_general.setOption<int>("fast", 1);  // 0: normal; 1: fast; 2: dirty
+    // Maximum core time to allow for relic density calculation, in seconds
+    RD_oh2_general.setOption<double>("timeout", 10800.);
     RD_oh2_general.reset_and_calculate();
 
     // Calculate WMAP likelihoods -- Choose one of the two relic density calculators
