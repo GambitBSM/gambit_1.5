@@ -4451,6 +4451,9 @@ k_pivot: |
 mNu_tot: |
    The total mass of neutrinos [eV].
 
+Neff_SM: |
+   The value of Neff in the early Universe after neutrino decoupling for 3 SM neutrinos. Set to 3.045, see arXiv 1606.06986.
+
 N_ur: |
    The value of N_ur (today) (i.e. the contribution of massive neutrinos which are still relativistic).
 

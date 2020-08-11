@@ -150,12 +150,22 @@ START_MODULE
     #undef FUNCTION
   #undef CAPABILITY
 
+  // SM value of N_eff in the early Universe (3 + corrections from precise decoupling
+  // calculations)
+  #define CAPABILITY Neff_SM
+  START_CAPABILITY
+    #define FUNCTION get_Neff_SM
+    START_FUNCTION(double)
+     #undef FUNCTION
+  #undef CAPABILITY
+  
   // Value of N_ur (today) (aka. contribution of massive neutrinos which are still relativistic)
   #define CAPABILITY N_ur
   START_CAPABILITY
     #define FUNCTION get_N_ur
     START_FUNCTION(double)
     ALLOW_MODEL(StandardModel_SLHA2)
+    DEPENDENCY(Neff_SM, double)
     MODEL_CONDITIONAL_DEPENDENCY(etaBBN_rBBN_rCMB_dNurBBN_dNurCMB_parameters,ModelParameters,etaBBN_rBBN_rCMB_dNurBBN_dNurCMB)
     #undef FUNCTION
   #undef CAPABILITY
@@ -713,6 +723,7 @@ START_MODULE
     #define FUNCTION AlterBBN_Input
     START_FUNCTION(map_str_dbl)
     DEPENDENCY(etaBBN, double)
+    DEPENDENCY(Neff_SM, double)
     MODEL_CONDITIONAL_DEPENDENCY(nuclear_params_neutron_lifetime_parameters,ModelParameters,nuclear_params_neutron_lifetime)
     MODEL_CONDITIONAL_DEPENDENCY(etaBBN_rBBN_rCMB_dNurBBN_dNurCMB_parameters,ModelParameters,etaBBN_rBBN_rCMB_dNurBBN_dNurCMB)
     #undef FUNCTION

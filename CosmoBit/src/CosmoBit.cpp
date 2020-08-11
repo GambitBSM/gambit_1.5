@@ -76,6 +76,15 @@ namespace Gambit
       result = Pipes::set_k_pivot::runOptions->getValueOrDef<double>(0.05, "k_pivot");
     }
 
+    // return Neff for 3 SM neutrinos in the early Universe 
+    // see arXiv 1606.06986
+    void get_Neff_SM(double& result)
+    {
+      using namespace Pipes::get_Neff_SM;
+
+      result = 3.045;
+    }
+    
     void get_mNu_tot(double& result)
     {
       using namespace Pipes::get_mNu_tot;
@@ -102,16 +111,16 @@ namespace Gambit
       switch (N_ncdm)
       {
         case 1:
-          result = 2.0328;  // N_ur (today) = 2.0328 for 1 massive neutrino at CMB release
+          result = 2.0318;  // N_ur (today) = 2.0318 for 1 massive neutrino at CMB release
           break;
         case 2:
-          result = 1.0196;  // N_ur (today) = 1.0196 for 2 massive neutrino at CMB release
+          result = 1.0186;  // N_ur (today) = 1.0186 for 2 massive neutrino at CMB release
           break;
         case 3:
-          result = 0.00641;  // N_ur (today) = 0.00641 for 3 massive neutrinos at CMB release
+          result = 0.00541;  // N_ur (today) = 0.00541 for 3 massive neutrinos at CMB release
           break;
         case 0:
-          result = 3.046;
+          result = *Dep::Neff_SM;
           break;
         default:
           {

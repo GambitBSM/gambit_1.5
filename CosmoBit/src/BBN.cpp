@@ -73,7 +73,7 @@ namespace Gambit
       // If we are using some of the "non-standard energy content" models, set the
       // inputs for the AlterBBN_input map according to the parameters of that model.
       // In case we are not using one of these models, we use the default values
-      // (i.e. eta inferred from LCDM, Nnu = 3.046 and dNnu = 0)
+      // (i.e. eta inferred from LCDM, Nnu = Neff_SM (3.045) and dNnu = 0)
       if (ModelInUse("etaBBN_rBBN_rCMB_dNurBBN_dNurCMB"))
       {
         const ModelParameters& NP_params = *Dep::etaBBN_rBBN_rCMB_dNurBBN_dNurCMB_parameters;
@@ -98,12 +98,12 @@ namespace Gambit
         }
 
         //If check is passed, set inputs.
-        result["Nnu"]=3.046*pow(NP_params.at("r_BBN"),4); // contribution from SM neutrinos
+        result["Nnu"]=*Dep::Neff_SM*pow(NP_params.at("r_BBN"),4); // contribution from SM neutrinos
         result["dNnu"]=dNurBBN;    // dNnu: within AlterBBN scenarios in which the sum Nnu+dNnu is the same are identical
       }
       else
       {
-        result["Nnu"]=3.046; // contribution from SM neutrinos
+        result["Nnu"]=*Dep::Neff_SM; // contribution from SM neutrinos
         result["dNnu"]=0.;   // no extra ur species in standard LCDM model
       }
       result["eta0"] = *Dep::etaBBN;
