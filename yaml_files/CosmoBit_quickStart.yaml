@@ -4,8 +4,8 @@
 ##      Quickstart yaml file for CosmoBit
 ##
 ##        With this file, you can reproduce Fig. 5 in the 
-##        CosmoBit Module paper (arXiv: ). It shows the constraints on 
-##        Omega_m and H0 arising from BBN and BAO data. See 1907.11594 
+##        CosmoBit Module paper (arXiv: TODO insert link to arXiv). It shows the constraints on 
+##        Omega_m and H0 arising from BBN and BAO data. See arXiv 1907.11594 
 ##        for the original study. 
 ##
 ##
@@ -23,11 +23,11 @@
 #         -----
 #           *) for this specific yaml file you only need CosmoBit and NeutrinoBit
 #                 => there is no need to build all Bits of GAMBIT, you can ditch the others
-#                    with the cmake flag -Ditch="Collider;Decay;Spec;Flav;Precision"
+#                    with the cmake flag -Ditch="Collider;Dark;Decay;Spec;Flav;Precision"
 #           *) you will need the python package cython (now added to cmake prerequisite)
 #
 #
-#      cmake -Ditch="Collider;Decay;Spec;Flav;Precision;Neutrino;Dark" -DFORCE_PYTHON2=ON -D WITH_MPI=ON ..
+#      cmake -Ditch="Collider;Decay;Spec;Flav;Precision;Neutrino;Dark" -DWITH_MPI=ON ..
 #      make -jn scanners (where n specifies the desired number of cores for the build, e.g. 4)
 #      cmake ..
 #      make -jn gambit
@@ -51,7 +51,7 @@
 
 
 #======== 2) Input parameter declarations =======
-#  In this section the models to be scanned over are specified. You can
+#  In this section, the models to be scanned over are specified. You can
 #  set all model parameters here or import another yaml file containing them.
 #
 #  => for more details check out chapter 6.2 of the GAMBIT manual (https://arxiv.org/abs/1705.07908)
@@ -88,10 +88,10 @@ Parameters:
     n_s: 0.9649
 
   # Uncomment to allow for non-standard values of dNeff
-  dNurCMB:
-    dNur_CMB:
-      prior_type: flat
-      range: [-1.0,1.0]
+  #dNurCMB:
+  #  dNur_CMB:
+  #    prior_type: flat
+  #    range: [-1.0,1.0]
 
 
 #======== 3) Prior setup ========
@@ -223,8 +223,8 @@ Rules:
 
   # ----------- 7.c) "Global" (CossmoBit-wide) settings ------------
 
-  # By default, CosmoBit does not allow negative values for dNur_BBN and dNur_CMB as this leads
-  # in general to unphysical inputs.
+  # By default, CosmoBit does not allow negative values for dNur_BBN and dNur_CMB as this can
+  # lead to unphysical inputs in cases where dN_ur < 0 and abs(dN_ur) > N_ur contribution from 3 SM neutrinos today.
   # As this scan assumes only one massive neutrino, the resultant inputs for CLASS remain valid
   # and we can safely circumvent the limitation
   - module: CosmoBit
@@ -252,4 +252,4 @@ KeyValues:
   default_output_path: "runs/CosmoBit_quickStart"
 
   likelihood:
-    model_invalid_for_lnlike_below: -1e6
+    model_invalid_for_lnlike_below: -1e30
