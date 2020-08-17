@@ -128,12 +128,24 @@ namespace Gambit
 
     /// Check the validity of a correlation matrix for AlterBBN likelihood calculations given in the YAML file, and use it to populate a correlation matrix object
     void populate_correlation_matrix(const std::map<std::string, int>& abund_map, std::vector<std::vector<double>>& corr,
-                                     std::vector<double>& relerr, bool use_relative_errors, const Options& runOptions)
+                                     std::vector<double>& err, bool has_errors, const Options& runOptions)
     {
       std::vector<str> isotope_basis = runOptions.getValue<std::vector<str> >("isotope_basis");
-      std::vector<std::vector<double>> tmp_corr = runOptions.getValue<std::vector<std::vector<double>>>("correlation_matrix");
-      std::vector<double> tmp_relerr;
       unsigned int nisotopes = isotope_basis.size();
+
+      std::vector<std::vector<double>> tmp_corr;
+      if (runOptions.hasKey("correlation_matrix"))
+      {
+        tmp_corr = runOptions.getValue<std::vector<std::vector<double>>>("correlation_matrix");
+      }
+      else
+      {
+        tmp_corr = std::vector<std::vector<double>>(nisotopes, std::vector<double>(nisotopes,0.0));
+        for (unsigned int ie = 0; ie < nisotopes; ie++)
+          tmp_corr.at(ie).at(ie) = 1.0;
+      }
+
+      std::vector<double> tmp_err;
 
       // Check if the size of the isotope_basis and the size of the correlation matrix agree
       if (nisotopes != tmp_corr.size())
@@ -143,22 +155,37 @@ namespace Gambit
         CosmoBit_error().raise(LOCAL_INFO, err.str());
       }
 
-      // If the relative errors are also given, then do also a check if the length of the list is correct and if the entries are positive.
-      if (use_relative_errors)
+      // If the relative errors or absolute errors are also given, then do also
+      // a check if the length of the list is correct and if the entries are positive.
+      if (has_errors)
       {
-        tmp_relerr = runOptions.getValue< std::vector<double> >("relative_errors");
-        if (nisotopes != tmp_relerr.size())
+        if (runOptions.hasKey("relative_errors"))
         {
-          std::ostringstream err;
-          err << "The length of the list \'isotope_basis\' and the length of \'relative_errors\' do not agree";
-          CosmoBit_error().raise(LOCAL_INFO, err.str());
+          tmp_err = runOptions.getValue< std::vector<double> >("relative_errors");
+          if (nisotopes != tmp_err.size())
+          {
+            std::ostringstream err;
+            err << "The length of the list \'isotope_basis\' and the length of \'relative_errors\' do not agree";
+            CosmoBit_error().raise(LOCAL_INFO, err.str());
+          }
         }
-        for (std::vector<double>::iterator it = tmp_relerr.begin(); it != tmp_relerr.end(); it++)
+        else
+        {
+          tmp_err = runOptions.getValue< std::vector<double> >("absolute_errors");
+          if (nisotopes != tmp_err.size())
+          {
+            std::ostringstream err;
+            err << "The length of the list \'isotope_basis\' and the length of \'absolute_errors\' do not agree";
+            CosmoBit_error().raise(LOCAL_INFO, err.str());
+          }
+        }
+
+        for (std::vector<double>::iterator it = tmp_err.begin(); it != tmp_err.end(); it++)
         {
           if (*it <= 0.0)
           {
             std::ostringstream err;
-            err << "One entry for the relative error is not positive";
+            err << "At least one entry in 'relative_error'/'absolute_error' is not positive";
             CosmoBit_error().raise(LOCAL_INFO, err.str());
           }
         }
@@ -215,13 +242,13 @@ namespace Gambit
         }
       }
 
-      // Populate the correlation matrix and relative errors
+      // Populate the correlation matrix and relative (absolute) errors
       for (std::vector<str>::iterator it1 = isotope_basis.begin(); it1 != isotope_basis.end(); it1++)
       {
         int ie  =  abund_map.at(*it1);
         int i = std::distance( isotope_basis.begin(), it1 );
-        // If the relative errors are given, fill relerr with the respective values (-1.0 refers to no errors given).
-        if (use_relative_errors) relerr.at(ie) = tmp_relerr.at(i);
+        // If errors are given, fill err with the respective values (-1.0 refers to no errors given).
+        if (has_errors) err.at(ie) = tmp_err.at(i);
         for (std::vector<str>::iterator it2 = isotope_basis.begin(); it2 != isotope_basis.end(); it2++)
         {
           int je = abund_map.at(*it2);
@@ -249,9 +276,45 @@ namespace Gambit
       std::unique_ptr<double[], decltype(deleter)> cov_ratioH(new double[(NNUC+1)*(NNUC+1)](), deleter);
 
       static bool first = true;
-      const static bool use_fudged_correlations = (runOptions->hasKey("correlation_matrix") && runOptions->hasKey("isotope_basis"));
-      const static bool use_relative_errors = runOptions->hasKey("relative_errors");
-      static std::vector<double> relerr(NNUC+1, -1.0);
+
+      /*  Logic of the modified uncertainty treatment:
+          - To modify the covariance matrix, the list containing the isotope basis
+            must be present.
+          - If the correlation_matrix is given it will be read, if it is missing,
+            it is assumed to be diagonal.
+          - For the uncertainties on the respective isotopes, either the relative
+            or an absolute error can be specified. They are mutually exclusive.
+            If they are missing, the uncertainty will be deduced from the result
+            of AlterBBN
+      */
+      const static bool use_custom_covariances = (runOptions->hasKey("isotope_basis"));
+      const static bool has_relative_errors = runOptions->hasKey("relative_errors");
+      const static bool has_absolute_errors = runOptions->hasKey("absolute_errors");
+      const static bool has_custom_correlations = runOptions->hasKey("correlation_matrix");
+
+      // Raise error if the modified uncertainty treatment is intended but 'isotope_basis' is missing
+      if( !use_custom_covariances &&
+          (has_relative_errors || has_absolute_errors || has_custom_correlations) )
+      {
+        str err = "It appears that you intend to pass a custom covariance"
+                  " matrix to AlterBBN, but the entry for \'isotope_basis\'"
+                  " is missing in the options.\n"
+                  "Without this entry neither of the options \'relative_errors\',"
+                  " \'absolute_errors\', or \'correlation_matrix\' can be interpreted.\n\n"
+                  "Please fix this by providing \'isotope_basis\' or by deleting the conflicting options.";
+                  CosmoBit_error().raise(LOCAL_INFO, err);
+      }
+
+      // Raise error if the uncertainty rules are contradictory
+      if (has_relative_errors && has_absolute_errors)
+      {
+        str err = "You specified both \'relative_errors\' and \'absolute_errors\'.\n"
+                  "This is contradictory. Please choose only one option.\n";
+        CosmoBit_error().raise(LOCAL_INFO, err);
+      }
+
+      // Define the vectors to hold the customs errors (correlation matrix + relative (absolute) errors on the isotopes)
+      static std::vector<double> err(NNUC+1, -1.0);
       static std::vector<std::vector<double>> corr(NNUC+1, std::vector<double>(NNUC+1, 0.0));
 
       if (first)
@@ -275,11 +338,12 @@ namespace Gambit
         }
 
         // Process user-defined correlations (if provided)
-        if (use_fudged_correlations)
+        if (use_custom_covariances)
         {
           for (int ie = 1; ie < NNUC; ie++) corr.at(ie).at(ie) = 1.;
           const std::map<std::string, int>& abund_map = result.get_abund_map();
-          populate_correlation_matrix(abund_map, corr, relerr, use_relative_errors, *runOptions);
+          bool has_errors = (has_relative_errors || has_absolute_errors);
+          populate_correlation_matrix(abund_map, corr, err, has_errors, *runOptions);
         }
 
         // Here for a good time, not a long time
@@ -299,14 +363,16 @@ namespace Gambit
         invalid_point().raise(err.str());
       }
 
-      // Fill relative errors
+      // Fill relative (absolute) errors
       std::vector<double> err_ratio(NNUC+1,0);
-      if (use_fudged_correlations) for (const int& ie : result.get_active_isotope_indices())
+      if (use_custom_covariances) for (const int& ie : result.get_active_isotope_indices())
       {
-        if (use_relative_errors && (relerr.at(ie) > 0.0))
-          err_ratio.at(ie) =  relerr.at(ie) * ratioH[ie];
+        if (has_relative_errors && (err.at(ie) > 0.0))
+          err_ratio.at(ie) =  err.at(ie) * ratioH[ie];
+        else if (has_absolute_errors && (err.at(ie) > 0.0))
+          err_ratio.at(ie) =  err.at(ie);
         else
-          // Get every diagonal element (row and line 0 is not filled)
+          // get every diagonal element (row and line 0 are not filled)
           err_ratio.at(ie) = sqrt(cov_ratioH[ie*(NNUC+1)+ie]);
       }
 
@@ -316,7 +382,7 @@ namespace Gambit
         result.set_BBN_abund(ie, ratioH[ie]);
         for (const int& je : result.get_active_isotope_indices())
         {
-          if (use_fudged_correlations)
+          if (use_custom_covariances)
             result.set_BBN_covmat(ie, je, corr.at(ie).at(je) * err_ratio.at(ie) * err_ratio.at(je));
           else
             result.set_BBN_covmat(ie, je, cov_ratioH[ie*(NNUC+1)+je]);
