@@ -61,7 +61,10 @@ namespace Gambit
       {
            t_grid[jj] = exp(log(t0) + jj*Delta_logt);
       }
-      double Neff_SM = 3.046;
+      double Neff_SM = 3.046; // TODO -> this is now set by a capability to avoid
+      // hard-coding the value multiple times. We can't call it here..
+      // should we implement a non-rollcalled util function returning Neff 
+      // and let the get_Neff_SM capability call that? then we'd only have it coded once? (JR)
       double g_star_SM = 2.+2.*7./8.*Neff_SM*pow(4./11.,4./3.); // contribution from photons & neutrinos with Neff = 3.046
 
       // factor needed to calculate temperature evolution. For details see definition of functions set_T_evo(),.. in CosmoBit_types.hpp header
