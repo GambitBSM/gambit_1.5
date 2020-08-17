@@ -4112,7 +4112,7 @@ multimodecode_gambit_driver_test: |
    will be deleted.
 
 multimode_input_parameters: |
-   Object containing the generic inputs used when calling MultiModeCode.
+   Creates object containing the generic inputs for calling multimodecode.
 
 multimode_internal: |
    Exclusively used for internal variables and function for the MultiModeCode backend.
@@ -4197,10 +4197,10 @@ calc_MP_LogLikes: |
     Calls MontePython to get the likelihood of all experiments (tagged with 'Likelihood' and 'Observable'). The results are stored as map from experiment name to LogLike result in the type MPLike_result_container.
 
 MP_Combined_LogLike: |
-    Returns combined LogLike of all MontePython Likelihoods used in the scan.
+   Returns combined LogLike of all montethon Likelihoods used in the scan.
 
 MP_LogLikes: |
-    Returns a map from experiment name to LogLike value containing the likelihood of all experiments used as an Observable. All LogLike values contained here are added up an count to the total LogLike that drives the scan.
+   Calls montethon to get the likelihood of all experiments (tagged with Likelihood and Observable). The results are stored as map from experiment name to LogLike result in the type MPLike_result_container.
 
 MP_Observables: |
     Returns a map from experiment name to LogLike value containing the likelihood of all experiments used as an Observable. These are not added to the value returned by MP_Combined_LogLike, hence they are not driving the scan.
@@ -4215,16 +4215,16 @@ MontePythonLike_3_3_0_init: |
   Initialise MontePython backend v3.3.0.
 
 MP_objects: |
-   An object containing the MontePython data and likelihood objects, determining which experiments are in use in the process.
+   Creates an object containing the montethon ~Data and Likelihood objects, deining which experiments are in use in the process.
 
 parameter_dict_for_MPLike: |
-   A pybind11::dict filled with the mcmc_parameters dictionary of MontePython's Data object, with current values of nuisance parameters.
+   Returns bind11::dict filled with the mcmc_parameters dictionary of montethon's Data object, with current values of nuisance parameters.
 
 create_MP_likelihood_objects: |
    Returns a map of string to Python objects: the Python objects from MontePython are the initialised "Likelihood" objects used internally.
 
 bao_like_correlation: |
-   Optional to use in combination with the 'bao_correlations' MontePython likelihoods. Including this capability as an Observable in the YAML file will add the correlation coefficients of the 'bao_correlations' likelihood to the ouput file.
+   Adds the correlation coefficients of the bao_correlations likelihood to the output file. Optional to use in combination with the bao_correlations montethon likelihoods. 
 
 #----------------------------
 #  DarkAges
@@ -4310,7 +4310,7 @@ rCMB_parameters: |
    Child model of rBBN_rCMB model. See ./gambit rCMB for more details.
 
 PowerLaw_ps_parameters: |
-   Simple, parametrised, purely phenomenological, scale-free power spectrum.
+   Returns the purely phenomenological parametrised scale-free power spectrum.
    See ./gambit PowerLaw_ps for details.
 
 Minimal_PowerLaw_ps_parameters: |
@@ -4398,43 +4398,43 @@ T_cmb: |
   Sets CMB temperature (to 2.7255 if not specified in the YAML file).
 
 T_ncdm_SM: |
-  Temperature of non-cold DM components in units of T_cmb in the SM, fixed to 0.71611. This is larger than the value obtained by assuming instantaneous neutrino decoupling to account for the effect of flavour oscillations (hep-ph/0506164).
+   Returns the SM neutrino temperature in units of Tcmb.
 
 T_ncdm: |
-  Sets temperature of non-cold DM components in units of T_cmb (fixed to 0.71611, uncomment line in function set_Tncdm to be able to specify it in the YAML file via runOptions).
+   Returns the neutrino temperature in units of Tcmb.
 
 n0_g: |
-  Compute the number density of photons today per cm^3 from CMB temperature.
+   Returns the number density of photons today, n_0^gamma, in cm^-3.
 
-eta0:  |
-  Calculate baryon to photon ratio today eta from Omega_b and T_cmb.
+eta0: |
+   Returns the baryon-to-photon ratio today, eta_0.
 
 etaCMB:  |
   Calculate baryon to photon ratio etaCMB at CMB release.
 
-etaBBN:  |
-  Calculate or set (depending on model) baryon to photon ratio etaBBN at BBN.
+etaBBN: |
+   Returns the baryon-to-photon ratio at the emphend of BBN, eta_BBN. 
 
 Omega0_g: |
-  Energy density of photons today.
+   Returns the total photon content today, Omega_gamma. 
 
 Omega0_ur: |
-  Energy density of ultra-relativistic species today; includes contribution from ultra-relativistic species (Neutrinos + potential extra components).
+   Returns the total content in ultrarelativistic species today. 
 
 Omega0_r: |
-  Energy density of radiation today; sum of Omega0_g and Omega0_ur).
+   Returns the total radiation content today, Omega_r.
 
 Omega0_m: |
-  Energy density of matter today; sum of Omega0_b, Omega0_cdm and potential Omega0_ncdm.
+   Returns the total matter content today, Omega_m. 
 
 Omega0_cdm: |
-  Energy density of cold dark matter today.
+   Returns the total cold DM content today, Omega_cdm. 
 
 Omega0_ncdm: |
-  Energy density of non-CDM components today, e.g. contribution from non-relativistic massive neutrinos.
+   Returns the total neutrino content today, Omega_ncdm. 
 
 Omega0_b: |
-  Energy density of baryons today.
+   Returns the total baryon content today, Omega_b.  
 
 H0:
    The Hubble rate today [km/s/Mpc].
@@ -4443,55 +4443,65 @@ helium_abundance:
    The He4 abundance.
 
 primordial_power_spectrum: |
-   An object containing the primordial power spectra of scalar, tensor, and isocurvature perturbations, for a given array of [k] values.
+   Creates object containing the primordial power spectra of scalar, tensor, and isocurvature perturbations, for a given array of [k] values.
 
 k_pivot: |
-   The pivot scale used to evaluate the primordial power spectrum. Can be set by the function "set_k_pivot".
+   Returns the comoving pivot scale, k_star in Mpc^-1. 
 
 mNu_tot: |
-   The total mass of neutrinos [eV].
+   Returns the total mass of neutrinos in eV.
 
 Neff_SM: |
-   The value of Neff in the early Universe after neutrino decoupling for 3 SM neutrinos. Set to 3.045, see arXiv 1606.06986.
+   Returns the effective number of neutrino species in the SM. 
 
 N_ur: |
-   The value of N_ur (today) (i.e. the contribution of massive neutrinos which are still relativistic).
+   Returns the total number of ultra-relativistic species today. 
 
-Sigma8:  |
-  Returns Sigma8.
+Sigma8: |
+   Returns sigma_8, the RMS perturbation over a sphere of radius 8h^-1 Mpc. 
 
-rs_drag:  |
-  Returns comoving sound horizon at baryon drag.
+rs_drag: |
+   Returns the comoving sound horizon at baryon drag.
 
-unlensed_Cl_TT:  |
-  Capability returning the unlensed dimensionless CMB temperature-temperature anisotropy spectrum.
+unlensed_Cl_TT: |
+   Returns the unlensed dimensionless CMB temperature-temperature anisotro spectrum.
 
-unlensed_Cl_EE:  |
-  Capability returning the unlensed dimensionless CMB E-mode spectrum.
+unlensed_Cl_EE: |
+   Returns the unlensed dimensionless CMB E-mode spectrum.
 
-unlensed_Cl_BB:  |
-  Capability returning the unlensed dimensionless CMB B-mode spectrum.
+unlensed_Cl_BB: |
+   Returns the unlensed dimensionless CMB B-mode spectrum.
 
-unlensed_Cl_TE:  |
-  Capability returning the unlensed dimensionless CMB TE cross-correlations.
+unlensed_Cl_TE: |
+   Returns the unlensed dimensionless CMB TE cross-correlations.
 
-unlensed_Cl_PhiPhi:  |
-  Capability returning the unlensed dimensionless CMB lensing potential.
+unlensed_Cl_PhiPhi: |
+   Returns the unlensed dimensionless CMB lensing potential.
 
-lensed_Cl_TT:  |
-  Capability returning the lensed dimensionless CMB temperature-temperature anisotropy spectrum.
+unlensed_Cl_TT: |
+   Returns the unlensed dimensionless CMB temperature-temperature anisotro spectrum.
+lensed_Cl_TT: |
+   Returns the unlensed dimensionless CMB temperature-temperature anisotro spectrum.
 
-lensed_Cl_EE:  |
-  Capability returning the lensed dimensionless CMB E-mode spectrum.
+unlensed_Cl_EE: |
+   Returns the unlensed dimensionless CMB E-mode spectrum.
+lensed_Cl_EE: |
+   Returns the unlensed dimensionless CMB E-mode spectrum.
 
-lensed_Cl_BB:  |
-  Capability returning the lensed dimensionless CMB B-mode spectrum.
+unlensed_Cl_BB: |
+   Returns the unlensed dimensionless CMB B-mode spectrum.
+lensed_Cl_BB: |
+   Returns the unlensed dimensionless CMB B-mode spectrum.
 
-lensed_Cl_TE:  |
-  Capability returning the lensed dimensionless CMB TE cross-correlations.
+unlensed_Cl_TE: |
+   Returns the unlensed dimensionless CMB TE cross-correlations.
+lensed_Cl_TE: |
+   Returns the unlensed dimensionless CMB TE cross-correlations.
 
-lensed_Cl_PhiPhi:  |
-  Capability returning the lensed dimensionless CMB lensing potential.
+unlensed_Cl_PhiPhi: |
+   Returns the unlensed dimensionless CMB lensing potential.
+lensed_Cl_PhiPhi: |
+   Returns the unlensed dimensionless CMB lensing potential.
 
 ExtNeffCMB: |
    Capability to set or compute non-standard values of dNeff at CMB release. E.g. needed for the CosmoALP model.
@@ -4509,28 +4519,28 @@ total_DM_abundance: |
     Compute the total abundance of axion-like particles, produced either by misalignment or freeze-in.
 
 Neff: |
-  Return the value of Neff from CLASS.
+   Returns the effective number of neutrino species. 
 
 NuMasses_SM: |
   Create a map containing neutrino masses, the corresponding number of non-cold DM components (N_ncdm) today as well as the sum of the neutrino masses. Needed to pass correct parameters to CLASS.
 
 classy_NuMasses_Nur_input: |
-  Set all neutrino related input parameters for CLASS (N_ur, N_ncdm, T_ncdm, m_ncdm) and store them in a python dictionary.
+   Sets all neutrino related input parameters for classy (N_ur, N_ncdm, T_ncdm, m_ncdm) and stores them in a Python dictionary.
 
 classy_MPLike_input: |
-  Set all input parameters for CLASS from active MontePython likelihoods and store them in a python dictionary. If no MontePython likelihoods are in use, this will simply pass an empty dictionary.
+   Sets all input parameters for classy from active montethon likelihoods and stores them in a Python dictionary. If no montethon likelihoods are in use, this will simply pass an empty dictionary.
 
 classy_PlanckLike_input: |
-  Set all input parameters for CLASS needed for the calculation of active Planck CMB likelihoods. This sets the non linear treatment to 'halofit', the maximum angular scale up to which the CMB spectra are computed, and which spectra need to be computed (temperature, polarization and/or lensing).
+   Sets all input parameters for classy needed for the calculation of active Planck CMB likelihoods. This sets the non-linear treatment to "halofit", the maximum angular scale up to which the CMB spectra are computed, and which spectra need to be computed (temperature, polarisation and/or lensing).
 
 classy_primordial_input: |
-  Set all primordial input parameters for CLASS. These are the primordial helium abundance, and parameters related to the primordial power spectrum. This can either be just A_s, n_s (and r) through the function 'set_classy_parameters_parametrised_ps, or the full shape of the spectrum calculated from an inflationary model through the function 'set_classy_parameters_primordial_ps. 
+   Sets all primordial input parameters for classy. These are the primordial helium abundance, and parameters related to the primordial power spectrum. This can either be just A_s, n_s (and r) through the function set_classy_parameters_parametrised_ps, or the full shape of the spectrum calculated from an inflationary model through the function set_classy_parameters_primordial_ps.
 
 classy_parameters_EnergyInjection: |
-  Set all input parameters for exo_CLASS relevant for energy injection in the early Universe. These parameters are for example the DM mass and cross section (for annihilating DM models) or the DM lifetime and fraction (decaying DM models). Further, the energy injection coefficients and the injection efficiency functions are passed.
+   Sets all input parameters for exoclass relevant for energy injection in the early Universe. These parameters are for example the DM mass and cross section (for annihilating DM models) or the DM lifetime and fraction (decaying DM models). Further, the energy injection coefficients and the injection efficiency functions are passed.
 
 classy_input_params: |
-  Create an object of type Classy_input containing a python dictionary with all relevant input parameters for the CLASS run. Here, the parameters H0, T_cmb, omega_b, tau_reio, omega_cdm are set. Further, all input parameters from the capabilities 'classy_NuMasses_Nur_input', 'classy_MPLike_input', 'classy_PlanckLike_input', 'classy_primordial_input' and 'classy_parameters_EnergyInjection' are gathered and merged into one dictionary which will be passed to CLASS.
+   Creates an object of type Classy_input, containing a Python dictionary with all relevant input parameters for the classy run. 
   Additional input options for CLASS (precision parameters, more output...) can be set by setting a runOption 'classy_dict' for the function 'set_classy_input_params' and specifying these parameters.
 
 class_get_Neff: |
@@ -4575,19 +4585,19 @@ lnL_A_planck : |
     effect than using a Gaussian prior on it in the first place.
 
 Planck_highl_loglike: |
-   Planck CMB likelihood for the multipole range 30 ≤ ell ≤ 2508.
+   Calculates the Planck CMB likelihood for the multipole range 30 leq ell leq 2508.
 
 Planck_lowl_loglike: |
-   Planck CMB likelihood for the multipole range 2 ≤ ell ≤ 29.
+   Computes the Planck CMB likelihood for the multipole range 2 leq ell leq 29.
 
 Planck_lensing_loglike: |
-   Planck CMB lensing likelihood.
+   Computes the Planck lensing log-likelihood for a given set of C_ells. All module functions described here have the prefix function_Planck_lensing_. 
 
 Planck_nuisance_prior_loglike: |
-   Gaussian priors on nuisance parameters of the Planck Likelihoods as suggested by the Planck collaboration.
+   Provides Gaussian priors on the nuisance parameters of the Planck likelihoods, as suggested by the Planck collaboration.
 
 Planck_sz_prior_loglike: |
-   SZ- prior: Prior on the tSZ and kSZ amplitudes. The correlation is unconstrained by Planck. Use prior based on SPT and ACT data, cf. https://arxiv.org/pdf/1507.02704.pdf -- eq. 32.
+   Provides priors on the tSZ and kSZ amplitudes. The correlation is unconstrained by Planck. Uses prior based on SPT and ACT data, cf. Eq. (32) of citeAghanim:2015xee.
 
 f_effective_at_z: |
     returns f(z) at  z~600 (annihilating DM) or z=300 (decaying DM) summed over all channels.
@@ -4607,7 +4617,7 @@ energy_injection_spectrum: |
     the decay or annihilation of a DM particle with a certain mass.
 
 energy_injection_efficiency: |
-    Table of energy injection efficiency functions
+   Gets the energy injection efficiency table from the darkages frontend.
 
 # -----------
 # AlterBBN
@@ -4623,7 +4633,7 @@ AlterBBN_2_2_init: |
     Initialise AlterBBN.
 
 AlterBBN_Input: |
-    Set input parameters depending on scanned model & error calculation settings for AlterBBN run.
+   Sets input parameters for an alterbbn run.
 
 Init_AlterBBN: |
     Set the members of the AlterBBN relicparam structure to their according values and. Modify this function if you want to pass so far unimplemented options to AlterBBN.
@@ -4644,10 +4654,10 @@ nucl_err: |
     AlterBBN function that computes element abundances and their covariance during BBN.
 
 BBN_LogLike: |
-    Compute likelihood for BBN data.
+   Computes likelihood for BBN data.
 
 BBN_abundances: |
-    Fills BBN_container with theoretically expected element abundances and covariance matrix from BBN.
+   Fills BBN_container with theoretically expected element abundances and covariance matrix from BBN.
 
 Helium_abundance: |
     Compute predicted Helium mass fraction, Yp, and theoretical error from BBN. First vector entry mean, second standard deviation.
