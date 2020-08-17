@@ -4478,30 +4478,20 @@ unlensed_Cl_TE: |
 unlensed_Cl_PhiPhi: |
    Returns the unlensed dimensionless CMB lensing potential.
 
-unlensed_Cl_TT: |
-   Returns the unlensed dimensionless CMB temperature-temperature anisotro spectrum.
 lensed_Cl_TT: |
-   Returns the unlensed dimensionless CMB temperature-temperature anisotro spectrum.
+   Returns the lensed dimensionless CMB temperature-temperature anisotro spectrum.
 
-unlensed_Cl_EE: |
-   Returns the unlensed dimensionless CMB E-mode spectrum.
 lensed_Cl_EE: |
-   Returns the unlensed dimensionless CMB E-mode spectrum.
+   Returns the lensed dimensionless CMB E-mode spectrum.
 
-unlensed_Cl_BB: |
-   Returns the unlensed dimensionless CMB B-mode spectrum.
 lensed_Cl_BB: |
-   Returns the unlensed dimensionless CMB B-mode spectrum.
+   Returns the lensed dimensionless CMB B-mode spectrum.
 
-unlensed_Cl_TE: |
-   Returns the unlensed dimensionless CMB TE cross-correlations.
 lensed_Cl_TE: |
-   Returns the unlensed dimensionless CMB TE cross-correlations.
+   Returns the lensed dimensionless CMB TE cross-correlations.
 
-unlensed_Cl_PhiPhi: |
-   Returns the unlensed dimensionless CMB lensing potential.
 lensed_Cl_PhiPhi: |
-   Returns the unlensed dimensionless CMB lensing potential.
+   Returns the lensed dimensionless CMB lensing potential.
 
 ExtNeffCMB: |
    Capability to set or compute non-standard values of dNeff at CMB release. E.g. needed for the CosmoALP model.
@@ -4540,7 +4530,7 @@ classy_parameters_EnergyInjection: |
    Sets all input parameters for exoclass relevant for energy injection in the early Universe. These parameters are for example the DM mass and cross section (for annihilating DM models) or the DM lifetime and fraction (decaying DM models). Further, the energy injection coefficients and the injection efficiency functions are passed.
 
 classy_input_params: |
-   Creates an object of type Classy_input, containing a Python dictionary with all relevant input parameters for the classy run. 
+  Creates an object of type Classy_input, containing a Python dictionary with all relevant input parameters for the classy run. 
   Additional input options for CLASS (precision parameters, more output...) can be set by setting a runOption 'classy_dict' for the function 'set_classy_input_params' and specifying these parameters.
 
 class_get_Neff: |
