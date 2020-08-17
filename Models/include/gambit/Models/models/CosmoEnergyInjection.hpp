@@ -34,7 +34,9 @@
   START_MODEL
   DEFINEPARS(mass)      // mass of dcdm candidate [GeV]
   DEFINEPARS(sigmav)    // thermally averaged cross section [cm^3 s^-1]
-  DEFINEPARS(BR)        // Branching ratio into electrons (1-BR into photons)
+  DEFINEPARS(BR_el)     // Branching ratio into electrons
+  DEFINEPARS(BR_ph)     // Branching ratio into photons
+                        // (1 - BR_el -BR_ph) >= 0 must hold !!
 
   INTERPRET_AS_PARENT_FUNCTION(AnnihilatingDM_mixture_to_AnnihilatingDM_general)
 
@@ -89,7 +91,9 @@
   DEFINEPARS(mass)      // mass of dcdm candidate [GeV]
   DEFINEPARS(lifetime)  // lifetime of dcdm candiate [s]
   DEFINEPARS(fraction)  // rho_dcdm / rho_cdm in the infinite past
-  DEFINEPARS(BR)        // Branching ratio into electrons (1-BR into photons)
+  DEFINEPARS(BR_el)     // Branching ratio into electrons
+  DEFINEPARS(BR_ph)     // Branching ratio into photons
+                        // (1 - BR_el -BR_ph) >= 0 must hold !!
 
   INTERPRET_AS_PARENT_FUNCTION(DecayingDM_mixture_to_DecayingDM_general)
 

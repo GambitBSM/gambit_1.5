@@ -43,8 +43,20 @@ void MODEL_NAMESPACE::energy_injection_spectrum_AnnihilatingDM_mixture(DarkAges:
   using namespace Pipes::energy_injection_spectrum_AnnihilatingDM_mixture;
 
   double m = *Param["mass"];
-  double BR_el = *Param["BR"];
-  double BR_ph = 1.0 - BR_el;
+  double BR_el = *Param["BR_el"];
+  double BR_ph = *Param["BR_ph"];
+
+  logger() << LogTags::debug << "Creating \'energy_injection_spectrum\' for \'AnnihilatingDM_mixture\'\n\n";
+  logger() << "- Branching fraction into e+/e-: " << BR_el;
+  logger() << "\n- Branching fraction into photons: " << BR_ph;
+  logger() << "\n- Branching fraction into inefficient final state: " << 1 - BR_ph - BR_el << "\n" << EOM;
+
+  if (BR_el + BR_ph > 1.0)
+  {
+    std::ostringstream err;
+    err << "The sum of the branching fractions into electrons and photons (BR_el and BR_ph) must not exceed 1.";
+    model_error().raise(LOCAL_INFO,err.str());
+  }
 
   if (m <= m_electron && BR_el >= std::numeric_limits<double>::epsilon())
   {
@@ -76,7 +88,8 @@ void MODEL_NAMESPACE::AnnihilatingDM_photon_to_AnnihilatingDM_mixture (const Mod
   targetP.setValue("sigmav", myP.getValue("sigmav"));
 
   // All decays into photons (BR into electrons is 0.0)
-  targetP.setValue("BR", 0.0);
+  targetP.setValue("BR_el", 0.0);
+  targetP.setValue("BR_ph", 1.0);
 }
 #undef MODEL
 
@@ -89,8 +102,9 @@ void MODEL_NAMESPACE::AnnihilatingDM_electron_to_AnnihilatingDM_mixture (const M
   targetP.setValue("mass", myP.getValue("mass"));
   targetP.setValue("sigmav", myP.getValue("sigmav"));
 
-  // All decays into electrons
-  targetP.setValue("BR", 1.0);
+  // All decays into electrons (BR into photons is 0.0)
+  targetP.setValue("BR_el", 1.0);
+  targetP.setValue("BR_ph", 0.0);
 }
 #undef MODEL
 
@@ -110,8 +124,20 @@ void MODEL_NAMESPACE::energy_injection_spectrum_DecayingDM_mixture(DarkAges::Ene
   using namespace Pipes::energy_injection_spectrum_DecayingDM_mixture;
 
   double m = *Param["mass"];
-  double BR_el = *Param["BR"];
-  double BR_ph = 1.0 - BR_el;
+  double BR_el = *Param["BR_el"];
+  double BR_ph = *Param["BR_ph"];
+
+  logger() << LogTags::debug << "Creating \'energy_injection_spectrum\' for \'DecayingDM_mixture\'\n\n";
+  logger() << "- Branching fraction into e+/e-: " << BR_el;
+  logger() << "\n- Branching fraction into photons: " << BR_ph;
+  logger() << "\n- Branching fraction into inefficient final state: " << 1 - BR_ph - BR_el << "\n" << EOM;
+
+  if (BR_el + BR_ph > 1.0)
+  {
+    std::ostringstream err;
+    err << "The sum of the branching fractions into electrons and photons (BR_el and BR_ph) must not exceed 1.";
+    model_error().raise(LOCAL_INFO,err.str());
+  }
 
   if (m <= 2*m_electron && BR_el >= std::numeric_limits<double>::epsilon())
   {
@@ -144,7 +170,8 @@ void MODEL_NAMESPACE::DecayingDM_photon_to_DecayingDM_mixture (const ModelParame
   targetP.setValue("fraction", myP.getValue("fraction"));
 
   // All decays into photons (BR into electrons is 0.0)
-  targetP.setValue("BR", 0.0);
+  targetP.setValue("BR_el", 0.0);
+  targetP.setValue("BR_ph", 1.0);
 }
 #undef MODEL
 
@@ -158,7 +185,8 @@ void MODEL_NAMESPACE::DecayingDM_electron_to_DecayingDM_mixture (const ModelPara
   targetP.setValue("lifetime", myP.getValue("lifetime"));
   targetP.setValue("fraction", myP.getValue("fraction"));
 
-  // All decays into electrons
-  targetP.setValue("BR", 1.0);
+  // All decays into electrons (BR into photons is 0.0)
+  targetP.setValue("BR_el", 1.0);
+  targetP.setValue("BR_ph", 0.0);
 }
 #undef MODEL
