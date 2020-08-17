@@ -111,15 +111,6 @@ START_MODULE
     #undef FUNCTION
   #undef CAPABILITY
 
-  #define CAPABILITY f_effective_at_z
-  START_CAPABILITY
-    #define FUNCTION f_effective_at_z
-    START_FUNCTION(double)
-    ALLOW_MODELS(AnnihilatingDM_general,DecayingDM_general)
-    DEPENDENCY(energy_injection_efficiency,DarkAges::Energy_injection_efficiency_table)
-    #undef FUNCTION
-  #undef CAPABILITY
-
   #define CAPABILITY Planck_nuisance_prior_loglike
   START_CAPABILITY
     #define FUNCTION compute_Planck_nuisance_prior_loglike
