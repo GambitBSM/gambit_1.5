@@ -221,6 +221,15 @@ Rules:
   #- capability: classy_final_input
   #  function: set_classy_input
 
+  # (JR) tried to add rule for first capability dependency resolver complains about
+  # when having multiple classy versions installed at the same time. 
+  # Syntax from CMSSM.yaml, but GAMBIT doesn't seem to read it 
+  # #TODO
+  - capability: get_classy_backendDir
+    backends:
+    - {backend: classy, version: 2.6.3}
+  
+
   # ----------- 7.c) "Global" (CossmoBit-wide) settings ------------
 
   # By default, CosmoBit does not allow negative values for dNur_BBN and dNur_CMB as this can
