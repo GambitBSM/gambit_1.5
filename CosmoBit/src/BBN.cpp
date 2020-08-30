@@ -118,8 +118,8 @@ namespace Gambit
         result["neutron_lifetime"] = 879.4; // (PDG 2019 recommendation http://pdg.lbl.gov/2019/listings/rpp2019-list-n.pdf);
       }
 
-      result["failsafe"] = runOptions->getValueOrDef<double>(3,"failsafe");
-      result["err"] = runOptions->getValueOrDef<double>(0,"err");
+      result["failsafe"] = runOptions->getValueOrDef<double>(7,"failsafe");
+      result["err"] = runOptions->getValueOrDef<double>(1,"err");
 
       logger() << "Set AlterBBN with parameters eta = " << result["eta0"] << ", Nnu = " << result["Nnu"] << ", dNnu = " << result["dNnu"] << ", neutron lifetime = " << result["neutron_lifetime"];
       logger() << " and error params: failsafe = " << result["failsafe"] << ", err = " << result["err"] << EOM;
@@ -231,17 +231,6 @@ namespace Gambit
         }
       }
 
-      // Check if the isotopes in the basis are actually known.
-      for (std::vector<str>::iterator it = isotope_basis.begin(); it != isotope_basis.end(); it++)
-      {
-        if (abund_map.count(*it) == 0)
-        {
-          std::ostringstream err;
-          err << "I do not recognise the element \'" << *it << "\'";
-          CosmoBit_error().raise(LOCAL_INFO, err.str());
-        }
-      }
-
       // Populate the correlation matrix and relative (absolute) errors
       for (std::vector<str>::iterator it1 = isotope_basis.begin(); it1 != isotope_basis.end(); it1++)
       {
@@ -317,6 +306,9 @@ namespace Gambit
       static std::vector<double> err(NNUC+1, -1.0);
       static std::vector<std::vector<double>> corr(NNUC+1, std::vector<double>(NNUC+1, 0.0));
 
+      // Fill AlterBBN_input map with the parameters for the model in consideration
+      map_str_dbl AlterBBN_input = *Dep::AlterBBN_Input;
+
       if (first)
       {
         // Init abundance map and allocate arrays in result
@@ -341,17 +333,60 @@ namespace Gambit
         if (use_custom_covariances)
         {
           for (int ie = 1; ie < NNUC; ie++) corr.at(ie).at(ie) = 1.;
-          const std::map<std::string, int>& abund_map = result.get_abund_map();
+          std::map<std::string, int> abund_map = result.get_abund_map();
+
+          // Check whether any of the entries in isotope_basis is not recognised
+          std::vector<str> isotope_basis = runOptions->getValue<std::vector<str> >("isotope_basis");
+          for (const auto& it : isotope_basis)
+          {
+            if (abund_map.count(it) == 0)
+            {
+              std::ostringstream err;
+              err << "The isotope \'" << it << "\' is not recognised by AlterBBN." ;
+              CosmoBit_error().raise(LOCAL_INFO, err.str());
+            }
+          }
+
           bool has_errors = (has_relative_errors || has_absolute_errors);
+
+          // If either has_relative_errors or has_absolute_errors is and the "err" option for AlterBBN is nonzero,
+          // we need to carefully check, whether we are about to override all error estimates for the relevant abundances.
+          // To this end, perform a set differnce between the elements in the subcaps (i.e. isotopes we are interested in)
+          // and the isotopes in isotope basis (the ones we want to override).
+          // When all elements in v are included in isotope_basis, throw an error
+          if (has_errors && int(AlterBBN_input["err"]) != 0)
+          {
+            std::set<int> modified_indices, diff;
+            for (const auto& it : isotope_basis)
+            {
+              modified_indices.insert(abund_map[it]);
+            }
+            std::set<int> active_indices = result.get_active_isotope_indices();
+            std::set_difference(active_indices.begin(), active_indices.end(),
+                                modified_indices.begin(), modified_indices.end(),
+                                std::inserter(diff, diff.begin()));
+
+            if (diff.size() == 0)
+            {
+              std::ostringstream err;
+              err << "It seems that you run AlterBBN in a mode with \'error\' != 0 ";
+              err << "but you have also chosen to set the uncertainties manually by ";
+              err << "either \'absolute_errors\' or \'relative_errors\'.\n";
+              err << "Given your input for the \'isotope_basis\' option, you are about ";
+              err << "to ovveride all relevant entries of the covariance matrix.\n\n";
+              err << "Therefore any nonzero value for \'err\' would have no effect on your ";
+              err << "results but can slow down the code significantly.\n" ;
+              err << "Please fix this by setting \'err\'to 0 in the rule for \'AlterBBN_Input\'.";
+              CosmoBit_error().raise(LOCAL_INFO, err.str());
+            }
+          }
+
           populate_correlation_matrix(abund_map, corr, err, has_errors, *runOptions);
         }
 
         // Here for a good time, not a long time
         first = false;
       }
-
-      // Fill AlterBBN_input map with the parameters for the model in consideration
-      map_str_dbl AlterBBN_input = *Dep::AlterBBN_Input;
 
       // Call AlterBBN routine to calculate element abundances (& errors -- depending
       // on error calculation settings made with parameters 'err' and failsafe set in
