@@ -158,15 +158,16 @@
       return Dl;
     }
 
-    // returns scale_independent_growth_factor for given redshift
+    // returns scale_independent_growth_factor D(z) for CDM perturbations for a given 
+    // redshift (quantity defined by CLASS as index_bg_D in the background module)
     double class_get_scale_independent_growth_factor(double z)
     {
       double growth_fact = cosmo.attr("scale_independent_growth_factor")(z).cast<double>();
       return growth_fact;
     }
 
-    // returns scale_independent_growth_factor for given redshift  TODO: what is different with and without f? think it
-    // is connected to power spectra with baryons vs. baryons + cdm
+    // returns scale_independent_growth_factor_f f(z)=d ln D / d ln a for CDM perturbations
+    // for given redshift (quantity defined by CLASS as index_bg_f in the background module)
     double class_get_scale_independent_growth_factor_f(double z)
     {
       double growth_fact_f = cosmo.attr("scale_independent_growth_factor_f")(z).cast<double>();
@@ -208,16 +209,6 @@
       return Omega0_ncdm;
     }
 
-    /* you *could* also have this function in principle, however since the contains
-    the contribution from ALL ncdm components it is not in general true, that Omega_ncdm = Omega_nu
-    so I would not recommend doing it.
-    // returns Omega nu today
-    double class_get_Omega0_nu()
-    {
-      double Omega0_nu = cosmo.attr("Omega_nu")().cast<double>();
-      return Omega0_nu;
-    }
-    */
     // returns Omega_Lambda
     double class_get_Omega0_Lambda()
     {
