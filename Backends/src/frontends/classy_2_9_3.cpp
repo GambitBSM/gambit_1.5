@@ -279,7 +279,7 @@ BE_INI_FUNCTION
     if (cosmo_input_dict.attr("__contains__")("f_eff_type").cast<bool>())
     {
       std::ostringstream error;
-      error << "\nYou are scanning over a model, e.g. decayin or annihilating DM, ";
+      error << "\nYou are scanning over a model, e.g. decaying or annihilating DM, ";
       error << "\nwith exotic energy injection in the early Universe. However, you ";
       error << "\nare using a CLASS version that does not support these calculations. ";
       error << "\nGAMBIT will exit now. To fix this simply run";
