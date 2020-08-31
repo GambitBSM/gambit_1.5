@@ -56,7 +56,9 @@
 
 #define MODULE CosmoBit
 START_MODULE
-
+  
+  /// fraction of the abundance of the dark matter candidate in question
+  /// (mostly a decaying component) contributing to the total DM abundance.
   #define CAPABILITY DM_fraction
   START_CAPABILITY
     #define FUNCTION DM_fraction_ALP
@@ -67,7 +69,8 @@ START_MODULE
     ALLOW_JOINT_MODEL(LCDM, GeneralCosmoALP)
     #undef FUNCTION
   #undef CAPABILITY
-
+  
+  /// total abundance of axion-like particles, produced either by misalignment or freeze-in
   #define CAPABILITY total_DM_abundance
   START_CAPABILITY
     #define FUNCTION total_DM_abundance_ALP
@@ -77,6 +80,7 @@ START_MODULE
     #undef FUNCTION
   #undef CAPABILITY
 
+  /// lifetime of the decaying dark matter component (in s)
   #define CAPABILITY lifetime
   START_CAPABILITY
     #define FUNCTION lifetime_ALP_agg
@@ -85,6 +89,7 @@ START_MODULE
     #undef FUNCTION
   #undef CAPABILITY
 
+  /// minimal Freeze-in abundance of axion-like particles, produced via Primakoff processes
   #define CAPABILITY minimum_abundance
   START_CAPABILITY
     #define FUNCTION minimum_abundance_ALP
@@ -93,6 +98,8 @@ START_MODULE
     #undef FUNCTION
   #undef CAPABILITY
 
+  /// the fraction of the minimal freeze-in abundance of axion-like particles, 
+  /// produced via Primakoff processes, to the total abundance of dark matter
   #define CAPABILITY minimum_fraction
   START_CAPABILITY
     #define FUNCTION minimum_fraction_ALP
@@ -102,6 +109,7 @@ START_MODULE
     #undef FUNCTION
   #undef CAPABILITY
 
+  /// get the energy injection efficiency tables
   #define CAPABILITY energy_injection_efficiency
   START_CAPABILITY
     #define FUNCTION energy_injection_efficiency_func
@@ -111,28 +119,13 @@ START_MODULE
     #undef FUNCTION
   #undef CAPABILITY
 
-  #define CAPABILITY Planck_nuisance_prior_loglike
-  START_CAPABILITY
-    #define FUNCTION compute_Planck_nuisance_prior_loglike
-    START_FUNCTION(double)
-    ALLOW_MODELS(cosmo_nuisance_Planck_lite,cosmo_nuisance_Planck_TT,cosmo_nuisance_Planck_TTTEEE)
-    #undef FUNCTION
-  #undef CAPABILITY
-
-  #define CAPABILITY Planck_sz_prior_loglike
-  START_CAPABILITY
-    #define FUNCTION compute_Planck_sz_prior
-    START_FUNCTION(double)
-    ALLOW_MODELS(cosmo_nuisance_Planck_TT,cosmo_nuisance_Planck_TTTEEE)
-    #undef FUNCTION
-  #undef CAPABILITY
 
   // ----------------------
 
-  // Capabilities related to setting neutrino masses,
+  // capabilities related to setting neutrino masses,
   // temperature, ncdm components & number of ultra-relativistic species Nur
 
-  // Total mass of neutrinos (in eV)
+  // total mass of neutrinos (in eV)
   #define CAPABILITY mNu_tot
   START_CAPABILITY
     #define FUNCTION get_mNu_tot
@@ -150,7 +143,7 @@ START_MODULE
      #undef FUNCTION
   #undef CAPABILITY
   
-  // Value of N_ur (today) (aka. contribution of massive neutrinos which are still relativistic)
+  // value of N_ur (today) (aka. contribution of massive neutrinos which are still relativistic)
   #define CAPABILITY N_ur
   START_CAPABILITY
     #define FUNCTION get_N_ur
@@ -173,9 +166,17 @@ START_MODULE
 
   // ------------------------
 
-  // Capabilities related to setting input options for CLASS
+  // capabilities related to setting input options for CLASS
   // (cosmo parameters, temperature and number of ultra-relativistic species Nur)
 
+  /// gather all CLASS input parameters, i.e.
+  /// - cosmological parameters (H0, Omega_b, Omega_cmd, tau_reio)
+  /// - primordial parameters (YHe, primordial power spectrum) from classy_primordial_input
+  /// - neutrino mass, ultra-relativistic species and ncdm related parameters from classy_NuMasses_Nur_input
+  /// - energy injection related parameters (if needed) from classy_parameters_EnergyInjection
+  /// - CLASS settings from MontePython likelihoods from classy_MPLike_input
+  /// - CLASS settings passed as yaml file options to the capability classy_input_params 
+  /// consistency checks when combining all these different inputs are performed.
   #define CAPABILITY classy_input_params
   START_CAPABILITY
     #define FUNCTION set_classy_input_params
@@ -189,7 +190,7 @@ START_MODULE
     #undef FUNCTION
   #undef CAPABILITY
 
-  // Initialise CLASS either with the run options needed by
+  // initialise CLASS either with the run options needed by
   // MontePython Likelihoods (t modes, Pk at specific z,..), or not.
   #define CAPABILITY classy_MPLike_input
   START_CAPABILITY
@@ -203,10 +204,11 @@ START_MODULE
     #undef FUNCTION
   #undef CAPABILITY
 
-  // Set different CLASS input parameters
+  // set primordial CLASS input parameters
   #define CAPABILITY classy_primordial_input
   START_CAPABILITY
-    // H0, tau_reio, Omega_m, Omega_b plus an external primordial power spectrum
+    // primordial helium abundance,YHe & *external* full shape of primordial power spectrum
+    // (array with scalar & tensor perturb as function of k + pivot scale)
     #define FUNCTION set_classy_parameters_primordial_ps
     START_FUNCTION(pybind11::dict)
     DEPENDENCY(primordial_power_spectrum, Primordial_ps)
@@ -214,7 +216,8 @@ START_MODULE
     DEPENDENCY(k_pivot, double)
     #undef FUNCTION
 
-    // H0, tau_reio, Omega_m, Omega_b plus an external *parametrised* primordial power spectrum
+    // primordial helium abundance,YHe & *parametrised* primordial power spectrum
+    // parameters (A_s,n_s,r + pivot scale)
     #define FUNCTION set_classy_parameters_parametrised_ps
     START_FUNCTION(pybind11::dict)
     ALLOW_MODELS(PowerLaw_ps)
@@ -223,7 +226,8 @@ START_MODULE
     #undef FUNCTION
   #undef CAPABILITY
 
-  // Set extra CLASS parameters for energy injection
+  /// set extra CLASS parameters for energy injection -- different functions for
+  /// decaying and annihilating DM models 
   #define CAPABILITY classy_parameters_EnergyInjection
   START_CAPABILITY
     #define FUNCTION set_classy_parameters_EnergyInjection_AnnihilatingDM
@@ -239,7 +243,7 @@ START_MODULE
     #undef FUNCTION
   #undef CAPABILITY
 
-  // Set extra parameters for CLASS run if Planck CMB likelihoods are included
+  // set extra parameters for CLASS run if Planck CMB likelihoods are included
   #define CAPABILITY classy_PlanckLike_input
   START_CAPABILITY
     #define FUNCTION set_classy_PlanckLike_input
@@ -248,6 +252,7 @@ START_MODULE
     #undef FUNCTION
   #undef CAPABILITY
 
+  /// set neutrino mass related CLASS input -- m_ncdm, T_ncdm, N_ur, N_ncdm
   #define CAPABILITY classy_NuMasses_Nur_input
   START_CAPABILITY
     #define FUNCTION set_classy_NuMasses_Nur_input
@@ -262,7 +267,7 @@ START_MODULE
 
   // Primodial power spectra (MultiModeCode)
 
-  /// Initialise settings for MultiModeCode
+  /// initialise settings for MultiModeCode
   #define CAPABILITY multimode_input_parameters
   START_CAPABILITY
     #define FUNCTION set_multimode_inputs
@@ -272,7 +277,7 @@ START_MODULE
     #undef FUNCTION
   #undef CAPABILITY
 
-  /// Use MultiModeCode to compute a non-parametric primordial power spectrum
+  /// use MultiModeCode to compute a non-parametric primordial power spectrum
   #define CAPABILITY primordial_power_spectrum
   START_CAPABILITY
     #define FUNCTION get_multimode_primordial_ps
@@ -283,7 +288,7 @@ START_MODULE
     #undef FUNCTION
   #undef CAPABILITY
 
-  /// Use MultiModeCode to compute a parameterised primordial power spectrum
+  /// use MultiModeCode to compute a parameterised primordial power spectrum
   #define CAPABILITY PowerLaw_ps_parameters
   START_CAPABILITY
     #define FUNCTION get_multimode_parametrised_ps
@@ -298,6 +303,7 @@ START_MODULE
 
   // CMB (CLASS / Planck)
 
+  /// get unlensed CMB TT spectrum
   #define CAPABILITY unlensed_Cl_TT
   START_CAPABILITY
     #define FUNCTION class_get_unlensed_Cl_TT
@@ -307,42 +313,7 @@ START_MODULE
     #undef FUNCTION
   #undef CAPABILITY
 
-  #define CAPABILITY unlensed_Cl_TE
-  START_CAPABILITY
-    #define FUNCTION class_get_unlensed_Cl_TE
-    START_FUNCTION(std::vector<double>)
-    BACKEND_REQ(class_get_unlensed_cl,(class_tag),std::vector<double>, (str))
-    FORCE_SAME_BACKEND(class_tag)
-    #undef FUNCTION
-  #undef CAPABILITY
-
-  #define CAPABILITY unlensed_Cl_EE
-  START_CAPABILITY
-    #define FUNCTION class_get_unlensed_Cl_EE
-    START_FUNCTION(std::vector<double>)
-    BACKEND_REQ(class_get_unlensed_cl,(class_tag),std::vector<double>, (str))
-    FORCE_SAME_BACKEND(class_tag)
-    #undef FUNCTION
-  #undef CAPABILITY
-
-  #define CAPABILITY unlensed_Cl_BB
-  START_CAPABILITY
-    #define FUNCTION class_get_unlensed_Cl_BB
-    START_FUNCTION(std::vector<double>)
-    BACKEND_REQ(class_get_unlensed_cl,(class_tag),std::vector<double>, (str))
-    FORCE_SAME_BACKEND(class_tag)
-    #undef FUNCTION
-  #undef CAPABILITY
-
-  #define CAPABILITY unlensed_Cl_PhiPhi
-  START_CAPABILITY
-    #define FUNCTION class_get_unlensed_Cl_PhiPhi
-    START_FUNCTION(std::vector<double>)
-    BACKEND_REQ(class_get_unlensed_cl,(class_tag),std::vector<double>, (str))
-    FORCE_SAME_BACKEND(class_tag)
-    #undef FUNCTION
-  #undef CAPABILITY
-
+  /// get lensed CMB TT spectrum
   #define CAPABILITY lensed_Cl_TT
   START_CAPABILITY
     #define FUNCTION class_get_lensed_Cl_TT
@@ -352,6 +323,17 @@ START_MODULE
     #undef FUNCTION
   #undef CAPABILITY
 
+  /// get unlensed CMB Temperature-E mode cross-correlation spectrum
+  #define CAPABILITY unlensed_Cl_TE
+  START_CAPABILITY
+    #define FUNCTION class_get_unlensed_Cl_TE
+    START_FUNCTION(std::vector<double>)
+    BACKEND_REQ(class_get_unlensed_cl,(class_tag),std::vector<double>, (str))
+    FORCE_SAME_BACKEND(class_tag)
+    #undef FUNCTION
+  #undef CAPABILITY
+
+  /// get lensed CMB Temperature-E mode cross-correlation spectrum
   #define CAPABILITY lensed_Cl_TE
   START_CAPABILITY
     #define FUNCTION class_get_lensed_Cl_TE
@@ -361,6 +343,17 @@ START_MODULE
     #undef FUNCTION
   #undef CAPABILITY
 
+  /// get unlensed CMB E mode spectrum
+  #define CAPABILITY unlensed_Cl_EE
+  START_CAPABILITY
+    #define FUNCTION class_get_unlensed_Cl_EE
+    START_FUNCTION(std::vector<double>)
+    BACKEND_REQ(class_get_unlensed_cl,(class_tag),std::vector<double>, (str))
+    FORCE_SAME_BACKEND(class_tag)
+    #undef FUNCTION
+  #undef CAPABILITY
+
+  /// get lensed CMB E mode spectrum
   #define CAPABILITY lensed_Cl_EE
   START_CAPABILITY
     #define FUNCTION class_get_lensed_Cl_EE
@@ -370,6 +363,17 @@ START_MODULE
     #undef FUNCTION
   #undef CAPABILITY
 
+  /// get unlensed CMB B mode spectrum
+  #define CAPABILITY unlensed_Cl_BB
+  START_CAPABILITY
+    #define FUNCTION class_get_unlensed_Cl_BB
+    START_FUNCTION(std::vector<double>)
+    BACKEND_REQ(class_get_unlensed_cl,(class_tag),std::vector<double>, (str))
+    FORCE_SAME_BACKEND(class_tag)
+    #undef FUNCTION
+  #undef CAPABILITY
+
+  /// get lensed CMB B mode spectrum
   #define CAPABILITY lensed_Cl_BB
   START_CAPABILITY
     #define FUNCTION class_get_lensed_Cl_BB
@@ -379,6 +383,17 @@ START_MODULE
     #undef FUNCTION
   #undef CAPABILITY
 
+  /// get unlensed CMB lensing spectrum (Cell_phiphi)
+  #define CAPABILITY unlensed_Cl_PhiPhi
+  START_CAPABILITY
+    #define FUNCTION class_get_unlensed_Cl_PhiPhi
+    START_FUNCTION(std::vector<double>)
+    BACKEND_REQ(class_get_unlensed_cl,(class_tag),std::vector<double>, (str))
+    FORCE_SAME_BACKEND(class_tag)
+    #undef FUNCTION
+  #undef CAPABILITY
+
+  /// get lensed CMB lensing spectrum (Cell_phiphi)
   #define CAPABILITY lensed_Cl_PhiPhi
   START_CAPABILITY
     #define FUNCTION class_get_lensed_Cl_PhiPhi
@@ -388,6 +403,10 @@ START_MODULE
     #undef FUNCTION
   #undef CAPABILITY
 
+  /// compute CMB low ell likelihood from Planck data
+  /// functions to use 
+  /// - TT or TEB or or EE or TTEE 
+  /// - 2018 or 2015 DR and 
   #define CAPABILITY Planck_lowl_loglike
   START_CAPABILITY
     #define FUNCTION function_Planck_lowl_TT_2015_loglike
@@ -437,6 +456,11 @@ START_MODULE
     #undef FUNCTION
   #undef CAPABILITY
 
+  /// compute CMB high ell likelihood from Planck data
+  /// functions to use 
+  /// - TT or TTTEEE 
+  /// - 2018 or 2015 DR and 
+  /// - full (16 for TT 34 for TTTEEE nuisance params) or lite (1 nuisance param)
   #define CAPABILITY Planck_highl_loglike
   START_CAPABILITY
     #define FUNCTION function_Planck_highl_TT_2015_loglike
@@ -512,6 +536,8 @@ START_MODULE
     #undef FUNCTION
   #undef CAPABILITY
 
+  /// compute CMB lensing likelihood from Planck data
+  /// function for 2018 and 2015 DR available
   #define CAPABILITY Planck_lensing_loglike
   START_CAPABILITY
     #define FUNCTION function_Planck_lensing_2015_loglike
@@ -544,7 +570,26 @@ START_MODULE
     #undef FUNCTION
   #undef CAPABILITY
 
-  // Needed in addition to T_ncdm, as T_ncdm of non-SM models
+  /// Gaussian priors on the nuisance parameters of the Planck likelihoods
+  #define CAPABILITY Planck_nuisance_prior_loglike
+  START_CAPABILITY
+    #define FUNCTION compute_Planck_nuisance_prior_loglike
+    START_FUNCTION(double)
+    ALLOW_MODELS(cosmo_nuisance_Planck_lite,cosmo_nuisance_Planck_TT,cosmo_nuisance_Planck_TTTEEE)
+    #undef FUNCTION
+  #undef CAPABILITY
+
+  /// priors on the tSZ and kSZ amplitudes based on based on SPT and ACT data
+  /// cf. Eq. (32) of Aghanim et al. 2015 (arXiv 1507.02704)
+  #define CAPABILITY Planck_sz_prior_loglike
+  START_CAPABILITY
+    #define FUNCTION compute_Planck_sz_prior
+    START_FUNCTION(double)
+    ALLOW_MODELS(cosmo_nuisance_Planck_TT,cosmo_nuisance_Planck_TTTEEE)
+    #undef FUNCTION
+  #undef CAPABILITY
+
+  // needed in addition to T_ncdm, as T_ncdm of non-SM models
   // assume a fiducial value to base calculation on
   #define CAPABILITY T_ncdm_SM
   START_CAPABILITY
@@ -553,6 +598,7 @@ START_MODULE
     #undef FUNCTION
   #undef CAPABILITY
 
+  /// temperature of non-cold DM components
   #define CAPABILITY T_ncdm
   START_CAPABILITY
     #define FUNCTION T_ncdm
@@ -562,7 +608,7 @@ START_MODULE
     #undef FUNCTION
   #undef CAPABILITY
 
-  /// Extract H0 from a classy run if it is not a fundamental parameter
+  /// extract H0 from a classy run if it is not a fundamental parameter
   /// (i.e. for LCDM_theta), as it now becomes derived
   #define CAPABILITY H0
   START_CAPABILITY
@@ -573,18 +619,15 @@ START_MODULE
     #undef FUNCTION
   #undef CAPABILITY
 
+  /// number density of photons today
   #define CAPABILITY n0_g
   START_CAPABILITY
     #define FUNCTION compute_n0_g
     START_FUNCTION(double)
     #undef FUNCTION
-
-    //#define FUNCTION get_n0_g_classy
-    //START_FUNCTION(double)
-    //DEPENDENCY(get_Classy_cosmo_container, Classy_cosmo_container)
-    //#undef FUNCTION
   #undef CAPABILITY
 
+  /// energy density of all matter components today
   #define CAPABILITY Omega0_m
   START_CAPABILITY
     #define FUNCTION get_Omega0_m_classy
@@ -593,6 +636,7 @@ START_MODULE
     #undef FUNCTION
   #undef CAPABILITY
 
+  /// energy density in baryons today
   #define CAPABILITY Omega0_b
   START_CAPABILITY
     #define FUNCTION compute_Omega0_b
@@ -602,6 +646,7 @@ START_MODULE
     #undef FUNCTION
   #undef CAPABILITY
 
+  /// energy density of CDM component today
   #define CAPABILITY Omega0_cdm
   START_CAPABILITY
     #define FUNCTION compute_Omega0_cdm
@@ -611,6 +656,7 @@ START_MODULE
     #undef FUNCTION
   #undef CAPABILITY
 
+  /// energy density in radiation today
   #define CAPABILITY Omega0_r
   START_CAPABILITY
     #define FUNCTION get_Omega0_r_classy
@@ -627,6 +673,7 @@ START_MODULE
     #undef FUNCTION
   #undef CAPABILITY
 
+  /// energy density in ultra-relativistic species today
   #define CAPABILITY Omega0_ur
   START_CAPABILITY
     #define FUNCTION compute_Omega0_ur
@@ -641,6 +688,7 @@ START_MODULE
     #undef FUNCTION
   #undef CAPABILITY
 
+  /// energy density of non-cold DM components today
   #define CAPABILITY Omega0_ncdm
   START_CAPABILITY
     #define FUNCTION get_Omega0_ncdm_classy
@@ -649,15 +697,17 @@ START_MODULE
     #undef FUNCTION
   #undef CAPABILITY
 
+  /// baryon-to-photon ratio today
   #define CAPABILITY eta0
   START_CAPABILITY
-    // Calculate eta0 (today) from omega_b and T_cmb
+    // calculate eta0 (today) from omega_b and T_cmb
     #define FUNCTION eta0_LCDM
     START_FUNCTION(double)
     ALLOW_MODELS(LCDM, LCDM_theta)
     #undef FUNCTION
   #undef CAPABILITY
 
+  /// baryon-to-photon ratio during BBN
   #define CAPABILITY etaBBN
   START_CAPABILITY
     // Fallback for etaBBN if 'etaBBN_rBBN_rCMB_dNurBBN_dNurCMB'
@@ -668,6 +718,7 @@ START_MODULE
     #undef FUNCTION
   #undef CAPABILITY
 
+  // sound horizon at baryon drag
   #define CAPABILITY rs_drag
   START_CAPABILITY
     #define FUNCTION get_rs_drag_classy
@@ -676,7 +727,7 @@ START_MODULE
     #undef FUNCTION
   #undef CAPABILITY
 
-  // Good for cross-checks, innit.
+  // good for cross-checks, innit.
   #define CAPABILITY Neff
   START_CAPABILITY
     #define FUNCTION get_Neff_classy
@@ -685,7 +736,7 @@ START_MODULE
     #undef FUNCTION
   #undef CAPABILITY
 
-  // Compute dNeff AND etaBBN for non-standard models
+  // compute dNeff AND etaBBN for non-standard models
   #define CAPABILITY external_dNeff_etaBBN
   START_CAPABILITY
     #define FUNCTION compute_dNeff_etaBBN_ALP
@@ -696,6 +747,7 @@ START_MODULE
     #undef FUNCTION
   #undef CAPABILITY
 
+  /// get sigma8
   #define CAPABILITY Sigma8
   START_CAPABILITY
     #define FUNCTION get_Sigma8_classy
@@ -709,6 +761,7 @@ START_MODULE
 
   // AlterBBN
 
+  /// collect all input options for AlterBBN in form of a string to double map
   #define CAPABILITY AlterBBN_Input
   START_CAPABILITY
     #define FUNCTION AlterBBN_Input
@@ -720,6 +773,8 @@ START_MODULE
     #undef FUNCTION
   #undef CAPABILITY
 
+  /// compute primordial element abundances (and theoretical errors &
+  /// covariances if requested) as predicted from BBN 
   #define CAPABILITY BBN_abundances
   START_CAPABILITY
     #define FUNCTION compute_BBN_abundances
@@ -732,6 +787,7 @@ START_MODULE
     #undef FUNCTION
   #undef CAPABILITY
 
+  /// compute primordial helium abundance
   #define CAPABILITY helium_abundance
   START_CAPABILITY
     #define FUNCTION extract_helium_abundance
@@ -740,6 +796,9 @@ START_MODULE
     #undef FUNCTION
   #undef CAPABILITY
 
+  /// compute BBN likelihood for chosen isotopes 
+  /// depending on yaml file settings, theoretical
+  /// errors and cross-correlations are included
   #define CAPABILITY BBN_LogLike
   START_CAPABILITY
     #define FUNCTION compute_BBN_LogLike
@@ -752,8 +811,10 @@ START_MODULE
 
   // MontePython
 
+  /// pass current values of nuisance parameters to MP
   #define CAPABILITY parameter_dict_for_MPLike
   START_CAPABILITY
+    // allow all possible nuisance parameter models here
     #define FUNCTION set_parameter_dict_for_MPLike
     START_FUNCTION(pybind11::dict)
     ALLOW_MODELS(cosmo_nuisance_acbar,cosmo_nuisance_spt)
@@ -765,12 +826,15 @@ START_MODULE
     ALLOW_MODELS(cosmo_nuisance_dummy)
     #undef FUNCTION
 
+    // pass an empty dictionary if no likelihood with nuisance parameters
+    // is in use
     #define FUNCTION pass_empty_parameter_dict_for_MPLike
     START_FUNCTION(pybind11::dict)
     #undef FUNCTION
   #undef CAPABILITY
 
-  // Creates the MontePython data and likelihood objects, determining which experiments are in use in the process
+  /// creates the MontePython data and likelihood objects, determining which experiments
+  /// are in use in the process
   #define CAPABILITY MP_objects
   START_CAPABILITY
     #define FUNCTION create_MP_objects
@@ -782,7 +846,7 @@ START_MODULE
     #undef FUNCTION
   #undef CAPABILITY
 
-  // Calculates lnL for individual experiments using MontePython
+  /// calculates lnL for individual experiments using MontePython
   #define CAPABILITY MP_LogLikes
   START_CAPABILITY
     #define FUNCTION compute_MP_LogLikes
@@ -795,7 +859,7 @@ START_MODULE
     #undef FUNCTION
   #undef CAPABILITY
 
-  // Calculates the total lnL from MontePython
+  /// calculates the total lnL from MontePython
   #define CAPABILITY MP_Combined_LogLike
     START_CAPABILITY
     #define FUNCTION compute_MP_combined_LogLike
@@ -804,8 +868,8 @@ START_MODULE
     #undef FUNCTION
   #undef CAPABILITY
  
-  // Retrieves the correlation coefficients and the LogLike not taking 
-  // bao correlations into account from the MP likelihood "bao_correlations"
+  /// retrieves the correlation coefficients and the LogLike not taking 
+  /// bao correlations into account from the MP likelihood "bao_correlations"
   #define CAPABILITY bao_like_correlation
     START_CAPABILITY
     #define FUNCTION get_bao_like_correlation
