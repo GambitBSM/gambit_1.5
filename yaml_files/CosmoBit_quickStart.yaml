@@ -87,6 +87,10 @@ Parameters:
     ln10A_s: 3.044
     n_s: 0.9649
 
+  #AnnihilatingDM_photon:
+  #  mass: 0.001
+  #  sigmav: 0.000001
+
   # Uncomment to allow for non-standard values of dNeff
   #dNurCMB:
   #  dNur_CMB:
@@ -138,6 +142,7 @@ Scanner:
 ObsLikes:
 
   # ---- 6.a) BBN -----
+
   # Likelihood from BBN; use deuterium (D) and Helium-4 (He4)
   - purpose:      LogLike
     capability:   BBN_LogLike
@@ -154,6 +159,7 @@ ObsLikes:
 
 
   # ---- 6.b) MontePython Likelihoods -----
+
   # The total lnL from MontePython
   # Since the single MontePython likelihoods are not implemented in GAMBIT as capabilities
   # (and are more flexible -- you import them at runtime and don't need to know their names
@@ -207,6 +213,7 @@ Rules:
                            [+1.524e-2, +1.000e00]]
       relative_errors: [1.348e-3, 1.596e-2]
 
+
   # ----------- 7.b) MontePython Likelihoods ------------
   #         (CosmoBit Module paper, Appendix C.4)
 
@@ -221,21 +228,6 @@ Rules:
   #- capability: classy_final_input
   #  function: set_classy_input
 
-  # (JR) tried to add rule for first capability dependency resolver complains about
-  # when having multiple classy versions installed at the same time. 
-  # Syntax from CMSSM.yaml, but GAMBIT doesn't seem to read it 
-  # (TG) fixed this so remove comment when happy
-  # #TODO
-  - capability: MP_LogLikes
-    backends:
-    - {capability: get_classy_backendDir, backend: classy, version: 2.6.3}
-    - {capability: get_classy_cosmo_object, backend: classy, version: 2.6.3}
-    - {capability: get_MP_loglike, backend: MontePythonLike}
-  
-  # (TG) Added this as it also complains of ambiguous backend selection
-  - capability: Omega0_m
-    backends:
-    - {capability: class_get_Omega0_m, backend: classy, version: 2.6.3}
 
   # ----------- 7.c) "Global" (CossmoBit-wide) settings ------------
 

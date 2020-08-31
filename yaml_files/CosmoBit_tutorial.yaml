@@ -61,11 +61,11 @@
 #           -----
 #              x Alternatively you can also make 'classy' (standard version of CLASS) instead of 'classy_exo_2.7.0'
 #                 If you do that, however, you won't be able to use any capabilities depending on CLASS output when you
-#                 scan a model with exotic energy injection into the CMB. You can try to, you should get a FATAL error ;)
+#                 scan a model with exotic energy injection into the CMB.
 #              x If you have more than one classy version installed, GAMBIT will throw an error during the
 #                 dependency resolution. This is the case as the different CLASS versions can all satisfy
 #                 the same capabilities. To fix this, either set a rule for each CLASS-related capability which
-#                 version GAMBIT should use or (easier) uninstall all classy versions you don't want to use (see below). 
+#                 version GAMBIT should use (see comments in section C.7)) or (easier) uninstall all classy versions you don't want to use (see below). 
 #
 #
 #    => To clean/nuke a backend just do
@@ -420,6 +420,7 @@ Rules:
 
 
   # ---- C.2) CLASS related settings -----
+  
   # Specify any CLASS input parameters (except model parameters) that usually go into the .ini file here
   # Note: - all ouput-related parameters for any included likelihood (which spectra need to be computed, 
   #     mPk up to which redshifts, precision parameters,..) are passed automatically to CLASS. So in principle,
@@ -436,6 +437,7 @@ Rules:
 
 
   # ---- C.3) DarkAges related settings -----
+
   # Options recognised by DarkAges. The user can choose if the energy injection efficiency 
   # functions f_eff are calculated via the transfer functions or the factorised approach.
   # See chapter 5.4 and Appendix C.3 of the module paper for details on the two approaches.
@@ -448,6 +450,7 @@ Rules:
 
 
   # ---- C.4) MontePython related settings -----
+
   # You need to choose whether to have the possibility to set up the class parameters with arguments from MontePython Likelihoods.
   # GAMBIT will tell you if you get this wrong; if it doesn't complain it is fine.
   # Option a): If MontePython is installed, use this option. Everything will be taken care of 
@@ -471,6 +474,7 @@ Rules:
 
 
   # ---- C.5) MultimodeCode related settings -----
+
   # pass input settings to MultiModeCode
   - capability: multimode_input_parameters
     function: set_multimode_inputs
@@ -492,6 +496,7 @@ Rules:
 
 
   # ---- C.6) plc related settings -----
+
   # If you use any of the Planck likelihoods and you do not want to download the 
   # Planck data through gambit (type 'make plc_data' in the build directory)
   # then you can set the path to the directory where you have downloaded the data
@@ -502,7 +507,9 @@ Rules:
   #    plc_data_2_path: /path/to/plc_2.0 # 2015 data
 
 
-  # ---- Finally "Global" (CossmoBit-wide) settings ----
+
+  # ---- C.7) Finally "Global" (CossmoBit-wide) settings ----
+
   # By default, CosmoBit does not allow negative values for dNur_BBN and dNur_CMB as this can
   # lead to unphysical inputs in cases where dN_ur < 0 and abs(dN_ur) > N_ur contribution from 
   # 3 SM neutrinos today. If you want to circumvent this limitation, uncomment the following lines
@@ -510,6 +517,33 @@ Rules:
   #- module: CosmoBit
   #  options:
   #    allow_negative_delta_N_ur: true
+
+  # The rules below are only needed when you have multiple classy version installed at the same
+  # time. The easiest way to choose one is just to run 'make nuke-classy_<version>' for 
+  # all versions but the one you would like to use. 
+  # If you want to keep all of them installed, fix the version you want to use with the
+  # rules below
+  #- capability: MP_LogLikes
+  #  backends:
+  #  - {capability: get_classy_backendDir, backend: classy, version: 2.6.3}
+  #  - {capability: get_classy_cosmo_object, backend: classy, version: 2.6.3}
+  #  - {capability: get_MP_loglike, backend: MontePythonLike}
+  #
+  #- capability: lensed_Cl_TT
+  #  backends:
+  #  - {capability: class_get_lensed_cl, backend: classy, version: 2.6.3}
+  #
+  #- capability: lensed_Cl_TE
+  #  backends:
+  #  - {capability: class_get_lensed_cl, backend: classy, version: 2.6.3}
+  #
+  #- capability: lensed_Cl_EE
+  #  backends:
+  #  - {capability: class_get_lensed_cl, backend: classy, version: 2.6.3}
+  #
+  #- capability: lensed_Cl_PhiPhi
+  #  backends:
+  #  - {capability: class_get_lensed_cl, backend: classy, version: 2.6.3}
 
 #======== Logging setup ========
 Logger:
