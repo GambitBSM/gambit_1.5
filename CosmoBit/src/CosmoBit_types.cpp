@@ -61,18 +61,17 @@ namespace Gambit
       {
            t_grid[jj] = exp(log(t0) + jj*Delta_logt);
       }
-      double Neff_SM = 3.046; // TODO -> this is now set by a capability to avoid
-      // hard-coding the value multiple times. We can't call it here..
-      // should we implement a non-rollcalled util function returning Neff 
-      // and let the get_Neff_SM capability call that? then we'd only have it coded once? (JR)
+      double Neff_SM = CosmoBit_utils::set_Neff_SM_value();
       double g_star_SM = 2.+2.*7./8.*Neff_SM*pow(4./11.,4./3.); // contribution from photons & neutrinos with Neff = 3.046
 
       // factor needed to calculate temperature evolution. For details see definition of functions set_T_evo(),.. in CosmoBit_types.hpp header
       factor_T_evo = 1./sqrt(2.*sqrt(8.*pi*pi*pi*_GN_SI_ *pow(_kB_SI_,4.)*g_star_SM/90./_c_SI_/_c_SI_/pow(_hP_SI_/2./pi*_c_SI_,3.)))*_kB_eV_over_K_/1e3;
-      // TODO: different from T_nu/T_gamma from nu oscillation results?
       factor_Tnu_evo = pow(Neff_SM/3.,1./4.)* pow(4./11.,1./3.)*factor_T_evo; // = T_nu/T_gamma * factor_T_evo
       factor_HT_evo = sqrt(8.*pi*_GN_SI_/3.*pi*pi/30.*g_star_SM/pow(_hP_SI_/2./pi*_c_SI_,3.))*(1e6*_eV_to_J_*_eV_to_J_)/_c_SI_;
 
+      // set time evolution of photon T, neutrino T, and Hubble
+      // rate based on above calculated evolution factors 
+      // for time grid 't_grid'
       set_T_evo();
       set_Tnu_evo();
       set_Ht_evo();
@@ -143,10 +142,7 @@ namespace Gambit
       std::vector<double> K(k_array, k_array+len);
       k = std::move(K);
       vec_size = len;
-      // (JR) the vector gets just filled with copies of kmin # todo
-      // for testing -> atm
-      // issue fixed -- thanks to whoever did it :) let's leave the debug print
-      // a while longer though, you never know ..
+      //let's leave the debug print a while longer though, you never know ..
       //for( int i =0; i<len;i++) {std::cout << k[i] << std::endl;};
     }
 

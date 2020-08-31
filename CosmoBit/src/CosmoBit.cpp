@@ -82,7 +82,11 @@ namespace Gambit
     {
       using namespace Pipes::get_Neff_SM;
 
-      result = 3.045;
+      // call a non-rollcalled function fixing Neff to 3.045
+      // -> the reason why it's not fixed here, is that 
+      // the SM value is also needed in the CosmoBit type 'SM_time_evo'
+      // where we don't have access to the result of a capability
+      result = CosmoBit_utils::set_Neff_SM_value();
     }
     
     void get_mNu_tot(double& result)

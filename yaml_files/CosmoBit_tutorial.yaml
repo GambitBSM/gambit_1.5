@@ -103,6 +103,7 @@ Parameters:
 
 
   # ====== B.1) Standard cosmology – LCDM =======
+
   # choose either base-line LCDM model parameters and prior
   # with H0 as model parameter or ..
   LCDM:
@@ -140,6 +141,7 @@ Parameters:
 
 
   # ====== B.2) Primordial power spectra & inflationary models =======
+
   # For a primordial power spectrum that is described by a 
   # power-law choose the model PowerLaw_ps and set the relevant 
   # parameters and priors
@@ -164,6 +166,7 @@ Parameters:
 
 
   # ====== B.3) Neutrino Masses =======
+
   # Neutrino masses, choose between normal hierarchy (NH) and inverted hierarchy (IH)
   StandardModel_mNudiff: !import include/StandardModel_mNudiff_NH_scan.yaml
   #StandardModel_mNudiff: !import include/StandardModel_mNudiff_IH_scan.yaml
@@ -177,6 +180,7 @@ Parameters:
 
 
   # ====== B.4) Non-standard radiation content (optional) =======
+
   # If you would like to study extensions of LCDM including non-standard radiation
   # content, you can add the most general model 'etaBBN_rBBN_rCMB_dNurBBN_dNurCMB' 
   # and its parameters, or any child model thereof. See Appendix B.4 of the CosmoBit
@@ -212,6 +216,7 @@ Parameters:
 
 
   # ====== B.5) Energy injection (optional) =======
+
   # If you would like to study scenarios of energy injection between z~30 and z~2700 of annihilating or decaying DM,
   # you need to include a model, which is in relation to AnnihilatingDM_general or DecayingDM_general and provides the
   # injected spectrum of photons and e+/e-. See Appendix B.5 of the CosmoBit module paper.
@@ -225,6 +230,7 @@ Parameters:
 
 
   # ====== B.6) Cosmological nuisance parameters (depending on included likelihoods) =======
+
   # If likelihoods that require the use of nuisance parameters are used in the scan, the
   # parameters have to be included as models here.
   #  => if you don't include the Planck likelihoods into the scan you should get a FATAL Error
@@ -244,6 +250,7 @@ Parameters:
 
 
   # ====== B.7) Neutron lifetime (optional) =======
+
   # Neutron lifetime.  If this is not included as a model, the lifetime will default to 879.4 s
   # (PDG 2019 recommendation http://pdg.lbl.gov/2019/listings/rpp2019-list-n.pdf).
   # Note: If you include any likelihoods related to the neutron lifetime, you have to include
@@ -420,7 +427,7 @@ Rules:
 
 
   # ---- C.2) CLASS related settings -----
-  
+
   # Specify any CLASS input parameters (except model parameters) that usually go into the .ini file here
   # Note: - all ouput-related parameters for any included likelihood (which spectra need to be computed, 
   #     mPk up to which redshifts, precision parameters,..) are passed automatically to CLASS. So in principle,

@@ -116,7 +116,7 @@ namespace Gambit
 
       // Consistency check: if the ALP abundance from all thermal processes is less than that expected just from Primakoff processes, invalidate this point.
       double Ya0_min = *Dep::minimum_abundance;
-      double ssm0 = entropy_density_SM(T);           // SM entropy density today in eV^3 (cf. footnote 24 of PDG2018-Astrophysical parameters)
+      double ssm0 = CosmoBit_utils::entropy_density_SM(T);           // SM entropy density today in eV^3 (cf. footnote 24 of PDG2018-Astrophysical parameters)
       double rho0_cdm = omega_cdm * rho0_crit_by_h2; // rho0_cdm = Omega_cdm * rho0_crit;
       double rho0_min = Ya0_min * ma0 * ssm0;        // energy density of axions today in eV^4
       result = rho0_min / rho0_cdm;
@@ -174,7 +174,7 @@ namespace Gambit
 
       double ma0 = *Param["ma0"];
       double TCMB = *Param["T_cmb"];
-      double ssm0 = entropy_density_SM(TCMB);
+      double ssm0 = CosmoBit_utils::entropy_density_SM(TCMB);
 
       result = rho0_ALP / (ma0 * ssm0);
     }
@@ -186,7 +186,7 @@ namespace Gambit
     ///  y[0]: stores SM T[t0]
     int diff_eq_rhs (double t, const double y[], double f[], void *params)
     {
-      fast_interpolation injection_inter = *(static_cast<fast_interpolation*>(params));
+      CosmoBit_utils::fast_interpolation injection_inter = *(static_cast<CosmoBit_utils::fast_interpolation*>(params));
       f[0] = (15.0/(4.0*pi*pi)) * injection_inter.interp(t)/pow(y[0], 3) - 3.7978719e-7*y[0]*y[0]*y[0];
       return GSL_SUCCESS;
     }
@@ -219,7 +219,7 @@ namespace Gambit
       // --- model parameters ----
       double Ya0 = *Dep::total_DM_abundance;
       double T0 = T_evo[0];
-      double ssm_at_T0 = entropy_density_SM(T0, true);; // T0 in units of keV, set T_in_eV=True to interpret it correctly
+      double ssm_at_T0 = CosmoBit_utils::entropy_density_SM(T0, true);; // T0 in units of keV, set T_in_eV=True to interpret it correctly
 
       double na_t0 = Ya0 * ssm_at_T0;     // initial number density of a at t=t0, in units keV^3.
       double m_a = 1e-3*(*Param["ma0"]);  // mass of a in keV
@@ -235,7 +235,7 @@ namespace Gambit
         na_grid = na_t0*exp(-3.0*SM.get_H_int())*exp(-t_grid/tau_a);    // na(t) in units keV^3
         injection_grid = (m_a/tau_a)*na_grid;                           // m_a*na(t)/tau_a in units keV^4/s
         Tnu_grid = SM.get_Tnu_evo()[0]*exp(-1.0*SM.get_H_int());        // T_nu(t) in units keV
-        fast_interpolation injection_inter(t_grid, injection_grid);     // interpolating function
+        CosmoBit_utils::fast_interpolation injection_inter(t_grid, injection_grid);     // interpolating function
 
         gsl_odeiv2_system sys = {diff_eq_rhs, NULL, 1, &injection_inter};
         gsl_odeiv2_driver *d = gsl_odeiv2_driver_alloc_y_new (&sys, gsl_odeiv2_step_rkf45, hstart, 0.0, epsrel);

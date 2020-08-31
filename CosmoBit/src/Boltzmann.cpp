@@ -216,8 +216,12 @@ namespace Gambit
       if (ModelInUse("LCDM")) result.add_entry("H0", *Param["H0"]);
       else result.add_entry("100*theta_s", *Param["100theta_s"]);
 
-      // TODO: need to test if class or exo_class in use! does not work -> (JR) should be fixed with classy implementation
-      // -> (JR again) not sure if that is actually true.. need to test.
+      // add energy-injection-related CLASS input parameters
+      // Note: if one of the models below is in use, an "exo" version of CLASS needs
+      // to be used. Otherwise the features for energy injection are not available. 
+      // To ensure this, there is a check in the classy frontends that can not
+      // handle energy injection. In that case, a fatal error is thrown and 
+      // the user is told to use exoCLASS (and how to install it).
       if (ModelInUse("DecayingDM_general") || ModelInUse("AnnihilatingDM_general"))
       {
         // Add decaying/annihilating DM-specific options to Python dictionary passed to CLASS (consistency checks only executed in first run).

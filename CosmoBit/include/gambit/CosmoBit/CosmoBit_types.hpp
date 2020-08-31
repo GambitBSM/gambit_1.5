@@ -66,7 +66,7 @@ namespace Gambit
     {
      /* Time evolution of photon & neutrino temperature as well as Hubble rate in SM for time t > 1e3 s.
         Heads-up: explicit SM-specific assumptions enter. I.e.
-            - Neff = 3.046 -> T_nu/T_gamma = (Neff/Nnu)^(1/4) (4/11)^(1/4) = 0.716486
+            - Neff = 3.045 -> T_nu/T_gamma = (Neff/Nnu)^(1/4) (4/11)^(1/3) = 0.716428
             - Only contribution to Omega_rad in early Universe are photons & neutrinos
             - g_star (relativistic degrees of freedom) is constant in time
         => Use these routines only for times t >~ 10^3 s, where electrons and positrons are
@@ -86,7 +86,7 @@ namespace Gambit
         void set_T_evo() {T_evo = factor_T_evo/sqrt(t_grid);}
 
         // SM neutrino temperature (keV) as a function of time (seconds)
-        // Defined in this way, one gets Neff = 3.046, using Nnu = 3 SM neutrinos (Tnu = 0.716486 T(t0))
+        // Defined in this way, one gets Neff = 3.046, using Nnu = 3 SM neutrinos (Tnu = 0.716428 T(t0))
         void set_Tnu_evo() {Tnu_evo = factor_Tnu_evo/sqrt(t_grid);}
 
         // SM Hubble rate (1/s) as a function of time (seconds)
