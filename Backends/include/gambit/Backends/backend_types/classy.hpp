@@ -20,6 +20,7 @@
 ///          (janina.renk@fysik.su.se)
 ///  \date 2018 Oct
 ///  \date 2019 Mar
+///  \date 2020 Aug
 ///
 ///  \author Sebastian Hoof
 ///          (hoof@uni-goettingen.de)
@@ -58,23 +59,23 @@
     {
       public:
 
-        /// add all entries from extra_entries to input_dict, concatenates and returns all
-        /// keys that are contained in both dictionaries:
-        /// -> no keys in common: returns empty string ("")
-        /// -> else: returns sting containing all duplicated keys
-        /// need to check after use of this function if returned string was empty to avoid overwriting of
-        /// input values & inconsistencies.
-        std::string add_dict(pybind11::dict);
-
+        // add entries of different types to 
+        // member input_dict
         void add_entry(str, double);
         void add_entry(str, int);
         void add_entry(str, str);
         void add_entry(str, std::vector<double>&);
 
+        // method to check if certain key is 
+        // already contained in input_dict
         bool has_key(str);
 
         // merge dictionaries with overwriting/combining rules that only
         // apply for CLASS input dictionaries
+        // e.g. concatenate strings for 'output' option, take
+        // more precise values for a given precision parameter (which 
+        // one the more precise one is is set in the string sets
+        // keep_larger_val and keep_smaller_val defined below)
         void merge_input_dicts(pybind11::dict);
 
         // routine to print CLASS input values to logger

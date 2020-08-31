@@ -18,6 +18,7 @@
 ///          (janina.renk@fysik.su.se)
 ///  \date 2018 Oct
 ///  \date 2019 Mar
+///  \date 2020 Aug
 ///
 ///  \author Sebastian Hoof
 ///          (hoof@uni-goettingen.de)
@@ -62,37 +63,6 @@ namespace Gambit
     }
 
     bool Classy_input::has_key(str key){return input_dict.contains(key.c_str());}
-
-    /// add all entries from extra_entries to input_dict, concatenates and returns all
-    /// keys that are contained in both dictionaries:
-    /// -> no keys in common: returns empty string ("")
-    /// -> else: returns sting containing all duplicated keys
-    /// need to check after use of this function if returned string was empty to avoid overwriting of
-    /// input values & inconsistencies.
-    std::string Classy_input::add_dict(pybind11::dict extra_dict)
-    {
-      // string to be returned -- stays empty if no duplicated dict entries are found
-      std::string common_keys ("");
-
-      for (auto item : extra_dict)
-      {
-        pybind11::str key = pybind11::str(item.first);
-        pybind11::str arg = pybind11::str(item.second);
-
-        if(!input_dict.attr("__contains__")(key).cast<bool>())
-        {
-          input_dict[key] = arg;
-          //std::cout << "Adding key = " << std::string(pybind11::str(item.first)) << ", "<< "value=" << std::string(pybind11::str(item.second)) << std::endl;
-        }
-        else
-        {
-          // add duplicated strings
-          common_keys = common_keys + " " + key.cast<std::string>();
-          //std::cout << "Found duplicated key = " << std::string(pybind11::str(item.first)) << ", "<< "value=" << std::string(pybind11::str(item.second)) << std::endl;
-        }
-      }
-      return common_keys;
-    }
 
     /// CLASS specific functionto merge python dictionary extra_dict into input_dict 
     /// (member of Classy_input). If both dictionaries have the same key it decides

@@ -202,19 +202,9 @@ namespace Gambit
 
       // Get the dictionary with inputs for the neutrino masses and merge it
       // into Classy_Input dictionary
-      std::string common_keyszero = result.add_dict(*Dep::classy_MPLike_input);
+      result.merge_input_dicts(*Dep::classy_MPLike_input);
       result.merge_input_dicts(*Dep::classy_NuMasses_Nur_input);
       result.merge_input_dicts(*Dep::classy_primordial_input);
-
-      // @TODO: can this be deleted?
-      // No check if something went wrong and some parameters were defined twice
-      //if(common_keys != "")
-      //{
-      //  CosmoBit_error().raise(LOCAL_INFO, "The key(s) '" + common_keys + "' already "
-      //          "exists in the CLASSY dictionary. You are probably trying to override a CLASS setting. Check that none "
-      //          "of the parameters you pass through your YAML file through runOptions for the capability 'set_classy_input_params' "
-      //          "is in contradiction with any settings made via the dependency resolution by CosmoBit in the function '"+__func__+"'.");
-      //}
 
       // Standard cosmological parameters (common to all CDM-like models)
       result.add_entry("T_cmb"      , *Param["T_cmb"]);
@@ -231,7 +221,7 @@ namespace Gambit
       if (ModelInUse("DecayingDM_general") || ModelInUse("AnnihilatingDM_general"))
       {
         // Add decaying/annihilating DM-specific options to Python dictionary passed to CLASS (consistency checks only executed in first run).
-        std::string common_keystwo = result.add_dict(*Dep::classy_parameters_EnergyInjection);
+        result.merge_input_dicts(*Dep::classy_parameters_EnergyInjection);
       }
 
       // Other CLASS input direct from the YAML file.
