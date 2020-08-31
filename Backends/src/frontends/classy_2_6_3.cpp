@@ -268,13 +268,22 @@ BE_INI_FUNCTION
     Classy_input input_container = *Dep::classy_input_params;
     pybind11::dict cosmo_input_dict = input_container.get_input_dict();
 
-    // Check whether the energy injection tables have changed.
-    // Then remove the entry from the dict, as it cannot be understood by classy.
-    bool EnergyInjection_changed = false;
-    if(cosmo_input_dict.attr("__contains__")("EnergyInjection_changed").cast<bool>())
+    // check if any energy injection-related parameters are contained in the 
+    // CLASS input dictionary. If so, throw a fatal error as these models
+    // requires features only available in exoCLASS
+    // Note: checking for presence of input key 'f_eff_type' as this 
+    // input has to be added for all models making use of the energy 
+    // injection features (regardless of whether they are annihilating
+    // or decaying DM models).
+    if (cosmo_input_dict.attr("__contains__")("f_eff_type").cast<bool>())
     {
-      EnergyInjection_changed = true;
-      cosmo_input_dict.attr("pop")("EnergyInjection_changed").cast<str>();
+      std::ostringstream error;
+      error << "\nYou are scanning over a model, e.g. decayin or annihilating DM, ";
+      error << "\nwith exotic energy injection in the early Universe. However, you ";
+      error << "\nare using a CLASS version that does not support these calculations. ";
+      error << "\nGAMBIT will exit now. To fix this simply run";
+      error << "\n\ncd build; make nuke-classy_"<< STRINGIFY(VERSION) <<"; make classy_exo_2.7.2; cd ..";
+      backend_error().raise(LOCAL_INFO,error.str());
     }
 
     static bool first_run = true;
@@ -286,14 +295,14 @@ BE_INI_FUNCTION
       // check input for consistency
       class_input_consistency_checks(cosmo_input_dict);
 
-      // create deep copy of cosmo_input_dict
+      // create deep copy of cosmo_input_dict to cache results from 
+      // previous run
       prev_input_dict = cosmo_input_dict.attr("copy")();
     }
 
     // test if input arguments for CLASS are exactly the same as in previous run ...
     bool equal = compare_dicts(prev_input_dict, cosmo_input_dict);
-    equal &= !EnergyInjection_changed;
-
+    
     // .. if so there is no need to recompute the results. If not, clean structure, re-fill input & re-compute
     if(not equal or first_run)
     {
