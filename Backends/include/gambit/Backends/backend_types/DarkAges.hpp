@@ -24,9 +24,13 @@ namespace Gambit
   {
     struct Energy_injection_spectrum
     {
+      // kinetic energy of electron-positron plasma
       std::vector<double> E_el;
+      // kinetic energy of photons
       std::vector<double> E_ph;
+      // normalised electron-positron spectrum (dN/dE in GeV^-1) as function of energy E_el
       std::vector<double> spec_el;
+      // normalised photon spectrum (dN/dE in GeV^-1) as function of energy E_ph
       std::vector<double> spec_ph;
     };
 

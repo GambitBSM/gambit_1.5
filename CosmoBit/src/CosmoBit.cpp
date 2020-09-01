@@ -89,6 +89,7 @@ namespace Gambit
       result = CosmoBit_utils::set_Neff_SM_value();
     }
     
+    // returning the total mass sum of SM neutrino
     void get_mNu_tot(double& result)
     {
       using namespace Pipes::get_mNu_tot;

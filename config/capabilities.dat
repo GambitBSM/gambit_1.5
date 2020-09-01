@@ -4187,6 +4187,9 @@ get_MP_available_likelihoods: |
     Returns a list with all available likelihoods implemented in MontePython. New likelihoods can simply be added
     into the MontePython installation folder and GAMBIT will recognize it without the need to recompile.
 
+check_likelihood_classy_combi: |
+    Checks if a given likelihood can be computed with the CLASS version in use. For older CLASS versions, some necessary features might not be available. The list of incompatible likelihood and CLASS version combinations is defined in the MontePython frontend source file.
+
 get_MP_loglike: |
     Returns LogLike value of MontePython likelihood specified by passing the name of the likelihood as a string.
 
@@ -4541,6 +4544,9 @@ classy_2_6_3_init: |
 
 classy_2_9_3_init: |
   Initialise CLASS 2.9.3 run through the classy python wrapper.
+
+classy_2_9_4_init: |
+  Initialise CLASS 2.9.4 run through the classy python wrapper.
 
 classy_exo_2_7_2_init: |
   Initialise ExoCLASS 2.7.2 run through the classy python wrapper.
