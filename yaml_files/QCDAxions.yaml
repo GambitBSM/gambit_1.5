@@ -1,31 +1,11 @@
 # An example YAML file for QCD axion scans
-# Author: Sebastian Hoof (s.hoof15@imperial.ac.uk)
+# Author: Sebastian Hoof (hoof@uni-goettingen.de)
 
 #################################
  # Input parameter declarations
 #################################
 
 Parameters:
-
-  # (JR) add LCDM to get access to CMB temperature, T_cmb
-  # ATM, this yaml file will fail ->
-  #
-  # GAMBIT has exited with fatal exception: GAMBIT error
-  # ERROR: A problem has been encountered in the model subsystem.
-  # Requested parameter "T_R" is not available. 
-  # Generally this happens because you have requested a parameter of a model that
-  # is not being scanned (check that you are using the ModelInUse() function), or
-  # because you have failed to declare the dependency on the model's parameters  
-  # in your rollcall header using ALLOW_MODEL(S) or ALLOW_MODEL_DEPENDENCE.
-  # 
-  # we need to fix this TODO
-  LCDM:
-    omega_b:   0.02237
-    omega_cdm: 0.1200
-    H0:        67.36
-    tau_reio:  0.0544
-    T_cmb:     2.72548
-
   QCDAxion:
     fa:
       range: [1.0E6, 1.0E16]
@@ -63,6 +43,12 @@ Parameters:
     alpha: 1
     beta: 3
     gamma: 1
+  LCDM:
+    omega_b:   0.02237
+    omega_cdm: 0.1200
+    H0:        67.36
+    tau_reio:  0.0544
+    T_cmb:     2.72548
 
 #################################
  # Prior setup

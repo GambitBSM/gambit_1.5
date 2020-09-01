@@ -1487,21 +1487,12 @@ START_MODULE
     START_FUNCTION(double)
     ALLOW_MODEL(GeneralALP)
     DEPENDENCY(PhotonFluence_SN1987A_Conversion, double)
-    DEPENDENCY(PhotonFluence_SN1987A_Decay, double)
     #undef FUNCTION
   #undef CAPABILITY
 
   #define CAPABILITY PhotonFluence_SN1987A_Conversion
   START_CAPABILITY
     #define FUNCTION calc_PhotonFluence_SN1987A_Conversion
-    START_FUNCTION(double)
-    ALLOW_MODEL(GeneralALP)
-    #undef FUNCTION
-  #undef CAPABILITY
-
-  #define CAPABILITY PhotonFluence_SN1987A_Decay
-  START_CAPABILITY
-    #define FUNCTION calc_PhotonFluence_SN1987A_Decay
     START_FUNCTION(double)
     ALLOW_MODEL(GeneralALP)
     #undef FUNCTION

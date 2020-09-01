@@ -1758,18 +1758,10 @@ namespace Gambit
       double thetai = *Param["thetai"];
       double fa = *Param["fa"];
       double Tosc = *Dep::AxionOscillationTemperature;
-      double T_R = *Param["T_R"];
 
       if ( (thetai<-pi) || (thetai>3.0*pi) ) { DarkBit_error().raise(LOCAL_INFO, "ERROR! The parameter 'thetai' should be chosen from the interval [-pi,3pi]."); };
       // If thetai in (pi,3pi): map it back to its equivalent value in (-pi,pi]. This is to allow sampling around pi and easier averaging.
       if (thetai>pi) { thetai = thetai - 2.0*pi; };
-
-      // Check (a) Tosc vs T_R: The oscillations start well after the end of inflation.
-      //       (b) Compare energy densities: The axion energy density doesn't dominate at Tosc (i.e. also not before)
-      //       (c) fa/sqrt(2) vs T_R: PQ symmetry breaking happened before the end of inflation
-      if (fabs(thetai) > 0 && Tosc > T_R) { invalid_point().raise("Axion oscillations start during reheating."); };
-      if ( m_planck_red/M_SQRT3 < fa*(1.0-gsl_sf_cos(thetai)) ) { invalid_point().raise("Axions dominate the energy budget of the Universe before oscillations begin: Axion = inflaton."); };
-      if (1.0E+3*fa/M_SQRT2 < T_R) { invalid_point().raise("PQ symmetry only breaks after inflation."); };
 
       // Only do computations if thetai > 0.
       result = 0.0;
@@ -1993,18 +1985,16 @@ namespace Gambit
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     // Capability function to calculate the likelihood for SN 1987A (based on data from 25 to 100 MeV photons, interpreted
-    // by Chupp et al., Phys. Rev. Lett. 62, 505 (1989). Use 10 sec of data for conversion and 223 sec for decay.
+    // by Chupp et al., Phys. Rev. Lett. 62, 505 (1989). Use 10 sec of data for conversion.
     void calc_lnL_SN1987A (double &result)
     {
       using namespace Pipes::calc_lnL_SN1987A;
       double f_10s = *Dep::PhotonFluence_SN1987A_Conversion;
-      double f_223s = *Dep::PhotonFluence_SN1987A_Decay;
 
       // Standard devations of the null observation.
       const double sigma_10s = 0.2;
-      const double sigma_223s = 0.59333;
 
-      double ratio = std::max(f_10s/sigma_10s, f_223s/sigma_223s);
+      double ratio = f_10s/sigma_10s;
 
       result = -0.5*ratio*ratio;
     }
@@ -2023,25 +2013,6 @@ namespace Gambit
 
       result = 0.570589*gsl_pow_4(g);
       if (m > 1.0) { result = result*pow(m, -4.021046); };
-    }
-
-    ////////////////////////////////////////////////////////////////////////
-    //       SN 1987A photon fluence (from axion decay into photons)      //
-    ////////////////////////////////////////////////////////////////////////
-
-    // Capability function to calculate the photon fluence from SN 1987A as a result of axion decay.
-    // Based on MC simulations by Marie Lecroq & Sebastian Hoof (following arXiv:1702.02964).
-    void calc_PhotonFluence_SN1987A_Decay (double &result)
-    {
-      using namespace Pipes::calc_PhotonFluence_SN1987A_Decay;
-      double lgg = log10(std::fabs(*Param["gagg"]));
-      double lgm = log10(*Param["ma0"]);
-      result = 0.0;
-
-      // Initialise interpolation class with MC data from file.
-      static AxionInterpolator2D fluence (GAMBIT_DIR "/DarkBit/data/SN1987A_DecayFluence.dat");
-
-      if (fluence.is_inside_box(lgm,lgg)) { result = fluence.interpolate(lgm,lgg); };
     }
 
     //////////////////////////////////////////////////////////////////
