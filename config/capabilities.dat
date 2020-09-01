@@ -4545,9 +4545,6 @@ classy_2_6_3_init: |
 classy_2_9_3_init: |
   Initialise CLASS 2.9.3 run through the classy python wrapper.
 
-classy_exo_2_7_0_init: |
-  Initialise ExoCLASS 2.7.0 run through the classy python wrapper.
-
 classy_exo_2_7_2_init: |
   Initialise ExoCLASS 2.7.2 run through the classy python wrapper.
 
@@ -4609,12 +4606,6 @@ energy_injection_efficiency: |
 # -----------
 # AlterBBN
 # -----------
-
-AlterBBN_2_0_init: |
-    Initialise AlterBBN.
-
-AlterBBN_2_1_init: |
-    Initialise AlterBBN.
 
 AlterBBN_2_2_init: |
     Initialise AlterBBN.
