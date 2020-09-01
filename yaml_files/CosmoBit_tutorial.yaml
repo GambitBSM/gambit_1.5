@@ -532,7 +532,6 @@ Rules:
   # rules below
   #- capability: MP_LogLikes
   #  backends:
-  #  - {capability: get_classy_backendDir, backend: classy, version: 2.6.3}
   #  - {capability: get_classy_cosmo_object, backend: classy, version: 2.6.3}
   #  - {capability: get_MP_loglike, backend: MontePythonLike}
   #
