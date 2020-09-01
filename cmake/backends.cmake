@@ -546,40 +546,6 @@ endif()
 
 # MontePythonLike
 set(name "montepythonlike")
-set(ver "3.1.0")
-set(sfver "3_1_0")
-set(dl "null")
-set(dir "${PROJECT_SOURCE_DIR}/Backends/installed/${name}/${ver}")
-set(patchdir "${PROJECT_SOURCE_DIR}/Backends/patches/${name}/${ver}/")
-# Ditch MP if Python version is 3
-set(ditch_if_absent "Python2")
-set(required_modules "scipy")
-check_ditch_status(${name} ${ver} ${dir} ${ditch_if_absent})
-if(NOT ditched_${name}_${ver})
-  check_python_modules(${name} ${ver} ${required_modules})
-  if(modules_missing_${name}_${ver})
-    inform_of_missing_modules(${name} ${ver} ${modules_missing_${name}_${ver}})
-  else()
-    ExternalProject_Add(${name}_${ver}
-      GIT_REPOSITORY https://github.com/brinckmann/montepython_public.git
-      GIT_TAG ${ver}
-      SOURCE_DIR ${dir}
-      BUILD_IN_SOURCE 1
-      CONFIGURE_COMMAND ${CMAKE_COMMAND} -E copy ${patchdir}/MontePythonLike.py ${dir}/montepython/MontePythonLike_${sfver}.py
-      COMMAND ${CMAKE_COMMAND} -E copy_directory ${patchdir}/WiggleZ_bao_highz ${dir}/montepython/likelihoods/WiggleZ_bao_highz/
-      COMMAND ${CMAKE_COMMAND} -E copy ${patchdir}/fastPantheon__init__.py ${dir}/montepython/likelihoods/Pantheon/__init__.py
-      COMMAND ${CMAKE_COMMAND} -E copy ${patchdir}/sdss_lrgDR7_fiducialmodel.dat ${dir}/data/sdss_lrgDR7/sdss_lrgDR7_fiducialmodel.dat
-      COMMAND ${CMAKE_COMMAND} -E copy ${patchdir}/MPLike_patch_script.py ${dir}/montepython/MPLike_patch_script.py
-      COMMAND sed ${dashi} -e "s#from MontePythonLike import#from MontePythonLike_${sfver} import#g" ${dir}/montepython/MPLike_patch_script.py
-      BUILD_COMMAND ""
-      INSTALL_COMMAND ${PYTHON_EXECUTABLE} ${dir}/montepython/MPLike_patch_script.py
-    )
-  endif()
-  add_extra_targets("backend" ${name} ${ver} ${dir} ${dl} none)
-endif()
-
-# MontePythonLike
-set(name "montepythonlike")
 set(ver "3.3.0")
 set(sfver "3_3_0")
 set(dl "null")

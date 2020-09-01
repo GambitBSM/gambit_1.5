@@ -4208,9 +4208,6 @@ MP_Observables: |
 MP_experiment_names: |
   Set names of all experiments in use for a scan and stores the path to the settings file for the different likelihoods by reading in the runOptions 'Likelihoods' and/or 'Observables' of this capability.
 
-MontePythonLike_3_1_0_init: |
-  Initialise MontePython backend v3.1.0.
-
 MontePythonLike_3_3_0_init: |
   Initialise MontePython backend v3.3.0.
 
