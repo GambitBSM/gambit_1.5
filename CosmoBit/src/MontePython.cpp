@@ -177,11 +177,12 @@ namespace Gambit
       }
     }
 
-
     /// Computes lnL for each experiment initialised in MontePython
     void compute_MP_LogLikes(map_str_dbl & result)
     {
       using namespace Pipes::compute_MP_LogLikes;
+
+      static bool first_run = true;
       static pybind11::object data = std::get<0>(*Dep::MP_objects);
       static const map_str_str& experiments = std::get<1>(*Dep::MP_objects);
       static const map_str_pyobj& likelihoods = std::get<2>(*Dep::MP_objects);
@@ -205,11 +206,22 @@ namespace Gambit
       // Loop through the list of experiments, and query the lnL from the MontePython backend.
       for (sspair it : experiments)
       {
+        // perform check if all requested MP likelihoods are compatible 
+        // with CLASS version in use. 
+        // Got to do that here, as the MP data object gets the information 
+        // about the classy version a few lines above through the BEreq
+        // get_classy_backendDir()
+        if(first_run)
+        {
+          BEreq::check_likelihood_classy_combi(it.first,backendDir);
+        }
+
         // Likelihood names are keys of experiment map (str, str map mapping likelihood name to .data file)
         double logLike = BEreq::get_MP_loglike(mplike_cont, cosmo, it.first);
         result[it.first] = logLike;
         logger() << "(compute_MP_LogLikes):  name: " << it.first << "\tvalue: " << logLike << EOM;
       }
+      first_run = false;
     }
 
     /// Computes the combined lnL from the set of experiments

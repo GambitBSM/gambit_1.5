@@ -45,9 +45,41 @@
       return avail_likes.cast<std::vector<str>>();
     }
 
-    /// Convenience function to compute the loglike from a given experiment, given a MontePython likelihood-data container
-    /// mplike, using the CLASS Python object cosmo.
-    /// Convenience function to compute the loglike from a given experiment, given a MontePython likelihood-data container
+    /// convenience function to check compatibility of likelihoods and CLASS version in use
+    /// add further rules for incompatibilities here.
+    void check_likelihood_classy_combi(std::string& likelihood, std::string& classy_backendDir)
+    {
+
+      // add all combinations that are not compatible here.
+      // example for such a incompatibility: an update in CLASS 2.7 enable the separation 
+      // of the matter power spectrum into the baryonic and CDM components separated from 
+      // other non-CDM species (e.g. massive neutrinos). Likelihoods that rely on the 
+      // baryon+CDM matter power spectrum can't be used with a CLASS version below 2.7
+      map_str_str incompatible_combi = {{"bao_correlations", "2.6.3"},{"euclid_pk", "2.6.3"}, 
+          {"ska1_IM_band1", "2.6.3"},{"ska1_IM_band2", "2.6.3"},{"ska2_pk", "2.6.3"}};
+
+      // check if incompatible CLASS version exists for given likelihood
+      if (incompatible_combi.count(likelihood))
+      {
+        // if incompatible version in use throw a fatal error
+        if (classy_backendDir.find(incompatible_combi[likelihood]) != std::string::npos)
+        {
+          std::string classy_version = classy_backendDir.substr(classy_backendDir.find("classy/"),classy_backendDir.find("/lib")); 
+          classy_version = classy_version.substr(7, classy_version.size() - 11);
+
+          std::ostringstream ss;
+            ss << "You requested the MontePython likelihood '"<< likelihood<<"'." << endl
+               << "The CLASS version "<< classy_version << " is not compatible with that likelihood"<< endl
+               << "You need to install a later version of CLASS. To do so you can execute" << endl
+               << "\ncd build; make nuke-classy_"<< classy_version <<"; make classy_<version_name>; cd ..\n" << endl
+               << "where <version_name> is the version greater than "<< classy_version <<" of the CLASS backend." << endl
+               << "Type \n\n./gambit backends\n\nto see which versions are available to install." << endl;
+            backend_error().raise(LOCAL_INFO, ss.str());
+        }
+      }
+    }
+
+    /// convenience function to compute the loglike from a given experiment, given a MontePython likelihood-data container
     /// mplike, using the CLASS Python object cosmo.
     double get_MP_loglike(const MPLike_data_container& mplike, pybind11::object& cosmo, std::string& experiment)
     {

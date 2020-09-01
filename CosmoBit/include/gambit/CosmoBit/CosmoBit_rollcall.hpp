@@ -854,6 +854,7 @@ START_MODULE
     START_FUNCTION(map_str_dbl)
     DEPENDENCY(parameter_dict_for_MPLike, pybind11::dict)
     DEPENDENCY(MP_objects, MPLike_objects_container)
+    BACKEND_REQ(check_likelihood_classy_combi,(),          void,             (str&, str&))
     BACKEND_REQ(get_MP_loglike,               (),          double,           (const MPLike_data_container&, pybind11::object&, std::string&))
     BACKEND_REQ(get_classy_backendDir,        (class_tag), std::string,      ())
     BACKEND_REQ(get_classy_cosmo_object,      (class_tag), pybind11::object, ())
