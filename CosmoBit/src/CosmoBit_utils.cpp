@@ -33,15 +33,6 @@ namespace Gambit
         return 3.045;
       }
 
-      // Return entropy density of SM as function of Temperature T. By default: T interpreted to be in K,
-      // set T_in_eV = True if T is in eV
-      double entropy_density_SM(double T, bool T_in_eV)
-      {
-        
-        if(T_in_eV == true) {T = T/_kB_eV_over_K_;}
-  
-        return (2.*pow(pi,2)/45.) * (43./11.) * pow((_kB_eV_over_K_*T),3);
-      }
     }
   }
 }

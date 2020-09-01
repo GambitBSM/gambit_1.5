@@ -4493,21 +4493,6 @@ lensed_Cl_TE: |
 lensed_Cl_PhiPhi: |
    Returns the lensed dimensionless CMB lensing potential.
 
-ExtNeffCMB: |
-   Capability to set or compute non-standard values of dNeff at CMB release. E.g. needed for the CosmoALP model.
-
-external_dNeff_etaBBN: |
-   Compute dNeff @CMB and etaBBN for non-standard models. E.g. needed for the CosmoALP model.
-
-minimum_abundance: |
-   Compute minimal Freeze-in abundance of axion-like particles, produced via Primakoff processes.
-
-minimum_fraction: |
-   Compute the fraction of the minimal freeze-in abundance of axion-like particles, produced via Primakoff processes, to the total abundance of dark matter
-
-total_DM_abundance: |
-    Compute the total abundance of axion-like particles, produced either by misalignment or freeze-in.
-
 Neff: |
    Returns the effective number of neutrino species. 
 
@@ -4591,13 +4576,6 @@ Planck_sz_prior_loglike: |
 
 DM_mass: |
     Dark matter mass (in GeV).
-
-DM_fraction: |
-    fraction of the abundance of the dark matter candidate in question
-    (mostly a decaying component) contributing to the total DM abundance.
-
-lifetime: |
-    lifetime of the decaying dark matter component (in s).
 
 energy_injection_spectrum: |
     Spectrum of electrons/positrons and photons injected by

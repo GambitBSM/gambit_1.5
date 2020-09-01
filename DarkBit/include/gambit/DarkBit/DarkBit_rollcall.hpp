@@ -225,7 +225,7 @@ START_MODULE
     // Routine for computing axion energy density today from vacuum misalignment, assuming no axion decays.
     #define FUNCTION RD_oh2_Axions
       START_FUNCTION(double)
-        ALLOW_MODEL(GeneralCosmoALP)
+        ALLOW_MODEL(GeneralALP)
         DEPENDENCY(AxionOscillationTemperature, double)
         DEPENDENCY(T_cmb, double)
     #undef FUNCTION
@@ -1330,7 +1330,7 @@ START_MODULE
   START_CAPABILITY
     #define FUNCTION calc_ALPS1_signal_vac
     START_FUNCTION(double)
-    ALLOW_MODEL(GeneralCosmoALP)
+    ALLOW_MODEL(GeneralALP)
     #undef FUNCTION
   #undef CAPABILITY
 
@@ -1338,7 +1338,7 @@ START_MODULE
   START_CAPABILITY
     #define FUNCTION calc_ALPS1_signal_gas
     START_FUNCTION(double)
-    ALLOW_MODEL(GeneralCosmoALP)
+    ALLOW_MODEL(GeneralALP)
   #undef FUNCTION
   #undef CAPABILITY
 
@@ -1346,7 +1346,7 @@ START_MODULE
   START_CAPABILITY
     #define FUNCTION calc_lnL_ALPS1
     START_FUNCTION(double)
-    ALLOW_MODEL(GeneralCosmoALP)
+    ALLOW_MODEL(GeneralALP)
     DEPENDENCY(ALPS1_signal_vac, double)
     DEPENDENCY(ALPS1_signal_gas, double)
     #undef FUNCTION
@@ -1356,7 +1356,7 @@ START_MODULE
   START_CAPABILITY
     #define FUNCTION calc_CAST2007_signal_vac
     START_FUNCTION(std::vector<double>)
-    ALLOW_MODEL(GeneralCosmoALP)
+    ALLOW_MODEL(GeneralALP)
     #undef FUNCTION
   #undef CAPABILITY
 
@@ -1364,7 +1364,7 @@ START_MODULE
   START_CAPABILITY
     #define FUNCTION calc_CAST2017_signal_vac
     START_FUNCTION(std::vector<std::vector<double>>)
-    ALLOW_MODEL(GeneralCosmoALP)
+    ALLOW_MODEL(GeneralALP)
     #undef FUNCTION
   #undef CAPABILITY
 
@@ -1372,7 +1372,7 @@ START_MODULE
   START_CAPABILITY
     #define FUNCTION calc_lnL_CAST2007
     START_FUNCTION(double)
-    ALLOW_MODEL(GeneralCosmoALP)
+    ALLOW_MODEL(GeneralALP)
     DEPENDENCY(CAST2007_signal_vac, std::vector<double>)
     #undef FUNCTION
   #undef CAPABILITY
@@ -1381,7 +1381,7 @@ START_MODULE
   START_CAPABILITY
     #define FUNCTION calc_lnL_CAST2017
     START_FUNCTION(double)
-    ALLOW_MODEL(GeneralCosmoALP)
+    ALLOW_MODEL(GeneralALP)
     DEPENDENCY(CAST2017_signal_vac, std::vector<std::vector<double>>)
     #undef FUNCTION
   #undef CAPABILITY
@@ -1436,7 +1436,7 @@ START_MODULE
   START_CAPABILITY
     #define FUNCTION calc_RParameter
     START_FUNCTION(double)
-    ALLOW_MODEL(GeneralCosmoALP)
+    ALLOW_MODEL(GeneralALP)
     #undef FUNCTION
   #undef CAPABILITY
 
@@ -1444,7 +1444,7 @@ START_MODULE
   START_CAPABILITY
     #define FUNCTION calc_lnL_RParameter
     START_FUNCTION(double)
-    ALLOW_MODEL(GeneralCosmoALP)
+    ALLOW_MODEL(GeneralALP)
     DEPENDENCY(RParameter, double)
     #undef FUNCTION
   #undef CAPABILITY
@@ -1453,7 +1453,7 @@ START_MODULE
   START_CAPABILITY
     #define FUNCTION calc_lnL_WDVar_G117B15A
     START_FUNCTION(double)
-    ALLOW_MODEL(GeneralCosmoALP)
+    ALLOW_MODEL(GeneralALP)
     #undef FUNCTION
   #undef CAPABILITY
 
@@ -1461,7 +1461,7 @@ START_MODULE
   START_CAPABILITY
     #define FUNCTION calc_lnL_WDVar_R548
     START_FUNCTION(double)
-    ALLOW_MODEL(GeneralCosmoALP)
+    ALLOW_MODEL(GeneralALP)
     #undef FUNCTION
   #undef CAPABILITY
 
@@ -1469,7 +1469,7 @@ START_MODULE
   START_CAPABILITY
     #define FUNCTION calc_lnL_WDVar_PG1351489
     START_FUNCTION(double)
-    ALLOW_MODEL(GeneralCosmoALP)
+    ALLOW_MODEL(GeneralALP)
     #undef FUNCTION
   #undef CAPABILITY
 
@@ -1477,7 +1477,7 @@ START_MODULE
   START_CAPABILITY
     #define FUNCTION calc_lnL_WDVar_L192
     START_FUNCTION(double)
-    ALLOW_MODEL(GeneralCosmoALP)
+    ALLOW_MODEL(GeneralALP)
     #undef FUNCTION
   #undef CAPABILITY
 
@@ -1485,7 +1485,7 @@ START_MODULE
   START_CAPABILITY
     #define FUNCTION calc_lnL_SN1987A
     START_FUNCTION(double)
-    ALLOW_MODEL(GeneralCosmoALP)
+    ALLOW_MODEL(GeneralALP)
     DEPENDENCY(PhotonFluence_SN1987A_Conversion, double)
     DEPENDENCY(PhotonFluence_SN1987A_Decay, double)
     #undef FUNCTION
@@ -1495,7 +1495,7 @@ START_MODULE
   START_CAPABILITY
     #define FUNCTION calc_PhotonFluence_SN1987A_Conversion
     START_FUNCTION(double)
-    ALLOW_MODEL(GeneralCosmoALP)
+    ALLOW_MODEL(GeneralALP)
     #undef FUNCTION
   #undef CAPABILITY
 
@@ -1503,7 +1503,7 @@ START_MODULE
   START_CAPABILITY
     #define FUNCTION calc_PhotonFluence_SN1987A_Decay
     START_FUNCTION(double)
-    ALLOW_MODEL(GeneralCosmoALP)
+    ALLOW_MODEL(GeneralALP)
     #undef FUNCTION
   #undef CAPABILITY
 
@@ -1511,7 +1511,7 @@ START_MODULE
   START_CAPABILITY
     #define FUNCTION calc_lnL_HESS_GCMF
     START_FUNCTION(double)
-    ALLOW_MODEL(GeneralCosmoALP)
+    ALLOW_MODEL(GeneralALP)
     #undef FUNCTION
   #undef CAPABILITY
 
@@ -1519,7 +1519,7 @@ START_MODULE
   START_CAPABILITY
     #define FUNCTION calc_AxionOscillationTemperature
     START_FUNCTION(double)
-    ALLOW_MODEL(GeneralCosmoALP)
+    ALLOW_MODEL(GeneralALP)
     #undef FUNCTION
   #undef CAPABILITY
 

@@ -57,67 +57,6 @@
 #define MODULE CosmoBit
 START_MODULE
   
-  /// fraction of the abundance of the dark matter candidate in question
-  /// (mostly a decaying component) contributing to the total DM abundance.
-  #define CAPABILITY DM_fraction
-  START_CAPABILITY
-    #define FUNCTION DM_fraction_ALP
-    START_FUNCTION(double)
-    DEPENDENCY(minimum_fraction,double)
-    DEPENDENCY(lifetime,double)
-    DEPENDENCY(RD_oh2, double)
-    ALLOW_MODEL_DEPENDENCE(LCDM, LCDM_theta, GeneralCosmoALP)
-    MODEL_GROUP(lcdm_model, (LCDM, LCDM_theta))
-    MODEL_GROUP(alp_model, (GeneralCosmoALP))
-    ALLOW_MODEL_COMBINATION(lcdm_model, alp_model)
-    #undef FUNCTION
-  #undef CAPABILITY
-
-  /// total abundance of axion-like particles, produced either by misalignment or freeze-in
-  #define CAPABILITY total_DM_abundance
-  START_CAPABILITY
-    #define FUNCTION total_DM_abundance_ALP
-    START_FUNCTION(double)
-    DEPENDENCY(DM_fraction,double)
-    ALLOW_MODEL_DEPENDENCE(LCDM, LCDM_theta, GeneralCosmoALP)
-    MODEL_GROUP(lcdm_model, (LCDM, LCDM_theta))
-    MODEL_GROUP(alp_model, (GeneralCosmoALP))
-    ALLOW_MODEL_COMBINATION(lcdm_model, alp_model)
-    #undef FUNCTION
-  #undef CAPABILITY
-
-  /// lifetime of the decaying dark matter component (in s)
-  #define CAPABILITY lifetime
-  START_CAPABILITY
-    #define FUNCTION lifetime_ALP_agg
-    START_FUNCTION(double)
-    ALLOW_MODELS(GeneralCosmoALP)
-    #undef FUNCTION
-  #undef CAPABILITY
-
-  /// minimal Freeze-in abundance of axion-like particles, produced via Primakoff processes
-  #define CAPABILITY minimum_abundance
-  START_CAPABILITY
-    #define FUNCTION minimum_abundance_ALP
-    START_FUNCTION(double)
-    ALLOW_MODELS(GeneralCosmoALP)
-    #undef FUNCTION
-  #undef CAPABILITY
-
-  /// the fraction of the minimal freeze-in abundance of axion-like particles, 
-  /// produced via Primakoff processes, to the total abundance of dark matter
-  #define CAPABILITY minimum_fraction
-  START_CAPABILITY
-    #define FUNCTION minimum_fraction_ALP
-    START_FUNCTION(double)
-    DEPENDENCY(minimum_abundance,double)
-    ALLOW_MODEL_DEPENDENCE(LCDM, LCDM_theta, GeneralCosmoALP)
-    MODEL_GROUP(lcdm_model, (LCDM, LCDM_theta))
-    MODEL_GROUP(alp_model, (GeneralCosmoALP))
-    ALLOW_MODEL_COMBINATION(lcdm_model, alp_model)
-    #undef FUNCTION
-  #undef CAPABILITY
-
   /// get the energy injection efficiency tables
   #define CAPABILITY energy_injection_efficiency
   START_CAPABILITY
@@ -733,17 +672,6 @@ START_MODULE
     #define FUNCTION get_Neff_classy
     START_FUNCTION(double)
     BACKEND_REQ(class_get_Neff,(),double,())
-    #undef FUNCTION
-  #undef CAPABILITY
-
-  // compute dNeff AND etaBBN for non-standard models
-  #define CAPABILITY external_dNeff_etaBBN
-  START_CAPABILITY
-    #define FUNCTION compute_dNeff_etaBBN_ALP
-    START_FUNCTION(map_str_dbl)
-    ALLOW_MODELS(GeneralCosmoALP)
-    DEPENDENCY(total_DM_abundance, double)
-    DEPENDENCY(lifetime, double)
     #undef FUNCTION
   #undef CAPABILITY
 
