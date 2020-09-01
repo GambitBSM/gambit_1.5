@@ -66,17 +66,23 @@ START_MODULE
     DEPENDENCY(minimum_fraction,double)
     DEPENDENCY(lifetime,double)
     DEPENDENCY(RD_oh2, double)
-    ALLOW_JOINT_MODEL(LCDM, GeneralCosmoALP)
+    ALLOW_MODEL_DEPENDENCE(LCDM, LCDM_theta, GeneralCosmoALP)
+    MODEL_GROUP(lcdm_model, (LCDM, LCDM_theta))
+    MODEL_GROUP(alp_model, (GeneralCosmoALP))
+    ALLOW_MODEL_COMBINATION(lcdm_model, alp_model)
     #undef FUNCTION
   #undef CAPABILITY
-  
+
   /// total abundance of axion-like particles, produced either by misalignment or freeze-in
   #define CAPABILITY total_DM_abundance
   START_CAPABILITY
     #define FUNCTION total_DM_abundance_ALP
     START_FUNCTION(double)
     DEPENDENCY(DM_fraction,double)
-    ALLOW_JOINT_MODEL(LCDM, GeneralCosmoALP)
+    ALLOW_MODEL_DEPENDENCE(LCDM, LCDM_theta, GeneralCosmoALP)
+    MODEL_GROUP(lcdm_model, (LCDM, LCDM_theta))
+    MODEL_GROUP(alp_model, (GeneralCosmoALP))
+    ALLOW_MODEL_COMBINATION(lcdm_model, alp_model)
     #undef FUNCTION
   #undef CAPABILITY
 
@@ -105,7 +111,10 @@ START_MODULE
     #define FUNCTION minimum_fraction_ALP
     START_FUNCTION(double)
     DEPENDENCY(minimum_abundance,double)
-    ALLOW_JOINT_MODEL(LCDM,GeneralCosmoALP)
+    ALLOW_MODEL_DEPENDENCE(LCDM, LCDM_theta, GeneralCosmoALP)
+    MODEL_GROUP(lcdm_model, (LCDM, LCDM_theta))
+    MODEL_GROUP(alp_model, (GeneralCosmoALP))
+    ALLOW_MODEL_COMBINATION(lcdm_model, alp_model)
     #undef FUNCTION
   #undef CAPABILITY
 
@@ -115,10 +124,9 @@ START_MODULE
     #define FUNCTION energy_injection_efficiency_func
     START_FUNCTION(DarkAges::Energy_injection_efficiency_table)
     ALLOW_MODELS(AnnihilatingDM_general,DecayingDM_general)
-    BACKEND_REQ(get_energy_injection_efficiency_table, (DarkAges_tag), DarkAges::Energy_injection_efficiency_table,())
+    BACKEND_REQ(get_energy_injection_efficiency_table, (), DarkAges::Energy_injection_efficiency_table,())
     #undef FUNCTION
   #undef CAPABILITY
-
 
   // ----------------------
 
@@ -140,9 +148,9 @@ START_MODULE
   START_CAPABILITY
     #define FUNCTION get_Neff_SM
     START_FUNCTION(double)
-     #undef FUNCTION
+    #undef FUNCTION
   #undef CAPABILITY
-  
+
   // value of N_ur (today) (aka. contribution of massive neutrinos which are still relativistic)
   #define CAPABILITY N_ur
   START_CAPABILITY
@@ -186,7 +194,7 @@ START_MODULE
     DEPENDENCY(classy_NuMasses_Nur_input, pybind11::dict)
     DEPENDENCY(classy_primordial_input, pybind11::dict)
     MODEL_CONDITIONAL_DEPENDENCY(classy_parameters_EnergyInjection, pybind11::dict, AnnihilatingDM_general, DecayingDM_general)
-    MODEL_CONDITIONAL_DEPENDENCY(classy_PlanckLike_input, pybind11::dict, cosmo_nuisance_Planck_lite,cosmo_nuisance_Planck_TTTEEE,cosmo_nuisance_Planck_TT,plik_dx11dr2_HM_v18_TT)
+    MODEL_CONDITIONAL_DEPENDENCY(classy_PlanckLike_input, pybind11::dict, cosmo_nuisance_Planck_lite,cosmo_nuisance_Planck_TTTEEE,cosmo_nuisance_Planck_TT)
     #undef FUNCTION
   #undef CAPABILITY
 
@@ -248,7 +256,7 @@ START_MODULE
   START_CAPABILITY
     #define FUNCTION set_classy_PlanckLike_input
     START_FUNCTION(pybind11::dict)
-    BACKEND_REQ(plc_required_Cl,(plc_tag),void,(int&,bool&,bool&))
+    BACKEND_REQ(plc_required_Cl,(),void,(int&,bool&,bool&))
     #undef FUNCTION
   #undef CAPABILITY
 
@@ -308,8 +316,7 @@ START_MODULE
   START_CAPABILITY
     #define FUNCTION class_get_unlensed_Cl_TT
     START_FUNCTION(std::vector<double>)
-    BACKEND_REQ(class_get_unlensed_cl,(class_tag),std::vector<double>, (str))
-    FORCE_SAME_BACKEND(class_tag)
+    BACKEND_REQ(class_get_unlensed_cl,(),std::vector<double>, (str))
     #undef FUNCTION
   #undef CAPABILITY
 
@@ -318,8 +325,7 @@ START_MODULE
   START_CAPABILITY
     #define FUNCTION class_get_lensed_Cl_TT
     START_FUNCTION(std::vector<double>)
-    BACKEND_REQ(class_get_lensed_cl,(class_tag),std::vector<double>, (str))
-    FORCE_SAME_BACKEND(class_tag)
+    BACKEND_REQ(class_get_lensed_cl,(),std::vector<double>, (str))
     #undef FUNCTION
   #undef CAPABILITY
 
@@ -328,8 +334,7 @@ START_MODULE
   START_CAPABILITY
     #define FUNCTION class_get_unlensed_Cl_TE
     START_FUNCTION(std::vector<double>)
-    BACKEND_REQ(class_get_unlensed_cl,(class_tag),std::vector<double>, (str))
-    FORCE_SAME_BACKEND(class_tag)
+    BACKEND_REQ(class_get_unlensed_cl,(),std::vector<double>, (str))
     #undef FUNCTION
   #undef CAPABILITY
 
@@ -338,8 +343,7 @@ START_MODULE
   START_CAPABILITY
     #define FUNCTION class_get_lensed_Cl_TE
     START_FUNCTION(std::vector<double>)
-    BACKEND_REQ(class_get_lensed_cl,(class_tag),std::vector<double>, (str))
-    FORCE_SAME_BACKEND(class_tag)
+    BACKEND_REQ(class_get_lensed_cl,(),std::vector<double>, (str))
     #undef FUNCTION
   #undef CAPABILITY
 
@@ -348,8 +352,7 @@ START_MODULE
   START_CAPABILITY
     #define FUNCTION class_get_unlensed_Cl_EE
     START_FUNCTION(std::vector<double>)
-    BACKEND_REQ(class_get_unlensed_cl,(class_tag),std::vector<double>, (str))
-    FORCE_SAME_BACKEND(class_tag)
+    BACKEND_REQ(class_get_unlensed_cl,(),std::vector<double>, (str))
     #undef FUNCTION
   #undef CAPABILITY
 
@@ -358,8 +361,7 @@ START_MODULE
   START_CAPABILITY
     #define FUNCTION class_get_lensed_Cl_EE
     START_FUNCTION(std::vector<double>)
-    BACKEND_REQ(class_get_lensed_cl,(class_tag),std::vector<double>, (str))
-    FORCE_SAME_BACKEND(class_tag)
+    BACKEND_REQ(class_get_lensed_cl,(),std::vector<double>, (str))
     #undef FUNCTION
   #undef CAPABILITY
 
@@ -368,8 +370,7 @@ START_MODULE
   START_CAPABILITY
     #define FUNCTION class_get_unlensed_Cl_BB
     START_FUNCTION(std::vector<double>)
-    BACKEND_REQ(class_get_unlensed_cl,(class_tag),std::vector<double>, (str))
-    FORCE_SAME_BACKEND(class_tag)
+    BACKEND_REQ(class_get_unlensed_cl,(),std::vector<double>, (str))
     #undef FUNCTION
   #undef CAPABILITY
 
@@ -378,8 +379,7 @@ START_MODULE
   START_CAPABILITY
     #define FUNCTION class_get_lensed_Cl_BB
     START_FUNCTION(std::vector<double>)
-    BACKEND_REQ(class_get_lensed_cl,(class_tag),std::vector<double>, (str))
-    FORCE_SAME_BACKEND(class_tag)
+    BACKEND_REQ(class_get_lensed_cl,(),std::vector<double>, (str))
     #undef FUNCTION
   #undef CAPABILITY
 
@@ -388,8 +388,7 @@ START_MODULE
   START_CAPABILITY
     #define FUNCTION class_get_unlensed_Cl_PhiPhi
     START_FUNCTION(std::vector<double>)
-    BACKEND_REQ(class_get_unlensed_cl,(class_tag),std::vector<double>, (str))
-    FORCE_SAME_BACKEND(class_tag)
+    BACKEND_REQ(class_get_unlensed_cl,(),std::vector<double>, (str))
     #undef FUNCTION
   #undef CAPABILITY
 
@@ -398,8 +397,7 @@ START_MODULE
   START_CAPABILITY
     #define FUNCTION class_get_lensed_Cl_PhiPhi
     START_FUNCTION(std::vector<double>)
-    BACKEND_REQ(class_get_lensed_cl,(class_tag),std::vector<double>, (str))
-    FORCE_SAME_BACKEND(class_tag)
+    BACKEND_REQ(class_get_lensed_cl,(),std::vector<double>, (str))
     #undef FUNCTION
   #undef CAPABILITY
 
@@ -615,7 +613,7 @@ START_MODULE
     #define FUNCTION get_H0_classy
     START_FUNCTION(double)
     ALLOW_MODELS(LCDM_theta)
-    BACKEND_REQ(class_get_H0,(class_tag),double,())
+    BACKEND_REQ(class_get_H0,(),double,())
     #undef FUNCTION
   #undef CAPABILITY
 
@@ -624,6 +622,7 @@ START_MODULE
   START_CAPABILITY
     #define FUNCTION compute_n0_g
     START_FUNCTION(double)
+    ALLOW_MODELS(LCDM, LCDM_theta)
     #undef FUNCTION
   #undef CAPABILITY
 
@@ -632,7 +631,7 @@ START_MODULE
   START_CAPABILITY
     #define FUNCTION get_Omega0_m_classy
     START_FUNCTION(double)
-    BACKEND_REQ(class_get_Omega0_m,(class_tag),double,())
+    BACKEND_REQ(class_get_Omega0_m,(),double,())
     #undef FUNCTION
   #undef CAPABILITY
 
@@ -661,7 +660,7 @@ START_MODULE
   START_CAPABILITY
     #define FUNCTION get_Omega0_r_classy
     START_FUNCTION(double)
-    BACKEND_REQ(class_get_Omega0_r,(class_tag),double,())
+    BACKEND_REQ(class_get_Omega0_r,(),double,())
     #undef FUNCTION
   #undef CAPABILITY
 
@@ -669,6 +668,7 @@ START_MODULE
   START_CAPABILITY
     #define FUNCTION compute_Omega0_g
     START_FUNCTION(double)
+    ALLOW_MODELS(LCDM, LCDM_theta)
     DEPENDENCY(H0, double)
     #undef FUNCTION
   #undef CAPABILITY
@@ -684,7 +684,7 @@ START_MODULE
 
     #define FUNCTION get_Omega0_ur_classy
     START_FUNCTION(double)
-    BACKEND_REQ(class_get_Omega0_ur,(class_tag),double,())
+    BACKEND_REQ(class_get_Omega0_ur,(),double,())
     #undef FUNCTION
   #undef CAPABILITY
 
@@ -693,7 +693,7 @@ START_MODULE
   START_CAPABILITY
     #define FUNCTION get_Omega0_ncdm_classy
     START_FUNCTION(double)
-    BACKEND_REQ(class_get_Omega0_ncdm_tot,(class_tag),double,())
+    BACKEND_REQ(class_get_Omega0_ncdm_tot,(),double,())
     #undef FUNCTION
   #undef CAPABILITY
 
@@ -723,7 +723,7 @@ START_MODULE
   START_CAPABILITY
     #define FUNCTION get_rs_drag_classy
     START_FUNCTION(double)
-    BACKEND_REQ(class_get_rs,(class_tag),double,())
+    BACKEND_REQ(class_get_rs,(),double,())
     #undef FUNCTION
   #undef CAPABILITY
 
@@ -732,7 +732,7 @@ START_MODULE
   START_CAPABILITY
     #define FUNCTION get_Neff_classy
     START_FUNCTION(double)
-    BACKEND_REQ(class_get_Neff,(class_tag),double,())
+    BACKEND_REQ(class_get_Neff,(),double,())
     #undef FUNCTION
   #undef CAPABILITY
 
@@ -753,7 +753,7 @@ START_MODULE
     #define FUNCTION get_Sigma8_classy
     START_FUNCTION(double)
     DEPENDENCY(Omega0_m, double)
-    BACKEND_REQ(class_get_sigma8,(class_tag),double,())
+    BACKEND_REQ(class_get_sigma8,(),double,())
     #undef FUNCTION
   #undef CAPABILITY
 
@@ -780,10 +780,10 @@ START_MODULE
     #define FUNCTION compute_BBN_abundances
     START_FUNCTION(BBN_container)
     DEPENDENCY(AlterBBN_Input, map_str_dbl)
-    BACKEND_REQ(call_nucl_err, (libbbn), int, (map_str_dbl&,double*,double*))
-    BACKEND_REQ(get_NNUC, (libbbn), int, ())
-    BACKEND_REQ(get_abund_map_AlterBBN, (libbbn), map_str_int, ())
-    BACKEND_OPTION( (AlterBBN), (libbbn) )
+    BACKEND_REQ(call_nucl_err, (alterbbn_tag), int, (map_str_dbl&,double*,double*))
+    BACKEND_REQ(get_NNUC, (alterbbn_tag), int, ())
+    BACKEND_REQ(get_abund_map_AlterBBN, (alterbbn_tag), map_str_int, ())
+    FORCE_SAME_BACKEND(alterbbn_tag)
     #undef FUNCTION
   #undef CAPABILITY
 
@@ -839,10 +839,11 @@ START_MODULE
   START_CAPABILITY
     #define FUNCTION create_MP_objects
     START_FUNCTION(MPLike_objects_container)
-    BACKEND_REQ(create_MP_data_object,        (libmontepythonlike), pybind11::object, (map_str_str&))
-    BACKEND_REQ(get_MP_available_likelihoods, (libmontepythonlike), std::vector<str>, ())
-    BACKEND_REQ(create_MP_likelihood_objects, (libmontepythonlike), map_str_pyobj,    (pybind11::object&, map_str_str&))
     DEPENDENCY(parameter_dict_for_MPLike, pybind11::dict)
+    BACKEND_REQ(create_MP_data_object,        (mplike_tag), pybind11::object, (map_str_str&))
+    BACKEND_REQ(get_MP_available_likelihoods, (mplike_tag), std::vector<str>, ())
+    BACKEND_REQ(create_MP_likelihood_objects, (mplike_tag), map_str_pyobj,    (pybind11::object&, map_str_str&))
+    FORCE_SAME_BACKEND(mplike_tag)
     #undef FUNCTION
   #undef CAPABILITY
 
@@ -853,9 +854,10 @@ START_MODULE
     START_FUNCTION(map_str_dbl)
     DEPENDENCY(parameter_dict_for_MPLike, pybind11::dict)
     DEPENDENCY(MP_objects, MPLike_objects_container)
-    BACKEND_REQ(get_classy_backendDir,        (class_tag),          std::string, ())
-    BACKEND_REQ(get_classy_cosmo_object,      (class_tag),          pybind11::object, ())
-    BACKEND_REQ(get_MP_loglike,               (libmontepythonlike), double,           (const MPLike_data_container&, pybind11::object&, std::string&))
+    BACKEND_REQ(get_MP_loglike,               (),          double,           (const MPLike_data_container&, pybind11::object&, std::string&))
+    BACKEND_REQ(get_classy_backendDir,        (class_tag), std::string,      ())
+    BACKEND_REQ(get_classy_cosmo_object,      (class_tag), pybind11::object, ())
+    FORCE_SAME_BACKEND(class_tag)
     #undef FUNCTION
   #undef CAPABILITY
 
