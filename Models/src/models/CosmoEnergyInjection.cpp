@@ -31,7 +31,6 @@
 #define MODEL AnnihilatingDM_mixture
 void MODEL_NAMESPACE::AnnihilatingDM_mixture_to_AnnihilatingDM_general (const ModelParameters &myP, ModelParameters &targetP)
 {
-  USE_MODEL_PIPE(AnnihilatingDM_general)
   logger()<<"Running interpret_as_parent calculations for AnnihilatingDM_mixture --> AnnihilatingDM_general ..."<<LogTags::info<<EOM;
 
   targetP.setValue("mass", myP.getValue("mass"));
@@ -81,7 +80,6 @@ void MODEL_NAMESPACE::energy_injection_spectrum_AnnihilatingDM_mixture(DarkAges:
 #define MODEL AnnihilatingDM_photon
 void MODEL_NAMESPACE::AnnihilatingDM_photon_to_AnnihilatingDM_mixture (const ModelParameters &myP, ModelParameters &targetP)
 {
-  USE_MODEL_PIPE(AnnihilatingDM_mixture)
   logger()<<"Running interpret_as_parent calculations for AnnihilatingDM_photon --> AnnihilatingDM_mixture ..."<<LogTags::info<<EOM;
 
   targetP.setValue("mass", myP.getValue("mass"));
@@ -111,7 +109,6 @@ void MODEL_NAMESPACE::AnnihilatingDM_electron_to_AnnihilatingDM_mixture (const M
 #define MODEL DecayingDM_mixture
 void MODEL_NAMESPACE::DecayingDM_mixture_to_DecayingDM_general (const ModelParameters &myP, ModelParameters &targetP)
 {
-  USE_MODEL_PIPE(DecayingDM_general)
   logger()<<"Running interpret_as_parent calculations for DecayingDM_mixture --> DecayingDM_general ..."<<LogTags::info<<EOM;
 
   targetP.setValue("mass", myP.getValue("mass"));
@@ -162,7 +159,6 @@ void MODEL_NAMESPACE::energy_injection_spectrum_DecayingDM_mixture(DarkAges::Ene
 #define MODEL DecayingDM_photon
 void MODEL_NAMESPACE::DecayingDM_photon_to_DecayingDM_mixture (const ModelParameters &myP, ModelParameters &targetP)
 {
-  USE_MODEL_PIPE(DecayingDM_mixture)
   logger()<<"Running interpret_as_parent calculations for DecayingDM_photon --> DecayingDM_mixture ..."<<LogTags::info<<EOM;
 
   targetP.setValue("mass", myP.getValue("mass"));
@@ -178,7 +174,6 @@ void MODEL_NAMESPACE::DecayingDM_photon_to_DecayingDM_mixture (const ModelParame
 #define MODEL DecayingDM_electron
 void MODEL_NAMESPACE::DecayingDM_electron_to_DecayingDM_mixture (const ModelParameters &myP, ModelParameters &targetP)
 {
-  USE_MODEL_PIPE(DecayingDM_mixture)
   logger()<<"Running interpret_as_parent calculations for DecayingDM_electron --> DecayingDM_mixture ..."<<LogTags::info<<EOM;
 
   targetP.setValue("mass", myP.getValue("mass"));

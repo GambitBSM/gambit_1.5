@@ -112,7 +112,7 @@ namespace Gambit
       auto isNonZero = [](double i) {return i > 0.;};
       int N_ncdm = std::count_if(nuMasses.begin(), nuMasses.end(), isNonZero);
 
-      // Assing the result to the standard value of N_ur depending on the number of massive neutrinos.
+      // Value of N_ur depends on the number of massive neutrinos
       switch (N_ncdm)
       {
         case 1:

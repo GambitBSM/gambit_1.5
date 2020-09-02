@@ -49,7 +49,8 @@
 ///
 ///  *********************************************
 
-#pragma once
+#ifndef __CosmoBit_rollcall_hpp__
+#define __CosmoBit_rollcall_hpp__
 
 #include "gambit/CosmoBit/CosmoBit_types.hpp"
 
@@ -342,8 +343,8 @@ START_MODULE
 
   /// compute CMB low ell likelihood from Planck data
   /// functions to use 
-  /// - TT or TEB or or EE or TTEE 
-  /// - 2018 or 2015 DR and 
+  /// - TT or TEB or EE or TTEE
+  /// - 2018 or 2015 DR
   #define CAPABILITY Planck_lowl_loglike
   START_CAPABILITY
     #define FUNCTION function_Planck_lowl_TT_2015_loglike
@@ -782,10 +783,11 @@ START_MODULE
     START_FUNCTION(map_str_dbl)
     DEPENDENCY(parameter_dict_for_MPLike, pybind11::dict)
     DEPENDENCY(MP_objects, MPLike_objects_container)
-    BACKEND_REQ(check_likelihood_classy_combi,(),          void,             (str&, str&))
-    BACKEND_REQ(get_MP_loglike,               (),          double,           (const MPLike_data_container&, pybind11::object&, std::string&))
-    BACKEND_REQ(get_classy_backendDir,        (class_tag), std::string,      ())
-    BACKEND_REQ(get_classy_cosmo_object,      (class_tag), pybind11::object, ())
+    BACKEND_REQ(check_likelihood_classy_combi,(mplike_tag), void,             (str&, str&))
+    BACKEND_REQ(get_MP_loglike,               (mplike_tag), double,           (const MPLike_data_container&, pybind11::object&, std::string&))
+    BACKEND_REQ(get_classy_backendDir,        (class_tag),  std::string,      ())
+    BACKEND_REQ(get_classy_cosmo_object,      (class_tag),  pybind11::object, ())
+    FORCE_SAME_BACKEND(mplike_tag)
     FORCE_SAME_BACKEND(class_tag)
     #undef FUNCTION
   #undef CAPABILITY
@@ -811,3 +813,4 @@ START_MODULE
   #undef CAPABILITY
 
 #undef MODULE
+#endif /* defined __CosmoBit_rollcall_hpp__ */

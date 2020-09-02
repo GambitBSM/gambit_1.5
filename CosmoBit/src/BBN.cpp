@@ -351,7 +351,7 @@ namespace Gambit
 
           // If either has_relative_errors or has_absolute_errors is and the "err" option for AlterBBN is nonzero,
           // we need to carefully check, whether we are about to override all error estimates for the relevant abundances.
-          // To this end, perform a set differnce between the elements in the subcaps (i.e. isotopes we are interested in)
+          // To this end, perform a set difference between the elements in the subcaps (i.e. isotopes we are interested in)
           // and the isotopes in isotope basis (the ones we want to override).
           // When all elements in v are included in isotope_basis, throw an error
           if (has_errors && int(AlterBBN_input["err"]) != 0)

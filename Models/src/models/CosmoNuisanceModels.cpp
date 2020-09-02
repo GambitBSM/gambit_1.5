@@ -34,31 +34,25 @@
 
 
 #define MODEL cosmo_nuisance_Pantheon
-  #define PARENT cosmo_nuisance_JLA
-    // Translation function definition
-    void MODEL_NAMESPACE::cosmo_nuisance_Pantheon_to_cosmo_nuisance_JLA (const ModelParameters &myP, ModelParameters &targetP)
-    {
-      USE_MODEL_PIPE(PARENT) // get pipe for "interpret as PARENT" function
-      logger()<<"Running interpret_as_parent calculations for cosmo_nuisance_Pantheon --> cosmo_nuisance_JLA ..."<<LogTags::info<<EOM;
-    
-      targetP.setValue("M", myP.getValue("M"));
-      // the rest (alpha, beta & Delta_M) automatically defaults to 0
-    }
-  #undef PARENT
+// Translation function definition
+void MODEL_NAMESPACE::cosmo_nuisance_Pantheon_to_cosmo_nuisance_JLA (const ModelParameters &myP, ModelParameters &targetP)
+{
+  logger()<<"Running interpret_as_parent calculations for cosmo_nuisance_Pantheon --> cosmo_nuisance_JLA ..."<<LogTags::info<<EOM;
+
+  targetP.setValue("M", myP.getValue("M"));
+  // the rest (alpha, beta & Delta_M) automatically defaults to 0
+}
 #undef MODEL
 
 #define MODEL cosmo_nuisance_BK14priors
-  #define PARENT cosmo_nuisance_BK14
-    // Translation function definition
-    void MODEL_NAMESPACE::cosmo_nuisance_BK14priors_to_cosmo_nuisance_BK14 (const ModelParameters &myP, ModelParameters &targetP)
-    {
-      USE_MODEL_PIPE(PARENT) // get pipe for "interpret as PARENT" function
-      logger()<<"Running interpret_as_parent calculations for cosmo_nuisance_BK14priors --> cosmo_nuisance_BK14 ..."<<LogTags::info<<EOM;
-    
-      targetP.setValue("BBbetadust", myP.getValue("BBbetadust"));
-      targetP.setValue("BBbetasync", myP.getValue("BBbetasync"));
-      // the rest BBdust,BBsync,BBalphadust,BBTdust,BBalphasync,BBdustsynccorr,EEtoBB_dust,EEtoBB_sync automatically defaults to 0
-    }
-  #undef PARENT
+// Translation function definition
+void MODEL_NAMESPACE::cosmo_nuisance_BK14priors_to_cosmo_nuisance_BK14 (const ModelParameters &myP, ModelParameters &targetP)
+{
+  logger()<<"Running interpret_as_parent calculations for cosmo_nuisance_BK14priors --> cosmo_nuisance_BK14 ..."<<LogTags::info<<EOM;
+
+  targetP.setValue("BBbetadust", myP.getValue("BBbetadust"));
+  targetP.setValue("BBbetasync", myP.getValue("BBbetasync"));
+  // the rest BBdust,BBsync,BBalphadust,BBTdust,BBalphasync,BBdustsynccorr,EEtoBB_dust,EEtoBB_sync automatically defaults to 0
+}
 #undef MODEL
 
