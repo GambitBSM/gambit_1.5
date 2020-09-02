@@ -31,8 +31,6 @@
   #include <pybind11/stl.h>
   #include <pybind11/stl_bind.h>
   #include <pybind11/functional.h>
-  //#include <pybind11/eval.h>
-
 
   BE_NAMESPACE
   {
@@ -60,10 +58,9 @@
       for (auto it : classy_input)
       {
          // test if any pointer is being passed to CLASS -- if so you'd need to compare the contents
-         // of the vectors, so just recompute by default in that case (atm the options that pass pointser
+         // of the vectors, so just recompute by default in that case (atm the options that pass pointers
          // can be identified by searching for 'array' or 'pointer_to' in the CLASS input dict. If more of
          // these cases are implemented the checks have to be added here.)
-         // (as soon there is a real fast-slow scanner implemented this sould probably be changed)
          if(it.first.cast<std::string>().find("array") != std::string::npos){return false;}
          if(it.first.cast<std::string>().find("pointer_to") != std::string::npos){return false;}
 
@@ -86,7 +83,7 @@
       // check if "modes" input is set while "output" is not set
       if(classy_input.contains("modes") and not classy_input.contains("output"))
       {
-         errMssg << "You are calling class asking for the following modes to be computed : "<< pybind11::repr(classy_input["modes"]);
+         errMssg << "You are calling CLASS asking for the following modes to be computed : "<< pybind11::repr(classy_input["modes"]);
          errMssg << "\nHowever, you did not request any output that requires solving the perturbations.\nHence CLASS";
          errMssg << " will not read the input 'modes' and won't run. Add the CLASS input parameter 'output' requesting";
          errMssg << " a spectrum to be computed to the yaml file as run option, e.g. \n  - capability: classy_baseline_params\n";
@@ -234,7 +231,6 @@
     // returns Neff
     double class_get_Neff()
     {
-      // in CosmoBit.cpp test if ClassInput contains mPk -> otherwise SegFault when trying to compute sigma8
       double Neff = cosmo.attr("Neff")().cast<double>();
       return Neff;
     }
@@ -279,7 +275,7 @@ BE_INI_FUNCTION
     if (cosmo_input_dict.attr("__contains__")("f_eff_type").cast<bool>())
     {
       std::ostringstream error;
-      error << "\nYou are scanning over a model, e.g. decayin or annihilating DM, ";
+      error << "\nYou are scanning over a model, e.g. decaying or annihilating DM, ";
       error << "\nwith exotic energy injection in the early Universe. However, you ";
       error << "\nare using a CLASS version that does not support these calculations. ";
       error << "\nGAMBIT will exit now. To fix this simply run";
@@ -319,8 +315,8 @@ BE_INI_FUNCTION
       logger() << pybind11::repr(cosmo_input_dict) << EOM;
       cosmo.attr("set")(cosmo_input_dict);
 
-      // CLASS re-computed -> safe this information in cosmo container, so MontePython
-      // (and potentially other backends) have access to this information 
+      // CLASS re-computed -> save this information in cosmo container, so MontePython
+      // (and potentially other backends) has access to this information
       cosmo.attr("set_cosmo_update")(true);
       // -> access value
       //int recomputed = cosmo.attr("recomputed").cast<int>();
@@ -387,8 +383,8 @@ BE_INI_FUNCTION
     else
     {
       logger() << LogTags::info << "[classy_"<< STRINGIFY(VERSION) <<"] \"cosmo.compute\" was skipped, input was identical to previously computed point" << EOM;
-      // CLASS did not recompute -> safe this information in cosmo container, so MontePython
-      // (and potentially other backends) have access to this information and can skip
+      // CLASS did not recompute -> save this information in cosmo container, so MontePython
+      // (and potentially other backends) has access to this information and can skip
       // their computations as well 
       cosmo.attr("set_cosmo_update")(false);
       // -> access the information with 

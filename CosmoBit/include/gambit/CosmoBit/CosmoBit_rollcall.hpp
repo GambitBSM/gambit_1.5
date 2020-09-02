@@ -709,7 +709,7 @@ START_MODULE
     START_FUNCTION(BBN_container)
     DEPENDENCY(AlterBBN_Input, map_str_dbl)
     BACKEND_REQ(call_nucl_err, (alterbbn_tag), int, (map_str_dbl&,double*,double*))
-    BACKEND_REQ(get_NNUC, (alterbbn_tag), int, ())
+    BACKEND_REQ(get_NNUC, (alterbbn_tag), size_t, ())
     BACKEND_REQ(get_abund_map_AlterBBN, (alterbbn_tag), map_str_int, ())
     FORCE_SAME_BACKEND(alterbbn_tag)
     #undef FUNCTION

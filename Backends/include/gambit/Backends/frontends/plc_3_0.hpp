@@ -23,8 +23,6 @@
 #define VERSION 3.0
 #define SAFE_VERSION 3_0
 
-#include "gambit/Utils/util_functions.hpp"
-
 LOAD_LIBRARY
 
 // Internal function of plc (Not intended to be called directly)

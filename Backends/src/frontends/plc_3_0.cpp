@@ -81,9 +81,9 @@ BE_NAMESPACE
     double res;
     clik_error* plc_Error = initError();
     if (lensing)
-     res = clik_lensing_compute(clik_lensing_map[name].get(), cl_and_pars, &plc_Error);
+      res = clik_lensing_compute(clik_lensing_map[name].get(), cl_and_pars, &plc_Error);
     else
-     res = clik_compute(clik_map[name].get(), cl_and_pars, &plc_Error);
+      res = clik_compute(clik_map[name].get(), cl_and_pars, &plc_Error);
     if (isError(plc_Error) || !(std::isfinite(res)))
     {
       std::string err = "Calling \"plc_loglike_" + name + "\" was not successful.\n";

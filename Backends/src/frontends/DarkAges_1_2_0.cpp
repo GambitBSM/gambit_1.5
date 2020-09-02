@@ -68,6 +68,9 @@
       return push_to_front_and_back(input,front,back);
     }
 
+    // Main routine of DarkAges
+    // Calculates the f(z) table for a given injection spectrum, mass, and lifetime
+    // (For annihilating DM, lifetime has a dummy value and will not be used)
     void calc_f(DarkAges::Energy_injection_spectrum spec, double mass, double lifetime)
     {
       // This is nothing else than 'import numpy as np'
@@ -104,42 +107,42 @@
       const double me_eV = 1.e9 * m_electron;
 
       // Initialise the appropriate "model"
-      // Electrons/positrons and photns are treated separately
+      // Electrons/positrons and photons are treated separately
       static py::object model_el;
       static py::object model_ph;
       if (hasAnnihilation)
       {
-	py::object mod = DA_model.attr("annihilating_model");
-	model_el = mod(spec_el, null_el, null_el,
-		       mass-me_eV, logE_el, redshift,
-		       py::arg("normalize_spectrum_by") = "mass");
-	model_ph = mod(null_ph, spec_ph, null_ph,
-		       mass, logE_ph, redshift,
-		       py::arg("normalize_spectrum_by") = "mass");
+        py::object mod = DA_model.attr("annihilating_model");
+        model_el = mod(spec_el, null_el, null_el,
+                       mass-me_eV, logE_el, redshift,
+                       py::arg("normalize_spectrum_by") = "mass");
+        model_ph = mod(null_ph, spec_ph, null_ph,
+                       mass, logE_ph, redshift,
+                       py::arg("normalize_spectrum_by") = "mass");
       }
       else if (hasDecay)
       {
-	py::object mod = DA_model.attr("decaying_model");
-	model_el = mod(spec_el, null_el, null_el,
-		       mass-2*me_eV, lifetime, logE_el, redshift,
-		       py::arg("normalize_spectrum_by") = "mass");
-	model_ph = mod(null_ph, spec_ph, null_ph,
-		       mass, lifetime, logE_ph, redshift,
-		       py::arg("normalize_spectrum_by") = "mass");
+        py::object mod = DA_model.attr("decaying_model");
+        model_el = mod(spec_el, null_el, null_el,
+                       mass-2*me_eV, lifetime, logE_el, redshift,
+                       py::arg("normalize_spectrum_by") = "mass");
+        model_ph = mod(null_ph, spec_ph, null_ph,
+                       mass, lifetime, logE_ph, redshift,
+                       py::arg("normalize_spectrum_by") = "mass");
       }
 
       // Loop through all transfer functions and calculate f_c(z)
       // and add it to result_map
       for (auto const& it : transfer_functions)
       {
-	std::string channel = it.first;
-	py::object tf = it.second;
-	pyArray_dbl f = np.attr("zeros_like")(redshift);
-	if (hasElectrons)
-	  f = f.attr("__add__")((model_el.attr("calc_f")(tf)).attr("__getitem__")(-1));
-	if (hasPhotons)
-	  f = f.attr("__add__")((model_ph.attr("calc_f")(tf)).attr("__getitem__")(-1));
-	result_map[channel] = repeat_front_and_back(f);
+        std::string channel = it.first;
+        py::object tf = it.second;
+        pyArray_dbl f = np.attr("zeros_like")(redshift);
+        if (hasElectrons)
+          f = f.attr("__add__")((model_el.attr("calc_f")(tf)).attr("__getitem__")(-1));
+        if (hasPhotons)
+          f = f.attr("__add__")((model_ph.attr("calc_f")(tf)).attr("__getitem__")(-1));
+        result_map[channel] = repeat_front_and_back(f);
       }
 
       // Add redshift to result_map
@@ -149,7 +152,6 @@
       result_map["redshift"] =  push_to_front_and_back(z,0,zmax);
 
       // And we are done
-      return;
     }
 
     DarkAges::Energy_injection_efficiency_table get_energy_injection_efficiency_table()
@@ -159,21 +161,21 @@
       // lambda to safely check if requested column is in result_map
       auto safe_retrieve = [](const str& key) -> std::vector<double>
       {
-	 if (result_map.count(key) != 0)
-	 {
-	   return cast_np_to_std(result_map[key]);
-	 }
-	 else
-	 {
-	   std::ostringstream errMssg;
-	   errMssg << "Could not successfully gather the results ";
-	   errMssg << "of DarkAges_v"<< STRINGIFY(VERSION)<<".\n";
-	   errMssg << "The key -> " << key << " <- is not in \'result map\'.";
-	   backend_error().raise(LOCAL_INFO,errMssg.str());
+        if (result_map.count(key) != 0)
+        {
+          return cast_np_to_std(result_map[key]);
+        }
+        else
+        {
+          std::ostringstream errMssg;
+          errMssg << "Could not successfully gather the results ";
+          errMssg << "of DarkAges_v"<< STRINGIFY(VERSION)<<".\n";
+          errMssg << "The key -> " << key << " <- is not in \'result map\'.";
+          backend_error().raise(LOCAL_INFO,errMssg.str());
 
-	   // This will never be returned, but the compiler keeps quiet
-	   return std::vector<double>{};
-	 }
+          // This will never be returned, but the compiler keeps quiet
+          return std::vector<double>{};
+         }
       };
 
       // Fill the effiency table with all calculated columns
@@ -183,15 +185,15 @@
 
       if (f_eff_mode)
       {
-	result.f_eff = safe_retrieve("effective");
+        result.f_eff = safe_retrieve("effective");
       }
       else
       {
-	result.f_heat = safe_retrieve("Heat");
-	result.f_lya = safe_retrieve("Ly-A");
-	result.f_hion = safe_retrieve("H-Ion");
-	result.f_heion = safe_retrieve("He-Ion");
-	result.f_lowe = safe_retrieve("LowE");
+        result.f_heat = safe_retrieve("Heat");
+        result.f_lya = safe_retrieve("Ly-A");
+        result.f_hion = safe_retrieve("H-Ion");
+        result.f_heion = safe_retrieve("He-Ion");
+        result.f_lowe = safe_retrieve("LowE");
       }
 
       return result;
@@ -220,7 +222,7 @@ BE_INI_FUNCTION
     {
       first_point = false;
 
-      // Check if annihilating DM or decaying DM is considered.
+      // Check if annihilating DM or decaying DM are considered.
       // If both is considered, raise an error.
       // The BE_ALLOW_MODELS-macro in the frontend header ensures that
       // hasAnnihilation and hasDecay cannot be false at the same time.
@@ -228,11 +230,11 @@ BE_INI_FUNCTION
       hasDecay = ModelInUse("DecayingDM_general");
       if (hasAnnihilation && hasDecay)
       {
-	std::ostringstream errMssg;
-	errMssg << "You asked for a combined scenario of decaying DM and annihilating DM. ";
-	errMssg << "The current version of DarkAges (v"<< STRINGIFY(VERSION)<<") cannot handle this.\n";
-	errMssg << "Please consider only one scenario exclusively.";
-	backend_error().raise(LOCAL_INFO,errMssg.str());
+        std::ostringstream errMssg;
+        errMssg << "You asked for a combined scenario of decaying DM and annihilating DM. ";
+        errMssg << "The current version of DarkAges (v"<< STRINGIFY(VERSION)<<") cannot handle this.\n";
+        errMssg << "Please consider only one scenario exclusively.";
+        backend_error().raise(LOCAL_INFO,errMssg.str());
       }
 
       // Save the submodule "model" (for later)
@@ -253,23 +255,23 @@ BE_INI_FUNCTION
       // Depending on the execution mode, collect the relevant transfer functions.
       if (f_eff_mode)
       {
-	py::object tf_vec = DA.attr("transfer_functions");
-	py::object tf_corr = DA.attr("transfer_functions_corr");
+        py::object tf_vec = DA.attr("transfer_functions");
+        py::object tf_corr = DA.attr("transfer_functions_corr");
 
-	py::object tf_eff = tf_vec.attr("sum")();
-	tf_eff = tf_eff.attr("__sub__")(tf_corr);
-	transfer_functions["effective"] = tf_eff;
+        py::object tf_eff = tf_vec.attr("sum")();
+        tf_eff = tf_eff.attr("__sub__")(tf_corr);
+        transfer_functions["effective"] = tf_eff;
       }
       else
       {
-	map_str_int channel_map = DA.attr("channel_dict").cast<map_str_int>();
-	for (auto const& it: channel_map)
-	{
-	  std::string channel = it.first;
-	  int idx = it.second;
-	  py::object tf = DA.attr("transfer_functions").attr("__getitem__")(idx);
-	  transfer_functions[channel] = tf;
-	}
+        map_str_int channel_map = DA.attr("channel_dict").cast<map_str_int>();
+        for (auto const& it: channel_map)
+        {
+          std::string channel = it.first;
+          int idx = it.second;
+          py::object tf = DA.attr("transfer_functions").attr("__getitem__")(idx);
+          transfer_functions[channel] = tf;
+        }
       }
 
       // How far (in redshift) should the table be extended?
@@ -323,24 +325,24 @@ BE_INI_FUNCTION
       std::ostringstream buff;
       buff << "---------------" << "\n";
       if (f_eff_mode)
-	buff << "z\tf_eff" << "\n";
+        buff << "z\tf_eff" << "\n";
       else
-	buff << "z\tf_heat\tf_lya\tf_hion\tf_heion\tf_lowe" << "\n";
+        buff << "z\tf_heat\tf_lya\tf_hion\tf_heion\tf_lowe" << "\n";
       for (unsigned int i = 0; i < result_map["redshift"].size(); i++)
       {
-	buff << result_map["redshift"].at(i) << "\t";
-	if (f_eff_mode)
-	{
-	  buff << result_map["effective"].at(i) << "\n";
-	}
-	else
-	{
-	  buff << result_map["Heat"].at(i) << "\t";
-	  buff << result_map["Ly-A"].at(i) << "\t";
-	  buff << result_map["H-Ion"].at(i) << "\t";
-	  buff << result_map["He-Ion"].at(i) << "\t";
-	  buff << result_map["LowE"].at(i)  << "\n";
-	}
+        buff << result_map["redshift"].at(i) << "\t";
+        if (f_eff_mode)
+        {
+          buff << result_map["effective"].at(i) << "\n";
+        }
+        else
+        {
+          buff << result_map["Heat"].at(i) << "\t";
+          buff << result_map["Ly-A"].at(i) << "\t";
+          buff << result_map["H-Ion"].at(i) << "\t";
+          buff << result_map["He-Ion"].at(i) << "\t";
+          buff << result_map["LowE"].at(i)  << "\n";
+        }
       }
       buff << "---------------" << "\n";
       std::cout << buff.str();

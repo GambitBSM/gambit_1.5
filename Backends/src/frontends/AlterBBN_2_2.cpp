@@ -36,11 +36,8 @@
 
 // Initialisation
 BE_INI_FUNCTION{
-
-
 }
 END_BE_INI_FUNCTION
-
 
 // Convenience functions (definitions)
 BE_NAMESPACE
@@ -55,7 +52,7 @@ BE_NAMESPACE
   /// here and in the function fill_cosmomodel below to modify the lifetime of the neutron
   std::set<std::string> known_relicparam_options = {"eta0", "Nnu", "dNnu", "neutron_lifetime", "err","failsafe"};
 
-  /// pass all values of AlterBBN's relicparam structure that
+  /// Fill AlterBBN's relicparam with the entries from the AlterBBN_input
   void fill_cosmomodel(AlterBBN_2_2::relicparam * input_relicparam, map_str_dbl & AlterBBN_input)
   {
     // check that only options that are known to the interface, i.e. that they are one of the options
@@ -63,18 +60,17 @@ BE_NAMESPACE
     static bool first_run = true;
     if(first_run)
     {
-      std::map<std::string, double>::const_iterator it;
-      for ( it = AlterBBN_input.begin(); it != AlterBBN_input.end(); it++ )
+      for (const auto& it : AlterBBN_input)
       {
         // throw error if an option is not currently being passed on to AlterBBN & tell user how to change that
-        if(known_relicparam_options.count(it->first)==0)
+        if(known_relicparam_options.count(it.first)==0)
         {
           std::ostringstream errormsg;
-          errormsg << "Option '" << it->first << "' tried to pass to AlterBBN_" << VERSION<< " is not know to the relicparam strucutre "<<std::endl;
+          errormsg << "Option '" << it.first << "' tried to pass to AlterBBN_" << VERSION<< " is not know to the relicparam strucutre "<<std::endl;
           errormsg << "Known options are:";
           for(auto item : known_relicparam_options)
           {
-                  errormsg <<" '"<<item << "'";
+            errormsg << " '" << item << "'";
           }
           errormsg << ". Check for typos or add new one to the string set 'known_relicparam_options' in Backends/src/frontends/AlterBBN_"<< VERSION<< ".cpp"<<std::endl;
           backend_error().raise(LOCAL_INFO,errormsg.str());
@@ -101,19 +97,18 @@ BE_NAMESPACE
     if (AlterBBN_input != prev_AlterBBN_input)
     {
       AlterBBN_2_2::relicparam input_relicparam;
-      Init_cosmomodel(&input_relicparam); // initialise valuse of relicparam structure to their defaults
+      Init_cosmomodel(&input_relicparam); // initialise values of relicparam structure to their defaults
       fill_cosmomodel(&input_relicparam, AlterBBN_input); // fill strucutre with values contained in AlerBBN_input map which is filled in CosmoBit.ccp for different models
   
       nucl_err_res = nucl_err(&input_relicparam, ratioH, cov_ratioH);
-      //int bbn_exc = bbn_excluded_chi2(&input_relicparam); just for testing purposes to compare internal AlterBBN output to GAMBIT result
       prev_ratioH = std::vector<double>(ratioH, ratioH+NNUC+1);
       prev_cov_ratioH = std::vector<double>(cov_ratioH, cov_ratioH+(NNUC+1)*(NNUC+1));
       prev_AlterBBN_input = AlterBBN_input;
     }
     else
     {
-      for (int i=0;i<NNUC+1;i++) ratioH[i] = prev_ratioH[i];
-      for (int i=0;i<(NNUC+1)*(NNUC+1);i++) cov_ratioH[i] = prev_cov_ratioH[i];
+      for (size_t i=0;i<NNUC+1;i++) ratioH[i] = prev_ratioH[i];
+      for (size_t i=0;i<(NNUC+1)*(NNUC+1);i++) cov_ratioH[i] = prev_cov_ratioH[i];
     }
     return nucl_err_res;
   }
@@ -121,7 +116,7 @@ BE_NAMESPACE
   /// return the NNUC -- global parameter of AlterBBN specifying the number of
   /// elements for which abundances are calculated -> length of array ratioH is NNUC+1 (AlterBBN
   /// starts filling @ position 1)
-  int get_NNUC() { return NNUC; }
+  size_t get_NNUC() { return NNUC; }
 
   /// create a map that translates element name to position of element in ratioH vector
   /// (holding the computed element abundances)

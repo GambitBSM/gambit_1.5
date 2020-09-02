@@ -21,7 +21,7 @@ if sys.version_info[0] < 3:
     In MontePython, this file is created if it does not exist in the MP data folder. 
     However, the results depend on the treatment of the non linearities. Hence, it is 
     not guaranteed to be (CLASS) version independent. To ensure this for the use with
-    GAMBIT, we execute this script after the build step of each CLASS version and safe
+    GAMBIT, we execute this script after the build step of each CLASS version and save
     the resulting spectra in the installation folder of the respective CLASS version. 
     When running MontePython, we pass the path to the CLASS version that is used for
     the current GAMBIT run. Therefore, we avoid all potential inconsistencies related to the use

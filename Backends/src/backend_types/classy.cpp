@@ -31,23 +31,12 @@
 ///  *********************************************
 
 #include "gambit/Backends/backend_types/classy.hpp"
+#include "gambit/Utils/util_functions.hpp"
 
 #include <boost/algorithm/string/predicate.hpp> // case-insensitive string comparison
 
-
 namespace Gambit
 {
-
-  /// helper to convert the memory address a double pointer points to
-  /// to an integer (-> uintptr_t, size of type depends on system & ensures
-  /// it is big enough to store memory addresses of the underlying setup)
-  /// (implemented to pass contents of arrays to CLASS)
-  uintptr_t memaddress_to_uint(double* ptr)
-  {
-    uintptr_t addr;
-    addr = reinterpret_cast<uintptr_t>(ptr);
-    return addr;
-  }
 
   #ifdef HAVE_PYBIND11
 
@@ -56,15 +45,15 @@ namespace Gambit
     void Classy_input::add_entry(str key, str    value) {input_dict[key.c_str()]=value.c_str();}
     void Classy_input::add_entry(str key, std::vector<double>& values)
     {
-    // get pointers to arrays holding the information that needs
-    // to be passed on to class, convert to uintptr_t (type large enough
-    // to store memory address of the used system) and pass to class
-    input_dict[key.c_str()] = std::to_string(memaddress_to_uint(&values[0])).c_str();
+      // get pointers to arrays holding the information that needs
+      // to be passed on to class, convert to uintptr_t (type large enough
+      // to store memory address of the used system) and pass to class
+      input_dict[key.c_str()] = std::to_string(memaddress_to_uint(&values[0])).c_str();
     }
 
     bool Classy_input::has_key(str key){return input_dict.contains(key.c_str());}
 
-    /// CLASS specific functionto merge python dictionary extra_dict into input_dict 
+    /// CLASS specific function to merge python dictionary extra_dict into input_dict
     /// (member of Classy_input). If both dictionaries have the same key it decides
     /// on a case-by-case basis how to deal with that.
     /// Some examples are already implemented, might have to be extended in the future
@@ -189,23 +178,6 @@ namespace Gambit
           backend_error().raise(LOCAL_INFO,errormsg.str());
         }
       }
-    }
-
-    // return stringstream to print current entries of
-    // input_dict (can be send to logger)
-    std::string Classy_input::print_entries_to_logger()
-    {
-      using namespace LogTags;
-      std::ostringstream log_msg;
-      log_msg << "Parameters passed to class: \n \n";
-      for (auto item : input_dict)
-      {
-        pybind11::str key = pybind11::str(item.first);
-        pybind11::str value = pybind11::str(item.second);
-
-        log_msg << std::string(key) << " = " << std::string(value) << " \n";
-      }
-      return log_msg.str();
     }
 
     // clears all entries from input_dict

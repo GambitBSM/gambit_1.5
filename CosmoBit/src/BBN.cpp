@@ -253,7 +253,7 @@ namespace Gambit
       using namespace Pipes::compute_BBN_abundances;
 
       // Global variable of AlterBBN (# computed element abundances)
-      const static int NNUC = BEreq::get_NNUC();
+      const static size_t NNUC = BEreq::get_NNUC();
 
       // In AlterBBN ratioH and cov_ratioH are arrays of fixed length.
       // With certain compiler versions (gcc 5.4.0) we have seen memory corruption problems
@@ -332,7 +332,7 @@ namespace Gambit
         // Process user-defined correlations (if provided)
         if (use_custom_covariances)
         {
-          for (int ie = 1; ie < NNUC; ie++) corr.at(ie).at(ie) = 1.;
+          for (size_t ie = 1; ie < NNUC; ie++) corr.at(ie).at(ie) = 1.;
           std::map<std::string, int> abund_map = result.get_abund_map();
 
           // Check whether any of the entries in isotope_basis is not recognised

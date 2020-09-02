@@ -32,7 +32,8 @@
 ///
 ///  *********************************************
 
-#pragma once
+#ifndef __classy_types_hpp__
+#define __classy_types_hpp__
 
 #include "gambit/cmake/cmake_variables.hpp"
 #include "gambit/Utils/util_types.hpp"
@@ -47,12 +48,6 @@
     /// Merge two dictionaries containing input parameters for CLASS
     /// (specific rules are applied in case of key duplication)
     void merge_pybind_dicts(pybind11::dict&, pybind11::dict, bool);
-
-    /// helper to convert the memory address a double pointer points to
-    /// to an integer (-> uintptr_t, size of type depends on system & ensures
-    /// it is big enough to store memory addresses of the underlying setup)
-    /// (implemented to pass contents of arrays to CLASS)
-    uintptr_t memaddress_to_uint(double* ptr);
 
     // Class that manages the input dictionary for classy
     class Classy_input
@@ -78,9 +73,6 @@
         // keep_larger_val and keep_smaller_val defined below)
         void merge_input_dicts(pybind11::dict);
 
-        // routine to print CLASS input values to logger
-        std::string print_entries_to_logger();
-
         // clears all entries from input_dict
         void clear();
 
@@ -103,4 +95,6 @@
 
   }
 
-#endif
+#endif // end of HAVE_PYBIND11 bracket
+
+#endif // defined __classy_types_hpp__

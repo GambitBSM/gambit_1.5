@@ -4,7 +4,7 @@
 ///  script to patch MontePython to work with gambit
 ///
 ///   - harvest all likelihoods included in montepython/likelihoods folder
-///   - creapte list of availible likelihoods
+///   - create list of available likelihoods
 ///   - replace import statement in each __init__ file to import MontePhytonLike instead of montepython.likelihood_class
 ///
 ///   Note: for simplicity the Data object is also defined in MontePythonLike (extra file in standard MontePython)

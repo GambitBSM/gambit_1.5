@@ -33,7 +33,7 @@
 
   BE_NAMESPACE
   {
-    using namespace pybind11::literals; // to bring in the `_a` literal to initialise python dictionarys with pybind11
+    using namespace pybind11::literals; // to bring in the `_a` literal to initialise python dictionaries with pybind11
 
     static map_str_dbl chached_likelihoods; // string double map to save likelihood calculation from previous param point
 
@@ -104,7 +104,7 @@
         }
         catch(const std::exception&)
         {
-          // if for some reason the MP likelihood object does not have the attribute "use_nusicane" (even though all of them
+          // if for some reason the MP likelihood object does not have the attribute "use_nuisance" (even though all of them
           //  should, but let's not count on it...) there are no nuisance parameters. So calculation can be skipped. 
           needs_update = false;
         }

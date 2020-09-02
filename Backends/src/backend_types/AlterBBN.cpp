@@ -30,7 +30,7 @@ namespace Gambit
   {}
 
   /// Initialize sizes of vectors (get NNUC, number of computed element abundances, from AlterBBN)
-  void BBN_container::init_arr_size(int nnuc)
+  void BBN_container::init_arr_size(size_t nnuc)
   {
     NNUC = nnuc;
     BBN_abund.resize(NNUC+1, 0.);
@@ -47,7 +47,7 @@ namespace Gambit
   void BBN_container::set_BBN_covmat(int row, int col, double val) {BBN_covmat[row][col] = val;}
 
   /// Global parameter in AlterBBN; holds number of computed element abundances
-  int BBN_container::get_NNUC() const {return NNUC;};
+  size_t BBN_container::get_NNUC() const {return NNUC;};
 
   /// Getter for map from isotope names to position in BBN_abundance vector
   const std::map<std::string,int>& BBN_container::get_abund_map() const {return abund_map;};

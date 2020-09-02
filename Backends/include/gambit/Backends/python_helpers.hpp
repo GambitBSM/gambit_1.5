@@ -42,7 +42,7 @@ namespace Gambit
     /// Returns an empty string when the function or variable is not inside a submodule.
     sspair split_qualified_python_name(str, str);
 
-    /// Helper function (translations std::vector <-> numpy array)
+    /// Function to translate std::vector to numpy array
     template<typename T>
     pybind11::array_t<T> cast_std_to_np(const std::vector<T>& input)
     {
@@ -56,6 +56,7 @@ namespace Gambit
       return pybind11::array_t<T>(size, data);
     }
 
+    /// Function to translate numpy array to std::vector
     template<typename T>
     std::vector<T> cast_np_to_std(const pybind11::array_t<T>& input)
     {
@@ -86,7 +87,7 @@ namespace Gambit
       pybind11::array_t<T> output(size_a+size_b);
       auto output_data = output.mutable_data();
 
-      //
+      // Copy the contents of a and b into output
       std::memcpy(output_data, data_a, size_a*sizeof(T));
       std::memcpy(output_data+size_a, data_b, size_b*sizeof(T));
 

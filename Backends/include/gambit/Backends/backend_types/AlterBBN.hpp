@@ -19,7 +19,8 @@
 ///
 ///  *********************************************
 
-#pragma once
+#ifndef __AlterBBN_types_hpp__
+#define __AlterBBN_types_hpp__
 
 #include "gambit/Utils/util_types.hpp"
 
@@ -47,7 +48,7 @@ namespace Gambit
       BBN_container();
 
       /// Initialize sizes of vectors (get NNUC, number of computed element abundances, from AlterBBN)
-      void init_arr_size(int);
+      void init_arr_size(size_t);
 
       /// Initialise the translation map from element name to position in abundance vector
       void set_abund_map(map_str_int);
@@ -59,7 +60,7 @@ namespace Gambit
       void set_BBN_covmat(int, int, double);
 
       /// Global parameter in AlterBBN; holds number of computed element abundances
-      int get_NNUC() const;
+      size_t get_NNUC() const;
 
       /// Getter for map from isotope names to position in BBN_abundance vector
       const std::map<str,int>& get_abund_map() const;
@@ -83,7 +84,7 @@ namespace Gambit
       const std::set<int>& get_active_isotope_indices() const;
 
     private:
-      int NNUC;
+      size_t NNUC;
       std::vector<double> BBN_abund;
       std::vector<std::vector<double>> BBN_covmat;
       std::map<str,int> abund_map;
@@ -181,3 +182,4 @@ namespace Gambit
   }
 }
 
+#endif // defined __AlterBBN_types_hpp__
