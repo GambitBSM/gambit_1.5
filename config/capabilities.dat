@@ -3850,14 +3850,6 @@ calculate_uncertainty_amu_2loop: |
 #  Axion-related capabilities
 #----------------------------
 
-CosmoALP_parameters: |
-   Parameters of the CosmoALP model (Cagg, fa, ma0, thetai, f0_thermal, T_R).
-   See ./gambit CosmoALP
-
-GeneralCosmoALP_parameters: |
-   Parameters of the GeneralCosmoALP model (gagg, gaee, fa, ma0, Tchi, beta, thetai, f0_thermal, T_R).
-   See ./gambit GeneralCosmoALP
-
 GeneralALP_parameters: |
    Parameters of the GeneralALP model (gagg, gaee, fa, ma0, Tchi, beta, thetai).
    See also ./gambit GeneralALP

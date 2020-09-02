@@ -953,25 +953,3 @@ DecayingDM_electron: |
    lifetime    - lifetime of said DM candidate [in s]
    fraction    - fraction of how much the decaying DM component contributes to all DM.
 
-#
-# Cosmological ALPs
-#
-
-GeneralCosmoALP : |
-
-   General ALP model with parametric temperature-dependent mass and cosmological applications.
-
-   gagg                 - ALP-photon coupling [GeV^-1]
-   gaee                 - ALP-electron coupling [dimensionless]
-   fa                   - ALP decay constant scale [GeV]
-   ma0                  - ALP mass (at zero temperature) [eV]
-   Tchi                 - Critical temperature below which the axion mass is constant [MeV]
-   beta                 - Exponent of the temperature scaling of the axion mass above Tchi [dimensionless]
-   thetai               - Initial misalignment angle [dimensionless]
-   f0_thermal           - Fraction of total CDM in ALPs produced thermally (at production) [dimensionless]
-   T_R                  - Reheating temperature [MeV]
-
-CosmoALP : |
-
-   Specialised version of GeneralCosmoALP for cosmological applications, without ALP-election coupling (gaee=0) and with temperature-
-   independent mass (beta=0, Tchi irrelevant). The ALP-photon coupling (gagg) is replaced by its dimensionless equivalent (Cagg).
