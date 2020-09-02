@@ -210,7 +210,6 @@ else()
     if(${result} STREQUAL "0")
       execute_process(COMMAND ${CMAKE_COMMAND} -E chdir ${pybind11_CONTRIB_DIR} git checkout -q v${PREFERRED_pybind11_VERSION})
       use_contributed_pybind11()
-      include_directories("${PYTHON_INCLUDE_DIRS};${PYBIND11_INCLUDE_DIR}")
     else()
       message("${BoldRed}   Attempt to clone git repository for pybind11 failed.  This may be because you are disconnected from the internet.\n   "
               "Otherwise, your git installation may be faulty. Errors about missing .so files are usually due to\n   "
