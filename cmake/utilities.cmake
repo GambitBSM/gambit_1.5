@@ -262,10 +262,10 @@ endfunction()
 
 # Macro to set up internal variables for contrib version of pybind11
 macro(use_contributed_pybind11)
-  include_directories("${PYTHON_INCLUDE_DIRS}")
   set(pybind11_FOUND TRUE)
   set(pybind11_DIR "${pybind11_CONTRIB_DIR}")
   set(pybind11_VERSION "${PREFERRED_pybind11_VERSION}")
+  message("${BoldYellow}   Found pybind11 ${pybind11_VERSION} at ${pybind11_DIR}.${ColourReset}")
   add_subdirectory("${pybind11_DIR}")
   include_directories("${PYBIND11_INCLUDE_DIR}")
   add_custom_target(nuke-pybind11 COMMAND ${CMAKE_COMMAND} -E remove_directory "${pybind11_DIR}")
