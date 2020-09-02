@@ -223,11 +223,39 @@ Parameters:
   # In the initial CosmoBit version, We provide simple "mixture" models for both scenarios and child models thereof.
   # These mixture models assume mono-energetic dark matter decays/annihilations into photons, and e+/e- with branching fractions BR_el and BR_ph
   # The complementary branching fraction (1-BR_el-BR_ph) accounts for possible inefficient final states such as neutrinos
-  # In the examples included, no inefficient contribution is assumed such that BR_el + BR_ph = 1
+  # In the examples included, no inefficient contribution is assumed such that BR_el + BR_ph = 1 holds
+  # And BR_ph has to be derived from BR_el -> "same_as" prior
   # To study one of the natively supported models, you just need to include the model in the scan.
-  #AnnihilatingDM_mixture: !import include/AnnihilatingDM_mixture_scan.yaml
-  #DecayingDM_mixture: !import include/DecayingDM_mixture_scan.yaml
+  #AnnihilatingDM_mixture:
+  #  mass:                    # (mass in GeV)
+  #    range: [1e-2, 1e4]
+  #    prior_type: log
+  #  BR_el:
+  #    range: [0.0, 1.0]
+  #  BR_ph:
+  #    same_as: AnnihilatingDM_mixture::BR_el
+  #    shift: 1.0
+  #    scale: -1.0
+  #  sigmav:                 # (< sigma v > in cm^3 s^-1)
+  #    range: [1e-28, 1e-24]
+  #    prior_type: log
 
+  #DecayingDM_mixture:
+  #  mass:                   # (mass in Gev)
+  #    range: [1e-2, 1e4]
+  #    prior_type: log
+  #  BR_el:
+  #    range: [0.0, 1.0]
+  #  BR_ph:
+  #    same_as: DecayingDM_mixture::BR_el
+  #    shift: 1.0
+  #    scale: -1.0
+  #  lifetime:               # (lifetime in s)
+  #    range: [1e14, 1e18]
+  #    prior_type: log
+  #  fraction:               # (initial fractional decaying dark matter abundance)
+  #    range: [1e-12, 1e-6]
+  #    prior_type: log
 
   # ====== B.6) Cosmological nuisance parameters (depending on included likelihoods) =======
 

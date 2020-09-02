@@ -1,3 +1,15 @@
+#  === Gaussian priors on Planck nuisance parameters based on PR2 (2015) ===
+#
+#  The Columns are:
+#     parameter_name | modelID | central value | 1sigma uncertainty
+#
+#  'modelID'
+#     1 -> Parameter of all models ('lite', 'TT', 'TTTEEE')
+#     3 -> Parameter of 'cosmo_nuisance_Planck_TT' and 'cosmo_nuisance_Planck_TTTEEE'
+#     7 -> Parameter of 'cosmo_nuisance_Planck_TTTEEE'
+#
+#  =========================================================================
+
 # Prior on A_planck (All models)
 A_planck            1   1.0         2.5e-3
 
