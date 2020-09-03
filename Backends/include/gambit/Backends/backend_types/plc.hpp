@@ -23,7 +23,7 @@ namespace Gambit
 {
 
   // Types needed for using the Planck likelihoods
-  typedef void clik_object;
+  struct clik_object;
 
   typedef struct _err {
     char errWhere[2048];
