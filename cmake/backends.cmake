@@ -1487,7 +1487,7 @@ if(NOT ditched_${name}_${ver})
     DOWNLOAD_COMMAND ${DL_BACKEND} ${dl} ${md5} ${dir}
     SOURCE_DIR ${dir}
     BUILD_IN_SOURCE 1
-    PATCH_COMMAND patch -p1 < ${patch}/multimodecode.diff
+    PATCH_COMMAND patch -p1 < ${patch}/multimodecode_${ver}.diff
     CONFIGURE_COMMAND ""
     BUILD_COMMAND ${MAKE_SERIAL} F90C=${CMAKE_Fortran_COMPILER} FFLAGS=${multimode_Fortran_FLAGS}
     INSTALL_COMMAND ""

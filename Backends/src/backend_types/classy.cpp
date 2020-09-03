@@ -113,13 +113,12 @@ namespace Gambit
           // throw error if the treatment of non-linearities disagree
           // (need case-insensitive comparison as CLASS accepts 'halofit' and 'HALOFIT' as input)
           if (not boost::iequals(nonlin_input_dict, nonlin_extra_dict))
-          //if (nonlin_input_dict != nonlin_extra_dict)
           {
             std::ostringstream errormsg;
-            errormsg << "A problem occurred when trying to compose the input dictionary for CLASS:"<<std::endl;
-            errormsg << "The included likelihoods requested contradicting treatments for non linearities:"<<std::endl;
-            errormsg<< nonlin_input_dict <<" and "<< nonlin_extra_dict <<std::endl;
-            errormsg<<"This will lead to inconsistent results, so we are stopping here now."<<std::endl;
+            errormsg << "A problem occurred when trying to compose the input dictionary for CLASS:" << std::endl;
+            errormsg << "The included likelihoods requested contradicting treatments for non linearities:" << std::endl;
+            errormsg << nonlin_input_dict << " and " << nonlin_extra_dict << std::endl;
+            errormsg << "This will lead to inconsistent results, so we are stopping here now." << std::endl;
             backend_error().raise(LOCAL_INFO,errormsg.str());
           }
         }

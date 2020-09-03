@@ -49,6 +49,8 @@
 
 // Vanilla ΛCDM.
 // This model would usually be scanned alongside an inflationary model and a neutrino model
+// As LCDM but with 100theta_s, acoustic angular scale of first CMB peak x 100, as
+// model parameter instead of H0.
 #define MODEL LCDM_theta
   START_MODEL
   DEFINEPARS(T_cmb,omega_b,omega_cdm,100theta_s,tau_reio)
