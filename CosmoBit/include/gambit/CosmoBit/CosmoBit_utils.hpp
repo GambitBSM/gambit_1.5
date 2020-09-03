@@ -4,10 +4,6 @@
 ///
 ///  Type definition header for utilities for module CosmoBit.
 ///
-///  Compile-time registration of type definitions
-///  required for the rest of the code to
-///  communicate with CosmoBit.
-///
 ///  Add to this if you want to implement new
 ///  utility functions that do not provide a 
 ///  capability.
