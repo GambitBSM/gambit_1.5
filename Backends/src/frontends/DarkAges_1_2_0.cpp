@@ -286,14 +286,12 @@ BE_INI_FUNCTION
     double lifetime{};
     if (hasDecay)
     {
-      const ModelParameters& NP_params = *Dep::DecayingDM_general_parameters;
-      mass = NP_params.at("mass");
-      lifetime = NP_params.at("lifetime");
+      mass = *Param["mass"];
+      lifetime = *Param["lifetime"];
     }
     else if (hasAnnihilation)
     {
-      const ModelParameters& NP_params = *Dep::AnnihilatingDM_general_parameters;
-      mass = NP_params.at("mass");
+      mass = *Param["mass"];
       lifetime  = -1.0; // This input will be ignored anyway if hasAnnihilation is true
     }
 

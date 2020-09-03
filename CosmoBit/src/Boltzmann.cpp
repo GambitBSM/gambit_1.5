@@ -368,9 +368,8 @@ namespace Gambit
       result.clear();
 
       // Set relevant inputs for the scenario of s-wave annihilating DM
-      const ModelParameters& NP_params = *Dep::AnnihilatingDM_general_parameters;
-      result["DM_annihilation_cross_section"] = NP_params.at("sigmav");
-      result["DM_annihilation_mass"] = NP_params.at("mass");
+      result["DM_annihilation_cross_section"] = *Param["sigmav"];
+      result["DM_annihilation_mass"] = *Param["mass"];
 
       // Get the results from the DarkAges tables that hold extra information to be passed to the CLASS thermodynamics structure
       static DarkAges::Energy_injection_efficiency_table fz;
@@ -433,9 +432,8 @@ namespace Gambit
       result.clear();
 
       // Set relevant inputs for the scenario of decaying DM
-      const ModelParameters& NP_params = *Dep::DecayingDM_general_parameters;
-      result["DM_decay_tau"] = NP_params.at("lifetime");
-      result["DM_decay_fraction"] = NP_params.at("fraction");
+      result["DM_decay_tau"] = *Param["lifetime"];
+      result["DM_decay_fraction"] = *Param["fraction"];
 
       // Get the results from the DarkAges tables that hold extra information to be passed to the CLASS thermodynamics structure
       static DarkAges::Energy_injection_efficiency_table fz;
