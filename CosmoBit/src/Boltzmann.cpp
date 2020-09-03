@@ -289,7 +289,7 @@ namespace Gambit
       // - l_max_scalars: 2508
 
       // NOTE: this if performed *after* the YAML options are read in, since it would trigger an error of duplicated
-      // keys in the event the user specifies one of the options themselves. The 'merge_pybind_dicts' routine will properly
+      // keys in the event the user specifies one of the options themselves. The 'merge_input_dicts' routine will properly
       // deal with concatenating the output values and choosing the maximum passed value for l_max_scalars. Contradictions
       // in the lensing or non-linear choice will rightfully trigger an error.
       if (ModelInUse("cosmo_nuisance_Planck_lite") || ModelInUse("cosmo_nuisance_Planck_TTTEEE") || ModelInUse("cosmo_nuisance_Planck_TT"))
