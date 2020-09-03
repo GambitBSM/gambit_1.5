@@ -55,6 +55,38 @@ namespace Gambit
         int err = 0;
     } gambit_inflation_observables;
 
+    /// Class containing the inputs used for inputs to MultiModeCode
+    class Multimode_inputs
+    {
+        public:
+            // Constructor
+            Multimode_inputs();
+            // Debugging options
+            int silence_output;
+            // k values where to evaluate the power spectrum
+            double k_min;
+            double k_max;
+            int numsteps;
+            // Parameters realted to the pivot scale
+            double k_pivot;
+            double N_pivot;
+            double dlnk;
+            // Parameters related to the potential and initial condidtions
+            int num_inflaton = -1;
+            int potential_choice = -1;
+            int vparam_rows = -1;
+            std::vector<double> vparams;
+            std::vector<double> phi_init0;
+            std::vector<double> dphi_init0;
+            // Parameters realted to the scenario for initial conditions
+            int slowroll_infl_end;
+            int instreheat;
+            // Parameters related to approximations and observables
+            int use_deltaN_SR;
+            int evaluate_modes;
+            int use_horiz_cross_approx;
+            int get_runningofrunning;
+    };
 }
 
 #endif // defined __MultiModeCode_hpp__

@@ -4150,7 +4150,7 @@ class_get_scale_independent_growth_factor_f: |
     computed by CLASS.
 
 class_get_sigma8: |
-    Returns sigma8 computed at z = 0 by CLASS.
+    Returns sigma8, root mean square density fluctuations within spheres of radius 8/h Mpc, computed at z = 0 by CLASS.
 
 class_get_Omega0_m: |
     Returns Omega0_m (matter energy density today) computed by CLASS. (Mainly for test purposes, you can use gambit internal capability Omega0_m, Omega0_g..).
@@ -4449,8 +4449,8 @@ Neff_SM: |
 N_ur: |
    Returns the total number of ultra-relativistic species today. 
 
-Sigma8: |
-   Returns sigma_8, the RMS perturbation over a sphere of radius 8h^-1 Mpc. 
+S8_cosmo: |
+   Returns S8 = sigma_8 (Omega0_m/0.3)^0.5, a measure for the amplitude of the matter power spectrum on scale 8/h Mpc.
 
 rs_drag: |
    Returns the comoving sound horizon at baryon drag.
