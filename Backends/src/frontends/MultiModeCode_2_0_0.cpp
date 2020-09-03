@@ -43,6 +43,7 @@ BE_INI_FUNCTION
     // Set the SilenceOutput variable
     *SilenceOutput = runOptions->getValueOrDef<bool>(true, "SilenceOutput");
   }
+  scan_level = false;
 
 }
 END_BE_INI_FUNCTION
