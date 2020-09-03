@@ -8,10 +8,9 @@
 ///  required for the rest of the code to
 ///  communicate with CosmoBit.
 ///
-///  Add to this if you want to define a new type
-///  for the functions in CosmoBit to return, but
-///  you don't expect that type to be needed by
-///  any other modules.
+///  Add to this if you want to implement new
+///  utility functions that do not provide a 
+///  capability.
 ///
 ///  *********************************************
 ///
@@ -27,13 +26,6 @@
 
 #ifndef __CosmoBit_utils_hpp__
 #define __CosmoBit_utils_hpp__
-
-#include <valarray>
-#include <vector>
-#include <map>
-#include <string>
-#include <sstream>
-#include <pybind11/stl.h>
 
 namespace Gambit
 {
@@ -54,4 +46,4 @@ namespace Gambit
   }
 }
 
-#endif // defined __CosmoBit_types_hpp__
+#endif // defined __CosmoBit_utils_hpp__

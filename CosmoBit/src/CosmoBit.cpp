@@ -314,10 +314,12 @@ namespace Gambit
       result = BEreq::class_get_Omega0_ncdm_tot();
     }
 
-    /// Sigma8
-    void get_Sigma8_classy(double& result)
+    /// returns S8 = sigma8 (Omega0_m/0.3)^0.5
+    /// (sigma8:root mean square fluctuations density fluctuations within 
+    /// spheres of radius 8/h Mpc)
+    void get_S8_classy(double& result)
     {
-      using namespace Pipes::get_Sigma8_classy;
+      using namespace Pipes::get_S8_classy;
 
       double sigma8 = BEreq::class_get_sigma8();
       double Omega0_m = *Dep::Omega0_m;

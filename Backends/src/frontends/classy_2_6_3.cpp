@@ -220,6 +220,8 @@
     }
 
     // returns sigma8 at z = 0
+    // (root mean square fluctuations density fluctuations within 
+    // spheres of radius 8/h Mpc)
     double class_get_sigma8()
     {
       // in CosmoBit.cpp test if ClassInput contains mPk -> otherwise SegFault when trying to compute sigma8

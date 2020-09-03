@@ -604,6 +604,7 @@ START_MODULE
     #undef FUNCTION
   #undef CAPABILITY
 
+  /// energy density in photons today
   #define CAPABILITY Omega0_g
   START_CAPABILITY
     #define FUNCTION compute_Omega0_g
@@ -667,7 +668,7 @@ START_MODULE
     #undef FUNCTION
   #undef CAPABILITY
 
-  // good for cross-checks, innit.
+  // get the value of Neff in the early Universe from CLASS backend
   #define CAPABILITY Neff
   START_CAPABILITY
     #define FUNCTION get_Neff_classy
@@ -676,10 +677,12 @@ START_MODULE
     #undef FUNCTION
   #undef CAPABILITY
 
-  /// get sigma8
-  #define CAPABILITY Sigma8
+  /// returns S8 = sigma8 (Omega0_m/0.3)^0.5
+  /// (sigma8:root mean square fluctuations density fluctuations within 
+  /// spheres of radius 8/h Mpc)
+  #define CAPABILITY S8_cosmo
   START_CAPABILITY
-    #define FUNCTION get_Sigma8_classy
+    #define FUNCTION get_S8_classy
     START_FUNCTION(double)
     DEPENDENCY(Omega0_m, double)
     BACKEND_REQ(class_get_sigma8,(),double,())

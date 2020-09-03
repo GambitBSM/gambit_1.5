@@ -46,53 +46,53 @@
 #include "gambit/CosmoBit/CosmoBit_types.hpp"
 #include "gambit/CosmoBit/CosmoBit_utils.hpp"
 
-/// Helper function for diagnosing MultiModeCode errors
-std::string multimode_error_handling(int& err)
-{
-
-  std::string message = "MultiModeCode error: ";
-  switch(err)
-  {
-
-    /// > 0 = "failure; not fatal"
-    case 1:
-      message = "Inflation did not start.";
-      break;
-    case 2:
-      message = "The pivot scale didn't leave the horizon.";
-      break;
-    case 3:
-      message = "A modes' initial conditions couldn't be set consistently.";
-      break;
-    case 4:
-      message = "Too many e-folds; can't initialize the scale factor.";
-      break;
-    case 5:
-      message = "Trying to save the field values at some reference N, but got less evolution than that.";
-      break;
-    case 6:
-      message = "Didn't satisfy reheating bounds.";
-      break;
-
-    /// < 0 = "fatal"
-    case -1:
-      message = "Numerical underflow error in odeint.";
-      break;
-
-    // Otherwise -- who knows.
-    default:
-      message = "GAMBIT caught an unknown error in MultiModeCode. Check MultiModeCode output and error messages for more "
-                "info (set the 'debug' switch in 'set_multimode_inputs' to '1' if you have set it to '0').";
-  }
-  return message;
-}
-
 namespace Gambit
 {
 
   namespace CosmoBit
   {
     using namespace LogTags;
+
+    /// Helper function for diagnosing MultiModeCode errors
+    std::string multimode_error_handling(int& err)
+    {
+
+      std::string message = "MultiModeCode error: ";
+      switch(err)
+      {
+
+        /// > 0 = "failure; not fatal"
+        case 1:
+          message = "Inflation did not start.";
+          break;
+        case 2:
+          message = "The pivot scale didn't leave the horizon.";
+          break;
+        case 3:
+          message = "A modes' initial conditions couldn't be set consistently.";
+          break;
+        case 4:
+          message = "Too many e-folds; can't initialize the scale factor.";
+          break;
+        case 5:
+          message = "Trying to save the field values at some reference N, but got less evolution than that.";
+          break;
+        case 6:
+          message = "Didn't satisfy reheating bounds.";
+          break;
+
+        /// < 0 = "fatal"
+        case -1:
+          message = "Numerical underflow error in odeint.";
+          break;
+
+        // Otherwise -- who knows.
+        default:
+          message = "GAMBIT caught an unknown error in MultiModeCode. Check MultiModeCode output and error messages for more "
+                    "info (set the 'debug' switch in 'set_multimode_inputs' to '1' if you have set it to '0').";
+      }
+      return message;
+    }
 
     // Function to set the generic inputs used for MultiModeCode (MMC).
     // N.B. Most of the available MMC parameters are already set by the default constructor of Multimode_inputs. These default
