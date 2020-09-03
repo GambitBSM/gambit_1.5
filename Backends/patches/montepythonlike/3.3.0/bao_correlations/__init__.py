@@ -12,9 +12,30 @@ from .findiff_py23 import FinDiff
 
 class bao_correlations(Likelihood):
     '''
-        (JR) copied "bao_small_z" likelihood and added some comments. It should still run
-        and produce the same result as the normal "bao_small_z" likelihood, but I hope the
-        comments help to generalise it.
+
+    BAO scale likelihood for BOSS DR12 and eBOSS data considering correlations
+    between overlapping samples in the BAO scale measurements. This likelihood 
+    takes into account the overlap of eBOSS LRG sample and BOSS DR12 galaxies,
+    and the overlap of the eBOSS QSO sample with the LRGs on the sky & in redshift. 
+    The non-zero correlations that should be accounted for between the measurements
+    of (D_M/r_s)^{BOSS}, (Hr_s)^{BOSS}, (D_V/r_s)^{eBOSS,LRG}$, and (D_V/r_s)^{eBOSS,QSO}
+    are calculated accounting for a variation in cosmological parameters. If you 
+    use this likelihood, please cite Stoecker et al. '20 #TODO insert arXiv number.
+
+    To account for variation with cosmological parameters, this likelihood uses a
+    novel method to compute the cross-correlation coefficients using Fisher matrices, 
+    following BAO forecasting techniques (Seo & Eisenstein '07 {astro-ph/0701079}, 
+    Font-Ribera et al. '14 {arXiv 1308.4164}). 
+    Here, we sum the Fisher information that each sample contributes to the four
+    overlapping measurements listed above, accounting for redshift and sky overlap. 
+    Inverting the full Fisher matrix then gives the correlation coefficients. This 
+    is done separately for every combination of cosmological parameters in the scan, 
+    using the number density of objects, matter power spectrum and growth rate of 
+    structure to model the BOSS/eBOSS galaxy power spectra and their covariance 
+    matrices as a function of redshift. 
+    
+    For more details, see Stoecker et al. '20  #TODO insert arXiv number. 
+
     '''
 
     # initialization routine
@@ -23,7 +44,7 @@ class bao_correlations(Likelihood):
 
         Likelihood.__init__(self, path, data, command_line)
 
-        # are there conflicting experiments?
+        # define conflicting experiments
         conflicting_experiments = [
             'bao', 'bao_boss', 'bao_boss_dr12', 'bao_known_rs',
             'bao_boss_aniso', 'bao_boss_aniso_gauss_approx']
@@ -31,11 +52,6 @@ class bao_correlations(Likelihood):
             if experiment in data.experiments:
                 raise io_mp.LikelihoodError(
                     'conflicting BAO measurements')
-
-        # (JR) now read in all likelihood specific data, e.g. n(z) values
-        # for different experiments, Dv/Dh/Da measurements, errors...
-        # The lines below are from the original likelihood and set
-        # the redshift array, measurements, uncertainties & format (Da,DH,Dv?)
 
         # define array for values of z and data points
         self.z = np.array([], 'float64')
