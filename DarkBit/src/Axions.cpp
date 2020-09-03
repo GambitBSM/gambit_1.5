@@ -210,6 +210,7 @@ namespace Gambit
         gsl_interp_accel *x_acc;
         gsl_interp_accel *y_acc;
         gsl_spline2d *spline;
+        double* z;
         // Upper and lower "x" and "y" values available to the interpolating function.
         double x_lo, y_lo, x_up, y_up;
     };
@@ -226,6 +227,7 @@ namespace Gambit
         std::swap(x_up,interp.x_up);
         std::swap(y_lo,interp.y_lo);
         std::swap(y_up,interp.y_up);
+        std::swap(z,interp.z);
       }
       return *this;
     }
@@ -236,6 +238,7 @@ namespace Gambit
       gsl_spline2d_free (spline);
       gsl_interp_accel_free (x_acc);
       gsl_interp_accel_free (y_acc);
+      free(z);
     }
 
     // Initialiser for the AxionInterpolator class.
@@ -271,7 +274,7 @@ namespace Gambit
       const double* x = &x_vec[0];
       const double* y = &y_vec[0];
       // Allocate memory for "z" values array in gsl format
-      double* z = (double*) malloc(nx * ny * sizeof(double));
+      z = (double*) malloc(nx * ny * sizeof(double));
 
       if (type == "bicubic")
       {
@@ -313,10 +316,16 @@ namespace Gambit
         gsl_spline2d_init (spline, x, y, z, nx, ny);
     };
 
+    // Default creator with dummy entries for the objects w/ memory allocation
+    AxionInterpolator2D::AxionInterpolator2D() {
+      x_acc = gsl_interp_accel_alloc();
+      y_acc = gsl_interp_accel_alloc();
+      spline = gsl_spline2d_alloc(gsl_interp2d_bilinear, 2, 2);
+      z = (double*) malloc(2 * 2 * sizeof(double));
+    };
     // Overloaded class creators for the AxionInterpolator class using the init function above.
     AxionInterpolator2D::AxionInterpolator2D(std::string file, std::string type) { init(file, type); };
     AxionInterpolator2D::AxionInterpolator2D(std::string file) { init(file, "bilinear"); };
-    AxionInterpolator2D::AxionInterpolator2D() {};
 
     // Routine to access interpolated values.
     double AxionInterpolator2D::interpolate(double x, double y) { return gsl_spline2d_eval(spline, x, y, x_acc, y_acc); };
@@ -1850,10 +1859,6 @@ namespace Gambit
      void calc_RParameter(double &result)
      {
        using namespace Pipes::calc_RParameter;
-       //const ModelParameters& params = *Dep::GeneralCosmoALP_parameters;
-       //double gaee2 = gsl_pow_2(1.0E+13 * std::fabs(params.at("gaee")));
-       //double gagg = 1.0E+10*std::fabs(params.at("gagg")); // gagg needs to be in 10^-10 GeV^-1.
-       //double lgma0 = log10(params.at("ma0"));
        double gaee2 = gsl_pow_2(1.0E+13*std::fabs(*Param["gaee"]));
        double gagg = 1.0E+10*std::fabs(std::fabs(*Param["gagg"]));
        double lgma0 = log10(*Param["ma0"]);
