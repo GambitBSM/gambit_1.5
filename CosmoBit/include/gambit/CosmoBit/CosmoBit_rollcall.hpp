@@ -114,102 +114,106 @@ START_MODULE
 
   // ------------------------
 
-  // capabilities related to setting input options for CLASS
-  // (cosmo parameters, temperature and number of ultra-relativistic species Nur)
+  #ifdef HAVE_PYBIND11
 
-  /// gather all CLASS input parameters, i.e.
-  /// - cosmological parameters (H0, Omega_b, Omega_cmd, tau_reio)
-  /// - primordial parameters (YHe, primordial power spectrum) from classy_primordial_input
-  /// - neutrino mass, ultra-relativistic species and ncdm related parameters from classy_NuMasses_Nur_input
-  /// - energy injection related parameters (if needed) from classy_parameters_EnergyInjection
-  /// - CLASS settings from MontePython likelihoods from classy_MPLike_input
-  /// - CLASS settings passed as yaml file options to the capability classy_input_params 
-  /// consistency checks when combining all these different inputs are performed.
-  #define CAPABILITY classy_input_params
-  START_CAPABILITY
-    #define FUNCTION set_classy_input_params
-    START_FUNCTION(Classy_input)
-    ALLOW_MODELS(LCDM,LCDM_theta)
-    DEPENDENCY(classy_MPLike_input, pybind11::dict)
-    DEPENDENCY(classy_NuMasses_Nur_input, pybind11::dict)
-    DEPENDENCY(classy_primordial_input, pybind11::dict)
-    MODEL_CONDITIONAL_DEPENDENCY(classy_parameters_EnergyInjection, pybind11::dict, AnnihilatingDM_general, DecayingDM_general)
-    MODEL_CONDITIONAL_DEPENDENCY(classy_PlanckLike_input, pybind11::dict, cosmo_nuisance_Planck_lite,cosmo_nuisance_Planck_TTTEEE,cosmo_nuisance_Planck_TT)
-    #undef FUNCTION
-  #undef CAPABILITY
+    // capabilities related to setting input options for CLASS
+    // (cosmo parameters, temperature and number of ultra-relativistic species Nur)
 
-  // initialise CLASS either with the run options needed by
-  // MontePython Likelihoods (t modes, Pk at specific z,..), or not.
-  #define CAPABILITY classy_MPLike_input
-  START_CAPABILITY
-    #define FUNCTION set_classy_input_with_MPLike
-    START_FUNCTION(pybind11::dict)
-    DEPENDENCY(MP_objects, MPLike_objects_container)
-    #undef FUNCTION
+    /// gather all CLASS input parameters, i.e.
+    /// - cosmological parameters (H0, Omega_b, Omega_cmd, tau_reio)
+    /// - primordial parameters (YHe, primordial power spectrum) from classy_primordial_input
+    /// - neutrino mass, ultra-relativistic species and ncdm related parameters from classy_NuMasses_Nur_input
+    /// - energy injection related parameters (if needed) from classy_parameters_EnergyInjection
+    /// - CLASS settings from MontePython likelihoods from classy_MPLike_input
+    /// - CLASS settings passed as yaml file options to the capability classy_input_params 
+    /// consistency checks when combining all these different inputs are performed.
+    #define CAPABILITY classy_input_params
+    START_CAPABILITY
+      #define FUNCTION set_classy_input_params
+      START_FUNCTION(Classy_input)
+      ALLOW_MODELS(LCDM,LCDM_theta)
+      DEPENDENCY(classy_MPLike_input, pybind11::dict)
+      DEPENDENCY(classy_NuMasses_Nur_input, pybind11::dict)
+      DEPENDENCY(classy_primordial_input, pybind11::dict)
+      MODEL_CONDITIONAL_DEPENDENCY(classy_parameters_EnergyInjection, pybind11::dict, AnnihilatingDM_general, DecayingDM_general)
+      MODEL_CONDITIONAL_DEPENDENCY(classy_PlanckLike_input, pybind11::dict, cosmo_nuisance_Planck_lite,cosmo_nuisance_Planck_TTTEEE,cosmo_nuisance_Planck_TT)
+      #undef FUNCTION
+    #undef CAPABILITY
 
-    #define FUNCTION set_classy_input_no_MPLike
-    START_FUNCTION(pybind11::dict)
-    #undef FUNCTION
-  #undef CAPABILITY
+    // initialise CLASS either with the run options needed by
+    // MontePython Likelihoods (t modes, Pk at specific z,..), or not.
+    #define CAPABILITY classy_MPLike_input
+    START_CAPABILITY
+      #define FUNCTION set_classy_input_with_MPLike
+      START_FUNCTION(pybind11::dict)
+      DEPENDENCY(MP_objects, MPLike_objects_container)
+      #undef FUNCTION
 
-  // set primordial CLASS input parameters
-  #define CAPABILITY classy_primordial_input
-  START_CAPABILITY
-    // primordial helium abundance,YHe & *external* full shape of primordial power spectrum
-    // (array with scalar & tensor perturb as function of k + pivot scale)
-    #define FUNCTION set_classy_parameters_primordial_ps
-    START_FUNCTION(pybind11::dict)
-    DEPENDENCY(primordial_power_spectrum, Primordial_ps)
-    DEPENDENCY(helium_abundance, double)
-    DEPENDENCY(k_pivot, double)
-    #undef FUNCTION
+      #define FUNCTION set_classy_input_no_MPLike
+      START_FUNCTION(pybind11::dict)
+      #undef FUNCTION
+    #undef CAPABILITY
 
-    // primordial helium abundance,YHe & *parametrised* primordial power spectrum
-    // parameters (A_s,n_s,r + pivot scale)
-    #define FUNCTION set_classy_parameters_parametrised_ps
-    START_FUNCTION(pybind11::dict)
-    ALLOW_MODELS(PowerLaw_ps)
-    DEPENDENCY(helium_abundance, double)
-    DEPENDENCY(k_pivot, double)
-    #undef FUNCTION
-  #undef CAPABILITY
+    // set primordial CLASS input parameters
+    #define CAPABILITY classy_primordial_input
+    START_CAPABILITY
+      // primordial helium abundance,YHe & *external* full shape of primordial power spectrum
+      // (array with scalar & tensor perturb as function of k + pivot scale)
+      #define FUNCTION set_classy_parameters_primordial_ps
+      START_FUNCTION(pybind11::dict)
+      DEPENDENCY(primordial_power_spectrum, Primordial_ps)
+      DEPENDENCY(helium_abundance, double)
+      DEPENDENCY(k_pivot, double)
+      #undef FUNCTION
 
-  /// set extra CLASS parameters for energy injection -- different functions for
-  /// decaying and annihilating DM models 
-  #define CAPABILITY classy_parameters_EnergyInjection
-  START_CAPABILITY
-    #define FUNCTION set_classy_parameters_EnergyInjection_AnnihilatingDM
-    START_FUNCTION(pybind11::dict)
-    ALLOW_MODELS(AnnihilatingDM_general)
-    DEPENDENCY(energy_injection_efficiency, DarkAges::Energy_injection_efficiency_table)
-    #undef FUNCTION
+      // primordial helium abundance,YHe & *parametrised* primordial power spectrum
+      // parameters (A_s,n_s,r + pivot scale)
+      #define FUNCTION set_classy_parameters_parametrised_ps
+      START_FUNCTION(pybind11::dict)
+      ALLOW_MODELS(PowerLaw_ps)
+      DEPENDENCY(helium_abundance, double)
+      DEPENDENCY(k_pivot, double)
+      #undef FUNCTION
+    #undef CAPABILITY
 
-    #define FUNCTION set_classy_parameters_EnergyInjection_DecayingDM
-    START_FUNCTION(pybind11::dict)
-    ALLOW_MODELS(DecayingDM_general)
-    DEPENDENCY(energy_injection_efficiency, DarkAges::Energy_injection_efficiency_table)
-    #undef FUNCTION
-  #undef CAPABILITY
+    /// set extra CLASS parameters for energy injection -- different functions for
+    /// decaying and annihilating DM models 
+    #define CAPABILITY classy_parameters_EnergyInjection
+    START_CAPABILITY
+      #define FUNCTION set_classy_parameters_EnergyInjection_AnnihilatingDM
+      START_FUNCTION(pybind11::dict)
+      ALLOW_MODELS(AnnihilatingDM_general)
+      DEPENDENCY(energy_injection_efficiency, DarkAges::Energy_injection_efficiency_table)
+      #undef FUNCTION
 
-  // set extra parameters for CLASS run if Planck CMB likelihoods are included
-  #define CAPABILITY classy_PlanckLike_input
-  START_CAPABILITY
-    #define FUNCTION set_classy_PlanckLike_input
-    START_FUNCTION(pybind11::dict)
-    BACKEND_REQ(plc_required_Cl,(),void,(int&,bool&,bool&))
-    #undef FUNCTION
-  #undef CAPABILITY
+      #define FUNCTION set_classy_parameters_EnergyInjection_DecayingDM
+      START_FUNCTION(pybind11::dict)
+      ALLOW_MODELS(DecayingDM_general)
+      DEPENDENCY(energy_injection_efficiency, DarkAges::Energy_injection_efficiency_table)
+      #undef FUNCTION
+    #undef CAPABILITY
 
-  /// set neutrino mass related CLASS input -- m_ncdm, T_ncdm, N_ur, N_ncdm
-  #define CAPABILITY classy_NuMasses_Nur_input
-  START_CAPABILITY
-    #define FUNCTION set_classy_NuMasses_Nur_input
-    START_FUNCTION(pybind11::dict)
-    ALLOW_MODEL(StandardModel_SLHA2)
-    DEPENDENCY(T_ncdm, double)
-    DEPENDENCY(N_ur, double)
-    #undef FUNCTION
-  #undef CAPABILITY
+    // set extra parameters for CLASS run if Planck CMB likelihoods are included
+    #define CAPABILITY classy_PlanckLike_input
+    START_CAPABILITY
+      #define FUNCTION set_classy_PlanckLike_input
+      START_FUNCTION(pybind11::dict)
+      BACKEND_REQ(plc_required_Cl,(),void,(int&,bool&,bool&))
+      #undef FUNCTION
+    #undef CAPABILITY
+
+    /// set neutrino mass related CLASS input -- m_ncdm, T_ncdm, N_ur, N_ncdm
+    #define CAPABILITY classy_NuMasses_Nur_input
+    START_CAPABILITY
+      #define FUNCTION set_classy_NuMasses_Nur_input
+      START_FUNCTION(pybind11::dict)
+      ALLOW_MODEL(StandardModel_SLHA2)
+      DEPENDENCY(T_ncdm, double)
+      DEPENDENCY(N_ur, double)
+      #undef FUNCTION
+    #undef CAPABILITY
+
+  #endif
 
   // -----------
 
@@ -738,79 +742,83 @@ START_MODULE
 
   // ----------------------
 
-  // MontePython
+  #ifdef HAVE_PYBIND11
 
-  /// pass current values of nuisance parameters to MP
-  #define CAPABILITY parameter_dict_for_MPLike
-  START_CAPABILITY
-    // allow all possible nuisance parameter models here
-    #define FUNCTION set_parameter_dict_for_MPLike
-    START_FUNCTION(pybind11::dict)
-    ALLOW_MODELS(cosmo_nuisance_acbar,cosmo_nuisance_spt)
-    ALLOW_MODELS(cosmo_nuisance_JLA,cosmo_nuisance_Pantheon,cosmo_nuisance_BK14,cosmo_nuisance_BK14priors)
-    ALLOW_MODELS(cosmo_nuisance_CFHTLens_correlation,cosmo_nuisance_euclid_lensing,cosmo_nuisance_euclid_pk,cosmo_nuisance_ISW)
-    ALLOW_MODELS(cosmo_nuisance_kids450_qe_likelihood_public,cosmo_nuisance_ska,cosmo_nuisance_wmap)
-    // if you implement new MontePython likelihoods with new nuisance parameters add the name of your new
-    // nuisance parameter model (to be defined in Models/include/gambit/Models/models/CosmoNuisanceModels.hpp)
-    ALLOW_MODELS(cosmo_nuisance_dummy)
-    #undef FUNCTION
+    // MontePython
 
-    // pass an empty dictionary if no likelihood with nuisance parameters
-    // is in use
-    #define FUNCTION pass_empty_parameter_dict_for_MPLike
-    START_FUNCTION(pybind11::dict)
-    #undef FUNCTION
-  #undef CAPABILITY
-
-  /// creates the MontePython data and likelihood objects, determining which experiments
-  /// are in use in the process
-  #define CAPABILITY MP_objects
-  START_CAPABILITY
-    #define FUNCTION create_MP_objects
-    START_FUNCTION(MPLike_objects_container)
-    DEPENDENCY(parameter_dict_for_MPLike, pybind11::dict)
-    BACKEND_REQ(create_MP_data_object,        (mplike_tag), pybind11::object, (map_str_str&))
-    BACKEND_REQ(get_MP_available_likelihoods, (mplike_tag), std::vector<str>, ())
-    BACKEND_REQ(create_MP_likelihood_objects, (mplike_tag), map_str_pyobj,    (pybind11::object&, map_str_str&))
-    FORCE_SAME_BACKEND(mplike_tag)
-    #undef FUNCTION
-  #undef CAPABILITY
-
-  /// calculates lnL for individual experiments using MontePython
-  #define CAPABILITY MP_LogLikes
-  START_CAPABILITY
-    #define FUNCTION compute_MP_LogLikes
-    START_FUNCTION(map_str_dbl)
-    DEPENDENCY(parameter_dict_for_MPLike, pybind11::dict)
-    DEPENDENCY(MP_objects, MPLike_objects_container)
-    BACKEND_REQ(check_likelihood_classy_combi,(mplike_tag), void,             (str&, str&))
-    BACKEND_REQ(get_MP_loglike,               (mplike_tag), double,           (const MPLike_data_container&, pybind11::object&, std::string&))
-    BACKEND_REQ(get_classy_backendDir,        (class_tag),  std::string,      ())
-    BACKEND_REQ(get_classy_cosmo_object,      (class_tag),  pybind11::object, ())
-    FORCE_SAME_BACKEND(mplike_tag)
-    FORCE_SAME_BACKEND(class_tag)
-    #undef FUNCTION
-  #undef CAPABILITY
-
-  /// calculates the total lnL from MontePython
-  #define CAPABILITY MP_Combined_LogLike
+    /// pass current values of nuisance parameters to MP
+    #define CAPABILITY parameter_dict_for_MPLike
     START_CAPABILITY
-    #define FUNCTION compute_MP_combined_LogLike
-    START_FUNCTION(double)
-    DEPENDENCY(MP_LogLikes, map_str_dbl)
-    #undef FUNCTION
-  #undef CAPABILITY
- 
-  /// retrieves the correlation coefficients and the LogLike not taking 
-  /// bao correlations into account from the MP likelihood "bao_correlations"
-  #define CAPABILITY bao_like_correlation
+      // allow all possible nuisance parameter models here
+      #define FUNCTION set_parameter_dict_for_MPLike
+      START_FUNCTION(pybind11::dict)
+      ALLOW_MODELS(cosmo_nuisance_acbar,cosmo_nuisance_spt)
+      ALLOW_MODELS(cosmo_nuisance_JLA,cosmo_nuisance_Pantheon,cosmo_nuisance_BK14,cosmo_nuisance_BK14priors)
+      ALLOW_MODELS(cosmo_nuisance_CFHTLens_correlation,cosmo_nuisance_euclid_lensing,cosmo_nuisance_euclid_pk,cosmo_nuisance_ISW)
+      ALLOW_MODELS(cosmo_nuisance_kids450_qe_likelihood_public,cosmo_nuisance_ska,cosmo_nuisance_wmap)
+      // if you implement new MontePython likelihoods with new nuisance parameters add the name of your new
+      // nuisance parameter model (to be defined in Models/include/gambit/Models/models/CosmoNuisanceModels.hpp)
+      ALLOW_MODELS(cosmo_nuisance_dummy)
+      #undef FUNCTION
+
+      // pass an empty dictionary if no likelihood with nuisance parameters
+      // is in use
+      #define FUNCTION pass_empty_parameter_dict_for_MPLike
+      START_FUNCTION(pybind11::dict)
+      #undef FUNCTION
+    #undef CAPABILITY
+
+    /// creates the MontePython data and likelihood objects, determining which experiments
+    /// are in use in the process
+    #define CAPABILITY MP_objects
     START_CAPABILITY
-    #define FUNCTION get_bao_like_correlation
-    START_FUNCTION(map_str_dbl)
-    DEPENDENCY(MP_LogLikes, map_str_dbl)
-    DEPENDENCY(MP_objects, MPLike_objects_container)
-    #undef FUNCTION
-  #undef CAPABILITY
+      #define FUNCTION create_MP_objects
+      START_FUNCTION(MPLike_objects_container)
+      DEPENDENCY(parameter_dict_for_MPLike, pybind11::dict)
+      BACKEND_REQ(create_MP_data_object,        (mplike_tag), pybind11::object, (map_str_str&))
+      BACKEND_REQ(get_MP_available_likelihoods, (mplike_tag), std::vector<str>, ())
+      BACKEND_REQ(create_MP_likelihood_objects, (mplike_tag), map_str_pyobj,    (pybind11::object&, map_str_str&))
+      FORCE_SAME_BACKEND(mplike_tag)
+      #undef FUNCTION
+    #undef CAPABILITY
+
+    /// calculates lnL for individual experiments using MontePython
+    #define CAPABILITY MP_LogLikes
+    START_CAPABILITY
+      #define FUNCTION compute_MP_LogLikes
+      START_FUNCTION(map_str_dbl)
+      DEPENDENCY(parameter_dict_for_MPLike, pybind11::dict)
+      DEPENDENCY(MP_objects, MPLike_objects_container)
+      BACKEND_REQ(check_likelihood_classy_combi,(mplike_tag), void,             (str&, str&))
+      BACKEND_REQ(get_MP_loglike,               (mplike_tag), double,           (const MPLike_data_container&, pybind11::object&, std::string&))
+      BACKEND_REQ(get_classy_backendDir,        (class_tag),  std::string,      ())
+      BACKEND_REQ(get_classy_cosmo_object,      (class_tag),  pybind11::object, ())
+      FORCE_SAME_BACKEND(mplike_tag)
+      FORCE_SAME_BACKEND(class_tag)
+      #undef FUNCTION
+    #undef CAPABILITY
+
+    /// calculates the total lnL from MontePython
+    #define CAPABILITY MP_Combined_LogLike
+      START_CAPABILITY
+      #define FUNCTION compute_MP_combined_LogLike
+      START_FUNCTION(double)
+      DEPENDENCY(MP_LogLikes, map_str_dbl)
+      #undef FUNCTION
+    #undef CAPABILITY
+   
+    /// retrieves the correlation coefficients and the LogLike not taking 
+    /// bao correlations into account from the MP likelihood "bao_correlations"
+    #define CAPABILITY bao_like_correlation
+      START_CAPABILITY
+      #define FUNCTION get_bao_like_correlation
+      START_FUNCTION(map_str_dbl)
+      DEPENDENCY(MP_LogLikes, map_str_dbl)
+      DEPENDENCY(MP_objects, MPLike_objects_container)
+      #undef FUNCTION
+    #undef CAPABILITY
+
+  #endif
 
 #undef MODULE
 #endif /* defined __CosmoBit_rollcall_hpp__ */

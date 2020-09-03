@@ -47,7 +47,9 @@
 #include <valarray>
 #include <tuple>
 
-#include <pybind11/stl.h>
+#ifdef HAVE_PYBIND11
+  #include <pybind11/stl.h>
+#endif
 
 namespace Gambit
 {
@@ -60,7 +62,9 @@ namespace Gambit
     warning& CosmoBit_warning();
 
     typedef std::map< str,std::valarray < double > > map_str_valarray_dbl;
-    typedef std::tuple<pybind11::object, map_str_str, map_str_pyobj> MPLike_objects_container;
+    #ifdef HAVE_PYBIND11
+      typedef std::tuple<pybind11::object, map_str_str, map_str_pyobj> MPLike_objects_container;
+    #endif
 
     /// Class containing the inputs used for inputs to MultiModeCode
     class Multimode_inputs

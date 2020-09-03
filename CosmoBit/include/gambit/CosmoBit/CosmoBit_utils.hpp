@@ -28,13 +28,6 @@
 #ifndef __CosmoBit_utils_hpp__
 #define __CosmoBit_utils_hpp__
 
-#include <valarray>
-#include <vector>
-#include <map>
-#include <string>
-#include <sstream>
-#include <pybind11/stl.h>
-
 namespace Gambit
 {
 
