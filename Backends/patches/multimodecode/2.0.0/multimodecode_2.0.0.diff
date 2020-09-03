@@ -42,10 +42,10 @@ index 0db23f9..ee9fa53 100644
  cleanoutput:
  	-rm out_fields_infl_end.csv
 diff --git a/modpk.f90 b/modpk.f90
-index 1ad7e43..3607d3a 100644
+index 1ad7e43..e062db6 100644
 --- a/modpk.f90
 +++ b/modpk.f90
-@@ -18,15 +18,105 @@ MODULE access_modpk
+@@ -18,15 +18,83 @@ MODULE access_modpk
  
  CONTAINS
  
@@ -75,8 +75,6 @@ index 1ad7e43..3607d3a 100644
 +      xi = 10**vparams(1,1)
 +      beta = 10**vparams(2,1)
 +      lambda = 10**vparams(3,1)
-+
-+      print*,"phi_init0 =",phi_init0
 +
 +      do ii=1,builtpot
 +        rhoHarray(ii) = 5e0_dp*phi_init0(1) - dble(ii)*(1e-3_dp)*phi_init0(1)
@@ -112,27 +110,7 @@ index 1ad7e43..3607d3a 100644
 +      ii = locate(chiHarray,phi_init0(1))
 +      call polint(chiHarray(ii:ii+4), rhoHarray(ii:ii+4), phi_init0(1), rho_init, derr)
 +
-+      !slowroll_efolds = (0.06250000000000001*beta)/xi - &
-+      !                  (0.0625*Sqrt(beta**2 + &
-+      !                  32.*beta*xi + &
-+	  !					192.*xi**2))/xi + &
-+      !                  0.125*beta*rho_init**2 + &
-+	  !					0.75*xi*rho_init**2 + &
-+      !                  0.75*Log(1. + (0.5000000000000001* &
-+      !                  (-1.*beta + Sqrt(beta**2 + &
-+	  !					32.*beta*xi + &
-+      !                  192.*xi**2)))/ &
-+      !                  (beta + 6.*xi)) - &
-+      !                  0.75*Log(1. + xi*rho_init**2)
-+      ! if (slowroll_efolds < 30. .or. slowroll_efolds > 120.) then
-+	  !  observs%is_ic_ok = .false.
-+	  !  print*, "SMASH: Initial conditions: SR efolds =", slowroll_efolds
-+      !  RETURN
-+      !else
 +      observs%is_ic_ok = .true.
-+	  !end if
-+
-+      print*, "we are still inside!"
 +
 +      call polint(chiHarray((size(d2potHarray)-4):size(d2potHarray)-1),&
 +                  d2potHarray((size(d2potHarray)-4):size(d2potHarray)-1),&
@@ -153,7 +131,7 @@ index 1ad7e43..3607d3a 100644
      !     Solve the background equations
      !
 diff --git a/modpk_backgrnd.f90 b/modpk_backgrnd.f90
-index bcfdf96..68b1bf8 100644
+index bcfdf96..af0bee9 100644
 --- a/modpk_backgrnd.f90
 +++ b/modpk_backgrnd.f90
 @@ -23,7 +23,9 @@ CONTAINS
@@ -167,34 +145,30 @@ index bcfdf96..68b1bf8 100644
  
      real(dp) :: phi_init_trial(size(phi_init))
      real(dp) :: alpha_e,dalpha,V_end,dv,dh
-@@ -244,11 +246,11 @@ CONTAINS
+@@ -243,12 +245,6 @@ CONTAINS
+             end if
  
            end if
- 
+-
 -          IF (a_end .GT. a_end_inst) THEN
 -             PRINT*,'MODECODE: inflation ends too late with this N_pivot', N_pivot
 -             pk_bad = run_outcome%bad_reheat
 -             RETURN
 -          ENDIF
-+          !IF (a_end .GT. a_end_inst) THEN
-+          !   PRINT*,'MODECODE: inflation ends too late with this N_pivot', N_pivot
-+          !   pk_bad = run_outcome%bad_reheat
-+          !   RETURN
-+          !ENDIF
         END IF
  
         a_pivot = EXP(alpha_pivot)*a_init
-@@ -347,6 +349,9 @@ CONTAINS
+@@ -347,6 +343,9 @@ CONTAINS
  
        dphi_init0 = y(size(y)/2+1 : (size(y)))
  
 +      if (potential_choice==18) then
-+				y(size(y)/2+1 : (size(y))) = 0.0e0_dp
++        y(size(y)/2+1 : (size(y))) = 0.0e0_dp
 +
      else
  
        h_init = getH(phi_init_trial,dphi_init0)
-@@ -525,6 +530,7 @@ CONTAINS
+@@ -525,6 +524,7 @@ CONTAINS
  
         if (out_opt%modpkoutput .and. .not. out_opt%output_reduced) &
           WRITE(*,array_fmt) ' phi_end =', phi_infl_end
@@ -202,7 +176,7 @@ index bcfdf96..68b1bf8 100644
  
         IF (instreheat) THEN
            !Set a plausible pivot (ignoring logarithmic V_k and V_end terms) for
-@@ -539,7 +545,7 @@ CONTAINS
+@@ -539,7 +539,7 @@ CONTAINS
         !or to homogeneously rescale all the fields. It is better to work on a case by case basis.
         !
  
@@ -343,7 +317,7 @@ index 3226d39..9b2419f 100644
        procedure, public :: printout => ic_print_observables
        procedure, public :: print_header => ic_print_headers
 diff --git a/modpk_potential.f90 b/modpk_potential.f90
-index 630ec5b..65bc8af 100644
+index 630ec5b..8057926 100644
 --- a/modpk_potential.f90
 +++ b/modpk_potential.f90
 @@ -48,7 +48,7 @@ contains
@@ -451,16 +425,10 @@ index 630ec5b..65bc8af 100644
  
      third_deriv = 0e0_dp
  
-@@ -808,6 +848,16 @@ contains
+@@ -808,6 +848,10 @@ contains
      case(1)
        m2_V = 10.e0_dp**(vparams(1,:))
        third_deriv=0e0_dp
-+
-+    ! temporary solution, will work on this later.
-+    ! case(3)
-+    !  lambda = 10.e0_dp**vparams(1,:)
-+    !  third_deriv=0e0_dp
-+    !  forall (i = 1:size(phi)) third_deriv(i,i,i) = 6.e0_dp*lambda(i)*phi(i)
 +
 +    case(4)
 +      third_deriv=0e0_dp
@@ -468,7 +436,7 @@ index 630ec5b..65bc8af 100644
      case(14)
  
        !Multifield step potential
-@@ -852,6 +902,22 @@ contains
+@@ -852,6 +896,21 @@ contains
            m2_V(ii)*abs(phi(ii))**(p_exp-3.0e0_dp)
        end do
  
@@ -477,7 +445,6 @@ index 630ec5b..65bc8af 100644
 +       ii = locate(chiHarray,phi(1))
 +       call polint(chiHarray(ii:ii+4), d3potHarray(ii:ii+4), &
 +                         phi(1), third_deriv(1,1,1), derr(1))
-+       ! print*,"third_deriv(1,1,1) = ", third_deriv(1,1,1), "derr(1)" , derr(1)
 +
 +     case(19)
 +     ! Starobinsky
@@ -491,7 +458,7 @@ index 630ec5b..65bc8af 100644
      case default
  
        print*, "MODECODE: potential_choice =", potential_choice
-@@ -906,6 +972,10 @@ contains
+@@ -906,6 +965,10 @@ contains
               x2 = 4.e0_dp*Ninit + 2.e0_dp*x1/phesq + 0.5e0_dp*phesq
               phii = sqrt(x2)*sqrt(1.e0_dp-sqrt(1.e0_dp-4.e0_dp*x1/x2/x2))
            end if
@@ -502,7 +469,7 @@ index 630ec5b..65bc8af 100644
         case default
            phii = phi0
         end select
-@@ -923,9 +993,17 @@ contains
+@@ -923,9 +986,17 @@ contains
      !
      real(dp) :: getEps
      real(dp), INTENT(IN) :: phi(:), dphi(:)
@@ -524,7 +491,7 @@ index 630ec5b..65bc8af 100644
      if (getEps >=3.0e0_dp) then
        print*, "MODECODE: epsilon =", getEps
 diff --git a/modpk_utils.f90 b/modpk_utils.f90
-index 77866a5..6a42c33 100644
+index 77866a5..bab6987 100644
 --- a/modpk_utils.f90
 +++ b/modpk_utils.f90
 @@ -92,8 +92,8 @@ CONTAINS
@@ -548,44 +515,26 @@ index 77866a5..6a42c33 100644
      !END MULTIFIELD
  
      if (.not. use_t) then
-@@ -157,12 +160,31 @@ CONTAINS
+@@ -157,12 +160,15 @@ CONTAINS
      !MULTIFIELD
      if (.not. use_t) then
        !Derivs wrt e-folds
--      hubble=getH(p,delp)
--      dhubble=getdHdalpha(p,delp)
++
++      yprime(1 : size(y)/2) = delp
++
+       hubble=getH(p,delp)
+       dhubble=getdHdalpha(p,delp)
  
-       yprime(1 : size(y)/2) = delp
--      yprime(size(y)/2+1 : size(y)) = -((3.0e0_dp+dhubble/hubble)*delp+&
+-      yprime(1 : size(y)/2) = delp
+       yprime(size(y)/2+1 : size(y)) = -((3.0e0_dp+dhubble/hubble)*delp+&
 -        dVdphi(p)/hubble/hubble)
-+
-+      ! if (potential_choice == 18) then
-+      !  yprime(size(y)/2+1: size(y)) = -3.0e0_dp*delp + &
-+      !                   delp**3/2.0e0_dp - (3.0e0_dp - &
-+      !                   delp**2/2.0e0_dp)* &
-+      !                   sqrt(2.0e0_dp*getEps(p,delp))
-+        ! print*, "hubble = ", hubble
-+        ! print*, "dhubble = ", dhubble
-+				! print*, "delp = " , delp
-+				! print*, "getEps(p,delp) = ", getEps(p,delp)
-+        ! print*, "-dhubble/hubble**2 = ", -dhubble/hubble**2
-+        ! print*, " -3.0e0_dp*delp(1) = ", -3.0e0_dp*delp(1)
-+        ! print*, " delp(1)**3/2.0e0_dp = ", delp(1)**3/2.0e0_dp
-+        ! print*, "y from inside utils = " , yprime(size(y)/2+1: size(y))
-+        ! print*, " sqrt(2eps) = ", sqrt(2.0e0_dp*dVpot(1)/Vpot)
-+
-+	  ! else
-+        hubble=getH(p,delp)
-+        dhubble=getdHdalpha(p,delp)
-+
-+        yprime(size(y)/2+1 : size(y)) = -((3.0e0_dp+dhubble/hubble)*delp+&
-+          dVdphi(p)/hubble/hubble)
++      dVdphi(p)/hubble/hubble)
 +    ! end if
      else
  
        !Derivs in cosmic time
 diff --git a/multimodecode_driver.f90 b/multimodecode_driver.f90
-index 3ba54a2..d8e972e 100644
+index 3ba54a2..296e434 100644
 --- a/multimodecode_driver.f90
 +++ b/multimodecode_driver.f90
 @@ -5,6 +5,7 @@ program multimodecode
@@ -596,41 +545,12 @@ index 3ba54a2..d8e972e 100644
    use internals
    use modpk_icsampling
    use modpk_io, only : out_opt
-@@ -24,6 +25,9 @@ program multimodecode
-   !Cosmology
-   real(dp) :: dlnk
- 
-+  !SMASH!
-+  real(dp) :: slowroll_efolds
-+
-   !Sampling parameters for ICs
-   integer :: numb_samples
-   integer :: out_adiab
-@@ -432,8 +436,17 @@ program multimodecode
-         observs_SR%ic = observs%ic
-       end if
- 
-+
-       !Initialize potential and calc background
--      call potinit
-+      call potinit(observs)
-+
-+      print*,"outside of potinit"
-+      if (potential_choice == 18) then
-+        if (.not. observs%is_ic_ok) then
-+          print*, "ICs for SMASH potential resulted in too long(or short) inflation."
-+          RETURN
-+        end if
-+      end if
- 
-       !For outputting field values at horiz crossing
-       if (out_opt%fields_horiz) then
 diff --git a/multimodecode_gambit.f90 b/multimodecode_gambit.f90
 new file mode 100644
-index 0000000..cf777a6
+index 0000000..c95782d
 --- /dev/null
 +++ b/multimodecode_gambit.f90
-@@ -0,0 +1,1029 @@
+@@ -0,0 +1,983 @@
 +! Module that contains the interface for MultiModeCode to CosmoBit in GAMBIT
 +MODULE multimodecode_gambit
 +  use modpkparams
@@ -688,10 +608,6 @@ index 0000000..cf777a6
 +    integer :: err
 +  end type gambit_inflation_observables
 +
-+
-+!Define some macros for global use
-+! #include "modpk_macros.f90"
-+
 +contains
 +
 +  function multimodecode_gambit_driver(ginput_num_inflaton, &
@@ -738,11 +654,6 @@ index 0000000..cf777a6
 +    logical, intent(in) :: ginput_use_deltaN_SR
 +    logical, intent(in) :: ginput_use_horiz_cross_approx
 +
-+    !---------------------------------------------------------------
-+    !At the moment, the options related to the reheating stuff from the code are
-+    !not available to be controlled from the gambit function. MultiModeCode at
-+    !this point does not have reheating option (other than instant-).
-+
 +    type(observables) :: observs, observs_SR
 +
 +    !Run-specific input params
@@ -779,9 +690,9 @@ index 0000000..cf777a6
 +
 +    call deallocate_vars()
 +
-+    ! Fix some parameters that we don't need in GAMBIT
-+    ! The following parameters control the internal sampling of MMC
-+    ! We don't need them because ScannerBit in GAMBIT handles all the sampling; set them to dummy values
++    ! Below, we fix some parameters that are not needed in GAMBIT.
++    ! These parameters control the internal sampling of MMC.
++    ! They are not needed because ScannerBit in GAMBIT handles all the sampling; below we set them to dummy values
 +    ! Sampling method for initial condition in MMC (1 = regular, 2 = equal-energy, 3 = slowroll, 6 = iso-N sampling)
 +    ic_sampling = 1
 +    ! Number of samples to obtain
@@ -834,10 +745,6 @@ index 0000000..cf777a6
 +    out_opt%spectra = .false.
 +    out_opt%modes = .false.
 +
-+
-+    !---------------------------------------------------------------
-+    ! setting up the integrator options at the code-level.
-+    ! TODO. make this from GAMBIT yaml file (if necessary)
 +    assert%use_assertions = .true.
 +
 +    tech_opt%accuracy_setting = 1
@@ -879,14 +786,10 @@ index 0000000..cf777a6
 +
 +    ! SMASH potential.
 +    if (potential_choice == 18) then
-+      ! it might make sense instead to put zero's etc. to the values here instead of just returning
 +      if (.not. observs%is_ic_ok) then
 +        gambit_obs%err = 999 ! TODO choose error messages
 +        RETURN
 +      else
-+        ! at the moment, smash potential is only calculated by solving the background dynamics
-+        ! and using slow roll approximation. going beyong would require solving first order
-+        ! mode equations in perturbation theory.
 +        gambit_obs%As = observs_SR%As
 +        gambit_obs%ns = observs_SR%ns
 +        gambit_obs%nt = observs_SR%nt
@@ -1073,13 +976,6 @@ index 0000000..cf777a6
 +      !Initialize potential and calc background
 +      call potinit(observs)
 +
-+      ! if (potential_choice == 18) then
-+      !   if (.not. observs%is_ic_ok) then
-+      !     print*, "ICs for SMASH potential resulted in too long(or short) inflation."
-+      !     RETURN
-+      !   end if
-+      ! end if
-+
 +      call test_bad(observs_gambit%err, observs, leave)
 +      if (leave) return
 +
@@ -1100,9 +996,6 @@ index 0000000..cf777a6
 +          if (leave) then
 +            return
 +          end if
-+!DEBUG
-+!print*, "Not evaluating second and third evolve routines"
-+!stop
 +
 +        call evolve(k_pivot*exp(-dlnk), pk1)
 +          call test_bad(observs_gambit%err, observs, leave)
@@ -1158,7 +1051,6 @@ index 0000000..cf777a6
 +    !delta-N formalism in slow-roll
 +    subroutine calculate_SR_observables(observs_SR)
 +      use modpk_numerics, only : locate, array_polint, polint
-+!     use modpk_reheat, only : reheater
 +      type(observables), intent(inout) :: observs_SR
 +      integer :: j, i
 +      real(dp) :: ah, alpha_ik, dalpha, N_end, del_N, Npiv_renorm
@@ -1258,9 +1150,6 @@ index 0000000..cf777a6
 +    logical, intent(in) :: ginput_use_horiz_cross_approx
 +
 +    !---------------------------------------------------------------
-+    !At the moment, the options related to the reheating stuff from the code are
-+    !not available to be controlled from the gambit function. MultiModeCode at
-+    !this point does not have reheating option (other than instant-).
 +    type(observables) :: observs, observs_SR
 +
 +    !Run-specific input params
@@ -1387,17 +1276,10 @@ index 0000000..cf777a6
 +
 +    call calculate_pk_observables(gambit_obs,observs,observs_SR,k_pivot,dlnk)
 +
-+    !print*,"Observables calculated! (708)"
-+
 +    if (potential_choice == 18) then
 +      if (.not. observs%is_ic_ok) then
-+        ! it might make sense instead to put zero's etc. to the values here instead of just returning
-+        ! print*, "SMASH: exiting pk_observables "
 +        RETURN
 +      else
-+        ! at the moment, smash potential is only calculated by solving the background dynamics
-+        ! and using slow roll approximation. going beyong would require solving first order
-+        ! mode equations in perturbation theory.
 +        gambit_obs%As = observs_SR%As
 +        gambit_obs%ns = observs_SR%ns
 +        gambit_obs%nt = observs_SR%nt
@@ -1425,11 +1307,6 @@ index 0000000..cf777a6
 +      gambit_obs%f_NL = observs%f_NL
 +      gambit_obs%tau_NL = observs%tau_NL
 +
-+
-+      !print*, gambit_obs%As
-+      !print*, gambit_obs%ns
-+      !print*, gambit_obs%r
-+      !print*, gambit_obs%err
 +      !-------------setting up the observables--------------------
 +
 +    end if
@@ -1551,9 +1428,6 @@ index 0000000..cf777a6
 +          if (leave) then
 +            return
 +          end if
-+!DEBUG
-+!print*, "Not evaluating second and third evolve routines"
-+!stop
 +
 +        call evolve(k_pivot*exp(-dlnk), pk1)
 +          call test_bad(pk_bad, observs, leave)
