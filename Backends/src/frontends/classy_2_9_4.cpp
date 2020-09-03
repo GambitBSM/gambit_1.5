@@ -79,7 +79,9 @@
 
       std::ostringstream errMssg;
       // one thing that can go wrong is that the primordial power spectrum is requested but
-      // not output of requiring the perturbations to be solved is asked for =>
+      // no observable depending on perturbations is asked for. In that case, CLASS will only
+      // derive background quantities and an error occurs when trying to access quantities 
+      // depending on perturbations  =>
       // check if "modes" input is set while "output" is not set
       if(classy_input.contains("modes") and not classy_input.contains("output"))
       {
@@ -144,7 +146,6 @@
     double class_get_Da(double z)
     {
       double Da = cosmo.attr("angular_distance")(z).cast<double>();
-      // check if units are the same as from class??
       return Da;
     }
 
@@ -213,19 +214,18 @@
       return Omega0_Lambda;
     }
 
-    // returns sound horizon at drag
+    // returns sound horizon at drag epoch
     double class_get_rs()
     {
       double rs_d = cosmo.attr("rs_drag")().cast<double>();
       return rs_d;
     }
 
-    // returns sigma8 at z = 0
+    // returns sigma8 at z = 0 
     // (root mean square fluctuations density fluctuations within 
     // spheres of radius 8/h Mpc)
     double class_get_sigma8()
     {
-      // in CosmoBit.cpp test if ClassInput contains mPk -> otherwise SegFault when trying to compute sigma8
       double sigma8 = cosmo.attr("sigma8")().cast<double>();
       return sigma8;
     }
@@ -294,7 +294,7 @@ BE_INI_FUNCTION
       // check input for consistency
       class_input_consistency_checks(cosmo_input_dict);
 
-      // create deep copy of cosmo_input_dict to cache results from 
+      // create copy of cosmo_input_dict to cache results from 
       // previous run
       prev_input_dict = cosmo_input_dict.attr("copy")();
     }
@@ -395,7 +395,7 @@ BE_INI_FUNCTION
 
     first_run = false;
     // save input arguments from this run to dictionary prev_input_dict
-    // (clear entries before copying, hope there are non memory leaks?)
+    // (clear entries before copying)
     prev_input_dict.attr("clear")();
     prev_input_dict = cosmo_input_dict.attr("copy")();
 

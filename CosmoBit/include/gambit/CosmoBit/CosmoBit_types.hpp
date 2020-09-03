@@ -85,7 +85,7 @@ namespace Gambit
             std::vector<double>& get_k() { return k; }
             std::vector<double>& get_P_s() { return P_s; }
             std::vector<double>& get_P_t() { return P_t; }
-            std::vector<double>& fill_P_s_iso() { return P_s_iso; }
+            std::vector<double>& get_P_s_iso() { return P_s_iso; }
             int get_vec_size() { return vec_size; }
 
         private:
@@ -102,7 +102,7 @@ namespace Gambit
     /// Class containing the *parametrised* primordial power spectrum.
     /// Members:
     /// - spectral tilt n_s
-    /// - amplitude of scalar perturbations A_s
+    /// - amplitude of scalar perturbations A_s [as ln(10^{10}A_s)]
     /// - scalar to tensor ratio r
     class Parametrised_ps
     {

@@ -43,7 +43,6 @@ if __name__ == '__main__':
     
     # create list with all likelihood names contained in montepython/likelihoods/ folder
     output = [dI for dI in os.listdir("montepython/likelihoods/") if os.path.isdir(os.path.join('montepython/likelihoods/',dI))]
-    # (JR) todo: add this line to CosmoBit to cross-check requested Likelihoods with requested ones in yaml files
     
     for like in output:
         # replace importin of montepython.likelihood_class with import of MontePythonLike
@@ -52,7 +51,3 @@ if __name__ == '__main__':
             "from MontePythonLike import", append_to_beginning="import sys \nsys.path.append('../../')\n" )
         # also replace importing of io_mp module (only contains input/output stream so safe to use with GAMBIT)
         replace("montepython/likelihoods/"+like+"/__init__.py", "import montepython.io_mp as io_mp", "import io_mp")
-
-# Note: I tested to init all likes with a python script like that. Most of them work -- did not test the ones where
-# data have to be downloaded separately, yet (Planck, wmap, JLA...) and
-# some failed -- will check on what happens at some point (TODO for (JR) )
