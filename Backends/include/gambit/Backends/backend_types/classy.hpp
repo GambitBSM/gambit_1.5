@@ -45,10 +45,6 @@
   namespace Gambit
   {
 
-    /// Merge two dictionaries containing input parameters for CLASS
-    /// (specific rules are applied in case of key duplication)
-    void merge_pybind_dicts(pybind11::dict&, pybind11::dict, bool);
-
     // Class that manages the input dictionary for classy
     class Classy_input
     {
