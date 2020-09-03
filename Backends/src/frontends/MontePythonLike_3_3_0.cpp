@@ -51,7 +51,7 @@
     {
 
       // add all combinations that are not compatible here.
-      // example for such a incompatibility: an update in CLASS 2.7 enable the separation 
+      // example for such an incompatibility: an update in CLASS 2.7 enables the separation 
       // of the matter power spectrum into the baryonic and CDM components separated from 
       // other non-CDM species (e.g. massive neutrinos). Likelihoods that rely on the 
       // baryon+CDM matter power spectrum can't be used with a CLASS version below 2.7
@@ -148,10 +148,10 @@
           "root"_a=backendDir+"/../../../");
 
       // Cast the list of experiments to a tuple, for MP to fire up...
-      // not experiments is a str to str map where the key is the likelihood name.
+      // note that experiments is a str to str map where the key is the likelihood name.
       // This is the only thing we need here when creating the data object
       // The value of the keys (data files to use) will be needed when initialising the likelihood objects
-      // in the funciton 'create_MP_likelihood_objects'
+      // in the function 'create_MP_likelihood_objects'
       pybind11::list MP_experiments;
       for (auto const& it : experiments)
       {
@@ -188,7 +188,6 @@
 
       // Now go through each experiment one by one, and initialise the Likelihood containers in
       // MontePython, then add them to a dictionary to pass back to CosmoBit.
-      //for (std::vector<std::string>::const_iterator it = experiments.begin(); it != experiments.end(); ++it)
       for (auto const& it : experiments)
       {
 
