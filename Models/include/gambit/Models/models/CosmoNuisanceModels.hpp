@@ -2,7 +2,8 @@
 //   *********************************************
 ///  \file
 ///
-///  General model 'cosmo_nuisance' and 
+///  Declaration of all cosmology-related nuisance
+///  parameter models.  
 ///  
 ///  
 ///
