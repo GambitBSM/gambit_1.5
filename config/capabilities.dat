@@ -4566,9 +4566,6 @@ Planck_nuisance_prior_loglike: |
 Planck_sz_prior_loglike: |
    Provides priors on the tSZ and kSZ amplitudes. The correlation is unconstrained by Planck. Uses prior based on SPT and ACT data, cf. Eq. (32) of Aghanim et al. 2015 (arXiv 1507.02704).
 
-DM_mass: |
-    Dark matter mass (in GeV).
-
 energy_injection_spectrum: |
     Spectrum of electrons/positrons and photons injected by
     the decay or annihilation of a DM particle with a certain mass.
