@@ -1,7 +1,8 @@
 ///  GAMBIT: Global and Modular BSM Inference Tool
 ///  *********************************************
 ///
-///  Model translation functions for cosmology models
+///  Model translation functions for models holding
+///  cosmological nuisance parameters.
 ///
 ///  *********************************************
 ///
