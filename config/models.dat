@@ -903,18 +903,19 @@ AnnihilatingDM_mixture : |
 
    mass        - mass of the dark matter candidate [in GeV]
    sigmav      - thermally averaged cross section [in cm^3 s^-1]
-   BR          - the fraction of how much energy will be contributed in e+/e-. (1-BR will be assigned to photons)
+   BR_el       - the fraction of how much energy will be contributed in e+/e-.
+   BR_ph       - the fraction of how much energy will be contributed to photons.
 
 AnnihilatingDM_photon: |
 
-   Special case of AnnihilatingDM_mixture. (Annihilation only into photons -> BR = 0)
+   Special case of AnnihilatingDM_mixture. (Annihilation only into photons -> BR_el = 0, BR_ph = 1)
 
    mass        - mass of the dark matter candidate [in GeV]
    sigmav      - thermally averaged cross section [in cm^3 s^-1]
 
 AnnihilatingDM_electron: |
 
-   Special case of AnnihilatingDM_mixture. (Annihilation only into e+/e- -> BR = 1)
+   Special case of AnnihilatingDM_mixture. (Annihilation only into e+/e- -> BR_el = 1, BR_ph = 0)
 
    mass        - mass of the dark matter candidate [in GeV]
    sigmav      - thermally averaged cross section [in cm^3 s^-1]
@@ -935,11 +936,12 @@ DecayingDM_mixture: |
    mass        - mass of the dark matter candidate [in GeV]
    lifetime    - lifetime of said DM candidate [in s]
    fraction    - fraction of how much the decaying DM component contributes to all DM.
-   BR          - the fraction of how much energy will be contributed in e+/e-. (1-BR will be assigned to photons)
+   BR_el       - the fraction of how much energy will be contributed in e+/e-.
+   BR_ph       - the fraction of how much energy will be contributed to photons.
 
 DecayingDM_photon: |
 
-   Special case of DecayingDM_mixture. (Decay only into photons -> BR = 0)
+   Special case of DecayingDM_mixture. (Decay only into photons -> BR_el = 0, BR_ph = 1)
 
    mass        - mass of the dark matter candidate [in GeV]
    lifetime    - lifetime of said DM candidate [in s]
@@ -947,31 +949,9 @@ DecayingDM_photon: |
 
 DecayingDM_electron: |
 
-   Special case of DecayingDM_mixture. (Decay only into e+/e- -> BR = 1)
+   Special case of DecayingDM_mixture. (Decay only into e+/e- -> BR_el = 1, BR_ph = 0)
 
    mass        - mass of the dark matter candidate [in GeV]
    lifetime    - lifetime of said DM candidate [in s]
    fraction    - fraction of how much the decaying DM component contributes to all DM.
 
-#
-# Cosmological ALPs
-#
-
-GeneralCosmoALP : |
-
-   General ALP model with parametric temperature-dependent mass and cosmological applications.
-
-   gagg                 - ALP-photon coupling [GeV^-1]
-   gaee                 - ALP-electron coupling [dimensionless]
-   fa                   - ALP decay constant scale [GeV]
-   ma0                  - ALP mass (at zero temperature) [eV]
-   Tchi                 - Critical temperature below which the axion mass is constant [MeV]
-   beta                 - Exponent of the temperature scaling of the axion mass above Tchi [dimensionless]
-   thetai               - Initial misalignment angle [dimensionless]
-   f0_thermal           - Fraction of total CDM in ALPs produced thermally (at production) [dimensionless]
-   T_R                  - Reheating temperature [MeV]
-
-CosmoALP : |
-
-   Specialised version of GeneralCosmoALP for cosmological applications, without ALP-election coupling (gaee=0) and with temperature-
-   independent mass (beta=0, Tchi irrelevant). The ALP-photon coupling (gagg) is replaced by its dimensionless equivalent (Cagg).

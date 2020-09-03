@@ -67,7 +67,7 @@ namespace Gambit
 
     /// Getter functions for CL spectra from classy.
 
-    /* LENSED SPECTRA */
+    /* UNLENSED SPECTRA */
 
     /// Temperature autocorrelation 
     void class_get_unlensed_Cl_TT(std::vector<double>& result)
