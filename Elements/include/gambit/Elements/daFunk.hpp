@@ -886,8 +886,7 @@ namespace daFunk
             FunkDelta(std::string arg, double pos, double width) : pos(pos), width(width)
             {
                 arguments = vec(arg);
-                // this->set_singularity("v", pos, width);
-                // Need to bypass "set_singularity". Would throw "bad_weak_ptr"
+                this->set_singularity("v", pos, width);
                 singularities[arg].push_back(std::pair<Funk, Funk>(cnst(pos), cnst(width)));
             }
 
