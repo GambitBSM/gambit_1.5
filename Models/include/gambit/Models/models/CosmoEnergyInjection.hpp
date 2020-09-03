@@ -23,9 +23,6 @@
   START_MODEL
   DEFINEPARS(mass)      // mass of dcdm candidate [GeV]
   DEFINEPARS(sigmav)    // thermally averaged cross section [cm^3 s^-1]
-
-  MAP_TO_CAPABILITY(mass, DM_mass)
-  MAP_TO_CAPABILITY(sigmav, sigmav)
 #undef MODEL
 
 // Toy model of annihilating dark matter with monochromatic injection of e+/- and photons
@@ -78,10 +75,6 @@
   DEFINEPARS(mass)      // mass of dcdm candidate [GeV]
   DEFINEPARS(lifetime)  // lifetime of dcdm candiate [s]
   DEFINEPARS(fraction)  // rho_dcdm / rho_cdm in the infinite past
-
-  MAP_TO_CAPABILITY(mass, DM_mass)
-  MAP_TO_CAPABILITY(lifetime, lifetime)
-  MAP_TO_CAPABILITY(fraction, DM_fraction)
 #undef MODEL
 
 // Toy model of decaying dark matter with monochromatic injection of e+/- and photons
