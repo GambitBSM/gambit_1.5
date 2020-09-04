@@ -14,7 +14,8 @@ Please cite the following GAMBIT papers, depending on your use of different modu
  - GAMBIT Flavour Workgroup: F. U. Bernlochner, et. al., **FlavBit**: A GAMBIT module for computing flavour observables and likelihoods, Eur. Phys. J. C 77 (2017) 786, arXiv:1705.07933
  - GAMBIT Scanner Workgroup: G. D. Martinez, et. al., Comparison of statistical sampling methods with **ScannerBit**, the GAMBIT scanning module, Eur. Phys. J. C 77 (2017) 761, arXiv:1705.07959
  - GAMBIT Dark Matter Workgroup: T. Bringmann, et. al., **DarkBit**: A GAMBIT module for computing dark matter observables and likelihoods, Eur. Phys. J. C 77 (2017) 831, arXiv:1705.07920
- - **NeutrinoBit**: M. Chrzaszcz, M. Drewes, T. Gonzalo, J. Harz, S. Krishnamurthy, C. Weniger, A frequentist analysis of three right-handed neutrinos with GAMBIT, Eur. Phys. J. C (2020) in press, arXiv:1908.02302
+ - **NeutrinoBit**: M. Chrzaszcz, M. Drewes, T. Gonzalo, J. Harz, S. Krishnamurthy, C. Weniger, A frequentist analysis of three right-handed neutrinos with GAMBIT, Eur. Phys. J. C 80 (2020) 569, arXiv:1908.02302
+ - GAMBIT Cosmology Workgroup: J. J. Renk, et. al., **CosmoBit**: A GAMBIT module for computing cosmological observables and likelihoods, submitted to JCAP (2020), arXiv:2009.xxxxx
 
 GAMBIT contains interfaces to various external codes, along with scripts for downloading and configuring them. Please cite as appropriate if you use those codes:
 
@@ -40,16 +41,17 @@ GAMBIT contains interfaces to various external codes, along with scripts for dow
 Documentation
 --
 
-Please see the above list of GAMBIT papers for the main documentation on the design and use of the GAMBIT core and modules. Further details on the code are available via the doxygen documentation in the gambit/doc directory.
+Please see the above list of GAMBIT papers for the main documentation on the design and use of the GAMBIT Core and modules. Further details on the code are available via the doxygen documentation in the gambit/doc directory.
 
 Supported Compilers and Library Dependencies
 --
 
-GAMBIT is built using the CMake system (version 2.8.12 or greater required). The following libraries and packages must be installed prior to configuration:
+GAMBIT is built using the CMake system. The following libraries and packages must be installed prior to configuration:
 
 COMPULSORY:
 
- - gcc/gfortran 5.1 or greater, or icc/ifort 15.0.2 or greater
+ - g++/gfortran 5.1 or greater, or icpc/ifort 15.0.2 or greater
+ - Cmake 2.8.12 or greater
  - Python 2.7 or greater (Python 3 is supported)
  - Python modules: yaml, os, re, datetime, sys, getopt, shutil and itertools.
  - git
@@ -57,7 +59,7 @@ COMPULSORY:
  - GNU Scientific Library (GSL) 2.1 or greater
  - Eigen 3.1.0 or greater
  - LAPACK
- - PKG Config
+ - pkg-config
 
 OPTIONAL:
 
@@ -67,12 +69,23 @@ OPTIONAL:
  - axel (speeds up downloads of backends and scanners)
  - graphviz (required for model hierarchy and dependency tree plots)
  - ROOT (required for RestFrames support in ColliderBit, or the GreAT scanner from ScannerBit)
-
+ - Python modules:
+    - Cython (required for using the classy backend)
+    - scipy (required for using the MontePython or DarkAges backends)
+    - numpy 1.12 or greater (required for using the classy or DarkAges backends)
+    - dill, future (required for using the DarkAges backend)
+    - pandas, numexpr (required for using the MontePython backend)
 
 Building GAMBIT
 --
 
-The basic build instructions are as follows, but note that cmake will fail to find some dependencies on some systems without guidance. More information is provided in the paper "GAMBIT: The Global and Modular Beyond-the-Standard-Model Inference Tool" (see the top of this README file for a link). For a list of commonly used cmake options, see the file CMAKE_FLAGS.md. Specific cluster configuration examples are available via gambit.hepforge.org.
+The basic build instructions are below.
+
+Note that cmake will fail to find some dependencies on some systems without guidance. More information is provided in the Core paper ("GAMBIT: The Global and Modular Beyond-the-Standard-Model Inference Tool", the first link at the top of this README file). 
+
+For building the entirety of GAMBIT, 16 GB of RAM is required. The build can be completed with less RAM if enough modules are ditched when running cmake, with e.g. `cmake -Ditch="ColliderBit;DarkBit" ..`, etc. See the Core paper for further details.  
+
+For a list of commonly used cmake options, see the file CMAKE_FLAGS.md. Specific cluster configuration examples are available via gambit.hepforge.org.
 
 Assuming that you have retrieved the git repository or the tarball and unpacked it:
 
