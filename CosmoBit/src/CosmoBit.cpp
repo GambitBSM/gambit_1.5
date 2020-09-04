@@ -216,14 +216,6 @@ namespace Gambit
       logger() << "Baryon to photon ratio (eta) today computed to be " << result << EOM;
     }
 
-    /// Baryon-to-photon ratio
-    void etaBBN_SM(double& result)
-    {
-      using namespace Pipes::etaBBN_SM;
-
-      result = *Dep::eta0;
-    }
-
     /// The total baryon content today.
     void compute_Omega0_b(double &result)
     {

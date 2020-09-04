@@ -667,17 +667,6 @@ START_MODULE
     #undef FUNCTION
   #undef CAPABILITY
 
-  /// baryon-to-photon ratio during BBN
-  #define CAPABILITY etaBBN
-  START_CAPABILITY
-    // Fallback for etaBBN if 'etaBBN_rBBN_rCMB_dNurBBN_dNurCMB'
-    // cannot be used to provide the capability
-    #define FUNCTION etaBBN_SM
-    START_FUNCTION(double)
-    DEPENDENCY(eta0,double)
-    #undef FUNCTION
-  #undef CAPABILITY
-
   // sound horizon at baryon drag
   #define CAPABILITY rs_drag
   START_CAPABILITY
@@ -717,11 +706,9 @@ START_MODULE
   START_CAPABILITY
     #define FUNCTION AlterBBN_Input
     START_FUNCTION(map_str_dbl)
-    DEPENDENCY(etaBBN, double)
+    ALLOW_MODELS(LCDM, LCDM_theta, etaBBN_rBBN_rCMB_dNurBBN_dNurCMB, nuclear_params_neutron_lifetime)
     DEPENDENCY(Neff_SM, double)
-    MODEL_CONDITIONAL_DEPENDENCY(neutron_lifetime,double,nuclear_params_neutron_lifetime)
-    MODEL_CONDITIONAL_DEPENDENCY(rBBN,double,etaBBN_rBBN_rCMB_dNurBBN_dNurCMB)
-    MODEL_CONDITIONAL_DEPENDENCY(dNurBBN,double,etaBBN_rBBN_rCMB_dNurBBN_dNurCMB)
+    MODEL_CONDITIONAL_DEPENDENCY(eta0, double, LCDM, LCDM_theta, nuclear_params_neutron_lifetime)
     #undef FUNCTION
   #undef CAPABILITY
 
