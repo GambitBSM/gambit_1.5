@@ -9,11 +9,12 @@
 ///  Authors (add name and date if you modify):
 ///
 ///  \author Sebastian Hoof
-///          (s.hoof15@imperial.ac.uk)
+///          (hoof@uni-goettingen.de)
 ///  \date 2016 Oct
-///  \date 2017 Jan, Feb, Jun, Jul, Sep - Dec
-///  \date 2018 Jan, Mar - May, Sep
-///  \date 2019 Feb
+///  \date 2017 Jan, Feb, June, July, Sept - Dec
+///  \date 2018 Jan, Mar - May, Sept
+///  \date 2019 Feb, May - July
+///  \date 2020 Sept
 ///
 ///  *********************************************
 
@@ -102,7 +103,7 @@ namespace Gambit
     };
 
     // Default constructor.
-    AxionInterpolator::AxionInterpolator() {};
+    AxionInterpolator::AxionInterpolator() {}
 
     // Initialiser for the AxionInterpolator class.
     void AxionInterpolator::init(const std::vector<double> x, const std::vector<double> y, std::string type)
@@ -123,14 +124,14 @@ namespace Gambit
       else
       {
         DarkBit_error().raise(LOCAL_INFO, "ERROR! Interpolation type '"+type+"' not known to class AxionInterpolator.\n       Available types: 'linear' and 'cspline'.");
-      };
+      }
 
       gsl_spline_init (spline, &x[0], &y[0], pts);
-    };
+    }
 
     // Overloaded class creators for the AxionInterpolator class using the init function above.
-    AxionInterpolator::AxionInterpolator(const std::vector<double> x, const std::vector<double> y, std::string type) { init(x, y, type); };
-    AxionInterpolator::AxionInterpolator(const std::vector<double> x, const std::vector<double> y) { init(x, y, "linear"); };
+    AxionInterpolator::AxionInterpolator(const std::vector<double> x, const std::vector<double> y, std::string type) { init(x, y, type); }
+    AxionInterpolator::AxionInterpolator(const std::vector<double> x, const std::vector<double> y) { init(x, y, "linear"); }
 
     // Initialiser for the AxionInterpolator class.
     void AxionInterpolator::init(std::string file, std::string type)
@@ -141,17 +142,17 @@ namespace Gambit
         DarkBit_error().raise(LOCAL_INFO, "ERROR! File '"+file+"' not found!");
       } else {
         logger() << LogTags::debug << "Reading data from file '"+file+"' and interpolating it with '"+type+"' method." << EOM;
-      };
+      }
       // Read numerical values from data file.
       ASCIItableReader tab (file);
       tab.setcolnames("x", "y");
 
       init(tab["x"],tab["y"],type);
-    };
+    }
 
     // Overloaded class creators for the AxionInterpolator class using the init function above.
-    AxionInterpolator::AxionInterpolator(std::string file, std::string type) { init(file, type); };
-    AxionInterpolator::AxionInterpolator(std::string file) { init(file, "linear"); };
+    AxionInterpolator::AxionInterpolator(std::string file, std::string type) { init(file, type); }
+    AxionInterpolator::AxionInterpolator(std::string file) { init(file, "linear"); }
 
     // Move assignment operator
     AxionInterpolator& AxionInterpolator::operator=(AxionInterpolator&& interp)
@@ -174,11 +175,11 @@ namespace Gambit
     }
 
     // Routine to access interpolated values.
-    double AxionInterpolator::interpolate(double x) { return gsl_spline_eval(spline, x, acc); };
+    double AxionInterpolator::interpolate(double x) { return gsl_spline_eval(spline, x, acc); }
 
     // Routines to return upper and lower boundaries of interpolating function
-    double AxionInterpolator::lower() { return lo; };
-    double AxionInterpolator::upper() { return up; };
+    double AxionInterpolator::lower() { return lo; }
+    double AxionInterpolator::upper() { return up; }
 
 
     /*! \brief Two-dimensional integration container for bilinear interpolation and bicubic splines.
@@ -250,7 +251,7 @@ namespace Gambit
         DarkBit_error().raise(LOCAL_INFO, "ERROR! File '"+file+"' not found!");
       } else {
         logger() << LogTags::debug << "Reading data from file '"+file+"' and interpolating it with '"+type+"' method." << EOM;
-      };
+      }
       // Read numerical values from data file.
       ASCIItableReader tab (file);
       tab.setcolnames("x", "y", "z");
@@ -269,7 +270,7 @@ namespace Gambit
       if (nx*ny != n_grid_pts)
       {
         DarkBit_error().raise(LOCAL_INFO, "ERROR! The number of grid points ("+std::to_string(n_grid_pts)+") for AxionInterpolator2D does not equal the number of unique 'x' and 'y' values ("+std::to_string(nx)+" and "+std::to_string(ny)+")!\n       Check formatting of the file: '"+file+"'.");
-      };
+      }
 
       const double* x = &x_vec[0];
       const double* y = &y_vec[0];
@@ -287,7 +288,7 @@ namespace Gambit
       else
       {
         DarkBit_error().raise(LOCAL_INFO, "ERROR! Interpolation type '"+type+"' not known to class AxionInterpolator2D.\n       Available types: 'bilinear' and 'bicubic'.");
-      };
+      }
 
       x_acc = gsl_interp_accel_alloc();
       y_acc = gsl_interp_accel_alloc();
@@ -312,32 +313,33 @@ namespace Gambit
         //std::cout << ind_x << "/" << nx-1 << " " << tab["x"][i] << " vs " << x[ind_x] << " " << ind_y << "/" << ny-1 << " " << tab["y"][i] << " vs " << y[ind_y] << std::endl;
 
         gsl_spline2d_set(spline, z, ind_x, ind_y, tab["z"][i]);
-      };
-        gsl_spline2d_init (spline, x, y, z, nx, ny);
-    };
+      }
+      gsl_spline2d_init (spline, x, y, z, nx, ny);
+    }
 
     // Default creator with dummy entries for the objects w/ memory allocation
-    AxionInterpolator2D::AxionInterpolator2D() {
+    AxionInterpolator2D::AxionInterpolator2D()
+    {
       x_acc = gsl_interp_accel_alloc();
       y_acc = gsl_interp_accel_alloc();
       spline = gsl_spline2d_alloc(gsl_interp2d_bilinear, 2, 2);
       z = (double*) malloc(2 * 2 * sizeof(double));
-    };
+    }
     // Overloaded class creators for the AxionInterpolator class using the init function above.
-    AxionInterpolator2D::AxionInterpolator2D(std::string file, std::string type) { init(file, type); };
-    AxionInterpolator2D::AxionInterpolator2D(std::string file) { init(file, "bilinear"); };
+    AxionInterpolator2D::AxionInterpolator2D(std::string file, std::string type) { init(file, type); }
+    AxionInterpolator2D::AxionInterpolator2D(std::string file) { init(file, "bilinear"); }
 
     // Routine to access interpolated values.
-    double AxionInterpolator2D::interpolate(double x, double y) { return gsl_spline2d_eval(spline, x, y, x_acc, y_acc); };
+    double AxionInterpolator2D::interpolate(double x, double y) { return gsl_spline2d_eval(spline, x, y, x_acc, y_acc); }
 
     // Routine to check if a point is inside the interpolating box.
-    bool AxionInterpolator2D::is_inside_box(double x, double y) { return ((x >= x_lo) && (x <= x_up) && (y >= y_lo) && (y <= y_up)); };
+    bool AxionInterpolator2D::is_inside_box(double x, double y) { return ((x >= x_lo) && (x <= x_up) && (y >= y_lo) && (y <= y_up)); }
 
      /*! \brief H.E.S.S.-likelihood-related interpolation routines.
      */
 
     // Auxillary function for a parabola (needed for H.E.S.S. likelihood approximation).
-    double parabola(double x, const double params[]) { return params[0]*x*x + params[1]*x + params[2]; };
+    double parabola(double x, const double params[]) { return params[0]*x*x + params[1]*x + params[2]; }
 
     // Auxillary function to return the appropriate intersection between a parabola and a line (needed for H.E.S.S. likelihood).
     double intersect_parabola_line(double a, double b, double sign, const double pparams[])
@@ -352,7 +354,7 @@ namespace Gambit
       temp1 = x1 - x2;
       double temp2 = y1 - y2;
       return sqrt(temp1*temp1 + temp2*temp2);
-    };
+    }
 
     // HESS_Interpolator class: Provides a customised interpolation container for the H.E.S.S. likelihood.
     class HESS_Interpolator
@@ -375,7 +377,7 @@ namespace Gambit
     };
 
     // Class creator. Needs path to tabulated H.E.S.S. data.
-    HESS_Interpolator::HESS_Interpolator (std::string file)
+    HESS_Interpolator::HESS_Interpolator(std::string file)
     {
       // Initialise upper part of the likelihood interpolation (i.e. higher axion-photon coupling).
       interp_lnL = ASCIItableReader(file);
@@ -392,8 +394,8 @@ namespace Gambit
         } else {
           const double lnLvals [7] = {0., -2.30259, -2.99573, -4.60517, -2.99573, -2.30259, 0.};
           gsl_spline_init (spline[i], epsvals, lnLvals, pts);
-        };
-      };
+        }
+      }
     }
 
     // Destructor
@@ -428,11 +430,12 @@ namespace Gambit
           if ( (epsilon > interp_lnL["lnL"+std::to_string(index_lo)].front()) && (epsilon < interp_lnL["lnL"+std::to_string(index_lo)].back()) )
           {
             z_lo = gsl_spline_eval (spline[index_lo], epsilon, acc[index_lo]);
-          };
+          }
+
           if ( (epsilon > interp_lnL["lnL"+std::to_string(index_hi)].front()) && (epsilon < interp_lnL["lnL"+std::to_string(index_hi)].back()) )
           {
             z_hi = gsl_spline_eval (spline[index_hi], epsilon, acc[index_hi]);
-          };
+          }
 
           // Linear interpolation in Gamma.
           double a = static_cast<double>(index_hi) - (gamma-0.4)/0.05;
@@ -462,15 +465,15 @@ namespace Gambit
             gammavals[3] = 1.0;
             gammavals[2] = intersect_parabola_line(a, b, temp1, ppars90)/temp2;
             gammavals[1] = intersect_parabola_line(a, b, temp1, ppars95)/temp2;
-          };
+          }
             gsl_interp_accel *acc = gsl_interp_accel_alloc ();
             gsl_spline *spline = gsl_spline_alloc (gsl_interp_cspline, 4);
             gsl_spline_init (spline, gammavals, loglikevals, 4);
             result = gsl_spline_eval (spline, distance, acc);
             gsl_spline_free (spline);
             gsl_interp_accel_free (acc);
-          };
-        };
+          }
+        }
       // CAVE: There used to be a bug with log-likelihood > 0.0; this is fixed now, but still safeguard the result against roundoff errors.
       return std::min(result,0.0);
     }
@@ -505,7 +508,7 @@ namespace Gambit
         gsl_spline *linear_interp[3];
     };
 
-    SolarModel::SolarModel() {};
+    SolarModel::SolarModel() {}
     SolarModel::SolarModel(std::string file)
     {
       data = ASCIItableReader(file);
@@ -515,7 +518,7 @@ namespace Gambit
       {
         DarkBit_error().raise(LOCAL_INFO, "ERROR! Solar model file '"+file+"' not compatible with GAMBIT!\n"
                                           "       See [arXiv:1810.07192] or example file in 'DarkBit/data/' for the correct format.");
-      };
+      }
       data.setcolnames("mass", "radius", "temperature", "rho", "Pressure", "Luminosity", "X_H1", "X_He4", "X_He3", "X_C12", "X_C13", "X_N14", "X_N15", "X_O16", "X_O17", "X_O18", "X_Ne", "X_Na", "X_Mg", "X_Al", "X_Si", "X_P", "X_S", "X_Cl", "X_Ar",
                        "X_K", "X_Ca", "X_Sc", "X_Ti", "X_V", "X_Cr", "X_Mn", "X_Fe", "X_Co", "X_Ni");
 
@@ -557,7 +560,7 @@ namespace Gambit
           double temp = x_intercept*Z_vals[j]/A_vals[j];
           ne += temp;
           sum += temp*(1.0 + Z_vals[j]);
-        };
+        }
         double kss = factor*sum*rho_intercept/t_intercept;
         kappa_s_sq.push_back(kss);
         double wpls = factor*ne*rho_intercept/(1.0E+6*m_electron);
@@ -577,7 +580,7 @@ namespace Gambit
           double temp = data[j+6][i]*Z_vals[j]/A_vals[j];
           ne += temp;
           sum += temp*(1.0 + Z_vals[j]);
-        };
+        }
         double kss = factor*sum*data["rho"][i]/temperature[i];
         kappa_s_sq.push_back(kss);
         double wpls = factor*ne*data["rho"][i]/(1.0E+6*m_electron);
@@ -585,7 +588,7 @@ namespace Gambit
         #ifdef AXION_DEBUG_MODE
           printf("%5.4f %1.6e %1.6e %1.6e\n", data["radius"][i], temperature[i], kss, wpls);
         #endif
-      };
+      }
       // Set up the interpolating functions for temperature and screening scale.
       accel[0] = gsl_interp_accel_alloc ();
       linear_interp[0] = gsl_spline_alloc (gsl_interp_linear, pts);
@@ -775,8 +778,8 @@ namespace Gambit
       // Check if a pre-computed a file for a given model exists.
       user_gagg_file_missing = not(Utils::file_exists(darkbitdata_path+"CAST/"+data_set+"_ReferenceCounts_"+solar_model_gagg+"_gagg.dat"));
       user_gaee_file_missing = not(Utils::file_exists(darkbitdata_path+"CAST/"+data_set+"_ReferenceCounts_"+solar_model_gaee+"_gaee.dat"));
-      if (not(user_gagg_file_missing)) { logger() << LogTags::info << "Found pre-calculated axion-photon counts file for experiment '"+data_set+"' and solar model '"+solar_model_gagg+"'. Skipping calculation step..." << EOM; };
-      if (not(user_gaee_file_missing)) { logger() << LogTags::info << "Found pre-calculated axion-electron counts file for experiment '"+data_set+"' and solar model '"+solar_model_gaee+"'. Skipping calculation step..." << EOM; };
+      if (not(user_gagg_file_missing)) { logger() << LogTags::info << "Found pre-calculated axion-photon counts file for experiment '"+data_set+"' and solar model '"+solar_model_gagg+"'. Skipping calculation step..." << EOM; }
+      if (not(user_gaee_file_missing)) { logger() << LogTags::info << "Found pre-calculated axion-electron counts file for experiment '"+data_set+"' and solar model '"+solar_model_gaee+"'. Skipping calculation step..." << EOM; }
 
       // If either file does not exists, compute it.
       if (user_gagg_file_missing || user_gaee_file_missing)
@@ -822,8 +825,8 @@ namespace Gambit
           } else {
             DarkBit_error().raise(LOCAL_INFO, "ERROR! No solar model file found for '"+solar_model_gagg+"'.\n"
                                               "       Check 'DarkBit/data' for files named 'SolarModel_*.dat' for available options *.");
-          };
-        };
+          }
+        }
 
         // Load and interpolate effective exposure and the data for the axion-electron spectrum (with its nasty peaks).
         AxionInterpolator eff_exposure (darkbitdata_path+"CAST/"+data_set+"_EffectiveExposure.dat");
@@ -836,8 +839,8 @@ namespace Gambit
           } else {
             DarkBit_error().raise(LOCAL_INFO, "ERROR! No spectrum file found for axion-electron interactions and model '"+solar_model_gaee+"'.\n"
                                               "       Check 'DarkBit/data' for files named 'Axion_Spectrum_*_gaee.dat' for available options *.");
-          };
-        };
+          }
+        }
         double all_peaks [32] = {0.653029, 0.779074, 0.920547, 0.956836, 1.02042, 1.05343, 1.3497, 1.40807, 1.46949, 1.59487, 1.62314, 1.65075, 1.72461, 1.76286, 1.86037, 2.00007, 2.45281, 2.61233, 3.12669, 3.30616, 3.88237, 4.08163, 5.64394,
                                  5.76064, 6.14217, 6.19863, 6.58874, 6.63942, 6.66482, 7.68441, 7.74104, 7.76785};
 
@@ -868,8 +871,8 @@ namespace Gambit
           for (int i = 0; i < 32; i++)
           {
             double temp = all_peaks[i];
-            if ( (erg_lo < temp) && (temp < erg_hi) ) { relevant_peaks.push_back(temp); };
-          };
+            if ( (erg_lo < temp) && (temp < erg_hi) ) { relevant_peaks.push_back(temp); }
+          }
           relevant_peaks.push_back(erg_hi);
 
           for (int i = 0; i < n_mass_bins; i++)
@@ -888,7 +891,7 @@ namespace Gambit
               #endif
 
               gagg_counts[bin*n_mass_bins+i] = log10(temp*gagg_result);
-            };
+            }
             // Only perform integration if axion-electron counts file does not exist.
             if (user_gaee_file_missing)
             {
@@ -901,13 +904,13 @@ namespace Gambit
               #endif
 
               // Include efficiency factor from not integrating over the full Solar disc in CAST2007 here:
-              if (data_set=="CAST2007") { gaee_result = 0.826*gaee_result; };
+              if (data_set=="CAST2007") { gaee_result = 0.826*gaee_result; }
               gaee_counts[bin*n_mass_bins+i] = log10(prefactor_gaee*gaee_result);
-            };
-          };
+            }
+          }
           gsl_integration_workspace_free (v);
           gsl_integration_workspace_free (w);
-        };
+        }
 
 
         // Write the results to a file (if the file does not yet exist).
@@ -924,12 +927,12 @@ namespace Gambit
           for (int i = 0; i < n_mass_bins; i++)
           {
             gagg_file << log_masses[i];
-            for (int j = 0; j < n_bins; j++) { gagg_file << " " << gagg_counts[j*n_mass_bins+i]; };
-            if (i < n_mass_bins-1) { gagg_file << "\n"; };
-          };
+            for (int j = 0; j < n_bins; j++) { gagg_file << " " << gagg_counts[j*n_mass_bins+i]; }
+            if (i < n_mass_bins-1) { gagg_file << "\n"; }
+          }
           gagg_file.close();
           logger() << LogTags::info << "Output file '"+darkbitdata_path+"CAST/"+data_set+"_ReferenceCounts_"+solar_model_gagg+"_gagg.dat"+"' written for axion-photon interactions." << EOM;
-        };
+        }
 
         if (user_gaee_file_missing)
         {
@@ -944,13 +947,13 @@ namespace Gambit
           for (int i = 0; i < n_mass_bins; i++)
           {
             gaee_file << log_masses[i];
-            for (int j = 0; j < n_bins; j++) { gaee_file << " " << gaee_counts[j*n_mass_bins+i]; };
-            if (i < n_mass_bins-1) { gaee_file << "\n"; };
-          };
+            for (int j = 0; j < n_bins; j++) { gaee_file << " " << gaee_counts[j*n_mass_bins+i]; }
+            if (i < n_mass_bins-1) { gaee_file << "\n"; }
+          }
           gaee_file.close();
           logger() << LogTags::info << "Output file '"+darkbitdata_path+"CAST/"+data_set+"_ReferenceCounts_"+solar_model_gaee+"_gagg.dat"+"' written for axion-electron interactions." << EOM;
-        };
-      };
+        }
+      }
 
       // Read in pre-integrated fluxes for the chosen models.
       // 0-entry = mass values; remaining entries = counts in bins.
@@ -976,7 +979,7 @@ namespace Gambit
         const double* flux_gaee = &gaee_data[bin+1][0];
         gsl_spline_init (gagg_linear_interp[bin], mass_gagg, flux_gagg, gagg_pts);
         gsl_spline_init (gaee_linear_interp[bin], mass_gaee, flux_gaee, gaee_pts);
-      };
+      }
     }
 
     // Move constructor
@@ -1015,10 +1018,10 @@ namespace Gambit
       // Only perform a calculation for valid masses.
       if (lgm < 2.0)
       {
-        for (int i = 0; i < n_bins; i++) { result.push_back(gsl_spline_eval(gagg_linear_interp[i], lgm, gagg_acc[i])); };
+        for (int i = 0; i < n_bins; i++) { result.push_back(gsl_spline_eval(gagg_linear_interp[i], lgm, gagg_acc[i])); }
       } else {
-        for (int i = 0; i < n_bins; i++) { result.push_back(0.0); };
-      };
+        for (int i = 0; i < n_bins; i++) { result.push_back(0.0); }
+      }
 
       return result;
     }
@@ -1033,16 +1036,16 @@ namespace Gambit
       // Only perform a calculation for valid masses.
       if (lgm < 2.0)
       {
-        for (int i = 0; i < n_bins; i++) { result.push_back(gsl_spline_eval(gaee_linear_interp[i], lgm, gaee_acc[i])); };
+        for (int i = 0; i < n_bins; i++) { result.push_back(gsl_spline_eval(gaee_linear_interp[i], lgm, gaee_acc[i])); }
       } else {
-        for (int i = 0; i < n_bins; i++) { result.push_back(0.0); };
-      };
+        for (int i = 0; i < n_bins; i++) { result.push_back(0.0); }
+      }
 
       return result;
     }
 
     // Use simplified version of Gaussian likelihood from GAMBIT Utils.
-    double gaussian_nuisance_lnL(double theo, double obs, double sigma) { return Stats::gaussian_loglikelihood(theo, obs, 0, sigma, false); };
+    double gaussian_nuisance_lnL(double theo, double obs, double sigma) { return Stats::gaussian_loglikelihood(theo, obs, 0, sigma, false); }
 
     ////////////////////////////////////////////////////////
     //                                                    //
@@ -1074,7 +1077,7 @@ namespace Gambit
         res = gR.interpolate (-4.99);
       } else {
         res = gR.interpolate (lgT);
-      };
+      }
 
       return res;
     }
@@ -1094,7 +1097,8 @@ namespace Gambit
         res = gS.interpolate (-4.99);
       } else {
         res = gS.interpolate (lgT);
-      };
+      }
+
       return res;
     }
 
@@ -1135,7 +1139,7 @@ namespace Gambit
     double log_chi (double T, double beta, double Tchi)
     {
       double result = 0.0;
-      if (T > Tchi) { result = -beta*log10(T/Tchi); };
+      if (T > Tchi) { result = -beta*log10(T/Tchi); }
 
       return result;
     }
@@ -1154,7 +1158,7 @@ namespace Gambit
        const double log_chi_err_vals [20] = {0.014468, 0.0361846, 0.014468, 0.014468, 0.064104, 0.064104, 0.0510815, 0.0361846, 0.0510815, 0.064104, 0.0878027, 0.110042, 0.142159, 0.163124, 0.183873, 0.224965, 0.255557, 0.286023, 0.316401, 0.356804};
 
        double dummy = 0.0;
-       for (int i = 0; i < 20; i++) { dummy = dummy + gaussian_nuisance_lnL(log_chi_vals[i], log_chi(temp_vals[i],beta,Tchi), log_chi_err_vals[i]); };
+       for (int i = 0; i < 20; i++) { dummy = dummy + gaussian_nuisance_lnL(log_chi_vals[i], log_chi(temp_vals[i],beta,Tchi), log_chi_err_vals[i]); }
 
        result = dummy;
      }
@@ -1197,7 +1201,7 @@ namespace Gambit
 
         // Prefactor: 1096 W * 1 h * (10^-17/eV * 4.98 T * 4.2 m)^4 / 16.
         result = 0.00282962979*eff*factor*(power/1096.0)/erg;
-      };
+      }
 
       return result;
     }
@@ -1280,7 +1284,7 @@ namespace Gambit
       {
         dummy = gsl_pow_2(gagg*1E19)*pow(10,lg_ref_counts_gagg[i]) + gsl_pow_2(gaee*1E13)*pow(10,lg_ref_counts_gaee[i]);
         counts.push_back(gsl_pow_2(gagg*1E19)*dummy);
-      };
+      }
 
       result = counts;
     }
@@ -1310,8 +1314,8 @@ namespace Gambit
         {
           CAST_SolarModel_Interpolator dummy (solar_model_gagg, solar_model_gaee, "CAST2017_"+exp_names[e]);
           lg_ref_counts.push_back(std::move(dummy));
-        };
-      };
+        }
+      }
       lg_ref_counts_not_calculated = false;
 
       for (int e = 0; e < n_exps; e++)
@@ -1325,10 +1329,10 @@ namespace Gambit
         {
           dummy = gsl_pow_2(gagg*1E19)*pow(10,lg_ref_counts_gagg[bin]) + gsl_pow_2(gaee*1E13)*pow(10,lg_ref_counts_gaee[bin]);
           counts.push_back(gsl_pow_2(gagg*1E19)*dummy);
-        };
+        }
 
         res.push_back(counts);
-      };
+      }
 
       result = res;
     }
@@ -1343,7 +1347,7 @@ namespace Gambit
       {
         double mu = s[i] + bkg_counts[i];
         result += sig_counts[i]*gsl_sf_log(mu) - mu;
-      };
+      }
 
       return result;
     }
@@ -1365,8 +1369,8 @@ namespace Gambit
       static bool norm_not_calculated = true;
       if (norm_not_calculated)
       {
-        for (int i = 0; i < n_bins; i++) { norm += gsl_sf_lnfact(dat_vac[i]); };
-      };
+        for (int i = 0; i < n_bins; i++) { norm += gsl_sf_lnfact(dat_vac[i]); }
+      }
       norm_not_calculated = false;
 
       result = CAST_lnL_general(sig_vac, bkg_vac, dat_vac) - norm;
@@ -1415,13 +1419,13 @@ namespace Gambit
       {
         for (int bin = 0; bin < n_bins; bin++)
         {
-          for (int e = 0; e < n_exps; e++) { norm += gsl_sf_lnfact(dat_vac_all[e][bin]); };
-        };
-      };
+          for (int e = 0; e < n_exps; e++) { norm += gsl_sf_lnfact(dat_vac_all[e][bin]); }
+        }
+      }
       norm_not_calculated = false;
 
       result = 0.0;
-      for (int e = 0; e < n_exps; e++) { result = result + CAST_lnL_general(sig_vac[e], bkg_vac_all[e], dat_vac_all[e]); };
+      for (int e = 0; e < n_exps; e++) { result = result + CAST_lnL_general(sig_vac[e], bkg_vac_all[e], dat_vac_all[e]); }
       result = result - norm;
     }
 
@@ -1468,7 +1472,7 @@ namespace Gambit
         gsl_histogram_fscanf (f, h);
         fclose(f);
         init_flag = true;
-      };
+      }
 
       // Likelihood shape parameters based on limits from astro-ph/9801286.
       const double a = 0.013060890;
@@ -1482,8 +1486,8 @@ namespace Gambit
         double s_ref = gsl_pow_2(gsl_histogram_get(h, index));
         double s_rel = s/s_ref;
         // Only apply contraints for a signal > threshold a.
-        if (s_rel > a) { l = -0.5 * gsl_pow_2( (s_rel - a)/b ); };
-      };
+        if (s_rel > a) { l = -0.5 * gsl_pow_2( (s_rel - a)/b ); }
+      }
 
       result = l;
     }
@@ -1510,7 +1514,7 @@ namespace Gambit
         double var_theo = gsl_pow_2(0.13*s);
         double var_tot = var_exp + var_theo;
         l = -0.5*gsl_pow_2(s)/var_tot;
-      };
+      }
 
       result = l;
     }
@@ -1534,7 +1538,7 @@ namespace Gambit
         //double s = 0.035083106*(0.45/0.2804)*(*Dep::Haloscope_signal);
         double s = 0.0273012*(*Dep::Haloscope_signal);
         l = -0.5 * gsl_pow_2(s/sigma);
-      };
+      }
 
       result = l;
     }
@@ -1574,8 +1578,8 @@ namespace Gambit
         double s = (0.45/0.3)*(*Dep::Haloscope_signal);
         if (s > offset) {
           l = -0.5 * gsl_pow_2( (s - offset)/sigma );
-        };
-      };
+        }
+      }
 
       result = l;
     }
@@ -1606,7 +1610,7 @@ namespace Gambit
       // Tabulated data: x = log10(T/GeV), y = F1(T); gR and gS from 0910.1066 .
       static AxionInterpolator F1 (GAMBIT_DIR "/DarkBit/data/Axion_DiffEqnFun1.dat", "linear");
       double res = -1.0;
-      if ((lgT > 3.0) && (lgT < -5.0)) { res = F1.interpolate (lgT); };
+      if ((lgT > 3.0) && (lgT < -5.0)) { res = F1.interpolate (lgT); }
       return res;
     }
 
@@ -1618,7 +1622,7 @@ namespace Gambit
       // Tabulated data: x = log10(T/GeV), y = F3(T); gR and gS from 0910.1066 .
       static AxionInterpolator F3 (GAMBIT_DIR "/DarkBit/data/Axion_DiffEqnFun3.dat", "linear");
       double res = 0.0;
-      if ((lgT > 3.0) && (lgT < -5.0)) { res = F3.interpolate (lgT); };
+      if ((lgT > 3.0) && (lgT < -5.0)) { res = F3.interpolate (lgT); }
       return res;
     }
 
@@ -1634,7 +1638,7 @@ namespace Gambit
     double axion_mass_temp(double T, double beta, double Tchi)
     {
       double res = 1.0;
-      if (T > Tchi) { res = pow(T/Tchi,-0.5*beta); };
+      if (T > Tchi) { res = pow(T/Tchi,-0.5*beta); }
       return res;
     }
 
@@ -1691,12 +1695,12 @@ namespace Gambit
       if ( (r > Tchi) && (beta > 1.0E-10) )
       {
         r = 0.76*pow((10.0/(pi*pi)) * gsl_pow_2(m_pl*ma0) * pow(Tchi, beta), 1.0/(4.0+beta));
-      };
+      }
       // Find appropriate values for r_lo and r_up
       r_up = r;
       r_lo = r;
-      while (GSL_FN_EVAL(&F,r_up) > 0.0) { r_up = 2.0*r_up; };
-      while (GSL_FN_EVAL(&F,r_lo) < 0.0) { r_lo = 0.5*r_lo; };
+      while (GSL_FN_EVAL(&F,r_up) > 0.0) { r_up = 2.0*r_up; }
+      while (GSL_FN_EVAL(&F,r_lo) < 0.0) { r_lo = 0.5*r_lo; }
 
       // Execute equation solver until we reach 10^-6 absolute precision.
       gsl_root_fsolver_set(s, &F, r_lo, r_up);
@@ -1768,9 +1772,9 @@ namespace Gambit
       double fa = *Param["fa"];
       double Tosc = *Dep::AxionOscillationTemperature;
 
-      if ( (thetai<-pi) || (thetai>3.0*pi) ) { DarkBit_error().raise(LOCAL_INFO, "ERROR! The parameter 'thetai' should be chosen from the interval [-pi,3pi]."); };
+      if ( (thetai<-pi) || (thetai>3.0*pi) ) { DarkBit_error().raise(LOCAL_INFO, "ERROR! The parameter 'thetai' should be chosen from the interval [-pi,3pi]."); }
       // If thetai in (pi,3pi): map it back to its equivalent value in (-pi,pi]. This is to allow sampling around pi and easier averaging.
-      if (thetai>pi) { thetai = thetai - 2.0*pi; };
+      if (thetai>pi) { thetai = thetai - 2.0*pi; }
 
       // Only do computations if thetai > 0.
       result = 0.0;
@@ -1810,7 +1814,7 @@ namespace Gambit
           i++;
           new_step = -pow(10.0, 1.0 + (log10(-tau2)-1.0)*i/1000.0);
           int status = gsl_odeiv2_driver_apply (d, &tau1, new_step, y);
-          if (status != GSL_SUCCESS) {std::cout << "Error, return value = " << d << std::endl;};
+          if (status != GSL_SUCCESS) { std::cout << "Error, return value = " << d << std::endl; }
           check1 = fabs(thetai)*sqrt(gsl_pow_2( fabs(y[0]) ) + gsl_pow_2( fabs((-new_step)*y[1]*hubble_rad_dom(-new_step*Tosc)/(ma0*axion_mass_temp(-new_step*Tosc,beta,Tchi))) ));
           check2 = 3.0*hubble_rad_dom(-new_step*Tosc)/(ma0*axion_mass_temp(-new_step*Tosc,beta,Tchi));
 
@@ -1826,7 +1830,7 @@ namespace Gambit
           std::ostringstream buffer;
           buffer << "T_end: " << -new_step << " | theta_hat_val: " << check1 << ", theta_der: "<< -tau2*y[1]*thetai << ", 3H/m_osc: " << 3.0*hubble_rad_dom(Tosc)/(ma0*axion_mass_temp(-new_step*Tosc,beta,Tchi)) << ", 3H/m: " << check2 << " .\n";
           DarkBit_warning().raise(LOCAL_INFO, "WARNING! Maximum number of integration steps reached for energy density calculator!\n         "+buffer.str());
-        };
+        }
 
         // Calculate the axion energy density at the stopping point.
         double ede = 1E+18*gsl_pow_2(fa)*(0.5*gsl_pow_2(y[1]*thetai*hubble_rad_dom(-new_step*Tosc)*(-new_step)) + gsl_pow_2(ma0*axion_mass_temp(-new_step*Tosc,beta,Tchi))*(1.0 - gsl_sf_cos(y[0]*thetai)));
@@ -1836,7 +1840,7 @@ namespace Gambit
         gsl_odeiv2_driver_free (d);
 
         result = OmegaAh2;
-      };
+      }
     }
 
     //////////////////////////////////////////////
@@ -1869,12 +1873,12 @@ namespace Gambit
        // Initialise an effective axion-photon coupling, valid for low masses.
        double geff = gagg;
        // Apply correction for higher mass values...
-       if ((lgma0 > correction.lower()) && (lgma0 < correction.upper())) { geff *= pow(10, 0.5*correction.interpolate(lgma0)); };
+       if ((lgma0 > correction.lower()) && (lgma0 < correction.upper())) { geff *= pow(10, 0.5*correction.interpolate(lgma0)); }
        // ... or set to zero if mass is too high.
-       if (lgma0 >= correction.upper()) { geff = 0.0; };
+       if (lgma0 >= correction.upper()) { geff = 0.0; }
        // Expressions only valid for gaee2 < 35.18 but limits should become stronger for gaee2 > 35.18 (but perhaps not gaee2 >> 35.18).
        // Conservative approach: Constrain gaee2 > 35.18 at the level of gaee2 = 35.18.
-       if (gaee2 > 35.18) { gaee2 = 35.18; };
+       if (gaee2 > 35.18) { gaee2 = 35.18; }
 
        result = -0.421824 - 0.0948659*(-4.675 + sqrt(21.8556 + 21.0824*geff)) - 0.00533169*gaee2 - 0.0386834*(-1.23 - 0.137991*pow(gaee2,0.75) + sqrt(1.5129 + gaee2)) + 7.3306*Y;
      }
@@ -2017,7 +2021,7 @@ namespace Gambit
       double g = (1.0E+12*std::fabs(*Param["gagg"]))/5.339450;
 
       result = 0.570589*gsl_pow_4(g);
-      if (m > 1.0) { result = result*pow(m, -4.021046); };
+      if (m > 1.0) { result = result*pow(m, -4.021046); }
     }
 
     //////////////////////////////////////////////////////////////////
