@@ -34,6 +34,10 @@
 ///          (pat.scott@uq.edu.au)
 ///  \date 2020 Apr
 ///
+///  \author Tomas Gonzalo
+///          (tomas.gonzalo@monash.edu)
+///  \date 2020 Sep
+///
 ///  *********************************************
 
 #pragma once
@@ -66,9 +70,13 @@
 #define MODEL etaBBN_rBBN_rCMB_dNurBBN_dNurCMB
   START_MODEL
   DEFINEPARS(eta_BBN)
-  MAP_TO_CAPABILITY(eta_BBN, etaBBN)
   DEFINEPARS(r_BBN,r_CMB)
   DEFINEPARS(dNur_BBN,dNur_CMB)
+  MAP_TO_CAPABILITY(eta_BBN, etaBBN)
+  MAP_TO_CAPABILITY(r_BBN, rBBN)
+  MAP_TO_CAPABILITY(r_CMB, rCMB)
+  MAP_TO_CAPABILITY(dNur_BBN, dNurBBN)
+  MAP_TO_CAPABILITY(dNur_CMB, dNurCMB)
 #undef MODEL
 
 // No additional radiation or changes to the neutrino temperature.

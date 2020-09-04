@@ -47,6 +47,10 @@
 ///  \date 2019 Jul
 ///  \date 2020 Apr
 ///
+///  \author Tomas Gonzalo
+///          (tomas.gonzalo@monash.edu)
+///  \date 2020 Sep
+///
 ///  *********************************************
 
 #ifndef __CosmoBit_rollcall_hpp__
@@ -111,7 +115,8 @@ START_MODULE
     START_FUNCTION(double)
     ALLOW_MODEL(StandardModel_SLHA2)
     DEPENDENCY(Neff_SM, double)
-    MODEL_CONDITIONAL_DEPENDENCY(etaBBN_rBBN_rCMB_dNurBBN_dNurCMB_parameters,ModelParameters,etaBBN_rBBN_rCMB_dNurBBN_dNurCMB)
+    MODEL_CONDITIONAL_DEPENDENCY(rCMB, double, etaBBN_rBBN_rCMB_dNurBBN_dNurCMB)
+    MODEL_CONDITIONAL_DEPENDENCY(dNurCMB, double, etaBBN_rBBN_rCMB_dNurBBN_dNurCMB)
     #undef FUNCTION
   #undef CAPABILITY
 
@@ -540,23 +545,22 @@ START_MODULE
     #undef FUNCTION
   #undef CAPABILITY
 
-  // needed in addition to T_ncdm, as T_ncdm of non-SM models
-  // assume a fiducial value to base calculation on
-  #define CAPABILITY T_ncdm_SM
+ /// temperature of non-cold DM components
+
+  #define CAPABILITY T_ncdm
   START_CAPABILITY
+
+    // needed in addition to T_ncdm, as T_ncdm of non-SM models
+    // assume a fiducial value to base calculation on
     #define FUNCTION T_ncdm_SM
     START_FUNCTION(double)
     #undef FUNCTION
-  #undef CAPABILITY
 
-  /// temperature of non-cold DM components
-  #define CAPABILITY T_ncdm
-  START_CAPABILITY
     #define FUNCTION T_ncdm
     START_FUNCTION(double)
-    MODEL_CONDITIONAL_DEPENDENCY(etaBBN_rBBN_rCMB_dNurBBN_dNurCMB_parameters,ModelParameters,etaBBN_rBBN_rCMB_dNurBBN_dNurCMB)
-    DEPENDENCY(T_ncdm_SM,double)
+    ALLOW_MODEL(etaBBN_rBBN_rCMB_dNurBBN_dNurCMB)
     #undef FUNCTION
+
   #undef CAPABILITY
 
   /// extract H0 from a classy run if it is not a fundamental parameter
@@ -713,8 +717,9 @@ START_MODULE
     START_FUNCTION(map_str_dbl)
     DEPENDENCY(etaBBN, double)
     DEPENDENCY(Neff_SM, double)
-    MODEL_CONDITIONAL_DEPENDENCY(nuclear_params_neutron_lifetime_parameters,ModelParameters,nuclear_params_neutron_lifetime)
-    MODEL_CONDITIONAL_DEPENDENCY(etaBBN_rBBN_rCMB_dNurBBN_dNurCMB_parameters,ModelParameters,etaBBN_rBBN_rCMB_dNurBBN_dNurCMB)
+    MODEL_CONDITIONAL_DEPENDENCY(neutron_lifetime,double,nuclear_params_neutron_lifetime)
+    MODEL_CONDITIONAL_DEPENDENCY(rBBN,double,etaBBN_rBBN_rCMB_dNurBBN_dNurCMB)
+    MODEL_CONDITIONAL_DEPENDENCY(dNurBBN,double,etaBBN_rBBN_rCMB_dNurBBN_dNurCMB)
     #undef FUNCTION
   #undef CAPABILITY
 

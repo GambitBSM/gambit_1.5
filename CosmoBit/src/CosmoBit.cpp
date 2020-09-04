@@ -46,6 +46,10 @@
 ///  \date 2019 Jul
 ///  \date 2020 Apr
 ///
+///  \author Tomas Gonzalo
+///          (tomas.gonzalo@monash.edu)
+///  \date 2020 Sep
+///
 ///  *********************************************
 
 #include <stdint.h> // save memory addresses as int
@@ -147,9 +151,8 @@ namespace Gambit
         static bool allow_negative_delta_N_ur = runOptions->getValueOrDef<bool>(false,"allow_negative_delta_N_ur");
 
         // Get values of the temperature ratio and any ultrarelativistic contribution.
-        const ModelParameters& NP_params = *Dep::etaBBN_rBBN_rCMB_dNurBBN_dNurCMB_parameters;
-        double dNurCMB =  NP_params.at("dNur_CMB");
-        double rCMB =  NP_params.at("r_CMB");
+        double dNurCMB = *Dep::dNurCMB;
+        double rCMB = *Dep::rCMB;
 
         // Only let the user have negative contributions to dNEff if they've signed off on it.
         if ( (!allow_negative_delta_N_ur) && (dNurCMB < 0.0) )
@@ -189,18 +192,15 @@ namespace Gambit
     {
       using namespace Pipes::T_ncdm;
 
-      double rCMB = 1.0; // Default value if no energy injection is assumed.
-
-      // If the "etaBBN_rBBN_rCMB_dNurBBN_dNurCMB" model is included in the scan,
-      // we use rCMB of this model.
-      if (ModelInUse("etaBBN_rBBN_rCMB_dNurBBN_dNurCMB"))
-      {
-        const ModelParameters& NP_params = *Dep::etaBBN_rBBN_rCMB_dNurBBN_dNurCMB_parameters;
-        rCMB = NP_params.at("r_CMB");
-      }
+      // Set to 0.71611 in units of photon temperature, above the instantaneous decoupling value (4/11)^(1/3)
+      // to recover Sum_i mNu_i/omega = 93.14 eV resulting from studies of active neutrino decoupling (arXiv:hep-ph/0506164)
+      double T_ncdm_SM = 0.71611;
+   
+      // Take rCMB from the model "etaBBN_rBBN_rCMB_dNurBBN_dNurCMB"
+      double rCMB = *Param.at("r_CMB");
 
       // Take the SM value of T_ncdm (T_nu) and multiply it with the value of rCMB
-      result = rCMB*(*Dep::T_ncdm_SM);
+      result = rCMB*T_ncdm_SM;
     }
 
     /// Baryon-to-photon ratio in LCDM

@@ -39,6 +39,10 @@
 ///  \date 2019 Jul
 ///  \date 2020 Apr
 ///
+///  \author Tomas Gonzalo
+///          (tomas.gonzalo@monash.edu)
+///  \date 2020 Sep
+///
 ///  *********************************************
 
 #include <memory>  // make_unique pointers
@@ -76,9 +80,7 @@ namespace Gambit
       // (i.e. eta inferred from LCDM, Nnu = Neff_SM (3.045) and dNnu = 0)
       if (ModelInUse("etaBBN_rBBN_rCMB_dNurBBN_dNurCMB"))
       {
-        const ModelParameters& NP_params = *Dep::etaBBN_rBBN_rCMB_dNurBBN_dNurCMB_parameters;
-
-        double dNurBBN =  NP_params.at("dNur_BBN");
+        double dNurBBN = *Dep::dNurBBN;
 
         // Check if the input for dNeff is negative (unphysical)
         // NOTE: CosmoBit performs no sanity checks if you allow negative dNEff; you're on your own.
@@ -98,7 +100,7 @@ namespace Gambit
         }
 
         //If check is passed, set inputs.
-        result["Nnu"]=*Dep::Neff_SM*pow(NP_params.at("r_BBN"),4); // contribution from SM neutrinos
+        result["Nnu"]=*Dep::Neff_SM*pow(*Dep::rBBN,4); // contribution from SM neutrinos
         result["dNnu"]=dNurBBN;    // dNnu: within AlterBBN scenarios in which the sum Nnu+dNnu is the same are identical
       }
       else
@@ -111,7 +113,7 @@ namespace Gambit
       // Adopt the default value for the neutron lifetime in seconds if is not passed as a model parameter
       if (ModelInUse("nuclear_params_neutron_lifetime"))
       {
-        result["neutron_lifetime"] = Dep::nuclear_params_neutron_lifetime_parameters->at("neutron_lifetime");
+        result["neutron_lifetime"] = *Dep::neutron_lifetime;
       }
       else
       {
