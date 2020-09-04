@@ -137,7 +137,7 @@ else()
   else()
     message("${BoldYellow}   Python 3 not found, searching for Python 2.7${ColourReset}")
     find_package(PythonInterp 2 REQUIRED)
-    if (PYTHON_VERSION_MINOR LESS 7)
+    if (PYTHON_VERSION_MAJOR EQUAL 2 AND PYTHON_VERSION_MINOR LESS 7)
       message(FATAL_ERROR "\nGAMBIT requires Python 2.7.  \nIf you need to set the path to the Python interpreter manually, "
                           "please use -D PYTHON_EXECUTABLE=path/to/preferred/python.")
     endif()
