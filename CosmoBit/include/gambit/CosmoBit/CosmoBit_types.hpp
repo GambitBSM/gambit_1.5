@@ -47,7 +47,9 @@
 #include <valarray>
 #include <tuple>
 
-#include <pybind11/stl.h>
+#ifdef HAVE_PYBIND11
+  #include <pybind11/stl.h>
+#endif
 
 namespace Gambit
 {
@@ -60,7 +62,9 @@ namespace Gambit
     warning& CosmoBit_warning();
 
     typedef std::map< str,std::valarray < double > > map_str_valarray_dbl;
-    typedef std::tuple<pybind11::object, map_str_str, map_str_pyobj> MPLike_objects_container;
+    #ifdef HAVE_PYBIND11
+      typedef std::tuple<pybind11::object, map_str_str, map_str_pyobj> MPLike_objects_container;
+    #endif
 
     /// Class containing the primordial power spectrum.
     /// Members:
@@ -74,7 +78,7 @@ namespace Gambit
             Primordial_ps() {};
             ~Primordial_ps() {};
 
-            // Fill k from an array of doubles
+            /// Fill k from an array of doubles
             void set_N_pivot(double npiv) { N_pivot = npiv; }
             void fill_k(double*, int);
             void fill_P_s(double*, int);
@@ -94,8 +98,7 @@ namespace Gambit
             std::vector<double> P_s;
             std::vector<double> P_s_iso;
             std::vector<double> P_t;
-            // needed to pass vector length to CLASS,
-            // set in 'fill_k' method
+            /// needed to pass vector length to CLASS; set in 'fill_k' method
             int vec_size;
     };
 
@@ -120,9 +123,8 @@ namespace Gambit
             double get_ln10A_s() { return ln10A_s; }
             double get_r() { return r; }
 
-            // return members as str to double map for printing
+            /// return members as str to double map for printing
             map_str_dbl get_parametrised_ps_map();
-
 
         private:
             double N_pivot;

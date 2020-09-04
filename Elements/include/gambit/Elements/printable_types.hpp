@@ -25,6 +25,8 @@
 // Types that Gambit printers can output (if printer plugin is properly equipped)
 #define PRINTABLE_TYPES    \
   SCANNER_PRINTABLE_TYPES  \
+  (map_intpair_dbl)        \
+  (triplet<double>)        \
   (DM_nucleon_couplings)   \
   (DM_nucleon_couplings_fermionic_HP) \
   (Flav_KstarMuMu_obs)     \

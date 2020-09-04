@@ -82,11 +82,11 @@ namespace Gambit
       {
         double dNurBBN = *Param.at("dNur_BBN");
 
-        // Check if the input for dNeff is negative (unphysical)
-        // NOTE: CosmoBit performs no sanity checks if you allow negative dNEff; you're on your own.
+        // Check if the input for Delta N_ur is negative (unphysical)
+        // NOTE: CosmoBit performs no sanity checks if you allow negative Delta N_ur; you're on your own.
         static bool allow_negative_delta_N_ur = runOptions->getValueOrDef<bool>(false,"allow_negative_delta_N_ur");
 
-        // Only let the user have negative contributions to dNEff if they've signed off on it.
+        // Only let the user have negative contributions to NEff from Delta N_ur if they've signed off on it.
         if ( (!allow_negative_delta_N_ur) && (dNurBBN < 0.0) )
         {
           std::ostringstream err;
@@ -261,7 +261,7 @@ namespace Gambit
 
       // In AlterBBN ratioH and cov_ratioH are arrays of fixed length.
       // With certain compiler versions (gcc 5.4.0) we have seen memory corruption problems
-      // if we initialise these as double ratioH[NNUC+1], since the memory was not allocated properly. 
+      // if we initialise these as double ratioH[NNUC+1], since the memory was not allocated properly.
       // Fixed size arrays do not seem to be properly supported even though there are no errors at compile time.
       // Using a unique pointer for ratioH and a 2D vector for cov_ratioH avoids these problems.
       auto deleter = [&](double* ptr){delete [] ptr;};
