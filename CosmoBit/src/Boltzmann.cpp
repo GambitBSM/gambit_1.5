@@ -58,7 +58,7 @@ namespace Gambit
   {
 
     using namespace LogTags;
-    
+
     #ifdef HAVE_PYBIND11
 
       /*****************/
@@ -170,8 +170,8 @@ namespace Gambit
         result["k_array"] = memaddress_to_uint(pps.get_k().data());
         result["pks_array"] = memaddress_to_uint(pps.get_P_s().data());
         result["pkt_array"] = memaddress_to_uint(pps.get_P_t().data());
-        result["lnk_size" ] = pps.get_vec_size(); // don't hard code but somehow make consistent with multimode
-        
+        result["lnk_size" ] = pps.get_vec_size(); // makes this consistent with multimodecode (rather than hardcoding it)
+
         // Pass pivot scale of external spectrum to CLASS
         result["k_pivot"] = *Dep::k_pivot;
 
@@ -186,37 +186,37 @@ namespace Gambit
       void set_classy_input_params(Classy_input &result)
       {
         using namespace Pipes::set_classy_input_params;
-  
+
         if (ModelInUse("LCDM") and ModelInUse("LCDM_theta"))
         {
           CosmoBit_error().raise(LOCAL_INFO, "You have requested to scan both LCDM and LCDM_theta.\n"
                                              "This is not allowed. Please select one in your YAML file.");
         }
-  
+
         // Make sure dict is empty
         result.clear();
-  
+
         // Keep track if it is the first run: if so, perform some
         // extra consistency checks to make sure no contradicting
         // values are in the classy python input dictionary.
         static bool first_run = true;
-  
+
         // Get the dictionary with inputs for the neutrino masses and merge it
         // into Classy_Input dictionary
         result.merge_input_dicts(*Dep::classy_MPLike_input);
         result.merge_input_dicts(*Dep::classy_NuMasses_Nur_input);
         result.merge_input_dicts(*Dep::classy_primordial_input);
-  
+
         // Standard cosmological parameters (common to all CDM-like models)
         result.add_entry("T_cmb"      , *Param["T_cmb"]);
         result.add_entry("omega_b"    , *Param["omega_b"]);
         result.add_entry("tau_reio"   , *Param["tau_reio"]);
         result.add_entry("omega_cdm"  , *Param["omega_cdm"]);
-  
+
         // Depending on parametrisation, pass either Hubble or the acoustic scale
         if (ModelInUse("LCDM")) result.add_entry("H0", *Param["H0"]);
         else result.add_entry("100*theta_s", *Param["100theta_s"]);
-  
+
         // add energy-injection-related CLASS input parameters
         // Note: if one of the models below is in use, an "exo" version of CLASS needs
         // to be used. Otherwise the features for energy injection are not available.
@@ -228,7 +228,7 @@ namespace Gambit
           // Add decaying/annihilating DM-specific options to Python dictionary passed to CLASS (consistency checks only executed in first run).
           result.merge_input_dicts(*Dep::classy_parameters_EnergyInjection);
         }
-  
+
         // Other CLASS input direct from the YAML file.
         // Check if these are already contained in the input dictionary -- if so throw an error.
         // Only do this for the first run...
@@ -280,16 +280,16 @@ namespace Gambit
         // Only want to do the gnarly stuff once!
         first_run = false;
         }
-  
+
         // Add YAML options to python dictionary passed to CLASS; consistency checks only executed on first run
         result.merge_input_dicts(yaml_input);
-  
+
         // If the Planck likelihood is used, add the following relevant input parameters to the CLASS dictionary:
         // - output: 'lCl, pCl, tCl'
-        // - lensing: yes 
+        // - lensing: yes
         // - non linear: halofit
         // - l_max_scalars: 2508
-  
+
         // NOTE: this if performed *after* the YAML options are read in, since it would trigger an error of duplicated
         // keys in the event the user specifies one of the options themselves. The 'merge_input_dicts' routine will properly
         // deal with concatenating the output values and choosing the maximum passed value for l_max_scalars. Contradictions
@@ -339,7 +339,7 @@ namespace Gambit
       {
         using namespace Pipes::set_classy_input_with_MPLike;
         static bool first = true;
-  
+
         // Only do this this first time through, and if something actually needs info from MP downstream
         if (first and Downstream::neededFor("MP_LogLikes"))
         {
@@ -364,21 +364,21 @@ namespace Gambit
       void set_classy_parameters_EnergyInjection_AnnihilatingDM(pybind11::dict &result)
       {
         using namespace Pipes::set_classy_parameters_EnergyInjection_AnnihilatingDM;
-  
+
         // Make sure nothing from previous run is contained
         result.clear();
-  
+
          // Set relevant inputs for the scenario of s-wave annihilating DM
          result["DM_annihilation_cross_section"] = *Param["sigmav"];
          result["DM_annihilation_mass"] = *Param["mass"];
-  
+
         // Get the results from the DarkAges tables that hold extra information to be passed to the CLASS thermodynamics structure
         static DarkAges::Energy_injection_efficiency_table fz;
         static DarkAges::Energy_injection_efficiency_table cached_fz;
-  
+
         fz = *Dep::energy_injection_efficiency;
         bool f_eff_mode = fz.f_eff_mode;
-  
+
         // Flag passed to CLASS to signal that the energy_deposition_function is coming from GAMBIT
         // we patched exoCLASS to accept this. An alternative way without patching would be to write the tables to disk &
         // just have CLASS read in the file. To avoid the repeated file writing & deleting we pass pointers to the vector/arrays
@@ -391,13 +391,13 @@ namespace Gambit
         {
           result["f_eff_type"] = "pointer_to_fz_channel";
         }
-  
+
         // Set the lengths of the input tables (since we are passing pointers to arrays CLASS has to know how long they are)
         result["energyinj_coef_num_lines"] = fz.redshift.size();
-  
+
         // Add the pointers to arrays class needs to know about to input dictionary
-        // NOTE: memory addresses are passed as strings (the Python wrapper for CLASS 
-        // converts every entry to a string internally so we need to do that for the 
+        // NOTE: memory addresses are passed as strings (the Python wrapper for CLASS
+        // converts every entry to a string internally so we need to do that for the
         // memory addresses, before Python casts them to something else)
         result["energyinj_coef_z"] = memaddress_to_uint(fz.redshift.data());
         if (f_eff_mode)
@@ -412,19 +412,19 @@ namespace Gambit
           result["energyinj_coef_ionHe"] = memaddress_to_uint(fz.f_heion.data());
           result["energyinj_coef_lowE"] = memaddress_to_uint(fz.f_lowe.data());
         }
-  
+
         // Check if the table has changed compared to the previous iteration.
         // If so, notify class by adding {"EnergyInjection_changed":"yes"}
         // to the dictionary.
         // The classy frontend will just look for the key - the value is not important here.
         if (fz != cached_fz)
           result["EnergyInjection_changed"] = "yes";
-  
+
         // Copy fz to cache
         cached_fz = fz;
       }
 
-    
+
       /// Set the parameters for exoCLASS for a scenario with decaying dark matter.
       void set_classy_parameters_EnergyInjection_DecayingDM(pybind11::dict &result)
       {
@@ -446,8 +446,8 @@ namespace Gambit
         bool f_eff_mode = fz.f_eff_mode;
 
         // Flag passed to CLASS to signal that the energy_deposition_function is coming from GAMBIT
-        // (exoCLASS has been patched to accept this). An alternative way without patching would be 
-        // to write the tables to disk & just have CLASS read in the file. To avoid the repeated 
+        // (exoCLASS has been patched to accept this). An alternative way without patching would be
+        // to write the tables to disk & just have CLASS read in the file. To avoid the repeated
         // file writing & deleting we pass pointers to the vector/arrays to CLASS instead.
         if (f_eff_mode)
         {
@@ -462,8 +462,8 @@ namespace Gambit
         result["energyinj_coef_num_lines"] = fz.redshift.size();
 
         // Add the pointers to arrays class needs to know about to input dictionary
-        // NOTE: memory addresses are passed as strings (the Python wrapper for CLASS 
-        // converts every entry to a string internally so we need to do that for the 
+        // NOTE: memory addresses are passed as strings (the Python wrapper for CLASS
+        // converts every entry to a string internally so we need to do that for the
         // memory addresses, before Python casts them to something else)
         result["energyinj_coef_z"] = memaddress_to_uint(fz.redshift.data());
         if (f_eff_mode)
