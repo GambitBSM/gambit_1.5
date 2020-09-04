@@ -2,10 +2,10 @@
 //   *********************************************
 ///  \file
 ///
-///  Central module file of CosmoBit.  
+///  Central module file of CosmoBit.
 ///  Calculates cosmology-related observables.
 ///
-///  Additionally, contains main routines for 
+///  Additionally, contains main routines for
 ///  interfacing to CLASS and MontePython.
 ///
 ///  Most of the model- or observable-specific code is
@@ -80,19 +80,19 @@ namespace Gambit
       result = Pipes::set_k_pivot::runOptions->getValueOrDef<double>(0.05, "k_pivot");
     }
 
-    // return Neff for 3 SM neutrinos in the early Universe 
+    // return Neff for 3 SM neutrinos in the early Universe
     // see arXiv 1606.06986
     void get_Neff_SM(double& result)
     {
       using namespace Pipes::get_Neff_SM;
 
       // call a non-rollcalled function fixing Neff to 3.045
-      // -> the reason why it's not fixed here, is that 
+      // -> the reason why it's not fixed here, is that
       // the SM value is also needed in the CosmoBit type 'SM_time_evo'
       // where we don't have access to the result of a capability
       result = CosmoBit_utils::set_Neff_SM_value();
     }
-    
+
     // returning the total mass sum of SM neutrino
     void get_mNu_tot(double& result)
     {
@@ -146,15 +146,15 @@ namespace Gambit
       // be scaled and gets extra contributions
       if (ModelInUse("etaBBN_rBBN_rCMB_dNurBBN_dNurCMB"))
       {
-        // Check if the input for dNeff is negative (unphysical)
-        // NOTE: CosmoBit performs no sanity checks if you allow negative dNEff; you're on your own.
+        // Check if the input for Delta N_ur is negative (unphysical)
+        // NOTE: CosmoBit performs no sanity checks if you allow negative Delta N_ur; you're on your own.
         static bool allow_negative_delta_N_ur = runOptions->getValueOrDef<bool>(false,"allow_negative_delta_N_ur");
 
         // Get values of the temperature ratio and any ultrarelativistic contribution.
         double dNurCMB = *Param["dNur_CMB"];
         double rCMB = *Param["r_CMB"];
 
-        // Only let the user have negative contributions to dNEff if they've signed off on it.
+        // Only let the user have negative contributions to NEff from Delta N_ur if they've signed off on it.
         if ( (!allow_negative_delta_N_ur) && (dNurCMB < 0.0) )
         {
           std::ostringstream err;
@@ -195,7 +195,7 @@ namespace Gambit
       // Set to 0.71611 in units of photon temperature, above the instantaneous decoupling value (4/11)^(1/3)
       // to recover Sum_i mNu_i/omega = 93.14 eV resulting from studies of active neutrino decoupling (arXiv:hep-ph/0506164)
       double T_ncdm_SM = 0.71611;
-   
+
       // Take rCMB from the model "etaBBN_rBBN_rCMB_dNurBBN_dNurCMB"
       double rCMB = *Param.at("r_CMB");
 
@@ -307,7 +307,7 @@ namespace Gambit
     }
 
     /// returns S8 = sigma8 (Omega0_m/0.3)^0.5
-    /// (sigma8:root mean square fluctuations density fluctuations within 
+    /// (sigma8:root mean square fluctuations density fluctuations within
     /// spheres of radius 8/h Mpc)
     void get_S8_classy(double& result)
     {
