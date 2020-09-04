@@ -4401,12 +4401,6 @@ n0_g: |
 eta0: |
    Returns the baryon-to-photon ratio today, eta_0.
 
-etaCMB:  |
-  Calculate baryon to photon ratio etaCMB at CMB release.
-
-etaBBN: |
-   Returns the baryon-to-photon ratio at the emphend of BBN, eta_BBN. 
-
 Omega0_g: |
    Returns the total photon content today, Omega_gamma. 
 
