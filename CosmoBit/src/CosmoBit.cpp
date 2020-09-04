@@ -203,7 +203,7 @@ namespace Gambit
       result = rCMB*T_ncdm_SM;
     }
 
-    /// Baryon-to-photon ratio in LCDM
+    /// Baryon-to-photon ratio (today) in LCDM
     void eta0_LCDM(double &result)
     {
       using namespace Pipes::eta0_LCDM;
@@ -214,6 +214,14 @@ namespace Gambit
 
       result =  nb/ngamma;
       logger() << "Baryon to photon ratio (eta) today computed to be " << result << EOM;
+    }
+
+    /// Baryon-to-photon ratio (at the end of BBN) in LCDM
+    /// LCDM assumes that to be constant so this function maps to the function above.
+    /// This is needed to guarantee the existence of `etaBBN` for AlterBBN
+    void etaBBN_LCDM(double& result)
+    {
+      result = *Pipes::etaBBN_LCDM::Dep::eta0;
     }
 
     /// The total baryon content today.
