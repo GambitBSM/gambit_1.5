@@ -81,13 +81,13 @@
       std::ostringstream errMssg;
       // one thing that can go wrong is that the primordial power spectrum is requested but
       // no observable depending on perturbations is asked for. In that case, CLASS will only
-      // derive background quantities and an error occurs when trying to access quantities 
+      // derive background quantities and an error occurs when trying to access quantities
       // depending on perturbations  =>
       // check if "modes" input is set while "output" is not set
       if(classy_input.contains("modes") and not classy_input.contains("output"))
       {
         errMssg << "You are calling CLASS asking for the following modes to be computed : "<< pybind11::repr(classy_input["modes"]);
-        errMssg << "\nHowever, you did not request any output that requires solving the perturbations.\nHence CLASS";
+        errMssg << "\nHowever, you did not request any output that requires computing any perturbation spectra.\nHence CLASS";
         errMssg << " will not read the input 'modes' and won't run. Add the CLASS input parameter 'output' requesting";
         errMssg << " a spectrum to be computed to the yaml file as run option, e.g. \n  - capability: classy_baseline_params\n";
         errMssg << "    options:\n      classy_dict:\n        output: tCl";
@@ -238,7 +238,7 @@
       return Dl;
     }
 
-    // returns scale_independent_growth_factor D(z) for CDM perturbations for a given 
+    // returns scale_independent_growth_factor D(z) for CDM perturbations for a given
     // redshift (quantity defined by CLASS as index_bg_D in the background module)
     double class_get_scale_independent_growth_factor(double z)
     {
@@ -305,7 +305,7 @@
     }
 
     // returns sigma8 at z = 0
-    // (root mean square fluctuations density fluctuations within 
+    // (root mean square fluctuations density fluctuations within
     // spheres of radius 8/h Mpc)
     double class_get_sigma8()
     {
@@ -463,9 +463,9 @@ BE_INI_FUNCTION
       logger() << LogTags::info << "[classy_"<< STRINGIFY(VERSION) <<"] \"cosmo.compute\" was skipped, input was identical to previously computed point" << EOM;
       // CLASS did not recompute -> save this information in cosmo container, so MontePython
       // (and potentially other backends) has access to this information and can skip
-      // their computations as well 
+      // their computations as well
       cosmo.attr("set_cosmo_update")(false);
-      // -> access the information with 
+      // -> access the information with
       //int recomputed = cosmo.attr("recomputed").cast<int>();
     }
 
