@@ -105,7 +105,7 @@ namespace Gambit
         result["eta0"] = *Param.at("eta_BBN");
 
       }
-      else if (ModelInUse("LCDM") or ModelInUse("LCDM_theta"))
+      else if (ModelInUse("LCDM") or ModelInUse("LCDM_theta") or ModelInUse("nuclear_params_neutron_lifetime"))
       {
         result["Nnu"]=*Dep::Neff_SM; // contribution from SM neutrinos
         result["dNnu"]=0.;   // no extra ur species in standard LCDM model
