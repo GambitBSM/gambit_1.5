@@ -80,7 +80,7 @@ namespace Gambit
       // (i.e. eta inferred from LCDM, Nnu = Neff_SM (3.045) and dNnu = 0)
       if (ModelInUse("etaBBN_rBBN_rCMB_dNurBBN_dNurCMB"))
       {
-        double dNurBBN = *Dep::dNurBBN;
+        double dNurBBN = *Param.at("dNur_BBN");
 
         // Check if the input for dNeff is negative (unphysical)
         // NOTE: CosmoBit performs no sanity checks if you allow negative dNEff; you're on your own.
@@ -100,20 +100,32 @@ namespace Gambit
         }
 
         //If check is passed, set inputs.
-        result["Nnu"]=*Dep::Neff_SM*pow(*Dep::rBBN,4); // contribution from SM neutrinos
+        result["Nnu"]=*Dep::Neff_SM*pow(*Param.at("r_BBN"),4); // contribution from SM neutrinos
         result["dNnu"]=dNurBBN;    // dNnu: within AlterBBN scenarios in which the sum Nnu+dNnu is the same are identical
+        result["eta0"] = *Param.at("eta_BBN");
+
       }
-      else
+      else if (ModelInUse("LCDM") or ModelInUse("LCDM_theta"))
       {
         result["Nnu"]=*Dep::Neff_SM; // contribution from SM neutrinos
         result["dNnu"]=0.;   // no extra ur species in standard LCDM model
+
+        // Baryon-to-photon ratio in LCDM
+        double ngamma, nb;
+        ngamma = 16*pi*zeta3*pow(*Param["T_cmb"]*_kB_eV_over_K_/_hc_eVcm_,3); // photon number density today
+        nb = *Param["omega_b"]*3*100*1e3*100*1e3/_Mpc_SI_/_Mpc_SI_/(8*pi*_GN_cgs_* m_proton*1e9*eV2g); // baryon number density today
+  
+        result["eta0"] =  nb/ngamma;
       }
-      result["eta0"] = *Dep::etaBBN;
+      else
+      {
+        // This should not happen
+      }
 
       // Adopt the default value for the neutron lifetime in seconds if is not passed as a model parameter
       if (ModelInUse("nuclear_params_neutron_lifetime"))
       {
-        result["neutron_lifetime"] = *Dep::neutron_lifetime;
+        result["neutron_lifetime"] = *Param.at("neutron_lifetime");
       }
       else
       {

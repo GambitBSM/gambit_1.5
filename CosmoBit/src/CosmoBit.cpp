@@ -203,27 +203,6 @@ namespace Gambit
       result = rCMB*T_ncdm_SM;
     }
 
-    /// Baryon-to-photon ratio in LCDM
-    void eta0_LCDM(double &result)
-    {
-      using namespace Pipes::eta0_LCDM;
-
-      double ngamma, nb;
-      ngamma = 16*pi*zeta3*pow(*Param["T_cmb"]*_kB_eV_over_K_/_hc_eVcm_,3); // photon number density today
-      nb = *Param["omega_b"]*3*100*1e3*100*1e3/_Mpc_SI_/_Mpc_SI_/(8*pi*_GN_cgs_* m_proton*1e9*eV2g); // baryon number density today
-
-      result =  nb/ngamma;
-      logger() << "Baryon to photon ratio (eta) today computed to be " << result << EOM;
-    }
-
-    /// Baryon-to-photon ratio
-    void etaBBN_SM(double& result)
-    {
-      using namespace Pipes::etaBBN_SM;
-
-      result = *Dep::eta0;
-    }
-
     /// The total baryon content today.
     void compute_Omega0_b(double &result)
     {

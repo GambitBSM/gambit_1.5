@@ -72,9 +72,6 @@
   DEFINEPARS(eta_BBN)
   DEFINEPARS(r_BBN,r_CMB)
   DEFINEPARS(dNur_BBN,dNur_CMB)
-  MAP_TO_CAPABILITY(eta_BBN, etaBBN)
-  MAP_TO_CAPABILITY(r_BBN, rBBN)
-  MAP_TO_CAPABILITY(dNur_BBN, dNurBBN)
 #undef MODEL
 
 // No additional radiation or changes to the neutrino temperature.
