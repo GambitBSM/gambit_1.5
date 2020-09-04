@@ -27,6 +27,9 @@
 namespace Gambit
 {
 
+  /// Shorthand for a string to pybind object map
+  typedef std::map<std::string,pybind11::object> map_str_pyobj;
+
   namespace Backends
   {
 
