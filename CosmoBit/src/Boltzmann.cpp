@@ -58,7 +58,7 @@ namespace Gambit
   {
 
     using namespace LogTags;
-    
+
 
     /*****************/
     /* Classy inputs */
@@ -95,7 +95,7 @@ namespace Gambit
         std::vector<double> m_ncdm(N_ncdm);
         std::copy_if(nuMasses.begin(), nuMasses.end(), m_ncdm.begin(), isNonZero);
 
-        // NOTE: this explicitly assumed that all non-CDM components have the same temperature!
+        // NOTE: this explicitly assumes that all non-CDM components have the same temperature!
         std::vector<double> T_ncdm(N_ncdm,*Dep::T_ncdm);
 
         // Create one string with m_ncdm masses and
@@ -138,7 +138,7 @@ namespace Gambit
 
       // If r = 0 only compute scalar modes, else tensor modes as well
       //
-      // => Don't explicitly set "modes" to 's' since it defaults to it. If you set it here anyways
+      // => Don't explicitly set "modes" to 's' since it defaults to it. If you set it here anyway
       // you won't be able to run CLASS when only requesting background quantities (e.g. for BAO & SNe likelihoods)
       // as the perturbations module won't run and therefore the entry "modes" won't be read.
       if(*Param["r"] == 0){}
@@ -170,7 +170,7 @@ namespace Gambit
       result["pks_array"] = memaddress_to_uint(pps.get_P_s().data());
       result["pkt_array"] = memaddress_to_uint(pps.get_P_t().data());
       result["lnk_size" ] = pps.get_vec_size(); // don't hard code but somehow make consistent with multimode
-      
+
       // Pass pivot scale of external spectrum to CLASS
       result["k_pivot"] = *Dep::k_pivot;
 
@@ -218,9 +218,9 @@ namespace Gambit
 
       // add energy-injection-related CLASS input parameters
       // Note: if one of the models below is in use, an "exo" version of CLASS needs
-      // to be used. Otherwise the features for energy injection are not available. 
-      // To ensure this, there is a check in the classy frontends that can not
-      // handle energy injection. In that case, a fatal error is thrown and 
+      // to be used. Otherwise the features for energy injection are not available.
+      // To ensure this, there is a check in the classy frontends that cannot
+      // handle energy injection. In that case, a fatal error is thrown and
       // the user is told to use exoCLASS (and how to install it).
       if (ModelInUse("DecayingDM_general") || ModelInUse("AnnihilatingDM_general"))
       {
@@ -284,7 +284,7 @@ namespace Gambit
 
       // If the Planck likelihood is used, add the following relevant input parameters to the CLASS dictionary:
       // - output: 'lCl, pCl, tCl'
-      // - lensing: yes 
+      // - lensing: yes
       // - non linear: halofit
       // - l_max_scalars: 2508
 
@@ -395,8 +395,8 @@ namespace Gambit
       result["energyinj_coef_num_lines"] = fz.redshift.size();
 
       // Add the pointers to arrays class needs to know about to input dictionary
-      // NOTE: memory addresses are passed as strings (the Python wrapper for CLASS 
-      // converts every entry to a string internally so we need to do that for the 
+      // NOTE: memory addresses are passed as strings (the Python wrapper for CLASS
+      // converts every entry to a string internally so we need to do that for the
       // memory addresses, before Python casts them to something else)
       result["energyinj_coef_z"] = memaddress_to_uint(fz.redshift.data());
       if (f_eff_mode)
@@ -443,8 +443,8 @@ namespace Gambit
       bool f_eff_mode = fz.f_eff_mode;
 
       // Flag passed to CLASS to signal that the energy_deposition_function is coming from GAMBIT
-      // (exoCLASS has been patched to accept this). An alternative way without patching would be 
-      // to write the tables to disk & just have CLASS read in the file. To avoid the repeated 
+      // (exoCLASS has been patched to accept this). An alternative way without patching would be
+      // to write the tables to disk & just have CLASS read in the file. To avoid the repeated
       // file writing & deleting we pass pointers to the vector/arrays to CLASS instead.
       if (f_eff_mode)
       {
@@ -459,8 +459,8 @@ namespace Gambit
       result["energyinj_coef_num_lines"] = fz.redshift.size();
 
       // Add the pointers to arrays class needs to know about to input dictionary
-      // NOTE: memory addresses are passed as strings (the Python wrapper for CLASS 
-      // converts every entry to a string internally so we need to do that for the 
+      // NOTE: memory addresses are passed as strings (the Python wrapper for CLASS
+      // converts every entry to a string internally so we need to do that for the
       // memory addresses, before Python casts them to something else)
       result["energyinj_coef_z"] = memaddress_to_uint(fz.redshift.data());
       if (f_eff_mode)
