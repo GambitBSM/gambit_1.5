@@ -66,7 +66,6 @@ namespace Gambit
 #define MODEL nuclear_params_neutron_lifetime
   START_MODEL
   DEFINEPARS(neutron_lifetime)
-  MAP_TO_CAPABILITY(neutron_lifetime, neutron_lifetime)
 #undef MODEL
 
 #endif /* __nuclear_params_hpp__ */
