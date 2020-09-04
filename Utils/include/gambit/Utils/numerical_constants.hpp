@@ -74,6 +74,10 @@ namespace Gambit
 
   const double sigmaB_SI = 2*pow(pi,5)*pow(kB_SI,4)/(15*pow(hP_SI,3)*c_SI*c_SI); // Stefan-Boltzman constant in W/m^2/K^4 = Kg/K^4/s^3
 
+  const double Neff_SM = 3.045;     // effective number of relativistic dof in the early Universe
+  // the value of 3.045 holds for 3 SM neutrinos in the absence of any non-standard particles
+  // or components. Value from de Salas, Pastor '16, arXiv:1606.06986
+
   /**
      @brief Thomson limit of \f$\alpha_e\f$ in OS scheme from
      <a href="http://pdg.lbl.gov/2017/reviews/rpp2017-rev-phys-constants.pdf">PDG 2017</a>

@@ -36,11 +36,8 @@
 
 #include "gambit/Utils/statistics.hpp"
 #include "gambit/Utils/ascii_dict_reader.hpp"
-#include "gambit/Utils/numerical_constants.hpp"
 #include "gambit/Elements/gambit_module_headers.hpp"
 #include "gambit/CosmoBit/CosmoBit_rollcall.hpp"
-#include "gambit/CosmoBit/CosmoBit_types.hpp"
-#include "gambit/CosmoBit/CosmoBit_utils.hpp"
 
 namespace Gambit
 {

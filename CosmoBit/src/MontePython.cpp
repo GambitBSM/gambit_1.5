@@ -44,7 +44,6 @@
 #include "gambit/Elements/gambit_module_headers.hpp"
 #include "gambit/CosmoBit/CosmoBit_rollcall.hpp"
 #include "gambit/CosmoBit/CosmoBit_types.hpp"
-#include "gambit/CosmoBit/CosmoBit_utils.hpp"
 
 
 namespace Gambit
@@ -100,8 +99,14 @@ namespace Gambit
       void pass_empty_parameter_dict_for_MPLike(pybind11::dict & result)
       {
         using namespace Pipes::pass_empty_parameter_dict_for_MPLike;
-        pybind11::dict r;
-        result = r;
+
+        static bool first = true;
+        
+        if (first)
+        {
+          result = pybind11::dict();
+          first = false;
+        }
         // Nothing to do here.
       }
 

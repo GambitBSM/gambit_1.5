@@ -52,7 +52,7 @@
 #include "gambit/Elements/gambit_module_headers.hpp"
 #include "gambit/CosmoBit/CosmoBit_rollcall.hpp"
 #include "gambit/CosmoBit/CosmoBit_types.hpp"
-#include "gambit/CosmoBit/CosmoBit_utils.hpp"
+
 
 namespace Gambit
 {

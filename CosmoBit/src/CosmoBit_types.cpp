@@ -36,8 +36,6 @@
 #include <valarray>
 
 #include "gambit/CosmoBit/CosmoBit_types.hpp"
-#include "gambit/CosmoBit/CosmoBit_utils.hpp"
-#include "gambit/Utils/numerical_constants.hpp"
 
 namespace Gambit
 {

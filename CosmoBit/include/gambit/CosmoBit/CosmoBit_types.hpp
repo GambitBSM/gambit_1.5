@@ -42,7 +42,6 @@
 #define __CosmoBit_types_hpp__
 
 #include "gambit/Utils/util_types.hpp"
-#include "gambit/CosmoBit/CosmoBit_utils.hpp"
 #include "gambit/Backends/backend_types/MontePythonLike.hpp"
 #include <valarray>
 #include <tuple>

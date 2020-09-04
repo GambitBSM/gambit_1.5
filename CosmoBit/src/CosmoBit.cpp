@@ -55,12 +55,10 @@
 #include <stdint.h> // save memory addresses as int
 #include <boost/algorithm/string/trim.hpp>
 
-#include "gambit/Utils/ascii_table_reader.hpp"
-#include "gambit/Utils/ascii_dict_reader.hpp"
 #include "gambit/Elements/gambit_module_headers.hpp"
 #include "gambit/CosmoBit/CosmoBit_rollcall.hpp"
 #include "gambit/CosmoBit/CosmoBit_types.hpp"
-#include "gambit/CosmoBit/CosmoBit_utils.hpp"
+#include "gambit/Utils/numerical_constants.hpp"
 
 namespace Gambit
 {
@@ -80,17 +78,13 @@ namespace Gambit
       result = Pipes::set_k_pivot::runOptions->getValueOrDef<double>(0.05, "k_pivot");
     }
 
-    // return Neff for 3 SM neutrinos in the early Universe
-    // see arXiv 1606.06986
+    // return Neff for 3 SM neutrinos (and no additional dark radiation or BSM physics) 
+    // in the early Universe, see arXiv 1606.06986
     void get_Neff_SM(double& result)
     {
       using namespace Pipes::get_Neff_SM;
 
-      // call a non-rollcalled function fixing Neff to 3.045
-      // -> the reason why it's not fixed here, is that
-      // the SM value is also needed in the CosmoBit type 'SM_time_evo'
-      // where we don't have access to the result of a capability
-      result = CosmoBit_utils::set_Neff_SM_value();
+      result = Neff_SM;
     }
 
     // returning the total mass sum of SM neutrino
