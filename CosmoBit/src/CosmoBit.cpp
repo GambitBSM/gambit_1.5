@@ -151,8 +151,8 @@ namespace Gambit
         static bool allow_negative_delta_N_ur = runOptions->getValueOrDef<bool>(false,"allow_negative_delta_N_ur");
 
         // Get values of the temperature ratio and any ultrarelativistic contribution.
-        double dNurCMB = *Dep::dNurCMB;
-        double rCMB = *Dep::rCMB;
+        double dNurCMB = *Param["dNur_CMB"];
+        double rCMB = *Param["r_CMB"];
 
         // Only let the user have negative contributions to dNEff if they've signed off on it.
         if ( (!allow_negative_delta_N_ur) && (dNurCMB < 0.0) )
