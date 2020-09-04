@@ -101,14 +101,15 @@ namespace Gambit
 
         //If check is passed, set inputs.
         result["Nnu"] = *Dep::Neff_SM*pow(*Param.at("r_BBN"),4); // contribution from SM neutrinos
-        result["dNnu"] = dNurBBN;    // dNnu: within AlterBBN scenarios in which the sum Nnu+dNnu is the same are identical
+        result["dNnu"] = dNurBBN;                                // dNnu: within AlterBBN scenarios in which the sum Nnu+dNnu is the same are identical
+        result["eta0"] = *Param.at("eta_BBN");                // eta at the end of BBN
       }
       else // at this point either LCDM or LCDM_theta are in use so we assume standard values for Nnu and dNnu
       {
         result["Nnu"] = *Dep::Neff_SM; // contribution from SM neutrinos
-        result["dNnu"] = 0.;   // no extra ur species in standard LCDM model
+        result["dNnu"] = 0.;           // no extra ur species in standard LCDM model
+        result["eta0"] = *Dep::eta0;  // assume etaBBN = eta0
       }
-      result["eta0"] = *Dep::etaBBN;
 
       // Adopt the default value for the neutron lifetime in seconds if is not passed as a model parameter
       if (ModelInUse("nuclear_params_neutron_lifetime"))
