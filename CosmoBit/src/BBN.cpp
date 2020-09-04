@@ -109,13 +109,7 @@ namespace Gambit
       {
         result["Nnu"]=*Dep::Neff_SM; // contribution from SM neutrinos
         result["dNnu"]=0.;   // no extra ur species in standard LCDM model
-
-        // Baryon-to-photon ratio in LCDM
-        double ngamma, nb;
-        ngamma = 16*pi*zeta3*pow(*Param["T_cmb"]*_kB_eV_over_K_/_hc_eVcm_,3); // photon number density today
-        nb = *Param["omega_b"]*3*100*1e3*100*1e3/_Mpc_SI_/_Mpc_SI_/(8*pi*_GN_cgs_* m_proton*1e9*eV2g); // baryon number density today
-  
-        result["eta0"] =  nb/ngamma;
+        result["eta0"] = *Dep::eta0; // Baryon-to-photon ratio in LCDM
       }
       else
       {

@@ -657,6 +657,16 @@ START_MODULE
     #undef FUNCTION
   #undef CAPABILITY
 
+  /// baryon-to-photon ratio today
+  #define CAPABILITY eta0
+  START_CAPABILITY
+    // calculate eta0 (today) from omega_b and T_cmb
+    #define FUNCTION eta0_LCDM
+    START_FUNCTION(double)
+    ALLOW_MODELS(LCDM, LCDM_theta)
+    #undef FUNCTION
+  #undef CAPABILITY
+
   // sound horizon at baryon drag
   #define CAPABILITY rs_drag
   START_CAPABILITY
@@ -702,6 +712,7 @@ START_MODULE
     MODEL_GROUP(neutron, nuclear_params_neutron_lifetime)
     ALLOW_MODEL_COMBINATION(cosmo, neutron)
     DEPENDENCY(Neff_SM, double)
+    MODEL_CONDITIONAL_DEPENDENCY(eta0, double, LCDM, LCDM_theta)
     #undef FUNCTION
   #undef CAPABILITY
 
