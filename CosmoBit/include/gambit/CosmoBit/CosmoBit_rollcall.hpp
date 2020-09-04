@@ -114,9 +114,11 @@ START_MODULE
     #define FUNCTION get_N_ur
     START_FUNCTION(double)
     ALLOW_MODEL(StandardModel_SLHA2)
+    ALLOW_MODEL_DEPENDENCE(etaBBN_rBBN_rCMB_dNurBBN_dNurCMB)
+    MODEL_GROUP(group1, StandardModel_SLHA2)
+    MODEL_GROUP(gorup2, etaBBN_rBBN_rCMB_dNurBBN_dNurCMB)
+    ALLOW_MODEL_COMBINATION(group1, group2)
     DEPENDENCY(Neff_SM, double)
-    MODEL_CONDITIONAL_DEPENDENCY(rCMB, double, etaBBN_rBBN_rCMB_dNurBBN_dNurCMB)
-    MODEL_CONDITIONAL_DEPENDENCY(dNurCMB, double, etaBBN_rBBN_rCMB_dNurBBN_dNurCMB)
     #undef FUNCTION
   #undef CAPABILITY
 
