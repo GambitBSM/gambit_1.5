@@ -2,8 +2,7 @@
 //   *********************************************
 ///  \file
 ///
-///  Rollcall header for the developement
-///  version of the CosmoBit module.
+///  Rollcall header for the CosmoBit module.
 ///
 ///  Compile-time registration of available
 ///  functions and variables from this backend.
@@ -61,7 +60,7 @@
 
 #define MODULE CosmoBit
 START_MODULE
-  
+
   /// get the energy injection efficiency tables
   #define CAPABILITY energy_injection_efficiency
   START_CAPABILITY
@@ -99,7 +98,7 @@ START_MODULE
     #undef FUNCTION
   #undef CAPABILITY
 
-  // SM value of N_eff in the early Universe (3 + corrections from precise decoupling
+  // SM value of N_eff in the early Universe (3 + corrections from precise decoupling)
   // calculations)
   #define CAPABILITY Neff_SM
   START_CAPABILITY
@@ -366,7 +365,7 @@ START_MODULE
   #undef CAPABILITY
 
   /// compute CMB low ell likelihood from Planck data
-  /// functions to use 
+  /// functions to use
   /// - TT or TEB or EE or TTEE
   /// - 2018 or 2015 DR
   #define CAPABILITY Planck_lowl_loglike
@@ -419,9 +418,9 @@ START_MODULE
   #undef CAPABILITY
 
   /// compute CMB high ell likelihood from Planck data
-  /// functions to use 
-  /// - TT or TTTEEE 
-  /// - 2018 or 2015 DR and 
+  /// functions to use
+  /// - TT or TTTEEE
+  /// - 2018 or 2015 DR and
   /// - full (16 for TT 34 for TTTEEE nuisance params) or lite (1 nuisance param)
   #define CAPABILITY Planck_highl_loglike
   START_CAPABILITY
@@ -671,7 +670,7 @@ START_MODULE
     #undef FUNCTION
   #undef CAPABILITY
 
-  // sound horizon at baryon drag
+  /// sound horizon at baryon drag
   #define CAPABILITY rs_drag
   START_CAPABILITY
     #define FUNCTION get_rs_drag_classy
@@ -680,7 +679,7 @@ START_MODULE
     #undef FUNCTION
   #undef CAPABILITY
 
-  // get the value of Neff in the early Universe from CLASS backend
+  /// get the value of Neff in the early Universe from CLASS backend
   #define CAPABILITY Neff
   START_CAPABILITY
     #define FUNCTION get_Neff_classy
@@ -690,7 +689,7 @@ START_MODULE
   #undef CAPABILITY
 
   /// returns S8 = sigma8 (Omega0_m/0.3)^0.5
-  /// (sigma8:root mean square fluctuations density fluctuations within 
+  /// (sigma8:root mean square fluctuations density fluctuations within
   /// spheres of radius 8/h Mpc)
   #define CAPABILITY S8_cosmo
   START_CAPABILITY
@@ -717,7 +716,7 @@ START_MODULE
   #undef CAPABILITY
 
   /// compute primordial element abundances (and theoretical errors &
-  /// covariances if requested) as predicted from BBN 
+  /// covariances if requested) as predicted from BBN
   #define CAPABILITY BBN_abundances
   START_CAPABILITY
     #define FUNCTION compute_BBN_abundances
@@ -739,7 +738,7 @@ START_MODULE
     #undef FUNCTION
   #undef CAPABILITY
 
-  /// compute BBN likelihood for chosen isotopes 
+  /// compute BBN likelihood for chosen isotopes
   /// depending on yaml file settings, theoretical
   /// errors and cross-correlations are included
   #define CAPABILITY BBN_LogLike
