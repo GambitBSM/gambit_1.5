@@ -209,8 +209,8 @@ namespace Gambit
       using namespace Pipes::eta0_LCDM;
 
       double ngamma, nb;
-      ngamma = 16*pi*zeta3*pow(*Param["T_cmb"]*_kB_eV_over_K_/_hc_eVcm_,3); // photon number density today
-      nb = *Param["omega_b"]*3*100*1e3*100*1e3/_Mpc_SI_/_Mpc_SI_/(8*pi*_GN_cgs_* m_proton*1e9*eV2g); // baryon number density today
+      ngamma = 16*pi*zeta3*pow(*Param["T_cmb"]*kB_eV_over_K/hc_eVcm,3); // photon number density today
+      nb = *Param["omega_b"]*3*100*1e3*100*1e3/Mpc_SI/Mpc_SI/(8*pi*GN_cgs* m_proton*1e9*eV2g); // baryon number density today
 
       result =  nb/ngamma;
       logger() << "Baryon to photon ratio (eta) today computed to be " << result << EOM;
@@ -248,7 +248,7 @@ namespace Gambit
       using namespace Pipes::compute_Omega0_g;
 
       double h = *Dep::H0/100.;
-      result = (4.*_sigmaB_SI_/_c_SI_*pow(*Param["T_cmb"],4.)) / (3.*_c_SI_*_c_SI_*1.e10*h*h/_Mpc_SI_/_Mpc_SI_/8./pi/_GN_SI_);
+      result = (4.*sigmaB_SI/c_SI*pow(*Param["T_cmb"],4.)) / (3.*c_SI*c_SI*1.e10*h*h/Mpc_SI/Mpc_SI/8./pi/GN_SI);
     }
 
     /// Number density of photons today
@@ -256,7 +256,7 @@ namespace Gambit
     {
       using namespace Pipes::compute_n0_g;
 
-      result = 2./pi/pi*zeta3 *pow(*Param["T_cmb"]*_kB_eV_over_K_,3.)/pow(_hP_eVs_*_c_SI_/2./pi,3)/100/100/100; // result per cm^3
+      result = 2./pi/pi*zeta3 *pow(*Param["T_cmb"]*kB_eV_over_K,3.)/pow(hP_eVs*c_SI/2./pi,3)/100/100/100; // result per cm^3
     }
 
     /// The total ultrarelativistic content today.
@@ -277,7 +277,7 @@ namespace Gambit
       using namespace Pipes::get_H0_classy;
 
       // Rescale by c [km/s]
-      result = _c_SI_*BEreq::class_get_H0()/1000;
+      result = c_SI*BEreq::class_get_H0()/1000;
     }
 
     /// Energy densities *today* (Omega0)

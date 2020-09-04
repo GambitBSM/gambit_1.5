@@ -58,22 +58,21 @@ namespace Gambit
   const double alpha_EM = 7.2973525664e-3;                      // fine structure constant
 
   /// Values from Particle Data Group 2018 (http://pdg.lbl.gov/2018/reviews/rpp2018-rev-phys-constants.pdf)
-  /// @FIXME: this need cleaning up -- there is no reason to have so much duplication nor to prefix all these with an underscore
-  const double _c_SI_ = s2cm/100;                               // speed of light in m/s
-  const double _eV_to_J_ = 1.6021766208e-19;                    // electron charge in C
-  const double _Mpc_SI_ = 969394202136*pow(10,11)/pi;           // Mpc in m
+  const double c_SI = s2cm/100;                               // speed of light in m/s
+  const double eV_to_J = 1.6021766208e-19;                    // electron charge in C
+  const double Mpc_SI = 969394202136*pow(10,11)/pi;           // Mpc in m
 
-  const double _GN_cgs_ = 6.67408e-8;                           // Newton's constant in cm^3.g^-1.s^-2
-  const double _GN_SI_ = _GN_cgs_/1e3;                          // Newton's constant in m^3.kg^-1.s^-2
+  const double GN_cgs = 6.67408e-8;                           // Newton's constant in cm^3.g^-1.s^-2
+  const double GN_SI = GN_cgs/1e3;                          // Newton's constant in m^3.kg^-1.s^-2
 
-  const double _kB_SI_ = 1.38064852e-23;                        // Boltzmann constant in  Kg/K^4/s^3
-  const double _kB_eV_over_K_ = _kB_SI_/_eV_to_J_;              // Boltzmann constant in eV/K
+  const double kB_SI = 1.38064852e-23;                        // Boltzmann constant in  Kg/K^4/s^3
+  const double kB_eV_over_K = kB_SI/eV_to_J;              // Boltzmann constant in eV/K
 
-  const double _hP_SI_ = 6.626070040e-34;                       // Planck const. in Js
-  const double _hP_eVs_ = _hP_SI_/_eV_to_J_;                    // Planck const. in eVs
-  const double _hc_eVcm_ =_hP_eVs_*s2cm;                        // Planck const. x speed of light in eV cm
+  const double hP_SI = 6.626070040e-34;                       // Planck const. in Js
+  const double hP_eVs = hP_SI/eV_to_J;                    // Planck const. in eVs
+  const double hc_eVcm =hP_eVs*s2cm;                        // Planck const. x speed of light in eV cm
 
-  const double _sigmaB_SI_ = 2*pow(pi,5)*pow(_kB_SI_,4)/(15*pow(_hP_SI_,3)*_c_SI_*_c_SI_); // Stefan-Boltzman constant in W/m^2/K^4 = Kg/K^4/s^3
+  const double sigmaB_SI = 2*pow(pi,5)*pow(kB_SI,4)/(15*pow(hP_SI,3)*c_SI*c_SI); // Stefan-Boltzman constant in W/m^2/K^4 = Kg/K^4/s^3
 
   /**
      @brief Thomson limit of \f$\alpha_e\f$ in OS scheme from
