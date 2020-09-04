@@ -37,7 +37,7 @@ namespace Gambit
     // Using the instant reheating approximation makes N_pivot a derived parameter and the input N_pivot has no effect
     // We fix it to the dummy value below
     N_pivot = 50;
-    // CAVE Changing the default value of 'slowroll_infl_end' requires defining a custom condition for the end of inflation in MMC!
+    // Caveat: Changing the default value of 'slowroll_infl_end' requires defining a custom condition for the end of inflation in MMC!
     slowroll_infl_end = 1; // = true, i.e. stop inflation when slow roll parameters = 1
     // Control the output of analytic approximations for comparison. We do not use these.
     use_deltaN_SR = 0; // = false, i.e. MMC will not calculate deltaN observables (assumes slow roll & sum-separable potentials) at the pivot scale
