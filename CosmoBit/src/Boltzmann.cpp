@@ -169,7 +169,7 @@ namespace Gambit
       result["k_array"] = memaddress_to_uint(pps.get_k().data());
       result["pks_array"] = memaddress_to_uint(pps.get_P_s().data());
       result["pkt_array"] = memaddress_to_uint(pps.get_P_t().data());
-      result["lnk_size" ] = pps.get_vec_size(); // don't hard code but somehow make consistent with multimode
+      result["lnk_size" ] = pps.get_vec_size(); // makes this consistent with multimodecode (rather than hardcoding it)
 
       // Pass pivot scale of external spectrum to CLASS
       result["k_pivot"] = *Dep::k_pivot;
