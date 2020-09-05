@@ -119,7 +119,17 @@ Parameters:
     tau_reio:
       prior_type: flat
       range: [0.004,0.20]
-    T_cmb: 2.72548
+    T_cmb:
+      # FIRAS measurement 2.72548 \pm 0.00057
+      #
+      # -> Fix to central vsalue
+      fixed_value: 2.72548
+      #
+      # -> vary within error range
+      #prior_type: gaussian
+      #mean: [2.75248]
+      #sigs: [0.00057]
+
 
 
   # .. LCDM_theta with 100theta_s instead of H0
@@ -274,7 +284,10 @@ Parameters:
   #   - if you include a nuisance model that is not required by any likelihood, GAMBIT will
   #   exit and tell you the name of the parameter that is not needed. Likewise, if you forget
   #   to include a nuisance parameter model, GAMBIT will tell you which one is (likely) missing.
-  cosmo_nuisance_Pantheon: !import include/cosmo_nuisance_Pantheon.yaml
+  cosmo_nuisance_Pantheon:
+    M:
+      prior_type: flat
+      range: [-20,-18]
 
 
   # ====== B.7) Neutron lifetime (optional) =======
