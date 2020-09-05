@@ -46,11 +46,11 @@ CKM_rhobar  :  0.117
 CKM_etabar  :  0.353
 
 # PMNS
-# from NuFit 4.0 / JHEP 01 (2019) 106 / arXiv:1811.05487
+# from NuFit 4.1 / JHEP 01 (2019) 106 / arXiv:1811.05487
 theta12 :  0.59027 # solar angle
-theta23 :  0.86568 # atmospheric mixing angle
-theta13 :  0.15027 #
-delta13 :  3.75246 # Dirac CP-violating phase
+theta23 :  0.84823 # atmospheric mixing angle
+theta13 :  0.15010 #
+delta13 :  3.85718 # Dirac CP-violating phase
 alpha1  :  0       # first Majorana CP-violating phase
 alpha2  :  0       # second CP-violating Majorana phase
 

@@ -50,14 +50,10 @@ CKM_rhobar  :  0.117
 CKM_etabar  :  0.353
 
 # PMNS
-# from     http://pdg.lbl.gov/2014/tables/rpp2014-sum-leptons.pdf
-# see also http://pdg.lbl.gov/2014/reviews/rpp2014-rev-neutrino-mixing.pdf
-# Note: angles given as x = sin^2(2*theta), so I have converted them as:
-# theta = 0.5*arcsin(sqrt(x))
-# CP-violating phases not measured, so I set them to zero.
-theta12 :  0.58376 # solar angle
-theta23 :  0.76958 # atmospheric mixing angle
-theta13 :  0.15495 #
-delta13 :  0       # Dirac CP-violating phase
+# from NuFit 4.1 / JHEP 01 (2019) 106 / arXiv:1811.05487
+# normal hierarchy
+theta12 :  0.59027 # solar angle
+theta23 :  0.84823 # atmospheric mixing angle
+theta13 :  0.15010 #
+delta13 :  3.85718 # Dirac CP-violating phase
 alpha1  :  0       # first Majorana CP-violating phase
-alpha2  :  0       # second CP-violating Majorana phase
