@@ -4,9 +4,9 @@
 ##      Quickstart yaml file for CosmoBit
 ##
 ##        With this file, you can reproduce Fig. 5 in the 
-##        CosmoBit Module paper (arXiv: TODO insert link to arXiv). It shows the constraints on 
-##        Omega_m and H0 arising from BBN and BAO data. See arXiv 1907.11594 
-##        for the original study. 
+##        CosmoBit Module paper (GAMBIT Cosmology Workgroup, Renk, et al. arXiv:2009.xxxxx). 
+##        It shows the constraints on Omega_m and H0 arising from BBN and BAO data.
+##        See arXiv 1907.11594 for the original study.
 ##
 ##
 ##  \author Janina Renk <janina.renk@fysik.su.se>
