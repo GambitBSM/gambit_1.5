@@ -89,7 +89,7 @@ Parameters:
 #
 #  => for more details check out chapter 6.2 of the GAMBIT code paper (https://arxiv.org/abs/1705.07908)
 #  => for the definition of all models introduced with CosmoBit, check Appendix B of the CosmoBit
-#     module paper (TODO insert link to arXiv)
+#     module paper (GAMBIT Cosmology Workgroup, Renk, et al. arXiv:2009.xxxxx )
 #
 #     The different types of models described in Appendix B) are:
 #      B.1) Standard cosmology – LCDM
