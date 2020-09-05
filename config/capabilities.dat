@@ -3743,7 +3743,7 @@ nuclear_params_sigmas_sigmal_parameters: |
    Parameters for the model nuclear_params_sigmas_sigmal (see ./gambit nuclear_params_sigmas_sigmal)
 
 nuclear_params_neutron_lifetime_parameters: |
-   Model for the neutron lifetime. 
+   Model for the neutron lifetime.
    See ./gambit nuclear_params_neutron_lifetime for details.
 
 RightHandedNeutrinos_parameters: |
@@ -4216,7 +4216,7 @@ create_MP_likelihood_objects: |
    Returns a map of string to Python objects: the Python objects from MontePython are the initialised "Likelihood" objects used internally.
 
 bao_like_correlation: |
-   Adds the correlation coefficients of the bao_correlations likelihood to the output file. Optional to use in combination with the bao_correlations montethon likelihoods. 
+   Adds the correlation coefficients of the bao_correlations likelihood to the output file. Optional to use in combination with the bao_correlations montethon likelihoods.
 
 #----------------------------
 #  DarkAges
@@ -4267,7 +4267,7 @@ DecayingDM_electron_parameters: |
    See ./gambit DecayingDM_electron and ./gambit DecayingDM_general for more details.
 
 LCDM_parameters: |
-   Standard (4+1)-parameter LCDM model (no neutrinos, no inflation), using H0 instead of 100*theta_s. 
+   Standard (4+1)-parameter LCDM model (no neutrinos, no inflation), using H0 instead of 100*theta_s.
    See ./gambit LCDM for more details.
 
 LCDM_theta_parameters: |
@@ -4275,30 +4275,24 @@ LCDM_theta_parameters: |
    See ./gambit LCDM_theta for more details.
 
 etaBBN_rBBN_rCMB_dNurBBN_dNurCMB_parameters: |
-
    Model to be scanned in addition to LCDM as an extension: allowing for non-standard values of the baryon-to-photon ratio at BBN, non-standard values of the temperature ratio between photon and neutrinos at BBN and CMB release, as well as additional ultra-relativistic species present during BBN or at CMB release. See ./gambit etaBBN_rBBN_rCMB_dNurBBN_dNurCMB for more details.
 
 etaBBN_parameters: |
    Child model of etaBBN_rBBN_rCMB_dNurBBN_dNurCMB with only etaBBN as free parameter. See ./gambit etaBBN for more details.
 
 rBBN_rCMB_dNurBBN_dNurCMB_parameters: |
-
    Child model of etaBBN_rBBN_rCMB_dNurBBN_dNurCMB. See ./gambit rBBN_rCMB_dNurBBN_dNurCMB for more details.
 
 dNurBBN_dNurCMB_parameters: |
-
    Child model of rBBN_rCMB_dNurBBN_dNurCMB model. See ./gambit dNurBBN_dNurCMB for more details.
 
 dNurCMB_parameters: |
-
    Child model of dNurBBN_dNurCMB model. See ./gambit dNurCMB for more details.
 
 rBBN_rCMB_parameters: |
-
    Child model of rBBN_rCMB_dNurBBN_dNurCMB model. See ./gambit rBBN_rCMB for more details.
 
 rCMB_parameters: |
-
    Child model of rBBN_rCMB model. See ./gambit rCMB for more details.
 
 PowerLaw_ps_parameters: |
@@ -4314,23 +4308,18 @@ Inflation_InstReh_1Starobinsky_parameters: |
    See ./gambit Inflation_InstReh_1Starobinsky for more details.
 
 Inflation_InstReh_1mono23_parameters: |
-
    Inflation model with potential V(phi) = 1.5 lambda phi^(2/3), assuming instant reheating. See ./gambit Inflation_InstReh_1mono23 for more details.
 
 Inflation_InstReh_1linear_parameters: |
-
    Inflation model with potential V(phi) = lambda phi, assuming instant reheating. See ./gambit Inflation_InstReh_1linear for more details.
 
 Inflation_InstReh_1quadratic_parameters: |
-
    Inflation model with potential V(phi) = lambda phi, assuming instant reheating. See ./gambit Inflation_InstReh_1quadratic for more details.
 
 Inflation_InstReh_1quartic_parameters: |
-
    Inflation model with potential V(phi) = 0.25 lambda phi^4, assuming instant reheating. See ./gambit Inflation_InstReh_1quartic for more details.
 
 Inflation_InstReh_1natural_parameters: |
-
    Natural inflation model (axion-like particles) with potential V(phi) = Lambda^4 [1 + cos(phi/f)], assuming instant reheating. See ./gambit Inflation_InstReh_1natural for more details.
 
 cosmo_nuisance_JLA_parameters: |
@@ -4402,46 +4391,46 @@ eta0: |
    Returns the baryon-to-photon ratio today, eta_0.
 
 Omega0_g: |
-   Returns the total photon content today, Omega_gamma. 
+   Returns the total photon content today, Omega_gamma.
 
 Omega0_ur: |
-   Returns the total content in ultrarelativistic species today. 
+   Returns the total content in ultrarelativistic species today.
 
 Omega0_r: |
    Returns the total radiation content today, Omega_r.
 
 Omega0_m: |
-   Returns the total matter content today, Omega_m. 
+   Returns the total matter content today, Omega_m.
 
 Omega0_cdm: |
-   Returns the total cold DM content today, Omega_cdm. 
+   Returns the total cold DM content today, Omega_cdm.
 
 Omega0_ncdm: |
-   Returns the total neutrino content today, Omega_ncdm. 
+   Returns the total neutrino content today, Omega_ncdm.
 
 Omega0_b: |
-   Returns the total baryon content today, Omega_b.  
+   Returns the total baryon content today, Omega_b.
 
-H0:
+H0: |
    The Hubble rate today [km/s/Mpc].
 
-helium_abundance:
+helium_abundance: |
    The He4 abundance.
 
 primordial_power_spectrum: |
    Creates object containing the primordial power spectra of scalar, tensor, and isocurvature perturbations, for a given array of [k] values.
 
 k_pivot: |
-   Returns the comoving pivot scale, k_star in Mpc^-1. 
+   Returns the comoving pivot scale, k_star in Mpc^-1.
 
 mNu_tot: |
    Returns the total mass of neutrinos in eV.
 
 Neff_SM: |
-   Returns the effective number of neutrino species in the SM. 
+   Returns the effective number of neutrino species in the SM.
 
 N_ur: |
-   Returns the total number of ultra-relativistic species today. 
+   Returns the total number of ultra-relativistic species today.
 
 S8_cosmo: |
    Returns S8 = sigma_8 (Omega0_m/0.3)^0.5, a measure for the amplitude of the matter power spectrum on scale 8/h Mpc.
@@ -4480,7 +4469,7 @@ lensed_Cl_PhiPhi: |
    Returns the lensed dimensionless CMB lensing potential.
 
 Neff: |
-   Returns the effective number of neutrino species. 
+   Returns the effective number of neutrino species.
 
 NuMasses_SM: |
   Create a map containing neutrino masses, the corresponding number of non-cold DM components (N_ncdm) today as well as the sum of the neutrino masses. Needed to pass correct parameters to CLASS.
@@ -4501,7 +4490,7 @@ classy_parameters_EnergyInjection: |
    Sets all input parameters for exoclass relevant for energy injection in the early Universe. These parameters are for example the DM mass and cross section (for annihilating DM models) or the DM lifetime and fraction (decaying DM models). Further, the energy injection coefficients and the injection efficiency functions are passed.
 
 classy_input_params: |
-  Creates an object of type Classy_input, containing a Python dictionary with all relevant input parameters for the classy run. 
+  Creates an object of type Classy_input, containing a Python dictionary with all relevant input parameters for the classy run.
   Additional input options for CLASS (precision parameters, more output...) can be set by setting a runOption 'classy_dict' for the function 'set_classy_input_params' and specifying these parameters.
 
 class_get_Neff: |
@@ -4523,10 +4512,10 @@ classy_exo_2_7_2_init: |
   Initialise ExoCLASS 2.7.2 run through the classy python wrapper.
 
 get_classy_backendDir: |
-  Return the path to the CLASS version that is used in the current run. 
+  Return the path to the CLASS version that is used in the current run.
 
 get_classy_cosmo_object: |
-  Return an instance of the CLASS python object, usually initialised as 'cosmo'. In GAMBIT, this object will be passed to MontePython for the computation of external likelihoods. 
+  Return an instance of the CLASS python object, usually initialised as 'cosmo'. In GAMBIT, this object will be passed to MontePython for the computation of external likelihoods.
 
 compute_Planck_lowp_TT_loglike: |
    function computes the Planck log-likelihood for a  given
@@ -4552,7 +4541,7 @@ Planck_lowl_loglike: |
    Computes the Planck CMB likelihood for the multipole range 2 leq ell leq 29.
 
 Planck_lensing_loglike: |
-   Computes the Planck lensing log-likelihood for a given set of C_ells. All module functions described here have the prefix function_Planck_lensing_. 
+   Computes the Planck lensing log-likelihood for a given set of C_ells. All module functions described here have the prefix function_Planck_lensing_.
 
 Planck_nuisance_prior_loglike: |
    Provides Gaussian priors on the nuisance parameters of the Planck likelihoods, as suggested by the Planck collaboration.
@@ -4808,7 +4797,7 @@ Gamma_RHN2rhoplusl: |
 
 Gamma_RHN2Dstarplusl: |
   Decay rate of right-handed neutrinos to a positively-charged D* meson and a lepton
- 
+
 Gamma_RHN2Dstarsl: |
   Decay rate of right-handed neutrinos to a positively-charged Ds* and a lepton
 
@@ -4820,7 +4809,7 @@ Gamma_RHN2etacnu: |
 
 Gamma_RHN2omeganu: |
   Decay rate of right-handed neutrinos to a omega meson and a left-handed neutrino
- 
+
 Gamma_RHN2phinu: |
   Decay rate of right-handed neutrinos to a phi meson and a left-handed neutrino
 
