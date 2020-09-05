@@ -96,7 +96,7 @@ class Likelihood(object):
                     "for the %s likelihood. It seems you are using MontePython with GAMBIT. "
                     "Try adding the model cosmo_nuisance_%s to the 'Parameters' section "
                     "in your yaml file." % (nuisance, self.name, self.name) )
-        
+    
     def loglkl(self, cosmo, data):
         """
         Placeholder to remind that this function needs to be defined for a
@@ -1895,6 +1895,7 @@ class Likelihood_mpk(Likelihood):
 
         return
 
+
     # functions added for nuisance parameter space checks.
     def a2maxpos(self,a1val):
         a2max = -1.0
@@ -1993,6 +1994,8 @@ class Likelihood_mpk(Likelihood):
                 # (JR) had to adopt these check to work properly with ascii & unicode strings
                 #   original line was -> 'if type(value) != type('foo')' 
                 #   which crashed if one of the strings was unicode formated
+                if (sys.version_info > (3, 0)):
+                    unicode = str # global variable unicode in python2 renamed to str in3
                 if ((not isinstance(value, str)) and (not isinstance(value,unicode))):
                     #print("                     In non string type")
                     exec("self.%s = %s" % (key, value))

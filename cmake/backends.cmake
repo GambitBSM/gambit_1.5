@@ -551,6 +551,7 @@ set(sfver "3_3_0")
 set(dl "null")
 set(dir "${PROJECT_SOURCE_DIR}/Backends/installed/${name}/${ver}")
 set(patchdir "${PROJECT_SOURCE_DIR}/Backends/patches/${name}/${ver}/")
+set(patch "${PROJECT_SOURCE_DIR}/Backends/patches/${name}/${ver}/${name}_${ver}.diff")
 set(ditch_if_absent "Python")
 set(required_modules "scipy")
 check_ditch_status(${name} ${ver} ${dir} ${ditch_if_absent})
@@ -564,6 +565,7 @@ if(NOT ditched_${name}_${ver})
       GIT_TAG ${ver}
       SOURCE_DIR ${dir}
       BUILD_IN_SOURCE 1
+      PATCH_COMMAND patch -p1 < ${patch}
       CONFIGURE_COMMAND ${CMAKE_COMMAND} -E copy ${patchdir}/MontePythonLike.py ${dir}/montepython/MontePythonLike_${sfver}.py
       COMMAND ${CMAKE_COMMAND} -E copy ${patchdir}/fastPantheon__init__.py ${dir}/montepython/likelihoods/Pantheon/__init__.py
       COMMAND ${CMAKE_COMMAND} -E copy ${patchdir}/sdss_lrgDR7_fiducialmodel.dat ${dir}/data/sdss_lrgDR7/sdss_lrgDR7_fiducialmodel.dat
