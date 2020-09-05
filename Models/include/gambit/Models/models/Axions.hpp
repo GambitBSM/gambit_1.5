@@ -19,8 +19,6 @@
 #ifndef __GeneralALP_hpp__
 #define __GeneralALP_hpp__
 
-#include "gambit/Models/models/CosmoModels.hpp"
-
 // General axion model with parametric temperature-dependent mass.
 #define MODEL GeneralALP
   START_MODEL
