@@ -9,7 +9,6 @@
 Parameters:
   StandardModel_SLHA2: !import include/StandardModel_SLHA2_Planckbaseline.yaml
 
-  # --- import model parameters for models to scan over ---
   LCDM:
     omega_b:
       prior_type: flat
@@ -25,7 +24,6 @@ Parameters:
       range: [0.004,0.20]
     T_cmb: 2.72548
 
-  # minimal base-line power-law power spectrum and priors
   Minimal_PowerLaw_ps:
     ln10A_s:
       prior_type: flat
@@ -34,8 +32,6 @@ Parameters:
       prior_type: flat
       range: [0.9,1.10]
 
-
-  # nuisance parameters in Planck likelihood
   cosmo_nuisance_Planck_TTTEEE:
     A_cib_217:
       prior_type: flat
@@ -127,7 +123,6 @@ Parameters:
       prior_type: flat
       range: [0.9,1.1]
 
-
 #======== Prior setup ========
 Priors:
 
@@ -146,7 +141,6 @@ Scanner:
       nlive: 150
       tol: 0.01
       print_parameters_in_native_output: true
-      #printer_speed_threshold: 1  # This is buggy #
       fast_params:
         - cosmo_nuisance_Planck_TTTEEE::A_cib_217
         - cosmo_nuisance_Planck_TTTEEE::A_planck
@@ -183,14 +177,14 @@ Scanner:
         - cosmo_nuisance_Planck_TTTEEE::ps_A_217_217
         - cosmo_nuisance_Planck_TTTEEE::xi_sz_cib
 
-
 #======== Observables of interest ========
 ObsLikes:
 
-  # ----- BBN ------
-
   - purpose:      LogLike
     capability:   Planck_nuisance_prior_loglike
+
+  - purpose:      LogLike
+    capability:   Planck_sz_prior_loglike
 
   - purpose:      LogLike
     capability:   Planck_highl_loglike
@@ -203,9 +197,6 @@ ObsLikes:
   - purpose:      LogLike
     capability:   Planck_lensing_loglike
     function:     function_Planck_lensing_2018_loglike
-
-  - purpose:      LogLike
-    capability:   Planck_sz_prior_loglike
 
 #======== Rule entries ========
 Rules:
@@ -223,6 +214,7 @@ Rules:
 #####
 ##
 ##  Settings for AlterBBN and treatment of uncertainties
+##  Since we only need the central value of Yp as input for class we set err=0
 ##
 ####
 
@@ -235,7 +227,6 @@ Rules:
 Logger:
   redirection:
     [Default]  : "default.log"
-    [CosmoBit] : "CosmoBit.log"
 
 #======== Generic Name/Value Section ========
 KeyValues:
@@ -244,7 +235,7 @@ KeyValues:
 
   disable_logs_during_scan: true
 
-  default_output_path: "./runs/lcdm/"
+  default_output_path: "runs/polychord_fast_slow/"
 
   rng:
     generator: ranlux48
