@@ -116,7 +116,7 @@ scanner_plugin(polychord, version(1, 17, 1))
       std::vector<std::string> all_params = LogLike->getParameters();
 
       // Compute the set difference between fast_params and all_params to check if there are any fast_params not included in all_params
-      std::set<std::string> set_fast_params(fast_params.begin(), fast_params.end()), set_params(all_params.begin(), all_params.end()), diff; 
+      std::set<std::string> set_fast_params(fast_params.begin(), fast_params.end()), set_params(all_params.begin(), all_params.end()), diff;
       std::set_difference(set_fast_params.begin(), set_fast_params.end(), set_params.begin(), set_params.end(),std::inserter(diff,diff.begin()));
       if (diff.size())
       {
@@ -135,14 +135,14 @@ scanner_plugin(polychord, version(1, 17, 1))
       int i = 0;
       // Run through all the parameters, and if they're slow parameters
       // give them an index i, then increment i
-      for (auto param : varied_params) 
+      for (auto param : varied_params)
           if (std::find(fast_params.begin(), fast_params.end(),param) == fast_params.end())
               Gambit::PolyChord::global_loglike_object->index_map[param] = (i++);
       int nslow = i;
       if(nslow!=0) settings.grade_dims.push_back(nslow);
 
       // Do the same for the fast parameters
-      for (auto param : varied_params) 
+      for (auto param : varied_params)
           if (std::find(fast_params.begin(), fast_params.end(),param) != fast_params.end())
               Gambit::PolyChord::global_loglike_object->index_map[param] = (i++);
       int nfast = i-nslow;
@@ -151,7 +151,7 @@ scanner_plugin(polychord, version(1, 17, 1))
       if (nslow>0 and nfast>0)
       {
           // Specify the fraction of time to spend in the slow parameters.
-          double frac_slow = get_inifile_value<double>("frac_slow",0.75); 
+          double frac_slow = get_inifile_value<double>("frac_slow",0.75);
           settings.grade_frac = std::vector<double>({frac_slow, 1-frac_slow});
       }
       else if (nslow==0) // In the unusual case of all fast parameters, there's only one grade.
@@ -175,7 +175,7 @@ scanner_plugin(polychord, version(1, 17, 1))
       settings.cluster_posteriors = outfile;
       settings.write_paramnames = outfile;
       settings.write_stats = outfile;
-      settings.write_live = outfile; 
+      settings.write_live = outfile;
       settings.write_dead = outfile;
       settings.write_prior = outfile;
       settings.write_resume = outfile;
@@ -260,7 +260,7 @@ namespace Gambit {
          return global_loglike_object->LogLike(Cube, ndim, phi, nderived);
       }
 
-      void callback_dumper(int ndead, int nlive, int npars, 
+      void callback_dumper(int ndead, int nlive, int npars,
                            double *live, double *dead, double* logweights,
                            double logZ, double logZerr)
       {
@@ -282,7 +282,7 @@ namespace Gambit {
       /// Input arguments
       /// ndim          = dimensionality (total number of free parameters) of the problem
       /// nderived      = total number of derived parameters
-      /// Cube[ndim]    = ndim parameters 
+      /// Cube[ndim]    = ndim parameters
       ///
       /// Output arguments
       /// phi[nderived] = nderived devired parameters
@@ -300,12 +300,12 @@ namespace Gambit {
          //convert C style array to C++ vector class, reordering parameters slow->fast
          std::vector<std::string> params = boundLogLike->getShownParameters();
          std::vector<double> unitpars(ndim);
-         for (auto i=0; i<ndim; i++) 
+         for (auto i=0; i<ndim; i++)
              unitpars[i] = Cube[index_map[params[i]]];
          std::vector<double> derived(phi, phi + nderived);
 
          // Disable the printer when the unitcube parameters with speeds below
-         // the threshold have not changed and enbale it otherwise
+         // the threshold have not changed and enable it otherwise
          // (It might be probably already enabled again at that point)
          if (   ndim_threshold < ndim
              &&  std::equal(prev_slow_unit.begin(),prev_slow_unit.end(),Cube) )
@@ -364,7 +364,7 @@ namespace Gambit {
       /// logZ                                                 = log evidence value
       /// logZerr                                              = error on log evidence value
       void LogLikeWrapper::dumper(int ndead, int nlive, int npars,
-                                  double *live, double *dead, double* logweights, 
+                                  double *live, double *dead, double* logweights,
                                   double /*logZ*/, double /*logZerr*/)
       {
           int thisrank = boundPrinter.get_stream()->getRank(); // MPI rank of this process
