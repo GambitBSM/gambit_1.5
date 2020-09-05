@@ -138,7 +138,7 @@ START_MODULE
     #define FUNCTION test_sigma
     START_FUNCTION(double)
 
-    // Function can used if either NormalDist or SingletDM alone are in use.
+    // Function can be used if either NormalDist or SingletDM alone are in use.
     ALLOW_MODELS(NormalDist, SingletDM)
     // Function can also be used if CMSSM is in use, so long as either NormalDist or SingletDM is in use too.
     ALLOW_MODEL_DEPENDENCE(CMSSM)
