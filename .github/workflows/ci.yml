@@ -74,6 +74,10 @@ jobs:
       run: |
         . BUILD/buildenv.sh
         ./gambit -f yaml_files/ColliderBit_CMSSM.yaml
+    - name: Build standalones
+      run: |
+        cd BUILD && . buildenv.sh
+        make -j$(nproc) standalones
     # - name: Validation dependencies
     #   run: |
     #     . BUILD/buildenv.sh
