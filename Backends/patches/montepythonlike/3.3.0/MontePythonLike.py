@@ -24,6 +24,13 @@ import scipy.misc
 import sys
 import io_mp
 
+# (JR) to get a way of testing if a variable is 
+# a string working with python2 and 3
+# -> isinstance(some_variable, basestring)
+try:
+  basestring
+except NameError:
+  basestring = str
 
 class Likelihood(object):
     """
@@ -1994,14 +2001,12 @@ class Likelihood_mpk(Likelihood):
                 # (JR) had to adopt these check to work properly with ascii & unicode strings
                 #   original line was -> 'if type(value) != type('foo')' 
                 #   which crashed if one of the strings was unicode formated
-                if (sys.version_info > (3, 0)):
-                    unicode = str # global variable unicode in python2 renamed to str in3
-                if ((not isinstance(value, str)) and (not isinstance(value,unicode))):
+                if(not isinstance(value, basestring)):
                     #print("                     In non string type")
                     exec("self.%s = %s" % (key, value))
                 else:
                     #print("                     In string type")
-                    exec("self.%s = '%s'" % (key, value))
+                    exec("self.%s = '%s'" % (key, value.replace('\n','')))
 
     # compute likelihood
     def loglkl(self, cosmo, data):
