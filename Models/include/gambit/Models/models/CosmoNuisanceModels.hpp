@@ -80,7 +80,9 @@
 #define MODEL cosmo_nuisance_CFHTLens_correlation
   START_MODEL
   // parameter name in MP likelihood: epsilon renamed to epsilon_CFHT, have to translate back before passing to MP
-  // (we can not have several parameters with the same name in GAMBIT)
+  // (you can not scan over two models at the same time if they have parameters with the same names. When two models with e.g.
+  // sigma_NL are in use, you can declare the parameter sigma_NL_x to be the same as sigma_NL_y. See CosmoBit_tutorial.yaml
+  // for an example how to use 'same_as'.)
   DEFINEPARS(epsilon_CFHT)
 #undef MODEL
 
@@ -88,7 +90,9 @@
 #define MODEL cosmo_nuisance_euclid_lensing
   START_MODEL
   // parameter name in MP likelihood: epsilon renamed to epsilon_euclid, have to translate back before passing to MP
-  // (we can not have several parameters with the same name in GAMBIT)
+  // (you can not scan over two models at the same time if they have parameters with the same names. When two models with e.g.
+  // sigma_NL are in use, you can declare the parameter sigma_NL_x to be the same as sigma_NL_y. See CosmoBit_tutorial.yaml
+  // for an example how to use 'same_as'.)
   DEFINEPARS(epsilon_euclid)
 #undef MODEL
 
@@ -96,9 +100,11 @@
 #define MODEL cosmo_nuisance_euclid_pk
   START_MODEL
   // actual parameter names: beta_0^Euclid,beta_1^Euclid but macros don't like ^ -> have to take care of renaming when
-  // filling data.mcmc_parameters dictionary for MontePython (TODO)
+  // filling data.mcmc_parameters dictionary for MontePython
   // parameter name in MP likelihood: sigma_euclid renamed to sigma_NL_euclid, have to translate back before passing to MP
-  // (we can not have several parameters with the same name in GAMBIT)
+  // (you can not scan over two models at the same time if they have parameters with the same names. When two models with e.g.
+  // sigma_NL are in use, you can declare the parameter sigma_NL_x to be the same as sigma_NL_y. See CosmoBit_tutorial.yaml
+  // for an example how to use 'same_as'.)
   DEFINEPARS(sigma_NL_euclid,beta_0Euclid,beta_1Euclid,P_shot)
 #undef MODEL
 
@@ -141,9 +147,11 @@
 #define MODEL cosmo_nuisance_ska1
   START_MODEL
   // actual parameter names: beta_0^IM,beta_1^IM,beta_0^SKA1,beta_1^SKA1,beta_0^SKA2,beta_1^SKA2 but macros don't like ^ -> have to take care of renaming when
-  // filling data.mcmc_parameters dictionary for MontePython (TODO)
+  // filling data.mcmc_parameters dictionary for MontePython
   // parameter name in MP likelihood: epsilon,sigma_NL renamed to epsilon_ska & sigma_NL_ska, have to translate back before passing to MP
-  // (we can not have several parameters with the same name in GAMBIT)
+  // (you can not scan over two models at the same time if they have parameters with the same names. When two models with e.g.
+  // sigma_NL are in use, you can declare the parameter sigma_NL_x to be the same as sigma_NL_y. See CosmoBit_tutorial.yaml
+  // for an example how to use 'same_as'.)
   DEFINEPARS(sigma_NL_ska,beta_0IM,beta_1IM,Omega_HI0,alpha_HI,beta_0SKA1,beta_1SKA1)
 #undef MODEL
 
@@ -154,7 +162,9 @@
     // actual parameter names: beta_0^IM,beta_1^IM,beta_0^SKA1,beta_1^SKA1,beta_0^SKA2,beta_1^SKA2 but macros don't like ^ -> have to take care of renaming when
     // filling data.mcmc_parameters dictionary for MontePython
     // parameter name in MP likelihood: epsilon,sigma_NL renamed to epsilon_ska & sigma_NL_ska, have to translate back before passing to MP
-    // (we can not have several parameters with the same name in GAMBIT)
+    // (you can not scan over two models at the same time if they have parameters with the same names. When two models with e.g.
+    // sigma_NL are in use, you can declare the parameter sigma_NL_x to be the same as sigma_NL_y. See CosmoBit_tutorial.yaml
+    // for an example how to use 'same_as'.)
     DEFINEPARS(sigma_NL_ska,beta_0IM,beta_1IM,Omega_HI0,alpha_HI)
     INTERPRET_AS_PARENT_FUNCTION(cosmo_nuisance_ska1_IM_band_to_cosmo_nuisance_ska1)
   #undef PARENT
