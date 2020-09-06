@@ -114,15 +114,11 @@
       // examples could be
       //  * quantities derived by CLASS are not called directly through the CLASS python
       //    object but through MontePython data.get_mcmc_parameters(['derived'])
-      //  * to compute fiducial values the CLASS python object is emptied, filled with 
-      //    different parameters, computations are run, and the original values are put 
-      //    in again. This should not be done (especially not for every point in parameter 
-      //    space -- huge waste of computing time). We implemented a work-around this for 
-      //    the computation of the SDSS_DR7 fiducial model. Similar solutions can be implemented
-      //    for more cases.
+      //  * parameters setting the obsevables that CLASS has to compute are not specified
+      //    correctly with 'need_cosmo_arguments' function
       // If you fix these issues, you can use the likelihood remove it from the list
       // 'unsupported_likes'
-      std::set<std::string> unsupported_likes { "Lya_abg" };
+      std::set<std::string> unsupported_likes { "Lya_abg", "gunn_peterson" };
 
       if(unsupported_likes.count(likelihood))
       {

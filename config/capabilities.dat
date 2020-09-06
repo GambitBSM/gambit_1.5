@@ -4188,7 +4188,8 @@ check_likelihood_support: |
     - likelihood is only compatible with either python 2 or 3 and GAMBIT is configured with unsupported python version
     - likelihood implementation does not follow MontePython guidelines. Examples could be
         * quantities derived by CLASS are not called directly through the CLASS python object but through MontePython data.get_mcmc_parameters(['derived'])
-        * to compute fiducial values the CLASS python object is emptied, filled with different parameters, computations are run, and the original values are put in again. This should not be done (especially not for every point in parameter space -- huge waste of computing time). We implemented a work-around this for the computation of the SDSS_DR7 fiducial model. Similar solutions can be implemented for more cases.
+        * parameters setting the observables that CLASS has to compute are not specified
+        correctly with 'need_cosmo_arguments' function
       If you fix these issues, you can use the likelihood and remove it from the 'unsupported_likes' list in the MontePython frontend source file.
 
 get_MP_loglike: |

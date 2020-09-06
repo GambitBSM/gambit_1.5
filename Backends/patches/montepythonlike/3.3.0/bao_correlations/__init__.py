@@ -20,7 +20,7 @@ class bao_correlations(Likelihood):
     The non-zero correlations that should be accounted for between the measurements
     of (D_M/r_s)^{BOSS}, (Hr_s)^{BOSS}, (D_V/r_s)^{eBOSS,LRG}$, and (D_V/r_s)^{eBOSS,QSO}
     are calculated accounting for a variation in cosmological parameters. If you 
-    use this likelihood, please cite Stoecker et al. '20 #TODO insert arXiv number.
+    use this likelihood, please cite GAMBIT Cosmology Workgroup: Stoecker et al. '20.
 
     To account for variation with cosmological parameters, this likelihood uses a
     novel method to compute the cross-correlation coefficients using Fisher matrices, 
@@ -34,7 +34,7 @@ class bao_correlations(Likelihood):
     structure to model the BOSS/eBOSS galaxy power spectra and their covariance 
     matrices as a function of redshift. 
     
-    For more details, see Stoecker et al. '20  #TODO insert arXiv number. 
+    For more details, see GAMBIT Cosmology Workgroup: Stoecker et al. '20, arXiv:2009.xxxxx. 
 
     '''
 
