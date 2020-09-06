@@ -29,32 +29,6 @@
 #include "gambit/Printers/printers/sqlitetypes.hpp"
 #include "gambit/Utils/util_functions.hpp" // Need Utils::ci_less to make map find() functions case-insensitive, since SQLite is case insensitive
 
-// Sequence of all types printable by the SQLitePrinter,
-// except those that require special backend types
-#define SQL_TYPES           \
-  (int)                     \
-  (uint)                    \
-  (long)                    \
-  (ulong)                   \
-  (longlong)                \
-  (ulonglong)               \
-  (float)                   \
-  (double)                  \
-  (bool)                    \
-  (std::vector<double>)     \
-  (map_str_dbl)             \
-  (map_intpair_dbl)         \
-  (ModelParameters)         \
-  (triplet<double>)         \
-
-// Printable types that need to be excluded in
-// standalone builds
-#define SQL_BACKEND_TYPES             \
-  (DM_nucleon_couplings)              \
-  (DM_nucleon_couplings_fermionic_HP) \
-  (Flav_KstarMuMu_obs)                \
-  (BBN_container)                     \
-
 
 namespace Gambit
 {
