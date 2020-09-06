@@ -142,6 +142,10 @@
     pybind11::object create_MP_data_object(map_str_str& experiments)
     {
 
+      // Get the python major version in use
+      pybind11::module sys = pybind11::module::import("sys");
+      int pyMajorVersion = sys.attr("version_info").attr("major").cast<int>();
+
       pybind11::dict path_dict = pybind11::dict("MontePython"_a=backendDir,
           "data"_a=backendDir+"/../data/",
           "cosmo"_a=backendDir+"",  // we never want to class CLASS from MP so there is no need to pass anything here
@@ -155,7 +159,21 @@
       pybind11::list MP_experiments;
       for (auto const& it : experiments)
       {
-        MP_experiments.attr("append")( it.first.c_str() );
+        const std::string& exp_name = it.first;
+
+        // Currently the likelihoods 'euclid_lensing' and 'euclid_pk' will not work with Python 3
+        // Throw an fatal error, when either of these likelihoods is used and GAMBIT is configured with Python 3
+        if ( (pyMajorVersion == 3) && (exp_name.compare("euclid_lensing") == 0 ||  exp_name.compare("euclid_pk") == 0) )
+        {
+          std::ostringstream err;
+          err << "You requested the MontePython likelihood '"<< exp_name << "', ";
+          err << "but you are using Python 3. This likelihood will only work with Python 2.\n";
+          err << "Please reconfigure GAMBIT with Python 2, if you want to use this likelihood.";
+          backend_error().raise(LOCAL_INFO, err.str());
+        }
+
+          // If everything is fine, add the experiment to the list.
+          MP_experiments.attr("append")( exp_name.c_str() );
       }
 
       // Import Data object from MontePython
