@@ -4378,9 +4378,6 @@ cosmo_nuisance_dummy_parameters: |
 T_cmb: |
   Sets CMB temperature (to 2.7255 if not specified in the YAML file).
 
-T_ncdm_SM: |
-   Returns the SM neutrino temperature in units of Tcmb.
-
 T_ncdm: |
    Returns the neutrino temperature in units of Tcmb.
 
