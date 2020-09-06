@@ -195,6 +195,11 @@ namespace Gambit
         static const map_str_pyobj& likelihoods = std::get<2>(*Dep::MP_objects);
         static const MPLike_data_container mplike_cont(data, likelihoods);
 
+        // in the first run test if any unused nuisance parameters are passed
+        // to MontePython. If so this function will throw an error identifying
+        // the parameter that is scanned over but not in use.
+        if(first_run) mplike_cont.data.attr("check_nuisance_params")();
+
         // get classy backend directory. The only reason we need to pass this
         // to MP is because the likelihood 'sdss_lrgDR7' requires pre-computed fiducial spectra.
         // These can, in general, depend on the CLASS version they were calculated with (if the 
