@@ -56,7 +56,7 @@
       // other non-CDM species (e.g. massive neutrinos). Likelihoods that rely on the 
       // baryon+CDM matter power spectrum can't be used with a CLASS version below 2.7
       map_str_str incompatible_combi = {{"bao_correlations", "2.6.3"},{"euclid_pk", "2.6.3"}, 
-          {"ska1_IM_band1", "2.6.3"},{"ska1_IM_band2", "2.6.3"},{"ska2_pk", "2.6.3"}};
+          {"ska1_IM_band1", "2.6.3"},{"ska1_IM_band2", "2.6.3"},{"ska2_pk", "2.6.3"},{"Lya_abg", "2.6.3"}};
 
       // check if incompatible CLASS version exists for given likelihood
       if (incompatible_combi.count(likelihood))
@@ -76,6 +76,61 @@
                << "Type \n\n./gambit backends\n\nto see which versions are available to install." << endl;
             backend_error().raise(LOCAL_INFO, ss.str());
         }
+      }
+    }
+
+    /// convenience function to check if the chosen likelihood is supported
+    /// add further rules for incompatibilities here. 
+    void check_likelihood_support(std::string& likelihood)
+    {
+      // There are two different reasons why the support for a likelihood is 
+      // switched off:
+      // 1) python version that GAMBIT is configured with is not compatible with the likelihood
+      // 2) likelihood implementation does not follow MontePython guidelines
+
+      // case 1): python version that GAMBIT is configured with is not compatible with the
+      // python version the likelihood works with
+      // Currently the likelihoods 'euclid_lensing' and 'euclid_pk' will not work with Python 3
+      // Throw an fatal error, when either of these likelihoods is used and GAMBIT is configured with Python 3
+      
+      // Get the python major version in use
+      pybind11::module sys = pybind11::module::import("sys");
+      int pyMajorVersion = sys.attr("version_info").attr("major").cast<int>();
+      std::set<std::string> python3_incomp { "euclid_lensing", "euclid_pk", "ska1_pk", "ska2_pk", "ska1_lensing", "ska2_lensing"};
+
+      // check for incompatible combinations
+      if ( (pyMajorVersion == 3) && python3_incomp.count(likelihood))
+      {
+        std::ostringstream err;
+        err << "You requested the MontePython likelihood '" << likelihood << "', ";
+        err << "but you are using Python 3. In MontePython" << STRINGIFY(VERSION);
+        err << "this likelihood only works with Python 2.\n";
+        err << "Please reconfigure GAMBIT with Python 2, if you want to use this likelihood.";
+        backend_error().raise(LOCAL_INFO, err.str());
+      }
+
+      // case 2) likelihood implementation does not follow MontePython guidelines, 
+      // examples could be
+      //  * quantities derived by CLASS are not called directly through the CLASS python
+      //    object but through MontePython data.get_mcmc_parameters(['derived'])
+      //  * to compute fiducial values the CLASS python object is emptied, filled with 
+      //    different parameters, computations are run, and the original values are put 
+      //    in again. This should not be done (especially not for every point in parameter 
+      //    space -- huge waste of computing time). We implemented a work-around this for 
+      //    the computation of the SDSS_DR7 fiducial model. Similar solutions can be implemented
+      //    for more cases.
+      // If you fix these issues, you can use the likelihood remove it from the list
+      // 'unsupported_likes'
+      std::set<std::string> unsupported_likes { "Lya_abg" };
+      std::cout << "TEsting compatilibit for lieklihood "<< likelihood << std::endl;
+      if(unsupported_likes.count(likelihood))
+      {
+        std::ostringstream err;
+        err << "You requested the MontePython likelihood '" << likelihood << "'' ";
+        err << "which is currently not supported by MontePython" << STRINGIFY(VERSION);
+        err << ". For information on why this could be the case, type \n";
+        err << "./gambit check_likelihood_support";
+        backend_error().raise(LOCAL_INFO, err.str());
       }
     }
 
@@ -142,9 +197,7 @@
     pybind11::object create_MP_data_object(map_str_str& experiments)
     {
 
-      // Get the python major version in use
-      pybind11::module sys = pybind11::module::import("sys");
-      int pyMajorVersion = sys.attr("version_info").attr("major").cast<int>();
+      static bool first_run = true;
 
       pybind11::dict path_dict = pybind11::dict("MontePython"_a=backendDir,
           "data"_a=backendDir+"/../data/",
@@ -157,29 +210,23 @@
       // The value of the keys (data files to use) will be needed when initialising the likelihood objects
       // in the function 'create_MP_likelihood_objects'
       pybind11::list MP_experiments;
-      for (auto const& it : experiments)
+      for (auto const & it : experiments)
       {
-        const std::string& exp_name = it.first;
+        std::string exp_name = it.first;
 
-        // Currently the likelihoods 'euclid_lensing' and 'euclid_pk' will not work with Python 3
-        // Throw an fatal error, when either of these likelihoods is used and GAMBIT is configured with Python 3
-        if ( (pyMajorVersion == 3) && (exp_name.compare("euclid_lensing") == 0 ||  exp_name.compare("euclid_pk") == 0) )
-        {
-          std::ostringstream err;
-          err << "You requested the MontePython likelihood '"<< exp_name << "', ";
-          err << "but you are using Python 3. This likelihood will only work with Python 2.\n";
-          err << "Please reconfigure GAMBIT with Python 2, if you want to use this likelihood.";
-          backend_error().raise(LOCAL_INFO, err.str());
-        }
+        // run test if likelihoods are supported
+        if(first_run) check_likelihood_support(exp_name);
 
-          // If everything is fine, add the experiment to the list.
-          MP_experiments.attr("append")( exp_name.c_str() );
+        // If everything is fine, add the experiment to the list.
+        MP_experiments.attr("append")( exp_name.c_str() );
       }
 
       // Import Data object from MontePython
       // (pass empty string as "command_line" since we do not need this information as sampling is taken care
       // of by GAMBIT)
       pybind11::object data = MontePythonLike.attr("Data")("", path_dict, MP_experiments);
+
+      first_run = false;
 
       return data;
     }

@@ -45,6 +45,47 @@ void MODEL_NAMESPACE::cosmo_nuisance_Pantheon_to_cosmo_nuisance_JLA (const Model
 }
 #undef MODEL
 
+#define MODEL cosmo_nuisance_ska1_IM_band
+// Translation function definition
+void MODEL_NAMESPACE::cosmo_nuisance_ska1_IM_band_to_cosmo_nuisance_ska1 (const ModelParameters &myP, ModelParameters &targetP)
+{
+  logger()<<"Running interpret_as_parent calculations for cosmo_nuisance_ska1_IM_band --> cosmo_nuisance_ska1 ..."<<LogTags::info<<EOM;
+
+  targetP.setValue("sigma_NL_ska", myP.getValue("sigma_NL_ska"));
+  targetP.setValue("beta_0IM", myP.getValue("beta_0IM"));
+  targetP.setValue("beta_1IM", myP.getValue("beta_1IM"));
+  targetP.setValue("Omega_HI0", myP.getValue("Omega_HI0"));
+  targetP.setValue("alpha_HI", myP.getValue("alpha_HI"));
+  // other parameters automatically defaults to 0
+}
+#undef MODEL
+
+#define MODEL cosmo_nuisance_ska1_IM_band_noHI
+// Translation function definition
+void MODEL_NAMESPACE::cosmo_nuisance_ska1_IM_band_noHI_to_cosmo_nuisance_ska1_IM_band (const ModelParameters &myP, ModelParameters &targetP)
+{
+  logger()<<"Running interpret_as_parent calculations for cosmo_nuisance_ska1_IM_band_noHI --> cosmo_nuisance_ska1_IM_band ..."<<LogTags::info<<EOM;
+
+  targetP.setValue("sigma_NL_ska", myP.getValue("sigma_NL_ska"));
+  targetP.setValue("beta_0IM", myP.getValue("beta_0IM"));
+  targetP.setValue("beta_1IM", myP.getValue("beta_1IM"));
+  // other parameters automatically defaults to 0
+}
+#undef MODEL
+
+#define MODEL cosmo_nuisance_ska1_pk
+// Translation function definition
+void MODEL_NAMESPACE::cosmo_nuisance_ska1_pk_to_cosmo_nuisance_ska1 (const ModelParameters &myP, ModelParameters &targetP)
+{
+  logger()<<"Running interpret_as_parent calculations for cosmo_nuisance_ska1_pk --> cosmo_nuisance_ska1 ..."<<LogTags::info<<EOM;
+
+  targetP.setValue("sigma_NL_ska", myP.getValue("sigma_NL_ska"));
+  targetP.setValue("beta_0SKA1", myP.getValue("beta_0SKA1"));
+  targetP.setValue("beta_1SKA1", myP.getValue("beta_1SKA1"));
+  // other parameters automatically defaults to 0
+}
+#undef MODEL
+
 #define MODEL cosmo_nuisance_euclid_pk_noShot
 // Translation function definition
 void MODEL_NAMESPACE::cosmo_nuisance_euclid_pk_noShot_to_cosmo_nuisance_euclid_pk (const ModelParameters &myP, ModelParameters &targetP)

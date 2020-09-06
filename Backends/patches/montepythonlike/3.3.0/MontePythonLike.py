@@ -1504,6 +1504,14 @@ class Likelihood_mock_cmb(Likelihood):
             warnings.warn(
                 "Writing fiducial model in %s, for %s likelihood\n" % (
                     self.data_directory+'/'+self.fiducial_file, self.name))
+            # (JR) added extra info about sudden exit for use in GAMBIT 
+            warnings.warn(
+                "\nHeads-up: you are about to see a FATAL error of GAMBIT. "
+                "This is happening because the likelihood %s was"
+                "just run for the first time, computed a fiducial model file"
+                "and then exits (not very gracefully). This is supposed to happen"
+                "the way the likelihood is implemented. Don't stress, just try"
+                "running again and it should work fine."%(self.__class__.__name__))  
             return 1j
 
         # compute likelihood

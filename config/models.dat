@@ -792,8 +792,9 @@ cosmo_nuisance_kids450_qe_likelihood_public: |
                        if 0 redshift-scaling is turned off
    m_corr            - nuisance parameters for m-correction
 
-cosmo_nuisance_ska: |
-   Cosmological nuisance parameters for SKA1 21cm intensity mapping, SKA1 & SKA2 cosmic shear, SKA1 & SKA2 galaxy clustering from Sprenger et al. (https://arxiv.org/abs/11801.08331). These likelihoods are based on an earlier Euclid P(k) likelihood by Audren & Lesgourgues described in Audren et al. (https://arxiv.org/abs/1210.2194).
+cosmo_nuisance_ska1: |
+   Cosmological nuisance parameters for SKA1 21cm intensity mapping and galaxy clustering from Sprenger et al. (https://arxiv.org/abs/11801.08331). These likelihoods are based on an earlier Euclid P(k) likelihood by Audren & Lesgourgues described in Audren et al. (https://arxiv.org/abs/1210.2194).
+   When using only intensity mapping likelihoods use the child models 'cosmo_nuisance_ska1_IM_band' or 'cosmo_nuisance_ska1_IM_band_noHI' (neglecting the nuisance parameters Omega_HI0 and alpha_HI). For the galaxy clustering likelihood only use 'cosmo_nuisance_ska1_pk'
 
    21 cm intensity mapping:
    Omega_HI0         - nuisance parameter for calculation of Omega_HI (energy density of neutral hydrogen)
@@ -802,18 +803,59 @@ cosmo_nuisance_ska: |
    beta_0IM          - nuisance parameters to describe the future accuracy of bias modelling
    beta_1IM          - nuisance parameters to describe the future accuracy of bias modelling
                        => bHI(z) = beta_0IM [0.904 + 0.135(1 + z)^(1.696 beta_1IM)]  (eq. 4.7)
-   cosmic shear:
+
+   galaxy clustering:
+   beta_0SKA1        - nuisance parameter modelling the inaccuracy of the theoretical galaxy bias redshift
+                       dependence for SKA 1 & 2 respectively
+   beta_1SKA2        - nuisance parameter modelling the inaccuracy of the theoretical galaxy bias redshift
+                       dependence for SKA 1 & 2 respectively
+                     => b(z) = c4 beta_0SKA/2 exp(c5 beta_SKA1/2 z)  (eq. 2.20)
+   common:
+   sigma_NL_ska      - non-linear dispersion scale of RSDs from Bull et al. (https://arxiv.org/abs/1405.1452).
+
+cosmo_nuisance_ska1_IM_band: |
+   Cosmological nuisance parameters for SKA1 21cm intensity mapping from Sprenger et al. (https://arxiv.org/abs/11801.08331). 
+   Use this model with the MontePython likelihood 'ska1_IM_band1' or 'ska1_IM_band2'. To neglect the parameters Omega_HI0 and alpha_HI use the model 'cosmo_nuisance_ska1_IM_band_noHI'.
+
+   sigma_NL_ska      - non-linear dispersion scale of RSDs from Bull et al. (https://arxiv.org/abs/1405.1452).
+   Omega_HI0         - nuisance parameter for calculation of Omega_HI (energy density of neutral hydrogen)
+   alpha_HI          - nuisance parameter for redshift dependence of Omega_HI
+                       => Omega_HI = Omega_HI0 x (1 + z)^(alpha_HI)  (eq. 4.5)
+   beta_0IM          - nuisance parameters to describe the future accuracy of bias modelling
+   beta_1IM          - nuisance parameters to describe the future accuracy of bias modelling
+                       => bHI(z) = beta_0IM [0.904 + 0.135(1 + z)^(1.696 beta_1IM)]  (eq. 4.7)
+
+cosmo_nuisance_ska1_IM_band_noHI: |
+   Cosmological nuisance parameters for SKA1 21cm intensity mapping from Sprenger et al. (https://arxiv.org/abs/11801.08331) neglect the nuisance parameters Omega_HI0 and alpha_HI.
+
+   sigma_NL_ska      - non-linear dispersion scale of RSDs from Bull et al. (https://arxiv.org/abs/1405.1452).
+   beta_0IM          - nuisance parameters to describe the future accuracy of bias modelling
+   beta_1IM          - nuisance parameters to describe the future accuracy of bias modelling
+                       => bHI(z) = beta_0IM [0.904 + 0.135(1 + z)^(1.696 beta_1IM)]  (eq. 4.7)
+
+cosmo_nuisance_ska1_pk: |
+   Cosmological nuisance parameters for SKA1 galaxy clustering from Sprenger et al. (https://arxiv.org/abs/11801.08331). These likelihoods are based on an earlier Euclid P(k) likelihood by Audren & Lesgourgues described in Audren et al. (https://arxiv.org/abs/1210.2194). Use this model with the MontePython likelihood 'ska1_pk'.
+
+   sigma_NL_ska      - non-linear dispersion scale of RSDs from Bull et al. (https://arxiv.org/abs/1405.1452).
+   beta_0SKA1        - nuisance parameter modelling the inaccuracy of the theoretical galaxy bias redshift
+   beta_1SKA1        - nuisance parameter modelling the inaccuracy of the theoretical galaxy bias redshift
+                     => b(z) = c4 beta_0SKA/2 exp(c5 beta_SKA1 z)  (eq. 2.20)
+
+cosmo_nuisance_ska2_pk: |
+   Cosmological nuisance parameters for SKA2 galaxy clustering from Sprenger et al. (https://arxiv.org/abs/11801.08331). These likelihoods are based on an earlier Euclid P(k) likelihood by Audren & Lesgourgues described in Audren et al. (https://arxiv.org/abs/1210.2194). Use this model with the MontePython likelihood 'ska2_pk'.
+
+   sigma_NL_ska      - non-linear dispersion scale of RSDs from Bull et al. (https://arxiv.org/abs/1405.1452).
+   beta_0SKA2        - nuisance parameter modelling the inaccuracy of the theoretical galaxy bias redshift
+   beta_1SKA2        - nuisance parameter modelling the inaccuracy of the theoretical galaxy bias redshift
+                     => b(z) = c4 beta_0SKA/2 exp(c5 beta_SKA2 z)  (eq. 2.20)
+
+cosmo_nuisance_ska_lensing: |
+   Cosmological nuisance parameters for SKA1 & SKA2 cosmic shear from Sprenger et al. (https://arxiv.org/abs/11801.08331). Use this model with the MontePython likelihoods 'ska1_lensing' and 'ska2_lensing'. 
+
    epsilon_ska       - nuisance parameter accounting for a global uncorrelated
                        theoretical error in e.g. (non-)linear power spectrum, scale dependent bias,
                        errors in redshift-space distortions.. for details see appendix A.4 of Audren et al. (https://arxiv.org/abs/1210.2194)
 
-   galaxy clustering:
-   sigma_NL_ska      - non-linear dispersion scale of RSDs from Bull et al. (https://arxiv.org/abs/1405.1452).
-   beta_0SKAX        - nuisance parameter modelling the inaccuracy of the theoretical galaxy bias redshift
-                       dependence for SKA 1 & 2 respectively
-   beta_1SKAX        - nuisance parameter modelling the inaccuracy of the theoretical galaxy bias redshift
-                       dependence for SKA 1 & 2 respectively
-                     => b(z) = c4 beta_0SKA/2 exp(c5 beta_SKA1/2 z)  (eq. 2.20)
 
 cosmo_nuisance_Planck_TTTEEE: |
    Planck likelihood for high-l TT,TE,EE-spectra with 34 nuissance parameter.
