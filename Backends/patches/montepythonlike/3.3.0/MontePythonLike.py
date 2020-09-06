@@ -118,6 +118,24 @@ class Likelihood(object):
         raise NotImplementedError(
             'Must implement method loglkl() in your likelihood')
 
+    def raise_fiducial_model_err(self):
+        """ (JR) for use with GAMBIT: GAMBIT does not have an initial best-fit guess 
+        and the practice of erasing the cosmo container and refilling it does not 
+        work in the GAMBIT interface. Hence, potential fiducial model parameters
+        that likelihoods may need have to be provided. 
+        """
+        raise io_mp.LikelihoodError(
+            #warnings.warn(
+                "You are using the likelihood '%s' for which values for a fiducial "
+                "have to be computed before the likelihood can be used. In MontePython "
+                "this happens automatically before the computation of the first parameter point. "
+                "However, the implementation of these computations is problematic for the "
+                "current interface with GAMBIT. If you want to use this likelihood, unfortunately "
+                "at the moment you have to produce the fiducial file yourself by running the likelihood "
+                "'%s' with MontePython standalone and then copy the fiducial file that is created "
+                "into the MontePython folder in <gambit_dir>/Backends/installed/montepythonlike/"
+                "<version>/data/<fiducial_file_name>."%(self.__class__.__name__,self.__class__.__name__))
+
     def read_from_file(self, path, data, command_line):
         """
         Extract the information from the log.param concerning this likelihood.
@@ -1473,7 +1491,9 @@ class Likelihood_mock_cmb(Likelihood):
         # Write fiducial model spectra if needed (return an imaginary number in
         # that case)
         if self.fid_values_exist is False:
-            # Store the values now.
+            # (JR) added extra info about sudden exit for use in GAMBIT 
+            self.raise_fiducial_model_err()
+            '''# Store the values now.
             fid_file = open(os.path.join(
                 self.data_directory, self.fiducial_file), 'w')
             fid_file.write('# Fiducial parameters')
@@ -1503,16 +1523,7 @@ class Likelihood_mock_cmb(Likelihood):
             print( '\n')
             warnings.warn(
                 "Writing fiducial model in %s, for %s likelihood\n" % (
-                    self.data_directory+'/'+self.fiducial_file, self.name))
-            # (JR) added extra info about sudden exit for use in GAMBIT 
-            warnings.warn(
-                "\nHeads-up: you are about to see a FATAL error of GAMBIT. "
-                "This is happening because the likelihood %s was"
-                "just run for the first time, computed a fiducial model file"
-                "and then exits (not very gracefully). This is supposed to happen"
-                "the way the likelihood is implemented. Don't stress, just try"
-                "running again and it should work fine."%(self.__class__.__name__))  
-            return 1j
+                    self.data_directory+'/'+self.fiducial_file, self.name))'''  
 
         # compute likelihood
 
