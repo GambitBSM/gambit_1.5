@@ -18,7 +18,7 @@
 #ifndef __SQLITETYPES__
 #define __SQLITETYPES__
 
-#define SQLITE_TYPES        \
+#define SQL_TYPES           \
   (int)                     \
   (uint)                    \
   (long)                    \
@@ -35,7 +35,7 @@
   (map_intpair_dbl)         \
 
 
-#define SQLITE_BACKEND_TYPES          \
+#define SQL_BACKEND_TYPES             \
   (DM_nucleon_couplings)              \
   (DM_nucleon_couplings_fermionic_HP) \
   (Flav_KstarMuMu_obs)                \

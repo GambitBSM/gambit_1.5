@@ -74,5 +74,3 @@ namespace Gambit
   }
 }
 
-#undef DBUG
-#undef DEBUG_MODE

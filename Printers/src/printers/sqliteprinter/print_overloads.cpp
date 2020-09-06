@@ -21,8 +21,6 @@
 #include "gambit/Printers/printers/sqliteprinter.hpp"
 #include "gambit/Printers/printers/common_print_overloads.hpp"
 
-//#include "gambit/Utils/stream_overloads.hpp"
-
 namespace Gambit
 {
   namespace Printers
@@ -63,5 +61,3 @@ namespace Gambit
   }
 }
 
-#undef DBUG
-#undef DEBUG_MODE
