@@ -2559,5 +2559,43 @@ index b4221ef..eb721d3 100644
 -            sys.stdout.write('from input file    : ', elem, ' = ')
 +            sys.stdout.write('from input file    :  %s = ' %(elem))
              print(data.mcmc_parameters[elem]['initial'][0])
+
+
+diff --git a/montepython/likelihoods/euclid_lensing/__init__.py b/montepython/likelihoods/euclid_lensing/__init__.py
+index b4221ef..eb721d3 100644
+--- a/montepython/likelihoods/euclid_lensing/__init__.py
++++ b/montepython/likelihoods/euclid_lensing/__init__.py
+@@ -409,6 +409,14 @@
+             warnings.warn(
+                 "Writing fiducial model in %s, for %s likelihood\n" % (
+                     self.data_directory+'/'+self.fiducial_file, self.name))
++            # (JR) added extra info about sudden exit for use in GAMBIT 
++            warnings.warn(
++                "\nHeads-up: you are about to see a FATAL error of GAMBIT. "
++                "This is happening because the euclid_lensing likelihood was"
++                "just run for the first time, computed a fiducial model file"
++                "and then exits (not very gracefully). This is supposed to happen"
++                "the way the likelihood is implemented. Don't stress, just try"
++                "running again and it should work fine.")  
+             return 1j
  
+         # Now that the fiducial model is stored, we add the El to both Cl and
+diff --git a/montepython/likelihoods/euclid_pk/__init__.py b/montepython/likelihoods/euclid_pk/__init__.py
+index b4221ef..eb721d3 100644
+--- a/montepython/likelihoods/euclid_pk/__init__.py
++++ b/montepython/likelihoods/euclid_pk/__init__.py
+@@ -236,6 +236,14 @@
+             warnings.warn(
+                 "Writing fiducial model in %s, for %s likelihood\n" % (
+                     self.data_directory+'/'+self.fiducial_file, self.name))
++            # (JR) added extra info about sudden exit for use in GAMBIT 
++            warnings.warn(
++                "\nHeads-up: you are about to see a FATAL error of GAMBIT. "
++                "This is happening because the euclid_pk likelihood was"
++                "just run for the first time, computed a fiducial model file"
++                "and then exits (not very gracefully). This is supposed to happen"
++                "the way the likelihood is implemented. Don't stress, just try"
++                "running again and it should work fine.")    
+             return 1j
  
+         # NOTE: Many following loops will be hidden in a very specific numpy

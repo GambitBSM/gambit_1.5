@@ -45,6 +45,20 @@ void MODEL_NAMESPACE::cosmo_nuisance_Pantheon_to_cosmo_nuisance_JLA (const Model
 }
 #undef MODEL
 
+#define MODEL cosmo_nuisance_euclid_pk_noShot
+// Translation function definition
+void MODEL_NAMESPACE::cosmo_nuisance_euclid_pk_noShot_to_cosmo_nuisance_euclid_pk (const ModelParameters &myP, ModelParameters &targetP)
+{
+  logger()<<"Running interpret_as_parent calculations for cosmo_nuisance_euclid_pk_noShot --> cosmo_nuisance_euclid_pk ..."<<LogTags::info<<EOM;
+
+  targetP.setValue("epsilon_euclid", myP.getValue("epsilon_euclid"));
+  targetP.setValue("sigma_NL", myP.getValue("sigma_NL"));
+  targetP.setValue("beta_0Euclid", myP.getValue("beta_0Euclid"));
+  targetP.setValue("beta_1Euclid", myP.getValue("beta_1Euclid"));
+  // P_shot automatically defaults to 0
+}
+#undef MODEL
+
 #define MODEL cosmo_nuisance_BK14priors
 // Translation function definition
 void MODEL_NAMESPACE::cosmo_nuisance_BK14priors_to_cosmo_nuisance_BK14 (const ModelParameters &myP, ModelParameters &targetP)
