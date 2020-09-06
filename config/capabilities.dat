@@ -4346,6 +4346,9 @@ cosmo_nuisance_euclid_lensing_parameters: |
 cosmo_nuisance_euclid_pk_parameters: |
    Cosmological nuisance parameters for Euclid cosmic shear likelihood. See ./gambit cosmo_nuisance_euclid_pk for more details.
 
+cosmo_nuisance_euclid_pk_noShot_parameters: |
+   Cosmological nuisance parameters for Euclid cosmic shear likelihood. See ./gambit cosmo_nuisance_euclid_pk_noShot for more details.
+
 cosmo_nuisance_ISW_parameters: |
    Cosmological nuisance parameters for tomographic ISW likelihood. See ./gambit cosmo_nuisance_ISW for more details.
 

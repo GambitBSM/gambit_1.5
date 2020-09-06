@@ -759,14 +759,15 @@ cosmo_nuisance_euclid_lensing: |
 cosmo_nuisance_euclid_pk: |
    Cosmological nuisance parameters for euclid galaxy clustering likelihood from Sprenger et al. (https://arxiv.org/abs/1801.08331). This likelihood is based on an earlier Euclid P(k) likelihood by Audren & Lesgourgues described in Audren et al. (https://arxiv.org/1210.2194).
 
-   epsilon_euclid       - nuisance parameter accounting for a global uncorrelated
-                          theoretical error in e.g. (non-)linear power spectrum, scale dependent bias,
-                          errors in redshift-space distortions.. for details see appendix A.4 of Audren et al. (https://arxiv.org/abs/1210.2194)
-   sigma_NL             - nuisance parameter parametrising uncertainty in the galaxy power spectrum,
+   sigma_NL_euclid      - nuisance parameter parametrising uncertainty in the galaxy power spectrum,
                           details and definition (eq. 5.15) can be found in Sprenger et al.
    beta_0Euclid         - nuisance parameter parametrising uncertainty in redshift dependence of galaxy bias, mean value 1.
    beta_1Euclid         - nuisance parameter parametrising uncertainty in redshift dependence of galaxy bias, mean value 1.
                           => b(z) =  beta_0Euclid (1 + z)^(0.5 x beta_1Euclid)  (eq. 2.15 in Sprenger et al.)
+   P_shot               - shot noise, see Eq. A.2 in Sprenger et al. If the shot noise shall be neglected in the likelihood calculation, use the model 'cosmo_nuisance_euclid_pk_noShot' instead.
+
+cosmo_nuisance_euclid_pk_noShot: |
+   As cosmo_nuisance_euclid_pk but without the parameter 'P_shot'. Hence, shot noise in the likelihood calculation is neglected when using this nuisance model.
 
 cosmo_nuisance_ISW: |
    Cosmological nuisance parameters for tomographic ISW effect from Stölzner et al. (https://arxiv.org/abs/1710.03238). Used cross-correlation between CMB TT spectrum and 5 galaxy surveys: 2MPZ, Wise x SuperCOSMOS, SDSS DR12 photometric, SDSS DR6 QSO, and NVSS.

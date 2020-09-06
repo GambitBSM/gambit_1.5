@@ -101,6 +101,16 @@
   DEFINEPARS(sigma_NL_euclid,beta_0Euclid,beta_1Euclid,P_shot)
 #undef MODEL
 
+/// euclid pk nuisance parameters without shot noise parameter P_shot -> child of 
+/// cosmo_nuisance_euclid_pk
+#define MODEL cosmo_nuisance_euclid_pk_noShot
+  #define PARENT cosmo_nuisance_euclid_pk
+    START_MODEL
+    DEFINEPARS(sigma_NL_euclid,beta_0Euclid,beta_1Euclid)
+    INTERPRET_AS_PARENT_FUNCTION(cosmo_nuisance_euclid_pk_noShot_to_cosmo_nuisance_euclid_pk)
+  #undef PARENT
+#undef MODEL
+
 /// nuisance params for tomographic ISW likelihood implemented in MontePython
 #define MODEL cosmo_nuisance_ISW
   START_MODEL

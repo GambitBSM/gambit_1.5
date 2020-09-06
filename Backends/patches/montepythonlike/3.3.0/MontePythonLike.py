@@ -102,7 +102,8 @@ class Likelihood(object):
                 raise io_mp.LikelihoodError("The nuisance parameter %s must be defined, either fixed or varying, "
                     "for the %s likelihood. It seems you are using MontePython with GAMBIT. "
                     "Try adding the model cosmo_nuisance_%s to the 'Parameters' section "
-                    "in your yaml file." % (nuisance, self.name, self.name) )
+                    "in your yaml file. \nTo get a list of the model parmeteters type "
+                    "./gambit cosmo_nuisance_%s" % (nuisance, self.name, self.name, self.name) )
     
     def loglkl(self, cosmo, data):
         """
@@ -2965,7 +2966,7 @@ class Data(object):
                 raise io_mp.LikelihoodError("The nuisance parameter %s is included in the scan but not required by any"
                                     "likelihood in use. It seems you are using MontePython with GAMBIT. "
                                     "Remove the 'cosmo_nuisance_..' model in the 'Parameters' section of the yaml file"
-                                    "that contains the parameter '%s'" % (nuisance, nuisance))
+                                    "that contains the parameter '%s'." % (nuisance, nuisance))
         
 
 def get_available_likelihoods(backendDir):
