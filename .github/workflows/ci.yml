@@ -77,7 +77,7 @@ jobs:
     - name: Build standalones
       run: |
         cd BUILD && . buildenv.sh
-        make -j$(nproc) standalones
+        make standalones
     # - name: Validation dependencies
     #   run: |
     #     . BUILD/buildenv.sh
