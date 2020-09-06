@@ -96,7 +96,8 @@
       // Get the python major version in use
       pybind11::module sys = pybind11::module::import("sys");
       int pyMajorVersion = sys.attr("version_info").attr("major").cast<int>();
-      std::set<std::string> python3_incomp { "euclid_lensing", "euclid_pk", "ska1_pk", "ska2_pk", "ska1_lensing", "ska2_lensing"};
+      std::set<std::string> python3_incomp { "euclid_lensing", "euclid_pk", "ska1_pk", "ska2_pk",
+          "ska1_lensing", "ska2_lensing", "ska1_IM_band2"};
 
       // check for incompatible combinations
       if ( (pyMajorVersion == 3) && python3_incomp.count(likelihood))
@@ -122,7 +123,7 @@
       // If you fix these issues, you can use the likelihood remove it from the list
       // 'unsupported_likes'
       std::set<std::string> unsupported_likes { "Lya_abg" };
-      std::cout << "TEsting compatilibit for lieklihood "<< likelihood << std::endl;
+
       if(unsupported_likes.count(likelihood))
       {
         std::ostringstream err;

@@ -98,7 +98,6 @@ class Likelihood(object):
             self.nuisance = []
         for nuisance in self.use_nuisance:
             if nuisance not in data.mcmc_parameters:
-                print("Trying to raise error")
                 raise io_mp.LikelihoodError("The nuisance parameter %s must be defined, either fixed or varying, "
                     "for the %s likelihood. It seems you are using MontePython with GAMBIT. "
                     "Try adding the model cosmo_nuisance_%s to the 'Parameters' section "
@@ -125,14 +124,13 @@ class Likelihood(object):
         that likelihoods may need have to be provided. 
         """
         raise io_mp.LikelihoodError(
-            #warnings.warn(
-                "You are using the likelihood '%s' for which values for a fiducial "
+                "You are using the likelihood '%s'. For this likelihood, spectra for a fiducial "
                 "have to be computed before the likelihood can be used. In MontePython "
                 "this happens automatically before the computation of the first parameter point. "
                 "However, the implementation of these computations is problematic for the "
                 "current interface with GAMBIT. If you want to use this likelihood, unfortunately "
                 "at the moment you have to produce the fiducial file yourself by running the likelihood "
-                "'%s' with MontePython standalone and then copy the fiducial file that is created "
+                "'%s' with MontePython standalone. Copy the fiducial file that is created "
                 "into the MontePython folder in <gambit_dir>/Backends/installed/montepythonlike/"
                 "<version>/data/<fiducial_file_name>."%(self.__class__.__name__,self.__class__.__name__))
 
@@ -1491,7 +1489,7 @@ class Likelihood_mock_cmb(Likelihood):
         # Write fiducial model spectra if needed (return an imaginary number in
         # that case)
         if self.fid_values_exist is False:
-            # (JR) added extra info about sudden exit for use in GAMBIT 
+            # ( (JR) throw error as creation of fiducial file does not work with GAMBIT
             self.raise_fiducial_model_err()
             '''# Store the values now.
             fid_file = open(os.path.join(
@@ -2982,9 +2980,9 @@ class Data(object):
         # waste 
         for nuisance in self.mcmc_parameters:
             if nuisance not in nuisance_list:
-                raise io_mp.LikelihoodError("The nuisance parameter %s is included in the scan but not required by any"
+                raise io_mp.LikelihoodError("The nuisance parameter %s is included in the scan but not required by any "
                                     "likelihood in use. It seems you are using MontePython with GAMBIT. "
-                                    "Remove the 'cosmo_nuisance_..' model in the 'Parameters' section of the yaml file"
+                                    "Remove the 'cosmo_nuisance_..' model in the 'Parameters' section of the yaml file "
                                     "that contains the parameter '%s'." % (nuisance, nuisance))
         
 
