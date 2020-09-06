@@ -4373,13 +4373,13 @@ cosmo_nuisance_ska1_IM_band_parameters: |
 cosmo_nuisance_ska1_IM_band_noHI_parameters: |
    Cosmological nuisance parameters for SKA1 21cm intensity mapping likelihoods. See ./gambit cosmo_nuisance_ska1_IM_band_noHI for more details.
 
-cosmo_nuisance_ska1_pk: |
+cosmo_nuisance_ska1_pk_parameters: |
    Cosmological nuisance parameters for SKA1 galaxy clustering likelihood. See ./gambit cosmo_nuisance_ska1_pk for more details.
 
-cosmo_nuisance_ska2_pk: |
+cosmo_nuisance_ska2_pk_parameters: |
    Cosmological nuisance parameters for SKA2 galaxy clustering likelihood. See ./gambit cosmo_nuisance_ska2_pk for more details.
 
-cosmo_nuisance_ska2_lensing: |
+cosmo_nuisance_ska_lensing_parameters: |
    Cosmological nuisance parameters for SKA 1&2 cosmic shear likelihoods. See ./gambit cosmo_nuisance_ska_lensing for more details.
 
 cosmo_nuisance_spt_parameters: |
