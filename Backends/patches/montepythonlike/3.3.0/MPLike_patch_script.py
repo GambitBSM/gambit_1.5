@@ -60,10 +60,12 @@ if __name__ == '__main__':
     # create list with all likelihood names contained in montepython/likelihoods/ folder
     output = [dI for dI in os.listdir("montepython/likelihoods/") if os.path.isdir(os.path.join('montepython/likelihoods/',dI))]
     
+    abspath = os.path.dirname(os.path.abspath(__file__))
+
     for like in output:
         # replace importin of montepython.likelihood_class with import of MontePythonLike
         # Note that the system path has to be inserted in the begining of the file as well
         replace("montepython/likelihoods/"+like+"/__init__.py", "from montepython.likelihood_class import", 
-            "from MontePythonLike_3_3_0 import", append_to_beginning="import sys \nsys.path.append('../../')\n" )
+            "from MontePythonLike_3_3_0 import", append_to_beginning="import sys \nsys.path.append('"+abspath+"')\n" )
         # also replace importing of io_mp module (only contains input/output stream so safe to use with GAMBIT)
         replace("montepython/likelihoods/"+like+"/__init__.py", "import montepython.io_mp as io_mp", "import io_mp")
