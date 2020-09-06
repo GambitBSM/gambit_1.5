@@ -57,3 +57,4 @@ theta23 :  0.84823 # atmospheric mixing angle
 theta13 :  0.15010 #
 delta13 :  3.85718 # Dirac CP-violating phase
 alpha1  :  0       # first Majorana CP-violating phase
+alpha2  :  0       # second CP-violating Majorana phase
