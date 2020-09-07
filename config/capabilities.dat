@@ -1637,6 +1637,39 @@ PICO_60_2017_BinSignal: |
 PICO_60_2017_Bins: |
    The number of bins used in the PICO-60 2017 direct detection analysis.
 
+PICO_60_2019_Calculate: |
+   Perform rate and likelihood calculations for the PICO-60 2019 direct detection analysis.
+
+PICO_60_2019_Events: |
+   The number of observed events for the PICO-60 2019 direct detection analysis.
+
+PICO_60_2019_Background: |
+   The number of background events for the PICO-60 2019 direct detection analysis.
+
+PICO_60_2019_Signal: |
+   The number of signal events for the PICO-60 2019 direct detection analysis.
+
+PICO_60_2019_SignalSI: |
+   The number of spin-independent signal events for the PICO-60 2019 direct detection analysis.
+
+PICO_60_2019_SignalSD: |
+   The number of spin-dependent signal events for the PICO-60 2019 direct detection analysis.
+
+PICO_60_2019_LogLikelihood: |
+   Calculate the log-likelihood for the PICO-60 2019 direct detection analysis.
+
+PICO_60_2019_BinBackground: |
+   The number of expected background events in each bin for the PICO-60 2019 direct detection analysis.
+
+PICO_60_2019_BinEvents: |
+   The number of expected events in each bin for the PICO-60 2019 direct detection analysis.
+
+PICO_60_2019_BinSignal: |
+   The number of expected signal events in each bin for the PICO-60 2019 direct detection analysis.
+
+PICO_60_2019_Bins: |
+   The number of bins used in the PICO-60 2019 direct detection analysis.
+
 PICO_60_Calculate: |
    Perform rate and likelihood calculations for the PICO-60 direct detection analysis.
 
@@ -2119,6 +2152,9 @@ PICO_60_I_Init: |
 
 PICO_60_2017_Init: |
    Initialises a direct detection experiment with the properties of the 2017 analysis of PICO-60.
+
+PICO_60_2019_Init: |
+   Initialises a direct detection experiment with the properties of the 2019 analysis of PICO-60.
 
 PICO_60_Init: |
    Initialises a direct detection experiment with the properties of the analysis of PICO-60.
