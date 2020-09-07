@@ -1802,6 +1802,39 @@ CRESST_II_SignalSI: |
 CRESST_II_SignalSD: |
    The number of spin-dependent signal events for the CRESST-II direct detection analysis.
 
+CRESST_III_Background: |
+   The number of background events for the CRESST-III direct detection analysis.
+
+CRESST_III_BinBackground: |
+   The number of expected background events in each bin for the CRESST-III direct detection analysis.
+
+CRESST_III_BinEvents: |
+   The number of expected events in each bin for the CRESST-III direct detection analysis.
+
+CRESST_III_BinSignal: |
+   The number of expected signal events in each bin for the CRESST-III direct detection analysis.
+
+CRESST_III_Bins: |
+   The number of bins used in the CRESST-III direct detection analysis.
+
+CRESST_III_Calculate: |
+   Perform rate and likelihood calculations for the CRESST-III direct detection analysis.
+
+CRESST_III_Events: |
+   The number of observed events for the CRESST-III direct detection analysis.
+
+CRESST_III_LogLikelihood: |
+   Calculate the log-likelihood for the CRESST-III direct detection analysis.
+
+CRESST_III_Signal: |
+   The number of signal events for the CRESST-III direct detection analysis.
+
+CRESST_III_SignalSI: |
+   The number of spin-idependent signal events for the CRESST-III direct detection analysis.
+
+CRESST_III_SignalSD: |
+   The number of spin-dependent signal events for the CRESST-III direct detection analysis.
+
 DarkSide_50_Background: |
    The number of background events for the DarkSide 50 direct detection analysis.
 
@@ -2018,6 +2051,12 @@ DDCalc_1_2_0_init: |
 DDCalc_2_0_0_init: |
    Initialises DDCalc 2.0.0.
 
+DDCalc_2_1_0_init: |
+   Initialises DDCalc 2.1.0.
+
+DDCalc_2_2_0_init: |
+   Initialises DDCalc 2.2.0.
+
 DD_Experiment: |
    The name of the DDcalc experiment corresponding to a specific experiment index.
 
@@ -2111,6 +2150,9 @@ CDMSlite_Init: |
 CRESST_II_Init: |
    Initialises a direct detection experiment with the properties of the analysis of CRESST-II.
 
+CRESST_III_Init: |
+   Initialises a direct detection experiment with the properties of the analysis of CRESST-III.
+
 DarkSide_50_Init: |
    Initialises a direct detection experiment with the properties of the analysis of DarkSide-50.
 
@@ -2191,6 +2233,9 @@ nulike_1_0_6_init: |
 
 nulike_1_0_7_init: |
   Initializes nulike_1_0_7.
+
+nulike_1_0_8_init: |
+  Initializes nulike_1_0_8.
 
 nubounds:
   Counts, likelihoods and p-values from neutrino telescope searches for dark matter annihilation in the Sun.
