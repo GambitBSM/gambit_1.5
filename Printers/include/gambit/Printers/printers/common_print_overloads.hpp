@@ -14,6 +14,10 @@
 ///          (pat.scott@uq.edu.au)
 ///  \date 2020
 ///
+///  \author Tomas Gonzalo
+///          (tomas.gonzalo@monash.edu)
+///  \date 2020 Sept
+///
 ///  *********************************************
 
 #pragma once
@@ -91,62 +95,66 @@ namespace Gambit
       printer._print(m, label, vID, mpirank, pointID);
     }
 
-    /// DM-nucleon coupling print overload
-    template<typename P>
-    void _common_print(P& printer, DM_nucleon_couplings const& value, const std::string& label, const int vID, const unsigned int mpirank, const unsigned long pointID)
-    {
-      std::map<std::string, double> m;
-      m["Gp_SI"] = value.gps;
-      m["Gn_SI"] = value.gns;
-      m["Gp_SD"] = value.gpa;
-      m["Gn_SD"] = value.gna;
-      printer._print(m, label, vID, mpirank, pointID);
-    }
+    #ifndef SCANNER_STANDALONE
 
-    /// DM-nucleon coupling print overload (For the fermionic HP)
-    template<typename P>
-    void _common_print(P& printer, DM_nucleon_couplings_fermionic_HP const& value, const std::string& label, const int vID, const unsigned int mpirank, const unsigned long pointID)
-    {
-      std::map<std::string, double> m;
-      m["Gp_SI"] = value.gps;
-      m["Gn_SI"] = value.gns;
-      m["Gp_q2"] = value.gp_q2;
-      m["Gn_q2"] = value.gn_q2;
-      printer._print(m, label, vID, mpirank, pointID);
-    }
-
-    /// K*->mumu angular observables print overload
-    template<typename P>
-    void _common_print(P& printer, Flav_KstarMuMu_obs const& value, const std::string& label, const int vID, const unsigned int mpirank, const unsigned long pointID)
-    {
-      std::map<std::string, double> m;
-      std::ostringstream bins;
-      bins << value.q2_min << "_" << value.q2_max;
-      m["BR_"+bins.str()] = value.BR;
-      m["AFB_"+bins.str()] = value.AFB;
-      m["FL_"+bins.str()] = value.FL;
-      m["S3_"+bins.str()] = value.S3;
-      m["S4_"+bins.str()] = value.S4;
-      m["S5_"+bins.str()] = value.S5;
-      m["S7_"+bins.str()] = value.S7;
-      m["S8_"+bins.str()] = value.S8;
-      m["S9_"+bins.str()] = value.S9;
-      printer._print(m, label, vID, mpirank, pointID);
-    }
-
-    /// BBN observables print overload
-    template<typename P>
-    void _common_print(P& printer, BBN_container const& value, const std::string& label, const int vID, const unsigned int mpirank, const unsigned long pointID)
-    {
-      std::map<std::string, double> m;
-      for (const str& i : value.get_active_isotopes())
+      /// DM-nucleon coupling print overload
+      template<typename P>
+      void _common_print(P& printer, DM_nucleon_couplings const& value, const std::string& label, const int vID, const unsigned int mpirank, const unsigned long pointID)
       {
-        int index = value.get_abund_map().at(i);
-        m[i] = value.get_BBN_abund(index);
-        m[i+"::1sigma_err"] = sqrt(value.get_BBN_covmat(index, index));
+        std::map<std::string, double> m;
+        m["Gp_SI"] = value.gps;
+        m["Gn_SI"] = value.gns;
+        m["Gp_SD"] = value.gpa;
+        m["Gn_SD"] = value.gna;
+        printer._print(m, label, vID, mpirank, pointID);
       }
-      printer._print(m, label, vID, mpirank, pointID);
-    }
+
+      /// DM-nucleon coupling print overload (For the fermionic HP)
+      template<typename P>
+      void _common_print(P& printer, DM_nucleon_couplings_fermionic_HP const& value, const std::string& label, const int vID, const unsigned int mpirank, const unsigned long pointID)
+      {
+        std::map<std::string, double> m;
+        m["Gp_SI"] = value.gps;
+        m["Gn_SI"] = value.gns;
+        m["Gp_q2"] = value.gp_q2;
+        m["Gn_q2"] = value.gn_q2;
+        printer._print(m, label, vID, mpirank, pointID);
+      }
+
+      /// K*->mumu angular observables print overload
+      template<typename P>
+      void _common_print(P& printer, Flav_KstarMuMu_obs const& value, const std::string& label, const int vID, const unsigned int mpirank, const unsigned long pointID)
+      {
+        std::map<std::string, double> m;
+        std::ostringstream bins;
+        bins << value.q2_min << "_" << value.q2_max;
+        m["BR_"+bins.str()] = value.BR;
+        m["AFB_"+bins.str()] = value.AFB;
+        m["FL_"+bins.str()] = value.FL;
+        m["S3_"+bins.str()] = value.S3;
+        m["S4_"+bins.str()] = value.S4;
+        m["S5_"+bins.str()] = value.S5;
+        m["S7_"+bins.str()] = value.S7;
+        m["S8_"+bins.str()] = value.S8;
+        m["S9_"+bins.str()] = value.S9;
+        printer._print(m, label, vID, mpirank, pointID);
+      }
+
+      /// BBN observables print overload
+      template<typename P>
+      void _common_print(P& printer, BBN_container const& value, const std::string& label, const int vID, const unsigned int mpirank, const unsigned long pointID)
+      {
+        std::map<std::string, double> m;
+        for (const str& i : value.get_active_isotopes())
+        {
+          int index = value.get_abund_map().at(i);
+          m[i] = value.get_BBN_abund(index);
+          m[i+"::1sigma_err"] = sqrt(value.get_BBN_covmat(index, index));
+        }
+        printer._print(m, label, vID, mpirank, pointID);
+      }
+
+    #endif
 
   }
 
