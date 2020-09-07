@@ -10,13 +10,10 @@
 ## GAMBIT. Rather, we use a dummy model to bypass the full model
 ## machinery in GAMBIT and simply pass the parameter point of interest
 ## to Pythia via an SLHA file. We use a version of the Pythia backend
-## (Pythia 8.212.EM) extended with matrix elements for the new model.
+## (Pythia_EM 8.212) extended with matrix elements for the new model.
 ## See the main ColliderBit paper for details on the example BSM model
 ## and how to replace it with a different one.
 ##
-## Note: GAMBIT must be told to use Pythia 8.212.EM. Do this by specifying
-##       "8_212_EM" as the "Default_Pythia" in the file
-##       /Backends/include/gambit/Backends/default_bossed_versions.hpp
 ##########################################################################
 
 
@@ -105,15 +102,17 @@ Rules:
         analyses:
           - CMS_8TeV_1LEPDMTOP_20invfb
           - CMS_8TeV_2LEPDMTOP_20invfb
-          - CMS_8TeV_3LEPEW_20invfb
-          - CMS_8TeV_MONOJET_20invfb
+          - CMS_8TeV_MultiLEP_20invfb
+          - CMS_8TeV_MultiLEP_3Lep_20invfb
+          - CMS_8TeV_MultiLEP_4Lep_20invfb
+          - CMS_8TeV_MONOJET_20invfb 
           - ATLAS_8TeV_0LEP_20invfb
           - ATLAS_8TeV_0LEPStop_20invfb
           - ATLAS_8TeV_1LEPStop_20invfb
           - ATLAS_8TeV_2bStop_20invfb
           - ATLAS_8TeV_2LEPEW_20invfb
           - ATLAS_8TeV_2LEPStop_20invfb
-          - ATLAS_8TeV_3LEPEW_20invf
+          - ATLAS_8TeV_3LEPEW_20invfb
 
   # Choose Monte Carlo event simulator and options.
   - capability:  HardScatteringSim
@@ -144,6 +143,11 @@ Rules:
           - HadronLevel:all = on
           - Beams:eCM = 8000
 
+  - capability: HardScatteringSim
+    type: const BaseCollider*
+    function: getPythia_EMAsBase
+    module: ColliderBit
+
   # Choose to get cross-sections from the Monte Carlo
   - capability: CrossSection
     function: getMCxsec
@@ -156,12 +160,28 @@ Rules:
         partonOnly: false
         antiktR: 0.4
 
+
   # Choose CMS detector simulation and options.
   - capability: CMSDetectorSim
     options:
       LHC_13TeV:
         partonOnly: false
         antiktR: 0.4
+
+  # Choose ATLAS smearing options
+  - capability: ATLASSmearedEvent
+    function: smearEventATLAS_EM
+    module: ColliderBit
+
+  # Choose CMS smearing options
+  - capability: CMSSmearedEvent
+    function: smearEventCMS_EM
+    module: ColliderBit
+ 
+  # Choose copied event option
+  - capability: CopiedEvent
+    function: copyEvent_EM
+    module: ColliderBit
 
   # Use lognormal errors when marginalising the LHC Poisson likelihoods over systematic uncertainties.
   # Can change "_lognormal_" to "_gaussian_" if you prefer
@@ -193,4 +213,5 @@ KeyValues:
 
   likelihood:
     model_invalid_for_lnlike_below: -1e6
-    debug: true
+
+  debug: true

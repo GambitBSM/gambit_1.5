@@ -554,6 +554,11 @@ Rules:
           - TauDecays:mode = 0
           - TimeShower:pTmin = 2
 
+  - capability: HardScatteringSim
+    type: const BaseCollider*
+    function: getPythiaAsBase
+    module: ColliderBit
+
   # Choose to get cross-sections from the Monte Carlo
   - capability: CrossSection
     function: getMCxsec
@@ -572,6 +577,21 @@ Rules:
       LHC_13TeV:
         partonOnly: false
         antiktR: 0.4
+
+  # Choose ATLAS smearing function
+  - capability: ATLASSmearedEvent
+    function: smearEventATLAS
+    module: ColliderBit
+
+  # Choose CMS smearing function
+  - capability: CMSSmearedEvent
+    function: smearEventCMS
+    module: ColliderBit
+
+  # Choose copied event function
+  - capability: CopiedEvent
+    function: copyEvent
+    module: ColliderBit
 
   # Choose which type of marginalised Poisson likelihood to use for LHC likelihoods
   - capability: LHC_LogLikes
