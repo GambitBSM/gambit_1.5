@@ -81,61 +81,44 @@ ObsLikes:
 
 Rules:
 
-  # BuckFast for ATLAS rules and options
-  - capability: SimpleSmearingSim
-    type: "Gambit::ColliderBit::BuckFastSmearATLAS"
-    function: getBuckFastATLAS
+  # Choose to get decays from DecayBit proper, not from an SLHA file.
+  - capability: decay_rates
+    function: all_decays_from_SLHA
     options:
-      useDetector: [true]
-      partonOnly: [false]
-      antiktR: [0.4]
+      SLHA_decay_filenames:
+        - ColliderBit/data/ExternalModel_point.slha
 
-  # BuckFast for CMS rules and options
-  - capability: SimpleSmearingSim
-    type: "Gambit::ColliderBit::BuckFastSmearCMS"
-    function: getBuckFastCMS
-    options:
-      useDetector: [true]
-      partonOnly: [false]
-      antiktR: [0.5]
-
-  # Specify the list of ATLAS analyses to run with BuckFast
-  - capability: ATLASAnalysisContainer
-    function: getATLASAnalysisContainer
-    options:
-      analyses: [ ["ATLAS_8TeV_0LEP_20invfb",
-                   "ATLAS_8TeV_0LEPStop_20invfb",
-                   "ATLAS_8TeV_1LEPStop_20invfb",
-                   "ATLAS_8TeV_2bStop_20invfb",
-                   "ATLAS_8TeV_2LEPEW_20invfb",
-                   "ATLAS_8TeV_2LEPStop_20invfb",
-                   "ATLAS_8TeV_3LEPEW_20invfb"] ]
-
-  # Specify the list of CMS analyses to run with BuckFast
-  - capability: CMSAnalysisContainer
-    function: getCMSAnalysisContainer
-    options:
-      analyses: [ ["CMS_8TeV_1LEPDMTOP_20invfb",
-                   "CMS_8TeV_2LEPDMTOP_20invfb",
-                   "CMS_8TeV_3LEPEW_20invfb",
-                   "CMS_8TeV_MONOJET_20invfb"] ]
-
-  # Specify details of the ColliderOperator
-  # Includes the number of generated events
-  # Also includes the name of the Pythia object we will use (set to the external model one here)
-  - capability:  ColliderOperator
+  # Choose colliders to simulate and their convergence settings, and pick analyses to run with each collider.
+  - capability: RunMC
     function: operateLHCLoop
     options:
-      nEvents: [5000]
-      pythiaNames: ["Pythia_external"]
       silenceLoop: false
+      LHC_13TeV:
+        min_nEvents: 5000
+        max_nEvents: 50000
+        events_between_convergence_checks: 5000
+        target_fractional_uncert: 0.3
+        halt_when_systematic_dominated: true
+        all_analyses_must_converge: false
+        all_SR_must_converge: false
+        maxFailedEvents: 10
+        analyses:
+          - CMS_8TeV_1LEPDMTOP_20invfb
+          - CMS_8TeV_2LEPDMTOP_20invfb
+          - CMS_8TeV_3LEPEW_20invfb
+          - CMS_8TeV_MONOJET_20invfb
+          - ATLAS_8TeV_0LEP_20invfb
+          - ATLAS_8TeV_0LEPStop_20invfb
+          - ATLAS_8TeV_1LEPStop_20invfb
+          - ATLAS_8TeV_2bStop_20invfb
+          - ATLAS_8TeV_2LEPEW_20invfb
+          - ATLAS_8TeV_2LEPStop_20invfb
+          - ATLAS_8TeV_3LEPEW_20invf
 
-  # Choose which getPythia to use
-  # Here we run on an input SLHA file by using "getPythiaFileReader", and specifying an SLHA_filename
-  # Note that you must specify the path to the xmldoc
-  # Note also that you can use normal Pythia options here
+  # Choose Monte Carlo event simulator and options.
   - capability:  HardScatteringSim
-    function:  getPythiaFileReader
+    type: ColliderPythia_EM_defaultversion
+    function: getPythia_EM
     options:
       # Point GAMBIT to the version of Pythia that has the external model example included.
       # You will also need to set the default Pythia version in this file:
@@ -147,27 +130,38 @@ Rules:
       # Note that GAMBIT must be rebuilt after you have made this change
       # Specify the Pythia options (and tell Pythia to run the new model).
       # Specify the SLHA file that Pythia will use to run the model.
-      Pythia_doc_path: "Backends/installed/pythia/8.212.EM/share/Pythia8/xmldoc/"
-      Pythia_external: ["UserModel:all = on",
-                        "PartonLevel:MPI = off",
-                        "PartonLevel:ISR = on",
-                        "PartonLevel:FSR = on",
-                        "HadronLevel:all = on",
-                        "Beams:eCM = 8000",
-                        ]
       SLHA_filenames:
         - ColliderBit/data/ExternalModel_point.slha
-      xsec_vetos: [0.0]   # Don't generate events if the estimated cross section upper limit is below this value [fb]
+      LHC_13TeV:
+        # 0.028 fb corresponds to ~1 expected event at L = 36 fb^-1.
+        xsec_veto: 0.028
+        pythia_settings:
+          - Print:quiet = on
+          - UserModel:all = on
+          - PartonLevel:MPI = off
+          - PartonLevel:ISR = on
+          - PartonLevel:FSR = on
+          - HadronLevel:all = on
+          - Beams:eCM = 8000
 
-  # Choose statistical settings for Monte Carlo event generator
-  - capability: MC_ConvergenceSettings
+  # Choose to get cross-sections from the Monte Carlo
+  - capability: CrossSection
+    function: getMCxsec
+    module: ColliderBit
+
+  # Choose ATLAS detector simulation and options.
+  - capability: ATLASDetectorSim
     options:
-      min_nEvents: [5000]
-      max_nEvents: [50000]
-      events_between_convergence_checks: [5000]
-      target_fractional_uncert: [0.3]
-      halt_when_systematic_dominated: true
-      all_SR_must_converge: false
+      LHC_13TeV:
+        partonOnly: false
+        antiktR: 0.4
+
+  # Choose CMS detector simulation and options.
+  - capability: CMSDetectorSim
+    options:
+      LHC_13TeV:
+        partonOnly: false
+        antiktR: 0.4
 
   # Use lognormal errors when marginalising the LHC Poisson likelihoods over systematic uncertainties.
   # Can change "_lognormal_" to "_gaussian_" if you prefer
