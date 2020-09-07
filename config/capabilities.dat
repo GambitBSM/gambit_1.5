@@ -259,15 +259,22 @@ MathTest_VarEqualVar2: |
    Test function for Mathematica backends checks the equality of two variables.
 
 MathTest_VoidTest: |
-   Test function for Mathematica backends for testing void functions
+   Test function for Mathematica backends for testing void functions.
 
 MathTest_Gammafunc: |
-   Test function for Mathematica backends for testing non-alphanumerical characters in function names
+   Test function for Mathematica backends for testing non-alphanumerical characters in function names.
 
 MathTest_deltabar: |
-   Test function for Mamthematica backends for tsting non-alphanumerical characters in variable names
+   Test function for Mamthematica backends for tsting non-alphanumerical characters in variable names.
 
+a_cap: |
+   Example function demonstrating the usage of capabilities within a model namespace.
 
+demo_CAP_parameters: |
+   Model parameters to demonstre the usage of module functions within a model namespace.
+
+large_print: |
+  Scale test for various aspects of the printer buffer system.
 
 #-------------------------------------
 #  SpecBit
@@ -360,6 +367,9 @@ Higgs_Couplings: |
     Higgs couplings, as computed by FeynHiggs
 
 SPheno_3_3_8_init: |
+    Initalises SPheno 3.3.8 and sets the internal model type according to the one being scanned.
+
+SPheno_4_0_3_init: |
     Initalises SPheno 3.3.8 and sets the internal model type according to the one being scanned.
 
 SPheno_MSSMspectrum: |
@@ -526,6 +536,11 @@ L3_Chargino_Leptonic_LLike: |
    model-independent limit according to the L3 collaboration.
    Returns a log likelihood value.
 
+L3_Gravitino_LLike: |
+   Compares the cross section times branching ratio for neutralino
+   production and decay to gravitinos to the model-independent limit 
+   according to the L3 collaboration. Returns a log likelihood value.
+
 OPAL_Neutralino_Hadronic_LLike: |
     Compares the cross section times branching ratio for neutralino
     pair production (with hadronically decaying Z bosons) to the
@@ -655,6 +670,10 @@ LEP205_xsec_chi00_34: |
 LEP205_xsec_chi00_44: |
    The LEP neutralino pair production cross-section for
    mass eigenstates 'chi04' and 'chi04' at centre of mass energy 205 GeV.
+
+LEP207_xsec_chi00_11: |
+   The LEP neutralino pair production cross-section for
+   mass eigenstates 'chi01' and 'chi01' at centre of mass energy 207 GeV.
 
 LEP208_xsec_chi00_11: |
    The LEP neutralino pair production cross-section for
@@ -1055,6 +1074,9 @@ TH_ProcessCatalog: |
 
 DD_couplings: |
    Provides WIMP mass and couplings to nucleons.
+
+DD_couplings_fermionic_HP: |
+   Provides WIMP mass and couplings to nucleons for Higgs-Portal models with fermionic DM.
 
 mwimp: |
    DM mass in GeV.
