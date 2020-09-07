@@ -2051,6 +2051,12 @@ DDCalc_1_2_0_init: |
 DDCalc_2_0_0_init: |
    Initialises DDCalc 2.0.0.
 
+DDCalc_2_1_0_init: |
+   Initialises DDCalc 2.1.0.
+
+DDCalc_2_2_0_init: |
+   Initialises DDCalc 2.2.0.
+
 DD_Experiment: |
    The name of the DDcalc experiment corresponding to a specific experiment index.
 
