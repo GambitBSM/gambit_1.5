@@ -259,15 +259,22 @@ MathTest_VarEqualVar2: |
    Test function for Mathematica backends checks the equality of two variables.
 
 MathTest_VoidTest: |
-   Test function for Mathematica backends for testing void functions
+   Test function for Mathematica backends for testing void functions.
 
 MathTest_Gammafunc: |
-   Test function for Mathematica backends for testing non-alphanumerical characters in function names
+   Test function for Mathematica backends for testing non-alphanumerical characters in function names.
 
 MathTest_deltabar: |
-   Test function for Mamthematica backends for tsting non-alphanumerical characters in variable names
+   Test function for Mamthematica backends for tsting non-alphanumerical characters in variable names.
 
+a_cap: |
+   Example function demonstrating the usage of capabilities within a model namespace.
 
+demo_CAP_parameters: |
+   Model parameters to demonstre the usage of module functions within a model namespace.
+
+large_print: |
+  Scale test for various aspects of the printer buffer system.
 
 #-------------------------------------
 #  SpecBit
@@ -360,6 +367,9 @@ Higgs_Couplings: |
     Higgs couplings, as computed by FeynHiggs
 
 SPheno_3_3_8_init: |
+    Initalises SPheno 3.3.8 and sets the internal model type according to the one being scanned.
+
+SPheno_4_0_3_init: |
     Initalises SPheno 3.3.8 and sets the internal model type according to the one being scanned.
 
 SPheno_MSSMspectrum: |
