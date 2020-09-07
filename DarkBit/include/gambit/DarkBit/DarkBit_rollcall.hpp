@@ -71,6 +71,7 @@
 ///  \date 2016 Oct
 ///  \date 2017 Feb, Sep, Dec
 ///  \date 2018 Jan, Mar, Apr
+///  \date 2019 Mar, Apr, Jun
 ///
 ///  *********************************************
 
@@ -221,11 +222,12 @@ START_MODULE
       DEPENDENCY(RD_oh2_Xf, ddpair)
     #undef FUNCTION
 
-    // Routine for axion energy density today
+    // Routine for computing axion energy density today from vacuum misalignment, assuming no axion decays.
     #define FUNCTION RD_oh2_Axions
       START_FUNCTION(double)
         ALLOW_MODEL(GeneralALP)
         DEPENDENCY(AxionOscillationTemperature, double)
+        DEPENDENCY(T_cmb, double)
     #undef FUNCTION
   #undef CAPABILITY
 
@@ -1434,7 +1436,7 @@ START_MODULE
   START_CAPABILITY
     #define FUNCTION calc_RParameter
     START_FUNCTION(double)
-    DEPENDENCY(GeneralALP_parameters, ModelParameters)
+    ALLOW_MODEL(GeneralALP)
     #undef FUNCTION
   #undef CAPABILITY
 
@@ -1482,6 +1484,15 @@ START_MODULE
   #define CAPABILITY lnL_SN1987A
   START_CAPABILITY
     #define FUNCTION calc_lnL_SN1987A
+    START_FUNCTION(double)
+    ALLOW_MODEL(GeneralALP)
+    DEPENDENCY(PhotonFluence_SN1987A_Conversion, double)
+    #undef FUNCTION
+  #undef CAPABILITY
+
+  #define CAPABILITY PhotonFluence_SN1987A_Conversion
+  START_CAPABILITY
+    #define FUNCTION calc_PhotonFluence_SN1987A_Conversion
     START_FUNCTION(double)
     ALLOW_MODEL(GeneralALP)
     #undef FUNCTION
