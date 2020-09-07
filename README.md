@@ -18,7 +18,7 @@ Please cite the following GAMBIT papers, depending on your use of different modu
  - GAMBIT Cosmology Workgroup: J. J. Renk, et al., **CosmoBit**: A GAMBIT module for computing cosmological observables and likelihoods, submitted to JCAP (2020), arXiv:2009.xxxxx
 
 GAMBIT contains interfaces to various external codes, along with scripts for downloading and configuring them. Please cite as appropriate if you use those codes:
- 
+
  - **AlterBBN:** **(i)** A. Arbey, AlterBBN: A program for calculating the BBN abundances of the elements in alternative cosmologies, Comput. Phys. Commun. 183 (2012) 1822, arXiv:1106.1363 **(ii)** A. Arbey, J. Auffinger, K. P. Hickerson and E. S. Jenssen, AlterBBN v2: A public code for calculating Big-Bang nucleosynthesis constraints in alternative cosmologies, arXiv:1806.11095
  - **CLASS:** D. Blas, J. Lesgourgues, T. Tram, The Cosmic Linear Anisotropy Solving System (CLASS) II: Approximation schemes, JCAP 07 (2011) 034, arXiv: 1104.2933.
  - **Capt'n General:** GAMBIT Collaboration: P. Athron, C. Balazs, et al., Global analyses of Higgs portal singlet dark matter models using GAMBIT, Eur. Phys. J. C 79 (2019) 38, arXiv:1808.10465
@@ -87,9 +87,9 @@ Building GAMBIT
 
 The basic build instructions are below.
 
-Note that cmake will fail to find some dependencies on some systems without guidance. More information is provided in the Core paper ("GAMBIT: The Global and Modular Beyond-the-Standard-Model Inference Tool", the first link at the top of this README file). 
+Note that cmake will fail to find some dependencies on some systems without guidance. More information is provided in the Core paper ("GAMBIT: The Global and Modular Beyond-the-Standard-Model Inference Tool", the first link at the top of this README file).
 
-For building the entirety of GAMBIT, 16 GB of RAM is required. The build can be completed with less RAM if enough modules are ditched when running cmake, with e.g. `cmake -Ditch="ColliderBit;DarkBit" ..`, etc. See the Core paper for further details.  
+For building the entirety of GAMBIT, 16 GB of RAM is required. The build can be completed with less RAM if enough modules are ditched when running cmake, with e.g. `cmake -Ditch="ColliderBit;DarkBit" ..`, etc. See the Core paper for further details.
 
 For a list of commonly used cmake options, see the file CMAKE_FLAGS.md. Specific cluster configuration examples are available via gambit.hepforge.org.
 
@@ -152,7 +152,7 @@ The BSD license below applies to all source files in the GAMBIT distribution, ex
 
 License
 --
-Copyright (c) 2017, The GAMBIT Collaboration
+Copyright (c) 2017-2020, The GAMBIT Collaboration
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without modification, are permitted provided that the following conditions are met:
