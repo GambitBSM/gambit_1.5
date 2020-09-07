@@ -1802,6 +1802,39 @@ CRESST_II_SignalSI: |
 CRESST_II_SignalSD: |
    The number of spin-dependent signal events for the CRESST-II direct detection analysis.
 
+CRESST_III_Background: |
+   The number of background events for the CRESST-III direct detection analysis.
+
+CRESST_III_BinBackground: |
+   The number of expected background events in each bin for the CRESST-III direct detection analysis.
+
+CRESST_III_BinEvents: |
+   The number of expected events in each bin for the CRESST-III direct detection analysis.
+
+CRESST_III_BinSignal: |
+   The number of expected signal events in each bin for the CRESST-III direct detection analysis.
+
+CRESST_III_Bins: |
+   The number of bins used in the CRESST-III direct detection analysis.
+
+CRESST_III_Calculate: |
+   Perform rate and likelihood calculations for the CRESST-III direct detection analysis.
+
+CRESST_III_Events: |
+   The number of observed events for the CRESST-III direct detection analysis.
+
+CRESST_III_LogLikelihood: |
+   Calculate the log-likelihood for the CRESST-III direct detection analysis.
+
+CRESST_III_Signal: |
+   The number of signal events for the CRESST-III direct detection analysis.
+
+CRESST_III_SignalSI: |
+   The number of spin-idependent signal events for the CRESST-III direct detection analysis.
+
+CRESST_III_SignalSD: |
+   The number of spin-dependent signal events for the CRESST-III direct detection analysis.
+
 DarkSide_50_Background: |
    The number of background events for the DarkSide 50 direct detection analysis.
 
@@ -2110,6 +2143,9 @@ CDMSlite_Init: |
 
 CRESST_II_Init: |
    Initialises a direct detection experiment with the properties of the analysis of CRESST-II.
+
+CRESST_III_Init: |
+   Initialises a direct detection experiment with the properties of the analysis of CRESST-III.
 
 DarkSide_50_Init: |
    Initialises a direct detection experiment with the properties of the analysis of DarkSide-50.
