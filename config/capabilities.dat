@@ -1637,6 +1637,39 @@ PICO_60_2017_BinSignal: |
 PICO_60_2017_Bins: |
    The number of bins used in the PICO-60 2017 direct detection analysis.
 
+PICO_60_2019_Calculate: |
+   Perform rate and likelihood calculations for the PICO-60 2019 direct detection analysis.
+
+PICO_60_2019_Events: |
+   The number of observed events for the PICO-60 2019 direct detection analysis.
+
+PICO_60_2019_Background: |
+   The number of background events for the PICO-60 2019 direct detection analysis.
+
+PICO_60_2019_Signal: |
+   The number of signal events for the PICO-60 2019 direct detection analysis.
+
+PICO_60_2019_SignalSI: |
+   The number of spin-independent signal events for the PICO-60 2019 direct detection analysis.
+
+PICO_60_2019_SignalSD: |
+   The number of spin-dependent signal events for the PICO-60 2019 direct detection analysis.
+
+PICO_60_2019_LogLikelihood: |
+   Calculate the log-likelihood for the PICO-60 2019 direct detection analysis.
+
+PICO_60_2019_BinBackground: |
+   The number of expected background events in each bin for the PICO-60 2019 direct detection analysis.
+
+PICO_60_2019_BinEvents: |
+   The number of expected events in each bin for the PICO-60 2019 direct detection analysis.
+
+PICO_60_2019_BinSignal: |
+   The number of expected signal events in each bin for the PICO-60 2019 direct detection analysis.
+
+PICO_60_2019_Bins: |
+   The number of bins used in the PICO-60 2019 direct detection analysis.
+
 PICO_60_Calculate: |
    Perform rate and likelihood calculations for the PICO-60 direct detection analysis.
 
@@ -1867,6 +1900,39 @@ DarkSide_50_SignalSI: |
 
 DarkSide_50_SignalSD: |
    The number of spin-dependent signal events for the DarkSide 50 direct detection analysis.
+
+DarkSide_50_S2_Background: |
+   The number of background events for the DarkSide 50 (S2-only) direct detection analysis.
+
+DarkSide_50_S2_BinBackground: |
+   The number of expected background events in each bin for the DarkSide 50 (S2-only) direct detection analysis.
+
+DarkSide_50_S2_BinEvents: |
+   The number of expected events in each bin for the DarkSide 50 (S2-only) direct detection analysis.
+
+DarkSide_50_S2_BinSignal: |
+   The number of expected signal events in each bin for the DarkSide 50 (S2-only) direct detection analysis.
+
+DarkSide_50_S2_Bins: |
+   The number of bins used in the DarkSide 50 (S2-only) direct detection analysis.
+
+DarkSide_50_S2_Calculate: |
+   Perform rate and likelihood calculations for the DarkSide 50 (S2-only) direct detection analysis.
+
+DarkSide_50_S2_Events: |
+   The number of observed events for the DarkSide 50 (S2-only) direct detection analysis.
+
+DarkSide_50_S2_LogLikelihood: |
+   Calculate the log-likelihood for the DarkSide 50 (S2-only) direct detection analysis.
+
+DarkSide_50_S2_Signal: |
+   The number of signal events for the DarkSide 50 (S2-only) direct detection analysis.
+
+DarkSide_50_S2_SignalSI: |
+   The number of spin-idependent signal events for the DarkSide 50 (S2-only) direct detection analysis.
+
+DarkSide_50_S2_SignalSD: |
+   The number of spin-dependent signal events for the DarkSide 50 (S2-only) direct detection analysis.
 
 lnL_SI_nuclear_parameters: |
    The log-likehood for the spin-independent nuclear parameters.
@@ -2120,6 +2186,9 @@ PICO_60_I_Init: |
 PICO_60_2017_Init: |
    Initialises a direct detection experiment with the properties of the 2017 analysis of PICO-60.
 
+PICO_60_2019_Init: |
+   Initialises a direct detection experiment with the properties of the 2019 analysis of PICO-60.
+
 PICO_60_Init: |
    Initialises a direct detection experiment with the properties of the analysis of PICO-60.
 
@@ -2155,6 +2224,9 @@ CRESST_III_Init: |
 
 DarkSide_50_Init: |
    Initialises a direct detection experiment with the properties of the analysis of DarkSide-50.
+
+DarkSide_50_S2_Init: |
+   Initialises a direct detection experiment with the properties of the S2-only analysis of DarkSide-50.
 
 DARWIN_Init: |
    Initialises a direct detection experiment with the properties of the analysis of DARWIN.
