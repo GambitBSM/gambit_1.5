@@ -51,11 +51,11 @@
     {
 
       // add all combinations that are not compatible here.
-      // example for such an incompatibility: an update in CLASS 2.7 enables the separation 
-      // of the matter power spectrum into the baryonic and CDM components separated from 
-      // other non-CDM species (e.g. massive neutrinos). Likelihoods that rely on the 
+      // example for such an incompatibility: an update in CLASS 2.7 enables the separation
+      // of the matter power spectrum into the baryonic and CDM components separated from
+      // other non-CDM species (e.g. massive neutrinos). Likelihoods that rely on the
       // baryon+CDM matter power spectrum can't be used with a CLASS version below 2.7
-      map_str_str incompatible_combi = {{"bao_correlations", "2.6.3"},{"euclid_pk", "2.6.3"}, 
+      map_str_str incompatible_combi = {{"bao_correlations", "2.6.3"},{"euclid_pk", "2.6.3"},
           {"ska1_IM_band1", "2.6.3"},{"ska1_IM_band2", "2.6.3"},{"ska2_pk", "2.6.3"},{"Lya_abg", "2.6.3"}};
 
       // check if incompatible CLASS version exists for given likelihood
@@ -64,7 +64,7 @@
         // if incompatible version in use throw a fatal error
         if (classy_backendDir.find(incompatible_combi[likelihood]) != std::string::npos)
         {
-          std::string classy_version = classy_backendDir.substr(classy_backendDir.find("classy/"),classy_backendDir.find("/lib")); 
+          std::string classy_version = classy_backendDir.substr(classy_backendDir.find("classy/"),classy_backendDir.find("/lib"));
           classy_version = classy_version.substr(7, classy_version.size() - 11);
 
           std::ostringstream ss;
@@ -80,19 +80,19 @@
     }
 
     /// convenience function to check if the chosen likelihood is supported
-    /// add further rules for incompatibilities here. 
+    /// add further rules for incompatibilities here.
     void check_likelihood_support(std::string& likelihood)
     {
-      // There are two different reasons why the support for a likelihood is 
+      // There are two different reasons why the support for a likelihood is
       // switched off:
       // 1) python version that GAMBIT is configured with is not compatible with the likelihood
       // 2) likelihood implementation does not follow MontePython guidelines
 
       // case 1): python version that GAMBIT is configured with is not compatible with the
-      // python version the likelihood works with
-      // Currently the likelihoods 'euclid_lensing' and 'euclid_pk' will not work with Python 3
-      // Throw an fatal error, when either of these likelihoods is used and GAMBIT is configured with Python 3
-      
+      // python version the likelihood works with.
+      // Currently the likelihoods 'euclid_lensing' and 'euclid_pk' will not work with Python 3, nor will many SKA likelihoods.
+      // Throw a fatal error when any of these likelihoods is in use and GAMBIT is configured with Python 3.
+
       // Get the python major version in use
       pybind11::module sys = pybind11::module::import("sys");
       int pyMajorVersion = sys.attr("version_info").attr("major").cast<int>();
@@ -110,13 +110,13 @@
         backend_error().raise(LOCAL_INFO, err.str());
       }
 
-      // case 2) likelihood implementation does not follow MontePython guidelines, 
+      // case 2) likelihood implementation does not follow MontePython guidelines,
       // examples could be
       //  * quantities derived by CLASS are not called directly through the CLASS python
       //    object but through MontePython data.get_mcmc_parameters(['derived'])
       //  * parameters setting the obsevables that CLASS has to compute are not specified
       //    correctly with 'need_cosmo_arguments' function
-      // If you fix these issues, you can use the likelihood remove it from the list
+      // If you fix these issues, you can use the likelihood; in that case, remove it from the list
       // 'unsupported_likes'
       std::set<std::string> unsupported_likes { "Lya_abg", "gunn_peterson" };
 
@@ -138,7 +138,7 @@
 
       double result;
 
-      //static const bool first_run 
+      //static const bool first_run
       // check if likelihood needs to be re-evaluated:
       // => if CLASS re-ran likelihood needs updating in any case
       bool needs_update = cosmo.attr("recomputed").cast<bool>();
@@ -157,7 +157,7 @@
         catch(const std::exception&)
         {
           // if for some reason the MP likelihood object does not have the attribute "use_nuisance" (even though all of them
-          //  should, but let's not count on it...) there are no nuisance parameters. So calculation can be skipped. 
+          //  should, but let's not count on it...) there are no nuisance parameters. So calculation can be skipped.
           needs_update = false;
         }
       }
@@ -274,7 +274,7 @@
         // by calling data.check_nuisance_params()
         data.attr("add_experiment")(exp_name,EXP_MODULE);
       }
-      
+
 
       // Remove "like_path" from sys.path (The likelihoods are now loaded)
       sys.attr("path").attr("remove")(like_path);
