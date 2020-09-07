@@ -536,6 +536,11 @@ L3_Chargino_Leptonic_LLike: |
    model-independent limit according to the L3 collaboration.
    Returns a log likelihood value.
 
+L3_Gravitino_LLike: |
+   Compares the cross section times branching ratio for neutralino
+   production and decay to gravitinos to the model-independent limit 
+   according to the L3 collaboration. Returns a log likelihood value.
+
 OPAL_Neutralino_Hadronic_LLike: |
     Compares the cross section times branching ratio for neutralino
     pair production (with hadronically decaying Z bosons) to the
@@ -665,6 +670,10 @@ LEP205_xsec_chi00_34: |
 LEP205_xsec_chi00_44: |
    The LEP neutralino pair production cross-section for
    mass eigenstates 'chi04' and 'chi04' at centre of mass energy 205 GeV.
+
+LEP207_xsec_chi00_11: |
+   The LEP neutralino pair production cross-section for
+   mass eigenstates 'chi01' and 'chi01' at centre of mass energy 207 GeV.
 
 LEP208_xsec_chi00_11: |
    The LEP neutralino pair production cross-section for
@@ -1065,6 +1074,9 @@ TH_ProcessCatalog: |
 
 DD_couplings: |
    Provides WIMP mass and couplings to nucleons.
+
+DD_couplings_fermionic_HP: |
+   Provides WIMP mass and couplings to nucleons for Higgs-Portal models with fermionic DM.
 
 mwimp: |
    DM mass in GeV.
