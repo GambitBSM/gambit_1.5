@@ -88,8 +88,8 @@ BE_INI_FUNCTION
 
   }
 
-// Initialization function for a given MSSM point
-// (previous capaility DarkSUSY_PointInit)
+  // Initialization function for a given MSSM point
+  // (previous capability DarkSUSY_PointInit)
   bool mssm_result = false;
 
   // If the user provides a file list, just read in SLHA files for debugging
@@ -114,12 +114,9 @@ BE_INI_FUNCTION
     mssm_result = true;
   }
 
-  // CMSSM with DS-internal ISASUGRA (should be avoided, only for
-  // debugging)
-  else if (ModelInUse("CMSSM") and
-  /// Option use_DS_isasugra<bool>: Use DS internal isasugra for parameter running (false)
-      runOptions->getValueOrDef<bool>(false, "use_DS_isasugra")
-      )
+  // CMSSM with DS-internal ISASUGRA (should be avoided, only for debugging)
+  // Option use_DS_isasugra<bool>: Use DS internal isasugra for parameter running (false)
+  else if (ModelInUse("CMSSM") and runOptions->getValueOrDef<bool>(false, "use_DS_isasugra"))
   {
     // Setup mSUGRA model from CMSSM parameters
     double am0    = *Param["M0"];     // m0
@@ -127,8 +124,7 @@ BE_INI_FUNCTION
     double aa0    = *Param["A0"];     // A0
     double asgnmu = *Param["SignMu"];  // sign(mu)
     double atanbe = *Param["TanBeta"];   // tan(beta)
-    logger() << "Initializing DarkSUSY via dsgive_model_isasugra:"
-      << EOM;
+    logger() << "Initializing DarkSUSY via dsgive_model_isasugra:" << EOM;
     logger() << "  m0        =" << am0    << std::endl;
     logger() << "  m_1/2     =" << amhf   << std::endl;
     logger() << "  A0        =" << aa0    << std::endl;
@@ -138,23 +134,27 @@ BE_INI_FUNCTION
     int unphys, hwarning;
     dssusy_isasugra(unphys, hwarning);
     //mssm_result = (unphys == 0) && (hwarning == 0);
-    if (unphys < 0) {
-      backend_warning().raise(LOCAL_INFO,
-          "Model point is theoretically inconsistent (DarkSUSY).");
-  invalid_point().raise(
-          "Model point is theoretically inconsistent (DarkSUSY).");
+    if (unphys < 0)
+    {
+      backend_warning().raise(LOCAL_INFO, "Model point is theoretically inconsistent (DarkSUSY).");
+      invalid_point().raise("Model point is theoretically inconsistent (DarkSUSY).");
       mssm_result = false;
-    } else if (unphys > 0) {
-      backend_warning().raise(LOCAL_INFO,
-          "Neutralino is not the LSP (DarkSUSY).");
+    } 
+    else if (unphys > 0)
+    {
+      backend_warning().raise(LOCAL_INFO, "Neutralino is not the LSP (DarkSUSY).");
       invalid_point().raise("Neutralino is not the LSP (DarkSUSY).");
       mssm_result = false;
-    } else if (hwarning != 0) {
+    }
+    else if (hwarning != 0)
+    {
       backend_warning().raise(LOCAL_INFO,
           "Radiative corrections in Higgs sector "
           "outside range of validity (DarkSUSY).");
       mssm_result = true;
-    } else {
+    }
+    else
+    {
       mssm_result = true;
     }
   }
@@ -166,20 +166,25 @@ BE_INI_FUNCTION
     bool use_dsSLHAread = runOptions->getValueOrDef<bool>(false, "use_dsSLHAread");
     int slha_version = 2;
     const Spectrum& mySpec = *Dep::MSSM_spectrum;
-    try{mySLHA = mySpec.getSLHAea(2);}
+    try
+    {
+      mySLHA = mySpec.getSLHAea(2);
+    }
     catch(Gambit::exception& e)
     {
         slha_version = 1;
         mySLHA = mySpec.getSLHAea(1);
         use_dsSLHAread = true;
     }
-     // Use an actual SLHA file.  DarkSUSY is on its own wrt (s)particle widths this way.
+    
+    // Use an actual SLHA file.  DarkSUSY is on its own wrt (s)particle widths this way.
     if (use_dsSLHAread || slha_version == 1)
     {
       if (!use_dsSLHAread) {backend_error().raise(LOCAL_INFO,
               "A SLHA1 spectrum requires use of the DarkSUSY SLHA reader rather than the diskless\n"
               "GAMBIT DarkSUSY initialization. To enable the DarkSUSY SLHA reader, set the option\n"
               "use_dsSLHAread for the function DarkSUSY_PointInit_MSSM to true.");}
+
       int rank = 0;
       #ifdef WITH_MPI
         if(GMPI::Is_initialized())
@@ -188,7 +193,8 @@ BE_INI_FUNCTION
           rank = comm.Get_rank();
         }
       #endif
-       // Add model select block to inform DS about 6x6 mixing
+      
+      // Add model select block to inform DS about 6x6 mixing
       if (slha_version == 2)
       {
           SLHAea::Block modsel_block("MODSEL");
@@ -196,14 +202,15 @@ BE_INI_FUNCTION
           modsel_block.push_back("6 3 # FV");
           mySLHA.push_back(modsel_block);
       }
-       // Set filename
+      
+      // Set filename
       std::string fstr = "DarkBit_temp_";
       fstr += std::to_string(rank) + ".slha";
-       // Dump SLHA onto disk
+      // Dump SLHA onto disk
       std::ofstream ofs(fstr);
       ofs << mySLHA;
       ofs.close();
-       // Initialize SUSY spectrum from SLHA
+      // Initialize SUSY spectrum from SLHA
       int len = fstr.size();
       int flag = 15;
       const char * filename = fstr.c_str();
@@ -214,6 +221,7 @@ BE_INI_FUNCTION
       dsprep();
       mssm_result = true;
     }
+    
     // Do pure diskless SLHA initialisation, including (s)particle widths from GAMBIT.
     else
     {
