@@ -29,9 +29,6 @@ LOAD_LIBRARY
 // Functions used in DS frontend
 BE_FUNCTION(dsinit, void, (), "dsinit_", "dsinit")
 
-// Convenience functions (registration)
-// (none needed so far, for application in DarkBit_standalone_WIMP)
-
 // Functions used in RelicDensity.cpp
 BE_FUNCTION(dsanwx, double, (double&), "dsanwx_", "dsanwx")
 BE_FUNCTION(dsrdcom, void, (), "dsrdcom_", "dsrdcom")
@@ -44,7 +41,10 @@ BE_FUNCTION(dsanyield_sim, double, (double&,double&,int&,char*,int&,int&,int&), 
 // Functions used in SunNeutrinos.cpp
 BE_FUNCTION(dssenu_capsuntab, double, (const double&, const double&, const double&, const double&), "dssenu_capsuntab_", "cap_Sun_v0q0_isoscalar_DS")
 
-// Halo model common blocks
+// Functions used by convenience functions
+BE_FUNCTION(dsseyield_sim_ls, double, (const double&, const double&, const double&, const int&, const int&, const int&, const int&, const int&, const int&, const char*, const int&, const int&, const int&), "dsseyield_sim_ls_", "raw_nuyield_sim")
+
+  // Halo model common blocks
 BE_VARIABLE(dshmcom, DS_HMCOM, "dshmcom_", "dshmcom")
 BE_VARIABLE(dshmframevelcom, DS_HMFRAMEVELCOM, "dshmframevelcom_", "dshmframevelcom")
 BE_VARIABLE(dshmisodf, DS_HMISODF, "dshmisodf_", "dshmisodf")
@@ -60,8 +60,6 @@ BE_CONV_FUNCTION(dsgenericwimp_nusetup, void, (const double(&)[29], const double
 BE_CONV_FUNCTION(DS_neutral_h_decay_channels, std::vector<std::vector<str>>, (), "get_DS_neutral_h_decay_channels")
 BE_CONV_FUNCTION(DS_charged_h_decay_channels, std::vector<std::vector<str>>, (), "get_DS_charged_h_decay_channels")
 BE_CONV_FUNCTION(neutrino_yield, double, (const double&, const int&, void*&), "nuyield")
-// Functions used by convenience functions
-BE_FUNCTION(dsseyield_sim_ls, double, (const double&, const double&, const double&, const int&, const int&, const int&, const int&, const int&, const int&, const char*, const int&, const int&, const int&), "dsseyield_sim_ls_", "raw_nuyield_sim")
 
 // Undefine macros to avoid conflict with other backends
 #include "gambit/Backends/backend_undefs.hpp"
