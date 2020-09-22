@@ -129,8 +129,6 @@ int main(int argc, char* argv[])
     model_warning().set_fatal(true);
 
     // ---- Check which backends are present ----
-    // if (not Backends::backendInfo().works["DarkSUSY_MSSM6.1.1"]) backend_error().raise(LOCAL_INFO, "DarkSUSY MSSM 6.1.1 is missing!");
-    // if (not Backends::backendInfo().works["MicrOmegas_MSSM3.6.9.2"]) backend_error().raise(LOCAL_INFO, "MicrOmegas 3.6.9.2 for MSSM is missing!");
     if (not Backends::backendInfo().works["gamLike1.0.1"]) backend_error().raise(LOCAL_INFO, "gamLike 1.0.1 is missing!");
     if (not Backends::backendInfo().works["DDCalc2.2.0"]) backend_error().raise(LOCAL_INFO, "DDCalc 2.2.0 is missing!");
     if (not Backends::backendInfo().works["nulike1.0.9"]) backend_error().raise(LOCAL_INFO, "nulike 1.0.9 is missing!");
