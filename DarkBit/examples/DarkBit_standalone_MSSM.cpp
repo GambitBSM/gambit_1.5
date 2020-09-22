@@ -27,6 +27,9 @@
 ///  \author Anders Kvellestad
 ///  \date 2020 Feb
 ///
+///  \author Ankit Beniwal
+///  \date 2020
+///
 ///  *********************************************
 
 #include "gambit/Elements/standalone_module.hpp"
@@ -129,7 +132,7 @@ int main(int argc, char* argv[])
     // if (not Backends::backendInfo().works["DarkSUSY_MSSM6.1.1"]) backend_error().raise(LOCAL_INFO, "DarkSUSY MSSM 6.1.1 is missing!");
     // if (not Backends::backendInfo().works["MicrOmegas_MSSM3.6.9.2"]) backend_error().raise(LOCAL_INFO, "MicrOmegas 3.6.9.2 for MSSM is missing!");
     if (not Backends::backendInfo().works["gamLike1.0.1"]) backend_error().raise(LOCAL_INFO, "gamLike 1.0.1 is missing!");
-    if (not Backends::backendInfo().works["DDCalc2.0.0"]) backend_error().raise(LOCAL_INFO, "DDCalc 2.0.0 is missing!");
+    if (not Backends::backendInfo().works["DDCalc2.2.0"]) backend_error().raise(LOCAL_INFO, "DDCalc 2.2.0 is missing!");
     if (not Backends::backendInfo().works["nulike1.0.9"]) backend_error().raise(LOCAL_INFO, "nulike 1.0.9 is missing!");
 
     // ---- Useful variables ----
@@ -384,9 +387,9 @@ int main(int argc, char* argv[])
       // The below calculates the DD couplings using the full 1 loop calculation of
       // Drees Nojiri Phys.Rev. D48 (1993) 3483
       DD_couplings_DarkSUSY_DS5.setOption<bool>("loop", true);
-      // When the calculation is done at tree level (loop = false), setting the below to false
-      // approximates the squark propagator as 1/m_sq^2 to avoid poles.
-      // DD_couplings_DarkSUSY_DS5.setOption<bool>("pole", false);
+      // Setting the below to false approximates the squark propagator as 1/m_sq^2 to avoid poles.
+      // To reproduce numbers in Tables 11/12 of DarkBit paper (https://arxiv.org/abs/1705.07920), set "pole" to true.
+      DD_couplings_DarkSUSY_DS5.setOption<bool>("pole", false);
       DD_couplings_DarkSUSY_DS5.reset_and_calculate();
 
       // Initialize DDCalc backend
@@ -411,7 +414,6 @@ int main(int argc, char* argv[])
       LUX_2016_GetLogLikelihood.reset_and_calculate();
       // Save the result
       results["LUX_2016_lnL"][current_backend] = LUX_2016_GetLogLikelihood(0);
-
 
       sigma_SI_p_simple.resolveDependency(&mwimp_generic);
       sigma_SI_p_simple.resolveDependency(&DD_couplings_DarkSUSY_DS5);

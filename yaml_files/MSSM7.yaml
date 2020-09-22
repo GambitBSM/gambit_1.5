@@ -349,7 +349,7 @@ Rules:
     #function: RD_oh2_DS5_general
     function: RD_oh2_DS_general
     options:
-      # these options are identical for DS5 and DS6+ version 
+      # these options are identical for DS5 and DS6+ version
       fast: 1  # 0: standard, 1: fast (default)
     #function: RD_oh2_DarkSUSY_DS5
     #options:
@@ -363,7 +363,7 @@ Rules:
   # Choose to use the function RD_eff_annrate_DS_MSSM rather than RD_eff_annrate_from_ProcessCatalog
   - capability: RD_eff_annrate
     function: RD_eff_annrate_DS_MSSM
-  # ...and use the function RD_annrate_DSprep_MSSM_func to supply the dependency RD_eff_annrate_DSprep_MSSM 
+  # ...and use the function RD_annrate_DSprep_MSSM_func to supply the dependency RD_eff_annrate_DSprep_MSSM
   - capability: RD_eff_annrate_DSprep_MSSM
     function: RD_annrate_DSprep_MSSM_func
     #function: RD_annrate_DSprep_MSSM_func
@@ -396,7 +396,7 @@ Rules:
   - capability: DD_couplings
     #function: DD_couplings_DarkSUSY_DS5
     function: DD_couplings_DarkSUSY_MSSM
-    options: 
+    options:
       loop: true
     #function: DD_couplings_MicrOmegas
 
@@ -539,71 +539,37 @@ Rules:
       ms_central: 95.E-03
       ms_error: 5.E-03
 
-  # Choose to get collider cross-sections from the event generator (Pythia)
-  - capability: CrossSection
-    function: getMCxsec
-
-  # ATLAS detector simulation
-  - capability: SimpleSmearingSim
-    type: "ColliderBit::BuckFastSmearATLAS"
-    function: getBuckFastATLAS
-    options:
-      partonOnly: [false]
-      antiktR: [0.4]
-      useDetector: [true]
-
-  # CMS detector simulation
-  - capability: SimpleSmearingSim
-    type: "ColliderBit::BuckFastSmearCMS"
-    function: getBuckFastCMS
-    options:
-      partonOnly: [false]
-      antiktR: [0.4]
-      useDetector: [true]
-
-  # ATLAS analysis setup.
-  - capability: ATLASAnalysisContainer
-    function: getATLASAnalysisContainer
-    options:
-      analyses: [ ["ATLAS_13TeV_0LEP_36invfb",
-                   "ATLAS_13TeV_MultiLEP_36invfb",
-                   "ATLAS_13TeV_0LEPStop_36invfb",
-                   "ATLAS_13TeV_2LEPStop_36invfb",
-                   "ATLAS_13TeV_2bMET_36invfb"] ]
-
-                   # "ATLAS_13TeV_RJ3L_lowmass_36invfb",
-                   # "ATLAS_13TeV_1LEPStop_36invfb",
-                   # These analyses currently depend on ROOT.
-
-  # CMS analysis setup
-  - capability: CMSAnalysisContainer
-    function: getCMSAnalysisContainer
-    options:
-      analyses: [ ["CMS_13TeV_0LEP_36invfb",
-                   "CMS_13TeV_1LEPbb_36invfb",
-                   "CMS_13TeV_2OSLEP_36invfb",
-                   "CMS_13TeV_2LEPsoft_36invfb",
-                   "CMS_13TeV_1LEPStop_36invfb",
-                   "CMS_13TeV_2LEPStop_36invfb",
-                   "CMS_13TeV_MultiLEP_36invfb",
-                   "CMS_13TeV_MONOJET_36invfb" ] ]
-
-  # Choose Monte Carlo event simulator.
-  - capability:  ColliderOperator
+  # Choose colliders to simulate and their convergence settings, and pick analyses to run with each collider.
+  - capability: RunMC
     function: operateLHCLoop
     options:
-      pythiaNames: ["Pythia_SUSY_LHC_13TeV"]
       silenceLoop: true
-
-  # Choose statistical settings for Monte Carlo event generator
-  - capability: MC_ConvergenceSettings
-    options:
-      min_nEvents: [5000]
-      max_nEvents: [50000]
-      events_between_convergence_checks: [5000]
-      target_fractional_uncert: [0.3]
-      halt_when_systematic_dominated: true
-      all_SR_must_converge: false
+      LHC_13TeV:
+        min_nEvents: 5000
+        max_nEvents: 50000
+        events_between_convergence_checks: 5000
+        target_fractional_uncert: 0.3
+        halt_when_systematic_dominated: true
+        all_analyses_must_converge: false
+        all_SR_must_converge: false
+        maxFailedEvents: 10
+        analyses:
+          - CMS_13TeV_0LEP_36invfb
+          - CMS_13TeV_1LEPbb_36invfb
+          - CMS_13TeV_2OSLEP_36invfb
+          - CMS_13TeV_2LEPsoft_36invfb
+          - CMS_13TeV_1LEPStop_36invfb
+          - CMS_13TeV_2LEPStop_36invfb
+          - CMS_13TeV_MultiLEP_36invfb
+          - CMS_13TeV_MONOJET_36invfb
+          - ATLAS_13TeV_0LEP_36invfb
+          - ATLAS_13TeV_MultiLEP_36invfb
+          - ATLAS_13TeV_0LEPStop_36invfb
+          - ATLAS_13TeV_2LEPStop_36invfb
+          - ATLAS_13TeV_2bMET_36invfb
+        # - ATLAS_13TeV_RJ3L_lowmass_36invfb
+        # - ATLAS_13TeV_1LEPStop_36invfb
+        # The last two analyses depend on ROOT.
 
   # Choose Monte Carlo event simulator and options.
   - capability:  HardScatteringSim
@@ -622,6 +588,45 @@ Rules:
           - SUSY:all = on
           - TauDecays:mode = 0
           - TimeShower:pTmin = 2
+
+  - capability: HardScatteringSim
+    type: const BaseCollider*
+    function: getPythiaAsBase
+    module: ColliderBit
+
+  # Choose to get cross-sections from the Monte Carlo
+  - capability: CrossSection
+    function: getMCxsec
+    module: ColliderBit
+
+  # Choose ATLAS detector simulation and options.
+  - capability: ATLASDetectorSim
+    options:
+      LHC_13TeV:
+        partonOnly: false
+        antiktR: 0.4
+
+  # Choose CMS detector simulation and options.
+  - capability: CMSDetectorSim
+    options:
+      LHC_13TeV:
+        partonOnly: false
+        antiktR: 0.4
+
+  # Choose ATLAS smearing function
+  - capability: ATLASSmearedEvent
+    function: smearEventATLAS
+    module: ColliderBit
+
+  # Choose CMS smearing function
+  - capability: CMSSmearedEvent
+    function: smearEventCMS
+    module: ColliderBit
+
+  # Choose copied event function
+  - capability: CopiedEvent
+    function: copyEvent
+    module: ColliderBit
 
   # Choose which type of marginalised Poisson likelihood to use for LHC likelihoods
   - capability: LHC_LogLikes

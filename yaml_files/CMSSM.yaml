@@ -88,11 +88,11 @@ Scanner:
   scanners:
 
     # Useful for testing
-    random: 
-      plugin: random 
-      like:  LogLike 
-      point_number: 1 
-      output_file: output 
+    random:
+      plugin: random
+      like:  LogLike
+      point_number: 1
+      output_file: output
 
     multinest:
       plugin: multinest
@@ -316,7 +316,7 @@ Rules:
     #function: capture_rate_Sun_const_xsec_DS5
     function: capture_rate_Sun_const_xsec
 
-  # If you have multiple versions of DarkSUSY installed, you can pick which one to provide 
+  # If you have multiple versions of DarkSUSY installed, you can pick which one to provide
   # the backend requirements to the function nuyield_from_DS
   # - capability: nuyield_ptr
   #   function: nuyield_from_DS
@@ -358,7 +358,7 @@ Rules:
     #function: RD_oh2_DS5_general
     function: RD_oh2_DS_general
     options:
-      # these options are identical for DS5 and DS6+ version 
+      # these options are identical for DS5 and DS6+ version
       fast: 1  # 0: standard, 1: fast (default)
     #function: RD_oh2_DarkSUSY_DS5
     #options:
@@ -372,7 +372,7 @@ Rules:
   # Choose to use the function RD_eff_annrate_DS_MSSM rather than RD_eff_annrate_from_ProcessCatalog
   - capability: RD_eff_annrate
     function: RD_eff_annrate_DS_MSSM
-  # ...and use the function RD_annrate_DSprep_MSSM_func to supply the dependency RD_eff_annrate_DSprep_MSSM 
+  # ...and use the function RD_annrate_DSprep_MSSM_func to supply the dependency RD_eff_annrate_DSprep_MSSM
   - capability: RD_eff_annrate_DSprep_MSSM
     function: RD_annrate_DSprep_MSSM_func
     #function: RD_annrate_DSprep_MSSM_func
@@ -405,7 +405,7 @@ Rules:
   - capability: DD_couplings
     #function: DD_couplings_DarkSUSY_DS5
     function: DD_couplings_DarkSUSY_MSSM
-    options: 
+    options:
       loop: true
     #function: DD_couplings_MicrOmegas
 
@@ -598,7 +598,12 @@ Rules:
           - TauDecays:mode = 0
           - TimeShower:pTmin = 2
 
-  # Choose to get collider cross-sections from the event generator (Pythia)
+  - capability: HardScatteringSim
+    type: const BaseCollider*
+    function: getPythiaAsBase
+    module: ColliderBit
+
+  # Choose to get cross-sections from the Monte Carlo
   - capability: CrossSection
     function: getMCxsec
 
@@ -615,6 +620,21 @@ Rules:
       LHC_13TeV:
         partonOnly: false
         antiktR: 0.4
+
+  # Choose ATLAS smearing function
+  - capability: ATLASSmearedEvent
+    function: smearEventATLAS
+    module: ColliderBit
+
+  # Choose CMS smearing function
+  - capability: CMSSmearedEvent
+    function: smearEventCMS
+    module: ColliderBit
+
+  # Choose copied event function
+  - capability: CopiedEvent
+    function: copyEvent
+    module: ColliderBit
 
   # Choose LHC likelihood form and options.
   - capability: LHC_LogLikes
@@ -650,6 +670,7 @@ KeyValues:
     seed: -1
 
   likelihood:
+    # Choose a lower cutoff for the likelihood
     model_invalid_for_lnlike_below: -5e5
     model_invalid_for_lnlike_below_alt: -1e5
 
