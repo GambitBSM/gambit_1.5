@@ -49,7 +49,6 @@
 BE_NAMESPACE
 {
   const double min_DS_rwidth = 5.e-3; // 0.5%  to avoid numerical problems
-  // const std::vector<str> IBfinalstate = initVector<str>("e-","mu-","tau-","u","d","c","s","t","b","W+","H+");
   std::vector<double> DSparticle_mass;
   std::vector<double> GAMBITparticle_mass;
 }
@@ -88,7 +87,7 @@ BE_INI_FUNCTION
     scan_level = false;
 
   }
-  
+
 // Initialization function for a given MSSM point
 // (previous capaility DarkSUSY_PointInit)
   bool mssm_result = false;
@@ -233,7 +232,7 @@ BE_INI_FUNCTION
         "DarkSUSY point initialization failed.");
     invalid_point().raise("DarkSUSY point initialization failed.");
   }
-    
+
 }
 END_BE_INI_FUNCTION
 
@@ -887,7 +886,7 @@ BE_NAMESPACE
 
   /// Function DD_couplings returns direct detection couplings gps,gns,gpa,gna
   /// (proton/neutron scalar/axial four-couplings)
-  /// Provided here because the signature of the corresponding DarkSUSY 
+  /// Provided here because the signature of the corresponding DarkSUSY
 
 //  FIXME: Remove this once everything is known to be working.
 //  double* DD_couplings()

@@ -22,7 +22,7 @@
 
 #include "gambit/Backends/frontend_macros.hpp"
 /// TODO: include HERE a standard version for DS6, and make the
-///       following a minimal version only (specific for the 	MSSM)
+///       following a minimal version only (specific for the  MSSM)
 #include "gambit/Backends/frontends/DarkSUSY_MSSM_6_1_1.hpp"
 #include "gambit/Utils/file_lock.hpp"
 #include "gambit/Utils/mpiwrapper.hpp"
@@ -35,7 +35,6 @@
 BE_NAMESPACE
 {
   const double min_DS_rwidth = 5.e-3; // 0.5%  to avoid numerical problems
-  // const std::vector<str> IBfinalstate = Initvector<str>("e-","mu-","tau-","u","d","c","s","t","b","W+","H+");
   std::vector<double> DSparticle_mass;
   std::vector<double> GAMBITparticle_mass;
   std::vector<double> DSanbr; // to have BR available to neutrino_yield
@@ -68,7 +67,7 @@ BE_INI_FUNCTION
     double mdm=100.0, egev=10.0;
     int pdg=5, yieldpdg, diff=1;
     char*hel =  (char *)"0";
-    
+
     yieldpdg = 22;// gamma rays
     dsanyield_sim(mdm,egev,pdg,hel,yieldpdg,diff,istat);
     yieldpdg = -2212; //antiprotons
@@ -79,7 +78,7 @@ BE_INI_FUNCTION
     scan_level = false;
 
   }
-   
+
 // Initialization function for a given MSSM point
 // (previous capaility DarkSUSY_PointInit)
   bool mssm_result = false;
@@ -171,7 +170,7 @@ BE_INI_FUNCTION
   }
 
   else if (ModelInUse("MSSM63atQ") || ModelInUse("CMSSM"))
-  {  
+  {
     SLHAstruct mySLHA;
     /// Option use_dsSLHAread<bool>: Use DS internal SLHA reader to initialize backend (false)
     bool use_dsSLHAread = runOptions->getValueOrDef<bool>(false, "use_dsSLHAread");
@@ -221,7 +220,7 @@ BE_INI_FUNCTION
       logger() << LogTags::debug << "Initializing DarkSUSY via SLHA." << EOM;
       dsSLHAread(byVal(filename),flag);
       // dsSLHAread(byVal(filename),flag,byVal(len));
-      int unphys,warning; 
+      int unphys,warning;
       dsmodelsetup(unphys,warning);
     if (unphys < 0) {
       backend_warning().raise(LOCAL_INFO,
@@ -247,11 +246,11 @@ BE_INI_FUNCTION
     else
     {
       if (init_diskless(mySLHA, *Dep::decay_rates) == 0 )
-      {          
+      {
         logger() << LogTags::debug << "Using diskless SLHA interface to DarkSUSY." << EOM;
-        int unphys,warning; 
+        int unphys,warning;
         dsmodelsetup(unphys,warning);
-            
+
         if (unphys < 0) {
           backend_warning().raise(LOCAL_INFO,
               "Model point is theoretically inconsistent (DarkSUSY).");
@@ -273,7 +272,7 @@ BE_INI_FUNCTION
         }
       }
     }
-    
+
   }
 
   if ( (ModelInUse("MSSM63atQ") || ModelInUse("CMSSM")) && !mssm_result )
@@ -325,7 +324,7 @@ BE_NAMESPACE
     DSanpdg1.clear();
     DSanpdg2.clear();
     DSanpdg1.push_back(10000); // not used, as I keep the same numbering as for Fortran
-    DSanpdg2.push_back(10000);  
+    DSanpdg2.push_back(10000);
     DSanpdg1.push_back(35);  // H H, channel 1
     DSanpdg2.push_back(35);
     DSanpdg1.push_back(25);  // h H, channel 2
@@ -383,7 +382,7 @@ BE_NAMESPACE
     DSanpdg1.push_back(22);   // gamma gamma, channel 28
     DSanpdg2.push_back(22);
     DSanpdg1.push_back(22);   // gamma Z, channel 29
-    DSanpdg2.push_back(23); 
+    DSanpdg2.push_back(23);
 
     // Transfer Higgs decay branching fractions (not widths) to Higgs decay common blocks.
     // The total width is not relevant, as all Higgs decay in flight eventually, so
@@ -434,52 +433,52 @@ BE_NAMESPACE
     int twol=0;
     int cp=-1;
     double result=0.0;
-    
+
     for (int i=1; i<=29; i++)
     {
       // cout << "DDD: " << i << " " << DSanbr[i] << " " << DSanpdg1[i] << " " << DSanpdg2[i] << endl; // JE TMP
       if (DSanbr[i]>0) {
-	if (i==13) { // W+ W-
-	  twos=2;
-	  twol=2;
-	} else {
-	  twos=0;
-	  twol=0;
-	}
-	iistat=0;
-	if ((ptype == 1) or (ptype == 3)) { // particles
-	  tmp=dsseyield_sim_ls(anmwimp,pow(10.0,log10E),10.0,DSanpdg1[i],DSanpdg2[i],twoj,cp,twol,twos,object,3,t1,iistat);
-	    if ((iistat bitand 8) == 8) { // not simulated channel
-	     
+  if (i==13) { // W+ W-
+    twos=2;
+    twol=2;
+  } else {
+    twos=0;
+    twol=0;
+  }
+  iistat=0;
+  if ((ptype == 1) or (ptype == 3)) { // particles
+    tmp=dsseyield_sim_ls(anmwimp,pow(10.0,log10E),10.0,DSanpdg1[i],DSanpdg2[i],twoj,cp,twol,twos,object,3,t1,iistat);
+      if ((iistat bitand 8) == 8) { // not simulated channel
+
         tmp=dsseyield_ch(anmwimp,pow(10.0,log10E),10.0,DSanpdg1[i],DSanpdg2[i],object,3,t1,iistat);
-	    }
-	  result += 1e-30 * DSanbr[i] * tmp;
+      }
+    result += 1e-30 * DSanbr[i] * tmp;
 
       // The following is just a warning, not an error: unpolarized yields
-      // are used even if polarized yields are asked for   
+      // are used even if polarized yields are asked for
       if ((iistat bitand 16) == 16) iistat -= 16;
-	  istat=(istat bitor iistat);
-	}
-	if ((ptype == 2) or (ptype == 3)) { // anti-particles
-	  tmp=dsseyield_sim_ls(anmwimp,pow(10.0,log10E),10.0,DSanpdg1[i],DSanpdg2[i],twoj,cp,twol,twos,object,3,t2,iistat);
-	    if ((iistat bitand 8) == 8) { // not simulated channel
-	      // cout << "CCC: " << i << " " << DSanpdg1[i] << " " << DSanpdg2[i] << endl; // JE TMP
+    istat=(istat bitor iistat);
+  }
+  if ((ptype == 2) or (ptype == 3)) { // anti-particles
+    tmp=dsseyield_sim_ls(anmwimp,pow(10.0,log10E),10.0,DSanpdg1[i],DSanpdg2[i],twoj,cp,twol,twos,object,3,t2,iistat);
+      if ((iistat bitand 8) == 8) { // not simulated channel
+        // cout << "CCC: " << i << " " << DSanpdg1[i] << " " << DSanpdg2[i] << endl; // JE TMP
 
           tmp=dsseyield_ch(anmwimp,pow(10.0,log10E),10.0,DSanpdg1[i],DSanpdg2[i],object,3,t2,iistat);
-	    }
-	  result += 1e-30 * DSanbr[i] * tmp;
+      }
+    result += 1e-30 * DSanbr[i] * tmp;
 
       // The following is just a warning, not an error: unpolarized yields
-      // are used even if polarized yields are asked for   
+      // are used even if polarized yields are asked for
       if ((iistat bitand 16) == 16) iistat -= 16;
-	  istat=(istat bitor iistat);
-	}
+    istat=(istat bitor iistat);
+  }
 
       } // end if DSanbr>0
 
     } // end loop
-      
-    
+
+
     if ((istat bitand 1) == 1)
     {
       if (not piped_warnings.inquire()) // Don't bother re-raising a warning if it's already been done since the last .check().
@@ -516,15 +515,15 @@ BE_NAMESPACE
       std::ostringstream err;
       err << "Error from DarkSUSY::dsddgpgn function when calling DD_couplings().  ierr = " << ierr;
       piped_errors.request(LOCAL_INFO, err.str());
-    } 
+    }
     std::vector<double> couplings;
     couplings.clear();
     couplings.push_back(gg(1,1).re); // gps
     couplings.push_back(gg(1,2).re); // gns
     couplings.push_back(gg(4,1).re); // gpa
     couplings.push_back(gg(4,2).re); // gna
-    
-    
+
+
     return couplings;
   }
 
@@ -535,7 +534,7 @@ BE_NAMESPACE
   /// to prepare DS for the calculation of the invariant rate, dsanwx.
   // Note: DarkSUSY use the opposite convention on h1_0 and h2_0. The names
   // used here are the gambit names where h1_0 hence refers to what DarkSUSY
-  // calls H2. 
+  // calls H2.
   int DSparticle_code(const str& particleID)
   {
     int kpart;
