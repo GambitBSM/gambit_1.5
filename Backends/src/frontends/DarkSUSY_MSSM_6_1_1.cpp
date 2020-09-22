@@ -27,8 +27,6 @@
 #include "gambit/Utils/file_lock.hpp"
 #include "gambit/Utils/mpiwrapper.hpp"
 
-#define square(x) ((x) * (x))  // square a number
-
 //#define DARKSUSY_DEBUG
 
 // Some ad-hoc DarkSUSY global state.
@@ -715,7 +713,7 @@ BE_NAMESPACE
     // Quark masses as defined in SLHA2
     smquarkmasses->mu2gev        = to<double>(mySLHA.at("SMINPUTS").at(22).at(1)); // up quark mass @ 2 GeV
     smquarkmasses->md2gev        = to<double>(mySLHA.at("SMINPUTS").at(21).at(1)); // down quark mass @ 2 GeV
-    smquarkmasses->ms2gev        = to<double>(mySLHA.at("SMINPUTS").at(23).at(1)); // stange mass @ 2 GeV
+    smquarkmasses->ms2gev        = to<double>(mySLHA.at("SMINPUTS").at(23).at(1)); // strange mass @ 2 GeV
     smquarkmasses->mcmc          = to<double>(mySLHA.at("SMINPUTS").at(24).at(1)); // charm mass at m_c
     smquarkmasses->mbmb          = to<double>(mySLHA.at("SMINPUTS").at(5).at(1));  // bottom mass at m_b
     pmasses->mass(DSpart->kqu(3)) = to<double>(mySLHA.at("SMINPUTS").at(6).at(1));  // top pole mass
@@ -734,31 +732,31 @@ BE_NAMESPACE
 
     // Block MINPAR we skip, it is not needed
 
-    // Block MSOFT
+    // Block MSOFT (this comes later in DS, but this has no effect on DS calls)
     mssmpar->m1 = to<double>(mySLHA.at("MSOFT").at(1).at(1));
     mssmpar->m2 = to<double>(mySLHA.at("MSOFT").at(2).at(1));
     mssmpar->m3 = to<double>(mySLHA.at("MSOFT").at(3).at(1));
-    mssmpar->mass2l(1) = square(to<double>(mySLHA.at("MSOFT").at(31).at(1)));
-    mssmpar->mass2l(2) = square(to<double>(mySLHA.at("MSOFT").at(32).at(1)));
-    mssmpar->mass2l(3) = square(to<double>(mySLHA.at("MSOFT").at(33).at(1)));
-    mssmpar->mass2e(1) = square(to<double>(mySLHA.at("MSOFT").at(34).at(1)));
-    mssmpar->mass2e(2) = square(to<double>(mySLHA.at("MSOFT").at(35).at(1)));
-    mssmpar->mass2e(3) = square(to<double>(mySLHA.at("MSOFT").at(36).at(1)));
-    mssmpar->mass2q(1) = square(to<double>(mySLHA.at("MSOFT").at(41).at(1)));
-    mssmpar->mass2q(2) = square(to<double>(mySLHA.at("MSOFT").at(42).at(1)));
-    mssmpar->mass2q(3) = square(to<double>(mySLHA.at("MSOFT").at(43).at(1)));
-    mssmpar->mass2u(1) = square(to<double>(mySLHA.at("MSOFT").at(44).at(1)));
-    mssmpar->mass2u(2) = square(to<double>(mySLHA.at("MSOFT").at(45).at(1)));
-    mssmpar->mass2u(3) = square(to<double>(mySLHA.at("MSOFT").at(46).at(1)));
-    mssmpar->mass2d(1) = square(to<double>(mySLHA.at("MSOFT").at(47).at(1)));
-    mssmpar->mass2d(2) = square(to<double>(mySLHA.at("MSOFT").at(48).at(1)));
-    mssmpar->mass2d(3) = square(to<double>(mySLHA.at("MSOFT").at(49).at(1)));
+    mssmpar->mass2l(1) = pow(to<double>(mySLHA.at("MSOFT").at(31).at(1)),2);
+    mssmpar->mass2l(2) = pow(to<double>(mySLHA.at("MSOFT").at(32).at(1)),2);
+    mssmpar->mass2l(3) = pow(to<double>(mySLHA.at("MSOFT").at(33).at(1)),2);
+    mssmpar->mass2e(1) = pow(to<double>(mySLHA.at("MSOFT").at(34).at(1)),2);
+    mssmpar->mass2e(2) = pow(to<double>(mySLHA.at("MSOFT").at(35).at(1)),2);
+    mssmpar->mass2e(3) = pow(to<double>(mySLHA.at("MSOFT").at(36).at(1)),2);
+    mssmpar->mass2q(1) = pow(to<double>(mySLHA.at("MSOFT").at(41).at(1)),2);
+    mssmpar->mass2q(2) = pow(to<double>(mySLHA.at("MSOFT").at(42).at(1)),2);
+    mssmpar->mass2q(3) = pow(to<double>(mySLHA.at("MSOFT").at(43).at(1)),2);
+    mssmpar->mass2u(1) = pow(to<double>(mySLHA.at("MSOFT").at(44).at(1)),2);
+    mssmpar->mass2u(2) = pow(to<double>(mySLHA.at("MSOFT").at(45).at(1)),2);
+    mssmpar->mass2u(3) = pow(to<double>(mySLHA.at("MSOFT").at(46).at(1)),2);
+    mssmpar->mass2d(1) = pow(to<double>(mySLHA.at("MSOFT").at(47).at(1)),2);
+    mssmpar->mass2d(2) = pow(to<double>(mySLHA.at("MSOFT").at(48).at(1)),2);
+    mssmpar->mass2d(3) = pow(to<double>(mySLHA.at("MSOFT").at(49).at(1)),2);
 
     // Block HMIX
     mssmpar->mu = to<double>(mySLHA.at("HMIX").at(1).at(1));
     mssmpar->tanbe = to<double>(mySLHA.at("HMIX").at(2).at(1));
 
-    // A boson mass
+    // A boson mass (h3 in DarkSUSY)
     pmasses->mass(DSparticle_code("A0")) = to<double>(mySLHA.at("MASS").at(36).at(1));
     mssmpar->ma = pmasses->mass(DSparticle_code("A0"));
 
@@ -812,7 +810,7 @@ BE_NAMESPACE
     // as given (read in earlier), and instead enforce the tree-level condition
     // by redefining sin^2 theta_W. That we do here:
     pmasses->mass(DSparticle_code("W+"))  = to<double>(mySLHA.at("MASS").at(24).at(1));    // W boson mass
-    smcoupling->s2thw=1.0-square(pmasses->mass(DSparticle_code("W+")))/square(pmasses->mass(DSparticle_code("Z0")));
+    smcoupling->s2thw=1.0-pow(pmasses->mass(DSparticle_code("W+"))/pmasses->mass(DSparticle_code("Z0")),2);
 
     // Higgs masses. Note h0_1 is the lightest CP-even neutral higgs, and h2_0 the heavier.
     pmasses->mass(DSparticle_code("h0_1")) = to<double>(mySLHA.at("MASS").at(25).at(1));
@@ -972,7 +970,7 @@ BE_NAMESPACE
 
     // Do flavour reordering for SLHA2 compatibility
     // FIXME. The call to dsorder_flavour and dsvertex needs to go AFTER
-    // the widhts are read. Move this later. It requires that we use
+    // the widths are read. Move this later. It requires that we use
     // a version of dsorder_flavour that also orders widths, i.e. a version
     // of DarkSUSY later than 6.1.1.
     dsorder_flavour();

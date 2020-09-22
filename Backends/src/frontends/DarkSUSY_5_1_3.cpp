@@ -41,8 +41,6 @@
 #include "gambit/Utils/file_lock.hpp"
 #include "gambit/Utils/mpiwrapper.hpp"
 
-#define square(x) ((x) * (x))  // square a number
-
 //#define DARKSUSY_DEBUG
 
 // Some ad-hoc DarkSUSY global state.
@@ -133,7 +131,7 @@ BE_INI_FUNCTION
     dsgive_model_isasugra(am0, amhf, aa0, asgnmu, atanbe);
     int unphys, hwarning;
     dssusy_isasugra(unphys, hwarning);
-    //mssm_result = (unphys == 0) && (hwarning == 0);
+
     if (unphys < 0)
     {
       backend_warning().raise(LOCAL_INFO, "Model point is theoretically inconsistent (DarkSUSY).");
@@ -181,7 +179,7 @@ BE_INI_FUNCTION
     if (use_dsSLHAread || slha_version == 1)
     {
       if (!use_dsSLHAread) {backend_error().raise(LOCAL_INFO,
-              "A SLHA1 spectrum requires use of the DarkSUSY SLHA reader rather than the diskless\n"
+              "An SLHA1 spectrum requires use of the DarkSUSY SLHA reader rather than the diskless\n"
               "GAMBIT DarkSUSY initialization. To enable the DarkSUSY SLHA reader, set the option\n"
               "use_dsSLHAread for the function DarkSUSY_PointInit_MSSM to true.");}
 
@@ -275,7 +273,6 @@ BE_NAMESPACE
     for (int i=1; i<=29; i++)
     {
       wabranch->wabr(i) = annihilation_bf[i-1];
-      // cout << "DDD: " << i << " " << annihilation_bf[i-1] << endl ; // JE TMP
     }
 
     // Transfer Higgs decay branching fractions (not widths) to Higgs decay common blocks.
@@ -334,7 +331,6 @@ BE_NAMESPACE
       err << "Error from DarkSUSY::dswayield functions in neutrino flux calculation.  istat = " << istat;
       piped_errors.request(LOCAL_INFO, err.str());
     }
-    // cout << "AAA: nuyield DS5: " << result << endl; // JE TMP
     return result;
   }
 
@@ -543,21 +539,21 @@ BE_NAMESPACE
     mssmpar->m1 = to<double>(mySLHA.at("MSOFT").at(1).at(1));
     mssmpar->m2 = to<double>(mySLHA.at("MSOFT").at(2).at(1));
     mssmpar->m3 = to<double>(mySLHA.at("MSOFT").at(3).at(1));
-    mssmpar->mass2l(1) = square(to<double>(mySLHA.at("MSOFT").at(31).at(1)));
-    mssmpar->mass2l(2) = square(to<double>(mySLHA.at("MSOFT").at(32).at(1)));
-    mssmpar->mass2l(3) = square(to<double>(mySLHA.at("MSOFT").at(33).at(1)));
-    mssmpar->mass2e(1) = square(to<double>(mySLHA.at("MSOFT").at(34).at(1)));
-    mssmpar->mass2e(2) = square(to<double>(mySLHA.at("MSOFT").at(35).at(1)));
-    mssmpar->mass2e(3) = square(to<double>(mySLHA.at("MSOFT").at(36).at(1)));
-    mssmpar->mass2q(1) = square(to<double>(mySLHA.at("MSOFT").at(41).at(1)));
-    mssmpar->mass2q(2) = square(to<double>(mySLHA.at("MSOFT").at(42).at(1)));
-    mssmpar->mass2q(3) = square(to<double>(mySLHA.at("MSOFT").at(43).at(1)));
-    mssmpar->mass2u(1) = square(to<double>(mySLHA.at("MSOFT").at(44).at(1)));
-    mssmpar->mass2u(2) = square(to<double>(mySLHA.at("MSOFT").at(45).at(1)));
-    mssmpar->mass2u(3) = square(to<double>(mySLHA.at("MSOFT").at(46).at(1)));
-    mssmpar->mass2d(1) = square(to<double>(mySLHA.at("MSOFT").at(47).at(1)));
-    mssmpar->mass2d(2) = square(to<double>(mySLHA.at("MSOFT").at(48).at(1)));
-    mssmpar->mass2d(3) = square(to<double>(mySLHA.at("MSOFT").at(49).at(1)));
+    mssmpar->mass2l(1) = pow(to<double>(mySLHA.at("MSOFT").at(31).at(1)),2);
+    mssmpar->mass2l(2) = pow(to<double>(mySLHA.at("MSOFT").at(32).at(1)),2);
+    mssmpar->mass2l(3) = pow(to<double>(mySLHA.at("MSOFT").at(33).at(1)),2);
+    mssmpar->mass2e(1) = pow(to<double>(mySLHA.at("MSOFT").at(34).at(1)),2);
+    mssmpar->mass2e(2) = pow(to<double>(mySLHA.at("MSOFT").at(35).at(1)),2);
+    mssmpar->mass2e(3) = pow(to<double>(mySLHA.at("MSOFT").at(36).at(1)),2);
+    mssmpar->mass2q(1) = pow(to<double>(mySLHA.at("MSOFT").at(41).at(1)),2);
+    mssmpar->mass2q(2) = pow(to<double>(mySLHA.at("MSOFT").at(42).at(1)),2);
+    mssmpar->mass2q(3) = pow(to<double>(mySLHA.at("MSOFT").at(43).at(1)),2);
+    mssmpar->mass2u(1) = pow(to<double>(mySLHA.at("MSOFT").at(44).at(1)),2);
+    mssmpar->mass2u(2) = pow(to<double>(mySLHA.at("MSOFT").at(45).at(1)),2);
+    mssmpar->mass2u(3) = pow(to<double>(mySLHA.at("MSOFT").at(46).at(1)),2);
+    mssmpar->mass2d(1) = pow(to<double>(mySLHA.at("MSOFT").at(47).at(1)),2);
+    mssmpar->mass2d(2) = pow(to<double>(mySLHA.at("MSOFT").at(48).at(1)),2);
+    mssmpar->mass2d(3) = pow(to<double>(mySLHA.at("MSOFT").at(49).at(1)),2);
 
     // Block HMIX
     mssmpar->mu = to<double>(mySLHA.at("HMIX").at(1).at(1));
@@ -617,7 +613,7 @@ BE_NAMESPACE
     // as given (read in earlier), and instead enforce the tree-level condition
     // by redefining sin^2 theta_W. That we do here:
     mspctm->mass(DSparticle_code("W+"))  = to<double>(mySLHA.at("MASS").at(24).at(1));    // W boson mass
-    smruseful->s2thw=1.0-square(mspctm->mass(DSparticle_code("W+")))/square(mspctm->mass(DSparticle_code("Z0")));
+    smruseful->s2thw=1.0-pow(mspctm->mass(DSparticle_code("W+"))/mspctm->mass(DSparticle_code("Z0")),2);
 
     // Higgs masses. Note h0_1 is the lightest CP-even neutral higgs, and h2_0 the heavier.
     mspctm->mass(DSparticle_code("h0_1")) = to<double>(mySLHA.at("MASS").at(25).at(1));
