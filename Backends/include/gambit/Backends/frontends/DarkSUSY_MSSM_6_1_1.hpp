@@ -46,45 +46,31 @@ BE_FUNCTION(dssuconst_ckm, void, (), "dssuconst_ckm_", "dssuconst_ckm")
 BE_FUNCTION(dssuconst_yukawa_running, void, (), "dssuconst_yukawa_running_", "dssuconst_yukawa_running")
 BE_FUNCTION(dsmqpole4loop, double, (int&, double&), "dsmqpole4loop_", "dsmqpole4loop")
 BE_FUNCTION(dsgf2s2thw, double, (const double&, const double&, const double&, const double&, const int&), "dsgf2s2thw_", "dsgf2s2thw")
-// only needed in debug mode
+
+ // Functions only needed in debug mode
 BE_FUNCTION(dswspectrum, void, (int&), "dswspectrum_", "dswspectrum")
 BE_FUNCTION(dswwidth, void, (int&), "dswwidth_", "dswwidth")
-// model-conditional dependencies of BE_INI 
-BE_INI_CONDITIONAL_DEPENDENCY(MSSM_spectrum, Spectrum, MSSM63atQ, CMSSM)
-BE_INI_CONDITIONAL_DEPENDENCY(decay_rates, DecayTable, MSSM63atQ, CMSSM)
 
-
-// Convenience functions (registration)
-BE_CONV_FUNCTION(DD_couplings, std::vector<double>, (), "get_DD_couplings")
-BE_CONV_FUNCTION(DSparticle_code, int, (const str&), "DSparticle_code")
-BE_CONV_FUNCTION(DS_neutral_h_decay_channels, std::vector<std::vector<str>>, (), "get_DS_neutral_h_decay_channels")
-BE_CONV_FUNCTION(DS_charged_h_decay_channels, std::vector<std::vector<str>>, (), "get_DS_charged_h_decay_channels")
-BE_CONV_FUNCTION(neutrino_yield, double, (const double&, const int&, void*&), "nuyield")
-BE_CONV_FUNCTION(dsgenericwimp_nusetup, void, (const double(&)[29], const double(&)[29][3], const double(&)[15], const double(&)[3], const double&, const double&), "DS_nuyield_setup")
-BE_CONV_FUNCTION(init_diskless, int, (const SLHAstruct&, const DecayTable&), "initFromSLHAeaAndDecayTable")
 // Functions used by convenience functions
 BE_FUNCTION(dsseyield_sim_ls, double, (const double&, const double&, const double&, const int&, const int&, const int&, const int&, const int&, const int&, const char*, const int&, const int&, const int&), "dsseyield_sim_ls_", "raw_nuyield_sim")
 BE_FUNCTION(dsseyield_ch, double, (const double&, const double&, const double&, const int&, const int&, const char*, const int&, const int&, const int&), "dsseyield_ch_", "raw_nuyield_casc")
 BE_FUNCTION(dsddgpgn, void, (Farray<Fcomplex8,1,27,1,2>&, int&), "dsddgpgn_", "dsddgpgn")
 
-
 // Functions used in MSSM.cpp
- BE_FUNCTION(dsgive_model_isasugra, void, (double&,double&,double&,double&,double&), "dsgive_model_isasugra_", "dsgive_model_isasugra")
- BE_FUNCTION(dssigmav0, double, (int&,int&), "dssigmav0_", "dssigmav0")
- BE_FUNCTION(dssigmav0tot, double, (), "dssigmav0tot_", "dssigmav0tot")
- BE_FUNCTION(dsIBffdxdy, double, (int&, double&, double&), "dsibffdxdy_", "dsIBffdxdy")
- BE_FUNCTION(dsIBfsrdxdy, double, (int&, double&, double&), "dsibfsrdxdy_", "dsIBfsrdxdy")
- BE_FUNCTION(dsIBhhdxdy, double, (int&, double&, double&), "dsibhhdxdy_", "dsIBhhdxdy")
- BE_FUNCTION(dsIBwhdxdy, double, (int&, double&, double&), "dsibwhdxdy_", "dsIBwhdxdy")
- BE_FUNCTION(dsIBwwdxdy, double, (int&, double&, double&), "dsibwwdxdy_", "dsIBwwdxdy")
-
+BE_FUNCTION(dsgive_model_isasugra, void, (double&,double&,double&,double&,double&), "dsgive_model_isasugra_", "dsgive_model_isasugra")
+BE_FUNCTION(dssigmav0, double, (int&,int&), "dssigmav0_", "dssigmav0")
+BE_FUNCTION(dssigmav0tot, double, (), "dssigmav0tot_", "dssigmav0tot")
+BE_FUNCTION(dsIBffdxdy, double, (int&, double&, double&), "dsibffdxdy_", "dsIBffdxdy")
+BE_FUNCTION(dsIBfsrdxdy, double, (int&, double&, double&), "dsibfsrdxdy_", "dsIBfsrdxdy")
+BE_FUNCTION(dsIBhhdxdy, double, (int&, double&, double&), "dsibhhdxdy_", "dsIBhhdxdy")
+BE_FUNCTION(dsIBwhdxdy, double, (int&, double&, double&), "dsibwhdxdy_", "dsIBwhdxdy")
+BE_FUNCTION(dsIBwwdxdy, double, (int&, double&, double&), "dsibwwdxdy_", "dsIBwwdxdy")
 
 // Functions used in RelicDensity.cpp
 BE_FUNCTION(dsanwx, double, (double&), "dsanwx_", "dsanwx")
 BE_FUNCTION(dsrdcom, void, (), "dsrdcom_", "dsrdcom")
 BE_FUNCTION(dsrdstart, void, (int&, double(&)[1000], double(&)[1000], int&, double(&)[1000], double(&)[1000], int&, double(&)[1000]), "dsrdstart_", "dsrdstart")
 BE_FUNCTION(dsrdens, void, (double(*)(double&),double&,double&,int&,int&,int&), "dsrdens_", "dsrdens")
-
 
 // Functions used in GamYields.cpp
 BE_FUNCTION(dsanyield_sim, double, (double&,double&,int&,char*,int&,int&,int&), "dsanyield_sim_", "dsanyield_sim")
@@ -98,18 +84,18 @@ BE_VARIABLE(dshmframevelcom, DS_HMFRAMEVELCOM, "dshmframevelcom_", "dshmframevel
 BE_VARIABLE(dshmisodf, DS_HMISODF, "dshmisodf_", "dshmisodf")
 BE_VARIABLE(dshmnoclue, DS_HMNOCLUE, "dshmnoclue_", "dshmnoclue")
 
-
 // Common blocks in the DarkSUSY core library
 BE_VARIABLE(ddcomlegacy, DS_DDCOMLEGACY, "ddcomlegacy_", "ddcomlegacy") //DD
 BE_VARIABLE(rdtime, DS_RDTIME,     "rdtime_",    "rdtime")    // RD timeout
 BE_VARIABLE(rdpars, DS_RDPARS,     "rdpars_",    "rdpars")    // gRD Parameters
-// Common blocks in the MSSM module library
+
+ // Common blocks in the MSSM module library
 BE_VARIABLE(smquarkmasses, DS_SMQUARKMASSES, "smquarkmasses_", "smquarkmasses")
 //BE_VARIABLE(sckm, DS_SCKM, "sckm_", "sckm")
 BE_VARIABLE(pmasses, DS_PMASSES, "pmasses_", "pmasses")
 BE_VARIABLE(pwidths, DS_PWIDTHS, "pwidths_", "pwidths")
 BE_VARIABLE(smcoupling, DS_SMCOUPLING61, "smcoupling_", "smcoupling")
-// only here starts the part that is really MSSM-specific (and not SM/generic)
+// The part that is genuinely MSSM-specific (and not SM/generic) only starts here
 BE_VARIABLE(pacodes_mssm, DS_PACODES_MSSM61, "pacodes_mssm_", "pacodes_mssm")
 BE_VARIABLE(mssmiuseful, DS_MSSMIUSEFUL, "mssmiuseful_", "mssmiuseful")
 BE_VARIABLE(couplingconstants, DS_COUPLINGCONSTANTS61, "couplingconstants_", "couplingconstants")
@@ -123,6 +109,18 @@ BE_VARIABLE(anbranch,DS_NUCOM, "anbranch_", "nu_common_block") // BRs
 BE_VARIABLE(ddmssmcom, DS_DDMSSMCOM, "ddmssmcom_", "ddmssmcom") //DD
 BE_VARIABLE(dsancoann, DS_DSANCOANN, "dsancoann_", "dsancoann") // RD
 
+// Convenience functions (registration)
+BE_CONV_FUNCTION(DD_couplings, std::vector<double>, (), "get_DD_couplings")
+BE_CONV_FUNCTION(DSparticle_code, int, (const str&), "DSparticle_code")
+BE_CONV_FUNCTION(DS_neutral_h_decay_channels, std::vector<std::vector<str>>, (), "get_DS_neutral_h_decay_channels")
+BE_CONV_FUNCTION(DS_charged_h_decay_channels, std::vector<std::vector<str>>, (), "get_DS_charged_h_decay_channels")
+BE_CONV_FUNCTION(neutrino_yield, double, (const double&, const int&, void*&), "nuyield")
+BE_CONV_FUNCTION(dsgenericwimp_nusetup, void, (const double(&)[29], const double(&)[29][3], const double(&)[15], const double(&)[3], const double&, const double&), "DS_nuyield_setup")
+BE_CONV_FUNCTION(init_diskless, int, (const SLHAstruct&, const DecayTable&), "initFromSLHAeaAndDecayTable")
+
+// Model-conditional dependencies of BE_INI 
+BE_INI_CONDITIONAL_DEPENDENCY(MSSM_spectrum, Spectrum, MSSM63atQ, CMSSM)
+BE_INI_CONDITIONAL_DEPENDENCY(decay_rates, DecayTable, MSSM63atQ, CMSSM)
 
 // Undefine macros to avoid conflict with other backends
 #include "gambit/Backends/backend_undefs.hpp"
