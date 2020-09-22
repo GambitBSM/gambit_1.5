@@ -139,7 +139,7 @@ BE_INI_FUNCTION
       backend_warning().raise(LOCAL_INFO, "Model point is theoretically inconsistent (DarkSUSY).");
       invalid_point().raise("Model point is theoretically inconsistent (DarkSUSY).");
       mssm_result = false;
-    } 
+    }
     else if (unphys > 0)
     {
       backend_warning().raise(LOCAL_INFO, "Neutralino is not the LSP (DarkSUSY).");
@@ -176,7 +176,7 @@ BE_INI_FUNCTION
         mySLHA = mySpec.getSLHAea(1);
         use_dsSLHAread = true;
     }
-    
+
     // Use an actual SLHA file.  DarkSUSY is on its own wrt (s)particle widths this way.
     if (use_dsSLHAread || slha_version == 1)
     {
@@ -193,7 +193,7 @@ BE_INI_FUNCTION
           rank = comm.Get_rank();
         }
       #endif
-      
+
       // Add model select block to inform DS about 6x6 mixing
       if (slha_version == 2)
       {
@@ -202,7 +202,7 @@ BE_INI_FUNCTION
           modsel_block.push_back("6 3 # FV");
           mySLHA.push_back(modsel_block);
       }
-      
+
       // Set filename
       std::string fstr = "DarkBit_temp_";
       fstr += std::to_string(rank) + ".slha";
@@ -221,7 +221,7 @@ BE_INI_FUNCTION
       dsprep();
       mssm_result = true;
     }
-    
+
     // Do pure diskless SLHA initialisation, including (s)particle widths from GAMBIT.
     else
     {
@@ -892,27 +892,8 @@ BE_NAMESPACE
     return 0;  // everything OK (hah. maybe.)
   }
 
-  /// Function DD_couplings returns direct detection couplings gps,gns,gpa,gna
+  /// Returns direct detection couplings gps,gns,gpa,gna
   /// (proton/neutron scalar/axial four-couplings)
-  /// Provided here because the signature of the corresponding DarkSUSY
-
-//  FIXME: Remove this once everything is known to be working.
-//  double* DD_couplings()
-//  {
-//    double gps,gns,gpa,gna;
-//    dsddgpgn(gps,gns,gpa,gna);
-//    cout << "gps " << gps << endl;
-//    double couplings[4];
-//    couplings[0]=gps;
-//    couplings[1]=gns;
-//    couplings[2]=gpa;
-//    couplings[3]=gna;
-//    cout << "couplings[0] " << couplings[0] << endl;
-//    double * result = couplings;
-//    cout << "result " << result << endl;
-//    return result;
-//  }
-
   std::vector<double> DD_couplings()
   {
     double gps,gns,gpa,gna;
