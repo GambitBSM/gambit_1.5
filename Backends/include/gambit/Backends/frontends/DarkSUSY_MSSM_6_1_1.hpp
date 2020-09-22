@@ -35,13 +35,13 @@ BE_ALLOW_MODELS(MSSM63atQ)
 BE_FUNCTION(dsinit, void, (), "dsinit_", "dsinit")
 BE_FUNCTION(dsSLHAread, void, (const char*, int), "dsgive_model_SLHA_", "dsgive_model_SLHA")
 BE_FUNCTION(dsmodelsetup, void, (int&,int&), "dsmodelsetup_", "dsmodelsetup")
-BE_FUNCTION(dssuconst, void, (), "dssuconst_", "dssuconst")
 BE_FUNCTION(dsmssmzero, void, (), "dsmssmzero_", "dsmssmzero")
 BE_FUNCTION(dsvertx, void, (), "dsvertx_", "dsvertx")
 BE_FUNCTION(dsorder_flavour, void, (), "dsorder_flavour_", "dsorder_flavour")
 BE_FUNCTION(dshigwid, void, (), "dshigwid_", "dshigwid")
 BE_FUNCTION(dsspwid, void, (), "dsspwid_", "dsspwid")
 BE_FUNCTION(dsfindmtmt, void, (), "dsfindmtmt_", "dsfindmtmt")
+BE_FUNCTION(dssuconst, void, (), "dssuconst_", "dssuconst")
 BE_FUNCTION(dssuconst_ckm, void, (), "dssuconst_ckm_", "dssuconst_ckm")
 BE_FUNCTION(dssuconst_yukawa_running, void, (), "dssuconst_yukawa_running_", "dssuconst_yukawa_running")
 BE_FUNCTION(dsmqpole4loop, double, (int&, double&), "dsmqpole4loop_", "dsmqpole4loop")
@@ -89,21 +89,20 @@ BE_VARIABLE(ddcomlegacy, DS_DDCOMLEGACY, "ddcomlegacy_", "ddcomlegacy") //DD
 BE_VARIABLE(rdtime, DS_RDTIME,     "rdtime_",    "rdtime")    // RD timeout
 BE_VARIABLE(rdpars, DS_RDPARS,     "rdpars_",    "rdpars")    // gRD Parameters
 
- // Common blocks in the MSSM module library
+// Common blocks in the MSSM module library
 BE_VARIABLE(smquarkmasses, DS_SMQUARKMASSES, "smquarkmasses_", "smquarkmasses")
-//BE_VARIABLE(sckm, DS_SCKM, "sckm_", "sckm")
+BE_VARIABLE(smcoupling, DS_SMCOUPLING61, "smcoupling_", "smcoupling")
 BE_VARIABLE(pmasses, DS_PMASSES, "pmasses_", "pmasses")
 BE_VARIABLE(pwidths, DS_PWIDTHS, "pwidths_", "pwidths")
-BE_VARIABLE(smcoupling, DS_SMCOUPLING61, "smcoupling_", "smcoupling")
 // The part that is genuinely MSSM-specific (and not SM/generic) only starts here
 BE_VARIABLE(pacodes_mssm, DS_PACODES_MSSM61, "pacodes_mssm_", "pacodes_mssm")
-BE_VARIABLE(mssmiuseful, DS_MSSMIUSEFUL, "mssmiuseful_", "mssmiuseful")
-BE_VARIABLE(couplingconstants, DS_COUPLINGCONSTANTS61, "couplingconstants_", "couplingconstants")
 BE_VARIABLE(mixing, DS_MIXING, "mixing_", "mixing")
+BE_VARIABLE(mssmmixing, DS_MSSMMIXING, "mssmmixing_", "mssmmixing")
+BE_VARIABLE(couplingconstants, DS_COUPLINGCONSTANTS61, "couplingconstants_", "couplingconstants")
+BE_VARIABLE(mssmiuseful, DS_MSSMIUSEFUL, "mssmiuseful_", "mssmiuseful")
 BE_VARIABLE(mssmtype, DS_MSSMTYPE, "mssmtype_", "mssmtype")
 BE_VARIABLE(mssmpar, DS_MSSMPAR, "mssmpar_", "mssmpar")
 BE_VARIABLE(mssmwidths, DS_MSSMWIDTHS, "mssmwidths_", "mssmwidths")
-BE_VARIABLE(mssmmixing, DS_MSSMMIXING, "mssmmixing_", "mssmmixing")
 BE_VARIABLE(IBintvars, DS_IBINTVARS,"ibintvars_", "IBintvars")
 BE_VARIABLE(anbranch,DS_NUCOM, "anbranch_", "nu_common_block") // BRs
 BE_VARIABLE(ddmssmcom, DS_DDMSSMCOM, "ddmssmcom_", "ddmssmcom") //DD
