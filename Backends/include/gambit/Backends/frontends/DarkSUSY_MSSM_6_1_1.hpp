@@ -19,6 +19,10 @@
 ///          (edsjo@fysik.su.se)
 ///  \date 2018 September
 ///
+///  \author Pat Scott
+///          (pat.scott@uq.edu.au)
+///  \date 2020 September
+///
 ///  *********************************************
 
 #define BACKENDNAME DarkSUSY_MSSM
@@ -31,8 +35,9 @@ LOAD_LIBRARY
 
 BE_ALLOW_MODELS(MSSM63atQ)
 
-// Functions used in DS frontend
-BE_FUNCTION(dsinit, void, (), "dsinit_", "dsinit")
+// Include common DarkSUSY frontend declarations shared across all model-specific versions of the backend
+#include "gambit/Backends/frontends/shared_includes/DarkSUSY_6.hpp"
+
 BE_FUNCTION(dsSLHAread, void, (const char*, int), "dsgive_model_SLHA_", "dsgive_model_SLHA")
 BE_FUNCTION(dsmodelsetup, void, (int&,int&), "dsmodelsetup_", "dsmodelsetup")
 BE_FUNCTION(dsmssmzero, void, (), "dsmssmzero_", "dsmssmzero")
@@ -47,14 +52,9 @@ BE_FUNCTION(dssuconst_yukawa_running, void, (), "dssuconst_yukawa_running_", "ds
 BE_FUNCTION(dsmqpole4loop, double, (int&, double&), "dsmqpole4loop_", "dsmqpole4loop")
 BE_FUNCTION(dsgf2s2thw, double, (const double&, const double&, const double&, const double&, const int&), "dsgf2s2thw_", "dsgf2s2thw")
 
- // Functions only needed in debug mode
+// Functions only needed in debug mode
 BE_FUNCTION(dswspectrum, void, (int&), "dswspectrum_", "dswspectrum")
 BE_FUNCTION(dswwidth, void, (int&), "dswwidth_", "dswwidth")
-
-// Functions used by convenience functions
-BE_FUNCTION(dsseyield_sim_ls, double, (const double&, const double&, const double&, const int&, const int&, const int&, const int&, const int&, const int&, const char*, const int&, const int&, const int&), "dsseyield_sim_ls_", "raw_nuyield_sim")
-BE_FUNCTION(dsseyield_ch, double, (const double&, const double&, const double&, const int&, const int&, const char*, const int&, const int&, const int&), "dsseyield_ch_", "raw_nuyield_casc")
-BE_FUNCTION(dsddgpgn, void, (Farray<Fcomplex8,1,27,1,2>&, int&), "dsddgpgn_", "dsddgpgn")
 
 // Functions used in MSSM.cpp
 BE_FUNCTION(dsgive_model_isasugra, void, (double&,double&,double&,double&,double&), "dsgive_model_isasugra_", "dsgive_model_isasugra")
@@ -66,28 +66,9 @@ BE_FUNCTION(dsIBhhdxdy, double, (int&, double&, double&), "dsibhhdxdy_", "dsIBhh
 BE_FUNCTION(dsIBwhdxdy, double, (int&, double&, double&), "dsibwhdxdy_", "dsIBwhdxdy")
 BE_FUNCTION(dsIBwwdxdy, double, (int&, double&, double&), "dsibwwdxdy_", "dsIBwwdxdy")
 
-// Functions used in RelicDensity.cpp
-BE_FUNCTION(dsanwx, double, (double&), "dsanwx_", "dsanwx")
-BE_FUNCTION(dsrdcom, void, (), "dsrdcom_", "dsrdcom")
-BE_FUNCTION(dsrdstart, void, (int&, double(&)[1000], double(&)[1000], int&, double(&)[1000], double(&)[1000], int&, double(&)[1000]), "dsrdstart_", "dsrdstart")
-BE_FUNCTION(dsrdens, void, (double(*)(double&),double&,double&,int&,int&,int&), "dsrdens_", "dsrdens")
-
-// Functions used in GamYields.cpp
-BE_FUNCTION(dsanyield_sim, double, (double&,double&,int&,char*,int&,int&,int&), "dsanyield_sim_", "dsanyield_sim")
-
-// Functions used in SunNeutrinos.cpp
-BE_FUNCTION(dssenu_capsuntab, double, (const double&, const double&, const double&, const double&), "dssenu_capsuntab_", "cap_Sun_v0q0_isoscalar_DS")
-
-// Halo model common blocks
-BE_VARIABLE(dshmcom, DS_HMCOM, "dshmcom_", "dshmcom")
-BE_VARIABLE(dshmframevelcom, DS_HMFRAMEVELCOM, "dshmframevelcom_", "dshmframevelcom")
-BE_VARIABLE(dshmisodf, DS_HMISODF, "dshmisodf_", "dshmisodf")
-BE_VARIABLE(dshmnoclue, DS_HMNOCLUE, "dshmnoclue_", "dshmnoclue")
-
-// Common blocks in the DarkSUSY core library
-BE_VARIABLE(ddcomlegacy, DS_DDCOMLEGACY, "ddcomlegacy_", "ddcomlegacy") //DD
-BE_VARIABLE(rdtime, DS_RDTIME,     "rdtime_",    "rdtime")    // RD timeout
-BE_VARIABLE(rdpars, DS_RDPARS,     "rdpars_",    "rdpars")    // gRD Parameters
+// Functions used by convenience functions
+BE_FUNCTION(dsseyield_ch, double, (const double&, const double&, const double&, const int&, const int&, const char*, const int&, const int&, const int&), "dsseyield_ch_", "raw_nuyield_casc")
+BE_FUNCTION(dsddgpgn, void, (Farray<Fcomplex8,1,27,1,2>&, int&), "dsddgpgn_", "dsddgpgn")
 
 // Common blocks in the MSSM module library
 BE_VARIABLE(smquarkmasses, DS_SMQUARKMASSES, "smquarkmasses_", "smquarkmasses")
@@ -111,13 +92,9 @@ BE_VARIABLE(dsancoann, DS_DSANCOANN, "dsancoann_", "dsancoann") // RD
 // Convenience functions (registration)
 BE_CONV_FUNCTION(DD_couplings, std::vector<double>, (), "get_DD_couplings")
 BE_CONV_FUNCTION(DSparticle_code, int, (const str&), "DSparticle_code")
-BE_CONV_FUNCTION(DS_neutral_h_decay_channels, std::vector<std::vector<str>>, (), "get_DS_neutral_h_decay_channels")
-BE_CONV_FUNCTION(DS_charged_h_decay_channels, std::vector<std::vector<str>>, (), "get_DS_charged_h_decay_channels")
-BE_CONV_FUNCTION(neutrino_yield, double, (const double&, const int&, void*&), "nuyield")
-BE_CONV_FUNCTION(dsgenericwimp_nusetup, void, (const double(&)[29], const double(&)[29][3], const double(&)[15], const double(&)[3], const double&, const double&), "DS_nuyield_setup")
 BE_CONV_FUNCTION(init_diskless, int, (const SLHAstruct&, const DecayTable&), "initFromSLHAeaAndDecayTable")
 
-// Model-conditional dependencies of BE_INI 
+// Model-conditional dependencies of BE_INI
 BE_INI_CONDITIONAL_DEPENDENCY(MSSM_spectrum, Spectrum, MSSM63atQ, CMSSM)
 BE_INI_CONDITIONAL_DEPENDENCY(decay_rates, DecayTable, MSSM63atQ, CMSSM)
 
