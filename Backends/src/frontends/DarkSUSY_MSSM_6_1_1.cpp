@@ -24,8 +24,6 @@
 ///  *********************************************
 
 #include "gambit/Backends/frontend_macros.hpp"
-/// TODO: include HERE a standard version for DS6, and make the
-///       following a minimal version only (specific for the  MSSM)
 #include "gambit/Backends/frontends/DarkSUSY_MSSM_6_1_1.hpp"
 #include "gambit/Utils/file_lock.hpp"
 #include "gambit/Utils/mpiwrapper.hpp"
@@ -436,7 +434,7 @@ BE_NAMESPACE
   }
 
   /// Returns neutrino yields at the top of the atmosphere,
-  /// in m^-2 GeV^-1 annihilation^-1.  Provided here for 
+  /// in m^-2 GeV^-1 annihilation^-1.  Provided here for
   /// interfacing with nulike.
   ///   --> log10Enu log_10(neutrino energy/GeV)
   ///   --> p        p=1 for neutrino yield, p=2 for nubar yield

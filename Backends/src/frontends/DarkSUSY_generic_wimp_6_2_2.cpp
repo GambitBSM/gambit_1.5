@@ -39,7 +39,6 @@ BE_INI_FUNCTION
 
   if (scan_level)
   {
-
     // Do the call to dsinit one-by-one for each MPI process, as DarkSUSY loads up
     // HiggsBounds, which writes files at init then reads them back in later.
     Utils::FileLock mylock("DarkSUSY_" STRINGIFY(SAFE_VERSION) "_init");
@@ -54,7 +53,7 @@ BE_INI_FUNCTION
     double mdm=100.0, egev=10.0;
     int pdg=5, yieldpdg, diff=1;
     char*hel =  (char *)"0";
-    
+
     yieldpdg = 22;// gamma rays
     dsanyield_sim(mdm,egev,pdg,hel,yieldpdg,diff,istat);
     yieldpdg = -2212; //antiprotons
@@ -63,21 +62,20 @@ BE_INI_FUNCTION
     dsanyield_sim(mdm,egev,pdg,hel,yieldpdg,diff,istat);
 
     scan_level = false;
-
   }
-// unlike in the MSSM case, we don't actually initialize a generic WIMP
-// model "point" here. We thus just use basic, "model-independent"
-// DarkSUSY functionalities.
+
+  // Unlike in the MSSM case, we don't actually initialize a generic WIMP
+  // model "point" here. We thus just use basic, "model-independent"
+  // DarkSUSY functinalities.
 }
 END_BE_INI_FUNCTION
+
 
 // Convenience functions (definitions)
 BE_NAMESPACE
 {
-  /// Function dsgenericwimp_nusetup sets DarkSUSY's internal common
-  /// blocks with some of the properties required to compute neutrino
-  /// yields for a generic WIMP. Remaining internal variables are internal
-  /// to this frontend.
+  /// Sets DarkSUSY's internal common blocks with some of the properties required to compute neutrino
+  /// yields for a generic WIMP. Remaining internal variables are internal to this frontend.
   void dsgenericwimp_nusetup(const double (&annihilation_bf)[29], const double (&Higgs_decay_BFs_neutral)[29][3],
    const double (&Higgs_decay_BFs_charged)[15], const double (&Higgs_masses_neutral)[3], const double &Higgs_mass_charged,
    const double &mwimp)
@@ -90,19 +88,19 @@ BE_NAMESPACE
     // PDG code 20000.
     DSanpdg1.clear();
     DSanpdg2.clear();
-    DSanpdg1.push_back(10000); // not used, as I keep the same numbering as for Fortran
+    DSanpdg1.push_back(10000);  // not used, as we keep the same numbering as for Fortran
     DSanpdg2.push_back(10000);
     DSanpdg1.push_back(20000);  // H H, channel 1
     DSanpdg2.push_back(20000);
-    DSanpdg1.push_back(25);  // h H, channel 2
+    DSanpdg1.push_back(25);     // h H, channel 2
     DSanpdg2.push_back(20000);
-    DSanpdg1.push_back(25);  // h h, channel 3
+    DSanpdg1.push_back(25);     // h h, channel 3
     DSanpdg2.push_back(25);
     DSanpdg1.push_back(20000);  // A A, channel 4
     DSanpdg2.push_back(20000);
     DSanpdg1.push_back(20000);  // H A, channel 5
     DSanpdg2.push_back(20000);
-    DSanpdg1.push_back(25);  // h A, channel 6
+    DSanpdg1.push_back(25);     // h A, channel 6
     DSanpdg2.push_back(20000);
     DSanpdg1.push_back(20000);  // H+ H-, channel 7
     DSanpdg2.push_back(20000);
@@ -110,45 +108,45 @@ BE_NAMESPACE
     DSanpdg2.push_back(20000);
     DSanpdg1.push_back(20000);  // Z h, channel 9
     DSanpdg2.push_back(25);
-    DSanpdg1.push_back(23);  // Z A, channel 10
+    DSanpdg1.push_back(23);     // Z A, channel 10
     DSanpdg2.push_back(20000);
-    DSanpdg1.push_back(24);  // W+ H-, channel 11
+    DSanpdg1.push_back(24);     // W+ H-, channel 11
     DSanpdg2.push_back(20000);
-    DSanpdg1.push_back(23);  // Z Z, channel 12
+    DSanpdg1.push_back(23);     // Z Z, channel 12
     DSanpdg2.push_back(23);
-    DSanpdg1.push_back(24);  // W+ W-, channel 13
+    DSanpdg1.push_back(24);     // W+ W-, channel 13
     DSanpdg2.push_back(-24);
-    DSanpdg1.push_back(12);  // nue nuebar, channel 14
+    DSanpdg1.push_back(12);     // nue nuebar, channel 14
     DSanpdg2.push_back(-12);
-    DSanpdg1.push_back(11);  // e- e+, channel 15
+    DSanpdg1.push_back(11);     // e- e+, channel 15
     DSanpdg2.push_back(-11);
-    DSanpdg1.push_back(14);  // numu numubar, channel 16
+    DSanpdg1.push_back(14);     // numu numubar, channel 16
     DSanpdg2.push_back(-14);
-    DSanpdg1.push_back(13);  // mu- mu+, channel 17
+    DSanpdg1.push_back(13);     // mu- mu+, channel 17
     DSanpdg2.push_back(-13);
-    DSanpdg1.push_back(16);  // nutau nutaubar, channel 18
+    DSanpdg1.push_back(16);     // nutau nutaubar, channel 18
     DSanpdg2.push_back(-16);
-    DSanpdg1.push_back(15);  // tau- tau+, channel 19
+    DSanpdg1.push_back(15);     // tau- tau+, channel 19
     DSanpdg2.push_back(-15);
-    DSanpdg1.push_back(2);   // u ubar, channel 20
+    DSanpdg1.push_back(2);      // u ubar, channel 20
     DSanpdg2.push_back(-2);
-    DSanpdg1.push_back(1);   // d dbar, channel 21
+    DSanpdg1.push_back(1);      // d dbar, channel 21
     DSanpdg2.push_back(-1);
-    DSanpdg1.push_back(4);   // c cbar, channel 22
+    DSanpdg1.push_back(4);      // c cbar, channel 22
     DSanpdg2.push_back(-4);
-    DSanpdg1.push_back(3);   // s sbar, channel 23
+    DSanpdg1.push_back(3);      // s sbar, channel 23
     DSanpdg2.push_back(-3);
-    DSanpdg1.push_back(6);   // t tbar, channel 24
+    DSanpdg1.push_back(6);      // t tbar, channel 24
     DSanpdg2.push_back(-6);
-    DSanpdg1.push_back(5);   // b bbar, channel 25
+    DSanpdg1.push_back(5);      // b bbar, channel 25
     DSanpdg2.push_back(-5);
-    DSanpdg1.push_back(21);   // gluon gluon, channel 26
+    DSanpdg1.push_back(21);     // gluon gluon, channel 26
     DSanpdg2.push_back(21);
-    DSanpdg1.push_back(10000);   // (not used)
+    DSanpdg1.push_back(10000);  // (not used)
     DSanpdg2.push_back(10000);
-    DSanpdg1.push_back(22);   // gamma gamma, channel 28
+    DSanpdg1.push_back(22);     // gamma gamma, channel 28
     DSanpdg2.push_back(22);
-    DSanpdg1.push_back(22);   // gamma Z, channel 29
+    DSanpdg1.push_back(22);     // gamma Z, channel 29
     DSanpdg2.push_back(23);
 
     // Transfer branching fractions to WIMP annihilation common blocks.
@@ -158,30 +156,29 @@ BE_NAMESPACE
 
     for (int i=1; i<=29; i++)
     {
-        if (DSanpdg1[i] == 10000 || DSanpdg2[i] == 10000)
-          DSanbr.push_back(0.);
-        else if (DSanpdg1[i] == 20000 || DSanpdg2[i] == 20000)
-        {
-            if (annihilation_bf[i-1] > 0.00001)
-              backend_error().raise(LOCAL_INFO, "ERROR: The DarkSUSY neutrino telescope routines "
-                              "for a generic WIMP cannot handle models with non-standard model\n"
-                              "WIMP annihilation final states.");
-            else
-              DSanbr.push_back(0.);
-        } // if
+      if (DSanpdg1[i] == 10000 || DSanpdg2[i] == 10000)
+        DSanbr.push_back(0.);
+      else if (DSanpdg1[i] == 20000 || DSanpdg2[i] == 20000)
+      {
+        if (annihilation_bf[i-1] > 0.00001)
+          backend_error().raise(LOCAL_INFO, "ERROR: The DarkSUSY neutrino telescope routines "
+                          "for a generic WIMP cannot handle models with non-standard model\n"
+                          "WIMP annihilation final states.");
         else
-          DSanbr.push_back(annihilation_bf[i-1]);
+          DSanbr.push_back(0.);
+      } // if
+      else
+        DSanbr.push_back(annihilation_bf[i-1]);
     } // for
   } // dsgenericwimp_nusetup
 
-  /// Function nuyield returns neutrino yields at the top of the
-  /// the atmosphere, in m^-2 GeV^-1 annihilation^-1.  Provided
-  /// here for interfacing with nulike.
+  /// Returns neutrino yields at the top of the the atmosphere,
+  /// in m^-2 GeV^-1 annihilation^-1.  Provided here for
+  /// interfacing with nulike.
   ///   --> log10Enu log_10(neutrino energy/GeV)
   ///   --> p        p=1 for neutrino yield, p=2 for nubar yield,
   ///                p=3 for nu and nubar yields
   ///   --> context  void pointer (ignored)
-
   double neutrino_yield(const double& log10E, const int& ptype, void*&)
   {
     int istat = 0;
