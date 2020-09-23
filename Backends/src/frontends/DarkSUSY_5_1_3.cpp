@@ -98,9 +98,8 @@ BE_INI_FUNCTION
     logger() << LogTags::debug <<
       "Initializing DarkSUSY via debug_SLHA_filenames option." << EOM;
 
-    std::vector<str> filenames =
-      /// Option debug_SLHA_filenames<std::vector<std::string>>: Optional override list of SLHA filenames used for backend initialization default
-      runOptions->getValue<std::vector<str> >("debug_SLHA_filenames");
+    /// Option debug_SLHA_filenames<std::vector<std::string>>: Optional override list of SLHA filenames used for backend initialization default
+    std::vector<str> filenames = runOptions->getValue<std::vector<str> >("debug_SLHA_filenames");
     const char * filename = filenames[counter].c_str();
     int len = filenames[counter].length();
     int flag = 15;
@@ -113,7 +112,7 @@ BE_INI_FUNCTION
   }
 
   // CMSSM with DS-internal ISASUGRA (should be avoided, only for debugging)
-  // Option use_DS_isasugra<bool>: Use DS internal isasugra for parameter running (false)
+  /// Option use_DS_isasugra<bool>: Use DS internal isasugra for parameter running (false)
   else if (ModelInUse("CMSSM") and runOptions->getValueOrDef<bool>(false, "use_DS_isasugra"))
   {
     // Setup mSUGRA model from CMSSM parameters
@@ -243,7 +242,6 @@ BE_INI_FUNCTION
 END_BE_INI_FUNCTION
 
 
-
 // Convenience functions (definitions)
 BE_NAMESPACE
 {
@@ -264,7 +262,6 @@ BE_NAMESPACE
    const double (&Higgs_decay_BFs_charged)[15], const double (&Higgs_masses_neutral)[3], const double &Higgs_mass_charged,
    const double &mwimp)
   {
-
     // Transfer WIMP mass common block.
     wabranch->wamwimp = mwimp;
 
@@ -285,6 +282,7 @@ BE_NAMESPACE
         wabranch->was0br(j,i) = Higgs_decay_BFs_neutral[j-1][i-1];
       }
     }
+
     for (int i=1; i<=15; i++)   // Loop over the known charged Higgs decay channels
     {
       wabranch->wascbr(i) = Higgs_decay_BFs_charged[i-1];
@@ -302,9 +300,9 @@ BE_NAMESPACE
 
   }
 
-  /// Function nuyield returns neutrino yields at the top of the
-  /// the atmosphere, in m^-2 GeV^-1 annihilation^-1.  Provided
-  /// here for interfacing with nulike.
+  /// Returns neutrino yields at the top of the atmosphere,
+  /// in m^-2 GeV^-1 annihilation^-1.  Provided here for 
+  /// interfacing with nulike.
   ///   --> log10Enu log_10(neutrino energy/GeV)
   ///   --> p        p=1 for neutrino yield, p=2 for nubar yield
   ///   --> context  void pointer (ignored)
@@ -516,7 +514,7 @@ BE_NAMESPACE
     // Quark masses as defined in SLHA2
     mspctm->mu2gev               = to<double>(mySLHA.at("SMINPUTS").at(22).at(1)); // up quark mass @ 2 GeV
     mspctm->md2gev               = to<double>(mySLHA.at("SMINPUTS").at(21).at(1)); // down quark mass @ 2 GeV
-    mspctm->ms2gev               = to<double>(mySLHA.at("SMINPUTS").at(23).at(1)); // stange mass @ 2 GeV
+    mspctm->ms2gev               = to<double>(mySLHA.at("SMINPUTS").at(23).at(1)); // strange mass @ 2 GeV
     mspctm->mcmc                 = to<double>(mySLHA.at("SMINPUTS").at(24).at(1)); // charm mass at m_c
     mspctm->mbmb                 = to<double>(mySLHA.at("SMINPUTS").at(5).at(1));  // bottom mass at m_b
     mspctm->mass(DSpart->kqu(3)) = to<double>(mySLHA.at("SMINPUTS").at(6).at(1));  // top pole mass
@@ -803,7 +801,8 @@ BE_NAMESPACE
       mssmwidths->hdwidth(i+1,1) = (h02.has_channel(chan) ? widths->width(DSparticle_code("h0_2")) * h02.BF(chan) : 0.0);
       mssmwidths->hdwidth(i+1,3) = (A0.has_channel(chan)  ? widths->width(DSparticle_code("A0"))   * A0.BF(chan)  : 0.0);
       if (neutral_channels[i] == sister_chan)
-      { // Add the missing W-H+ contributions.
+      {
+        // Add the missing W-H+ contributions.
         mssmwidths->hdwidth(i+1,2) = (h01.has_channel(missing_chan) ? widths->width(DSparticle_code("h0_1")) * h01.BF(missing_chan) : 0.0);
         mssmwidths->hdwidth(i+1,1) = (h02.has_channel(missing_chan) ? widths->width(DSparticle_code("h0_2")) * h02.BF(missing_chan) : 0.0);
         mssmwidths->hdwidth(i+1,3) = (A0.has_channel(missing_chan)  ? widths->width(DSparticle_code("A0"))   * A0.BF(missing_chan)  : 0.0);

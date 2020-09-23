@@ -17,6 +17,9 @@
 ///          (edsjo@fysik.su.se)
 ///  \date 2018 September
 ///
+///  \author Pat Scott
+///          (pat.scott@uq.edu.au)
+///  \date 2020 September
 ///
 ///  *********************************************
 
@@ -45,7 +48,7 @@ END_BE_NAMESPACE
 // Initialisation function (definition)
 BE_INI_FUNCTION
 {
-  // Initialize DarkSUSY if run for the first time
+  // Initialize DarkSUSY (only) if run for the first time
   bool static scan_level = true;
 
   if (scan_level)
@@ -77,8 +80,8 @@ BE_INI_FUNCTION
 
   }
 
-// Initialization function for a given MSSM point
-// (previous capaility DarkSUSY_PointInit)
+  // Initialization function for a given MSSM point
+  // (previous capability DarkSUSY_PointInit)
   bool mssm_result = false;
 
   // If the user provides a file list, just read in SLHA files for debugging
@@ -89,31 +92,37 @@ BE_INI_FUNCTION
     logger() << LogTags::debug <<
       "Initializing DarkSUSY via debug_SLHA_filenames option." << EOM;
 
-    std::vector<str> filenames =
-      /// Option debug_SLHA_filenames<std::vector<std::string>>: Optional override list of SLHA filenames used for backend initialization default
-      runOptions->getValue<std::vector<str> >("debug_SLHA_filenames");
+    /// Option debug_SLHA_filenames<std::vector<std::string>>: Optional override list of SLHA filenames used for backend initialization default
+    std::vector<str> filenames = runOptions->getValue<std::vector<str> >("debug_SLHA_filenames");
     const char * filename = filenames[counter].c_str();
     int flag = 15;
     dsSLHAread(byVal(filename),byVal(flag)); // dsgive_model_SLHA
     int unphys, warning;
     dsmodelsetup(unphys,warning);
-    if (unphys < 0) {
+    if (unphys < 0)
+    {
       backend_warning().raise(LOCAL_INFO,
           "Model point is theoretically inconsistent (DarkSUSY).");
       invalid_point().raise(
          "Model point is theoretically inconsistent (DarkSUSY).");
       mssm_result = false;
-    } else if (unphys > 0) {
+    }
+    else if (unphys > 0)
+    {
       backend_warning().raise(LOCAL_INFO,
           "Neutralino is not the LSP (DarkSUSY).");
       invalid_point().raise("Neutralino is not the LSP (DarkSUSY).");
       mssm_result = false;
-    } else if (warning != 0) {
+    }
+    else if (warning != 0)
+    {
       backend_warning().raise(LOCAL_INFO,
           "Radiative corrections in Higgs sector "
           "outside range of validity (DarkSUSY).");
       mssm_result = true;
-    } else {
+    }
+    else
+    {
       mssm_result = true;
     }
 
@@ -122,12 +131,9 @@ BE_INI_FUNCTION
     mssm_result = true;
   }
 
-  // CMSSM with DS-internal ISASUGRA (should be avoided, only for
-  // debugging)
-  else if (ModelInUse("CMSSM") and
+  // CMSSM with DS-internal ISASUGRA (should be avoided, only for debugging)
   /// Option use_DS_isasugra<bool>: Use DS internal isasugra for parameter running (false)
-      runOptions->getValueOrDef<bool>(false, "use_DS_isasugra")
-      )
+  else if (ModelInUse("CMSSM") and runOptions->getValueOrDef<bool>(false, "use_DS_isasugra"))
   {
     // Setup mSUGRA model from CMSSM parameters
     double am0    = *Param["M0"];     // m0
@@ -135,8 +141,7 @@ BE_INI_FUNCTION
     double aa0    = *Param["A0"];     // A0
     double asgnmu = *Param["SignMu"];  // sign(mu)
     double atanbe = *Param["TanBeta"];   // tan(beta)
-    logger() << "Initializing DarkSUSY via dsgive_model_isasugra:"
-      << EOM;
+    logger() << "Initializing DarkSUSY via dsgive_model_isasugra:" << EOM;
     logger() << "  m0        =" << am0    << std::endl;
     logger() << "  m_1/2     =" << amhf   << std::endl;
     logger() << "  A0        =" << aa0    << std::endl;
@@ -145,24 +150,28 @@ BE_INI_FUNCTION
     dsgive_model_isasugra(am0, amhf, aa0, asgnmu, atanbe);
     int unphys, warning;
     dsmodelsetup(unphys, warning);
-    //mssm_result = (unphys == 0) && (warning == 0);
-    if (unphys < 0) {
-      backend_warning().raise(LOCAL_INFO,
-          "Model point is theoretically inconsistent (DarkSUSY).");
-      invalid_point().raise(
-          "Model point is theoretically inconsistent (DarkSUSY).");
+
+    if (unphys < 0)
+    {
+      backend_warning().raise(LOCAL_INFO, "Model point is theoretically inconsistent (DarkSUSY).");
+      invalid_point().raise("Model point is theoretically inconsistent (DarkSUSY).");
       mssm_result = false;
-    } else if (unphys > 0) {
-      backend_warning().raise(LOCAL_INFO,
-          "Neutralino is not the LSP (DarkSUSY).");
+    }
+    else if (unphys > 0)
+    {
+      backend_warning().raise(LOCAL_INFO, "Neutralino is not the LSP (DarkSUSY).");
       invalid_point().raise("Neutralino is not the LSP (DarkSUSY).");
       mssm_result = false;
-    } else if (warning != 0) {
+    }
+    else if (warning != 0)
+    {
       backend_warning().raise(LOCAL_INFO,
           "Radiative corrections in Higgs sector "
           "outside range of validity (DarkSUSY).");
       mssm_result = true;
-    } else {
+    }
+    else
+    {
       mssm_result = true;
     }
   }
@@ -174,20 +183,25 @@ BE_INI_FUNCTION
     bool use_dsSLHAread = runOptions->getValueOrDef<bool>(false, "use_dsSLHAread");
     int slha_version = 2;
     const Spectrum& mySpec = *Dep::MSSM_spectrum;
-    try{mySLHA = mySpec.getSLHAea(2);}
+    try
+    {
+      mySLHA = mySpec.getSLHAea(2);
+    }
     catch(Gambit::exception& e)
     {
         slha_version = 1;
         mySLHA = mySpec.getSLHAea(1);
         use_dsSLHAread = true;
     }
-     // Use an actual SLHA file.  DarkSUSY is on its own wrt (s)particle widths this way.
+
+    // Use an actual SLHA file.  DarkSUSY is on its own wrt (s)particle widths this way.
     if (use_dsSLHAread || slha_version == 1)
     {
       if (!use_dsSLHAread) {backend_error().raise(LOCAL_INFO,
-              "A SLHA1 spectrum requires use of the DarkSUSY SLHA reader rather than the diskless\n"
+              "An SLHA1 spectrum requires use of the DarkSUSY SLHA reader rather than the diskless\n"
               "GAMBIT DarkSUSY initialization. To enable the DarkSUSY SLHA reader, set the option\n"
               "use_dsSLHAread for the function DarkSUSY_PointInit_MSSM to true.");}
+
       int rank = 0;
       #ifdef WITH_MPI
         if(GMPI::Is_initialized())
@@ -196,7 +210,8 @@ BE_INI_FUNCTION
           rank = comm.Get_rank();
         }
       #endif
-       // Add model select block to inform DS about 6x6 mixing
+
+      // Add model select block to inform DS about 6x6 mixing
       if (slha_version == 2)
       {
           SLHAea::Block modsel_block("MODSEL");
@@ -204,15 +219,14 @@ BE_INI_FUNCTION
           modsel_block.push_back("6 3 # FV");
           mySLHA.push_back(modsel_block);
       }
-       // Set filename
+      // Set filename
       std::string fstr = "DarkBit_temp_";
       fstr += std::to_string(rank) + ".slha";
-       // Dump SLHA onto disk
+      // Dump SLHA onto disk
       std::ofstream ofs(fstr);
       ofs << mySLHA;
       ofs.close();
       // Initialize SUSY spectrum from SLHA
-      // int len = fstr.size();
       int flag = 15;
       const char * filename = fstr.c_str();
       logger() << LogTags::debug << "Initializing DarkSUSY via SLHA." << EOM;
@@ -220,26 +234,34 @@ BE_INI_FUNCTION
       // dsSLHAread(byVal(filename),flag,byVal(len));
       int unphys,warning;
       dsmodelsetup(unphys,warning);
-    if (unphys < 0) {
-      backend_warning().raise(LOCAL_INFO,
-          "Model point is theoretically inconsistent (DarkSUSY).");
-      invalid_point().raise(
-          "Model point is theoretically inconsistent (DarkSUSY).");
-      mssm_result = false;
-    } else if (unphys > 0) {
-      backend_warning().raise(LOCAL_INFO,
-          "Neutralino is not the LSP (DarkSUSY).");
-      invalid_point().raise("Neutralino is not the LSP (DarkSUSY).");
-      mssm_result = false;
-    } else if (warning != 0) {
-      backend_warning().raise(LOCAL_INFO,
-          "Radiative corrections in Higgs sector "
-          "outside range of validity (DarkSUSY).");
-      mssm_result = true;
-    } else {
-      mssm_result = true;
+      if (unphys < 0)
+      {
+        backend_warning().raise(LOCAL_INFO,
+            "Model point is theoretically inconsistent (DarkSUSY).");
+        invalid_point().raise(
+            "Model point is theoretically inconsistent (DarkSUSY).");
+        mssm_result = false;
+      }
+      else if (unphys > 0)
+      {
+        backend_warning().raise(LOCAL_INFO,
+            "Neutralino is not the LSP (DarkSUSY).");
+        invalid_point().raise("Neutralino is not the LSP (DarkSUSY).");
+        mssm_result = false;
+      }
+      else if (warning != 0)
+      {
+        backend_warning().raise(LOCAL_INFO,
+            "Radiative corrections in Higgs sector "
+            "outside range of validity (DarkSUSY).");
+        mssm_result = true;
+      }
+      else
+      {
+        mssm_result = true;
+      }
     }
-    }
+
     // Do pure diskless SLHA initialisation, including (s)particle widths from GAMBIT.
     else
     {
@@ -249,28 +271,34 @@ BE_INI_FUNCTION
         int unphys,warning;
         dsmodelsetup(unphys,warning);
 
-        if (unphys < 0) {
+        if (unphys < 0)
+        {
           backend_warning().raise(LOCAL_INFO,
               "Model point is theoretically inconsistent (DarkSUSY).");
           invalid_point().raise(
               "Model point is theoretically inconsistent (DarkSUSY).");
           mssm_result = false;
-        } else if (unphys > 0) {
+        }
+        else if (unphys > 0)
+        {
           backend_warning().raise(LOCAL_INFO,
               "Neutralino is not the LSP (DarkSUSY).");
           invalid_point().raise("Neutralino is not the LSP (DarkSUSY).");
           mssm_result = false;
-        } else if (warning != 0) {
+        }
+        else if (warning != 0)
+        {
           backend_warning().raise(LOCAL_INFO,
               "Radiative corrections in Higgs sector "
               "outside range of validity (DarkSUSY).");
           mssm_result = true;
-        } else {
+        }
+        else
+        {
           mssm_result = true;
         }
       }
     }
-
   }
 
   if ( (ModelInUse("MSSM63atQ") || ModelInUse("CMSSM")) && !mssm_result )
@@ -282,6 +310,7 @@ BE_INI_FUNCTION
 
 }
 END_BE_INI_FUNCTION
+
 
 // Convenience functions (definitions)
 BE_NAMESPACE
@@ -311,11 +340,10 @@ BE_NAMESPACE
     // For channel indices, see dswayieldone.f
     DSanbr.clear();
     DSanbr.push_back(0.0);
-//    DSanbr[0]=0.0; // not used, keep Fortran numbering below
+    //DSanbr[0]=0.0; // not used, keep Fortran numbering below
     for (int i=1; i<=29; i++)
     {
         DSanbr.push_back(annihilation_bf[i-1]);
-//      DSanbr[i] = annihilation_bf[i-1];
     }
 
     // Setup PDG common blocks
@@ -405,18 +433,14 @@ BE_NAMESPACE
     }
     anbranch->anscm = Higgs_mass_charged;                               // Charged Higgses
 
-    // Tell DarkSUSY we've taken care of business.
-    // wabranch->dswasetupcalled = true; // No longer needed
-
   }
 
-  /// Function nuyield returns neutrino yields at the top of the
-  /// the atmosphere, in m^-2 GeV^-1 annihilation^-1.  Provided
-  /// here for interfacing with nulike.
+  /// Returns neutrino yields at the top of the atmosphere,
+  /// in m^-2 GeV^-1 annihilation^-1.  Provided here for 
+  /// interfacing with nulike.
   ///   --> log10Enu log_10(neutrino energy/GeV)
   ///   --> p        p=1 for neutrino yield, p=2 for nubar yield
   ///   --> context  void pointer (ignored)
-
   double neutrino_yield(const double& log10E, const int& ptype, void*&)
   {
     int istat = 0;
@@ -434,43 +458,49 @@ BE_NAMESPACE
 
     for (int i=1; i<=29; i++)
     {
-      // cout << "DDD: " << i << " " << DSanbr[i] << " " << DSanpdg1[i] << " " << DSanpdg2[i] << endl; // JE TMP
-      if (DSanbr[i]>0) {
-  if (i==13) { // W+ W-
-    twos=2;
-    twol=2;
-  } else {
-    twos=0;
-    twol=0;
-  }
-  iistat=0;
-  if ((ptype == 1) or (ptype == 3)) { // particles
-    tmp=dsseyield_sim_ls(anmwimp,pow(10.0,log10E),10.0,DSanpdg1[i],DSanpdg2[i],twoj,cp,twol,twos,object,3,t1,iistat);
-      if ((iistat bitand 8) == 8) { // not simulated channel
+      if (DSanbr[i]>0)
+      {
+        if (i==13) // W+ W-
+        {
+          twos=2;
+          twol=2;
+        }
+        else
+        {
+          twos=0;
+          twol=0;
+        }
+        iistat=0;
 
-        tmp=dsseyield_ch(anmwimp,pow(10.0,log10E),10.0,DSanpdg1[i],DSanpdg2[i],object,3,t1,iistat);
-      }
-    result += 1e-30 * DSanbr[i] * tmp;
+        if ((ptype == 1) or (ptype == 3)) // particles
+        {
+          tmp=dsseyield_sim_ls(anmwimp,pow(10.0,log10E),10.0,DSanpdg1[i],DSanpdg2[i],twoj,cp,twol,twos,object,3,t1,iistat);
+          if ((iistat bitand 8) == 8) // not simulated channel
+          {
+            tmp=dsseyield_ch(anmwimp,pow(10.0,log10E),10.0,DSanpdg1[i],DSanpdg2[i],object,3,t1,iistat);
+          }
+          result += 1e-30 * DSanbr[i] * tmp;
 
-      // The following is just a warning, not an error: unpolarized yields
-      // are used even if polarized yields are asked for
-      if ((iistat bitand 16) == 16) iistat -= 16;
-    istat=(istat bitor iistat);
-  }
-  if ((ptype == 2) or (ptype == 3)) { // anti-particles
-    tmp=dsseyield_sim_ls(anmwimp,pow(10.0,log10E),10.0,DSanpdg1[i],DSanpdg2[i],twoj,cp,twol,twos,object,3,t2,iistat);
-      if ((iistat bitand 8) == 8) { // not simulated channel
-        // cout << "CCC: " << i << " " << DSanpdg1[i] << " " << DSanpdg2[i] << endl; // JE TMP
+          // The following is just a warning, not an error: unpolarized yields
+          // are used even if polarized yields are asked for
+          if ((iistat bitand 16) == 16) iistat -= 16;
+          istat=(istat bitor iistat);
+        }
 
-          tmp=dsseyield_ch(anmwimp,pow(10.0,log10E),10.0,DSanpdg1[i],DSanpdg2[i],object,3,t2,iistat);
-      }
-    result += 1e-30 * DSanbr[i] * tmp;
+        if ((ptype == 2) or (ptype == 3)) // anti-particles
+        {
+          tmp=dsseyield_sim_ls(anmwimp,pow(10.0,log10E),10.0,DSanpdg1[i],DSanpdg2[i],twoj,cp,twol,twos,object,3,t2,iistat);
+          if ((iistat bitand 8) == 8) // not simulated channel
+          {
+            tmp=dsseyield_ch(anmwimp,pow(10.0,log10E),10.0,DSanpdg1[i],DSanpdg2[i],object,3,t2,iistat);
+          }
+          result += 1e-30 * DSanbr[i] * tmp;
 
-      // The following is just a warning, not an error: unpolarized yields
-      // are used even if polarized yields are asked for
-      if ((iistat bitand 16) == 16) iistat -= 16;
-    istat=(istat bitor iistat);
-  }
+          // The following is just a warning, not an error: unpolarized yields
+          // are used even if polarized yields are asked for
+          if ((iistat bitand 16) == 16) iistat -= 16;
+          istat=(istat bitor iistat);
+        }
 
       } // end if DSanbr>0
 
@@ -495,12 +525,11 @@ BE_NAMESPACE
       err << "Error from DarkSUSY::dsseyield functions in neutrino flux calculation.  istat = " << istat;
       piped_errors.request(LOCAL_INFO, err.str());
     }
-    // cout << "AAA: nuyield DS6: " << result << endl; // JE TMP
     return result;
   }
 
 
-  /// Function DD_couplings returns direct detection couplings gps,gns,gpa,gna
+  /// Returns direct detection couplings gps,gns,gpa,gna
   /// (proton/neutron scalar/axial four-couplings)
   /// Provided here because the signature of the corresponding DarkSUSY routine
   std::vector<double> DD_couplings()
@@ -692,7 +721,7 @@ BE_NAMESPACE
     // mssmswitch->higwid = 1;  // tell DarkSUSY not to use FeynHiggs for Higgs widths.
 
     // Block SMINPUTS
-    smcoupling->alphem                  = 1./to<double>(mySLHA.at("SMINPUTS").at(1).at(1)); // 1/alpha_{QED}
+    smcoupling->alphem                   = 1./to<double>(mySLHA.at("SMINPUTS").at(1).at(1)); // 1/alpha_{QED}
     smcoupling->alph3mz                  = to<double>(mySLHA.at("SMINPUTS").at(3).at(1));    // alpha_s @ MZ
     smcoupling->gfermi                   = to<double>(mySLHA.at("SMINPUTS").at(2).at(1));    // Fermi constant
     pmasses->mass(DSparticle_code("Z0")) = to<double>(mySLHA.at("SMINPUTS").at(4).at(1));    // Z boson mass
@@ -711,24 +740,24 @@ BE_NAMESPACE
     pmasses->mass(DSpart->knu(3)) = to<double>(mySLHA.at("SMINPUTS").at(8).at(1));   // nu_3 pole mass
 
     // Quark masses as defined in SLHA2
-    smquarkmasses->mu2gev        = to<double>(mySLHA.at("SMINPUTS").at(22).at(1)); // up quark mass @ 2 GeV
-    smquarkmasses->md2gev        = to<double>(mySLHA.at("SMINPUTS").at(21).at(1)); // down quark mass @ 2 GeV
-    smquarkmasses->ms2gev        = to<double>(mySLHA.at("SMINPUTS").at(23).at(1)); // strange mass @ 2 GeV
-    smquarkmasses->mcmc          = to<double>(mySLHA.at("SMINPUTS").at(24).at(1)); // charm mass at m_c
-    smquarkmasses->mbmb          = to<double>(mySLHA.at("SMINPUTS").at(5).at(1));  // bottom mass at m_b
+    smquarkmasses->mu2gev         = to<double>(mySLHA.at("SMINPUTS").at(22).at(1)); // up quark mass @ 2 GeV
+    smquarkmasses->md2gev         = to<double>(mySLHA.at("SMINPUTS").at(21).at(1)); // down quark mass @ 2 GeV
+    smquarkmasses->ms2gev         = to<double>(mySLHA.at("SMINPUTS").at(23).at(1)); // strange mass @ 2 GeV
+    smquarkmasses->mcmc           = to<double>(mySLHA.at("SMINPUTS").at(24).at(1)); // charm mass at m_c
+    smquarkmasses->mbmb           = to<double>(mySLHA.at("SMINPUTS").at(5).at(1));  // bottom mass at m_b
     pmasses->mass(DSpart->kqu(3)) = to<double>(mySLHA.at("SMINPUTS").at(6).at(1));  // top pole mass
 
     // Do the DarkSUSY-style sin^2 theta_W calculation (will be overwritten later).
     smcoupling->s2thw=dsgf2s2thw(smcoupling->gfermi, smcoupling->alphem, pmasses->mass(DSparticle_code("Z0")), pmasses->mass(DSpart->kqu(3)),1);
 
     // Set other internal quark masses for DarkSUSY
-    dsfindmtmt();                                                                  // top mass at mt
-    pmasses->mass(DSpart->kqu(1)) = smquarkmasses->mu2gev;                                 // use 2GeV u mass as proxy for pole
-    pmasses->mass(DSpart->kqd(1)) = smquarkmasses->md2gev;                                 // use 2GeV d mass as proxy for pole
-    pmasses->mass(DSpart->kqd(2)) = smquarkmasses->ms2gev;                                 // use 2GeV s mass as proxy for pole
-    pmasses->mass(DSpart->kqu(2)) = dsmqpole4loop(DSpart->kqu(2),smquarkmasses->mcmc);     // use DarkSUSY internal routine to get mc pole
-    pmasses->mass(DSpart->kqd(3)) = to<double>(mySLHA.at("MASS").at(5).at(1));      // the GAMBIT way to get the bottom pole mass
-    //pmasses->mass(DSpart->kqd(3)) = dsmqpole4loop(DSpart->kqd(3),smquarkmasses->mbmb);   // the DarkSUSY SLHAreader way to get mb pole
+    dsfindmtmt();                                                                       // top mass at mt
+    pmasses->mass(DSpart->kqu(1)) = smquarkmasses->mu2gev;                              // use 2GeV u mass as proxy for pole
+    pmasses->mass(DSpart->kqd(1)) = smquarkmasses->md2gev;                              // use 2GeV d mass as proxy for pole
+    pmasses->mass(DSpart->kqd(2)) = smquarkmasses->ms2gev;                              // use 2GeV s mass as proxy for pole
+    pmasses->mass(DSpart->kqu(2)) = dsmqpole4loop(DSpart->kqu(2),smquarkmasses->mcmc);  // use DarkSUSY internal routine to get mc pole
+    pmasses->mass(DSpart->kqd(3)) = to<double>(mySLHA.at("MASS").at(5).at(1));          // the GAMBIT way to get the bottom pole mass
+    //pmasses->mass(DSpart->kqd(3)) = dsmqpole4loop(DSpart->kqd(3),smquarkmasses->mbmb);// the DarkSUSY SLHAreader way to get mb pole
 
     // Block MINPAR we skip, it is not needed
 
@@ -1007,7 +1036,8 @@ BE_NAMESPACE
       mssmwidths->hdwidth(i+1,1) = (h02.has_channel(chan) ? pwidths->width(DSparticle_code("h0_2")) * h02.BF(chan) : 0.0);
       mssmwidths->hdwidth(i+1,3) = (A0.has_channel(chan)  ? pwidths->width(DSparticle_code("A0"))   * A0.BF(chan)  : 0.0);
       if (neutral_channels[i] == sister_chan)
-      { // Add the missing W-H+ contributions.
+      {
+        // Add the missing W-H+ contributions.
         mssmwidths->hdwidth(i+1,2) = (h01.has_channel(missing_chan) ? pwidths->width(DSparticle_code("h0_1")) * h01.BF(missing_chan) : 0.0);
         mssmwidths->hdwidth(i+1,1) = (h02.has_channel(missing_chan) ? pwidths->width(DSparticle_code("h0_2")) * h02.BF(missing_chan) : 0.0);
         mssmwidths->hdwidth(i+1,3) = (A0.has_channel(missing_chan)  ? pwidths->width(DSparticle_code("A0"))   * A0.BF(missing_chan)  : 0.0);
