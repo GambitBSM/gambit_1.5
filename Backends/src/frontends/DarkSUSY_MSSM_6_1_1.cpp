@@ -53,7 +53,7 @@ BE_INI_FUNCTION
   {
     // Do the call to dsinit one-by-one for each MPI process, as DarkSUSY loads up
     // HiggsBounds, which writes files at init then reads them back in later.
-    Utils::FileLock mylock("DarkSUSY_" STRINGIFY(SAFE_VERSION) "_init");
+    Utils::ProcessLock mylock("DarkSUSY_" STRINGIFY(SAFE_VERSION) "_init");
     mylock.get_lock();
     dsinit();
     mylock.release_lock();
@@ -227,7 +227,6 @@ BE_INI_FUNCTION
       const char * filename = fstr.c_str();
       logger() << LogTags::debug << "Initializing DarkSUSY via SLHA." << EOM;
       dsSLHAread(byVal(filename),flag);
-      // dsSLHAread(byVal(filename),flag,byVal(len));
       int unphys,warning;
       dsmodelsetup(unphys,warning);
       if (unphys < 0)
