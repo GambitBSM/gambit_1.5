@@ -34,7 +34,7 @@ END_BE_NAMESPACE
 // Initialisation function (definition)
 BE_INI_FUNCTION
 {
-  // Initialize DarkSUSY if run for the first time
+  // Initialize DarkSUSY (only) if run for the first time
   bool static scan_level = true;
 
   if (scan_level)
@@ -172,7 +172,7 @@ BE_NAMESPACE
     } // for
   } // dsgenericwimp_nusetup
 
-  /// Returns neutrino yields at the top of the the atmosphere,
+  /// Returns neutrino yields at the top of the atmosphere,
   /// in m^-2 GeV^-1 annihilation^-1.  Provided here for
   /// interfacing with nulike.
   ///   --> log10Enu log_10(neutrino energy/GeV)
@@ -191,7 +191,7 @@ BE_NAMESPACE
     int twoj=0; // ignored by current version of DS
     int twos=0; // ignored by current version of DS
     int twol=0; // ignored by current version of DS
-    int cp=-1; // ignored by current version of DS
+    int cp=-1;  // ignored by current version of DS
     double result=0.0;
 
     for (int i=1; i<=29; i++)
@@ -207,14 +207,17 @@ BE_NAMESPACE
           else
             tmp=dsseyield_sim_ls(anmwimp,pow(10.0,log10E),10.0,DSanpdg1[i],DSanpdg2[i],twoj,cp,twol,twos,object,3,t1,iistat);
           if ((iistat bitand 8) == 8) // not simulated channel
+          {
             backend_error().raise(LOCAL_INFO, "ERROR: The DarkSUSY neutrino telescope routines "
                                   "for a generic WIMP cannot handle models with non-standard model\n"
                                   "WIMP annihilation final states.");
+          }
           result += 1e-30 * DSanbr[i] * tmp;
+
           // The following is just a warning, not an error: unpolarized yields
           // are used even if polarized yields are asked for
           if ((iistat bitand 16) == 16) iistat -= 16;
-             istat=(istat bitor iistat);
+          istat=(istat bitor iistat);
         }
 
         if ((ptype == 2) or (ptype == 3)) // anti-particles
@@ -225,16 +228,21 @@ BE_NAMESPACE
           else
             tmp=dsseyield_sim_ls(anmwimp,pow(10.0,log10E),10.0,DSanpdg1[i],DSanpdg2[i],twoj,cp,twol,twos,object,3,t2,iistat);
           if ((iistat bitand 8) == 8) // not simulated channel
+          {
             backend_error().raise(LOCAL_INFO, "ERROR: The DarkSUSY neutrino telescope routines "
                                   "for a generic WIMP cannot handle models with non-standard model\n"
                                   "WIMP annihilation final states.");
+          }
           result += 1e-30 * DSanbr[i] * tmp;
+
           // The following is just a warning, not an error: unpolarized yields
           // are used even if polarized yields are asked for
           if ((iistat bitand 16) == 16) iistat -= 16;
           istat=(istat bitor iistat);
         }
+
       } // end if DSanbr>0
+
     } // end loop
 
 

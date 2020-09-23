@@ -51,7 +51,6 @@ BE_INI_FUNCTION
 
   if (scan_level)
   {
-
     // Do the call to dsinit one-by-one for each MPI process, as DarkSUSY loads up
     // HiggsBounds, which writes files at init then reads them back in later.
     Utils::FileLock mylock("DarkSUSY_" STRINGIFY(SAFE_VERSION) "_init");
@@ -75,7 +74,6 @@ BE_INI_FUNCTION
     dsanyield_sim(mdm,egev,pdg,hel,yieldpdg,diff,istat);
 
     scan_level = false;
-
   }
 
   // Initialization function for a given MSSM point
@@ -347,7 +345,7 @@ BE_NAMESPACE
     // Setup PDG common blocks
     DSanpdg1.clear();
     DSanpdg2.clear();
-    DSanpdg1.push_back(10000); // not used, as I keep the same numbering as for Fortran
+    DSanpdg1.push_back(10000); // not used, as we keep the same numbering as for Fortran
     DSanpdg2.push_back(10000);
     DSanpdg1.push_back(35);  // H H, channel 1
     DSanpdg2.push_back(35);
@@ -437,7 +435,8 @@ BE_NAMESPACE
   /// in m^-2 GeV^-1 annihilation^-1.  Provided here for
   /// interfacing with nulike.
   ///   --> log10Enu log_10(neutrino energy/GeV)
-  ///   --> p        p=1 for neutrino yield, p=2 for nubar yield
+  ///   --> p        p=1 for neutrino yield, p=2 for nubar yield,
+  ///                p=3 for nu and nubar yields
   ///   --> context  void pointer (ignored)
   double neutrino_yield(const double& log10E, const int& ptype, void*&)
   {
@@ -448,10 +447,10 @@ BE_NAMESPACE
     const char*object =  (char *)"su";
 
     double tmp=0;
-    int twoj=0;
-    int twos=0;
-    int twol=0;
-    int cp=-1;
+    int twoj=0; // ignored by current version of DS
+    int twos=0; // ignored by current version of DS
+    int twol=0; // ignored by current version of DS
+    int cp=-1;  // ignored by current version of DS
     double result=0.0;
 
     for (int i=1; i<=29; i++)
@@ -525,7 +524,6 @@ BE_NAMESPACE
     }
     return result;
   }
-
 
   /// Returns direct detection couplings gps,gns,gpa,gna
   /// (proton/neutron scalar/axial four-couplings)
