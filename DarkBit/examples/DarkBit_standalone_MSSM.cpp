@@ -775,9 +775,8 @@ int main(int argc, char* argv[])
       // The below calculates the DD couplings using the full 1 loop calculation of
       // Drees Nojiri Phys.Rev. D48 (1993) 3483
       DD_couplings_DarkSUSY_MSSM.setOption<bool>("loop", true);
-      // When the calculation is done at tree level (loop = false), setting the below to false
-      // approximates the squark propagator as 1/m_sq^2 to avoid poles.
-      // DD_couplings_DarkSUSY_DS5.setOption<bool>("pole", false);
+      // Setting the below to false approximates the squark propagator as 1/m_sq^2 to avoid poles.
+      DD_couplings_DarkSUSY_MSSM.setOption<bool>("pole", false);
       DD_couplings_DarkSUSY_MSSM.reset_and_calculate();
 
       // Initialize DDCalc backend
@@ -1082,9 +1081,8 @@ int main(int argc, char* argv[])
       // The below calculates the DD couplings using the full 1 loop calculation of
       // Drees Nojiri Phys.Rev. D48 (1993) 3483
       DD_couplings_DarkSUSY_MSSM.setOption<bool>("loop", true);
-      // When the calculation is done at tree level (loop = false), setting the below to false
-      // approximates the squark propagator as 1/m_sq^2 to avoid poles.
-      // DD_couplings_DarkSUSY_DS5.setOption<bool>("pole", false);
+      // Setting the below to false approximates the squark propagator as 1/m_sq^2 to avoid poles.
+      DD_couplings_DarkSUSY_MSSM.setOption<bool>("pole", false);
       DD_couplings_DarkSUSY_MSSM.reset_and_calculate();
 
       // Initialize DDCalc backend
