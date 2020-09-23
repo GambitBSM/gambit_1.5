@@ -97,11 +97,11 @@ int main(int argc, char* argv[])
   std::cout << "Welcome to the DarkBit MSSM standalone program!" << std::endl;
   std::cout << std::endl;
   std::cout << "********************************************************************************" << std::endl;
-  std::cout << "Usage: DarkBit_standalone_MSSM SLHA_file (spectrum) (data)" << std::endl;
+  std::cout << "Usage: DarkBit_standalone_MSSM SLHA_file (spectrum) (output)" << std::endl;
   std::cout << std::endl;
   std::cout << "SLHA_file: SLHA file used to intialise the program (required)" << std::endl;
   std::cout << "(spectrum): name of output file for gamma-ray spectrum (default: BACKENDNAME_dNdE.dat)" << std::endl;
-  std::cout << "(data): name of output file for observables and likelihoods (default: data.dat)" << std::endl;
+  std::cout << "(output): name of output file for observables and likelihoods (default: DarkBit_standalone_MSSM.out)" << std::endl;
   std::cout << std::endl;
   std::cout << "The SLHA files for the MSSM-7 benchmarks in the DarkBit paper are located in    " << std::endl;
   std::cout << "DarkBit/data/benchmarks/                                                        " << std::endl;
@@ -118,7 +118,7 @@ int main(int argc, char* argv[])
     std::string filename = argv[1];
     std::string outname_dNdE_spectrum = "dNdE.dat";
     if (argc >= 3) outname_dNdE_spectrum = argv[2];
-    std::string outname_data = "data.dat";
+    std::string outname_data = "DarkBit_standalone_MSSM.out";
     if (argc >= 4) outname_data = argv[3];
 
 

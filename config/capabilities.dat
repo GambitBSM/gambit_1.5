@@ -538,7 +538,7 @@ L3_Chargino_Leptonic_LLike: |
 
 L3_Gravitino_LLike: |
    Compares the cross section times branching ratio for neutralino
-   production and decay to gravitinos to the model-independent limit 
+   production and decay to gravitinos to the model-independent limit
    according to the L3 collaboration. Returns a log likelihood value.
 
 OPAL_Neutralino_Hadronic_LLike: |
@@ -1112,11 +1112,11 @@ RD_spectrum_ordered: |
    included
 
 RD_eff_annrate_DSprep: |
-   Ensures that DarkSUSY (up to version 5) is correctly initialized 
+   Ensures that DarkSUSY (up to version 5) is correctly initialized
    for relic density calculations.
 
 RD_eff_annrate_DSprep_MSSM: |
-   Ensures that DarkSUSY (from version 6) is correctly initialized 
+   Ensures that DarkSUSY (from version 6) is correctly initialized
    for relic density calculations.
 
 dsancoann: |
@@ -2174,12 +2174,6 @@ DDCalc_2_1_0_init: |
 DDCalc_2_2_0_init: |
    Initialises DDCalc 2.2.0.
 
-DDCalc_2_1_0_init: |
-   Initialises DDCalc 2.1.0.
-
-DDCalc_2_2_0_init: |
-   Initialises DDCalc 2.2.0.
-
 DD_Experiment: |
    The name of the DDcalc experiment corresponding to a specific experiment index.
 
@@ -2506,7 +2500,7 @@ dsgive_model_SLHA: |
    Reads in SLHA file from disk, and sets DarkSUSY model parameters.
 
 dsmodelsetup: |
-   Initializes a particle model point with DarkSUSY (after model papermeters 
+   Initializes a particle model point with DarkSUSY (after model papermeters
    have been set with dsgive_xxxx).
 
 dshainit: |
