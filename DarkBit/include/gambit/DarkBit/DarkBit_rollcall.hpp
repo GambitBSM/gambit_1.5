@@ -436,26 +436,6 @@ START_MODULE
   #undef CAPABILITY
   */
 
-  /*
-  /// Process catalog for testing purposes
-  #define CAPABILITY cascadeMC_test_TH_ProcessCatalog
-  START_CAPABILITY
-    #define FUNCTION cascadeMC_test_TH_ProcessCatalog
-      START_FUNCTION(TH_ProcessCatalog)
-    #undef FUNCTION
-  #undef CAPABILITY
-
-  /// Unit test for decay chains
-  #define CAPABILITY cascadeMC_UnitTest
-  START_CAPABILITY
-    #define FUNCTION cascadeMC_UnitTest
-      START_FUNCTION(bool)
-      DEPENDENCY(cascadeMC_test_TH_ProcessCatalog, TH_ProcessCatalog)
-      DEPENDENCY(SimYieldTable, SimYieldTable)
-    #undef FUNCTION
-  #undef CAPABILITY
-  */
-
   // Gamma rays --------------------------------------------
 
   #define CAPABILITY GA_missingFinalStates
@@ -477,14 +457,6 @@ START_MODULE
       DEPENDENCY(cascadeMC_gammaSpectra, stringFunkMap)
       DEPENDENCY(DarkMatter_ID, std::string)
     #undef FUNCTION
-  /*
-    #define FUNCTION GA_AnnYield_DarkSUSY
-      START_FUNCTION(daFunk::Funk)
-      DEPENDENCY(TH_ProcessCatalog, TH_ProcessCatalog)
-      DEPENDENCY(DarkMatter_ID, std::string)
-      BACKEND_REQ(dshayield, (), double, (double&,double&,int&,int&,int&))
-    #undef FUNCTION
-  */
   #undef CAPABILITY
 
   #define CAPABILITY TH_ProcessCatalog
