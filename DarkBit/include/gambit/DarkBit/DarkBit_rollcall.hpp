@@ -119,7 +119,6 @@ START_MODULE
       BACKEND_REQ(dshmnoclue, (ds6), DS_HMNOCLUE)
       BACKEND_OPTION((DarkSUSY_MSSM, 6.1.1, 6.2.2), (ds6))  // Only DS6
       BACKEND_OPTION((DarkSUSY_generic_wimp, 6.1.1, 6.2.2), (ds6))  // Only DS6
-      BACKEND_OPTION((DarkSUSY_silveira_zee, 6.1.1, 6.2.2), (ds6))  // Only DS6
       FORCE_SAME_BACKEND(ds6)
     #undef FUNCTION
   #undef CAPABILITY
@@ -953,7 +952,6 @@ START_MODULE
       DEPENDENCY(DarkSUSY_PointInit_LocalHalo, bool)
       BACKEND_OPTION((DarkSUSY_MSSM, 6.1.1, 6.2.2), (ds6))
       BACKEND_OPTION((DarkSUSY_generic_wimp, 6.1.1, 6.2.2), (ds6))
-      BACKEND_OPTION((DarkSUSY_silveira_zee, 6.1.1, 6.2.2), (ds6))
       FORCE_SAME_BACKEND(ds6)
 //JE FIXME / PLEASE CHECK: I don't think this is needed / wanted
 //        #define CONDITIONAL_DEPENDENCY DarkSUSY_PointInit_LocalHalo
