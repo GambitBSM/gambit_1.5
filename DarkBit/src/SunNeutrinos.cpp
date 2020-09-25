@@ -708,84 +708,82 @@ namespace Gambit
     /// Function to set Local Halo Parameters in DarkSUSY (DS5 only)
     void DarkSUSY5_PointInit_LocalHalo_func(bool &result)
     {
-        using namespace Pipes::DarkSUSY5_PointInit_LocalHalo_func;
+      using namespace Pipes::DarkSUSY5_PointInit_LocalHalo_func;
 
-          LocalMaxwellianHalo LocalHaloParameters = *Dep::LocalHalo;
+      LocalMaxwellianHalo LocalHaloParameters = *Dep::LocalHalo;
 
-          double rho0 = LocalHaloParameters.rho0;
-          double rho0_eff = (*Dep::RD_fraction)*rho0;
-          double vrot = LocalHaloParameters.vrot;
-          double vd_3d = sqrt(3./2.)*LocalHaloParameters.v0;
-          double vesc = LocalHaloParameters.vesc;
-          /// Option v_earth<double>: Keplerian velocity of the Earth around the Sun in km/s (default 29.78)
-          double v_earth = runOptions->getValueOrDef<double>(29.78, "v_earth");
+      double rho0 = LocalHaloParameters.rho0;
+      double rho0_eff = (*Dep::RD_fraction)*rho0;
+      double vrot = LocalHaloParameters.vrot;
+      double vd_3d = sqrt(3./2.)*LocalHaloParameters.v0;
+      double vesc = LocalHaloParameters.vesc;
+      /// Option v_earth<double>: Keplerian velocity of the Earth around the Sun in km/s (default 29.78)
+      double v_earth = runOptions->getValueOrDef<double>(29.78, "v_earth");
 
-          BEreq::dshmcom->rho0 = rho0;
-          BEreq::dshmcom->v_sun = vrot;
-          BEreq::dshmcom->v_earth = v_earth;
-          BEreq::dshmcom->rhox = rho0_eff;
+      BEreq::dshmcom->rho0 = rho0;
+      BEreq::dshmcom->v_sun = vrot;
+      BEreq::dshmcom->v_earth = v_earth;
+      BEreq::dshmcom->rhox = rho0_eff;
 
-          BEreq::dshmframevelcom->v_obs = vrot;
+      BEreq::dshmframevelcom->v_obs = vrot;
 
-          BEreq::dshmisodf->vd_3d = vd_3d;
-          BEreq::dshmisodf->vgalesc = vesc;
+      BEreq::dshmisodf->vd_3d = vd_3d;
+      BEreq::dshmisodf->vgalesc = vesc;
 
-          BEreq::dshmnoclue->vobs = vrot;
+      BEreq::dshmnoclue->vobs = vrot;
 
-          logger() << LogTags::debug
-                   << "Updating DarkSUSY halo parameters:" << std::endl
-                   << "    rho0 [GeV/cm^3] = " << rho0 << std::endl
-                   << "    rho0_eff [GeV/cm^3] = " << rho0_eff << std::endl
-                   << "    v_sun [km/s]  = " << vrot<< std::endl
-                   << "    v_earth [km/s]  = " << v_earth << std::endl
-                   << "    v_obs [km/s]  = " << vrot << std::endl
-                   << "    vd_3d [km/s]  = " << vd_3d << std::endl
-                   << "    v_esc [km/s]  = " << vesc << EOM;
+      logger() << LogTags::debug
+               << "Updating DarkSUSY halo parameters:" << std::endl
+               << "    rho0 [GeV/cm^3] = " << rho0 << std::endl
+               << "    rho0_eff [GeV/cm^3] = " << rho0_eff << std::endl
+               << "    v_sun [km/s]  = " << vrot<< std::endl
+               << "    v_earth [km/s]  = " << v_earth << std::endl
+               << "    v_obs [km/s]  = " << vrot << std::endl
+               << "    vd_3d [km/s]  = " << vd_3d << std::endl
+               << "    v_esc [km/s]  = " << vesc << EOM;
 
-          result = true;
+      result = true;
 
-          return;
+      return;
     }
 
     /// Function to set Local Halo Parameters in DarkSUSY (DS 6)
     void DarkSUSY_PointInit_LocalHalo_func(bool &result)
     {
-        using namespace Pipes::DarkSUSY_PointInit_LocalHalo_func;
+      using namespace Pipes::DarkSUSY_PointInit_LocalHalo_func;
 
-          LocalMaxwellianHalo LocalHaloParameters = *Dep::LocalHalo;
+      LocalMaxwellianHalo LocalHaloParameters = *Dep::LocalHalo;
 
-          double rho0 = LocalHaloParameters.rho0;
-    //          double rho0_eff = (*Dep::RD_fraction)*rho0;
-          double vrot = LocalHaloParameters.vrot;
-          double vd_3d = sqrt(3./2.)*LocalHaloParameters.v0;
-          double vesc = LocalHaloParameters.vesc;
-          /// Option v_earth<double>: Keplerian velocity of the Earth around the Sun in km/s (default 29.78)
-          double v_earth = runOptions->getValueOrDef<double>(29.78, "v_earth");
+      double rho0 = LocalHaloParameters.rho0;
+      double vrot = LocalHaloParameters.vrot;
+      double vd_3d = sqrt(3./2.)*LocalHaloParameters.v0;
+      double vesc = LocalHaloParameters.vesc;
+      /// Option v_earth<double>: Keplerian velocity of the Earth around the Sun in km/s (default 29.78)
+      double v_earth = runOptions->getValueOrDef<double>(29.78, "v_earth");
 
-          BEreq::dshmcom->rho0 = rho0;
-          BEreq::dshmcom->v_sun = vrot;
-          BEreq::dshmcom->v_earth = v_earth;
-          // BEreq::dshmcom->rhox = rho0_eff;  // now argument instead
+      BEreq::dshmcom->rho0 = rho0;
+      BEreq::dshmcom->v_sun = vrot;
+      BEreq::dshmcom->v_earth = v_earth;
 
-          BEreq::dshmframevelcom->v_obs = vrot;
+      BEreq::dshmframevelcom->v_obs = vrot;
 
-          BEreq::dshmisodf->vd_3d = vd_3d;
-          BEreq::dshmisodf->vgalesc = vesc;
+      BEreq::dshmisodf->vd_3d = vd_3d;
+      BEreq::dshmisodf->vgalesc = vesc;
 
-          BEreq::dshmnoclue->vobs = vrot;
+      BEreq::dshmnoclue->vobs = vrot;
 
-          logger() << LogTags::debug
-                   << "Updating DarkSUSY halo parameters:" << std::endl
-                   << "    rho0 [GeV/cm^3] = " << rho0 << std::endl
-                   << "    v_sun [km/s]  = " << vrot<< std::endl
-                   << "    v_earth [km/s]  = " << v_earth << std::endl
-                   << "    v_obs [km/s]  = " << vrot << std::endl
-                   << "    vd_3d [km/s]  = " << vd_3d << std::endl
-                   << "    v_esc [km/s]  = " << vesc << EOM;
+      logger() << LogTags::debug
+               << "Updating DarkSUSY halo parameters:" << std::endl
+               << "    rho0 [GeV/cm^3] = " << rho0 << std::endl
+               << "    v_sun [km/s]  = " << vrot<< std::endl
+               << "    v_earth [km/s]  = " << v_earth << std::endl
+               << "    v_obs [km/s]  = " << vrot << std::endl
+               << "    vd_3d [km/s]  = " << vd_3d << std::endl
+               << "    v_esc [km/s]  = " << vesc << EOM;
 
-          result = true;
+      result = true;
 
-          return;
+      return;
     }
 
   }
