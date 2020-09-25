@@ -953,11 +953,6 @@ START_MODULE
       BACKEND_OPTION((DarkSUSY_MSSM, 6.1.1, 6.2.2), (ds6))
       BACKEND_OPTION((DarkSUSY_generic_wimp, 6.1.1, 6.2.2), (ds6))
       FORCE_SAME_BACKEND(ds6)
-//JE FIXME / PLEASE CHECK: I don't think this is needed / wanted
-//        #define CONDITIONAL_DEPENDENCY DarkSUSY_PointInit_LocalHalo
-//        START_CONDITIONAL_DEPENDENCY(bool)
-//        ACTIVATE_FOR_BACKEND(cap_Sun_v0q0_isoscalar_DS, DarkSUSY_MSSM)
-//        #undef CONDITIONAL_DEPENDENCY
     #undef FUNCTION
 
     ///Alternative function for the above: Capture rate of dark matter with a constant cross section (s^-1), using backend Captn' General

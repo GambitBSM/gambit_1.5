@@ -42,9 +42,8 @@ namespace Gambit
     //////////////////////////////////////////////////////////////////////////
 
     /*! \brief Capture rate of regular dark matter in the Sun (no v-dependent
-     *         or q-dependent cross-sections) (s^-1).
+     *         or q-dependent cross-sections) (s^-1). DarkSUSY 5 version.
      */
-    // DS 5
     void capture_rate_Sun_const_xsec_DS5(double &result)
     {
       using namespace Pipes::capture_rate_Sun_const_xsec_DS5;
@@ -59,12 +58,11 @@ namespace Gambit
 
       result = BEreq::cap_Sun_v0q0_isoscalar_DS5(*Dep::mwimp, *Dep::sigma_SI_p, *Dep::sigma_SD_p);
 
-      //cout << "mwimp" << *Dep::mwimp << "sigma_SI_p: " << *Dep::sigma_SI_p << " sigma_SD_p: " << *Dep::sigma_SD_p << "result: " << result << "\n";
-      //cout << "capture rate via capture_rate_Sun_const_xsec_DS5 = " << result << "\n";
-
     }
 
-    // DS 6
+    /*! \brief Capture rate of regular dark matter in the Sun (no v-dependent
+     *         or q-dependent cross-sections) (s^-1). DarkSUSY 6 version.
+     */
     void capture_rate_Sun_const_xsec(double &result)
     {
       using namespace Pipes::capture_rate_Sun_const_xsec;
@@ -73,21 +71,16 @@ namespace Gambit
         if(!(*Dep::DarkSUSY_PointInit_LocalHalo))
           DarkBit_error().raise(LOCAL_INFO,"DarkSUSY halo model not initialized!");
 
-      // Why doesn't the following work. JE FIX
       LocalMaxwellianHalo LocalHaloParameters = *Dep::LocalHalo;
-	  
+      double rho0 = LocalHaloParameters.rho0;
+      double rho0_eff = (*Dep::RD_fraction)*rho0;
+
       // When calculating the solar capture rate, DarkSUSY assumes that the
       // proton and neutron scattering cross-sections are the same; we
       // assume that whichever backend has been hooked up here does so too.
-      double rho0 = LocalHaloParameters.rho0;
-      double rho0_eff = (*Dep::RD_fraction)*rho0;
-      //double rho0=0.3; // JE FIX, want to use above, how?
-      //double rho0_eff=0.3;  // JE FIX, want to use above, how?
 
       result = BEreq::cap_Sun_v0q0_isoscalar_DS(*Dep::mwimp, rho0_eff, *Dep::sigma_SI_p, *Dep::sigma_SD_p);
 
-      //cout << "mwimp" << *Dep::mwimp << "sigma_SI_p: " << *Dep::sigma_SI_p << " sigma_SD_p: " << *Dep::sigma_SD_p << "result: " << result << "\n";
-      //cout << "capture rate via capture_rate_Sun_const_xsec = " << result << "\n";
 
     }
 
@@ -762,7 +755,7 @@ namespace Gambit
           LocalMaxwellianHalo LocalHaloParameters = *Dep::LocalHalo;
 
           double rho0 = LocalHaloParameters.rho0;
-	  //          double rho0_eff = (*Dep::RD_fraction)*rho0;
+    //          double rho0_eff = (*Dep::RD_fraction)*rho0;
           double vrot = LocalHaloParameters.vrot;
           double vd_3d = sqrt(3./2.)*LocalHaloParameters.v0;
           double vesc = LocalHaloParameters.vesc;
