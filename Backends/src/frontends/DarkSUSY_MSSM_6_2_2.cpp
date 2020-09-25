@@ -320,10 +320,8 @@ BE_NAMESPACE
     "then sort out your SLHA file so that it is readable by DarkSUSY!                      ");
   }
 
-  /// Function dsgenericwimp_nusetup sets DarkSUSY's internal common
-  /// blocks with some of the properties required to compute neutrino
-  /// yields for a generic WIMP. Remaining internal variables are internal
-  /// to this frontend.
+  /// Sets DarkSUSY's internal common blocks with some of the properties required to compute neutrino
+  /// yields for a generic WIMP. Remaining internal variables are internal to this frontend.
   void dsgenericwimp_nusetup(const double (&annihilation_bf)[29], const double (&Higgs_decay_BFs_neutral)[29][3],
    const double (&Higgs_decay_BFs_charged)[15], const double (&Higgs_masses_neutral)[3], const double &Higgs_mass_charged,
    const double &mwimp)
