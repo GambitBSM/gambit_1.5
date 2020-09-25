@@ -355,7 +355,9 @@ Rules:
     function: sigmav_late_universe
 
   - capability: RD_eff_annrate_DSprep_MSSM
-    function: RD_annrate_DS6prep_MSSM_func
+    function: RD_annrate_DSprep_MSSM_func
+    backends:
+      - {backend: DarkSUSY_MSSM, version: 6.2.2}
 
   - capability: RD_eff_annrate
     function: RD_eff_annrate_DS_MSSM

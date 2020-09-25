@@ -196,7 +196,7 @@ BE_NAMESPACE
 
     for (int i=1; i<=29; i++)
     {
-      if (DSanbr[i]>0.00001)
+      if (DSanbr[i]>0)
       {
         iistat=0;
         if ((ptype == 1) or (ptype == 3)) // particles
