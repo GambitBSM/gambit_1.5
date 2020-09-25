@@ -170,11 +170,9 @@ if(NOT ditched_${name}_${ver})
     INSTALL_COMMAND ""
   )
   add_extra_targets("backend" ${name} ${ver} ${dir} ${dl} clean)
-  # set_as_default_version("backend" ${name} ${ver})
 endif()
 
 # DarkSUSY base (for all models)
-# FIXME Something needs to be added to make sure the DarkSUSY base and models build one at a time...
 set(name "darksusy")
 set(ver "6.1.1")
 set(dl "staff.fysik.su.se/~edsjo/darksusy/tars/${name}-${ver}.tar.gz")
@@ -193,54 +191,47 @@ if(NOT ditched_${name}_${ver})
     #CONFIGURE_COMMAND ./configure FC=${CMAKE_Fortran_COMPILER} FCFLAGS=${GAMBIT_Fortran_FLAGS} FFLAGS=${GAMBIT_Fortran_FLAGS} CC=${CMAKE_C_COMPILER} CFLAGS=${GAMBIT_C_FLAGS} CXX=${CMAKE_CXX_COMPILER} CXXFLAGS=${GAMBIT_CXX_FLAGS}
     CONFIGURE_COMMAND ./configure FC=${CMAKE_Fortran_COMPILER} FCFLAGS=${DS_Fortran_FLAGS} FFLAGS=${DS_Fortran_FLAGS} CC=${CMAKE_C_COMPILER} CFLAGS=${CMAKE_C_FLAGS} CXX=${CMAKE_CXX_COMPILER} CXXFLAGS=${CMAKE_CXX_FLAGS}
     # FIXME Need to add shared option
-    # BUILD_COMMAND ${MAKE_PARALLEL} dslib_shared
+    #BUILD_COMMAND ${MAKE_PARALLEL} dslib_shared
     BUILD_COMMAND ${MAKE_PARALLEL} all
-#          COMMAND ${MAKE_PARALLEL} install_tables
-#          COMMAND ${MAKE_PARALLEL} ds_mssm_shared
+    #COMMAND ${MAKE_PARALLEL} install_tables
+    #COMMAND ${MAKE_PARALLEL} ds_mssm_shared
     INSTALL_COMMAND ""
   )
   add_extra_targets("backend" ${name} ${ver} ${dir} ${dl} clean)
-#  set_as_default_version("backend" ${name} ${ver})
 endif()
 
 # DarkSUSY MSSM module
 set(model "MSSM")
-#set(patch "${PROJECT_SOURCE_DIR}/Backends/patches/${name}/${ver}/patch_${name}_${ver}_${model}")
 check_ditch_status(${name}_${model} ${ver} ${dir})
 if(NOT ditched_${name}_${model}_${ver})
   ExternalProject_Add(${name}_${model}_${ver}
     DOWNLOAD_COMMAND ""
     SOURCE_DIR ${dir}
-#    PATCH_COMMAND patch -p1 < ${patch}
     BUILD_IN_SOURCE 1
     CONFIGURE_COMMAND ""
     BUILD_COMMAND ${MAKE_PARALLEL} ds_mssm_shared
     INSTALL_COMMAND ""
   )
   add_extra_targets("backend model" ${name} ${ver} ${dir}/${model} ${model} "yes | clean")
-#  set_as_default_version("backend model" ${name}_${model} ${ver})
 endif()
 
 # DarkSUSY generic_wimp module
 set(model "generic_wimp")
-#set(patch "${PROJECT_SOURCE_DIR}/Backends/patches/${name}/${ver}/patch_${name}_${ver}_${model}")
 check_ditch_status(${name}_${model} ${ver} ${dir})
 if(NOT ditched_${name}_${model}_${ver})
   ExternalProject_Add(${name}_${model}_${ver}
     DOWNLOAD_COMMAND ""
     SOURCE_DIR ${dir}
-#    PATCH_COMMAND patch -p1 < ${patch}
     BUILD_IN_SOURCE 1
     CONFIGURE_COMMAND ""
     BUILD_COMMAND ${MAKE_PARALLEL} ds_generic_wimp_shared
     INSTALL_COMMAND ""
   )
   add_extra_targets("backend model" ${name} ${ver} ${dir}/${model} ${model} "yes | clean")
-#  set_as_default_version("backend model" ${name}_${model} ${ver})
 endif()
 
 # DarkSUSY base (for all models)
-# FIXME Something needs to be added to make sure the DarkSUSY base and models build one at a time...
+# FIXME Something needs to be added to set_as_default_version to make sure that the DarkSUSY models build one at a time...
 set(name "darksusy")
 set(ver "6.2.2")
 set(dl "https://darksusy.hepforge.org/tars/${name}-${ver}.tgz")
@@ -259,10 +250,10 @@ if(NOT ditched_${name}_${ver})
     #CONFIGURE_COMMAND ./configure FC=${CMAKE_Fortran_COMPILER} FCFLAGS=${GAMBIT_Fortran_FLAGS} FFLAGS=${GAMBIT_Fortran_FLAGS} CC=${CMAKE_C_COMPILER} CFLAGS=${GAMBIT_C_FLAGS} CXX=${CMAKE_CXX_COMPILER} CXXFLAGS=${GAMBIT_CXX_FLAGS}
     CONFIGURE_COMMAND ./configure FC=${CMAKE_Fortran_COMPILER} FCFLAGS=${DS_Fortran_FLAGS} FFLAGS=${DS_Fortran_FLAGS} CC=${CMAKE_C_COMPILER} CFLAGS=${CMAKE_C_FLAGS} CXX=${CMAKE_CXX_COMPILER} CXXFLAGS=${CMAKE_CXX_FLAGS}
     # FIXME Need to add shared option
-    # BUILD_COMMAND ${MAKE_PARALLEL} dslib_shared
+    #BUILD_COMMAND ${MAKE_PARALLEL} dslib_shared
     BUILD_COMMAND ${MAKE_PARALLEL} all
-#          COMMAND ${MAKE_PARALLEL} install_tables
-#          COMMAND ${MAKE_PARALLEL} ds_mssm_shared
+    #COMMAND ${MAKE_PARALLEL} install_tables
+    #COMMAND ${MAKE_PARALLEL} ds_mssm_shared
     INSTALL_COMMAND ""
   )
   add_extra_targets("backend" ${name} ${ver} ${dir} ${dl} clean)
@@ -271,13 +262,11 @@ endif()
 
 # DarkSUSY MSSM module
 set(model "MSSM")
-#set(patch "${PROJECT_SOURCE_DIR}/Backends/patches/${name}/${ver}/patch_${name}_${ver}_${model}")
 check_ditch_status(${name}_${model} ${ver} ${dir})
 if(NOT ditched_${name}_${model}_${ver})
   ExternalProject_Add(${name}_${model}_${ver}
     DOWNLOAD_COMMAND ""
     SOURCE_DIR ${dir}
-#    PATCH_COMMAND patch -p1 < ${patch}
     BUILD_IN_SOURCE 1
     CONFIGURE_COMMAND ""
     BUILD_COMMAND ${MAKE_PARALLEL} ds_mssm_shared
@@ -289,13 +278,11 @@ endif()
 
 # DarkSUSY generic_wimp module
 set(model "generic_wimp")
-#set(patch "${PROJECT_SOURCE_DIR}/Backends/patches/${name}/${ver}/patch_${name}_${ver}_${model}")
 check_ditch_status(${name}_${model} ${ver} ${dir})
 if(NOT ditched_${name}_${model}_${ver})
   ExternalProject_Add(${name}_${model}_${ver}
     DOWNLOAD_COMMAND ""
     SOURCE_DIR ${dir}
-#    PATCH_COMMAND patch -p1 < ${patch}
     BUILD_IN_SOURCE 1
     CONFIGURE_COMMAND ""
     BUILD_COMMAND ${MAKE_PARALLEL} ds_generic_wimp_shared
@@ -304,7 +291,6 @@ if(NOT ditched_${name}_${model}_${ver})
   add_extra_targets("backend model" ${name} ${ver} ${dir}/${model} ${model} "yes | clean")
   set_as_default_version("backend model" ${name}_${model} ${ver})
 endif()
-
 
 
 # SuperIso
