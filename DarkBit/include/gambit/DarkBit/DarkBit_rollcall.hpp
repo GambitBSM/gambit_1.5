@@ -92,7 +92,7 @@
 #define MODULE DarkBit
 START_MODULE
 
-  // Make sure LocalHalo model is initialized in DarkSUSY
+  /// Make sure LocalHalo model is initialized in DarkSUSY
   #define CAPABILITY DarkSUSY5_PointInit_LocalHalo
   START_CAPABILITY
     #define FUNCTION DarkSUSY5_PointInit_LocalHalo_func
@@ -175,6 +175,7 @@ START_MODULE
       BACKEND_REQ(dsancoann, (ds6), DS_DSANCOANN)
       BACKEND_REQ(DSparticle_code, (ds6), int, (const str&))
       BACKEND_OPTION((DarkSUSY_MSSM, 6.1.1, 6.2.2), (ds6))
+      FORCE_SAME_BACKEND(ds6)
     #undef FUNCTION
   #undef CAPABILITY
 
@@ -200,7 +201,7 @@ START_MODULE
   #define CAPABILITY RD_oh2
   START_CAPABILITY
 
-// General Boltzmann solver from DarkSUSY, using arbitrary Weff
+    /// General Boltzmann solver from DarkSUSY, using arbitrary Weff
     #define FUNCTION RD_oh2_DS_general
       START_FUNCTION(double)
       DEPENDENCY(RD_spectrum_ordered, RD_spectrum_type)
@@ -243,7 +244,7 @@ START_MODULE
       BACKEND_OPTION((DarkSUSY, 5.1.3), (ds5))  // Only for DarkSUSY5
     #undef FUNCTION
 
-    // Routine for cross checking relic density results, using DarkSUSY5
+    /// Routine for cross checking relic density results, using DarkSUSY5
     // TODO: corresponding function for DS6+ not yet implemented
     #define FUNCTION RD_oh2_DarkSUSY_DS5
       START_FUNCTION(double)
@@ -254,13 +255,13 @@ START_MODULE
       BACKEND_OPTION((DarkSUSY, 5.1.3), (ds5))  // Only for DarkSUSY5
     #undef FUNCTION
 
-    // Routine for cross checking relic density results
+    /// Routine for cross checking relic density results, using MicrOmegas
     #define FUNCTION RD_oh2_MicrOmegas
       START_FUNCTION(double)
       DEPENDENCY(RD_oh2_Xf, ddpair)
     #undef FUNCTION
 
-    // Routine for computing axion energy density today from vacuum misalignment, assuming no axion decays.
+    /// Routine for computing axion energy density today from vacuum misalignment, assuming no axion decays.
     #define FUNCTION RD_oh2_Axions
       START_FUNCTION(double)
         ALLOW_MODEL(GeneralALP)
@@ -270,7 +271,7 @@ START_MODULE
   #undef CAPABILITY
 
 
-  // get oh2 and Xf simultaneously
+  /// Get oh2 and Xf simultaneously
   #define CAPABILITY RD_oh2_Xf
   START_CAPABILITY
     #define FUNCTION RD_oh2_Xf_MicrOmegas
@@ -290,7 +291,7 @@ START_MODULE
   #undef CAPABILITY
 
 
-  // Xf = m_WIMP/T_freezeout
+  /// Xf = m_WIMP/T_freezeout
   #define CAPABILITY Xf
   START_CAPABILITY
     #define FUNCTION Xf_MicrOmegas
@@ -299,7 +300,7 @@ START_MODULE
     #undef FUNCTION
   #undef CAPABILITY
 
-  // Contributions of different annihilation channels to the relic density
+  /// Contributions of different annihilation channels to the relic density
   #define CAPABILITY relic_density_contributions
   START_CAPABILITY
     #define FUNCTION print_channel_contributions_MicrOmegas
@@ -309,7 +310,7 @@ START_MODULE
     #undef FUNCTION
   #undef CAPABILITY
 
-  // Contributions of semi-annihilation to the relic density
+  /// Contributions of semi-annihilation to the relic density
   #define CAPABILITY semi_annihilation_fraction
   START_CAPABILITY
     #define FUNCTION get_semi_ann_MicrOmegas
@@ -320,7 +321,7 @@ START_MODULE
     #undef FUNCTION
   #undef CAPABILITY
 
-  // Fraction of the relic density constituted by the DM candidate under investigation
+  /// Fraction of the relic density constituted by the DM candidate under investigation
   #define CAPABILITY RD_fraction
   START_CAPABILITY
     #define FUNCTION RD_fraction_one
@@ -339,7 +340,7 @@ START_MODULE
 
   // Cascade decays --------------------------------------------
 
-  // Function for retrieving list of final states for cascade decays
+  /// Function for retrieving list of final states for cascade decays
   #define CAPABILITY cascadeMC_FinalStates
   START_CAPABILITY
     #define FUNCTION cascadeMC_FinalStates
@@ -347,7 +348,7 @@ START_MODULE
     #undef FUNCTION
   #undef CAPABILITY
 
-  // Function setting up the decay table used in decay chains
+  /// Function setting up the decay table used in decay chains
   #define CAPABILITY cascadeMC_DecayTable
   START_CAPABILITY
     #define FUNCTION cascadeMC_DecayTable
@@ -357,7 +358,7 @@ START_MODULE
     #undef FUNCTION
   #undef CAPABILITY
 
-  // Loop manager for cascade decays
+  /// Loop manager for cascade decays
   #define CAPABILITY cascadeMC_LoopManagement
   START_CAPABILITY
     #define FUNCTION cascadeMC_LoopManager
@@ -366,7 +367,7 @@ START_MODULE
     #undef FUNCTION
   #undef CAPABILITY
 
-  // Function selecting initial state for decay chain
+  /// Function selecting initial state for decay chain
   #define CAPABILITY cascadeMC_InitialState
   START_CAPABILITY
     #define FUNCTION cascadeMC_InitialState
@@ -376,7 +377,7 @@ START_MODULE
     #undef FUNCTION
   #undef CAPABILITY
 
-  // Event counter for cascade decays
+  /// Event counter for cascade decays
   #define CAPABILITY cascadeMC_EventCount
   START_CAPABILITY
     #define FUNCTION cascadeMC_EventCount
@@ -386,7 +387,7 @@ START_MODULE
     #undef FUNCTION
   #undef CAPABILITY
 
-  // Function for generating decay chains
+  /// Function for generating decay chains
   #define CAPABILITY cascadeMC_ChainEvent
   START_CAPABILITY
     #define FUNCTION cascadeMC_GenerateChain
@@ -397,7 +398,7 @@ START_MODULE
     #undef FUNCTION
   #undef CAPABILITY
 
-  // Function responsible for histogramming and evaluating end conditions for event loop
+  /// Function responsible for histogramming and evaluating end conditions for event loop
   #define CAPABILITY cascadeMC_Histograms
   START_CAPABILITY
     #define FUNCTION cascadeMC_Histograms
@@ -411,7 +412,7 @@ START_MODULE
     #undef FUNCTION
   #undef CAPABILITY
 
-  // Function requesting and returning gamma ray spectra from cascade decays.
+  /// Function requesting and returning gamma ray spectra from cascade decays.
   #define CAPABILITY cascadeMC_gammaSpectra
   START_CAPABILITY
     #define FUNCTION cascadeMC_gammaSpectra
@@ -424,7 +425,7 @@ START_MODULE
   #undef CAPABILITY
 
   /*
-  // Function for printing test result of cascade decays
+  /// Function for printing test result of cascade decays
   #define CAPABILITY cascadeMC_PrintResult
   START_CAPABILITY
     #define FUNCTION cascadeMC_PrintResult
@@ -436,7 +437,7 @@ START_MODULE
   */
 
   /*
-  // Process catalog for testing purposes
+  /// Process catalog for testing purposes
   #define CAPABILITY cascadeMC_test_TH_ProcessCatalog
   START_CAPABILITY
     #define FUNCTION cascadeMC_test_TH_ProcessCatalog
@@ -444,7 +445,7 @@ START_MODULE
     #undef FUNCTION
   #undef CAPABILITY
 
-  // Unit test for decay chains
+  /// Unit test for decay chains
   #define CAPABILITY cascadeMC_UnitTest
   START_CAPABILITY
     #define FUNCTION cascadeMC_UnitTest
@@ -456,7 +457,7 @@ START_MODULE
   */
 
   // Gamma rays --------------------------------------------
-  //
+
   #define CAPABILITY GA_missingFinalStates
   START_CAPABILITY
     #define FUNCTION GA_missingFinalStates
@@ -488,14 +489,13 @@ START_MODULE
 
   #define CAPABILITY TH_ProcessCatalog
   START_CAPABILITY
-    // For DarkSUSY5:
+
+    /// Process Catalogue from DarkSUSY5
     #define FUNCTION TH_ProcessCatalog_DS5_MSSM
       START_FUNCTION(TH_ProcessCatalog)
-      //ALLOW_MODELS(MSSM63atQ)
       DEPENDENCY(MSSM_spectrum, Spectrum)
       DEPENDENCY(DarkMatter_ID, std::string)
       DEPENDENCY(decay_rates,DecayTable)
-      //BACKEND_REQ(mspctm, (ds5), DS5_MSPCTM)
       BACKEND_REQ(dssigmav, (ds5), double, (int&))
       BACKEND_REQ(dsIBffdxdy, (ds5), double, (int&, double&, double&))
       BACKEND_REQ(dsIBhhdxdy, (ds5), double, (int&, double&, double&))
@@ -504,7 +504,8 @@ START_MODULE
       BACKEND_REQ(IBintvars, (ds5), DS_IBINTVARS)
       BACKEND_OPTION((DarkSUSY, 5.1.3), (ds5))  // Only for DarkSUSY5
     #undef FUNCTION
-    // For DarkSUSY6 MSSM:
+
+    /// Process Catalogue from DarkSUSY6 (MSSM)
     #define FUNCTION TH_ProcessCatalog_DS_MSSM
       START_FUNCTION(TH_ProcessCatalog)
       DEPENDENCY(MSSM_spectrum, Spectrum)
@@ -518,13 +519,16 @@ START_MODULE
       BACKEND_REQ(dsIBwwdxdy, (ds6), double, (int&, double&, double&))
       BACKEND_REQ(IBintvars, (ds6), DS_IBINTVARS)
       BACKEND_OPTION((DarkSUSY_MSSM, 6.1.1, 6.2.2), (ds6))  // Only for DarkSUSY6 MSSM
+      FORCE_SAME_BACKEND(ds6)
     #undef FUNCTION
+
     #define FUNCTION TH_ProcessCatalog_ScalarSingletDM_Z2
       START_FUNCTION(TH_ProcessCatalog)
       DEPENDENCY(decay_rates, DecayTable)
       DEPENDENCY(ScalarSingletDM_Z2_spectrum, Spectrum)
       ALLOW_MODELS(ScalarSingletDM_Z2,ScalarSingletDM_Z2_running)
     #undef FUNCTION
+
     #define FUNCTION TH_ProcessCatalog_ScalarSingletDM_Z3
       START_FUNCTION(TH_ProcessCatalog)
       DEPENDENCY(decay_rates, DecayTable)
@@ -534,18 +538,21 @@ START_MODULE
       FORCE_SAME_BACKEND(gimmemicro)
       ALLOW_MODELS(ScalarSingletDM_Z3,ScalarSingletDM_Z3_running)
     #undef FUNCTION
+
     #define FUNCTION TH_ProcessCatalog_VectorSingletDM_Z2
       START_FUNCTION(TH_ProcessCatalog)
       DEPENDENCY(VectorSingletDM_Z2_spectrum, Spectrum)
       DEPENDENCY(decay_rates, DecayTable)
       ALLOW_MODELS(VectorSingletDM_Z2)
     #undef FUNCTION
+
     #define FUNCTION TH_ProcessCatalog_MajoranaSingletDM_Z2
       START_FUNCTION(TH_ProcessCatalog)
       DEPENDENCY(MajoranaSingletDM_Z2_spectrum, Spectrum)
       DEPENDENCY(decay_rates, DecayTable)
       ALLOW_MODELS(MajoranaSingletDM_Z2)
     #undef FUNCTION
+
     #define FUNCTION TH_ProcessCatalog_DiracSingletDM_Z2
       START_FUNCTION(TH_ProcessCatalog)
       DEPENDENCY(decay_rates, DecayTable)
@@ -709,6 +716,7 @@ START_MODULE
       BACKEND_REQ(ddcomlegacy, (ds6), DS_DDCOMLEGACY)
       BACKEND_REQ(ddmssmcom, (ds6), DS_DDMSSMCOM)
       BACKEND_OPTION((DarkSUSY_MSSM, 6.1.1, 6.2.2), (ds6))  // Only for DarkSUSY6 MSSM
+      FORCE_SAME_BACKEND(ds6)
       ALLOW_JOINT_MODEL(nuclear_params_fnq,MSSM63atQ)
     #undef FUNCTION
 
@@ -890,7 +898,6 @@ START_MODULE
    CAT(EXPERIMENT,_GetBinSignal), VERSIONS, (needs_DDCalc))                         \
 
 
-
   // Declare different DD experiments that exist in DDCalc.
   DD_DECLARE_EXPERIMENT(XENON100_2012)        // Aprile et al., PRL 109, 181301 (2013) [arxiv:1207.5988]
   DD_DECLARE_EXPERIMENT(XENON1T_2017)         // Aprile et al., PRL 119, 181301 (2017) [arxiv:1705.06655]
@@ -948,7 +955,7 @@ START_MODULE
   // Solar capture ------------------------
 
   /// Capture rate of regular dark matter in the Sun (no v-dependent or q-dependent cross-sections) (s^-1).
-  #define CAPABILITY capture_rate_Sun 
+  #define CAPABILITY capture_rate_Sun
   START_CAPABILITY
     #define FUNCTION capture_rate_Sun_const_xsec_DS5 // DS 5
       START_FUNCTION(double)
@@ -962,7 +969,7 @@ START_MODULE
         #undef CONDITIONAL_DEPENDENCY
       BACKEND_OPTION((DarkSUSY, 5.1.3), (ds5))  // Only for DarkSUSY5
     #undef FUNCTION
-  
+
     #define FUNCTION capture_rate_Sun_const_xsec // DS 6
       START_FUNCTION(double)
       BACKEND_REQ(cap_Sun_v0q0_isoscalar_DS, (ds6), double, (const double&, const double&, const double&, const double&))
@@ -975,6 +982,7 @@ START_MODULE
       BACKEND_OPTION((DarkSUSY_MSSM, 6.1.1, 6.2.2), (ds6))
       BACKEND_OPTION((DarkSUSY_generic_wimp, 6.1.1, 6.2.2), (ds6))
       BACKEND_OPTION((DarkSUSY_silveira_zee, 6.1.1, 6.2.2), (ds6))
+      FORCE_SAME_BACKEND(ds6)
 //JE FIXME / PLEASE CHECK: I don't think this is needed / wanted
 //        #define CONDITIONAL_DEPENDENCY DarkSUSY_PointInit_LocalHalo
 //        START_CONDITIONAL_DEPENDENCY(bool)
@@ -1344,7 +1352,7 @@ START_MODULE
   START_CAPABILITY
     #define FUNCTION SimYieldTable_DarkSUSY
     START_FUNCTION(SimYieldTable)
-    BACKEND_REQ(dsanyield_sim, (), double, (double&,double&,int&,char*,int&,int&,int&)) 
+    BACKEND_REQ(dsanyield_sim, (), double, (double&,double&,int&,char*,int&,int&,int&))
     #undef FUNCTION
     #define FUNCTION SimYieldTable_DS5 // DS5 only
     START_FUNCTION(SimYieldTable)
