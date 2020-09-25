@@ -1044,12 +1044,13 @@ START_MODULE
     DEPENDENCY(mwimp, double)
     DEPENDENCY(sigmav, double)
     DEPENDENCY(DarkMatter_ID, std::string)
-    BACKEND_REQ(DS_nuyield_setup, (), void, (const double(&)[29],
+    BACKEND_REQ(DS_nuyield_setup, (ds), void, (const double(&)[29],
      const double(&)[29][3], const double(&)[15], const double(&)[3], const double&,
      const double&))
-    BACKEND_REQ(nuyield, (), double, (const double&, const int&, void*&))
-    BACKEND_REQ(get_DS_neutral_h_decay_channels, (), std::vector< std::vector<str> >, ())
-    BACKEND_REQ(get_DS_charged_h_decay_channels, (), std::vector< std::vector<str> >, ())
+    BACKEND_REQ(nuyield, (ds), double, (const double&, const int&, void*&))
+    BACKEND_REQ(get_DS_neutral_h_decay_channels, (ds), std::vector< std::vector<str> >, ())
+    BACKEND_REQ(get_DS_charged_h_decay_channels, (ds), std::vector< std::vector<str> >, ())
+    FORCE_SAME_BACKEND(ds)
     #undef FUNCTION
   #undef CAPABILITY
 
