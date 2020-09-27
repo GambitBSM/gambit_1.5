@@ -1,3 +1,10 @@
+GAMBIT Nuclear Physics
+======================
+gambit_np is a test project for global fits in nuclear physics, based on the GAMBIT software from high-energy physics (https://gambit.hepforge.org/).
+
+Below is the original README for the GAMBIT v1.5.0 repository (https://github.com/GambitBSM/gambit_1.5), which this repository is forked from.
+
+
 GAMBIT
 ======
 
