@@ -1,0 +1,15 @@
+mkdir build
+
+cd build
+
+cmake -Ditch="Mathematica;great;ColliderBit;CosmoBit;DarkBit;DecayBit;ExampleBit_A;ExampleBit_B;FlavBit;NeutrinoBit;PrecisionBit;SpecBit" -DEIGEN3_INCLUDE_DIR=/home/anders/physics/tools/eigen -DWITH_MPI=On -DWITH_HEPMC=Off -DWITH_ROOT=Off -DCMAKE_Fortran_COMPILER=gfortran-9 -DCMAKE_C_COMPILER=gcc-9 -DCMAKE_CXX_COMPILER=g++-9 ..
+
+make -j4 scanners
+
+cmake ..
+
+make -j4 NuclearBit 
+
+make -j4
+
+
