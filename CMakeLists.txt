@@ -287,6 +287,12 @@ if(HAVE_PYBIND11)
   endif()
 endif()
 
+# Check if we are using gnu version 7.2, and forbid the use of C++17 if so.
+if("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU" AND CMAKE_CXX_COMPILER_VERSION VERSION_GREATER 7.1 AND CMAKE_CXX_COMPILER_VERSION VERSION_LESS 7.3)
+    set(PERMIT_CXX17_CHECK FALSE)
+endif()
+
+
 # Check for C++11, C++14 and C++17 support.
 include(CheckCXXCompilerFlag)
 if(PERMIT_CXX17_CHECK)
