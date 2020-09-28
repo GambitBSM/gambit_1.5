@@ -147,10 +147,11 @@ namespace Gambit
       std::string reslist[] = {"h0_2","h0_1","A0","H+"};
       int resSMmax=sizeof(SMreslist) / sizeof(SMreslist[0]);
       int resmax=sizeof(reslist) / sizeof(reslist[0]);
-      // the last 2 resonances in the list can only appear for coannihilations
-      if (result.coannihilatingParticles.size() == 1)
+      // Charged resonances (last items in the lists) can only appear for coannihilations
+      if (result.coannihilatingParticles.size() == 1){
         resSMmax -= 1;
         resmax -= 1;
+      }
       double mres,Gammares;
       for (int i=0; i<resSMmax; i++){
           mres = std::abs(SMspec.get(Par::Pole_Mass,SMreslist[i]));
