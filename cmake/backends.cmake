@@ -181,8 +181,8 @@ set(dir "${PROJECT_SOURCE_DIR}/Backends/installed/${name}/${ver}")
 set(patch "${PROJECT_SOURCE_DIR}/Backends/patches/${name}/${ver}/patch_${name}_${ver}.dif")
 set(DS_Fortran_FLAGS "${BACKEND_Fortran_FLAGS}")  # Workaround to avoid the debug flag (-g) being ignored.
 check_ditch_status(${name} ${ver} ${dir})
-if(NOT ditched_${name}_${ver})
-  ExternalProject_Add(${name}_${ver}
+if(NOT ditched_${name}_${ver}_base)
+  ExternalProject_Add(${name}_${ver}_base
     DOWNLOAD_COMMAND ${DL_BACKEND} ${dl} ${md5} ${dir} ${name} ${ver}
     SOURCE_DIR ${dir}
     BUILD_IN_SOURCE 1
@@ -197,7 +197,7 @@ if(NOT ditched_${name}_${ver})
     #COMMAND ${MAKE_PARALLEL} ds_mssm_shared
     INSTALL_COMMAND ""
   )
-  add_extra_targets("backend" ${name} ${ver} ${dir} ${dl} clean)
+  add_extra_targets("backend base (not functional alone)" ${name} ${ver} ${dir} ${dl} clean)
 endif()
 
 # DarkSUSY MSSM module
@@ -231,7 +231,6 @@ if(NOT ditched_${name}_${model}_${ver})
 endif()
 
 # DarkSUSY base (for all models)
-# FIXME Something needs to be added to set_as_default_version to make sure that the DarkSUSY models build one at a time...
 set(name "darksusy")
 set(ver "6.2.2")
 set(dl "https://darksusy.hepforge.org/tars/${name}-${ver}.tgz")
@@ -240,8 +239,8 @@ set(dir "${PROJECT_SOURCE_DIR}/Backends/installed/${name}/${ver}")
 set(patch "${PROJECT_SOURCE_DIR}/Backends/patches/${name}/${ver}/patch_${name}_${ver}.dif")
 set(DS_Fortran_FLAGS "${BACKEND_Fortran_FLAGS}")  # Workaround to avoid the debug flag (-g) being ignored.
 check_ditch_status(${name} ${ver} ${dir})
-if(NOT ditched_${name}_${ver})
-  ExternalProject_Add(${name}_${ver}
+if(NOT ditched_${name}_${ver}_base)
+  ExternalProject_Add(${name}_${ver}_base
     DOWNLOAD_COMMAND ${DL_BACKEND} ${dl} ${md5} ${dir} ${name} ${ver}
     SOURCE_DIR ${dir}
     BUILD_IN_SOURCE 1
@@ -256,8 +255,7 @@ if(NOT ditched_${name}_${ver})
     #COMMAND ${MAKE_PARALLEL} ds_mssm_shared
     INSTALL_COMMAND ""
   )
-  add_extra_targets("backend" ${name} ${ver} ${dir} ${dl} clean)
-  set_as_default_version("backend" ${name} ${ver})
+  add_extra_targets("backend base (not functional alone)" ${name} ${ver} ${dir} ${dl} clean)
 endif()
 
 # DarkSUSY MSSM module
@@ -527,8 +525,8 @@ set(md5 "72807f6d0ef80737554d8702b6b212c1")
 set(dir "${PROJECT_SOURCE_DIR}/Backends/installed/${name}/${ver}")
 set(patch "${PROJECT_SOURCE_DIR}/Backends/patches/${name}/${ver}/patch_${name}_${ver}")
 check_ditch_status(${name} ${ver} ${dir})
-if(NOT ditched_${name}_${ver})
-  ExternalProject_Add(${name}_${ver}
+if(NOT ditched_${name}_${ver}_base)
+  ExternalProject_Add(${name}_${ver}_base
     DOWNLOAD_COMMAND ${DL_BACKEND} ${dl} ${md5} ${dir} ${name} ${ver}
     SOURCE_DIR ${dir}
     PATCH_COMMAND patch -p1 < ${patch}
@@ -551,7 +549,7 @@ if(NOT ditched_${name}_${ver})
           COMMAND make
     INSTALL_COMMAND ""
   )
-  add_extra_targets("backend" ${name} ${ver} ${dir} ${dl} "yes | clean")
+  add_extra_targets("backend base (functional alone)" ${name} ${ver} ${dir} ${dl} "yes | clean")
   set_as_default_version("backend" ${name} ${ver})
 endif()
 

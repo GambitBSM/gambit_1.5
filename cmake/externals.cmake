@@ -107,15 +107,41 @@ macro(add_extra_targets type package ver dir dl target)
   string(REGEX REPLACE " " ";" updated_target "${updated_target}")
   if (${type} STREQUAL "backend model")
     set(pname "${package}_${model}_${ver}")
-    add_dependencies(${pname} ${package}_${ver})
-    add_chained_external_clean(${pname} ${dir} "${updated_target}" ${package}_${ver})
+    add_dependencies(${pname} ${package}_${ver}_base)
+    add_chained_external_clean(${pname} ${dir} "${updated_target}" ${package}_${ver}_base)
     add_dependencies(clean-backends clean-${pname})
   else()
-    set(pname "${package}_${ver}")
-    string(REGEX REPLACE ".*/" "${${type}_download}/" short_dl "${dl}")
-    add_external_clean(${package}_${ver} ${dir} ${short_dl} "${updated_target}")
-    add_dependencies(clean-${type}s clean-${pname})
-    add_dependencies(nuke-${type}s nuke-${pname})
+    if (${type} MATCHES "^backend base")
+      set(effective_type "backend")
+      set(pname "${package}_${ver}_base")
+      #Add the all_models target
+    else()
+      set(effective_type ${type})
+      set(pname "${package}_${ver}")
+    endif()
+    string(REGEX REPLACE ".*/" "${${effective_type}_download}/" short_dl "${dl}")
+    add_external_clean(${pname} ${dir} ${short_dl} "${updated_target}")
+    add_dependencies(clean-${effective_type}s clean-${pname})
+    add_dependencies(nuke-${effective_type}s nuke-${pname})
+    if(${type} STREQUAL "backend base (functional alone)")
+      # This is a bit sneaky; here we overload the use of set_as_default_version to make an alias package_ver to package_ver_base
+      set_as_default_version("backend" ${package}_${ver} "base")
+    elseif(${type} STREQUAL "backend base (not functional alone)")
+      add_custom_target(${package}_${ver}
+        COMMAND ${CMAKE_COMMAND} -E echo
+        COMMAND ${CMAKE_COMMAND} -E echo "Sorry, the make target ${package}_${ver} does not actually exist, as the"
+        COMMAND ${CMAKE_COMMAND} -E echo "base package of this version of this backend cannot be used without a"
+        COMMAND ${CMAKE_COMMAND} -E echo "model-specific extension. Please build either a single model-specific"
+        COMMAND ${CMAKE_COMMAND} -E echo "extension of ${package}_${ver} by running"
+        COMMAND ${CMAKE_COMMAND} -E echo
+        COMMAND ${CMAKE_COMMAND} -E cmake_echo_color --red --bold "  make ${package}_[model name]_${ver}"
+        COMMAND ${CMAKE_COMMAND} -E echo
+        COMMAND ${CMAKE_COMMAND} -E echo "or build all model-specific extensions by running"
+        COMMAND ${CMAKE_COMMAND} -E echo
+        COMMAND ${CMAKE_COMMAND} -E cmake_echo_color --red --bold "  make ${package}_all_models_${ver}"
+        COMMAND ${CMAKE_COMMAND} -E echo
+        COMMAND exit 1)
+    endif()
   endif()
   enable_auto_rebuild(${pname})
   set_target_properties(${pname} PROPERTIES EXCLUDE_FROM_ALL 1)
