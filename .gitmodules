@@ -1,0 +1,3 @@
+[submodule "Backends/installed/gledeli"]
+	path = Backends/installed/gledeli
+	url = git@github.com:anderkve/gledeli.git
