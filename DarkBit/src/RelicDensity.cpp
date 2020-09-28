@@ -546,23 +546,22 @@ namespace Gambit
         TH_Process annProc = (*Dep::TH_ProcessCatalog).getProcess(DMid, DMid);
         double mDM = (*Dep::TH_ProcessCatalog).getParticleProperty(DMid).mass;
 
-        // TB: This is taken care of in RD_oh2_DS_general now !
-        // If process involves non-self-conjugate DM then we need to add a factor of 1/2 to the final weff. This must be explicitly set in the process catalogue.
-        // double k = (annProc.isSelfConj) ? 1. : 0.5;
-        double k=1;
-
         auto Weff = daFunk::zero("peff");
         auto peff = daFunk::var("peff");
         auto s = 4*(peff*peff + mDM*mDM);
 
+        // Individual contributions to the invariant rate Weff. Note that no
+        // symmetry factor of 1/2 for non-identical initial state particles
+        // (non-self-conjugate DM) should appear here. This factor does explicitly
+        // enter, however, when calculating the relic density in RD_oh2_DS_general.
         for (std::vector<TH_Channel>::iterator it = annProc.channelList.begin();
             it != annProc.channelList.end(); ++it)
         {
           Weff = Weff +
-            k*it->genRate->set("v", 2*peff/sqrt(mDM*mDM+peff*peff))*s/gev2tocm3s1;
+            it->genRate->set("v", 2*peff/sqrt(mDM*mDM+peff*peff))*s/gev2tocm3s1;
         }
         // Add genRateMisc to Weff
-        Weff = Weff + k*annProc.genRateMisc->set("v", 2*peff/sqrt(mDM*mDM+peff*peff))*s/gev2tocm3s1;
+        Weff = Weff + annProc.genRateMisc->set("v", 2*peff/sqrt(mDM*mDM+peff*peff))*s/gev2tocm3s1;
         if ( Weff->getNArgs() != 1 )
           DarkBit_error().raise(LOCAL_INFO,
               "RD_eff_annrate_from_ProcessCatalog: Wrong number of arguments.\n"
