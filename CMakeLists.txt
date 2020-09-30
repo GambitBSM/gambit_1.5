@@ -271,10 +271,10 @@ set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${mylibdir} )
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${mylibdir} )
 # Second, for multi-config builds (e.g. msvc)
 foreach(OUTPUTCONFIG ${CMAKE_CONFIGURATION_TYPES} )
-    string(TOUPPER ${OUTPUTCONFIG} OUTPUTCONFIG )
-    set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_${OUTPUTCONFIG} ${mybindir} )
-    set(CMAKE_LIBRARY_OUTPUT_DIRECTORY_${OUTPUTCONFIG} ${mylibdir} )
-    set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY_${OUTPUTCONFIG} ${mylibdir} )
+  string(TOUPPER ${OUTPUTCONFIG} OUTPUTCONFIG )
+  set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_${OUTPUTCONFIG} ${mybindir} )
+  set(CMAKE_LIBRARY_OUTPUT_DIRECTORY_${OUTPUTCONFIG} ${mylibdir} )
+  set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY_${OUTPUTCONFIG} ${mylibdir} )
 endforeach()
 
 # Check if we are using 2019 intel compilers or gcc 6.1 or 6.2 together with pybind11, and forbid the use of C++17 if so.
@@ -285,6 +285,11 @@ if(HAVE_PYBIND11)
   else()
     set(PERMIT_CXX17_CHECK TRUE)
   endif()
+endif()
+
+# Check if we are using gnu version 7.2, and forbid the use of C++17 if so.
+if("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU" AND CMAKE_CXX_COMPILER_VERSION VERSION_GREATER 7.1 AND CMAKE_CXX_COMPILER_VERSION VERSION_LESS 7.3)
+  set(PERMIT_CXX17_CHECK FALSE)
 endif()
 
 # Check for C++11, C++14 and C++17 support.
