@@ -212,7 +212,7 @@ if(NOT ditched_${name}_${model}_${ver})
     BUILD_COMMAND ${MAKE_PARALLEL} ds_mssm_shared
     INSTALL_COMMAND ""
   )
-  add_extra_targets("backend model" ${name} ${ver} ${dir}/${model} ${model} "yes | clean")
+  add_extra_targets("backend model" ${name} ${ver} ${dir}/${model} ${model} clean)
 endif()
 
 # DarkSUSY generic_wimp module
@@ -227,7 +227,7 @@ if(NOT ditched_${name}_${model}_${ver})
     BUILD_COMMAND ${MAKE_PARALLEL} ds_generic_wimp_shared
     INSTALL_COMMAND ""
   )
-  add_extra_targets("backend model" ${name} ${ver} ${dir}/${model} ${model} "yes | clean")
+  add_extra_targets("backend model" ${name} ${ver} ${dir}/${model} ${model} clean)
 endif()
 
 # DarkSUSY base (for all models)
@@ -256,6 +256,7 @@ if(NOT ditched_${name}_${ver}_base)
     INSTALL_COMMAND ""
   )
   add_extra_targets("backend base (not functional alone)" ${name} ${ver} ${dir} ${dl} clean)
+  #set_as_default_version("backend" ${name} ${ver})
 endif()
 
 # DarkSUSY MSSM module
@@ -270,8 +271,8 @@ if(NOT ditched_${name}_${model}_${ver})
     BUILD_COMMAND ${MAKE_PARALLEL} ds_mssm_shared
     INSTALL_COMMAND ""
   )
-  add_extra_targets("backend model" ${name} ${ver} ${dir}/${model} ${model} "yes | clean")
-  set_as_default_version("backend model" ${name}_${model} ${ver})
+  add_extra_targets("backend model" ${name} ${ver} ${dir}/${model} ${model} clean)
+  set_as_default_version("backend model" ${name} ${ver} ${model})
 endif()
 
 # DarkSUSY generic_wimp module
@@ -286,8 +287,8 @@ if(NOT ditched_${name}_${model}_${ver})
     BUILD_COMMAND ${MAKE_PARALLEL} ds_generic_wimp_shared
     INSTALL_COMMAND ""
   )
-  add_extra_targets("backend model" ${name} ${ver} ${dir}/${model} ${model} "yes | clean")
-  set_as_default_version("backend model" ${name}_${model} ${ver})
+  add_extra_targets("backend model" ${name} ${ver} ${dir}/${model} ${model} clean)
+  set_as_default_version("backend model" ${name} ${ver} ${model})
 endif()
 
 
@@ -568,7 +569,7 @@ if(NOT ditched_${name}_${model}_${ver})
     INSTALL_COMMAND ""
   )
   add_extra_targets("backend model" ${name} ${ver} ${dir}/${model} ${model} "yes | clean")
-  set_as_default_version("backend model" ${name}_${model} ${ver})
+  set_as_default_version("backend model" ${name} ${ver} ${model})
 endif()
 
 # MicrOmegas ScalarSingletDM_Z2 model
@@ -586,7 +587,7 @@ if(NOT ditched_${name}_${model}_${ver})
     INSTALL_COMMAND ""
   )
   add_extra_targets("backend model" ${name} ${ver} ${dir}/${model} ${model} "yes | clean")
-  set_as_default_version("backend model" ${name}_${model} ${ver})
+  set_as_default_version("backend model" ${name} ${ver} ${model})
 endif()
 
 # MicrOmegas ScalarSingletDM_Z3 model
@@ -604,7 +605,7 @@ if(NOT ditched_${name}_${model}_${ver})
     INSTALL_COMMAND ""
   )
   add_extra_targets("backend model" ${name} ${ver} ${dir}/${model} ${model} "yes | clean")
-  set_as_default_version("backend model" ${name}_${model} ${ver})
+  set_as_default_version("backend model" ${name} ${ver} ${model})
 endif()
 
 # MicrOmegas VectorSingletDM_Z2 model
@@ -622,7 +623,7 @@ if(NOT ditched_${name}_${model}_${ver})
     INSTALL_COMMAND ""
   )
   add_extra_targets("backend model" ${name} ${ver} ${dir}/${model} ${model} "yes | clean")
-  set_as_default_version("backend model" ${name}_${model} ${ver})
+  set_as_default_version("backend model" ${name} ${ver} ${model})
 endif()
 
 # MicrOmegas MajoranaSingletDM_Z2 model
@@ -640,7 +641,7 @@ if(NOT ditched_${name}_${model}_${ver})
     INSTALL_COMMAND ""
   )
   add_extra_targets("backend model" ${name} ${ver} ${dir}/${model} ${model} "yes | clean")
-  set_as_default_version("backend model" ${name}_${model} ${ver})
+  set_as_default_version("backend model" ${name} ${ver} ${model})
 endif()
 
 # MicrOmegas DiracSingletDM_Z2 model
@@ -658,7 +659,7 @@ if(NOT ditched_${name}_${model}_${ver})
     INSTALL_COMMAND ""
   )
   add_extra_targets("backend model" ${name} ${ver} ${dir}/${model} ${model} "yes | clean")
-  set_as_default_version("backend model" ${name}_${model} ${ver})
+  set_as_default_version("backend model" ${name} ${ver} ${model})
 endif()
 
 # MontePythonLike
@@ -1635,9 +1636,3 @@ if(NOT ditched_${name}_${ver})
   add_extra_targets("backend" ${name} ${ver} ${dir} ${dl} clean)
   set_as_default_version("backend" ${name} ${ver})
 endif()
-
-# Alternative download command for getting unreleased things from the gambit_internal repository.
-# If you don't know what that is, you don't need to tinker with these.
-#    DOWNLOAD_COMMAND ${CMAKE_COMMAND} -E cmake_echo_color --yellow --bold ${private_code_warning1}
-#             COMMAND ${CMAKE_COMMAND} -E cmake_echo_color --red --bold ${private_code_warning2}
-#             COMMAND ${CMAKE_COMMAND} -E copy_directory ${loc} ${dir}

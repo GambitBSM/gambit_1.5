@@ -33,21 +33,11 @@
 #************************************************
 
 
-# Specify the location of unreleased codes in the gambit_internal repository.
-set(GAMBIT_INTERNAL "${PROJECT_SOURCE_DIR}/../gambit_internal/unreleased")
-
 # Specify CCPForge credentials
 set(CCPForge_user "gambit_user")
 set(CCPForge_p1 "bsm")
 set(CCPForge_p2 "or")
 set(CCPForge_p3 "bust")
-
-# Specify the warning to give when trying to compile unreleased codes.
-set(private_code_warning "       Retrieving unreleased code from GAMBIT Collaboration private repository. This will fail if you don't have the repository.")
-set(private_code_warning1 "       Retrieving unreleased code from GAMBIT Collaboration private repository.")
-if(NOT EXISTS ${GAMBIT_INTERNAL})
-  set(private_code_warning2 "       The repository was not found by cmake, so this will probably fail!")
-endif()
 
 # Specify where all backend and scanner tarballs are to be stored
 set(backend_download "${PROJECT_SOURCE_DIR}/Backends/downloaded")
@@ -97,52 +87,88 @@ macro(enable_auto_rebuild package)
   add_dependencies(${package} check-rebuild-${package})
 endmacro()
 
+
 # Macro to add all additional targets for a new backend or scanner
 macro(add_extra_targets type package ver dir dl target)
+
+  # Make sense of multi-line responses given for the clean target
   string(REPLACE "|" "| ${MAKE_SERIAL}" updated_target ${target})
   string(FIND "${target}" "|" pipe_found)
   if (pipe_found STREQUAL "-1")
     set(updated_target "${MAKE_SERIAL} ${target}")
   endif()
   string(REGEX REPLACE " " ";" updated_target "${updated_target}")
+
+  # Add extra targets needed for backend models
   if (${type} STREQUAL "backend model")
+
     set(pname "${package}_${model}_${ver}")
     add_dependencies(${pname} ${package}_${ver}_base)
+    add_dependencies(${package}_all_models_${ver} ${pname})
     add_chained_external_clean(${pname} ${dir} "${updated_target}" ${package}_${ver}_base)
     add_dependencies(clean-backends clean-${pname})
+
   else()
+
+    # Choose settings for extra targets needed for backend bases
     if (${type} MATCHES "^backend base")
+
       set(effective_type "backend")
       set(pname "${package}_${ver}_base")
       #Add the all_models target
+      add_custom_target(${package}_all_models_${ver})
+
+    # Choose settings for extra targets needed for scanners and self-contained backends
     else()
+
       set(effective_type ${type})
       set(pname "${package}_${ver}")
+
     endif()
+
+    # Add extra targets needed for backend bases, scanners and self-contained backends
     string(REGEX REPLACE ".*/" "${${effective_type}_download}/" short_dl "${dl}")
     add_external_clean(${pname} ${dir} ${short_dl} "${updated_target}")
     add_dependencies(clean-${effective_type}s clean-${pname})
     add_dependencies(nuke-${effective_type}s nuke-${pname})
+
+    # Add extra targets needed only for a backend base that is able to function as a backend in its own right
     if(${type} STREQUAL "backend base (functional alone)")
+
       # This is a bit sneaky; here we overload the use of set_as_default_version to make an alias package_ver to package_ver_base
       set_as_default_version("backend" ${package}_${ver} "base")
+
+    # Add extra targets for a backend base unable to function without a backend model.  These are just dummy targets that throw an error.
     elseif(${type} STREQUAL "backend base (not functional alone)")
+
       add_custom_target(${package}_${ver}
         COMMAND ${CMAKE_COMMAND} -E echo
-        COMMAND ${CMAKE_COMMAND} -E echo "Sorry, the make target ${package}_${ver} does not actually exist, as the"
-        COMMAND ${CMAKE_COMMAND} -E echo "base package of this version of this backend cannot be used without a"
-        COMMAND ${CMAKE_COMMAND} -E echo "model-specific extension. Please build either a single model-specific"
-        COMMAND ${CMAKE_COMMAND} -E echo "extension of ${package}_${ver} by running"
+        COMMAND ${CMAKE_COMMAND} -E cmake_echo_color --red --bold "Sorry, the make target ${package}_${ver} does not actually exist, as the"
+        COMMAND ${CMAKE_COMMAND} -E cmake_echo_color --red --bold "base package of this this backend cannot be used without a model-specific"
+        COMMAND ${CMAKE_COMMAND} -E cmake_echo_color --red --bold "extension. Please build either:"
         COMMAND ${CMAKE_COMMAND} -E echo
-        COMMAND ${CMAKE_COMMAND} -E cmake_echo_color --red --bold "  make ${package}_[model name]_${ver}"
+        COMMAND ${CMAKE_COMMAND} -E cmake_echo_color --yellow " a. The default versions of all model-specific extensions of ${package}, by running"
         COMMAND ${CMAKE_COMMAND} -E echo
-        COMMAND ${CMAKE_COMMAND} -E echo "or build all model-specific extensions by running"
+        COMMAND ${CMAKE_COMMAND} -E cmake_echo_color --yellow --bold "    make ${package}_all_models"
         COMMAND ${CMAKE_COMMAND} -E echo
-        COMMAND ${CMAKE_COMMAND} -E cmake_echo_color --red --bold "  make ${package}_all_models_${ver}"
+        COMMAND ${CMAKE_COMMAND} -E cmake_echo_color --yellow " b. The default version of a single model-specific extension of ${package}, by running"
+        COMMAND ${CMAKE_COMMAND} -E echo
+        COMMAND ${CMAKE_COMMAND} -E cmake_echo_color --yellow --bold "    make ${package}_[model name]"
+        COMMAND ${CMAKE_COMMAND} -E echo
+        COMMAND ${CMAKE_COMMAND} -E cmake_echo_color --yellow " c. All model-specific extensions of ${package}_${ver}, by running"
+        COMMAND ${CMAKE_COMMAND} -E echo
+        COMMAND ${CMAKE_COMMAND} -E cmake_echo_color --yellow --bold "    make ${package}_all_models_${ver}"
+        COMMAND ${CMAKE_COMMAND} -E echo
+        COMMAND ${CMAKE_COMMAND} -E cmake_echo_color --yellow " d. A single model-specific extension of ${package}_${ver}, by running"
+        COMMAND ${CMAKE_COMMAND} -E echo
+        COMMAND ${CMAKE_COMMAND} -E cmake_echo_color --yellow --bold "    make ${package}_[model name]_${ver}"
         COMMAND ${CMAKE_COMMAND} -E echo
         COMMAND exit 1)
+
     endif()
   endif()
+
+  #Add extra targets common to everything.
   enable_auto_rebuild(${pname})
   set_target_properties(${pname} PROPERTIES EXCLUDE_FROM_ALL 1)
   set(rmstring "${CMAKE_BINARY_DIR}/${pname}-prefix/src/${pname}-stamp/${pname}-download")
@@ -150,6 +176,7 @@ macro(add_extra_targets type package ver dir dl target)
     COMMAND test -e ${rmstring}-failed && ${CMAKE_COMMAND} -E remove -f ${rmstring} ${rmstring}-failed || true
     DEPENDEES download
     DEPENDERS patch configure build)
+
 endmacro()
 
 # Function to check whether or not a given scanner or backend has been ditched
@@ -193,17 +220,28 @@ endfunction()
 
 # Function to set up a new target with a generic name of a backend/scanner and associate it with the default version
 function(set_as_default_version type name default)
-  add_custom_target(${name})
-  add_dependencies(${name} ${name}_${default})
-  add_custom_target(clean-${name})
-  add_dependencies(clean-${name} clean-${name}_${default})
+  #Retrieve the model name if it is also passed
+  if(${ARGC} GREATER 3)
+    set(model ${ARGV3})
+    set(target ${name}_${model})
+  else()
+    set(target ${name})
+  endif()
+  add_custom_target(${target})
+  add_dependencies(${target} ${target}_${default})
+  add_custom_target(clean-${target})
+  add_dependencies(clean-${target} clean-${target}_${default})
   if (type STREQUAL "backend model")
+    if (NOT TARGET ${name}_all_models)
+      add_custom_target(${name}_all_models)
+    endif()
+    add_dependencies(${name}_all_models ${target})
     set(type "backend")
   else()
-    add_custom_target(nuke-${name})
-    add_dependencies(nuke-${name} nuke-${name}_${default})
+    add_custom_target(nuke-${target})
+    add_dependencies(nuke-${target} nuke-${target}_${default})
   endif()
-  add_dependencies(${type}s ${name})
+  add_dependencies(${type}s ${target})
 endfunction()
 
 # Check whether or not Python modules required for backend builds are available
