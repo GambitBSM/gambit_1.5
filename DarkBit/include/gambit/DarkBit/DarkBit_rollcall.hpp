@@ -930,20 +930,17 @@ START_MODULE
   START_CAPABILITY
     #define FUNCTION capture_rate_Sun_const_xsec_DS5 // DS 5
       START_FUNCTION(double)
-      BACKEND_REQ(cap_Sun_v0q0_isoscalar_DS5, (ds5), double, (const double&, const double&, const double&))
+      BACKEND_REQ(cap_Sun_v0q0_isoscalar, (ds5), double, (const double&, const double&, const double&))
       DEPENDENCY(mwimp, double)
       DEPENDENCY(sigma_SI_p, double)
       DEPENDENCY(sigma_SD_p, double)
-        #define CONDITIONAL_DEPENDENCY DarkSUSY5_PointInit_LocalHalo
-        START_CONDITIONAL_DEPENDENCY(bool)
-        ACTIVATE_FOR_BACKEND(cap_Sun_v0q0_isoscalar_DS5, DarkSUSY)
-        #undef CONDITIONAL_DEPENDENCY
-      BACKEND_OPTION((DarkSUSY, 5.1.3), (ds5))  // Only for DarkSUSY5
+      DEPENDENCY(DarkSUSY5_PointInit_LocalHalo, bool)
+      BACKEND_OPTION((DarkSUSY, 5.1.3), (ds5))
     #undef FUNCTION
 
     #define FUNCTION capture_rate_Sun_const_xsec // DS 6
       START_FUNCTION(double)
-      BACKEND_REQ(cap_Sun_v0q0_isoscalar_DS, (ds6), double, (const double&, const double&, const double&, const double&))
+      BACKEND_REQ(cap_Sun_v0q0_isoscalar, (ds6), double, (const double&, const double&, const double&, const double&))
       DEPENDENCY(mwimp, double)
       DEPENDENCY(sigma_SI_p, double)
       DEPENDENCY(sigma_SD_p, double)
@@ -958,21 +955,25 @@ START_MODULE
     ///Alternative function for the above: Capture rate of dark matter with a constant cross section (s^-1), using backend Captn' General
     #define FUNCTION capture_rate_Sun_const_xsec_capgen
     START_FUNCTION(double)
-    BACKEND_REQ(cap_Sun_v0q0_isoscalar,(CaptnGeneral),void,(const double&,const double&,const double&,double&,double&))
-    BACKEND_REQ(cap_sun_saturation,(CaptnGeneral),void,(const double&,double&))
     DEPENDENCY(mwimp,double)
     DEPENDENCY(sigma_SI_p, double)
     DEPENDENCY(sigma_SD_p, double)
+    BACKEND_REQ(cap_Sun_v0q0_isoscalar,(cg),void,(const double&,const double&,const double&,double&,double&))
+    BACKEND_REQ(cap_sun_saturation,(cg),void,(const double&,double&))
+    BACKEND_OPTION((CaptnGeneral),(cg))
+    FORCE_SAME_BACKEND(cg)
     #undef FUNCTION
 
     ///Capture rate of dark matter with q^n or v^n cross section (s^-1), using backend Captn' General
     #define FUNCTION capture_rate_Sun_vnqn
     START_FUNCTION(double)
-    BACKEND_REQ(cap_Sun_vnqn_isoscalar,(CaptnGeneral),void,(const double&,const double&,const int&,const int&,const int&,double&))
-    BACKEND_REQ(cap_sun_saturation,(CaptnGeneral),void,(const double&,double&))
     DEPENDENCY(mwimp,double)
     DEPENDENCY(sigma_SD_p, map_intpair_dbl)
     DEPENDENCY(sigma_SI_p, map_intpair_dbl)
+    BACKEND_REQ(cap_Sun_vnqn_isoscalar,(cg),void,(const double&,const double&,const int&,const int&,const int&,double&))
+    BACKEND_REQ(cap_sun_saturation,(cg),void,(const double&,double&))
+    BACKEND_OPTION((CaptnGeneral),(cg))
+    FORCE_SAME_BACKEND(cg)
     #undef FUNCTION
   #undef CAPABILITY
 

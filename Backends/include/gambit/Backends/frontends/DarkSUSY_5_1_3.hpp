@@ -73,7 +73,7 @@ BE_FUNCTION(dsddgpgn, void, (double&, double&, double&, double&), "dsddgpgn_", "
 BE_FUNCTION(dsSLHAread, void, (const char*, int&, int), "dsslharead_", "dsSLHAread")
 BE_FUNCTION(dsprep, void, (), "dsprep_", "dsprep")
 BE_FUNCTION(dsIByieldone, double, (double&, int&, int&, int&), "dsibyieldone_", "dsibyieldone")
-BE_FUNCTION(dsntcapsuntab, double, (const double&, const double&, const double&), "dsntcapsuntab_", "cap_Sun_v0q0_isoscalar_DS5")
+BE_FUNCTION(dsntcapsuntab, double, (const double&, const double&, const double&), "dsntcapsuntab_", "cap_Sun_v0q0_isoscalar")
 BE_FUNCTION(dsntmuonyield, double, (const double&, const double&, const char&, const int&, const int&, const int&, const int&), "dsntmuonyield_", "raw_muonyield")
 BE_FUNCTION(dswspectrum, void, (int&), "dswspectrum_", "dswspectrum")
 BE_FUNCTION(dswwidth, void, (int&), "dswwidth_", "dswwidth")
@@ -144,7 +144,7 @@ BE_CONV_FUNCTION(DS_charged_h_decay_channels, std::vector<std::vector<str>>, (),
 // Fraction of DM that is accounted for by model
 // BE_INI_DEPENDENCY(RD_fraction, double)
 
-// model-conditional dependencies of BE_INI 
+// model-conditional dependencies of BE_INI
 BE_INI_CONDITIONAL_DEPENDENCY(MSSM_spectrum, Spectrum, MSSM63atQ, CMSSM)
 BE_INI_CONDITIONAL_DEPENDENCY(decay_rates, DecayTable, MSSM63atQ, CMSSM)
 

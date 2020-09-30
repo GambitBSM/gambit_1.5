@@ -2360,6 +2360,9 @@ nulike_1_0_7_init: |
 nulike_1_0_8_init: |
   Initializes nulike_1_0_8.
 
+nulike_1_0_9_init: |
+  Initializes nulike_1_0_9.
+
 nubounds:
   Counts, likelihoods and p-values from neutrino telescope searches for dark matter annihilation in the Sun.
 
@@ -2615,10 +2618,7 @@ dswwidth: |
    Writes out widths.
 
 cap_Sun_v0q0_isoscalar: |
-   Capture rate of dark matter in the sun (for DarkSUSY up to version 5).
-
-cap_Sun_v0q0_isoscalar_DS6: |
-   Capture rate of dark matter in the sun (for DarkSUSY from version 6).
+   Capture rate of standard velocity and momentum-independent dark matter in the sun.
 
 raw_muonyield: |
    Gives either the differential or total yield of muons in a neutrino telescope from dark matter annihilation in the sun.

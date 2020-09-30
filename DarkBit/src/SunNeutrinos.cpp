@@ -48,7 +48,7 @@ namespace Gambit
     {
       using namespace Pipes::capture_rate_Sun_const_xsec_DS5;
 
-      if (BEreq::cap_Sun_v0q0_isoscalar_DS5.origin()=="DarkSUSY")
+      if (BEreq::cap_Sun_v0q0_isoscalar.origin()=="DarkSUSY")
         if(!(*Dep::DarkSUSY5_PointInit_LocalHalo))
           DarkBit_error().raise(LOCAL_INFO,"DarkSUSY halo model not initialized!");
 
@@ -56,7 +56,7 @@ namespace Gambit
       // proton and neutron scattering cross-sections are the same; we
       // assume that whichever backend has been hooked up here does so too.
 
-      result = BEreq::cap_Sun_v0q0_isoscalar_DS5(*Dep::mwimp, *Dep::sigma_SI_p, *Dep::sigma_SD_p);
+      result = BEreq::cap_Sun_v0q0_isoscalar(*Dep::mwimp, *Dep::sigma_SI_p, *Dep::sigma_SD_p);
 
     }
 
@@ -67,7 +67,7 @@ namespace Gambit
     {
       using namespace Pipes::capture_rate_Sun_const_xsec;
 
-      if (BEreq::cap_Sun_v0q0_isoscalar_DS.origin()=="DarkSUSY")
+      if (BEreq::cap_Sun_v0q0_isoscalar.origin()=="DarkSUSY")
         if(!(*Dep::DarkSUSY_PointInit_LocalHalo))
           DarkBit_error().raise(LOCAL_INFO,"DarkSUSY halo model not initialized!");
 
@@ -79,8 +79,7 @@ namespace Gambit
       // proton and neutron scattering cross-sections are the same; we
       // assume that whichever backend has been hooked up here does so too.
 
-      result = BEreq::cap_Sun_v0q0_isoscalar_DS(*Dep::mwimp, rho0_eff, *Dep::sigma_SI_p, *Dep::sigma_SD_p);
-
+      result = BEreq::cap_Sun_v0q0_isoscalar(*Dep::mwimp, rho0_eff, *Dep::sigma_SI_p, *Dep::sigma_SD_p);
 
     }
 
@@ -100,9 +99,6 @@ namespace Gambit
       {
         result = maxcap;
       }
-
-      //cout << "mwimp" << *Dep::mwimp << "sigma_SI_p: " << *Dep::sigma_SI_p << " sigma_SD_p: " << *Dep::sigma_SD_p << "result: " << result << "\n";
-      //cout << "capture rate via capture_rate_Sun_const_xsec_capgen = " << result << "\n";
 
     }
 
