@@ -185,7 +185,7 @@ if(NOT ditched_${name}_${ver}_base)
     SOURCE_DIR ${dir}
     BUILD_IN_SOURCE 1
     CONFIGURE_COMMAND ./configure FC=${CMAKE_Fortran_COMPILER} FCFLAGS=${BACKEND_Fortran_FLAGS} FFLAGS=${BACKEND_Fortran_FLAGS} CC=${CMAKE_C_COMPILER} CFLAGS=${BACKEND_C_FLAGS} CXX=${CMAKE_CXX_COMPILER} CXXFLAGS=${BACKEND_CXX_FLAGS}
-    BUILD_COMMAND ${MAKE_PARALLEL} all
+    BUILD_COMMAND ${MAKE_PARALLEL} makedirs tspack healpix ds_core ds_common ds_empty inst_tab_if_loc
     # FIXME Need to add shared option
     #BUILD_COMMAND ${MAKE_PARALLEL} dslib_shared
     #      COMMAND ${MAKE_PARALLEL} install_tables
@@ -203,7 +203,8 @@ if(NOT ditched_${name}_${model}_${ver})
     SOURCE_DIR ${dir}
     BUILD_IN_SOURCE 1
     CONFIGURE_COMMAND ""
-    BUILD_COMMAND ${MAKE_PARALLEL} ds_mssm_shared
+    BUILD_COMMAND ${MAKE_PARALLEL} feynhiggs higgsbounds higgssignals superiso libisajet ds_mssm
+          COMMAND ${MAKE_PARALLEL} ds_mssm_shared
     INSTALL_COMMAND ""
   )
   add_extra_targets("backend model" ${name} ${ver} ${dir}/dummy ${model} "none")
@@ -218,7 +219,8 @@ if(NOT ditched_${name}_${model}_${ver})
     SOURCE_DIR ${dir}
     BUILD_IN_SOURCE 1
     CONFIGURE_COMMAND ""
-    BUILD_COMMAND ${MAKE_PARALLEL} ds_generic_wimp_shared
+    BUILD_COMMAND ${MAKE_PARALLEL} ds_generic_wimp
+          COMMAND ${MAKE_PARALLEL} ds_generic_wimp_shared
     INSTALL_COMMAND ""
   )
   add_extra_targets("backend model" ${name} ${ver} ${dir}/dummy ${model} "none")
@@ -239,7 +241,7 @@ if(NOT ditched_${name}_${ver}_base)
     BUILD_IN_SOURCE 1
     PATCH_COMMAND patch -p1 < ${patch}
     CONFIGURE_COMMAND ./configure FC=${CMAKE_Fortran_COMPILER} FCFLAGS=${BACKEND_Fortran_FLAGS} FFLAGS=${BACKEND_Fortran_FLAGS} CC=${CMAKE_C_COMPILER} CFLAGS=${BACKEND_C_FLAGS} CXX=${CMAKE_CXX_COMPILER} CXXFLAGS=${BACKEND_CXX_FLAGS}
-    BUILD_COMMAND ${MAKE_PARALLEL} all
+    BUILD_COMMAND ${MAKE_PARALLEL} makedirs tspack healpix ds_core ds_common ds_empty inst_tab_if_loc
     # FIXME Need to add shared option
     #BUILD_COMMAND ${MAKE_PARALLEL} dslib_shared
     #COMMAND ${MAKE_PARALLEL} install_tables
@@ -259,7 +261,8 @@ if(NOT ditched_${name}_${model}_${ver})
     SOURCE_DIR ${dir}
     BUILD_IN_SOURCE 1
     CONFIGURE_COMMAND ""
-    BUILD_COMMAND ${MAKE_PARALLEL} ds_mssm_shared
+    BUILD_COMMAND ${MAKE_PARALLEL} feynhiggs higgsbounds higgssignals superiso libisajet ds_mssm
+          COMMAND ${MAKE_PARALLEL} ds_mssm_shared
     INSTALL_COMMAND ""
   )
   add_extra_targets("backend model" ${name} ${ver} ${dir}/dummy ${model} "none")
@@ -275,7 +278,8 @@ if(NOT ditched_${name}_${model}_${ver})
     SOURCE_DIR ${dir}
     BUILD_IN_SOURCE 1
     CONFIGURE_COMMAND ""
-    BUILD_COMMAND ${MAKE_PARALLEL} ds_generic_wimp_shared
+    BUILD_COMMAND ${MAKE_PARALLEL} ds_generic_wimp
+          COMMAND ${MAKE_PARALLEL} ds_generic_wimp_shared
     INSTALL_COMMAND ""
   )
   add_extra_targets("backend model" ${name} ${ver} ${dir}/dummy ${model} "none")
