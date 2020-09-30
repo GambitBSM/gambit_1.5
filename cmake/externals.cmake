@@ -132,40 +132,18 @@ macro(add_extra_targets type package ver dir dl target)
     add_dependencies(clean-${effective_type}s clean-${pname})
     add_dependencies(nuke-${effective_type}s nuke-${pname})
 
-    # Add extra targets needed only for a backend base that is able to function as a backend in its own right
     if(${type} STREQUAL "backend base (functional alone)")
-
+      # Add extra targets needed only for a backend base that is able to function as a backend in its own right
       # This is a bit sneaky; here we overload the use of set_as_default_version to make an alias package_ver to package_ver_base
       set_as_default_version("backend" ${package}_${ver} "base")
-
-    # Add extra targets for a backend base unable to function without a backend model.  These are just dummy targets that throw an error.
     elseif(${type} STREQUAL "backend base (not functional alone)")
-
-      add_custom_target(${package}_${ver}
-        COMMAND ${CMAKE_COMMAND} -E echo
-        COMMAND ${CMAKE_COMMAND} -E cmake_echo_color --red --bold "Sorry, the make target ${package}_${ver} does not actually exist, as the"
-        COMMAND ${CMAKE_COMMAND} -E cmake_echo_color --red --bold "base package of this this backend cannot be used without a model-specific"
-        COMMAND ${CMAKE_COMMAND} -E cmake_echo_color --red --bold "extension. Please build either:"
-        COMMAND ${CMAKE_COMMAND} -E echo
-        COMMAND ${CMAKE_COMMAND} -E cmake_echo_color --yellow " a. The default versions of all model-specific extensions of ${package}, by running"
-        COMMAND ${CMAKE_COMMAND} -E echo
-        COMMAND ${CMAKE_COMMAND} -E cmake_echo_color --yellow --bold "    make ${package}_all_models"
-        COMMAND ${CMAKE_COMMAND} -E echo
-        COMMAND ${CMAKE_COMMAND} -E cmake_echo_color --yellow " b. The default version of a single model-specific extension of ${package}, by running"
-        COMMAND ${CMAKE_COMMAND} -E echo
-        COMMAND ${CMAKE_COMMAND} -E cmake_echo_color --yellow --bold "    make ${package}_[model name]"
-        COMMAND ${CMAKE_COMMAND} -E echo
-        COMMAND ${CMAKE_COMMAND} -E cmake_echo_color --yellow " c. All model-specific extensions of ${package}_${ver}, by running"
-        COMMAND ${CMAKE_COMMAND} -E echo
-        COMMAND ${CMAKE_COMMAND} -E cmake_echo_color --yellow --bold "    make ${package}_all_models_${ver}"
-        COMMAND ${CMAKE_COMMAND} -E echo
-        COMMAND ${CMAKE_COMMAND} -E cmake_echo_color --yellow " d. A single model-specific extension of ${package}_${ver}, by running"
-        COMMAND ${CMAKE_COMMAND} -E echo
-        COMMAND ${CMAKE_COMMAND} -E cmake_echo_color --yellow --bold "    make ${package}_[model name]_${ver}"
-        COMMAND ${CMAKE_COMMAND} -E echo
-        COMMAND exit 1)
-
+      # Add an extra target for a backend base unable to function without a backend model.  This is just a dummy target that throws an error.
+      add_error_target(${package} ${ver})
+      # Add additional clean and nuke aliases
+      add_custom_target(clean-${package}_${ver} DEPENDS clean-${pname})
+      add_custom_target(nuke-${package}_${ver} DEPENDS nuke-${pname})
     endif()
+
   endif()
 
   #Add extra targets common to everything.
@@ -218,8 +196,33 @@ function(check_ditch_status name version dir)
   endforeach()
 endfunction()
 
+# Add a new target that just prints a helpful error explaining that the target for a backend base is not activated.
+macro(add_error_target name)
+  if(${ARGC} GREATER 1)
+    set(_ver "_${ARGV1}")
+  else()
+    set(_ver "")
+  endif()
+  add_custom_target(${name}${_ver}
+    COMMAND ${CMAKE_COMMAND} -E echo
+    COMMAND ${CMAKE_COMMAND} -E cmake_echo_color --red --bold "Sorry, the make target ${name}${_ver} does not actually exist, as the"
+    COMMAND ${CMAKE_COMMAND} -E cmake_echo_color --red --bold "base package of this this backend cannot be used without a model-specific"
+    COMMAND ${CMAKE_COMMAND} -E cmake_echo_color --red --bold "extension. Please build either:"
+    COMMAND ${CMAKE_COMMAND} -E echo
+    COMMAND ${CMAKE_COMMAND} -E cmake_echo_color --yellow " a. All model-specific extensions of ${name}${_ver}, by running"
+    COMMAND ${CMAKE_COMMAND} -E echo
+    COMMAND ${CMAKE_COMMAND} -E cmake_echo_color --yellow --bold "    make ${name}_all_models${_ver}"
+    COMMAND ${CMAKE_COMMAND} -E echo
+    COMMAND ${CMAKE_COMMAND} -E cmake_echo_color --yellow " b. A single model-specific extension of ${name}${_ver}, by running"
+    COMMAND ${CMAKE_COMMAND} -E echo
+    COMMAND ${CMAKE_COMMAND} -E cmake_echo_color --yellow --bold "    make ${name}_[model name]${_ver}"
+    COMMAND ${CMAKE_COMMAND} -E echo
+    COMMAND exit 1)
+endmacro()
+
 # Function to set up a new target with a generic name of a backend/scanner and associate it with the default version
 function(set_as_default_version type name default)
+
   #Retrieve the model name if it is also passed
   if(${ARGC} GREATER 3)
     set(model ${ARGV3})
@@ -227,10 +230,16 @@ function(set_as_default_version type name default)
   else()
     set(target ${name})
   endif()
-  add_custom_target(${target})
-  add_dependencies(${target} ${target}_${default})
+
+  # Add clean targets
   add_custom_target(clean-${target})
-  add_dependencies(clean-${target} clean-${target}_${default})
+  if (${type} MATCHES "^backend base")
+    add_dependencies(clean-${target} clean-${target}_${default}_base)
+  else()
+    add_dependencies(clean-${target} clean-${target}_${default})
+  endif()
+
+  # Add nuke or all_models target
   if (type STREQUAL "backend model")
     if (NOT TARGET ${name}_all_models)
       add_custom_target(${name}_all_models)
@@ -239,9 +248,26 @@ function(set_as_default_version type name default)
     set(type "backend")
   else()
     add_custom_target(nuke-${target})
-    add_dependencies(nuke-${target} nuke-${target}_${default})
+    if (${type} MATCHES "^backend base")
+      add_dependencies(nuke-${target} nuke-${target}_${default}_base)
+    else()
+      add_dependencies(nuke-${target} nuke-${target}_${default})
+    endif()
   endif()
-  add_dependencies(${type}s ${target})
+
+  # Add the actual default target, and add it to the backends or scanners target if relevant
+  if (type STREQUAL "backend base (not functional alone)")
+    add_error_target(${target})
+  else()
+    add_custom_target(${target})
+    add_dependencies(${target} ${target}_${default})
+    if (type STREQUAL "backend base (functional alone)")
+      add_dependencies(backends ${target})
+    else()
+      add_dependencies(${type}s ${target})
+    endif()
+  endif()
+
 endfunction()
 
 # Check whether or not Python modules required for backend builds are available
