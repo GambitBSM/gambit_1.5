@@ -53,8 +53,8 @@ Priors:
 
 Printer:
 
-  printer: cout 
-  #printer: hdf5
+  #printer: cout 
+  printer: hdf5
 
   options:
     output_file: "ScalarSingletDM_Z2.hdf5"
