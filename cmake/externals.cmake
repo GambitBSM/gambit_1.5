@@ -206,7 +206,7 @@ macro(add_error_target name)
   add_custom_target(${name}${_ver}
     COMMAND ${CMAKE_COMMAND} -E echo
     COMMAND ${CMAKE_COMMAND} -E cmake_echo_color --red --bold "Sorry, the make target ${name}${_ver} does not actually exist, as the"
-    COMMAND ${CMAKE_COMMAND} -E cmake_echo_color --red --bold "base package of this this backend cannot be used without a model-specific"
+    COMMAND ${CMAKE_COMMAND} -E cmake_echo_color --red --bold "base package of this backend cannot be used without a model-specific"
     COMMAND ${CMAKE_COMMAND} -E cmake_echo_color --red --bold "extension. Please build either:"
     COMMAND ${CMAKE_COMMAND} -E echo
     COMMAND ${CMAKE_COMMAND} -E cmake_echo_color --yellow " a. All model-specific extensions of ${name}${_ver}, by running"
