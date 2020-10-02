@@ -103,9 +103,9 @@ macro(add_extra_targets type package ver dir dl target)
   if (${type} STREQUAL "backend model")
 
     set(pname "${package}_${model}_${ver}")
-    add_dependencies(${pname} ${package}_${ver}_base)
+    add_dependencies(${pname} .${package}_${ver}_base)
     add_dependencies(${package}_all_models_${ver} ${pname})
-    add_chained_external_clean(${pname} ${dir} "${updated_target}" ${package}_${ver}_base)
+    add_chained_external_clean(${pname} ${dir} "${updated_target}" .${package}_${ver}_base)
     add_dependencies(clean-backends clean-${pname})
 
   else()
@@ -114,7 +114,7 @@ macro(add_extra_targets type package ver dir dl target)
     if (${type} MATCHES "^backend base")
 
       set(effective_type "backend")
-      set(pname "${package}_${ver}_base")
+      set(pname ".${package}_${ver}_base")
       #Add the all_models target
       add_custom_target(${package}_all_models_${ver})
 
@@ -134,7 +134,7 @@ macro(add_extra_targets type package ver dir dl target)
 
     if(${type} STREQUAL "backend base (functional alone)")
       # Add extra targets needed only for a backend base that is able to function as a backend in its own right
-      # This is a bit sneaky; here we overload the use of set_as_default_version to make an alias package_ver to package_ver_base
+      # This is a bit sneaky; here we overload the use of set_as_default_version to make an alias package_ver to .package_ver_base
       set_as_default_version("backend" ${package}_${ver} "base")
     elseif(${type} STREQUAL "backend base (not functional alone)")
       # Add an extra target for a backend base unable to function without a backend model.  This is just a dummy target that throws an error.
@@ -231,12 +231,12 @@ function(set_as_default_version type name default)
     set(target ${name})
   endif()
 
-  # Add clean targets
+  # Add clean targets for default version of hidden/unhidden target
   add_custom_target(clean-${target})
-  if (${type} MATCHES "^backend base")
-    add_dependencies(clean-${target} clean-${target}_${default}_base)
-  else()
+  if (TARGET clean-${target}_${default})
     add_dependencies(clean-${target} clean-${target}_${default})
+  else()
+    add_dependencies(clean-${target} clean-.${target}_${default})
   endif()
 
   # Add nuke or all_models target
@@ -248,10 +248,10 @@ function(set_as_default_version type name default)
     set(type "backend")
   else()
     add_custom_target(nuke-${target})
-    if (${type} MATCHES "^backend base")
-      add_dependencies(nuke-${target} nuke-${target}_${default}_base)
-    else()
+    if (TARGET nuke-${target}_${default})
       add_dependencies(nuke-${target} nuke-${target}_${default})
+    else()
+      add_dependencies(nuke-${target} nuke-.${target}_${default})
     endif()
   endif()
 
@@ -260,7 +260,11 @@ function(set_as_default_version type name default)
     add_error_target(${target})
   else()
     add_custom_target(${target})
-    add_dependencies(${target} ${target}_${default})
+    if (TARGET ${target}_${default})
+      add_dependencies(${target} ${target}_${default})
+    else()
+      add_dependencies(${target} .${target}_${default})
+    endif()
     if (type STREQUAL "backend base (functional alone)")
       add_dependencies(backends ${target})
     else()
