@@ -131,7 +131,6 @@ ObsLikes:
       purpose:    Observable
 
 ##############################################################################################
-
 Rules:
 
   # Use DDCalc 2.0.0
@@ -157,7 +156,7 @@ Rules:
     backends:
     - {backend: DDCalc, version: 2.0.0}
 
-  # Use the DarkBit native calculator for the relic density
+  # Use DarkBit native calculator (based on the DarkSUSY Boltzmann solver) for relic density
   - capability: RD_oh2
     #function: RD_oh2_DS5_general
     function: RD_oh2_DS_general
@@ -206,6 +205,10 @@ Rules:
   # Choose to use capgen for solar capture
   - capability: capture_rate_Sun
     function: capture_rate_Sun_vnqn
+
+  # Use micromega's calculations of the direct detection couplings
+  - capability: DD_couplings
+    function: DD_couplings_MicrOmegas
 
   # Choose to rescale signals in direct and indirect detection by the relic density fraction
   - capability: RD_fraction
@@ -264,7 +267,6 @@ Scanner:
       plugin: twalk
       sqrtR: 1.001
       timeout_mins: 1380
-
 
 ##############################################################################################
 Logger:

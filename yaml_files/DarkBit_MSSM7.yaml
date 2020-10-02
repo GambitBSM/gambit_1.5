@@ -10,7 +10,8 @@
 ##########################################################################
 
 # NB: This example yaml file uses flexiblesusy, so make sure you have
-# built gambit with the correct " -DBUILD_FS_MODELS" option
+# built gambit with -DBUILD_FS_MODELS="MSSM"
+
 
 Parameters:
 
@@ -132,7 +133,7 @@ Printer:
   #  buffer_length: 10
   #  delete_file_on_restart: true
 
-  #printer: cout 
+  #printer: cout
 
 
 Scanner:
@@ -331,7 +332,7 @@ Rules:
     #function: RD_oh2_DS5_general
     function: RD_oh2_DS_general
     options:
-      # these options are identical for DS5 and DS6+ version 
+      # these options are identical for DS5 and DS6+ version
       fast: 1  # 0: standard, 1: fast (default)
     #function: RD_oh2_DarkSUSY_DS5
     #options:
@@ -343,14 +344,14 @@ Rules:
     #  Beps: 1e-5  #  1e-5: standard, 1: switches coann off
 
   # Choose between initializing the invariant rate calculation for DS5 and DS6
-  - capability: RD_eff_annrate_DSprep_MSSM 
+  - capability: RD_eff_annrate_DSprep_MSSM
     function: RD_annrate_DSprep_MSSM_func
     #function: RD_annrate_DSprep_MSSM_func
 
   # Input type for oh2 calculations needed by DS5 and DS6, respectively
-  - capability: RD_spectrum  
+  - capability: RD_spectrum
     #function: RD_spectrum_SUSY_DS5
-    function: RD_spectrum_MSSM 
+    function: RD_spectrum_MSSM
 
   # Choose between the functions sigmav_late_universe and sigmav_late_universe_MicrOmegas
   - capability: sigmav

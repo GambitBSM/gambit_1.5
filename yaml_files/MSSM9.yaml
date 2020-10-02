@@ -9,6 +9,9 @@
 ## are included.
 ##########################################################################
 
+# NB: This example yaml file uses flexiblesusy, so make sure you have
+# built gambit with -DBUILD_FS_MODELS="MSSMEFTHiggs_mAmu"
+
 
 Parameters:
 

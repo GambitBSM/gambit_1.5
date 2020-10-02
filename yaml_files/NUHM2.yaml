@@ -10,7 +10,8 @@
 ##########################################################################
 
 # NB: This example yaml file uses flexiblesusy, so make sure you have
-# built gambit with the correct " -DBUILD_FS_MODELS" option
+# built gambit with -DBUILD_FS_MODELS="MSSMatMGUT"
+
 
 Parameters:
 
@@ -372,7 +373,7 @@ Rules:
   - capability: TH_ProcessCatalog
     #function: TH_ProcessCatalog_DS5_MSSM # For DarkSUSY 5
     function: TH_ProcessCatalog_DS_MSSM   # For DarkSUSY 6
- 
+
   # Choose between the functions sigmav_late_universe and sigmav_late_universe_MicrOmegas
   - capability: sigmav
     function: sigmav_late_universe
