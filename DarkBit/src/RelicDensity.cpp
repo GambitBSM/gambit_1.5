@@ -313,8 +313,9 @@ namespace Gambit
       // Is DM self-conjugate ?
       result.isSelfConj = annihilation.isSelfConj;
       // This function reports particle IDs in terms of internal DarkSUSY codes
-      // TODO: CHECK whether that is actually concsistently implemented
-      //       -> should be changed to PDG !
+      // NB: This should eventually be changed to PDG, which however requires updating
+      //     all existing examples where the invariant rate (entering in the relic density)
+      //     is calculated directly from the ProcessCatalogue!
       result.particle_index_type = "DarkSUSY";
 
 
