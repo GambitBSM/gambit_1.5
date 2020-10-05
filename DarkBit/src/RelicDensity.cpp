@@ -100,47 +100,47 @@ namespace Gambit
 
       // add all sparticles that are not too heavy
       double msp;
-      #define addCoannParticle(PDG0, DOF)                                                         \
-        msp = std::abs(spec.get(Par::Pole_Mass,Models::ParticleDB().long_name(PDG0,ContInt)));    \
-        if (msp/mWIMP < CoannMaxMass)                                                             \
-        {                                                                                         \
-           result.coannihilatingParticles.push_back(RD_coannihilating_particle(PDG0, DOF, msp));  \
+      auto addCoannParticle = [&](int PDG0, int DOF)
+      {
+        msp = std::abs(spec.get(Par::Pole_Mass,Models::ParticleDB().long_name(PDG0,ContInt)));
+        if (msp/mWIMP < CoannMaxMass)
+        {
+           result.coannihilatingParticles.push_back(RD_coannihilating_particle(PDG0, DOF, msp));
         }
+      };
 
       if(CoannCharginosNeutralinos) // include  neutralino & chargino coannihilation
       {
-        addCoannParticle(1000023, 2)        // "~chi0_2"
-        addCoannParticle(1000025, 2)        // "~chi0_3"
-        addCoannParticle(1000035, 2)        // "~chi0_4"
-        addCoannParticle(1000024, 4)        // "~chi+_1"
-        addCoannParticle(1000037, 4)        // "~chi+_2"
+        addCoannParticle(1000023, 2);        // "~chi0_2"
+        addCoannParticle(1000025, 2);        // "~chi0_3"
+        addCoannParticle(1000035, 2);        // "~chi0_4"
+        addCoannParticle(1000024, 4);        // "~chi+_1"
+        addCoannParticle(1000037, 4);        // "~chi+_2"
       }
       if(CoannSfermions) // include sfermion coannihilation
       {
-        addCoannParticle(1000011, 2)        // "~e-_1"
-        addCoannParticle(1000013, 2)        // "~e-_2"
-        addCoannParticle(1000015, 2)        // "~e-_3"
-        addCoannParticle(2000011, 2)        // "~e-_4"
-        addCoannParticle(2000013, 2)        // "~e-_5"
-        addCoannParticle(2000015, 2)        // "~e-_6"
-        addCoannParticle(1000012, 1)        // "~nu_1"
-        addCoannParticle(1000014, 1)        // "~nu_2"
-        addCoannParticle(1000016, 1)        // "~nu_3"
-        addCoannParticle(1000001, 6)        // "~d_1"
-        addCoannParticle(1000003, 6)        // "~d_2"
-        addCoannParticle(1000005, 6)        // "~d_3"
-        addCoannParticle(2000001, 6)        // "~d_4"
-        addCoannParticle(2000003, 6)        // "~d_5"
-        addCoannParticle(2000005, 6)        // "~d_6"
-        addCoannParticle(1000002, 6)        // "~u_1"
-        addCoannParticle(1000004, 6)        // "~u_2"
-        addCoannParticle(1000006, 6)        // "~u_3"
-        addCoannParticle(2000002, 6)        // "~u_4"
-        addCoannParticle(2000004, 6)        // "~u_5"
-        addCoannParticle(2000006, 6)        // "~u_6"
+        addCoannParticle(1000011, 2);        // "~e-_1"
+        addCoannParticle(1000013, 2);        // "~e-_2"
+        addCoannParticle(1000015, 2);        // "~e-_3"
+        addCoannParticle(2000011, 2);        // "~e-_4"
+        addCoannParticle(2000013, 2);        // "~e-_5"
+        addCoannParticle(2000015, 2);        // "~e-_6"
+        addCoannParticle(1000012, 1);        // "~nu_1"
+        addCoannParticle(1000014, 1);        // "~nu_2"
+        addCoannParticle(1000016, 1);        // "~nu_3"
+        addCoannParticle(1000001, 6);        // "~d_1"
+        addCoannParticle(1000003, 6);        // "~d_2"
+        addCoannParticle(1000005, 6);        // "~d_3"
+        addCoannParticle(2000001, 6);        // "~d_4"
+        addCoannParticle(2000003, 6);        // "~d_5"
+        addCoannParticle(2000005, 6);        // "~d_6"
+        addCoannParticle(1000002, 6);        // "~u_1"
+        addCoannParticle(1000004, 6);        // "~u_2"
+        addCoannParticle(1000006, 6);        // "~u_3"
+        addCoannParticle(2000002, 6);        // "~u_4"
+        addCoannParticle(2000004, 6);        // "~u_5"
+        addCoannParticle(2000006, 6);        // "~u_6"
       }
-
-      #undef addCoannParticle
 
       // determine resonances for LSP annihilation
       std::string SMreslist[] = {"Z0","W+"};
