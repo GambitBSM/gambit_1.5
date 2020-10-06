@@ -100,12 +100,12 @@ namespace Gambit
 
       // add all sparticles that are not too heavy
       double msp;
-      auto addCoannParticle = [&](int PDG0, int DOF)
+      auto addCoannParticle = [&](int pdg0, int dof)
       {
-        msp = std::abs(spec.get(Par::Pole_Mass,Models::ParticleDB().long_name(PDG0,ContInt)));
+        msp = std::abs(spec.get(Par::Pole_Mass,Models::ParticleDB().long_name(pdg0,ContInt)));
         if (msp/mWIMP < CoannMaxMass)
         {
-           result.coannihilatingParticles.push_back(RD_coannihilating_particle(PDG0, DOF, msp));
+           result.coannihilatingParticles.push_back(RD_coannihilating_particle(pdg0, dof, msp));
         }
       };
 

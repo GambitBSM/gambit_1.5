@@ -129,9 +129,9 @@ namespace Gambit
       {
         catalog.particleProperties.insert(
         std::pair<std::string, TH_ParticleProperty>(
-        Name , TH_ParticleProperty(SM.get(Par::Pole_Mass,Name), spinX2)));
+         Name , TH_ParticleProperty(SM.get(Par::Pole_Mass,Name), spinX2)));
       };
-      
+
       getSMmass("e-_1",     1);
       getSMmass("e+_1",     1);
       getSMmass("e-_2",     1);
@@ -153,9 +153,9 @@ namespace Gambit
       {
         catalog.particleProperties.insert(
         std::pair<std::string, TH_ParticleProperty>(
-        Name , TH_ParticleProperty(Mass, spinX2)));
+         Name , TH_ParticleProperty(Mass, spinX2)));
       };
-      
+
       addParticle("d_1"   , SMI.mD,  1); // md(2 GeV)^MS-bar, not pole mass
       addParticle("dbar_1", SMI.mD,  1); // md(2 GeV)^MS-bar, not pole mass
       addParticle("u_1"   , SMI.mU,  1); // mu(2 GeV)^MS-bar, not pole mass
@@ -187,59 +187,59 @@ namespace Gambit
       {
         catalog.particleProperties.insert(
         std::pair<std::string, TH_ParticleProperty> (
-        Name , TH_ParticleProperty(std::abs(spec.get(Par::Pole_Mass,Name)), spinX2)));
+         Name , TH_ParticleProperty(std::abs(spec.get(Par::Pole_Mass,Name)), spinX2)));
       };
 
-      getMSSMmass("H+"     , 0);
-      getMSSMmass("H-"     , 0);
-      getMSSMmass("h0_1"   , 0);
-      getMSSMmass("h0_2"   , 0);
-      getMSSMmass("A0"     , 0);
-      getMSSMmass("~chi0_1", 1);
-      getMSSMmass("~d_1", 0);
-      getMSSMmass("~dbar_1", 0);
-      getMSSMmass("~u_1", 0);
-      getMSSMmass("~ubar_1", 0);
-      getMSSMmass("~d_2", 0);
-      getMSSMmass("~dbar_2", 0);
-      getMSSMmass("~u_2", 0);
-      getMSSMmass("~ubar_2", 0);
-      getMSSMmass("~d_3", 0);
-      getMSSMmass("~dbar_3", 0);
-      getMSSMmass("~u_3", 0);
-      getMSSMmass("~ubar_3", 0);
-      getMSSMmass("~d_4", 0);
-      getMSSMmass("~dbar_4", 0);
-      getMSSMmass("~u_4", 0);
-      getMSSMmass("~ubar_4", 0);
-      getMSSMmass("~d_5", 0);
-      getMSSMmass("~dbar_5", 0);
-      getMSSMmass("~u_5", 0);
-      getMSSMmass("~ubar_5", 0);
-      getMSSMmass("~d_6", 0);
-      getMSSMmass("~dbar_6", 0);
-      getMSSMmass("~u_6", 0);
-      getMSSMmass("~ubar_6", 0);
-      //getMSSMmass("~e_1", 0);
-      //getMSSMmass("~ebar_1", 0);
-      //getMSSMmass("~e-_1", 0);
-      getMSSMmass("~e+_1", 0);
-      getMSSMmass("~e-_1", 0);
-      getMSSMmass("~e+_2", 0);
-      getMSSMmass("~e-_2", 0);
-      getMSSMmass("~e+_3", 0);
-      getMSSMmass("~e-_3", 0);
-      getMSSMmass("~e+_4", 0);
-      getMSSMmass("~e-_4", 0);
-      getMSSMmass("~e+_5", 0);
-      getMSSMmass("~e-_5", 0);
-      getMSSMmass("~e+_6", 0);
-      getMSSMmass("~e-_6", 0);
-      getMSSMmass("~nu_1", 0);
+      getMSSMmass("H+"      , 0);
+      getMSSMmass("H-"      , 0);
+      getMSSMmass("h0_1"    , 0);
+      getMSSMmass("h0_2"    , 0);
+      getMSSMmass("A0"      , 0);
+      getMSSMmass("~chi0_1" , 1);
+      getMSSMmass("~d_1"    , 0);
+      getMSSMmass("~dbar_1" , 0);
+      getMSSMmass("~u_1"    , 0);
+      getMSSMmass("~ubar_1" , 0);
+      getMSSMmass("~d_2"    , 0);
+      getMSSMmass("~dbar_2" , 0);
+      getMSSMmass("~u_2"    , 0);
+      getMSSMmass("~ubar_2" , 0);
+      getMSSMmass("~d_3"    , 0);
+      getMSSMmass("~dbar_3" , 0);
+      getMSSMmass("~u_3"    , 0);
+      getMSSMmass("~ubar_3" , 0);
+      getMSSMmass("~d_4"    , 0);
+      getMSSMmass("~dbar_4" , 0);
+      getMSSMmass("~u_4"    , 0);
+      getMSSMmass("~ubar_4" , 0);
+      getMSSMmass("~d_5"    , 0);
+      getMSSMmass("~dbar_5" , 0);
+      getMSSMmass("~u_5"    , 0);
+      getMSSMmass("~ubar_5" , 0);
+      getMSSMmass("~d_6"    , 0);
+      getMSSMmass("~dbar_6" , 0);
+      getMSSMmass("~u_6"    , 0);
+      getMSSMmass("~ubar_6" , 0);
+      //getMSSMmass("~e_1"    , 0);
+      //getMSSMmass("~ebar_1" , 0);
+      //getMSSMmass("~e-_1"   , 0);
+      getMSSMmass("~e+_1"   , 0);
+      getMSSMmass("~e-_1"   , 0);
+      getMSSMmass("~e+_2"   , 0);
+      getMSSMmass("~e-_2"   , 0);
+      getMSSMmass("~e+_3"   , 0);
+      getMSSMmass("~e-_3"   , 0);
+      getMSSMmass("~e+_4"   , 0);
+      getMSSMmass("~e-_4"   , 0);
+      getMSSMmass("~e+_5"   , 0);
+      getMSSMmass("~e-_5"   , 0);
+      getMSSMmass("~e+_6"   , 0);
+      getMSSMmass("~e-_6"   , 0);
+      getMSSMmass("~nu_1"   , 0);
       getMSSMmass("~nubar_1", 0);
-      getMSSMmass("~nu_2", 0);
+      getMSSMmass("~nu_2"   , 0);
       getMSSMmass("~nubar_2", 0);
-      getMSSMmass("~nu_3", 0);
+      getMSSMmass("~nu_3"   , 0);
       getMSSMmass("~nubar_3", 0);
 
 
@@ -259,63 +259,59 @@ namespace Gambit
       double M_DM = catalog.getParticleProperty(DMid).mass;
 
       // lambda for setting up 2-body annihilations (chi chi -> X X) from results in DS
-      auto setup_ds_process = [&](str NAME, int PARTCH, str P1, str P2, double PREFACTOR)
+      auto setup_ds_process = [&](int index, str p1, str p2, double prefac)
       {
         /* Check if process is kinematically allowed */
-        double m_1 = catalog.getParticleProperty(P1).mass;
-        double m_2 = catalog.getParticleProperty(P2).mass;
+        double m_1 = catalog.getParticleProperty(p1).mass;
+        double m_2 = catalog.getParticleProperty(p2).mass;
         if(m_1 + m_2 < 2*M_DM)
         {
           /* Set cross-section */
-          int index = PARTCH;
-          double CAT(sigma_,NAME) = BEreq::dssigmav(index);
+          double sigma = BEreq::dssigmav(index);
           /* Create associated kinematical functions (just dependent on vrel)
            *  here: s-wave, vrel independent 1-dim constant function */
-          daFunk::Funk CAT(kinematicFunction_,NAME) =
-                daFunk::cnst(CAT(sigma_,NAME)*PREFACTOR, "v");
+          daFunk::Funk kinematicFunction = daFunk::cnst(sigma*prefac, "v");
           /* Create channel identifier string */
-          std::vector<std::string> CAT(finalStates_,NAME);
-          CAT(finalStates_,NAME).push_back(STRINGIFY(P1));
-          CAT(finalStates_,NAME).push_back(STRINGIFY(P2));
+          std::vector<std::string> finalStates;
+          finalStates.push_back(p1);
+          finalStates.push_back(p2);
           /* Create channel and push it into channel list of process */
-          TH_Channel CAT(channel_,NAME)(CAT(finalStates_,NAME),
-              CAT(kinematicFunction_,NAME));
-          process.channelList.push_back(CAT(channel_,NAME));
-          annFinalStates.insert(STRINGIFY(P1));
-          annFinalStates.insert(STRINGIFY(P2));
+          process.channelList.push_back(TH_Channel(finalStates, kinematicFunction));
+          annFinalStates.insert(p1);
+          annFinalStates.insert(p1);
         }
       };
 
-      setup_ds_process("H1H1",      1 , "h0_2",   "h0_2",   1   );
-      setup_ds_process("H1H2",      2 , "h0_2",   "h0_1",   1   );
-      setup_ds_process("H2H2",      3 , "h0_1",   "h0_1",   1   );
-      setup_ds_process("H3H3",      4 , "A0",     "A0",     1   );
-      setup_ds_process("H1H3",      5 , "h0_2",   "A0",     1   );
-      setup_ds_process("H2H3",      6 , "h0_1",   "A0",     1   );
-      setup_ds_process("HpHm",      7 , "H+",     "H-",     1   );
-      setup_ds_process("H1Z0",      8 , "h0_2",   "Z0",     1   );
-      setup_ds_process("H2Z0",      9 , "h0_1",   "Z0",     1   );
-      setup_ds_process("H3Z0",      10, "A0",     "Z0",     1   );
+      setup_ds_process(1 , "h0_2",   "h0_2",   1   );
+      setup_ds_process(2 , "h0_2",   "h0_1",   1   );
+      setup_ds_process(3 , "h0_1",   "h0_1",   1   );
+      setup_ds_process(4 , "A0",     "A0",     1   );
+      setup_ds_process(5 , "h0_2",   "A0",     1   );
+      setup_ds_process(6 , "h0_1",   "A0",     1   );
+      setup_ds_process(7 , "H+",     "H-",     1   );
+      setup_ds_process(8 , "h0_2",   "Z0",     1   );
+      setup_ds_process(9 , "h0_1",   "Z0",     1   );
+      setup_ds_process(10, "A0",     "Z0",     1   );
       // Prefactor 0.5 since W+H- and W-H+ are summed in DS
-      setup_ds_process("WpHm",      11, "W+",     "H-",     0.5 );
-      setup_ds_process("WmHp",      11, "W-",     "H+",     0.5 );
-      setup_ds_process("Z0Z0",      12, "Z0",     "Z0",     1   );
-      setup_ds_process("WW",        13, "W+",     "W-",     1   );
-      setup_ds_process("nuenue",    14, "nu_e",   "nubar_e",1   );
-      setup_ds_process("ee",        15, "e+_1",   "e-_1",   1   );
-      setup_ds_process("numnum",    16, "nu_mu",  "nubar_mu",1  );
-      setup_ds_process("mumu",      17, "e+_2",   "e-_2",   1   );
-      setup_ds_process("nutnut",    18, "nu_tau", "nubar_tau",1 );
-      setup_ds_process("tautau",    19, "e+_3",   "e-_3",   1   );
-      setup_ds_process("uubar",     20, "u_1",    "ubar_1",  1  );
-      setup_ds_process("ddbar",     21, "d_1",    "dbar_1",  1  );
-      setup_ds_process("ccbar",     22, "u_2",    "ubar_2",  1  );
-      setup_ds_process("ssbar",     23, "d_2",    "dbar_2",  1  );
-      setup_ds_process("ttbar",     24, "u_3",    "ubar_3",  1  );
-      setup_ds_process("bbbar",     25, "d_3",    "dbar_3",  1  );
-      setup_ds_process("gluglu",    26, "g",      "g",      1   );
-      setup_ds_process("gammagamma",28, "gamma",  "gamma",  1   );
-      //        setup_ds_process("Z0gamma",   29, "Z0",     gamma,  1   );
+      setup_ds_process(11, "W+",     "H-",     0.5 );
+      setup_ds_process(11, "W-",     "H+",     0.5 );
+      setup_ds_process(12, "Z0",     "Z0",     1   );
+      setup_ds_process(13, "W+",     "W-",     1   );
+      setup_ds_process(14, "nu_e",   "nubar_e",1   );
+      setup_ds_process(15, "e+_1",   "e-_1",   1   );
+      setup_ds_process(16, "nu_mu",  "nubar_mu",1  );
+      setup_ds_process(17, "e+_2",   "e-_2",   1   );
+      setup_ds_process(18, "nu_tau", "nubar_tau",1 );
+      setup_ds_process(19, "e+_3",   "e-_3",   1   );
+      setup_ds_process(20, "u_1",    "ubar_1", 1   );
+      setup_ds_process(21, "d_1",    "dbar_1", 1   );
+      setup_ds_process(22, "u_2",    "ubar_2", 1   );
+      setup_ds_process(23, "d_2",    "dbar_2", 1   );
+      setup_ds_process(24, "u_3",    "ubar_3", 1   );
+      setup_ds_process(25, "d_3",    "dbar_3", 1   );
+      setup_ds_process(26, "g",      "g",      1   );
+      setup_ds_process(28, "gamma",  "gamma",  1   );
+      //        setup_ds_process(29, "Z0",     gamma,  1   );
 
 
       ///////////////////////////////////////////
@@ -324,34 +320,28 @@ namespace Gambit
 
       using DarkBit_utils::str_flav_to_mass;
 
-      //PS: commented out for now, as this can't be a backend function in its current form.
-      //BEreq::registerMassesForIB(catalog.particleProperties);
-
       // lambda for setting up 3-body decays with gammas
-      auto setup_ds_process_gamma3body = [&](str NAME,int IBCH, str P1, str P2, double (*IBFUNC)(int&, double&, double&), int SV_IDX, double PREFACTOR)
+      auto setup_ds_process_gamma3body = [&](int IBch, str p1, str p2, double (*IBfunc)(int&, double&, double&), int index, double prefac)
       {
         /* Check if process is kinematically allowed */
-        double m_1 = catalog.getParticleProperty(str_flav_to_mass(P1)).mass;
-        double m_2 = catalog.getParticleProperty(str_flav_to_mass(P2)).mass;
+        double m_1 = catalog.getParticleProperty(str_flav_to_mass(p1)).mass;
+        double m_2 = catalog.getParticleProperty(str_flav_to_mass(p2)).mass;
         if(m_1 + m_2 < 2*M_DM)
         {
-          int index = SV_IDX;
-          double sv = PREFACTOR*BEreq::dssigmav(index);
-          daFunk::Funk CAT(kinematicFunction_,NAME) =
+          double sv = prefac*BEreq::dssigmav(index);
+          daFunk::Funk kinematicFunction =
             daFunk::cnst(sv,"v")*daFunk::func(DSgamma3bdy,
-            STRIP_PARENS(IBFUNC), IBCH, daFunk::var("E"), daFunk::var("E1"),
+            IBfunc, IBch, daFunk::var("E"), daFunk::var("E1"),
             M_DM, m_1, m_2);
           /* Create channel identifier string */
-          std::vector<std::string> CAT(finalStates_,NAME);
-          CAT(finalStates_,NAME).push_back("gamma");
-          CAT(finalStates_,NAME).push_back(str_flav_to_mass(P1));
-          CAT(finalStates_,NAME).push_back(str_flav_to_mass(P2));
+          std::vector<std::string> finalStates;
+          finalStates.push_back("gamma");
+          finalStates.push_back(str_flav_to_mass(p1));
+          finalStates.push_back(str_flav_to_mass(p2));
           /* Create channel and push it into channel list of process */
-          TH_Channel CAT(channel_,NAME)(CAT(finalStates_,NAME),
-              CAT(kinematicFunction_,NAME));
-          process.channelList.push_back(CAT(channel_,NAME));
-          annFinalStates.insert(str_flav_to_mass(P1));
-          annFinalStates.insert(str_flav_to_mass(P2));
+          process.channelList.push_back(TH_Channel(finalStates, kinematicFunction));
+          annFinalStates.insert(str_flav_to_mass(p1));
+          annFinalStates.insert(str_flav_to_mass(p2));
         };
       };
 
@@ -361,34 +351,21 @@ namespace Gambit
         // Set DarkSUSY DM mass parameter used in 3-body decays
         BEreq::IBintvars->ibcom_mx = catalog.getParticleProperty(DMid).mass;
 
-        setup_ds_process_gamma3body("gammaWW",        1, "W+",      "W-",
-            BEreq::dsIBwwdxdy.pointer(),  13, 1   );
+        setup_ds_process_gamma3body(1,  "W+",      "W-",   BEreq::dsIBwwdxdy.pointer(), 13, 1  );
         // Prefactor 0.5 since W+H- and W-H+ are summed in DS
-        setup_ds_process_gamma3body("gammaWpHm",      2, "W+",      "H-",
-            (BEreq::dsIBwhdxdy.pointer()),  11, 0.5 );
+        setup_ds_process_gamma3body(2,  "W+",      "H-",   BEreq::dsIBwhdxdy.pointer(), 11, 0.5);
         // Prefactor 0.5 since W+H- and W-H+ are summed in DS
-        setup_ds_process_gamma3body("gammaWmHp",      2, "W-",      "H+",
-            (BEreq::dsIBwhdxdy.pointer()),  11, 0.5 );
-        setup_ds_process_gamma3body("gammaHpHm",      3, "H+",      "H-",
-            (BEreq::dsIBhhdxdy.pointer()),  0,  1   );
-        setup_ds_process_gamma3body("gammaee",        4, "e+",      "e-",
-            (BEreq::dsIBffdxdy.pointer()) , 15, 1   );
-        setup_ds_process_gamma3body("gammamumu",      5, "mu+",     "mu-",
-            (BEreq::dsIBffdxdy.pointer()) , 17, 1   );
-        setup_ds_process_gamma3body("gammatautau",    6, "tau+",    "tau-",
-            (BEreq::dsIBffdxdy.pointer()) , 19, 1   );
-        setup_ds_process_gamma3body("gammauubar",     7, "u",       "ubar",
-            (BEreq::dsIBffdxdy.pointer()) , 20, 1   );
-        setup_ds_process_gamma3body("gammaddbar",     8, "d",       "dbar",
-            (BEreq::dsIBffdxdy.pointer()) , 21, 1   );
-        setup_ds_process_gamma3body("gammaccbar",     9, "c",       "cbar",
-            (BEreq::dsIBffdxdy.pointer()) , 22, 1   );
-        setup_ds_process_gamma3body("gammassbar",     10,"s",       "sbar",
-            (BEreq::dsIBffdxdy.pointer()) , 23, 1   );
-        setup_ds_process_gamma3body("gammattbar",     11,"t",       "tbar",
-            (BEreq::dsIBffdxdy.pointer()) , 24, 1   );
-        setup_ds_process_gamma3body("gammabbbar",     12,"b",       "bbar",
-            (BEreq::dsIBffdxdy.pointer()) , 25, 1   );
+        setup_ds_process_gamma3body(2,  "W-",      "H+",   BEreq::dsIBwhdxdy.pointer(), 11, 0.5);
+        setup_ds_process_gamma3body(3,  "H+",      "H-",   BEreq::dsIBhhdxdy.pointer(),  0, 1  );
+        setup_ds_process_gamma3body(4,  "e+",      "e-",   BEreq::dsIBffdxdy.pointer(), 15, 1  );
+        setup_ds_process_gamma3body(5,  "mu+",     "mu-",  BEreq::dsIBffdxdy.pointer(), 17, 1  );
+        setup_ds_process_gamma3body(6,  "tau+",    "tau-", BEreq::dsIBffdxdy.pointer(), 19, 1  );
+        setup_ds_process_gamma3body(7,  "u",       "ubar", BEreq::dsIBffdxdy.pointer(), 20, 1  );
+        setup_ds_process_gamma3body(8,  "d",       "dbar", BEreq::dsIBffdxdy.pointer(), 21, 1  );
+        setup_ds_process_gamma3body(9,  "c",       "cbar", BEreq::dsIBffdxdy.pointer(), 22, 1  );
+        setup_ds_process_gamma3body(10, "s",       "sbar", BEreq::dsIBffdxdy.pointer(), 23, 1  );
+        setup_ds_process_gamma3body(11, "t",       "tbar", BEreq::dsIBffdxdy.pointer(), 24, 1  );
+        setup_ds_process_gamma3body(12, "b",       "bbar", BEreq::dsIBffdxdy.pointer(), 25, 1  );
       };
 
 
@@ -469,7 +446,7 @@ namespace Gambit
       {
         catalog.particleProperties.insert(
         std::pair<std::string, TH_ParticleProperty>(
-        Name , TH_ParticleProperty(SM.get(Par::Pole_Mass,Name), spinX2)));
+         Name , TH_ParticleProperty(SM.get(Par::Pole_Mass,Name), spinX2)));
       };
 
       getSMmass("e-_1",     1);
@@ -478,11 +455,11 @@ namespace Gambit
       getSMmass("e+_2",     1);
       getSMmass("e-_3",     1);
       getSMmass("e+_3",     1);
-      getSMmass("Z0",     2);
-      getSMmass("W+",     2);
-      getSMmass("W-",     2);
-      getSMmass("g",      2);
-      getSMmass("gamma",  2);
+      getSMmass("Z0",       2);
+      getSMmass("W+",       2);
+      getSMmass("W-",       2);
+      getSMmass("g",        2);
+      getSMmass("gamma",    2);
       getSMmass("d_3",      1);
       getSMmass("dbar_3",   1);
       getSMmass("u_3",      1);
@@ -493,7 +470,7 @@ namespace Gambit
       {
         catalog.particleProperties.insert(
         std::pair<std::string, TH_ParticleProperty>(
-        Name , TH_ParticleProperty(Mass, spinX2)));
+         Name , TH_ParticleProperty(Mass, spinX2)));
       };
 
       addParticle("d_1"   , SMI.mD,  1); // md(2 GeV)^MS-bar, not pole mass
@@ -525,60 +502,60 @@ namespace Gambit
       auto getMSSMmass = [&](str Name, int spinX2)
       {
         catalog.particleProperties.insert(
-        std::pair<std::string, TH_ParticleProperty> (
-        Name , TH_ParticleProperty(std::abs(spec.get(Par::Pole_Mass,Name)), spinX2)));
+        std::pair<std::string, TH_ParticleProperty>(
+         Name , TH_ParticleProperty(std::abs(spec.get(Par::Pole_Mass,Name)), spinX2)));
       };
 
-      getMSSMmass("H+"     , 0);
-      getMSSMmass("H-"     , 0);
-      getMSSMmass("h0_1"   , 0);
-      getMSSMmass("h0_2"   , 0);
-      getMSSMmass("A0"     , 0);
-      getMSSMmass("~chi0_1", 1);
-      getMSSMmass("~d_1", 0);
-      getMSSMmass("~dbar_1", 0);
-      getMSSMmass("~u_1", 0);
-      getMSSMmass("~ubar_1", 0);
-      getMSSMmass("~d_2", 0);
-      getMSSMmass("~dbar_2", 0);
-      getMSSMmass("~u_2", 0);
-      getMSSMmass("~ubar_2", 0);
-      getMSSMmass("~d_3", 0);
-      getMSSMmass("~dbar_3", 0);
-      getMSSMmass("~u_3", 0);
-      getMSSMmass("~ubar_3", 0);
-      getMSSMmass("~d_4", 0);
-      getMSSMmass("~dbar_4", 0);
-      getMSSMmass("~u_4", 0);
-      getMSSMmass("~ubar_4", 0);
-      getMSSMmass("~d_5", 0);
-      getMSSMmass("~dbar_5", 0);
-      getMSSMmass("~u_5", 0);
-      getMSSMmass("~ubar_5", 0);
-      getMSSMmass("~d_6", 0);
-      getMSSMmass("~dbar_6", 0);
-      getMSSMmass("~u_6", 0);
-      getMSSMmass("~ubar_6", 0);
-      //getMSSMmass("~e_1", 0);
-      //getMSSMmass("~ebar_1", 0);
-      //getMSSMmass("~e-_1", 0);
-      getMSSMmass("~e+_1", 0);
-      getMSSMmass("~e-_1", 0);
-      getMSSMmass("~e+_2", 0);
-      getMSSMmass("~e-_2", 0);
-      getMSSMmass("~e+_3", 0);
-      getMSSMmass("~e-_3", 0);
-      getMSSMmass("~e+_4", 0);
-      getMSSMmass("~e-_4", 0);
-      getMSSMmass("~e+_5", 0);
-      getMSSMmass("~e-_5", 0);
-      getMSSMmass("~e+_6", 0);
-      getMSSMmass("~e-_6", 0);
-      getMSSMmass("~nu_1", 0);
+      getMSSMmass("H+"      , 0);
+      getMSSMmass("H-"      , 0);
+      getMSSMmass("h0_1"    , 0);
+      getMSSMmass("h0_2"    , 0);
+      getMSSMmass("A0"      , 0);
+      getMSSMmass("~chi0_1" , 1);
+      getMSSMmass("~d_1"    , 0);
+      getMSSMmass("~dbar_1" , 0);
+      getMSSMmass("~u_1"    , 0);
+      getMSSMmass("~ubar_1" , 0);
+      getMSSMmass("~d_2"    , 0);
+      getMSSMmass("~dbar_2" , 0);
+      getMSSMmass("~u_2"    , 0);
+      getMSSMmass("~ubar_2" , 0);
+      getMSSMmass("~d_3"    , 0);
+      getMSSMmass("~dbar_3" , 0);
+      getMSSMmass("~u_3"    , 0);
+      getMSSMmass("~ubar_3" , 0);
+      getMSSMmass("~d_4"    , 0);
+      getMSSMmass("~dbar_4" , 0);
+      getMSSMmass("~u_4"    , 0);
+      getMSSMmass("~ubar_4" , 0);
+      getMSSMmass("~d_5"    , 0);
+      getMSSMmass("~dbar_5" , 0);
+      getMSSMmass("~u_5"    , 0);
+      getMSSMmass("~ubar_5" , 0);
+      getMSSMmass("~d_6"    , 0);
+      getMSSMmass("~dbar_6" , 0);
+      getMSSMmass("~u_6"    , 0);
+      getMSSMmass("~ubar_6" , 0);
+      //getMSSMmass("~e_1"    , 0);
+      //getMSSMmass("~ebar_1" , 0);
+      //getMSSMmass("~e-_1"   , 0);
+      getMSSMmass("~e+_1"   , 0);
+      getMSSMmass("~e-_1"   , 0);
+      getMSSMmass("~e+_2"   , 0);
+      getMSSMmass("~e-_2"   , 0);
+      getMSSMmass("~e+_3"   , 0);
+      getMSSMmass("~e-_3"   , 0);
+      getMSSMmass("~e+_4"   , 0);
+      getMSSMmass("~e-_4"   , 0);
+      getMSSMmass("~e+_5"   , 0);
+      getMSSMmass("~e-_5"   , 0);
+      getMSSMmass("~e+_6"   , 0);
+      getMSSMmass("~e-_6"   , 0);
+      getMSSMmass("~nu_1"   , 0);
       getMSSMmass("~nubar_1", 0);
-      getMSSMmass("~nu_2", 0);
+      getMSSMmass("~nu_2"   , 0);
       getMSSMmass("~nubar_2", 0);
-      getMSSMmass("~nu_3", 0);
+      getMSSMmass("~nu_3"   , 0);
       getMSSMmass("~nubar_3", 0);
 
       /////////////////////////////////////////
@@ -597,64 +574,59 @@ namespace Gambit
       double M_DM = catalog.getParticleProperty(DMid).mass;
 
       // lambda for setting up 2-body annihilations (chi chi -> X X) from results in DS
-      auto setup_DS6_process = [&](str NAME, int PDG1, int PDG2, str P1, str P2, double PREFACTOR)
+      auto setup_DS6_process = [&](int pdg1, int pdg2, str p1, str p2, double prefac)
       {
         /* Check if process is kinematically allowed */
-        double m_1 = catalog.getParticleProperty(P1).mass;
-        double m_2 = catalog.getParticleProperty(P2).mass;
+        double m_1 = catalog.getParticleProperty(p1).mass;
+        double m_2 = catalog.getParticleProperty(p2).mass;
         if(m_1 + m_2 < 2*M_DM)
         {
           /* Set cross-section */
-          int p1ds = PDG1;
-          int p2ds = PDG2;
-          double CAT(sigma_,NAME) = BEreq::dssigmav0(p1ds,p2ds);
+          double sigma = BEreq::dssigmav0(pdg1,pdg2);
           /* Create associated kinematical functions (just dependent on vrel)
            *  here: s-wave, vrel independent 1-dim constant function */
-          daFunk::Funk CAT(kinematicFunction_,NAME) =
-                daFunk::cnst(CAT(sigma_,NAME)*PREFACTOR, "v");
+          daFunk::Funk kinematicFunction = daFunk::cnst(sigma*prefac, "v");
           /* Create channel identifier string */
-          std::vector<std::string> CAT(finalStates_,NAME);
-          CAT(finalStates_,NAME).push_back(P1);
-          CAT(finalStates_,NAME).push_back(P2);
+          std::vector<std::string> finalStates;
+          finalStates.push_back(p1);
+          finalStates.push_back(p2);
           /* Create channel and push it into channel list of process */
-          TH_Channel CAT(channel_,NAME)(CAT(finalStates_,NAME),
-              CAT(kinematicFunction_,NAME));
-          process.channelList.push_back(CAT(channel_,NAME));
-          annFinalStates.insert(P1);
-          annFinalStates.insert(P2);
+          process.channelList.push_back(TH_Channel(finalStates, kinematicFunction));
+          annFinalStates.insert(p1);
+          annFinalStates.insert(p2);
         }
       };
 
-      setup_DS6_process("H1H1",      35,  35, "h0_2",   "h0_2",   1   );
-      setup_DS6_process("H1H2",      35,  25, "h0_2",   "h0_1",   1   );
-      setup_DS6_process("H2H2",      25,  25, "h0_1",   "h0_1",   1   );
-      setup_DS6_process("H3H3",      36,  36, "A0",     "A0",     1   );
-      setup_DS6_process("H1H3",      35,  36, "h0_2",   "A0",     1   );
-      setup_DS6_process("H2H3",      25,  36, "h0_1",   "A0",     1   );
-      setup_DS6_process("HpHm",      37, -37, "H+",     "H-",     1   );
-      setup_DS6_process("H1Z0",      35,  23, "h0_2",   "Z0",     1   );
-      setup_DS6_process("H2Z0",      25,  23, "h0_1",   "Z0",     1   );
-      setup_DS6_process("H3Z0",      36,  23, "A0",     "Z0",     1   );
+      setup_DS6_process( 35,  35, "h0_2",   "h0_2",   1   );
+      setup_DS6_process( 35,  25, "h0_2",   "h0_1",   1   );
+      setup_DS6_process( 25,  25, "h0_1",   "h0_1",   1   );
+      setup_DS6_process( 36,  36, "A0",     "A0",     1   );
+      setup_DS6_process( 35,  36, "h0_2",   "A0",     1   );
+      setup_DS6_process( 25,  36, "h0_1",   "A0",     1   );
+      setup_DS6_process( 37, -37, "H+",     "H-",     1   );
+      setup_DS6_process( 35,  23, "h0_2",   "Z0",     1   );
+      setup_DS6_process( 25,  23, "h0_1",   "Z0",     1   );
+      setup_DS6_process( 36,  23, "A0",     "Z0",     1   );
       // Prefactor 0.5 since W+H- and W-H+ are summed in DS
-      setup_DS6_process("WpHm",      24, -37, "W+",     "H-",     0.5 );
-      setup_DS6_process("WmHp",     -24,  37, "W-",     "H+",     0.5 );
-      setup_DS6_process("Z0Z0",      23,  23, "Z0",     "Z0",     1   );
-      setup_DS6_process("WW",        24, -24, "W+",     "W-",     1   );
-      setup_DS6_process("nuenue",    12, -12, "nu_e",   "nubar_e",1   );
-      setup_DS6_process("ee",        11, -11, "e+_1",   "e-_1",   1   );
-      setup_DS6_process("numnum",    14, -14, "nu_mu",  "nubar_mu",1  );
-      setup_DS6_process("mumu",      13, -13, "e+_2",   "e-_2",   1   );
-      setup_DS6_process("nutnut",    16, -16, "nu_tau", "nubar_tau",1 );
-      setup_DS6_process("tautau",    15, -15, "e+_3",   "e-_3",   1   );
-      setup_DS6_process("uubar",      2, - 2, "u_1",    "ubar_1",   1   );
-      setup_DS6_process("ddbar",      1, - 1, "d_1",    "dbar_1",   1   );
-      setup_DS6_process("ccbar",      4, - 4, "u_2",    "ubar_2",   1   );
-      setup_DS6_process("ssbar",      3, - 3, "d_2",    "dbar_2",   1   );
-      setup_DS6_process("ttbar",      6, - 6, "u_3",    "ubar_3",   1   );
-      setup_DS6_process("bbbar",      5, - 5, "d_3",    "dbar_3",   1   );
-      setup_DS6_process("gluglu",    21,  21, "g",      "g",      1   );
-      setup_DS6_process("gammagamma",22,  22, "gamma",  "gamma",  1   );
-      setup_DS6_process("Z0gamma",   23,  22, "Z0",     "gamma",  1   );
+      setup_DS6_process( 24, -37, "W+",     "H-",     0.5 );
+      setup_DS6_process(-24,  37, "W-",     "H+",     0.5 );
+      setup_DS6_process( 23,  23, "Z0",     "Z0",     1   );
+      setup_DS6_process( 24, -24, "W+",     "W-",     1   );
+      setup_DS6_process( 12, -12, "nu_e",   "nubar_e",1   );
+      setup_DS6_process( 11, -11, "e+_1",   "e-_1",   1   );
+      setup_DS6_process( 14, -14, "nu_mu",  "nubar_mu",1  );
+      setup_DS6_process( 13, -13, "e+_2",   "e-_2",   1   );
+      setup_DS6_process( 16, -16, "nu_tau", "nubar_tau",1 );
+      setup_DS6_process( 15, -15, "e+_3",   "e-_3",   1   );
+      setup_DS6_process(  2, - 2, "u_1",    "ubar_1", 1   );
+      setup_DS6_process(  1, - 1, "d_1",    "dbar_1", 1   );
+      setup_DS6_process(  4, - 4, "u_2",    "ubar_2", 1   );
+      setup_DS6_process(  3, - 3, "d_2",    "dbar_2", 1   );
+      setup_DS6_process(  6, - 6, "u_3",    "ubar_3", 1   );
+      setup_DS6_process(  5, - 5, "d_3",    "dbar_3", 1   );
+      setup_DS6_process( 21,  21, "g",      "g",      1   );
+      setup_DS6_process( 22,  22, "gamma",  "gamma",  1   );
+      setup_DS6_process( 23,  22, "Z0",     "gamma",  1   );
 
 
       ///////////////////////////////////////////
@@ -668,77 +640,58 @@ namespace Gambit
 
       // Macro for setting up 3-body decays with gammas
 
-      auto setup_DS6_process_gamma3body = [&](str NAME,int IBCH, str P1, str P2, double (*IBFUNC)(int&, double&, double&), int SV_PDG1, int SV_PDG2, double PREFACTOR)
+      auto setup_DS6_process_gamma3body = [&](int IBch, str p1, str p2, double (*IBfunc)(int&, double&, double&), int sv_pdg1, int sv_pdg2, double prefac)
       {
         /* Check if process is kinematically allowed */
-        double m_1 = catalog.getParticleProperty(str_flav_to_mass(P1)).mass;
-        double m_2 = catalog.getParticleProperty(str_flav_to_mass(P2)).mass;
+        double m_1 = catalog.getParticleProperty(str_flav_to_mass(p1)).mass;
+        double m_2 = catalog.getParticleProperty(str_flav_to_mass(p2)).mass;
         if(m_1 + m_2 < 2*M_DM)
         {
-          int p1ds = SV_PDG1;
-          int p2ds = SV_PDG2;
           double sv;
-          if(p1ds==0 && p2ds==0)
+          if(sv_pdg1==0 && sv_pdg2==0)
           {
-            sv = PREFACTOR*BEreq::dssigmav0tot();
+            sv = prefac*BEreq::dssigmav0tot();
           }
           else
           {
-            sv = PREFACTOR*BEreq::dssigmav0(p1ds,p2ds);
+            sv = prefac*BEreq::dssigmav0(sv_pdg1,sv_pdg2);
           }
-          daFunk::Funk CAT(kinematicFunction_,NAME) =
-          daFunk::cnst(sv,"v")*daFunk::func(DSgamma3bdy,
-          STRIP_PARENS(IBFUNC), IBCH, daFunk::var("E"), daFunk::var("E1"),
-          M_DM, m_1, m_2);
+          daFunk::Funk kinematicFunction = daFunk::cnst(sv,"v")*daFunk::func(DSgamma3bdy,
+           IBfunc, IBch, daFunk::var("E"), daFunk::var("E1"), M_DM, m_1, m_2);
           /* Create channel identifier string */
-          std::vector<std::string> CAT(finalStates_,NAME);
-          CAT(finalStates_,NAME).push_back("gamma");
-          CAT(finalStates_,NAME).push_back(str_flav_to_mass(P1));
-          CAT(finalStates_,NAME).push_back(str_flav_to_mass(P2));
+          std::vector<std::string> finalStates;
+          finalStates.push_back("gamma");
+          finalStates.push_back(str_flav_to_mass(p1));
+          finalStates.push_back(str_flav_to_mass(p2));
           /* Create channel and push it into channel list of process */
-          TH_Channel CAT(channel_,NAME)(CAT(finalStates_,NAME),
-              CAT(kinematicFunction_,NAME));
-          process.channelList.push_back(CAT(channel_,NAME));
-          annFinalStates.insert(str_flav_to_mass(P1));
-          annFinalStates.insert(str_flav_to_mass(P2));
+          process.channelList.push_back(TH_Channel(finalStates, kinematicFunction));
+          annFinalStates.insert(str_flav_to_mass(p1));
+          annFinalStates.insert(str_flav_to_mass(p2));
         }
       };
-      
+
       /// Option ignore_three_body<bool>: Ignore three-body final states (default false)
       if ( not runOptions->getValueOrDef<bool>(false, "ignore_three_body") )
       {
         // Set DarkSUSY DM mass parameter used in 3-body decays
         BEreq::IBintvars->ibcom_mx = catalog.getParticleProperty(DMid).mass;
 
-        setup_DS6_process_gamma3body("gammaWW",        1, "W+",      "W-",
-            (BEreq::dsIBwwdxdy.pointer()),  24, -24, 1   );
+        setup_DS6_process_gamma3body( 1, "W+",  "W-",  BEreq::dsIBwwdxdy.pointer(),24, -24, 1  );
         // Prefactor 0.5 since W+H- and W-H+ are summed in DS
-        setup_DS6_process_gamma3body("gammaWpHm",      2, "W+",      "H-",
-            (BEreq::dsIBwhdxdy.pointer()),  24, -37, 0.5 );
+        setup_DS6_process_gamma3body( 2, "W+",  "H-",  BEreq::dsIBwhdxdy.pointer(),24, -37, 0.5);
         // Prefactor 0.5 since W+H- and W-H+ are summed in DS
-        setup_DS6_process_gamma3body("gammaWmHp",      2, "W-",      "H+",
-            (BEreq::dsIBwhdxdy.pointer()),  37, -24, 0.5 );
-        setup_DS6_process_gamma3body("gammaHpHm",      3, "H+",      "H-",
-            (BEreq::dsIBhhdxdy.pointer()),  0,    0,   1 );
+        setup_DS6_process_gamma3body( 2, "W-",  "H+",  BEreq::dsIBwhdxdy.pointer(),37, -24, 0.5);
+        setup_DS6_process_gamma3body( 3, "H+",  "H-",  BEreq::dsIBhhdxdy.pointer(), 0,   0, 1  );
 
-        setup_DS6_process_gamma3body("gammaee",        4, "e+",      "e-",
-            (BEreq::dsIBffdxdy.pointer()) , 11, -11, 1   );
-        setup_DS6_process_gamma3body("gammamumu",      5, "mu+",     "mu-",
-            (BEreq::dsIBffdxdy.pointer()) , 13, -13, 1   );
-        setup_DS6_process_gamma3body("gammatautau",    6, "tau+",    "tau-",
-            (BEreq::dsIBffdxdy.pointer()) , 15, -15, 1   );
-        setup_DS6_process_gamma3body("gammauubar",     7, "u",       "ubar",
-            (BEreq::dsIBffdxdy.pointer()) ,  2, - 2, 1   );
-        setup_DS6_process_gamma3body("gammaddbar",     8, "d",       "dbar",
-            (BEreq::dsIBffdxdy.pointer()) ,  1, - 1, 1   );
-        setup_DS6_process_gamma3body("gammaccbar",     9, "c",       "cbar",
-            (BEreq::dsIBffdxdy.pointer()) ,  4, - 4, 1   );
-        setup_DS6_process_gamma3body("gammassbar",     10,"s",       "sbar",
-            (BEreq::dsIBffdxdy.pointer()) ,  3, - 3, 1   );
-        setup_DS6_process_gamma3body("gammattbar",     11,"t",       "tbar",
-            (BEreq::dsIBffdxdy.pointer()) ,  6, - 6, 1   );
-        setup_DS6_process_gamma3body("gammabbbar",     12,"b",       "bbar",
-            (BEreq::dsIBffdxdy.pointer()) ,  5, - 5, 1   );
+        setup_DS6_process_gamma3body( 4, "e+",  "e-",  BEreq::dsIBffdxdy.pointer(),11, -11, 1  );
+        setup_DS6_process_gamma3body( 5, "mu+", "mu-", BEreq::dsIBffdxdy.pointer(),13, -13, 1  );
+        setup_DS6_process_gamma3body( 6, "tau+","tau-",BEreq::dsIBffdxdy.pointer(),15, -15, 1  );
+        setup_DS6_process_gamma3body( 7, "u",   "ubar",BEreq::dsIBffdxdy.pointer(), 2,  -2, 1  );
+        setup_DS6_process_gamma3body( 8, "d",   "dbar",BEreq::dsIBffdxdy.pointer(), 1,  -1, 1  );
+        setup_DS6_process_gamma3body( 9, "c",   "cbar",BEreq::dsIBffdxdy.pointer(), 4,  -4, 1  );
+        setup_DS6_process_gamma3body(10,"s",    "sbar",BEreq::dsIBffdxdy.pointer(), 3,  -3, 1  );
+        setup_DS6_process_gamma3body(11,"t",    "tbar",BEreq::dsIBffdxdy.pointer(), 6,  -6, 1  );
+        setup_DS6_process_gamma3body(12,"b",    "bbar",BEreq::dsIBffdxdy.pointer(), 5,  -5, 1  );
       };
 
 
