@@ -538,7 +538,7 @@ L3_Chargino_Leptonic_LLike: |
 
 L3_Gravitino_LLike: |
    Compares the cross section times branching ratio for neutralino
-   production and decay to gravitinos to the model-independent limit 
+   production and decay to gravitinos to the model-independent limit
    according to the L3 collaboration. Returns a log likelihood value.
 
 OPAL_Neutralino_Hadronic_LLike: |
@@ -1075,6 +1075,9 @@ TH_ProcessCatalog: |
 DD_couplings: |
    Provides WIMP mass and couplings to nucleons.
 
+get_DD_couplings: |
+   Provides WIMP mass and couplings to nucleons from DarkSUSY 6.
+
 DD_couplings_fermionic_HP: |
    Provides WIMP mass and couplings to nucleons for Higgs-Portal models with fermionic DM.
 
@@ -1109,8 +1112,16 @@ RD_spectrum_ordered: |
    included
 
 RD_eff_annrate_DSprep: |
-   Ensures that DarkSUSY is correctly initialized for relic density
-   calculations.
+   Ensures that DarkSUSY (up to version 5) is correctly initialized
+   for relic density calculations.
+
+RD_eff_annrate_DSprep_MSSM: |
+   Ensures that DarkSUSY (from version 6) is correctly initialized
+   for relic density calculations.
+
+dsancoann: |
+   DarkSUSY6 common block containing model-independent (kinematic)
+   information about coannihilating particles.
 
 RD_eff_annrate: |
    The effective invariant rate W_eff that enters in the calculation
@@ -1971,6 +1982,9 @@ GA_missingFinalStates: |
 GA_AnnYield: |
    Calculate the gamma-ray yield from the process catalogue.
 
+dsanyield_sim: |
+   Provides tabulated yields from DarkSUSY 6.
+
 cascadeMC_FinalStates: |
    List of final states for cascade decays.
 
@@ -2113,10 +2127,25 @@ IceCube_likelihood: |
    The complete IceCube log-likelihood, including 22-string and 79-string data.
 
 DarkSUSY_PointInit: |
-   Initialises DarkSUSY for a specific model point.
+   Initialises DarkSUSY (up to version 5) for a specific model point.
+
+DarkSUSY_MSSM_6_1_1_init: |
+   Initialises DarkSUSY 6.1.1 for the MSSM.
+
+DarkSUSY_MSSM_6_2_2_init: |
+   Initialises DarkSUSY 6.2.2 for the MSSM.
+
+DarkSUSY_generic_wimp_6_1_1_init: |
+   Initialises DarkSUSY 6.1.1 for a generic WIMP.
+
+DarkSUSY_generic_wimp_6_2_2_init: |
+   Initialises DarkSUSY 6.2.2 for a generic WIMP.
+
+DarkSUSY5_PointInit_LocalHalo: |
+   Initialises Milky Way halo model parameters in DarkSUSY5
 
 DarkSUSY_PointInit_LocalHalo: |
-   Initialises Milky Way halo model parameters in DarkSUSY
+   Initialises Milky Way halo model parameters in DarkSUSY6+
 
 dump_GammaSpectrum: |
    Dumps gamma-ray yield into ASCII table
@@ -2331,6 +2360,9 @@ nulike_1_0_7_init: |
 nulike_1_0_8_init: |
   Initializes nulike_1_0_8.
 
+nulike_1_0_9_init: |
+  Initializes nulike_1_0_9.
+
 nubounds:
   Counts, likelihoods and p-values from neutrino telescope searches for dark matter annihilation in the Sun.
 
@@ -2467,6 +2499,13 @@ dsgf2s2thw: |
 dsgive_model_isasugra: |
    Sets CMSSM model parameters in ISASUGRA included with DarkSUSY.
 
+dsgive_model_SLHA: |
+   Reads in SLHA file from disk, and sets DarkSUSY model parameters.
+
+dsmodelsetup: |
+   Initializes a particle model point with DarkSUSY (after model papermeters
+   have been set with dsgive_xxxx).
+
 dshainit: |
    Intialises and loads common block values needed by DarkSUSY halo yield routines.
 
@@ -2527,8 +2566,26 @@ dsrdthlim: |
 dsrdwintp: |
    Interpolation of tabulated invariant rate.
 
+dsrdcom: |
+   DarkSUSY 6 common block use by the Boltzmann solver.
+
+dsrdens: |
+   DarkSUSY Boltzmann solver (for relic density).
+
+dsrdstart: |
+   Prepare DarkSUSY Boltzmann solver.
+
 dssigmav: |
-   Neutralino self-annihilation cross section <sigma v> in zero velocity limit.
+   Neutralino self-annihilation cross section <sigma v> in zero velocity limit
+   (provided by DarkSUSY up to version 5).
+
+dssigmav0: |
+   Partial neutralino self-annihilation cross section <sigma v> in zero velocity limit
+   (provided by DarkSUSY from version 6).
+
+dssigmav0tot: |
+   Total neutralino self-annihilation cross section <sigma v> in zero velocity limit
+   (provided by DarkSUSY from version 6).
 
 dsspectrum: |
    Sets up particle mass spectrum and mixing matrices in DarkSUSY.
@@ -2561,13 +2618,22 @@ dswwidth: |
    Writes out widths.
 
 cap_Sun_v0q0_isoscalar: |
-   Capture rate of dark matter in the sun.
+   Capture rate of standard velocity and momentum-independent dark matter in the sun.
 
 raw_muonyield: |
    Gives either the differential or total yield of muons in a neutrino telescope from dark matter annihilation in the sun.
 
 pacodes: |
    Common block containing particle codes used in DarkSUSY.
+
+pacodes_mssm: |
+   Common block containing MSSM sparticle codes used in DarkSUSY 6.
+
+pmasses: |
+   Common block containing particle masses used in DarkSUSY.
+
+pwidths: |
+   Common block containing particle widths used in DarkSUSY.
 
 mssmiuseful: |
    Common block containing DarkSUSY particle codes for lightest supersymmmetric particle and neutralino.
@@ -2617,6 +2683,21 @@ mssmwidths: |
 mssmmixing: |
    MSSM mixing matrices.
 
+smcoupling: |
+   SM couplings for DarkSUSY.
+
+smquarkmasses: |
+   SM (running) quark masses for DarkSUSY.
+
+dsfindmtmt: |
+   quark mass at the scale mt (used in DarkSUSY).
+
+dssuconst_higgs: |
+   Higgs couplings in MSSM used as fallback in DarkSUSY.
+
+dssuconst_yukawa: |
+   Yukawa couplings in MSSM used as fallback in DarkSUSY.
+
 rdmgev: |
    Information about (co)annihilating particles for the DarkSUSY relic density routines.
 
@@ -2648,7 +2729,13 @@ IBintvars: |
    Common block for DarkSUSY internal Bremsstrahlung routines.
 
 ddcom: |
-   Common block containing DM nucleon couplings and options for their calculation in DarkSUSY.
+   Common block containing DM nucleon couplings and options for their calculation in DarkSUSY 5.
+
+ddcomlegacy: |
+   Common block containing options for DM-nucleon couplings in DarkSUSY 6.
+
+ddmssmcom: |
+   DarkSUSY 6 common block containing DM nucleon couplings in the MSSM.
 
 nu_common_block: |
    Annihilation branching rates and scalar decay rates used by DarkSUSY routines for DM annihilation in sun.
@@ -2656,11 +2743,20 @@ nu_common_block: |
 nuyield: |
    Neutrino yields at the top of the atmosphere.
 
-nuyield_setup: |
+raw_nuyield_sim: |
+   Neutrino yields from simulated channels provided by DarkSUSY 6.
+
+raw_nuyield_casc: |
+   Neutrino yields from MSSM cascade decays provided by DarkSUSY 6.
+
+DS_nuyield_setup: |
    Sets DarkSUSY common blocks with all necessary information to calculate neutrino yields.
 
-particle_code: |
-   Translates GAMBIT string particle identifiers to corresponding DarkSUSY integer codes.
+DS5particle_code: |
+   Translates GAMBIT string particle identifiers to corresponding DarkSUSY 5 integer codes.
+
+DSparticle_code: |
+   Translates GAMBIT string particle identifiers to corresponding DarkSUSY 6 integer codes.
 
 initFromSLHAeaAndDecayTable: |
    Initialises an MSSM model in DarkSUSY from an SLHAea object and a DecayTable.

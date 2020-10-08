@@ -29,6 +29,14 @@ DarkAges:
 DarkSUSY:
   5.1.3:       ./Backends/installed/darksusy/5.1.3/lib/libdarksusy.so
 
+DarkSUSY_MSSM:
+  6.1.1:       ./Backends/installed/darksusy/6.1.1/lib/libds_core_mssm.so
+  6.2.2:       ./Backends/installed/darksusy/6.2.2/lib/libds_core_mssm.so
+
+DarkSUSY_generic_wimp:
+  6.1.1:       ./Backends/installed/darksusy/6.1.1/lib/libds_core_generic_wimp.so
+  6.2.2:       ./Backends/installed/darksusy/6.2.2/lib/libds_core_generic_wimp.so
+
 SuperIso:
   3.6:         ./Backends/installed/superiso/3.6/libsuperiso.so
 
@@ -93,6 +101,7 @@ nulike:
   1.0.6:       ./Backends/installed/nulike/1.0.6/lib/libnulike.so
   1.0.7:       ./Backends/installed/nulike/1.0.7/lib/libnulike.so
   1.0.8:       ./Backends/installed/nulike/1.0.8/lib/libnulike.so
+  1.0.9:       ./Backends/installed/nulike/1.0.9/lib/libnulike.so
 
 SUSY_HIT:
   1.5:         ./Backends/installed/susyhit/1.5/libsusyhit.so

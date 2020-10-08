@@ -68,6 +68,15 @@ function(check_result result command)
   endif()
 endfunction()
 
+#Check if a string starts with a give substring
+function(starts_with str search)
+  string(FIND "${str}" "${search}" out)
+  if("${out}" EQUAL 0)
+    return(true)
+  endif()
+  return(false)
+endfunction()
+
 #Macro to retrieve GAMBIT modules
 macro(retrieve_bits bits root excludes quiet)
 

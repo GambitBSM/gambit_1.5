@@ -54,7 +54,7 @@ Printers/CMakeLists.txt
 ScannerBit/CMakeLists.txt
 
 # Generated code files
-*/examples/standalone_functors.cpp
+*/examples/functors_for_*_standalone*
 */include/gambit/*/*_rollcall.hpp
 Backends/include/gambit/Backends/backend_functor_types.hpp
 Elements/include/gambit/Elements/module_functor_types.hpp

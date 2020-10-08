@@ -21,8 +21,8 @@
 
 #define BACKENDNAME nulike
 #define BACKENDLANG Fortran
-#define VERSION 1.0.6
-#define SAFE_VERSION 1_0_6
+#define VERSION 1.0.9
+#define SAFE_VERSION 1_0_9
 
 // Load it
 LOAD_LIBRARY
