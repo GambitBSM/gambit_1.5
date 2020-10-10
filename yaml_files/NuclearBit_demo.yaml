@@ -1,0 +1,166 @@
+#########################################################
+#
+# GAMBIT configuration example for using the OMBit module
+#
+#########################################################
+
+
+Parameters:
+
+  GSFModel20:
+    gsf_p1:
+      prior_type: flat
+      range: [11, 13]
+    gsf_p2:
+      prior_type: flat
+      range: [200, 300]
+    gsf_p3:
+      prior_type: flat
+      range: [2, 4]
+    gsf_p4:
+      prior_type: flat
+      range: [14, 16]
+    gsf_p5:
+      prior_type: flat
+      range: [100, 300]
+    gsf_p6:
+      prior_type: flat
+      range: [2, 4]
+    gsf_p7:
+      prior_type: flat
+      range: [5, 7]
+    gsf_p8:
+      prior_type: flat
+      range: [2, 6]
+    gsf_p9:
+      prior_type: flat
+      range: [1, 3]
+    gsf_p10:
+      prior_type: flat
+      range: [9, 11]
+    gsf_p11:
+      prior_type: flat
+      range: [10, 100]
+    gsf_p12:
+      prior_type: flat
+      range: [4, 6]
+    gsf_p13:
+      prior_type: flat
+      range: [2, 4]
+    gsf_p14:
+      prior_type: flat
+      range: [0.1, 2]
+    gsf_p15:
+      prior_type: flat
+      range: [0.1, 2]
+    gsf_p16:
+      fixed_value: 0
+    gsf_p17:
+      fixed_value: 0
+    gsf_p18:
+      fixed_value: 0
+    gsf_p19:
+      fixed_value: 0
+    gsf_p20:
+      prior_type: log
+      range: [0.4, 0.8]
+
+  NLDModelCT_and_discretes:
+    nld_T:
+      prior_type: log
+      range: [0.1, 1]
+    nld_Eshift:
+      prior_type: flat
+      range: [-5, 5]
+    nld_Ecrit:
+      prior_type: flat
+      range: [0.1, 4]
+
+
+Priors:
+
+  # None needed: all priors are simple and defined in the Parameters section above
+
+
+Printer:
+
+  printer: cout
+
+  printer: hdf5
+  options:
+    output_file: "results.hdf5"
+    group: "/scan_output"
+    delete_file_on_restart: true
+
+
+Scanner:
+
+  # use_scanner: de
+  use_scanner: random
+  # use_scanner: multinest
+
+  scanners:
+
+    random:
+      plugin: random
+      point_number: 5
+      like: LogLike
+
+    de:
+      plugin: diver
+      like: LogLike
+      NP: 100
+      convthresh: 1e-4
+      verbosity: 1
+      lambdajDE: false
+
+    multinest:
+      plugin: multinest
+      like:  LogLike
+      nlive: 1000
+      tol: 0.01
+
+
+ObsLikes:
+
+  # We must include the Oslo Method loglike in total loglike for the scan
+  - purpose:      LogLike
+    capability:   OMLogLike
+    module:       OMBit         # Not really needed, GAMBIT can figure it out
+    function:     getOMLogLike  # Not really needed, GAMBIT can figure it out
+
+  # We want to save all the different numbers we get from the fompy backend
+  - purpose:      Observable
+    capability:   GLEDELiResults
+    module:       OMBit            # Not really needed, GAMBIT can figure it out
+    function:     getGLEDELiResults  # Not really needed, GAMBIT can figure it out
+
+
+Rules:
+
+  # None required, since no module dependencies to be resolved.
+
+
+Logger:
+
+  redirection:
+    [Default]  : "default.log"
+    [OMBit]    : "OMBit.log"
+    [Scanner]  : "Scanner.log"
+
+
+KeyValues:
+
+  debug: false  # Set to true for very verbose log files
+
+  default_output_path: "runs/NuclearBit_demo"
+
+  rng:
+    generator: ranlux48
+    seed: 7389172  # Use -1 to get seed from the system clock
+
+  print_timing_data: false
+
+  likelihood:
+    model_invalid_for_lnlike_below: -5e5
+
