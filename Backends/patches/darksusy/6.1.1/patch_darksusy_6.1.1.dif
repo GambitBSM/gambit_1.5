@@ -1,0 +1,12 @@
+diff -rupN darksusy-6.2.2_original/src/include/dsdmdcom.h darksusy-6.2.2_patched/src/include/dsdmdcom.h
+--- darksusy-6.2.2_original/src/include/dsdmdcom.h
++++ darksusy-6.2.2_patched/src/include/dsdmdcom.h
+@@ -25,7 +25,7 @@ ccc
+       common/dmdintericom/dmdihalotag,dmdihalotagtmp
+       common/dmdinterrcom/dmdobjdist,dmdradintr,dmdradouttr,dmdrho0
+       common/dmdinterccom/dmdlabel    
+-      save /dmdinterlcom/,/dmdintericom/,/dmdinterlcom/,/dmdinterccom/
++      save /dmdinterlcom/,/dmdintericom/,/dmdinterccom/
+       
+ ccc
+ ccc entries to link instructions/functions to the driver:      
