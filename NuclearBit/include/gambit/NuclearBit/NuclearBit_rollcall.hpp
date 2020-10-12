@@ -27,6 +27,7 @@ START_MODULE
     START_FUNCTION(map_str_dbl)
     ALLOW_MODELS(GSFModel2, GSFModel3, GSFModel4, GSFModel5, GSFModel10, GSFModel20, NLDModelCT_and_discretes, NLDModel10, NLDModel15, NLDModel20)
     BACKEND_REQ(gledeliBE_set_model_pars, (), void, (pybind11::dict&))
+    BACKEND_REQ(gledeliBE_set_model_names, (), void, (pybind11::list&))
     BACKEND_REQ(gledeliBE_run, (), pybind11::dict, (pybind11::dict&))
     BACKEND_REQ(gledeliBE_get_results, (), pybind11::dict, ())
     #undef FUNCTION

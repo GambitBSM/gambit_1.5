@@ -12,6 +12,7 @@
 
 #include "gambit/Elements/gambit_module_headers.hpp"
 #include "gambit/NuclearBit/NuclearBit_rollcall.hpp"
+#include "gambit/Models/claw_singleton.hpp"
 
 namespace Gambit
 {
@@ -29,6 +30,18 @@ namespace Gambit
     void getGledeliResults(std::map<std::string,double> &result)
     {
       using namespace Pipes::getGledeliResults;
+
+      // The first time this function is run we let
+      // gledeli know which GAMBIT models are in use.
+      static bool first = true;
+      if (first)
+      {
+        // Get a set<str> with the names of active GAMBIT models and cast it to a pybind11::list
+        pybind11::list active_models_list = pybind11::cast(Models::ModelDB().get_activemodels());
+        // Pass the list to the gledeli backend.
+        BEreq::gledeliBE_set_model_names(active_models_list);
+        first = false;
+      }
 
       // Grab parameter values from the GAMBIT Param map (type map<str,double*>)
       // and populate a pybind11::dict that we pass to the gledeli backend

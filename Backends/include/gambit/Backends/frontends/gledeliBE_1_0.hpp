@@ -38,6 +38,7 @@ LOAD_LIBRARY
  */
 
 BE_FUNCTION(set_model_pars, void, (pybind11::dict&), "set_model_pars", "gledeliBE_set_model_pars")
+BE_FUNCTION(set_model_names, void, (pybind11::list&), "set_model_names", "gledeliBE_set_model_names")
 BE_FUNCTION(run, pybind11::dict, (pybind11::dict&), "run", "gledeliBE_run")
 BE_FUNCTION(get_results, pybind11::dict, (), "get_results", "gledeliBE_get_results")
 
