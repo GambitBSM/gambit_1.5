@@ -219,8 +219,6 @@ START_MODULE
       BACKEND_REQ(dsrdcom, (ds6), void, ())
       BACKEND_REQ(dsrdstart,(ds6),void,(int&, double(&)[1000], double(&)[1000], int&, double(&)[1000], double(&)[1000], int&, double(&)[1000]))
       BACKEND_REQ(dsrdens, (ds6), void, (double(*)(double&), double&, double&, int&, int&, int&))
-      BACKEND_REQ(DSparticle_code, (ds6), int, (const str&))
-      BACKEND_REQ(pwidths, (ds6), DS_PWIDTHS)
       BACKEND_OPTION((DarkSUSY_MSSM),(ds6))
       BACKEND_OPTION((DarkSUSY_generic_wimp),(ds6))
       FORCE_SAME_BACKEND(ds6)
