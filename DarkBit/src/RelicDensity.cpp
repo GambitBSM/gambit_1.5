@@ -520,19 +520,31 @@ namespace Gambit
 
 
     /*! \brief Get Weff directly from initialized DarkSUSY.
-     * Note that this function does not (and should not) correct Weff for
+     * Note that these functions do not (and should not) correct Weff for
      * non-self-conjugate dark matter.
     */
     void RD_eff_annrate_DS_MSSM(double(*&result)(double&))
     {
       using namespace Pipes::RD_eff_annrate_DS_MSSM;
 
-      if ((BEreq::dsanwx.origin() == "DarkSUSY") || (BEreq::dsanwx.origin() == "DarkSUSY_MSSM"))
+      if (BEreq::dsanwx.origin() == "DarkSUSY_MSSM")
       {
         result=BEreq::dsanwx.pointer();
       }
       else DarkBit_error().raise(LOCAL_INFO, "Wrong DarkSUSY backend initialized?");
     } // function RD_eff_annrate_DS_MSSM
+
+    void RD_eff_annrate_DS5_MSSM(double(*&result)(double&))
+    {
+      using namespace Pipes::RD_eff_annrate_DS5_MSSM;
+
+      if (BEreq::dsanwx.origin() == "DarkSUSY")
+      {
+        result=BEreq::dsanwx.pointer();
+      }
+      else DarkBit_error().raise(LOCAL_INFO, "Wrong DarkSUSY backend initialized?");
+    } // function RD_eff_annrate_DS5_MSSM
+
 
 
     /*! \brief Infer Weff from process catalog.
@@ -656,6 +668,10 @@ namespace Gambit
       #endif
       BEreq::dsrdstart(tnco,tmco,tdof,tnrs,trm,trw,tnthr,ttm);
 
+      // follow wide res treatment for heavy Higgs adopted in DS
+        double widthheavyHiggs = BEreq::pwidths->width(BEreq::DSparticle_code("h0_2"));
+        if (widthheavyHiggs<0.1) BEreq::pwidths->width(BEreq::DSparticle_code("h0_2"))=0.1;
+
       // always check that invariant rate is OK at least at one point
       double peff = mwimp/100;
       double weff = (*Dep::RD_eff_annrate)(peff);
@@ -669,6 +685,9 @@ namespace Gambit
       double oh2, xf;
       int ierr=0; int iwar=0;
       BEreq::dsrdens(byVal(*Dep::RD_eff_annrate),oh2,xf,fast,ierr,iwar);
+
+      // change heavy Higgs width in DS back to standard value
+      BEreq::pwidths->width(BEreq::DSparticle_code("h0_2")) = widthheavyHiggs;
 
       //Check for NAN result.
       if ( Utils::isnan(oh2) ) DarkBit_error().raise(LOCAL_INFO, "DarkSUSY returned NaN for relic density!");

@@ -180,13 +180,19 @@ START_MODULE
 
   #define CAPABILITY RD_eff_annrate
   START_CAPABILITY
+    #define FUNCTION RD_eff_annrate_DS5_MSSM
+      START_FUNCTION(fptr_dd)
+      ALLOW_MODELS(MSSM63atQ)
+      MODEL_CONDITIONAL_DEPENDENCY(RD_eff_annrate_DSprep_MSSM, int, MSSM63atQ)
+      BACKEND_REQ(dsanwx, (ds5), double, (double&))
+      BACKEND_OPTION((DarkSUSY, 5.1.3), (ds5))
+    #undef FUNCTION
     #define FUNCTION RD_eff_annrate_DS_MSSM
       START_FUNCTION(fptr_dd)
       ALLOW_MODELS(MSSM63atQ)
       MODEL_CONDITIONAL_DEPENDENCY(RD_eff_annrate_DSprep_MSSM, int, MSSM63atQ)
-      BACKEND_REQ(dsanwx, (ds5or6), double, (double&))
-      BACKEND_OPTION((DarkSUSY, 5.1.3), (ds5or6))
-      BACKEND_OPTION((DarkSUSY_MSSM, 6.1.1, 6.2.2), (ds5or6))
+      BACKEND_REQ(dsanwx, (ds6), double, (double&))
+      BACKEND_OPTION((DarkSUSY_MSSM, 6.1.1, 6.2.2), (ds6))
     #undef FUNCTION
     #define FUNCTION RD_eff_annrate_from_ProcessCatalog
       START_FUNCTION(fptr_dd)
@@ -213,6 +219,8 @@ START_MODULE
       BACKEND_REQ(dsrdcom, (ds6), void, ())
       BACKEND_REQ(dsrdstart,(ds6),void,(int&, double(&)[1000], double(&)[1000], int&, double(&)[1000], double(&)[1000], int&, double(&)[1000]))
       BACKEND_REQ(dsrdens, (ds6), void, (double(*)(double&), double&, double&, int&, int&, int&))
+      BACKEND_REQ(DSparticle_code, (ds6), int, (const str&))
+      BACKEND_REQ(pwidths, (ds6), DS_PWIDTHS)
       BACKEND_OPTION((DarkSUSY_MSSM),(ds6))
       BACKEND_OPTION((DarkSUSY_generic_wimp),(ds6))
       FORCE_SAME_BACKEND(ds6)
