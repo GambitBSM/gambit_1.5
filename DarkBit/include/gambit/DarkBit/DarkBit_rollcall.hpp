@@ -183,14 +183,14 @@ START_MODULE
     #define FUNCTION RD_eff_annrate_DS5_MSSM
       START_FUNCTION(fptr_dd)
       ALLOW_MODELS(MSSM63atQ)
-      MODEL_CONDITIONAL_DEPENDENCY(RD_eff_annrate_DSprep_MSSM, int, MSSM63atQ)
+      DEPENDENCY(RD_eff_annrate_DSprep_MSSM, int)
       BACKEND_REQ(dsanwx, (ds5), double, (double&))
       BACKEND_OPTION((DarkSUSY, 5.1.3), (ds5))
     #undef FUNCTION
     #define FUNCTION RD_eff_annrate_DS_MSSM
       START_FUNCTION(fptr_dd)
       ALLOW_MODELS(MSSM63atQ)
-      MODEL_CONDITIONAL_DEPENDENCY(RD_eff_annrate_DSprep_MSSM, int, MSSM63atQ)
+      DEPENDENCY(RD_eff_annrate_DSprep_MSSM, int)
       BACKEND_REQ(dsanwx, (ds6), double, (double&))
       BACKEND_OPTION((DarkSUSY_MSSM, 6.1.1, 6.2.2), (ds6))
     #undef FUNCTION
