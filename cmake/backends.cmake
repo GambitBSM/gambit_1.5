@@ -135,6 +135,9 @@ check_ditch_status(${name} ${ver} ${dir})
 if(NOT ditched_${name}_${ver})
   ExternalProject_Add(${name}_${ver}
     GIT_REPOSITORY https://github.com/aaronvincent/captngen.git
+    GIT_TAG ${ver}
+    GIT_SHALLOW 1
+    GIT_PROGRESS 1
     SOURCE_DIR ${dir}
     BUILD_IN_SOURCE 1
     CONFIGURE_COMMAND ""
@@ -677,6 +680,8 @@ if(NOT ditched_${name}_${ver})
     ExternalProject_Add(${name}_${ver}
       GIT_REPOSITORY https://github.com/brinckmann/montepython_public.git
       GIT_TAG ${ver}
+      GIT_SHALLOW 1
+      GIT_PROGRESS 1
       SOURCE_DIR ${dir}
       BUILD_IN_SOURCE 1
       PATCH_COMMAND patch -p1 < ${patch}
@@ -1592,6 +1597,8 @@ if(NOT ditched_${name}_${ver})
     ExternalProject_Add(${name}_${ver}
       GIT_REPOSITORY https://github.com/pstoecker/DarkAges.git
       GIT_TAG v${ver}
+      GIT_SHALLOW 1
+      GIT_PROGRESS 1
       SOURCE_DIR ${dir}
       BUILD_IN_SOURCE 1
       CONFIGURE_COMMAND ln ${DarkAges_SYMLINK_FLAGS} DarkAges DarkAges_${sfver}
