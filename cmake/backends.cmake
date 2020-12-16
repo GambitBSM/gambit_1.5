@@ -1446,7 +1446,7 @@ if(NOT ditched_${name}_${ver})
       CONFIGURE_COMMAND ""
       COMMAND sed ${dashi} -e "s#autosetup.py install#autosetup.py build#g" Makefile
       COMMAND sed ${dashi} -e "s#rm -f libclass.a#rm -rf libclass.a lib#g" Makefile
-      COMMAND sed ${dashi} -e "s#\".\"#\"${dir}\"#g" include/common.h
+      COMMAND sed ${dashi} -e "s#\"[.]\"#\"${dir}\"#g" include/common.h
       BUILD_COMMAND ${MAKE_PARALLEL} CC=${CMAKE_C_COMPILER} OMPFLAG=${OpenMP_C_FLAGS} OPTFLAG= CCFLAG=${BACKEND_GNU99_FLAGS} LDFLAG=${BACKEND_GNU99_FLAGS} PYTHON=${PYTHON_EXECUTABLE} all
       COMMAND ${CMAKE_COMMAND} -E make_directory lib
       COMMAND find python/ -name "classy*.so" | xargs -I {} cp "{}" lib/
@@ -1484,7 +1484,7 @@ if(NOT ditched_${name}_${ver})
       CONFIGURE_COMMAND ""
       COMMAND sed ${dashi} -e "s#autosetup.py install#autosetup.py build#g" Makefile
       COMMAND sed ${dashi} -e "s#rm -f libclass.a#rm -rf libclass.a lib#g" Makefile
-      COMMAND sed ${dashi} -e "s#\".\"#\"${dir}\"#g" include/common.h
+      COMMAND sed ${dashi} -e "s#\"[.]\"#\"${dir}\"#g" include/common.h
       BUILD_COMMAND ${MAKE_PARALLEL} CC=${CMAKE_C_COMPILER} OMPFLAG=${OpenMP_C_FLAGS} OPTFLAG= CCFLAG=${BACKEND_GNU99_FLAGS} LDFLAG=${BACKEND_GNU99_FLAGS} PYTHON=${PYTHON_EXECUTABLE} all
       COMMAND ${CMAKE_COMMAND} -E make_directory lib
       COMMAND find python/ -name "classy*.so" | xargs -I {} cp "{}" lib/
@@ -1522,7 +1522,7 @@ if(NOT ditched_${name}_${ver})
       CONFIGURE_COMMAND ""
       COMMAND sed ${dashi} -e "s#autosetup.py install#autosetup.py build#g" Makefile
       COMMAND sed ${dashi} -e "s#rm -f libclass.a#rm -rf libclass.a lib#g" Makefile
-      COMMAND sed ${dashi} -e "s#\".\"#\"${dir}\"#g" include/common.h
+      COMMAND sed ${dashi} -e "s#\"[.]\"#\"${dir}\"#g" include/common.h
       BUILD_COMMAND ${MAKE_PARALLEL} CC=${CMAKE_C_COMPILER} OMPFLAG=${OpenMP_C_FLAGS} OPTFLAG= CCFLAG=${BACKEND_GNU99_FLAGS} LDFLAG=${BACKEND_GNU99_FLAGS} PYTHON=${PYTHON_EXECUTABLE} all
       COMMAND ${CMAKE_COMMAND} -E make_directory lib
       COMMAND find python/ -name "classy*.so" | xargs -I {} cp "{}" lib/
@@ -1561,7 +1561,7 @@ if(NOT ditched_${name}_${ver})
       CONFIGURE_COMMAND ""
       COMMAND sed ${dashi} -e "s#autosetup.py install#autosetup.py build#g" Makefile
       COMMAND sed ${dashi} -e "s#rm -f libclass.a#rm -rf libclass.a lib#g" Makefile
-      COMMAND sed ${dashi} -e "s#\".\"#\"${dir}\"#g" include/common.h
+      COMMAND sed ${dashi} -e "s#\"[.]\"#\"${dir}\"#g" include/common.h
       BUILD_COMMAND ${MAKE_PARALLEL} CC=${CMAKE_C_COMPILER} OMPFLAG=${OpenMP_C_FLAGS} OPTFLAG= CCFLAG=${BACKEND_GNU99_FLAGS} LDFLAG=${BACKEND_GNU99_FLAGS} PYTHON=${PYTHON_EXECUTABLE} all
       COMMAND ${CMAKE_COMMAND} -E make_directory lib
       COMMAND find python/ -name "classy*.so" | xargs -I {} cp "{}" lib/
