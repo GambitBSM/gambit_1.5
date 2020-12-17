@@ -53,7 +53,7 @@ namespace Gambit
     {
       // In the Planck analysis the monopole (CMB temperature) is assumed to be
       // T_cmb = 2.72548 K (FIRAS measurement).
-      // To correctly reconstruct the dimensionfull Cl out of the dimensionless Cl,
+      // To correctly reconstruct the dimensionful Cl out of the dimensionless Cl,
       // this value needs to be assumed rather than the (variable) value of T_cmb.
       // (cf. Appendix A of arXiv:2005.10656)
       double T_cmb_FIRAS = 2.72548;
