@@ -129,15 +129,13 @@ endif()
 set(name "capgen")
 set(ver "1.0")
 set(lib "gencaplib")
-set(dl "null")
+set(dl "https://github.com/aaronvincent/captngen/archive/${ver}.tar.gz")
+set(md5 "410034ac91593c6695a8ed1751a4214c")
 set(dir "${PROJECT_SOURCE_DIR}/Backends/installed/${name}/${ver}")
 check_ditch_status(${name} ${ver} ${dir})
 if(NOT ditched_${name}_${ver})
   ExternalProject_Add(${name}_${ver}
-    GIT_REPOSITORY https://github.com/aaronvincent/captngen.git
-    GIT_TAG ${ver}
-    GIT_SHALLOW 1
-    GIT_PROGRESS 1
+    DOWNLOAD_COMMAND ${DL_BACKEND} ${dl} ${md5} ${dir} ${name} ${ver}
     SOURCE_DIR ${dir}
     BUILD_IN_SOURCE 1
     CONFIGURE_COMMAND ""
@@ -665,7 +663,8 @@ endif()
 set(name "montepythonlike")
 set(ver "3.3.0")
 set(sfver "3_3_0")
-set(dl "null")
+set(dl "https://github.com/brinckmann/montepython_public/archive/${ver}.tar.gz")
+set(md5 "84944f0a5b9fb1cab0ddb5dd7be3ea17")
 set(dir "${PROJECT_SOURCE_DIR}/Backends/installed/${name}/${ver}")
 set(patchdir "${PROJECT_SOURCE_DIR}/Backends/patches/${name}/${ver}/")
 set(patch "${PROJECT_SOURCE_DIR}/Backends/patches/${name}/${ver}/${name}_${ver}.diff")
@@ -678,10 +677,7 @@ if(NOT ditched_${name}_${ver})
     inform_of_missing_modules(${name} ${ver} ${modules_missing_${name}_${ver}})
   else()
     ExternalProject_Add(${name}_${ver}
-      GIT_REPOSITORY https://github.com/brinckmann/montepython_public.git
-      GIT_TAG ${ver}
-      GIT_SHALLOW 1
-      GIT_PROGRESS 1
+      DOWNLOAD_COMMAND ${DL_BACKEND} ${dl} ${md5} ${dir} ${name} ${ver}
       SOURCE_DIR ${dir}
       BUILD_IN_SOURCE 1
       PATCH_COMMAND patch -p1 < ${patch}
@@ -1584,7 +1580,8 @@ endif()
 set(name "darkages")
 set(ver "1.2.0")
 set(sfver "1_2_0")
-set(dl "null")
+set(dl "https://github.com/pstoecker/DarkAges/archive/v${ver}.tar.gz")
+set(md5 "d39d331ab750d1f9796d2b81d55e7703")
 set(dir "${PROJECT_SOURCE_DIR}/Backends/installed/${name}/${ver}")
 set(ditch_if_absent "Python")
 set(required_modules "scipy,dill,future")
@@ -1595,10 +1592,7 @@ if(NOT ditched_${name}_${ver})
     inform_of_missing_modules(${name} ${ver} ${modules_missing_${name}_${ver}})
   else()
     ExternalProject_Add(${name}_${ver}
-      GIT_REPOSITORY https://github.com/pstoecker/DarkAges.git
-      GIT_TAG v${ver}
-      GIT_SHALLOW 1
-      GIT_PROGRESS 1
+      DOWNLOAD_COMMAND ${DL_BACKEND} ${dl} ${md5} ${dir}
       SOURCE_DIR ${dir}
       BUILD_IN_SOURCE 1
       CONFIGURE_COMMAND ln ${DarkAges_SYMLINK_FLAGS} DarkAges DarkAges_${sfver}
